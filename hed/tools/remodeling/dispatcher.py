@@ -51,18 +51,62 @@ class Dispatcher:
             return archive
         elif not archive:
             archive = io.BytesIO()
+        summary_list = self.get_context_summaries(file_formats=['.txt', '.json'], verbose=True)
+        with zipfile.ZipFile(archive, mode="a", compression=zipfile.ZIP_DEFLATED) as zf:
+            for item in summary_list:
+                zf.writestr(item['file_name'], str.encode(item['content'], 'utf-8'))
+        return archive
+
+    def get_context_summaries(self, file_formats=['.txt', '.json'], verbose=True):
+        """ Return the summaries in a dictionary suitable for saving or archiving.
+
+        Parameters:
+            file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
+            verbose (bool): If true, a more extensive summary is archived.
+
+        Returns:
+            dict: A dictionary of summaries keyed to filenames.
+
+        """
+
+        summary_list = []
         for context_name, context_item in self.context_dict.items():
             file_base = generate_filename(context_item.context_filename, append_datetime=True)
-            with zipfile.ZipFile(archive, mode="a", compression=zipfile.ZIP_DEFLATED) as zf:
-                for file_format in file_formats:
-                    if file_format == '.txt':
-                        summary = context_item.get_text_summary(verbose=True)
-                    elif file_format == '.json':
-                        summary = context_item.get_summary(as_json=True)
-                    else:
-                        continue
-                    zf.writestr(file_base + file_format, str.encode(summary, 'utf-8'))
-        return archive
+            for file_format in file_formats:
+                if file_format == '.txt':
+                    summary = context_item.get_text_summary(verbose=True)
+                elif file_format == '.json':
+                    summary = context_item.get_summary(as_json=True)
+                else:
+                    continue
+                summary_list.append({'file_name': file_base + file_format, 'file_format': file_format,
+                                     'file_type': 'summary', 'content': summary})
+        return summary_list
+
+    # def get_context_summaries(self, file_formats=['.txt', '.json'], verbose=True):
+    #     """ Return the summaries in a dictionary suitable for saving or archiving.
+    #
+    #     Parameters:
+    #         file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
+    #         verbose (bool): If true, a more extensive summary is archived.
+    #
+    #     Returns:
+    #         dict: A dictionary of summaries keyed to filenames.
+    #
+    #     """
+    #
+    #     summary_dict = {}
+    #     for context_name, context_item in self.context_dict.items():
+    #         file_base = generate_filename(context_item.context_filename, append_datetime=True)
+    #         for file_format in file_formats:
+    #             if file_format == '.txt':
+    #                 summary = context_item.get_text_summary(verbose=True)
+    #             elif file_format == '.json':
+    #                 summary = context_item.get_summary(as_json=True)
+    #             else:
+    #                 continue
+    #             summary_dict[file_base + file_format] = summary
+    #     return summary_dict
 
     def get_data_file(self, file_path):
         """ Full path of the backup file corresponding to the file path.
@@ -97,10 +141,14 @@ class Dispatcher:
 
     def run_operations(self, file_path, sidecar=None, verbose=False):
         """ Run the dispatcher operations on a file.
+
         Parameters:
             file_path (str):      Full path of the file to be remodeled.
             sidecar (Sidecar or file-like):   Only needed for HED operations.
             verbose (bool):  If true, print out progress reports
+
+        Returns:
+            DataFrame:  The processed dataframe.
 
         """
 

@@ -3,6 +3,7 @@
 
 # todo: Switch various properties to this cached_property once we require python 3.8
 
+import json
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.errors import ErrorHandler, ValidationErrors
 from hed.schema.hed_schema_constants import HedSectionKey
@@ -42,6 +43,14 @@ class HedSchemaGroup:
     # ===============================================
     # General schema properties/functions
     # ===============================================
+
+    def get_formatted_version(self, as_string=True):
+        x = [schema.get_formatted_version() for schema in self._schemas.values()]
+        y = json.dumps(x)
+        if as_string:
+            return json.dumps(x)
+        return  x
+
     @property
     def has_duplicate_tags(self):
         """ Return True if valid hed3 schema with no duplicate short tags.

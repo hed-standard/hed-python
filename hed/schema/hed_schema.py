@@ -62,6 +62,18 @@ class HedSchema:
         """
         return self.header_attributes['version']
 
+    def get_formatted_version(self, as_string=True):
+        """ The HED version string including prefix and library name if any of this schema.
+
+        Returns:
+            str: The complete version of this schema including library name and prefix.
+
+        """
+        library = self.header_attributes.get('library', '')
+        if library:
+            library = library + '_'
+        return self._schema_prefix + library + self.header_attributes.get('version', '')
+
     @property
     def library(self):
         """ The name of this library schema if one exists.

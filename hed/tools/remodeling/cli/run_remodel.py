@@ -19,6 +19,12 @@ def get_parser():
                         help="Directories names to exclude from search for files.")
     parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events',
                         help="Filename suffix excluding file type of items to be analyzed (events by default).")
+    parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
+                        help="Optional path to JSON sidecar with HED information")
+    parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
+                        help="Optional path to JSON sidecar with HED information.")
+    parser.add_argument("-r", "--hed-versions", dest="hed_versions", nargs="*", default=[],
+                        help="Optional list of HED schema versions used for annotation, include prefixes.")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
                         help="Format for saving any summaries, if any. If empty, then no summaries are saved.")
     parser.add_argument("-b", "--bids-format", action='store_true', dest="use_bids",
@@ -79,13 +85,17 @@ def run_direct_ops(dispatch, args):
                                   exclude_dirs=args.exclude_dirs)
     if args.verbose:
         print(f"Found {len(tabular_files)} files with suffix {args.file_suffix} and extensions {str(args.extensions)}")
+    if hasattr(args, 'sidecar'):
+        sidecar = args.sidecar
+    else:
+        sidecar = None
     for file_path in tabular_files:
         if args.task_names:
             (suffix, ext, entity_dict) = parse_bids_filename(file_path)
             task = entity_dict.get('task', None)
             if not (task and task in args.task_names):
                 continue
-        df = dispatch.run_operations(file_path, verbose=args.verbose)
+        df = dispatch.run_operations(file_path, verbose=args.verbose, sidecar=sidecar)
         df.to_csv(file_path, sep='\t', index=False, header=True)
     return
 
@@ -99,7 +109,8 @@ def main(arg_list=None):
         raise HedFileError("BackupDoesNotExist", f"Backup {args.backup_name} does not exist. "
                            f"Please run_remodel_backup first", "")
     backup_man.restore_backup(args.backup_name, verbose=args.verbose)
-    dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=args.backup_name)
+    dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=args.backup_name,
+                          hed_versions=args.hed_versions)
     if args.use_bids:
         run_bids_ops(dispatch, args)
     else:

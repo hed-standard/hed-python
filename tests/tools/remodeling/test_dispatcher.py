@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
             pass
 
     def test_dispatcher_constructor(self):
-        model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')
+        model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
         with open(model_path1) as fp:
             model1 = json.load(fp)
         dispatch = Dispatcher(model1)
@@ -134,7 +134,7 @@ class Test(unittest.TestCase):
         self.assertFalse(the_zip.testzip())
 
     def test_get_context_save_dir(self):
-        model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')
+        model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
         with open(model_path1) as fp:
             model1 = json.load(fp)
         dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
@@ -181,7 +181,7 @@ class Test(unittest.TestCase):
             self.assertIsInstance(item, BaseOp)
 
     def test_run_operations(self):
-        model_path1 = os.path.join(self.data_path, 'simple_reorder_remdl.json')
+        model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
         with open(model_path1) as fp:
             model1 = json.load(fp)
         dispatch = Dispatcher(model1)
@@ -200,6 +200,30 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df_new), num_test_rows, "run_operations did not change the number of output rows")
         self.assertEqual(len(dispatch.parsed_ops), len(model1),
                          "dispatcher operation list should have one item for each operation")
+
+    def test_run_operations_hed(self):
+        events_path = os.path.realpath(os.path.join(self.data_path, 'sub-002_task-FacePerception_run-1_events.tsv'))
+        sidecar_path = os.path.realpath(os.path.join(self.data_path, 'task-FacePerception_events.json'))
+        op_list = [
+            {
+                "operation": "factor_hed_type",
+                "description": "Test run",
+                "parameters": {
+                    "type_tag": "Condition-variable",
+                    "type_values": [],
+                    "overwrite_existing": False,
+                    "factor_encoding": "categorical"
+                }
+            }
+        ]
+        operations, errors = Dispatcher.parse_operations(op_list)
+        self.assertFalse(errors)
+        dispatch = Dispatcher(op_list, hed_versions=['8.1.0'])
+        df = dispatch.run_operations(events_path, sidecar=sidecar_path, verbose=False)
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertEqual(len(df), 200)
+        self.assertEqual(len(df.columns), 13)
+        self.assertIn('key-assignment', df.columns)
 
     def test_save_context(self):
         with open(self.summarize_model) as fp:
