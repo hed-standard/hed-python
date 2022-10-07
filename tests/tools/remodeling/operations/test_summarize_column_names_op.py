@@ -2,6 +2,8 @@ import json
 import os
 import pandas as pd
 import unittest
+from hed.models import Sidecar
+from hed.schema import load_schema_version
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNameSummary, SummarizeColumnNamesOp
 
@@ -27,8 +29,34 @@ class Test(unittest.TestCase):
     def test_constructor(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnNamesOp(parms)
-        self.assertEqual(sum_op.summary_type, "column_headers", "constructor creates summary of right type")
+        self.assertEqual(sum_op.summary_type, "column_names", "constructor creates summary of right type")
         self.assertIsInstance(sum_op, SummarizeColumnNamesOp, "constructor creates an object of the correct type")
+
+    def test_summary_op(self):
+        events =  os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
+        sidecar_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                     '../../../data/remodel_tests/aomic_sub-0013_events.json'))
+        hed_schema = load_schema_version('8.1.0')
+        sidecar = Sidecar(sidecar_path, 'aomic_sidecar', hed_schema=hed_schema)
+        column_summary_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+        with open(column_summary_path, 'r') as fp:
+            parms = json.load(fp)
+        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        dispatch = Dispatcher([], data_root=None, hed_versions=['8.1.0'])
+        df = dispatch.get_data_file(events)
+        sum_op = parsed_commands[0]
+        df = sum_op.do_op(dispatch, df, os.path.basename(events), sidecar=sidecar)
+        context_dict = dispatch.context_dict
+        for key, item in context_dict.items():
+            text_value = item.get_text_summary()
+            self.assertTrue(text_value)
+            json_value = item.get_summary(as_json=True)
+            self.assertTrue(json_value)
+        context1 = dispatch.context_dict['AOMIC_column_names']
+        self.assertIsInstance(context1, ColumnNameSummary)
+        self.assertEqual(len(context1.unique_headers), 1)
 
     def test_do_ops(self):
         parms = json.loads(self.json_parms)
@@ -81,13 +109,18 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnNamesOp(parms)
         context = ColumnNameSummary(sum_op)
-        update1 = context.update_context(self.sample_columns1)
-        self.assertEqual(update1, 0, "update_context has first item at position 0")
+        context.update_context({"name": "name1", "column_names": self.sample_columns1})
+        self.assertEqual(len(context.file_dict), 1, "update_context has first item at position 0")
+        self.assertEqual(context.file_dict["name1"], 0, "update_context has first item at position 0")
         self.assertEqual(len(context.unique_headers), 1, "update_context has 1 unique item after first insertion")
-        update2 = context.update_context(self.sample_columns1)
-        self.assertEqual(update2, 0, "update_context has same position after update if item already there")
-        update3 = context.update_context(self.sample_columns2)
-        self.assertEqual(update3, update2+1, "update_context increments after update if new item")
+        context.update_context({"name": "name1a", "column_names": self.sample_columns1})
+        self.assertEqual(len(context.file_dict), 2, "update_context adds new names to file dictionary")
+        self.assertEqual(context.file_dict["name1a"], 0, "update_context the unique header position is correct")
+        self.assertEqual(len(context.unique_headers), 1, "update_context has 1 unique item after second insertion")
+        context.update_context({"name": "name2", "column_names": self.sample_columns2})
+        self.assertEqual(len(context.file_dict), 3, "update_context adds new names to file dictionary ")
+        self.assertEqual(context.file_dict["name2"], 1, "update_context has new columns at position 1")
+        self.assertEqual(len(context.unique_headers), 2, "update_context has 2 unique items after insertion")
 
 
 if __name__ == '__main__':

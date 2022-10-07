@@ -5,7 +5,7 @@ import pandas as pd
 import zipfile
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.remodeling.backup_manager import BackupManager
-from hed.tools.remodeling.operations.operation_list import valid_operations
+from hed.tools.remodeling.operations.valid_operations import valid_operations
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import generate_filename
 
@@ -65,7 +65,7 @@ class Dispatcher:
             verbose (bool): If true, a more extensive summary is archived.
 
         Returns:
-            dict: A dictionary of summaries keyed to filenames.
+            list: A list of dictionaries of summaries keyed to filenames.
 
         """
 
@@ -247,3 +247,10 @@ class Dispatcher:
         archive.seek(0)
         with open(this_path, "wb") as f:  # use `wb` mode
             f.write(archive.getvalue())
+
+    @staticmethod
+    def get_save_frame(df, filename):
+        return {'file_name': filename,
+                'file_format': '.tsv',
+                'file_type': 'dataframe',
+                'content': df.to_csv(None, sep='\t', index=False, header=True)}

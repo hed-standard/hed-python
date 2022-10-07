@@ -17,12 +17,12 @@ class Test(unittest.TestCase):
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                        '../data/bids/eeg_ds003654s_hed'))
         schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                    '../data/schema_test_data/HED8.0.0.xml'))
+                                                    '../data/schema_tests/HED8.0.0.xml'))
         sidecar1_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         cls.events_path = os.path.realpath(
             os.path.join(bids_root_path,'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar2_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                      '../data/remodeling/task-FacePerceptionSmall_events.json'))
+                                                      '../data/remodel_tests/task-FacePerceptionSmall_events.json'))
         cls.hed_schema = schema.load_schema(schema_path)
         cls.sidecar1 = Sidecar(sidecar1_path, name='face_sub1_json')
         cls.sidecar2 = Sidecar(sidecar2_path, name='face_small_json')

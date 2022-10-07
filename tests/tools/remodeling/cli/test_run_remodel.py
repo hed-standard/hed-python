@@ -13,31 +13,31 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         file_list = ['top_level.tsv', 'sub1/sub1_events.tsv', 'sub2/sub2_events.tsv', 'sub2/sub2_next_events.tsv']
         cls.file_list = file_list
-        cls.extract_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../data/remodeling')
-        test_root = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../data/remodeling/test_root')
+        cls.extract_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../data/remodel_tests')
+        test_root = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../data/remodel_tests/test_root')
         cls.test_root = test_root
         cls.test_paths = [os.path.join(test_root, file) for file in file_list]
         cls.test_zip = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                    '../../../data/remodeling/test_root.zip')
+                                    '../../../data/remodel_tests/test_root.zip')
 
         test_root_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                       '../../../data/remodeling/test_root_back1')
+                                       '../../../data/remodel_tests/test_root_back1')
         cls.test_root_back1 = test_root_back1
         cls.test_paths_back1 = [os.path.join(test_root_back1, file) for file in file_list]
         cls.test_zip_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../../data/remodeling/test_root_back1.zip')
+                                          '../../../data/remodel_tests/test_root_back1.zip')
 
         test_root_bad = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                     '../../../data/remodeling/test_root_bad')
+                                     '../../../data/remodel_tests/test_root_bad')
         cls.test_root_bad = test_root_bad
         cls.test_root_bad_backups = os.path.join(test_root_bad, BackupManager.RELATIVE_BACKUP_LOCATION)
         cls.test_paths_bad = [os.path.join(test_root_bad, file) for file in file_list]
         cls.test_zip_bad = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                        '../../../data/remodeling/test_root_bad.zip')
+                                        '../../../data/remodel_tests/test_root_bad.zip')
         cls.model_rename_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                             '../../../data/remodeling/test_root1_rename_rmdl.json')
+                                             '../../../data/remodel_tests/test_root1_rename_rmdl.json')
         cls.model_summary_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                              '../../../data/remodeling/test_root1_summarize_column_value_rmdl.json')
+                                              '../../../data/remodel_tests/test_root1_summarize_column_value_rmdl.json')
 
     def setUp(self):
         with zipfile.ZipFile(self.test_zip, 'r') as zip_ref:

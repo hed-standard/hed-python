@@ -20,9 +20,9 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.events_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                           '../../../data/remodeling/sub-0013_task-stopsignal_acq-seq_events.tsv'))
+                                                        '../../../data/remodel_tests/sub-0013_task-stopsignal_acq-seq_events.tsv'))
         cls.model1_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                           '../../../data/remodeling/only_splitevents_rmdl.json'))
+                                                        '../../../data/remodel_tests/only_splitevents_rmdl.json'))
         cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                            [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
                            [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],

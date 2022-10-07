@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                        '../data/bids/eeg_ds003654s_hed'))
         schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                    '../data/schema_test_data/HED8.0.0.xml'))
+                                                    '../data/schema_tests/HED8.0.0.xml'))
         cls.bids_root_path = bids_root_path
         json_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         events_path = os.path.realpath(os.path.join(bids_root_path,

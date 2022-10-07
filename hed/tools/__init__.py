@@ -32,7 +32,7 @@ from .remodeling.operations.filter_hed_op import FilterHedOp
 from .remodeling.operations.merge_consecutive_op import MergeConsecutiveOp
 from .remodeling.operations.number_groups_op import NumberGroupsOp
 from .remodeling.operations.number_rows_op import NumberRowsOp
-from .remodeling.operations import operation_list
+from .remodeling.operations import valid_operations
 from .remodeling.operations.remap_columns_op import RemapColumnsOp
 from .remodeling.operations.remove_columns_op import RemoveColumnsOp
 from .remodeling.operations.remove_rows_op import RemoveRowsOp

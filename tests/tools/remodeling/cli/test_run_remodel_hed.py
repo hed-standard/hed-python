@@ -11,29 +11,29 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.extract_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../data/remodeling')
+        cls.extract_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../data/remodel_tests')
         cls.model_rename_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                             '../../../data/remodeling/test_ds002790_rename_rmdl.json')
+                                             '../../../data/remodel_tests/test_ds002790_rename_rmdl.json')
         cls.model_summary_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                              '../../../data/remodeling/test_root1_summarize_column_value_rmdl.json')
+                                              '../../../data/remodel_tests/test_root1_summarize_column_value_rmdl.json')
         cls.hed_model_summary_path = \
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../../data/remodeling/test_ds003654_summarize_condition_variable_rmdl.json'))
+                                          '../../../data/remodel_tests/test_ds003654_summarize_condition_variable_rmdl.json'))
         cls.test_root_ds002790 = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                               '../../../data/remodeling/test_ds002790s_hed'))
+                                                               '../../../data/remodel_tests/test_ds002790s_hed'))
         cls.test_zip_ds002790 = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                              '../../../data/remodeling/test_ds002790s_hed.zip'))
+                                                              '../../../data/remodel_tests/test_ds002790s_hed.zip'))
         cls.test_root_ds002790_backed = \
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../../data/remodeling/test_ds002790s_hed_backed'))
+                                          '../../../data/remodel_tests/test_ds002790s_hed_backed'))
         cls.test_zip_ds002790_backed = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                        '../../../data/remodeling/test_ds002790s_hed_backed.zip'))
+                                                                     '../../../data/remodel_tests/test_ds002790s_hed_backed.zip'))
         cls.test_root_ds003654_backed = \
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../../data/remodeling/test_ds003654s_hed_backed'))
+                                          '../../../data/remodel_tests/test_ds003654s_hed_backed'))
         cls.test_zip_ds003654_backed = \
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../../data/remodeling/test_ds003654s_hed_backed.zip'))
+                                          '../../../data/remodel_tests/test_ds003654s_hed_backed.zip'))
 
     def setUp(self):
         with zipfile.ZipFile(self.test_zip_ds002790, 'r') as zip_ref:

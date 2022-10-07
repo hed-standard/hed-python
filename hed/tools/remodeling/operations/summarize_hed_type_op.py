@@ -84,18 +84,3 @@ class HedTypeSummary(BaseContext):
 
     def get_summary_details(self, verbose=True):
         return self.summary.get_summary(as_json=False)
-
-    # def get_summary(self, as_json=False, verbose=True):
-    #     summary = super().get_summary(as_json=False, verbose=verbose)
-    #     summary['summary'] = self.get_summary_details
-    #     if as_json:
-    #         return json.dumps(summary, indent=4)
-    #     else:
-    #         return summary
-    #
-    # def get_text_summary(self, title='', verbose=True):
-    #     sum_str = super().get_text_summary(title=title, verbose=verbose)
-    #     summary = self.get_summary(as_json=False, verbose=verbose)
-    #     summary_details = json.dumps(summary['summary'], indent=4)
-    #     summary_details = summary_details.replace('"', '').replace('{', '').replace('}', '').replace(',', '')
-    #     return sum_str + '\n' + 'Summary:' +'\n' + summary_details
