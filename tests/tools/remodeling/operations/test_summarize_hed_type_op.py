@@ -1,8 +1,11 @@
 import json
 import os
 import unittest
+from hed.models import Sidecar
+from hed.schema import load_schema_version
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp
+from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp, HedTypeSummary
+from hed.tools import HedVariableSummary
 
 
 class Test(unittest.TestCase):
@@ -10,7 +13,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                             '../../../data/remodeling/'))
+                                             '../../../data/remodel_tests/'))
         cls.data_path = os.path.realpath(os.path.join(path, 'sub-002_task-FacePerception_run-1_events.tsv'))
         cls.json_path = os.path.realpath(os.path.join(path, 'task-FacePerception_events.json'))
         base_parameters = {
@@ -42,45 +45,34 @@ class Test(unittest.TestCase):
         self.assertEqual(200, len(df_new), "summarize_hed_type_op dataframe length is correct")
         self.assertEqual(10, len(df_new.columns), "summarize_hed_type_op has correct number of columns")
 
-    # def test_do_ops(self):
-    #     # TODO
-    #     parms = json.loads(self.json_parms)
-    #     sum_op = SummarizeColumnValuesOp(parms)
-    #     dispatch = Dispatcher([], data_root=self.data_root)
-    #     df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-    #     df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-    #     sum_op.do_op(dispatch, df1, 'name1')
-    #     context1 = dispatch.context_dict.get(parms['summary_name'], None)
-    #     summary = context1.summary
-    #     cat_len = len(summary.categorical_info)
-    #     self.assertEqual(cat_len, len(self.sample_columns),
-    #                      'do_ops if all columns are categorical summary has same number of columns as df')
-    #     sum_op.do_op(dispatch, df1a, 'name1')
-    #     self.assertEqual(len(context1.summary.categorical_info), len(self.sample_columns),
-    #                      "do_ops updating does not change number of categorical columns.")
-    #     sum_op.do_op(dispatch, df1a, 'name2')
-    #
-    # def test_get_summary(self):
-    #     # TODO implement these tests
-    #     parms = json.loads(self.json_parms)
-    #     sum_op = SummarizeColumnValuesOp(parms)
-    #     dispatch = Dispatcher([], data_root=self.data_root)
-    #     df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-    #     sum_op.do_op(dispatch, df1, 'name1')
-    #     sum_op.do_op(dispatch, df1, 'name2')
-    #     sum_op.do_op(dispatch, df1, 'name3')
-    #     context1 = dispatch.context_dict.get(parms['summary_name'], None)
-    #     self.assertIsInstance(context1, ColumnValueSummary, "get_summary testing ColumnValueSummary")
-    #     summary1 = context1.get_summary()
-    #     self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
-    #     summary2 = context1.get_summary(as_json=True)
-    #     self.assertIsInstance(summary2, str, "get_summary returns a dictionary if json requested")
-    #     summary3 = context1.get_text_summary(verbose=False)
-    #     self.assertIsInstance(summary3, str, "get_text_summary returns a str if verbose is False")
-    #     summary4 = context1.get_text_summary()
-    #     self.assertIsInstance(summary4, str, "get_text_summary returns a str by default")
-    #     summary5 = context1.get_text_summary(verbose=True)
-    #     self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
+    def test_summary_op(self):
+        events =  os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
+        sidecar_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                     '../../../data/remodel_tests/aomic_sub-0013_events.json'))
+        hed_schema = load_schema_version('8.1.0')
+        sidecar = Sidecar(sidecar_path, 'aomic_sidecar', hed_schema=hed_schema)
+        column_summary_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+        with open(column_summary_path, 'r') as fp:
+            parms = json.load(fp)
+        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        self.assertFalse(errors)
+        dispatch = Dispatcher([], data_root=None, hed_versions=['8.1.0'])
+        df = dispatch.get_data_file(events)
+        sum_op =  parsed_commands[2]
+        df = sum_op.do_op(dispatch, df, os.path.basename(events), sidecar=sidecar)
+        context_dict = dispatch.context_dict
+        for key, item in context_dict.items():
+            text_value = item.get_text_summary()
+            self.assertTrue(text_value)
+            json_value = item.get_summary(as_json=True)
+            self.assertTrue(json_value)
+        context1 = dispatch.context_dict['AOMIC_condition_variables']
+        self.assertIsInstance(context1, HedTypeSummary)
+        summary = context1.summary
+        self.assertIsInstance(summary, HedVariableSummary)
+        self.assertEqual(context1.variable_type, 'condition-variable')
 
 
 if __name__ == '__main__':

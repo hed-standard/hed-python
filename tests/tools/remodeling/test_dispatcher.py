@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         data_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                  '../../data/remodeling'))
+                                                  '../../data/remodel_tests'))
         sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                        [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
                        [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
@@ -33,16 +33,16 @@ class Test(unittest.TestCase):
         cls.file_path = file_path
         cls.sample_data = sample_data
         cls.sample_columns = sample_columns
-        cls.extract_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
+        cls.extract_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodel_tests')
         cls.test_zip_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../data/remodeling/test_root_back1.zip')
+                                          '../../data/remodel_tests/test_root_back1.zip')
         test_root_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                       '../../data/remodeling/test_root_back1')
+                                       '../../data/remodel_tests/test_root_back1')
         cls.test_root_back1 = test_root_back1
         cls.summarize_model = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                           '../../data/remodeling/test_root1_summarize_column_value_rmdl.json')
+                                           '../../data/remodel_tests/test_root1_summarize_column_value_rmdl.json')
         cls.archive_zip = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                           '../../data/remodeling/test_archive/test_archive_file.zip'))
+                                                        '../../data/remodel_tests/test_archive/test_archive_file.zip'))
 
     def setUp(self):
         with zipfile.ZipFile(self.test_zip_back1, 'r') as zip_ref:

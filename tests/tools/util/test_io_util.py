@@ -152,7 +152,7 @@ class Test(unittest.TestCase):
 
     def test_get_file_list_files(self):
         dir_pairs = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                 '../../data/schema_test_data/prologue_tests')
+                                 '../../data/schema_tests/prologue_tests')
         dir_pairs = os.path.realpath(dir_pairs)
         test_files = [name for name in os.listdir(dir_pairs) if os.path.isfile(os.path.join(dir_pairs, name))]
         file_list1 = get_file_list(dir_pairs)

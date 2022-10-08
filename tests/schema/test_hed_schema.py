@@ -7,8 +7,8 @@ from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, 
 
 
 class TestHedSchema(unittest.TestCase):
-    schema_file_3g_xml = '../data/schema_test_data/HED8.0.0t.xml'
-    schema_file_3g = '../data/schema_test_data/HED8.0.0.mediawiki'
+    schema_file_3g_xml = '../data/schema_tests/HED8.0.0t.xml'
+    schema_file_3g = '../data/schema_tests/HED8.0.0.mediawiki'
 
     @classmethod
     def setUpClass(cls):

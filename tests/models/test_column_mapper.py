@@ -7,7 +7,7 @@ from hed.models.sidecar import Sidecar
 
 
 class Test(unittest.TestCase):
-    schema_file = '../data/schema_test_data/HED8.0.0t.xml'
+    schema_file = '../data/schema_tests/HED8.0.0t.xml'
 
     @classmethod
     def setUpClass(cls):

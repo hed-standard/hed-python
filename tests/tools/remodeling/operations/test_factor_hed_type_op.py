@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                             '../../../data/remodeling/'))
+                                             '../../../data/remodel_tests/'))
         cls.data_path = os.path.realpath(os.path.join(path, 'sub-002_task-FacePerception_run-1_events.tsv'))
         cls.json_path = os.path.realpath(os.path.join(path, 'task-FacePerception_events.json'))
         base_parameters = {

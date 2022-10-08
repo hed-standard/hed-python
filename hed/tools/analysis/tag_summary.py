@@ -115,7 +115,7 @@ if __name__ == '__main__':
     root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                              '../../../tests/data/bids/eeg_ds003654s_hed')
 
-    json_path = "../../../tests/data/remodeling/tag_summary_template.json5"
+    json_path = "../../../tests/data/remodel_tests/tag_summary_template.json5"
     with open(json_path) as fp:
         rules = json.load(fp)
     breakouts = rules["Tag-categories"]

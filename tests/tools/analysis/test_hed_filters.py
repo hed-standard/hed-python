@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
     #     bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
     #                                       '../../data/bids/eeg_ds003654s_hed'))
     #     schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                                    '../../data/schema_test_data/HED8.0.0.xml'))
+    #                                    '../../data/schema_tests/HED8.0.0.xml'))
     #     schema = load_schema_version(xml_version="8.1.0")
     #     cls.test_strings1 = [HedString(f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
     #                                    f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4, Def/Other",

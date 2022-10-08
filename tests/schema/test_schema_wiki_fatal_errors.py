@@ -6,7 +6,7 @@ from hed.errors import HedFileError, HedExceptions
 
 
 class TestHedSchema(unittest.TestCase):
-    base_schema_dir = '../data/invalid_wiki_schemas/'
+    base_schema_dir = '../data/schema_tests/wiki_tests/'
 
     @classmethod
     def setUpClass(cls):
