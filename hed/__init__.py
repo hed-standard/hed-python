@@ -10,7 +10,7 @@ from hed.models.sidecar import Sidecar
 
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
-from hed.schema.hed_schema_io import load_schema, load_schema_version
+from hed.schema.hed_schema_io import get_schema, get_schema_versions, load_schema, load_schema_version
 
 from hed.validator.hed_validator import HedValidator
 

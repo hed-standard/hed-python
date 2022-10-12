@@ -32,27 +32,6 @@ class BidsTabularDictionary(BidsFileDictionary):
         self.rowcount_dict = {}
         self._info_set = False
 
-    def correct_file(self, the_file):
-        """ Transform to BidsTabularFile if needed.
-
-        Parameters:
-            the_file (str or BidsFile): If a str, create a new BidsTabularFile object,
-                                        otherwise pass the original on.
-        Returns:
-            BidsTabularFile:  Either the original file or a newly created BidsTabularFile.
-
-        Raises:
-            HedFileError: If the_file isn't str or BidsTabularFile.
-
-        """
-        if isinstance(the_file, str):
-            the_file = BidsTabularFile(the_file)
-        elif not isinstance(the_file, BidsFile):
-            HedFileError("BadArgument", f"correct_file needs file path or BidsFile type but found {str(the_file)}", [])
-        elif not isinstance(the_file, BidsTabularFile):
-            the_file = BidsTabularFile(the_file.file_path)
-        return the_file
-
     def count_diffs(self, other_dict):
         """ Return keys in which the number of rows differ.
 
@@ -69,10 +48,13 @@ class BidsTabularDictionary(BidsFileDictionary):
                 - int:  Number of rows in the file in the other dictionary.
 
         """
-        self._set_tsv_info()
+        self.set_tsv_info()
+        other_dict.set_tsv_info()
         diff_list = []
-        for key in self._file_dict.keys():
-            if self.rowcount_dict[key] != other_dict.rowcount_dict[key]:
+        for key in self.file_dict.keys():
+            if key not in other_dict.rowcount_dict:
+                diff_list.append((key, self.rowcount_dict[key], 0))
+            elif self.rowcount_dict[key] != other_dict.rowcount_dict[key]:
                 diff_list.append((key, self.rowcount_dict[key], other_dict.rowcount_dict[key]))
         return diff_list
 
@@ -88,7 +70,7 @@ class BidsTabularDictionary(BidsFileDictionary):
         """
 
         if not self._info_set:
-            self._set_tsv_info()
+            self.set_tsv_info()
         return {"key": key,
                 "row_count": self.rowcount_dict.get(key, None),
                 "columns": self.column_dict.get(key, None)}
@@ -120,7 +102,7 @@ class BidsTabularDictionary(BidsFileDictionary):
                 - list:  List of column names
 
         """
-        self._set_tsv_info()
+        self.set_tsv_info()
         for key, file in self._file_dict.items():
             yield key, file, self.rowcount_dict[key], self.column_dict[key]
 
@@ -137,7 +119,7 @@ class BidsTabularDictionary(BidsFileDictionary):
         """
         return BidsTabularDictionary(name, files, entities=self.entities)
 
-    def _set_tsv_info(self):
+    def set_tsv_info(self):
         if self._info_set:
             return
 
@@ -145,7 +127,7 @@ class BidsTabularDictionary(BidsFileDictionary):
             df = get_new_dataframe(file.file_path)
             self.rowcount_dict[key] = len(df.index)
             self.column_dict[key] = list(df.columns.values)
-        self.info_set = True
+        self._info_set = True
 
     def report_diffs(self, tsv_dict, logger=None):
         """ Reports and logs the contents and differences between this tabular dictionary and another
@@ -160,18 +142,11 @@ class BidsTabularDictionary(BidsFileDictionary):
         """
         report_list = [f"{self.name} has {len(self.file_list)} event files"]
         logger.add("overall", f"{report_list[-1]}")
-        report_list.append(f"{self.name} has {len(tsv_dict.file_list)} event files")
+        report_list.append(f"{tsv_dict.name} has {len(tsv_dict.file_list)} event files")
         logger.add("overall", f"{report_list[-1]}")
 
         report_list.append(self.output_files(title=f"\n{self.name} event files", logger=logger))
         report_list.append(tsv_dict.output_files(title=f"\n{tsv_dict.name} event files", logger=logger))
-
-        # Make sure there are the same number of files in both collections
-        if len(self.key_list) != len(tsv_dict.key_list):
-            report_list.append(f"{self.name} has {len(self.file_list)} files and " +
-                               f"{tsv_dict.name} has {len(tsv_dict.file_list)} files")
-            if logger:
-                logger.add("overall", f"{report_list[-1]}", level="ERROR")
 
         # Compare keys from the two dictionaries to make sure they have the same keys
         key_diff = self.key_diffs(tsv_dict)
@@ -203,3 +178,26 @@ class BidsTabularDictionary(BidsFileDictionary):
             logger.add("overall", f"{report_list[-1]}")
 
         return "\n".join(report_list)
+
+    @classmethod
+    def _correct_file(cls, the_file):
+        """ Transform to BidsTabularFile if needed.
+
+        Parameters:
+            the_file (str or BidsFile): If a str, create a new BidsTabularFile object,
+                                        otherwise pass the original on.
+        Returns:
+            BidsTabularFile:  Either the original file or a newly created BidsTabularFile.
+
+        Raises:
+            HedFileError: If the_file isn't str or BidsTabularFile.
+
+        """
+        if isinstance(the_file, str):
+            the_file = BidsTabularFile(the_file)
+        elif not isinstance(the_file, BidsFile):
+            raise HedFileError("BadArgument",
+                               f"_correct_file needs file path or BidsFile type but found {str(the_file)}", [])
+        elif not isinstance(the_file, BidsTabularFile):
+            the_file = BidsTabularFile(the_file.file_path)
+        return the_file

@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         cls.input_data_no_sidecar = TabularInput(events_path, name="face_sub1_events_no_sidecar")
 
-    def test_assemble_hed(self):
+    def test_assemble_hed_included_no_expand(self):
         df1, dict1 = assemble_hed(self.input_data,
                                   columns_included=["onset", "duration", "event_type"], expand_defs=False)
         self.assertIsInstance(df1, DataFrame, "hed_assemble should return a dataframe when columns are included")
@@ -39,17 +39,56 @@ class Test(unittest.TestCase):
                          "assemble_hed with no def expand does not have Def-expand tags")
         self.assertIsInstance(dict1, dict, "hed_assemble returns a dictionary of definitions")
         self.assertEqual(len(dict1), 17, "hed_assemble definition dictionary has the right number of elements.")
+
+    def test_assemble_hed_included_expand(self):
         df2, dict2 = assemble_hed(self.input_data,
                                   columns_included=["onset", "duration", "event_type"], expand_defs=True)
         first_str2 = df2.iloc[0]['HED_assembled']
         self.assertEqual(first_str2.find('Def/'), -1, "assemble_hed with def expand has no Def tag")
         self.assertNotEqual(first_str2.find('Def-expand/'), -1, "assemble_hed with def expand has Def-expand tags")
 
+    def test_assemble_hed_included_no_expand_bad_column(self):
         df3, dict3 = assemble_hed(self.input_data,
                                   columns_included=["onset", "baloney", "duration", "event_type"], expand_defs=False)
         columns3 = list(df3.columns)
         self.assertEqual(len(columns3), 4,
                          "assemble_hed should return the correct number of columns when bad columns are included ")
+
+    def test_assemble_hed_included_expand_bad_column(self):
+        df3, dict3 = assemble_hed(self.input_data,
+                                  columns_included=["onset", "baloney", "duration", "event_type"], expand_defs=True)
+        columns3 = list(df3.columns)
+        self.assertEqual(len(columns3), 4,
+                         "assemble_hed should return the correct number of columns when bad columns are included ")
+
+    def test_assemble_hed_no_included_no_expand(self):
+        df1, dict1 = assemble_hed(self.input_data, columns_included=None, expand_defs=False)
+        self.assertIsInstance(df1, DataFrame, "hed_assemble returns a dataframe when no columns are included")
+        columns1 = list(df1.columns)
+        self.assertEqual(len(columns1), 1,
+                         "assemble_hed returns only assembled strings when no columns include. ")
+        first_str1 = df1.iloc[0]['HED_assembled']
+        self.assertNotEqual(first_str1.find('Def/'), -1, "assemble_hed with no def expand has Def tags")
+        self.assertEqual(first_str1.find('Def-expand'), -1,
+                         "assemble_hed with no def expand does not have Def-expand tags")
+        self.assertIsInstance(dict1, dict, "hed_assemble returns a dictionary of definitions")
+        self.assertEqual(len(dict1), 17, "hed_assemble definition dictionary has the right number of elements.")
+
+    def test_assemble_hed_no_included_expand(self):
+        df2, dict2 = assemble_hed(self.input_data, columns_included=None, expand_defs=True)
+        first_str2 = df2.iloc[0]['HED_assembled']
+        self.assertEqual(first_str2.find('Def/'), -1, "assemble_hed with def expand has no Def tag")
+        self.assertNotEqual(first_str2.find('Def-expand/'), -1, "assemble_hed with def expand has Def-expand tags")
+
+    def test_assemble_hed_bad_column_no_expand(self):
+        df3, dict3 = assemble_hed(self.input_data,
+                                  columns_included=["onset", "baloney", "duration", "event_type"], expand_defs=False)
+        columns3 = list(df3.columns)
+        self.assertEqual(len(columns3), 4,
+                         "assemble_hed returns the correct number of columns when bad columns are included ")
+        first_str2 = df3.iloc[0]['HED_assembled']
+        self.assertNotEqual(first_str2.find('Def/'), -1, "assemble_hed with def expand has no Def tag")
+        self.assertEqual(first_str2.find('Def-expand/'), -1, "assemble_hed with def expand has Def-expand tags")
 
     def test_search_tabular(self):
         query1 = "sensory-event"
