@@ -7,6 +7,7 @@ from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.schema.hed_schema import HedSchema
 from hed.schema.schema_io import schema_util
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.schema_validation_util import validate_version_string
@@ -45,6 +46,28 @@ def from_string(schema_string, file_type=".xml", schema_prefix=None):
         hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
     return hed_schema
+
+
+def get_schema(hed_versions):
+    if not hed_versions:
+        return None
+    elif isinstance(hed_versions, str) or isinstance(hed_versions, list):
+        return load_schema_version(hed_versions)
+    elif isinstance(hed_versions, HedSchema) or isinstance(hed_versions, HedSchemaGroup):
+        return hed_versions
+    else:
+        raise ValueError("InvalidHedSchemaOrSchemaVersion", "Expected schema or schema version")
+
+
+def get_schema_versions(hed_schema, as_string=True):
+    if not hed_schema and as_string:
+        return ''
+    elif not hed_schema:
+        return None
+    elif isinstance(hed_schema, HedSchema) or isinstance(hed_schema, HedSchemaGroup):
+        return hed_schema.get_formatted_version(as_string=as_string)
+    else:
+        raise ValueError("InvalidHedSchemaOrHedSchemaGroup", "Expected schema or schema group")
 
 
 def load_schema(hed_path=None, schema_prefix=None):

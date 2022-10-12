@@ -91,20 +91,3 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
         df = data_input.dataframe.iloc[row_numbers][eligible_columns].reset_index()
         df.rename(columns={'index': 'row_number'})
     return df
-
-
-if __name__ == '__main__':
-    import os
-    from hed.models import Sidecar
-    from hed.schema import load_schema_version
-    root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../tests/data/bids/eeg_ds003654s_hed')
-    events_path = os.path.realpath(os.path.join(root_path, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
-    json_path = os.path.realpath(os.path.join(root_path, 'task-FacePerception_events.json'))
-    sidecar = Sidecar(json_path, name='face_sub1_json')
-    input_data = TabularInput(events_path, sidecar=sidecar, name="face_sub1_events")
-    hed_schema1 = load_schema_version(xml_version="8.1.0")
-    query1 = "Sensory-event"
-    df3 = search_tabular(input_data, hed_schema1, query1, columns_included=['onset', 'event_type'])
-
-    print(f"{len(df3)} events match")
-    df1, defs = assemble_hed(input_data, columns_included=None, expand_defs=False)

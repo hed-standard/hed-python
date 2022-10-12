@@ -1,12 +1,10 @@
 import os
-import io
 import numpy as np
 import pandas as pd
-import zipfile
-from hed.schema.hed_schema_io import load_schema_version
+from hed.errors.exceptions import HedFileError
+from hed.schema.hed_schema_io import get_schema
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
-from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import generate_filename
 
 
@@ -15,6 +13,14 @@ class Dispatcher:
 
     def __init__(self, operation_list, data_root=None,
                  backup_name=BackupManager.DEFAULT_BACKUP_NAME, hed_versions=None):
+        """ Initialize the dispatcher.
+
+        Parameters:
+            operation_list (list): List of unparsed operations.
+            data_root (str or None):  Root directory for the dataset. If none, then backups are not made.
+            hed_versions (str, list, HedSchema, or HedSchemaGroup): The HED schema.
+
+        """
         self.data_root = data_root
         self.backup_name = backup_name
         self.backup_man = None
@@ -29,33 +35,8 @@ class Dispatcher:
             these_errors = self.errors_to_str(errors, 'Dispatcher failed due to invalid operations')
             raise ValueError("InvalidOperationList", f"{these_errors}")
         self.parsed_ops = op_list
-        if hed_versions:
-            self.hed_schema = load_schema_version(hed_versions)
-        else:
-            self.hed_schema = None
+        self.hed_schema = get_schema(hed_versions)
         self.context_dict = {}
-
-    def archive_context(self, archive=None, file_formats=['.txt', '.json'], verbose=True):
-        """ Write the context information to an stream archive and return.
-
-        Parameters:
-            archive (BytesIO or None): Open byte stream to write zipped content or None if one is to be created.
-            file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
-            verbose (bool): If true, a more extensive summary is archived.
-
-        Returns:
-            BytesIO or None: An open byte stream or None if no archive was passed and no context is available.
-
-        """
-        if not self.context_dict:
-            return archive
-        elif not archive:
-            archive = io.BytesIO()
-        summary_list = self.get_context_summaries(file_formats=['.txt', '.json'], verbose=True)
-        with zipfile.ZipFile(archive, mode="a", compression=zipfile.ZIP_DEFLATED) as zf:
-            for item in summary_list:
-                zf.writestr(item['file_name'], str.encode(item['content'], 'utf-8'))
-        return archive
 
     def get_context_summaries(self, file_formats=['.txt', '.json'], verbose=True):
         """ Return the summaries in a dictionary suitable for saving or archiving.
@@ -82,31 +63,6 @@ class Dispatcher:
                 summary_list.append({'file_name': file_base + file_format, 'file_format': file_format,
                                      'file_type': 'summary', 'content': summary})
         return summary_list
-
-    # def get_context_summaries(self, file_formats=['.txt', '.json'], verbose=True):
-    #     """ Return the summaries in a dictionary suitable for saving or archiving.
-    #
-    #     Parameters:
-    #         file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
-    #         verbose (bool): If true, a more extensive summary is archived.
-    #
-    #     Returns:
-    #         dict: A dictionary of summaries keyed to filenames.
-    #
-    #     """
-    #
-    #     summary_dict = {}
-    #     for context_name, context_item in self.context_dict.items():
-    #         file_base = generate_filename(context_item.context_filename, append_datetime=True)
-    #         for file_format in file_formats:
-    #             if file_format == '.txt':
-    #                 summary = context_item.get_text_summary(verbose=True)
-    #             elif file_format == '.json':
-    #                 summary = context_item.get_summary(as_json=True)
-    #             else:
-    #                 continue
-    #             summary_dict[file_base + file_format] = summary
-    #     return summary_dict
 
     def get_data_file(self, file_path):
         """ Full path of the backup file corresponding to the file path.
@@ -229,16 +185,6 @@ class Dispatcher:
         if title:
             return title + sep + errors
         return errors
-
-    @staticmethod
-    def archive_data_file(df, file_path, archive=None):
-        if not archive:
-            archive = io.BytesIO()
-        file_name = generate_filename(os.path.basename(file_path), append_datetime=True,
-                                      extension=os.path.splitext(file_path)[1])
-        with zipfile.ZipFile(archive, mode="a", compression=zipfile.ZIP_DEFLATED) as zf:
-            zf.writestr(file_name, str.encode(df.to_csv(None, sep='\t', index=False, header=True), 'utf-8'))
-        return archive
 
     @staticmethod
     def save_archive(archive, archive_path):

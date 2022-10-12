@@ -40,31 +40,12 @@ class BidsFileDictionary(FileDictionary):
     @property
     def file_dict(self):
         """ Dictionary of keys and paths. """
-        return {key:file.file_path for key, file in self._file_dict.items()}
+        return {key: file.file_path for key, file in self._file_dict.items()}
 
     @property
     def file_list(self):
         """ Paths of the files in the list. """
         return [file.file_path for file in self._file_dict.values()]
-
-    def correct_file(self, the_file):
-        """ Transform to BidsFile if needed.
-
-        Parameters:
-            the_file (str or BidsFile): If a str, create a new BidsFile object, otherwise pass the original on.
-
-        Returns:
-            BidsFile:  Either the original file or a newly created BidsTabularFile.
-
-        Raises:
-            HedFileError: If the_file isn't str or BidsFile.
-
-        """
-        if isinstance(the_file, str):
-            the_file = BidsFile(the_file)
-        elif not isinstance(the_file, BidsFile):
-            HedFileError("BadArgument", f"correct_file expects file path or BidsFile but found {str(the_file)}", [])
-        return the_file
 
     def get_file_path(self, key):
         """ Return the file path corresponding to key.
@@ -145,7 +126,7 @@ class BidsFileDictionary(FileDictionary):
         elif not isinstance(files, list):
             raise HedFileError("BadArgument", "make_bids_file_dict expects a list or dict", [])
         for the_file in files:
-            the_file = self.correct_file(the_file)
+            the_file = self._correct_file(the_file)
             key = the_file.get_key(entities)
             if key in file_dict:
                 raise HedFileError("NonUniqueFileKeys",
@@ -250,3 +231,24 @@ class BidsFileDictionary(FileDictionary):
             entity_dict[key] = file
             split_dict[entity_value] = entity_dict
         return split_dict, leftovers
+
+    @classmethod
+    def _correct_file(cls, the_file):
+        """ Transform to BidsFile if needed.
+
+        Parameters:
+            the_file (str or BidsFile): If a str, create a new BidsFile object, otherwise pass the original on.
+
+        Returns:
+            BidsFile:  Either the original file or a newly created BidsTabularFile.
+
+        Raises:
+            HedFileError: If the_file isn't str or BidsFile.
+
+        """
+        if isinstance(the_file, str):
+            the_file = BidsFile(the_file)
+        elif not isinstance(the_file, BidsFile):
+            raise HedFileError("BadArgument",
+                               f"_correct_file expects file path or BidsFile but found {str(the_file)}", [])
+        return the_file

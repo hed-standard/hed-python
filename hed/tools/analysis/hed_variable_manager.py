@@ -77,23 +77,23 @@ class HedVariableManager:
         return f"Type_variables: {str(list(self._variable_type_map.keys()))}"
 
 
-if __name__ == '__main__':
-    import os
-    from hed import Sidecar, TabularInput
-    from hed.tools.analysis.analysis_util import get_assembled_strings
-    schema = load_schema_version(xml_version="8.1.0")
-
-    bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                   '../../../tests/data/bids/eeg_ds003654s_hed'))
-    events_path = os.path.realpath(os.path.join(bids_root_path,
-                                                'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
-    sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
-    sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
-    input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
-    assembled_strings = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
-    definitions = input_data.get_definitions()
-    var_manager = HedVariableManager(assembled_strings, schema, definitions)
-    var_manager.add_type_variable("condition-variable")
-    var_cond = var_manager.get_type_variable("condition-variable")
-    var_summary = var_cond.summarize()
-    summary_total = var_manager.summarize_all()
+# if __name__ == '__main__':
+#     import os
+#     from hed import Sidecar, TabularInput
+#     from hed.tools.analysis.analysis_util import get_assembled_strings
+#     schema = load_schema_version(xml_version="8.1.0")
+#
+#     bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+#                                                    '../../../tests/data/bids/eeg_ds003654s_hed'))
+#     events_path = os.path.realpath(os.path.join(bids_root_path,
+#                                                 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
+#     sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
+#     sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
+#     input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+#     assembled_strings = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
+#     definitions = input_data.get_definitions()
+#     var_manager = HedVariableManager(assembled_strings, schema, definitions)
+#     var_manager.add_type_variable("condition-variable")
+#     var_cond = var_manager.get_type_variable("condition-variable")
+#     var_summary = var_cond.summarize()
+#     summary_total = var_manager.summarize_all()

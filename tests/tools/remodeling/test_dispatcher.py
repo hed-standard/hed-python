@@ -85,53 +85,53 @@ class Test(unittest.TestCase):
         self.assertEqual(errors[0]['error_type'], KeyError,
                          "parse_operation error has the correct type for missing operation")
 
-    def test_archive_context(self):
-        with open(self.summarize_model) as fp:
-            model1 = json.load(fp)
-        dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
-        file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
-                                  exclude_dirs=['derivatives'])
-        for file in file_list:
-            dispatch1.run_operations(file)
+    # def test_archive_context(self):
+    #     with open(self.summarize_model) as fp:
+    #         model1 = json.load(fp)
+    #     dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
+    #     file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
+    #                               exclude_dirs=['derivatives'])
+    #     for file in file_list:
+    #         dispatch1.run_operations(file)
+    #
+    #     archive_io = dispatch1.archive_context()
+    #     self.assertIsInstance(archive_io, io.BytesIO)
+    #     self.assertFalse(os.path.exists(self.archive_zip))
+    #     os.makedirs(os.path.dirname(self.archive_zip), exist_ok=True)
+    #     with open(self.archive_zip, "wb") as f:  # use `wb` mode
+    #         f.write(archive_io.getvalue())
+    #     self.assertTrue(os.path.exists(self.archive_zip))
+    #     the_zip = zipfile.ZipFile(self.archive_zip)
+    #     self.assertFalse(the_zip.testzip())
 
-        archive_io = dispatch1.archive_context()
-        self.assertIsInstance(archive_io, io.BytesIO)
-        self.assertFalse(os.path.exists(self.archive_zip))
-        os.makedirs(os.path.dirname(self.archive_zip), exist_ok=True)
-        with open(self.archive_zip, "wb") as f:  # use `wb` mode
-            f.write(archive_io.getvalue())
-        self.assertTrue(os.path.exists(self.archive_zip))
-        the_zip = zipfile.ZipFile(self.archive_zip)
-        self.assertFalse(the_zip.testzip())
+    # def test_archive_data_file(self):
+    #     file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
+    #                               exclude_dirs=['derivatives'])
+    #     archive_one = io.BytesIO()
+    #     for file in file_list:
+    #         df = pd.read_csv(file, sep='\t', header=0)
+    #         self.assertIsInstance(df, pd.DataFrame)
+    #         archive_one = Dispatcher.archive_data_file(df, file, archive=archive_one)
+    #     self.assertFalse(os.path.exists(self.archive_zip))
+    #     Dispatcher.save_archive(archive_one, self.archive_zip)
+    #     self.assertTrue(os.path.exists(self.archive_zip))
+    #     the_zip = zipfile.ZipFile(self.archive_zip)
+    #     self.assertFalse(the_zip.testzip())
 
-    def test_archive_data_file(self):
-        file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
-                                  exclude_dirs=['derivatives'])
-        archive_one = io.BytesIO()
-        for file in file_list:
-            df = pd.read_csv(file, sep='\t', header=0)
-            self.assertIsInstance(df, pd.DataFrame)
-            archive_one = Dispatcher.archive_data_file(df, file, archive=archive_one)
-        self.assertFalse(os.path.exists(self.archive_zip))
-        Dispatcher.save_archive(archive_one, self.archive_zip)
-        self.assertTrue(os.path.exists(self.archive_zip))
-        the_zip = zipfile.ZipFile(self.archive_zip)
-        self.assertFalse(the_zip.testzip())
-
-    def test_archive_data_file_with_context(self):
-        with open(self.summarize_model) as fp:
-            model1 = json.load(fp)
-        dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
-        file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
-                                  exclude_dirs=['derivatives'])
-        df = dispatch1.run_operations(file_list[0])
-        archive_one = io.BytesIO()
-        archive_one = Dispatcher.archive_data_file(df, file_list[0], archive=archive_one)
-        archive_one = dispatch1.archive_context(archive=archive_one)
-        Dispatcher.save_archive(archive_one, self.archive_zip)
-        self.assertTrue(os.path.exists(self.archive_zip))
-        the_zip = zipfile.ZipFile(self.archive_zip)
-        self.assertFalse(the_zip.testzip())
+    # def test_archive_data_file_with_context(self):
+    #     with open(self.summarize_model) as fp:
+    #         model1 = json.load(fp)
+    #     dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
+    #     file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
+    #                               exclude_dirs=['derivatives'])
+    #     df = dispatch1.run_operations(file_list[0])
+    #     archive_one = io.BytesIO()
+    #     archive_one = Dispatcher.archive_data_file(df, file_list[0], archive=archive_one)
+    #     archive_one = dispatch1.archive_context(archive=archive_one)
+    #     Dispatcher.save_archive(archive_one, self.archive_zip)
+    #     self.assertTrue(os.path.exists(self.archive_zip))
+    #     the_zip = zipfile.ZipFile(self.archive_zip)
+    #     self.assertFalse(the_zip.testzip())
 
     def test_get_context_save_dir(self):
         model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
