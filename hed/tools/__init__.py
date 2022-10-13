@@ -22,7 +22,6 @@ from .bids.bids_timeseries_file import BidsTimeseriesFile
 
 from .remodeling.dispatcher import Dispatcher
 from .remodeling.backup_manager import BackupManager
-
 from .remodeling.operations.base_context import BaseContext
 from .remodeling.operations.base_op import BaseOp
 from .remodeling.operations.factor_column_op import FactorColumnOp
