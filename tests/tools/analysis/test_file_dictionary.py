@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                         '../../data/bids/eeg_ds003654s_hed')
+                                         '../../data/bids_tests/eeg_ds003654s_hed')
 
     def test_constructor_valid(self):
         file_list = get_file_list(self.bids_base_dir, name_suffix="_events",

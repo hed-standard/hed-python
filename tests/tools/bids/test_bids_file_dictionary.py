@@ -9,7 +9,8 @@ from hed.tools.util.io_util import get_file_list
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),  '../../data/bids/eeg_ds003654s_hed')
+        bids_base_dir = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                      '../../data/bids_tests/eeg_ds003654s_hed'))
         cls.bids_base_dir = bids_base_dir
         cls.file_list = get_file_list(bids_base_dir, name_suffix="_events",
                                       extensions=['.tsv'], exclude_dirs=['stimuli'])

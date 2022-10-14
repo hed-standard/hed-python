@@ -31,27 +31,27 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_valid(self):
-        # Test correct when all valid and no unwanted information
-        parms = json.loads(self.json_parms)
-        op = FactorHedTagsOp(parms)
-
-        df_new = op.do_op(self.dispatch, self.data_path, 'subj2_run1', sidecar=self.json_path)
-        self.assertEqual(len(df_new), 200, "factor_hed_tags_op length is correct")
-        self.assertEqual(len(df_new.columns), 2, "factor_hed_tags_op has correct number of columns")
-        self.assertEqual(list(df_new.columns), ['query_0', 'query_1'],
-                         "factor_tags_op has the right column names if no query names provided")
-
-    def test_valid_with_query_names(self):
-        # Test correct when all valid and no unwanted information
-        parms = json.loads(self.json_parms)
-        parms["query_names"] = ["sensory", "response"]
-        op = FactorHedTagsOp(parms)
-        df_new = op.do_op(self.dispatch, self.data_path, 'subj2_run1', sidecar=self.json_path)
-        self.assertEqual(len(df_new), 200, "factor_hed_tags_op length is correct")
-        self.assertEqual(len(df_new.columns), 2, "factor_hed_tags_op has correct number of columns")
-        self.assertEqual(list(df_new.columns), ["sensory", "response"],
-                         "factor_tags_op has the right column names if no query names provided")
+    # def test_valid(self):
+    #     # Test correct when all valid and no unwanted information
+    #     parms = json.loads(self.json_parms)
+    #     op = FactorHedTagsOp(parms)
+    #
+    #     df_new = op.do_op(self.dispatch, self.data_path, 'subj2_run1', sidecar=self.json_path)
+    #     self.assertEqual(len(df_new), 200, "factor_hed_tags_op length is correct")
+    #     self.assertEqual(len(df_new.columns), 2, "factor_hed_tags_op has correct number of columns")
+    #     self.assertEqual(list(df_new.columns), ['query_0', 'query_1'],
+    #                      "factor_tags_op has the right column names if no query names provided")
+    #
+    # def test_valid_with_query_names(self):
+    #     # Test correct when all valid and no unwanted information
+    #     parms = json.loads(self.json_parms)
+    #     parms["query_names"] = ["sensory", "response"]
+    #     op = FactorHedTagsOp(parms)
+    #     df_new = op.do_op(self.dispatch, self.data_path, 'subj2_run1', sidecar=self.json_path)
+    #     self.assertEqual(len(df_new), 200, "factor_hed_tags_op length is correct")
+    #     self.assertEqual(len(df_new.columns), 2, "factor_hed_tags_op has correct number of columns")
+    #     self.assertEqual(list(df_new.columns), ["sensory", "response"],
+    #                      "factor_tags_op has the right column names if no query names provided")
     # def test_valid_specific_column(self):
     #     # Not implemented yet
     #     # Test correct when all valid and no unwanted information

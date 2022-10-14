@@ -10,14 +10,16 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.bids_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
-        stern_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
-        att_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/attention_shift')
+        cls.bids_dir = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                     '../../data/bids_tests/eeg_ds003654s_hed'))
+        stern_base_dir = os.path.join(os.path.dirname(__file__), '../data/sternberg')
+        att_base_dir = os.path.join(os.path.dirname(__file__), '../data/attention_shift')
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
-        cls.stern_test1_path = os.path.join(stern_base_dir, "sternberg_test_events.tsv")
-        cls.stern_test2_path = os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv")
-        cls.stern_test3_path = os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path = os.path.join(att_base_dir, "sub-001_task-AuditoryVisualShift_run-01_events.tsv")
+        cls.stern_test1_path = os.path.realpath(os.path.join(stern_base_dir, "sternberg_test_events.tsv"))
+        cls.stern_test2_path = os.path.realpath(os.path.join(stern_base_dir, "sternberg_with_quotes_events.tsv"))
+        cls.stern_test3_path = os.path.realpath(os.path.join(stern_base_dir, "sternberg_no_quotes_events.tsv"))
+        cls.attention_shift_path = os.path.realpath(os.path.join(att_base_dir,
+                                                                 "sub-001_task-AuditoryVisualShift_run-01_events.tsv"))
 
     def test_check_filename(self):
         name1 = "/user/local/task_baloney.gz_events.nii"
@@ -142,7 +144,7 @@ class Test(unittest.TestCase):
             self.assertTrue(filename.startswith('sternberg'))
 
     def test_get_file_list_exclude_dir(self):
-        dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        dir_data = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../data/bids_tests/eeg_ds003654s_hed'))
         file_list1 = get_file_list(dir_data, extensions=[".bmp"])
         self.assertEqual(345, len(file_list1), 'get_file_list has the right number of files when no exclude')
         file_list2 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=[])
@@ -196,7 +198,7 @@ class Test(unittest.TestCase):
         self.assertFalse(len(new_list4))
 
     def test_get_path_components(self):
-        base_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s')
+        base_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../data/bids_test/eeg_ds003654s'))
         file_path1 = os.path.realpath(os.path.join(base_path, 'sub-002/eeg/sub-002_FacePerception_run-1_events.tsv'))
         comps1 = get_path_components(base_path, file_path1)
         self.assertEqual(len(comps1), 2, "get_path_components has correct number of components")

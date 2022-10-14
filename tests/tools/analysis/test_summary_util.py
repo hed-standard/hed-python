@@ -11,7 +11,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.sidecar_path1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                         '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
+                                         '../../data/bids_tests/eeg_ds003654s_hed/task-FacePerception_events.json')
         cls.schema = load_schema_version(xml_version="8.0.0")
         cls.str1 = f"(Task,Experiment-participant,(See,Face),(Discriminate,(Face, Symmetrical))," \
                    f"(Press,Keyboard-key),Description/Evaluate degree of image symmetry and respond with key" \

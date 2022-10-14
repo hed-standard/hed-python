@@ -1,6 +1,3 @@
-import os
-import json
-from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.analysis.summary_util import breakout_tags, extract_dict_values
 from hed.models.definition_dict import add_group_to_dict, DefinitionDict
 
@@ -111,15 +108,15 @@ class TagSummary:
         return dict_info
 
 
-if __name__ == '__main__':
-    root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             '../../../tests/data/bids/eeg_ds003654s_hed')
-
-    json_path = "../../../tests/data/remodel_tests/tag_summary_template.json5"
-    with open(json_path) as fp:
-        rules = json.load(fp)
-    breakouts = rules["Tag-categories"]
-    bids = BidsDataset(root_path)
-    event_group = bids.get_tabular_group(obj_type="events")
-    summary = TagSummary(event_group, schema=bids.schema, breakout_list=breakouts)
-    designs, others, errors = summary.get_design_matrices()
+# if __name__ == '__main__':
+#     root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+#                              '../../../tests/data/bids_tests/eeg_ds003654s_hed')
+#
+#     json_path = "../../../tests/data/remodel_tests/tag_summary_template.json5"
+#     with open(json_path) as fp:
+#         rules = json.load(fp)
+#     breakouts = rules["Tag-categories"]
+#     bids = BidsDataset(root_path)
+#     event_group = bids.get_tabular_group(obj_type="events")
+#     summary = TagSummary(event_group, schema=bids.schema, breakout_list=breakouts)
+#     designs, others, errors = summary.get_design_matrices()

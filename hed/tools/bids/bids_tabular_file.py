@@ -37,7 +37,7 @@ class BidsTabularFile(BidsFile):
             self.has_hed = True
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # from hed import HedSchemaGroup, HedValidator, load_schema, load_schema_version, Sidecar, TabularInput
 
     # check_for_warnings = False
@@ -63,6 +63,6 @@ if __name__ == '__main__':
     # issues1 = bids_tab1.validate_file(hed_ops=validator, check_for_warnings=False)
     # print(f"Issues 1 {issues1}")
 
-    y = '../../../tests/data/curation/sub-001_task-AuditoryVisualShift_run-01_events.tsv'
-    print(os.path.realpath(os.path.abspath(y)))
-    x = TabularInput(file=y, name=os.path.realpath(y))
+    # y = '../../../tests/data/curation/sub-001_task-AuditoryVisualShift_run-01_events.tsv'
+    # print(os.path.realpath(os.path.abspath(y)))
+    # x = TabularInput(file=y, name=os.path.realpath(y))

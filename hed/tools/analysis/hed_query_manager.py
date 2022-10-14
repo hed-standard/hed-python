@@ -1,7 +1,4 @@
-from hed.models.hed_string import HedString
 from hed.models.expression_parser import TagExpressionParser
-from hed.schema.hed_schema_io import load_schema_version
-import pandas as pd
 
 
 class HedQuery:
@@ -34,20 +31,20 @@ class HedQueryManager:
         return matches
 
 
-if __name__ == '__main__':
-    qlist = [HedQuery({'name': 'cond_1', 'query_type': 'condition', 'query_str': 'Condition-variable'}),
-             HedQuery({'name': 'tag_1', 'query_type': 'get_tag', 'query_str': 'Sensory-presentation'})]
-
-    schema = load_schema_version(xml_version="8.0.0")
-    test_strings = [HedString('Condition-variable/Test-cond', hed_schema=schema),
-                    HedString('Visual-presentation', hed_schema=schema),
-                    HedString('Agent-action, (Move, Hand)', hed_schema=schema)]
-    q_parser = HedQueryManager(qlist)
-    col_names = q_parser.get_column_names()
-    print(f"Column names:{str(col_names)}")
-
-    result = [None]*len(test_strings)
-    for index, obj in enumerate(test_strings):
-        result[index] = q_parser.parse(obj)
-
-    df = pd.DataFrame(result, columns=col_names)
+# if __name__ == '__main__':
+#     qlist = [HedQuery({'name': 'cond_1', 'query_type': 'condition', 'query_str': 'Condition-variable'}),
+#              HedQuery({'name': 'tag_1', 'query_type': 'get_tag', 'query_str': 'Sensory-presentation'})]
+#
+#     schema = load_schema_version(xml_version="8.0.0")
+#     test_strings = [HedString('Condition-variable/Test-cond', hed_schema=schema),
+#                     HedString('Visual-presentation', hed_schema=schema),
+#                     HedString('Agent-action, (Move, Hand)', hed_schema=schema)]
+#     q_parser = HedQueryManager(qlist)
+#     col_names = q_parser.get_column_names()
+#     print(f"Column names:{str(col_names)}")
+#
+#     result = [None]*len(test_strings)
+#     for index, obj in enumerate(test_strings):
+#         result[index] = q_parser.parse(obj)
+#
+#     df = pd.DataFrame(result, columns=col_names)

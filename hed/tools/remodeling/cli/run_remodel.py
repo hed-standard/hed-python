@@ -21,8 +21,6 @@ def get_parser():
                         help="Filename suffix excluding file type of items to be analyzed (events by default).")
     parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
                         help="Optional path to JSON sidecar with HED information")
-    parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
-                        help="Optional path to JSON sidecar with HED information.")
     parser.add_argument("-r", "--hed-versions", dest="hed_versions", nargs="*", default=[],
                         help="Optional list of HED schema versions used for annotation, include prefixes.")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
