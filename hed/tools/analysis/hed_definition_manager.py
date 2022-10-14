@@ -156,28 +156,28 @@ class HedDefinitionManager:
         return to_append
 
 
-if __name__ == '__main__':
-    schema = load_schema_version(xml_version="8.1.0")
-    test_strings1 = [HedString(f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
-                               f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4", hed_schema=schema),
-                     HedString('(Def/Cond1, Offset)', hed_schema=schema),
-                     HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast', hed_schema=schema),
-                     HedString('', hed_schema=schema),
-                     HedString('(Def/Cond2, Onset)', hed_schema=schema),
-                     HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
-                     HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
-
-    onset_man = HedContextManager(test_strings1)
-    def1 = HedString('(Condition-variable/Var1, Circle, Square)', hed_schema=schema)
-    def2 = HedString('(condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere)', hed_schema=schema)
-    def3 = HedString('(Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross)',
-                     hed_schema=schema)
-    def4 = HedString('(Condition-variable, Apple, Banana)', hed_schema=schema)
-    definitions = {'cond1': DefinitionEntry('Cond1', def1, False, None),
-                   'cond2': DefinitionEntry('Cond2', def2, False, None),
-                   'cond3': DefinitionEntry('Cond3', def3, True, None),
-                   'cond4': DefinitionEntry('Cond4', def4, False, None)}
-    def_man = HedDefinitionManager(definitions, schema)
-    a = def_man.get_def_names(HedTag('Def/Cond3/4', hed_schema=schema))
-    b = def_man.get_def_names(HedString('(Def/Cond3/5,(Red, Blue))', hed_schema=schema))
-    c = def_man.get_def_names(HedString('(Def/Cond3/6,(Red, Blue, Def/Cond1), Def/Cond2)', hed_schema=schema))
+# if __name__ == '__main__':
+#     schema = load_schema_version(xml_version="8.1.0")
+#     test_strings1 = [HedString(f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
+#                                f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4", hed_schema=schema),
+#                      HedString('(Def/Cond1, Offset)', hed_schema=schema),
+#                      HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast', hed_schema=schema),
+#                      HedString('', hed_schema=schema),
+#                      HedString('(Def/Cond2, Onset)', hed_schema=schema),
+#                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
+#                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
+#
+#     onset_man = HedContextManager(test_strings1)
+#     def1 = HedString('(Condition-variable/Var1, Circle, Square)', hed_schema=schema)
+#     def2 = HedString('(condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere)', hed_schema=schema)
+#     def3 = HedString('(Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross)',
+#                      hed_schema=schema)
+#     def4 = HedString('(Condition-variable, Apple, Banana)', hed_schema=schema)
+#     definitions = {'cond1': DefinitionEntry('Cond1', def1, False, None),
+#                    'cond2': DefinitionEntry('Cond2', def2, False, None),
+#                    'cond3': DefinitionEntry('Cond3', def3, True, None),
+#                    'cond4': DefinitionEntry('Cond4', def4, False, None)}
+#     def_man = HedDefinitionManager(definitions, schema)
+#     a = def_man.get_def_names(HedTag('Def/Cond3/4', hed_schema=schema))
+#     b = def_man.get_def_names(HedString('(Def/Cond3/5,(Red, Blue))', hed_schema=schema))
+#     c = def_man.get_def_names(HedString('(Def/Cond3/6,(Red, Blue, Def/Cond1), Def/Cond2)', hed_schema=schema))

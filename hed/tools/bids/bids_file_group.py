@@ -219,11 +219,11 @@ class BidsFileGroup:
         return sidecar_dir_dict
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
-    path = 'G:\\WakemanHenson\\WH_Released'
-    bids = BidsFileGroup(path)
+    #                     '../../../tests/data/bids_tests/eeg_ds003654s_hed_inheritance')
+    # path = 'G:\\WakemanHenson\\WH_Released'
+    # bids = BidsFileGroup(path)
 
     # for file_obj in bids.sidecar_dict.values():
     #     print(file_obj.file_path)
@@ -231,21 +231,21 @@ if __name__ == '__main__':
     # for file_obj in bids.datafile_dict.values():
     #     print(file_obj.file_path)
 
-    schema = load_schema_version(xml_version="8.0.0")
-    validator = HedValidator(hed_schema=schema)
-
-    issues_side = bids.validate_sidecars(hed_ops=[validator], check_for_warnings=False)
-    print(f"Side issues {str(issues_side)}\n")
-    issues_data = bids.validate_datafiles(hed_ops=[validator], check_for_warnings=False)
-    print(f"Data issues {str(issues_data)}\n")
-    if issues_side:
-        print(get_printable_issue_string(issues_side, "Sidecar errors", skip_filename=False))
-    else:
-        print("No validation errors in the sidecars")
-
-    if issues_data:
-        print(get_printable_issue_string(issues_data, "Tabular errors"))
-    else:
-        print("No validation errors in the datafiles")
+    # schema = load_schema_version(xml_version="8.0.0")
+    # validator = HedValidator(hed_schema=schema)
+    #
+    # issues_side = bids.validate_sidecars(hed_ops=[validator], check_for_warnings=False)
+    # print(f"Side issues {str(issues_side)}\n")
+    # issues_data = bids.validate_datafiles(hed_ops=[validator], check_for_warnings=False)
+    # print(f"Data issues {str(issues_data)}\n")
+    # if issues_side:
+    #     print(get_printable_issue_string(issues_side, "Sidecar errors", skip_filename=False))
+    # else:
+    #     print("No validation errors in the sidecars")
+    #
+    # if issues_data:
+    #     print(get_printable_issue_string(issues_data, "Tabular errors"))
+    # else:
+    #     print("No validation errors in the datafiles")
     # col_info = bids.summarize()
     # print(f"Info: {str(col_info)}")

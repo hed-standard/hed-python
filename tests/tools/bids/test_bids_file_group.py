@@ -11,13 +11,14 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        cls.root_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                      '../../data/bids_tests/eeg_ds003654s_hed'))
+        file_name = 'eeg/sub-002_task-FacePerception_run-1_events.tsv'
         cls.event_path = \
-            os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                         '../../data/bids/eeg_ds003654s_hed/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
-        cls.sidecar_path = \
-            os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                         '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.tsv')
+            os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                          '../../data/bids_tests/eeg_ds003654s_hed/sub-002', file_name))
+        events_file = '../../data/bids_tests/eeg_ds003654s_hed/task-FacePerception_events.tsv'
+        cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(__file__), events_file))
 
     def test_constructor(self):
         events = BidsFileGroup(self.root_path)

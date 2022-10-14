@@ -1,5 +1,4 @@
 from hed.errors.exceptions import HedFileError
-from hed.schema.hed_schema_io import load_schema_version
 
 
 class OnsetGroup:
@@ -115,21 +114,21 @@ class HedContextManager:
             onset_dict[name] = onset_element
 
 
-if __name__ == '__main__':
-    from hed import HedString
-    schema = load_schema_version(xml_version="8.1.0")
-    test_strings1 = [HedString('Sensory-event,(Def/Cond1,(Red, Blue),Onset),(Def/Cond2,Onset),Green,Yellow',
-                               hed_schema=schema),
-                     HedString('Yellow, Green', hed_schema=schema),
-                     HedString('(Def/Cond1, Offset)', hed_schema=schema),
-                     HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast', hed_schema=schema),
-                     HedString('', hed_schema=schema),
-                     HedString('(Def/Cond2, Onset)', hed_schema=schema),
-                     HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
-                     HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
-
-    manager = HedContextManager(test_strings1)
-    print("to here")
+# if __name__ == '__main__':
+#     from hed import HedString
+#     schema = load_schema_version(xml_version="8.1.0")
+#     test_strings1 = [HedString('Sensory-event,(Def/Cond1,(Red, Blue),Onset),(Def/Cond2,Onset),Green,Yellow',
+#                                hed_schema=schema),
+#                      HedString('Yellow, Green', hed_schema=schema),
+#                      HedString('(Def/Cond1, Offset)', hed_schema=schema),
+#                      HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast', hed_schema=schema),
+#                      HedString('', hed_schema=schema),
+#                      HedString('(Def/Cond2, Onset)', hed_schema=schema),
+#                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
+#                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
+#
+#     manager = HedContextManager(test_strings1)
+#     print("to here")
     # hed_list1 = [HedString('Yellow, Green', hed_schema=schema),
     #             HedString('(Def/Cond1, Offset)', hed_schema=schema),
     #             HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast', hed_schema=schema),

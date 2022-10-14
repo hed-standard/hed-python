@@ -1,6 +1,6 @@
 import os
 import json
-from hed.errors.error_reporter import ErrorHandler, get_printable_issue_string
+from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_io import load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
@@ -117,24 +117,24 @@ class BidsDataset:
         return version_list
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                     '../../../tests/data/bids/eeg_ds003654s_hed_library')
+    #                     '../../../tests/data/bids_tests/eeg_ds003654s_hed_library')
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
+    #                     '../../../tests/data/bids_tests/eeg_ds003654s_hed_inheritance')
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                     '../../../tests/data/bids/eeg_ds003654s_hed')
+    #                     '../../../tests/data/bids_tests/eeg_ds003654s_hed')
     #
     # path = 'Q:\WakemanHensonON'
-    path = 'G:\\WakemanHenson\\WH_Released'
-    bids = BidsDataset(path)
-    issue_list = bids.validate(check_for_warnings=False)
-    if issue_list:
-        issue_str = get_printable_issue_string(issue_list, "HED validation errors:", skip_filename=False)
-    else:
-        issue_str = "No issues"
-    print(issue_str)
-    warnings = False
+    # path = 'G:\\WakemanHenson\\WH_Released'
+    # bids = BidsDataset(path)
+    # issue_list = bids.validate(check_for_warnings=False)
+    # if issue_list:
+    #     issue_str = get_printable_issue_string(issue_list, "HED validation errors:", skip_filename=False)
+    # else:
+    #     issue_str = "No issues"
+    # print(issue_str)
+    # warnings = False
     # path = '/XXX/bids-examples/xeeg_hed_score/'
     # bids = BidsDataset(path)
     # # summary1 = bids.get_summary()

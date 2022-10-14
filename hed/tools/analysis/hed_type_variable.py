@@ -1,9 +1,7 @@
 import json
 import pandas as pd
-
 from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
-from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_definition_manager import HedDefinitionManager
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
@@ -208,7 +206,7 @@ class HedTypeVariable:
 #     conditions2 = HedTypeVariable(HedContextManager(test_strings2), hed_schema, defs)
 #     conditions3 = HedTypeVariable(HedContextManager(test_strings3), hed_schema, defs)
 #     bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-#                                                    '../../../tests/data/bids/eeg_ds003654s_hed'))
+#                                                    '../../../tests/data/bids_tests/eeg_ds003654s_hed'))
 #     events_path = os.path.realpath(os.path.join(bids_root_path,
 #                                                 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
 #     sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
