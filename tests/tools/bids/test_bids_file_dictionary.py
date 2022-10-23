@@ -20,18 +20,15 @@ class Test(unittest.TestCase):
         dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
         self.assertEqual(6, len(dict1.key_list),
                          "BidsFileDictionary should have correct number of entries when key okay")
+        file1 = dict1.get_file_path('sub-002_run-1')
+        self.assertIsInstance(file1, str)
+        file2 = dict1.get_file_path('junk')
+        self.assertIsNone(file2)
 
     def test_constructor_invalid(self):
         with self.assertRaises(HedFileError) as context:
             BidsFileDictionary("My name", self.file_list, entities=('sub', 'task'))
         self.assertEqual(context.exception.args[0], "NonUniqueFileKeys")
-
-    def test_constructor_valid(self):
-        dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
-        file1 = dict1.get_file_path('sub-002_run-1')
-        self.assertIsInstance(file1, str)
-        file2 = dict1.get_file_path('junk')
-        self.assertIsNone(file2)
 
     def test_iter(self):
         dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
@@ -101,7 +98,7 @@ class Test(unittest.TestCase):
                                   'split_by_entity dictionary values should be BidsFileDictionary objects')
         self.assertFalse(leftovers, "split_by_entity leftovers should be empty")
 
-    def test_split_by_entity(self):
+    def test_split_by_entity_non_empty_leftovers(self):
         dict1 = BidsFileDictionary("My name", self.file_list, entities=('sub', 'run'))
         split_dict, leftovers = dict1.split_by_entity('ses')
         self.assertFalse(split_dict)

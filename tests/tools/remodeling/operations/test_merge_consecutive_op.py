@@ -85,10 +85,10 @@ class Test(unittest.TestCase):
                         "merge_consecutive should not change the input df columns when no extras and not ignored")
         for index, row in df.iterrows():
             if not math.isclose(df.loc[index, "onset"], df_test.loc[index, "onset"]):
-                self.fail(f"merge_consecutive should not change onset after op, but onset does not agree at" +
+                self.fail("merge_consecutive should not change onset after op, but onset does not agree at" +
                           f"at {index}: {df.loc[index, 'onset']} instead of {df_test.loc[index, 'onset']}")
             if not math.isclose(df.loc[index, "duration"], df_test.loc[index, "duration"]):
-                self.fail(f"merge_consecutive should not change duration after op, but duration does not agree at" +
+                self.fail("merge_consecutive should not change duration after op, but duration does not agree at" +
                           f"at {index}: {df.loc[index, 'duration']} instead of {df_test.loc[index, 'duration']}")
 
     def test_do_op_no_set_durations(self):

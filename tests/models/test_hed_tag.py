@@ -9,6 +9,7 @@ class TestValidatorUtilityFunctions(TestHedBase):
         valid_tag1 = HedTag('Left-handed', hed_schema=self.hed_schema)
         hash1 = hash(valid_tag1)
         hash2 = hash(valid_tag1)
+        self.assertEqual(hash1, hash2)
         valid_tag2 = HedTag('Geometric-object', hed_schema=self.hed_schema)
         valid_tag3 = HedTag('duration/#', hed_schema=self.hed_schema)
         invalid_tag1 = HedTag('something', hed_schema=self.hed_schema)

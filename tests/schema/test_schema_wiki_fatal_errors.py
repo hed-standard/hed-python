@@ -44,13 +44,8 @@ class TestHedSchema(unittest.TestCase):
     def test_invalid_schema(self):
         for filename, error in self.files_and_errors.items():
             full_filename = self.full_base_folder + filename
-
-            try:
-                loaded_schema = schema.load_schema(full_filename)
+            with self.assertRaises(HedFileError) as context:
+                schema.load_schema(full_filename)
                 # all of these should produce exceptions.
-                self.assertFalse(True)
-            except HedFileError as e:
-                self.assertEqual(e.error_type, error)
-                if filename in self.expected_count:
-                    self.assertEqual(len(e.issues), self.expected_count[filename])
-                pass
+            self.assertTrue(context.exception.args[0])
+            self.assertTrue(context.exception.filename)

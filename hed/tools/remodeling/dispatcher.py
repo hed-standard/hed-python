@@ -83,8 +83,7 @@ class Dispatcher:
             df = pd.read_csv(actual_path, sep='\t', header=0)
         except Exception:
             raise HedFileError("BadDataFile",
-                               f"{str(actual_path)} (orig: {file_path}) does not correspond to "
-                               f"a valid tab-separated value file", "")
+                               f"{str(actual_path)} (orig: {file_path}) does not correspond to a valid tsv file", "")
         df = self.prep_events(df)
         return df
 

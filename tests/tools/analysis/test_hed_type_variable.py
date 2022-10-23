@@ -18,15 +18,15 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.1.0")
-        cls.test_strings1 = [f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
-                             f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4",
+        cls.test_strings1 = ["Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
+                             "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4",
                              '(Def/Cond1, Offset)',
                              'White, Black, Condition-variable/Wonder, Condition-variable/Fast',
                              '',
                              '(Def/Cond2, Onset)',
                              '(Def/Cond3/4.3, Onset)',
                              'Arm, Leg, Condition-variable/Fast']
-        cls.test_strings2 = [f"Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
+        cls.test_strings2 = ["Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
                              "Yellow",
                              "Def/Cond2, (Def/Cond6/4, Onset)",
                              "Def/Cond2, Def/Cond6/5.2 (Def/Cond6/7.8, Offset)",

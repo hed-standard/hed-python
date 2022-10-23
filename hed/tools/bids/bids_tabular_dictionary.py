@@ -167,8 +167,7 @@ class BidsTabularDictionary(BidsFileDictionary):
         # Output keys for files in which the BIDS and EEG.events have different numbers of events
         count_diffs = self.count_diffs(tsv_dict)
         if count_diffs:
-            report_list.append(f"\nThe number of {self.name} events and {tsv_dict.name} events" +
-                               f"differ for the following files:")
+            report_list.append(f"\n{self.name} events and {tsv_dict.name} events differ for the following files:")
             for item in count_diffs:
                 report_list.append(f"The {self.name} file has {item[1]} rows and " +
                                    f"the {tsv_dict.name} event file has {item[2]} rows")

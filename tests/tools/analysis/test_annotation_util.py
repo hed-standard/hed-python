@@ -144,7 +144,7 @@ class Test(unittest.TestCase):
                 ['event_code', 'sausage', 'this is sausage', 'junk2']]
         df = DataFrame(data, columns=['column_name', 'column_value', 'description', 'blech'])
         with self.assertRaises(HedFileError) as context:
-            hed1 = df_to_hed(df)
+            df_to_hed(df)
         self.assertEqual(context.exception.args[0], 'RequiredColumnsMissing')
 
     def test_df_to_hed_nas(self):
@@ -253,6 +253,10 @@ class Test(unittest.TestCase):
         df2c = hed_to_df(self.sidecar2c, col_names=None)
         hed2a = df_to_hed(df2a)
         self.assertIsInstance(hed2a, dict)
+        hed2b = df_to_hed(df2b)
+        self.assertIsInstance(hed2b, dict)
+        hed2c = df_to_hed(df2c)
+        self.assertIsInstance(hed2c, dict)
         # TODO: test of categorical columns not yet written
 
     def test_merge_hed_dict_value_col(self):
@@ -384,6 +388,7 @@ class Test(unittest.TestCase):
         col1 = self.sidecar2c["a"]
         col2 = self.sidecar2c["b"]
         self.assertTrue(col1)
+        self.assertTrue(col2)
 
     def test_get_value_entry(self):
         dict1 = _get_value_entry('n/a', 'n/a')

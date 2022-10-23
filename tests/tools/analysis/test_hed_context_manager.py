@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
                              HedString('(Def/Cond3/1.3, Onset)', hed_schema=schema),
                              HedString('Arm, Leg', hed_schema=schema)]
         cls.test_strings2 = [HedString('(Def/Cond3/2, Offset)', hed_schema=schema)]
-        cls.test_strings3 = [HedString(f"Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
+        cls.test_strings3 = [HedString("Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
                                        hed_schema=schema),
                              HedString("Yellow", hed_schema=schema),
                              HedString("Def/Cond2, (Def/Cond6/4, Onset)", hed_schema=schema),

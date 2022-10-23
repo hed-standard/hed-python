@@ -7,6 +7,7 @@ from hed.validator.hed_validator import HedValidator
 
 # TODO: Add test when exclude directories have files of the type needed (such as JSON in code directory).
 
+
 class Test(unittest.TestCase):
 
     @classmethod

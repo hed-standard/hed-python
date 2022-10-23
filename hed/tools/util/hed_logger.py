@@ -1,8 +1,3 @@
-
-import os
-import json
-
-
 class HedLogger:
     """ Log status messages organized by key. """
     def __init__(self, name=None):

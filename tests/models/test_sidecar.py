@@ -13,23 +13,27 @@ from hed.models import DefinitionDict
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "schema_tests/HED8.0.0t.xml")
+        base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        cls.base_data_dir = base_data_dir
+        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
-        cls.json_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events.json")
-        cls.json_def_filename = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_with_defs.json")
-        cls.json_without_definitions_filename = \
-            os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events_without_definitions.json")
-        cls.json_errors_filename = os.path.join(cls.base_data_dir, "sidecar_tests/json_errors.json")
-        cls.json_errors_filename_minor = os.path.join(cls.base_data_dir, "sidecar_tests/json_errors_minor.json")
-        cls.default_sidecar = Sidecar(cls.json_filename)
-        cls.json_def_sidecar = Sidecar(cls.json_def_filename)
-        cls.errors_sidecar = Sidecar(cls.json_errors_filename)
-        cls.errors_sidecar_minor = Sidecar(cls.json_errors_filename_minor)
-        cls.json_without_definitions_sidecar = Sidecar(cls.json_without_definitions_filename)
+        json_filename = os.path.join(base_data_dir, "sidecar_tests/both_types_events.json")
+        cls.json_filename = json_filename
+        json_def_filename = os.path.join(base_data_dir, "sidecar_tests/both_types_events_with_defs.json")
+        cls.json_def_filename = json_def_filename
+        json_without_definitions_filename = \
+            os.path.join(base_data_dir, "sidecar_tests/both_types_events_without_definitions.json")
+        json_errors_filename = os.path.join(base_data_dir, "sidecar_tests/json_errors.json")
+        json_errors_filename_minor = os.path.join(base_data_dir, "sidecar_tests/json_errors_minor.json")
+        cls.default_sidecar = Sidecar(json_filename)
+        cls.json_def_sidecar = Sidecar(json_def_filename)
+        cls.errors_sidecar = Sidecar(json_errors_filename)
+        cls.errors_sidecar_minor = Sidecar(json_errors_filename_minor)
+        cls.json_without_definitions_sidecar = Sidecar(json_without_definitions_filename)
 
-        cls.base_output_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
-        os.makedirs(cls.base_output_folder, exist_ok=True)
+        base_output_folder = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/tests_output/"))
+        cls.base_output_folder = base_output_folder
+        os.makedirs(base_output_folder, exist_ok=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -56,12 +60,9 @@ class Test(unittest.TestCase):
 
     def test_name(self):
         invalid_json = "invalidxmlfile.json"
-        name = "PrettyDisplayName.json"
-        try:
-            json_dict = Sidecar(invalid_json)
-            self.assertTrue(False)
-        except HedFileError as e:
-            self.assertTrue(name in e.format_error_message(return_string_only=True, name=name))
+        with self.assertRaises(HedFileError) as context:
+            Sidecar(invalid_json)
+        self.assertEqual(context.exception.args[0], 'fileNotFound')
 
     def test_add_json_string(self):
         with open(self.json_filename) as file:

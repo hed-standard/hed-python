@@ -32,21 +32,23 @@ class Test(unittest.TestCase):
         self.assertIsInstance(sum_op, SummarizeColumnNamesOp, "constructor creates an object of the correct type")
 
     def test_summary_op(self):
-        events =  os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
+        events = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                               '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
         sidecar_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                      '../../../data/remodel_tests/aomic_sub-0013_events.json'))
         hed_schema = load_schema_version('8.1.0')
         sidecar = Sidecar(sidecar_path, 'aomic_sidecar', hed_schema=hed_schema)
         column_summary_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+                                               '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
         with open(column_summary_path, 'r') as fp:
             parms = json.load(fp)
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         dispatch = Dispatcher([], data_root=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(events)
+        old_len = len(df)
         sum_op = parsed_commands[0]
         df = sum_op.do_op(dispatch, df, os.path.basename(events), sidecar=sidecar)
+        self.assertEqual(len(df), old_len)
         context_dict = dispatch.context_dict
         for key, item in context_dict.items():
             text_value = item.get_text_summary()
@@ -84,12 +86,11 @@ class Test(unittest.TestCase):
         sum_op = SummarizeColumnNamesOp(parms)
         dispatch = Dispatcher([], data_root=None)
         df1 = pd.DataFrame(self.data1, columns=self.sample_columns1)
-        df1a = pd.DataFrame(self.data1, columns=self.sample_columns1)
         df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)
         sum_op.do_op(dispatch, df1, 'name1')
         with self.assertRaises(ValueError) as context:
             sum_op.do_op(dispatch, df2, 'name1')
-        self.assertEqual(context.exception.args[0],"FileHasChangedColumnNames")
+        self.assertEqual(context.exception.args[0], "FileHasChangedColumnNames")
 
     def test_get_summary(self):
         parms = json.loads(self.json_parms)

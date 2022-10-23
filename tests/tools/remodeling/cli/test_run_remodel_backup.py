@@ -5,7 +5,7 @@ import unittest
 import zipfile
 from hed.errors import HedFileError
 from hed.tools.remodeling.backup_manager import BackupManager
-from hed.tools.remodeling.cli.run_remodel_backup import get_parser, main
+from hed.tools.remodeling.cli.run_remodel_backup import main
 from hed.tools.util.io_util import get_file_list
 
 
@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
         backed_files = get_file_list(back_path)
         self.assertEqual(len(backed_files), 6)
 
-    def test_main_task(self):
+    def test_main_bad_task(self):
         der_path = os.path.realpath(os.path.join(self.data_root, 'derivatives'))
         self.assertTrue(os.path.exists(der_path))
         shutil.rmtree(der_path)
@@ -110,6 +110,7 @@ class Test(unittest.TestCase):
         with self.assertRaises(HedFileError) as context:
             main(arg_list)
         self.assertEqual(context.exception.args[0], "BackupExists")
+
 
 if __name__ == '__main__':
     unittest.main()

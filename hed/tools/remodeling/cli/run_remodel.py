@@ -62,7 +62,7 @@ def run_bids_ops(dispatch, args):
         print(f"Successfully parsed BIDS dataset with HED schema {str(bids.get_schema_versions())}")
     events = bids.get_tabular_group(args.file_suffix)
     if args.verbose:
-        print(f"Processing ")
+        print(f"Processing {dispatch.data_root}")
     for events_obj in events.datafile_dict.values():
         if args.task_names and events_obj.get_entity('task') not in args.task_names:
             continue

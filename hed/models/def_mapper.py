@@ -8,6 +8,7 @@ from hed.models.hed_ops import HedOps
 
 # TODO: should not have print statement when error
 
+
 class DefMapper(HedOps):
     """ Handles converting Def/ and Def-expand/.
 

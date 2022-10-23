@@ -110,10 +110,6 @@ class Test(unittest.TestCase):
         self.assertEqual(df_new.iloc[3]["event_type"], 'n/a',
                          "remap should have n/a in the targets when key is missing")
 
-    def test_remap_missing(self):
-        t_map = KeyMap(self.key_cols1, self.target_cols1)
-        stern_df = get_new_dataframe(self.stern_map_path)
-
     def test_remap_files(self):
         key_cols = ['type']
         target_cols = ['event_type', 'task_role', 'letter']

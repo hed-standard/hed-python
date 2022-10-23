@@ -174,6 +174,7 @@ class Test(unittest.TestCase):
         hed_string_obj = HedString(self.short_tag_with_missing_prefix)
         ColumnMetadata._prepend_required_prefix(hed_string_obj, self.short_tag_key)
         issues = hed_string_obj.convert_to_canonical_forms(hed_schema)
+        self.assertFalse(issues)
         for tag in hed_string_obj.get_all_tags():
             self.assertEqual("Character/D", tag.short_tag)
 

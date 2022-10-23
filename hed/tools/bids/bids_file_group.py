@@ -1,12 +1,10 @@
 import os
-from hed.errors.error_reporter import ErrorContext, ErrorHandler, get_printable_issue_string
-from hed.schema.hed_schema_io import load_schema_version
+from hed.errors.error_reporter import ErrorContext, ErrorHandler
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.util.io_util import get_dir_dictionary, get_file_list, get_path_components
-from hed.validator.hed_validator import HedValidator
 
 
 class BidsFileGroup:

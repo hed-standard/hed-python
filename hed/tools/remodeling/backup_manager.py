@@ -1,7 +1,6 @@
 import os
 import json
 import shutil
-from unittest.mock import patch
 from datetime import datetime
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import get_file_list, get_path_components

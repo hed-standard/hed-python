@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
 
     def test_check_parameters_bad_element(self):
         parms = json.loads(self.json_parms)
-        parms["is_multiple"] = {"a":1, "b": 2}
+        parms["is_multiple"] = {"a": 1, "b": 2}
         op1 = BaseOp(self.params["operation"], self.params["required_parameters"], self.params["optional_parameters"])
         self.assertIsInstance(op1, BaseOp, "constructor should create a BaseOp and list parameter not raise error")
         with self.assertRaises(TypeError) as context:
@@ -91,14 +91,15 @@ class Test(unittest.TestCase):
         self.assertEqual(context.exception.args[0], 'MissingRequiredParameters')
 
     def test_check_parameters_test(self):
-        params1 =  {"op_name": "test_op", "skip_columns": ["onset", "duration"], "keep_all": True, "junk": "bad_parm"}
+        params1 = {"op_name": "test_op", "skip_columns": ["onset", "duration"], "keep_all": True, "junk": "bad_parm"}
         with self.assertRaises(KeyError) as context1:
             TestOp(params1)
         self.assertEqual(context1.exception.args[0], 'BadParameter')
-        params2 =  {"op_name": "test_op", "skip_columns": ["onset", "duration"], "keep_all": "true"}
+        params2 = {"op_name": "test_op", "skip_columns": ["onset", "duration"], "keep_all": "true"}
         with self.assertRaises(TypeError) as context2:
             TestOp(params2)
         self.assertEqual(context2.exception.args[0], 'BadType')
+
 
 if __name__ == '__main__':
     unittest.main()

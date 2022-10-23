@@ -46,10 +46,9 @@ class HedSchemaGroup:
 
     def get_formatted_version(self, as_string=True):
         x = [schema.get_formatted_version() for schema in self._schemas.values()]
-        y = json.dumps(x)
         if as_string:
             return json.dumps(x)
-        return  x
+        return x
 
     @property
     def has_duplicate_tags(self):

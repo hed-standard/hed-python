@@ -51,7 +51,7 @@ class MergeConsecutiveOp(BaseOp):
                              f"Data must have an onset column in order to set_durations")
         if self.set_durations and "duration" not in df.columns:
             raise ValueError("MissingDurationColumn",
-                             f"Data must have a duration column in order to set_durations")
+                             "Data must have a duration column in order to set_durations")
         missing = set(self.match_columns).difference(set(df.columns))
         if self.match_columns and not self.ignore_missing and missing:
             raise ValueError("MissingMatchColumns", f"{str(missing)} columns are unmatched and not ignored")

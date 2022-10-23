@@ -5,8 +5,7 @@ import unittest
 from unittest.mock import patch
 import zipfile
 from hed.errors import HedFileError
-from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.cli.run_remodel import get_parser, parse_arguments, run_bids_ops, run_direct_ops, main
+from hed.tools.remodeling.cli.run_remodel import parse_arguments, main
 
 
 class Test(unittest.TestCase):
@@ -114,7 +113,7 @@ class Test(unittest.TestCase):
             main(arg_list)
             self.assertFalse(fp.getvalue())
 
-    def test_main_direct_sidecar_with_hed(self):
+    def test_main_direct_sidecar_with_hed_bad_task(self):
         arg_list = [self.data_root, self.summary_model_path, '-x', 'derivatives', 'stimuli', '-r', '8.1.0',
                     '-j', self.sidecar_path, '-t', 'junk']
         with patch('sys.stdout', new=io.StringIO()) as fp:

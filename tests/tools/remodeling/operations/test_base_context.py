@@ -17,7 +17,7 @@ class TestContext(BaseContext):
         return summary
 
     def update_context(self, context_dict):
-        do_nothing = "ok"
+        pass
 
 
 class Test(unittest.TestCase):

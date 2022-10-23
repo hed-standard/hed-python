@@ -78,17 +78,19 @@ class Test(unittest.TestCase):
         self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
 
     def test_summary_op(self):
-        events =  os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
+        events = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                               '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
         column_summary_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+                                               '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
         with open(column_summary_path, 'r') as fp:
             parms = json.load(fp)
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         dispatch = Dispatcher([], data_root=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(events)
+        old_len = len(df)
         sum_op = parsed_commands[1]
         df = sum_op.do_op(dispatch, df, os.path.basename(events))
+        self.assertEqual(len(df), old_len)
         context_dict = dispatch.context_dict
         for key, item in context_dict.items():
             text_value = item.get_text_summary()

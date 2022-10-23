@@ -118,15 +118,6 @@ class Test(unittest.TestCase):
         return_val2 = test_man.create_backup(file_list, backup_name="test_back1", verbose=False)
         self.assertTrue(return_val2, "create_backup returns true when it has created a backup.")
 
-    def test_create_backup_no_name(self):
-        test_man = BackupManager(self.test_root)
-        self.assertFalse(test_man.backups_dict)
-        file_list = get_file_list(self.test_root)
-        with patch('sys.stdout', new=io.StringIO()) as fp1:
-            return_val1 = test_man.create_backup(file_list, verbose=True)
-            self.assertTrue(fp1.getvalue())
-        self.assertTrue(return_val1)
-
 
 if __name__ == '__main__':
     unittest.main()

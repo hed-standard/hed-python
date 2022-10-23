@@ -470,8 +470,9 @@ class ColumnMapper:
 
     def _check_if_mapping_info(self):
         # If any of these have any data, don't do default behavior.
-        return bool(self.column_data or self._final_column_map or self._requested_columns is not None or self._tag_columns \
-            or self._optional_tag_columns or self._column_prefix_dictionary)
+        return bool(self.column_data or self._final_column_map
+                    or self._requested_columns is not None or self._tag_columns
+                    or self._optional_tag_columns or self._column_prefix_dictionary)
 
     def _column_name_requested(self, column_name):
         if self._requested_columns is None:

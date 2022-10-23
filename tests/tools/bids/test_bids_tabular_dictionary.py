@@ -1,7 +1,5 @@
 import os
-from io import StringIO
 import unittest
-from unittest import mock
 from hed.errors.exceptions import HedFileError
 from hed.models.tabular_input import TabularInput
 from hed.tools.bids.bids_file import BidsFile
@@ -24,14 +22,9 @@ class Test(unittest.TestCase):
         self.assertEqual(6, len(dict1.key_list), "BidsTabularDictionary has correct number of entries when key okay")
 
     def test_constructor_invalid(self):
-        try:
-            dict1 = BidsTabularDictionary("Tsv name", self.file_list, entities=('sub'))
-        except HedFileError or TypeError:
-            pass
-        except Exception as ex:
-            self.fail("BidsTabularDictionary threw the wrong exception when duplicate key")
-        else:
-            self.fail("BidsTabularDictionary should have thrown a HedFileError when duplicate key")
+        with self.assertRaises(HedFileError) as context:
+            BidsTabularDictionary("Tsv name", self.file_list, entities=('sub'))
+        self.assertEqual(context.exception.args[0], 'NonUniqueFileKeys')
 
     def test_count_diffs_same(self):
         dict1 = BidsTabularDictionary("Tsv Name1", self.file_list, entities=('sub', 'run'))
@@ -137,6 +130,7 @@ class Test(unittest.TestCase):
         output = dict1.report_diffs(dict2, logger)
         self.assertTrue(output, "report_diffs has differences")
         self.assertTrue(logger.log, "report_diffs the logger is empty before report is called")
+
 
 if __name__ == '__main__':
     unittest.main()
