@@ -3,7 +3,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
 
 
-class SummarizeColumnValuesOp(BaseOp):
+class SummarizeEventsToSidecarOp(BaseOp):
     """ Summarize the values that are in the columns.
 
     Notes: The required parameters are:
@@ -17,19 +17,18 @@ class SummarizeColumnValuesOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "summarize_column_values",
+        "operation": "summarize_events_to_sidecar",
         "required_parameters": {
             "summary_name": str,
             "summary_filename": str,
             "skip_columns": list,
             "value_columns": list,
-            "task_names": list,
         },
         "optional_parameters": {
         }
     }
 
-    SUMMARY_TYPE = 'column_values'
+    SUMMARY_TYPE = "events_to_sidecar"
 
     def __init__(self, parameters):
         super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
@@ -59,13 +58,13 @@ class SummarizeColumnValuesOp(BaseOp):
 
         summary = dispatcher.context_dict.get(self.summary_name, None)
         if not summary:
-            summary = ColumnValueSummary(self)
+            summary = EventsToSidecarSummary(self)
             dispatcher.context_dict[self.summary_name] = summary
         summary.update_context({'df': df})
         return df
 
 
-class ColumnValueSummary(BaseContext):
+class EventsToSidecarSummary(BaseContext):
 
     def __init__(self, sum_op):
         super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
@@ -76,4 +75,4 @@ class ColumnValueSummary(BaseContext):
         self.summary.update(new_context['df'])
 
     def get_summary_details(self, verbose=True):
-        return self.summary.get_summary(as_json=False)
+        return self.summary.extract_sidecar_template()

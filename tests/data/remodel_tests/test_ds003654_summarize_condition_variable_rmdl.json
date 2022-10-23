@@ -1,6 +1,6 @@
 [
     {
-        "command": "summarize_hed_type",
+        "operation": "summarize_hed_type",
         "description": "Summarize the experimental design.",
         "parameters": {
             "summary_name": "summarize conditions",

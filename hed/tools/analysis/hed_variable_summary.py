@@ -67,8 +67,8 @@ class HedVariableSummary:
     def __init__(self, variable_type, name=''):
         """ Constructor for HedVariableSummary for a particular type of variable.
 
-        Args:
-            variable_type (str)    Tag representing the type in this summary
+        Parameters:
+            variable_type (str):    Tag representing the type in this summary
 
         """
 
@@ -92,8 +92,9 @@ class HedVariableSummary:
     def update_summary(self, variable):
         """ Update this summary based on the type variable map.
 
-        Args:
-            variable (HedTypeVariable):  Contains the information about
+        Parameters:
+            variable (HedTypeVariable):  Contains the information about.
+
         """
 
         for type_var in variable.type_variables:

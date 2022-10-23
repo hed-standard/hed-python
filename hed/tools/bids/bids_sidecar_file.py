@@ -53,8 +53,8 @@ class BidsSidecarFile(BidsFile):
             return
         if not content_info:
             content_info = self.file_path
-        self.contents = Sidecar(files=content_info,
-                                name=os.path.realpath(os.path.basename(self.file_path)))
+        x = os.path.basename(self.file_path)
+        self._contents = Sidecar(files=content_info, name=os.path.basename(self.file_path))
         self.has_hed = self.is_hed(self.contents.loaded_dict)
 
     @staticmethod

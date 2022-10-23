@@ -44,9 +44,6 @@ class HedTypeVariable:
             tag_list = tag_list + [key for key in factor.levels.keys()]
         return list(set(tag_list))
 
-    def get_variable_type_map(self, type_name):
-        return self._variable_map.get(type_name.lower(), None)
-
     def get_variable_names(self):
         return list(self._variable_map.keys())
 
@@ -62,11 +59,16 @@ class HedTypeVariable:
     def get_variable_factors(self, variables=None, factor_encoding="one-hot"):
         if variables is None:
             variables = self.get_variable_names()
-        df_list = [0]*len(variables)
+        df_list = []
         for index, variable in enumerate(variables):
-            var_sum = self._variable_map[variable]
-            df_list[index] = var_sum.get_factors(factor_encoding=factor_encoding)
-        return pd.concat(df_list, axis=1)
+            var_sum = self._variable_map.get(variable, None)
+            if not var_sum:
+                continue
+            df_list.append(var_sum.get_factors(factor_encoding=factor_encoding))
+        if not df_list:
+            return None
+        else:
+            return pd.concat(df_list, axis=1)
 
     def __str__(self):
         return f"{self.variable_type} type_variables: {str(list(self._variable_map.keys()))}"
@@ -118,7 +120,7 @@ class HedTypeVariable:
             hed_var.levels[level] = var_levels
 
     def _extract_variables(self, hed_strings, hed_contexts):
-        """ Extract all condition type_variables from hed_strings and event_contexts. """
+        """ Extract all type_variables from hed_strings and event_contexts. """
         for index, hed in enumerate(hed_strings):
             self._extract_direct_variables(hed, index)
             self._extract_definition_variables(hed, index)

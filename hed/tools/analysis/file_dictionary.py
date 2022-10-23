@@ -106,9 +106,9 @@ class FileDictionary:
     def output_files(self, title=None, logger=None):
         """ Return a string with the output of the list.
 
-        Args:
-            title (None, str)    Optional title.
-            logger (HedLogger)   Optional HED logger for recording.
+        Parameters:
+            title (None, str):    Optional title.
+            logger (HedLogger):   Optional HED logger for recording.
 
         Returns:
             str: The dictionary in string form.
@@ -131,7 +131,7 @@ class FileDictionary:
     def make_file_dict(file_list, key_indices=(0, 2), separator='_'):
         """ Return a dictionary of files using entity keys.
 
-        Args:
+        Parameters:
             file_list (list):    Paths to files to use.
             key_indices (tuple): Positions of entities to use for key.
             separator (str):  Separator character used to construct key.
@@ -155,7 +155,7 @@ class FileDictionary:
     def make_key(key_string, indices=(0, 2), separator='_'):
         """ Create a key from specified entities.
 
-        Args:
+        Parameters:
             key_string (str): The string from which to extract the key (usually a filename or path).
             indices (tuple):  Positions of entity pairs to use as key.
             separator (str):  Separator between entity pairs in the created key.

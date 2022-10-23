@@ -28,7 +28,7 @@
       remove_quotes
       reorder_columns
       replace_values
-      separate_columns
+      separate_values
       tuple_to_range
    
    

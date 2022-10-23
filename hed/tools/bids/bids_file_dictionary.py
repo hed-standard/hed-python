@@ -79,7 +79,7 @@ class BidsFileDictionary(FileDictionary):
     def key_diffs(self, other_dict):
         """ Return the symmetric key difference with other.
 
-        Args:
+        Parameters:
             other_dict (FileDictionary)  A file dictionary object
 
         Returns:
@@ -92,7 +92,7 @@ class BidsFileDictionary(FileDictionary):
     def get_new_dict(self, name, files):
         """ Create a dictionary with these files.
 
-        Args:
+        Parameters:
             name (str):  Name of this dictionary
             files (list or dict):  List or dictionary of files. These could be paths or objects.
 
@@ -108,7 +108,7 @@ class BidsFileDictionary(FileDictionary):
     def make_dict(self, files, entities):
         """ Make a dictionary from files or a dict.
 
-        Args:
+        Parameters:
             files (list or dict):  List or dictionary of file-like objs to use.
             entities (tuple):   Tuple of entity names to use as keys, e.g. ('sub', 'run').
 
@@ -137,7 +137,7 @@ class BidsFileDictionary(FileDictionary):
     def make_query(self, query_dict={'sub': '*'}):
         """ Return a dictionary of files matching query.
 
-        Args:
+        Parameters:
             query_dict (dict): A dictionary whose keys are entities and whose values are entity values to match.
 
         Returns:
@@ -159,7 +159,7 @@ class BidsFileDictionary(FileDictionary):
     def split_by_entity(self, entity):
         """ Split this dictionary based on an entity.
 
-        Args:
+        Parameters:
             entity (str):  Entity name (for example task).
 
         Returns:
@@ -184,7 +184,7 @@ class BidsFileDictionary(FileDictionary):
     def match_query(query_dict, entity_dict):
         """ Return True if query has a match in dictionary.
 
-        Args:
+        Parameters:
             query_dict (dict): A dictionary representing a query about entities.
             entity_dict (dict): A dictionary containing the entity representation for a BIDS file.
 
@@ -211,7 +211,7 @@ class BidsFileDictionary(FileDictionary):
     def _split_dict_by_entity(file_dict, entity):
         """ Split a dict of BidsFile based on an entity.
 
-        Args:
+        Parameters:
             file_dict (dict): Dictionary of BidsFile keyed by entity keys.
             entity (str):     String
 
@@ -249,6 +249,6 @@ class BidsFileDictionary(FileDictionary):
         if isinstance(the_file, str):
             the_file = BidsFile(the_file)
         elif not isinstance(the_file, BidsFile):
-            raise HedFileError("BadArgument",
+            raise HedFileError("BadBidsFileArgument",
                                f"_correct_file expects file path or BidsFile but found {str(the_file)}", [])
         return the_file

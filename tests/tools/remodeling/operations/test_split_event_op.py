@@ -9,20 +9,11 @@ from hed.tools.remodeling.operations.split_event_op import SplitEventOp
 
 class Test(unittest.TestCase):
 
-    """
-
-    TODO: only the anchor column existing has been tested so far.
-        - test new anchor column
-        - test not adding trial numbers
-        - test deleting parent events
-
-    """
     @classmethod
     def setUpClass(cls):
-        cls.events_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                        '../../../data/remodel_tests/sub-0013_task-stopsignal_acq-seq_events.tsv'))
-        cls.model1_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                        '../../../data/remodel_tests/only_splitevents_rmdl.json'))
+        base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../data/remodel_tests')
+        cls.events_path = os.path.realpath(os.path.join(base_dir, 'sub-0013_task-stopsignal_acq-seq_events.tsv'))
+        cls.model1_path = os.path.realpath(os.path.join(base_dir, 'only_splitevents_rmdl.json'))
         cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                            [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
                            [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
@@ -71,7 +62,7 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_split_event_valid_existing_column(self):
+    def test_valid_existing_anchor_column(self):
         # Test when existing column is used as anchor event
         parms = json.loads(self.json_parms)
         op = SplitEventOp(parms)
@@ -103,6 +94,65 @@ class Test(unittest.TestCase):
         self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
                         "split_event should not change the input df values when existing column anchor")
 
+    def test_valid_new_anchor_column(self):
+        # Test when new column is used as anchor event
+        parms = json.loads(self.json_parms)
+        parms["anchor_column"] = "event_type"
+        op = SplitEventOp(parms)
+        df_check = pd.DataFrame(self.split, columns=self.split_columns)
+        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, df_test, name="sample_data")
+        df_new = df_new.fillna('n/a')
+
+        # Test that df_new has the right values
+        self.assertEqual(len(df_check), len(df_new),
+                         "split_event should have expected number of rows when new column anchor")
+        self.assertEqual(len(df_new.columns), len(self.split_columns) + 1,
+                         "split_event should have expected number of columns when new column anchor")
+        self.assertIn("event_type", list(df_new.columns),
+                      "split_event should have the new column when new column anchor")
+
+    def test_remove_parent(self):
+        # Test when existing column is used as anchor event
+        parms = json.loads(self.json_parms)
+        parms["remove_parent_event"] = True
+        op = SplitEventOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, df, name="sample_data")
+        self.assertEqual(len(df), 6)
+        self.assertEqual(len(df_new), 8)
+
+    def test_onsets_and_durations(self):
+        # Onset
+        parms = json.loads(self.json_parms)
+        parms["new_events"]["response"]["onset_source"] = ["response_time", 0.35]
+        parms["new_events"]["response"]["duration"] = [0.3, "duration"]
+        op = SplitEventOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, df, name="sample_data")
+        self.assertEqual(len(df), 6)
+        self.assertEqual(len(df_new), len(self.split))
+
+    def test_bad_onset(self):
+        # Onset
+        parms = json.loads(self.json_parms)
+        parms["new_events"]["response"]["onset_source"] = ["baloney"]
+        op = SplitEventOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        with self.assertRaises(TypeError) as context:
+            op.do_op(self.dispatch, df, name="sample_data")
+        self.assertEqual(context.exception.args[0], 'BadOnsetInModel')
+
+    def test_bad_duration(self):
+        # Onset
+        parms = json.loads(self.json_parms)
+        parms["new_events"]["response"]["duration"] = ["baloney"]
+        op = SplitEventOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        with self.assertRaises(TypeError) as context:
+            op.do_op(self.dispatch, df, name="sample_data")
+        self.assertEqual(context.exception.args[0], 'BadDurationInModel')
+
     def test_split_event_from_files(self):
         # Test when existing column is used as anchor event
         df = pd.read_csv(self.events_path, delimiter='\t', header=0, dtype=str, keep_default_na=False, na_values=None)
@@ -112,24 +162,17 @@ class Test(unittest.TestCase):
         self.assertFalse(errors, 'split_event should not give errors if operation is correct')
         dispatch = Dispatcher(operation_list)
         df = dispatch.prep_events(df)
+        df_new = None
         for operation in dispatch.parsed_ops:
             df_new = operation.do_op(dispatch, df, "Name")
-        df_new = df_new.fillna('n/a')
+        self.assertIsInstance(df_new, pd.DataFrame)
         df_check = pd.read_csv(self.events_path, delimiter='\t', header=0, dtype=str,
                                keep_default_na=False, na_values=None)
-        # parms = json.loads(self.json_parms)
-        # op = SplitEventOp(parms)
-        # df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        # df_check = pd.DataFrame(self.split, columns=self.split_columns)
-        # df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        # df_new = op.do_op(self.dispatch, df_test, name="sample_data")
-        # df_new = df_new.fillna('n/a')
-        #
-        # Test that this
         self.assertEqual(len(df_check), len(df),
                          "split_event should not change the length of the original dataframe")
         self.assertEqual(len(df_check.columns), len(df.columns),
                          "split_event should change the number of columns of the original dataframe")
+
 
 if __name__ == '__main__':
     unittest.main()

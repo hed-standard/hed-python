@@ -7,7 +7,7 @@ class BidsDatasetSummary:
     def __init__(self, dataset):
         """ Constructor for producing a BIDS dataset JSON summary.
 
-        Args:
+        Parameters:
             dataset (BidsDataset or str): The dataset to be summarized.
 
         """

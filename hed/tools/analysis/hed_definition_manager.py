@@ -1,9 +1,6 @@
-from hed.schema import load_schema_version
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 from hed.models.def_mapper import DefMapper
-from hed.models.definition_dict import DefinitionEntry
-from hed.tools.analysis.hed_context_manager import HedContextManager
 
 
 class HedDefinitionManager:
@@ -11,7 +8,7 @@ class HedDefinitionManager:
     def __init__(self, definitions, hed_schema, variable_type='condition-variable'):
         """ Create a definition manager for a type of variable.
 
-        Args:
+        Parameters:
             definitions (dict or DefMapper): A dictionary of DefinitionEntry objects.
             hed_schema (Hedschema or HedSchemaGroup): The schema used for parsing.
             variable_type (str): Lower-case string giving the type of HED variable.
@@ -32,7 +29,7 @@ class HedDefinitionManager:
     def get_vars(self, item):
         """ Return a list of type_variables in item.
 
-        Args:
+        Parameters:
             item (HedTag, HedGroup, or HedString): An item potentially containing def tags.
 
         Returns:
@@ -56,7 +53,7 @@ class HedDefinitionManager:
     def _extract_from_entry(self, entry):
         """ Extract a list of type_variables associated with a definition.
 
-        Args:
+        Parameters:
             entry (DictionaryEntry): A definition entry to be processed.
 
         Returns:
@@ -81,7 +78,7 @@ class HedDefinitionManager:
     def get_def_names(item, no_value=True):
         """ Return a list of Def values in item.
 
-        Args:
+        Parameters:
             item (HedTag, HedGroup, or HedString): An item containing a def tag.
             no_value (bool):  If True, strip off extra values after the definition name.
 
@@ -103,7 +100,7 @@ class HedDefinitionManager:
     def split_name(name, lowercase=True):
         """ Split a name/# or name/x into name, x.
 
-        Args:
+        Parameters:
             name (str):  The extension or value portion of a tag
             lowercase (bool): If True
 
@@ -127,7 +124,7 @@ class HedDefinitionManager:
     def remove_defs(hed_strings):
         """ This removes any def or Def-expand from a list of HedStrings.
 
-        Args:
+        Parameters:
             hed_strings (list):  A list of HedStrings
 
         Returns:
@@ -142,17 +139,29 @@ class HedDefinitionManager:
         return def_groups
 
     @staticmethod
-    def extract_defs(hed):
+    def extract_defs(hed_string_obj):
+        """ This removes any def or Def-expand from a list of HedStrings.
+
+        Parameters:
+            hed_string_obj (HedString):  A HedString
+
+        Returns:
+            list: A list of the removed Defs.
+
+        Notes:
+            - the hed_string_obj passed in no longer has definitions.
+
+        """
         to_remove = []
         to_append = []
-        tups = hed.find_def_tags(recursive=True, include_groups=3)
-        for tup in tups:
+        tuples = hed_string_obj.find_def_tags(recursive=True, include_groups=3)
+        for tup in tuples:
             if len(tup[2].children) == 1:
                 to_append.append(tup[0])
             else:
                 to_append.append(tup[2])
             to_remove.append(tup[2])
-        hed.remove(to_remove)
+        hed_string_obj.remove(to_remove)
         return to_append
 
 

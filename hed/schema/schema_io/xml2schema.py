@@ -248,7 +248,7 @@ class HedSchemaXMLParser:
     def _get_ancestor_tag_names(self, tag_element):
         """ Get all ancestor tag names of a tag element.
 
-        Args:
+        Parameters:
             tag_element (Element): A tag element in the HED XML file.
 
         Returns:
@@ -268,7 +268,7 @@ class HedSchemaXMLParser:
     def _get_element_tag_value(self, element, tag_name=xml_constants.NAME_ELEMENT):
         """ Get the value of the element's tag.
 
-        Args:
+        Parameters:
             element (Element): A element in the HED XML file.
             tag_name (str): The name of the XML element's tag. The default is 'name'.
 
@@ -291,7 +291,7 @@ class HedSchemaXMLParser:
     def _get_parent_tag_name(self, tag_element):
         """ Return the name of the tag parent element.
 
-        Args:
+        Parameters:
             tag_element (Element): A tag element in the HED XML file.
 
         Returns:
@@ -310,7 +310,7 @@ class HedSchemaXMLParser:
     def _get_tag_path_from_tag_element(self, tag_element):
         """ Get the tag path from a given tag element.
 
-        Args:
+        Parameters:
             tag_element (Element): A tag element in the HED XML file.
 
         Returns:
@@ -328,7 +328,7 @@ class HedSchemaXMLParser:
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """ Get the elements that have a specific element name.
 
-        Args:
+        Parameters:
             element_name (str): The name of the element. The default is 'node'.
             parent_element (RestrictedElement or None): The parent element.
 

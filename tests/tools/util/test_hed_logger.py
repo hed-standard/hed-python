@@ -1,14 +1,8 @@
 import unittest
-from io import StringIO
-from unittest import mock
 from hed.tools.util.hed_logger import HedLogger
 
 
 class Test(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.temp = ""
 
     def test_hed_logger_constructor(self):
         status = HedLogger()
@@ -36,39 +30,29 @@ class Test(unittest.TestCase):
         status = HedLogger()
         status.add("baloney", "Test message 1", level="ERROR")
         status.add("baloney", "Test message 2")
+        status.add("bacon", "Test message 3", level="ERROR")
+        status.add("olives", "Test message 4", level="ERROR")
         stuff1 = status.get_log_string()
         self.assertGreater(len(stuff1), 0, "get_log should contain messages.")
-        self.assertEqual(stuff1.count('\n'), 3, "get_log should output right number of lines.")
-        status.add("banana", "")
-        stuff2 = status.get_log_string(level="ERROR")
-        self.assertEqual(stuff2.count('\n'), 3, "get_log should output right number of lines when level is given.")
+        self.assertEqual(stuff1.count('\n'), 7, "get_log should output right number of lines.")
+        status.add("banana", "Test message 5")
+        stuff2 = status.get_log_string()
+        self.assertEqual(stuff2.count('\n'), 9, "get_log should output right number of lines.")
+        stuff3 = status.get_log_string(level="ERROR")
+        self.assertEqual(stuff3.count('\n'), 7, "get_log should output right number of lines when level is given.")
 
-    def test_print_log(self):
-        status = HedLogger()
-        with mock.patch('sys.stdout', new=StringIO()) as fake_out1:
-            self.assertIsInstance(fake_out1, StringIO, "Mock creates a StringIO")
-            status.add("baloney", "Test message 1", level="ERROR", also_print=True)
-            status.add("baloney", "Test message 2", also_print=True)
-            stuff1 = fake_out1.getvalue()
-            self.assertGreater(len(stuff1), 0, "HedLogger should print messages if also_print is True")
-            self.assertEqual(stuff1.count('\n'), 2,
-                             "HedLogger should output right number of lines if also_print is True")
-
-        with mock.patch('sys.stdout', new=StringIO()) as fake_out2:
-            self.assertIsInstance(fake_out2, StringIO, "Mock creates a StringIO")
-            status.print_log()
-            stuff2 = fake_out2.getvalue()
-            self.assertGreater(len(stuff2), 0, "HedLogger should print messages if also_print is True")
-            self.assertEqual(stuff2.count('\n'), 3,
-                             "HedLogger should output right number of lines if also_print is True")
-
-        with mock.patch('sys.stdout', new=StringIO()) as fake_out3:
-            self.assertIsInstance(fake_out3, StringIO, "Mock creates a StringIO")
-            status.print_log(level="ERROR")
-            stuff3 = fake_out3.getvalue()
-            self.assertGreater(len(stuff3), 0, "HedLogger should print messages if also_print is True")
-            self.assertEqual(stuff3.count('\n'), 2,
-                             "HedLogger should output right number of lines if also_print is True")
+    def test_get_log(self):
+        status = HedLogger(name='help')
+        status.add("baloney", "Test message 1", level="ERROR")
+        status.add("baloney", "Test message 2", level="ERROR")
+        status.add("bacon", "Test message 3", level="ERROR")
+        status.add("olives", "Test message 4", level="ERROR")
+        baloney = status.get_log("baloney")
+        self.assertIsInstance(baloney, list)
+        self.assertEqual(len(baloney), 2)
+        oranges = status.get_log("oranges")
+        self.assertIsInstance(baloney, list)
+        self.assertEqual(len(oranges), 0)
 
 
 if __name__ == '__main__':

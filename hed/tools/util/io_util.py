@@ -9,7 +9,7 @@ from hed.errors.exceptions import HedFileError
 def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
     """ Return True if correct extension, suffix, and prefix.
 
-    Args:
+    Parameters:
         test_file (str) :           Path of filename to test.
         name_prefix (list, str, None):  An optional name_prefix or list of prefixes to accept for the base filename
         name_suffix (list, str, None):  An optional name_suffix or list of suffixes to accept for the base file name
@@ -43,7 +43,7 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
 def get_allowed(value, allowed_values=None, starts_with=True):
     """ Returns the portion of the value that matches a value in allowed_values or None if no match.
 
-    Args:
+    Parameters:
         value (str): value to be matched.
         allowed_values (list, str, or None):  Values to match.
         starts_with (bool):  If true match is done at beginning of string, otherwise the end.
@@ -70,7 +70,7 @@ def get_allowed(value, allowed_values=None, starts_with=True):
 def extract_suffix_path(path, prefix_path):
     """ Return suffix of path after prefix path has been removed.
 
-    Args:
+    Parameters:
         path (str)           path of the root directory.
         prefix_path (str)    sub-path relative to the root directory.
 
@@ -93,11 +93,12 @@ def extract_suffix_path(path, prefix_path):
 def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None, append_datetime=False):
     """ Generate a filename for the attachment.
 
-    Args:
+    Parameters:
         base_name (str):   Name of the base, usually the name of the file that the issues were generated from.
         name_prefix (str): Prefix prepended to the front of the base name.
         name_suffix (str): Suffix appended to the end of the base name.
         extension (str):   Extension to use.
+        append_datetime (bool): If True, append the current date-time to the base output filename.
 
     Returns:
         str:  Name of the attachment other containing the issues.
@@ -129,7 +130,7 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
 
     """ Create dictionary directory paths keys.
 
-    Args:
+    Parameters:
         dir_path (str):               Full path of the directory tree to be traversed (no ending slash).
         name_prefix (str, None):      An optional name_prefix for the base filename.
         name_suffix (str, None):      An optional name_suffix for the base file name.
@@ -167,11 +168,11 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
 
     Everything is converted to lower case prior to testing so this test should be case insensitive.
 
-     Args:
-         file_list (list):      List of files to test.
-         name_prefix (str):     Optional name_prefix for the base filename.
-         name_suffix (str):     Optional name_suffix for the base filename.
-         extensions (list):     Optional list of file extensions (allows two periods (.tsv.gz)
+    Parameters:
+        file_list (list):      List of files to test.
+        name_prefix (str):     Optional name_prefix for the base filename.
+        name_suffix (str):     Optional name_suffix for the base filename.
+        extensions (list):     Optional list of file extensions (allows two periods (.tsv.gz)
 
      Returns:
          list:  The filtered file names.
@@ -185,7 +186,7 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
 def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None, exclude_dirs=None):
     """ Return paths satisfying various conditions.
 
-    Args:
+    Parameters:
         root_path (str):              Full path of the directory tree to be traversed (no ending slash).
         name_prefix (str, None):      An optional name_prefix for the base filename.
         name_suffix (str, None):      The name_suffix of the paths to be extracted.
@@ -209,7 +210,7 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
 def get_path_components(root_path, this_path):
     """ Get a list of the remaining components after root path.
 
-    Args:
+    Parameters:
         root_path (str):      A path (no trailing separator)
         this_path (str):      The path of a file or directory descendant of root_path
 
@@ -239,13 +240,13 @@ def get_path_components(root_path, this_path):
 def make_path(root_path, sub_path, filename):
     """ Get path for a file, verifying all components exist.
 
-    Args:
-        root_path (str)   path of the root directory
-        sub_path (str)    sub-path relative to the root directory
-        filename (str)    filename of the file
+    Parameters:
+        root_path (str):   path of the root directory.
+        sub_path (str):    sub-path relative to the root directory.
+        filename (str):    filename of the file.
 
-    Returns: (str)
-        A valid realpath for the specified file.
+    Returns:
+        str: A valid realpath for the specified file.
 
     Notes: This function is useful for creating files within BIDS datasets
 
@@ -259,13 +260,13 @@ def make_path(root_path, sub_path, filename):
 def parse_bids_filename(file_path):
     """ Split a filename into BIDS-relevant components.
 
-        Args:
-            file_path (str)     Path to be parsed.
+    Parameters:
+        file_path (str):     Path to be parsed.
 
-        Returns: dict
-            suffix (str)        BIDS suffix name.
-            ext (str)           File extension (including the .).
-            entity_dict (dict)  Dictionary with key-value pair being (entity type, entity value).
+    Returns:
+        str:   BIDS suffix name.
+        str:   File extension (including the .).
+        dict:  Dictionary with key-value pair being (entity type, entity value).
 
         Raises:
             HedFileError when filename does not conform to name-value_suffix format.
@@ -303,11 +304,12 @@ def parse_bids_filename(file_path):
 def _split_entity(piece):
     """Splits an piece into an entity or suffix.
 
-        Args:
-            piece (str):   A string to be parsed.
+    Parameters:
+        piece (str):   A string to be parsed.
 
-        Returns:
-            dict:  with entities as keys as well as the key "bad" and the key "suffix".
+    Returns:
+        dict:  with entities as keys as well as the key "bad" and the key "suffix".
+
     """
     piece = piece.strip()
     if not piece:

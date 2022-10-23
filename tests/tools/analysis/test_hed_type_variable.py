@@ -1,5 +1,6 @@
 import os
 import unittest
+from pandas import DataFrame
 from hed.errors.exceptions import HedFileError
 from hed.models.definition_dict import DefinitionEntry
 from hed.models.hed_string import HedString
@@ -97,8 +98,30 @@ class Test(unittest.TestCase):
 
     def test_constructor_unmatched(self):
         test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings3]
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context:
             HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, self.defs)
+        self.assertEqual(context.exception.args[0], 'UnmatchedOffset')
+
+    def test_get_variable_factors(self):
+        test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, definitions)
+        df_new1 = var_manager.get_variable_factors()
+        self.assertIsInstance(df_new1, DataFrame)
+        self.assertEqual(len(df_new1), 200)
+        self.assertEqual(len(df_new1.columns), 10)
+        df_new2 = var_manager.get_variable_factors(variables=["face-type"])
+        self.assertEqual(len(df_new2), 200)
+        self.assertEqual(len(df_new2.columns), 4)
+        df_new3 = var_manager.get_variable_factors(variables=["junk"])
+        self.assertIsNone(df_new3)
+
+    def test_str(self):
+        test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
+        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
+        var_manager = HedTypeVariable(HedContextManager(test_strings1), self.hed_schema, definitions)
+        new_str = str(var_manager)
+        self.assertIsInstance(new_str, str)
 
     def test_summarize_variables(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)

@@ -2,21 +2,30 @@ import numpy as np
 import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-PARAMS = {
-    "operation": "split_events",
-    "required_parameters": {
-        "anchor_column": str,
-        "new_events": dict,
-        "remove_parent_event": bool
-    },
-    "optional_parameters": {}
-}
-
 
 class SplitEventOp(BaseOp):
+    """ Split an event into multiple events.
+
+    Notes: The required parameters are:
+        - anchor_column (str):  The column in which new items are generated.
+        - new_events (dict):    Dictionary mapping new values to combination of values in the anchor_column.
+        - remove_parent_event (bool):    If true, columns not in column_order are placed at end.
+
+    """
+
+    PARAMS = {
+        "operation": "split_events",
+        "required_parameters": {
+            "anchor_column": str,
+            "new_events": dict,
+            "remove_parent_event": bool
+        },
+        "optional_parameters": {}
+    }
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.anchor_column = parameters['anchor_column']
         self.new_events = parameters['new_events']
@@ -25,11 +34,11 @@ class SplitEventOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Split a row representing a particular event into multiple rows.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+        Parameters:
+            dispatcher (Dispatcher):  dispatcher object for context.
+            df (DataFrame):   The DataFrame to be remodeled.
+            name (str):  Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
             Dataframe - a new dataframe after processing.

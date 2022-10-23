@@ -32,7 +32,7 @@ class HedGroup(HedGroupBase):
     def append(self, tag_or_group):
         """ Add a tag or group to this group.
 
-        Args:
+        Parameters:
             tag_or_group (HedTag or HedGroup): The new object to add to this group.
 
         Raises:
@@ -45,7 +45,7 @@ class HedGroup(HedGroupBase):
     def check_if_in_original(self, tag_or_group):
         """ Check if the tag or group in original string.
 
-        Args:
+        Parameters:
             tag_or_group (HedTag or HedGroup): The HedTag or HedGroup to be looked for in this group.
 
         Returns:
@@ -66,7 +66,7 @@ class HedGroup(HedGroupBase):
     def replace(self, item_to_replace, new_contents):
         """ Replace an existing tag or group.
 
-        Args:
+        Parameters:
             item_to_replace (HedTag or HedGroup): The item to replace must exist or this will raise an error.
             new_contents (HedTag or HedGroup): Replacement contents.
 
@@ -85,7 +85,7 @@ class HedGroup(HedGroupBase):
     def remove(self, items_to_remove):
         """ Remove any tags/groups in items_to_remove.
 
-        Args:
+        Parameters:
             items_to_remove (list):  List of HedGroups and/or HedTags to remove.
 
         Notes:
@@ -99,7 +99,7 @@ class HedGroup(HedGroupBase):
     def _remove(self, items_to_remove, all_groups):
         """ Needs to be documented.
 
-        Args:
+        Parameters:
             items_to_remove (list):  List of HedGroups and/or HedTags to remove.
             all_groups (list):   List of HedGroups.
 
@@ -143,7 +143,7 @@ class HedGroupFrozen(HedGroupBase):
     def __init__(self, contents, hed_string=None):
         """ Initialize a frozen group.
 
-        Args:
+        Parameters:
             contents (HedGroupBase or list): Used to set the contents of this group.
             hed_string (str or None): If contents is a list, this is the raw string the contents came from.
 
@@ -196,7 +196,7 @@ class HedGroupFrozen(HedGroupBase):
     def get_all_groups(self, also_return_depth=False):
         """ Return HedGroups, including descendants and self.
 
-        Args:
+        Parameters:
             also_return_depth (bool): If True, this yields tuples (group, depth) rather than just groups.
 
         Returns:

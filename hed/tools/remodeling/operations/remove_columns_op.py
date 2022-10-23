@@ -1,14 +1,5 @@
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-PARAMS = {
-    "operation": "remove_columns",
-    "required_parameters": {
-        "remove_names": list,
-        "ignore_missing": bool
-    },
-    "optional_parameters": {}
-}
-
 
 class RemoveColumnsOp(BaseOp):
     """ Remove columns from a dataframe.
@@ -18,6 +9,15 @@ class RemoveColumnsOp(BaseOp):
         - ignore_missing (boolean) If true, the names in remove_names that are not columns in df should be ignored.
 
     """
+
+    PARAMS = {
+        "operation": "remove_columns",
+        "required_parameters": {
+            "remove_names": list,
+            "ignore_missing": bool
+        },
+        "optional_parameters": {}
+    }
 
     def __init__(self, parameters):
         """ Constructor for remove columns operation.
@@ -30,7 +30,8 @@ class RemoveColumnsOp(BaseOp):
             TypeError if a value in parameters has an invalid type.
 
         """
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.remove_names = parameters['remove_names']
         ignore_missing = parameters['ignore_missing']

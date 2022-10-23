@@ -122,7 +122,7 @@ def hed_string_iter(hed_strings, tag_funcs, error_handler):
 
         Also gives issues for blank strings
 
-    Args:
+    Parameters:
         hed_strings(dict or str): A hed_string or dict of hed strings
         tag_funcs (list of funcs): The functions to apply before returning
         error_handler (ErrorHandler): The error handler to use for context, uses a default one if none.
@@ -158,7 +158,7 @@ def _hed_iter_low(hed_strings):
 
         Used by hed_string_iter
 
-    Args:
+    Parameters:
         hed_strings(dict or str): A hed_string or dict of hed strings
 
     Yields:
@@ -184,7 +184,7 @@ def _hed_iter_low(hed_strings):
 def set_hed_string(new_hed_string, hed_strings, position=None):
     """ Set a hed string for a category key/etc.
 
-    Args:
+    Parameters:
         new_hed_string (str or HedString): The new hed_string to replace the value at position.
         hed_strings(dict or str or HedString): The hed strings we want to update
         position (str, optional): This should only be a value returned from hed_string_iter.
@@ -227,7 +227,7 @@ class HedOps:
     def __get_string_funcs__(self, **kwargs):
         """ Return the operations that should be done on the full string at once.
 
-        Args:
+        Parameters:
             kwargs See above.
 
         Returns:
@@ -239,7 +239,7 @@ class HedOps:
     def __get_tag_funcs__(self, **kwargs):
         """ Return the operations that should be done on the individual tags in the string.
 
-        Args:
+        Parameters:
             kwargs: See above.
 
         Returns:

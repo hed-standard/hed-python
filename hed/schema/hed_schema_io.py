@@ -167,7 +167,7 @@ def _load_schema_version(xml_version=None, xml_folder=None):
 def load_schema_version(xml_version=None, xml_folder=None):
     """ Return a HedSchema or HedSchemaGroup extracted from xml_version field.
 
-    Args:
+    Parameters:
         xml_version (str or list or None): List or str specifying which official HED schemas to use.
                                            An empty string returns the latest version
         xml_folder (str): Path to a folder containing schema.

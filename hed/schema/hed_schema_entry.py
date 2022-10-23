@@ -16,7 +16,7 @@ class HedSchemaEntry:
     def __init__(self, name, section):
         """ Constructor for HedSchemaEntry.
 
-        Args:
+        Parameters:
             name (str): The name of the entry.
             section (HedSchemaSection):  The section to which it belongs.
 
@@ -34,7 +34,7 @@ class HedSchemaEntry:
     def finalize_entry(self, schema):
         """ Called once after loading to set internal state.
 
-        Args:
+        Parameters:
             schema (HedSchema): The schema that holds the rules.
 
         """
@@ -43,7 +43,7 @@ class HedSchemaEntry:
     def set_attribute_value(self, attribute_name, attribute_value):
         """ Add attribute and set its value.
 
-        Args:
+        Parameters:
             attribute_name (str): The name of the schema entry attribute.
             attribute_value (bool or str):  The value of the attribute.
 
@@ -64,7 +64,7 @@ class HedSchemaEntry:
     def has_attribute(self, attribute_name, return_value=False):
         """ Return True if this entry has the attribute.
 
-        Args:
+        Parameters:
             attribute_name (str): The attribute to check for.
             return_value (bool):  If True return the actual attribute value rather than just indicate presence.
 
@@ -83,7 +83,7 @@ class HedSchemaEntry:
     def attribute_has_property(self, attribute_name, property_name):
         """ Return True if attribute has property.
 
-        Args:
+        Parameters:
             attribute_name (str): Attribute name to check for property_name.
             property_name (str): The property value to return.
 
@@ -130,7 +130,7 @@ class UnitClassEntry(HedSchemaEntry):
     def add_unit(self, unit_entry):
         """ Add the given unit entry to this unit class.
 
-        Args:
+        Parameters:
             unit_entry (HedSchemaEntry): Unit entry to add.
 
         """
@@ -139,7 +139,7 @@ class UnitClassEntry(HedSchemaEntry):
     def finalize_entry(self, schema):
         """ Called once after schema load to set state.
 
-        Args:
+        Parameters:
             schema (HedSchema): The object with the schema rules.
 
         """
@@ -168,7 +168,7 @@ class UnitEntry(HedSchemaEntry):
     def finalize_entry(self, schema):
         """ Called once after loading to set internal state.
 
-        Args:
+        Parameters:
             schema (HedSchema): The schema rules come from.
 
         """
@@ -192,7 +192,7 @@ class HedTagEntry(HedSchemaEntry):
     def get_fake_tag_entry(tag, tags_to_identify):
         """ Create a tag entry if a given a tag has a match in a list of possible short tags.
 
-        Args:
+        Parameters:
             tag (str): The short/mid/long form tag to identify.
             tags_to_identify (list): A list of lowercase short tags to identify.
 
@@ -221,7 +221,7 @@ class HedTagEntry(HedSchemaEntry):
     def any_parent_has_attribute(self, attribute):
         """ Check if tag (or parents) has the attribute.
 
-        Args:
+        Parameters:
             attribute (str): The name of the attribute to check for.
 
         Returns:
@@ -241,7 +241,7 @@ class HedTagEntry(HedSchemaEntry):
     def base_tag_has_attribute(self, tag_attribute):
         """ Check if the base tag has a specific attribute.
 
-        Args:
+        Parameters:
             tag_attribute (str): A tag attribute.
 
         Returns:
@@ -260,7 +260,7 @@ class HedTagEntry(HedSchemaEntry):
     def finalize_entry(self, schema):
         """ Called once after schema loading to set state.
 
-        Args:
+        Parameters:
             schema (HedSchema): The schema that the rules come from.
 
         """

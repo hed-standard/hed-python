@@ -2,17 +2,6 @@ import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.analysis.key_map import KeyMap
 
-PARAMS = {
-    "operation": "remap_columns",
-    "required_parameters": {
-        "source_columns": list,
-        "destination_columns": list,
-        "map_list": list,
-        "ignore_missing": bool
-    },
-    "optional_parameters": {}
-}
-
 
 class RemapColumnsOp(BaseOp):
     """ Map combinations of values in m columns into a new combinations in n columns.
@@ -20,8 +9,22 @@ class RemapColumnsOp(BaseOp):
         TODO: Allow wildcards
 
     """
+
+    PARAMS = {
+        "operation": "remap_columns",
+        "required_parameters": {
+            "source_columns": list,
+            "destination_columns": list,
+            "map_list": list,
+            "ignore_missing": bool
+        },
+        "optional_parameters": {}
+    }
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.source_columns = parameters['source_columns']
         self.destination_columns = parameters['destination_columns']
@@ -32,8 +35,8 @@ class RemapColumnsOp(BaseOp):
                              f"The source column list {str(self.source_columns)} must be non-empty")
 
         if len(self.destination_columns) < 1:
-            raise ValueError("EmptySourceColumns",
-                             f"The source column list {str(self.destination_columns)} must be non-empty")
+            raise ValueError("EmptyDestinationColumns",
+                             f"The destination column list {str(self.destination_columns)} must be non-empty")
         entry_len = len(self.source_columns) + len(self.destination_columns)
         for index, item in enumerate(self.map_list):
             if len(item) != entry_len:

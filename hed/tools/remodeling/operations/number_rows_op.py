@@ -1,19 +1,20 @@
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-PARAMS = {
-    "operation": "number_rows",
-    "required_parameters": {
-        "number_column_name": str
-    },
-    "optional_parameters": {"overwrite": bool, "match_value": dict}
-}
-
 
 class NumberRowsOp(BaseOp):
 
+    PARAMS = {
+        "operation": "number_rows",
+        "required_parameters": {
+            "number_column_name": str
+        },
+        "optional_parameters": {"overwrite": bool, "match_value": dict}
+    }
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.number_column_name = parameters['number_column_name']
         self.overwrite = parameters.get('overwrite', False)

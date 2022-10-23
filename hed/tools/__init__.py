@@ -25,9 +25,8 @@ from .remodeling.backup_manager import BackupManager
 from .remodeling.operations.base_context import BaseContext
 from .remodeling.operations.base_op import BaseOp
 from .remodeling.operations.factor_column_op import FactorColumnOp
-from .remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
+# from .remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
 from .remodeling.operations.factor_hed_type_op import FactorHedTypeOp
-from .remodeling.operations.filter_hed_op import FilterHedOp
 from .remodeling.operations.merge_consecutive_op import MergeConsecutiveOp
 from .remodeling.operations.number_groups_op import NumberGroupsOp
 from .remodeling.operations.number_rows_op import NumberRowsOp

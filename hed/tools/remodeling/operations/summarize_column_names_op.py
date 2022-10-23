@@ -2,17 +2,6 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
 
 
-PARAMS = {
-    "operation": "summarize_column_names",
-    "required_parameters": {
-        "summary_name": str,
-        "summary_filename": str
-    },
-    "optional_parameters": {
-    }
-}
-
-
 class SummarizeColumnNamesOp(BaseOp):
     """ Summarize the column names in a dataset.
 
@@ -24,10 +13,22 @@ class SummarizeColumnNamesOp(BaseOp):
 
     """
 
+    PARAMS = {
+        "operation": "summarize_column_names",
+        "required_parameters": {
+            "summary_name": str,
+            "summary_filename": str
+        },
+        "optional_parameters": {
+        }
+    }
+
+    SUMMARY_TYPE = "column_names"
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
-        self.summary_type = 'column_names'
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
 
@@ -59,7 +60,7 @@ class SummarizeColumnNamesOp(BaseOp):
 class ColumnNameSummary(BaseContext):
 
     def __init__(self, sum_op):
-        super().__init__(sum_op.summary_type, sum_op.summary_name, sum_op.summary_filename)
+        super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
         self.file_dict = {}
         self.unique_headers = []
 

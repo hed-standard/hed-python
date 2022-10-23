@@ -10,7 +10,7 @@ class HedTypeFactors:
     def __init__(self, variable_value, number_elements, variable_type="condition-variable"):
         """ Constructor for HedTypeFactors.
 
-        Args:
+        Parameters:
             variable_value (str): The value of the type summarized by this class.
             number_elements (int): Number of elements in the data column
             variable_type (str):  Lowercase string corresponding to a HED tag which has a takes value child.

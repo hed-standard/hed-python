@@ -3,22 +3,22 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.util.data_util import get_indices, tuple_to_range
 import itertools
 
-PARAMS = {
-    "operation": "number_groups",
-    "required_parameters": {
-        "number_column_name": str,
-        "source_column": str,
-        "start": dict,
-        "stop": dict
-    },
-    "optional_parameters": {"overwrite": bool}
-}
-
 
 class NumberGroupsOp(BaseOp):
+    PARAMS = {
+        "operation": "number_groups",
+        "required_parameters": {
+            "number_column_name": str,
+            "source_column": str,
+            "start": dict,
+            "stop": dict
+        },
+        "optional_parameters": {"overwrite": bool}
+    }
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.number_column_name = parameters['number_column_name']
         self.source_column = parameters['source_column']
@@ -51,8 +51,8 @@ class NumberGroupsOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Add numbers to groups of events in dataframe.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
+        Parameters:
+            dispatcher (Dispatcher) - dispatcher object for context.
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.

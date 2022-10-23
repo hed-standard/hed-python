@@ -29,7 +29,6 @@ class Test(unittest.TestCase):
     def test_constructor(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnNamesOp(parms)
-        self.assertEqual(sum_op.summary_type, "column_names", "constructor creates summary of right type")
         self.assertIsInstance(sum_op, SummarizeColumnNamesOp, "constructor creates an object of the correct type")
 
     def test_summary_op(self):
@@ -76,8 +75,21 @@ class Test(unittest.TestCase):
         self.assertEqual(len(context1.unique_headers), 2, "do_ops context changes unique names if new added")
         self.assertEqual(context1, dispatch.context_dict.get(parms['summary_name'], None),
                          "do_ops making sure the context is in the dispatcher")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as context:
             sum_op.do_op(dispatch, df2, 'name1')
+        self.assertEqual(context.exception.args[0], 'FileHasChangedColumnNames')
+
+    def test_do_ops_duplicate_files(self):
+        parms = json.loads(self.json_parms)
+        sum_op = SummarizeColumnNamesOp(parms)
+        dispatch = Dispatcher([], data_root=None)
+        df1 = pd.DataFrame(self.data1, columns=self.sample_columns1)
+        df1a = pd.DataFrame(self.data1, columns=self.sample_columns1)
+        df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)
+        sum_op.do_op(dispatch, df1, 'name1')
+        with self.assertRaises(ValueError) as context:
+            sum_op.do_op(dispatch, df2, 'name1')
+        self.assertEqual(context.exception.args[0],"FileHasChangedColumnNames")
 
     def test_get_summary(self):
         parms = json.loads(self.json_parms)

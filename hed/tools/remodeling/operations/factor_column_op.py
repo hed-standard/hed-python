@@ -3,24 +3,14 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 # TODO: Does not handle empty factor names.
 # TODO: Does not handle optional return columns.
 
-PARAMS = {
-    "operation": "factor_column",
-    "required_parameters": {
-        "column_name": str,
-        "factor_values": list,
-        "factor_names": list
-    },
-    "optional_parameters": {}
-}
-
 
 class FactorColumnOp(BaseOp):
     """ Creates factor columns corresponding to values in specified column.
 
         Notes: The required parameters are:
-            - column_name (string)  The name of a column in the DataFrame.
-            - factor_values (list)  Values in the column column_name to create factors for.
-            - factor_names (list)   Names to use as the factor columns.
+            - column_name (string):  The name of a column in the DataFrame.
+            - factor_values (list):  Values in the column column_name to create factors for.
+            - factor_names (list):   Names to use as the factor columns.
 
         Raises:
             ValueError:
@@ -29,8 +19,19 @@ class FactorColumnOp(BaseOp):
 
     """
 
+    PARAMS = {
+        "operation": "factor_column",
+        "required_parameters": {
+            "column_name": str,
+            "factor_values": list,
+            "factor_names": list
+        },
+        "optional_parameters": {}
+    }
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.column_name = parameters['column_name']
         self.factor_values = parameters['factor_values']
@@ -43,8 +44,8 @@ class FactorColumnOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns for values in a specified column.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
+        Parameters:
+            dispatcher (Dispatcher) - dispatcher object for context.
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.

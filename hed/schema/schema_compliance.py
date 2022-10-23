@@ -91,7 +91,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
 def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
     """ Check if comma separated list has valid HedTags.
 
-    Args:
+    Parameters:
         hed_schema (HedSchema): The schema to check if the tag exists.
         tag_entry (HedSchemaEntry): The schema entry for this tag.
         possible_tags (str): Comma separated list of tags.  Short long or mixed form valid.
@@ -116,7 +116,7 @@ def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_
 def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
     """ Check if comma separated list are valid HedTags.
 
-    Args:
+    Parameters:
         hed_schema (HedSchema): The schema to check if the tag exists.
         tag_entry (HedSchemaEntry): The schema entry for this tag.
         possible_tags (str): Comma separated list of tags.  Short long or mixed form valid.
@@ -144,7 +144,7 @@ def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warni
 def validate_schema_term(hed_term):
     """ Check short tag for capitalization and illegal characters.
 
-    Args:
+    Parameters:
         hed_term (str): A single hed term.
 
     Returns:
@@ -171,7 +171,7 @@ def validate_schema_term(hed_term):
 def validate_schema_description(tag_name, hed_description):
     """ Check the description of a single schema term.
 
-    Args:
+    Parameters:
         tag_name (str): A single hed tag - not validated here, just used for error messages.
         hed_description (str): The description string to validate.
 

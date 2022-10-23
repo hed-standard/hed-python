@@ -1,14 +1,5 @@
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-PARAMS = {
-    "operation": "remove_rows",
-    "required_parameters": {
-        "column_name": str,
-        "remove_values": list
-    },
-    "optional_parameters": {}
-}
-
 
 class RemoveRowsOp(BaseOp):
     """ Remove dataframe rows that take one of the specified values in the specified column.
@@ -17,10 +8,20 @@ class RemoveRowsOp(BaseOp):
              - column_name (str)     The name of column to be tested.
              - remove_values (list)  The values to test for row removal.
 
-     """
+    """
+
+    PARAMS = {
+        "operation": "remove_rows",
+        "required_parameters": {
+            "column_name": str,
+            "remove_values": list
+        },
+        "optional_parameters": {}
+    }
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.column_name = parameters["column_name"]
         self.remove_values = parameters["remove_values"]

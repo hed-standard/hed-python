@@ -20,7 +20,7 @@ class HedSchemaGroup:
     def __init__(self, schema_list):
         """ Combine multiple HedSchema objects from a list.
 
-        Args:
+        Parameters:
             schema_list (list): A list of HedSchema for the container.
 
         Returns:
@@ -91,7 +91,7 @@ class HedSchemaGroup:
     def schema_for_prefix(self, prefix):
         """ Return the HedSchema for the library prefix.
 
-        Args:
+        Parameters:
             prefix (str): A schema library name prefix.
 
         Returns:
@@ -114,7 +114,7 @@ class HedSchemaGroup:
     def check_compliance(self, check_for_warnings=True, name=None, error_handler=None):
         """ Check for hed3 compliance of this schema.
 
-        Args:
+        Parameters:
             check_for_warnings (bool): If True, checks for formatting issues like invalid characters, capitalization.
             name (str): If present, use as the filename for context, rather than using the actual filename.
             error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
@@ -134,7 +134,7 @@ class HedSchemaGroup:
     def get_tags_with_attribute(self, key):
         """ Return the tags with this attribute.
 
-        Args:
+        Parameters:
             key (str): The attributes.
 
         """
@@ -147,7 +147,7 @@ class HedSchemaGroup:
     def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, schema_prefix=""):
         """ Return the schema entry for this tag, if one exists.
 
-        Args:
+        Parameters:
             name (str): Any form of basic tag(or other section entry) to look up.
             key_class (HedSectionKey): The tag section to search.
             schema_prefix (str or None): An optional prefix associated with this tag.
@@ -168,7 +168,7 @@ class HedSchemaGroup:
     def find_tag_entry(self, tag, schema_prefix=""):
         """ Find a schema entry for a source tag.
 
-        Args:
+        Parameters:
             tag (str or HedTag): Any form of tag to look up.  Can have an extension, value, etc.
             schema_prefix (str): The prefix the library, if any.
 

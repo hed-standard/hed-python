@@ -30,9 +30,8 @@ class HedVariableManager:
     def add_type_variable(self, type_name):
         if type_name.lower() in self._variable_type_map:
             return
-        self._variable_type_map[type_name.lower()] = HedTypeVariable(self.context_manager, self.hed_schema,
-                                                                     self.definitions,
-                                                                     variable_type=type_name)
+        self._variable_type_map[type_name.lower()] = \
+            HedTypeVariable(self.context_manager, self.hed_schema, self.definitions, variable_type=type_name)
 
     def get_factor_vectors(self, type_name, type_variables=None, factor_encoding="one-hot"):
         this_var = self.get_type_variable(type_name)

@@ -3,6 +3,7 @@
 import pandas as pd
 from hed.models.tabular_input import TabularInput
 from hed.models.expression_parser import TagExpressionParser
+from hed.tools.util.data_util import separate_values
 
 
 def assemble_hed(data_input, columns_included=None, expand_defs=False):
@@ -19,12 +20,7 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
         dict: A dictionary with definition names as keys and definition content strings as values.
     """
 
-    if columns_included:
-        columns = frozenset(list(data_input.dataframe.columns))
-        eligible_columns = [x for x in columns_included if x in columns]
-    else:
-        eligible_columns = None
-
+    eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
     hed_obj_list = get_assembled_strings(data_input, expand_defs=expand_defs)
     hed_string_list = [str(hed) for hed in hed_obj_list]
     if not eligible_columns:
@@ -66,12 +62,8 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
         DataFrame or None: A DataFrame with the results of the query or None if no events satisfied the query.
 
     """
-    if columns_included:
-        columns = frozenset(list(data_input.dataframe.columns))
-        eligible_columns = [x for x in columns_included if x in columns]
-    else:
-        eligible_columns = None
 
+    eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
     hed_list = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
     expression = TagExpressionParser(query)
     hed_tags = []

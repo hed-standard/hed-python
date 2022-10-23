@@ -1,15 +1,5 @@
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-PARAMS = {
-    "operation": "reorder_columns",
-    "required_parameters": {
-        "column_order": list,
-        "ignore_missing": bool,
-        "keep_others": bool
-    },
-    "optional_parameters": {}
-}
-
 
 class ReorderColumnsOp(BaseOp):
     """ Reorder columns in a dataframe.
@@ -23,8 +13,20 @@ class ReorderColumnsOp(BaseOp):
         KeyError if ignore_missing is false and a column name in column_order is not in the dataframe.
 
     """
+
+    PARAMS = {
+        "operation": "reorder_columns",
+        "required_parameters": {
+            "column_order": list,
+            "ignore_missing": bool,
+            "keep_others": bool
+        },
+        "optional_parameters": {}
+    }
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.column_order = parameters['column_order']
         self.ignore_missing = parameters['ignore_missing']

@@ -101,7 +101,7 @@ class BaseInput:
     def reset_mapper(self, new_mapper):
         """ Set mapper to a different view of the file.
 
-        Args:
+        Parameters:
             new_mapper (ColumnMapper): A column mapper to be associated with this base input.
 
         """
@@ -151,7 +151,7 @@ class BaseInput:
     def _convert_to_form(self, hed_schema, tag_form, error_handler):
         """ Convert all tags to the specified form.
 
-        Args:
+        Parameters:
             hed_schema (HedSchema or None): The schema to use to convert tags.
                 If None, uses the one used to open the file.
             tag_form (str): The form to convert the tags to (short_tag, long_tag, base_tag, etc).
@@ -183,7 +183,7 @@ class BaseInput:
     def convert_to_short(self, hed_schema=None, error_handler=None):
         """ Convert all tags to short form.
 
-        Args:
+        Parameters:
             hed_schema (HedSchema or None): The schema to use to convert tags.
                 If None, uses the one used to open the file.
             error_handler (ErrorHandler): The error handler to use for context, uses a default if none.
@@ -197,7 +197,7 @@ class BaseInput:
     def convert_to_long(self, hed_schema=None, error_handler=None):
         """ Convert all tags to long form.
 
-        Args:
+        Parameters:
             hed_schema (HedSchema or None): The schema to use to convert tags.
                 If None, uses the one used to open the file.
             error_handler (ErrorHandler): The error handler to use for context, uses a default if none.
@@ -211,7 +211,7 @@ class BaseInput:
     def to_excel(self, file, output_processed_file=False):
         """ Output to an Excel file.
 
-        Args:
+        Parameters:
             file (str or file-like):      Location to save this base input.
             output_processed_file (bool): If True, replace definitions and labels in HED columns.
                                           Also fills in things like categories.
@@ -246,7 +246,7 @@ class BaseInput:
     def to_csv(self, file=None, output_processed_file=False):
         """ Write to file or return as a string.
 
-        Args:
+        Parameters:
             file (str, file-like, or None): Location to save this file. If None, return as string.
             output_processed_file (bool): Replace all definitions and labels in HED columns as appropriate.
                                           Also fills in things like categories.
@@ -297,7 +297,7 @@ class BaseInput:
                        **kwargs):
         """ Iterate rows based on the given column mapper.
 
-        Args:
+        Parameters:
             hed_ops (list, func, HedOps, or None):  A func, a HedOps or a list of these to apply to the
                                                     hed strings before returning.
             mapper (ColumnMapper or None): The column name to column number mapper (or internal mapper if None).
@@ -369,7 +369,7 @@ class BaseInput:
                  tag_form="short_tag"):
         """ Replace the specified cell with transformed text.
 
-        Args:
+        Parameters:
             row_number (int):    The row number of the spreadsheet to set.
             column_number (int): The column number of the spreadsheet to set.
             new_string_obj (HedString): Object with text to put in the given cell.
@@ -394,7 +394,7 @@ class BaseInput:
     def get_worksheet(self, worksheet_name=None):
         """ Get the requested worksheet.
 
-        Args:
+        Parameters:
             worksheet_name (str or None): The name of the requested worksheet by name or the first one if None.
 
         Returns:
@@ -415,7 +415,7 @@ class BaseInput:
     def get_def_and_mapper_issues(self, error_handler, check_for_warnings=False):
         """ Return definition and column issues.
 
-        Args:
+        Parameters:
             error_handler (ErrorHandler): The error handler to use.
             check_for_warnings (bool): If True check for and return warnings as well as errors.
 
@@ -457,7 +457,7 @@ class BaseInput:
     def _get_dataframe_from_worksheet(worksheet, has_headers):
         """ Create a dataframe from the worksheet.
 
-        Args:
+        Parameters:
             worksheet (Worksheet): The loaded worksheet to convert.
             has_headers (bool): True if this worksheet has column headers.
 
@@ -516,7 +516,7 @@ class BaseInput:
     def validate_file(self, hed_ops, name=None, error_handler=None, check_for_warnings=True, **kwargs):
         """ Run the hed_ops on columns and rows.
 
-        Args:
+        Parameters:
             hed_ops (func, HedOps, or list of func and/or HedOps): The HedOps of funcs to apply.
             name (str): If present, use this as the filename for context, rather than using the actual filename
                 Useful for temp filenames.
@@ -547,7 +547,7 @@ class BaseInput:
     def extract_definitions(self, error_handler=None):
         """ Gather and validate all definitions.
 
-        Args:
+        Parameters:
             error_handler (ErrorHandler): The error handler to use for context or a default if None.
 
         Returns:
@@ -571,7 +571,7 @@ class BaseInput:
     def update_definition_mapper(self, def_dict):
         """ Add definitions from dict(s) if mapper exists.
 
-        Args:
+        Parameters:
             def_dict (list or DefinitionDict): Add the DefDict or list of DefDict to the internal definition mapper.
 
         """

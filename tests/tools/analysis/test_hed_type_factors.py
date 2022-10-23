@@ -84,8 +84,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(var_sum, HedTypeFactors)
 
     def test_constructor_unmatched(self):
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context:
             HedTypeVariable(HedContextManager(self.test_strings3), self.schema, self.defs)
+        self.assertEqual(context.exception.args[0], 'UnmatchedOffset')
 
     def test_variable_summary(self):
         var_manager = HedTypeVariable(HedContextManager(self.test_strings2), self.schema, self.defs)

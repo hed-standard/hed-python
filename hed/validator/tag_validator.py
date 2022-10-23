@@ -331,7 +331,7 @@ class TagValidator:
     def check_tag_requires_child(self, original_tag):
         """ Report if tag is a leaf with 'requiredTag' attribute.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
 
         Returns:
@@ -346,7 +346,7 @@ class TagValidator:
     def check_tag_unit_class_units_exist(self, original_tag):
         """ Report warning if tag has a unit class tag with no units.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
 
         Returns:
@@ -366,7 +366,7 @@ class TagValidator:
     def check_for_invalid_extension_chars(self, original_tag):
         """Report invalid characters in extension/value.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
 
         Returns:
@@ -381,7 +381,7 @@ class TagValidator:
     def check_capitalization(self, original_tag):
         """Report warning if incorrect tag capitalization.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original tag used to report the warning.
 
         Returns:
@@ -400,7 +400,7 @@ class TagValidator:
     def check_tag_level_issue(self, original_tag_list, is_top_level, is_group):
         """ Report tags incorrectly positioned in hierarchy.
 
-        Args:
+        Parameters:
             original_tag_list (list): HedTags containing the original tags.
             is_top_level (bool): If True, this group is a "top level tag group"
             is_group (bool): If true group should be contained by parenthesis
@@ -436,7 +436,7 @@ class TagValidator:
     def check_for_required_tags(self, tags):
         """ Report missing required tags.
 
-        Args:
+        Parameters:
             tags (list): HedTags containing the tags.
 
         Returns:
@@ -457,7 +457,7 @@ class TagValidator:
             A unique Term can only appear once in a given HedString.
             Unique terms are terms with the 'unique' property in the schema.
 
-        Args:
+        Parameters:
             tags (list): HedTags containing the tags.
 
         Returns:
@@ -485,7 +485,7 @@ class TagValidator:
     def _report_invalid_character_error(self, hed_string, index):
         """ Report an invalid character.
 
-        Args:
+        Parameters:
             hed_string (str): The HED string that caused the error.
             index (int): The index of the invalid character in the HED string.
 
@@ -504,7 +504,7 @@ class TagValidator:
     def _comma_is_missing_after_closing_parentheses(last_non_empty_character, current_character):
         """ Checks if missing comma after a closing parentheses.
 
-        Args:
+        Parameters:
             last_non_empty_character (str): The last non-empty string in the HED string.
             current_character (str): The current character in the HED string.
 
@@ -523,7 +523,7 @@ class TagValidator:
     def _character_is_delimiter(character):
         """ Checks if the character is a delimiter.
 
-        Args:
+        Parameters:
             character (str): A string character.
 
         Returns:
@@ -538,7 +538,7 @@ class TagValidator:
     def check_for_placeholder(self, original_tag, is_definition=False):
         """ Report invalid placeholder characters.
 
-        Args:
+        Parameters:
             original_tag (HedTag):  The HedTag to be checked
             is_definition (bool): If True, placeholders are allowed.
 
@@ -591,7 +591,7 @@ class TagValidator:
     def validate_value_class_type(self, unit_or_value_portion, valid_types):
         """ Report invalid unit or valid class values.
 
-        Args:
+        Parameters:
             unit_or_value_portion (str): The value portion to validate.
             valid_types (list): The names of value class or unit class types (e.g. dateTime or dateTimeClass).
 
