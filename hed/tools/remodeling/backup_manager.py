@@ -37,7 +37,7 @@ class BackupManager:
         """
         if not backup_name:
             backup_name = self.DEFAULT_BACKUP_NAME
-        if self.backups_dict:
+        if self.backups_dict and backup_name in self.backups_dict:
             return False
         backup = {}
         time_stamp = f"{str(datetime.now())}"
