@@ -18,8 +18,8 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.1.0")
-        cls.test_strings1 = [HedString(f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
-                                       f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4", hed_schema=schema),
+        cls.test_strings1 = [HedString("Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
+                                       "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4", hed_schema=schema),
                              HedString('(Def/Cond1, Offset)', hed_schema=schema),
                              HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast',
                                        hed_schema=schema),
@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
                              HedString('(Def/Cond2, Onset)', hed_schema=schema),
                              HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
                              HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
-        cls.test_strings2 = [HedString(f"Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
+        cls.test_strings2 = [HedString("Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
                                        hed_schema=schema),
                              HedString("Yellow", hed_schema=schema),
                              HedString("Def/Cond2, (Def/Cond6/4, Onset)", hed_schema=schema),
@@ -84,8 +84,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(var_sum, HedTypeFactors)
 
     def test_constructor_unmatched(self):
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context:
             HedTypeVariable(HedContextManager(self.test_strings3), self.schema, self.defs)
+        self.assertEqual(context.exception.args[0], 'UnmatchedOffset')
 
     def test_variable_summary(self):
         var_manager = HedTypeVariable(HedContextManager(self.test_strings2), self.schema, self.defs)

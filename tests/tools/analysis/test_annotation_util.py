@@ -4,6 +4,7 @@ import json
 import unittest
 from pandas import DataFrame
 from hed import schema as hedschema
+from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
 from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags, hed_to_df, merge_hed_dict
 from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, \
@@ -64,7 +65,7 @@ class Test(unittest.TestCase):
         self.assertTrue(missing2, "check_df_column has non-empty return if items missing")
         self.assertEqual(len(missing2), 1, "check_df_column finds correct number of missing items")
 
-    def test_extract_tags(self):
+    def test_extract_tags_no_tag(self):
         remainder0, extracted0 = extract_tags("", 'Description/')
         self.assertFalse(remainder0, "extract_tags should have empty remainder if empty string")
         self.assertFalse(extracted0, "extract_tags should have empty extracted if empty string")
@@ -75,6 +76,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(extracted1, list, "extract_tags should return an empty list list")
         self.assertFalse(extracted1, "extract_tags return an empty extracted list if no tag in string ")
 
+    def test_extract_tags_with_remainder(self):
         str2 = "Bear, Description/Pluck this leaf., Junk"
         remainder2, extracted2 = extract_tags(str2, 'Description/')
         self.assertEqual(remainder2, "Bear, Junk", "extract_tags should return the right string")
@@ -98,6 +100,7 @@ class Test(unittest.TestCase):
         self.assertEqual(extracted4[0], "Description/Pluck this leaf.",
                          "extract_tags return right item when at beginning")
 
+    def extract_tag_multiple_matches(self):
         str5 = "Bear, Description/Pluck this leaf., Junk, Description/Another description."
         remainder5, extracted5 = extract_tags(str5, 'Description/')
         self.assertEqual(remainder5, "Bear, Junk", "extract_tags should return the right string")
@@ -115,6 +118,7 @@ class Test(unittest.TestCase):
         self.assertEqual(extracted6[1], "Description/Another description.",
                          "extract_tags return right item when parens")
 
+    def extract_tag_with_parens(self):
         str7 = "Bear, ((Informational-property/Description/Pluck this leaf., Junk), Description/Another description.)"
         remainder7, extracted7 = extract_tags(str7, 'Description/')
         self.assertEqual(remainder7, "Bear, ((Junk))", "extract_tags should return the right string when parens")
@@ -134,6 +138,23 @@ class Test(unittest.TestCase):
         hed2 = df_to_hed(df2)
         self.assertIsInstance(hed2, dict, "df_to_hed should produce a dictionary")
         self.assertEqual(len(hed2), 1, "df_to_hed ")
+
+    def test_df_to_hed_wrong_format(self):
+        data = [['event_code', 'baloney', 'this is baloney', 'junk1'],
+                ['event_code', 'sausage', 'this is sausage', 'junk2']]
+        df = DataFrame(data, columns=['column_name', 'column_value', 'description', 'blech'])
+        with self.assertRaises(HedFileError) as context:
+            df_to_hed(df)
+        self.assertEqual(context.exception.args[0], 'RequiredColumnsMissing')
+
+    def test_df_to_hed_nas(self):
+        data = [['event_code', 'baloney', 'n/a', 'n/a'],
+                ['event_code', 'sausage', 'this is sausage', 'n/a']]
+        df = DataFrame(data, columns=['column_name', 'column_value', 'description', 'HED'])
+        hed1 = df_to_hed(df)
+        self.assertIsInstance(hed1, dict)
+        self.assertIsInstance(hed1['event_code'], dict)
+        self.assertEqual(len(hed1['event_code']), 2)
 
     def test_df_to_hed_columns_missing(self):
         df1 = hed_to_df(self.sidecar3, col_names=["a", "b"])
@@ -232,6 +253,10 @@ class Test(unittest.TestCase):
         df2c = hed_to_df(self.sidecar2c, col_names=None)
         hed2a = df_to_hed(df2a)
         self.assertIsInstance(hed2a, dict)
+        hed2b = df_to_hed(df2b)
+        self.assertIsInstance(hed2b, dict)
+        hed2c = df_to_hed(df2c)
+        self.assertIsInstance(hed2c, dict)
         # TODO: test of categorical columns not yet written
 
     def test_merge_hed_dict_value_col(self):
@@ -333,17 +358,22 @@ class Test(unittest.TestCase):
         self.assertEqual(descriptions2[0], 'Bad purple',
                          "_flatten_cat_col should use the Description tag if available")
 
+    def test_flatten_cat_col_only_description(self):
+        keys, values, descriptions, tags = _flatten_cat_col("event_type", {"HED": {"code1": "Description/Code 1 here."}})
+        self.assertIsInstance(tags, list)
+        self.assertEqual(tags[0], 'n/a')
+
+    def test_flatten_val_col_only_description(self):
+        keys, values, descriptions, tags = _flatten_val_col("response", {"HED": "Description/Code 1 here."})
+        self.assertEqual(descriptions[0], 'Code 1 here.')
+        self.assertFalse(tags[0])
+
     def test_flatten_value_col(self):
         col1 = self.sidecar1a["a"]
         col2 = self.sidecar1b["b"]
-        try:
+        with self.assertRaises(KeyError) as context:
             _flatten_val_col("a", col1)
-        except KeyError:
-            pass
-        except Exception:
-            self.fail("_flatten_value_col threw the wrong exception when no HED key")
-        else:
-            self.fail("_flatten_value_col should have thrown a KeyError exception when no HED key")
+        self.assertEqual(context.exception.args[0], 'HED')
 
         keys2, values2, descriptions2, tags2 = _flatten_val_col("b", col2)
         self.assertEqual(len(keys2), 1, "_flatten_val_col should have right number of keys if HED")
@@ -358,6 +388,7 @@ class Test(unittest.TestCase):
         col1 = self.sidecar2c["a"]
         col2 = self.sidecar2c["b"]
         self.assertTrue(col1)
+        self.assertTrue(col2)
 
     def test_get_value_entry(self):
         dict1 = _get_value_entry('n/a', 'n/a')

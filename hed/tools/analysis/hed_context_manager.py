@@ -17,7 +17,7 @@ class HedContextManager:
     def __init__(self, hed_strings):
         """ Create an context manager for an events file.
 
-        Args:
+        Parameters:
             hed_strings (list): A list of hed_strings to be managed.
 
         Raises:
@@ -27,6 +27,7 @@ class HedContextManager:
 
         self.hed_strings = hed_strings
         self.onset_list = []
+        self.offset_count = 0
         self.contexts = []
         self._create_onset_list()
         self._set_event_contexts()
@@ -49,6 +50,7 @@ class HedContextManager:
                 group.remove([tup[0]])
                 self._update_onset_list(group, onset_dict, event_index, is_offset=False)
             offset_tuples = hed.find_tags(["offset"], recursive=True, include_groups=2)
+            self.offset_count += len(offset_tuples)
             for tup in offset_tuples:
                 group = tup[1]
                 to_remove.append(group)
@@ -76,20 +78,20 @@ class HedContextManager:
                 contexts[i].append(onset.contents)
         self.contexts = contexts
 
-    @staticmethod
-    def hed_list_to_string(hed_list):
-        hed_strs = []
-        for hed in hed_list:
-            hed_str = hed._hed_string[hed._startpos:hed._endpos]
-            if hed_str:
-                hed_strs.append(hed_str)
-        hed_str_final = ",".join(hed_strs)
-        return hed_str_final
+    # @staticmethod
+    # def hed_list_to_string(hed_list):
+    #     hed_strs = []
+    #     for hed in hed_list:
+    #         hed_str = hed._hed_string[hed._startpos:hed._endpos]
+    #         if hed_str:
+    #             hed_strs.append(hed_str)
+    #     hed_str_final = ",".join(hed_strs)
+    #     return hed_str_final
 
     def _update_onset_list(self, group, onset_dict, event_index, is_offset=False):
         """ Process one onset or offset group to create onset_list.
 
-        Args:
+        Parameters:
             group (HedGroup):  The HedGroup containing the onset or offset.
             onset_dict (dict): A dictionary of OnsetGroup objects that keep track of span of an event.
             event_index (int): The event number in the list.
@@ -108,7 +110,7 @@ class HedContextManager:
             onset_element.end_index = event_index
             self.onset_list.append(onset_element)
         elif is_offset:
-            raise HedFileError("Unmatched offset", f"Unmatched {name} offset at event {event_index}", " ")
+            raise HedFileError("UnmatchedOffset", f"Unmatched {name} offset at event {event_index}", " ")
         if not is_offset:
             onset_element = OnsetGroup(name, event_index, contents=group)
             onset_dict[name] = onset_element

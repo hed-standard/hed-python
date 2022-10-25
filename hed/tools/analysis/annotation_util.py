@@ -169,9 +169,8 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             sidecar_dict[key] = value_dict
             continue
         sidecar_dict[key]['HED'] = value_dict['HED']
-        if isinstance(value_dict['HED'], str):
-            if value_dict.get('Description', "n/a") != "n/a":
-                sidecar_dict[key]['Description'] = value_dict['Description']
+        if isinstance(value_dict['HED'], str) and value_dict.get('Description', "n/a") != "n/a":
+            sidecar_dict[key]['Description'] = value_dict['Description']
             continue
         if isinstance(value_dict['HED'], dict) and 'Levels' in value_dict:
             sidecar_dict[key]['Levels'] = value_dict['Levels']
@@ -310,35 +309,35 @@ def _flatten_val_col(col_key, col_dict):
     return [col_key], ['n/a'], [description], [tags]
 
 
-def _get_row_tags(row, description_tag=True):
-    """ Return the HED string associated with row, possibly without the description.
-
-    Parameters:
-        row (DataSeries):        Pandas data frame containing a row of a tagging spreadsheet.
-        description_tag (bool):  If True, include any Description tags in the returned string.
-
-    Returns:
-        str:  A HED string extracted from the row.
-        str:  A string representing the description (without the Description tag.
-
-    Notes:
-        If description_tag is True the entire tag string is included with description.
-        If there was a description extracted, it is appended to any existing description.
-
-    """
-    remainder, extracted = extract_tags(row['HED'], 'Description/')
-    if description_tag:
-        tags = row["HED"]
-    else:
-        tags = remainder
-
-    if row["description"] != 'n/a':
-        description = row["description"]
-    else:
-        description = ""
-    if extracted:
-        description = " ".join([description, extracted])
-    return tags, description
+# def _get_row_tags(row, description_tag=True):
+#     """ Return the HED string associated with row, possibly without the description.
+#
+#     Parameters:
+#         row (DataSeries):        Pandas data frame containing a row of a tagging spreadsheet.
+#         description_tag (bool):  If True, include any Description tags in the returned string.
+#
+#     Returns:
+#         str:  A HED string extracted from the row.
+#         str:  A string representing the description (without the Description tag.
+#
+#     Notes:
+#         If description_tag is True the entire tag string is included with description.
+#         If there was a description extracted, it is appended to any existing description.
+#
+#     """
+#     remainder, extracted = extract_tags(row['HED'], 'Description/')
+#     if description_tag:
+#         tags = row["HED"]
+#     else:
+#         tags = remainder
+#
+#     if row["description"] != 'n/a':
+#         description = row["description"]
+#     else:
+#         description = ""
+#     if extracted:
+#         description = " ".join([description, extracted])
+#     return tags, description
 
 
 def _get_value_entry(hed_entry, description_entry, description_tag=True):
@@ -396,7 +395,7 @@ def _tag_list_to_str(extracted, removed_tag=None):
 def _update_cat_dict(cat_dict, value_entry, hed_entry, description_entry, description_tag=True):
     """ Update a category entry in the sidecar dictionary based on a row of the spreadsheet.
 
-    Args:
+    Parameters:
         cat_dict (dict):         A dictionary representing a category column in a JSON sidecar.
         value_entry (str):       The value of the key in the category dictionary.
         hed_entry (str):         HED tag string corresponding to the key.
@@ -421,7 +420,7 @@ def _update_cat_dict(cat_dict, value_entry, hed_entry, description_entry, descri
 def _update_remainder(remainder, update_piece):
     """ Update remainder with update piece.
 
-    Args:
+    Parameters:
         remainder (str):      A tag string without trailing comma.
         update_piece (str):   A tag string to be appended.
 

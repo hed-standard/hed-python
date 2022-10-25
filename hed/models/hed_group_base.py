@@ -356,7 +356,7 @@ class HedGroupBase:
 
             Note: This can only find identified tags.
 
-        Args:
+        Parameters:
             term (str): A single term to search for.
             recursive (bool): If true, recursively check subgroups.
             include_groups: 0, 1 or 2

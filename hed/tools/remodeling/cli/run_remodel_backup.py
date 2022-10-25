@@ -37,9 +37,9 @@ def main(arg_list=None):
         file_list = get_filtered_by_element(file_list, args.task_names)
     backup_man = BackupManager(args.data_dir)
     if backup_man.get_backup(args.backup_name):
-        raise HedFileError("BackupExists", f"{args.backup_name}", "")
+        raise HedFileError("BackupExists", f"Backup {args.backup_name} already exists", "")
     else:
-        backup_man.create_backup(args.backup_name, file_list, verbose=args.verbose)
+        backup_man.create_backup(file_list, backup_name=args.backup_name, verbose=args.verbose)
 
 
 if __name__ == '__main__':

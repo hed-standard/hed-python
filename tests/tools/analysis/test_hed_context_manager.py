@@ -6,7 +6,7 @@ from hed.models.hed_string import HedString
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.analysis.hed_context_manager import HedContextManager
+from hed.tools.analysis.hed_context_manager import HedContextManager, OnsetGroup
 from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
                              HedString('(Def/Cond3/1.3, Onset)', hed_schema=schema),
                              HedString('Arm, Leg', hed_schema=schema)]
         cls.test_strings2 = [HedString('(Def/Cond3/2, Offset)', hed_schema=schema)]
-        cls.test_strings3 = [HedString(f"Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
+        cls.test_strings3 = [HedString("Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
                                        hed_schema=schema),
                              HedString("Yellow", hed_schema=schema),
                              HedString("Def/Cond2, (Def/Cond6/4, Onset)", hed_schema=schema),
@@ -39,6 +39,11 @@ class Test(unittest.TestCase):
         sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         cls.schema = schema
+
+    def test_onset_group(self):
+        onset_gr = OnsetGroup('this_group', 0, 10, HedGroup('(Definition/Temper, (Label/help)'))
+        this_str = str(onset_gr)
+        self.assertIsInstance(this_str, str)
 
     def test_constructor(self):
         manager1 = HedContextManager(self.test_strings1)
@@ -60,8 +65,9 @@ class Test(unittest.TestCase):
                          "The constructor for assembled strings has onset_list of correct length")
 
     def test_constructor_unmatched(self):
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context:
             HedContextManager(self.test_strings2)
+        self.assertEqual(context.exception.args[0], 'UnmatchedOffset')
 
     def test_constructor_multiple_values(self):
         manager = HedContextManager(self.test_strings3)

@@ -1,7 +1,5 @@
 """ Utilities for loading and outputting HED schema. """
 import os
-
-
 from hed.schema.schema_io.xml2schema import HedSchemaXMLParser
 from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
@@ -157,7 +155,7 @@ def _load_schema_version(xml_version=None, xml_folder=None):
             hed_schema = load_schema(final_hed_xml_file)
         else:
             raise e
-        
+
     if schema_prefix:
         hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
@@ -167,7 +165,7 @@ def _load_schema_version(xml_version=None, xml_folder=None):
 def load_schema_version(xml_version=None, xml_folder=None):
     """ Return a HedSchema or HedSchemaGroup extracted from xml_version field.
 
-    Args:
+    Parameters:
         xml_version (str or list or None): List or str specifying which official HED schemas to use.
                                            An empty string returns the latest version
         xml_folder (str): Path to a folder containing schema.

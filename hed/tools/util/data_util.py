@@ -87,6 +87,26 @@ def delete_rows_by_column(df, value, column_list=None):
         df.drop(df[map_col].index, axis=0, inplace=True)
 
 
+def get_eligible_values(values, values_included):
+    """ Return a list of the items from values that are in values_included or None if no values_included
+
+    Parameters:
+        values (list): List of strings against which to test.
+        values_included (list): List of items to be selected from values if they are present.
+
+    Returns:
+        list:  list of selected values or None if values_included is empty or None.
+
+
+    """
+
+    if values_included:
+        eligible_columns = [x for x in values_included if x in frozenset(values)]
+    else:
+        eligible_columns = None
+    return eligible_columns
+
+
 def get_key_hash(key_tuple):
     """ Calculate a hash key for tuple of values.
 
@@ -104,7 +124,7 @@ def get_key_hash(key_tuple):
 def get_new_dataframe(data):
     """ Get a new dataframe representing a tsv file.
 
-    Args:
+    Parameters:
         data (DataFrame or str):  DataFrame or filename representing a tsv file.
 
     Returns:
@@ -128,7 +148,7 @@ def get_new_dataframe(data):
 def get_row_hash(row, key_list):
     """ Get a hash key from key column values for row.
 
-    Args:
+    Parameters:
         row (DataSeries)   A Pandas data series corresponding to a row in a spreadsheet.
         key_list (list)    List of column names to create the hash value from.
 
@@ -139,7 +159,7 @@ def get_row_hash(row, key_list):
         HedFileError: If row doesn't have all of the columns in key_list HedFileError is raised.
 
     """
-    columns_present, columns_missing = separate_columns(list(row.index.values), key_list)
+    columns_present, columns_missing = separate_values(list(row.index.values), key_list)
     if columns_missing:
         raise HedFileError("lookup_row", f"row must have all keys, missing{str(columns_missing)}", "")
     return get_key_hash(row[key_list])
@@ -148,17 +168,17 @@ def get_row_hash(row, key_list):
 def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate'):
     """ Get a dictionary of two columns of a dataframe.
 
-    Args:
-        tsv_path (str)   Path to a tsv file with a header row to be read into a DataFrame.
-        key_col (str)    Name of the column which should be the key.
-        value_col (str)  Name of the column which should be the value.
+    Parameters:
+        tsv_path (str):   Path to a tsv file with a header row to be read into a DataFrame.
+        key_col (str):    Name of the column which should be the key.
+        value_col (str):  Name of the column which should be the value.
 
     Returns:
-        dict:  Dictionary with key_col values as the keys and the corresponding
-               value_col values as the values.
+        dict:  Dictionary with key_col values as the keys and the corresponding value_col values as the values.
 
     Raises:
         HedFileError: When tsv_path does not correspond to a file that can be read into a DataFrame.
+
     """
 
     value_dict = {}
@@ -173,7 +193,7 @@ def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate')
 def make_info_dataframe(col_info, selected_col):
     """ Get a dataframe from selected columns.
 
-    Args:
+    Parameters:
         col_info (dict):      Dictionary of dictionaries of column values and counts.
         selected_col (str):   Name of the column used as top level key for col_info.
 
@@ -194,7 +214,7 @@ def make_info_dataframe(col_info, selected_col):
 def replace_values(df, values=None, replace_value='n/a', column_list=None):
     """ Replace string values in specified columns.
 
-    Args:
+    Parameters:
         df (DataFrame):            Dataframe whose values will replaced.
         values (list, None):       List of strings to replace. If None, only empty strings are replaced.
         replace_value (str):       String replacement value.
@@ -223,7 +243,7 @@ def replace_values(df, values=None, replace_value='n/a', column_list=None):
 def remove_quotes(df):
     """ Remove quotes from all columns.
 
-    Args:
+    Parameters:
         df (Dataframe):   Dataframe to process by removing quotes.
 
     Notes:
@@ -240,37 +260,38 @@ def remove_quotes(df):
 
 def reorder_columns(data, col_order, skip_missing=True):
     """ Create a new dataframe with columns reordered.
-    Args:
-        data (DataFrame, str) :        Dataframe or filename of dataframe whose columns are to be reordered.
-        col_order (list):              List of column names in desired order.
-        skip_missing (bool):           If true, col_order columns missing from data are skipped, otherwise error.
+
+    Parameters:
+        data (DataFrame, str):      Dataframe or filename of dataframe whose columns are to be reordered.
+        col_order (list):           List of column names in desired order.
+        skip_missing (bool):        If true, col_order columns missing from data are skipped, otherwise error.
 
     Returns:
-        DataFrame                      A new reordered dataframe.
+        DataFrame:                  A new reordered dataframe.
 
     Raises:
         HedFileError:  If col_order contains columns not in data and skip_missing is False or if
             data corresponds to a filename from which a dataframe cannot be created.
     """
     df = get_new_dataframe(data)
-    present_cols, missing_cols = separate_columns(df.columns.values.tolist(), col_order)
+    present_cols, missing_cols = separate_values(df.columns.values.tolist(), col_order)
     if missing_cols and not skip_missing:
         raise HedFileError("MissingKeys", f"Events file must have columns {str(missing_cols)}", "")
     df = df[present_cols]
     return df
 
 
-def separate_columns(base_cols, target_cols):
-    """ Get target columns from the base list.
+def separate_values(values, target_values):
+    """ Get target values from the target_values list.
 
-    Args:
-        base_cols (list) :        List of columns to be tested.
-        target_cols (list):       List of desired column names.
+    Parameters:
+        values (list):          List of values to be tested.
+        target_values (list):   List of desired values.
 
      Returns:
         tuples:
-            list:  Target columns present in base_cols.
-            list:  Target columns missing from base_cols.
+            list:  Target values present in values.
+            list:  Target values missing from values.
 
      Notes:
          - The function computes the set difference of target_cols and base_cols and returns a list
@@ -278,18 +299,13 @@ def separate_columns(base_cols, target_cols):
 
      """
 
-    if not target_cols:
+    if not target_values:
         return [], []
-    elif not base_cols:
-        return [], target_cols
-    missing_cols = []
-    present_cols = []
-    for col in target_cols:
-        if col not in base_cols:
-            missing_cols.append(col)
-        else:
-            present_cols.append(col)
-    return present_cols, missing_cols
+    elif not values:
+        return [], target_values
+    present_values = [x for x in target_values if x in frozenset(values)]
+    missing_values = list(set(target_values).difference(set(values)))
+    return present_values, missing_values
 
 
 def get_indices(df, column, start, stop):

@@ -13,14 +13,14 @@ class Test(unittest.TestCase):
         cls.sidecar_path1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                          '../../data/bids_tests/eeg_ds003654s_hed/task-FacePerception_events.json')
         cls.schema = load_schema_version(xml_version="8.0.0")
-        cls.str1 = f"(Task,Experiment-participant,(See,Face),(Discriminate,(Face, Symmetrical))," \
-                   f"(Press,Keyboard-key),Description/Evaluate degree of image symmetry and respond with key" \
-                   f"press evaluation.)"
-        cls.str2 = f"Sensory-event, (Intended-effect, Cue), (Def/Cross-only, Onset), (Def/Fixation-task, Onset)," \
-                   f"(Def/Circle-only, Offset)"
-        cls.str_with_def = f"(Definition/First-show-cond, ((Condition-variable/Repetition-type," \
-                           f" (Item-count/1, Face), Item-interval/0), " \
-                           f"Description/Factor level indicating the first display of this face.))"
+        cls.str1 = "(Task,Experiment-participant,(See,Face),(Discriminate,(Face, Symmetrical))," \
+                   "(Press,Keyboard-key),Description/Evaluate degree of image symmetry and respond with key" \
+                   "press evaluation.)"
+        cls.str2 = "Sensory-event, (Intended-effect, Cue), (Def/Cross-only, Onset), (Def/Fixation-task, Onset)," \
+                   "(Def/Circle-only, Offset)"
+        cls.str_with_def = "(Definition/First-show-cond, ((Condition-variable/Repetition-type," \
+                           " (Item-count/1, Face), Item-interval/0), " \
+                           "Description/Factor level indicating the first display of this face.))"
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../../data/remodel_tests/tag_summary_template.json5")
         with open(json_path) as fp:

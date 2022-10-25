@@ -10,7 +10,7 @@ class TabularSummary:
     def __init__(self, value_cols=None, skip_cols=None, name=''):
         """ Constructor for a BIDS tabular file summary.
 
-        Args:
+        Parameters:
             value_cols (list, None):  List of columns to be treated as value columns.
             skip_cols (list, None):   List of columns to be skipped.
             name (str):               Name associated with the dictionary.
@@ -86,7 +86,7 @@ class TabularSummary:
     def get_number_unique(self, column_names=None):
         """ Return the number of unique values in columns.
 
-        Args:
+        Parameters:
             column_names (list, None):   A list of column names to analyze or all columns if None.
 
         Returns:
@@ -106,7 +106,7 @@ class TabularSummary:
     def update(self, data):
         """ Update the counts based on data.
 
-        Args:
+        Parameters:
             data (DataFrame, str, or list):    DataFrame containing data to update.
 
         """
@@ -120,7 +120,7 @@ class TabularSummary:
     def update_summary(self, col_sum):
         """ Add ColumnSummary values to this object.
 
-        Args:
+        Parameters:
             col_sum (BidsTabularSummary):   A ColumnSummary to be combined.
 
         Notes:
@@ -200,7 +200,7 @@ class TabularSummary:
     def get_columns_info(dataframe, skip_cols=None):
         """ Extract unique value counts for columns.
 
-        Args:
+        Parameters:
             dataframe (DataFrame):    The DataFrame to be analyzed.
             skip_cols(list):          List of names of columns to be skipped in the extraction.
 
@@ -221,7 +221,7 @@ class TabularSummary:
     def make_combined_dicts(file_dictionary, skip_cols=None):
         """ Return combined and individual summaries.
 
-        Args:
+        Parameters:
             file_dictionary (FileDictionary):  Dictionary of file name keys and full path.
             skip_cols (list):  Name of the column.
 

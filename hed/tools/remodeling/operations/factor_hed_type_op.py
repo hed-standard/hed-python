@@ -8,31 +8,32 @@ from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 # TODO: restricted factor values are not implemented yet.
 
-PARAMS = {
-    "operation": "factor_hed_type",
-    "required_parameters": {
-        "type_tag": str,
-        "type_values": list,
-        "overwrite_existing": bool,
-        "factor_encoding": str
-    },
-    "optional_parameters": {}
-}
-
 
 class FactorHedTypeOp(BaseOp):
     """ Create factors based on a specified type of tag such as Condition-variable.
 
         Notes: The required parameters are
-             - type_tag (str)     HED tag used to find the factors (most commonly Condition-variable).
-             - type_values (list) Factor values to include. If empty all values of that type_tag are used.
-             - overwrite_existing (bool)  If true, existing factor columns are overwritten.
-             - factor_encoding (str)  Type of factor encoding. Valid encodings are 'categorical' and 'one-hot'.
+             - type_tag (str):       HED tag used to find the factors (most commonly Condition-variable).
+             - type_values (list):   Factor values to include. If empty all values of that type_tag are used.
+             - overwrite_existing (bool):  If true, existing factor columns are overwritten.
+             - factor_encoding (str):  Type of factor encoding. Valid encodings are 'categorical' and 'one-hot'.
 
-     """
+    """
+
+    PARAMS = {
+        "operation": "factor_hed_type",
+        "required_parameters": {
+            "type_tag": str,
+            "type_values": list,
+            "overwrite_existing": bool,
+            "factor_encoding": str
+        },
+        "optional_parameters": {}
+    }
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.type_tag = parameters["type_tag"]
         self.type_values = parameters["type_values"]
@@ -46,8 +47,8 @@ class FactorHedTypeOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Factor columns based on HED type.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
+        Parameters:
+            dispatcher (Dispatcher) - dispatcher object for context.
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.

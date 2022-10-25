@@ -391,7 +391,7 @@ class HedSchemaWikiParser:
     def _get_tag_level(tag_line):
         """ Get the tag level from a line in a wiki file.
 
-        Args:
+        Parameters:
             tag_line (str): A tag line.
 
         Returns:
@@ -433,7 +433,7 @@ class HedSchemaWikiParser:
     def _get_tag_name(self, tag_line):
         """ Get the tag name from the tag line.
 
-        Args:
+        Parameters:
             tag_line (str): A tag line.
 
         Returns:
@@ -456,7 +456,7 @@ class HedSchemaWikiParser:
     def _get_tag_attributes(tag_line, starting_index):
         """ Get the tag attributes from a line.
 
-        Args:
+        Parameters:
             tag_line (str): A tag line.
             starting_index (int): The first index we can check for the brackets.
 
@@ -491,7 +491,7 @@ class HedSchemaWikiParser:
     def _get_line_section(tag_line, starting_index, start_delim='[', end_delim=']'):
         """ Get the portion enclosed by the given delimiters.
 
-        Args:
+        Parameters:
             tag_line (str): A tag line.
             starting_index (int): The first index we can check for the brackets.
             start_delim (str): The string that starts this block.
@@ -522,7 +522,7 @@ class HedSchemaWikiParser:
     def _add_tag_line(self, parent_tags, tag_line):
         """ Add a tag to the dictionaries.
 
-        Args:
+        Parameters:
             parent_tags (list): A list of parent tags in order.
             tag_line (str): A tag line.
 

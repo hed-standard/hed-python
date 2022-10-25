@@ -101,8 +101,9 @@ class Test(unittest.TestCase):
         parms["ignore_missing"] = False
         op = ReorderColumnsOp(parms)
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as context:
             op.do_op(self.dispatch, df_test, 'sample_data')
+        self.assertEqual(context.exception.args[0], 'MissingReorderedColumns')
 
     def test_valid_keep_others_ignore_missing(self):
         # Test extras, keep, ignore

@@ -1,6 +1,6 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.data_util import get_new_dataframe, get_row_hash, remove_quotes, separate_columns
+from hed.tools.util.data_util import get_new_dataframe, get_row_hash, remove_quotes, separate_values
 
 
 class KeyMap:
@@ -91,7 +91,7 @@ class KeyMap:
 
         df_new = get_new_dataframe(data)
         remove_quotes(df_new)
-        present_keys, missing_keys = separate_columns(df_new.columns.values.tolist(), self.key_cols)
+        present_keys, missing_keys = separate_values(df_new.columns.values.tolist(), self.key_cols)
         if missing_keys:
             raise HedFileError("MissingKeys", f"File must have key columns {str(self.key_cols)}", "")
         df_new[self.target_cols] = 'n/a'
@@ -146,7 +146,7 @@ class KeyMap:
         df = get_new_dataframe(data)
         remove_quotes(df)
         col_list = df.columns.values.tolist()
-        keys_present, keys_missing = separate_columns(col_list, self.key_cols)
+        keys_present, keys_missing = separate_values(col_list, self.key_cols)
         if keys_missing and not allow_missing:
             raise HedFileError("MissingKeyColumn",
                                f"make_template data does not have key columns {str(keys_missing)}", "")
@@ -155,7 +155,7 @@ class KeyMap:
             base_df[keys_missing] = 'n/a'
         if self.target_cols:
             base_df[self.target_cols] = 'n/a'
-            targets_present, targets_missing = separate_columns(col_list, self.target_cols)
+            targets_present, targets_missing = separate_values(col_list, self.target_cols)
             if targets_present:
                 base_df[targets_present] = df[targets_present].values
         return self._update(base_df, track_duplicates=keep_counts)
@@ -163,13 +163,14 @@ class KeyMap:
     def _update(self, base_df, track_duplicates=True):
         """ Update the dictionary of key values based on information in the dataframe.
 
-        Args:
+        Parameters:
             base_df (DataFrame):       DataFrame of consisting of the columns in the KeyMap
             track_duplicates (bool):        If true, keep counts of the indices.
 
         Returns:
             list:         List of key positions that appeared more than once or an empty list of no duplicates or
                           track_duplicates was false.
+
         """
 
         duplicate_indices = []
@@ -188,7 +189,7 @@ class KeyMap:
     def _handle_update(self, row, row_list, next_pos, keep_counts):
         """ Update the dictionary and counts of the number of times this combination of key columns appears.
 
-        Args:
+        Parameters:
             row (DataSeries):  Data the values in a row.
             row_list (list):   A list of rows to be appended to hold the unique rows
             next_pos (int):    Index into the

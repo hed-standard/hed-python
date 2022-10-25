@@ -104,7 +104,7 @@ class HedSchemaSection:
     def get(self, key):
         """ Return the name associated with key.
 
-        Args:
+        Parameters:
             key (str): The name of the key.
 
         """

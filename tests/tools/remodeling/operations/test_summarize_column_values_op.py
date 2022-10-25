@@ -2,7 +2,6 @@ import json
 import os
 import pandas as pd
 import unittest
-from hed.schema import load_schema_version
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_column_values_op import ColumnValueSummary, SummarizeColumnValuesOp
 
@@ -38,7 +37,6 @@ class Test(unittest.TestCase):
     def test_constructor(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        self.assertEqual(sum_op.summary_type, "column_values", "constructor creates summary of right type")
         self.assertIsInstance(sum_op, SummarizeColumnValuesOp, "constructor creates an object of the correct type")
 
     def test_do_ops(self):
@@ -80,17 +78,19 @@ class Test(unittest.TestCase):
         self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
 
     def test_summary_op(self):
-        events =  os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
+        events = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                               '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
         column_summary_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+                                               '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
         with open(column_summary_path, 'r') as fp:
             parms = json.load(fp)
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         dispatch = Dispatcher([], data_root=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(events)
+        old_len = len(df)
         sum_op = parsed_commands[1]
         df = sum_op.do_op(dispatch, df, os.path.basename(events))
+        self.assertEqual(len(df), old_len)
         context_dict = dispatch.context_dict
         for key, item in context_dict.items():
             text_value = item.get_text_summary()

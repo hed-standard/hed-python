@@ -9,8 +9,9 @@ from hed import schema
 class TestParser(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "schema_tests/HED8.0.0t.xml")
+        base_data_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '../data/'))
+        cls.base_data_dir = base_data_dir
+        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
 
     def base_test(self, parse_expr, search_strings):
@@ -33,7 +34,7 @@ class TestParser(unittest.TestCase):
             #    print(f"\t\tFound as group(s) {str([str(r) for r in result])}")
             self.assertEqual(bool(result2), expected_result)
 
-            # Same test with HedStringGroupined
+            # Same test with HedStringGroup in
             hed_string_comb = HedStringGroup([hed_string])
             result3 = expression.search_hed_string(hed_string_comb)
             # print(f"\tSearching string '{str(hed_string)}'")
@@ -61,11 +62,9 @@ class TestParser(unittest.TestCase):
             "A)"
         ]
         for string in test_search_strings:
-            try:
-                parser = TagExpressionParser(string)
-                self.assertFalse(True)
-            except ValueError:
-                continue
+            with self.assertRaises(ValueError) as context:
+                TagExpressionParser(string)
+            self.assertTrue(context.exception.args[0])
 
     def test_finding_tags(self):
         test_strings = {
@@ -193,7 +192,7 @@ class TestParser(unittest.TestCase):
             "(A, B)": False,
             "((A), (B))": False,
             "((A))": False,
-            "((A), ((B)))": True, # TODO: must all result groups have tags?  True because of ((B)) group with no tags.
+            "((A), ((B)))": True,  # TODO: must all result groups have tags?  True because of ((B)) group with no tags.
             "((A, B))": False,
             "((A), (C))": True,
             "((A), (B, C))": False,

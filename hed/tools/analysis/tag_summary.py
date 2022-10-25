@@ -20,6 +20,7 @@ class TagSummary:
         breakout_list (list):   The tag nodes that are to be specially summarized.
         breakout_dict (dict):   The keys are the breakout nodes. The values are dictionaries of the
                                 child nodes and the nodes themselves that appear in the dataset.
+
         task_dict (dict):       The keys are definition names and the values are dictionaries with info.
         cond_dict (dict):       The keys are definition names and the values are dictionaries with info.
 

@@ -83,8 +83,7 @@ class Dispatcher:
             df = pd.read_csv(actual_path, sep='\t', header=0)
         except Exception:
             raise HedFileError("BadDataFile",
-                               f"{str(actual_path)} (orig: {file_path}) does not correspond to "
-                               f"a valid tab-separated value file", "")
+                               f"{str(actual_path)} (orig: {file_path}) does not correspond to a valid tsv file", "")
         df = self.prep_events(df)
         return df
 
@@ -150,7 +149,7 @@ class Dispatcher:
                     raise KeyError("MissingParameters",
                                    f"Operation {str(item)} does not have a parameters key")
                 if item["operation"] not in valid_operations:
-                    raise KeyError("OperationCanNotBeDispatched",
+                    raise KeyError("OperationNotListedAsValid",
                                    f"Operation {item['operation']} must be added to operations_list"
                                    f"before it can be executed.")
                 new_operation = valid_operations[item["operation"]](item["parameters"])
@@ -185,18 +184,3 @@ class Dispatcher:
         if title:
             return title + sep + errors
         return errors
-
-    @staticmethod
-    def save_archive(archive, archive_path):
-        this_path = os.path.realpath(archive_path)
-        os.makedirs(os.path.dirname(this_path), exist_ok=True)
-        archive.seek(0)
-        with open(this_path, "wb") as f:  # use `wb` mode
-            f.write(archive.getvalue())
-
-    @staticmethod
-    def get_save_frame(df, filename):
-        return {'file_name': filename,
-                'file_format': '.tsv',
-                'file_type': 'dataframe',
-                'content': df.to_csv(None, sep='\t', index=False, header=True)}

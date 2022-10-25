@@ -19,11 +19,10 @@ class BaseContext(ABC):
         self.context_filename = context_filename
 
     @abstractmethod
-    def get_summary_details(self, as_json=False, verbose=True):
+    def get_summary_details(self, verbose=True):
         """ Return the summary-specific information.
 
         Parameters:
-            as_json (bool)  If False return a dictionary otherwise return a JSON string.
             verbose (bool)  If True, may provide additional details in the summary.
 
         Notes:

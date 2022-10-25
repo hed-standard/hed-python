@@ -11,7 +11,7 @@ from hed.tools.remodeling.backup_manager import BackupManager
 def get_parser():
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
-    parser.add_argument("model_path", help="Full path of the file with remodeling instructions.")
+    parser.add_argument("remodel_path", help="Full path of the file with remodeling instructions.")
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
                         help="File extensions to allow in locating files.")
@@ -43,10 +43,10 @@ def parse_arguments(arg_list=None):
         args.extensions = None
     args.data_dir = os.path.realpath(args.data_dir)
     args.exclude_dirs = args.exclude_dirs + ['remodel']
-    args.model_path = os.path.realpath(args.model_path)
+    args.model_path = os.path.realpath(args.remodel_path)
     if args.verbose:
-        print(f"Data directory: {args.data_dir}\nJSON remodel path: {args.json_remodel_path}")
-    with open(args.model_path, 'r') as fp:
+        print(f"Data directory: {args.data_dir}\nRemodel path: {args.remodel_path}")
+    with open(args.remodel_path, 'r') as fp:
         operations = json.load(fp)
     parsed_operations, errors = Dispatcher.parse_operations(operations)
     if errors:
@@ -62,7 +62,7 @@ def run_bids_ops(dispatch, args):
         print(f"Successfully parsed BIDS dataset with HED schema {str(bids.get_schema_versions())}")
     events = bids.get_tabular_group(args.file_suffix)
     if args.verbose:
-        print(f"Processing ")
+        print(f"Processing {dispatch.data_root}")
     for events_obj in events.datafile_dict.values():
         if args.task_names and events_obj.get_entity('task') not in args.task_names:
             continue

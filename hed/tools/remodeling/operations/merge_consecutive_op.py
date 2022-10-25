@@ -1,23 +1,24 @@
 import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-PARAMS = {
-    "operation": "merge_consecutive",
-    "required_parameters": {
-        "column_name": str,
-        "event_code": [str, int, float],
-        "match_columns": list,
-        "set_durations": bool,
-        "ignore_missing": bool
-    },
-    "optional_parameters": {}
-}
-
 
 class MergeConsecutiveOp(BaseOp):
 
+    PARAMS = {
+        "operation": "merge_consecutive",
+        "required_parameters": {
+            "column_name": str,
+            "event_code": [str, int, float],
+            "match_columns": list,
+            "set_durations": bool,
+            "ignore_missing": bool
+        },
+        "optional_parameters": {}
+    }
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
         self.column_name = parameters["column_name"]
         self.event_code = parameters["event_code"]
@@ -50,10 +51,10 @@ class MergeConsecutiveOp(BaseOp):
                              f"Data must have an onset column in order to set_durations")
         if self.set_durations and "duration" not in df.columns:
             raise ValueError("MissingDurationColumn",
-                             f"Data must have a duration column in order to set_durations")
+                             "Data must have a duration column in order to set_durations")
         missing = set(self.match_columns).difference(set(df.columns))
         if self.match_columns and not self.ignore_missing and missing:
-            raise ValueError("ColumnMissing", f"{str(missing)} columns are unmatched and not ignored")
+            raise ValueError("MissingMatchColumns", f"{str(missing)} columns are unmatched and not ignored")
         match_columns = list(set(self.match_columns).intersection(set(df.columns)))
 
         df_new = df.copy()
@@ -73,9 +74,9 @@ class MergeConsecutiveOp(BaseOp):
     def _get_remove_groups(match_df, code_mask):
         """ Return a list of same length as match_df with group numbers of consecutive items.
 
-        Args:
+        Parameters:
             match_df (DataFrame): DataFrame containing columns to be matched must contain at least the base column.
-            code_mask (list):  List of the same length as match_df with the names of the
+            code_mask (DataSeries):  Same length as match_df with the names.
 
         Returns:
             list with group numbers set (starting at 1).
@@ -109,16 +110,3 @@ class MergeConsecutiveOp(BaseOp):
             anchor = df_group.index[0] - 1
             max_anchor = df_new.loc[anchor, ["onset", "duration"]].sum(skipna=True).max()
             df_new.loc[anchor, "duration"] = max(max_group, max_anchor) - df_new.loc[anchor, "onset"]
-
-        # in_group = False
-        # start_group = -1
-        # end_group = -1
-        # for index in range(len(remove_groups)):
-        #     if in_group and remove_groups[index] > 0:
-        #         end_group = index
-        #     elif in_group and remove_groups[index] == 0:
-        #         in_group = False
-        #         df_new.loc[start_group, "duration"] = df_new.loc[end_group, "onset"] - \
-        #                                               df_new.loc[start_group, "onset"] + \
-        #                                               df_new.loc[end_group, "duration"]
-        # return

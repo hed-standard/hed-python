@@ -28,7 +28,7 @@ class BaseOp:
             if isinstance(param_type, list):
                 self._check_list_type(param_value, param_type)
             elif not isinstance(param_value, param_type):
-                raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
+                raise TypeError("BadType", f"{param_value} has type {type(param_value)} not {param_type}")
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Base class method to be overridden.
@@ -47,4 +47,4 @@ class BaseOp:
         for this_type in param_type:
             if isinstance(param_value, this_type):
                 return
-        raise TypeError("BadType" f"{param_value} has type {type(param_value)} which is not in {str(param_type)}")
+        raise TypeError("BadType", f"{param_value} has type {type(param_value)} which is not in {str(param_type)}")

@@ -46,7 +46,7 @@ class HedSchema:
     def filename(self, value):
         """ Set the filename, if one has not already been set.
 
-        Args:
+        Parameters:
             value (str): The source filename for this file
         """
         if self._filename is None:
@@ -87,7 +87,7 @@ class HedSchema:
     def schema_for_prefix(self, prefix):
         """ Return HedSchema object for this prefix.
 
-        Args:
+        Parameters:
             prefix (str): The schema library name prefix.
 
         Returns:
@@ -165,7 +165,7 @@ class HedSchema:
     def set_schema_prefix(self, schema_prefix):
         """ Set library prefix associated for this schema.
 
-        Args:
+        Parameters:
             schema_prefix (str): Should be empty, or end with a colon.(Colon will be automated added if missing).
 
         """
@@ -177,7 +177,7 @@ class HedSchema:
     def check_compliance(self, check_for_warnings=True, name=None, error_handler=None):
         """ Check for HED3 compliance of this schema.
 
-        Args:
+        Parameters:
             check_for_warnings (bool): If True, also checks for formatting issues
             name (str): If present, use this as the filename for context
             error_handler (ErrorHandler or None): Used to report errors.
@@ -279,7 +279,7 @@ class HedSchema:
     def __eq__(self, other):
         """ Return True if these schema match exactly.
 
-        Args:
+        Parameters:
             other (HedSchema): The schema to be compared.
 
         Returns:
@@ -326,7 +326,7 @@ class HedSchema:
     def get_unit_class_units(self, unit_class_type):
         """ Get the list of unit class units this type will accept.
 
-        Args:
+        Parameters:
             unit_class_type (str): The unit class type to check for.  e.g. "time".
 
         Returns:
@@ -344,9 +344,7 @@ class HedSchema:
     def get_tags_with_attribute(self, key, section_key=HedSectionKey.AllTags):
         """ Return tag entries with the given attribute.
 
-
-
-        Args:
+        Parameters:
             key (str): A tag attribute.  Eg HedKey.ExtensionAllowed
             section_key (str): The HedSectionKey for the section to retrieve from.
 
@@ -363,7 +361,7 @@ class HedSchema:
     def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, schema_prefix=""):
         """ Return the schema entry for this tag, if one exists.
 
-        Args:
+        Parameters:
             name (str): Any form of basic tag(or other section entry) to look up.
                 This will not handle extensions or similar.
                 If this is a tag, it can have a schema prefix, but it's not required
@@ -385,7 +383,7 @@ class HedSchema:
     def _get_tag_entry(self, name, key_class=HedSectionKey.AllTags):
         """ Return the schema entry for this tag, if one exists.
 
-        Args:
+        Parameters:
             name (str): Any form of basic tag(or other section entry) to look up.
                 This will not handle extensions or similar.
             key_class (HedSectionKey or str):  The type of entry to return.
@@ -401,7 +399,7 @@ class HedSchema:
 
             Note: Will not identify tags if schema_prefix is set incorrectly
 
-        Args:
+        Parameters:
             tag (str, HedTag):     Any form of tag to look up.  Can have an extension, value, etc.
             schema_prefix (str):  The schema prefix of the tag, if any.
 
@@ -423,7 +421,7 @@ class HedSchema:
     def _find_tag_entry(self, tag, schema_prefix=""):
         """ Find the schema entry for a given source tag.
 
-        Args:
+        Parameters:
             tag (str, HedTag):     Any form of tag to look up.  Can have an extension, value, etc.
             schema_prefix (str):  The schema prefix of the tag, if any.
 
@@ -520,7 +518,7 @@ class HedSchema:
     def _initialize_attributes(self, key_class):
         """ Set the valid attributes for a section.
 
-        Args:
+        Parameters:
             key_class (str): The section key for the section to update.
 
         """
@@ -546,7 +544,7 @@ class HedSchema:
     def get_tag_description(self, tag_name, key_class=HedSectionKey.AllTags):
         """ Return the description associated with the tag.
 
-        Args:
+        Parameters:
             tag_name (str): A hed tag name(or unit/unit modifier etc) with proper capitalization.
             key_class (str): A string indicating type of description (e.g. All tags, Units, Unit modifier).
                 The default is HedSectionKey.AllTags.
@@ -614,7 +612,7 @@ class HedSchema:
     def get_all_tag_attributes(self, tag_name, key_class=HedSectionKey.AllTags):
         """ Gather all attributes for a given tag name.
 
-        Args:
+        Parameters:
             tag_name (str): The name of the tag to check.
             key_class (str): The type of attributes requested.  e.g. Tag, Units, Unit modifiers, or attributes.
 
@@ -652,7 +650,7 @@ class HedSchema:
     def get_modifiers_for_unit(self, unit):
         """ Return the valid modifiers for the given unit
 
-        Args:
+        Parameters:
             unit (str): A known unit.
 
         Returns:
@@ -679,7 +677,7 @@ class HedSchema:
     def _get_attributes_for_section(self, key_class):
         """ Return the valid attributes for this section.
 
-        Args:
+        Parameters:
             key_class (str): The HedKey for this section.
 
         Returns:

@@ -1,9 +1,6 @@
 import unittest
-import os
-
 from hed.errors import HedFileError
-from hed.models import HedString, HedTag
-from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup, load_schema_version, HedSchema
+from hed.schema import load_schema, HedSchemaGroup, load_schema_version, HedSchema
 
 
 class TestHedSchema(unittest.TestCase):
@@ -103,7 +100,6 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(len(schemas3._schemas), 2, "load_schema_version group dictionary is right length")
         s = schemas3._schemas[""]
         self.assertEqual(s.version, "8.0.0", "load_schema_version has the right version with prefix")
-        x = schemas3.get_formatted_version(as_string=True)
         self.assertEqual(schemas3.get_formatted_version(as_string=True), '["8.0.0", "sc:score_0.0.1"]',
                          "load_schema_version gives correct version_string with single library with prefix")
         formatted_list = schemas3.get_formatted_version(as_string=False)
@@ -118,8 +114,9 @@ class TestHedSchema(unittest.TestCase):
                          "load_schema_version gives correct version_string with multiple prefixes")
         s = schemas4._schemas["ts:"]
         self.assertEqual(s.version, "8.0.0", "load_schema_version has the right version with prefix")
-        with self.assertRaises(KeyError):
-            s = schemas4._schemas[""]
+        with self.assertRaises(KeyError) as context:
+            schemas4._schemas[""]
+        self.assertEqual(context.exception.args[0], '')
 
     def test_load_schema_version_empty(self):
         schemas = load_schema_version("")
@@ -140,26 +137,34 @@ class TestHedSchema(unittest.TestCase):
         self.assertFalse(schemas.library, "load_schema_version for empty string is not a library")
 
     def test_schema_load_schema_version_invalid(self):
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context1:
             load_schema_version("x.0.1")
+        self.assertEqual(context1.exception.args[0], 'fileNotFound')
 
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context2:
             load_schema_version("base:score_x.0.1")
+        self.assertEqual(context2.exception.args[0], 'fileNotFound')
 
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context3:
             load_schema_version(["", None])
+        self.assertEqual(context3.exception.args[0], 'schemaDuplicatePrefix')
 
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context4:
             load_schema_version(["8.0.0", "score_0.0.1"])
+        self.assertEqual(context4.exception.args[0], 'schemaDuplicatePrefix')
 
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context5:
             load_schema_version(["sc:8.0.0", "sc:score_0.0.1"])
+        self.assertEqual(context5.exception.args[0], 'schemaDuplicatePrefix')
 
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context6:
             load_schema_version(["", "score_0.0.1"])
+        self.assertEqual(context6.exception.args[0], 'schemaDuplicatePrefix')
 
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context7:
             load_schema_version(["", "score_"])
+        self.assertEqual(context7.exception.args[0], 'schemaDuplicatePrefix')
 
-        with self.assertRaises(HedFileError):
+        with self.assertRaises(HedFileError) as context8:
             load_schema_version(["", "notreallibrary"])
+        self.assertEqual(context8.exception.args[0], 'fileNotFound')

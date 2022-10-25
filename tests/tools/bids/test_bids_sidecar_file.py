@@ -36,14 +36,9 @@ class Test(unittest.TestCase):
         self.assertFalse(sidecar1.has_hed)
 
     def test_bad_constructor(self):
-        try:
-            json1 = BidsSidecarFile(self.description_path)
-        except HedFileError:
-            pass
-        except Exception:
-            self.fail("BidsSidecarFile threw the wrong exception when filename invalid")
-        else:
-            self.fail("BidsSidecarFile should have thrown a HedFileError when duplicate key")
+        with self.assertRaises(HedFileError) as context:
+            BidsSidecarFile(self.description_path)
+        self.assertEqual(context.exception.args[0], 'BadKeyValue')
 
     def test_bids_sidecar_file_str(self):
         sidecar1 = BidsSidecarFile(self.sidecar_path)

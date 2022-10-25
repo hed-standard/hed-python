@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
                                                     '../data/schema_tests/HED8.0.0.xml'))
         sidecar1_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         cls.events_path = os.path.realpath(
-            os.path.join(bids_root_path,'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
+            os.path.join(bids_root_path, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar2_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                       '../data/remodel_tests/task-FacePerceptionSmall_events.json'))
         cls.hed_schema = schema.load_schema(schema_path)
@@ -99,7 +99,6 @@ class Test(unittest.TestCase):
 
     def test_validate_file_warnings(self):
         validator = HedValidator(hed_schema=self.hed_schema)
-        issue_str = ''
         issues1 = self.sidecar1.validate_entries(validator, check_for_warnings=True)
         input_file1 = TabularInput(self.events_path, sidecar=self.sidecar1)
         issues1a = input_file1.validate_file(validator, check_for_warnings=True)

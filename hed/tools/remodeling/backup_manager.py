@@ -20,37 +20,12 @@ class BackupManager:
         os.makedirs(self.backups_root, exist_ok=True)
         self.backups_dict = self._get_backups()
 
-    def check_backup_files(self, backup_name, file_paths=None):
-        """ Return the files in file_paths that are not backed up and vice-versa.
-
-        Parameters:
-            backup_name (str): Name of the backup.
-            file_paths (list):  List of full paths of files to be checked against the backup.
-
-        Returns:
-            list:  Files in file_paths that are not in the backup.
-            list:  Files in backup not in file_paths
-
-        Notes:
-            If file_path is None, this checks against consistency in the backup dictionary.
-
-        """
-
-        backup_paths = self.get_backup_files(backup_name)
-        if not file_paths:
-            return [], backup_paths
-        backup_path_set = set(backup_paths)
-        file_path_set = set(file_paths)
-        files_not_in_backup = list(file_path_set.difference(backup_path_set))
-        backups_not_in_files = list(backup_path_set.difference(file_path_set))
-        return files_not_in_backup, backups_not_in_files
-
-    def create_backup(self, backup_name, file_list, verbose=True):
+    def create_backup(self, file_list, backup_name=None, verbose=True):
         """ Create a new backup from file_list.
 
         Parameters:
-            backup_name (str or None):  Name of the backup.
             file_list (list):   Full paths of the files to be in the backup.
+            backup_name (str or None):  Name of the backup. If None, uses the default
             verbose (bool):     If True, print out the files that are being backed up.
 
         Returns:
@@ -62,12 +37,14 @@ class BackupManager:
         """
         if not backup_name:
             backup_name = self.DEFAULT_BACKUP_NAME
-        if self.backups_dict:
+        if self.backups_dict and backup_name in self.backups_dict:
             return False
         backup = {}
         time_stamp = f"{str(datetime.now())}"
         if verbose:
             print(f"Creating backup {backup_name}")
+        backup_dir_path = os.path.realpath(os.path.join(self.backups_root, backup_name, BackupManager.BACKUP_ROOT))
+        os.makedirs(backup_dir_path, exist_ok=True)
         for file in file_list:
             backup_file = self.get_backup_path(backup_name, file)
             os.makedirs(os.path.dirname(backup_file), exist_ok=True)
@@ -76,16 +53,16 @@ class BackupManager:
             shutil.copy2(file, backup_file)
             backup[self.get_file_key(file)] = time_stamp
         self.backups_dict[backup_name] = backup
-        backup_dir_path = os.path.join(self.backups_root, backup_name)
-        backup_dict_path = os.path.join(self.backups_root, backup_name, backup_dir_path, self.BACKUP_DICTIONARY)
-        with open(os.path.realpath(backup_dict_path), 'w') as fp:
+        backup_dict_path = os.path.realpath(os.path.join(self.backups_root, backup_name,
+                                                         self.BACKUP_DICTIONARY))
+        with open(backup_dict_path, 'w') as fp:
             json.dump(backup, fp, indent=4)
         return True
 
     def get_backup(self, backup_name):
         """ Return the dictionary corresponding to backup_name.
 
-        Args:
+        Parameters:
             backup_name (str): Name of the backup to be retrieved.
 
         Returns:
@@ -99,7 +76,7 @@ class BackupManager:
     def get_backup_files(self, backup_name, original_paths=False):
         """ Returns a list of full paths of files contained in the backup.
 
-        Args:
+        Parameters:
             backup_name (str):       Name of the backup.
             original_paths (bool):   If true return the original paths.
 
@@ -122,8 +99,8 @@ class BackupManager:
     def get_backup_path(self, backup_name, file_name):
         """ Retrieve the file from the backup or throw an error.
 
-        Args:
-            backup_name (str): Name of the backup
+        Parameters:
+            backup_name (str): Name of the backup.
             file_name (str): Full path of the file to be retrieved.
 
         Returns:
@@ -140,8 +117,8 @@ class BackupManager:
     def restore_backup(self, backup_name=DEFAULT_BACKUP_NAME, verbose=True):
         """ Restore the files from backup_name to the main directory.
 
-        Args:
-            backup_name (str):  Name of the backup to restore
+        Parameters:
+            backup_name (str):  Name of the backup to restore.
             verbose (bool):  If true, print out the file names being restored.
 
         """
@@ -167,7 +144,7 @@ class BackupManager:
             if not os.path.isdir(backup_root):
                 raise HedFileError('BadBackupPath', f"{backup_root} is not a backup directory.", "")
             if len(os.listdir(backup_root)) != 2:
-                raise HedFileError("BadBackFormat",
+                raise HedFileError("BadBackupFormat",
                                    f"Backup {backup_root} must only contain backup_root and backup_lock.json file.", "")
             backup_dict, files_not_in_backup, backups_not_in_directory = self._check_backup_consistency(backup)
             if files_not_in_backup:
@@ -181,7 +158,7 @@ class BackupManager:
     def _check_backup_consistency(self, backup_name):
         """ Return the consistency of a backup.
 
-        Args:
+        Parameters:
             backup_name (str): Name of the backup.
 
         Returns:
@@ -196,12 +173,14 @@ class BackupManager:
 
         backup_dict_path = os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_DICTIONARY))
         if not os.path.exists(backup_dict_path):
-            raise HedFileError("BadBackupDictionary",
-                               f"Backup dictionary for {backup_name} does not exist so backup invalid", "")
+            raise HedFileError("BadBackupDictionaryPath",
+                               f"Backup dictionary path {backup_dict_path} for backup "
+                               f"{backup_name} does not exist so backup invalid", "")
         backup_root_path = os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_ROOT))
         if not os.path.isdir(backup_root_path):
-            raise HedFileError("BadBackupDictionary",
-                               f"Backup dictionary for {backup_name} does not exist so backup invalid", "")
+            raise HedFileError("BadBackupRootPath",
+                               f"Backup root path {backup_root_path} for {backup_name} "
+                               f"does not exist so backup invalid", "")
         with open(backup_dict_path, 'r') as fp:
             backup_dict = json.load(fp)
         backup_paths = set([os.path.realpath(os.path.join(backup_root_path, backup_key))

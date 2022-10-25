@@ -3,20 +3,6 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
 
 
-PARAMS = {
-    "operation": "summarize_column_values",
-    "required_parameters": {
-        "summary_name": str,
-        "summary_filename": str,
-        "skip_columns": list,
-        "value_columns": list,
-        "task_names": list,
-    },
-    "optional_parameters": {
-    }
-}
-
-
 class SummarizeColumnValuesOp(BaseOp):
     """ Summarize the values that are in the columns.
 
@@ -25,22 +11,34 @@ class SummarizeColumnValuesOp(BaseOp):
         - summary_filename (str)   Base filename of the summary.
         - skip_columns (list)  Names of columns to skip in the summary.
         - value_columns (list) Names of columns to treat as value columns rather than categorical columns
-        - task_names (list)    If non-empty, produce summaries for each task listed separately.
 
     The purpose of this op is to produce a summary of the values in a tabular file.
 
-
     """
 
+    PARAMS = {
+        "operation": "summarize_column_values",
+        "required_parameters": {
+            "summary_name": str,
+            "summary_filename": str,
+            "skip_columns": list,
+            "value_columns": list,
+            "task_names": list,
+        },
+        "optional_parameters": {
+        }
+    }
+
+    SUMMARY_TYPE = 'column_values'
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
-        self.summary_type = 'column_values'
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.skip_columns = parameters['skip_columns']
         self.value_columns = parameters['value_columns']
-        self.task_names = parameters['task_names']
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns corresponding to values in a specified column.
@@ -70,10 +68,9 @@ class SummarizeColumnValuesOp(BaseOp):
 class ColumnValueSummary(BaseContext):
 
     def __init__(self, sum_op):
-        super().__init__(sum_op.summary_type, sum_op.summary_name, sum_op.summary_filename)
+        super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
         self.summary = TabularSummary(value_cols=sum_op.value_columns, skip_cols=sum_op.skip_columns,
                                       name=sum_op.summary_name)
-        self.task_names = sum_op.task_names
 
     def update_context(self, new_context):
         self.summary.update(new_context['df'])

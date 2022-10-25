@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
 
     def test_get_vars(self):
         def_man = HedDefinitionManager(self.definitions1, self.schema)
-        item1 = HedString(f"Sensory-event,((Red,Blue)),", self.schema)
+        item1 = HedString("Sensory-event,((Red,Blue)),", self.schema)
         vars1 = def_man.get_vars(item1)
         self.assertFalse(vars1, "get_vars should return None if no condition type_variables")
         item2 = HedString(f"Sensory-event,(Def/Cond1,(Red,Blue,Condition-variable/Trouble))", self.schema)

@@ -18,7 +18,7 @@ def main(arg_list=None):
     args = parser.parse_args(arg_list)
     backup_man = BackupManager(args.data_dir)
     if not backup_man.get_backup(args.backup_name):
-        raise HedFileError("BackupExists", f"{args.backup_name}", "")
+        raise HedFileError("BackupDoesNotExist", f"{args.backup_name}", "")
     backup_man.restore_backup(args.backup_name, verbose=args.verbose)
 
 

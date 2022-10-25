@@ -1,12 +1,10 @@
 import os
-from hed.errors.error_reporter import ErrorContext, ErrorHandler, get_printable_issue_string
-from hed.schema.hed_schema_io import load_schema_version
+from hed.errors.error_reporter import ErrorContext, ErrorHandler
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.util.io_util import get_dir_dictionary, get_file_list, get_path_components
-from hed.validator.hed_validator import HedValidator
 
 
 class BidsFileGroup:
@@ -94,7 +92,7 @@ class BidsFileGroup:
     def summarize(self, value_cols=None, skip_cols=None):
         """ Return a BidsTabularSummary of group files.
 
-        Args:
+        Parameters:
             value_cols (list):  Column names designated as value columns.
             skip_cols (list):   Column names designated as columns to skip.
 
@@ -115,7 +113,7 @@ class BidsFileGroup:
     def validate_sidecars(self, hed_ops, check_for_warnings=True, error_handler=None):
         """ Validate merged sidecars.
 
-        Args:
+        Parameters:
             hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
             check_for_warnings (bool):  If True, include warnings in the check.
             error_handler (ErrorHandler): The common error handler for the dataset.
@@ -140,7 +138,7 @@ class BidsFileGroup:
     def validate_datafiles(self, hed_ops, check_for_warnings=True, keep_contents=False, error_handler=None):
         """ Validate the datafiles and return an error list.
 
-        Args:
+        Parameters:
             hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
             check_for_warnings (bool):  If True, include warnings in the check.
             keep_contents (bool):       If True, the underlying data files are read and their contents retained.

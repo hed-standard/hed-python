@@ -1,5 +1,4 @@
 import os
-import io
 import json
 import shutil
 import unittest
@@ -18,48 +17,32 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         data_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                   '../../data/remodel_tests'))
-        sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
-                       [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
-                       [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
-                       [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
-                       [17.1021, 0.5083, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
-                       [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male']]
-        sample_columns = ['onset', 'duration', 'trial_type', 'stop_signal_delay', 'response_time',
-                          'response_accuracy', 'response_hand', 'sex']
-        file_path = os.path.realpath(os.path.join(data_path, "sample_data.tsv"))
-        df = pd.DataFrame(sample_data, columns=sample_columns)
-        df.to_csv(file_path, sep='\t', index=False)
+        cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
+                           [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
+                           [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
+                           [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
+                           [17.1021, 0.5083, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
+                           [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male']]
+        cls.sample_columns = ['onset', 'duration', 'trial_type', 'stop_signal_delay', 'response_time',
+                              'response_accuracy', 'response_hand', 'sex']
         cls.data_path = data_path
-        cls.file_path = file_path
-        cls.sample_data = sample_data
-        cls.sample_columns = sample_columns
-        cls.extract_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodel_tests')
+        cls.file_path = os.path.realpath(os.path.join(data_path, 'aomic_sub-0013_excerpt_events.tsv'))
         cls.test_zip_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/remodel_tests/test_root_back1.zip')
-        test_root_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                       '../../data/remodel_tests/test_root_back1')
-        cls.test_root_back1 = test_root_back1
+        cls.test_root_back1 = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                           '../../data/remodel_tests/test_root_back1')
         cls.summarize_model = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                            '../../data/remodel_tests/test_root1_summarize_column_value_rmdl.json')
-        cls.archive_zip = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                        '../../data/remodel_tests/test_archive/test_archive_file.zip'))
+        cls.summarize_excerpt = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                             '../../data/remodel_tests/aomic_sub-0013_before_after_reorder_rmdl.json')
 
     def setUp(self):
         with zipfile.ZipFile(self.test_zip_back1, 'r') as zip_ref:
-            zip_ref.extractall(self.extract_path)
+            zip_ref.extractall(self.data_path)
 
     def tearDown(self):
         if os.path.exists(self.test_root_back1):
             shutil.rmtree(self.test_root_back1)
-        if os.path.exists(self.archive_zip):
-            shutil.rmtree(os.path.dirname(self.archive_zip))
-
-    @classmethod
-    def tearDownClass(cls):
-        try:
-            os.remove(cls.file_path)
-        except OSError:
-            pass
 
     def test_dispatcher_constructor(self):
         model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
@@ -85,53 +68,15 @@ class Test(unittest.TestCase):
         self.assertEqual(errors[0]['error_type'], KeyError,
                          "parse_operation error has the correct type for missing operation")
 
-    # def test_archive_context(self):
-    #     with open(self.summarize_model) as fp:
-    #         model1 = json.load(fp)
-    #     dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
-    #     file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
-    #                               exclude_dirs=['derivatives'])
-    #     for file in file_list:
-    #         dispatch1.run_operations(file)
-    #
-    #     archive_io = dispatch1.archive_context()
-    #     self.assertIsInstance(archive_io, io.BytesIO)
-    #     self.assertFalse(os.path.exists(self.archive_zip))
-    #     os.makedirs(os.path.dirname(self.archive_zip), exist_ok=True)
-    #     with open(self.archive_zip, "wb") as f:  # use `wb` mode
-    #         f.write(archive_io.getvalue())
-    #     self.assertTrue(os.path.exists(self.archive_zip))
-    #     the_zip = zipfile.ZipFile(self.archive_zip)
-    #     self.assertFalse(the_zip.testzip())
-
-    # def test_archive_data_file(self):
-    #     file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
-    #                               exclude_dirs=['derivatives'])
-    #     archive_one = io.BytesIO()
-    #     for file in file_list:
-    #         df = pd.read_csv(file, sep='\t', header=0)
-    #         self.assertIsInstance(df, pd.DataFrame)
-    #         archive_one = Dispatcher.archive_data_file(df, file, archive=archive_one)
-    #     self.assertFalse(os.path.exists(self.archive_zip))
-    #     Dispatcher.save_archive(archive_one, self.archive_zip)
-    #     self.assertTrue(os.path.exists(self.archive_zip))
-    #     the_zip = zipfile.ZipFile(self.archive_zip)
-    #     self.assertFalse(the_zip.testzip())
-
-    # def test_archive_data_file_with_context(self):
-    #     with open(self.summarize_model) as fp:
-    #         model1 = json.load(fp)
-    #     dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
-    #     file_list = get_file_list(self.test_root_back1, name_suffix='events', extensions=['.tsv'],
-    #                               exclude_dirs=['derivatives'])
-    #     df = dispatch1.run_operations(file_list[0])
-    #     archive_one = io.BytesIO()
-    #     archive_one = Dispatcher.archive_data_file(df, file_list[0], archive=archive_one)
-    #     archive_one = dispatch1.archive_context(archive=archive_one)
-    #     Dispatcher.save_archive(archive_one, self.archive_zip)
-    #     self.assertTrue(os.path.exists(self.archive_zip))
-    #     the_zip = zipfile.ZipFile(self.archive_zip)
-    #     self.assertFalse(the_zip.testzip())
+    def test_get_data_file(self):
+        model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
+        with open(model_path1) as fp:
+            model1 = json.load(fp)
+        sidecar_file = os.path.realpath(os.path.join(self.data_path, 'task-FacePerception_events.json'))
+        dispatch = Dispatcher(model1)
+        with self.assertRaises(HedFileError) as context:
+            dispatch.get_data_file(sidecar_file)
+        self.assertEqual(context.exception.error_type, 'BadDataFile')
 
     def test_get_context_save_dir(self):
         model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
@@ -144,8 +89,9 @@ class Test(unittest.TestCase):
         dispatch2 = Dispatcher(model1)
         with self.assertRaises(HedFileError) as context:
             dispatch2.get_context_save_dir()
+        self.assertEqual(context.exception.error_type, 'NoDataRoot')
 
-    def test_parse_operations_no_parameters(self):
+    def test_parse_operations_errors(self):
         test = [{"operation": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},
                 {"operation": "remove_rows"}]
         operations, errors = Dispatcher.parse_operations(test)
@@ -156,7 +102,6 @@ class Test(unittest.TestCase):
         self.assertEqual(errors[0]['error_type'], KeyError,
                          "parse_operation error has the correct type for missing parameters")
 
-    def test_parse_operations_missing_required(self):
         test = [{"operation": "remove_rows",
                  "parameters": {"column_name": "trial_type", "remove_values": ["succesful_stop", "unsuccesful_stop"]}},
                 {"operation": "remove_rows", "parameters": {"column_name": "response_time"}}]
@@ -167,8 +112,24 @@ class Test(unittest.TestCase):
         self.assertEqual(errors[0]['index'], 1, "parse_operation error has the correct index for missing parameters")
         self.assertEqual(errors[0]['error_type'], KeyError,
                          "parse_operation error has the correct type for missing required")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as context:
             Dispatcher(test)
+        self.assertEqual(context.exception.args[0], 'InvalidOperationList')
+
+        test2 = [{"operation": "blimey",
+                 "parameters": {"column_name": "trial_type", "remove_values": ["succesful_stop", "unsuccesful_stop"]}}]
+        operations, errors = Dispatcher.parse_operations(test2)
+        self.assertFalse(operations, "parse_operations returns empty if missing required")
+        self.assertEqual(len(errors), 1,
+                         "parse_operation returns a list of one error if bad operation")
+        self.assertEqual(errors[0]['index'], 0, "parse_operation error has the correct index for bad operation")
+        self.assertEqual(errors[0]['error_type'], KeyError,
+                         "parse_operation error has the correct type for bad operation")
+        self.assertEqual(errors[0]['error_code'], 'OperationNotListedAsValid''',
+                         "parse_operation error has has correct code for bad operation")
+        with self.assertRaises(ValueError) as context:
+            Dispatcher(test2)
+        self.assertEqual(context.exception.args[0], 'InvalidOperationList')
 
     def test_parse_operation_list(self):
         test = [{"operation": "remove_rows",
@@ -238,7 +199,20 @@ class Test(unittest.TestCase):
         dispatch1.save_context()
         self.assertTrue(os.path.exists(summary_path))
         file_list1 = os.listdir(summary_path)
-        self.assertEqual(len(file_list1), 4, "run_remodel creates correct number of summary files when run.")
+        self.assertEqual(len(file_list1), 4, "save_context creates correct number of summary files when run.")
+        dispatch1.save_context(save_formats=[])
+        file_list2 = os.listdir(summary_path)
+        self.assertEqual(len(file_list2), 4, "save_context must have a format to save")
+
+    def test_get_context_summaries(self):
+        with open(self.summarize_excerpt) as fp:
+            model1 = json.load(fp)
+        dispatch = Dispatcher(model1)
+        df_new = dispatch.run_operations(self.file_path)
+        self.assertIsInstance(df_new, pd.DataFrame)
+        summaries = dispatch.get_context_summaries(file_formats=['.txt', '.json', '.tsv'])
+        self.assertIsInstance(summaries, list)
+        self.assertEqual(len(summaries), 4)
 
 
 if __name__ == '__main__':

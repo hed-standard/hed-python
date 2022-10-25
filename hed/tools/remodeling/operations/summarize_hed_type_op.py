@@ -6,18 +6,6 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
 
 
-PARAMS = {
-    "operation": "summarize_hed_type",
-    "required_parameters": {
-        "summary_name": str,
-        "summary_filename": str,
-        "type_tag": str,
-    },
-    "optional_parameters": {
-    }
-}
-
-
 class SummarizeHedTypeOp(BaseOp):
     """ Summarize the occurrences of a type tag in the dataset.
 
@@ -29,13 +17,25 @@ class SummarizeHedTypeOp(BaseOp):
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
     is often used with 'condition-variable' to produce a summary of the experimental design.
 
-
     """
 
+    PARAMS = {
+        "operation": "summarize_hed_type",
+        "required_parameters": {
+            "summary_name": str,
+            "summary_filename": str,
+            "type_tag": str,
+        },
+        "optional_parameters": {
+        }
+    }
+
+    SUMMARY_TYPE = 'hed_type'
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["operation"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
+                         self.PARAMS["optional_parameters"])
         self.check_parameters(parameters)
-        self.summary_type = 'summarize_hed_type'
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.type_tag = parameters['type_tag'].lower()
@@ -75,7 +75,7 @@ class SummarizeHedTypeOp(BaseOp):
 class HedTypeSummary(BaseContext):
 
     def __init__(self, sum_op):
-        super().__init__(sum_op.summary_type, sum_op.summary_name, sum_op.summary_filename)
+        super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
         self.variable_type = sum_op.type_tag
         self.summary = HedVariableSummary(variable_type=sum_op.type_tag)
 

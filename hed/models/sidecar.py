@@ -184,7 +184,7 @@ class Sidecar(SidecarBase):
     def _detect_column_type(dict_for_entry):
         """ Determine the ColumnType of a given json entry.
 
-        Args:
+        Parameters:
             dict_for_entry (dict): The loaded json entry a specific column.
                 Generally has a "HED" entry among other optional ones.
 
@@ -214,7 +214,7 @@ class Sidecar(SidecarBase):
     def _validate_column_structure(self, column_name, dict_for_entry, error_handler):
         """ Checks primarily for type errors such as expecting a string and getting a list in a json sidecar.
 
-        Args:
+        Parameters:
             error_handler (ErrorHandler)  Sets the context for the error reporting. Cannot be None.
 
         Returns:

@@ -95,10 +95,10 @@ class Test(unittest.TestCase):
         parms["remove_names"].append("face")
         parms["ignore_missing"] = False
         op = RemoveColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        with self.assertRaises(KeyError):
+        with self.assertRaises(KeyError) as context:
             op.do_op(self.dispatch, df_test, 'sample_data')
+        self.assertEqual(context.exception.args[0], "['face'] not found in axis")
 
 
 if __name__ == '__main__':

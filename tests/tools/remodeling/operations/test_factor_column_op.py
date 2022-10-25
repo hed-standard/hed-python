@@ -1,4 +1,3 @@
-import json
 import pandas as pd
 import numpy as np
 import unittest
@@ -27,29 +26,44 @@ class Test(unittest.TestCase):
                         [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male', 0, 0]]
         cls.sample_columns = ['onset', 'duration', 'trial_type', 'stop_signal_delay', 'response_time',
                               'response_accuracy', 'response_hand', 'sex']
-        base_parameters = {
+        cls.default_factor_columns = ["trial_type.succesful_stop", "trial_type.unsuccesful_stop"]
+
+    def setUp(self):
+        self.base_parameters = {
             "column_name": "trial_type",
             "factor_values": ["succesful_stop", "unsuccesful_stop"],
             "factor_names": ["stopped", "stop_failed"]
         }
-        cls.default_factor_columns = ["trial_type.succesful_stop", "trial_type.unsuccesful_stop"]
-        cls.json_parms = json.dumps(base_parameters)
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def test_bad_constructor(self):
+        self.base_parameters["factor_names"] = ["stopped"]
+        with self.assertRaises(ValueError) as context:
+            FactorColumnOp(self.base_parameters)
+        self.assertEqual(context.exception.args[0], "FactorNamesLenBad",
+                         "factor_names and factor_values must be same length")
+
+    def test_no_names(self):
+        self.base_parameters["factor_names"] = []
+        self.base_parameters["factor_values"] = []
+        op = FactorColumnOp(self.base_parameters)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(None, df, 'sample_data')
+        self.assertEqual(len(df_new.columns), len(df.columns) + 3)
+
     def test_valid_factors_no_extras(self):
         # Test correct when all valid and no unwanted information
-        parms = json.loads(self.json_parms)
-        op = FactorColumnOp(parms)
+        op = FactorColumnOp(self.base_parameters)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_check = pd.DataFrame(self.factored, columns=self.sample_columns + parms['factor_names'])
+        df_check = pd.DataFrame(self.factored, columns=self.sample_columns + self.base_parameters['factor_names'])
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df_new = op.do_op(None, df_test, 'sample_data')
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with ignore missing")
-        self.assertEqual(len(df_check.columns), len(df.columns) + len(parms["factor_values"]),
+        self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
                          "factor_column check should have extra columns with no extras and ignore missing")
         self.assertTrue(list(df_new.columns) == list(df_check.columns),
                         "factor_column resulting df should have correct columns with no extras and ignore missing")
@@ -64,15 +78,14 @@ class Test(unittest.TestCase):
 
     def test_valid_factors_no_extras_no_ignore(self):
         # Test when no extras and extras not ignored.
-        parms = json.loads(self.json_parms)
-        op = FactorColumnOp(parms)
+        op = FactorColumnOp(self.base_parameters)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_check = pd.DataFrame(self.factored, columns=self.sample_columns + parms['factor_names'])
+        df_check = pd.DataFrame(self.factored, columns=self.sample_columns + self.base_parameters['factor_names'])
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df_new = op.do_op(None, df_test, 'sample_data')
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with no extras and no ignore")
-        self.assertEqual(len(df_check.columns), len(df.columns) + len(parms["factor_values"]),
+        self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
                          "factor_column check should have extra columns with no extras and no ignore")
         self.assertTrue(list(df_new.columns) == list(df_check.columns),
                         "factor_column resulting df should have correct columns with no extras and no ignore")
@@ -87,20 +100,19 @@ class Test(unittest.TestCase):
 
     def test_valid_factors_extras_ignore(self):
         # Test when extra factor values but ignored
-        parms = json.loads(self.json_parms)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_check = pd.DataFrame(self.factored, columns=self.sample_columns + parms['factor_names'])
-        parms["factor_values"] = ["succesful_stop", "unsuccesful_stop", "face"]
-        parms["factor_names"] = ["stopped", "stop_failed", "baloney"]
-        op = FactorColumnOp(parms)
+        df_check = pd.DataFrame(self.factored, columns=self.sample_columns + self.base_parameters['factor_names'])
+        self.base_parameters["factor_values"] = ["succesful_stop", "unsuccesful_stop", "face"]
+        self.base_parameters["factor_names"] = ["stopped", "stop_failed", "baloney"]
+        op = FactorColumnOp(self.base_parameters)
         df_check["baloney"] = [0, 0, 0, 0, 0, 0]
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df_new = op.do_op(None, df_test, 'sample_data')
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with extras and ignore missing")
-        self.assertEqual(len(df_check.columns), len(df.columns) + len(parms["factor_values"]),
+        self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
                          "factor_column check should have extra columns with extras and ignore missing")
-        self.assertEqual(len(df_check.columns), len(df.columns) + len(parms["factor_values"]),
+        self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
                          "factor_column should have extra columns with extras and ignore missing")
         self.assertTrue(list(df_new.columns) == list(df_check.columns),
                         "factor_column resulting df should have correct columns with extras and ignore missing")
@@ -115,20 +127,19 @@ class Test(unittest.TestCase):
 
     def test_valid_factors_extras_no_ignore(self):
         # Test when extra factors are included but not ignored.
-        parms = json.loads(self.json_parms)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_check = pd.DataFrame(self.factored, columns=self.sample_columns + parms['factor_names'])
-        parms["factor_values"] = ["succesful_stop", "unsuccesful_stop", "face"]
-        parms["factor_names"] = ["stopped", "stop_failed", "baloney"]
-        op = FactorColumnOp(parms)
+        df_check = pd.DataFrame(self.factored, columns=self.sample_columns + self.base_parameters['factor_names'])
+        self.base_parameters["factor_values"] = ["succesful_stop", "unsuccesful_stop", "face"]
+        self.base_parameters["factor_names"] = ["stopped", "stop_failed", "baloney"]
+        op = FactorColumnOp(self.base_parameters)
         df_check["baloney"] = [0, 0, 0, 0, 0, 0]
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df_new = op.do_op(None, df_test, 'sample_data')
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with extras and ignore missing")
-        self.assertEqual(len(df_check.columns), len(df.columns) + len(parms["factor_values"]),
+        self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
                          "factor_column check should have extra columns with extras and ignore missing")
-        self.assertEqual(len(df_check.columns), len(df.columns) + len(parms["factor_values"]),
+        self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
                          "factor_column should have extra columns with extras and ignore missing")
         self.assertTrue(list(df_new.columns) == list(df_check.columns),
                         "factor_column resulting df should have correct columns with extras and ignore missing")
