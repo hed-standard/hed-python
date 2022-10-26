@@ -23,10 +23,16 @@ class HedContextManager:
         Raises:
             HedFileError: if there are any unmatched offsets.
 
+        Notes:
+            The constructor has the side-effect of splitting each element of the hed_strings list into two
+            by removing the Offset groups and the Onset tags. The context has the temporal extent information.
+            For users wanting to use only Onset events, self.hed_strings contains the information.
+
         """
 
         self.hed_strings = hed_strings
         self.onset_list = []
+        self.onset_count = 0
         self.offset_count = 0
         self.contexts = []
         self._create_onset_list()
@@ -36,7 +42,7 @@ class HedContextManager:
         """ Create a list of events of extended duration.
 
         Raises:
-            HedFileError if the hed_strings contain unmatched offsets.
+            HedFileError: If the hed_strings contain unmatched offsets.
 
         """
 
@@ -45,6 +51,7 @@ class HedContextManager:
         for event_index, hed in enumerate(self.hed_strings):
             to_remove = []  # tag_tuples = hed.find_tags(['Onset'], recursive=False, include_groups=1)
             onset_tuples = hed.find_tags(["onset"], recursive=True, include_groups=2)
+            self.onset_count += len(onset_tuples)
             for tup in onset_tuples:
                 group = tup[1]
                 group.remove([tup[0]])

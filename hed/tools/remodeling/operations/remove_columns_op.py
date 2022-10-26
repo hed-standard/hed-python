@@ -44,17 +44,22 @@ class RemoveColumnsOp(BaseOp):
         """ Remove indicated columns from a dataframe.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for context
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str):     Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):   Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: a new dataframe after processing.
 
         Raises:
             KeyError if ignore_missing is false and column not in df is to be removed.
 
         """
 
-        return df.drop(self.remove_names, axis=1, errors=self.error_handling)
+        try:
+            return df.drop(self.remove_names, axis=1, errors=self.error_handling)
+        except KeyError as context:
+            raise KeyError("MissingColumnCannotBeRemoved",
+                           f"{name}: Ignore missing is False but a column in {str(self.remove_names)} is "
+                           f"not in the data columns [{str(df.columns)}]")

@@ -44,16 +44,16 @@ class SummarizeHedTypeOp(BaseOp):
         """ Create factor columns corresponding to values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for context
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like): Only needed for HED operations.
 
         Returns:
-            DataFrame - a new DataFrame with the factor columns appended.
+            DataFrame: A new DataFrame with the factor columns appended.
 
         Side-effect:
-            Updates the context
+            Updates the context.
 
         """
         summary = dispatcher.context_dict.get(self.summary_name, None)

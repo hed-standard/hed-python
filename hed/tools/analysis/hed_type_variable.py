@@ -57,6 +57,11 @@ class HedTypeVariable:
             return summary
 
     def get_variable_factors(self, variables=None, factor_encoding="one-hot"):
+        """ Create a dataframe with the indicated variables as factors.
+
+
+
+        """
         if variables is None:
             variables = self.get_variable_names()
         df_list = []

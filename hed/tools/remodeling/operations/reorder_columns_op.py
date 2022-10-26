@@ -36,16 +36,16 @@ class ReorderColumnsOp(BaseOp):
         """ Reorder columns as specified in event dictionary.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for context.
+            df (DataFrame):  The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):   Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: a new dataframe after processing.
 
         Raises:
-            ValueError - when ignore_missing is false and column_order has columns not in df.
+            ValueError:  when ignore_missing is false and column_order has columns not in df.
 
         """
 
@@ -54,7 +54,8 @@ class ReorderColumnsOp(BaseOp):
         ordered = self.column_order
         if missing_columns and not self.ignore_missing:
             raise ValueError("MissingReorderedColumns",
-                             f"reorder_columns {list(missing_columns)} are not in dataframe and not ignored")
+                             f"{str(missing_columns)} are not in dataframe columns "
+                             f" [{str(df.columns)}] and not ignored.")
         elif missing_columns:
             ordered = [elem for elem in self.column_order if elem not in list(missing_columns)]
         if self.keep_others:

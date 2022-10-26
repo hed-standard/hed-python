@@ -48,13 +48,13 @@ class FactorHedTypeOp(BaseOp):
         """ Factor columns based on HED type.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context.
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for context.
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like): Only needed for HED operations.
 
         Returns
-            DataFrame - a new DataFame with that includes the factors
+            DataFrame: a new DataFame with that includes the factors
 
         Notes:
             - column_name (str)     The name of column to be tested.

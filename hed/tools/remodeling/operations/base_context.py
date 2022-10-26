@@ -23,7 +23,7 @@ class BaseContext(ABC):
         """ Return the summary-specific information.
 
         Parameters:
-            verbose (bool)  If True, may provide additional details in the summary.
+            verbose (bool):  If True, may provide additional details in the summary.
 
         Notes:
             Abstract method be implemented by each individual context summary.
@@ -65,6 +65,7 @@ class BaseContext(ABC):
             with open(os.path.realpath(file_base + file_format), 'w') as text_file:
                 text_file.write(summary)
 
+    @abstractmethod
     def update_context(self, context_dict):
         """ Method to update summary for a given tabular input.
 

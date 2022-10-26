@@ -25,7 +25,7 @@ class MergeConsecutiveOp(BaseOp):
         self.match_columns = parameters["match_columns"]
         if self.column_name in self.match_columns:
             raise ValueError("MergeColumnCannotBeMatched",
-                             f"column{self.column_name} cannot be one of the match columns: {str(self.match_columns)}")
+                             f"Column {self.column_name} cannot be one of the match columns: {str(self.match_columns)}")
         self.set_durations = parameters["set_durations"]
         self.ignore_missing = parameters["ignore_missing"]
 
@@ -33,28 +33,31 @@ class MergeConsecutiveOp(BaseOp):
         """ Merge consecutive events of the same type
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for context
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like): Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         """
 
         if not self.ignore_missing and self.column_name not in df.columns:
             raise ValueError("ColumnMissing",
-                             f"{self.column_name} is not in data and missing columns are not ignored")
+                             f"{name}: {self.column_name} is not in data columns [{str(df.columns)}] "
+                             f"and missing columns are not ignored")
         if self.set_durations and "onset" not in df.columns:
             raise ValueError("MissingOnsetColumn",
-                             f"Data must have an onset column in order to set_durations")
+                             f"{name}: Data must have an onset column in order to set durations")
         if self.set_durations and "duration" not in df.columns:
             raise ValueError("MissingDurationColumn",
-                             "Data must have a duration column in order to set_durations")
+                             f"{name}: Data must have a duration column in order to set durations")
         missing = set(self.match_columns).difference(set(df.columns))
         if self.match_columns and not self.ignore_missing and missing:
-            raise ValueError("MissingMatchColumns", f"{str(missing)} columns are unmatched and not ignored")
+            raise ValueError("MissingMatchColumns",
+                             f"{name}: {str(missing)} columns are unmatched by data columns"
+                             f"[{str(df.columns)}] and not ignored")
         match_columns = list(set(self.match_columns).intersection(set(df.columns)))
 
         df_new = df.copy()

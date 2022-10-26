@@ -36,17 +36,22 @@ class RenameColumnsOp (BaseOp):
         """ Rename columns as specified in column_mapping dictionary.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for context
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         Raises:
-            KeyError - when ignore_missing is false and column_mapping has columns not in df.
+            KeyError: When ignore_missing is false and column_mapping has columns not in df.
 
         """
 
-        return df.rename(columns=self.column_mapping, errors=self.error_handling)
+        try:
+            return df.rename(columns=self.column_mapping, errors=self.error_handling)
+        except KeyError:
+            raise KeyError("MappedColumnsMissingFromData",
+                           f"{name}: ignore_missing is False, mapping columns [{self.column_mapping}]"
+                           f" but df columns are [{str(df.columns)}")
