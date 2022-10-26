@@ -45,15 +45,13 @@ class FactorColumnOp(BaseOp):
         """ Create factor columns for values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context.
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for context.
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            DataFrame - a new DataFrame with the factor columns appended.
-
-
+            DataFrame_ a new DataFrame with the factor columns appended.
 
         """
 

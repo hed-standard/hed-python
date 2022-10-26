@@ -6,7 +6,8 @@ from .analysis.hed_definition_manager import HedDefinitionManager
 from .analysis.hed_type_factors import HedTypeFactors
 from .analysis.hed_type_variable import HedTypeVariable
 from .analysis.hed_variable_manager import HedVariableManager
-from .analysis.hed_variable_summary import HedVariableCounts, HedVariableSummary
+from .analysis.hed_variable_summary import HedVariableSummary
+from .analysis.hed_variable_counts import HedVariableCounts
 from .analysis.key_map import KeyMap
 from .analysis.tabular_summary import TabularSummary
 from .analysis.tag_summary import TagSummary

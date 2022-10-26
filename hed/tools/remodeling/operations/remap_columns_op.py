@@ -55,16 +55,20 @@ class RemapColumnsOp(BaseOp):
         """ Remap new columns from combinations of others.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher):  The dispatcher object for context.
+            df (DataFrame):  The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):   Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
+
+        Raises:
+            ValueError: If ignore
 
         """
         df_new, missing = self.key_map.remap(df)
         if missing and not self.ignore_missing:
-            raise ValueError("MapSourceValueMissing", f"Missing sources for rows: {str(missing)}")
+            raise ValueError("MapSourceValueMissing",
+                             f"{name}: Ignore missing is false, but source values [{missing}] are in data but not map")
         return df_new

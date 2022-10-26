@@ -35,16 +35,16 @@ class SplitEventOp(BaseOp):
         """ Split a row representing a particular event into multiple rows.
 
         Parameters:
-            dispatcher (Dispatcher):  dispatcher object for context.
+            dispatcher (Dispatcher):  The dispatcher object for context.
             df (DataFrame):   The DataFrame to be remodeled.
             name (str):  Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         Raises:
-            TypeError - if bad onset or duration.
+            TypeError: If bad onset or duration.
 
         """
 
@@ -101,7 +101,7 @@ class SplitEventOp(BaseOp):
         """ Create a vector of onsets for the the new events.
 
         Parameters:
-            df (DataFrame):  The dataframe to process
+            df (DataFrame):  The dataframe to process.
             onset_source (list):  List of onsets of process.
 
         Returns:
@@ -120,5 +120,5 @@ class SplitEventOp(BaseOp):
                 onsets = onsets.add(pd.to_numeric(df[onset], errors='coerce'))
             else:
                 raise TypeError("BadOnsetInModel",
-                                f"Remodeling onset {str(onset)} must either be numeric or a column name", "")
+                                f"Remodeling onset {str(onset)} must either be numeric or a column name.", "")
         return onsets

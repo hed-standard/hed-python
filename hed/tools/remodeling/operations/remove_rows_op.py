@@ -30,13 +30,13 @@ class RemoveRowsOp(BaseOp):
         """ Remove rows with the values indicated in the column.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for context
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str):  Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like): Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         """
 

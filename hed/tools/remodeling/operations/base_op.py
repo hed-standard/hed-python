@@ -34,12 +34,13 @@ class BaseOp:
         """ Base class method to be overridden.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for context
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):   Only needed for HED operations.
 
         """
+
         return df
 
     @staticmethod
