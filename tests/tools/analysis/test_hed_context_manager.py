@@ -40,13 +40,28 @@ class Test(unittest.TestCase):
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         cls.schema = schema
 
-    def test_onset_group(self):
-        onset_gr = OnsetGroup('this_group', 0, 10, HedGroup('(Definition/Temper, (Label/help)'))
-        this_str = str(onset_gr)
-        self.assertIsInstance(this_str, str)
+    # def test_onset_group(self):
+    #     str1 = '(Def/Temper, (Label/help))'
+    #     str1_obj = HedString(str1)
+    #     grp1 = str1_obj.chilren()[0]
+    #     on_grp1 = OnsetGroup('this_group', x, 1)
+    #     self.assertIsInstance(grp1.contents, str)
+    #     self.assertEqual(grp1.contents, '(Def/Temper,(Label/help))')
+    #     str1_obj = HedString(str1)
+    #     grp2 =
+    #     self.assertIsInstance(grp2.contents, str)
+    #     self.assertEqual(grp2.contents, str1)
+    #
+    #     y = HedGroup(str1)
+    #     grp3 = OnsetGroup('this_group', y, 0)
+    #     self.assertIsInstance(grp3.contents, str)
+    #     self.assertEqual(grp3.contents, str1)
+    #     grp4 = OnsetGroup('this_group', x, 0, 10)
+    #     self.assertIsInstance(grp4.contents, str)
+    #     self.assertEqual(grp4.contents, str1)
 
     def test_constructor(self):
-        manager1 = HedContextManager(self.test_strings1)
+        manager1 = HedContextManager(self.test_strings1, self.schema)
         self.assertIsInstance(manager1, HedContextManager, "The constructor should create an HedContextManager")
         self.assertEqual(len(manager1.hed_strings), 7, "The constructor should have the right number of strings")
         self.assertEqual(len(manager1.onset_list), 4, "The constructor should have right length onset list")
@@ -54,11 +69,25 @@ class Test(unittest.TestCase):
         self.assertFalse(manager1.hed_strings[1].children, "When no tags list HedString is empty")
         context = manager1.contexts
         self.assertIsInstance(context, list, "The constructor event contexts should be a list")
-        self.assertIsInstance(context[1][0], HedGroup, "The constructor event contexts has a correct element")
+        self.assertIsInstance(context[1], HedString, "The constructor event contexts has a correct element")
+
+    def test_constructor(self):
+        with self.assertRaises(ValueError) as cont:
+            HedContextManager(self.test_strings1, None)
+        self.assertEqual(cont.exception.args[0], "ContextRequiresSchema")
+
+    def test_iter(self):
+        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
+        manager1 = HedContextManager(hed_strings, self.schema)
+        i = 0
+        for hed, context in manager1.iter_context():
+            self.assertEqual(hed, manager1.hed_strings[i])
+            self.assertEqual(context, manager1.contexts[i])
+            i = i + 1
 
     def test_constructor_from_assembled(self):
         hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        manager1 = HedContextManager(hed_strings)
+        manager1 = HedContextManager(hed_strings, self.schema)
         self.assertEqual(len(manager1.hed_strings), 200,
                          "The constructor for assembled strings has expected # of strings")
         self.assertEqual(len(manager1.onset_list), 261,
@@ -66,11 +95,11 @@ class Test(unittest.TestCase):
 
     def test_constructor_unmatched(self):
         with self.assertRaises(HedFileError) as context:
-            HedContextManager(self.test_strings2)
+            HedContextManager(self.test_strings2, self.schema)
         self.assertEqual(context.exception.args[0], 'UnmatchedOffset')
 
     def test_constructor_multiple_values(self):
-        manager = HedContextManager(self.test_strings3)
+        manager = HedContextManager(self.test_strings3, self.schema)
         self.assertEqual(len(manager.onset_list), 3, "Constructor should have right number of onsets")
 
 

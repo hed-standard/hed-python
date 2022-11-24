@@ -3,7 +3,8 @@ import os
 import pandas as pd
 import unittest
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_column_values_op import ColumnValueSummary, SummarizeColumnValuesOp
+from hed.tools.remodeling.operations.summarize_column_values_op import \
+    ColumnValueSummaryContext, SummarizeColumnValuesOp
 
 
 class Test(unittest.TestCase):
@@ -47,12 +48,12 @@ class Test(unittest.TestCase):
         df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         sum_op.do_op(dispatch, df1, 'name1')
         context1 = dispatch.context_dict.get(parms['summary_name'], None)
-        summary = context1.summary
-        cat_len = len(summary.categorical_info)
+        summary1 = context1.summary_dict['name1']
+        cat_len = len(summary1.categorical_info)
         self.assertEqual(cat_len, len(self.sample_columns),
                          'do_ops if all columns are categorical summary has same number of columns as df')
         sum_op.do_op(dispatch, df1a, 'name1')
-        self.assertEqual(len(context1.summary.categorical_info), len(self.sample_columns),
+        self.assertEqual(cat_len, len(self.sample_columns),
                          "do_ops updating does not change number of categorical columns.")
         sum_op.do_op(dispatch, df1a, 'name2')
 
@@ -65,16 +66,16 @@ class Test(unittest.TestCase):
         sum_op.do_op(dispatch, df1, 'name2')
         sum_op.do_op(dispatch, df1, 'name3')
         context1 = dispatch.context_dict.get(parms['summary_name'], None)
-        self.assertIsInstance(context1, ColumnValueSummary, "get_summary testing ColumnValueSummary")
+        self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
         summary1 = context1.get_summary()
         self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
         summary2 = context1.get_summary(as_json=True)
         self.assertIsInstance(summary2, str, "get_summary returns a dictionary if json requested")
-        summary3 = context1.get_text_summary(verbose=False)
+        summary3 = context1.get_text_summary(include_individual=False)
         self.assertIsInstance(summary3, str, "get_text_summary returns a str if verbose is False")
         summary4 = context1.get_text_summary()
         self.assertIsInstance(summary4, str, "get_text_summary returns a str by default")
-        summary5 = context1.get_text_summary(verbose=True)
+        summary5 = context1.get_text_summary(include_individual=True)
         self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
 
     def test_summary_op(self):

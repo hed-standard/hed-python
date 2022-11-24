@@ -245,5 +245,5 @@ class BidsFileGroup:
     #     print(get_printable_issue_string(issues_data, "Tabular errors"))
     # else:
     #     print("No validation errors in the datafiles")
-    # col_info = bids.summarize()
+    # col_info = bids.get_summary()
     # print(f"Info: {str(col_info)}")

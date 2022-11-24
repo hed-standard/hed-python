@@ -2,71 +2,87 @@ import json
 import pandas as pd
 from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
-from hed.tools.analysis.hed_definition_manager import HedDefinitionManager
+from hed.tools.analysis.hed_type_definitions import HedTypeDefinitions
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 
-class HedTypeVariable:
+class HedTypeValues:
 
-    def __init__(self, context_manager, hed_schema, hed_definitions, variable_type="condition-variable"):
+    def __init__(self, context_manager, definitions, type_tag="condition-variable"):
         """ Create a variable manager for one type-variable for one tabular file.
 
         Parameters:
             context_manager (HedContextManager): A list of HED strings.
-            hed_schema (HedSchema or HedSchemaGroup): The HED schema to use for processing.
-            hed_definitions (dict): A dictionary of DefinitionEntry objects.
-            variable_type (str): Lowercase short form of the variable to be managed.
+            definitions (dict): A dictionary of DefinitionEntry objects.
+            type_tag (str): Lowercase short form of the tag to be managed.
 
         Raises:
             HedFileError:  On errors such as unmatched onsets or missing definitions.
+
         """
 
-        self.variable_type = variable_type.lower()
-        self.definitions = HedDefinitionManager(hed_definitions, hed_schema, variable_type=variable_type)
+        self.type_tag = type_tag.lower()
+        self.definitions = HedTypeDefinitions(definitions, context_manager.hed_schema, type_tag=type_tag)
         hed_strings = context_manager.hed_strings
         hed_contexts = context_manager.contexts
         self.number_events = len(hed_strings)
-        self._variable_map = {}
+        self._type_value_map = {}
         self._extract_variables(hed_strings, hed_contexts)
 
-    def get_variable(self, var_name):
-        """ Return the HedTypeFactors associated with var_name or None. """
-        return self._variable_map.get(var_name, None)
+    def get_type_value_factors(self, type_value):
+        """ Return the HedTypeFactors associated with type_name or None.
+
+        Parameters:
+            type_value (str): The tag corresponding to the type's value (such as the name of the condition variable).
+
+        Returns:
+            HedTypeFactors or None
+
+        """
+        return self._type_value_map.get(type_value.lower(), None)
+
+    def get_type_value_level_info(self, type_value, type_level):
+        """ Return  associated with v_name or None. """
+        return self._type_value_map.get(type_value, None)
 
     @property
     def type_variables(self):
-        return set(self._variable_map.keys())
+        return set(self._type_value_map.keys())
 
-    def get_variable_def_names(self):
+    def get_type_def_names(self):
+        """ Return the definitions """
         tag_list = []
-        for variable, factor in self._variable_map.items():
+        for variable, factor in self._type_value_map.items():
             tag_list = tag_list + [key for key in factor.levels.keys()]
         return list(set(tag_list))
 
-    def get_variable_names(self):
-        return list(self._variable_map.keys())
+    def get_type_value_names(self):
+        return list(self._type_value_map.keys())
 
-    def summarize(self, as_json=False):
-        summary = self._variable_map.copy()
+    def get_summary(self):
+        summary = self._type_value_map.copy()
         for var_name, var_sum in summary.items():
             summary[var_name] = var_sum.get_summary()
-        if as_json:
-            return json.dumps(summary, indent=4)
-        else:
-            return summary
+        return summary
 
-    def get_variable_factors(self, variables=None, factor_encoding="one-hot"):
-        """ Create a dataframe with the indicated variables as factors.
+    def get_type_factors(self, type_values=None, factor_encoding="one-hot"):
+        """ Create a dataframe with the indicated type tag values as factors.
 
+        Parameters:
+            type_values (list or None): A list of values of type tags for which to generate factors.
+            factor_encoding (str):      Type of factor encoding (one-hot or categorical).
+
+        Returns:
+            DataFrame:  Contains the specified factors associated with this type tag.
 
 
         """
-        if variables is None:
-            variables = self.get_variable_names()
+        if type_values is None:
+            type_values = self.get_type_value_names()
         df_list = []
-        for index, variable in enumerate(variables):
-            var_sum = self._variable_map.get(variable, None)
+        for index, type_value in enumerate(type_values):
+            var_sum = self._type_value_map.get(type_value, None)
             if not var_sum:
                 continue
             df_list.append(var_sum.get_factors(factor_encoding=factor_encoding))
@@ -76,7 +92,7 @@ class HedTypeVariable:
             return pd.concat(df_list, axis=1)
 
     def __str__(self):
-        return f"{self.variable_type} type_variables: {str(list(self._variable_map.keys()))}"
+        return f"{self.type_tag} type_variables: {str(list(self._type_value_map.keys()))}"
 
     def _extract_definition_variables(self, item, index):
         """ Extract the definition uses from a HedTag, HedGroup, or HedString.
@@ -97,7 +113,7 @@ class HedTypeVariable:
         for tag in tags:
             if tag.short_base_tag.lower() != "def":
                 continue
-            hed_vars = self.definitions.get_vars(tag)
+            hed_vars = self.definitions.get_type_values(tag)
             if not hed_vars:
                 continue
             self._update_definition_variables(tag, hed_vars, index)
@@ -116,10 +132,10 @@ class HedTypeVariable:
         """
         level = tag.extension_or_value_portion.lower()
         for var_name in hed_vars:
-            hed_var = self._variable_map.get(var_name, None)
+            hed_var = self._type_value_map.get(var_name, None)
             if hed_var is None:
-                hed_var = HedTypeFactors(var_name, self.number_events)
-                self._variable_map[var_name] = hed_var
+                hed_var = HedTypeFactors(self.type_tag, var_name, self.number_events)
+                self._type_value_map[var_name] = hed_var
             var_levels = hed_var.levels.get(level, {index: 0})
             var_levels[index] = 0
             hed_var.levels[level] = var_levels
@@ -129,9 +145,9 @@ class HedTypeVariable:
         for index, hed in enumerate(hed_strings):
             self._extract_direct_variables(hed, index)
             self._extract_definition_variables(hed, index)
-            for item in hed_contexts[index]:
-                self._extract_direct_variables(item, index)
-                self._extract_definition_variables(item, index)
+
+            self._extract_direct_variables(hed_contexts[index], index)
+            self._extract_definition_variables(hed_contexts[index], index)
 
     def _extract_direct_variables(self, item, index):
         """ Extract the condition type_variables from a HedTag, HedGroup, or HedString.
@@ -141,10 +157,10 @@ class HedTypeVariable:
             index (int):  Position in the array.
 
         """
-        if isinstance(item, HedTag) and item.short_base_tag.lower() == self.variable_type:
+        if isinstance(item, HedTag) and item.short_base_tag.lower() == self.type_tag:
             tag_list = [item]
         elif isinstance(item, HedGroup) and item.children:
-            tag_list = item.find_tags_with_term(self.variable_type, recursive=True, include_groups=0)
+            tag_list = item.find_tags_with_term(self.type_tag, recursive=True, include_groups=0)
         else:
             tag_list = []
         self._update_variables(tag_list, index)
@@ -158,13 +174,13 @@ class HedTypeVariable:
 
         """
         for tag in tag_list:
-            name = tag.extension_or_value_portion.lower()
-            if not name:
-                name = self.variable_type
-            hed_var = self._variable_map.get(name, None)
+            tag_value = tag.extension_or_value_portion.lower()
+            if not tag_value:
+                tag_value = self.type_tag
+            hed_var = self._type_value_map.get(tag_value, None)
             if hed_var is None:
-                hed_var = HedTypeFactors(name, self.number_events)
-            self._variable_map[name] = hed_var
+                hed_var = HedTypeFactors(self.type_tag, tag_value, self.number_events)
+            self._type_value_map[tag_value] = hed_var
             hed_var.direct_indices[index] = ''
 
 
@@ -209,9 +225,9 @@ class HedTypeVariable:
 #             'Cond6': DefinitionEntry('Cond6', def6, True, None)
 #             }
 #
-#     conditions1 = HedTypeVariable(HedContextManager(test_strings1), hed_schema, defs)
-#     conditions2 = HedTypeVariable(HedContextManager(test_strings2), hed_schema, defs)
-#     conditions3 = HedTypeVariable(HedContextManager(test_strings3), hed_schema, defs)
+#     conditions1 = HedTypeValues(HedContextManager(test_strings1), hed_schema, defs)
+#     conditions2 = HedTypeValues(HedContextManager(test_strings2), hed_schema, defs)
+#     conditions3 = HedTypeValues(HedContextManager(test_strings3), hed_schema, defs)
 #     bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 #                                                    '../../../tests/data/bids_tests/eeg_ds003654s_hed'))
 #     events_path = os.path.realpath(os.path.join(bids_root_path,
@@ -222,14 +238,14 @@ class HedTypeVariable:
 #     hed_strings = get_assembled_strings(input_data, hed_schema=hed_schema, expand_defs=False)
 #     onset_man = HedContextManager(hed_strings)
 #     definitions = input_data.get_definitions().gathered_defs
-#     var_type = HedTypeVariable(onset_man, hed_schema, definitions)
-#     df = var_type.get_variable_factors()
-#     summary = var_type.summarize()
+#     var_type = HedTypeValues(onset_man, hed_schema, definitions)
+#     df = var_type.get_type_factors()
+#     summary = var_type.get_summary()
 #     df.to_csv("D:/wh_conditionslong.csv", sep='\t', index=False)
 #     with open('d:/wh_summary.json', 'w') as f:
 #         json.dump(summary, f, indent=4)
 #
-#     df_no_hot = var_type.get_variable_factors(factor_encoding="categorical")
+#     df_no_hot = var_type.get_type_factors(factor_encoding="categorical")
 #     df_no_hot.to_csv("D:/wh_conditions_no_hot.csv", sep='\t', index=False)
 #     with open('d:/wh_summarylong.json', 'w') as f:
 #         json.dump(summary, f, indent=4)

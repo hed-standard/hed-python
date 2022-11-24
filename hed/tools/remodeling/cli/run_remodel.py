@@ -19,6 +19,8 @@ def get_parser():
                         help="Directories names to exclude from search for files.")
     parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events',
                         help="Filename suffix excluding file type of items to be analyzed (events by default).")
+    parser.add_argument("-i", "--include-individual", action='store_true', dest="include_individual",
+                        help="If present, individual files are summarized in addition to overall summary.")
     parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
                         help="Optional path to JSON sidecar with HED information")
     parser.add_argument("-r", "--hed-versions", dest="hed_versions", nargs="*", default=[],
@@ -113,7 +115,7 @@ def main(arg_list=None):
         run_bids_ops(dispatch, args)
     else:
         run_direct_ops(dispatch, args)
-    dispatch.save_context(args.save_formats)
+    dispatch.save_context(args.save_formats, include_individual=args.include_individual)
 
 
 if __name__ == '__main__':

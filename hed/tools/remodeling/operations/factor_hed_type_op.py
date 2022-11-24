@@ -3,7 +3,7 @@ import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.analysis_util import get_assembled_strings
-from hed.tools.analysis.hed_variable_manager import HedVariableManager
+from hed.tools.analysis.hed_type_manager import HedTypeManager
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 # TODO: restricted factor values are not implemented yet.
@@ -70,7 +70,7 @@ class FactorHedTypeOp(BaseOp):
         hed_strings = get_assembled_strings(input_data, hed_schema=dispatcher.hed_schema, expand_defs=False)
 
         definitions = input_data.get_definitions()
-        var_manager = HedVariableManager(hed_strings, dispatcher.hed_schema, definitions)
+        var_manager = HedTypeManager(hed_strings, dispatcher.hed_schema, definitions)
         var_manager.add_type_variable(self.type_tag.lower())
 
         df_factors = var_manager.get_factor_vectors(self.type_tag, [], factor_encoding=self.factor_encoding)

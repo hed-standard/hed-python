@@ -1,3 +1,4 @@
+from hed.tools.analysis.column_name_summary import ColumnNameSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
 
@@ -51,44 +52,32 @@ class SummarizeColumnNamesOp(BaseOp):
 
         summary = dispatcher.context_dict.get(self.summary_name, None)
         if not summary:
-            summary = ColumnNameSummary(self)
+            summary = ColumnNameSummaryContext(self)
             dispatcher.context_dict[self.summary_name] = summary
         summary.update_context({"name": name, "column_names": list(df.columns)})
         return df
 
 
-class ColumnNameSummary(BaseContext):
+class ColumnNameSummaryContext(BaseContext):
 
     def __init__(self, sum_op):
         super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
-        self.file_dict = {}
-        self.unique_headers = []
 
     def update_context(self, new_context):
-        columns = new_context["column_names"]
-        name = new_context["name"]
-        position = self._update_headers(columns)
-        if name not in self.file_dict:
-            self.file_dict[name] = position
-        elif name in self.file_dict and position != self.file_dict[name]:
-            raise ValueError("FileHasChangedColumnNames",
-                             f"{name}: Summary has conflicting column names " +
-                             f"Current: {str(columns)} Previous: {str(self.unique_headers[self.file_dict[name]])}")
+        name = new_context['name']
+        if name not in self.summary_dict:
+            self.summary_dict[name] = ColumnNameSummary(name=name)
+        self.summary_dict[name].update(name, new_context["column_names"])
 
-    def _update_headers(self, column_names):
-        for index, item in enumerate(self.unique_headers):
-            if item == column_names:
-                return index
-        self.unique_headers.append(column_names)
-        return len(self.unique_headers) - 1
+    def _get_summary_details(self, column_summary):
+        return column_summary.get_summary()
 
-    def get_summary_details(self, verbose=True):
-        patterns = [list() for element in self.unique_headers]
-        for key, value in self.file_dict.items():
-            patterns[value].append(key)
-        column_headers = {}
-        for index, pattern in enumerate(patterns):
-            column_headers[index] = {'column_names': self.unique_headers[index], 'file_list': patterns[index]}
-        summary = {'unique_patterns': len(self.unique_headers),
-                   'files': len(self.file_dict), 'patterns': column_headers}
-        return summary
+    def _merge_all(self):
+        all_sum = ColumnNameSummary(name='Dataset')
+        for key, counts in self.summary_dict.items():
+            for name, pos in counts.file_dict.items():
+                all_sum.update(name, counts.unique_headers[pos])
+        return all_sum
+
+    def _get_result_string(self, name, result):
+        return result[name].get_text_summary()

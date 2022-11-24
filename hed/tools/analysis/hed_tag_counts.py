@@ -1,76 +1,104 @@
-# import json
+import copy
 
 
-# class HedTagCount:
-#     def __init__(self, tag):
-#         self.tag = tag
-#         self.events = 0
-#         self.files = 0
-#         self.occurrences = 0
-#
-#     def update(self, events, files, occurrences):
-#         self.events += events
-#         self.files += files
-#         self.occurrences += occurrences
-#
-#     def get_summary(self, as_json=False):
-#         pass
-#
-#         # summary = {'variable_value': self.variable_value,
-#         #            'variable_type': self.variable_type,
-#         #            'levels': len(self.level_counts.keys()),
-#         #            'direct_references': self.direct_references,
-#         #            'total_events': self.total_events,
-#         #            'events': self.events,
-#         #            'multiple_events': self.multiple_events,
-#         #            'multiple_event_maximum': self.multiple_event_maximum}
-#
-#
-# class HedTagCounts:
-#     """ Keeps a summary of tag counts.
-#
-#
-#     """
-#
-#     def __init__(self, hed_schema=None):
-#         self.schema = hed_schema
-#         self.tag_dict = dict()
-#
-#     def update(self, variable_info):
-#         """ Update the counts from a HedTypeVariable.
-#
-#         Parameters:
-#             variable_info (HedTypeFactor) information about the contents for a particular data file.
-#
-#         """
-#         var_sum = variable_info.get_summary(full=True)
-#         # self.direct_references += var_sum['direct_references']
-#         # self.total_events += var_sum['total_events']
-#         # self.events += var_sum['events']
-#         # self.multiple_events += var_sum['multiple_events']
-#         # self.multiple_event_maximum = max(self.multiple_event_maximum, var_sum['multiple_event_maximum'])
-#         # self._update_levels(var_sum.get('level_counts', {}))
-#
-#     # def _update_levels(self, level_dict):
-#     #     for key, item in level_dict.items():
-#     #         if key not in self.level_counts:
-#     #             self.level_counts[key] = {'files': 0, 'events': 0}
-#     #         self.level_counts[key]['files'] = self.level_counts[key]['files'] + 1
-#     #         self.level_counts[key]['events'] = self.level_counts[key]['events'] + item
-#
-#     def get_summary(self, as_json=False):
-#         pass
-#
-#         # summary = {'variable_value': self.variable_value,
-#         #            'variable_type': self.variable_type,
-#         #            'levels': len(self.level_counts.keys()),
-#         #            'direct_references': self.direct_references,
-#         #            'total_events': self.total_events,
-#         #            'events': self.events,
-#         #            'multiple_events': self.multiple_events,
-#         #            'multiple_event_maximum': self.multiple_event_maximum}
-#         # if self.level_counts:
-#         #     summary['level_counts'] = self.level_counts
-#         # if as_json:
-#         #     return json.dumps(summary, indent=4)
-#         # return summary
+class HedTagCount:
+    def __init__(self, hed_tag, name):
+        """ Keeps the counts for a particular HedTag.
+
+        Parameters:
+            hed_tag (HedTag):  The HedTag to keep track of.
+            name (str):   Name of the file associated with the tag.
+
+        """
+
+        self.tag = hed_tag.short_base_tag
+        self.tag_terms = hed_tag.tag_terms
+        self.events = 1
+        self.files = {name: ''}
+        self.value_dict = {}
+        self.set_value(hed_tag)
+
+    def set_value(self, hed_tag):
+        if not hed_tag:
+            return
+        value = hed_tag.extension_or_value_portion
+        if not value:
+            value = None
+        if value in self.value_dict:
+            self.value_dict[value] = self.value_dict[value] + 1
+        else:
+            self.value_dict[value] = 1
+
+    def get_info(self, verbose=False):
+        if verbose:
+            files = [name for name in self.files]
+        else:
+            files = len(self.files)
+        return {'tag': self.tag, 'events': self.events, 'files': files}
+
+    def get_empty(self):
+        empty = copy.copy(self)
+        empty.events = 0
+        empty.files = {}
+        empty.value_dict = {}
+        return empty
+
+
+class HedTagCounts:
+    """ Keeps a summary of tag counts for a file.
+
+
+    """
+
+    def __init__(self, type_tag="condition-variable", name=""):
+        self.tag_dict = {}
+        self.name = name
+
+    def update_event_counts(self, hed_string_obj):
+        tag_list = hed_string_obj.get_all_tags()
+        tag_dict = {}
+        for tag in tag_list:
+            str_tag = tag.short_base_tag.lower()
+            if str_tag not in tag_dict:
+                tag_dict[str_tag] = HedTagCount(tag, self.name)
+            else:
+                tag_dict[str_tag].set_value(tag)
+
+        self.merge_tag_dicts(self.tag_dict, tag_dict)
+
+    def organize_tags(self, tag_template):
+        template = self.create_template(tag_template)
+        unmatched = []
+        for key, tag_count in self.tag_dict.items():
+            matched = False
+            for tag in reversed(tag_count.tag_terms):
+                if tag in template:
+                    template[tag].append(tag_count)
+                    matched = True
+                    break
+            if not matched:
+                unmatched.append(tag_count)
+        return template, unmatched
+
+    @staticmethod
+    def create_template(tags):
+        template_dict = {}
+        for key, key_list in tags.items():
+            for element in key_list:
+                template_dict[element.lower()] = []
+        return template_dict
+
+    @staticmethod
+    def merge_tag_dicts(base_dict, other_dict):
+        for tag, count in other_dict.items():
+            if tag not in base_dict:
+                base_dict[tag] = count.get_empty()
+            base_dict[tag].events = base_dict[tag].events + count.events
+            value_dict = base_dict[tag].value_dict
+            for value, val_count in count.value_dict.items():
+                if value in value_dict:
+                    value_dict[value] = value_dict[value] + val_count
+                else:
+                    value_dict[value] = val_count
+            for file in count.files:
+                base_dict[tag].files[file] = ''

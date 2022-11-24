@@ -74,5 +74,29 @@ class EventsToSidecarSummary(BaseContext):
     def update_context(self, new_context):
         self.summary.update(new_context['df'])
 
-    def get_summary_details(self, verbose=True):
+    def get_summary_details(self, include_individual=True):
         return self.summary.extract_sidecar_template()
+
+    def _get_summary_details(self, summary_info):
+        """ Return the summary-specific information.
+
+        Parameters:
+            summary_info (object):  Summary to return info from
+
+        Notes:
+            Abstract method be implemented by each individual context summary.
+
+        """
+        pass
+
+    def _merge_all(self):
+        """ Return merged information.
+
+        Returns:
+           object:  Consolidated summary of information.
+
+        Notes:
+            Abstract method be implemented by each individual context summary.
+
+        """
+        pass

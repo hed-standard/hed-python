@@ -45,11 +45,11 @@ class Test(unittest.TestCase):
     def test_summarize(self):
         events = BidsFileGroup(self.root_path)
         info = events.summarize()
-        self.assertIsInstance(info, TabularSummary, "summarize returns a TabularSummary")
-        self.assertEqual(len(info.categorical_info), 10, "summarize info has entries with all columns if non-skipped")
+        self.assertIsInstance(info, TabularSummary, "get_summary returns a TabularSummary")
+        self.assertEqual(len(info.categorical_info), 10, "get_summary info has entries with all columns if non-skipped")
         info2 = events.summarize(skip_cols=['onset', 'sample'])
         self.assertEqual(len(info2.categorical_info), len(info.categorical_info)-2,
-                         "summarize info has two less entries if two columns are skipped")
+                         "get_summary info has two less entries if two columns are skipped")
 
 
 if __name__ == '__main__':

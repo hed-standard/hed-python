@@ -3,7 +3,8 @@
 from .base_input import BaseInput
 from .column_mapper import ColumnMapper
 from .column_metadata import ColumnMetadata, ColumnType
-from .definition_dict import DefinitionDict, DefinitionEntry
+from .definition_dict import DefinitionDict
+from .definition_entry import DefinitionEntry
 from .def_mapper import DefMapper
 from .expression_parser import TagExpressionParser
 from .hed_group import HedGroup, HedGroupFrozen

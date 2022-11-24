@@ -64,7 +64,7 @@ class HedString(HedGroup):
             If schema is None, still identify "key" tags such as definitions.
 
         Parameters:
-            hed_schema (HedSchema or None): The schema to use to validate/convert tags.
+            hed_schema (HedSchema, HedSchemaGroup, None): The schema to use to validate/convert tags.
 
         Returns:
             list: A list of issues found while converting the string. Each issue is a dictionary.

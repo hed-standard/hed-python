@@ -5,6 +5,7 @@ from pandas import DataFrame
 from hed.errors.exceptions import HedFileError
 
 
+
 def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')):
     """ Return a list of the specified columns that are missing from a dataframe.
 

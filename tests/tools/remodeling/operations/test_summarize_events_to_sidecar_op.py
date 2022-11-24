@@ -66,11 +66,11 @@ class Test(unittest.TestCase):
         self.assertEqual(len(summary1_contents), len(self.sample_columns) - len(self.base_parameters["skip_columns"]))
         summary2 = context1.get_summary(as_json=True)
         self.assertIsInstance(summary2, str, "get_summary returns a dictionary if json requested")
-        summary3 = context1.get_text_summary(verbose=False)
+        summary3 = context1.get_text_summary(include_individual=True)
         self.assertIsInstance(summary3, str, "get_text_summary returns a str if verbose is False")
         summary4 = context1.get_text_summary()
         self.assertIsInstance(summary4, str, "get_text_summary returns a str by default")
-        summary5 = context1.get_text_summary(verbose=True)
+        summary5 = context1.get_text_summary(include_individual=True)
         self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
 
 

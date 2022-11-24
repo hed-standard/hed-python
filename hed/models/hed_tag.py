@@ -164,7 +164,7 @@ class HedTag:
 
     @property
     def tag(self):
-        """ Return the entire user editable attribute in the tag.
+        """ Returns the tag.
 
             Returns the original tag if no user form set.
 
@@ -309,7 +309,7 @@ class HedTag:
         """ Update internal state based on schema.
 
         Parameters:
-            hed_schema (HedSchema): The schema to use to validate this tag
+            hed_schema (HedSchema or HedSchemaGroup): The schema to use to validate this tag
 
         Returns:
             list:  A list of issues found during conversion. Each element is a dictionary.

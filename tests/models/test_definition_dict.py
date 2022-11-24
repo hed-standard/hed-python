@@ -1,5 +1,4 @@
 import unittest
-
 from hed.models.definition_dict import DefinitionDict
 from hed.errors import ErrorHandler, DefinitionErrors
 from hed.models.hed_string import HedString
@@ -19,7 +18,7 @@ class TestDefBase(unittest.TestCase):
             self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
 
 
-class TestDefDict(TestDefBase):
+class TestDefinitionDict(TestDefBase):
     def_contents_string = "(Item/TestDef1,Item/TestDef2)"
     def_contents_string2 = "(Item/TestDef3,Item/TestDef4)"
     basic_definition_string = f"(Definition/TestDef,{def_contents_string})"
