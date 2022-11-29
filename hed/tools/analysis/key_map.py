@@ -144,7 +144,6 @@ class KeyMap:
 
         """
         df = get_new_dataframe(data)
-        remove_quotes(df)
         col_list = df.columns.values.tolist()
         keys_present, keys_missing = separate_values(col_list, self.key_cols)
         if keys_missing and not allow_missing:

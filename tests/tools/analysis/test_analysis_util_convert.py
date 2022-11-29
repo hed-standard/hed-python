@@ -33,7 +33,20 @@ class Test(unittest.TestCase):
         self.assertIsInstance(str3, str)
         self.assertEqual(str3, 'Label/Cond1')
 
-    def test_hed_to_str(self):
+    def test_hed_to_str_other(self):
+        str1 = hed_to_str(None)
+        self.assertFalse(str1)
+        str2 = 'test/node1'
+        str3 = hed_to_str(str2)
+        self.assertIsInstance(str2, str)
+        self.assertEqual(str2, str3)
+        dict1 = {'first': 'Red'}
+        with self.assertRaises(TypeError) as context:
+            hed_to_str(dict1)
+        self.assertEqual(context.exception.args[0], "ContentsWrongClass")
+
+
+    def test_hed_to_str_obj(self):
         str_obj1 = HedString('Label/Cond1')
         str1 = hed_to_str(str_obj1)
         self.assertIsInstance(str1, str)

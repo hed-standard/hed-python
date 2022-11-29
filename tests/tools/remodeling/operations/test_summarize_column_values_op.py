@@ -43,25 +43,26 @@ class Test(unittest.TestCase):
     def test_do_ops(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        dispatch = Dispatcher([], data_root=None)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        sum_op.do_op(dispatch, df1, 'name1')
+        sum_op.do_op(dispatch, dispatch.prep_events(df1), 'name1')
         context1 = dispatch.context_dict.get(parms['summary_name'], None)
         summary1 = context1.summary_dict['name1']
         cat_len = len(summary1.categorical_info)
         self.assertEqual(cat_len, len(self.sample_columns),
                          'do_ops if all columns are categorical summary has same number of columns as df')
-        sum_op.do_op(dispatch, df1a, 'name1')
+        sum_op.do_op(dispatch, dispatch.prep_events(df1a), 'name1')
         self.assertEqual(cat_len, len(self.sample_columns),
                          "do_ops updating does not change number of categorical columns.")
-        sum_op.do_op(dispatch, df1a, 'name2')
+        sum_op.do_op(dispatch, dispatch.prep_events(df1a), 'name2')
 
     def test_get_summary(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        dispatch = Dispatcher([], data_root=None)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df1 = dispatch.prep_events(df1)
         sum_op.do_op(dispatch, df1, 'name1')
         sum_op.do_op(dispatch, df1, 'name2')
         sum_op.do_op(dispatch, df1, 'name3')
@@ -86,11 +87,11 @@ class Test(unittest.TestCase):
         with open(column_summary_path, 'r') as fp:
             parms = json.load(fp)
         parsed_commands, errors = Dispatcher.parse_operations(parms)
-        dispatch = Dispatcher([], data_root=None, hed_versions=['8.1.0'])
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(events)
         old_len = len(df)
         sum_op = parsed_commands[1]
-        df = sum_op.do_op(dispatch, df, os.path.basename(events))
+        df = sum_op.do_op(dispatch, dispatch.prep_events(df), os.path.basename(events))
         self.assertEqual(len(df), old_len)
         context_dict = dispatch.context_dict
         for key, item in context_dict.items():

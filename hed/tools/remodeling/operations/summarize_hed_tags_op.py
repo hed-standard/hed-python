@@ -30,7 +30,7 @@ class SummarizeHedTagsOp(BaseOp):
             "summary_name": str,
             "summary_filename": str,
             "tags": dict,
-            "use_context": bool
+            "expand_context": bool
         },
         "optional_parameters": {
         }
@@ -45,7 +45,7 @@ class SummarizeHedTagsOp(BaseOp):
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.tags = parameters['tags']
-        self.use_context = parameters['use_context']
+        self.expand_context = parameters['expand_context']
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns corresponding to values in a specified column.
@@ -67,7 +67,8 @@ class SummarizeHedTagsOp(BaseOp):
         if not summary:
             summary = HedTagSummaryContext(self)
             dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': df, 'name': name, 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
+        summary.update_context({'df': dispatcher.post_prep_events(df), 'name': name,
+                                'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df
 
 
@@ -76,7 +77,7 @@ class HedTagSummaryContext(BaseContext):
     def __init__(self, sum_op):
         super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
         self.tags = sum_op.tags
-        self.use_context = sum_op.use_context
+        self.expand_context = sum_op.expand_context
 
     def update_context(self, new_context):
         counts = HedTagCounts(new_context['name'])

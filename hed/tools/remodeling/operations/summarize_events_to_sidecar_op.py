@@ -60,7 +60,7 @@ class SummarizeEventsToSidecarOp(BaseOp):
         if not summary:
             summary = EventsToSidecarSummary(self)
             dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': df})
+        summary.update_context({'df': dispatcher.post_prep_events(df)})
         return df
 
 

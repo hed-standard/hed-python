@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
             "remove_types": []
         }
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([], hed_versions=['8.1.0'])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
 
     @classmethod
     def tearDownClass(cls):

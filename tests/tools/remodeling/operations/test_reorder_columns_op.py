@@ -44,19 +44,23 @@ class Test(unittest.TestCase):
         cls.reordered_keep_columns = ['onset', 'duration', 'response_time', 'trial_type',
                                       'stop_signal_delay', 'response_accuracy', 'response_hand', 'sex']
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_events(df), 'run-01')
+        return df, self.dispatch.post_prep_events(df_new)
+
     def test_valid_no_keep_others_ignore_missing(self):
         # Test no extras no keep and ignore missing
         parms = json.loads(self.json_parms)
         op = ReorderColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_new = self.get_dfs(op)
+        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         self.assertTrue(self.reordered_columns == list(df_new.columns),
                         "reorder_columns resulting df should have correct columns when no extras, no keep, and ignore")
         self.assertEqual(len(df), len(df_new),
@@ -66,9 +70,9 @@ class Test(unittest.TestCase):
                         "reorder_column should have expected values when no extras, no keep, and ignore")
 
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df1.columns),
                         "reorder_columns should not change the input df columns when no extras, no keep, and ignore")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df1.to_numpy()),
                         "reorder_columns should not change the input df values when no extras, no keep, and ignore")
 
     def test_valid_extras_no_keep_others_ignore_missing(self):
@@ -76,10 +80,9 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         parms["column_order"] = ["onset", "duration", "response_time", "apples", "trial_type"]
         op = ReorderColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        num_test_rows = len(df_test)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_new = self.get_dfs(op)
+        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        num_test_rows = len(df1)
         self.assertTrue(self.reordered_columns == list(df_new.columns),
                         "reorder_columns resulting df should have correct columns when extras, no keep, and ignore")
         self.assertEqual(num_test_rows, len(df_new),
@@ -89,9 +92,9 @@ class Test(unittest.TestCase):
                         "reorder_columns should have expected values when extras, no keep, and ignore")
 
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df1.columns),
                         "reorder_columns should not change the input df columns when extras, no keep, and ignore")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df1.to_numpy()),
                         "reorder_columns should not change the input df values when extras, no keep, and ignore")
 
     def test_invalid_extras_no_keep_others_no_ignore_missing(self):
@@ -100,9 +103,8 @@ class Test(unittest.TestCase):
         parms["column_order"] = ["onset", "duration", "response_time", "apples", "trial_type"]
         parms["ignore_missing"] = False
         op = ReorderColumnsOp(parms)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         with self.assertRaises(ValueError) as context:
-            op.do_op(self.dispatch, df_test, 'sample_data')
+            self.get_dfs(op)
         self.assertEqual(context.exception.args[0], 'MissingReorderedColumns')
 
     def test_valid_keep_others_ignore_missing(self):
@@ -111,18 +113,18 @@ class Test(unittest.TestCase):
         parms["column_order"] = ["onset", "duration", "response_time", "apples", "trial_type"]
         parms["keep_others"] = True
         op = ReorderColumnsOp(parms)
+        df, df_new = self.get_dfs(op)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         self.assertTrue(self.reordered_keep_columns == list(df_new.columns),
                         "reorder_columns resulting df should have correct columns when extras, keep, and ignore")
         self.assertEqual(len(df), len(df_new),
                          "reorder_columns should not change the number of events when extras, keep, and ignore")
 
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df1.columns),
                         "reorder_columns should not change the input df columns when extras, keep, and ignore")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df1.to_numpy()),
                         "reorder_columns should not change the input df values when extras, keep, and ignore")
 
 

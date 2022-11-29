@@ -80,11 +80,10 @@ class Dispatcher:
             actual_path = file_path
 
         try:
-            df = pd.read_csv(actual_path, sep='\t', header=0)
+            df = pd.read_csv(actual_path, sep='\t', header=0, keep_default_na=False, na_values=",null")
         except Exception:
             raise HedFileError("BadDataFile",
                                f"{str(actual_path)} (orig: {file_path}) does not correspond to a valid tsv file", "")
-        df = self.prep_events(df)
         return df
 
     def get_context_save_dir(self):
@@ -111,10 +110,10 @@ class Dispatcher:
         if verbose:
             print(f"Reading {file_path}...")
         df = self.get_data_file(file_path)
+        df = self.prep_events(df)
         for operation in self.parsed_ops:
             df = operation.do_op(self, df, file_path, sidecar=sidecar)
-        df = df.fillna('n/a')
-        return df
+        return self.post_prep_events(df)
 
     def save_context(self, save_formats=['.json', '.txt'], include_individual=True):
         """ Save the summary files in the specified formats.
@@ -150,7 +149,7 @@ class Dispatcher:
                                    f"Operation {str(item)} does not have a parameters key")
                 if item["operation"] not in valid_operations:
                     raise KeyError("OperationNotListedAsValid",
-                                   f"Operation {item['operation']} must be added to operations_list"
+                                   f"Operation {item['operation']} must be added to operations_list "
                                    f"before it can be executed.")
                 new_operation = valid_operations[item["operation"]](item["parameters"])
                 operations.append(new_operation)
@@ -169,8 +168,20 @@ class Dispatcher:
             df (DataFrame) - The DataFrame to be processed.
 
         """
-        df = df.replace('n/a', np.NaN)
-        return df
+        return df.replace('n/a', np.NaN)
+
+    @staticmethod
+    def post_prep_events(df):
+        """ Replace all nan entries with 'n/a' for BIDS compliance
+
+        Parameters:
+            df (DataFrame): The DataFrame to be processed.
+
+        Returns:
+            DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'
+
+        """
+        return df.fillna('n/a')
 
     @staticmethod
     def errors_to_str(messages, title="", sep='\n'):

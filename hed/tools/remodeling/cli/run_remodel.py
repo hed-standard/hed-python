@@ -15,7 +15,7 @@ def get_parser():
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
                         help="File extensions to allow in locating files.")
-    parser.add_argument("-x", "--exclude-dirs", nargs="*", default=[], dest="exclude_dirs",
+    parser.add_argument("-x", "--exclude-dirs", nargs="*", default=['derivatives'], dest="exclude_dirs",
                         help="Directories names to exclude from search for files.")
     parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events',
                         help="Filename suffix excluding file type of items to be analyzed (events by default).")

@@ -24,29 +24,32 @@ class Test(unittest.TestCase):
             "ignore_missing": True
         }
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_events(df), 'run-01')
+        return df, self.dispatch.post_prep_events(df_new)
+
     def test_valid_no_extras_ignore_missing(self):
         # Test when no extras but ignored.
         parms = json.loads(self.json_parms)
         op = RemoveColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_new = self.get_dfs(op)
         remaining_columns = ['onset', 'duration', 'trial_type', 'response_time', 'response_hand', 'sex']
         self.assertTrue(remaining_columns == list(df_new.columns),
                         "remove_columns resulting df should have correct columns")
-        self.assertEqual(len(df_test), len(df_new),
+        self.assertEqual(len(df), len(df_new),
                          "remove_columns should not change the number of events when no extras and ignored")
 
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df.columns),
                         "remove_columns should not change the input df columns when no extras and ignore missing")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df.to_numpy()),
                         "remove_columns should not change the input df values when no extras and ignore missing")
 
     def test_valid_extras_ignore_missing(self):
@@ -54,9 +57,7 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         parms["remove_names"].append("face")
         op = RemoveColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_new = self.get_dfs(op)
         remaining_columns = ['onset', 'duration', 'trial_type', 'response_time', 'response_hand', 'sex']
         self.assertTrue(remaining_columns == list(df_new.columns),
                         "remove_columns resulting df should have correct columns when extras ignored")
@@ -64,9 +65,10 @@ class Test(unittest.TestCase):
                          "remove_columns should not change the number of events when extras but ignored")
 
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        self.assertTrue(list(df1.columns) == list(df.columns),
                         "remove_columns should not change the input df columns when extras and ignore missing")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df1.to_numpy(), df.to_numpy()),
                         "remove_columns should not change the input df values when extras and ignore missing")
 
     def test_valid_no_extras_no_ignore(self):
@@ -74,9 +76,8 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         parms["ignore_missing"] = False
         op = RemoveColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df, df_new = self.get_dfs(op)
         remaining_columns = ['onset', 'duration', 'trial_type', 'response_time', 'response_hand', 'sex']
         self.assertTrue(remaining_columns == list(df_new.columns),
                         "remove_columns resulting df should have correct columns when no extras but not ignored")
@@ -84,9 +85,9 @@ class Test(unittest.TestCase):
                          "remove_columns should not change the number of events when no extras but not ignored")
 
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df1.columns),
                         "remove_columns should not change the input df columns when no extras and not ignored")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df1.to_numpy()),
                         "remove_columns should not change the input df values when no extras and not ignored")
 
     def test_invalid_extras_no_ignore(self):
@@ -95,9 +96,8 @@ class Test(unittest.TestCase):
         parms["remove_names"].append("face")
         parms["ignore_missing"] = False
         op = RemoveColumnsOp(parms)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         with self.assertRaises(KeyError) as context:
-            op.do_op(self.dispatch, df_test, 'sample_data')
+            self.get_dfs(op)
         self.assertEqual(context.exception.args[0], "MissingColumnCannotBeRemoved")
 
 

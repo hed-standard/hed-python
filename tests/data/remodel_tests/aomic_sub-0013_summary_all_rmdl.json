@@ -24,7 +24,8 @@
         "parameters": {
             "summary_name": "AOMIC_condition_variables",
             "summary_filename": "AOMIC_condition_variables",
-            "type_tag": "condition-variable"
+            "type_tag": "condition-variable",
+            "expand_context": false
         }
     }
 ]

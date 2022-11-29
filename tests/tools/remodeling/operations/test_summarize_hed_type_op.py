@@ -17,9 +17,10 @@ class Test(unittest.TestCase):
         cls.data_path = os.path.realpath(os.path.join(path, 'sub-002_task-FacePerception_run-1_events.tsv'))
         cls.json_path = os.path.realpath(os.path.join(path, 'task-FacePerception_events.json'))
         base_parameters = {
-            "summary_name": 'get_summary conditions',
+            "summary_name": 'get summary conditions',
             "summary_filename": 'summarize_condition_variable_type',
-            "type_tag": "condition-variable"
+            "type_tag": "condition-variable",
+            "expand_context": False
         }
         cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                            [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
@@ -31,7 +32,7 @@ class Test(unittest.TestCase):
                               'response_accuracy', 'response_hand', 'sex']
 
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([], hed_versions=['8.1.0'])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         cls.events = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                    '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
         cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -60,17 +61,18 @@ class Test(unittest.TestCase):
             parms = json.load(fp)
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         self.assertFalse(errors)
-        dispatch = Dispatcher([], data_root=None, hed_versions=['8.1.0'])
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(self.events)
         old_len = len(df)
         sum_op = parsed_commands[2]
-        df = sum_op.do_op(dispatch, df, os.path.basename(self.events), sidecar=sidecar)
+        df = sum_op.do_op(dispatch, dispatch.prep_events(df), os.path.basename(self.events), sidecar=sidecar)
         self.assertEqual(len(df), old_len)
         context_dict = dispatch.context_dict
         self.assertIsInstance(context_dict, dict)
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         self.assertIsInstance(context1, HedTypeSummaryContext)
         text_summary1 = context1.get_text_summary()
+        print(text_summary1)
         self.assertIsInstance(text_summary1, str)
 
 

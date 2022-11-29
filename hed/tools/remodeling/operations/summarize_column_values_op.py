@@ -61,7 +61,7 @@ class SummarizeColumnValuesOp(BaseOp):
         if not summary:
             summary = ColumnValueSummaryContext(self)
             dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': df, 'name': name})
+        summary.update_context({'df': dispatcher.post_prep_events(df), 'name': name})
         return df
 
 

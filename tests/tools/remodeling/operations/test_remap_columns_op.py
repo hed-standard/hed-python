@@ -29,21 +29,24 @@ class Test(unittest.TestCase):
                 "ignore_missing": True
             }
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=None)
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_events(df), 'run-01')
+        return df, self.dispatch.post_prep_events(df_new)
+
     def test_valid(self):
         # Test when no extras but ignored.
         parms = json.loads(self.json_parms)
         op = RemapColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_test = self.get_dfs(op)
         self.assertNotIn("response_type", df.columns, "remap_columns before does not have response_type column")
-        self.assertIn("response_type", df_new.columns, "remap_columns after has response_type column")
+        self.assertIn("response_type", df_test.columns, "remap_columns after has response_type column")
 
     def test_invalid_params(self):
         parms1 = json.loads(self.json_parms)
@@ -72,11 +75,9 @@ class Test(unittest.TestCase):
         after_len = len(parms["map_list"])
         self.assertEqual(after_len + 1, before_len)
         op = RemapColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_test = self.get_dfs(op)
         self.assertNotIn("response_type", df.columns, "remap_columns before does not have response_type column")
-        self.assertIn("response_type", df_new.columns, "remap_columns after has response_type column")
+        self.assertIn("response_type", df_test.columns, "remap_columns after has response_type column")
 
     def test_invalid_missing(self):
         # Test when no extras but ignored.
@@ -87,9 +88,8 @@ class Test(unittest.TestCase):
         after_len = len(parms["map_list"])
         self.assertEqual(after_len + 1, before_len)
         op = RemapColumnsOp(parms)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         with self.assertRaises(ValueError) as context:
-            op.do_op(self.dispatch, df_test, 'sample_data')
+            self.get_dfs(op)
         self.assertEqual(context.exception.args[0], 'MapSourceValueMissing')
 
 
