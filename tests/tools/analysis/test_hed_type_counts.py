@@ -23,13 +23,13 @@ class Test(unittest.TestCase):
         input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         hed_strings1 = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
         definitions1 = input_data.get_definitions(as_strings=False).gathered_defs
-        cls.var_type1 = HedTypeValues(HedContextManager(hed_strings1, schema), definitions1,
+        cls.var_type1 = HedTypeValues(HedContextManager(hed_strings1, schema), definitions1, 'run-01',
                                       type_tag='condition-variable')
 
     def test_type_count_one_level(self):
-        type_counts1 = HedTypeCounts(type_tag="condition-variable")
+        type_counts1 = HedTypeCounts('Dummy', "condition-variable")
         self.assertIsInstance(type_counts1, HedTypeCounts, "Constructor should create a HedTypeCounts")
-        count1 = HedTypeCount('key-assignment', 'condition-variable')
+        count1 = HedTypeCount('key-assignment', 'condition-variable', 'run-01')
         self.assertEqual(0, count1.direct_references, "get_summary")
         var1 = self.var_type1.get_type_value_factors('key-assignment')
         count1.update(var1.get_summary(), 'run-1')
@@ -44,7 +44,7 @@ class Test(unittest.TestCase):
         self.assertEqual(2, count1.level_counts['right-sym-cond']['files'])
 
     def test_get_summary_multiple_levels(self):
-        counts = HedTypeCounts(type_tag="condition-variable")
+        counts = HedTypeCounts('Dummy', "condition-variable")
         self.assertIsInstance(counts, HedTypeCounts, "Constructor should create a HedTypeCounts")
         counts.update_summary(self.var_type1.get_summary(), 'run-1')
         type_dict = counts.type_dict

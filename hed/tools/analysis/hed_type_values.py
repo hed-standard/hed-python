@@ -9,19 +9,20 @@ from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 class HedTypeValues:
 
-    def __init__(self, context_manager, definitions, type_tag="condition-variable"):
+    def __init__(self, context_manager, definitions, name, type_tag="condition-variable"):
         """ Create a variable manager for one type-variable for one tabular file.
 
         Parameters:
             context_manager (HedContextManager): A list of HED strings.
             definitions (dict): A dictionary of DefinitionEntry objects.
+            name (str): Name of the tabular file as a unique identifier.
             type_tag (str): Lowercase short form of the tag to be managed.
 
         Raises:
             HedFileError:  On errors such as unmatched onsets or missing definitions.
 
         """
-
+        self.name = name
         self.type_tag = type_tag.lower()
         self.definitions = HedTypeDefinitions(definitions, context_manager.hed_schema, type_tag=type_tag)
         hed_strings = context_manager.hed_strings
@@ -61,8 +62,10 @@ class HedTypeValues:
         return list(self._type_value_map.keys())
 
     def get_summary(self):
-        summary = self._type_value_map.copy()
-        for var_name, var_sum in summary.items():
+        var_summary = self._type_value_map.copy()
+        summary = {}
+        for var_name, var_sum in var_summary.items():
+            y = var_sum.get_summary()
             summary[var_name] = var_sum.get_summary()
         return summary
 

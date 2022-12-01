@@ -50,7 +50,7 @@ class HedTagCounts:
 
     """
 
-    def __init__(self, type_tag="condition-variable", name=""):
+    def __init__(self, name=""):
         self.tag_dict = {}
         self.name = name
 

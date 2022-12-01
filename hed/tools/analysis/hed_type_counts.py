@@ -11,40 +11,44 @@ class HedTypeCount:
 
     """
 
-    def __init__(self, type_value, type_tag):
+    def __init__(self, type_value, type_tag, file_name=None):
+
         self.type_value = type_value
         self.type_tag = type_tag.lower()
         self.direct_references = 0
         self.total_events = 0
         self.events = 0
         self.files = {}
-        self.multiple_events = 0
-        self.multiple_event_maximum = 0
+        if file_name:
+            self.files[file_name] = ''
+        self.events_with_multiple_refs = 0
+        self.max_refs_per_event = 0
         self.level_counts = {}
 
-    def update(self, type_sum, name=None):
+    def update(self, type_sum, file_id):
         """ Update the counts from a HedTypeValues.
 
         Parameters:
             type_sum (dict): Information about the contents for a particular data file.
-            name (str or None):  Name of the file associated with the counts.
+            file_id (str or None):  Name of the file associated with the counts.
 
         """
 
         self.direct_references += type_sum['direct_references']
         self.total_events += type_sum['total_events']
         self.events += type_sum['events']
-        if name:
-            self.files[name] = ''
-        self.multiple_events += type_sum['multiple_events']
-        self.multiple_event_maximum = max(self.multiple_event_maximum, type_sum['multiple_event_maximum'])
+        file_dict = self.files
+        if file_id:
+            self.files[file_id] = ''
+        self.events_with_multiple_refs += type_sum['events_with_multiple_refs']
+        self.max_refs_per_event = max(self.max_refs_per_event, type_sum['max_refs_per_event'])
         self._update_levels(type_sum.get('level_counts', {}))
 
     def to_dict(self):
         return {'type_value': self.type_value, 'type_tag': self.type_tag,
                 'direct_references': self.direct_references, 'total_events': self.total_events,
-                'events': self.events, 'files': self.files, 'multiple_events': self.multiple_events,
-                'multiple_event_maximum': self.multiple_event_maximum, 'level_counts': self.level_counts}
+                'events': self.events, 'files': self.files, 'events_with_multiple_refs': self.events_with_multiple_refs,
+                'max_refs_per_event': self.max_refs_per_event, 'level_counts': self.level_counts}
 
     def _update_levels(self, level_dict):
         for key, item in level_dict.items():
@@ -69,8 +73,8 @@ class HedTypeCount:
                    'direct_references': self.direct_references,
                    'total_events': self.total_events,
                    'events': self.events,
-                   'multiple_events': self.multiple_events,
-                   'multiple_event_maximum': self.multiple_event_maximum,
+                   'events_with_multiple_refs': self.events_with_multiple_refs,
+                   'max_refs_per_event': self.max_refs_per_event,
                    'files': list(self.files.keys())}
         if self.level_counts:
             summary['level_counts'] = self.level_counts
@@ -83,12 +87,13 @@ class HedTypeCounts:
 
     """
 
-    def __init__(self, type_tag="", name=""):
+    def __init__(self, name, type_tag, files={}):
         self.name = name
         self.type_tag = type_tag
+        self.files = files
         self.type_dict = {}
 
-    def update_summary(self, type_sum, file_id):
+    def update_summary(self, type_sum, file_id=None):
         """ Update this summary based on the type variable map.
 
         Parameters:
@@ -98,9 +103,10 @@ class HedTypeCounts:
 
         for type_val, type_counts in type_sum.items():
             if type_val not in self.type_dict:
-                self.type_dict[type_val] = HedTypeCount(type_val, self.type_tag)
+                self.type_dict[type_val] = HedTypeCount(type_val, self.type_tag, file_id)
             val_counts = self.type_dict[type_val]
             val_counts.update(type_counts, file_id)
+        self.files[file_id] = ''
 
     def add_descriptions(self, type_defs):
         """ Update this summary based on the type variable map.
@@ -123,12 +129,12 @@ class HedTypeCounts:
     def update_dict(self, other_dict):
         for key, count in other_dict.items():
             if key not in self.type_dict:
-                self.type_dict[key] = HedTypeCount(count.type_value, count.type_tag)
+                self.type_dict[key] = HedTypeCount(count.type_value, count.type_tag, None)
             this_count = self.type_dict[key]
-            this_count.update(count.to_dict())
+            this_count.update(count.to_dict(), None)
 
     def get_summary(self):
         details = {}
         for type_value, count in self.type_dict.items():
             details[type_value] = count.get_summary()
-        return {'name': str(self.name), 'type tag': self.type_tag, 'details': details}
+        return {'name': str(self.name), 'type_tag': self.type_tag, 'details': details}

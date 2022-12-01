@@ -54,6 +54,19 @@ class Test(unittest.TestCase):
         self.assertEqual(200, len(df_new), "summarize_hed_type_op dataframe length is correct")
         self.assertEqual(10, len(list(df_new.columns)), "summarize_hed_type_op has correct number of columns")
 
+    def test_summary(self):
+        with open(self.summary_path, 'r') as fp:
+            parms = json.load(fp)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        df = dispatch.get_data_file(self.events)
+        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        sum_op = parsed_commands[2]
+        df = sum_op.do_op(dispatch, dispatch.prep_events(df), os.path.basename(self.events), sidecar=self.sidecar_path)
+        context1 = dispatch.context_dict['AOMIC_condition_variables']
+        summary1 = context1.get_summary()
+        print(f"{str(summary1)}")
+        print("to here")
+
     def test_text_summary(self):
         sidecar = Sidecar(self.sidecar_path, 'aomic_sidecar', hed_schema=self.hed_schema)
 
@@ -72,7 +85,7 @@ class Test(unittest.TestCase):
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         self.assertIsInstance(context1, HedTypeSummaryContext)
         text_summary1 = context1.get_text_summary()
-        print(text_summary1)
+        print(f"{text_summary1}")
         self.assertIsInstance(text_summary1, str)
 
 

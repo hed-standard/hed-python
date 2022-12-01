@@ -32,7 +32,7 @@ class SummarizeHedTypeOp(BaseOp):
         }
     }
 
-    SUMMARY_TYPE = 'hed_type'
+    SUMMARY_TYPE = 'hed_type_summary'
 
     def __init__(self, parameters):
         super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
@@ -74,15 +74,19 @@ class HedTypeSummaryContext(BaseContext):
         self.type_tag = sum_op.type_tag
 
     def _get_result_string(self, name, result):
-        sum_list = [f"\n{name}\n\tMain tags[events,files]:"]
-        if result.get('Main tags', ""):
-            for category, tags in result['Main tags'].items():
-                sum_list.append(f"\t\t{category}:")
-                if tags:
-                    sum_list.append(f"\t\t\t{' '.join(self._tag_details(tags))}")
-        if result.get('Other tags', ""):
-            sum_list.append(f"\tOther tags[events,files]:")
-            sum_list.append(f"\t\t{' '.join(self._tag_details(result['Other tags']))}")
+        sum_list = [f"\n{result['name']}: {result['type_tag']}"]
+        details = result.get('details', {})
+        for key, item in details.items():
+            sum_list.append(f"\t{key}:")
+            sum_list.append(f"\t\tLevels: {item['levels']}  Direct references: {item['direct_references']}")
+            str1 = f"\t\tEvents: {item['events']} out of {item['total_events']} total events " + \
+                   f"in {len(item['files'])} files"
+
+            if item['events_with_multiple_refs']:
+                str1 = str1 + f" (Events with multiple refs: {item['events_with_multiple_refs']})"
+            sum_list.append(str1)
+            if item['level_counts']:
+                sum_list = sum_list + self._level_details(item['level_counts'])
         return "\n".join(sum_list)
 
     def update_context(self, new_context):
@@ -90,8 +94,10 @@ class HedTypeSummaryContext(BaseContext):
         hed_strings = get_assembled_strings(input_data, hed_schema=new_context['schema'], expand_defs=False)
         definitions = input_data.get_definitions().gathered_defs
         context_manager = HedContextManager(hed_strings, new_context['schema'])
-        type_values = HedTypeValues(context_manager, definitions, type_tag=self.type_tag)
-        counts = HedTypeCounts(self.type_tag, name=new_context['name'])
+        type_values = HedTypeValues(context_manager, definitions, new_context['name'], type_tag=self.type_tag)
+
+        counts = HedTypeCounts(new_context['name'], self.type_tag, files={type_values.name: ''})
+        x = type_values.get_summary()
         counts.update_summary(type_values.get_summary(), new_context['name'])
         counts.add_descriptions(type_values.definitions)
         self.summary_dict[new_context["name"]] = counts
@@ -109,7 +115,18 @@ class HedTypeSummaryContext(BaseContext):
             Abstract method be implemented by each individual context summary.
 
         """
-        all_counts = HedTypeCounts(name='Dataset')
+        all_counts = HedTypeCounts('Dataset', self.type_tag)
         for key, counts in self.summary_dict.items():
             all_counts.update_dict(counts.type_dict)
         return all_counts
+
+    @staticmethod
+    def _level_details(level_counts):
+        level_list = [f"\t\tLevels:"]
+        for key, details in level_counts.items():
+            level_list.append(f"\t\t\t{key} [Events:{details['events']}, Files:{details['files']}]")
+            if details['description']:
+                level_list.append(f"\t\t\t\tDescription: {details['description']}")
+            if details['tags']:
+                level_list.append(f"\t\t\t\tTags: {str(details['tags'])}")
+        return level_list

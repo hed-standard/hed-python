@@ -7,32 +7,24 @@ class HedTypeFactors:
 
     ALLOWED_ENCODINGS = ("categorical", "one-hot")
 
-    def __init__(self, type_tag, type_value, number_elements, name=None):
+    def __init__(self, type_tag, type_value, number_elements):
         """ Constructor for HedTypeFactors.
 
         Parameters:
             type_value (str): The value of the type summarized by this class.
             number_elements (int): Number of elements in the data column
             type_tag (str):  Lowercase string corresponding to a HED tag which has a takes value child.
-            name (str or None): Identifying name for these factors (e.g., file_name).
+
         """
 
-        self.name = name
         self.type_value = type_value
         self.number_elements = number_elements
         self.type_tag = type_tag.lower()
         self.levels = {}
         self.direct_indices = {}
 
-    @property
-    def str_name(self):
-        if self.name:
-            str_name = self.name
-        else:
-            str_name = ''
-
     def __str__(self):
-        return f"{self.str_name}[{self.type_value},{self.type_tag}]: {self.number_elements} elements " + \
+        return f"[{self.type_value},{self.type_tag}]: {self.number_elements} elements " + \
             f"{str(self.levels)} levels {len(self.direct_indices)} references"
 
     def get_factors(self, factor_encoding="one-hot"):
@@ -90,10 +82,10 @@ class HedTypeFactors:
             for index, item in cond.items():
                 count_list[index] = count_list[index] + 1
         number_events, number_multiple, max_multiple = self._count_level_events(count_list)
-        summary = {'name': str(self.name), 'type_value': self.type_value, 'type_tag': self.type_tag,
+        summary = {'type_value': self.type_value, 'type_tag': self.type_tag,
                    'levels': len(self.levels.keys()), 'direct_references': len(self.direct_indices.keys()),
                    'total_events': self.number_elements, 'events': number_events,
-                   'multiple_events': number_multiple, 'multiple_event_maximum': max_multiple,
+                   'events_with_multiple_refs': number_multiple, 'max_refs_per_event': max_multiple,
                    'level_counts': self._get_level_counts()}
         return summary
 

@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
         cls.schema = schema
 
     def test_with_mixed(self):
-        var_manager = HedTypeValues(HedContextManager(self.test_strings1, self.schema), self.defs)
+        var_manager = HedTypeValues(HedContextManager(self.test_strings1, self.schema), self.defs, 'run-01')
         var_facts = var_manager.get_type_value_factors('fast')
         self.assertIsInstance(var_facts, HedTypeFactors)
         df = var_facts.get_factors()
@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
     def test_tabular_input(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema), definitions)
+        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema), definitions, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from a tabular input")
         var_fact = var_manager.get_type_value_factors('face-type')
@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df2.columns), 1)
 
     def test_constructor_multiple_values(self):
-        var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs)
+        var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from strings")
         self.assertEqual(len(var_manager._type_value_map), 3,
@@ -110,11 +110,11 @@ class Test(unittest.TestCase):
 
     def test_constructor_unmatched(self):
         with self.assertRaises(HedFileError) as context:
-            HedTypeValues(HedContextManager(self.test_strings3, self.schema), self.defs)
+            HedTypeValues(HedContextManager(self.test_strings3, self.schema), self.defs, 'run-01')
         self.assertEqual(context.exception.args[0], 'UnmatchedOffset')
 
     def test_variable_summary(self):
-        var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs)
+        var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from strings")
         self.assertEqual(len(var_manager._type_value_map), 3,
@@ -125,7 +125,7 @@ class Test(unittest.TestCase):
             self.assertIsInstance(summary, dict, "get_summary returns a dictionary summary")
 
     def test_get_variable_factors(self):
-        var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs)
+        var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from strings")
         self.assertEqual(len(var_manager._type_value_map), 3,
@@ -156,7 +156,7 @@ class Test(unittest.TestCase):
     def test_get_summary(self):
         hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeValues(HedContextManager(hed_strings, self.schema), definitions)
+        var_manager = HedTypeValues(HedContextManager(hed_strings, self.schema), definitions, 'run-01')
         var_key = var_manager.get_type_value_factors('key-assignment')
         sum_key = var_key.get_summary()
         self.assertEqual(sum_key['events'], 200, "get_summary has right number of events")

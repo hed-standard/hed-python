@@ -30,7 +30,7 @@ class HedTypeManager:
         if type_name.lower() in self._type_tag_map:
             return
         self._type_tag_map[type_name.lower()] = \
-            HedTypeValues(self.context_manager, self.definitions, type_tag=type_name)
+            HedTypeValues(self.context_manager, self.definitions, 'run-01', type_tag=type_name)
 
     def get_factor_vectors(self, type_tag, type_values=None, factor_encoding="one-hot"):
         """ Return a DataFrame of factor vectors for the indicated HED tag and values

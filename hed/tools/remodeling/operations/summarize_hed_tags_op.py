@@ -36,7 +36,7 @@ class SummarizeHedTagsOp(BaseOp):
         }
     }
 
-    SUMMARY_TYPE = "summarize_hed_tags"
+    SUMMARY_TYPE = "hed_tag_summary"
 
     def __init__(self, parameters):
         super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
