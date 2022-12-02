@@ -117,26 +117,26 @@ class TabularSummary:
         else:
             self._update_dataframe(data)
 
-    def update_summary(self, col_sum):
-        """ Add ColumnSummary values to this object.
+    def update_summary(self, tab_sum):
+        """ Add TabularSummary values to this object.
 
         Parameters:
-            col_sum (BidsTabularSummary):   A ColumnSummary to be combined.
+            tab_sum (TabularSummary):   A TabularSummary to be combined.
 
         Notes:
             - The value_cols and skip_cols are updated as long as they are not contradictory.
             - A new skip column cannot used.
 
         """
-        self._update_dict_skip(col_sum)
-        self._update_dict_value(col_sum)
-        self._update_dict_categorical(col_sum)
+        self._update_dict_skip(tab_sum)
+        self._update_dict_value(tab_sum)
+        self._update_dict_categorical(tab_sum)
 
-    def _update_categorical(self, col_name, values):
-        if col_name not in self.categorical_info:
-            self.categorical_info[col_name] = {}
+    def _update_categorical(self, tab_name, values):
+        if tab_name not in self.categorical_info:
+            self.categorical_info[tab_name] = {}
 
-        total_values = self.categorical_info[col_name]
+        total_values = self.categorical_info[tab_name]
         for name, value in values.items():
             total_values[name] = total_values.get(name, 0) + value
 

@@ -15,7 +15,7 @@
       ~HedDefinitionManager.__init__
       ~HedDefinitionManager.extract_defs
       ~HedDefinitionManager.get_def_names
-      ~HedDefinitionManager.get_vars
+      ~HedDefinitionManager.get_type_values
       ~HedDefinitionManager.remove_defs
       ~HedDefinitionManager.split_name
    

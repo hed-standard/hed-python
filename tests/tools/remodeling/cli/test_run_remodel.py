@@ -107,7 +107,7 @@ class Test(unittest.TestCase):
             self.assertFalse(fp.getvalue())
 
     def test_main_direct_no_sidecar_with_hed(self):
-        arg_list = [self.data_root, self.summary_model_path, '-x', 'derivatives', 'stimuli']
+        arg_list = [self.data_root, self.summary_model_path, '-x', 'derivatives', 'stimuli', '-r', '8.1.0']
         os.remove(self.sidecar_path)
         with patch('sys.stdout', new=io.StringIO()) as fp:
             main(arg_list)
@@ -127,8 +127,9 @@ class Test(unittest.TestCase):
             main(arg_list)
             self.assertTrue(fp.getvalue())
 
-    def test_main_bids_no_sidecar_with_hed(self):
-        arg_list = [self.data_root, self.summary_model_path, '-x', 'derivatives', 'stimuli', '-t', 'FacePerception']
+    def test_main_bids_no_sidecar_with_hed_task(self):
+        arg_list = [self.data_root, self.summary_model_path, '-x', 'derivatives', 'stimuli', '-t', 'FacePerception',
+                    '-r', '8.1.0']
         os.remove(self.sidecar_path)
         with patch('sys.stdout', new=io.StringIO()) as fp:
             main(arg_list)

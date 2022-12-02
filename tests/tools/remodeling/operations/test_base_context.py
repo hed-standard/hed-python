@@ -9,11 +9,14 @@ class TestContext(BaseContext):
     def __init__(self):
         super().__init__("TestContext", "Test", "test_context")
 
-    def get_summary_details(self, verbose=True):
+    def _get_summary_details(self, include_individual=True):
         summary = {"name": self.context_name}
-        if verbose:
+        if include_individual:
             summary["more"] = "more stuff"
         return summary
+
+    def _merge_all(self):
+        return {"merged": self.context_name}
 
     def update_context(self, context_dict):
         pass
@@ -47,7 +50,7 @@ class Test(unittest.TestCase):
         self.assertTrue(str1)
         str2 = test.get_text_summary(title='this title')
         self.assertGreater(len(str2), len(str1))
-        str3 = test.get_text_summary(title='this title', verbose=False)
+        str3 = test.get_text_summary(title='this title', include_individual=False)
         self.assertGreater(len(str2), len(str3))
 
     def test_save(self):
@@ -57,7 +60,7 @@ class Test(unittest.TestCase):
         test1.save(self.summary_dir)
         file_list2 = os.listdir(self.summary_dir)
         self.assertEqual(len(file_list2), 1)
-        test1.save(self.summary_dir, file_formats=['.json', '.tsv'], verbose=False)
+        test1.save(self.summary_dir, file_formats=['.json', '.tsv'], include_individual=False)
         file_list3 = os.listdir(self.summary_dir)
         self.assertEqual(len(file_list3), 2)
 

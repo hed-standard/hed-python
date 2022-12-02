@@ -53,7 +53,7 @@ class Test(unittest.TestCase):
                          "dispatcher operation list should have one item for each operation")
 
     def test_constructor_empty_operations(self):
-        disp = Dispatcher([])
+        disp = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         self.assertIsInstance(disp, Dispatcher, "")
         self.assertFalse(disp.parsed_ops, "constructor empty operations list has empty parsed ops")
 

@@ -99,7 +99,7 @@
 # if __name__ == '__main__':
 #     import os
 #     import json
-#     from hed.tools.analysis.hed_variable_manager import HedVariableManager
+#     from hed.tools.analysis.hed_variable_manager import HedTypeManager
 #     from hed.schema import load_schema_version
 #     from hed.models import HedString, DefinitionEntry, TabularInput, Sidecar
 #     from hed.tools.analysis.analysis_util import get_assembled_strings
@@ -141,7 +141,7 @@
 #     }
 #
 #     test_objs1 = [HedString(hed, hed_schema=hed_schema) for hed in test_strings1]
-#     var_manager = HedVariableManager(test_objs1, hed_schema, defs)
+#     var_manager = HedTypeManager(test_objs1, hed_schema, defs)
 #     remove_strings = var_manager.get_variable_tags()
 #     print(f"Remove strings {str(remove_strings)}")
 #     filter1 = RemoveTypeFilter(remove_strings, remove_option="all")

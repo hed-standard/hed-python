@@ -132,7 +132,7 @@ hed.tools.remodeling.operations.split\_event\_op module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.remodeling.operations.summarize\_column\_names\_op module
+hed.tools.remodeling.operations.get_summary\_column\_names\_op module
 -------------------------------------------------------------------
 
 .. automodule:: hed.tools.remodeling.operations.summarize_column_names_op
@@ -140,7 +140,7 @@ hed.tools.remodeling.operations.summarize\_column\_names\_op module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.remodeling.operations.summarize\_column\_values\_op module
+hed.tools.remodeling.operations.get_summary\_column\_values\_op module
 --------------------------------------------------------------------
 
 .. automodule:: hed.tools.remodeling.operations.summarize_column_values_op
@@ -148,7 +148,7 @@ hed.tools.remodeling.operations.summarize\_column\_values\_op module
    :undoc-members:
    :show-inheritance:
 
-hed.tools.remodeling.operations.summarize\_hed\_type\_op module
+hed.tools.remodeling.operations.get_summary\_hed\_type\_op module
 ---------------------------------------------------------------
 
 .. automodule:: hed.tools.remodeling.operations.summarize_hed_type_op

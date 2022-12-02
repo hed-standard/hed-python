@@ -2,15 +2,13 @@
 
 from .analysis.file_dictionary import FileDictionary
 from .analysis.hed_context_manager import OnsetGroup, HedContextManager
-from .analysis.hed_definition_manager import HedDefinitionManager
+from .analysis.hed_type_definitions import HedTypeDefinitions
 from .analysis.hed_type_factors import HedTypeFactors
-from .analysis.hed_type_variable import HedTypeVariable
-from .analysis.hed_variable_manager import HedVariableManager
-from .analysis.hed_variable_summary import HedVariableSummary
-from .analysis.hed_variable_counts import HedVariableCounts
+from .analysis.hed_type_values import HedTypeValues
+from .analysis.hed_type_manager import HedTypeManager
+from .analysis.hed_type_counts import HedTypeCount
 from .analysis.key_map import KeyMap
 from .analysis.tabular_summary import TabularSummary
-from .analysis.tag_summary import TagSummary
 from .bids.bids_dataset import BidsDataset
 from .bids.bids_dataset_summary import BidsDatasetSummary
 from .bids.bids_file import BidsFile

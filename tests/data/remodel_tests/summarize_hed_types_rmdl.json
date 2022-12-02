@@ -5,7 +5,8 @@
         "parameters": {
             "summary_name": "Hed type summary",
             "summary_filename": "hed_type_summary",
-            "type_tag": "condition-variable"
+            "type_tag": "condition-variable",
+            "expand_context": false
         }
     }
 ]

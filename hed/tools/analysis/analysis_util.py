@@ -4,6 +4,9 @@ import pandas as pd
 from hed.models.tabular_input import TabularInput
 from hed.models.expression_parser import TagExpressionParser
 from hed.tools.util.data_util import separate_values
+from hed.models.hed_tag import HedTag
+from hed.models.hed_group_base import HedGroupBase
+from hed.models.hed_string import HedString
 
 
 def assemble_hed(data_input, columns_included=None, expand_defs=False):
@@ -83,3 +86,72 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
         df = data_input.dataframe.iloc[row_numbers][eligible_columns].reset_index()
         df.rename(columns={'index': 'row_number'})
     return df
+
+
+# def remove_defs(hed_strings):
+#     """ This removes any def or Def-expand from a list of HedStrings.
+#
+#     Parameters:
+#         hed_strings (list):  A list of HedStrings
+#
+#     Returns:
+#         list: A list of the removed Defs.
+#
+#     """
+#     def_groups = [[] for i in range(len(hed_strings))]
+#     for index, hed in enumerate(hed_strings):
+#         def_groups[index] = extract_defs(hed)
+#     return def_groups
+#
+#
+# def extract_defs(hed_string_obj):
+#     """ This removes any def or Def-expand from a list of HedStrings.
+#
+#     Parameters:
+#         hed_string_obj (HedString):  A HedString
+#
+#     Returns:
+#         list: A list of the removed Defs.
+#
+#     Notes:
+#         - the hed_string_obj passed in no longer has definitions.
+#
+#     """
+#     to_remove = []
+#     to_append = []
+#     tuples = hed_string_obj.find_def_tags(recursive=True, include_groups=3)
+#     for tup in tuples:
+#         if len(tup[2].children) == 1:
+#             to_append.append(tup[0])
+#         else:
+#             to_append.append(tup[2])
+#         to_remove.append(tup[2])
+#     hed_string_obj.remove(to_remove)
+#     return to_append
+
+
+def hed_to_str(contents, remove_parentheses=False):
+
+    if contents is None:
+        return ''
+    if isinstance(contents, str):
+        return contents
+    if isinstance(contents, HedTag):
+        return str(contents)
+    if isinstance(contents, list):
+        converted = [hed_to_str(element, remove_parentheses) for element in contents if element]
+        return ",".join(converted)
+    if not isinstance(contents, HedGroupBase):
+        raise TypeError("ContentsWrongClass", "OnsetGroup excepts contents that can be converted to string.")
+    if not remove_parentheses or len(contents.children) != 1:
+        return str(contents)
+    return _handle_remove(contents)
+
+
+def _handle_remove(contents):
+    if contents.is_group or isinstance(contents.children[0], HedTag):
+        return str(contents.children[0])
+    child = contents.children[0]
+    if child.is_group and len(child.children) == 1:
+        return str(child.children[0])
+    return str(child)

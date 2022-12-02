@@ -38,12 +38,12 @@ class Dispatcher:
         self.hed_schema = get_schema(hed_versions)
         self.context_dict = {}
 
-    def get_context_summaries(self, file_formats=['.txt', '.json'], verbose=True):
+    def get_context_summaries(self, file_formats=['.txt', '.json'], show_individual=True):
         """ Return the summaries in a dictionary suitable for saving or archiving.
 
         Parameters:
             file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
-            verbose (bool): If true, a more extensive summary is archived.
+            show_individual (bool): If true, individual file summaries are archived.
 
         Returns:
             list: A list of dictionaries of summaries keyed to filenames.
@@ -55,7 +55,7 @@ class Dispatcher:
             file_base = generate_filename(context_item.context_filename, append_datetime=True)
             for file_format in file_formats:
                 if file_format == '.txt':
-                    summary = context_item.get_text_summary(verbose=True)
+                    summary = context_item.get_text_summary(include_individual=True)
                 elif file_format == '.json':
                     summary = context_item.get_summary(as_json=True)
                 else:
@@ -80,11 +80,10 @@ class Dispatcher:
             actual_path = file_path
 
         try:
-            df = pd.read_csv(actual_path, sep='\t', header=0)
+            df = pd.read_csv(actual_path, sep='\t', header=0, keep_default_na=False, na_values=",null")
         except Exception:
             raise HedFileError("BadDataFile",
                                f"{str(actual_path)} (orig: {file_path}) does not correspond to a valid tsv file", "")
-        df = self.prep_events(df)
         return df
 
     def get_context_save_dir(self):
@@ -111,17 +110,17 @@ class Dispatcher:
         if verbose:
             print(f"Reading {file_path}...")
         df = self.get_data_file(file_path)
+        df = self.prep_events(df)
         for operation in self.parsed_ops:
             df = operation.do_op(self, df, file_path, sidecar=sidecar)
-        df = df.fillna('n/a')
-        return df
+        return self.post_prep_events(df)
 
-    def save_context(self, save_formats=['.json', '.txt'], verbose=True):
+    def save_context(self, save_formats=['.json', '.txt'], include_individual=True):
         """ Save the summary files in the specified formats.
 
         Parameters:
-            save_formats (list) list of formats [".txt", ."json"]
-            verbose (bool) If include additional details
+            save_formats (list):  A list of formats [".txt", ."json"]
+            include_individual (bool): If True, include summaries of individual files.
 
         The summaries are saved in the dataset derivatives/remodeling folder.
 
@@ -131,7 +130,7 @@ class Dispatcher:
         summary_path = self.get_context_save_dir()
         os.makedirs(summary_path, exist_ok=True)
         for context_name, context_item in self.context_dict.items():
-            context_item.save(summary_path, save_formats, verbose=verbose)
+            context_item.save(summary_path, save_formats, include_individual=include_individual)
 
     @staticmethod
     def parse_operations(operation_list):
@@ -150,7 +149,7 @@ class Dispatcher:
                                    f"Operation {str(item)} does not have a parameters key")
                 if item["operation"] not in valid_operations:
                     raise KeyError("OperationNotListedAsValid",
-                                   f"Operation {item['operation']} must be added to operations_list"
+                                   f"Operation {item['operation']} must be added to operations_list "
                                    f"before it can be executed.")
                 new_operation = valid_operations[item["operation"]](item["parameters"])
                 operations.append(new_operation)
@@ -169,8 +168,20 @@ class Dispatcher:
             df (DataFrame) - The DataFrame to be processed.
 
         """
-        df = df.replace('n/a', np.NaN)
-        return df
+        return df.replace('n/a', np.NaN)
+
+    @staticmethod
+    def post_prep_events(df):
+        """ Replace all nan entries with 'n/a' for BIDS compliance
+
+        Parameters:
+            df (DataFrame): The DataFrame to be processed.
+
+        Returns:
+            DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'
+
+        """
+        return df.fillna('n/a')
 
     @staticmethod
     def errors_to_str(messages, title="", sep='\n'):

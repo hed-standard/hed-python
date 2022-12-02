@@ -13,12 +13,12 @@
    .. autosummary::
    
       ~HedTypeVariable.__init__
-      ~HedTypeVariable.get_variable
-      ~HedTypeVariable.get_variable_def_names
-      ~HedTypeVariable.get_variable_factors
-      ~HedTypeVariable.get_variable_names
+      ~HedTypeVariable.get_type_value_factors
+      ~HedTypeVariable.get_type_def_names
+      ~HedTypeVariable.get_type_factors
+      ~HedTypeVariable.get_type_value_names
       ~HedTypeVariable.get_variable_type_map
-      ~HedTypeVariable.summarize
+      ~HedTypeVariable.get_summary
    
    
 

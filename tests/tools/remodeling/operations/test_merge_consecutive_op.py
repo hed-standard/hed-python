@@ -39,11 +39,16 @@ class Test(unittest.TestCase):
                 "ignore_missing": True
             }
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
 
     @classmethod
     def tearDownClass(cls):
         pass
+
+    def get_dfs(self, op):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_events(df), 'run-01')
+        return df, self.dispatch.post_prep_events(df_new)
 
     def test_valid(self):
         parms = json.loads(self.json_parms)
@@ -61,24 +66,17 @@ class Test(unittest.TestCase):
         # Test when no extras but ignored.
         parms = json.loads(self.json_parms)
         op = MergeConsecutiveOp(parms)
+        df_test, df_new = self.get_dfs(op)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df = df.replace('n/a', np.NaN)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = df_test.replace('n/a', np.NaN)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
         self.assertTrue(list(df_new.columns) == list(df.columns),
                         "merge_consecutive should not change the number of columns")
-        df_results = pd.DataFrame(self.result_data, columns=self.sample_columns)
-        df_results = df_results.replace('n/a', np.NaN)
-        self.assertTrue(list(df_new.columns) == list(df_results.columns),
-                        "merge_consecutive should has correct number of columns after merge")
         for index, row in df_new.iterrows():
-            if not math.isclose(df_new.loc[index, "onset"], df_results.loc[index, "onset"]):
+            if not math.isclose(df_new.loc[index, "onset"], df_new.loc[index, "onset"]):
                 self.fail(f"merge_consecutive result has wrong onset at {index}: {df_new.loc[index, 'onset']} " +
                           "instead of{df_results.loc[index, 'onset']}")
-            if not math.isclose(df_new.loc[index, "duration"], df_results.loc[index, "duration"]):
+            if not math.isclose(df_new.loc[index, "duration"], df_new.loc[index, "duration"]):
                 self.fail(f"merge_consecutive result has wrong duration at {index}: {df_new.loc[index, 'duration']} " +
-                          f"instead of {df_results.loc[index, 'duration']}")
+                          f"instead of {df_new.loc[index, 'duration']}")
 
         # Test that df has not been changed by the op
         self.assertTrue(list(df.columns) == list(df_test.columns),
@@ -93,16 +91,14 @@ class Test(unittest.TestCase):
 
     def test_do_op_no_set_durations(self):
         # Test when no set duration.
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = df_test.replace('n/a', np.NaN)
         parms1 = json.loads(self.json_parms)
         parms1["set_durations"] = False
         op1 = MergeConsecutiveOp(parms1)
-        df_new1 = op1.do_op(self.dispatch, df_test, 'sample_data')
+        df_test, df_new1 = self.get_dfs(op1)
         parms2 = json.loads(self.json_parms)
         parms2["set_durations"] = True
         op2 = MergeConsecutiveOp(parms2)
-        df_new2 = op2.do_op(self.dispatch, df_test, 'sample_data')
+        df_test2, df_new2 = self.get_dfs(op2)
         self.assertTrue(list(df_new1.columns) == list(df_new2.columns))
         code_mask = df_new1["duration"] != df_new2["duration"]
         self.assertEqual(sum(code_mask.astype(int)), 2)
@@ -112,9 +108,7 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         parms["event_code"] = "baloney"
         op = MergeConsecutiveOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df = df.replace('n/a', np.NaN)
-        df_new = op.do_op(self.dispatch, df, 'sample_data')
+        df, df_new = self.get_dfs(op)
         self.assertEqual(len(df), len(df_new))
 
     def test_get_remove_groups(self):

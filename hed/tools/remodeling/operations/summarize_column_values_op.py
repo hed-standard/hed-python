@@ -59,21 +59,31 @@ class SummarizeColumnValuesOp(BaseOp):
 
         summary = dispatcher.context_dict.get(self.summary_name, None)
         if not summary:
-            summary = ColumnValueSummary(self)
+            summary = ColumnValueSummaryContext(self)
             dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': df})
+        summary.update_context({'df': dispatcher.post_prep_events(df), 'name': name})
         return df
 
 
-class ColumnValueSummary(BaseContext):
+class ColumnValueSummaryContext(BaseContext):
 
     def __init__(self, sum_op):
         super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
-        self.summary = TabularSummary(value_cols=sum_op.value_columns, skip_cols=sum_op.skip_columns,
-                                      name=sum_op.summary_name)
+        self.value_columns = sum_op.value_columns
+        self.skip_columns = sum_op.skip_columns
 
     def update_context(self, new_context):
-        self.summary.update(new_context['df'])
+        name = new_context['name']
+        if name not in self.summary_dict:
+            self.summary_dict[name] = \
+                TabularSummary(value_cols=self.value_columns, skip_cols=self.skip_columns, name=name)
+        self.summary_dict[name].update(new_context['df'])
 
-    def get_summary_details(self, verbose=True):
-        return self.summary.get_summary(as_json=False)
+    def _get_summary_details(self, summary):
+        return summary.get_summary(as_json=False)
+
+    def _merge_all(self):
+        all_sum = TabularSummary(value_cols=self.value_columns, skip_cols=self.skip_columns, name='Dataset')
+        for key, counts in self.summary_dict.items():
+            all_sum.update_summary(counts)
+        return all_sum

@@ -14,6 +14,7 @@ from hed.tools.remodeling.operations.summarize_column_names_op import SummarizeC
 from hed.tools.remodeling.operations.summarize_column_values_op import SummarizeColumnValuesOp
 from hed.tools.remodeling.operations.summarize_events_to_sidecar_op import SummarizeEventsToSidecarOp
 from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp
+from hed.tools.remodeling.operations.summarize_hed_tags_op import SummarizeHedTagsOp
 
 valid_operations = {
     'factor_column': FactorColumnOp,
@@ -31,6 +32,6 @@ valid_operations = {
     'summarize_column_names': SummarizeColumnNamesOp,
     'summarize_column_values': SummarizeColumnValuesOp,
     'summarize_events_to_sidecar': SummarizeEventsToSidecarOp,
-    'summarize_hed_type': SummarizeHedTypeOp
-
+    'summarize_hed_type': SummarizeHedTypeOp,
+    'summarize_hed_tags': SummarizeHedTagsOp
 }

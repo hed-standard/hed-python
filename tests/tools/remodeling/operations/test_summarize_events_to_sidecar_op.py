@@ -38,25 +38,25 @@ class Test(unittest.TestCase):
 
     def test_do_ops(self):
         sum_op = SummarizeEventsToSidecarOp(self.base_parameters)
-        dispatch = Dispatcher([], data_root=None)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        sum_op.do_op(dispatch, df1, 'name1')
+        sum_op.do_op(dispatch, dispatch.prep_events(df1), 'name1')
         context1 = dispatch.context_dict.get(self.base_parameters['summary_name'], None)
         summary = context1.summary
         cat_len = len(summary.categorical_info)
         cat_base = len(self.sample_columns) - len(self.base_parameters["skip_columns"]) -  \
             len(self.base_parameters["value_columns"])
         self.assertEqual(cat_len, cat_base, 'do_ops has right number of categorical columns')
-        sum_op.do_op(dispatch, df1a, 'name1')
+        sum_op.do_op(dispatch, dispatch.prep_events(df1a), 'name1')
         self.assertEqual(len(df1.columns), len(self.sample_columns), "do_ops updating does not change number columns.")
-        sum_op.do_op(dispatch, df1a, 'name2')
+        sum_op.do_op(dispatch, dispatch.prep_events(df1a), 'name2')
 
     def test_get_summary(self):
         sum_op = SummarizeEventsToSidecarOp(self.base_parameters)
-        dispatch = Dispatcher([], data_root=None)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        sum_op.do_op(dispatch, df1, 'name1')
+        sum_op.do_op(dispatch, dispatch.prep_events(df1), 'name1')
         context1 = dispatch.context_dict.get(self.base_parameters['summary_name'], None)
         self.assertIsInstance(context1, EventsToSidecarSummary, "get_summary testing EventsToSidecarSummary")
         summary1 = context1.get_summary()
@@ -66,11 +66,11 @@ class Test(unittest.TestCase):
         self.assertEqual(len(summary1_contents), len(self.sample_columns) - len(self.base_parameters["skip_columns"]))
         summary2 = context1.get_summary(as_json=True)
         self.assertIsInstance(summary2, str, "get_summary returns a dictionary if json requested")
-        summary3 = context1.get_text_summary(verbose=False)
+        summary3 = context1.get_text_summary(include_individual=True)
         self.assertIsInstance(summary3, str, "get_text_summary returns a str if verbose is False")
         summary4 = context1.get_text_summary()
         self.assertIsInstance(summary4, str, "get_text_summary returns a str by default")
-        summary5 = context1.get_text_summary(verbose=True)
+        summary5 = context1.get_text_summary(include_individual=True)
         self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
 
 

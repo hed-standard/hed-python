@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import unittest
 from hed.tools.remodeling.operations.factor_column_op import FactorColumnOp
+from hed.tools.remodeling.dispatcher import Dispatcher
 
 
 class Test(unittest.TestCase):
@@ -51,6 +52,7 @@ class Test(unittest.TestCase):
         self.base_parameters["factor_values"] = []
         op = FactorColumnOp(self.base_parameters)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df = Dispatcher.prep_events(df)
         df_new = op.do_op(None, df, 'sample_data')
         self.assertEqual(len(df_new.columns), len(df.columns) + 3)
 
@@ -58,9 +60,11 @@ class Test(unittest.TestCase):
         # Test correct when all valid and no unwanted information
         op = FactorColumnOp(self.base_parameters)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+
         df_check = pd.DataFrame(self.factored, columns=self.sample_columns + self.base_parameters['factor_names'])
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(None, df_test, 'sample_data')
+        df_new = op.do_op(None, Dispatcher.prep_events(df_test), 'sample_data')
+        df_new = Dispatcher.post_prep_events(df_new)
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with ignore missing")
         self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
@@ -82,7 +86,11 @@ class Test(unittest.TestCase):
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df_check = pd.DataFrame(self.factored, columns=self.sample_columns + self.base_parameters['factor_names'])
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_test = Dispatcher.prep_events(df_test)
         df_new = op.do_op(None, df_test, 'sample_data')
+        df_new = Dispatcher.post_prep_events(df_new)
+        df_test1 = Dispatcher.post_prep_events(df_test)
+
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with no extras and no ignore")
         self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
@@ -93,9 +101,9 @@ class Test(unittest.TestCase):
                         "factor_column should have expected values when no extras and no ignore")
 
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df_test1.columns),
                         "factor_column should not change the input df columns when no extras and no ignore missing")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df_test1.to_numpy()),
                         "factor_column should not change the input df values when no extras and no ignore missing")
 
     def test_valid_factors_extras_ignore(self):
@@ -107,7 +115,9 @@ class Test(unittest.TestCase):
         op = FactorColumnOp(self.base_parameters)
         df_check["baloney"] = [0, 0, 0, 0, 0, 0]
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(None, df_test, 'sample_data')
+        df_new = Dispatcher.prep_events(df_test)
+        df_new = op.do_op(None, df_new, 'sample_data')
+        df_new = Dispatcher.post_prep_events(df_new)
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with extras and ignore missing")
         self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
@@ -134,7 +144,8 @@ class Test(unittest.TestCase):
         op = FactorColumnOp(self.base_parameters)
         df_check["baloney"] = [0, 0, 0, 0, 0, 0]
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(None, df_test, 'sample_data')
+        df_new = op.do_op(None, Dispatcher.prep_events(df_test), 'sample_data')
+        df_new = Dispatcher.post_prep_events(df_new)
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with extras and ignore missing")
         self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),

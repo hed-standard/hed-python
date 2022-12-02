@@ -1,11 +1,11 @@
 import json
 import os
 import unittest
+import pandas as pd
 from hed.models import Sidecar
 from hed.schema import load_schema_version
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp, HedTypeSummary
-from hed.tools import HedVariableSummary
+from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp, HedTypeSummaryContext
 
 
 class Test(unittest.TestCase):
@@ -17,9 +17,10 @@ class Test(unittest.TestCase):
         cls.data_path = os.path.realpath(os.path.join(path, 'sub-002_task-FacePerception_run-1_events.tsv'))
         cls.json_path = os.path.realpath(os.path.join(path, 'task-FacePerception_events.json'))
         base_parameters = {
-            "summary_name": 'summarize conditions',
+            "summary_name": 'get summary conditions',
             "summary_filename": 'summarize_condition_variable_type',
-            "type_tag": "condition-variable"
+            "type_tag": "condition-variable",
+            "expand_context": False
         }
         cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                            [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
@@ -31,7 +32,15 @@ class Test(unittest.TestCase):
                               'response_accuracy', 'response_hand', 'sex']
 
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([], hed_versions=['8.1.0'])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        cls.events = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                   '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
+        cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                         '../../../data/remodel_tests/aomic_sub-0013_events.json'))
+        cls.hed_schema = load_schema_version('8.1.0')
+        cls.summary_path = \
+            os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                          '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
 
     @classmethod
     def tearDownClass(cls):
@@ -41,41 +50,54 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeHedTypeOp(parms)
         self.assertIsInstance(sum_op, SummarizeHedTypeOp, "constructor creates an object of the correct type")
-        df_new = sum_op.do_op(self.dispatch, self.data_path, 'subj2_run1', sidecar=self.json_path)
+        df = pd.read_csv(self.data_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
+        df_new = sum_op.do_op(self.dispatch, df, 'subj2_run1', sidecar=self.json_path)
         self.assertEqual(200, len(df_new), "summarize_hed_type_op dataframe length is correct")
-        self.assertEqual(10, len(df_new.columns), "summarize_hed_type_op has correct number of columns")
+        self.assertEqual(10, len(list(df_new.columns)), "summarize_hed_type_op has correct number of columns")
 
-    def test_summary_op(self):
-        events =  \
-            os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
-        sidecar_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                     '../../../data/remodel_tests/aomic_sub-0013_events.json'))
-        hed_schema = load_schema_version('8.1.0')
-        sidecar = Sidecar(sidecar_path, 'aomic_sidecar', hed_schema=hed_schema)
-        column_summary_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                               '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
-        with open(column_summary_path, 'r') as fp:
+    def test_summary(self):
+        with open(self.summary_path, 'r') as fp:
+            parms = json.load(fp)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        df = dispatch.get_data_file(self.events)
+        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        sum_op = parsed_commands[2]
+        sum_op.do_op(dispatch, dispatch.prep_events(df), 'run-01', sidecar=self.sidecar_path)
+        context1 = dispatch.context_dict['AOMIC_condition_variables']
+        summary1 = context1.get_summary()
+        self.assertEqual(summary1['summary']['Dataset']['files'][0], 'run-01')
+        self.assertEqual(len(summary1['summary']['Dataset']['files']), 1)
+        summary1a = context1.get_summary(as_json=True)
+        self.assertIsInstance(summary1a, str)
+        sum_op.do_op(dispatch, dispatch.prep_events(df), 'run-02', sidecar=self.sidecar_path)
+        context2 = dispatch.context_dict['AOMIC_condition_variables']
+        summary2 = context2.get_summary()
+        self.assertEqual(summary2['summary']['Dataset']['files'][0], 'run-01')
+        self.assertEqual(len(summary2['summary']['Dataset']['files']), 2)
+
+    def test_text_summary(self):
+        sidecar = Sidecar(self.sidecar_path, 'aomic_sidecar', hed_schema=self.hed_schema)
+
+        with open(self.summary_path, 'r') as fp:
             parms = json.load(fp)
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         self.assertFalse(errors)
-        dispatch = Dispatcher([], data_root=None, hed_versions=['8.1.0'])
-        df = dispatch.get_data_file(events)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        df = dispatch.get_data_file(self.events)
         old_len = len(df)
         sum_op = parsed_commands[2]
-        df = sum_op.do_op(dispatch, df, os.path.basename(events), sidecar=sidecar)
+        df = sum_op.do_op(dispatch, dispatch.prep_events(df), os.path.basename(self.events), sidecar=sidecar)
         self.assertEqual(len(df), old_len)
         context_dict = dispatch.context_dict
-        for key, item in context_dict.items():
-            text_value = item.get_text_summary()
-            self.assertTrue(text_value)
-            json_value = item.get_summary(as_json=True)
-            self.assertTrue(json_value)
+        self.assertIsInstance(context_dict, dict)
         context1 = dispatch.context_dict['AOMIC_condition_variables']
-        self.assertIsInstance(context1, HedTypeSummary)
-        summary = context1.summary
-        self.assertIsInstance(summary, HedVariableSummary)
-        self.assertEqual(context1.variable_type, 'condition-variable')
+        self.assertIsInstance(context1, HedTypeSummaryContext)
+        text_summary1 = context1.get_text_summary()
+        self.assertIsInstance(text_summary1, str)
+        sum_op.do_op(dispatch, dispatch.prep_events(df), 'new_events', sidecar=sidecar)
+        context2 = dispatch.context_dict['AOMIC_condition_variables']
+        text_summary2 = context2.get_text_summary()
+        self.assertIsInstance(text_summary2, str)
 
 
 if __name__ == '__main__':

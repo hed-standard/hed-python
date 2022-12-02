@@ -56,21 +56,24 @@ class Test(unittest.TestCase):
             "remove_parent_event": False
         }
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_events(df), 'run-01')
+        return df, self.dispatch.post_prep_events(df_new)
+
     def test_valid_existing_anchor_column(self):
         # Test when existing column is used as anchor event
         parms = json.loads(self.json_parms)
         op = SplitEventOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df, df_new = self.get_dfs(op)
         df_check = pd.DataFrame(self.split, columns=self.split_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, name="sample_data")
-        df_new = df_new.fillna('n/a')
+        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
 
         # Test that df_new has the right values
         self.assertEqual(len(df_check), len(df_new),
@@ -89,9 +92,9 @@ class Test(unittest.TestCase):
             self.assertTrue(np.allclose(new, check, equal_nan=True))
 
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df1.columns),
                         "split_event should not change the input df columns when existing column anchor")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df1.to_numpy()),
                         "split_event should not change the input df values when existing column anchor")
 
     def test_valid_new_anchor_column(self):
@@ -100,9 +103,7 @@ class Test(unittest.TestCase):
         parms["anchor_column"] = "event_type"
         op = SplitEventOp(parms)
         df_check = pd.DataFrame(self.split, columns=self.split_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, name="sample_data")
-        df_new = df_new.fillna('n/a')
+        df, df_new = self.get_dfs(op)
 
         # Test that df_new has the right values
         self.assertEqual(len(df_check), len(df_new),
@@ -117,8 +118,7 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         parms["remove_parent_event"] = True
         op = SplitEventOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df, name="sample_data")
+        df, df_new = self.get_dfs(op)
         self.assertEqual(len(df), 6)
         self.assertEqual(len(df_new), 8)
 
@@ -128,8 +128,7 @@ class Test(unittest.TestCase):
         parms["new_events"]["response"]["onset_source"] = ["response_time", 0.35]
         parms["new_events"]["response"]["duration"] = [0.3, "duration"]
         op = SplitEventOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df, name="sample_data")
+        df, df_new = self.get_dfs(op)
         self.assertEqual(len(df), 6)
         self.assertEqual(len(df_new), len(self.split))
 
@@ -138,9 +137,8 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         parms["new_events"]["response"]["onset_source"] = ["baloney"]
         op = SplitEventOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         with self.assertRaises(TypeError) as context:
-            op.do_op(self.dispatch, df, name="sample_data")
+            self.get_dfs(op)
         self.assertEqual(context.exception.args[0], 'BadOnsetInModel')
 
     def test_bad_duration(self):
@@ -148,9 +146,8 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         parms["new_events"]["response"]["duration"] = ["baloney"]
         op = SplitEventOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         with self.assertRaises(TypeError) as context:
-            op.do_op(self.dispatch, df, name="sample_data")
+            self.get_dfs(op)
         self.assertEqual(context.exception.args[0], 'BadDurationInModel')
 
     def test_split_event_from_files(self):
@@ -162,9 +159,7 @@ class Test(unittest.TestCase):
         self.assertFalse(errors, 'split_event should not give errors if operation is correct')
         dispatch = Dispatcher(operation_list)
         df = dispatch.prep_events(df)
-        df_new = None
-        for operation in dispatch.parsed_ops:
-            df_new = operation.do_op(dispatch, df, "Name")
+        df_new = operations[0].do_op(dispatch, df, "Name")
         self.assertIsInstance(df_new, pd.DataFrame)
         df_check = pd.read_csv(self.events_path, delimiter='\t', header=0, dtype=str,
                                keep_default_na=False, na_values=None)

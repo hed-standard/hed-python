@@ -3,7 +3,8 @@ import os
 import pandas as pd
 import unittest
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_column_values_op import ColumnValueSummary, SummarizeColumnValuesOp
+from hed.tools.remodeling.operations.summarize_column_values_op import \
+    ColumnValueSummaryContext, SummarizeColumnValuesOp
 
 
 class Test(unittest.TestCase):
@@ -42,39 +43,40 @@ class Test(unittest.TestCase):
     def test_do_ops(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        dispatch = Dispatcher([], data_root=None)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        sum_op.do_op(dispatch, df1, 'name1')
+        sum_op.do_op(dispatch, dispatch.prep_events(df1), 'name1')
         context1 = dispatch.context_dict.get(parms['summary_name'], None)
-        summary = context1.summary
-        cat_len = len(summary.categorical_info)
+        summary1 = context1.summary_dict['name1']
+        cat_len = len(summary1.categorical_info)
         self.assertEqual(cat_len, len(self.sample_columns),
                          'do_ops if all columns are categorical summary has same number of columns as df')
-        sum_op.do_op(dispatch, df1a, 'name1')
-        self.assertEqual(len(context1.summary.categorical_info), len(self.sample_columns),
+        sum_op.do_op(dispatch, dispatch.prep_events(df1a), 'name1')
+        self.assertEqual(cat_len, len(self.sample_columns),
                          "do_ops updating does not change number of categorical columns.")
-        sum_op.do_op(dispatch, df1a, 'name2')
+        sum_op.do_op(dispatch, dispatch.prep_events(df1a), 'name2')
 
     def test_get_summary(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        dispatch = Dispatcher([], data_root=None)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df1 = dispatch.prep_events(df1)
         sum_op.do_op(dispatch, df1, 'name1')
         sum_op.do_op(dispatch, df1, 'name2')
         sum_op.do_op(dispatch, df1, 'name3')
         context1 = dispatch.context_dict.get(parms['summary_name'], None)
-        self.assertIsInstance(context1, ColumnValueSummary, "get_summary testing ColumnValueSummary")
+        self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
         summary1 = context1.get_summary()
         self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
         summary2 = context1.get_summary(as_json=True)
         self.assertIsInstance(summary2, str, "get_summary returns a dictionary if json requested")
-        summary3 = context1.get_text_summary(verbose=False)
+        summary3 = context1.get_text_summary(include_individual=False)
         self.assertIsInstance(summary3, str, "get_text_summary returns a str if verbose is False")
         summary4 = context1.get_text_summary()
         self.assertIsInstance(summary4, str, "get_text_summary returns a str by default")
-        summary5 = context1.get_text_summary(verbose=True)
+        summary5 = context1.get_text_summary(include_individual=True)
         self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
 
     def test_summary_op(self):
@@ -85,11 +87,11 @@ class Test(unittest.TestCase):
         with open(column_summary_path, 'r') as fp:
             parms = json.load(fp)
         parsed_commands, errors = Dispatcher.parse_operations(parms)
-        dispatch = Dispatcher([], data_root=None, hed_versions=['8.1.0'])
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(events)
         old_len = len(df)
         sum_op = parsed_commands[1]
-        df = sum_op.do_op(dispatch, df, os.path.basename(events))
+        df = sum_op.do_op(dispatch, dispatch.prep_events(df), os.path.basename(events))
         self.assertEqual(len(df), old_len)
         context_dict = dispatch.context_dict
         for key, item in context_dict.items():

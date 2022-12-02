@@ -10,7 +10,7 @@ def get_parser():
     parser.add_argument("-n", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
                         help="Name of the default backup for remodeling")
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
-    parser.add_argument("-x", "--exclude-dirs", nargs="*", default=[], dest="exclude_dirs",
+    parser.add_argument("-x", "--exclude-dirs", nargs="*", default=['derivatives'], dest="exclude_dirs",
                         help="Directories names to exclude from search for files. " +
                              "If omitted, no directories except the backup directory will be excluded." +
                              "Note data_dir/remodel/backup will always be excluded.")

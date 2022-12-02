@@ -311,24 +311,19 @@ class HedGroupBase:
                     found_tags.append(sub_group)
 
         return found_tags
-
     def find_def_tags(self, recursive=False, include_groups=3):
         """ Find def and def-expand tags
-
         Parameters:
             recursive (bool): If true, also check subgroups.
             include_groups (int, 0, 1, 2, 3): options for how to expand or include groups
-
         Returns:
             list: A list of tuples. The contents depends on the values of the include group.
-
         Notes:
             - The include_groups option controls the tag expansion as follows:
                 - If 0: Return only def and def expand tags/.
                 - If 1: Return only def tags and def-expand groups.
                 - If 2: Return only groups containing defs, or def-expand groups.
                 - If 3 or any other value: Return all 3 as a tuple.
-
         """
         from hed.models.definition_dict import DefTagNames
         if recursive:

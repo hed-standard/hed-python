@@ -37,26 +37,26 @@ def breakout_tags(schema, tag_list, breakout_list):
     return breakout_dict
 
 
-def extract_dict_values(tag_dict, tag_name, tags):
-    """ Get the tags associated with tag name from the tag dictionary.
-
-    Parameters:
-        tag_dict (dict):  Dictionary with keys that a tag node names and values are dictionaries.
-        tag_name (str):   Name of a node.
-        tags (list):      List of tags left to process.
-
-    Returns:
-        tuple:
-            - list: Tags associated with tag_name.
-            - bool: True if tag_name was found in tag_dict.
-
-    Notes:
-        - Side-effect the tags list is modified.
-    """
-    if tag_name not in tag_dict:
-        return [], False
-    tags.remove(tag_name)
-    return list(tag_dict[tag_name].keys()), True
+# def extract_dict_values(tag_dict, tag_name, tags):
+#     """ Get the tags associated with tag name from the tag dictionary.
+#
+#     Parameters:
+#         tag_dict (dict):  Dictionary with keys that a tag node names and values are dictionaries.
+#         tag_name (str):   Name of a node.
+#         tags (list):      List of tags left to process.
+#
+#     Returns:
+#         tuple:
+#             - list: Tags associated with tag_name.
+#             - bool: True if tag_name was found in tag_dict.
+#
+#     Notes:
+#         - Side-effect the tags list is modified.
+#     """
+#     if tag_name not in tag_dict:
+#         return [], False
+#     tags.remove(tag_name)
+#     return list(tag_dict[tag_name].keys()), True
 
 
 def get_schema_entries(hed_schema, tag, schema_prefix=""):

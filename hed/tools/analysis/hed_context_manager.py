@@ -1,20 +1,23 @@
 from hed.errors.exceptions import HedFileError
+from hed.models import HedGroup, HedString
+from hed.schema import HedSchema, HedSchemaGroup
+from hed.tools.analysis.analysis_util import hed_to_str
 
 
 class OnsetGroup:
-    def __init__(self, name, start_index, end_index=None, contents=None):
+    def __init__(self, name, contents, start_index, end_index=None):
         self.name = name
         self.start_index = start_index
         self.end_index = end_index
-        self.contents = contents
+        self.contents = hed_to_str(contents, remove_parentheses=True)
 
     def __str__(self):
-        return f"{self.name}:[{self.start_index}, {self.end_index}] contents {str(self.contents)}"
+        return f"{self.name}:[events {self.start_index}:{self.end_index} contents:{self.contents}]"
 
 
 class HedContextManager:
 
-    def __init__(self, hed_strings):
+    def __init__(self, hed_strings, hed_schema):
         """ Create an context manager for an events file.
 
         Parameters:
@@ -30,13 +33,28 @@ class HedContextManager:
 
         """
 
-        self.hed_strings = hed_strings
+        self.hed_strings = [HedString(str(hed), hed_schema=hed_schema) for hed in hed_strings]
+        if not isinstance(hed_schema, HedSchema) and not isinstance(hed_schema, HedSchemaGroup):
+            raise ValueError("ContextRequiresSchema", f"Context manager must have a valid HedSchema of HedSchemaGroup")
+        self.hed_schema = hed_schema
         self.onset_list = []
         self.onset_count = 0
         self.offset_count = 0
         self.contexts = []
         self._create_onset_list()
         self._set_event_contexts()
+
+    def iter_context(self):
+        """ Iterate rows of context.
+
+        Yields:
+            HedString:  The HedString.
+            HedStringGroup: Context
+
+        """
+
+        for index in range(len(self.hed_strings)):
+            yield self.hed_strings[index], self.contexts[index]
 
     def _create_onset_list(self):
         """ Create a list of events of extended duration.
@@ -77,23 +95,13 @@ class HedContextManager:
             event context group or tag.
 
         """
-        contexts = [0]*len(self.hed_strings)
-        for i in range(len(self.hed_strings)):
-            contexts[i] = []
+        contexts = [[] for _ in range(len(self.hed_strings))]
         for onset in self.onset_list:
             for i in range(onset.start_index+1, onset.end_index):
                 contexts[i].append(onset.contents)
+        for i in range(len(self.hed_strings)):
+            contexts[i] = HedString(",".join(contexts[i]), hed_schema=self.hed_schema)
         self.contexts = contexts
-
-    # @staticmethod
-    # def hed_list_to_string(hed_list):
-    #     hed_strs = []
-    #     for hed in hed_list:
-    #         hed_str = hed._hed_string[hed._startpos:hed._endpos]
-    #         if hed_str:
-    #             hed_strs.append(hed_str)
-    #     hed_str_final = ",".join(hed_strs)
-    #     return hed_str_final
 
     def _update_onset_list(self, group, onset_dict, event_index, is_offset=False):
         """ Process one onset or offset group to create onset_list.
@@ -119,42 +127,5 @@ class HedContextManager:
         elif is_offset:
             raise HedFileError("UnmatchedOffset", f"Unmatched {name} offset at event {event_index}", " ")
         if not is_offset:
-            onset_element = OnsetGroup(name, event_index, contents=group)
+            onset_element = OnsetGroup(name, group, event_index)
             onset_dict[name] = onset_element
-
-
-# if __name__ == '__main__':
-#     from hed import HedString
-#     schema = load_schema_version(xml_version="8.1.0")
-#     test_strings1 = [HedString('Sensory-event,(Def/Cond1,(Red, Blue),Onset),(Def/Cond2,Onset),Green,Yellow',
-#                                hed_schema=schema),
-#                      HedString('Yellow, Green', hed_schema=schema),
-#                      HedString('(Def/Cond1, Offset)', hed_schema=schema),
-#                      HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast', hed_schema=schema),
-#                      HedString('', hed_schema=schema),
-#                      HedString('(Def/Cond2, Onset)', hed_schema=schema),
-#                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
-#                      HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
-#
-#     manager = HedContextManager(test_strings1)
-#     print("to here")
-    # hed_list1 = [HedString('Yellow, Green', hed_schema=schema),
-    #             HedString('(Def/Cond1, Offset)', hed_schema=schema),
-    #             HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast', hed_schema=schema),
-    #             HedString('', hed_schema=schema),
-    #             HedString('Blue', hed_schema=schema)]
-    #
-    #
-    # str_result1 = HedContextManager.hed_list_to_string(hed_list1)
-    # print(str_result1)
-    #
-    # big = HedString('Sensory-event,(Def/Cond1,(Red, Blue),Onset),(Def/Cond2,Onset),Green,Yellow', hed_schema=schema)
-    #
-    # big_result = Onset
-    #
-    # # big_groups = big.get_all_groups(also_return_depth=True)
-    # # for group, depth in big_groups:
-    # #     print(f"{group}: {depth}")
-    # # these_groups = [group for group, depth in big_groups if depth]
-    # # str_result2 = HedContextManager.hed_list_to_string(these_groups)
-    # # print(str_result2)

@@ -5,7 +5,7 @@ from pandas import DataFrame
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import add_columns, check_match, delete_columns, delete_rows_by_column, \
     get_key_hash, get_new_dataframe, get_row_hash, get_value_dict, \
-    make_info_dataframe, remove_quotes, reorder_columns, replace_values, separate_values
+    make_info_dataframe, reorder_columns, replace_values, separate_values
 
 
 class Test(unittest.TestCase):
@@ -122,12 +122,6 @@ class Test(unittest.TestCase):
         self.assertEqual(1, num_replaced2,
                          "replace_values should replace the correct number of values when columns are specified")
 
-    def test_remove_quotes(self):
-        df1 = get_new_dataframe(self.stern_test2_path)
-        remove_quotes(df1)
-        df2 = get_new_dataframe(self.stern_test3_path)
-        self.assertEqual(df1.loc[0, 'stimulus'], df2.loc[0, 'stimulus'], "remove_quotes should have quotes removed")
-
     def test_reorder_columns(self):
         df = get_new_dataframe(self.stern_map_path)
         df_new = reorder_columns(df, ['event_type', 'type'])
@@ -140,14 +134,9 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df_new1.columns), 2, "reorder_columns should return correct number of rows")
 
     def test_reorder_columns_no_skip(self):
-        try:
+        with self.assertRaises(HedFileError) as context:
             reorder_columns(self.stern_map_path, ['event_type', 'type', 'baloney'], skip_missing=False)
-        except HedFileError:
-            pass
-        except Exception as ex:
-            self.fail(f'reorder_columns threw the wrong exception {str(ex)} when missing column')
-        else:
-            self.fail('reorder_columns should have thrown a HedFileError exception when missing')
+        self.assertEqual(context.exception.args[0], 'MissingKeys')
 
     def test_separate_columns(self):
         base_cols = ['a', 'b', 'c', 'd']
