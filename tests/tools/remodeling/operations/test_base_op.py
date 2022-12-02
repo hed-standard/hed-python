@@ -17,9 +17,7 @@ class TestOp(BaseOp):
     }
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         return df
@@ -40,64 +38,55 @@ class Test(unittest.TestCase):
             "optional_parameters": {}
         }
         base_parameters = {
-            "is_string": "Condition-variable",
-            "is_multiple": ["a", "b", "c"],
-            "is_bool": False,
-            "is_list": [3, 4, 5]
+                "is_string": "Condition-variable",
+                "is_multiple": ["a", "b", "c"],
+                "is_bool": False,
+                "is_list": [3, 4, 5]
         }
-        cls.json_parms = json.dumps(base_parameters)
+        cls.json_parameters = json.dumps(base_parameters)
 
     @classmethod
     def tearDownClass(cls):
         pass
 
     def test_constructor(self):
-        op1 = BaseOp(self.params["operation"], self.params["required_parameters"], self.params["optional_parameters"])
-        self.assertIsInstance(op1, BaseOp,
-                              "constructor should create a BaseOp")
+        parameters = json.loads(self.json_parameters)
+        op1 = BaseOp(self.params, parameters)
+        self.assertIsInstance(op1, BaseOp, "constructor should create a BaseOp")
         self.assertIn("is_string", op1.required_params,
                       "constructor required_params should contain an expected value")
 
     def test_constructor_no_operation(self):
         with self.assertRaises(ValueError) as context:
-            BaseOp([], self.params["required_parameters"], self.params["optional_parameters"])
+            BaseOp({}, {})
         self.assertEqual(context.exception.args[0], 'OpMustHaveOperation')
 
     def test_constructor_no_parameters(self):
-        op1 = BaseOp("no_parameter_operation", [], [])
+        op1 = BaseOp({"operation": "no_parameter_operation"}, {})
         self.assertIsInstance(op1, BaseOp, "constructor allows a operation with no parameters")
 
-    def test_check_parameters(self):
-        parms = json.loads(self.json_parms)
-        op1 = BaseOp(self.params["operation"], self.params["required_parameters"], self.params["optional_parameters"])
-        op1.check_parameters(parms)
-        self.assertIsInstance(op1, BaseOp, "constructor should create a BaseOp and list parameter not raise error")
-
     def test_check_parameters_bad_element(self):
-        parms = json.loads(self.json_parms)
-        parms["is_multiple"] = {"a": 1, "b": 2}
-        op1 = BaseOp(self.params["operation"], self.params["required_parameters"], self.params["optional_parameters"])
-        self.assertIsInstance(op1, BaseOp, "constructor should create a BaseOp and list parameter not raise error")
+        parameters = json.loads(self.json_parameters)
+        parameters["is_multiple"] = {"a": 1, "b": 2}
         with self.assertRaises(TypeError) as context:
-            op1.check_parameters(parms)
+            BaseOp(self.params, parameters)
         self.assertEqual(context.exception.args[0], 'BadType')
 
     def test_parse_operations_missing_required(self):
-        op1 = BaseOp(self.params["operation"], self.params["required_parameters"], self.params["optional_parameters"])
-        parms = json.loads(self.json_parms)
-        parms.pop("is_string")
+        parameters = json.loads(self.json_parameters)
+        parameters.pop("is_string")
         with self.assertRaises(KeyError) as context:
-            op1.check_parameters(parms)
+            BaseOp(TestOp.PARAMS, parameters)
         self.assertEqual(context.exception.args[0], 'MissingRequiredParameters')
 
     def test_check_parameters_test(self):
-        params1 = {"op_name": "test_op", "skip_columns": ["onset", "duration"], "keep_all": True, "junk": "bad_parm"}
+        parameters1 = {"op_name": "test", "skip_columns": ["onset", "duration"], "keep_all": True, "junk": "bad_parm"}
         with self.assertRaises(KeyError) as context1:
-            TestOp(params1)
+            BaseOp(TestOp.PARAMS, parameters1)
         self.assertEqual(context1.exception.args[0], 'BadParameter')
-        params2 = {"op_name": "test_op", "skip_columns": ["onset", "duration"], "keep_all": "true"}
+        parameters2 = {"op_name": "test", "skip_columns": ["onset", "duration"], "keep_all": "true"}
         with self.assertRaises(TypeError) as context2:
-            TestOp(params2)
+            TestOp(parameters2)
         self.assertEqual(context2.exception.args[0], 'BadType')
 
 

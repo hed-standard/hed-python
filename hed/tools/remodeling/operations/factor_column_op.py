@@ -30,9 +30,7 @@ class FactorColumnOp(BaseOp):
     }
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.column_name = parameters['column_name']
         self.factor_values = parameters['factor_values']
         self.factor_names = parameters['factor_names']

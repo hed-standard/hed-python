@@ -2,13 +2,13 @@
 
 class BaseOp:
 
-    def __init__(self, operation, required_params, optional_params):
-        if operation:
-            self.operation = operation
-        else:
-            raise ValueError("OpMustHaveOperation", "BaseOp operation is empty")
-        self.required_params = required_params
-        self.optional_params = optional_params
+    def __init__(self, op_spec, parameters):
+        self.operation = op_spec.get("operation", "")
+        if not self.operation:
+            raise ValueError("OpMustHaveOperation", "Op must have operation is empty")
+        self.required_params = op_spec.get("required_parameters", {})
+        self.optional_params = op_spec.get("optional_parameters", {})
+        self.check_parameters(parameters)
 
     def check_parameters(self, parameters):
         # Check for required arguments

@@ -27,9 +27,7 @@ class SummarizeColumnNamesOp(BaseOp):
     SUMMARY_TYPE = "column_names"
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
 

@@ -24,9 +24,7 @@ class SplitEventOp(BaseOp):
     }
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.anchor_column = parameters['anchor_column']
         self.new_events = parameters['new_events']
         self.remove_parent_event = parameters['remove_parent_event']

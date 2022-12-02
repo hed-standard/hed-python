@@ -32,9 +32,7 @@ class SummarizeColumnValuesOp(BaseOp):
     SUMMARY_TYPE = 'column_values'
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.skip_columns = parameters['skip_columns']

@@ -23,9 +23,7 @@ class RemapColumnsOp(BaseOp):
 
     def __init__(self, parameters):
 
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.source_columns = parameters['source_columns']
         self.destination_columns = parameters['destination_columns']
         self.map_list = parameters['map_list']
