@@ -27,7 +27,7 @@ class HedTypeValues:
         self.definitions = HedTypeDefinitions(definitions, context_manager.hed_schema, type_tag=type_tag)
         hed_strings = context_manager.hed_strings
         hed_contexts = context_manager.contexts
-        self.number_events = len(hed_strings)
+        self.total_events = len(hed_strings)
         self._type_value_map = {}
         self._extract_variables(hed_strings, hed_contexts)
 
@@ -65,7 +65,6 @@ class HedTypeValues:
         var_summary = self._type_value_map.copy()
         summary = {}
         for var_name, var_sum in var_summary.items():
-            y = var_sum.get_summary()
             summary[var_name] = var_sum.get_summary()
         return summary
 
@@ -137,7 +136,7 @@ class HedTypeValues:
         for var_name in hed_vars:
             hed_var = self._type_value_map.get(var_name, None)
             if hed_var is None:
-                hed_var = HedTypeFactors(self.type_tag, var_name, self.number_events)
+                hed_var = HedTypeFactors(self.type_tag, var_name, self.total_events)
                 self._type_value_map[var_name] = hed_var
             var_levels = hed_var.levels.get(level, {index: 0})
             var_levels[index] = 0
@@ -182,7 +181,7 @@ class HedTypeValues:
                 tag_value = self.type_tag
             hed_var = self._type_value_map.get(tag_value, None)
             if hed_var is None:
-                hed_var = HedTypeFactors(self.type_tag, tag_value, self.number_events)
+                hed_var = HedTypeFactors(self.type_tag, tag_value, self.total_events)
             self._type_value_map[tag_value] = hed_var
             hed_var.direct_indices[index] = ''
 

@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
     def test_get_summary_multiple_levels(self):
         counts = HedTypeCounts('Dummy', "condition-variable")
         self.assertIsInstance(counts, HedTypeCounts, "Constructor should create a HedTypeCounts")
-        counts.update_summary(self.var_type1.get_summary(), 'run-1')
+        counts.update_summary(self.var_type1.get_summary(), self.var_type1.total_events, 'run-1')
         type_dict = counts.type_dict
         self.assertEqual(len(type_dict), 3)
         self.assertIn('face-type', type_dict)
@@ -54,7 +54,7 @@ class Test(unittest.TestCase):
         self.assertEqual(face_type.total_events, 200)
         self.assertEqual(face_type.events, 52)
         self.assertEqual(len(face_type.files), 1)
-        counts.update_summary(self.var_type1.get_summary(), 'run-2')
+        counts.update_summary(self.var_type1.get_summary(), self.var_type1.total_events, 'run-2')
         type_dict = counts.type_dict
         self.assertEqual(len(type_dict), 3)
         self.assertIn('face-type', type_dict)

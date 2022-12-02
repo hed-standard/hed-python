@@ -41,6 +41,7 @@ class Test(unittest.TestCase):
         cls.summary_path = \
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+
     @classmethod
     def tearDownClass(cls):
         pass
@@ -61,11 +62,18 @@ class Test(unittest.TestCase):
         df = dispatch.get_data_file(self.events)
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         sum_op = parsed_commands[2]
-        df = sum_op.do_op(dispatch, dispatch.prep_events(df), os.path.basename(self.events), sidecar=self.sidecar_path)
+        sum_op.do_op(dispatch, dispatch.prep_events(df), 'run-01', sidecar=self.sidecar_path)
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         summary1 = context1.get_summary()
-        print(f"{str(summary1)}")
-        print("to here")
+        self.assertEqual(summary1['summary']['Dataset']['files'][0], 'run-01')
+        self.assertEqual(len(summary1['summary']['Dataset']['files']), 1)
+        summary1a = context1.get_summary(as_json=True)
+        self.assertIsInstance(summary1a, str)
+        sum_op.do_op(dispatch, dispatch.prep_events(df), 'run-02', sidecar=self.sidecar_path)
+        context2 = dispatch.context_dict['AOMIC_condition_variables']
+        summary2 = context2.get_summary()
+        self.assertEqual(summary2['summary']['Dataset']['files'][0], 'run-01')
+        self.assertEqual(len(summary2['summary']['Dataset']['files']), 2)
 
     def test_text_summary(self):
         sidecar = Sidecar(self.sidecar_path, 'aomic_sidecar', hed_schema=self.hed_schema)
@@ -85,8 +93,11 @@ class Test(unittest.TestCase):
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         self.assertIsInstance(context1, HedTypeSummaryContext)
         text_summary1 = context1.get_text_summary()
-        print(f"{text_summary1}")
         self.assertIsInstance(text_summary1, str)
+        sum_op.do_op(dispatch, dispatch.prep_events(df), 'new_events', sidecar=sidecar)
+        context2 = dispatch.context_dict['AOMIC_condition_variables']
+        text_summary2 = context2.get_text_summary()
+        self.assertIsInstance(text_summary2, str)
 
 
 if __name__ == '__main__':

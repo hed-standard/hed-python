@@ -37,9 +37,10 @@ class HedTypeCount:
         self.direct_references += type_sum['direct_references']
         self.total_events += type_sum['total_events']
         self.events += type_sum['events']
-        file_dict = self.files
         if file_id:
             self.files[file_id] = ''
+        for file in type_sum.get('files', {}).keys():
+            self.files[file] = ''
         self.events_with_multiple_refs += type_sum['events_with_multiple_refs']
         self.max_refs_per_event = max(self.max_refs_per_event, type_sum['max_refs_per_event'])
         self._update_levels(type_sum.get('level_counts', {}))
@@ -87,13 +88,14 @@ class HedTypeCounts:
 
     """
 
-    def __init__(self, name, type_tag, files={}):
+    def __init__(self, name, type_tag):
         self.name = name
         self.type_tag = type_tag
-        self.files = files
+        self.files = {}
+        self.total_events = 0
         self.type_dict = {}
 
-    def update_summary(self, type_sum, file_id=None):
+    def update_summary(self, type_sum, total_events=0, file_id=None):
         """ Update this summary based on the type variable map.
 
         Parameters:
@@ -107,6 +109,7 @@ class HedTypeCounts:
             val_counts = self.type_dict[type_val]
             val_counts.update(type_counts, file_id)
         self.files[file_id] = ''
+        self.total_events = self.total_events + 1
 
     def add_descriptions(self, type_defs):
         """ Update this summary based on the type variable map.
@@ -126,15 +129,17 @@ class HedTypeCounts:
                 type_count.level_counts[level]['tags'] = level_dict['tags']
                 type_count.level_counts[level]['description'] = level_dict['description']
 
-    def update_dict(self, other_dict):
-        for key, count in other_dict.items():
+    def update(self, counts):
+        for key, count in counts.type_dict.items():
             if key not in self.type_dict:
                 self.type_dict[key] = HedTypeCount(count.type_value, count.type_tag, None)
             this_count = self.type_dict[key]
             this_count.update(count.to_dict(), None)
+        for file_id in counts.files.keys():
+            self.files[file_id] = ''
 
     def get_summary(self):
         details = {}
         for type_value, count in self.type_dict.items():
             details[type_value] = count.get_summary()
-        return {'name': str(self.name), 'type_tag': self.type_tag, 'details': details}
+        return {'name': str(self.name), 'type_tag': self.type_tag, 'files': list(self.files.keys()), 'details': details}
