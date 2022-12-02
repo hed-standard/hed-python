@@ -30,8 +30,7 @@ class RemoveColumnsOp(BaseOp):
             TypeError if a value in parameters has an invalid type.
 
         """
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
+        super().__init__(self.PARAMS, parameters)
         self.check_parameters(parameters)
         self.remove_names = parameters['remove_names']
         ignore_missing = parameters['ignore_missing']

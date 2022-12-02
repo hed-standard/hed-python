@@ -32,9 +32,7 @@ class FactorHedTypeOp(BaseOp):
     }
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.type_tag = parameters["type_tag"]
         self.type_values = parameters["type_values"]
         self.overwrite_existing = parameters["overwrite_existing"]

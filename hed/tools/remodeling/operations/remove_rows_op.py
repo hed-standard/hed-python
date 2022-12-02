@@ -20,9 +20,7 @@ class RemoveRowsOp(BaseOp):
     }
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.column_name = parameters["column_name"]
         self.remove_values = parameters["remove_values"]
 

@@ -19,8 +19,7 @@ class Test(unittest.TestCase):
         base_parameters = {
             "summary_name": 'get summary conditions',
             "summary_filename": 'summarize_condition_variable_type',
-            "type_tag": "condition-variable",
-            "expand_context": False
+            "type_tag": "condition-variable"
         }
         cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                            [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],

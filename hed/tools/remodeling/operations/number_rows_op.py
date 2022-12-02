@@ -13,9 +13,7 @@ class NumberRowsOp(BaseOp):
     }
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS["operation"], self.PARAMS["required_parameters"],
-                         self.PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.number_column_name = parameters['number_column_name']
         self.overwrite = parameters.get('overwrite', False)
         self.match_value = parameters.get('match_value', False)
