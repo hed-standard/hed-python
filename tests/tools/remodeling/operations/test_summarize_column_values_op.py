@@ -23,8 +23,7 @@ class Test(unittest.TestCase):
             "summary_name": "test summary",
             "summary_filename": "column_values_summary",
             "skip_columns": [],
-            "value_columns": [],
-            "task_names": [],
+            "value_columns": ['onset', 'response_time']
         }
 
         cls.json_parms = json.dumps(base_parameters)
@@ -35,6 +34,11 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op, name, dispatch):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(dispatch, dispatch.prep_events(df), name)
+        return df, dispatch.post_prep_events(df_new)
+
     def test_constructor(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
@@ -44,40 +48,40 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
-        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        sum_op.do_op(dispatch, dispatch.prep_events(df1), 'name1')
+        self.get_dfs(sum_op, 'name1', dispatch)
         context1 = dispatch.context_dict.get(parms['summary_name'], None)
         summary1 = context1.summary_dict['name1']
         cat_len = len(summary1.categorical_info)
-        self.assertEqual(cat_len, len(self.sample_columns),
+        self.assertEqual(cat_len, len(self.sample_columns) - 2,
                          'do_ops if all columns are categorical summary has same number of columns as df')
-        sum_op.do_op(dispatch, dispatch.prep_events(df1a), 'name1')
-        self.assertEqual(cat_len, len(self.sample_columns),
+        self.get_dfs(sum_op, 'name2', dispatch)
+        self.assertEqual(cat_len, len(self.sample_columns) - 2,
                          "do_ops updating does not change number of categorical columns.")
-        sum_op.do_op(dispatch, dispatch.prep_events(df1a), 'name2')
+        context = dispatch.context_dict['test summary']
+        self.assertEqual(len(context.summary_dict), 2)
 
     def test_get_summary(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
-        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df1 = dispatch.prep_events(df1)
-        sum_op.do_op(dispatch, df1, 'name1')
-        sum_op.do_op(dispatch, df1, 'name2')
-        sum_op.do_op(dispatch, df1, 'name3')
+        self.get_dfs(sum_op, 'name1', dispatch)
+
         context1 = dispatch.context_dict.get(parms['summary_name'], None)
         self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
         summary1 = context1.get_summary()
         self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
-        summary2 = context1.get_summary(as_json=True)
-        self.assertIsInstance(summary2, str, "get_summary returns a dictionary if json requested")
-        summary3 = context1.get_text_summary(include_individual=False)
-        self.assertIsInstance(summary3, str, "get_text_summary returns a str if verbose is False")
-        summary4 = context1.get_text_summary()
-        self.assertIsInstance(summary4, str, "get_text_summary returns a str by default")
-        summary5 = context1.get_text_summary(include_individual=True)
-        self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
+        summary1a = context1.get_summary(as_json=True)
+        self.assertIsInstance(summary1a, str, "get_summary returns a dictionary if json requested")
+        text_summary = context1.get_text_summary(include_individual=True)
+        self.assertIsInstance(text_summary, str)
+        self.get_dfs(sum_op, 'name2', dispatch)
+        self.get_dfs(sum_op, 'name3', dispatch)
+        context2 = dispatch.context_dict.get(parms['summary_name'], None)
+        summary2 = context2.get_summary()
+        self.assertIsInstance(summary2, dict)
+        text_summary2 = context2.get_text_summary(include_individual=True)
+        self.assertIsInstance(text_summary2, str)
+        print(text_summary2)
 
     def test_summary_op(self):
         events = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),

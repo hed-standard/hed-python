@@ -6,8 +6,7 @@
             "summary_name": "AOMIC_column_values_before_reorder",
             "summary_filename": "AOMIC_column_values_before_reorder",
             "skip_columns": ["onset", "duration"],
-            "value_columns": ["response_time", "stop_signal_delay"],
-            "task_names": []
+            "value_columns": ["response_time", "stop_signal_delay"]
             }
     },
 	{
@@ -26,8 +25,7 @@
             "summary_name": "AOMIC_column_values_after_reorder",
             "summary_filename": "AOMIC_column_values_after_reorder",
             "skip_columns": ["onset", "duration"],
-            "value_columns": ["response_time", "stop_signal_delay"],
-            "task_names": []
+            "value_columns": ["response_time", "stop_signal_delay"]
             }
     }
 ]

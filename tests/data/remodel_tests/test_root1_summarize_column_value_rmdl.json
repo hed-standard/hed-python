@@ -6,8 +6,7 @@
             "summary_name": "test summary_values_before",
             "summary_filename": "column_values_summary_before_rename",
             "skip_columns": [],
-            "value_columns": [],
-            "task_names": []
+            "value_columns": []
         }
     },
     {
@@ -27,8 +26,7 @@
             "summary_name": "test summary_values_after",
             "summary_filename": "column_values_summary_after_rename",
             "skip_columns": [],
-            "value_columns": [],
-            "task_names": []
+            "value_columns": []
         }
     }
 ]

@@ -30,7 +30,7 @@ class ColumnNameSummary:
         column_headers = []
         for index in range(len(patterns)):
             column_headers.append({'Column names': self.unique_headers[index], 'Files': patterns[index]})
-        summary = {"Summary name": self.name, "Columns": column_headers}
+        summary = {"Summary name": self.name, "Columns": column_headers, "Number files": len(self.file_dict)}
         if as_json:
             return json.dumps(summary, indent=4)
         else:

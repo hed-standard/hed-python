@@ -114,6 +114,7 @@ class Test(unittest.TestCase):
         text_sum1no = sum_context1.get_text_summary(include_individual=False)
         self.assertGreater(len(text_sum1t), len(text_sum1))
         self.assertGreater(len(text_sum1), len(text_sum1no))
+        print(text_sum1t)
 
 
 if __name__ == '__main__':

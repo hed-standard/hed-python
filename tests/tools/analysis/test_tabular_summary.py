@@ -54,7 +54,7 @@ class Test(unittest.TestCase):
                          "TabularSummary categorical_info be columns minus skip and value columns")
         summary1 = dict1.get_summary(as_json=False)
         self.assertIsInstance(summary1, dict)
-        self.assertEqual(len(summary1), 3)
+        self.assertEqual(len(summary1), 5)
         summary2 = dict1.get_summary(as_json=True).replace('"', '')
         self.assertIsInstance(summary2, str)
 
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
         dict2.update(stern_df)
         self.assertEqual(len(dict2.value_info.keys()), 1,
                          "TabularSummary value_info should have letter value column")
-        self.assertEqual(dict2.value_info['letter'], len(stern_df),
+        self.assertEqual(dict2.value_info['letter'], [len(stern_df), 1],
                          "TabularSummary value counts should length of column")
         self.assertEqual(len(dict2.skip_cols), 1, "TabularSummary should have one skip column")
         self.assertEqual(len(dict2.categorical_info.keys()), len(stern_df.columns) - 2,
@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
         dict2.update(stern_df)
         self.assertEqual(len(dict2.value_info.keys()), 1,
                          "TabularSummary value_info should have letter value column")
-        self.assertEqual(dict2.value_info['letter'], 2*len(stern_df),
+        self.assertEqual(dict2.value_info['letter'], [2*len(stern_df), 2],
                          "TabularSummary value counts should update by column length each time update is called")
 
     def test_update_dict(self):

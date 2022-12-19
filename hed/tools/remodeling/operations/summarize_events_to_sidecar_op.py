@@ -85,7 +85,7 @@ class EventsToSidecarSummary(BaseContext):
             Abstract method be implemented by each individual context summary.
 
         """
-        pass
+        return ""
 
     def _merge_all(self):
         """ Return merged information.
@@ -97,4 +97,4 @@ class EventsToSidecarSummary(BaseContext):
             Abstract method be implemented by each individual context summary.
 
         """
-        pass
+        return {}

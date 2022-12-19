@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
                               'response_accuracy', 'response_hand', 'sex']
 
         base_parameters = {
-            "remove_names": ["stop_signal_delay", "response_accuracy"],
+            "column_names": ["stop_signal_delay", "response_accuracy"],
             "ignore_missing": True
         }
         cls.json_parms = json.dumps(base_parameters)
@@ -55,7 +55,7 @@ class Test(unittest.TestCase):
     def test_valid_extras_ignore_missing(self):
         # Test when extras, but ignored
         parms = json.loads(self.json_parms)
-        parms["remove_names"].append("face")
+        parms["column_names"].append("face")
         op = RemoveColumnsOp(parms)
         df, df_new = self.get_dfs(op)
         remaining_columns = ['onset', 'duration', 'trial_type', 'response_time', 'response_hand', 'sex']
@@ -93,7 +93,7 @@ class Test(unittest.TestCase):
     def test_invalid_extras_no_ignore(self):
         # Test when extras and not ignored.
         parms = json.loads(self.json_parms)
-        parms["remove_names"].append("face")
+        parms["column_names"].append("face")
         parms["ignore_missing"] = False
         op = RemoveColumnsOp(parms)
         with self.assertRaises(KeyError) as context:

@@ -239,21 +239,6 @@ def replace_values(df, values=None, replace_value='n/a', column_list=None):
             df.loc[index, col] = replace_value
     return num_replaced
 
-def remove_quotes(df):
-    """ Remove quotes from all columns.
-    Parameters:
-        df (Dataframe):   Dataframe to process by removing quotes.
-    Notes:
-        - Replacement is done in place.
-    """
-
-    col_types = df.dtypes
-    for index, col in enumerate(df.columns):
-        if col_types.iloc[index] in ['string', 'object']:
-            df[col] = df[col].astype(str)
-            df.iloc[:, index] = df.iloc[:, index].str.replace('"', '')
-            df.iloc[:, index] = df.iloc[:, index].str.replace("'", "")
-
 
 def reorder_columns(data, col_order, skip_missing=True):
     """ Create a new dataframe with columns reordered.

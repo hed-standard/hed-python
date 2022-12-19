@@ -92,6 +92,7 @@ class Test(unittest.TestCase):
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         self.assertIsInstance(context1, HedTypeSummaryContext)
         text_summary1 = context1.get_text_summary()
+        print(text_summary1)
         self.assertIsInstance(text_summary1, str)
         sum_op.do_op(dispatch, dispatch.prep_events(df), 'new_events', sidecar=sidecar)
         context2 = dispatch.context_dict['AOMIC_condition_variables']

@@ -171,9 +171,7 @@ class Test(unittest.TestCase):
                 "description": "Test run",
                 "parameters": {
                     "type_tag": "Condition-variable",
-                    "type_values": [],
-                    "overwrite_existing": False,
-                    "factor_encoding": "categorical"
+                    "type_values": []
                 }
             }
         ]
@@ -183,7 +181,7 @@ class Test(unittest.TestCase):
         df = dispatch.run_operations(events_path, sidecar=sidecar_path, verbose=False)
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(len(df), 200)
-        self.assertEqual(len(df.columns), 13)
+        self.assertEqual(len(df.columns), 20)
         self.assertIn('key-assignment', df.columns)
 
     def test_save_context(self):

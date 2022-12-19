@@ -14,8 +14,7 @@
             "summary_name": "AOMIC_column_values",
             "summary_filename": "AOMIC_column_values",
             "skip_columns": ["onset", "duration"],
-            "value_columns": ["response_time", "stop_signal_delay"],
-            "task_names": []
+            "value_columns": ["response_time", "stop_signal_delay"]
             }
     },
     {

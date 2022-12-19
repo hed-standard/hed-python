@@ -1,6 +1,6 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.data_util import get_new_dataframe, get_row_hash, remove_quotes, separate_values
+from hed.tools.util.data_util import get_new_dataframe, get_row_hash, separate_values
 
 
 class KeyMap:
@@ -10,6 +10,8 @@ class KeyMap:
         name (str):       Name of this remap for identification purposes.
         key_cols (list):  A list of column names that will be hashed into the keys for the map.
         target_cols (list):   An optional list of column names that will be inserted into data and later remapped.
+
+    Notes: This mapping converts all columns of type object to string.
 
     """
     def __init__(self, key_cols, target_cols=None, name=''):
@@ -77,7 +79,7 @@ class KeyMap:
         """ Remap the columns of a dataframe or columnar file.
 
         Parameters:
-            data (DataFrame, str) :     Columnar data (either DataFrame or filename) whose columns are to be remapped.
+            data (DataFrame, str):  Columnar data (either DataFrame or filename) whose columns are to be remapped.
 
         Returns:
             tuple:
@@ -90,10 +92,10 @@ class KeyMap:
         """
 
         df_new = get_new_dataframe(data)
-        remove_quotes(df_new)
         present_keys, missing_keys = separate_values(df_new.columns.values.tolist(), self.key_cols)
         if missing_keys:
             raise HedFileError("MissingKeys", f"File must have key columns {str(self.key_cols)}", "")
+        self.remove_quotes(df_new, columns=present_keys)
         df_new[self.target_cols] = 'n/a'
         missing_indices = self._remap(df_new)
         return df_new, missing_indices
@@ -149,7 +151,9 @@ class KeyMap:
         if keys_missing and not allow_missing:
             raise HedFileError("MissingKeyColumn",
                                f"make_template data does not have key columns {str(keys_missing)}", "")
+
         base_df = df[keys_present].copy()
+        self.remove_quotes(base_df)
         if keys_missing:
             base_df[keys_missing] = 'n/a'
         if self.target_cols:
@@ -205,3 +209,23 @@ class KeyMap:
         if keep_counts:
             self.count_dict[key] += 1
         return key, pos_update
+
+    @staticmethod
+    def remove_quotes(df, columns=None):
+        """ Remove quotes from the specified columns and convert to string.
+
+        Parameters:
+            df (Dataframe):   Dataframe to process by removing quotes.
+            columns (list):  List of column names. If None, all columns are used.
+        Notes:
+            - Replacement is done in place.
+        """
+
+        col_types = df.dtypes
+        if not columns:
+            columns = df.columns.values.tolist()
+        for index, col in enumerate(df.columns):
+            if col in columns and col_types.iloc[index] in ['string', 'object']:
+                df[col] = df[col].astype(str)
+                df.iloc[:, index] = df.iloc[:, index].str.replace('"', '')
+                df.iloc[:, index] = df.iloc[:, index].str.replace("'", "")

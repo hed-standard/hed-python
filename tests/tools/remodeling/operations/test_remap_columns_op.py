@@ -92,6 +92,20 @@ class Test(unittest.TestCase):
             self.get_dfs(op)
         self.assertEqual(context.exception.args[0], 'MapSourceValueMissing')
 
+    def test_numeric_keys(self):
+        parms = {
+            "source_columns": ["duration"],
+            "destination_columns": ["new_duration"],
+            "map_list": [[0.5083, 0.6],
+                         [0.5084, 0.7]],
+            "ignore_missing": True
+        }
+        op = RemapColumnsOp(parms)
+        df, df_test = self.get_dfs(op)
+        self.assertNotIn("new_duration", df.columns.values)
+        self.assertIn("new_duration", df_test.columns.values)
+        self.assertEqual(df_test.loc[2, "new_duration"], 0.7)
+
 
 if __name__ == '__main__':
     unittest.main()
