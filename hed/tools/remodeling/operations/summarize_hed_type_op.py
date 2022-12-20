@@ -59,7 +59,7 @@ class SummarizeHedTypeOp(BaseOp):
         if not summary:
             summary = HedTypeSummaryContext(self)
             dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_prep_events(df), 'name': name,
+        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df
 

@@ -1,6 +1,6 @@
 from hed.tools import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
 
 
 class SummarizeEventsToSidecarOp(BaseOp):
@@ -56,24 +56,23 @@ class SummarizeEventsToSidecarOp(BaseOp):
 
         summary = dispatcher.context_dict.get(self.summary_name, None)
         if not summary:
-            summary = EventsToSidecarSummary(self)
+            summary = EventsToSidecarSummaryContext(self)
             dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_prep_events(df)})
+        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name})
         return df
 
 
-class EventsToSidecarSummary(BaseContext):
+class EventsToSidecarSummaryContext(BaseContext):
 
     def __init__(self, sum_op):
         super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
-        self.summary = TabularSummary(value_cols=sum_op.value_columns, skip_cols=sum_op.skip_columns,
-                                      name=sum_op.summary_name)
+        self.value_cols = sum_op.value_columns
+        self.skip_cols = sum_op.skip_columns
 
     def update_context(self, new_context):
-        self.summary.update(new_context['df'])
-
-    def get_summary_details(self, include_individual=True):
-        return self.summary.extract_sidecar_template()
+        tab_sum = TabularSummary(value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_context["name"])
+        tab_sum.update(new_context['df'], new_context['name'])
+        self.summary_dict[new_context["name"]] = tab_sum
 
     def _get_summary_details(self, summary_info):
         """ Return the summary-specific information.
@@ -85,7 +84,11 @@ class EventsToSidecarSummary(BaseContext):
             Abstract method be implemented by each individual context summary.
 
         """
-        return ""
+
+        details = {"files": summary_info.files, "total_files": summary_info.total_files,
+                   "total_events": summary_info.total_events, "skip_cols": summary_info.skip_cols,
+                   "sidecar": summary_info.extract_sidecar_template()}
+        return {"Sidecar_details": details}
 
     def _merge_all(self):
         """ Return merged information.
@@ -98,3 +101,8 @@ class EventsToSidecarSummary(BaseContext):
 
         """
         return {}
+
+    def _get_result_string(self, name, result):
+        if name == "Dataset":
+            return "Dataset: Currently no overall sidecar extraction is available"
+        return f"{name}: {str(result)}"

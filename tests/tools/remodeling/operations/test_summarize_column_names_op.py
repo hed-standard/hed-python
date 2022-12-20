@@ -45,8 +45,8 @@ class Test(unittest.TestCase):
 
     def get_dfs(self, op, name, dispatch):
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(dispatch, dispatch.prep_events(df), name)
-        return df, dispatch.post_prep_events(df_new)
+        df_new = op.do_op(dispatch, dispatch.prep_data(df), name)
+        return df, dispatch.post_proc_data(df_new)
 
     def test_constructor(self):
         parms = json.loads(self.json_parms)
@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         df = dispatch.get_data_file(self.events_path)
-        df = dispatch.prep_events(df)
+        df = dispatch.prep_data(df)
 
         old_len = len(df)
         sum_op = parsed_commands[0]
@@ -118,12 +118,12 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         op = SummarizeColumnNamesOp(parms)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        op.do_op(dispatch, dispatch.prep_events(df), 'run-01')
+        op.do_op(dispatch, dispatch.prep_data(df), 'run-01')
         df1 = pd.DataFrame(self.data1, columns=self.sample_columns1)
-        op.do_op(dispatch, dispatch.prep_events(df1), 'run-02')
-        op.do_op(dispatch, dispatch.prep_events(df1), 'run-03')
+        op.do_op(dispatch, dispatch.prep_data(df1), 'run-02')
+        op.do_op(dispatch, dispatch.prep_data(df1), 'run-03')
         df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)
-        op.do_op(dispatch, dispatch.prep_events(df2), 'run-05')
+        op.do_op(dispatch, dispatch.prep_data(df2), 'run-05')
         context = dispatch.context_dict['columns']
         summary = context.get_summary()
         text_summary1 = context.get_text_summary()

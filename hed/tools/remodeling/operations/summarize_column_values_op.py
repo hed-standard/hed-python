@@ -58,7 +58,7 @@ class SummarizeColumnValuesOp(BaseOp):
         if not summary:
             summary = ColumnValueSummaryContext(self)
             dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_prep_events(df), 'name': name})
+        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name})
         return df
 
 
@@ -86,14 +86,13 @@ class ColumnValueSummaryContext(BaseContext):
         return all_sum
 
     def _get_result_string(self, name, result):
-        indent = "   "
         if name == "Dataset":
             return self._get_dataset_string(result, indent=DISPLAY_INDENT)
-        return self._get_individual_string(name, result, indent=indent)
+        return self._get_individual_string(name, result, indent=DISPLAY_INDENT)
 
     @staticmethod
-    def _get_dataset_string(result, indent=DISPLAY_INDENT):
-        sum_list = [f"{indent}Dataset: Total events={result.get('Total events', 0)} "
+    def _get_dataset_string(result, indent=""):
+        sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
                     f"Total files={result.get('Total files', 0)}"]
         cat_cols = result.get("Categorical columns", {})
         if cat_cols:
@@ -105,7 +104,7 @@ class ColumnValueSummaryContext(BaseContext):
 
     @staticmethod
     def _get_individual_string(name, result, indent=DISPLAY_INDENT):
-        sum_list = [f"{indent*2}{name}:"]
+        sum_list = [f"{indent}{name}:"]
         cat_cols = result.get("Categorical columns", {})
         if cat_cols:
             sum_list.append(ColumnValueSummaryContext._get_categorical_string(cat_cols, offset=indent, indent=indent))
@@ -116,18 +115,18 @@ class ColumnValueSummaryContext(BaseContext):
 
     @staticmethod
     def _get_categorical_string(cat_dict, offset="", indent="   "):
-        sum_list = [f"{offset}{indent*2}Categorical column values[Events, Files]:"]
+        sum_list = [f"{offset}{indent}Categorical column values[Events, Files]:"]
         for col_name, col_dict in cat_dict.items():
-            sum_list.append(f"{offset}{indent*3}{col_name}:")
+            sum_list.append(f"{offset}{indent*2}{col_name}:")
             col_list = []
             for col_value, val_counts in col_dict.items():
                 col_list.append(f"{col_value}{str(val_counts)}")
-            sum_list.append(f"{offset}{indent*4}{' '.join(col_list)}")
+            sum_list.append(f"{offset}{indent*3}{' '.join(col_list)}")
         return "\n".join(sum_list)
 
     @staticmethod
     def _get_value_string(val_dict, offset="", indent=""):
-        sum_list = [f"{offset}{indent*2}Value columns[Events, Files]:"]
+        sum_list = [f"{offset}{indent}Value columns[Events, Files]:"]
         for col_name, val_counts in val_dict.items():
-            sum_list.append(f"{offset}{indent*3}{col_name}{str(val_counts)}")
+            sum_list.append(f"{offset}{indent*2}{col_name}{str(val_counts)}")
         return "\n".join(sum_list)

@@ -6,6 +6,7 @@ from hed.models import Sidecar
 from hed.schema import load_schema_version
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp, HedTypeSummaryContext
+from hed.tools.util.io_util import get_file_list
 
 
 class Test(unittest.TestCase):
@@ -61,18 +62,21 @@ class Test(unittest.TestCase):
         df = dispatch.get_data_file(self.events)
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         sum_op = parsed_commands[2]
-        sum_op.do_op(dispatch, dispatch.prep_events(df), 'run-01', sidecar=self.sidecar_path)
+        sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-01', sidecar=self.sidecar_path)
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         summary1 = context1.get_summary()
         self.assertEqual(summary1['summary']['Dataset']['files'][0], 'run-01')
         self.assertEqual(len(summary1['summary']['Dataset']['files']), 1)
         summary1a = context1.get_summary(as_json=True)
         self.assertIsInstance(summary1a, str)
-        sum_op.do_op(dispatch, dispatch.prep_events(df), 'run-02', sidecar=self.sidecar_path)
+        sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-02', sidecar=self.sidecar_path)
         context2 = dispatch.context_dict['AOMIC_condition_variables']
         summary2 = context2.get_summary()
         self.assertEqual(summary2['summary']['Dataset']['files'][0], 'run-01')
         self.assertEqual(len(summary2['summary']['Dataset']['files']), 2)
+        summary2a = context2.get_summary(as_json=True)
+        summary_text = context2.get_text_summary()
+        self.assertIsInstance(summary_text, str)
 
     def test_text_summary(self):
         sidecar = Sidecar(self.sidecar_path, 'aomic_sidecar', hed_schema=self.hed_schema)
@@ -85,19 +89,42 @@ class Test(unittest.TestCase):
         df = dispatch.get_data_file(self.events)
         old_len = len(df)
         sum_op = parsed_commands[2]
-        df = sum_op.do_op(dispatch, dispatch.prep_events(df), os.path.basename(self.events), sidecar=sidecar)
+        df = sum_op.do_op(dispatch, dispatch.prep_data(df), os.path.basename(self.events), sidecar=sidecar)
         self.assertEqual(len(df), old_len)
         context_dict = dispatch.context_dict
         self.assertIsInstance(context_dict, dict)
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         self.assertIsInstance(context1, HedTypeSummaryContext)
         text_summary1 = context1.get_text_summary()
-        print(text_summary1)
+        # print(text_summary1)
         self.assertIsInstance(text_summary1, str)
-        sum_op.do_op(dispatch, dispatch.prep_events(df), 'new_events', sidecar=sidecar)
+        sum_op.do_op(dispatch, dispatch.prep_data(df), 'new_events', sidecar=sidecar)
         context2 = dispatch.context_dict['AOMIC_condition_variables']
         text_summary2 = context2.get_text_summary()
         self.assertIsInstance(text_summary2, str)
+
+    # def test_temp(self):
+    #     self.assertTrue(True)
+    #     remodel_list = [{"operation": "summarize_hed_type", "description": "Get design matrix.",
+    #                 "parameters": {
+    #                     "summary_name": "wh_condition_variables",
+    #                     "summary_filename": "wh_condition_variables",
+    #                     "type_tag": "condition-variable"
+    #                 }
+    #             }]
+    #
+    #     data_path = 'H:/HEDExamples/hed-examples/datasets/eeg_ds003654s_hed'
+    #     json_path = os.path.realpath(os.path.join(data_path, 'task-FacePerception_events.json'))
+    #
+    #     file_list = get_file_list(data_path, name_suffix='events', extensions=['.tsv'], exclude_dirs=['stimuli'])
+    #     dispatch = Dispatcher(remodel_list, data_root=None, backup_name=None, hed_versions=['8.1.0'])
+    #     for file in file_list:
+    #         dispatch.run_operations(file, sidecar=json_path)
+    #     context_dict = dispatch.context_dict.get("wh_condition_variables")
+    #     text_summary = context_dict.get_text_summary()
+    #     #print(text_summary)
+    #     summary = context_dict.get_summary(as_json=True)
+    #     print(summary)
 
 
 if __name__ == '__main__':

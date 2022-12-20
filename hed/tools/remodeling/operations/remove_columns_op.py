@@ -31,7 +31,6 @@ class RemoveColumnsOp(BaseOp):
 
         """
         super().__init__(self.PARAMS, parameters)
-        self.check_parameters(parameters)
         self.column_names = parameters['column_names']
         ignore_missing = parameters['ignore_missing']
         if ignore_missing:

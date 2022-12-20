@@ -73,13 +73,13 @@ class BaseContext(ABC):
             sum_list = []
             for name, individual_result in result["Individual files"].items():
                 sum_list.append(self._get_result_string(name, individual_result))
-            summary_details = summary_details + "\n\nIndividual files:\n" + "\n".join(sum_list)
+            summary_details = summary_details + "\n\nIndividual files:\n\n" + "\n\n".join(sum_list)
         if title:
             title_str = title + "\n"
         else:
             title_str = ''
         sum_str = f"{title_str}Context name: {self.context_name}\n" + f"Context type: {self.context_type}\n" + \
-                  f"Context filename: {self.context_filename}\n" + f"\nSummary details:\n{summary_details}"
+                  f"Context filename: {self.context_filename}\n" + f"\nSummary details:\n\n{summary_details}"
         return sum_str
 
     def save(self, save_dir, file_formats=['.txt'], include_individual=True):

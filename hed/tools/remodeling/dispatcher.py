@@ -110,10 +110,10 @@ class Dispatcher:
         if verbose:
             print(f"Reading {file_path}...")
         df = self.get_data_file(file_path)
-        df = self.prep_events(df)
+        df = self.prep_data(df)
         for operation in self.parsed_ops:
             df = operation.do_op(self, df, file_path, sidecar=sidecar)
-        return self.post_prep_events(df)
+        return self.post_proc_data(df)
 
     def save_context(self, save_formats=['.json', '.txt'], include_individual=True):
         """ Save the summary files in the specified formats.
@@ -161,7 +161,7 @@ class Dispatcher:
         return operations, []
 
     @staticmethod
-    def prep_events(df):
+    def prep_data(df):
         """ Replace all n/a entries in the data frame by np.NaN for processing.
 
         Parameters:
@@ -171,7 +171,7 @@ class Dispatcher:
         return df.replace('n/a', np.NaN)
 
     @staticmethod
-    def post_prep_events(df):
+    def post_proc_data(df):
         """ Replace all nan entries with 'n/a' for BIDS compliance
 
         Parameters:

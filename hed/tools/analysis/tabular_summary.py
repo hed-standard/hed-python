@@ -32,6 +32,7 @@ class TabularSummary:
             self.skip_cols = []
         self.total_files = 0
         self.total_events = 0
+        self.files = {}
 
     def __str__(self):
         indent = "   "
@@ -104,7 +105,7 @@ class TabularSummary:
                 counts[column_name] = len(self.categorical_info[column_name].keys())
         return counts
 
-    def update(self, data):
+    def update(self, data, name=None):
         """ Update the counts based on data.
 
         Parameters:
@@ -114,9 +115,11 @@ class TabularSummary:
 
         if isinstance(data, list):
             for filename in data:
-                self._update_dataframe(filename)
+                self._update_dataframe(filename, filename)
+        elif isinstance(data, str):
+            self._update_dataframe(data, data)
         else:
-            self._update_dataframe(data)
+            self._update_dataframe(data, name)
 
     def update_summary(self, tab_sum):
         """ Add TabularSummary values to this object.
@@ -131,6 +134,8 @@ class TabularSummary:
         """
         self.total_files = self.total_files + tab_sum.total_files
         self.total_events = self.total_events + tab_sum.total_events
+        for file, key in tab_sum.files.items():
+            self.files[file] = ''
         self._update_dict_skip(tab_sum)
         self._update_dict_value(tab_sum)
         self._update_dict_categorical(tab_sum)
@@ -146,8 +151,10 @@ class TabularSummary:
                 value = [value, 1]
             total_values[name] = [value_list[0] + value[0], value_list[1] + value[1]]
 
-    def _update_dataframe(self, data):
+    def _update_dataframe(self, data, name):
         df = get_new_dataframe(data)
+        if name:
+            self.files[name] = ""
         self.total_files = self.total_files + 1
         self.total_events = self.total_events + len(df.index)
         for col_name, col_values in df.items():

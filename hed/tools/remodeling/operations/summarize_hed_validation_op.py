@@ -1,11 +1,7 @@
 import os
-from hed.errors import ErrorSeverity, ErrorHandler, get_printable_issue_string
+from hed.errors import ErrorSeverity, ErrorHandler
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
-from hed.tools.analysis.analysis_util import get_assembled_strings
-from hed.tools.analysis.hed_type_values import HedTypeValues
-from hed.tools.analysis.hed_type_counts import HedTypeCounts
-from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
 from hed.validator import HedValidator
@@ -62,7 +58,7 @@ class SummarizeHedValidationOp(BaseOp):
         if not summary:
             summary = HedValidationSummaryContext(self)
             dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_prep_events(df), 'name': name,
+        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df
 
@@ -78,7 +74,7 @@ class HedValidationSummaryContext(BaseContext):
         if result["is_merged"]:
             sum_list = [f"{name}: [{result['total_sidecar_files']} sidecar files, "
                         f"{result['total_event_files']} event files]"]
-            sum_list = sum_list + self.get_error_list(result['sidecar_issues'], indent=DISPLAY_INDENT)
+            sum_list = sum_list + self.get_error_list(result['sidecar_issues'], count_only=True, indent=DISPLAY_INDENT)
             sum_list = sum_list + self.get_error_list(result['event_issues'], count_only=True, indent=DISPLAY_INDENT)
         else:
             sum_list = [f"{DISPLAY_INDENT}{name}: {result['total_sidecar_files']} sidecar files"]
@@ -106,8 +102,7 @@ class HedValidationSummaryContext(BaseContext):
             filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
             if not self.check_for_warnings:
                 sidecar_issues = filtered_issues
-            results['sidecar_issues'][sidecar.name] = \
-                [get_printable_issue_string([issue]).replace('\n', '') for issue in sidecar_issues]
+            results['sidecar_issues'][sidecar.name] = sidecar_issues
             results['total_sidecar_issues'] = len(sidecar_issues)
             results['total_sidecar_files'] = 1
         if not filtered_issues:
@@ -116,8 +111,7 @@ class HedValidationSummaryContext(BaseContext):
             issues = input_data.validate_file(validator, check_for_warnings=self.check_for_warnings)
             if not self.check_for_warnings:
                 issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-            results['event_issues'][new_context["name"]] = \
-                [get_printable_issue_string([issue]).replace('\n', '') for issue in issues]
+            results['event_issues'][new_context["name"]] = issues
             results['total_event_issues'] = len(issues)
 
     def _get_summary_details(self, summary_info):
@@ -147,8 +141,8 @@ class HedValidationSummaryContext(BaseContext):
                     results["event_issues"][ikey] = \
                        f"Validation incomplete due to {ind_results['total_sidecar_issues']} sidecar issues"
                 else:
-                    results["event_issues"][ikey] = f"{len(errors)} issues"
-            results["total_sidecar_files"] += results["total_sidecar_files"]
+                    results["event_issues"][ikey] = f"{len(errors)}"
+            results["total_sidecar_files"] += ind_results["total_sidecar_files"]
         return results
 
     @staticmethod
@@ -158,15 +152,41 @@ class HedValidationSummaryContext(BaseContext):
                 "validation_completed": False}
 
     @staticmethod
-    def get_error_list(error_dict, count_only=False, indent='\t\t'):
+    def get_error_list(error_dict, count_only=False, indent=DISPLAY_INDENT):
         error_list = []
         for key, item in error_dict.items():
-            if count_only:
-                error_list.append(f"{indent}{key}: {item}")
+            if count_only and isinstance(item, list):
+                error_list.append(f"{indent}{key}: {len(item)} issues")
+            elif count_only:
+                error_list.append(f"{indent}{key}: {item} issues")
             elif not len(item):
                 error_list.append(f"{indent}{key} has no issues")
             else:
                 error_list.append(f"{indent}{key} issues:")
                 for this_item in item:
-                    error_list.append(f"{indent*2}{this_item}")
+                    error_list.append(f"{indent*2}{HedValidationSummaryContext.format_error(this_item)}")
         return error_list
+
+    @staticmethod
+    def format_errors(error_list):
+        pass
+
+    @staticmethod
+    def format_error(error):
+        error_str = error['code']
+        error_locations = []
+        HedValidationSummaryContext.update_error_location(error_locations, "row", "ec_row", error)
+        HedValidationSummaryContext.update_error_location(error_locations, "column", "ec_column", error)
+        HedValidationSummaryContext.update_error_location(error_locations, "sidecar column",
+                                                          "ec_sidecarColumnName", error)
+        HedValidationSummaryContext.update_error_location(error_locations, "sidecar key", "ec_sidecarKeyName", error)
+        location_str = ",".join(error_locations)
+        if location_str:
+            error_str = error_str + f"[{location_str}]"
+        error_str = error_str + f": {error['message']}"
+        return error_str
+
+    @staticmethod
+    def update_error_location(error_locations, location_name, location_key, error):
+        if location_key in error:
+            error_locations.append(f"{location_name}={error[location_key][0]}")
