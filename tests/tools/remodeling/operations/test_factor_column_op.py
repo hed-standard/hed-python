@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         self.base_parameters["factor_values"] = []
         op = FactorColumnOp(self.base_parameters)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df = Dispatcher.prep_events(df)
+        df = Dispatcher.prep_data(df)
         df_new = op.do_op(None, df, 'sample_data')
         self.assertEqual(len(df_new.columns), len(df.columns) + 3)
 
@@ -63,8 +63,8 @@ class Test(unittest.TestCase):
 
         df_check = pd.DataFrame(self.factored, columns=self.sample_columns + self.base_parameters['factor_names'])
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(None, Dispatcher.prep_events(df_test), 'sample_data')
-        df_new = Dispatcher.post_prep_events(df_new)
+        df_new = op.do_op(None, Dispatcher.prep_data(df_test), 'sample_data')
+        df_new = Dispatcher.post_proc_data(df_new)
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with ignore missing")
         self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
@@ -86,10 +86,10 @@ class Test(unittest.TestCase):
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df_check = pd.DataFrame(self.factored, columns=self.sample_columns + self.base_parameters['factor_names'])
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = Dispatcher.prep_events(df_test)
+        df_test = Dispatcher.prep_data(df_test)
         df_new = op.do_op(None, df_test, 'sample_data')
-        df_new = Dispatcher.post_prep_events(df_new)
-        df_test1 = Dispatcher.post_prep_events(df_test)
+        df_new = Dispatcher.post_proc_data(df_new)
+        df_test1 = Dispatcher.post_proc_data(df_test)
 
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with no extras and no ignore")
@@ -115,9 +115,9 @@ class Test(unittest.TestCase):
         op = FactorColumnOp(self.base_parameters)
         df_check["baloney"] = [0, 0, 0, 0, 0, 0]
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = Dispatcher.prep_events(df_test)
+        df_new = Dispatcher.prep_data(df_test)
         df_new = op.do_op(None, df_new, 'sample_data')
-        df_new = Dispatcher.post_prep_events(df_new)
+        df_new = Dispatcher.post_proc_data(df_new)
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with extras and ignore missing")
         self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),
@@ -144,8 +144,8 @@ class Test(unittest.TestCase):
         op = FactorColumnOp(self.base_parameters)
         df_check["baloney"] = [0, 0, 0, 0, 0, 0]
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(None, Dispatcher.prep_events(df_test), 'sample_data')
-        df_new = Dispatcher.post_prep_events(df_new)
+        df_new = op.do_op(None, Dispatcher.prep_data(df_test), 'sample_data')
+        df_new = Dispatcher.post_proc_data(df_new)
         self.assertEqual(len(df_check), len(df_new),
                          "factor_column should not change number of rows with extras and ignore missing")
         self.assertEqual(len(df_check.columns), len(df.columns) + len(self.base_parameters["factor_values"]),

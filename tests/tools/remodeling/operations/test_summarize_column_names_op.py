@@ -1,5 +1,6 @@
 import json
 import os
+import pandas as pd
 import unittest
 from hed.tools.analysis.column_name_summary import ColumnNameSummary
 from hed.tools.remodeling.dispatcher import Dispatcher
@@ -19,6 +20,15 @@ class Test(unittest.TestCase):
             "summary_filename": "column_name_summary"
         }
         cls.json_parms = json.dumps(base_parameters)
+
+        cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
+                           [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
+                           [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
+                           [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
+                           [17.1021, 0.5083, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
+                           [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male']]
+        cls.sample_columns = ['onset', 'duration', 'trial_type', 'stop_signal_delay', 'response_time',
+                              'response_accuracy', 'response_hand', 'sex']
         cls.events_path = \
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
@@ -27,10 +37,16 @@ class Test(unittest.TestCase):
         cls.model_path = \
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
 
     @classmethod
     def tearDownClass(cls):
         pass
+
+    def get_dfs(self, op, name, dispatch):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(dispatch, dispatch.prep_data(df), name)
+        return df, dispatch.post_proc_data(df_new)
 
     def test_constructor(self):
         parms = json.loads(self.json_parms)
@@ -43,7 +59,7 @@ class Test(unittest.TestCase):
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         df = dispatch.get_data_file(self.events_path)
-        df = dispatch.prep_events(df)
+        df = dispatch.prep_data(df)
 
         old_len = len(df)
         sum_op = parsed_commands[0]
@@ -67,6 +83,52 @@ class Test(unittest.TestCase):
         with self.assertRaises(ValueError) as except_context:
             sum_op.do_op(dispatch, df, 'run-03')
         self.assertEqual(except_context.exception.args[0], 'FileHasChangedColumnNames')
+
+    def test_summary(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
+        parms = json.loads(self.json_parms)
+        op = SummarizeColumnNamesOp(parms)
+        df, df_new = self.get_dfs(op, 'run-01', dispatch)
+        self.assertEqual(len(df), len(df_new))
+        context_dict = dispatch.context_dict
+        self.assertIsInstance(context_dict, dict)
+        self.get_dfs(op, 'run-02', dispatch)
+        context = dispatch.context_dict['columns']
+        summary = context.get_summary()
+        dataset_sum = summary['summary']['Dataset']
+        columns = dataset_sum["Columns"]
+        self.assertEqual(len(columns), 1)
+        self.assertEqual(len(columns[0]['Files']), 2)
+        ind_sum = summary['summary']['Individual files']
+        self.assertEqual(len(ind_sum), 2)
+
+    def test_text_summary(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
+        parms = json.loads(self.json_parms)
+        op = SummarizeColumnNamesOp(parms)
+        self.get_dfs(op, 'run-01', dispatch)
+        self.get_dfs(op, 'run-02', dispatch)
+        context = dispatch.context_dict['columns']
+        self.assertIsInstance(context, ColumnNameSummaryContext)
+        text_summary1 = context.get_text_summary()
+        self.assertIsInstance(text_summary1, str)
+
+    def test_multiple(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
+        parms = json.loads(self.json_parms)
+        op = SummarizeColumnNamesOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        op.do_op(dispatch, dispatch.prep_data(df), 'run-01')
+        df1 = pd.DataFrame(self.data1, columns=self.sample_columns1)
+        op.do_op(dispatch, dispatch.prep_data(df1), 'run-02')
+        op.do_op(dispatch, dispatch.prep_data(df1), 'run-03')
+        df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)
+        op.do_op(dispatch, dispatch.prep_data(df2), 'run-05')
+        context = dispatch.context_dict['columns']
+        summary = context.get_summary()
+        text_summary1 = context.get_text_summary()
+        self.assertEqual(len(summary['summary']['Dataset']['Columns']), 3)
+        self.assertIsInstance(text_summary1, str)
 
 
 if __name__ == '__main__':

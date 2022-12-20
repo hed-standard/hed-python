@@ -37,8 +37,8 @@ class Test(unittest.TestCase):
 
     def get_dfs(self, op):
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, self.dispatch.prep_events(df), 'run-01')
-        return df, self.dispatch.post_prep_events(df_new)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_data(df), 'run-01')
+        return df, self.dispatch.post_proc_data(df_new)
 
     def test_valid(self):
         # Test when no extras but ignored.
@@ -91,6 +91,20 @@ class Test(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             self.get_dfs(op)
         self.assertEqual(context.exception.args[0], 'MapSourceValueMissing')
+
+    def test_numeric_keys(self):
+        parms = {
+            "source_columns": ["duration"],
+            "destination_columns": ["new_duration"],
+            "map_list": [[0.5083, 0.6],
+                         [0.5084, 0.7]],
+            "ignore_missing": True
+        }
+        op = RemapColumnsOp(parms)
+        df, df_test = self.get_dfs(op)
+        self.assertNotIn("new_duration", df.columns.values)
+        self.assertIn("new_duration", df_test.columns.values)
+        self.assertEqual(df_test.loc[2, "new_duration"], 0.7)
 
 
 if __name__ == '__main__':

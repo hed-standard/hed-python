@@ -1,6 +1,6 @@
 from hed.tools import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
 
 
 class SummarizeColumnValuesOp(BaseOp):
@@ -22,8 +22,7 @@ class SummarizeColumnValuesOp(BaseOp):
             "summary_name": str,
             "summary_filename": str,
             "skip_columns": list,
-            "value_columns": list,
-            "task_names": list,
+            "value_columns": list
         },
         "optional_parameters": {
         }
@@ -59,7 +58,7 @@ class SummarizeColumnValuesOp(BaseOp):
         if not summary:
             summary = ColumnValueSummaryContext(self)
             dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_prep_events(df), 'name': name})
+        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name})
         return df
 
 
@@ -85,3 +84,49 @@ class ColumnValueSummaryContext(BaseContext):
         for key, counts in self.summary_dict.items():
             all_sum.update_summary(counts)
         return all_sum
+
+    def _get_result_string(self, name, result):
+        if name == "Dataset":
+            return self._get_dataset_string(result, indent=DISPLAY_INDENT)
+        return self._get_individual_string(name, result, indent=DISPLAY_INDENT)
+
+    @staticmethod
+    def _get_dataset_string(result, indent=""):
+        sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
+                    f"Total files={result.get('Total files', 0)}"]
+        cat_cols = result.get("Categorical columns", {})
+        if cat_cols:
+            sum_list.append(ColumnValueSummaryContext._get_categorical_string(cat_cols, offset="", indent=indent))
+        val_cols = result.get("Value columns", {})
+        if val_cols:
+            sum_list.append(ColumnValueSummaryContext._get_value_string(val_cols, offset="", indent=indent))
+        return "\n".join(sum_list)
+
+    @staticmethod
+    def _get_individual_string(name, result, indent=DISPLAY_INDENT):
+        sum_list = [f"{indent}{name}:"]
+        cat_cols = result.get("Categorical columns", {})
+        if cat_cols:
+            sum_list.append(ColumnValueSummaryContext._get_categorical_string(cat_cols, offset=indent, indent=indent))
+        val_cols = result.get("Value columns", {})
+        if val_cols:
+            sum_list.append(ColumnValueSummaryContext._get_value_string(val_cols, offset=indent, indent=indent))
+        return "\n".join(sum_list)
+
+    @staticmethod
+    def _get_categorical_string(cat_dict, offset="", indent="   "):
+        sum_list = [f"{offset}{indent}Categorical column values[Events, Files]:"]
+        for col_name, col_dict in cat_dict.items():
+            sum_list.append(f"{offset}{indent*2}{col_name}:")
+            col_list = []
+            for col_value, val_counts in col_dict.items():
+                col_list.append(f"{col_value}{str(val_counts)}")
+            sum_list.append(f"{offset}{indent*3}{' '.join(col_list)}")
+        return "\n".join(sum_list)
+
+    @staticmethod
+    def _get_value_string(val_dict, offset="", indent=""):
+        sum_list = [f"{offset}{indent}Value columns[Events, Files]:"]
+        for col_name, val_counts in val_dict.items():
+            sum_list.append(f"{offset}{indent*2}{col_name}{str(val_counts)}")
+        return "\n".join(sum_list)

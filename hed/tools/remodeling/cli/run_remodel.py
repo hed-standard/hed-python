@@ -12,27 +12,27 @@ def get_parser():
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
     parser.add_argument("remodel_path", help="Full path of the file with remodeling instructions.")
-    parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
+    parser.add_argument("-b", "--bids-format", action='store_true', dest="use_bids",
+                        help="If present, the dataset is in BIDS format with sidecars. HED analysis is available.")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
                         help="File extensions to allow in locating files.")
-    parser.add_argument("-x", "--exclude-dirs", nargs="*", default=['derivatives'], dest="exclude_dirs",
-                        help="Directories names to exclude from search for files.")
     parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events',
                         help="Filename suffix excluding file type of items to be analyzed (events by default).")
     parser.add_argument("-i", "--include-individual", action='store_true', dest="include_individual",
                         help="If present, individual files are summarized in addition to overall summary.")
     parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
                         help="Optional path to JSON sidecar with HED information")
+    parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
+                        help="Name of the default backup for remodeling")
     parser.add_argument("-r", "--hed-versions", dest="hed_versions", nargs="*", default=[],
                         help="Optional list of HED schema versions used for annotation, include prefixes.")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
                         help="Format for saving any summaries, if any. If empty, then no summaries are saved.")
-    parser.add_argument("-b", "--bids-format", action='store_true', dest="use_bids",
-                        help="If present, the dataset is in BIDS format with sidecars. HED analysis is available.")
-    parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
-                        help="Name of the default backup for remodeling")
+    parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
+    parser.add_argument("-x", "--exclude-dirs", nargs="*", default=[], dest="exclude_dirs",
+                        help="Directories names to exclude from search for files.")
     return parser
 
 

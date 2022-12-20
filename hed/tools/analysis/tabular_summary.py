@@ -25,13 +25,14 @@ class TabularSummary:
                                f"Value columns {str(value_cols)} and skip columns {str(skip_cols)} cannot overlap", "")
         if value_cols:
             for value in value_cols:
-                self.value_info[value] = 0
+                self.value_info[value] = [0, 0]
         if skip_cols:
             self.skip_cols = skip_cols.copy()
         else:
             self.skip_cols = []
         self.total_files = 0
         self.total_events = 0
+        self.files = {}
 
     def __str__(self):
         indent = "   "
@@ -72,12 +73,13 @@ class TabularSummary:
             val_dict = {}
             for v_key in sorted_v_keys:
                 val_dict[v_key] = cat_dict[v_key]
-            categorical_cols[f"{key} [categorical column] values"] = val_dict
+            categorical_cols[key] = val_dict
         sorted_cols = sorted(map(str, list(self.value_info)))
         value_cols = {}
         for key in sorted_cols:
-            value_cols[f"{key} [value_column]"] = f"{self.value_info[key]} values"
-        summary = {"Summary name": self.name, "Categorical columns": categorical_cols, "Value columns": value_cols}
+            value_cols[key] = self.value_info[key]
+        summary = {"Summary name": self.name, "Total events": self.total_events, "Total files": self.total_files,
+                   "Categorical columns": categorical_cols, "Value columns": value_cols}
         if as_json:
             return json.dumps(summary, indent=4)
         else:
@@ -103,7 +105,7 @@ class TabularSummary:
                 counts[column_name] = len(self.categorical_info[column_name].keys())
         return counts
 
-    def update(self, data):
+    def update(self, data, name=None):
         """ Update the counts based on data.
 
         Parameters:
@@ -113,9 +115,11 @@ class TabularSummary:
 
         if isinstance(data, list):
             for filename in data:
-                self._update_dataframe(filename)
+                self._update_dataframe(filename, filename)
+        elif isinstance(data, str):
+            self._update_dataframe(data, data)
         else:
-            self._update_dataframe(data)
+            self._update_dataframe(data, name)
 
     def update_summary(self, tab_sum):
         """ Add TabularSummary values to this object.
@@ -128,6 +132,10 @@ class TabularSummary:
             - A new skip column cannot used.
 
         """
+        self.total_files = self.total_files + tab_sum.total_files
+        self.total_events = self.total_events + tab_sum.total_events
+        for file, key in tab_sum.files.items():
+            self.files[file] = ''
         self._update_dict_skip(tab_sum)
         self._update_dict_value(tab_sum)
         self._update_dict_categorical(tab_sum)
@@ -138,17 +146,23 @@ class TabularSummary:
 
         total_values = self.categorical_info[tab_name]
         for name, value in values.items():
-            total_values[name] = total_values.get(name, 0) + value
+            value_list = total_values.get(name, [0, 0])
+            if not isinstance(value, list):
+                value = [value, 1]
+            total_values[name] = [value_list[0] + value[0], value_list[1] + value[1]]
 
-    def _update_dataframe(self, data):
+    def _update_dataframe(self, data, name):
         df = get_new_dataframe(data)
+        if name:
+            self.files[name] = ""
         self.total_files = self.total_files + 1
         self.total_events = self.total_events + len(df.index)
         for col_name, col_values in df.items():
             if self.skip_cols and col_name in self.skip_cols:
                 continue
             if col_name in self.value_info.keys():
-                self.value_info[col_name] = self.value_info[col_name] + len(col_values)
+                self.value_info[col_name][0] = self.value_info[col_name][0] + len(col_values)
+                self.value_info[col_name][1] = self.value_info[col_name][1] + 1
             else:
                 col_values = col_values.astype(str)
                 values = col_values.value_counts(ascending=True)
@@ -194,7 +208,8 @@ class TabularSummary:
             elif col not in val_cols:
                 self.value_info[col] = col_dict.value_info[col]
             else:
-                self.value_info[col] = self.value_info[col] + col_dict.value_info[col]
+                self.value_info[col] = [self.value_info[col][0] + col_dict.value_info[col][0],
+                                        self.value_info[col][1] + col_dict.value_info[col][1]]
 
     @staticmethod
     def get_columns_info(dataframe, skip_cols=None):

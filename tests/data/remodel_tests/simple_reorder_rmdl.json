@@ -3,7 +3,7 @@
         "operation": "remove_columns",
         "description": "Get rid of the sample and the value columns",
         "parameters": {
-            "remove_names": ["sample", "value"],
+            "column_names": ["sample", "value"],
             "ignore_missing": true
         }
     },

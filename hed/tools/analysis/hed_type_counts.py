@@ -100,6 +100,7 @@ class HedTypeCounts:
 
         Parameters:
             type_sum (dict):  Contains the information about the value of a type.
+            total_events (int): Total number of events processed.
             file_id (str):   Unique identifier for the associated file.
         """
 
@@ -109,7 +110,7 @@ class HedTypeCounts:
             val_counts = self.type_dict[type_val]
             val_counts.update(type_counts, file_id)
         self.files[file_id] = ''
-        self.total_events = self.total_events + 1
+        self.total_events = self.total_events + total_events
 
     def add_descriptions(self, type_defs):
         """ Update this summary based on the type variable map.
@@ -130,6 +131,7 @@ class HedTypeCounts:
                 type_count.level_counts[level]['description'] = level_dict['description']
 
     def update(self, counts):
+        self.total_events = self.total_events + counts.total_events
         for key, count in counts.type_dict.items():
             if key not in self.type_dict:
                 self.type_dict[key] = HedTypeCount(count.type_value, count.type_tag, None)
@@ -142,4 +144,5 @@ class HedTypeCounts:
         details = {}
         for type_value, count in self.type_dict.items():
             details[type_value] = count.get_summary()
-        return {'name': str(self.name), 'type_tag': self.type_tag, 'files': list(self.files.keys()), 'details': details}
+        return {'name': str(self.name), 'type_tag': self.type_tag, 'files': list(self.files.keys()),
+                'total_events': self.total_events, 'details': details}

@@ -47,8 +47,8 @@ class Test(unittest.TestCase):
 
     def get_dfs(self, op):
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, self.dispatch.prep_events(df), 'run-01')
-        return df, self.dispatch.post_prep_events(df_new)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_data(df), 'run-01')
+        return df, self.dispatch.post_proc_data(df_new)
 
     def test_valid(self):
         parms = json.loads(self.json_parms)

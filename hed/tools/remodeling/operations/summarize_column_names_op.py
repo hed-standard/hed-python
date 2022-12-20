@@ -78,4 +78,16 @@ class ColumnNameSummaryContext(BaseContext):
         return all_sum
 
     def _get_result_string(self, name, result):
-        return result[name].get_text_summary()
+        if name == "Dataset":
+            return self._get_dataset_string(result)
+        columns = result["Columns"][0]
+        return f"\t\t{name}: {str(columns['Column names'])}"
+
+    @staticmethod
+    def _get_dataset_string(result):
+        sum_list = [f"Dataset: Number of files={result.get('Number files', 0)}"]
+        for element in result.get("Columns", []):
+            sum_list.append(f"\tColumns: {str(element['Column names'])}")
+            for file in element.get("Files", []):
+                sum_list.append(f"\t\t{file}")
+        return "\n".join(sum_list)

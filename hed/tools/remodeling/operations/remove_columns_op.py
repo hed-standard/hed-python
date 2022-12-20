@@ -13,7 +13,7 @@ class RemoveColumnsOp(BaseOp):
     PARAMS = {
         "operation": "remove_columns",
         "required_parameters": {
-            "remove_names": list,
+            "column_names": list,
             "ignore_missing": bool
         },
         "optional_parameters": {}
@@ -31,8 +31,7 @@ class RemoveColumnsOp(BaseOp):
 
         """
         super().__init__(self.PARAMS, parameters)
-        self.check_parameters(parameters)
-        self.remove_names = parameters['remove_names']
+        self.column_names = parameters['column_names']
         ignore_missing = parameters['ignore_missing']
         if ignore_missing:
             self.error_handling = 'ignore'
@@ -57,8 +56,8 @@ class RemoveColumnsOp(BaseOp):
         """
 
         try:
-            return df.drop(self.remove_names, axis=1, errors=self.error_handling)
-        except KeyError as context:
+            return df.drop(self.column_names, axis=1, errors=self.error_handling)
+        except KeyError:
             raise KeyError("MissingColumnCannotBeRemoved",
-                           f"{name}: Ignore missing is False but a column in {str(self.remove_names)} is "
+                           f"{name}: Ignore missing is False but a column in {str(self.column_names)} is "
                            f"not in the data columns [{str(df.columns)}]")
