@@ -68,23 +68,21 @@ class Test(unittest.TestCase):
         self.get_dfs(sum_op, 'name1', dispatch)
 
         cont = dispatch.context_dict
-        context1 = cont.get("test_summary", None)
-        # print("to here")
-        # self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
-        # summary1 = context1.get_summary()
-        # self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
-        # summary1a = context1.get_summary(as_json=True)
-        # self.assertIsInstance(summary1a, str, "get_summary returns a dictionary if json requested")
-        # text_summary = context1.get_text_summary(include_individual=True)
-        # print(text_summary)
-        # self.assertIsInstance(text_summary, str)
-        # self.get_dfs(sum_op, 'name2', dispatch)
-        # self.get_dfs(sum_op, 'name3', dispatch)
-        # context2 = dispatch.context_dict.get(parms['summary_name'], None)
-        # summary2 = context2.get_summary()
-        # self.assertIsInstance(summary2, dict)
-        # text_summary2 = context2.get_text_summary(include_individual=True)
-        # self.assertIsInstance(text_summary2, str)
+        context1 = cont.get("test summary", None)
+        self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
+        summary1 = context1.get_summary()
+        self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
+        summary1a = context1.get_summary(as_json=True)
+        self.assertIsInstance(summary1a, str, "get_summary returns a dictionary if json requested")
+        text_summary = context1.get_text_summary(include_individual=True)
+        self.assertIsInstance(text_summary, str)
+        self.get_dfs(sum_op, 'name2', dispatch)
+        self.get_dfs(sum_op, 'name3', dispatch)
+        context2 = dispatch.context_dict.get(parms['summary_name'], None)
+        summary2 = context2.get_summary()
+        self.assertIsInstance(summary2, dict)
+        text_summary2 = context2.get_text_summary(include_individual=True)
+        self.assertIsInstance(text_summary2, str)
 
     def test_summary_op(self):
         events = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -106,29 +104,6 @@ class Test(unittest.TestCase):
             self.assertTrue(text_value)
             json_value = item.get_summary(as_json=True)
             self.assertTrue(json_value)
-
-    # def test_temp(self):
-    #     data_path = 'H:/HEDExamples/hed-examples/datasets/eeg_ds003654s_hed'
-    #     json_path = os.path.realpath(os.path.join(data_path, 'task-FacePerception_events.json'))
-    #     remodel_list = [{
-    #         "operation": "summarize_column_values",
-    #         "description": "Summarize column values.",
-    #         "parameters": {
-    #             "summary_name": "column_values_summary",
-    #             "summary_filename": "column_values_summary",
-    #             "skip_columns": ["onset", "duration", "sample"],
-    #             "value_columns": ["trial", "stim_file"]
-    #         }
-    #     }]
-    #     file_list = get_file_list(data_path, name_suffix='events', extensions=['.tsv'], exclude_dirs=['stimuli'])
-    #     dispatch = Dispatcher(remodel_list, data_root=None, backup_name=None, hed_versions=['8.1.0'])
-    #     for file in file_list:
-    #         dispatch.run_operations(file)
-    #     context_dict = dispatch.context_dict.get("column_values_summary")
-    #     text_summary = context_dict.get_text_summary()
-    #     #print(text_summary)
-    #     summary = context_dict.get_summary(as_json=True)
-    #     print(summary)
 
 
 if __name__ == '__main__':

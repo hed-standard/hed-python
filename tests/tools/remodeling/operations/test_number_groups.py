@@ -268,9 +268,8 @@ class Test(unittest.TestCase):
         # Test when one of startstop values does not exist in source column
         parms = json.loads(self.json_missing_startstop_value_parms)
         op = NumberGroupsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
 
         with self.assertRaisesRegex(ValueError, "MissingValue"):
-            df_new = op.do_op(self.dispatcher, df_test, self.file_name)
+            op.do_op(self.dispatcher, df_test, self.file_name)
 

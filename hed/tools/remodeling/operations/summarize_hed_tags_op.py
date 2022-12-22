@@ -108,7 +108,7 @@ class HedTagSummaryContext(BaseContext):
         else:
             title_str = ''
         sum_str = f"{title_str}Context name: {self.context_name}\n" + f"Context type: {self.context_type}\n" + \
-                  f"Context filename: {self.context_filename}\n" + f"\nSummary details:\n{summary_details}"
+                  f"Context filename: {self.context_filename}\n" + f"\n{summary_details}"
 
         return sum_str
 

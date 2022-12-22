@@ -49,22 +49,6 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df_new.columns), 20,
                          "factor_hed_type_op has correct number of columns when type_values specified")
 
-    # def test_valid_categorical(self):
-        # # Test correct when all valid and no unwanted information
-        # self.base_parameters["factor_encoding"] = "categorical"
-        # op = FactorHedTypeOp(self.base_parameters)
-        # df_new = op.do_op(self.dispatch, self.data_path, 'subj2_run1', sidecar=self.json_path)
-        # self.assertEqual(len(df_new), 200, "factor_hed_type_op length is correct when categorical encoding")
-        # self.assertEqual(len(df_new.columns), 13,
-        #                  "factor_hed_type_op has correct number of columns when categorical encoding")
-
-    # def test_bad_encoding(self):
-    #     # Test correct when all valid and no unwanted information
-    #     self.base_parameters["factor_encoding"] = "junk"
-    #     with self.assertRaises(ValueError) as context:
-    #         FactorHedTypeOp(self.base_parameters)
-    #     self.assertEqual(context.exception.args[0], 'BadFactorEncoding')
-
 
 if __name__ == '__main__':
     unittest.main()

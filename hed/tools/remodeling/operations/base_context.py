@@ -44,28 +44,6 @@ class BaseContext(ABC):
         else:
             return ret_sum
 
-    # def get_summary_details(self, include_individual=True):
-    #     merged_summary = self._merge_all()
-    #     summary_details = {"Dataset": self._get_summary_details(merged_summary)}
-    #     if include_individual:
-    #         individual = {}
-    #         for name, count in self.summary_dict.items():
-    #             individual[name] = self._get_summary_details(count)
-    #         summary_details["Individual files"] = individual
-    #     return summary_details
-
-    # def get_text_summary(self, title='', include_individual=True):
-    #     summary_details = json.dumps(self.get_summary_details(include_individual=include_individual), indent=4)
-    #     summary_details = summary_details.replace('"', '').replace('{', '').replace('}', '').replace(',', '')
-    #
-    #     sum_str = ""
-    #     if title:
-    #         sum_str = title + "\n"
-    #     sum_str = sum_str + f"Context name: {self.context_name}\n" + f"Context type: {self.context_type}\n" + \
-    #         f"Context filename: {self.context_filename}\n" + f"Summary:\n{summary_details}"
-    #
-    #     return sum_str
-
     def get_text_summary(self, title='', include_individual=True):
         result = self.get_summary_details(include_individual=include_individual)
         summary_details = self._get_result_string("Dataset", result.get("Dataset", ""))
@@ -79,7 +57,7 @@ class BaseContext(ABC):
         else:
             title_str = ''
         sum_str = f"{title_str}Context name: {self.context_name}\n" + f"Context type: {self.context_type}\n" + \
-                  f"Context filename: {self.context_filename}\n" + f"\nSummary details:\n\n{summary_details}"
+                  f"Context filename: {self.context_filename}\n" + f"\n{summary_details}"
         return sum_str
 
     def save(self, save_dir, file_formats=['.txt'], include_individual=True):

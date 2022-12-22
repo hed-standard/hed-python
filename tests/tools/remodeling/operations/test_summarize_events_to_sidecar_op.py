@@ -67,12 +67,16 @@ class Test(unittest.TestCase):
         summary2 = context1.get_summary(as_json=True)
         self.assertIsInstance(summary2, str, "get_summary returns a dictionary if json requested")
         summary_text3 = context1.get_text_summary(include_individual=True)
-        # print(summary_text3)
         self.assertIsInstance(summary_text3, str, "get_text_summary returns a str if verbose is False")
         summary4 = context1.get_text_summary()
         self.assertIsInstance(summary4, str, "get_text_summary returns a str by default")
         summary_text5 = context1.get_text_summary(include_individual=False)
         self.assertIsInstance(summary_text5, str)
+        sum_op.do_op(dispatch, dispatch.prep_data(df1), 'name2')
+        context2 = dispatch.context_dict.get(self.base_parameters['summary_name'], None)
+        self.assertIsInstance(context1, EventsToSidecarSummaryContext, "get_summary testing EventsToSidecarSummary")
+        summary_text6 = context2.get_text_summary()
+        self.assertIsInstance(summary_text6, str)
 
 
 if __name__ == '__main__':
