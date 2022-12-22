@@ -24,7 +24,7 @@ class Dispatcher:
         self.data_root = data_root
         self.backup_name = backup_name
         self.backup_man = None
-        if self.data_root:
+        if self.data_root and backup_name:
             self.backup_man = BackupManager(data_root)
             if not self.backup_man.get_backup(self.backup_name):
                 raise HedFileError("BackupDoesNotExist",

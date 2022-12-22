@@ -1,3 +1,4 @@
+import json
 from hed.tools import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
@@ -105,4 +106,6 @@ class EventsToSidecarSummaryContext(BaseContext):
     def _get_result_string(self, name, result):
         if name == "Dataset":
             return "Dataset: Currently no overall sidecar extraction is available"
-        return f"{name}: {str(result)}"
+        details = result['Sidecar_details']
+        json_str = f"\nSidecar:\n{json.dumps(details['sidecar'], indent=4)}"
+        return f"{name}: Total events={details['total_events']} Skip columns: {str(details['skip_cols'])}{json_str}"

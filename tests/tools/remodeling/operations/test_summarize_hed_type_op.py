@@ -96,35 +96,11 @@ class Test(unittest.TestCase):
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         self.assertIsInstance(context1, HedTypeSummaryContext)
         text_summary1 = context1.get_text_summary()
-        # print(text_summary1)
         self.assertIsInstance(text_summary1, str)
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'new_events', sidecar=sidecar)
         context2 = dispatch.context_dict['AOMIC_condition_variables']
         text_summary2 = context2.get_text_summary()
         self.assertIsInstance(text_summary2, str)
-
-    # def test_temp(self):
-    #     self.assertTrue(True)
-    #     remodel_list = [{"operation": "summarize_hed_type", "description": "Get design matrix.",
-    #                 "parameters": {
-    #                     "summary_name": "wh_condition_variables",
-    #                     "summary_filename": "wh_condition_variables",
-    #                     "type_tag": "condition-variable"
-    #                 }
-    #             }]
-    #
-    #     data_path = 'H:/HEDExamples/hed-examples/datasets/eeg_ds003654s_hed'
-    #     json_path = os.path.realpath(os.path.join(data_path, 'task-FacePerception_events.json'))
-    #
-    #     file_list = get_file_list(data_path, name_suffix='events', extensions=['.tsv'], exclude_dirs=['stimuli'])
-    #     dispatch = Dispatcher(remodel_list, data_root=None, backup_name=None, hed_versions=['8.1.0'])
-    #     for file in file_list:
-    #         dispatch.run_operations(file, sidecar=json_path)
-    #     context_dict = dispatch.context_dict.get("wh_condition_variables")
-    #     text_summary = context_dict.get_text_summary()
-    #     #print(text_summary)
-    #     summary = context_dict.get_summary(as_json=True)
-    #     print(summary)
 
 
 if __name__ == '__main__':

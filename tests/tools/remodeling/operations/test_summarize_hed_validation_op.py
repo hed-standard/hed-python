@@ -113,12 +113,8 @@ class Test(unittest.TestCase):
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         parms = json.loads(self.json_parms)
         sum_op = SummarizeHedValidationOp(parms)
-        #print(self.sample_sidecar_path)
         sum_op.do_op(dispatch, df, 'sub-0013_task-stopsignal_acq-seq_events.tsv', sidecar=self.sample_sidecar_path)
-
         sum_context1 = dispatch.context_dict[sum_op.summary_name]
-        text_sum1 = sum_context1.get_text_summary(include_individual=True)
-        # print(text_sum1)
 
 
 if __name__ == '__main__':

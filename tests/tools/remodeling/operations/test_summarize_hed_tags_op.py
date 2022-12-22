@@ -4,7 +4,6 @@ import unittest
 import pandas as pd
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_hed_tags_op import SummarizeHedTagsOp, HedTagSummaryContext
-from hed.tools.util.io_util import get_file_list
 
 
 class Test(unittest.TestCase):
@@ -151,34 +150,7 @@ class Test(unittest.TestCase):
             df = operation.do_op(dispatch, df, "sample", sidecar=sidecar_path)
         context_dict = dispatch.context_dict.get("summarize_hed_tags")
         text_summary = context_dict.get_text_summary()
-        # print(text_summary)
-
-    def test_temp(self):
-        data_path = 'H:/HEDExamples/hed-examples/datasets/eeg_ds003654s_hed'
-        json_path = os.path.realpath(os.path.join(data_path, 'task-FacePerception_events.json'))
-        remodel_list = [{
-         "operation": "summarize_hed_tags",
-         "description": "Produce a summary of HED tags.",
-         "parameters": {
-             "summary_name": "summarize_hed_tags",
-             "summary_filename": "summarize_hed_tags",
-             "tags": {
-                 "Sensory events": ["Sensory-event","Sensory-presentation","Task-stimulus-role","Experimental-stimulus"],
-                 "Agent actions": ["Agent-action","Agent","Action","Agent-task-role","Task-action-type","Participant-response"],
-                 "Objects": ["Item"]
-             },
-             "expand_context": False
-         }}]
-        file_list = get_file_list(data_path, name_suffix='events', extensions=['.tsv'], exclude_dirs=['stimuli'])
-        dispatch = Dispatcher(remodel_list, data_root=None, backup_name=None, hed_versions=['8.1.0'])
-        for file in file_list:
-            dispatch.run_operations(file, sidecar=json_path)
-        context_dict = dispatch.context_dict.get("summarize_hed_tags")
-        text_summary = context_dict.get_text_summary()
-        #print(text_summary)
-        summary = context_dict.get_summary(as_json=True)
-        # print(summary)
-
+        self.assertIsInstance(text_summary, str)
 
 if __name__ == '__main__':
     unittest.main()
