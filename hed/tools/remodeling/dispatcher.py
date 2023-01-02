@@ -71,7 +71,10 @@ class Dispatcher:
             file_path (str): Full path of the dataframe in the original dataset.
 
         Returns:
-            str: Full path of the corresponding file in the backup.
+            DataFrame:  DataFrame after reading the path.
+
+        Raises:
+            HedFileError:  If a valid file cannot be found.
 
         """
         if self.backup_man:

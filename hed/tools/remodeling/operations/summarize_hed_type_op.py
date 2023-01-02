@@ -125,23 +125,21 @@ class HedTypeSummaryContext(BaseContext):
 
     @staticmethod
     def _get_dataset_string(result, indent=DISPLAY_INDENT):
-        sum_list = [f"Dataset: Type={result['type_tag']} Total events={result.get('total_events', 0)} "
-                    f"Total files={len(result.get('files', []))}"]
         details = result.get('details', {})
+        sum_list = [f"Dataset: {len(details)} {result['type_tag']} types in {len(result.get('files', []))} files" 
+                    f" with a total of {result.get('total_events', 0)}"]
+
         for key, item in details.items():
-            sum_list.append(f"{indent}{key}:")
-            sum_list.append(f"{indent*2}Files:{str(item['files'])}")
-            str1 = f"{indent*2}Levels:{item['levels']}  Events:{item['events']}"
-            str1 = f"{indent*2}Events: {item['events']} out of {item['total_events']} total events " + \
-                   f"in {len(item['files'])} files"
+            str1 = f"{item['events']} events out of {item['total_events']} total events in {len(item['files'])} files"
+            if item['level_counts']:
+                str1 = f"{len(item['level_counts'])} levels in " + str1
+            sum_list.append(f"{indent}{key}: {str1}")
             if item['direct_references']:
                 str1 = str1 + f" Direct references:{item['direct_references']}"
             if item['events_with_multiple_refs']:
                 str1 = str1 + f" Multiple references:{item['events_with_multiple_refs']})"
-            sum_list.append(str1)
             if item['level_counts']:
-                sum_list = sum_list + HedTypeSummaryContext._level_details(item['level_counts'],
-                                                                           offset=DISPLAY_INDENT, indent=DISPLAY_INDENT)
+                sum_list = sum_list + HedTypeSummaryContext._level_details(item['level_counts'], indent=DISPLAY_INDENT)
         return "\n".join(sum_list)
 
     @staticmethod
@@ -149,13 +147,14 @@ class HedTypeSummaryContext(BaseContext):
         sum_list = [f"{indent}{name}: Type={result['type_tag']} Total events={result.get('total_events', 0)} "]
         details = result.get('details', {})
         for key, item in details.items():
-            sum_list.append(f"{indent*2}{key}:")
-            str1 = f"{indent*3}Levels:{item['levels']}  Events:{item['events']}"
+            sum_list.append(f"{indent*2}{key}: {item['levels']} levels in {item['events']} events")
+            str1 = ""
             if item['direct_references']:
                 str1 = str1 + f" Direct references:{item['direct_references']}"
             if item['events_with_multiple_refs']:
                 str1 = str1 + f" (Multiple references:{item['events_with_multiple_refs']})"
-            sum_list.append(str1)
+            if str1:
+                sum_list.append(f"{indent*3}{str1}")
             if item['level_counts']:
                 sum_list = sum_list + HedTypeSummaryContext._level_details(item['level_counts'],
                                                                            offset=DISPLAY_INDENT, indent=DISPLAY_INDENT)
@@ -167,9 +166,12 @@ class HedTypeSummaryContext(BaseContext):
 
     @staticmethod
     def _level_details(level_counts, offset="", indent=""):
-        level_list = [f"{offset}{indent*2}Levels[Events,Files]: [Tags]"]
+        level_list = []
         for key, details in level_counts.items():
-            level_list.append(f"{offset}{indent*3}{key} [{details['events']},{details['files']}]: {str(details['tags'])}")
+            str1 = f"[{details['events']} events, {details['files']} files]:"
+            level_list.append(f"{offset}{indent*2}{key} {str1}")
+            if details['tags']:
+                level_list.append(f"{offset}{indent*3}Tags: {str(details['tags'])}")
             if details['description']:
-                level_list.append(f"{offset}{indent*4}tDescription: {details['description']}")
+                level_list.append(f"{offset}{indent*3}Description: {details['description']}")
         return level_list
