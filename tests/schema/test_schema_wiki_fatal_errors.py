@@ -28,6 +28,8 @@ class TestHedSchema(unittest.TestCase):
             "malformed_line3.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
             "malformed_line4.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
             "malformed_line5.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+            "malformed_line6.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+            "malformed_line7.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
             "empty_node.xml": HedExceptions.HED_SCHEMA_NODE_NAME_INVALID
         }
 
@@ -38,7 +40,19 @@ class TestHedSchema(unittest.TestCase):
             "malformed_line3.mediawiki": 2,
             "malformed_line4.mediawiki": 1,
             "malformed_line5.mediawiki": 1,
+            "malformed_line6.mediawiki": 2,
+            "malformed_line7.mediawiki": 2,
             'HED_schema_no_start.mediawiki': 1
+        }
+        cls.expected_line_numbers = {
+            "empty_node.mediawiki": [9],
+            "malformed_line.mediawiki": [9],
+            "malformed_line2.mediawiki": [9, 9],
+            "malformed_line3.mediawiki": [9, 9],
+            "malformed_line4.mediawiki": [9],
+            "malformed_line5.mediawiki": [9],
+            "malformed_line6.mediawiki": [9, 10],
+            "malformed_line7.mediawiki": [9, 10],
         }
 
     def test_invalid_schema(self):
@@ -47,5 +61,12 @@ class TestHedSchema(unittest.TestCase):
             with self.assertRaises(HedFileError) as context:
                 schema.load_schema(full_filename)
                 # all of these should produce exceptions.
-            self.assertTrue(context.exception.args[0])
-            self.assertTrue(context.exception.filename)
+
+            # Verify basic properties of exception
+            expected_line_numbers = self.expected_line_numbers.get(filename, [])
+            if expected_line_numbers:
+                for issue, expected in zip(context.exception.issues, expected_line_numbers):
+                    self.assertEqual(issue["line_number"], expected)
+
+            self.assertTrue(context.exception.args[0] == error)
+            self.assertTrue(context.exception.filename == full_filename)
