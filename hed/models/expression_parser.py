@@ -51,6 +51,7 @@ class Expression:
         self.left = left
         self.right = right
         self.token = token
+        self._match_mode = "/" in token.text
 
     def __str__(self):
         output_str = ""
@@ -62,8 +63,10 @@ class Expression:
         return output_str
 
     def handle_expr(self, hed_group, exact=False):
-        # groups_found = hed_group.find_exact_tags([self.token.text], recursive=True)
-        groups_found = hed_group.find_tags_with_term(self.token.text, recursive=True, include_groups=1)
+        if self._match_mode:
+            groups_found = hed_group.find_exact_tags([self.token.text], recursive=True)
+        else:
+            groups_found = hed_group.find_tags_with_term(self.token.text, recursive=True, include_groups=1)
         if exact:
             all_found_groups = groups_found
         else:
