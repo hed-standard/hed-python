@@ -118,6 +118,13 @@ class Test(unittest.TestCase):
         return_val2 = test_man.create_backup(file_list, backup_name="test_back1", verbose=False)
         self.assertTrue(return_val2, "create_backup returns true when it has created a backup.")
 
+    def test_get_task(self):
+        task1 = BackupManager.get_task(['abc', 'def'], 'temp/myabc.txt')
+        self.assertFalse(task1)
+        task2 = BackupManager.get_task([], 'temp/myabc.txt')
+        self.assertFalse(task2)
+        task3 = BackupManager.get_task(['abc', 'def'], 'temp/alpha_key_task_abc.txt')
+        self.assertEqual(task3, 'abc')
 
 if __name__ == '__main__':
     unittest.main()

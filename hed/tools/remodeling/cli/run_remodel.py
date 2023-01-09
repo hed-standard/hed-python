@@ -28,7 +28,7 @@ def get_parser():
                         help="Optional list of HED schema versions used for annotation, include prefixes.")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
                         help="Format for saving any summaries, if any. If empty, then no summaries are saved.")
-    parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
+    parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The names of the task.")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
     parser.add_argument("-x", "--exclude-dirs", nargs="*", default=[], dest="exclude_dirs",
@@ -90,14 +90,13 @@ def run_direct_ops(dispatch, args):
     else:
         sidecar = None
     for file_path in tabular_files:
-        if args.task_names:
-            (suffix, ext, entity_dict) = parse_bids_filename(file_path)
-            task = entity_dict.get('task', None)
-            if not (task and task in args.task_names):
-                continue
+        if not BackupManager.get_task(args.task_names, file_path):
+            continue
         df = dispatch.run_operations(file_path, verbose=args.verbose, sidecar=sidecar)
         df.to_csv(file_path, sep='\t', index=False, header=True)
     return
+
+
 
 
 def main(arg_list=None):
@@ -108,7 +107,7 @@ def main(arg_list=None):
     if not backup_man.get_backup(args.backup_name):
         raise HedFileError("BackupDoesNotExist", f"Backup {args.backup_name} does not exist. "
                            f"Please run_remodel_backup first", "")
-    backup_man.restore_backup(args.backup_name, verbose=args.verbose)
+    backup_man.restore_backup(args.backup_name, args.task_names, verbose=args.verbose)
     dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=args.backup_name,
                           hed_versions=args.hed_versions)
     if args.use_bids:
