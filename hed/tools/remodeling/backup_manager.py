@@ -114,11 +114,12 @@ class BackupManager:
         file_comp = get_path_components(self.data_root, file_name) + [os.path.basename(file_name)]
         return '/'.join(file_comp)
 
-    def restore_backup(self, backup_name=DEFAULT_BACKUP_NAME, verbose=True):
+    def restore_backup(self, backup_name=DEFAULT_BACKUP_NAME, task_names=[], verbose=True):
         """ Restore the files from backup_name to the main directory.
 
         Parameters:
             backup_name (str):  Name of the backup to restore.
+            task_names (list):  A list of task names to restore.
             verbose (bool):  If true, print out the file names being restored.
 
         """
@@ -127,6 +128,8 @@ class BackupManager:
         backup_files = self.get_backup_files(backup_name)
         data_files = self.get_backup_files(backup_name, original_paths=True)
         for index, file in enumerate(backup_files):
+            if task_names and not self.get_task(task_names, file):
+                continue
             os.makedirs(os.path.dirname(data_files[index]), exist_ok=True)
             if verbose:
                 print(f"Copying {file} to {data_files[index]}")
@@ -189,3 +192,23 @@ class BackupManager:
         files_not_in_backup = list(file_paths.difference(backup_paths))
         backups_not_in_directory = list(backup_paths.difference(file_paths))
         return backup_dict, files_not_in_backup, backups_not_in_directory
+
+    @staticmethod
+    def get_task(task_names, file_path):
+        """ Return the task if the file name contains a task_xxx where xxx is in task_names.
+
+        Args:
+            task_names (list):  List of task names (without the task_ prefix).
+            file_path (str):    Path of the filename to be tested.
+
+        Returns:
+            str  the task name or '' if there is no task_xxx or xxx is not in task_names.
+
+        """
+
+        base = os.path.basename(file_path)
+        for task in task_names:
+            if ('task_' + task) in base:
+                return task
+        else:
+            return ''
