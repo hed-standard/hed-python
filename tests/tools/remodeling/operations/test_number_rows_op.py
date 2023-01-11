@@ -261,10 +261,8 @@ class Test(unittest.TestCase):
         # Test when existing column name is given with overwrite specified False
         parms = json.loads(self.json_overwrite_false_parms)
         op = NumberRowsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.existing_sample_columns)
         df_test = pd.DataFrame(self.sample_data, columns=self.existing_sample_columns)
-
-        with self.assertRaisesRegex(ValueError, "ExistingNumberColumn"):
+        with self.assertRaisesRegex(ValueError, "ExistingNumberColumn") as context:
             df_new = op.do_op(self.dispatcher, df_test, self.file_name)
 
     def test_existing_column_overwrite_unspecified(self):

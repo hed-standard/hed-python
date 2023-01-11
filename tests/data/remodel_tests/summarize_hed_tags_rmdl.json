@@ -1,0 +1,36 @@
+ [
+     {
+         "operation": "summarize_hed_tags",
+         "description": "Produce a summary of HED tags.",
+         "parameters": {
+             "summary_name": "Summarize_hed tags_basic",
+             "summary_filename": "summarize_hed_tags_basic",
+             "tags": {
+                 "Sensory events": [
+                     "Sensory-event",
+                     "Sensory-presentation",
+                     "Task-stimulus-role",
+                     "Experimental-stimulus"
+                 ],
+                 "Agent actions": [
+                     "Agent-action",
+                     "Agent",
+                     "Action",
+                     "Agent-task-role",
+                     "Task-action-type",
+                     "Participant-response"
+                 ],
+                 "Task properties": [
+                     "Task-property"
+                 ],
+                 "Objects": [
+                     "Item"
+                 ],
+                 "Properties": [
+                     "Property"
+                 ]
+             },
+             "expand_context": false
+         }
+     }
+]

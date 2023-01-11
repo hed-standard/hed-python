@@ -1,0 +1,24 @@
+{
+    "trial_type": {
+        "HED": {
+            "succesful_stop": "Sensory-presentation, Visual-presentation, Correct-action, Image, Label/succesful_stop",
+            "unsuccesful_stop": "Sensory-presentation, Visual-presentation, Incorrect-action, Image, Label/unsuccesful_stop",
+            "go": "Sensory-presentation, Visual-presentation, Image, Label/go"
+        }
+    },
+    "stop_signal_delay": {
+        "HED": "(Auditory-presentation, Delay/# s)"
+        },
+    "sex": {
+        "HED": {
+            "male": "Def/Male-image-cond",
+            "female": "Def/Female-image-cond"
+        }
+    },
+    "hed_defs": {
+        "HED": {
+            "def_male": "(Definition/Male-image-cond, (Condition-variable/Image-sex, (Male, (Image, Face))))",
+            "def_female": "(Definition/Female-image-cond, (Condition-variable/Image-sex, (Female, (Image, Face))))"
+        }
+    }
+}

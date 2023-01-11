@@ -21,7 +21,7 @@ class HedValidator(HedOps):
     def __init__(self, hed_schema=None, run_semantic_validation=True):
         """ Constructor for the HedValidator class.
 
-        Args:
+        Parameters:
             hed_schema (HedSchema or HedSchemaGroup): HedSchema object to use for validation.
             run_semantic_validation (bool): True if the validator should check the HED data against a schema.
         """
@@ -54,7 +54,7 @@ class HedValidator(HedOps):
     def _validate_groups_in_hed_string(self, hed_string_obj):
         """ Report invalid groups at each level.
 
-        Args:
+        Parameters:
             hed_string_obj (HedString): A HedString object.
 
         Returns:
@@ -101,7 +101,7 @@ class HedValidator(HedOps):
     def _validate_tags_in_hed_string(self, hed_string_obj, check_for_warnings=False):
         """ Report invalid the multi-tag properties.
 
-         Args:
+         Parameters:
             hed_string_obj (HedString): A HedString object.
 
          Returns:
@@ -120,7 +120,7 @@ class HedValidator(HedOps):
                                                 check_for_warnings=False):
         """ Validate individual tags in a HED string.
 
-         Args:
+         Parameters:
             hed_string_obj (HedString): A HedString  object.
 
          Returns:

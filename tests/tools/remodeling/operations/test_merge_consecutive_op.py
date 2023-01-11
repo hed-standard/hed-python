@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import unittest
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
+from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.merge_consecutive_op import MergeConsecutiveOp
 
 
@@ -39,45 +39,77 @@ class Test(unittest.TestCase):
                 "ignore_missing": True
             }
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_data(df), 'run-01')
+        return df, self.dispatch.post_proc_data(df_new)
+
     def test_valid(self):
+        parms = json.loads(self.json_parms)
+        op = MergeConsecutiveOp(parms)
+        self.assertIsInstance(op, MergeConsecutiveOp)
+
+    def test_invalid(self):
+        parms = json.loads(self.json_parms)
+        parms["column_name"] = "sex"
+        with self.assertRaises(ValueError) as context:
+            MergeConsecutiveOp(parms)
+        self.assertEqual(context.exception.args[0], "MergeColumnCannotBeMatched")
+
+    def test_do_op_valid(self):
         # Test when no extras but ignored.
         parms = json.loads(self.json_parms)
         op = MergeConsecutiveOp(parms)
+        df_test, df_new = self.get_dfs(op)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df = df.replace('n/a', np.NaN)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = df_test.replace('n/a', np.NaN)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
         self.assertTrue(list(df_new.columns) == list(df.columns),
                         "merge_consecutive should not change the number of columns")
-        df_results = pd.DataFrame(self.result_data, columns=self.sample_columns)
-        df_results = df_results.replace('n/a', np.NaN)
-        self.assertTrue(list(df_new.columns) == list(df_results.columns),
-                        "merge_consecutive should has correct number of columns after merge")
         for index, row in df_new.iterrows():
-            if not math.isclose(df_new.loc[index, "onset"], df_results.loc[index, "onset"]):
+            if not math.isclose(df_new.loc[index, "onset"], df_new.loc[index, "onset"]):
                 self.fail(f"merge_consecutive result has wrong onset at {index}: {df_new.loc[index, 'onset']} " +
                           "instead of{df_results.loc[index, 'onset']}")
-            if not math.isclose(df_new.loc[index, "duration"], df_results.loc[index, "duration"]):
+            if not math.isclose(df_new.loc[index, "duration"], df_new.loc[index, "duration"]):
                 self.fail(f"merge_consecutive result has wrong duration at {index}: {df_new.loc[index, 'duration']} " +
-                          f"instead of {df_results.loc[index, 'duration']}")
+                          f"instead of {df_new.loc[index, 'duration']}")
 
         # Test that df has not been changed by the op
         self.assertTrue(list(df.columns) == list(df_test.columns),
                         "merge_consecutive should not change the input df columns when no extras and not ignored")
         for index, row in df.iterrows():
             if not math.isclose(df.loc[index, "onset"], df_test.loc[index, "onset"]):
-                self.fail(f"merge_consecutive should not change onset after op, but onset does not agree at" +
+                self.fail("merge_consecutive should not change onset after op, but onset does not agree at" +
                           f"at {index}: {df.loc[index, 'onset']} instead of {df_test.loc[index, 'onset']}")
             if not math.isclose(df.loc[index, "duration"], df_test.loc[index, "duration"]):
-                self.fail(f"merge_consecutive should not change duration after op, but duration does not agree at" +
+                self.fail("merge_consecutive should not change duration after op, but duration does not agree at" +
                           f"at {index}: {df.loc[index, 'duration']} instead of {df_test.loc[index, 'duration']}")
+
+    def test_do_op_no_set_durations(self):
+        # Test when no set duration.
+        parms1 = json.loads(self.json_parms)
+        parms1["set_durations"] = False
+        op1 = MergeConsecutiveOp(parms1)
+        df_test, df_new1 = self.get_dfs(op1)
+        parms2 = json.loads(self.json_parms)
+        parms2["set_durations"] = True
+        op2 = MergeConsecutiveOp(parms2)
+        df_test2, df_new2 = self.get_dfs(op2)
+        self.assertTrue(list(df_new1.columns) == list(df_new2.columns))
+        code_mask = df_new1["duration"] != df_new2["duration"]
+        self.assertEqual(sum(code_mask.astype(int)), 2)
+
+    def test_do_op_valid_no_change(self):
+        # Test when no extras but ignored.
+        parms = json.loads(self.json_parms)
+        parms["event_code"] = "baloney"
+        op = MergeConsecutiveOp(parms)
+        df, df_new = self.get_dfs(op)
+        self.assertEqual(len(df), len(df_new))
 
     def test_get_remove_groups(self):
         match_df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
@@ -101,32 +133,51 @@ class Test(unittest.TestCase):
         self.assertEqual(remove_groups3[5], 1, "_get_remove_groups has correct first group")
         self.assertEqual(remove_groups3[7], 1, "_get_remove_groups has correct second group")
 
-    # def test_valid_missing(self):
-    #     # Test when no extras but ignored.
-    #     parms = json.loads(self.json_parms)
-    #     before_len = len(parms["map_list"])
-    #     parms["map_list"] = parms["map_list"][:-1]
-    #     after_len = len(parms["map_list"])
-    #     self.assertEqual(after_len + 1, before_len)
-    #     op = RemapColumnsOp(parms)
-    #     df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-    #     df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-    #     df_new = op.do_op(df_test)
-    #     self.assertNotIn("response_type", df.columns, "remap_columns before does not have response_type column")
-    #     self.assertIn("response_type", df_new.columns, "remap_columns after has response_type column")
-    #
-    # def test_invalid_missing(self):
-    #     # Test when no extras but ignored.
-    #     parms = json.loads(self.json_parms)
-    #     before_len = len(parms["map_list"])
-    #     parms["map_list"] = parms["map_list"][:-1]
-    #     parms["ignore_missing"] = False
-    #     after_len = len(parms["map_list"])
-    #     self.assertEqual(after_len + 1, before_len)
-    #     op = RemapColumnsOp(parms)
-    #     df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-    #     with self.assertRaises(ValueError):
-    #         df_new = op.do_op(df_test)
+    def test_invalid_missing_column(self):
+        parms = json.loads(self.json_parms)
+        parms["column_name"] = "baloney"
+        parms["ignore_missing"] = False
+        op = MergeConsecutiveOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df = df.replace('n/a', np.NaN)
+        with self.assertRaises(ValueError) as context:
+            op.do_op(self.dispatch, df, 'sample_data')
+        self.assertEqual(context.exception.args[0], "ColumnMissing")
+
+    def test_do_op_missing_onset(self):
+        parms = json.loads(self.json_parms)
+        parms["ignore_missing"] = False
+        op = MergeConsecutiveOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df = df.replace('n/a', np.NaN)
+        df_new = df.drop("onset", axis=1)
+        self.assertEqual(len(df.columns), len(df_new.columns) + 1)
+        with self.assertRaises(ValueError) as context:
+            op.do_op(self.dispatch, df_new, 'sample_data')
+        self.assertEqual(context.exception.args[0], "MissingOnsetColumn")
+
+    def test_do_op_missing_duration(self):
+        parms = json.loads(self.json_parms)
+        parms["set_durations"] = True
+        op = MergeConsecutiveOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df = df.replace('n/a', np.NaN)
+        df_new = df.drop("duration", axis=1)
+        self.assertEqual(len(df.columns), len(df_new.columns) + 1)
+        with self.assertRaises(ValueError) as context:
+            op.do_op(self.dispatch, df_new, 'sample_data')
+        self.assertEqual(context.exception.args[0], "MissingDurationColumn")
+
+    def test_do_op_missing_match(self):
+        parms = json.loads(self.json_parms)
+        parms["match_columns"] = ['stop_signal_delay', 'response_hand', 'sex', 'baloney']
+        parms["ignore_missing"] = False
+        op = MergeConsecutiveOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df = df.replace('n/a', np.NaN)
+        with self.assertRaises(ValueError) as context:
+            op.do_op(self.dispatch, df, 'sample_data')
+        self.assertEqual(context.exception.args[0], "MissingMatchColumns")
 
 
 if __name__ == '__main__':

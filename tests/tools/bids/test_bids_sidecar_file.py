@@ -11,20 +11,21 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.description_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                            '../../data/bids/eeg_ds003654s_hed/dataset_description.json')
-        cls.event_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                      '../../data/bids/eeg_ds003654s_hed/sub-002/'
-                                      'eeg/sub-002_task-FacePerception_run-1_events.tsv')
+        description = '../../data/bids/eeg_ds003654s_hed/dataset_description.json'
+        cls.description_path = os.path.realpath(os.path.join(os.path.dirname(__file__), description))
+        cls.event_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                       '../../data/bids_tests/eeg_ds003654s_hed/sub-002/',
+                                                       'eeg/sub-002_task-FacePerception_run-1_events.tsv'))
+        sidecar = '../../data/bids_tests/eeg_ds003654s_hed/task-FacePerception_events.json'
+        cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(__file__), sidecar))
 
-        cls.sidecar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                        '../../data/bids/eeg_ds003654s_hed/task-FacePerception_events.json')
-        path_upper = '../../data/bids/eeg_ds003654s_hed_inheritance/task-FacePerception_events.json'
-        path_lower2 = '../../data/bids/eeg_ds003654s_hed_inheritance/sub-002/sub-002_task-FacePerception_events.json'
-        path_lower3 = '../../data/bids/eeg_ds003654s_hed_inheritance/sub-003/sub-003_task-FacePerception_events.json'
-        cls.sidecar_path_upper = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_upper)
-        cls.sidecar_path_lower2 = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_lower2)
-        cls.sidecar_path_lower3 = os.path.join(os.path.dirname(os.path.realpath(__file__)), path_lower3)
+        inherit = '../../data/bids_tests/eeg_ds003654s_hed_inheritance'
+        upper = 'task-FacePerception_events.json'
+        lower2 = 'sub-002/sub-002_task-FacePerception_events.json'
+        lower3 = 'sub-003/sub-003_task-FacePerception_events.json'
+        cls.sidecar_path_upper = os.path.realpath(os.path.join(os.path.dirname(__file__), inherit, upper))
+        cls.sidecar_path_lower2 = os.path.realpath(os.path.join(os.path.dirname(__file__), inherit, lower2))
+        cls.sidecar_path_lower3 = os.path.realpath(os.path.join(os.path.dirname(__file__), inherit, lower3))
 
     def test_constructor(self):
         sidecar1 = BidsSidecarFile(self.sidecar_path)
@@ -35,14 +36,9 @@ class Test(unittest.TestCase):
         self.assertFalse(sidecar1.has_hed)
 
     def test_bad_constructor(self):
-        try:
-            json1 = BidsSidecarFile(self.description_path)
-        except HedFileError:
-            pass
-        except Exception:
-            self.fail("BidsSidecarFile threw the wrong exception when filename invalid")
-        else:
-            self.fail("BidsSidecarFile should have thrown a HedFileError when duplicate key")
+        with self.assertRaises(HedFileError) as context:
+            BidsSidecarFile(self.description_path)
+        self.assertEqual(context.exception.args[0], 'BadKeyValue')
 
     def test_bids_sidecar_file_str(self):
         sidecar1 = BidsSidecarFile(self.sidecar_path)

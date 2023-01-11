@@ -21,7 +21,7 @@ class BidsFile:
     def __init__(self, file_path):
         """ Constructor for a file path.
 
-        Args:
+        Parameters:
             file_path(str): Full path of the file.
 
         """
@@ -31,17 +31,17 @@ class BidsFile:
         self.ext = ext
         self.entity_dict = entity_dict
         self.sidecar = None    # list of sidecars starting at the root (including itself if sidecar)
-        self.contents = None
+        self._contents = None
         self.has_hed = False
 
     @property
-    def get_contents(self):
+    def contents(self):
         """ Return the current contents of this object. """
-        return self.contents
+        return self._contents
 
     def clear_contents(self):
         """ Set the contents attribute of this object to None. """
-        self.contents = None
+        self._contents = None
 
     def get_entity(self, entity_name):
         return self.entity_dict.get(entity_name, None)
@@ -49,7 +49,7 @@ class BidsFile:
     def get_key(self, entities=None):
         """ Return a key for this BIDS file given a list of entities.
 
-        Args:
+        Parameters:
             entities (tuple):  A tuple of strings representing entities.
 
         Returns:
@@ -72,7 +72,7 @@ class BidsFile:
     def set_contents(self, content_info=None, overwrite=False):
         """ Set the contents of this object.
 
-        Args:
+        Parameters:
             content_info:      The contents appropriate for this object.
             overwrite (bool):  If False and the contents are not empty, do nothing.
 
@@ -80,9 +80,9 @@ class BidsFile:
             - Do not set if the contents are already set and no_overwrite is True.
 
         """
-        if self.contents and not overwrite:
+        if self._contents and not overwrite:
             return
-        self.contents = content_info
+        self._contents = content_info
         self.has_hed = False
 
     def __str__(self):

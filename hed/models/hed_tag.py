@@ -14,7 +14,7 @@ class HedTag:
     def __init__(self, hed_string, span=None, hed_schema=None):
         """ Creates a HedTag.
 
-        Args:
+        Parameters:
             hed_string (str): Source hed string for this tag.
             span  (int, int): The start and end indexes of the tag in the hed_string.
             hed_schema (HedSchema or None): A convenience parameter for calculating canonical forms on creation.
@@ -105,7 +105,7 @@ class HedTag:
     def short_base_tag(self, new_tag_val):
         """ Change base tag, leaving extension or value.
 
-        Args:
+        Parameters:
             new_tag_val (str): The new short_base_tag for this tag.
 
         Raises:
@@ -164,7 +164,7 @@ class HedTag:
 
     @property
     def tag(self):
-        """ Return the entire user editable attribute in the tag.
+        """ Returns the tag.
 
             Returns the original tag if no user form set.
 
@@ -181,7 +181,7 @@ class HedTag:
     def tag(self, new_tag_val):
         """ Allow you to overwrite the tag output text.
 
-        Args:
+        Parameters:
             new_tag_val (str): New (implicitly long form) of tag to set.
 
         Notes:
@@ -271,7 +271,7 @@ class HedTag:
     def add_prefix_if_needed(self, required_prefix):
         """ Add a prefix to this tag *unless* already formatted.
 
-        Args:
+        Parameters:
             required_prefix (str): The full name_prefix to add if not present.
 
         Notes:
@@ -308,8 +308,8 @@ class HedTag:
     def convert_to_canonical_forms(self, hed_schema):
         """ Update internal state based on schema.
 
-        Args:
-            hed_schema (HedSchema): The schema to use to validate this tag
+        Parameters:
+            hed_schema (HedSchema or HedSchemaGroup): The schema to use to validate this tag
 
         Returns:
             list:  A list of issues found during conversion. Each element is a dictionary.
@@ -451,7 +451,7 @@ class HedTag:
     def has_attribute(self, attribute):
         """ Return true if this is an attribute this tag has.
 
-        Args:
+        Parameters:
             attribute (str): Name of the attribute.
 
         Returns:
@@ -480,8 +480,6 @@ class HedTag:
 
     def get_tag_unit_class_units(self):
         """ Get the unit class units associated with a particular tag.
-
-        Args:
 
         Returns:
             list: A list containing the unit class units associated with a particular tag or an empty list.
@@ -512,7 +510,7 @@ class HedTag:
     def base_tag_has_attribute(self, tag_attribute):
         """ Check to see if the tag has a specific attribute.
 
-        Args:
+        Parameters:
             tag_attribute (str): A tag attribute.
 
         Returns:
@@ -527,7 +525,7 @@ class HedTag:
     def any_parent_has_attribute(self, attribute):
         """ Check if the tag or any of its parents has the attribute.
 
-        Args:
+        Parameters:
             attribute (str): The name of the attribute to check for.
 
         Returns:
@@ -559,7 +557,7 @@ class HedTag:
     def _get_schema_prefix(self, org_tag):
         """ Finds the library prefix for the tag.
 
-        Args:
+        Parameters:
             org_tag (str): A string representing a tag.
 
         Returns:
@@ -579,7 +577,7 @@ class HedTag:
     def _get_tag_units_portion(self, tag_unit_classes):
         """ Check that this string has valid units and remove them.
 
-        Args:
+        Parameters:
             tag_unit_classes (dict): Dictionary of valid UnitClassEntry objects for this tag.
 
         Returns:
@@ -617,7 +615,7 @@ class HedTag:
     def replace_placeholder(self, placeholder_value):
         """ If tag has a placeholder character(#), replace with value.
 
-        Args:
+        Parameters:
             placeholder_value (str): Value to replace placeholder with.
 
         """

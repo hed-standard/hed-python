@@ -6,6 +6,8 @@ from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.hed_ops import HedOps
 
+# TODO: should not have print statement when error
+
 
 class DefMapper(HedOps):
     """ Handles converting Def/ and Def-expand/.
@@ -20,8 +22,9 @@ class DefMapper(HedOps):
     def __init__(self, def_dicts=None):
         """ Initialize mapper for definitions in hed strings.
 
-        Args:
-            def_dicts (list or DefDict): DefDicts containing the definitions this mapper should initialize with.
+        Parameters:
+            def_dicts (list or DefinitionDict): DefinitionDicts containing the definitions this mapper
+                                                should initialize with.
 
         Notes:
             - More definitions can be added later.
@@ -49,7 +52,7 @@ class DefMapper(HedOps):
     def get_def_entry(self, def_name):
         """ Get the definition entry for the definition name.
 
-        Args:
+        Parameters:
             def_name (str):  Name of the definition to retrieve.
 
         Returns:
@@ -68,7 +71,7 @@ class DefMapper(HedOps):
     def add_definitions_from_string_as_temp(self, hed_string_obj):
         """ Add definitions from hed string as temporary.
 
-        Args:
+        Parameters:
             hed_string_obj (HedString):  Hed string object to search for definitions
 
         Returns:
@@ -83,7 +86,7 @@ class DefMapper(HedOps):
     def add_definitions(self, def_dicts, add_as_temp=False):
         """ Add definitions from dict(s) to mapper
 
-        Args:
+        Parameters:
             def_dicts (list or DefinitionDict): DefDict or list of DefDicts whose definitions should be added.
             add_as_temp (bool):          If true, mark these new definitions as temporary (easily purged).
 
@@ -99,7 +102,7 @@ class DefMapper(HedOps):
     def _add_definitions_from_dict(self, def_dict, add_as_temp=False):
         """ Add the definitions found in the given definition dictionary to this mapper.
 
-         Args:
+         Parameters:
              def_dict (DefinitionDict): DefDict whose definitions should be added.
              add_as_temp (bool): If true, mark these new definitions as temporary (easily purged).
 
@@ -118,7 +121,7 @@ class DefMapper(HedOps):
     def expand_def_tags(self, hed_string_obj, expand_defs=True, shrink_defs=False):
         """ Validate and expand Def/Def-Expand tags.
 
-        Args:
+        Parameters:
             hed_string_obj (HedString): The hed string to process.
             expand_defs (bool): If true, convert def tags to def-expand tag groups that include definition content.
             shrink_defs (bool): If True, replace all def-expand groups with corresponding def tags.
@@ -158,7 +161,7 @@ class DefMapper(HedOps):
 
             Also removes definitions
 
-        Args:
+        Parameters:
             hed_string_obj (HedString): The string to search for definitions.
             check_for_definitions  (bool): If True, this will first check the hed string for any definitions.
             expand_defs (bool):        If True, replace Def tags to Def-expand tag groups.
@@ -188,7 +191,7 @@ class DefMapper(HedOps):
     def _get_definition_contents(self, def_tag, def_expand_group, def_issues):
         """ Check for issues with expanding a tag from Def to a Def-expand tag group and return the expanded tag group.
 
-        Args:
+        Parameters:
             def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
             def_expand_group (HedGroup or HedTag):
             Source group for this def-expand tag.  Same as def_tag if this is not a def-expand tag.

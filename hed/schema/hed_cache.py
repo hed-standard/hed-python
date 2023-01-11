@@ -42,7 +42,7 @@ version_pattern = re.compile(HED_VERSION_FINAL)
 def set_cache_directory(new_cache_dir):
     """ Set default global hed cache directory.
 
-    Args:
+    Parameters:
         new_cache_dir (str): Directory to check for versions.
 
     """
@@ -60,7 +60,7 @@ def get_cache_directory():
 def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=False):
     """ Get the HED versions in the hed directory.
 
-    Args:
+    Parameters:
         local_hed_directory (str): Directory to check for versions which defaults to hed_cache.
         library_name (str or None): An optional schema library name.
         get_libraries (bool): If true, return a dictionary of version numbers, with an entry for each library name.
@@ -103,7 +103,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=
 def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_folder=None):
     """ Cache a file from a URL.
 
-    Args:
+    Parameters:
         hed_xml_url (str): Path to an exact file at a URL, or a GitHub API url to a directory.
         xml_version (str): If not None and hed_xml_url is a directory, return this version or None.
         library_name (str or None): Optional schema library name.
@@ -148,7 +148,7 @@ def _cache_specific_url(hed_xml_url, cache_filename):
 def get_hed_version_path(xml_version=None, library_name=None, local_hed_directory=None):
     """ Get latest HED XML file path in a directory.
 
-    Args:
+    Parameters:
         library_name (str or None): Optional the schema library name.
         xml_version (str or None): If not None, return this version or None.
         local_hed_directory (str): Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
@@ -174,7 +174,7 @@ def get_hed_version_path(xml_version=None, library_name=None, local_hed_director
 def get_path_from_hed_version(hed_version, library_name=None, local_hed_directory=None):
     """ Return the HED XML file path for a version.
 
-    Args:
+    Parameters:
         hed_version (str): The HED version that is in the hed directory.
         library_name (str or None): An optional schema library name.
         local_hed_directory (str): The local hed path to use.
@@ -194,7 +194,7 @@ def get_path_from_hed_version(hed_version, library_name=None, local_hed_director
 def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
     """ Cache all schemas at the given URLs.
 
-    Args:
+    Parameters:
         hed_base_urls (str or list): Path or list of paths.
         skip_folders (list): A list of subfolders to skip over when downloading.
         cache_folder (str): The folder holding the cache.
@@ -241,7 +241,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
 def _read_last_cached_time(cache_folder):
     """ Check the given cache folder to see when it was last updated.
 
-    Args:
+    Parameters:
         cache_folder (str): The folder we're caching hed schema in.
 
     Returns:
@@ -261,7 +261,7 @@ def _read_last_cached_time(cache_folder):
 def _write_last_cached_time(new_time, cache_folder):
     """ Set the time of last cache update.
 
-    Args:
+    Parameters:
         new_time (float): The time this was updated.
         cache_folder (str): The folder used for caching the hed schema.
 
@@ -308,7 +308,7 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
                                    skip_folders=DEFAULT_SKIP_FOLDERS, get_libraries=False):
     """ Get all available schemas and their hash values
 
-    Args:
+    Parameters:
         hed_base_url (str): A single GitHub API url to cache
         library_name(str or None): If str, cache only the named library schemas
         skip_folders (list): A list of subfolders to skip over when downloading.
@@ -317,6 +317,7 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
     Returns:
         list or dict: List of version numbers or dictionary {library_name: [versions]}.
 
+    Notes:
         - The Default skip_folders is 'deprecated'.
         - The HED cache folder defaults to HED_CACHE_DIRECTORY.
         - The directories on Github are of the form:
@@ -402,7 +403,7 @@ def _calculate_sha1(filename):
 def _safe_move_tmp_to_folder(temp_hed_xml_file, dest_filename):
     """ Copy to destination folder and rename.
 
-    Args:
+    Parameters:
         temp_hed_xml_file (str): An XML file, generally from a temp folder.
         dest_filename (str): A destination folder and filename.
 
@@ -439,7 +440,7 @@ def _cache_hed_version(version, library_name, version_info, cache_folder):
 def _get_latest_semantic_version_in_list(semantic_version_list):
     """ Get the latest semantic version in a list.
 
-    Args:
+    Parameters:
         semantic_version_list (list): A list containing semantic versions.
 
     Returns:
@@ -459,7 +460,7 @@ def _get_latest_semantic_version_in_list(semantic_version_list):
 def _compare_semantic_versions(first_semantic_version, second_semantic_version):
     """ Compare two semantic versions.
 
-    Args:
+    Parameters:
         first_semantic_version (str): The first semantic version.
         second_semantic_version (str): The second semantic version.
 

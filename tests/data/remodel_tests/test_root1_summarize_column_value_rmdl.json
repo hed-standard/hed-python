@@ -1,0 +1,32 @@
+[
+    {
+        "operation": "summarize_column_values",
+        "description": "Summarize column values before renaming.",
+        "parameters": {
+            "summary_name": "test summary_values_before",
+            "summary_filename": "column_values_summary_before_rename",
+            "skip_columns": [],
+            "value_columns": []
+        }
+    },
+    {
+        "operation": "rename_columns",
+        "description": "Rename the columns.",
+        "parameters": {
+            "column_mapping": {
+                "stuff": "value"
+            },
+            "ignore_missing": true
+        }
+    },
+    {
+        "operation": "summarize_column_values",
+        "description": "Summarize column values after renaming.",
+        "parameters": {
+            "summary_name": "test summary_values_after",
+            "summary_filename": "column_values_summary_after_rename",
+            "skip_columns": [],
+            "value_columns": []
+        }
+    }
+]

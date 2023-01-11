@@ -1,12 +1,10 @@
 import os
-from hed.errors.error_reporter import ErrorContext, ErrorHandler, get_printable_issue_string
-from hed.schema.hed_schema_io import load_schema_version
+from hed.errors.error_reporter import ErrorContext, ErrorHandler
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.util.io_util import get_dir_dictionary, get_file_list, get_path_components
-from hed.validator.hed_validator import HedValidator
 
 
 class BidsFileGroup:
@@ -27,7 +25,7 @@ class BidsFileGroup:
                  exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli']):
         """ Constructor for a BidsFileGroup.
 
-        Args:
+        Parameters:
             root_path (str):  Path of the root of the BIDS dataset.
             suffix (str):     Suffix indicating the type this group represents (e.g. events, or channels, etc.).
             obj_type (str):   Indicates the type of underlying file represents the contents.
@@ -55,16 +53,17 @@ class BidsFileGroup:
     def get_sidecars_from_path(self, obj):
         """ Return applicable sidecars for the object.
 
-        Args:
+        Parameters:
             obj (BidsTabularFile or BidsSidecarFile):  The BIDS file object to get the sidecars for.
 
         Returns:
             list:  A list of the paths for applicable sidecars for obj starting at the root.
 
         """
+        path_components = [self.root_path] + get_path_components(self.root_path, obj.file_path)
         sidecar_list = []
         current_path = ''
-        for comp in get_path_components(obj.file_path, self.root_path):
+        for comp in path_components:
             current_path = os.path.realpath(os.path.join(current_path, comp))
             next_sidecar = self._get_sidecar_for_obj(obj, current_path)
             if next_sidecar:
@@ -74,12 +73,12 @@ class BidsFileGroup:
     def _get_sidecar_for_obj(self, obj, current_path):
         """ Return a single BidsSidecarFile relevant to obj from the sidecars in the current path.
 
-         Args:
-             obj (BidsFile):      A file whose sidecars are to be found.
-             current_path (str):  The path of the directory whose sidecars are to be checked.
+        Parameters:
+            obj (BidsFile):      A file whose sidecars are to be found.
+            current_path (str):  The path of the directory whose sidecars are to be checked.
 
-         Returns:
-             BidsSidecarFile or None:  The BidsSidecarFile in current_path relevant to obj, if any.
+        Returns:
+            BidsSidecarFile or None:  The BidsSidecarFile in current_path relevant to obj, if any.
 
          """
         sidecars = self.sidecar_dir_dict.get(current_path, None)
@@ -93,7 +92,7 @@ class BidsFileGroup:
     def summarize(self, value_cols=None, skip_cols=None):
         """ Return a BidsTabularSummary of group files.
 
-        Args:
+        Parameters:
             value_cols (list):  Column names designated as value columns.
             skip_cols (list):   Column names designated as columns to skip.
 
@@ -114,7 +113,7 @@ class BidsFileGroup:
     def validate_sidecars(self, hed_ops, check_for_warnings=True, error_handler=None):
         """ Validate merged sidecars.
 
-        Args:
+        Parameters:
             hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
             check_for_warnings (bool):  If True, include warnings in the check.
             error_handler (ErrorHandler): The common error handler for the dataset.
@@ -139,7 +138,7 @@ class BidsFileGroup:
     def validate_datafiles(self, hed_ops, check_for_warnings=True, keep_contents=False, error_handler=None):
         """ Validate the datafiles and return an error list.
 
-        Args:
+        Parameters:
             hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
             check_for_warnings (bool):  If True, include warnings in the check.
             keep_contents (bool):       If True, the underlying data files are read and their contents retained.
@@ -207,7 +206,8 @@ class BidsFileGroup:
             dict: A dictionary of lists of sidecar BidsSidecarFiles
 
         """
-        dir_dict = get_dir_dictionary(self.root_path, name_suffix=self.suffix, extensions=['.json'])
+        dir_dict = get_dir_dictionary(self.root_path, name_suffix=self.suffix, extensions=['.json'],
+                                      exclude_dirs=self.exclude_dirs)
         sidecar_dir_dict = {}
         for this_dir, dir_list in dir_dict.items():
             new_dir_list = []
@@ -217,11 +217,11 @@ class BidsFileGroup:
         return sidecar_dir_dict
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
-    path = 'G:\WakemanHenson\WH_Released'
-    bids = BidsFileGroup(path)
+    #                     '../../../tests/data/bids_tests/eeg_ds003654s_hed_inheritance')
+    # path = 'G:\\WakemanHenson\\WH_Released'
+    # bids = BidsFileGroup(path)
 
     # for file_obj in bids.sidecar_dict.values():
     #     print(file_obj.file_path)
@@ -229,21 +229,21 @@ if __name__ == '__main__':
     # for file_obj in bids.datafile_dict.values():
     #     print(file_obj.file_path)
 
-    schema = load_schema_version(xml_version="8.0.0")
-    validator = HedValidator(hed_schema=schema)
-
-    issues_side = bids.validate_sidecars(hed_ops=[validator], check_for_warnings=False)
-    print(f"Side issues {str(issues_side)}\n")
-    issues_data = bids.validate_datafiles(hed_ops=[validator], check_for_warnings=False)
-    print(f"Data issues {str(issues_data)}\n")
-    if issues_side:
-        print(get_printable_issue_string(issues_side, "Sidecar errors", skip_filename=False))
-    else:
-        print("No validation errors in the sidecars")
-
-    if issues_data:
-        print(get_printable_issue_string(issues_data, "Tabular errors"))
-    else:
-        print("No validation errors in the datafiles")
-    # col_info = bids.summarize()
+    # schema = load_schema_version(xml_version="8.0.0")
+    # validator = HedValidator(hed_schema=schema)
+    #
+    # issues_side = bids.validate_sidecars(hed_ops=[validator], check_for_warnings=False)
+    # print(f"Side issues {str(issues_side)}\n")
+    # issues_data = bids.validate_datafiles(hed_ops=[validator], check_for_warnings=False)
+    # print(f"Data issues {str(issues_data)}\n")
+    # if issues_side:
+    #     print(get_printable_issue_string(issues_side, "Sidecar errors", skip_filename=False))
+    # else:
+    #     print("No validation errors in the sidecars")
+    #
+    # if issues_data:
+    #     print(get_printable_issue_string(issues_data, "Tabular errors"))
+    # else:
+    #     print("No validation errors in the datafiles")
+    # col_info = bids.get_summary()
     # print(f"Info: {str(col_info)}")

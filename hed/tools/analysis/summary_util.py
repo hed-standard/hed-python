@@ -6,7 +6,7 @@ from hed.models.hed_tag import HedTag
 def breakout_tags(schema, tag_list, breakout_list):
     """ Create a dictionary with tags split into groups.
 
-    Args:
+    Parameters:
         schema (HedSchema, HedSchemas):   Schemas to use to break out the tags.
         tag_list (list, dict):            Iterable of tags to be broken out.
         breakout_list (list):             List of hed tag node strings that should be summarized separately.
@@ -37,32 +37,32 @@ def breakout_tags(schema, tag_list, breakout_list):
     return breakout_dict
 
 
-def extract_dict_values(tag_dict, tag_name, tags):
-    """ Get the tags associated with tag name from the tag dictionary.
-
-    Args:
-        tag_dict (dict):  Dictionary with keys that a tag node names and values are dictionaries.
-        tag_name (str):   Name of a node.
-        tags (list):      List of tags left to process.
-
-    Returns:
-        tuple:
-            - list: Tags associated with tag_name.
-            - bool: True if tag_name was found in tag_dict.
-
-    Notes:
-        - Side-effect the tags list is modified.
-    """
-    if tag_name not in tag_dict:
-        return [], False
-    tags.remove(tag_name)
-    return list(tag_dict[tag_name].keys()), True
+# def extract_dict_values(tag_dict, tag_name, tags):
+#     """ Get the tags associated with tag name from the tag dictionary.
+#
+#     Parameters:
+#         tag_dict (dict):  Dictionary with keys that a tag node names and values are dictionaries.
+#         tag_name (str):   Name of a node.
+#         tags (list):      List of tags left to process.
+#
+#     Returns:
+#         tuple:
+#             - list: Tags associated with tag_name.
+#             - bool: True if tag_name was found in tag_dict.
+#
+#     Notes:
+#         - Side-effect the tags list is modified.
+#     """
+#     if tag_name not in tag_dict:
+#         return [], False
+#     tags.remove(tag_name)
+#     return list(tag_dict[tag_name].keys()), True
 
 
 def get_schema_entries(hed_schema, tag, schema_prefix=""):
     """ Get schema entries for tag and to its parents.
 
-    Args:
+    Parameters:
         hed_schema (HedSchema, HedSchemaGroup):  The schema in which to search for tag.
         tag (HedTag, str):       The HED tag to look for.
         schema_prefix (str):    The library prefix to use in the search.
@@ -85,7 +85,7 @@ def get_schema_entries(hed_schema, tag, schema_prefix=""):
 def add_tag_list_to_dict(tag_list, tag_dict, hed_schema=None):
     """ Convert tags and groups to a dictionary.
 
-    Args:
+    Parameters:
         tag_list (list): List of HedTag and HedGroup objects to transform.
         tag_dict (dict):
         hed_schema (HedSchema or HedSchemaGroup):  Hed schema to use to convert tags to canonical form.
@@ -114,7 +114,7 @@ def add_tag_list_to_dict(tag_list, tag_dict, hed_schema=None):
 def unfold_tag_list(tag_list):
     """ Unfold a list to a single-level list of HedTags.
 
-     Args:
+     Parameters:
          tag_list (list):  List of HedTags and HedGroup objects.
 
      Returns:

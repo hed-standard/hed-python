@@ -29,6 +29,7 @@
 
    .. autosummary::
    
+      ~FileDictionary.file_dict
       ~FileDictionary.file_list
       ~FileDictionary.key_list
       ~FileDictionary.name

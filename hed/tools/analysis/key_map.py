@@ -1,6 +1,6 @@
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.data_util import get_new_dataframe, get_row_hash, remove_quotes, separate_columns
+from hed.tools.util.data_util import get_new_dataframe, get_row_hash, separate_values
 
 
 class KeyMap:
@@ -11,11 +11,13 @@ class KeyMap:
         key_cols (list):  A list of column names that will be hashed into the keys for the map.
         target_cols (list):   An optional list of column names that will be inserted into data and later remapped.
 
+    Notes: This mapping converts all columns of type object to string.
+
     """
     def __init__(self, key_cols, target_cols=None, name=''):
         """ Information for remapping columns of tabular files.
 
-        Args:
+        Parameters:
             key_cols (list):       List of columns to be replaced (assumed in the DataFrame)
             target_cols(list):     List of replacement columns (assumed to not be in the DataFrame)
             name (str):            Name associated with this remap (usually a pathname of the events file).
@@ -51,7 +53,7 @@ class KeyMap:
     def make_template(self, additional_cols=None):
         """ Return a dataframe template.
 
-        Args:
+        Parameters:
             additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
 
         Returns:
@@ -76,8 +78,8 @@ class KeyMap:
     def remap(self, data):
         """ Remap the columns of a dataframe or columnar file.
 
-        Args:
-            data (DataFrame, str) :     Columnar data (either DataFrame or filename) whose columns are to be remapped.
+        Parameters:
+            data (DataFrame, str):  Columnar data (either DataFrame or filename) whose columns are to be remapped.
 
         Returns:
             tuple:
@@ -90,10 +92,10 @@ class KeyMap:
         """
 
         df_new = get_new_dataframe(data)
-        remove_quotes(df_new)
-        present_keys, missing_keys = separate_columns(df_new.columns.values.tolist(), self.key_cols)
+        present_keys, missing_keys = separate_values(df_new.columns.values.tolist(), self.key_cols)
         if missing_keys:
             raise HedFileError("MissingKeys", f"File must have key columns {str(self.key_cols)}", "")
+        self.remove_quotes(df_new, columns=present_keys)
         df_new[self.target_cols] = 'n/a'
         missing_indices = self._remap(df_new)
         return df_new, missing_indices
@@ -101,7 +103,7 @@ class KeyMap:
     def _remap(self, df):
         """ Utility method that iterates through dataframes to do the remapping.
 
-        Args:
+        Parameters:
             df (DataFrame):    DataFrame in which to perform the mapping.
 
         Returns:
@@ -131,7 +133,7 @@ class KeyMap:
     def update(self, data, allow_missing=True, keep_counts=True):
         """ Update the existing map with information from data.
 
-        Args:
+        Parameters:
             data (DataFrame or str):     DataFrame or filename of an events file or event map.
             allow_missing (bool):        If true allow missing keys and add as n/a columns.
             keep_counts (bool):          If true keep a count of the times each key is present.
@@ -144,18 +146,19 @@ class KeyMap:
 
         """
         df = get_new_dataframe(data)
-        remove_quotes(df)
         col_list = df.columns.values.tolist()
-        keys_present, keys_missing = separate_columns(col_list, self.key_cols)
+        keys_present, keys_missing = separate_values(col_list, self.key_cols)
         if keys_missing and not allow_missing:
             raise HedFileError("MissingKeyColumn",
                                f"make_template data does not have key columns {str(keys_missing)}", "")
+
         base_df = df[keys_present].copy()
+        self.remove_quotes(base_df)
         if keys_missing:
             base_df[keys_missing] = 'n/a'
         if self.target_cols:
             base_df[self.target_cols] = 'n/a'
-            targets_present, targets_missing = separate_columns(col_list, self.target_cols)
+            targets_present, targets_missing = separate_values(col_list, self.target_cols)
             if targets_present:
                 base_df[targets_present] = df[targets_present].values
         return self._update(base_df, track_duplicates=keep_counts)
@@ -163,13 +166,14 @@ class KeyMap:
     def _update(self, base_df, track_duplicates=True):
         """ Update the dictionary of key values based on information in the dataframe.
 
-        Args:
+        Parameters:
             base_df (DataFrame):       DataFrame of consisting of the columns in the KeyMap
             track_duplicates (bool):        If true, keep counts of the indices.
 
         Returns:
             list:         List of key positions that appeared more than once or an empty list of no duplicates or
                           track_duplicates was false.
+
         """
 
         duplicate_indices = []
@@ -188,7 +192,7 @@ class KeyMap:
     def _handle_update(self, row, row_list, next_pos, keep_counts):
         """ Update the dictionary and counts of the number of times this combination of key columns appears.
 
-        Args:
+        Parameters:
             row (DataSeries):  Data the values in a row.
             row_list (list):   A list of rows to be appended to hold the unique rows
             next_pos (int):    Index into the
@@ -205,3 +209,23 @@ class KeyMap:
         if keep_counts:
             self.count_dict[key] += 1
         return key, pos_update
+
+    @staticmethod
+    def remove_quotes(df, columns=None):
+        """ Remove quotes from the specified columns and convert to string.
+
+        Parameters:
+            df (Dataframe):   Dataframe to process by removing quotes.
+            columns (list):  List of column names. If None, all columns are used.
+        Notes:
+            - Replacement is done in place.
+        """
+
+        col_types = df.dtypes
+        if not columns:
+            columns = df.columns.values.tolist()
+        for index, col in enumerate(df.columns):
+            if col in columns and col_types.iloc[index] in ['string', 'object']:
+                df[col] = df[col].astype(str)
+                df.iloc[:, index] = df.iloc[:, index].str.replace('"', '')
+                df.iloc[:, index] = df.iloc[:, index].str.replace("'", "")

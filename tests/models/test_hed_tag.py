@@ -3,12 +3,13 @@ from tests.validator.test_tag_validator_base import TestHedBase
 
 
 class TestValidatorUtilityFunctions(TestHedBase):
-    schema_file = '../data/schema_test_data/HED8.0.0t.xml'
+    schema_file = '../data/schema_tests/HED8.0.0t.xml'
 
     def test_if_tag_exists(self):
         valid_tag1 = HedTag('Left-handed', hed_schema=self.hed_schema)
         hash1 = hash(valid_tag1)
         hash2 = hash(valid_tag1)
+        self.assertEqual(hash1, hash2)
         valid_tag2 = HedTag('Geometric-object', hed_schema=self.hed_schema)
         valid_tag3 = HedTag('duration/#', hed_schema=self.hed_schema)
         invalid_tag1 = HedTag('something', hed_schema=self.hed_schema)
@@ -35,7 +36,7 @@ class TestValidatorUtilityFunctions(TestHedBase):
 
 
 class TestSchemaUtilityFunctions(TestHedBase):
-    schema_file = '../data/schema_test_data/HED8.0.0t.xml'
+    schema_file = '../data/schema_tests/HED8.0.0t.xml'
 
     def test_correctly_determine_tag_takes_value(self):
         value_tag1 = HedTag('Distance/35 px', hed_schema=self.hed_schema)

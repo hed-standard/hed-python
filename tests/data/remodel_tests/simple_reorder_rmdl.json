@@ -1,0 +1,19 @@
+[
+    {
+        "operation": "remove_columns",
+        "description": "Get rid of the sample and the value columns",
+        "parameters": {
+            "column_names": ["sample", "value"],
+            "ignore_missing": true
+        }
+    },
+    {
+        "operation": "reorder_columns",
+        "description": "Order columns so that response_time and trial_type come after onset and duration",
+        "parameters": {
+            "column_order": ["onset", "duration", "trial_type", "response_time"],
+            "ignore_missing": true,
+            "keep_others": false
+        }
+    }
+]

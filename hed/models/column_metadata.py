@@ -26,7 +26,7 @@ class ColumnMetadata:
     def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None):
         """ A single column entry in the column mapper.
 
-        Args:
+        Parameters:
             column_type (ColumnType or None): How to treat this column when reading data.
             name (str, int, or None): The column_name or column number identifying this column.
                 If name is a string, you'll need to use a column map to set the number later.
@@ -61,7 +61,7 @@ class ColumnMetadata:
     def _get_category_hed_string(self, category):
         """ Fetch the hed string for a category key.
 
-        Args:
+        Parameters:
             category (str): The category key to retrieve the string from.
 
         Returns:
@@ -88,7 +88,7 @@ class ColumnMetadata:
     def expand(self, input_text):
         """ Expand text using the rules for this column.
 
-        Args:
+        Parameters:
             input_text (str): Text to expand (generally from a single cell in a spreadsheet).
 
         Returns:
@@ -126,7 +126,7 @@ class ColumnMetadata:
     def _prepend_required_prefix(required_tag_column_tags, required_tag_prefix):
         """ Prepend the tag paths to the required tag column tags that need them.
 
-        Args:
+        Parameters:
             required_tag_column_tags (HedString): A string containing HED tags associated with a
                 required tag column that may need a tag name_prefix prepended to its tags.
             required_tag_prefix (str): A string that will be added if missing to any given tag.
@@ -142,7 +142,7 @@ class ColumnMetadata:
     def remove_prefix(self, original_tag, current_tag_text):
         """ Remove column_prefix if present from tag.
 
-        Args:
+        Parameters:
             original_tag (HedTag): The original hed tag being written.
             current_tag_text (str): A single tag as a string, in any form.
 
@@ -161,7 +161,7 @@ class ColumnMetadata:
     def expected_pound_sign_count(column_type):
         """ Return how many pound signs a column string should have.
 
-        Args:
+        Parameters:
             column_type(ColumnType): The type of the column
 
         Returns:

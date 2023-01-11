@@ -1,0 +1,10 @@
+[
+    {
+        "operation": "rename_columns",
+        "description": "Rename the columns.",
+        "parameters": {
+             "column_mapping": { "stuff": "value"},
+             "ignore_missing": true
+            }    
+    }
+]

@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 import unittest
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
+from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.remap_columns_op import RemapColumnsOp
 
 
@@ -29,21 +29,43 @@ class Test(unittest.TestCase):
                 "ignore_missing": True
             }
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=None)
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_data(df), 'run-01')
+        return df, self.dispatch.post_proc_data(df_new)
+
     def test_valid(self):
         # Test when no extras but ignored.
         parms = json.loads(self.json_parms)
         op = RemapColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_test = self.get_dfs(op)
         self.assertNotIn("response_type", df.columns, "remap_columns before does not have response_type column")
-        self.assertIn("response_type", df_new.columns, "remap_columns after has response_type column")
+        self.assertIn("response_type", df_test.columns, "remap_columns after has response_type column")
+
+    def test_invalid_params(self):
+        parms1 = json.loads(self.json_parms)
+        parms1["source_columns"] = []
+        with self.assertRaises(ValueError) as context1:
+            RemapColumnsOp(parms1)
+        self.assertEqual(context1.exception.args[0], "EmptySourceColumns")
+
+        parms2 = json.loads(self.json_parms)
+        parms2["destination_columns"] = []
+        with self.assertRaises(ValueError) as context2:
+            RemapColumnsOp(parms2)
+        self.assertEqual(context2.exception.args[0], "EmptyDestinationColumns")
+
+        parms3 = json.loads(self.json_parms)
+        parms3["map_list"][1] = ["right", "correct_right"],
+        with self.assertRaises(ValueError) as context3:
+            RemapColumnsOp(parms3)
+        self.assertEqual(context3.exception.args[0], "BadColumnMapEntry")
 
     def test_valid_missing(self):
         # Test when no extras but ignored.
@@ -53,11 +75,9 @@ class Test(unittest.TestCase):
         after_len = len(parms["map_list"])
         self.assertEqual(after_len + 1, before_len)
         op = RemapColumnsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_test = self.get_dfs(op)
         self.assertNotIn("response_type", df.columns, "remap_columns before does not have response_type column")
-        self.assertIn("response_type", df_new.columns, "remap_columns after has response_type column")
+        self.assertIn("response_type", df_test.columns, "remap_columns after has response_type column")
 
     def test_invalid_missing(self):
         # Test when no extras but ignored.
@@ -68,9 +88,23 @@ class Test(unittest.TestCase):
         after_len = len(parms["map_list"])
         self.assertEqual(after_len + 1, before_len)
         op = RemapColumnsOp(parms)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        with self.assertRaises(ValueError):
-            df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        with self.assertRaises(ValueError) as context:
+            self.get_dfs(op)
+        self.assertEqual(context.exception.args[0], 'MapSourceValueMissing')
+
+    def test_numeric_keys(self):
+        parms = {
+            "source_columns": ["duration"],
+            "destination_columns": ["new_duration"],
+            "map_list": [[0.5083, 0.6],
+                         [0.5084, 0.7]],
+            "ignore_missing": True
+        }
+        op = RemapColumnsOp(parms)
+        df, df_test = self.get_dfs(op)
+        self.assertNotIn("new_duration", df.columns.values)
+        self.assertIn("new_duration", df_test.columns.values)
+        self.assertEqual(df_test.loc[2, "new_duration"], 0.7)
 
 
 if __name__ == '__main__':

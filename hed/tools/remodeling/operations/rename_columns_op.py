@@ -1,14 +1,5 @@
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-RENAME_PARAMS = {
-    "command": "rename_columns",
-    "required_parameters": {
-        "column_mapping": dict,
-        "ignore_missing": bool
-    },
-    "optional_parameters": {}
-}
-
 
 class RenameColumnsOp (BaseOp):
     """ Rename columns in a dataframe.
@@ -22,10 +13,17 @@ class RenameColumnsOp (BaseOp):
 
     """
 
+    PARAMS = {
+        "operation": "rename_columns",
+        "required_parameters": {
+            "column_mapping": dict,
+            "ignore_missing": bool
+        },
+        "optional_parameters": {}
+    }
+
     def __init__(self, parameters):
-        super().__init__(RENAME_PARAMS["command"], RENAME_PARAMS["required_parameters"],
-                         RENAME_PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.column_mapping = parameters['column_mapping']
         if parameters['ignore_missing']:
             self.error_handling = 'ignore'
@@ -35,18 +33,23 @@ class RenameColumnsOp (BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Rename columns as specified in column_mapping dictionary.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+        Parameters:
+            dispatcher (Dispatcher): The dispatcher object for context
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         Raises:
-            KeyError - when ignore_missing is false and column_mapping has columns not in df.
+            KeyError: When ignore_missing is false and column_mapping has columns not in df.
 
         """
 
-        return df.rename(columns=self.column_mapping, errors=self.error_handling)
+        try:
+            return df.rename(columns=self.column_mapping, errors=self.error_handling)
+        except KeyError:
+            raise KeyError("MappedColumnsMissingFromData",
+                           f"{name}: ignore_missing is False, mapping columns [{self.column_mapping}]"
+                           f" but df columns are [{str(df.columns)}")

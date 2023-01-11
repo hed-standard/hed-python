@@ -88,4 +88,3 @@ exclude_patterns:
 - "**/deprecated/"
 - "**/versioneer.py"
 - "**/_version.py"
-- "**/cli/"

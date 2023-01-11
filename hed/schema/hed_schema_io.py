@@ -1,12 +1,11 @@
 """ Utilities for loading and outputting HED schema. """
 import os
-
-
 from hed.schema.schema_io.xml2schema import HedSchemaXMLParser
 from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.schema.hed_schema import HedSchema
 from hed.schema.schema_io import schema_util
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.schema_validation_util import validate_version_string
@@ -15,7 +14,7 @@ from hed.schema.schema_validation_util import validate_version_string
 def from_string(schema_string, file_type=".xml", schema_prefix=None):
     """ Create a schema from the given string.
 
-    Args:
+    Parameters:
         schema_string (str):         An XML or mediawiki file as a single long string.
         file_type (str):             The extension(including the .) corresponding to a file source.
         schema_prefix (str, None):  The name_prefix all tags in this schema will accept.
@@ -47,10 +46,32 @@ def from_string(schema_string, file_type=".xml", schema_prefix=None):
     return hed_schema
 
 
+def get_schema(hed_versions):
+    if not hed_versions:
+        return None
+    elif isinstance(hed_versions, str) or isinstance(hed_versions, list):
+        return load_schema_version(hed_versions)
+    elif isinstance(hed_versions, HedSchema) or isinstance(hed_versions, HedSchemaGroup):
+        return hed_versions
+    else:
+        raise ValueError("InvalidHedSchemaOrSchemaVersion", "Expected schema or schema version")
+
+
+def get_schema_versions(hed_schema, as_string=True):
+    if not hed_schema and as_string:
+        return ''
+    elif not hed_schema:
+        return None
+    elif isinstance(hed_schema, HedSchema) or isinstance(hed_schema, HedSchemaGroup):
+        return hed_schema.get_formatted_version(as_string=as_string)
+    else:
+        raise ValueError("InvalidHedSchemaOrHedSchemaGroup", "Expected schema or schema group")
+
+
 def load_schema(hed_path=None, schema_prefix=None):
     """ Load a schema from the given file or URL path.
 
-    Args:
+    Parameters:
         hed_path (str or None): A filepath or url to open a schema from.
         schema_prefix (str or None): The name_prefix all tags in this schema will accept.
 
@@ -87,7 +108,7 @@ def load_schema(hed_path=None, schema_prefix=None):
 def get_hed_xml_version(xml_file_path):
     """ Get the version number from a HED XML file.
 
-    Args:
+    Parameters:
         xml_file_path (str): The path to a HED XML file.
 
     Returns:
@@ -101,7 +122,7 @@ def get_hed_xml_version(xml_file_path):
 def _load_schema_version(xml_version=None, xml_folder=None):
     """ Return specified version or latest if not specified.
 
-    Args:
+    Parameters:
         xml_folder (str): Path to a folder containing schema.
         xml_version (str or list): HED version format string. Expected format: '[schema_prefix:][library_name_]X.Y.Z'.
 
@@ -134,7 +155,7 @@ def _load_schema_version(xml_version=None, xml_folder=None):
             hed_schema = load_schema(final_hed_xml_file)
         else:
             raise e
-        
+
     if schema_prefix:
         hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
 
@@ -144,7 +165,7 @@ def _load_schema_version(xml_version=None, xml_folder=None):
 def load_schema_version(xml_version=None, xml_folder=None):
     """ Return a HedSchema or HedSchemaGroup extracted from xml_version field.
 
-    Args:
+    Parameters:
         xml_version (str or list or None): List or str specifying which official HED schemas to use.
                                            An empty string returns the latest version
         xml_folder (str): Path to a folder containing schema.

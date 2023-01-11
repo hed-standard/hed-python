@@ -2,17 +2,6 @@ import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.analysis.key_map import KeyMap
 
-PARAMS = {
-    "command": "remap_columns",
-    "required_parameters": {
-        "source_columns": list,
-        "destination_columns": list,
-        "map_list": list,
-        "ignore_missing": bool
-    },
-    "optional_parameters": {}
-}
-
 
 class RemapColumnsOp(BaseOp):
     """ Map combinations of values in m columns into a new combinations in n columns.
@@ -20,9 +9,21 @@ class RemapColumnsOp(BaseOp):
         TODO: Allow wildcards
 
     """
+
+    PARAMS = {
+        "operation": "remap_columns",
+        "required_parameters": {
+            "source_columns": list,
+            "destination_columns": list,
+            "map_list": list,
+            "ignore_missing": bool
+        },
+        "optional_parameters": {}
+    }
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+
+        super().__init__(self.PARAMS, parameters)
         self.source_columns = parameters['source_columns']
         self.destination_columns = parameters['destination_columns']
         self.map_list = parameters['map_list']
@@ -32,8 +33,8 @@ class RemapColumnsOp(BaseOp):
                              f"The source column list {str(self.source_columns)} must be non-empty")
 
         if len(self.destination_columns) < 1:
-            raise ValueError("EmptySourceColumns",
-                             f"The source column list {str(self.destination_columns)} must be non-empty")
+            raise ValueError("EmptyDestinationColumns",
+                             f"The destination column list {str(self.destination_columns)} must be non-empty")
         entry_len = len(self.source_columns) + len(self.destination_columns)
         for index, item in enumerate(self.map_list):
             if len(item) != entry_len:
@@ -51,17 +52,21 @@ class RemapColumnsOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Remap new columns from combinations of others.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+        Parameters:
+            dispatcher (Dispatcher):  The dispatcher object for context.
+            df (DataFrame):  The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):   Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
+
+        Raises:
+            ValueError: If ignore
 
         """
         df_new, missing = self.key_map.remap(df)
         if missing and not self.ignore_missing:
-            raise ValueError("MapSourceValueMissing", f"Missing sources for rows: {str(missing)}")
+            raise ValueError("MapSourceValueMissing",
+                             f"{name}: Ignore missing is false, but source values [{missing}] are in data but not map")
         return df_new

@@ -2,8 +2,10 @@ import json
 import os
 import pandas as pd
 import unittest
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_column_values_op import ColumnValueSummary, SummarizeColumnValuesOp
+from hed.tools.remodeling.dispatcher import Dispatcher
+from hed.tools.remodeling.operations.summarize_column_values_op import \
+    ColumnValueSummaryContext, SummarizeColumnValuesOp
+from hed.tools.util.io_util import get_file_list
 
 
 class Test(unittest.TestCase):
@@ -22,60 +24,86 @@ class Test(unittest.TestCase):
             "summary_name": "test summary",
             "summary_filename": "column_values_summary",
             "skip_columns": [],
-            "value_columns": [],
-            "task_names": [],
+            "value_columns": ['onset', 'response_time']
         }
 
         cls.json_parms = json.dumps(base_parameters)
-        cls.data_root = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data'))
+        cls.data_root = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                      '../../../data/remodel_tests'))
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op, name, dispatch):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(dispatch, dispatch.prep_data(df), name)
+        return df, dispatch.post_proc_data(df_new)
+
     def test_constructor(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        self.assertEqual(sum_op.summary_type, "column_values", "constructor creates summary of right type")
         self.assertIsInstance(sum_op, SummarizeColumnValuesOp, "constructor creates an object of the correct type")
 
     def test_do_ops(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        dispatch = Dispatcher([], data_root=self.data_root)
-        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        sum_op.do_op(dispatch, df1, 'name1')
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
+        self.get_dfs(sum_op, 'name1', dispatch)
         context1 = dispatch.context_dict.get(parms['summary_name'], None)
-        summary = context1.summary
-        cat_len = len(summary.categorical_info)
-        self.assertEqual(cat_len, len(self.sample_columns),
+        summary1 = context1.summary_dict['name1']
+        cat_len = len(summary1.categorical_info)
+        self.assertEqual(cat_len, len(self.sample_columns) - 2,
                          'do_ops if all columns are categorical summary has same number of columns as df')
-        sum_op.do_op(dispatch, df1a, 'name1')
-        self.assertEqual(len(context1.summary.categorical_info), len(self.sample_columns),
+        self.get_dfs(sum_op, 'name2', dispatch)
+        self.assertEqual(cat_len, len(self.sample_columns) - 2,
                          "do_ops updating does not change number of categorical columns.")
-        sum_op.do_op(dispatch, df1a, 'name2')
+        context = dispatch.context_dict['test summary']
+        self.assertEqual(len(context.summary_dict), 2)
 
     def test_get_summary(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnValuesOp(parms)
-        dispatch = Dispatcher([], data_root=self.data_root)
-        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        sum_op.do_op(dispatch, df1, 'name1')
-        sum_op.do_op(dispatch, df1, 'name2')
-        sum_op.do_op(dispatch, df1, 'name3')
-        context1 = dispatch.context_dict.get(parms['summary_name'], None)
-        self.assertIsInstance(context1, ColumnValueSummary, "get_summary testing ColumnValueSummary")
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
+        self.get_dfs(sum_op, 'name1', dispatch)
+
+        cont = dispatch.context_dict
+        context1 = cont.get("test summary", None)
+        self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
         summary1 = context1.get_summary()
         self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
-        summary2 = context1.get_summary(as_json=True)
-        self.assertIsInstance(summary2, str, "get_summary returns a dictionary if json requested")
-        summary3 = context1.get_text_summary(verbose=False)
-        self.assertIsInstance(summary3, str, "get_text_summary returns a str if verbose is False")
-        summary4 = context1.get_text_summary()
-        self.assertIsInstance(summary4, str, "get_text_summary returns a str by default")
-        summary5 = context1.get_text_summary(verbose=True)
-        self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
+        summary1a = context1.get_summary(as_json=True)
+        self.assertIsInstance(summary1a, str, "get_summary returns a dictionary if json requested")
+        text_summary = context1.get_text_summary(include_individual=True)
+        self.assertIsInstance(text_summary, str)
+        self.get_dfs(sum_op, 'name2', dispatch)
+        self.get_dfs(sum_op, 'name3', dispatch)
+        context2 = dispatch.context_dict.get(parms['summary_name'], None)
+        summary2 = context2.get_summary()
+        self.assertIsInstance(summary2, dict)
+        text_summary2 = context2.get_text_summary(include_individual=True)
+        self.assertIsInstance(text_summary2, str)
+
+    def test_summary_op(self):
+        events = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                               '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
+        column_summary_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                               '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+        with open(column_summary_path, 'r') as fp:
+            parms = json.load(fp)
+        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        df = dispatch.get_data_file(events)
+        old_len = len(df)
+        sum_op = parsed_commands[1]
+        df = sum_op.do_op(dispatch, dispatch.prep_data(df), os.path.basename(events))
+        self.assertEqual(len(df), old_len)
+        context_dict = dispatch.context_dict
+        for key, item in context_dict.items():
+            text_value = item.get_text_summary()
+            self.assertTrue(text_value)
+            json_value = item.get_summary(as_json=True)
+            self.assertTrue(json_value)
 
 
 if __name__ == '__main__':

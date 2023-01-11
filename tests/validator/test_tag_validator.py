@@ -6,7 +6,7 @@ from functools import partial
 
 
 class TestHed(TestValidatorBase):
-    schema_file = "../data/schema_test_data/HED8.0.0.mediawiki"
+    schema_file = "../data/schema_tests/HED8.0.0.mediawiki"
 
 
 class IndividualHedTagsShort(TestHed):
@@ -365,7 +365,8 @@ class TestTagLevels(TestHed):
                            'Purple-color/Purple',
             'legalDuplicate': 'Item/Object/Man-made-object/VehicleTrain,(Item/Object/Man-made-object/VehicleTrain,'
                               'Event/Sensory-event)',
-            'duplicateGroup': 'Sensory-event, (Sensory-event, Man-made-object/VehicleTrain), (Man-made-object/VehicleTrain, Sensory-event)'
+            'duplicateGroup': 'Sensory-event, (Sensory-event, Man-made-object/VehicleTrain),' 
+                              '(Man-made-object/VehicleTrain, Sensory-event)'
         }
         expected_results = {
             'topLevelDuplicate': False,
@@ -380,7 +381,8 @@ class TestTagLevels(TestHed):
             'groupDuplicate': self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=3),
             'legalDuplicate': [],
             'noDuplicate': [],
-            'duplicateGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP, group=HedString("(Man-made-object/VehicleTrain, Sensory-event)")),
+            'duplicateGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
+                                                group=HedString("(Man-made-object/VehicleTrain, Sensory-event)")),
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, False)
 

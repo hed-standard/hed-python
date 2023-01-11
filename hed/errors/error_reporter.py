@@ -21,7 +21,7 @@ def _register_error_function(error_type, wrapper_func):
 def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None):
     """ Decorator for errors in error handler or inherited classes.
 
-    Args:
+    Parameters:
         error_type (str): A value from error_types or optionally another value.
         default_severity (ErrorSeverity): The default severity for the decorated error.
         actual_code (str): The actual error to report to the outside world.
@@ -35,7 +35,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
         def wrapper(*args, severity=default_severity, **kwargs):
             """ Wrapper function for error handling non-tag errors.
 
-            Args:
+            Parameters:
                 args (args): non keyword args.
                 severity (ErrorSeverity): Will override the default error value if passed.
                 kwargs (**kwargs): Any keyword args to be passed down to error message function.
@@ -56,7 +56,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
 def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=False, actual_code=None):
     """  Decorator for errors in error handler or inherited classes.
 
-    Args:
+    Parameters:
         error_type (str): A value from error_types or optionally another value.
         default_severity (ErrorSeverity): The default severity for the decorated error.
         has_sub_tag (bool): If true, this error message also wants a sub_tag passed down.  eg "This" in "This/Is/A/Tag"
@@ -72,7 +72,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
             def wrapper(tag, index_in_tag, index_in_tag_end, *args, severity=default_severity, **kwargs):
                 """ Wrapper function for error handling tag errors with sub tags.
 
-                Args:
+                Parameters:
                     tag (HedTag): The hed tag object with the problem,
                     index_in_tag (int): The index into the tag with a problem(usually 0),
                     index_in_tag_end (int): The last index into the tag with a problem(usually len(tag),
@@ -111,7 +111,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
             def wrapper(tag, *args, severity=default_severity, **kwargs):
                 """ Wrapper function for error handling tag errors.
 
-                Args:
+                Parameters:
                     tag (HedTag or HedGroup): The hed tag object with the problem.
                     args (non keyword args): Any other non keyword args.
                     severity (ErrorSeverity): For including warnings.
@@ -155,7 +155,7 @@ class ErrorHandler:
     def push_error_context(self, context_type, context, increment_depth_after=True):
         """ Push a new error context to narrow down error scope.
 
-        Args:
+        Parameters:
             context_type (ErrorContext): A value from ErrorContext representing the type of scope.
             context (str, int, or HedString): The main value for the context_type.
             increment_depth_after (bool): If True, add an extra tab to any subsequent errors in the scope.
@@ -200,7 +200,7 @@ class ErrorHandler:
     def format_error(error_type, *args, actual_error=None, **kwargs):
         """ Format an error based on the parameters, which vary based on what type of error this is.
 
-        Args:
+        Parameters:
             error_type (str): The type of error for this.  Registered with @hed_error or @hed_tag_error.
             args (args): Any remaining non keyword args after those required by the error type.
             actual_error (str or None): Code to actually add to report out.
@@ -233,7 +233,7 @@ class ErrorHandler:
     def format_error_list(self, issue_params):
         """ Convert an issue params list to an issues list.  This means adding the error context primarily.
 
-        Args:
+        Parameters:
             issue_params (list):  A list of dict containing the unformatted issues list.
 
         Returns:
@@ -249,7 +249,7 @@ class ErrorHandler:
     def format_error_from_context(error_type, error_context, *args, actual_error=None, **kwargs):
         """ Format an error based on the error type.
 
-        Args:
+        Parameters:
             error_type (str): The type of error.  Registered with @hed_error or @hed_tag_error.
             error_context (list): Contains the error context to use for this error.
             args (args): Any remaining non keyword args.
@@ -283,7 +283,7 @@ class ErrorHandler:
     def _add_context_to_errors(error_object, error_context_to_add):
         """ Add relevant context such as row number or column name around an error object.
 
-        Args:
+        Parameters:
             error_object (dict): Generated error containing at least a code and message entry.
             error_context_to_add (list): Source context to use.  If none, the error handler context is used.
 
@@ -358,8 +358,8 @@ class ErrorHandler:
     def val_error_unknown(*args, **kwargs):
         """ Default error handler if no error of this type was registered.
 
-        Args:
-            args (args): List of non-keyword parameters (varies).
+        Parameters:
+            args (args):     List of non-keyword parameters (varies).
             kwargs (kwargs): Keyword parameters (varies)
 
         Returns:
@@ -373,7 +373,7 @@ class ErrorHandler:
     def filter_issues_by_severity(issues_list, severity):
         """ Gather all issues matching or below a given severity.
 
-        Args:
+        Parameters:
             issues_list (list): A list of dictionaries containing the full issue list.
             severity (int): The level of issues to keep.
 
@@ -387,8 +387,8 @@ class ErrorHandler:
 def get_exception_issue_string(issues, title=None):
     """ Return a string with issues list flatted into single string, one issue per line.
 
-    Args:
-        issues (list) A list of strings containing issues to print.
+    Parameters:
+        issues (list):  A list of strings containing issues to print.
         title (str or None): An optional title that will always show up first if present.
 
     Returns:
@@ -413,11 +413,11 @@ def get_exception_issue_string(issues, title=None):
 def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True):
     """ Return a string with issues list flatted into single string, one per line.
 
-    Args:
-        issues (list)  Issues to print.
-        title (str) Optional title that will always show up first if present(even if there are no validation issues).
-        severity (int) Return only warnings >= severity.
-        skip_filename (bool) If true, don't add the filename context to the printable string.
+    Parameters:
+        issues (list):  Issues to print.
+        title (str):  Optional title that will always show up first if present(even if there are no validation issues).
+        severity (int):        Return only warnings >= severity.
+        skip_filename (bool):  If true, don't add the filename context to the printable string.
 
     Returns:
         str:   A string containing printable version of the issues or ''.
@@ -458,7 +458,7 @@ def check_for_any_errors(issues_list):
 def _get_context_from_issue(val_issue, skip_filename=True):
     """ Extract all the context values from the given issue.
 
-    Args:
+    Parameters:
         val_issue (dict): A dictionary a representing a single error.
         skip_filename (bool): If true, don't gather the filename context.
 
@@ -479,7 +479,7 @@ def _get_context_from_issue(val_issue, skip_filename=True):
 def _format_single_context_string(context_type, context, tab_count=0):
     """ Return the human readable form of a single context tuple.
 
-    Args:
+    Parameters:
         context_type (str): The context type of this entry.
         context (str or HedString): The value of this context
         tab_count (int): Number of tabs to name_prefix each line with.
@@ -511,7 +511,7 @@ def _format_single_context_string(context_type, context, tab_count=0):
 def _get_context_string(single_issue_context, last_used_context):
     """ Convert a single context list into the final human readable output form.
 
-    Args:
+    Parameters:
         single_issue_context (list): A list of tuples containing the context(context_type, context, increment_tab)
         last_used_context (list): A list of tuples containing the last drawn context.
 

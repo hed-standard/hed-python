@@ -1,72 +1,11 @@
+from hed.models.definition_entry import DefinitionEntry
 from hed.models.hed_string import HedString
-from hed.models.hed_group import HedGroup
 from hed.errors.error_types import DefinitionErrors
 from hed.errors.error_reporter import ErrorHandler
-import copy
 from functools import partial
 
 from hed.models.model_constants import DefTagNames
 from hed.models.hed_ops import HedOps
-
-
-class DefinitionEntry:
-    """ A single definition. """
-
-    def __init__(self, name, contents, takes_value, source_context):
-        """ Initialize info for a single definition.
-
-        Args:
-            name (str):            The label portion of this name (not including Definition/).
-            contents (HedGroup):   The contents of this definition.
-            takes_value (bool):    If True, expects ONE tag to have a single # sign in it.
-            source_context (dict): Info about where this definition was declared.
-        """
-        self.name = name
-        if contents:
-            contents = contents.copy()
-        self.contents = contents
-        self.takes_value = takes_value
-        self.source_context = source_context
-        self.tag_dict = {}
-        if contents:
-            add_group_to_dict(contents, self.tag_dict)
-
-    def get_definition(self, replace_tag, placeholder_value=None):
-        """ Return a copy of the definition with the tag expanded and the placeholder plugged in.
-
-        Args:
-            replace_tag (HedTag): The def hed tag to replace with an expanded version
-            placeholder_value (str or None):    If present and required, will replace any pound signs
-                                                in the definition contents.
-
-        Returns:
-            str:          The expanded def tag name
-            HedGroup:     The contents of this definition(including the def tag itself)
-
-        Raises:
-            ValueError:  If a placeholder_value is passed, but this definition doesn't have a placeholder.
-
-        """
-        if self.takes_value == (placeholder_value is None):
-            return None, []
-
-        output_contents = [replace_tag]
-        name = self.name
-        if self.contents:
-            output_group = self.contents
-            if placeholder_value:
-                output_group = copy.deepcopy(self.contents)
-                placeholder_tag = output_group.find_placeholder_tag()
-                if not placeholder_tag:
-                    raise ValueError("Internal error related to placeholders in definition mapping")
-                name = f"{name}/{placeholder_value}"
-                placeholder_tag.replace_placeholder(placeholder_value)
-
-            output_contents = [replace_tag, output_group]
-
-        output_contents = HedGroup(replace_tag._hed_string,
-                                   startpos=replace_tag.span[0], endpos=replace_tag.span[1], contents=output_contents)
-        return f"{DefTagNames.DEF_EXPAND_ORG_KEY}/{name}", output_contents
 
 
 class DefinitionDict(HedOps):
@@ -110,7 +49,7 @@ class DefinitionDict(HedOps):
     def check_for_definitions(self, hed_string_obj, error_handler=None):
         """ Check string for definition tags, adding them to self.
 
-        Args:
+        Parameters:
             hed_string_obj (HedString): A single hed string to gather definitions from.
             error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
 
@@ -196,7 +135,7 @@ class DefinitionDict(HedOps):
     def get_as_strings(def_dict):
         """ Convert the entries to strings of the contents
 
-        Args:
+        Parameters:
             def_dict(DefinitionDict or dict): A dict of definitions
 
         Returns:
@@ -208,27 +147,3 @@ class DefinitionDict(HedOps):
         return {key: str(value.contents) for key, value in def_dict.items()}
 
 
-def add_group_to_dict(group, tag_dict=None):
-    """ Add the tags and their values from a HED group to a tag dictionary.
-
-    Args:
-        group (HedGroup):   Contents to add to the tag dict.
-        tag_dict (dict):    The starting tag dictionary to which to add to.
-
-    Returns:
-        dict:  The updated tag_dict containing the tags with a list of values.
-
-    Notes:
-        - Expects tags to have forms calculated already.
-
-    """
-    if tag_dict is None:
-        tag_dict = {}
-    for tag in group.get_all_tags():
-        short_base_tag = tag.short_base_tag
-        value = tag.extension_or_value_portion
-        value_dict = tag_dict.get(short_base_tag, {})
-        if value:
-            value_dict[value] = ''
-        tag_dict[short_base_tag] = value_dict
-    return tag_dict

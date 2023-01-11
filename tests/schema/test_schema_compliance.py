@@ -7,7 +7,7 @@ from hed.errors import ErrorHandler, SchemaWarnings
 
 class Test(unittest.TestCase):
     # a known schema with some issues
-    schema_file = '../data/schema_test_data/HED8.0.0.mediawiki'
+    schema_file = '../data/schema_tests/HED8.0.0.mediawiki'
 
     @classmethod
     def setUpClass(cls):

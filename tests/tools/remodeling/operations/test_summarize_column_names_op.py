@@ -2,8 +2,9 @@ import json
 import os
 import pandas as pd
 import unittest
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNameSummary, SummarizeColumnNamesOp
+from hed.tools.analysis.column_name_summary import ColumnNameSummary
+from hed.tools.remodeling.dispatcher import Dispatcher
+from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNameSummaryContext, SummarizeColumnNamesOp
 
 
 class Test(unittest.TestCase):
@@ -20,74 +21,114 @@ class Test(unittest.TestCase):
         }
         cls.json_parms = json.dumps(base_parameters)
 
+        cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
+                           [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
+                           [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
+                           [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
+                           [17.1021, 0.5083, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
+                           [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male']]
+        cls.sample_columns = ['onset', 'duration', 'trial_type', 'stop_signal_delay', 'response_time',
+                              'response_accuracy', 'response_hand', 'sex']
+        cls.events_path = \
+            os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                          '../../../data/remodel_tests/aomic_sub-0013_excerpt_events.tsv'))
+        cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                         '../../../data/remodel_tests/aomic_sub-0013_events.json'))
+        cls.model_path = \
+            os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                          '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
+
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op, name, dispatch):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(dispatch, dispatch.prep_data(df), name)
+        return df, dispatch.post_proc_data(df_new)
+
     def test_constructor(self):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeColumnNamesOp(parms)
-        self.assertEqual(sum_op.summary_type, "column_headers", "constructor creates summary of right type")
         self.assertIsInstance(sum_op, SummarizeColumnNamesOp, "constructor creates an object of the correct type")
 
-    def test_do_ops(self):
-        parms = json.loads(self.json_parms)
-        sum_op = SummarizeColumnNamesOp(parms)
-        dispatch = Dispatcher([], data_root=self.data_root)
-        df1 = pd.DataFrame(self.data1, columns=self.sample_columns1)
-        df1a = pd.DataFrame(self.data1, columns=self.sample_columns1)
-        df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)
-        sum_op.do_op(dispatch, df1, 'name1')
-        context1 = dispatch.context_dict.get(parms['summary_name'], None)
-        self.assertEqual(len(context1.unique_headers), 1, "do_ops context has a element after adding to summary")
-        self.assertIsInstance(context1, ColumnNameSummary, "do_ops adds context of correct type")
-        sum_op.do_op(dispatch, df1a, 'name2')
-        self.assertEqual(len(context1.unique_headers), 1, "do_ops context does not change unique names if same added")
-        self.assertIsInstance(context1, ColumnNameSummary, "do_ops adds context of correct type")
-        sum_op.do_op(dispatch, df2, 'name3')
-        self.assertEqual(len(context1.unique_headers), 2, "do_ops context changes unique names if new added")
-        self.assertEqual(context1, dispatch.context_dict.get(parms['summary_name'], None),
-                         "do_ops making sure the context is in the dispatcher")
-        with self.assertRaises(ValueError):
-            sum_op.do_op(dispatch, df2, 'name1')
+    def test_summary_op(self):
+        with open(self.model_path, 'r') as fp:
+            parms = json.load(fp)
+        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
+        df = dispatch.get_data_file(self.events_path)
+        df = dispatch.prep_data(df)
 
-    def test_get_summary(self):
-        parms = json.loads(self.json_parms)
-        sum_op = SummarizeColumnNamesOp(parms)
-        dispatch = Dispatcher([], data_root=self.data_root)
-        df1 = pd.DataFrame(self.data1, columns=self.sample_columns1)
-        df1a = pd.DataFrame(self.data1, columns=self.sample_columns1)
-        df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)
-        sum_op.do_op(dispatch, df1, 'name1')
-        sum_op.do_op(dispatch, df1a, 'name2')
-        sum_op.do_op(dispatch, df2, 'name3')
-        summary_obj = dispatch.context_dict["columns"]
-        self.assertIsInstance(summary_obj, ColumnNameSummary, "get_summary testing ColumnNameSummary")
-        summary1 = summary_obj.get_summary()
-        self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
-        summary2 = summary_obj.get_summary(as_json=True)
-        self.assertIsInstance(summary2, str, "get_summary returns a dictionary if json requested")
-        summary3 = summary_obj.get_text_summary(verbose=False)
-        self.assertIsInstance(summary3, str, "get_text_summary returns a str if verbose is False")
-        summary4 = summary_obj.get_text_summary()
-        self.assertIsInstance(summary4, str, "get_text_summary returns a str by default")
-        self.assertTrue(len(summary4),
-                        "get_text_summary returns string at least as much information with verbose as without.")
-        summary5 = summary_obj.get_text_summary(verbose=True)
-        self.assertIsInstance(summary5, str, "get_text_summary returns a str with verbose True")
-        self.assertEqual(summary4, summary5, "get_text_summary string is same when verbose omitted or True")
+        old_len = len(df)
+        sum_op = parsed_commands[0]
+        df = sum_op.do_op(dispatch, df, 'run-02')
+        df = sum_op.do_op(dispatch, df, 'run-01')
+        self.assertEqual(len(df), old_len)
+        df1 = df.drop(labels='onset', axis=1)
+        sum_op.do_op(dispatch, df1, 'run-03')
+        this_context = dispatch.context_dict[sum_op.summary_name]
+        for key, item in this_context.summary_dict.items():
+            summary = item.get_summary()
+            self.assertIsInstance(summary, dict)
+            json_value = item.get_summary(as_json=True)
+            self.assertIsInstance(json_value, str)
+            new_summary = json.loads(json_value)
+            self.assertIsInstance(new_summary, dict)
+        merged1 = this_context._merge_all()
+        self.assertIsInstance(merged1, ColumnNameSummary)
+        self.assertEqual(len(merged1.file_dict), 3)
+        self.assertEqual(len(merged1.unique_headers), 2)
+        with self.assertRaises(ValueError) as except_context:
+            sum_op.do_op(dispatch, df, 'run-03')
+        self.assertEqual(except_context.exception.args[0], 'FileHasChangedColumnNames')
 
-    def test_context_get_name_group(self):
+    def test_summary(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         parms = json.loads(self.json_parms)
-        sum_op = SummarizeColumnNamesOp(parms)
-        context = ColumnNameSummary(sum_op)
-        update1 = context.update_context(self.sample_columns1)
-        self.assertEqual(update1, 0, "update_context has first item at position 0")
-        self.assertEqual(len(context.unique_headers), 1, "update_context has 1 unique item after first insertion")
-        update2 = context.update_context(self.sample_columns1)
-        self.assertEqual(update2, 0, "update_context has same position after update if item already there")
-        update3 = context.update_context(self.sample_columns2)
-        self.assertEqual(update3, update2+1, "update_context increments after update if new item")
+        op = SummarizeColumnNamesOp(parms)
+        df, df_new = self.get_dfs(op, 'run-01', dispatch)
+        self.assertEqual(len(df), len(df_new))
+        context_dict = dispatch.context_dict
+        self.assertIsInstance(context_dict, dict)
+        self.get_dfs(op, 'run-02', dispatch)
+        context = dispatch.context_dict['columns']
+        summary = context.get_summary()
+        dataset_sum = summary['summary']['Dataset']
+        columns = dataset_sum["Columns"]
+        self.assertEqual(len(columns), 1)
+        self.assertEqual(len(columns[0]['Files']), 2)
+        ind_sum = summary['summary']['Individual files']
+        self.assertEqual(len(ind_sum), 2)
+
+    def test_text_summary(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
+        parms = json.loads(self.json_parms)
+        op = SummarizeColumnNamesOp(parms)
+        self.get_dfs(op, 'run-01', dispatch)
+        self.get_dfs(op, 'run-02', dispatch)
+        context = dispatch.context_dict['columns']
+        self.assertIsInstance(context, ColumnNameSummaryContext)
+        text_summary1 = context.get_text_summary()
+        self.assertIsInstance(text_summary1, str)
+
+    def test_multiple(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
+        parms = json.loads(self.json_parms)
+        op = SummarizeColumnNamesOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        op.do_op(dispatch, dispatch.prep_data(df), 'run-01')
+        df1 = pd.DataFrame(self.data1, columns=self.sample_columns1)
+        op.do_op(dispatch, dispatch.prep_data(df1), 'run-02')
+        op.do_op(dispatch, dispatch.prep_data(df1), 'run-03')
+        df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)
+        op.do_op(dispatch, dispatch.prep_data(df2), 'run-05')
+        context = dispatch.context_dict['columns']
+        summary = context.get_summary()
+        text_summary1 = context.get_text_summary()
+        self.assertEqual(len(summary['summary']['Dataset']['Columns']), 3)
+        self.assertIsInstance(text_summary1, str)
 
 
 if __name__ == '__main__':

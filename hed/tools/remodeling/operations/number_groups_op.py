@@ -3,23 +3,21 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.util.data_util import get_indices, tuple_to_range
 import itertools
 
-PARAMS = {
-    "command": "number_groups",
-    "required_parameters": {
-        "number_column_name": str,
-        "source_column": str,
-        "start": dict,
-        "stop": dict
-    },
-    "optional_parameters": {"overwrite": bool}
-}
-
 
 class NumberGroupsOp(BaseOp):
+    PARAMS = {
+        "operation": "number_groups",
+        "required_parameters": {
+            "number_column_name": str,
+            "source_column": str,
+            "start": dict,
+            "stop": dict
+        },
+        "optional_parameters": {"overwrite": bool}
+    }
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.number_column_name = parameters['number_column_name']
         self.source_column = parameters['source_column']
         self.start = parameters['start']
@@ -39,7 +37,7 @@ class NumberGroupsOp(BaseOp):
                     param_type = self.start_stop_test[param_name]
                 else:
                     raise KeyError("BadParameter",
-                                   f"{param_name} not a required or optional parameter for {self.command}")
+                                   f"{param_name} not a required or optional parameter for {self.operation}")
                 # TODO: This has a syntax error
                 # if not isinstance(param_value, param_type):
                 #     raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
@@ -51,8 +49,8 @@ class NumberGroupsOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Add numbers to groups of events in dataframe.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
+        Parameters:
+            dispatcher (Dispatcher) - dispatcher object for context.
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
