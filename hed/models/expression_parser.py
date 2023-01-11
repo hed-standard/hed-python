@@ -234,11 +234,15 @@ class ExpressionOr(Expression):
 
 class ExpressionNegation(Expression):
     def handle_expr(self, hed_group, exact=False):
-        groups = self.right.handle_expr(hed_group, exact=exact)
+        found_groups = self.right.handle_expr(hed_group, exact=exact)
 
         # Todo: this may need more thought with respects to wildcards and negation
         #negated_groups = [group for group in hed_group.get_all_groups() if group not in groups]
-        negated_groups = [search_result(group, []) for group in hed_group.get_all_groups() if group not in groups]
+        # This simpler version works on python >= 3.9
+        # negated_groups = [search_result(group, []) for group in hed_group.get_all_groups() if group not in groups]
+        # Python 3.7/8 compatible version.
+        negated_groups = [search_result(group, []) for group in hed_group.get_all_groups()
+                          if not any(group is found_group.group for found_group in found_groups)]
 
         return negated_groups
 
