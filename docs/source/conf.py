@@ -17,16 +17,6 @@ from datetime import date
 
 
 sys.path.insert(0, os.path.abspath('../../'))
-# sys.path.insert(0, os.path.abspath('../../hed'))
-# sys.path.insert(0, os.path.abspath('../../hed/models'))
-# sys.path.insert(0, os.path.abspath('../../hed/schema'))
-sys.path.insert(0, os.path.abspath('../../hed/tools/'))
-# sys.path.insert(0, os.path.abspath('../../hed/tools/analysis'))
-# sys.path.insert(0, os.path.abspath('../../hed/tools/bids'))
-# sys.path.insert(0, os.path.abspath('../../hed/tools/remodeling'))
-# sys.path.insert(0, os.path.abspath('../../hed/tools/remodeling/cli'))
-# sys.path.insert(0, os.path.abspath('../../hed/tools/remodeling/operations'))
-# sys.path.insert(0, os.path.abspath('../../hed/validators'))
 
 # -- Project information -----------------------------------------------------
 project = 'HED Python'
