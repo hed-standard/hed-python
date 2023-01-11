@@ -277,13 +277,51 @@ class HedGroupBase:
             return [tag[include_groups] for tag in found_tags]
         return found_tags
 
-    def find_exact_tags(self, tags_or_groups, recursive=False):
+    def find_wildcard_tags(self, search_tags, recursive=False, include_groups=2):
+        """ Find the tags and their containing groups.
+
+        Parameters:
+            search_tags (container):    A container of the starts of short tags to search.
+            recursive (bool):           If true, also check subgroups.
+            include_groups (0, 1 or 2): Specify return values.
+
+        Returns:
+            list: The contents of the list depends on the value of include_groups.
+
+        Notes:
+            - If include_groups is 0, return a list of the HedTags.
+            - If include_groups is 1, return a list of the HedGroups containing the HedTags.
+            - If include_groups is 2, return a list of tuples (HedTag, HedGroup) for the found tags.
+            - This can only find identified tags.
+            - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
+
+        """
+        found_tags = []
+        if recursive:
+            groups = self.get_all_groups()
+        else:
+            groups = (self, )
+
+        for sub_group in groups:
+            for tag in sub_group.tags():
+                for search_tag in search_tags:
+                    if tag.short_tag.lower().startswith(search_tag):
+                        found_tags.append((tag, sub_group))
+
+        if include_groups == 0 or include_groups == 1:
+            return [tag[include_groups] for tag in found_tags]
+        return found_tags
+
+    def find_exact_tags(self, tags_or_groups, recursive=False, include_groups=1):
         """  Find the given tags or groups.
 
         Parameters:
             tags_or_groups (HedTag, HedGroupBase): A container of tags to locate.
             recursive (bool): If true, also check subgroups.
-
+            include_groups(bool): 0, 1 or 2
+                If 0: Return only tags
+                If 1: Return only groups
+                If 2 or any other value: Return both
         Returns:
             list: A list of HedGroupBases the given tags/groups were found in.
 
@@ -307,10 +345,15 @@ class HedGroupBase:
 
         for sub_group in groups:
             for search_tag in tags_or_groups:
-                if search_tag in sub_group.children:
-                    found_tags.append(sub_group)
+                for tag in sub_group.children:
+                    if tag == search_tag:
+                        found_tags.append((tag, sub_group))
+
+        if include_groups == 0 or include_groups == 1:
+            return [tag[include_groups] for tag in found_tags]
 
         return found_tags
+
     def find_def_tags(self, recursive=False, include_groups=3):
         """ Find def and def-expand tags
         Parameters:
