@@ -105,7 +105,10 @@ class Expression:
         self.right = right
         self.token = token
         self._match_mode = "/" in token.text
-        if self._match_mode and "*" in token.text:
+        if token.text.startswith('"') and token.text.endswith('"') and len(token.text) > 2:
+            self._match_mode = 1
+            token.text = token.text[1:-1]
+        if "*" in token.text:
             self._match_mode = 2
             token.text = token.text.replace("*", "")
 
@@ -394,7 +397,7 @@ class TagExpressionParser:
     def _tokenize(self, expression_string):
         grouping_re = r"\[\[|\[|\]\]|\]|}|{"
         paren_re = r"\)|\(|~"
-        word_re = r"\?+|@|\band\b|\bor\b|,|[_\-a-zA-Z0-9/.^#\*]+"
+        word_re = r"\?+|@|\band\b|\bor\b|,|[\"_\-a-zA-Z0-9/.^#\*]+"
         re_string = fr"({grouping_re}|{paren_re}|{word_re})"
         token_re = re.compile(re_string)
 

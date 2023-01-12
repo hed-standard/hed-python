@@ -17,13 +17,13 @@ class TestParser(unittest.TestCase):
     def base_test(self, parse_expr, search_strings):
         expression = TagExpressionParser(parse_expr)
 
-        # print(f"Search Pattern: {expression._org_string} - {str(expression.tree)}")
+        print(f"Search Pattern: {expression._org_string} - {str(expression.tree)}")
         for string, expected_result in search_strings.items():
             hed_string_frozen = HedStringFrozen(string, self.hed_schema)
             result1 = expression.search_hed_string(hed_string_frozen)
-            # print(f"\tSearching string '{str(hed_string_frozen)}'")
-            # if result1:
-            #    print(f"\t\tFound as group(s) {str([str(r) for r in result1])}")
+            print(f"\tSearching string '{str(hed_string_frozen)}'")
+            if result1:
+               print(f"\t\tFound as group(s) {str([str(r) for r in result1])}")
             self.assertEqual(bool(result1), expected_result)
 
             # Same test with HedString
@@ -107,6 +107,14 @@ class TestParser(unittest.TestCase):
             "Def/Def1/Value": True,
         }
         self.base_test("Def/Def1/*", test_strings)
+
+    def test_exact_term(self):
+        test_strings = {
+            "Event": True,
+            "Sensory-event": False,
+            "Event/ext": False
+        }
+        self.base_test('"Event"', test_strings)
 
     def test_actual_wildcard(self):
         test_strings = {
@@ -652,3 +660,19 @@ class TestParser(unittest.TestCase):
         self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
         hed_string = HedStringFrozen("A, C")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
+
+    def test_kay(self):
+        test_strings = {
+            "Event, (Event, Sensory-event)": True,
+        }
+        self.base_test("Event", test_strings)
+
+        test_strings = {
+            "Event, (Event, Sensory-event), Event": True,
+        }
+        self.base_test("Event and Sensory-event", test_strings)
+
+        test_strings = {
+            "Sensory-event, (Event, Sensory-event), Event": True,
+        }
+        self.base_test("[Sensory-event]", test_strings)
