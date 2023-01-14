@@ -1,5 +1,5 @@
 import unittest
-from hed.models.hed_string import HedStringFrozen, HedString
+from hed.models.hed_string import HedString
 from hed.models.hed_string_group import HedStringGroup
 from hed.models.expression_parser import TagExpressionParser
 import os
@@ -17,16 +17,8 @@ class TestParser(unittest.TestCase):
     def base_test(self, parse_expr, search_strings):
         expression = TagExpressionParser(parse_expr)
 
-        print(f"Search Pattern: {expression._org_string} - {str(expression.tree)}")
+        # print(f"Search Pattern: {expression._org_string} - {str(expression.tree)}")
         for string, expected_result in search_strings.items():
-            hed_string_frozen = HedStringFrozen(string, self.hed_schema)
-            result1 = expression.search_hed_string(hed_string_frozen)
-            print(f"\tSearching string '{str(hed_string_frozen)}'")
-            if result1:
-               print(f"\t\tFound as group(s) {str([str(r) for r in result1])}")
-            self.assertEqual(bool(result1), expected_result)
-
-            # Same test with HedString
             hed_string = HedString(string, self.hed_schema)
             result2 = expression.search_hed_string(hed_string)
             # print(f"\tSearching string '{str(hed_string)}'")
@@ -42,15 +34,13 @@ class TestParser(unittest.TestCase):
             #    print(f"\t\tFound as group(s) {str([str(r) for r in result3])}")
             self.assertEqual(bool(result3), expected_result)
 
-            for r1, r2, r3 in zip(result1, result2, result3):
+            for r2, r3 in zip(result2, result3):
                 # Ensure r2 is only a HedString if r3 is.
                 if isinstance(r3, HedStringGroup):
                     self.assertIsInstance(r2, HedString)
                 else:
                     self.assertNotIsInstance(r2, HedString)
                 self.assertEqual(r2, r3)
-            if len(hed_string_frozen.get_all_tags()) == len(hed_string_comb.get_all_tags()):
-                self.assertEqual(len(result1), len(result2))
 
     def test_broken_search_strings(self):
         test_search_strings = [
@@ -636,29 +626,29 @@ class TestParser(unittest.TestCase):
 
     def test_logical_negation(self):
         expression = TagExpressionParser("~a")
-        hed_string = HedStringFrozen("A")
+        hed_string = HedString("A")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
-        hed_string = HedStringFrozen("B")
+        hed_string = HedString("B")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
 
         expression = TagExpressionParser("~a and b")
-        hed_string = HedStringFrozen("A")
+        hed_string = HedString("A")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
-        hed_string = HedStringFrozen("B")
+        hed_string = HedString("B")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
-        hed_string = HedStringFrozen("A, B")
+        hed_string = HedString("A, B")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
 
         expression = TagExpressionParser("~( (a or b) and c)")
-        hed_string = HedStringFrozen("A")
+        hed_string = HedString("A")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
-        hed_string = HedStringFrozen("B")
+        hed_string = HedString("B")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
-        hed_string = HedStringFrozen("C")
+        hed_string = HedString("C")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
-        hed_string = HedStringFrozen("A, B")
+        hed_string = HedString("A, B")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
-        hed_string = HedStringFrozen("A, C")
+        hed_string = HedString("A, C")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
 
     def test_kay(self):
