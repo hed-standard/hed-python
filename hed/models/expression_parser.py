@@ -142,6 +142,7 @@ class Expression:
                     group = group._parent
         return all_found_groups
 
+
 class ExpressionAnd(Expression):
     def handle_expr(self, hed_group, exact=False):
         groups1 = self.left.handle_expr(hed_group, exact=exact)

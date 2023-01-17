@@ -7,8 +7,6 @@ from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 from hed.errors.error_types import ErrorContext
 from hed.models.hed_ops import translate_ops
 from hed.models.model_constants import DefTagNames
-from hed.models.hed_group import HedGroupFrozen
-from hed.models.hed_group_base import HedGroupBase
 
 
 class HedString(HedGroup):
@@ -23,7 +21,7 @@ class HedString(HedGroup):
         Parameters:
             hed_string (str): A HED string consisting of tags and tag groups.
             hed_schema (HedSchema or None): The schema to use to identify tags.  Can be passed later.
-            _contents ([HedGroupBase and/or HedTag] or None): Create a HedString from this exact list of children.
+            _contents ([HedGroup and/or HedTag] or None): Create a HedString from this exact list of children.
                                                               Does not make a copy.
         Notes:
             - The HedString object parses its component tags and groups into a tree-like structure.
@@ -150,7 +148,7 @@ class HedString(HedGroup):
             hed_schema (HedSchema or None): Hed schema to use to identify tags.
 
         Returns:
-            list:  A list of HedTag and/or HedGroupBase.
+            list:  A list of HedTag and/or HedGroup.
 
         Raises:
             ValueError: If the string is significantly malformed, such as mismatched parentheses.
@@ -333,15 +331,6 @@ class HedString(HedGroup):
 
         return issues
 
-    def get_frozen(self):
-        """ Return a frozen copy of this HedString.
-
-            This is a deep copy if the group was not already frozen.
-        Returns:
-            HedStringFrozen: A frozen copy of this HedString.
-        """
-        return HedStringFrozen(self)
-
     def find_top_level_tags(self, anchor_tags, include_groups=2):
         """ Find top level groups with an anchor tag.
 
@@ -371,35 +360,3 @@ class HedString(HedGroup):
             return [tag[include_groups] for tag in top_level_tags]
         return top_level_tags
 
-
-class HedStringFrozen(HedGroupFrozen):
-    """ Class representing an immutable hed string. """
-
-    def __init__(self, hed_string, hed_schema=None):
-        """ Initialize a frozen hed string object.
-
-        Parameters:
-            hed_string (HedGroupBase or str): The source HED string.
-            hed_schema (HedSchema, HedSchemaGroup or None): HedSchema to use to identify tags if hed_string is a str.
-
-        """
-        if isinstance(hed_string, HedGroupBase):
-            contents = hed_string
-            hed_string = hed_string._hed_string
-        else:
-            try:
-                contents = HedString.split_into_groups(hed_string, hed_schema)
-            except ValueError:
-                contents = []
-
-        super().__init__(contents, hed_string)
-
-    @property
-    def is_group(self):
-        """ Return False since this does not have parentheses. """
-        return False
-
-    # Other functions from HedString we want.
-    apply_funcs = HedString.apply_funcs
-    validate = HedString.validate
-    find_top_level_tags = HedString.find_top_level_tags

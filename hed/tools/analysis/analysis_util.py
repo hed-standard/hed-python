@@ -5,7 +5,7 @@ from hed.models.tabular_input import TabularInput
 from hed.models.expression_parser import TagExpressionParser
 from hed.tools.util.data_util import separate_values
 from hed.models.hed_tag import HedTag
-from hed.models.hed_group_base import HedGroupBase
+from hed.models.hed_group import HedGroup
 from hed.models.hed_string import HedString
 
 
@@ -141,7 +141,7 @@ def hed_to_str(contents, remove_parentheses=False):
     if isinstance(contents, list):
         converted = [hed_to_str(element, remove_parentheses) for element in contents if element]
         return ",".join(converted)
-    if not isinstance(contents, HedGroupBase):
+    if not isinstance(contents, HedGroup):
         raise TypeError("ContentsWrongClass", "OnsetGroup excepts contents that can be converted to string.")
     if not remove_parentheses or len(contents.children) != 1:
         return str(contents)
