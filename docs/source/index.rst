@@ -20,7 +20,6 @@ Note:  this is a work in progress. More information is coming.
    :maxdepth: 3
    :caption: HED Python API:
 
-   api.rst
    api2.rst
 
 
