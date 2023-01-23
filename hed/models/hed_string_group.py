@@ -32,6 +32,11 @@ class HedStringGroup(HedString):
     def get_original_hed_string(self):
         return "".join([group._hed_string for group in self._children])
 
+    def sort(self):
+        combined_string = HedString.from_hed_strings(self._children)
+        combined_string.sorted(update_self=True)
+        return combined_string
+
     @property
     def span(self):
         """ Return the source span of this group from the source hed string.
