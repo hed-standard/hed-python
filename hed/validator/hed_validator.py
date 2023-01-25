@@ -85,7 +85,9 @@ class HedValidator(HedOps):
                     validation_issues += ErrorHandler.format_error(error_code, child)
                 else:
                     error_code = ValidationErrors.HED_TAG_REPEATED_GROUP
-                    validation_issues += ErrorHandler.format_error(error_code, child[0]._parent)
+                    # Return a copy as we want it to be sorted
+                    duplicate_copy = child[0]._parent.copy().sort()
+                    validation_issues += ErrorHandler.format_error(error_code, duplicate_copy)
             if not isinstance(child, HedTag):
                 self._check_for_duplicate_groups_recursive(child, validation_issues)
             prev_child = child

@@ -143,22 +143,35 @@ class HedGroup:
         return return_copy
 
     def sort(self):
+        """ Sort the tags and groups in this HedString in a consistent order.
+
+        Returns:
+            self
+        """
         self.sorted(update_self=True)
         return self
 
     def sorted(self, update_self=False):
+        """ Returns a sorted copy of this hed group as a list of it's children
+
+        Parameters:
+            update_self (bool): If True, update the contents of this group to be sorted as well.
+
+        Returns:
+            list: The list of all tags in this group, with subgroups being returned as further nested lists
+        """
         output_list = []
         queue_list = list(self.children)
         for child in queue_list:
             if isinstance(child, HedTag):
-                output_list.append(child)
+                output_list.append((child, child))
             else:
-                output_list.append(child.sorted(update_self))
+                output_list.append((child, child.sorted(update_self)))
 
-        output_list.sort(key=lambda x: str(x))
+        output_list.sort(key=lambda x: str(x[1]))
         if update_self:
-            self._contents = output_list
-        return output_list
+            self._children = [x[0] for x in output_list]
+        return [x[1] for x in output_list]
 
     @property
     def children(self):

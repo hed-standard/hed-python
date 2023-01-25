@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
 
     def test_save_load(self):
         sidecar = Sidecar(self.json_def_filename)
-        save_filename = self.base_output_folder + "test_sidecar_save.json"
+        save_filename = os.path.join(self.base_output_folder, "test_sidecar_save.json")
         sidecar.save_as_json(save_filename)
 
         reloaded_sidecar = Sidecar(save_filename)
