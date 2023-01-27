@@ -168,7 +168,7 @@ class HedGroup:
             else:
                 output_list.append((child, child.sorted(update_self)))
 
-        output_list.sort(key=lambda x: str(x[1]))
+        output_list.sort(key=lambda x: str(x[0]))
         if update_self:
             self._children = [x[0] for x in output_list]
         return [x[1] for x in output_list]
