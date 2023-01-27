@@ -30,13 +30,13 @@ class Test(unittest.TestCase):
         self.assertIsInstance(t_map, KeyMap)
         df = t_map.col_map
         self.assertIsInstance(df, pd.DataFrame)
-        with self.assertRaises(HedFileError) as context:
+        with self.assertRaises(ValueError) as context:
             KeyMap(None, ['a'])
-        self.assertEqual(context.exception.args[0], "KeyColumnsEmpty")
+        self.assertEqual(context.exception.args[0], "KEY_COLUMNS_EMPTY")
 
-        with self.assertRaises(HedFileError) as context1:
+        with self.assertRaises(ValueError) as context1:
             KeyMap(['a', 'b', 'c'], ['b', 'c', 'd'])
-        self.assertEqual(context1.exception.args[0], "KeyTargetNotDisjoint")
+        self.assertEqual(context1.exception.args[0], "KEY_AND_TARGET_COLUMNS_NOT_DISJOINT")
 
         emap1 = KeyMap(['a'], [])
         self.assertIsInstance(emap1, KeyMap, "KeyMap: target columns can be empty")

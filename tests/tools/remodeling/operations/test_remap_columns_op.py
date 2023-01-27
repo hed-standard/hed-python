@@ -31,12 +31,22 @@ class Test(unittest.TestCase):
         cls.json_parms = json.dumps(base_parameters)
         cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=None)
 
+        base_parameters1 = {
+                "source_columns": ["duration"],
+                "destination_columns": ["new_duration", "new_hand"],
+                "map_list": [[0.5083, 1, "correct_left"],
+                             [0.5084, 2, "correct_right"]],
+                "ignore_missing": True
+            }
+        cls.json_parms1 = json.dumps(base_parameters1)
+
     @classmethod
     def tearDownClass(cls):
         pass
 
-    def get_dfs(self, op):
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+    def get_dfs(self, op, df=None):
+        if df is None:
+            df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df_new = op.do_op(self.dispatch, self.dispatch.prep_data(df), 'run-01')
         return df, self.dispatch.post_proc_data(df_new)
 
@@ -105,6 +115,59 @@ class Test(unittest.TestCase):
         self.assertNotIn("new_duration", df.columns.values)
         self.assertIn("new_duration", df_test.columns.values)
         self.assertEqual(df_test.loc[2, "new_duration"], 0.7)
+
+    def test_numeric_keys_cascade(self):
+        # Test when no extras but ignored.
+        op_list = [
+            {
+                "operation": "remap_columns",
+                "description": "This is first operation in sequence",
+                "parameters": {
+                    "source_columns": ["duration"],
+                    "destination_columns": ["new_duration"],
+                    "map_list": [[5, 6], [0.5084, 0.7]],
+                    "ignore_missing": True
+                }
+            },
+            {
+                "operation": "remap_columns",
+                "description": "This is first operation in sequence",
+                "parameters": {
+                    "source_columns": ["new_duration"],
+                    "destination_columns": ["new_value"],
+                    "map_list": [[0.6, 0.5], [0.7, 0.4]],
+                    "ignore_missing": True
+                }
+            }
+        ]
+        dispatcher = Dispatcher(op_list, data_root=None, backup_name=None, hed_versions=[])
+
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_test = dispatcher.run_operations(df, verbose=False, sidecar=None)
+        self.assertIn("new_duration", df_test.columns.values)
+        self.assertIn("new_value", df_test.columns.values)
+        self.assertEqual(df_test.loc[2, "new_duration"], 0.7)
+        self.assertEqual(df_test.loc[2, "new_value"], 0.4)
+
+    def test_scratch(self):
+        import os
+        from hed.tools.util.io_util import get_file_list
+        from hed.tools.util.data_util import get_new_dataframe
+        event_path = os.path.realpath('D:/monique/test_events.tsv')
+        save_path = os.path.realpath('D:/monique/output')
+        json_dir = os.path.realpath('D:/monique/json')
+        json_list = get_file_list(json_dir, extensions=['.json'])
+        for json_file in json_list:
+            event_out = os.path.basename(json_file)
+            event_out = f"events_{os.path.splitext(event_out)[0]}.tsv"
+            with open(json_file, 'r') as fp:
+                op_list = json.load(fp)
+            df = get_new_dataframe(event_path)
+            dispatcher = Dispatcher(op_list, data_root=None, backup_name=None, hed_versions=[])
+            df_test = dispatcher.run_operations(df, verbose=False, sidecar=None)
+            new_path = os.path.realpath(os.path.join(save_path, event_out))
+            df_test.to_csv(new_path, sep='\t', index=False, header=True)
+            break
 
 
 if __name__ == '__main__':

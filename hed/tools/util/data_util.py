@@ -118,7 +118,7 @@ def get_key_hash(key_tuple):
 
     """
 
-    return hash(tuple(key_tuple))
+    return hash(tuple((str(n) for n in key_tuple)))
 
 
 def get_new_dataframe(data):
@@ -162,7 +162,8 @@ def get_row_hash(row, key_list):
     columns_present, columns_missing = separate_values(list(row.index.values), key_list)
     if columns_missing:
         raise HedFileError("lookup_row", f"row must have all keys, missing{str(columns_missing)}", "")
-    return get_key_hash(row[key_list])
+    new_row = row[key_list].fillna('n/a').astype(str)
+    return get_key_hash(new_row)
 
 
 def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate'):

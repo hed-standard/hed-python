@@ -95,11 +95,13 @@ class Test(unittest.TestCase):
         self.get_dfs(op, 'run-02', dispatch)
         context = dispatch.context_dict['columns']
         summary = context.get_summary()
-        dataset_sum = summary['summary']['Dataset']
-        columns = dataset_sum["Columns"]
+        dataset_sum = summary['Dataset']
+        json_obj = json.loads(dataset_sum)
+        json_str = json.dumps(json_obj)
+        columns = json_obj["Overall summary"]["Columns"]
         self.assertEqual(len(columns), 1)
         self.assertEqual(len(columns[0]['Files']), 2)
-        ind_sum = summary['summary']['Individual files']
+        ind_sum = summary['Individual files']
         self.assertEqual(len(ind_sum), 2)
 
     def test_text_summary(self):
@@ -111,7 +113,7 @@ class Test(unittest.TestCase):
         context = dispatch.context_dict['columns']
         self.assertIsInstance(context, ColumnNameSummaryContext)
         text_summary1 = context.get_text_summary()
-        self.assertIsInstance(text_summary1, str)
+        self.assertIsInstance(text_summary1, dict)
 
     def test_multiple(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
@@ -127,8 +129,10 @@ class Test(unittest.TestCase):
         context = dispatch.context_dict['columns']
         summary = context.get_summary()
         text_summary1 = context.get_text_summary()
-        self.assertEqual(len(summary['summary']['Dataset']['Columns']), 3)
-        self.assertIsInstance(text_summary1, str)
+        self.assertEqual(len(summary), 2)
+        self.assertIsInstance(text_summary1, dict)
+        self.assertEqual(len(text_summary1), 2)
+        self.assertEqual(len(text_summary1["Individual files"]), 4)
 
 
 if __name__ == '__main__':

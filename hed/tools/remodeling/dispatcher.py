@@ -38,12 +38,12 @@ class Dispatcher:
         self.hed_schema = get_schema(hed_versions)
         self.context_dict = {}
 
-    def get_context_summaries(self, file_formats=['.txt', '.json'], show_individual=True):
+    def get_context_summaries(self, file_formats=['.txt', '.json'], include_individual=True):
         """ Return the summaries in a dictionary suitable for saving or archiving.
 
         Parameters:
             file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
-            show_individual (bool): If true, individual file summaries are archived.
+            include_individual (bool): If true, individual file summaries are archived.
 
         Returns:
             list: A list of dictionaries of summaries keyed to filenames.
@@ -55,7 +55,7 @@ class Dispatcher:
             file_base = generate_filename(context_item.context_filename, append_datetime=True)
             for file_format in file_formats:
                 if file_format == '.txt':
-                    summary = context_item.get_text_summary(include_individual=True)
+                    summary = context_item.get_text_summary(include_individual=include_individual)
                 elif file_format == '.json':
                     summary = context_item.get_summary(as_json=True)
                 else:
@@ -64,11 +64,11 @@ class Dispatcher:
                                      'file_type': 'summary', 'content': summary})
         return summary_list
 
-    def get_data_file(self, file_path):
-        """ Full path of the backup file corresponding to the file path.
+    def get_data_file(self, file_designator):
+        """ Get the correct data file give the file designator.
 
         Parameters:
-            file_path (str): Full path of the dataframe in the original dataset.
+            file_designator (str, DataFrame ): A dataFrame or the full path of the dataframe in the original dataset.
 
         Returns:
             DataFrame:  DataFrame after reading the path.
@@ -76,17 +76,27 @@ class Dispatcher:
         Raises:
             HedFileError:  If a valid file cannot be found.
 
-        """
-        if self.backup_man:
-            actual_path = self.backup_man.get_backup_path(self.backup_name, file_path)
-        else:
-            actual_path = file_path
+        Note:
+        - If a string is passed and there is a backup manager,
+          the string must correspond to the full path of the file in the original dataset.
+          In this case, the corresponding backup file is read and returned.
+        - If a string is passed and there is no backup manager,
+          the data file corresponding to the file_designator is read and returned.
+        - If a Pandas DataFrame is passed, a copy is returned.
 
+        """
+        if isinstance(file_designator, pd.DataFrame):
+            return file_designator.copy()
+        if self.backup_man:
+            actual_path = self.backup_man.get_backup_path(self.backup_name, file_designator)
+        else:
+            actual_path = file_designator
         try:
             df = pd.read_csv(actual_path, sep='\t', header=0, keep_default_na=False, na_values=",null")
         except Exception:
             raise HedFileError("BadDataFile",
-                               f"{str(actual_path)} (orig: {file_path}) does not correspond to a valid tsv file", "")
+                               f"{str(actual_path)} (orig: {file_designator}) does not correspond to a valid tsv file",
+                               "")
         return df
 
     def get_context_save_dir(self):
@@ -100,7 +110,7 @@ class Dispatcher:
         """ Run the dispatcher operations on a file.
 
         Parameters:
-            file_path (str):      Full path of the file to be remodeled.
+            file_path (str or DataFrame):    Full path of the file to be remodeled or a DataFrame
             sidecar (Sidecar or file-like):   Only needed for HED operations.
             verbose (bool):  If true, print out progress reports
 
@@ -113,17 +123,19 @@ class Dispatcher:
         if verbose:
             print(f"Reading {file_path}...")
         df = self.get_data_file(file_path)
-        df = self.prep_data(df)
         for operation in self.parsed_ops:
+            df = self.prep_data(df)
             df = operation.do_op(self, df, file_path, sidecar=sidecar)
-        return self.post_proc_data(df)
+        df = self.post_proc_data(df)
+        return df
 
-    def save_context(self, save_formats=['.json', '.txt'], include_individual=True):
+    def save_context(self, save_formats=['.json', '.txt'], include_individual=True, separate_files=False):
         """ Save the summary files in the specified formats.
 
         Parameters:
             save_formats (list):  A list of formats [".txt", ."json"]
             include_individual (bool): If True, include summaries of individual files.
+            separate_files (bool): If true, individual and overall summaries are each in separate files.
 
         The summaries are saved in the dataset derivatives/remodeling folder.
 
@@ -133,7 +145,8 @@ class Dispatcher:
         summary_path = self.get_context_save_dir()
         os.makedirs(summary_path, exist_ok=True)
         for context_name, context_item in self.context_dict.items():
-            context_item.save(summary_path, save_formats, include_individual=include_individual)
+            context_item.save(summary_path, save_formats, include_individual=include_individual,
+                              separate_files=separate_files)
 
     @staticmethod
     def parse_operations(operation_list):

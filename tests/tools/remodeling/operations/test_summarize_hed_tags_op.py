@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
         json_str2 = json.dumps(sum_obj2, indent=4)
         self.assertIsInstance(json_str2, str)
         sum_obj3 = sum_context2.get_summary_details(include_individual=False)
-        self.assertNotIn('Individual files', sum_obj3)
+        self.assertFalse(sum_obj3['Individual files'])
 
     def test_get_summary_details_verbose(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
@@ -106,15 +106,14 @@ class Test(unittest.TestCase):
         df = pd.read_csv(self.data_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
         df = dispatch.prep_data(df)
         sum_op.do_op(dispatch, df, 'subj2_run1', sidecar=self.json_path)
-        sum_context1a = dispatch.context_dict[sum_op.summary_name]
+
         sum_op.do_op(dispatch, df, 'subj2_run2', sidecar=self.json_path)
         sum_context1 = dispatch.context_dict[sum_op.summary_name]
-        text_sum1 = sum_context1.get_text_summary(include_individual=True)
-        text_sum1t = sum_context1.get_text_summary(title="Summary with title", include_individual=True)
-        text_sum1no = sum_context1.get_text_summary(include_individual=False)
-        self.assertGreater(len(text_sum1t), len(text_sum1))
-        self.assertGreater(len(text_sum1), len(text_sum1no))
-        # print(text_sum1t)
+        text_sum1 = sum_context1.get_text_summary(include_individual=True, separate_files=False)
+        text_sum1t = sum_context1.get_text_summary(include_individual=True, separate_files=True)
+        text_sum1no = sum_context1.get_text_summary(include_individual=False, separate_files=False)
+        self.assertGreater(len(text_sum1['Dataset']), len(text_sum1t['Dataset']))
+        self.assertGreater(len(text_sum1['Dataset']), len(text_sum1no['Dataset']))
 
     def test_sample_example(self):
         remodel_list = [{
@@ -124,21 +123,23 @@ class Test(unittest.TestCase):
                 "summary_name": "summarize_hed_tags",
                 "summary_filename": "summarize_hed_tags",
                 "tags": {
-                    "Sensory events": ["Sensory-event","Sensory-presentation","Task-stimulus-role","Experimental-stimulus"],
-                    "Agent actions": ["Agent-action","Agent","Action","Agent-task-role","Task-action-type","Participant-response"],
+                    "Sensory events": ["Sensory-event", "Sensory-presentation", "Task-stimulus-role",
+                                       "Experimental-stimulus"],
+                    "Agent actions": ["Agent-action", "Agent", "Action", "Agent-task-role", "Task-action-type",
+                                      "Participant-response"],
                     "Objects": ["Item"]
                 },
                 "expand_context": False
             }}]
 
         sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
-                          [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
-                          [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
-                          [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
-                          [17.1021, 0.5083, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
-                          [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male']]
+                       [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
+                       [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
+                       [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
+                       [17.1021, 0.5083, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
+                       [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male']]
         sample_columns = ['onset', 'duration', 'trial_type', 'stop_signal_delay', 'response_time',
-                         'response_accuracy', 'response_hand', 'sex']
+                          'response_accuracy', 'response_hand', 'sex']
 
         sidecar_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                      '../../../data/remodel_tests/aomic_sub-0013_events.json'))
@@ -150,7 +151,8 @@ class Test(unittest.TestCase):
             df = operation.do_op(dispatch, df, "sample", sidecar=sidecar_path)
         context_dict = dispatch.context_dict.get("summarize_hed_tags")
         text_summary = context_dict.get_text_summary()
-        self.assertIsInstance(text_summary, str)
+        self.assertIsInstance(text_summary["Dataset"], str)
+
 
 if __name__ == '__main__':
     unittest.main()
