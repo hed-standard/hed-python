@@ -86,10 +86,9 @@ class EventsToSidecarSummaryContext(BaseContext):
 
         """
 
-        details = {"files": summary_info.files, "total_files": summary_info.total_files,
-                   "total_events": summary_info.total_events, "skip_cols": summary_info.skip_cols,
-                   "sidecar": summary_info.extract_sidecar_template()}
-        return {"Sidecar_details": details}
+        return {"files": summary_info.files, "total_files": summary_info.total_files,
+                "total_events": summary_info.total_events, "skip_cols": summary_info.skip_cols,
+                "sidecar": summary_info.extract_sidecar_template()}
 
     def _merge_all(self):
         """ Return merged information.
@@ -106,6 +105,6 @@ class EventsToSidecarSummaryContext(BaseContext):
     def _get_result_string(self, name, result):
         if name == "Dataset":
             return "Dataset: Currently no overall sidecar extraction is available"
-        details = result['Sidecar_details']
+        details = result['sidecar']
         json_str = f"\nSidecar:\n{json.dumps(details['sidecar'], indent=4)}"
         return f"{name}: Total events={details['total_events']} Skip columns: {str(details['skip_cols'])}{json_str}"

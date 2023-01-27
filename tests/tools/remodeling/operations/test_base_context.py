@@ -8,6 +8,9 @@ class TestContext(BaseContext):
 
     def __init__(self):
         super().__init__("TestContext", "Test", "test_context")
+        self.summary_dict["data1"] = "test data 1"
+        self.summary_dict["data2"] = "test data 2"
+
 
     def _get_summary_details(self, include_individual=True):
         summary = {"name": self.context_name}
@@ -45,24 +48,35 @@ class Test(unittest.TestCase):
 
     def test_get_text_summary(self):
         test = TestContext()
-        str1 = test.get_text_summary()
-        self.assertIsInstance(str1, str)
-        self.assertTrue(str1)
-        str2 = test.get_text_summary(title='this title')
-        self.assertGreater(len(str2), len(str1))
-        str3 = test.get_text_summary(title='this title', include_individual=False)
-        self.assertGreater(len(str2), len(str3))
+        out1 = test.get_text_summary(separate_files=False, include_individual=False)
+        self.assertIsInstance(out1, dict)
+        self.assertTrue(out1["Dataset"])
+        self.assertEqual(len(out1), 1)
+        out2 = test.get_text_summary(include_individual=False, separate_files=True)
+        self.assertIsInstance(out2, dict)
+        self.assertIn('Dataset', out2)
+        self.assertNotIn('Individual files', out2)
+        self.assertEqual(out1['Dataset'], out2['Dataset'])
+        out3 = test.get_text_summary(include_individual=True)
+        self.assertIsInstance(out3, dict)
+        self.assertIn('Dataset', out3)
+        self.assertIn('Individual files', out3)
+        self.assertEqual(out1['Dataset'], out3['Dataset'])
+        self.assertIn('data1', out3['Individual files'])
 
     def test_save(self):
         test1 = TestContext()
         file_list1 = os.listdir(self.summary_dir)
         self.assertFalse(file_list1)
-        test1.save(self.summary_dir)
+        test1.save(self.summary_dir, include_individual=True, separate_files=True)
         file_list2 = os.listdir(self.summary_dir)
-        self.assertEqual(len(file_list2), 1)
-        test1.save(self.summary_dir, file_formats=['.json', '.tsv'], include_individual=False)
+        self.assertEqual(len(file_list2), 3)
+        test1.save(self.summary_dir, file_formats=['.json', '.tsv'], include_individual=False, separate_files=True)
         file_list3 = os.listdir(self.summary_dir)
-        self.assertEqual(len(file_list3), 2)
+        self.assertEqual(len(file_list3), 3+1)
+        test1.save(self.summary_dir, file_formats=['.json', '.tsv'], include_individual=True, separate_files=True)
+        file_list3 = os.listdir(self.summary_dir)
+        self.assertEqual(len(file_list3), 3+1+3)
 
 
 if __name__ == '__main__':

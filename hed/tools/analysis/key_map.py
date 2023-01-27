@@ -7,11 +7,12 @@ class KeyMap:
     """ A map of unique column values for remapping columns.
 
     Attributes:
-        name (str):       Name of this remap for identification purposes.
         key_cols (list):  A list of column names that will be hashed into the keys for the map.
-        target_cols (list):   An optional list of column names that will be inserted into data and later remapped.
+        target_cols (list or None):   An optional list of column names that will be inserted into data and later remapped.
+        name (str):       An optional name of this remap for identification purposes.
 
-    Notes: This mapping converts all columns of type object to string.
+    Notes: This mapping converts all columns in the mapping to strings.
+    The remapping does not support other types of columns.
 
     """
     def __init__(self, key_cols, target_cols=None, name=''):
@@ -25,15 +26,15 @@ class KeyMap:
         """
 
         if not key_cols:
-            raise HedFileError("KeyColumnsEmpty", "KeyMap key columns must exist", "")
+            raise ValueError("KEY_COLUMNS_EMPTY", "KeyMap key columns must exist", "")
         self.key_cols = key_cols.copy()
-        if target_cols and set(key_cols).intersection(target_cols):
-            raise HedFileError("KeyTargetNotDisjoint",
-                               f"Key cols {str(key_cols)} and target cols {str(target_cols)} must be disjoint", "")
-        elif target_cols:
+        if target_cols:
             self.target_cols = target_cols.copy()
         else:
             self.target_cols = []
+        if set(self.key_cols).intersection(set(self.target_cols)):
+            raise ValueError("KEY_AND_TARGET_COLUMNS_NOT_DISJOINT",
+                               f"Key cols {str(key_cols)} and target cols {str(target_cols)} must be disjoint", "")
         self.name = name
         self.col_map = pd.DataFrame(columns=self.key_cols + self.target_cols)
         self.map_dict = {}

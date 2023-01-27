@@ -70,19 +70,22 @@ class Test(unittest.TestCase):
         cont = dispatch.context_dict
         context1 = cont.get("test summary", None)
         self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
-        summary1 = context1.get_summary()
-        self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
+        summary1 = context1.get_summary(as_json=False)
+        self.assertIsInstance(summary1, dict, "get_summary returns a dictionary")
+        self.assertIsInstance(summary1["Dataset"], dict)
         summary1a = context1.get_summary(as_json=True)
-        self.assertIsInstance(summary1a, str, "get_summary returns a dictionary if json requested")
+        self.assertIsInstance(summary1a, dict)
+        self.assertIsInstance(summary1a["Dataset"], str)
         text_summary = context1.get_text_summary(include_individual=True)
-        self.assertIsInstance(text_summary, str)
+        self.assertIsInstance(text_summary, dict)
+        self.assertIsInstance(text_summary["Dataset"], str)
         self.get_dfs(sum_op, 'name2', dispatch)
         self.get_dfs(sum_op, 'name3', dispatch)
         context2 = dispatch.context_dict.get(parms['summary_name'], None)
         summary2 = context2.get_summary()
         self.assertIsInstance(summary2, dict)
-        text_summary2 = context2.get_text_summary(include_individual=True)
-        self.assertIsInstance(text_summary2, str)
+        text_summary2 = context2.get_text_summary(include_individual=True, separate_files=False)
+        self.assertIsInstance(text_summary2, dict)
 
     def test_summary_op(self):
         events = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),

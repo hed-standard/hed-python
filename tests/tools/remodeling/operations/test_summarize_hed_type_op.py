@@ -6,7 +6,6 @@ from hed.models import Sidecar
 from hed.schema import load_schema_version
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp, HedTypeSummaryContext
-from hed.tools.util.io_util import get_file_list
 
 
 class Test(unittest.TestCase):
@@ -65,18 +64,17 @@ class Test(unittest.TestCase):
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-01', sidecar=self.sidecar_path)
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         summary1 = context1.get_summary()
-        self.assertEqual(summary1['summary']['Dataset']['files'][0], 'run-01')
-        self.assertEqual(len(summary1['summary']['Dataset']['files']), 1)
-        summary1a = context1.get_summary(as_json=True)
-        self.assertIsInstance(summary1a, str)
+        self.assertIn('run-01', summary1['Individual files'])
+        self.assertEqual(len(summary1['Individual files']), 1)
+        summary1a = context1.get_summary(as_json=False)
+        self.assertIsInstance(summary1a['Dataset'], dict)
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-02', sidecar=self.sidecar_path)
         context2 = dispatch.context_dict['AOMIC_condition_variables']
-        summary2 = context2.get_summary()
-        self.assertEqual(summary2['summary']['Dataset']['files'][0], 'run-01')
-        self.assertEqual(len(summary2['summary']['Dataset']['files']), 2)
-        summary2a = context2.get_summary(as_json=True)
-        summary_text = context2.get_text_summary()
-        self.assertIsInstance(summary_text, str)
+        summary2 = context2.get_summary(include_individual=True, separate_files=True, as_json=False)
+        self.assertEqual(summary2['Dataset']['Overall summary']['files'][0], 'run-01')
+        self.assertEqual(len(summary2['Dataset']['Overall summary']['files']), 2)
+        summary2a = context2.get_summary(include_individual=True, separate_files=True, as_json=True)
+        self.assertIsInstance(summary2a["Individual files"]["run-02"], str)
 
     def test_text_summary(self):
         sidecar = Sidecar(self.sidecar_path, 'aomic_sidecar', hed_schema=self.hed_schema)
@@ -96,11 +94,13 @@ class Test(unittest.TestCase):
         context1 = dispatch.context_dict['AOMIC_condition_variables']
         self.assertIsInstance(context1, HedTypeSummaryContext)
         text_summary1 = context1.get_text_summary()
-        self.assertIsInstance(text_summary1, str)
+        self.assertIsInstance(text_summary1, dict)
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'new_events', sidecar=sidecar)
         context2 = dispatch.context_dict['AOMIC_condition_variables']
         text_summary2 = context2.get_text_summary()
-        self.assertIsInstance(text_summary2, str)
+        self.assertIsInstance(text_summary2, dict)
+        self.assertEqual(len(text_summary1["Individual files"]), 1)
+        self.assertEqual(len(text_summary2["Individual files"]), 2)
 
 
 if __name__ == '__main__':

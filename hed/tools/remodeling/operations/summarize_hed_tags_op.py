@@ -95,22 +95,19 @@ class HedTagSummaryContext(BaseContext):
         leftovers = [value.get_info(verbose=True) for value in unmatched]
         return {"Main tags": details, "Other tags": leftovers}
 
-    def get_text_summary(self, title='', include_individual=True):
-        result = self.get_summary_details(include_individual=include_individual)
-        summary_details = self._get_result_string("Dataset", result["Dataset"])
-        if include_individual:
-            sum_list = []
-            for name, individual_result in result["Individual files"].items():
-                sum_list.append(self._get_result_string(name, individual_result))
-            summary_details = summary_details + "\n" + "\n".join(sum_list)
-        if title:
-            title_str = title + "\n"
-        else:
-            title_str = ''
-        sum_str = f"{title_str}Context name: {self.context_name}\n" + f"Context type: {self.context_type}\n" + \
-                  f"Context filename: {self.context_filename}\n" + f"\n{summary_details}"
-
-        return sum_str
+    # def get_text_summary(self,include_individual=True):
+    #     result = self.get_summary_details(include_individual=include_individual)
+    #     summary_details = self._get_result_string("Dataset", result["Dataset"])
+    #     if include_individual:
+    #         sum_list = []
+    #         for name, individual_result in result["Individual files"].items():
+    #             sum_list.append(self._get_result_string(name, individual_result))
+    #         summary_details = summary_details + "\n" + "\n".join(sum_list)
+    #
+    #     sum_str = f"{title_str}Context name: {self.context_name}\n" + f"Context type: {self.context_type}\n" + \
+    #               f"Context filename: {self.context_filename}\n" + f"\n{summary_details}"
+    #
+    #     return sum_str
 
     def _get_result_string(self, name, result):
         sum_list = [f"\n{name}\n\tMain tags[events,files]:"]
@@ -123,13 +120,15 @@ class HedTagSummaryContext(BaseContext):
             sum_list.append(f"\t\t{' '.join(self._tag_details(result['Other tags']))}")
         return "\n".join(sum_list)
 
-    def _tag_details(self, tags):
+    @staticmethod
+    def _tag_details(tags):
         tag_list = []
         for tag in tags:
             tag_list.append(f"{tag['tag']}[{tag['events']},{len(tag['files'])}]")
         return tag_list
 
-    def _get_details(self, key_list, template, verbose=False):
+    @staticmethod
+    def _get_details(key_list, template, verbose=False):
         key_details = []
         for item in key_list:
             for tag_cnt in template[item.lower()]:
