@@ -7,10 +7,9 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 class TestContext(BaseContext):
 
     def __init__(self):
-        super().__init__("TestContext", "Test", "test_context")
+        super().__init__("TestContext", "test", "test_context")
         self.summary_dict["data1"] = "test data 1"
         self.summary_dict["data2"] = "test data 2"
-
 
     def _get_summary_details(self, include_individual=True):
         summary = {"name": self.context_name}
@@ -69,14 +68,23 @@ class Test(unittest.TestCase):
         file_list1 = os.listdir(self.summary_dir)
         self.assertFalse(file_list1)
         test1.save(self.summary_dir, include_individual=True, separate_files=True)
-        file_list2 = os.listdir(self.summary_dir)
-        self.assertEqual(len(file_list2), 3)
+        dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/'))
+        file_list2 = os.listdir(dir_full)
+        self.assertEqual(len(file_list2), 2)
+        dir_ind = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/',
+                                                "individual_summaries/"))
+        file_list3 = os.listdir(dir_ind)
+        self.assertEqual(len(file_list3), 2)
         test1.save(self.summary_dir, file_formats=['.json', '.tsv'], include_individual=False, separate_files=True)
-        file_list3 = os.listdir(self.summary_dir)
-        self.assertEqual(len(file_list3), 3+1)
+        file_list4 = os.listdir(dir_full)
+        self.assertEqual(len(file_list4), len(file_list2) + 1)
+        file_list5 = os.listdir(dir_ind)
+        self.assertEqual(len(file_list3), len(file_list5))
         test1.save(self.summary_dir, file_formats=['.json', '.tsv'], include_individual=True, separate_files=True)
-        file_list3 = os.listdir(self.summary_dir)
-        self.assertEqual(len(file_list3), 3+1+3)
+        file_list6 = os.listdir(dir_full)
+        self.assertEqual(len(file_list6), len(file_list4) + 1)
+        file_list7 = os.listdir(dir_ind)
+        self.assertEqual(len(file_list7), len(file_list5) + 2)
 
 
 if __name__ == '__main__':

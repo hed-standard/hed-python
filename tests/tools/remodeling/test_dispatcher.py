@@ -197,10 +197,10 @@ class Test(unittest.TestCase):
         dispatch1.save_context()
         self.assertTrue(os.path.exists(summary_path))
         file_list1 = os.listdir(summary_path)
-        self.assertEqual(len(file_list1), 4, "save_context creates correct number of summary files when run.")
+        self.assertEqual(len(file_list1), 2, "save_context creates correct number of summary files when run.")
         dispatch1.save_context(save_formats=[])
         file_list2 = os.listdir(summary_path)
-        self.assertEqual(len(file_list2), 4, "save_context must have a format to save")
+        self.assertEqual(len(file_list2), 2, "save_context must have a format to save")
 
     def test_get_context_summaries(self):
         with open(self.summarize_excerpt) as fp:

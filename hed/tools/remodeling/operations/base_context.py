@@ -17,6 +17,9 @@ class BaseContext(ABC):
         context_filename (str)  Base filename for saving the context.
 
     """
+
+    INDIVIDUAL_SUMMARIES_PATH = 'individual_summaries'
+
     def __init__(self, context_type, context_name, context_filename):
         self.context_type = context_type
         self.context_name = context_name
@@ -113,16 +116,22 @@ class BaseContext(ABC):
             self._save_separate(save_dir, file_format, time_stamp, summary)
 
     def _save_separate(self, save_dir, file_format, time_stamp, summary):
-        file_name = os.path.realpath(os.path.join(save_dir, secure_filename(self.context_filename) + "_overall" +
+        this_save = os.path.join(save_dir, self.context_name + '/')
+        os.makedirs(os.path.realpath(this_save), exist_ok=True)
+        file_name = os.path.realpath(os.path.join(this_save, secure_filename(self.context_filename) + "_overall" +
                                                   time_stamp + file_format))
 
         with open(file_name, 'w') as text_file:
             text_file.write(summary["Dataset"])
-        individual = summary.get("Individual files", {})
+        individual= summary.get("Individual files", {})
+
         if not individual:
             return
+
+        individual_dir = os.path.join(this_save, self.INDIVIDUAL_SUMMARIES_PATH + '/')
+        os.makedirs(os.path.realpath(individual_dir), exist_ok=True)
         for name, sum_str in individual.items():
-            file_name = os.path.realpath(os.path.join(save_dir,
+            file_name = os.path.realpath(os.path.join(individual_dir,
                                                       self.context_filename + "_" + name + time_stamp + file_format))
             with open(file_name, 'w') as text_file:
                 text_file.write(sum_str)
