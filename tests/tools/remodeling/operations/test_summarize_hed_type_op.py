@@ -70,10 +70,10 @@ class Test(unittest.TestCase):
         self.assertIsInstance(summary1a['Dataset'], dict)
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-02', sidecar=self.sidecar_path)
         context2 = dispatch.context_dict['AOMIC_condition_variables']
-        summary2 = context2.get_summary(include_individual=True, separate_files=True, as_json=False)
+        summary2 = context2.get_summary(individual_summaries="separate", as_json=False)
         self.assertEqual(summary2['Dataset']['Overall summary']['files'][0], 'run-01')
         self.assertEqual(len(summary2['Dataset']['Overall summary']['files']), 2)
-        summary2a = context2.get_summary(include_individual=True, separate_files=True, as_json=True)
+        summary2a = context2.get_summary(individual_summaries="separate", as_json=True)
         self.assertIsInstance(summary2a["Individual files"]["run-02"], str)
 
     def test_text_summary(self):

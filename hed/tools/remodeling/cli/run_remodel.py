@@ -18,8 +18,9 @@ def get_parser():
                         help="File extensions to allow in locating files.")
     parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events',
                         help="Filename suffix excluding file type of items to be analyzed (events by default).")
-    parser.add_argument("-i", "--include-individual", action='store_true', dest="include_individual",
-                        help="If present, individual files are summarized in addition to overall summary.")
+    parser.add_argument("-i", "--individual-summaries", dest="individual_summaries", default="separate",
+                        choices=["separate", "consolidated", "none"],
+                        help="Controls individual file summaries ('none', 'separate', 'consolidated')")
     parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
                         help="Optional path to JSON sidecar with HED information")
     parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
@@ -97,8 +98,6 @@ def run_direct_ops(dispatch, args):
     return
 
 
-
-
 def main(arg_list=None):
     args, operations = parse_arguments(arg_list)
     if not os.path.isdir(args.data_dir):
@@ -114,7 +113,7 @@ def main(arg_list=None):
         run_bids_ops(dispatch, args)
     else:
         run_direct_ops(dispatch, args)
-    dispatch.save_context(args.save_formats, include_individual=args.include_individual)
+    dispatch.save_context(args.save_formats, individual_summaries=args.individual_summaries)
 
 
 if __name__ == '__main__':
