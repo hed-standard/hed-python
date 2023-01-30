@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
         summary1a = context1.get_summary(as_json=True)
         self.assertIsInstance(summary1a, dict)
         self.assertIsInstance(summary1a["Dataset"], str)
-        text_summary = context1.get_text_summary(include_individual=True)
+        text_summary = context1.get_text_summary(individual_summaries="separate")
         self.assertIsInstance(text_summary, dict)
         self.assertIsInstance(text_summary["Dataset"], str)
         self.get_dfs(sum_op, 'name2', dispatch)
@@ -84,7 +84,7 @@ class Test(unittest.TestCase):
         context2 = dispatch.context_dict.get(parms['summary_name'], None)
         summary2 = context2.get_summary()
         self.assertIsInstance(summary2, dict)
-        text_summary2 = context2.get_text_summary(include_individual=True, separate_files=False)
+        text_summary2 = context2.get_text_summary(individual_summaries="consolidated")
         self.assertIsInstance(text_summary2, dict)
 
     def test_summary_op(self):

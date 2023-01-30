@@ -1,7 +1,7 @@
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
 
 
 class SummarizeHedTagsOp(BaseOp):
@@ -95,29 +95,15 @@ class HedTagSummaryContext(BaseContext):
         leftovers = [value.get_info(verbose=True) for value in unmatched]
         return {"Main tags": details, "Other tags": leftovers}
 
-    # def get_text_summary(self,include_individual=True):
-    #     result = self.get_summary_details(include_individual=include_individual)
-    #     summary_details = self._get_result_string("Dataset", result["Dataset"])
-    #     if include_individual:
-    #         sum_list = []
-    #         for name, individual_result in result["Individual files"].items():
-    #             sum_list.append(self._get_result_string(name, individual_result))
-    #         summary_details = summary_details + "\n" + "\n".join(sum_list)
-    #
-    #     sum_str = f"{title_str}Context name: {self.context_name}\n" + f"Context type: {self.context_type}\n" + \
-    #               f"Context filename: {self.context_filename}\n" + f"\n{summary_details}"
-    #
-    #     return sum_str
-
-    def _get_result_string(self, name, result):
-        sum_list = [f"\n{name}\n\tMain tags[events,files]:"]
+    def _get_result_string(self, name, result, indent=DISPLAY_INDENT):
+        sum_list = [f"\n{name}\n{indent}Main tags[events,files]:"]
         for category, tags in result['Main tags'].items():
-            sum_list.append(f"\t\t{category}:")
+            sum_list.append(f"{indent}{indent}{category}:")
             if tags:
-                sum_list.append(f"\t\t\t{' '.join(self._tag_details(tags))}")
+                sum_list.append(f"{indent}{indent}{indent}{' '.join(self._tag_details(tags))}")
         if result['Other tags']:
             sum_list.append(f"\tOther tags[events,files]:")
-            sum_list.append(f"\t\t{' '.join(self._tag_details(result['Other tags']))}")
+            sum_list.append(f"{indent}{indent}{' '.join(self._tag_details(result['Other tags']))}")
         return "\n".join(sum_list)
 
     @staticmethod

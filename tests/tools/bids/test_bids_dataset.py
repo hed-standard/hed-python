@@ -83,9 +83,9 @@ class Test(unittest.TestCase):
 
     def test_with_schema_group(self):
         base_version = '8.0.0'
-        library1_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/" + \
-                       "library_schemas/score/hedxml/HED_score_0.0.1.xml"
-        library2_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/" + \
+        library1_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/" + \
+                       "library_schemas/score/hedxml/HED_score_1.0.0.xml"
+        library2_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/" + \
                        "library_schemas/testlib/hedxml/HED_testlib_1.0.2.xml"
         schema_list = [load_schema_version(xml_version=base_version)]
         schema_list.append(load_schema(library1_url, schema_prefix="sc"))

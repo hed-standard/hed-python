@@ -38,12 +38,12 @@ class Dispatcher:
         self.hed_schema = get_schema(hed_versions)
         self.context_dict = {}
 
-    def get_context_summaries(self, file_formats=['.txt', '.json'], include_individual=True):
+    def get_context_summaries(self, file_formats=['.txt', '.json'], individual_summaries="separated"):
         """ Return the summaries in a dictionary suitable for saving or archiving.
 
         Parameters:
             file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
-            include_individual (bool): If true, individual file summaries are archived.
+            individual_summaries (str): Possible values are separate, consolidated, or none
 
         Returns:
             list: A list of dictionaries of summaries keyed to filenames.
@@ -55,7 +55,7 @@ class Dispatcher:
             file_base = generate_filename(context_item.context_filename, append_datetime=True)
             for file_format in file_formats:
                 if file_format == '.txt':
-                    summary = context_item.get_text_summary(include_individual=include_individual)
+                    summary = context_item.get_text_summary(individual_summaries=individual_summaries)
                 elif file_format == '.json':
                     summary = context_item.get_summary(as_json=True)
                 else:
@@ -129,13 +129,12 @@ class Dispatcher:
         df = self.post_proc_data(df)
         return df
 
-    def save_context(self, save_formats=['.json', '.txt'], include_individual=True, separate_files=False):
+    def save_context(self, save_formats=['.json', '.txt'], individual_summaries="separate"):
         """ Save the summary files in the specified formats.
 
         Parameters:
             save_formats (list):  A list of formats [".txt", ."json"]
-            include_individual (bool): If True, include summaries of individual files.
-            separate_files (bool): If true, individual and overall summaries are each in separate files.
+            individual_summaries (str): If True, include summaries of individual files.
 
         The summaries are saved in the dataset derivatives/remodeling folder.
 
@@ -145,8 +144,7 @@ class Dispatcher:
         summary_path = self.get_context_save_dir()
         os.makedirs(summary_path, exist_ok=True)
         for context_name, context_item in self.context_dict.items():
-            context_item.save(summary_path, save_formats, include_individual=include_individual,
-                              separate_files=separate_files)
+            context_item.save(summary_path, save_formats, individual_summaries=individual_summaries)
 
     @staticmethod
     def parse_operations(operation_list):

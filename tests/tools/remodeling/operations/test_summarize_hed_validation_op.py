@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
                                              '../../../data/remodel_tests/'))
         cls.data_path = os.path.realpath(os.path.join(path, 'sub-002_task-FacePerception_run-1_events.tsv'))
         cls.json_path = os.path.realpath(os.path.join(path, 'task-FacePerception_events.json'))
-        cls.bad_json_path =  os.path.realpath(os.path.join(path, 'task-FacePerceptionMissingDefs_events.json'))
+        cls.bad_json_path = os.path.realpath(os.path.join(path, 'task-FacePerceptionMissingDefs_events.json'))
         cls.sample_sidecar_path = os.path.realpath(os.path.join(path, 'task-stopsignal_acq-seq_events.json'))
         cls.sample_data = [[0.0776, 0.5083, 'baloney', 'n/a', 0.565, 'correct', 'right', 'female'],
                            [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
@@ -98,12 +98,12 @@ class Test(unittest.TestCase):
         sum_op.do_op(dispatch, df, 'subj2_run1', sidecar=self.bad_json_path)
 
         sum_context1 = dispatch.context_dict[sum_op.summary_name]
-        text_sum1 = sum_context1.get_text_summary(include_individual=True)
+        text_sum1 = sum_context1.get_text_summary(individual_summaries="separate")
         # print(text_sum1)
         sum_op.do_op(dispatch, df, 'subj2_run2', sidecar=self.json_path)
         sum_op.do_op(dispatch, df, 'subj2_run3', sidecar=self.bad_json_path)
-        text_sum2 = sum_context1.get_text_summary(include_individual=False, separate_files=False)
-        text_sum3 = sum_context1.get_text_summary(include_individual=True, separate_files=False)
+        text_sum2 = sum_context1.get_text_summary(individual_summaries="none")
+        text_sum3 = sum_context1.get_text_summary(individual_summaries="consolidated")
         self.assertIsInstance(text_sum3, dict)
         self.assertIsInstance(text_sum2, dict)
 

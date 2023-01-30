@@ -91,7 +91,7 @@ class ColumnValueSummaryContext(BaseContext):
         return self._get_individual_string(name, result, indent=DISPLAY_INDENT)
 
     @staticmethod
-    def _get_dataset_string(result, indent=""):
+    def _get_dataset_string(result, indent=DISPLAY_INDENT):
         sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
                     f"Total files={result.get('Total files', 0)}"]
         cat_cols = result.get("Categorical columns", {})

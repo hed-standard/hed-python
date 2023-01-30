@@ -109,9 +109,9 @@ class Test(unittest.TestCase):
 
         sum_op.do_op(dispatch, df, 'subj2_run2', sidecar=self.json_path)
         sum_context1 = dispatch.context_dict[sum_op.summary_name]
-        text_sum1 = sum_context1.get_text_summary(include_individual=True, separate_files=False)
-        text_sum1t = sum_context1.get_text_summary(include_individual=True, separate_files=True)
-        text_sum1no = sum_context1.get_text_summary(include_individual=False, separate_files=False)
+        text_sum1 = sum_context1.get_text_summary(individual_summaries="consolidated")
+        text_sum1t = sum_context1.get_text_summary(individual_summaries="separated")
+        text_sum1no = sum_context1.get_text_summary(individual_summaries="none")
         self.assertGreater(len(text_sum1['Dataset']), len(text_sum1t['Dataset']))
         self.assertGreater(len(text_sum1['Dataset']), len(text_sum1no['Dataset']))
 
