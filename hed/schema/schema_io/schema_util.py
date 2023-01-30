@@ -18,7 +18,7 @@ def get_api_key():
         A Github access key or an empty string.
     """
     try:
-        return os.environ["GITHUB_ACCESS_TOKEN"]
+        return os.environ["HED_GITHUB_TOKEN"]
     except KeyError:
         return github_api_access_token
 
