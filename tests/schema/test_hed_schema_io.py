@@ -37,13 +37,13 @@ class TestHedSchema(unittest.TestCase):
         schema2.set_schema_prefix("st")
         self.assertEqual(schema, schema2)
 
-        score_lib = load_schema_version(xml_version="score_0.0.1")
+        score_lib = load_schema_version(xml_version="score_1.0.0")
         self.assertEqual(score_lib._schema_prefix, "")
-        self.assertTrue(score_lib.get_tag_entry("Modulators"))
+        self.assertTrue(score_lib.get_tag_entry("Modulator"))
 
-        score_lib = load_schema_version(xml_version="sc:score_0.0.1")
+        score_lib = load_schema_version(xml_version="sc:score_1.0.0")
         self.assertEqual(score_lib._schema_prefix, "sc:")
-        self.assertTrue(score_lib.get_tag_entry("Modulators", schema_prefix="sc:"))
+        self.assertTrue(score_lib.get_tag_entry("Modulator", schema_prefix="sc:"))
 
     def test_load_schema_version(self):
         ver1 = "8.0.0"
@@ -68,12 +68,12 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(schemas3._schema_prefix, "base:", "load_schema_version has the right version with prefix")
 
     def test_load_schema_version_libraries(self):
-        ver1 = "score_0.0.1"
+        ver1 = "score_1.0.0"
         schemas1 = load_schema_version(ver1)
         self.assertIsInstance(schemas1, HedSchema, "load_schema_version returns a HedSchema if a string version")
-        self.assertEqual(schemas1.version, "0.0.1", "load_schema_version has the right version")
+        self.assertEqual(schemas1.version, "1.0.0", "load_schema_version has the right version")
         self.assertEqual(schemas1.library, "score", "load_schema_version works with single library no prefix")
-        self.assertEqual(schemas1.get_formatted_version(), "score_0.0.1",
+        self.assertEqual(schemas1.get_formatted_version(), "score_1.0.0",
                          "load_schema_version gives correct version_string with single library no prefix")
         ver1 = "score_"
         schemas1 = load_schema_version(ver1)
@@ -86,31 +86,31 @@ class TestHedSchema(unittest.TestCase):
         self.assertTrue(schemas1.version, "load_schema_version has the right version")
         self.assertEqual(schemas1.library, "score", "load_schema_version works with single library no prefix")
 
-        ver2 = "base:score_0.0.1"
+        ver2 = "base:score_1.0.0"
         schemas2 = load_schema_version(ver2)
         self.assertIsInstance(schemas2, HedSchema, "load_schema_version returns HedSchema version+prefix")
-        self.assertEqual(schemas2.version, "0.0.1", "load_schema_version has the right version with prefix")
+        self.assertEqual(schemas2.version, "1.0.0", "load_schema_version has the right version with prefix")
         self.assertEqual(schemas2._schema_prefix, "base:", "load_schema_version has the right version with prefix")
-        self.assertEqual(schemas2.get_formatted_version(as_string=True), "base:score_0.0.1",
+        self.assertEqual(schemas2.get_formatted_version(as_string=True), "base:score_1.0.0",
                          "load_schema_version gives correct version_string with single library with prefix")
-        ver3 = ["8.0.0", "sc:score_0.0.1"]
+        ver3 = ["8.0.0", "sc:score_1.0.0"]
         schemas3 = load_schema_version(ver3)
         self.assertIsInstance(schemas3, HedSchemaGroup, "load_schema_version returns HedSchema version+prefix")
         self.assertIsInstance(schemas3._schemas, dict, "load_schema_version group keeps dictionary of hed versions")
         self.assertEqual(len(schemas3._schemas), 2, "load_schema_version group dictionary is right length")
         s = schemas3._schemas[""]
         self.assertEqual(s.version, "8.0.0", "load_schema_version has the right version with prefix")
-        self.assertEqual(schemas3.get_formatted_version(as_string=True), '["8.0.0", "sc:score_0.0.1"]',
+        self.assertEqual(schemas3.get_formatted_version(as_string=True), '["8.0.0", "sc:score_1.0.0"]',
                          "load_schema_version gives correct version_string with single library with prefix")
         formatted_list = schemas3.get_formatted_version(as_string=False)
         self.assertEqual(len(formatted_list), 2,
                          "load_schema_version gives correct version_string with single library with prefix")
-        ver4 = ["ts:8.0.0", "sc:score_0.0.1"]
+        ver4 = ["ts:8.0.0", "sc:score_1.0.0"]
         schemas4 = load_schema_version(ver4)
         self.assertIsInstance(schemas4, HedSchemaGroup, "load_schema_version returns HedSchema version+prefix")
         self.assertIsInstance(schemas4._schemas, dict, "load_schema_version group keeps dictionary of hed versions")
         self.assertEqual(len(schemas4._schemas), 2, "load_schema_version group dictionary is right length")
-        self.assertEqual(schemas4.get_formatted_version(), '["ts:8.0.0", "sc:score_0.0.1"]',
+        self.assertEqual(schemas4.get_formatted_version(), '["ts:8.0.0", "sc:score_1.0.0"]',
                          "load_schema_version gives correct version_string with multiple prefixes")
         s = schemas4._schemas["ts:"]
         self.assertEqual(s.version, "8.0.0", "load_schema_version has the right version with prefix")
@@ -150,15 +150,15 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(context3.exception.args[0], 'schemaDuplicatePrefix')
 
         with self.assertRaises(HedFileError) as context4:
-            load_schema_version(["8.0.0", "score_0.0.1"])
+            load_schema_version(["8.0.0", "score_1.0.0"])
         self.assertEqual(context4.exception.args[0], 'schemaDuplicatePrefix')
 
         with self.assertRaises(HedFileError) as context5:
-            load_schema_version(["sc:8.0.0", "sc:score_0.0.1"])
+            load_schema_version(["sc:8.0.0", "sc:score_1.0.0"])
         self.assertEqual(context5.exception.args[0], 'schemaDuplicatePrefix')
 
         with self.assertRaises(HedFileError) as context6:
-            load_schema_version(["", "score_0.0.1"])
+            load_schema_version(["", "score_1.0.0"])
         self.assertEqual(context6.exception.args[0], 'schemaDuplicatePrefix')
 
         with self.assertRaises(HedFileError) as context7:
