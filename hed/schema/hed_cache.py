@@ -1,7 +1,6 @@
 """Infrastructure for caching HED schema from remote repositories."""
 
 import os
-import urllib.request
 
 import json
 from hashlib import sha1
@@ -10,7 +9,7 @@ import re
 from semantic_version import Version
 import portalocker
 import time
-from hed.schema.schema_io.schema_util import url_to_file
+from hed.schema.schema_io.schema_util import url_to_file, make_url_request
 from pathlib import Path
 
 # From https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
@@ -26,8 +25,8 @@ HED_XML_PREFIX = 'HED'
 HED_XML_EXTENSION = '.xml'
 hedxml_suffix = "/hedxml"  # The suffix for schema and library schema at the given urls
 
-DEFAULT_HED_LIST_VERSIONS_URL = """https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"""
-LIBRARY_HED_URL = 'https://api.github.com/repos/hed-standard/hed-schema-library/contents/library_schemas'
+DEFAULT_HED_LIST_VERSIONS_URL = "https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml"
+LIBRARY_HED_URL = "https://api.github.com/repos/hed-standard/hed-schemas/contents/library_schemas"
 DEFAULT_URL_LIST = (DEFAULT_HED_LIST_VERSIONS_URL, LIBRARY_HED_URL, )
 
 DEFAULT_SKIP_FOLDERS = ('deprecated', )
@@ -207,7 +206,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
         - The Default skip_folders is 'deprecated'.
         - The HED cache folder defaults to HED_CACHE_DIRECTORY.
         - The directories on Github are of the form:
-            https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml
+            https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml
 
     """
     if not cache_folder:
@@ -321,9 +320,9 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
         - The Default skip_folders is 'deprecated'.
         - The HED cache folder defaults to HED_CACHE_DIRECTORY.
         - The directories on Github are of the form:
-            https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml
+            https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml
     """
-    url_request = urllib.request.urlopen(hed_base_url)
+    url_request = make_url_request(hed_base_url)
     url_data = str(url_request.read(), 'utf-8')
     loaded_json = json.loads(url_data)
 
