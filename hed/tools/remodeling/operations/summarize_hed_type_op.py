@@ -101,27 +101,9 @@ class HedTypeSummaryContext(BaseContext):
         return all_counts
 
     def _get_result_string(self, name, result):
-        indent = "   "
         if name == "Dataset":
             return self._get_dataset_string(result, indent=DISPLAY_INDENT)
-        return self._get_individual_string(name, result, indent=indent)
-
-    # def _get_result_string(self, name, result):
-    #     sum_list = [f"\n{result['name']}: {result['type_tag']} for {len(result['files'])}"]
-    #     details = result.get('details', {})
-    #     for key, item in details.items():
-    #         sum_list.append(f"\t{key}:")
-    #         sum_list.append(f"\t\tFiles: {str(item['files'])}")
-    #         sum_list.append(f"\t\tLevels: {item['levels']}  Direct references: {item['direct_references']}")
-    #         str1 = f"\t\tEvents: {item['events']} out of {item['total_events']} total events " + \
-    #                f"in {len(item['files'])} files"
-    #
-    #         if item['events_with_multiple_refs']:
-    #             str1 = str1 + f" (Events with multiple refs: {item['events_with_multiple_refs']})"
-    #         sum_list.append(str1)
-    #         if item['level_counts']:
-    #             sum_list = sum_list + self._level_details(item['level_counts'])
-    #     return "\n".join(sum_list)
+        return self._get_individual_string(name, result, indent=DISPLAY_INDENT)
 
     @staticmethod
     def _get_dataset_string(result, indent=DISPLAY_INDENT):

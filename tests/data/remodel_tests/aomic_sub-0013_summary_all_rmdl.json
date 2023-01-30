@@ -19,7 +19,7 @@
     },
     {
         "operation": "summarize_hed_type",
-        "description": "Summarize column names.",
+        "description": "Summarize experimental conditions.",
         "parameters": {
             "summary_name": "AOMIC_condition_variables",
             "summary_filename": "AOMIC_condition_variables",

@@ -1,6 +1,6 @@
 from hed.tools.analysis.column_name_summary import ColumnNameSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
 
 
 class SummarizeColumnNamesOp(BaseOp):
@@ -77,17 +77,17 @@ class ColumnNameSummaryContext(BaseContext):
                 all_sum.update(name, counts.unique_headers[pos])
         return all_sum
 
-    def _get_result_string(self, name, result):
+    def _get_result_string(self, name, result, indent=DISPLAY_INDENT):
         if name == "Dataset":
-            return self._get_dataset_string(result)
+            return self._get_dataset_string(result, indent)
         columns = result["Columns"][0]
-        return f"\t\t{name}: {str(columns['Column names'])}"
+        return f"{indent}{indent}{name}: {str(columns['Column names'])}"
 
     @staticmethod
-    def _get_dataset_string(result):
+    def _get_dataset_string(result, indent=DISPLAY_INDENT):
         sum_list = [f"Dataset: Number of files={result.get('Number files', 0)}"]
         for element in result.get("Columns", []):
-            sum_list.append(f"\tColumns: {str(element['Column names'])}")
+            sum_list.append(f"{indent}Columns: {str(element['Column names'])}")
             for file in element.get("Files", []):
-                sum_list.append(f"\t\t{file}")
+                sum_list.append(f"{indent}{indent}{file}")
         return "\n".join(sum_list)

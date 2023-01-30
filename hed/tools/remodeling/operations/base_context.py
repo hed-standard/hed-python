@@ -39,15 +39,6 @@ class BaseContext(ABC):
                 summary_details["Individual files"][name] = self._get_summary_details(count)
         return summary_details
 
-    # def get_summary(self, include_individual=True):
-    #     ret_sum = {'context_name': self.context_name, 'context_type': self.context_type,
-    #                'context_filename': self.context_filename,
-    #                'summary': self.get_summary_details(include_individual=include_individual)}
-    #     if as_json:
-    #         return json.dumps(ret_sum, indent=4)
-    #     else:
-    #         return ret_sum
-
     def get_summary(self, as_json=True, individual_summaries="separate"):
         include_individual = individual_summaries == "separate" or individual_summaries == "consolidated"
         summary_details = self.get_summary_details(include_individual=include_individual)
@@ -137,8 +128,8 @@ class BaseContext(ABC):
             with open(file_name, 'w') as text_file:
                 text_file.write(sum_str)
 
-    def _get_result_string(self, name, result):
-        return f"\n{name}\n{DISPLAY_INDENT}{str(result)}"
+    def _get_result_string(self, name, result, indent=DISPLAY_INDENT):
+        return f"\n{name}\n{indent}{str(result)}"
 
     @abstractmethod
     def _get_summary_details(self, summary_info):

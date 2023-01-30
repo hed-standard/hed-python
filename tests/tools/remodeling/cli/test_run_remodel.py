@@ -19,13 +19,13 @@ class Test(unittest.TestCase):
                                                       '../../../data/remodel_tests/eeg_ds003654s_hed_remodel'))
         cls.model_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                        '../../../data/remodel_tests/eeg_ds003654s_hed_remodel',
-                                                       'derivatives/remodel/models/remove_extra_rmdl.json'))
+                                                       'derivatives/remodel/remodeling_files/remove_extra_rmdl.json'))
         cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                          '../../../data/remodel_tests/eeg_ds003654s_hed_remodel',
                                                          'task-FacePerception_events.json'))
         cls.summary_model_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                                '../../../data/remodel_tests/eeg_ds003654s_hed_remodel',
-                                                               'derivatives/remodel/models',
+                                                               'derivatives/remodel/remodeling_files',
                                                                'summarize_hed_types_rmdl.json'))
         cls.bad_remodel_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                              '../../../data/remodel_tests/bad_rename_rmdl.json'))
