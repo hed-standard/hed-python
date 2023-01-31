@@ -128,7 +128,7 @@ class Dispatcher:
         for operation in self.parsed_ops:
             df = self.prep_data(df)
             df = operation.do_op(self, df, file_path, sidecar=sidecar)
-        df = self.post_proc_data(df)
+            df = self.post_proc_data(df)
         return df
 
     def save_context(self, save_formats=['.json', '.txt'], individual_summaries="separate"):

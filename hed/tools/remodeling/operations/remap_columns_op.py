@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.analysis.key_map import KeyMap
 
@@ -18,13 +19,23 @@ class RemapColumnsOp(BaseOp):
             "map_list": list,
             "ignore_missing": bool
         },
-        "optional_parameters": {}
+        "optional_parameters": {
+            "integer_sources": list
+        }
     }
 
     def __init__(self, parameters):
 
         super().__init__(self.PARAMS, parameters)
         self.source_columns = parameters['source_columns']
+        self.integer_sources = []
+        self.string_sources = self.source_columns
+        if "integer_sources" in parameters:
+            self.integer_sources = parameters['integer_sources']
+            if not set(self.integer_sources).issubset(set(self.source_columns)):
+                raise ValueError("IntegerSourceColumnsInvalid",
+                                 f"Integer courses {str(self.integer_sources)} must be in {str(self.source_columns)}")
+            self.string_sources = list(set(self.source_columns).difference(set(self.integer_sources)))
         self.destination_columns = parameters['destination_columns']
         self.map_list = parameters['map_list']
         self.ignore_missing = parameters['ignore_missing']
@@ -65,6 +76,11 @@ class RemapColumnsOp(BaseOp):
             ValueError: If ignore
 
         """
+        df[self.source_columns] = df[self.source_columns].replace(np.NaN, 'n/a')
+        for column in self.integer_sources:
+            int_mask = df[column] != 'n/a'
+            df.loc[int_mask, column] = df.loc[int_mask, column].astype(int)
+        df[self.source_columns] = df[self.source_columns].astype(str)
         df_new, missing = self.key_map.remap(df)
         if missing and not self.ignore_missing:
             raise ValueError("MapSourceValueMissing",
