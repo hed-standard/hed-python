@@ -96,8 +96,8 @@ class Test(unittest.TestCase):
         context = dispatch.context_dict['columns']
         summary = context.get_summary()
         dataset_sum = summary['Dataset']
-        json_obj = json.loads(dataset_sum)
-        json_str = json.dumps(json_obj)
+        json_str = json.dumps(dataset_sum)
+        json_obj = json.loads(json_str)
         columns = json_obj["Overall summary"]["Columns"]
         self.assertEqual(len(columns), 1)
         self.assertEqual(len(columns[0]['Files']), 2)

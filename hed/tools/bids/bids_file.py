@@ -11,7 +11,6 @@ class BidsFile:
         ext (str):                   Extension (including the .).
         entity_dict (dict):          Dictionary of entity-names (keys) and entity-values (values).
         sidecar (BidsSidecarFile):   Merged sidecar for this file.
-        contents:                    Contents of this file
 
     Notes:
         - This class may hold the merged sidecar giving metadata for this file as well as contents.

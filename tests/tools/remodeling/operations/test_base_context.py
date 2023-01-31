@@ -76,14 +76,14 @@ class Test(unittest.TestCase):
         self.assertFalse(os.path.isdir(dir_ind))
         test1.save(self.summary_dir, file_formats=['.json', '.tsv'], individual_summaries="consolidated")
         file_list3 = os.listdir(dir_full)
-        self.assertEqual(len(file_list3), len(file_list2) + 1)
-        self.assertFalse(os.path.isdir(dir_ind))
+        self.assertEqual(len(file_list3), len(file_list2) + 2)
+        self.assertTrue(os.path.isdir(dir_ind))
         test1.save(self.summary_dir, file_formats=['.json', '.tsv'], individual_summaries="separate")
         self.assertTrue(os.path.isdir(dir_ind))
         file_list4 = os.listdir(dir_full)
-        self.assertEqual(len(file_list4), len(file_list3) + 2)
+        self.assertEqual(len(file_list4), len(file_list3) + 1)
         file_list5 = os.listdir(dir_ind)
-        self.assertEqual(len(file_list5), 2)
+        self.assertEqual(len(file_list5), 4)
 
 
 if __name__ == '__main__':
