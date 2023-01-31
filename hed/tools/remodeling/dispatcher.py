@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+import json
 from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_io import get_schema
 from hed.tools.remodeling.backup_manager import BackupManager
@@ -38,12 +39,11 @@ class Dispatcher:
         self.hed_schema = get_schema(hed_versions)
         self.context_dict = {}
 
-    def get_context_summaries(self, file_formats=['.txt', '.json'], individual_summaries="separated"):
-        """ Return the summaries in a dictionary suitable for saving or archiving.
+    def get_context_summaries(self, file_formats=['.txt', '.json']):
+        """ Return the summaries in a dictionary of strings suitable for saving or archiving.
 
         Parameters:
             file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
-            individual_summaries (str): Possible values are separate, consolidated, or none
 
         Returns:
             list: A list of dictionaries of summaries keyed to filenames.
@@ -55,9 +55,11 @@ class Dispatcher:
             file_base = generate_filename(context_item.context_filename, append_datetime=True)
             for file_format in file_formats:
                 if file_format == '.txt':
-                    summary = context_item.get_text_summary(individual_summaries=individual_summaries)
+                    summary = context_item.get_text_summary(individual_summaries="consolidated")
+                    summary = summary['Dataset']
                 elif file_format == '.json':
-                    summary = context_item.get_summary(as_json=True)
+                    summary = json.dumps(context_item.get_summary(individual_summaries="consolidated"), indent=4)
+
                 else:
                     continue
                 summary_list.append({'file_name': file_base + file_format, 'file_format': file_format,

@@ -81,18 +81,3 @@ class BidsSidecarFile(BidsFile):
                 return True
 
         return False
-
-
-# if __name__ == '__main__':
-#     from hed import load_schema, HedValidator, load_schema_version, HedSchemaGroup
-#     score_url = f"https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas" \
-#                 f"/score/prerelease/HED_score_1.0.0.xml"
-#     path = f"../../../sub-eegArtifactTUH_ses-eeg01_task-rest_run-001_events.json"
-#     bids_json = BidsSidecarFile(path)
-#     bids_json.set_contents()
-#     schema_base = load_schema_version(xml_version="8.1.0")
-#     schema_score = load_schema(score_url, schema_prefix="sc")
-#     schemas = HedSchemaGroup([schema_base, schema_score])
-#     validator = HedValidator(hed_schema=schemas)
-#     issues = bids_json.contents.validate_entries(hed_ops=validator, check_for_warnings=False)
-#     print(f"issues:{str(issues)}")

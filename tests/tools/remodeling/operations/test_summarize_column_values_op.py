@@ -70,12 +70,12 @@ class Test(unittest.TestCase):
         cont = dispatch.context_dict
         context1 = cont.get("test summary", None)
         self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
-        summary1 = context1.get_summary(as_json=False)
+        summary1 = context1.get_summary()
         self.assertIsInstance(summary1, dict, "get_summary returns a dictionary")
         self.assertIsInstance(summary1["Dataset"], dict)
-        summary1a = context1.get_summary(as_json=True)
+        summary1a = context1.get_summary()
         self.assertIsInstance(summary1a, dict)
-        self.assertIsInstance(summary1a["Dataset"], str)
+        self.assertIsInstance(summary1a["Dataset"], dict)
         text_summary = context1.get_text_summary(individual_summaries="separate")
         self.assertIsInstance(text_summary, dict)
         self.assertIsInstance(text_summary["Dataset"], str)
@@ -105,7 +105,7 @@ class Test(unittest.TestCase):
         for key, item in context_dict.items():
             text_value = item.get_text_summary()
             self.assertTrue(text_value)
-            json_value = item.get_summary(as_json=True)
+            json_value = item.get_summary()
             self.assertTrue(json_value)
 
 

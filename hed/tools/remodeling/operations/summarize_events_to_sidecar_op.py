@@ -79,7 +79,7 @@ class EventsToSidecarSummaryContext(BaseContext):
         """ Return the summary-specific information.
 
         Parameters:
-            summary_info (object):  Summary to return info from
+            summary_info (Object):  Summary to return info from
 
         Notes:
             Abstract method be implemented by each individual context summary.
@@ -102,9 +102,8 @@ class EventsToSidecarSummaryContext(BaseContext):
         """
         return {}
 
-    def _get_result_string(self, name, result):
+    def _get_result_string(self, name, result, indent=DISPLAY_INDENT):
         if name == "Dataset":
             return "Dataset: Currently no overall sidecar extraction is available"
-        details = result['sidecar']
-        json_str = f"\nSidecar:\n{json.dumps(details['sidecar'], indent=4)}"
-        return f"{name}: Total events={details['total_events']} Skip columns: {str(details['skip_cols'])}{json_str}"
+        json_str = f"\nSidecar:\n{json.dumps(result['sidecar'], indent=4)}"
+        return f"{name}: Total events={result['total_events']} Skip columns: {str(result['skip_cols'])}{json_str}"

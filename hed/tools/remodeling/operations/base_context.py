@@ -39,30 +39,27 @@ class BaseContext(ABC):
                 summary_details["Individual files"][name] = self._get_summary_details(count)
         return summary_details
 
-    def get_summary(self, as_json=True, individual_summaries="separate"):
+    def get_summary(self, individual_summaries="separate"):
+
         include_individual = individual_summaries == "separate" or individual_summaries == "consolidated"
         summary_details = self.get_summary_details(include_individual=include_individual)
-        summary = {"Dataset": {"Context name": self.context_name, "Context type": self.context_type,
-                   "Context filename": self.context_filename, "Overall summary": summary_details['Dataset']}}
-
-        if individual_summaries == "separate":
-            summary["Individual files"] = {}
-            for name, name_summary in summary_details["Individual files"].items():
-                summary["Individual files"][name] = {"Context name": self.context_name,
-                                                     "Context type": self.context_type,
-                                                     "Context filename": self.context_filename,
-                                                     "Summary": summary_details['Individual files'][name]}
-                if as_json:
-                    summary["Individual files"][name] = \
-                        json.dumps(summary_details["Individual files"][name], indent=4)
-            if as_json:
-                summary["Dataset"] = json.dumps(summary["Dataset"], indent=4)
-            return summary
+        dataset_summary = {"Context name": self.context_name, "Context type": self.context_type,
+                           "Context filename": self.context_filename, "Overall summary": summary_details['Dataset']}
+        summary = {"Dataset": dataset_summary, "Individual files": {}}
         if summary_details["Individual files"]:
-            summary["Dataset"]["Individual files"] = summary_details["Individual files"]
-        if as_json:
-            summary["Dataset"] = json.dumps(summary["Dataset"], indent=4)
+            summary["Individual files"] = self.get_individual(summary_details["Individual files"],
+                                                              separately=individual_summaries == "separate")
         return summary
+
+    def get_individual(self, summary_details, separately=True):
+        individual_dict = {}
+        for name, name_summary in summary_details.items():
+            if separately:
+                individual_dict[name] = {"Context name": self.context_name, "Context type": self.context_type,
+                                         "Context filename": self.context_filename, "File summary": name_summary}
+            else:
+                individual_dict[name] = name_summary
+        return individual_dict
 
     def get_text_summary_details(self, include_individual=True):
         result = self.get_summary_details(include_individual=include_individual)
@@ -102,7 +99,7 @@ class BaseContext(ABC):
             if file_format == '.txt':
                 summary = self.get_text_summary(individual_summaries=individual_summaries)
             elif file_format == '.json':
-                summary = self.get_summary(as_json=True, individual_summaries=individual_summaries)
+                summary = self.get_summary(individual_summaries=individual_summaries)
             else:
                 continue
             self._save_separate(save_dir, file_format, time_stamp, summary)
@@ -110,26 +107,28 @@ class BaseContext(ABC):
     def _save_separate(self, save_dir, file_format, time_stamp, summary):
         this_save = os.path.join(save_dir, self.context_name + '/')
         os.makedirs(os.path.realpath(this_save), exist_ok=True)
-        file_name = os.path.realpath(os.path.join(this_save, secure_filename(self.context_filename) + "_overall" +
-                                                  time_stamp + file_format))
-
-        with open(file_name, 'w') as text_file:
-            text_file.write(summary["Dataset"])
+        filename = os.path.realpath(os.path.join(this_save, secure_filename(self.context_filename) + "_overall" +
+                                                 time_stamp + file_format))
+        self.dump_summary(filename, summary["Dataset"])
         individual = summary.get("Individual files", {})
-
         if not individual:
             return
-
         individual_dir = os.path.join(this_save, self.INDIVIDUAL_SUMMARIES_PATH + '/')
         os.makedirs(os.path.realpath(individual_dir), exist_ok=True)
         for name, sum_str in individual.items():
-            file_name = secure_filename(self.context_filename + "_" + name + time_stamp + file_format)
-            file_name = os.path.realpath(os.path.join(individual_dir, file_name))
-            with open(file_name, 'w') as text_file:
-                text_file.write(sum_str)
+            filename = secure_filename(self.context_filename + "_" + name + time_stamp + file_format)
+            filename = os.path.realpath(os.path.join(individual_dir, filename))
+            self.dump_summary(filename, sum_str)
 
     def _get_result_string(self, name, result, indent=DISPLAY_INDENT):
         return f"\n{name}\n{indent}{str(result)}"
+
+    @staticmethod
+    def dump_summary(filename, summary):
+        with open(filename, 'w') as text_file:
+            if not isinstance(summary, str):
+                summary = json.dumps(summary, indent=4)
+            text_file.write(summary)
 
     @abstractmethod
     def _get_summary_details(self, summary_info):
