@@ -181,20 +181,20 @@ class Test(unittest.TestCase):
         from hed.tools.util.io_util import get_file_list
         from hed.tools.util.data_util import get_new_dataframe
         event_path = os.path.realpath('D:/monique/test_events.tsv')
-        save_path = os.path.realpath('D:/monique/output')
-        json_dir = os.path.realpath('D:/monique/json')
-        json_list = get_file_list(json_dir, extensions=['.json'])
-        for json_file in json_list:
-            event_out = os.path.basename(json_file)
-            event_out = f"events_{os.path.splitext(event_out)[0]}.tsv"
-            with open(json_file, 'r') as fp:
-                op_list = json.load(fp)
-            df = get_new_dataframe(event_path)
-            dispatcher = Dispatcher(op_list, data_root=None, backup_name=None, hed_versions=[])
-            df_test = dispatcher.run_operations(df, verbose=False, sidecar=None)
-            new_path = os.path.realpath(os.path.join(save_path, event_out))
-            df_test.to_csv(new_path, sep='\t', index=False, header=True)
-            break
+        # save_path = os.path.realpath('D:/monique/output')
+        # json_dir = os.path.realpath('D:/monique/json')
+        # json_list = get_file_list(json_dir, extensions=['.json'])
+        # for json_file in json_list:
+        #     event_out = os.path.basename(json_file)
+        #     event_out = f"events_{os.path.splitext(event_out)[0]}.tsv"
+        #     with open(json_file, 'r') as fp:
+        #         op_list = json.load(fp)
+        #     df = get_new_dataframe(event_path)
+        #     dispatcher = Dispatcher(op_list, data_root=None, backup_name=None, hed_versions=[])
+        #     df_test = dispatcher.run_operations(df, verbose=False, sidecar=None)
+        #     new_path = os.path.realpath(os.path.join(save_path, event_out))
+        #     df_test.to_csv(new_path, sep='\t', index=False, header=True)
+        #     break
 
 
 if __name__ == '__main__':
