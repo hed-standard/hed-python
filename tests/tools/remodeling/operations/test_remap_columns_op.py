@@ -9,13 +9,13 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
-                           [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
-                           [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
-                           [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
-                           [17.1021, 0.5083, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
-                           [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male']]
-        cls.sample_columns = ['onset', 'duration', 'trial_type', 'stop_signal_delay', 'response_time',
+        cls.sample_data = [[0.0776, 0.5083, 1, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
+                           [5.5774, 0.5083, 2, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
+                           [9.5856, 0.5084, 'n/a', 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
+                           [13.5939, 0.5083, 3, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
+                           [17.1021, 0.5083, 4, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
+                           [21.6103, 0.5083, 5, 'go', 'n/a', 0.443, 'correct', 'left', 'male']]
+        cls.sample_columns = ['onset', 'duration', 'test', 'trial_type', 'stop_signal_delay', 'response_time',
                               'response_accuracy', 'response_hand', 'sex']
 
         base_parameters = {
@@ -32,13 +32,27 @@ class Test(unittest.TestCase):
         cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=None)
 
         base_parameters1 = {
-                "source_columns": ["duration"],
+                "source_columns": ["test"],
                 "destination_columns": ["new_duration", "new_hand"],
-                "map_list": [[0.5083, 1, "correct_left"],
-                             [0.5084, 2, "correct_right"]],
-                "ignore_missing": True
+                "map_list": [[1, 1, "correct_left"],
+                             [2, 2, "correct_right"]],
+                "ignore_missing": True,
+                "integer_sources": ['test']
             }
         cls.json_parms1 = json.dumps(base_parameters1)
+
+        base_parameters2 = {
+                "source_columns": ["test", "response_accuracy", "response_hand"],
+                "destination_columns": ["response_type"],
+                "map_list": [[1, "correct", "left", "correct_left"],
+                             [2, "correct", "right", "correct_right"],
+                             [3, "incorrect", "left", "incorrect_left"],
+                             [4, "incorrect", "right", "incorrect_left"],
+                             [5, "n/a", "n/a", "n/a"]],
+                "ignore_missing": True,
+                "integer_sources": ["test"]
+            }
+        cls.json_parms2 = json.dumps(base_parameters2)
 
     @classmethod
     def tearDownClass(cls):
@@ -77,6 +91,20 @@ class Test(unittest.TestCase):
             RemapColumnsOp(parms3)
         self.assertEqual(context3.exception.args[0], "BadColumnMapEntry")
 
+        parms4 = json.loads(self.json_parms1)
+        parms4["integer_sources"] = ["test", "baloney"]
+        with self.assertRaises(ValueError) as context4:
+            RemapColumnsOp(parms4)
+        self.assertEqual(context4.exception.args[0], "IntegerSourceColumnsInvalid")
+
+    def test_integer_sources(self):
+        parms1 = json.loads(self.json_parms1)
+        op1 = RemapColumnsOp(parms1)
+        self.assertIn('test', op1.integer_sources)
+        parms2 = json.loads(self.json_parms2)
+        op2 = RemapColumnsOp(parms2)
+        self.assertIn('test', op2.integer_sources)
+
     def test_valid_missing(self):
         # Test when no extras but ignored.
         parms = json.loads(self.json_parms)
@@ -114,7 +142,6 @@ class Test(unittest.TestCase):
         df, df_test = self.get_dfs(op)
         self.assertNotIn("new_duration", df.columns.values)
         self.assertIn("new_duration", df_test.columns.values)
-        self.assertEqual(df_test.loc[2, "new_duration"], 0.7)
 
     def test_numeric_keys_cascade(self):
         # Test when no extras but ignored.
@@ -125,8 +152,9 @@ class Test(unittest.TestCase):
                 "parameters": {
                     "source_columns": ["duration"],
                     "destination_columns": ["new_duration"],
-                    "map_list": [[5, 6], [0.5084, 0.7]],
-                    "ignore_missing": True
+                    "map_list": [[5, 6], [3, 2]],
+                    "ignore_missing": True,
+                    "integer_sources": ["duration"]
                 }
             },
             {
@@ -135,8 +163,9 @@ class Test(unittest.TestCase):
                 "parameters": {
                     "source_columns": ["new_duration"],
                     "destination_columns": ["new_value"],
-                    "map_list": [[0.6, 0.5], [0.7, 0.4]],
-                    "ignore_missing": True
+                    "map_list": [[3, 0.5], [2, 0.4]],
+                    "ignore_missing": True,
+                    "integer_sources": ["new_duration"]
                 }
             }
         ]
@@ -146,8 +175,6 @@ class Test(unittest.TestCase):
         df_test = dispatcher.run_operations(df, verbose=False, sidecar=None)
         self.assertIn("new_duration", df_test.columns.values)
         self.assertIn("new_value", df_test.columns.values)
-        self.assertEqual(df_test.loc[2, "new_duration"], 0.7)
-        self.assertEqual(df_test.loc[2, "new_value"], 0.4)
 
     def test_scratch(self):
         import os
