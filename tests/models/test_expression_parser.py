@@ -651,18 +651,53 @@ class TestParser(unittest.TestCase):
         hed_string = HedString("A, C")
         self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
 
-    def test_kay(self):
+    def test_not_in_line(self):
         test_strings = {
-            "Event, (Event, Sensory-event)": True,
+            "A": True,
+            "B": False,
+            "C": True,
+            "A, B": False,
+            "A, C": True,
+            "B, C": False,
+            "A, B, C": False,
+            "D, A, B": False,
+            "A, B, (C)": False,
+            "(A, B, (C))": False,
+            "(A, B, (C)), D": False,
+            "(A, B, (C)), (D), E": False,
         }
-        self.base_test("Event", test_strings)
+        self.base_test("@B", test_strings)
 
+    def test_not_in_line2(self):
         test_strings = {
-            "Event, (Event, Sensory-event), Event": True,
+            "A": False,
+            "B": False,
+            "C": True,
+            "A, B": False,
+            "A, C": True,
+            "B, C": False,
+            "A, B, C": False,
+            "D, A, B": False,
+            "A, B, (C)": False,
+            "(A, B, (C))": False,
+            "(A, B, (C)), D": False,
+            "(A, B, (C)), (D), E": False,
         }
-        self.base_test("Event and Sensory-event", test_strings)
+        self.base_test("@B and C", test_strings)
 
+    def test_not_in_line3(self):
         test_strings = {
-            "Sensory-event, (Event, Sensory-event), Event": True,
+            "A": True,
+            "B": True,
+            "C": False,
+            "A, B": True,
+            "A, C": False,
+            "B, C": True,
+            "A, B, C": True,
+            "D, A, B": True,
+            "A, B, (C)": True,
+            "(A, B, (C))": True,
+            "(A, B, (C)), D": True,
+            "(A, B, (C)), (D), E": True,
         }
-        self.base_test("[Sensory-event]", test_strings)
+        self.base_test("@C or B", test_strings)
