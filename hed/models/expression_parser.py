@@ -7,9 +7,6 @@ class search_result:
         self.group = group
         # todo: rename tag: children
         if not isinstance(tag, list):
-            from hed import HedString
-            if isinstance(tag, HedString):
-                breakHere = 3
             new_tags = [tag]
         else:
             new_tags = tag.copy()
@@ -68,6 +65,7 @@ class Token:
     Wildcard = 10
     ExactMatch = 11
     ExactMatchEnd = 12
+    NotInLine = 13  # Not currently a token. In development and may become one.
 
     def __init__(self, text):
         tokens = {
@@ -86,6 +84,7 @@ class Token:
             "???": Token.Wildcard, # Any Group
             "{": Token.ExactMatch, # Nothing else
             "}": Token.ExactMatchEnd,  # Nothing else
+            "@": Token.NotInLine
         }
         self.kind = tokens.get(text, Token.Tag)
         self.text = text
@@ -105,6 +104,10 @@ class Expression:
         self.right = right
         self.token = token
         self._match_mode = "/" in token.text
+        self._must_not_be_in_line = False
+        if token.text.startswith("@"):
+            self._must_not_be_in_line = True
+            token.text = token.text[1:]
         if token.text.startswith('"') and token.text.endswith('"') and len(token.text) > 2:
             self._match_mode = 1
             token.text = token.text[1:-1]
@@ -128,6 +131,13 @@ class Expression:
             groups_found = hed_group.find_exact_tags([self.token.text], recursive=True, include_groups=2)
         else:
             groups_found = hed_group.find_tags_with_term(self.token.text, recursive=True, include_groups=2)
+
+        if self._must_not_be_in_line:
+            # If we found this, and it cannot be in the line.
+            if groups_found:
+                groups_found = []
+            else:
+                groups_found = [(None, group) for group in hed_group.get_all_groups()]
 
         # If we're checking for all groups, also need to add parents.
         if exact:
@@ -172,6 +182,7 @@ class ExpressionAnd(Expression):
         # finally simplify the list and remove duplicates.
 
         return return_list
+
     def __str__(self):
         output_str = "("
         if self.left:
@@ -398,7 +409,7 @@ class TagExpressionParser:
     def _tokenize(self, expression_string):
         grouping_re = r"\[\[|\[|\]\]|\]|}|{"
         paren_re = r"\)|\(|~"
-        word_re = r"\?+|@|\band\b|\bor\b|,|[\"_\-a-zA-Z0-9/.^#\*]+"
+        word_re = r"\?+|\band\b|\bor\b|,|[\"_\-a-zA-Z0-9/.^#\*@]+"
         re_string = fr"({grouping_re}|{paren_re}|{word_re})"
         token_re = re.compile(re_string)
 
