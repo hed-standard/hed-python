@@ -140,7 +140,7 @@ class Test(unittest.TestCase):
     def test_main_errors(self):
         # Test bad data directory
         arg_list = ['junk/junk', self.model_path, '-x', 'derivatives', '-n', 'back1']
-        with self.assertRaises(ValueError) as context:
+        with self.assertRaises(HedFileError) as context:
             main(arg_list=arg_list)
         self.assertEqual(context.exception.args[0], "DataDirectoryDoesNotExist")
 

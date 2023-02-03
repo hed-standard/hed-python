@@ -1,3 +1,6 @@
+""" Create factors for a tabular file based on tag queries. """
+
+
 import pandas as pd
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -7,14 +10,19 @@ from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 class FactorHedTagsOp(BaseOp):
+    """ Create factors for a tabular file based on tag queries.
 
-    """ Create factors based on tag queries.
+    The required parameters are:
+        - queries (list):       Queries to be applied successively as filters.
+        - query_names (list):   List of names to use as columns for the queries (otherwise use query1,.._.
+        - remove_types (list):  Structural HED tags to be removed (usually *Condition-variable* and *Task*).
+        - expand_context bool): Expand the context if True.
 
-        Notes: The required parameters are:
-             - queries (list)          Queries to be applied successively as filters.
-             - query_names (list)      List of names to use as columns for the queries (otherwise use query1,.._.
-             - remove_types (list)     Structural HED tags to be removed (usually *Condition-variable* and *Task*).
-             - expand_context bool)    Expand the context if True.
+    Raises:
+        ValueError:
+            - If the list of query_names is not empty or the same length as queries.
+            - If the query_names list contains duplicate names.
+            - If a query is invalid and cannot be parsed.
 
     """
 

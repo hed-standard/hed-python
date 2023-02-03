@@ -1,4 +1,4 @@
-""" Utilities for downstream analysis such as searching. """
+""" Utilities for assembly, analysis, and searching. """
 
 import pandas as pd
 from hed.models.tabular_input import TabularInput
@@ -6,7 +6,6 @@ from hed.models.expression_parser import TagExpressionParser
 from hed.tools.util.data_util import separate_values
 from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
-from hed.models.hed_string import HedString
 
 
 def assemble_hed(data_input, columns_included=None, expand_defs=False):

@@ -1,3 +1,5 @@
+""" Command line program for creating a backup. """
+
 import argparse
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import get_file_list, get_filtered_by_element

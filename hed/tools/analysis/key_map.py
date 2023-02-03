@@ -1,3 +1,6 @@
+""" A map of column value keys into new column values. """
+
+
 import pandas as pd
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import get_new_dataframe, get_row_hash, separate_values
@@ -8,7 +11,7 @@ class KeyMap:
 
     Attributes:
         key_cols (list):  A list of column names that will be hashed into the keys for the map.
-        target_cols (list or None):   An optional list of column names that will be inserted into data and later remapped.
+        target_cols (list or None):  Optional list of column names that will be inserted into data and later remapped.
         name (str):       An optional name of this remap for identification purposes.
 
     Notes: This mapping converts all columns in the mapping to strings.
@@ -34,7 +37,7 @@ class KeyMap:
             self.target_cols = []
         if set(self.key_cols).intersection(set(self.target_cols)):
             raise ValueError("KEY_AND_TARGET_COLUMNS_NOT_DISJOINT",
-                               f"Key cols {str(key_cols)} and target cols {str(target_cols)} must be disjoint", "")
+                             f"Key cols {str(key_cols)} and target cols {str(target_cols)} must be disjoint", "")
         self.name = name
         self.col_map = pd.DataFrame(columns=self.key_cols + self.target_cols)
         self.map_dict = {}

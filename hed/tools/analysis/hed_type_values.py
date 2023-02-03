@@ -1,4 +1,5 @@
-import json
+""" Class to manage a type variable and its associated context. """
+
 import pandas as pd
 from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
@@ -43,8 +44,16 @@ class HedTypeValues:
         """
         return self._type_value_map.get(type_value.lower(), None)
 
-    def get_type_value_level_info(self, type_value, type_level):
-        """ Return  associated with v_name or None. """
+    def get_type_value_level_info(self, type_value):
+        """ Return type variable corresponding to type_value.
+
+        Parameters:
+            type_value (str) - name of the type variable
+
+        Returns:
+
+
+        """
         return self._type_value_map.get(type_value, None)
 
     @property

@@ -1,9 +1,24 @@
+""" Merge consecutive events with same column value into a single event. """
+
 import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class MergeConsecutiveOp(BaseOp):
+    """ Merge consecutive events with same column value into a single event.
 
+    The required parameters are:
+        - column_name (str): the name of the column whose consecutive values are to be compared (the merge column).
+        - event_code (str or int or float): the particular value in the match column to be merged.
+        - match_columns (list):  A list of columns whose values have to be matched for two events to be the same.
+        - set_durations (bool): If true, set the duration of the merged event to the extent of the merged events.
+        - ignore_missing (bool):  If true, missing match_columns are ignored.
+
+    Raises:
+        ValueError:
+            - If the match column is also a merge column.
+
+    """
     PARAMS = {
         "operation": "merge_consecutive",
         "required_parameters": {
@@ -22,7 +37,7 @@ class MergeConsecutiveOp(BaseOp):
         self.event_code = parameters["event_code"]
         self.match_columns = parameters["match_columns"]
         if self.column_name in self.match_columns:
-            raise ValueError("MergeColumnCannotBeMatched",
+            raise ValueError("MergeColumnCannotBeMatchColumn",
                              f"Column {self.column_name} cannot be one of the match columns: {str(self.match_columns)}")
         self.set_durations = parameters["set_durations"]
         self.ignore_missing = parameters["ignore_missing"]

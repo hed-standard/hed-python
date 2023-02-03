@@ -3,7 +3,7 @@ from hed.errors import ErrorSeverity, ErrorHandler
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
+from hed.tools.remodeling.operations.base_context import BaseContext
 from hed.validator import HedValidator
 
 
@@ -69,22 +69,20 @@ class HedValidationSummaryContext(BaseContext):
         super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
         self.check_for_warnings = sum_op.check_for_warnings
 
-    def _get_result_string(self, name, result):
+    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
 
         if result["is_merged"]:
             sum_list = [f"{name}: [{result['total_sidecar_files']} sidecar files, "
                         f"{result['total_event_files']} event files]"]
-            sum_list = sum_list + self.get_error_list(result['sidecar_issues'], count_only=True, indent=DISPLAY_INDENT)
-            sum_list = sum_list + self.get_error_list(result['event_issues'], count_only=True, indent=DISPLAY_INDENT)
+            sum_list = sum_list + self.get_error_list(result['sidecar_issues'], count_only=True, indent=indent)
+            sum_list = sum_list + self.get_error_list(result['event_issues'], count_only=True, indent=indent)
         else:
-            sum_list = [f"{DISPLAY_INDENT}{name}: {result['total_sidecar_files']} sidecar files"]
-            sum_list = sum_list + self.get_error_list(result['sidecar_issues'], indent=DISPLAY_INDENT*2)
+            sum_list = [f"{indent}{name}: {result['total_sidecar_files']} sidecar files"]
+            sum_list = sum_list + self.get_error_list(result['sidecar_issues'], indent=indent*2)
             if result['validation_completed']:
-                sum_list = sum_list + self.get_error_list(result['event_issues'], count_only=False,
-                                                          indent=DISPLAY_INDENT*2)
+                sum_list = sum_list + self.get_error_list(result['event_issues'], count_only=False, indent=indent*2)
             else:
-                sum_list = sum_list + \
-                           [f"{DISPLAY_INDENT*2}Event file validation was incomplete because of sidecar errors"]
+                sum_list = sum_list + [f"{indent*2}Event file validation was incomplete because of sidecar errors"]
         return "\n".join(sum_list)
 
     def update_context(self, new_context):
@@ -152,7 +150,7 @@ class HedValidationSummaryContext(BaseContext):
                 "validation_completed": False}
 
     @staticmethod
-    def get_error_list(error_dict, count_only=False, indent=DISPLAY_INDENT):
+    def get_error_list(error_dict, count_only=False, indent=BaseContext.DISPLAY_INDENT):
         error_list = []
         for key, item in error_dict.items():
             if count_only and isinstance(item, list):

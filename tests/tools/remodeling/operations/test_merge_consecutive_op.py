@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
         parms["column_name"] = "sex"
         with self.assertRaises(ValueError) as context:
             MergeConsecutiveOp(parms)
-        self.assertEqual(context.exception.args[0], "MergeColumnCannotBeMatched")
+        self.assertEqual(context.exception.args[0], "MergeColumnCannotBeMatchColumn")
 
     def test_do_op_valid(self):
         # Test when no extras but ignored.

@@ -1,3 +1,4 @@
+""" Representation of a file dictionary keyed by entity indices. """
 import os
 from hed.errors.exceptions import HedFileError
 

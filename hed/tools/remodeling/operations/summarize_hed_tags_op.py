@@ -1,7 +1,7 @@
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
+from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 class SummarizeHedTagsOp(BaseOp):
@@ -95,7 +95,7 @@ class HedTagSummaryContext(BaseContext):
         leftovers = [value.get_info(verbose=True) for value in unmatched]
         return {"Main tags": details, "Other tags": leftovers}
 
-    def _get_result_string(self, name, result, indent=DISPLAY_INDENT):
+    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
         sum_list = [f"\n{name}\n{indent}Main tags[events,files]:"]
         for category, tags in result['Main tags'].items():
             sum_list.append(f"{indent}{indent}{category}:")

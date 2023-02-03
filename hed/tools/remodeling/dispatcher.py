@@ -1,3 +1,5 @@
+""" Controller for applying operations to tabular files and saving the results. """
+
 import os
 import numpy as np
 import pandas as pd
@@ -6,7 +8,7 @@ from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_io import get_schema
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
-from hed.tools.util.io_util import generate_filename
+from hed.tools.util.io_util import generate_filename, extract_suffix_path, get_timestamp
 
 
 class Dispatcher:
@@ -39,7 +41,7 @@ class Dispatcher:
         self.hed_schema = get_schema(hed_versions)
         self.context_dict = {}
 
-    def get_context_summaries(self, file_formats=['.txt', '.json']):
+    def get_summaries(self, file_formats=['.txt', '.json']):
         """ Return the summaries in a dictionary of strings suitable for saving or archiving.
 
         Parameters:
@@ -51,8 +53,12 @@ class Dispatcher:
         """
 
         summary_list = []
+        time_stamp = '_' + get_timestamp()
         for context_name, context_item in self.context_dict.items():
-            file_base = generate_filename(context_item.context_filename, append_datetime=True)
+            file_base = context_item.context_filename
+            if self.data_root:
+                file_base = extract_suffix_path(self.data_root, file_base)
+            file_base = generate_filename(file_base)
             for file_format in file_formats:
                 if file_format == '.txt':
                     summary = context_item.get_text_summary(individual_summaries="consolidated")
@@ -62,7 +68,7 @@ class Dispatcher:
 
                 else:
                     continue
-                summary_list.append({'file_name': file_base + file_format, 'file_format': file_format,
+                summary_list.append({'file_name': file_base + time_stamp + file_format, 'file_format': file_format,
                                      'file_type': 'summary', 'content': summary})
         return summary_list
 
@@ -101,8 +107,16 @@ class Dispatcher:
                                "")
         return df
 
-    def get_context_save_dir(self):
-        """"""
+    def get_summary_save_dir(self):
+        """ Return the directory in which to save the summaries.
+
+        Returns:
+            str: the data_root + remodeling summary path
+
+        Raises:
+            HedFileError  if this dispatcher does not have a data_root.
+
+        """
 
         if self.data_root:
             return os.path.realpath(os.path.join(self.data_root, Dispatcher.REMODELING_SUMMARY_PATH))
@@ -131,22 +145,25 @@ class Dispatcher:
             df = self.post_proc_data(df)
         return df
 
-    def save_context(self, save_formats=['.json', '.txt'], individual_summaries="separate"):
+    def save_summaries(self, save_formats=['.json', '.txt'], individual_summaries="separate", summary_dir=None):
         """ Save the summary files in the specified formats.
 
         Parameters:
             save_formats (list):  A list of formats [".txt", ."json"]
             individual_summaries (str): If True, include summaries of individual files.
+            summary_dir (str or None): Directory for saving summaries
 
-        The summaries are saved in the dataset derivatives/remodeling folder.
+        The summaries are saved in the dataset derivatives/remodeling folder if no save_dir is provided.
 
         """
         if not save_formats:
             return
-        summary_path = self.get_context_save_dir()
-        os.makedirs(summary_path, exist_ok=True)
+        if not summary_dir:
+            summary_dir = self.get_summary_save_dir()
+        os.makedirs(summary_dir, exist_ok=True)
         for context_name, context_item in self.context_dict.items():
-            context_item.save(summary_path, save_formats, individual_summaries=individual_summaries)
+            context_item.save(summary_dir, save_formats, individual_summaries=individual_summaries,
+                              prefix_dir=self.data_root)
 
     @staticmethod
     def parse_operations(operation_list):

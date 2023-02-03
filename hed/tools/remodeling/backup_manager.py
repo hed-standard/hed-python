@@ -1,3 +1,5 @@
+""" Class to manage backups for remodeling tools. """
+
 import os
 import json
 import shutil
