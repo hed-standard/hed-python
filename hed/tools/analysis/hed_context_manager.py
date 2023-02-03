@@ -1,3 +1,5 @@
+""" Classes for managing context and events of temporal extent. """
+
 from hed.errors.exceptions import HedFileError
 from hed.models import HedGroup, HedString
 from hed.schema import HedSchema, HedSchemaGroup

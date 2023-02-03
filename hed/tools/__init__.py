@@ -1,4 +1,4 @@
-""" HED tools for analysis and summarization. """
+""" HED tools for remodeling, analysis and summarization. """
 
 from .analysis.file_dictionary import FileDictionary
 from .analysis.hed_context_manager import OnsetGroup, HedContextManager
@@ -50,7 +50,6 @@ from .analysis.annotation_util import \
     check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
 from .analysis import analysis_util
 from .analysis.analysis_util import assemble_hed, search_tabular, get_assembled_strings
-from .analysis import summary_util
 
 from .remodeling.cli import run_remodel
 from .remodeling.cli import run_remodel_backup

@@ -1,3 +1,5 @@
+""" Classes for managing the counts of tags such as Condition-variable and task. """
+
 
 class HedTypeCount:
     """ Keeps a summary of one value of one type of variable.

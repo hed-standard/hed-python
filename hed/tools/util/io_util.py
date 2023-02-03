@@ -5,6 +5,8 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from hed.errors.exceptions import HedFileError
 
+TIME_FORMAT = '%Y_%m_%d_T_%H_%M_%S_%f'
+
 
 def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
     """ Return True if correct extension, suffix, and prefix.
@@ -118,7 +120,7 @@ def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=N
     filename = "".join(pieces)
     if append_datetime:
         now = datetime.now()
-        filename = filename + '_' + now.strftime('%Y_%m_%d_T_%H_%M_%S_%f')
+        filename = filename + '_' + now.strftime(TIME_FORMAT)[:-3]
     if filename and extension:
         filename = filename + extension
 
@@ -235,6 +237,11 @@ def get_path_components(root_path, this_path):
         return os.path.normpath(the_dir).split(os.sep)
     else:
         return []
+
+
+def get_timestamp():
+    now = datetime.now()
+    return now.strftime(TIME_FORMAT)[:-3]
 
 
 def make_path(root_path, sub_path, filename):

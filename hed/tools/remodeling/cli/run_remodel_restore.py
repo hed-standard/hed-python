@@ -1,3 +1,5 @@
+""" Command line program for restoring files from backup. """
+
 import argparse
 from hed.errors.exceptions import HedFileError
 from hed.tools.remodeling.backup_manager import BackupManager

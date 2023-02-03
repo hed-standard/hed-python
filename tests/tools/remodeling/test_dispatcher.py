@@ -78,17 +78,17 @@ class Test(unittest.TestCase):
             dispatch.get_data_file(sidecar_file)
         self.assertEqual(context.exception.error_type, 'BadDataFile')
 
-    def test_get_context_save_dir(self):
+    def test_get_summary_save_dir(self):
         model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
         with open(model_path1) as fp:
             model1 = json.load(fp)
         dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
-        summary_path = dispatch1.get_context_save_dir()
+        summary_path = dispatch1.get_summary_save_dir()
         self.assertEqual(summary_path,
                          os.path.realpath(os.path.join(self.test_root_back1, Dispatcher.REMODELING_SUMMARY_PATH)))
         dispatch2 = Dispatcher(model1)
         with self.assertRaises(HedFileError) as context:
-            dispatch2.get_context_save_dir()
+            dispatch2.get_summary_save_dir()
         self.assertEqual(context.exception.error_type, 'NoDataRoot')
 
     def test_parse_operations_errors(self):
@@ -184,7 +184,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df.columns), 20)
         self.assertIn('key-assignment', df.columns)
 
-    def test_save_context(self):
+    def test_save_summaries(self):
         with open(self.summarize_model) as fp:
             model1 = json.load(fp)
         dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
@@ -192,23 +192,23 @@ class Test(unittest.TestCase):
                                   exclude_dirs=['derivatives'])
         for file in file_list:
             dispatch1.run_operations(file)
-        summary_path = dispatch1.get_context_save_dir()
+        summary_path = dispatch1.get_summary_save_dir()
         self.assertFalse(os.path.exists(summary_path))
-        dispatch1.save_context()
+        dispatch1.save_summaries()
         self.assertTrue(os.path.exists(summary_path))
         file_list1 = os.listdir(summary_path)
-        self.assertEqual(len(file_list1), 2, "save_context creates correct number of summary files when run.")
-        dispatch1.save_context(save_formats=[])
+        self.assertEqual(len(file_list1), 2, "save_summaries creates correct number of summary files when run.")
+        dispatch1.save_summaries(save_formats=[])
         file_list2 = os.listdir(summary_path)
-        self.assertEqual(len(file_list2), 2, "save_context must have a format to save")
+        self.assertEqual(len(file_list2), 2, "save_summaries must have a format to save")
 
-    def test_get_context_summaries(self):
+    def test_get_summaries(self):
         with open(self.summarize_excerpt) as fp:
             model1 = json.load(fp)
         dispatch = Dispatcher(model1)
         df_new = dispatch.run_operations(self.file_path)
         self.assertIsInstance(df_new, pd.DataFrame)
-        summaries = dispatch.get_context_summaries(file_formats=['.txt', '.json', '.tsv'])
+        summaries = dispatch.get_summaries(file_formats=['.txt', '.json', '.tsv'])
         self.assertIsInstance(summaries, list)
         # self.assertEqual(len(summaries), 4)
 

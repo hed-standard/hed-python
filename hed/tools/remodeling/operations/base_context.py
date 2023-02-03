@@ -1,11 +1,10 @@
+""" Abstract base class for summary contexts. """
+
 import os
 from abc import ABC, abstractmethod
-from datetime import datetime
 import json
 from werkzeug.utils import secure_filename
-
-
-DISPLAY_INDENT = "   "
+from hed.tools.util.io_util import get_timestamp, extract_suffix_path
 
 
 class BaseContext(ABC):
@@ -18,6 +17,7 @@ class BaseContext(ABC):
 
     """
 
+    DISPLAY_INDENT = "   "
     INDIVIDUAL_SUMMARIES_PATH = 'individual_summaries'
 
     def __init__(self, context_type, context_name, context_filename):
@@ -91,9 +91,7 @@ class BaseContext(ABC):
 
         return summary
 
-    def save(self, save_dir, file_formats=['.txt'], individual_summaries="separate"):
-        now = datetime.now()
-        time_stamp = '_' + now.strftime('%Y_%m_%d_T_%H_%M_%S_%f')
+    def save(self, save_dir, file_formats=['.txt'], individual_summaries="separate", prefix_dir=None):
 
         for file_format in file_formats:
             if file_format == '.txt':
@@ -102,13 +100,13 @@ class BaseContext(ABC):
                 summary = self.get_summary(individual_summaries=individual_summaries)
             else:
                 continue
-            self._save_separate(save_dir, file_format, time_stamp, summary)
+            self._save_separate(save_dir, file_format, summary, prefix_dir)
 
-    def _save_separate(self, save_dir, file_format, time_stamp, summary):
+    def _save_separate(self, save_dir, file_format, summary, prefix_dir):
+        time_stamp = '_' + get_timestamp()
         this_save = os.path.join(save_dir, self.context_name + '/')
         os.makedirs(os.path.realpath(this_save), exist_ok=True)
-        filename = os.path.realpath(os.path.join(this_save, secure_filename(self.context_filename) + "_overall" +
-                                                 time_stamp + file_format))
+        filename = os.path.realpath(os.path.join(this_save, self.context_filename + time_stamp + file_format))
         self.dump_summary(filename, summary["Dataset"])
         individual = summary.get("Individual files", {})
         if not individual:
@@ -116,9 +114,21 @@ class BaseContext(ABC):
         individual_dir = os.path.join(this_save, self.INDIVIDUAL_SUMMARIES_PATH + '/')
         os.makedirs(os.path.realpath(individual_dir), exist_ok=True)
         for name, sum_str in individual.items():
-            filename = secure_filename(self.context_filename + "_" + name + time_stamp + file_format)
-            filename = os.path.realpath(os.path.join(individual_dir, filename))
+            filename = self._get_individual_filename(individual_dir, name, time_stamp, file_format)
             self.dump_summary(filename, sum_str)
+
+    def _get_individual_filename(self, individual_dir, name, time_stamp, file_format):
+        this_name = os.path.basename(name)
+        this_name = os.path.splitext(this_name)[0]
+        count = 1
+        match = True
+        while match:
+            filename = f"{self.context_filename}_{this_name}_{count}{time_stamp}{file_format}"
+            filename = os.path.realpath(os.path.join(individual_dir, filename))
+            if not os.path.isfile(filename):
+                break
+            count = count + 1
+        return filename
 
     def _get_result_string(self, name, result, indent=DISPLAY_INDENT):
         return f"\n{name}\n{indent}{str(result)}"

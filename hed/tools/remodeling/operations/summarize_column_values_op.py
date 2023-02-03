@@ -1,6 +1,6 @@
 from hed.tools import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
+from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 class SummarizeColumnValuesOp(BaseOp):
@@ -85,13 +85,13 @@ class ColumnValueSummaryContext(BaseContext):
             all_sum.update_summary(counts)
         return all_sum
 
-    def _get_result_string(self, name, result):
+    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
         if name == "Dataset":
-            return self._get_dataset_string(result, indent=DISPLAY_INDENT)
-        return self._get_individual_string(name, result, indent=DISPLAY_INDENT)
+            return self._get_dataset_string(result, indent=indent)
+        return self._get_individual_string(name, result, indent=indent)
 
     @staticmethod
-    def _get_dataset_string(result, indent=DISPLAY_INDENT):
+    def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
         sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
                     f"Total files={result.get('Total files', 0)}"]
         cat_cols = result.get("Categorical columns", {})
@@ -103,7 +103,7 @@ class ColumnValueSummaryContext(BaseContext):
         return "\n".join(sum_list)
 
     @staticmethod
-    def _get_individual_string(name, result, indent=DISPLAY_INDENT):
+    def _get_individual_string(name, result, indent=BaseContext.DISPLAY_INDENT):
         sum_list = [f"{indent}{name}:"]
         cat_cols = result.get("Categorical columns", {})
         if cat_cols:

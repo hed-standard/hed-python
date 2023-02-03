@@ -4,7 +4,7 @@ from hed.tools.analysis.hed_type_values import HedTypeValues
 from hed.tools.analysis.hed_type_counts import HedTypeCounts
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext, DISPLAY_INDENT
+from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 class SummarizeHedTypeOp(BaseOp):
@@ -100,13 +100,13 @@ class HedTypeSummaryContext(BaseContext):
             all_counts.update(counts)
         return all_counts
 
-    def _get_result_string(self, name, result):
+    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
         if name == "Dataset":
-            return self._get_dataset_string(result, indent=DISPLAY_INDENT)
-        return self._get_individual_string(name, result, indent=DISPLAY_INDENT)
+            return self._get_dataset_string(result, indent=indent)
+        return self._get_individual_string(name, result, indent=indent)
 
     @staticmethod
-    def _get_dataset_string(result, indent=DISPLAY_INDENT):
+    def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
         details = result.get('details', {})
         sum_list = [f"Dataset: {len(details)} {result['type_tag']} types in {len(result.get('files', []))} files" 
                     f" with a total of {result.get('total_events', 0)}"]
@@ -115,17 +115,17 @@ class HedTypeSummaryContext(BaseContext):
             str1 = f"{item['events']} events out of {item['total_events']} total events in {len(item['files'])} files"
             if item['level_counts']:
                 str1 = f"{len(item['level_counts'])} levels in " + str1
-            sum_list.append(f"{indent}{key}: {str1}")
             if item['direct_references']:
                 str1 = str1 + f" Direct references:{item['direct_references']}"
             if item['events_with_multiple_refs']:
                 str1 = str1 + f" Multiple references:{item['events_with_multiple_refs']})"
+            sum_list.append(f"{indent}{key}: {str1}")
             if item['level_counts']:
-                sum_list = sum_list + HedTypeSummaryContext._level_details(item['level_counts'], indent=DISPLAY_INDENT)
+                sum_list = sum_list + HedTypeSummaryContext._level_details(item['level_counts'], indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
-    def _get_individual_string(name, result, indent=DISPLAY_INDENT):
+    def _get_individual_string(name, result, indent=BaseContext.DISPLAY_INDENT):
         sum_list = [f"{indent}{name}: Type={result['type_tag']} Total events={result.get('total_events', 0)} "]
         details = result.get('details', {})
         for key, item in details.items():
@@ -139,12 +139,8 @@ class HedTypeSummaryContext(BaseContext):
                 sum_list.append(f"{indent*3}{str1}")
             if item['level_counts']:
                 sum_list = sum_list + HedTypeSummaryContext._level_details(item['level_counts'],
-                                                                           offset=DISPLAY_INDENT, indent=DISPLAY_INDENT)
+                                                                           offset=indent, indent=indent)
         return "\n".join(sum_list)
-        # if result['level_counts']:
-        #     sum_list = sum_list + HedTypeSummaryContext._level_details(result['level_counts'],
-        #                                                                offset=DISPLAY_INDENT, indent=DISPLAY_INDENT)
-        # return "\n".join(sum_list)
 
     @staticmethod
     def _level_details(level_counts, offset="", indent=""):

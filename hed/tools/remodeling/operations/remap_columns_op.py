@@ -1,3 +1,5 @@
+""" Map combinations of values in m columns into a new combinations in n columns. """
+
 import pandas as pd
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -6,6 +8,22 @@ from hed.tools.analysis.key_map import KeyMap
 
 class RemapColumnsOp(BaseOp):
     """ Map combinations of values in m columns into a new combinations in n columns.
+
+    Required parameters:
+        source_columns (list):  The key columns to map (m key columns).
+        destination_columns (list):  The destination columns to have the mapped values (n destination columns).
+        map_list (list):  A list of lists with the mapping.
+                          Each list element list is of length m + n with the key columns followed by mapped columns.
+        ignore_missing (bool): If True, entries whose key column values are not in map_list are ignored.
+
+    Optional_parameters:
+        integer_sources (list): A list of the source_columns that should be treated as integers rather than strings.
+
+    Raises:
+        ValueError:
+            - If an integer column is not a key column.
+            - If the length of an entry list in the map_list is not m + n.
+              (Both m and n must be greater than 0.)
 
         TODO: Allow wildcards
 

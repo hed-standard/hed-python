@@ -1,8 +1,10 @@
+""" Main command line program for running the remodeling tools. """
+
 import os
 import json
 import argparse
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.io_util import get_file_list, parse_bids_filename
+from hed.tools.util.io_util import get_file_list
 from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.backup_manager import BackupManager
@@ -82,26 +84,45 @@ def run_bids_ops(dispatch, args):
 
 
 def run_direct_ops(dispatch, args):
+    """ Run the remodeler on files of a specified form in a directory tree.
+
+    Parameters:
+        dispatch (Dispatcher):  Controls the application of the operations and backup.
+        args (dict): Dictionary of arguments and their values.
+
+    """
+
     tabular_files = get_file_list(dispatch.data_root, name_suffix=args.file_suffix, extensions=args.extensions,
                                   exclude_dirs=args.exclude_dirs)
     if args.verbose:
         print(f"Found {len(tabular_files)} files with suffix {args.file_suffix} and extensions {str(args.extensions)}")
-    if hasattr(args, 'sidecar'):
-        sidecar = args.sidecar
+    if hasattr(args, 'json_sidecar'):
+        sidecar = args.json_sidecar
     else:
         sidecar = None
     for file_path in tabular_files:
-        if not BackupManager.get_task(args.task_names, file_path):
+        if args.task_names and not BackupManager.get_task(args.task_names, file_path):
             continue
         df = dispatch.run_operations(file_path, verbose=args.verbose, sidecar=sidecar)
         df.to_csv(file_path, sep='\t', index=False, header=True)
-    return
 
 
 def main(arg_list=None):
+    """ The command-line program.
+
+    Parameters:
+        arg_list (list or None):   Called with value None when called from the command line.
+                                   Otherwise, called with the command-line parameters as an argument list.
+
+    Raises:
+        HedFileError
+            - if the data root directory does not exist.
+            - if the specified backup does not exist.
+
+    """
     args, operations = parse_arguments(arg_list)
     if not os.path.isdir(args.data_dir):
-        raise ValueError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist")
+        raise HedFileError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist")
     backup_man = BackupManager(args.data_dir)
     if not backup_man.get_backup(args.backup_name):
         raise HedFileError("BackupDoesNotExist", f"Backup {args.backup_name} does not exist. "
@@ -113,7 +134,7 @@ def main(arg_list=None):
         run_bids_ops(dispatch, args)
     else:
         run_direct_ops(dispatch, args)
-    dispatch.save_context(args.save_formats, individual_summaries=args.individual_summaries)
+    dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries)
 
 
 if __name__ == '__main__':

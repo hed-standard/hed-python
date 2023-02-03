@@ -1,3 +1,5 @@
+""" Class to manage type factors and type definitions. """
+
 import pandas as pd
 import json
 from hed.tools.analysis.hed_type_values import HedTypeValues

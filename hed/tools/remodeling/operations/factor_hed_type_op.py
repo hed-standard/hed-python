@@ -1,20 +1,21 @@
+""" Create factors for a tabular file based on type variables. """
+
 import pandas as pd
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.analysis_util import get_assembled_strings
 from hed.tools.analysis.hed_type_manager import HedTypeManager
-from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 # TODO: restricted factor values are not implemented yet.
 
 
 class FactorHedTypeOp(BaseOp):
-    """ Create factors based on a specified type of tag such as Condition-variable.
+    """ Create factors for a tabular file based on a specified type of tag such as `condition-variable`.
 
-        Notes: The required parameters are
-             - type_tag (str):       HED tag used to find the factors (most commonly Condition-variable).
-             - type_values (list):   Factor values to include. If empty all values of that type_tag are used.
+   The required parameters are
+        - type_tag (str): HED tag used to find the factors (most commonly `condition-variable`).
+        - type_values (list): Factor values to include. If empty all values of that type_tag are used.
 
     """
 

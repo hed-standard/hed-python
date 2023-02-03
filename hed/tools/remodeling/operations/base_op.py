@@ -1,6 +1,17 @@
+""" Base class for operations. """
 
 
 class BaseOp:
+    """ Base class for operations. All remodeling operations should extend this class.
+
+    Properties:
+        operation
+        required_parameters (dict): required parameters for the operation.
+        optional_parameters (dict): optional parameters for the operation.
+
+    The base class holds the parameters and does basic parameter checking.
+
+    """
 
     def __init__(self, op_spec, parameters):
         self.operation = op_spec.get("operation", "")
