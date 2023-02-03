@@ -122,7 +122,7 @@ def main(arg_list=None):
     """
     args, operations = parse_arguments(arg_list)
     if not os.path.isdir(args.data_dir):
-        raise HedFileError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist")
+        raise HedFileError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist", "")
     backup_man = BackupManager(args.data_dir)
     if not backup_man.get_backup(args.backup_name):
         raise HedFileError("BackupDoesNotExist", f"Backup {args.backup_name} does not exist. "
