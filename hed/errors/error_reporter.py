@@ -395,16 +395,17 @@ def get_exception_issue_string(issues, title=None):
         str: A str containing printable version of the issues or ''.
 
     """
-
     issue_str = ''
     if issues:
-        translated_messages = []
+        issue_list = []
         for issue in issues:
-            if isinstance(issue, str):
-                translated_messages.append(f"ERROR: {issue}.")
-            else:
-                translated_messages.append(f"ERROR: {issue[1]}.\n    Source Line: {issue[0]}")
-        issue_str += '\n' + '\n'.join(translated_messages)
+            this_str = f"{issue['message']}"
+            if 'code' in issue:
+                this_str = f"{issue['code']}:" + this_str
+            if 'line_number' in issue:
+                this_str = this_str + f"\n\tLine number {issue['line_number']}: {issue.get('line', '')} "
+            issue_list.append(this_str)
+        issue_str += '\n' + '\n'.join(issue_list)
     if title:
         issue_str = title + '\n' + issue_str
     return issue_str
