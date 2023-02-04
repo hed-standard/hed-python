@@ -1,16 +1,18 @@
+"""  Summarize the column names in a collection of tabular files. """
+
 from hed.tools.analysis.column_name_summary import ColumnNameSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 class SummarizeColumnNamesOp(BaseOp):
-    """ Summarize the column names in a dataset.
+    """  Summarize the column names in a collection of tabular files.
 
-    Notes: The required parameters are:
+    The required parameters are:
         - summary_name (str)       The name of the summary.
         - summary_filename (str)   Base filename of the summary.
 
-    The purpose of this is to check that all of the dataframes have the same columns in same order.
+    The purpose is to check that all of the tabular files have the same columns in same order.
 
     """
 
@@ -30,14 +32,15 @@ class SummarizeColumnNamesOp(BaseOp):
         """ Constructor for summarize column names operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError:
+
+            - KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -49,7 +52,7 @@ class SummarizeColumnNamesOp(BaseOp):
         """ Create factor columns corresponding to values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):   Only needed for HED operations.

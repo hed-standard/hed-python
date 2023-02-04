@@ -1,3 +1,5 @@
+""" Models a BIDS file. """
+
 import os
 from hed.tools.util.io_util import parse_bids_filename
 

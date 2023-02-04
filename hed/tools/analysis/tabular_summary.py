@@ -1,3 +1,6 @@
+""" Summarizes the contents of tabular files. """
+
+
 import json
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import get_new_dataframe
@@ -5,7 +8,7 @@ from hed.tools.analysis.annotation_util import generate_sidecar_entry
 
 
 class TabularSummary:
-    """ Summarize the contents of BIDS tabular files. """
+    """ Summarize the contents of tabular files. """
 
     def __init__(self, value_cols=None, skip_cols=None, name=''):
         """ Constructor for a BIDS tabular file summary.

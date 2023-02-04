@@ -12,17 +12,25 @@ from hed.tools.util.io_util import generate_filename, extract_suffix_path, get_t
 
 
 class Dispatcher:
+    """ Controller for applying operations to tabular files and saving the results. """
+
     REMODELING_SUMMARY_PATH = 'derivatives/remodel/summaries'
 
     def __init__(self, operation_list, data_root=None,
                  backup_name=BackupManager.DEFAULT_BACKUP_NAME, hed_versions=None):
-        """ Initialize the dispatcher.
+        """ Constructor for the dispatcher.
 
         Parameters:
             operation_list (list): List of unparsed operations.
             data_root (str or None):  Root directory for the dataset. If none, then backups are not made.
             hed_versions (str, list, HedSchema, or HedSchemaGroup): The HED schema.
 
+        Raises:
+            - HedFileError:
+                - If the specified backup does not exist.
+
+            - ValueError:
+                - If any of the operations cannot be parsed correctly.
         """
         self.data_root = data_root
         self.backup_name = backup_name

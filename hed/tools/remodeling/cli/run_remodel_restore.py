@@ -1,4 +1,4 @@
-""" Command line program for restoring files from backup. """
+""" Command-line program for restoring files from backup. """
 
 import argparse
 from hed.errors.exceptions import HedFileError

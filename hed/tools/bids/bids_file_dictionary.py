@@ -1,3 +1,5 @@
+""" A dictionary of BIDS files keyed to entity-value pairs. """
+
 from hed.errors.exceptions import HedFileError
 from hed.tools.bids.bids_file import BidsFile
 from hed.tools.analysis.file_dictionary import FileDictionary

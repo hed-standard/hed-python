@@ -1,4 +1,4 @@
-""" Class to manage a type variable and its associated context. """
+""" Manages a type variable and its associated context. """
 
 import pandas as pd
 from hed.models.hed_tag import HedTag

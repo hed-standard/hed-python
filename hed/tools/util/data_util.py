@@ -302,16 +302,16 @@ def get_indices(df, column, start, stop):
     next_start = start_event[0]
     while 1:
         try:
-            next_end = find_next(next_start, end_event)
+            next_end = _find_next(next_start, end_event)
             lst.append((next_start, next_end))
-            next_start = find_next_start(next_end, start_event)
+            next_start = _find_next_start(next_end, start_event)
         except IndexError:
             break
 
     return lst
 
 
-def find_next(v, lst):
+def _find_next(v, lst):
     return [x for x in sorted(lst) if x > v][0]
 
 
@@ -329,5 +329,5 @@ def tuple_to_range(tuple_list, inclusion):
     return range_list
 
 
-def find_next_start(v, lst):
+def _find_next_start(v, lst):
     return [x for x in sorted(lst) if x >= v][0]

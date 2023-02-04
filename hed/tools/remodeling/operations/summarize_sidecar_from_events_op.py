@@ -1,3 +1,5 @@
+""" Create a JSON sidecar from column values in a collection of tabular files. """
+
 import json
 from hed.tools import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -5,15 +7,15 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 class SummarizeSidecarFromEventsOp(BaseOp):
-    """ Summarize the values that are in the columns.
+    """ Create a JSON sidecar from column values in a collection of tabular files.
 
-    Notes: The required parameters are:
+    The required parameters are:
         - summary_name (str)   The name of the summary.
         - summary_filename (str)   Base filename of the summary.
         - skip_columns (list)  Names of columns to skip in the summary.
         - value_columns (list) Names of columns to treat as value columns rather than categorical columns
 
-    The purpose of this op is to produce a summary of the values in a tabular file.
+    The purpose is to produce a JSON sidecar template for annotating a dataset with HED tags.
 
     """
 
@@ -35,14 +37,14 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         """ Constructor for summarize sidecar from events operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError:
+            - KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -57,8 +59,8 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         """ Create factor columns corresponding to values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context.
-            df (DataFrame): The DataFrame to be remodeled.
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            df (DataFrame): The tabular file to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Only needed for HED operations.
 

@@ -1,4 +1,4 @@
-"""Class to capture definitions associated with a type such as condition-variable. """
+""" Manages definitions associated with a type such as condition-variable. """
 
 from hed.models.hed_tag import HedTag
 from hed.models.def_mapper import DefMapper

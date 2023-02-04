@@ -1,3 +1,5 @@
+""" Summarize the HED tags in collection of tabular files.  """
+
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -5,13 +7,13 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 class SummarizeHedTagsOp(BaseOp):
-    """ Summarize the occurrences of HED tags in the dataset.
+    """ Summarize the HED tags in collection of tabular files.
 
     Notes:
         The required parameters are:
         - summary_name (str)   The name of the summary.
         - summary_filename (str)   Base filename of the summary.
-        - type_tags (list)  Type tag to get_summary separately (e.g. 'condition-variable' or 'task')
+        - type_tags (list)  Type tag to get_summary separately (e.g. 'condition-variable' or 'task').
         - include_context (bool):  If True, expand Onset and Offset tags.
 
         Optional parameters are:
@@ -42,14 +44,15 @@ class SummarizeHedTagsOp(BaseOp):
         """ Constructor for the summarize hed tags operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError:
+
+            - KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -63,13 +66,13 @@ class SummarizeHedTagsOp(BaseOp):
         """ Create factor columns corresponding to values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
+            dispatcher (Dispatcher) - dispatcher object for managing the operations.
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
 
         Returns:
-            DataFrame - a new DataFrame with the factor columns appended.
+            DataFrame: A new DataFrame with the factor columns appended.
 
         Side-effect:
             Updates the context

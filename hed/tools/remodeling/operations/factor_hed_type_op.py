@@ -1,4 +1,4 @@
-""" Create factors for a tabular file based on type variables. """
+""" Create tabular file factors from type variables. """
 
 import pandas as pd
 import numpy as np
@@ -11,7 +11,7 @@ from hed.tools.analysis.hed_type_manager import HedTypeManager
 
 
 class FactorHedTypeOp(BaseOp):
-    """ Create factors for a tabular file based on a specified type of tag such as `condition-variable`.
+    """ Create tabular file factors from type variables.
 
    The required parameters are
         - type_tag (str): HED tag used to find the factors (most commonly `condition-variable`).
@@ -29,6 +29,24 @@ class FactorHedTypeOp(BaseOp):
     }
 
     def __init__(self, parameters):
+        """ Constructor for the factor HED type operation.
+
+        Parameters:
+            op_spec (dict): Specification for required and optional parameters.
+            parameters (dict):  Actual values of the parameters for the operation.
+
+        Raises:
+            - KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            - TypeError:
+                - If a parameter has the wrong type.
+
+            - ValueError:
+                - If the specification is missing a valid operation.
+
+        """
         super().__init__(self.PARAMS, parameters)
         self.type_tag = parameters["type_tag"]
         self.type_values = parameters["type_values"]
@@ -37,13 +55,13 @@ class FactorHedTypeOp(BaseOp):
         """ Factor columns based on HED type.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context.
+            dispatcher (Dispatcher): The dispatcher for managing the operations.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Only needed for HED operations.
 
         Returns:
-            DataFrame: a new DataFame with that includes the factors
+            DataFrame: A new DataFame with that includes the factors.
 
         If column_name is not a column in df, df is just returned.
 

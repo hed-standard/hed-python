@@ -1,12 +1,14 @@
+""" Split rows in a tabular file into multiple rows based on a column. """
+
 import numpy as np
 import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class SplitRowsOp(BaseOp):
-    """ Split each row into multiple rows.
+    """ Split rows in a tabular file into multiple rows based on a column.
 
-    Notes: The required parameters are:
+    The required parameters are:
         - anchor_column (str): The column in which new items are generated.
         - new_events (dict):  Dictionary mapping new values to combination of values in the anchor_column.
         - remove_parent_row (bool):  If true, columns not in column_order are placed at end.
@@ -24,17 +26,18 @@ class SplitRowsOp(BaseOp):
     }
 
     def __init__(self, parameters):
-        """ Constructor for split row operation.
+        """ Constructor for the split rows operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError:
+
+            - KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -47,7 +50,7 @@ class SplitRowsOp(BaseOp):
         """ Split a row representing a particular event into multiple rows.
 
         Parameters:
-            dispatcher (Dispatcher):  The dispatcher object for context.
+            dispatcher (Dispatcher):  The dispatcher object for managing the operations.
             df (DataFrame):   The DataFrame to be remodeled.
             name (str):  Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):  Only needed for HED operations.
@@ -56,7 +59,8 @@ class SplitRowsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            TypeError: If bad onset or duration.
+            - TypeError:
+                - If bad onset or duration.
 
         """
 
@@ -64,7 +68,6 @@ class SplitRowsOp(BaseOp):
 
         if self.anchor_column not in df_new.columns:
             df_new[self.anchor_column] = np.nan
-        # new_df = pd.DataFrame('n/a', index=range(len(df.index)), columns=df.columns)
         if self.remove_parent_row:
             df_list = []
         else:

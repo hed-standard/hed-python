@@ -1,4 +1,4 @@
-""" HED tools for remodeling, analysis and summarization. """
+""" HED remodeling, analysis and summarization tools. """
 
 from .analysis.file_dictionary import FileDictionary
 from .analysis.hed_context_manager import OnsetGroup, HedContextManager
@@ -10,21 +10,19 @@ from .analysis.hed_type_counts import HedTypeCount
 from .analysis.key_map import KeyMap
 from .analysis.tabular_summary import TabularSummary
 from .bids.bids_dataset import BidsDataset
-from .bids.bids_dataset_summary import BidsDatasetSummary
 from .bids.bids_file import BidsFile
 from .bids.bids_file_dictionary import BidsFileDictionary
 from .bids.bids_file_group import BidsFileGroup
 from .bids.bids_sidecar_file import BidsSidecarFile
 from .bids.bids_tabular_dictionary import BidsTabularDictionary
 from .bids.bids_tabular_file import BidsTabularFile
-from .bids.bids_timeseries_file import BidsTimeseriesFile
 
 from .remodeling.dispatcher import Dispatcher
 from .remodeling.backup_manager import BackupManager
 from .remodeling.operations.base_context import BaseContext
 from .remodeling.operations.base_op import BaseOp
 from .remodeling.operations.factor_column_op import FactorColumnOp
-# from .remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
+from .remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
 from .remodeling.operations.factor_hed_type_op import FactorHedTypeOp
 from .remodeling.operations.merge_consecutive_op import MergeConsecutiveOp
 from .remodeling.operations.number_groups_op import NumberGroupsOp

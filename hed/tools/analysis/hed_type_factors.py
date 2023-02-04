@@ -1,4 +1,4 @@
-""" Class to hold factor information for a tabular file. """
+""" Manages factor information for a tabular file. """
 
 import pandas as pd
 from hed.errors.exceptions import HedFileError

@@ -1,4 +1,4 @@
-""" Create factors for a tabular file based on tag queries. """
+""" Create tabular file factors from tag queries. """
 
 
 import pandas as pd
@@ -10,7 +10,7 @@ from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 class FactorHedTagsOp(BaseOp):
-    """ Create factors for a tabular file based on tag queries.
+    """ Create tabular file factors from tag queries.
 
     The required parameters are:
         - queries (list):       Queries to be applied successively as filters.
@@ -19,7 +19,7 @@ class FactorHedTagsOp(BaseOp):
         - expand_context bool): Expand the context if True.
 
     Raises:
-        ValueError:
+        - ValueError:
             - If the list of query_names is not empty or the same length as queries.
             - If the query_names list contains duplicate names.
             - If a query is invalid and cannot be parsed.
@@ -38,6 +38,26 @@ class FactorHedTagsOp(BaseOp):
     }
 
     def __init__(self, parameters):
+        """ Constructor for the factor HED tags operation.
+
+        Parameters:
+            op_spec (dict): Specification for required and optional parameters.
+            parameters (dict):  Actual values of the parameters for the operation.
+
+        Raises:
+            - KeyError:
+                - if a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            - TypeError:
+                - If a parameter has the wrong type.
+
+            - ValueError:
+                - If the specification is missing a valid operation.
+                - If the length of query names is not empty and not same length as queries.
+                - If there are duplicate query names.
+
+        """
         super().__init__(self.PARAMS, parameters)
         self.queries = parameters['queries']
         self.query_names = parameters['query_names']
@@ -62,13 +82,17 @@ class FactorHedTagsOp(BaseOp):
         """ Factor the column using HED tag queries.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context
+            dispatcher (Dispatcher) - dispatcher object for managing the operations.
             df (DataFrame) - The DataFrame to be remodeled.
             name (str) - Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like)   Only needed for HED operations.
 
+        Raises:
+            - ValueError:
+                - If a name for a new query factor column is already a column.
+
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         """
 

@@ -1,4 +1,4 @@
-""" Create factor columns for a tabular file based on values in column. """
+""" Create tabular file factor columns from column values. """
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
@@ -7,7 +7,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class FactorColumnOp(BaseOp):
-    """ Create factor columns corresponding to values in specified column of a tabular file.
+    """ Create tabular file factor columns from column values.
 
     The required parameters are:
         - column_name (str):  The name of a column in the DataFrame.
@@ -15,7 +15,7 @@ class FactorColumnOp(BaseOp):
         - factor_names (list):   Names to use as the factor columns.
 
     Raises:
-        ValueError:
+        - ValueError:
             - If lengths of factor_values and factor_names are not the same.
             - If factor_name is already a column and overwrite_existing is False.
 
@@ -38,14 +38,14 @@ class FactorColumnOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
         Raises:
-            KeyError:
+            - KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
-            ValueError:
+            - ValueError:
                 - If the factor_names list is not empty or the same length as the factor_values list.
 
         """
@@ -62,13 +62,13 @@ class FactorColumnOp(BaseOp):
         """ Create factor columns for values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context.
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            DataFrame_ a new DataFrame with the factor columns appended.
+            DataFrame: A new DataFrame with the factor columns appended.
 
         """
 

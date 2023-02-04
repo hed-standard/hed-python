@@ -1,3 +1,5 @@
+""" Container for a BIDS sidecar file. """
+
 import os
 from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_file import BidsFile
@@ -7,6 +9,12 @@ class BidsSidecarFile(BidsFile):
     """ A BIDS sidecar file. """
 
     def __init__(self, file_path):
+        """ Constructs a bids sidecar from a file.
+
+        Parameters:
+            file_path (str): The real path of the sidecar.
+
+        """
         super().__init__(file_path)
 
     def is_sidecar_for(self, obj):

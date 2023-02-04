@@ -1,3 +1,5 @@
+""" The valid operations for the remodeling tools. """
+
 from hed.tools.remodeling.operations.factor_column_op import FactorColumnOp
 from hed.tools.remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
 from hed.tools.remodeling.operations.factor_hed_type_op import FactorHedTypeOp

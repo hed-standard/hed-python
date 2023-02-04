@@ -1,8 +1,9 @@
+""" Remove columns from a tabular file. """
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class RemoveColumnsOp(BaseOp):
-    """ Remove columns from a dataframe.
+    """ Remove columns from a tabular file.
 
     Notes: The required parameters are:
         - remove_names (list)      The names of the columns to be removed.
@@ -26,11 +27,11 @@ class RemoveColumnsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
         Raises:
-            KeyError:
+            - KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -46,16 +47,17 @@ class RemoveColumnsOp(BaseOp):
         """ Remove indicated columns from a dataframe.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The DataFrame to be remodeled.
             name (str):     Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):   Only needed for HED operations.
 
         Returns:
-            Dataframe: a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         Raises:
-            KeyError if ignore_missing is false and column not in df is to be removed.
+            - KeyError:
+                - If ignore_missing is False and a column not in the data is to be removed.
 
         """
 

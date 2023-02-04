@@ -1,3 +1,5 @@
+""" Validate the HED tags in a dataset and report errors. """
+
 import os
 from hed.errors import ErrorSeverity, ErrorHandler
 from hed.models.sidecar import Sidecar
@@ -8,9 +10,9 @@ from hed.validator import HedValidator
 
 
 class SummarizeHedValidationOp(BaseOp):
-    """ Validate the events and report any HED validation errors.
+    """ Validate the HED tags in a dataset and report errors.
 
-    Notes: The required parameters are:
+    The required parameters are:
         - summary_name (str): The name of the summary.
         - summary_filename (str):  Base filename of the summary.
         - check_for_warnings (bool):  If true include warnings as well as errors.
@@ -36,14 +38,17 @@ class SummarizeHedValidationOp(BaseOp):
         """ Constructor for the summarize hed validation operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError:
+
+            - KeyError:
+
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
+
                 - If a parameter has the wrong type.
 
         """
@@ -56,7 +61,7 @@ class SummarizeHedValidationOp(BaseOp):
         """ Validate the dataframe with the accompanying sidecar, if any.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The DataFrame to be validated.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Usually needed unless only HED tags in HED column of event file.

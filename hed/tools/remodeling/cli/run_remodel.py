@@ -1,4 +1,4 @@
-""" Main command line program for running the remodeling tools. """
+""" Main command-line program for running the remodeling tools. """
 
 import os
 import json
