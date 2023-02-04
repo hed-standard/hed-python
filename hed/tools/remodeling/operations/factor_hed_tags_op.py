@@ -12,18 +12,23 @@ from hed.tools.analysis.analysis_util import get_assembled_strings
 class FactorHedTagsOp(BaseOp):
     """ Create tabular file factors from tag queries.
 
-    The required parameters are:
-        - queries (list):       Queries to be applied successively as filters.
-        - query_names (list):   List of names to use as columns for the queries (otherwise use query1,.._.
-        - remove_types (list):  Structural HED tags to be removed (usually *Condition-variable* and *Task*).
-        - expand_context bool): Expand the context if True.
+    Required parameters:
+    - queries (list):       Queries to be applied successively as filters.
+    - query_names (list):   Column names for the query factors.
+    - remove_types (list):  Structural HED tags to be removed .
+    - expand_context bool): Expand the context if True.
 
     Raises:
-        - ValueError:
-            - If the list of query_names is not empty or the same length as queries.
-            - If the query_names list contains duplicate names.
-            - If a query is invalid and cannot be parsed.
 
+        ValueError:
+        - If the list of query_names is not empty or the same length as queries.
+        - If the query_names list contains duplicate names.
+        - If a query is invalid and cannot be parsed.
+
+    Notes:
+        - If factor column names are not provided, *query1*, *query2*, ... are used.
+        - When the context is expanded, the effect of events for temporal extent is accounted for.
+          This is not implemented in the current version.
     """
 
     PARAMS = {
@@ -45,17 +50,18 @@ class FactorHedTagsOp(BaseOp):
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
-            - KeyError:
-                - if a required parameter is missing.
-                - If an unexpected parameter is provided.
 
-            - TypeError:
-                - If a parameter has the wrong type.
+            KeyError:
+            - if a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            - ValueError:
-                - If the specification is missing a valid operation.
-                - If the length of query names is not empty and not same length as queries.
-                - If there are duplicate query names.
+            TypeError:
+            - If a parameter has the wrong type.
+
+            ValueError:
+            - If the specification is missing a valid operation.
+            - If the length of query names is not empty and not same length as queries.
+            - If there are duplicate query names.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -88,8 +94,9 @@ class FactorHedTagsOp(BaseOp):
             sidecar (Sidecar or file-like)   Only needed for HED operations.
 
         Raises:
-            - ValueError:
-                - If a name for a new query factor column is already a column.
+
+            ValueError:
+            - If a name for a new query factor column is already a column.
 
         Returns:
             Dataframe: A new dataframe after processing.
