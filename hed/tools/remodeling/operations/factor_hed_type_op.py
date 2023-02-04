@@ -13,9 +13,9 @@ from hed.tools.analysis.hed_type_manager import HedTypeManager
 class FactorHedTypeOp(BaseOp):
     """ Create tabular file factors from type variables.
 
-   The required parameters are
-        - type_tag (str): HED tag used to find the factors (most commonly `condition-variable`).
-        - type_values (list): Factor values to include. If empty all values of that type_tag are used.
+   Required parameters:
+   - type_tag (str): HED tag used to find the factors (most commonly `condition-variable`).
+   - type_values (list): Factor values to include. If empty all values of that type_tag are used.
 
     """
 
@@ -36,15 +36,16 @@ class FactorHedTypeOp(BaseOp):
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
-            - KeyError:
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
 
-            - TypeError:
-                - If a parameter has the wrong type.
+            KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
+
+            TypeError:
+            - If a parameter has the wrong type.
 
             - ValueError:
-                - If the specification is missing a valid operation.
+            - If the specification is missing a valid operation.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -63,7 +64,8 @@ class FactorHedTypeOp(BaseOp):
         Returns:
             DataFrame: A new DataFame with that includes the factors.
 
-        If column_name is not a column in df, df is just returned.
+        Notes:
+            - If column_name is not a column in df, df is just returned.
 
         """
 

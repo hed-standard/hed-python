@@ -5,7 +5,7 @@ class BaseOp:
     """ Base class for operations. All remodeling operations should extend this class.
 
     Properties:
-        operation
+        operation (str): Operation name.
         required_parameters (dict): required parameters for the operation.
         optional_parameters (dict): optional parameters for the operation.
 
@@ -21,15 +21,15 @@ class BaseOp:
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
-            - KeyError:
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
+            KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            - TypeError:
-                - If a parameter has the wrong type.
+            TypeError:
+            - If a parameter has the wrong type.
 
-            - ValueError:
-                - If the specification is missing a valid operation.
+            ValueError:
+            - If the specification is missing a valid operation.
 
         """
         self.operation = op_spec.get("operation", "")
@@ -43,16 +43,16 @@ class BaseOp:
         """ Verify that the parameters meet the specification of the operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameters passed for this operation.
+            parameters (dict): Dictionary of parameters for this operation.
 
         Raises:
 
-            - KeyError:
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
+           KeyError:
+           - If a required parameter is missing.
+           - If an unexpected parameter is provided.
 
-            - TypeError:
-                - If a parameter has the wrong type.
+            TypeError:
+            - If a parameter has the wrong type.
 
         """
 
