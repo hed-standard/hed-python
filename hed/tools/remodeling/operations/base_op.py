@@ -1,4 +1,4 @@
-""" Base class for operations. """
+""" Base class for remodeling operations. """
 
 
 class BaseOp:
@@ -9,29 +9,27 @@ class BaseOp:
         required_parameters (dict): required parameters for the operation.
         optional_parameters (dict): optional parameters for the operation.
 
-    The base class holds the parameters and does basic parameter checking.
+    The base class holds the parameters and does basic parameter checking against the operations specification.
 
     """
 
     def __init__(self, op_spec, parameters):
-        """ BaseOp constructor.
+        """ Base class constructor for operations.
 
         Parameters:
-            op_spec (dict): Specification of the required and optional parameters for the operation.
+            op_spec (dict): Specification for required and optional parameters.
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
-        Raises:
-            KeyError:
-                - if a required parameter is missing.
-                - if an unexpected parameter is provided.
+            - KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
 
-            TypeError:
-                - if a parameter has the wrong type.
+            - TypeError:
+                - If a parameter has the wrong type.
 
-            ValueError:
-                - if the specification is missing a valid operation.
-
+            - ValueError:
+                - If the specification is missing a valid operation.
 
         """
         self.operation = op_spec.get("operation", "")
@@ -48,11 +46,12 @@ class BaseOp:
             parameters (dict): Dictionary with the parameters passed for this operation.
 
         Raises:
-            KeyError:
+
+            - KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -76,13 +75,13 @@ class BaseOp:
                 raise TypeError("BadType", f"{param_value} has type {type(param_value)} not {param_type}")
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Base class method to be overridden with the specification operation.
+        """ Base class method to be overridden with by each operation.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context
-            df (DataFrame): The DataFrame to be remodeled.
-            name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like):   Only needed for HED operations.
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            df (DataFrame): The tabular file to be remodeled.
+            name (str): Unique identifier for the data -- often the original file path.
+            sidecar (Sidecar or file-like):  A JSON sidecar needed for HED operations.
 
         """
 
@@ -90,7 +89,16 @@ class BaseOp:
 
     @staticmethod
     def _check_list_type(param_value, param_type):
-        """ Check a parameter value against its specified type. """
+        """ Check a parameter value against its specified type.
+
+        Parameters:
+            param_value (any):   The value to be checked.
+            param_type (any):    Class to check the param_value against.
+
+        Raises:
+            - TypeError: If param_value is not an instance of param_type.
+
+        """
 
         for this_type in param_type:
             if isinstance(param_value, this_type):

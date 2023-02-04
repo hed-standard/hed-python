@@ -1,8 +1,9 @@
+""" Reorder columns in a tabular file. """
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class ReorderColumnsOp(BaseOp):
-    """ Reorder columns in a dataframe.
+    """ Reorder columns in a tabular file.
 
     Notes: The required parameters are:
         - column_order (list)   The names of the columns to be reordered.
@@ -28,14 +29,15 @@ class ReorderColumnsOp(BaseOp):
         """ Constructor for reorder columns operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError:
+
+            - KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -48,16 +50,17 @@ class ReorderColumnsOp(BaseOp):
         """ Reorder columns as specified in event dictionary.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context.
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame):  The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):   Only needed for HED operations.
 
         Returns:
-            Dataframe: a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         Raises:
-            ValueError:  when ignore_missing is false and column_order has columns not in df.
+            - ValueError:
+                - When ignore_missing is false and column_order has columns not in the data.
 
         """
 

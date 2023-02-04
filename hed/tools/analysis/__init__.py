@@ -1,1 +1,1 @@
-""" HED basic analysis tools."""
+""" Basic analysis tools. """

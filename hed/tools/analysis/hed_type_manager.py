@@ -1,4 +1,4 @@
-""" Class to manage type factors and type definitions. """
+""" Manager for type factors and type definitions. """
 
 import pandas as pd
 import json

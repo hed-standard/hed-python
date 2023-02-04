@@ -1,18 +1,20 @@
+""" Summarize the values in the columns of a tabular file. """
+
 from hed.tools import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 class SummarizeColumnValuesOp(BaseOp):
-    """ Summarize the values that are in the columns.
+    """ Summarize the values in the columns of a tabular file.
 
-    Notes: The required parameters are:
+    The required parameters are:
         - summary_name (str)   The name of the summary.
         - summary_filename (str)   Base filename of the summary.
         - skip_columns (list)  Names of columns to skip in the summary.
-        - value_columns (list) Names of columns to treat as value columns rather than categorical columns
+        - value_columns (list) Names of columns to treat as value columns rather than categorical columns.
 
-    The purpose of this op is to produce a summary of the values in a tabular file.
+    The purpose is to produce a summary of the values in a tabular file.
 
     """
 
@@ -34,14 +36,15 @@ class SummarizeColumnValuesOp(BaseOp):
         """ Constructor for the summarize column values operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError:
+
+            -KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -56,7 +59,7 @@ class SummarizeColumnValuesOp(BaseOp):
         """ Create factor columns corresponding to values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The DataFrame to be remodeled.
             name (str):  Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Only needed for HED operations.

@@ -1,3 +1,5 @@
+""" The contents of a BIDS dataset. """
+
 import os
 import json
 from hed.errors.error_reporter import ErrorHandler
@@ -12,7 +14,7 @@ LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schemas/m
 
 
 class BidsDataset:
-    """ A BIDS dataset primarily focused on HED evaluation.
+    """ A BIDS dataset representation primarily focused on HED evaluation.
 
     Attributes:
         root_path (str):  Real root path of the BIDS dataset.

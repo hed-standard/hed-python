@@ -1,7 +1,8 @@
+""" A group of BIDS files with specified suffix name. """
+
 import os
 from hed.errors.error_reporter import ErrorContext, ErrorHandler
 from hed.tools.analysis.tabular_summary import TabularSummary
-from hed.tools.bids.bids_timeseries_file import BidsTimeseriesFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.util.io_util import get_dir_dictionary, get_file_list, get_path_components
@@ -178,8 +179,7 @@ class BidsFileGroup:
             for file in files:
                 file_dict[os.path.realpath(file)] = BidsTabularFile(file)
         else:
-            for file in files:
-                file_dict[os.path.realpath(file)] = BidsTimeseriesFile(file)
+            return None
         return file_dict
 
     def _make_sidecar_dict(self):

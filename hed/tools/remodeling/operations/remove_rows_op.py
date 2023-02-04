@@ -1,12 +1,14 @@
+""" Remove rows from a tabular file. """
+
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class RemoveRowsOp(BaseOp):
-    """ Remove dataframe rows that take one of the specified values in the specified column.
+    """ Remove rows from a tabular file.
 
-         Notes: The required parameters are
-             - column_name (str)     The name of column to be tested.
-             - remove_values (list)  The values to test for row removal.
+    The required parameters are:
+        - column_name (str)     The name of column to be tested.
+        - remove_values (list)  The values to test for row removal.
 
     """
 
@@ -23,14 +25,14 @@ class RemoveRowsOp(BaseOp):
         """ Constructor for remove rows operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError:
+            - KeyError:
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -42,7 +44,7 @@ class RemoveRowsOp(BaseOp):
         """ Remove rows with the values indicated in the column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The DataFrame to be remodeled.
             name (str):  Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Only needed for HED operations.

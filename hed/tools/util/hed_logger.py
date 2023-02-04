@@ -1,6 +1,14 @@
+""" Logger class with messages organized by key """
+
 class HedLogger:
     """ Log status messages organized by key. """
     def __init__(self, name=None):
+        """ Constructor for the HED logger.
+
+        Parameters:
+            name (str): Identifying name of the logger.
+
+        """
         self.log = {}
         self.name = name
 

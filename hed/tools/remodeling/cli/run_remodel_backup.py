@@ -1,4 +1,4 @@
-""" Command line program for creating a backup. """
+""" Command-line program for creating a backup. """
 
 import argparse
 from hed.errors.exceptions import HedFileError

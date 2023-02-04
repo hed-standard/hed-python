@@ -1,11 +1,11 @@
-""" Merge consecutive events with same column value into a single event. """
+""" Merge consecutive rows with same column value. """
 
 import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class MergeConsecutiveOp(BaseOp):
-    """ Merge consecutive events with same column value into a single event.
+    """ Merge consecutive rows with same column value.
 
     The required parameters are:
         - column_name (str): the name of the column whose consecutive values are to be compared (the merge column).
@@ -32,6 +32,25 @@ class MergeConsecutiveOp(BaseOp):
     }
 
     def __init__(self, parameters):
+        """ Constructor for the merge consecutive operation.
+
+        Parameters:
+            op_spec (dict): Specification for required and optional parameters.
+            parameters (dict):  Actual values of the parameters for the operation.
+
+        Raises:
+            - KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            - TypeError:
+                - If a parameter has the wrong type.
+
+            - ValueError:
+                - If the specification is missing a valid operation.
+                - If one of the match column is the merge column.
+
+        """
         super().__init__(self.PARAMS, parameters)
         self.column_name = parameters["column_name"]
         self.event_code = parameters["event_code"]
@@ -46,7 +65,7 @@ class MergeConsecutiveOp(BaseOp):
         """ Merge consecutive events of the same type
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Only needed for HED operations.
@@ -55,7 +74,7 @@ class MergeConsecutiveOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            ValueError
+            - ValueError:
                 - If dataframe does not have the anchor column and ignore_missing is False.
                 - If a match column is missing and ignore_missing is false.
                 - If the durations were to be set and the dataframe did not have an onset column.

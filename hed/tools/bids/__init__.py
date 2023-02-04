@@ -1,1 +1,1 @@
-""" HED models for BIDS datasets and files."""
+""" Models for BIDS datasets and files."""

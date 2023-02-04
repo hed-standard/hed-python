@@ -1,4 +1,4 @@
-""" Classes for keeping counts of HED tags in a file's annotations. """
+""" Keeps the counts of HED tags in a file's annotations. """
 
 import copy
 

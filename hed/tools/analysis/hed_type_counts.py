@@ -1,4 +1,4 @@
-""" Classes for managing the counts of tags such as Condition-variable and task. """
+""" Manages the counts of tags such as Condition-variable and task. """
 
 
 class HedTypeCount:

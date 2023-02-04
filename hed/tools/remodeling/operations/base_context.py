@@ -1,4 +1,4 @@
-""" Abstract base class for summary contexts. """
+""" Abstract base class for the context of summary operations. """
 
 import os
 from abc import ABC, abstractmethod

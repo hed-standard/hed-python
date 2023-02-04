@@ -1,3 +1,5 @@
+""" Summarizes the unique column names in a dataset. """
+
 import json
 
 

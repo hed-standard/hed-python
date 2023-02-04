@@ -1,3 +1,5 @@
+""" Summarize a HED type tag in a collection of tabular files. """
+
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.analysis_util import get_assembled_strings
 from hed.tools.analysis.hed_type_values import HedTypeValues
@@ -8,15 +10,15 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 
 
 class SummarizeHedTypeOp(BaseOp):
-    """ Summarize the occurrences of a type tag in the dataset.
+    """ Summarize a HED type tag in a collection of tabular files.
 
-    Notes: The required parameters are:
+    The required parameters are:
         - summary_name (str)   The name of the summary.
         - summary_filename (str)   Base filename of the summary.
-        - type_tag (str)  Type tag to get_summary (e.g. 'condition-variable' or 'task')
+        - type_tag (str)  Type tag to get_summary (e.g. `condition-variable` or `task` tags)
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
-    is often used with 'condition-variable' to produce a summary of the experimental design.
+    is often used with `condition-variable` to produce a summary of the experimental design.
 
     """
 
@@ -37,14 +39,16 @@ class SummarizeHedTypeOp(BaseOp):
         """ Constructor for the summarize hed type operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError:
+            - KeyError:
+
                 - If a required parameter is missing.
                 - If an unexpected parameter is provided.
 
-            TypeError:
+            - TypeError:
+
                 - If a parameter has the wrong type.
 
         """
@@ -57,13 +61,13 @@ class SummarizeHedTypeOp(BaseOp):
         """ Create factor columns corresponding to values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for context.
+            dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The DataFrame to be summarized.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Usually required unless event file has a HED column.
 
         Returns:
-            DataFrame: Input DataFrame, unchanged
+            DataFrame: Input DataFrame, unchanged.
 
         Side-effect:
             Updates the context.

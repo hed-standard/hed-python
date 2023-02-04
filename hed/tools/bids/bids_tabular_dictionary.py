@@ -1,3 +1,5 @@
+""" A dictionary of tabular files keyed to BIDS entities. """
+
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import get_new_dataframe
 from hed.tools.bids.bids_file_dictionary import BidsFileDictionary
@@ -6,7 +8,7 @@ from hed.tools.bids.bids_tabular_file import BidsTabularFile
 
 
 class BidsTabularDictionary(BidsFileDictionary):
-    """ A key tabular-file dictionary for tabular files.
+    """  A dictionary of tabular files keyed to BIDS entities.
 
     Attributes:
         column_dict (dict): Dictionary with an entity key and a list of column names for the file as the value.

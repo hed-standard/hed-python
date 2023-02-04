@@ -1,4 +1,4 @@
-""" Classes for managing context and events of temporal extent. """
+""" Manages context and events of temporal extent. """
 
 from hed.errors.exceptions import HedFileError
 from hed.models import HedGroup, HedString

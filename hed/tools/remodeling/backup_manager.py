@@ -15,6 +15,16 @@ class BackupManager:
     BACKUP_ROOT = 'backup_root'
 
     def __init__(self, data_root):
+        """ Constructor for the backup manager.
+
+        Parameters:
+            data_root (str): full path of the root of the data directory.
+
+        Raises:
+            - HedFileError:
+                - If the data_root does not correspond to a real directory.
+
+        """
         if not os.path.isdir(data_root):
             raise HedFileError('NonExistentData', f"{data_root} is not an existing directory", "")
         self.data_root = data_root

@@ -49,14 +49,14 @@ class RemapColumnsOp(BaseOp):
                 parameters (dict): Dictionary with the parameter values for required and optional parameters
 
             Raises:
-                KeyError:
+                - KeyError:
                     - If a required parameter is missing.
                     - If an unexpected parameter is provided.
 
-                TypeError:
+                - TypeError:
                     - If a parameter has the wrong type.
 
-                ValueError:
+                - ValueError:
                     - If a column designated as an integer source does not have valid integers.
                     - If no source columns are specified.
                     - If a map_list entry has the wrong number of items (source columns + destination columns).
@@ -100,7 +100,7 @@ class RemapColumnsOp(BaseOp):
         """ Remap new columns from combinations of others.
 
         Parameters:
-            dispatcher (Dispatcher):  The dispatcher object for context.
+            dispatcher (Dispatcher):  The dispatcher object for managing the operations.
             df (DataFrame):  The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):   Only needed for HED operations.
@@ -109,7 +109,8 @@ class RemapColumnsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            ValueError: If ignore
+            - ValueError:
+                - If ignore_missing is false and source values from the data are not in the map.
 
         """
         df[self.source_columns] = df[self.source_columns].replace(np.NaN, 'n/a')

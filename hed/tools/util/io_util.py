@@ -13,9 +13,9 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
 
     Parameters:
         test_file (str) :           Path of filename to test.
-        name_prefix (list, str, None):  An optional name_prefix or list of prefixes to accept for the base filename
-        name_suffix (list, str, None):  An optional name_suffix or list of suffixes to accept for the base file name
-        extensions (list, str, None):   An optional extension or list of extensions to accept for the extensions
+        name_prefix (list, str, None):  An optional name_prefix or list of prefixes to accept for the base filename.
+        name_suffix (list, str, None):  An optional name_suffix or list of suffixes to accept for the base file name.
+        extensions (list, str, None):   An optional extension or list of extensions to accept for the extensions.
 
     Returns:
         bool: True if file has the appropriate format.
@@ -43,7 +43,7 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
 
 
 def get_allowed(value, allowed_values=None, starts_with=True):
-    """ Returns the portion of the value that matches a value in allowed_values or None if no match.
+    """ Return the portion of the value that matches a value in allowed_values or None if no match.
 
     Parameters:
         value (str): value to be matched.
@@ -70,7 +70,7 @@ def get_allowed(value, allowed_values=None, starts_with=True):
 
 
 def extract_suffix_path(path, prefix_path):
-    """ Return suffix of path after prefix path has been removed.
+    """ Return the suffix of path after prefix path has been removed.
 
     Parameters:
         path (str)           path of the root directory.
@@ -161,6 +161,16 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
 
 
 def get_filtered_by_element(file_list, elements):
+    """ Filter a file list by whether the base names have a substring matching any of the members of elements.
+
+    Parameters:
+        file_list (list):  List of file paths to be filtered.
+        elements (list):  List of strings to use as filename filters.
+
+    Returns:
+        list:  The list only containing file paths whose filenames match a filter.
+
+    """
     new_list = [file for file in file_list if any(substring in os.path.basename(file) for substring in elements)]
     return new_list
 
