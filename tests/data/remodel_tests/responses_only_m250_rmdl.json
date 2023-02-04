@@ -16,7 +16,7 @@
         }
     },
     {
-        "operation": "split_events",
+        "operation": "split_rows",
         "description": "Create event files that only have response events",
         "parameters": {
             "anchor_column": "event_type",
@@ -28,7 +28,7 @@
                 }
             },
 			"add_trial_numbers": false,
-            "remove_trial_parent": true
+            "remove_parent_row": true
         }
     },
     {

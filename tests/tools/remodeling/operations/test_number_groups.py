@@ -200,9 +200,9 @@ class Test(unittest.TestCase):
 
         # Test that df has not been changed by the op
         self.assertTrue(list(df.columns) == list(df_test.columns),
-                        "split_event should not change the input df columns")
+                        "split_rows should not change the input df columns")
         self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
-                        "split_event should not change the input df values")
+                        "split_rows should not change the input df values")
 
     # test expected breaks parameters
     def test_missing_startstop_param(self):

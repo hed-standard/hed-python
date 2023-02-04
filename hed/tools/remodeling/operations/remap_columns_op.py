@@ -43,7 +43,25 @@ class RemapColumnsOp(BaseOp):
     }
 
     def __init__(self, parameters):
+        """ Constructor for the remap columns operation.
 
+            Parameters:
+                parameters (dict): Dictionary with the parameter values for required and optional parameters
+
+            Raises:
+                KeyError:
+                    - If a required parameter is missing.
+                    - If an unexpected parameter is provided.
+
+                TypeError:
+                    - If a parameter has the wrong type.
+
+                ValueError:
+                    - If a column designated as an integer source does not have valid integers.
+                    - If no source columns are specified.
+                    - If a map_list entry has the wrong number of items (source columns + destination columns).
+
+          """
         super().__init__(self.PARAMS, parameters)
         self.source_columns = parameters['source_columns']
         self.integer_sources = []

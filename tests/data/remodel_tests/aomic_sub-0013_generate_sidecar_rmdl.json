@@ -1,6 +1,6 @@
 [
     {
-        "operation": "summarize_events_to_sidecar",
+        "operation": "summarize_sidecar_from_events",
         "description": "Generate a sidecar from the excerpted events file.",
         "parameters": {
             "summary_name": "AOMIC_generate_sidecar",

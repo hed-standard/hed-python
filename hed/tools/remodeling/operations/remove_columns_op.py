@@ -23,11 +23,15 @@ class RemoveColumnsOp(BaseOp):
         """ Constructor for remove columns operation.
 
         Parameters:
-            parameters (dict): A dictionary of the parameters for this operation.
+            parameters (dict): Dictionary with the parameter values for required and optional parameters
 
         Raises:
-            KeyError if an invalid key is included in parameters.
-            TypeError if a value in parameters has an invalid type.
+            KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            TypeError:
+                - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)

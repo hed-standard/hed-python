@@ -2,8 +2,8 @@ import os
 import pandas as pd
 import unittest
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_events_to_sidecar_op import EventsToSidecarSummaryContext, \
-    SummarizeEventsToSidecarOp
+from hed.tools.remodeling.operations.summarize_sidecar_from_events_op import EventsToSidecarSummaryContext, \
+    SummarizeSidecarFromEventsOp
 
 
 class Test(unittest.TestCase):
@@ -33,11 +33,11 @@ class Test(unittest.TestCase):
         pass
 
     def test_constructor(self):
-        sum_op = SummarizeEventsToSidecarOp(self.base_parameters)
-        self.assertIsInstance(sum_op, SummarizeEventsToSidecarOp, "constructor creates an object of the correct type")
+        sum_op = SummarizeSidecarFromEventsOp(self.base_parameters)
+        self.assertIsInstance(sum_op, SummarizeSidecarFromEventsOp, "constructor creates an object of the correct type")
 
     def test_do_ops(self):
-        sum_op = SummarizeEventsToSidecarOp(self.base_parameters)
+        sum_op = SummarizeSidecarFromEventsOp(self.base_parameters)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
@@ -53,7 +53,7 @@ class Test(unittest.TestCase):
         sum_op.do_op(dispatch, dispatch.prep_data(df1a), 'name2')
 
     def test_get_summary(self):
-        sum_op = SummarizeEventsToSidecarOp(self.base_parameters)
+        sum_op = SummarizeSidecarFromEventsOp(self.base_parameters)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         sum_op.do_op(dispatch, dispatch.prep_data(df1), 'name1')

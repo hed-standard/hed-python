@@ -35,7 +35,7 @@ from .remodeling.operations.remove_columns_op import RemoveColumnsOp
 from .remodeling.operations.remove_rows_op import RemoveRowsOp
 from .remodeling.operations.rename_columns_op import RenameColumnsOp
 from .remodeling.operations.reorder_columns_op import ReorderColumnsOp
-from .remodeling.operations.split_event_op import SplitEventOp
+from .remodeling.operations.split_rows_op import SplitRowsOp
 from .remodeling.operations.summarize_column_names_op import SummarizeColumnNamesOp
 from .remodeling.operations.summarize_column_values_op import SummarizeColumnValuesOp
 from .remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp

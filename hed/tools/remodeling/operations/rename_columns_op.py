@@ -23,6 +23,20 @@ class RenameColumnsOp (BaseOp):
     }
 
     def __init__(self, parameters):
+        """ Constructor for rename columns operation.
+
+        Parameters:
+            parameters (dict): Dictionary with the parameter values for required and optional parameters
+
+        Raises:
+            KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            TypeError:
+                - If a parameter has the wrong type.
+
+        """
         super().__init__(self.PARAMS, parameters)
         self.column_mapping = parameters['column_mapping']
         if parameters['ignore_missing']:
