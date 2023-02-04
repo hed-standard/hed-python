@@ -152,6 +152,8 @@ def _load_schema_version(xml_version=None, xml_folder=None):
         if e.error_type == HedExceptions.FILE_NOT_FOUND:
             hed_cache.cache_xml_versions()
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
+            if not final_hed_xml_file:
+                raise HedFileError(HedExceptions.FILE_NOT_FOUND, f"HED version '{xml_version}' not found in cache: {hed_cache.get_cache_directory()}", filename=xml_folder)
             hed_schema = load_schema(final_hed_xml_file)
         else:
             raise e
