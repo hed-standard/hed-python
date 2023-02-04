@@ -54,6 +54,13 @@ class MergeConsecutiveOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
+        Raises:
+            ValueError
+                - If dataframe does not have the anchor column and ignore_missing is False.
+                - If a match column is missing and ignore_missing is false.
+                - If the durations were to be set and the dataframe did not have an onset column.
+                - If the durations were to be set and the dataframe did not have a duration column.
+
         """
 
         if not self.ignore_missing and self.column_name not in df.columns:

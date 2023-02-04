@@ -1,6 +1,6 @@
 [
    {
-       "operation": "split_event",
+       "operation": "split_rows",
        "description": "Create separate response event from response time column.",
        "parameters": {
            "anchor_column": "event_type",
@@ -9,7 +9,7 @@
                                        "copy_columns": ["response_accuracy",
                                                         "response_hand",
                                                         "trial_type"]}},
-           "remove_parent_event": false
+           "remove_parent_row": false
        }
    }
 ]

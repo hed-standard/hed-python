@@ -4,7 +4,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
 
 
-class SummarizeEventsToSidecarOp(BaseOp):
+class SummarizeSidecarFromEventsOp(BaseOp):
     """ Summarize the values that are in the columns.
 
     Notes: The required parameters are:
@@ -18,7 +18,7 @@ class SummarizeEventsToSidecarOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "summarize_events_to_sidecar",
+        "operation": "summarize_sidecar_from_events",
         "required_parameters": {
             "summary_name": str,
             "summary_filename": str,
@@ -32,6 +32,21 @@ class SummarizeEventsToSidecarOp(BaseOp):
     SUMMARY_TYPE = "events_to_sidecar"
 
     def __init__(self, parameters):
+        """ Constructor for summarize sidecar from events operation.
+
+        Parameters:
+            parameters (dict): Dictionary with the parameter values for required and optional parameters
+
+        Raises:
+            KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            TypeError:
+                - If a parameter has the wrong type.
+
+        """
+
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']

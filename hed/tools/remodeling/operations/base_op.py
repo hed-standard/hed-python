@@ -14,6 +14,26 @@ class BaseOp:
     """
 
     def __init__(self, op_spec, parameters):
+        """ BaseOp constructor.
+
+        Parameters:
+            op_spec (dict): Specification of the required and optional parameters for the operation.
+            parameters (dict):  Actual values of the parameters for the operation.
+
+        Raises:
+        Raises:
+            KeyError:
+                - if a required parameter is missing.
+                - if an unexpected parameter is provided.
+
+            TypeError:
+                - if a parameter has the wrong type.
+
+            ValueError:
+                - if the specification is missing a valid operation.
+
+
+        """
         self.operation = op_spec.get("operation", "")
         if not self.operation:
             raise ValueError("OpMustHaveOperation", "Op must have operation is empty")
@@ -22,7 +42,21 @@ class BaseOp:
         self.check_parameters(parameters)
 
     def check_parameters(self, parameters):
-        # Check for required arguments
+        """ Verify that the parameters meet the specification of the operation.
+
+        Parameters:
+            parameters (dict): Dictionary with the parameters passed for this operation.
+
+        Raises:
+            KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            TypeError:
+                - If a parameter has the wrong type.
+
+        """
+
         required = set(self.required_params.keys())
         required_missing = required.difference(set(parameters.keys()))
         if required_missing:
@@ -42,7 +76,7 @@ class BaseOp:
                 raise TypeError("BadType", f"{param_value} has type {type(param_value)} not {param_type}")
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Base class method to be overridden.
+        """ Base class method to be overridden with the specification operation.
 
         Parameters:
             dispatcher (Dispatcher): The dispatcher object for context
@@ -56,6 +90,8 @@ class BaseOp:
 
     @staticmethod
     def _check_list_type(param_value, param_type):
+        """ Check a parameter value against its specified type. """
+
         for this_type in param_type:
             if isinstance(param_value, this_type):
                 return

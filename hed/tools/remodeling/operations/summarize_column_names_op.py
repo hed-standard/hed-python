@@ -27,6 +27,20 @@ class SummarizeColumnNamesOp(BaseOp):
     SUMMARY_TYPE = "column_names"
 
     def __init__(self, parameters):
+        """ Constructor for summarize column names operation.
+
+        Parameters:
+            parameters (dict): Dictionary with the parameter values for required and optional parameters
+
+        Raises:
+            KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            TypeError:
+                - If a parameter has the wrong type.
+
+        """
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']

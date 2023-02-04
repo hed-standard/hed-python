@@ -1,4 +1,4 @@
-""" Create factor columns for tabular file based on values in column. """
+""" Create factor columns for a tabular file based on values in column. """
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
@@ -7,7 +7,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class FactorColumnOp(BaseOp):
-    """ Create factor columns corresponding to values in specified column.
+    """ Create factor columns corresponding to values in specified column of a tabular file.
 
     The required parameters are:
         - column_name (str):  The name of a column in the DataFrame.
@@ -32,6 +32,23 @@ class FactorColumnOp(BaseOp):
     }
 
     def __init__(self, parameters):
+        """ Constructor for the factor column operation.
+
+        Parameters:
+            parameters (dict): Dictionary with the parameter values for required and optional parameters
+
+        Raises:
+            KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            TypeError:
+                - If a parameter has the wrong type.
+
+            ValueError:
+                - If the factor_names list is not empty or the same length as the factor_values list.
+
+        """
         super().__init__(self.PARAMS, parameters)
         self.column_name = parameters['column_name']
         self.factor_values = parameters['factor_values']

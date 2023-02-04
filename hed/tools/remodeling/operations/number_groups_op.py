@@ -3,6 +3,8 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.util.data_util import get_indices, tuple_to_range
 import itertools
 
+#TODO: This class is under development
+
 
 class NumberGroupsOp(BaseOp):
     PARAMS = {

@@ -3,31 +3,45 @@ import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
-class SplitEventOp(BaseOp):
-    """ Split an event into multiple events.
+class SplitRowsOp(BaseOp):
+    """ Split each row into multiple rows.
 
     Notes: The required parameters are:
-        - anchor_column (str):  The column in which new items are generated.
-        - new_events (dict):    Dictionary mapping new values to combination of values in the anchor_column.
-        - remove_parent_event (bool):    If true, columns not in column_order are placed at end.
+        - anchor_column (str): The column in which new items are generated.
+        - new_events (dict):  Dictionary mapping new values to combination of values in the anchor_column.
+        - remove_parent_row (bool):  If true, columns not in column_order are placed at end.
 
     """
 
     PARAMS = {
-        "operation": "split_events",
+        "operation": "split_rows",
         "required_parameters": {
             "anchor_column": str,
             "new_events": dict,
-            "remove_parent_event": bool
+            "remove_parent_row": bool
         },
         "optional_parameters": {}
     }
 
     def __init__(self, parameters):
+        """ Constructor for split row operation.
+
+        Parameters:
+            parameters (dict): Dictionary with the parameter values for required and optional parameters
+
+        Raises:
+            KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            TypeError:
+                - If a parameter has the wrong type.
+
+        """
         super().__init__(self.PARAMS, parameters)
         self.anchor_column = parameters['anchor_column']
         self.new_events = parameters['new_events']
-        self.remove_parent_event = parameters['remove_parent_event']
+        self.remove_parent_row = parameters['remove_parent_row']
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Split a row representing a particular event into multiple rows.
@@ -51,18 +65,18 @@ class SplitEventOp(BaseOp):
         if self.anchor_column not in df_new.columns:
             df_new[self.anchor_column] = np.nan
         # new_df = pd.DataFrame('n/a', index=range(len(df.index)), columns=df.columns)
-        if self.remove_parent_event:
+        if self.remove_parent_row:
             df_list = []
         else:
             df_list = [df_new]
-        self._split_events(df, df_list)
+        self._split_rows(df, df_list)
         df_ret = pd.concat(df_list, axis=0, ignore_index=True)
         df_ret["onset"] = df_ret["onset"].apply(pd.to_numeric)
         df_ret = df_ret.sort_values('onset').reset_index(drop=True)
         return df_ret
 
-    def _split_events(self, df, df_list):
-        """ Split the events based on an anchor and different columns.
+    def _split_rows(self, df, df_list):
+        """ Split the rows based on an anchor and different columns.
 
         Parameters:
             df (DataFrame):  The DataFrame to be split.

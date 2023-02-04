@@ -11,9 +11,9 @@ class SummarizeHedValidationOp(BaseOp):
     """ Validate the events and report any HED validation errors.
 
     Notes: The required parameters are:
-        - summary_name (str)   The name of the summary.
-        - summary_filename (str)   Base filename of the summary.
-        - type_tag (str)  Type tag to get_summary (e.g. 'condition-variable' or 'task')
+        - summary_name (str): The name of the summary.
+        - summary_filename (str):  Base filename of the summary.
+        - check_for_warnings (bool):  If true include warnings as well as errors.
 
     The purpose of this op is to produce a summary of the HED validation errors in a file.
 
@@ -33,6 +33,20 @@ class SummarizeHedValidationOp(BaseOp):
     SUMMARY_TYPE = 'hed_validation'
 
     def __init__(self, parameters):
+        """ Constructor for the summarize hed validation operation.
+
+        Parameters:
+            parameters (dict): Dictionary with the parameter values for required and optional parameters
+
+        Raises:
+            KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
+
+            TypeError:
+                - If a parameter has the wrong type.
+
+        """
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
