@@ -310,7 +310,7 @@ class ExpressionExactMatch(Expression):
         return []
 
 
-class TagExpressionParser:
+class QueryParser:
     """Parse a search expression into a form than can be used to search a hed string."""
     def __init__(self, expression_string):
         self.tokens = []
@@ -418,7 +418,7 @@ class TagExpressionParser:
 
         return tokens
 
-    def search_hed_string(self, hed_string_obj):
+    def search(self, hed_string_obj):
         current_node = self.tree
 
         result = current_node.handle_expr(hed_string_obj)

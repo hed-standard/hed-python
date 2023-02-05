@@ -1,7 +1,7 @@
 import unittest
 from hed.models.hed_string import HedString
 from hed.models.hed_string_group import HedStringGroup
-from hed.models.expression_parser import TagExpressionParser
+from hed.models.expression_parser import QueryParser
 import os
 from hed import schema
 
@@ -15,12 +15,12 @@ class TestParser(unittest.TestCase):
         cls.hed_schema = schema.load_schema(hed_xml_file)
 
     def base_test(self, parse_expr, search_strings):
-        expression = TagExpressionParser(parse_expr)
+        expression = QueryParser(parse_expr)
 
         # print(f"Search Pattern: {expression._org_string} - {str(expression.tree)}")
         for string, expected_result in search_strings.items():
             hed_string = HedString(string, self.hed_schema)
-            result2 = expression.search_hed_string(hed_string)
+            result2 = expression.search(hed_string)
             # print(f"\tSearching string '{str(hed_string)}'")
             # if result2:
             #    print(f"\t\tFound as group(s) {str([str(r) for r in result2])}")
@@ -28,7 +28,7 @@ class TestParser(unittest.TestCase):
 
             # Same test with HedStringGroup in
             hed_string_comb = HedStringGroup([hed_string])
-            result3 = expression.search_hed_string(hed_string_comb)
+            result3 = expression.search(hed_string_comb)
             # print(f"\tSearching string '{str(hed_string)}'")
             # if result3:
             #    print(f"\t\tFound as group(s) {str([str(r) for r in result3])}")
@@ -53,7 +53,7 @@ class TestParser(unittest.TestCase):
         ]
         for string in test_search_strings:
             with self.assertRaises(ValueError) as context:
-                TagExpressionParser(string)
+                QueryParser(string)
             self.assertTrue(context.exception.args[0])
 
     def test_finding_tags(self):
@@ -625,31 +625,31 @@ class TestParser(unittest.TestCase):
         self.base_test("(a or b) and c", test_strings)
 
     def test_logical_negation(self):
-        expression = TagExpressionParser("~a")
+        expression = QueryParser("~a")
         hed_string = HedString("A")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
+        self.assertEqual(bool(expression.search(hed_string)), False)
         hed_string = HedString("B")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
+        self.assertEqual(bool(expression.search(hed_string)), True)
 
-        expression = TagExpressionParser("~a and b")
+        expression = QueryParser("~a and b")
         hed_string = HedString("A")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
+        self.assertEqual(bool(expression.search(hed_string)), False)
         hed_string = HedString("B")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
+        self.assertEqual(bool(expression.search(hed_string)), True)
         hed_string = HedString("A, B")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
+        self.assertEqual(bool(expression.search(hed_string)), False)
 
-        expression = TagExpressionParser("~( (a or b) and c)")
+        expression = QueryParser("~( (a or b) and c)")
         hed_string = HedString("A")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
+        self.assertEqual(bool(expression.search(hed_string)), True)
         hed_string = HedString("B")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
+        self.assertEqual(bool(expression.search(hed_string)), True)
         hed_string = HedString("C")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
+        self.assertEqual(bool(expression.search(hed_string)), True)
         hed_string = HedString("A, B")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), True)
+        self.assertEqual(bool(expression.search(hed_string)), True)
         hed_string = HedString("A, C")
-        self.assertEqual(bool(expression.search_hed_string(hed_string)), False)
+        self.assertEqual(bool(expression.search(hed_string)), False)
 
     def test_not_in_line(self):
         test_strings = {

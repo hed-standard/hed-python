@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
-from hed.models.expression_parser import TagExpressionParser
+from hed.models.expression_parser import QueryParser
 from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
@@ -72,7 +72,7 @@ class FactorHedTagsOp(BaseOp):
         self.expression_parsers = []
         for index, query in enumerate(self.queries):
             try:
-                next_query = TagExpressionParser(query)
+                next_query = QueryParser(query)
             except Exception:
                 raise ValueError("BadQuery", f"Query [{index}]: {query} cannot be parsed")
             self.expression_parsers.append(next_query)
@@ -108,7 +108,7 @@ class FactorHedTagsOp(BaseOp):
         df_factors = pd.DataFrame(0, index=range(len(hed_strings)), columns=self.query_names)
         for parse_ind, parser in enumerate(self.expression_parsers):
             for index, next_item in enumerate(hed_strings):
-                match = parser.search_hed_string(next_item)
+                match = parser.search(next_item)
                 if match:
                     df_factors.at[index, self.query_names[parse_ind]] = 1
         if len(df_factors.columns) > 0:
