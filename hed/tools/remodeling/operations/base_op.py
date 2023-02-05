@@ -4,7 +4,7 @@
 class BaseOp:
     """ Base class for operations. All remodeling operations should extend this class.
 
-    Properties:
+    Attributes:
         operation (str): Operation name.
         required_parameters (dict): required parameters for the operation.
         optional_parameters (dict): optional parameters for the operation.
@@ -16,21 +16,19 @@ class BaseOp:
     def __init__(self, op_spec, parameters):
         """ Base class constructor for operations.
 
-        Parameters:
+        Args:
             op_spec (dict): Specification for required and optional parameters.
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
             KeyError
-
-                > If a required parameter is missing.
-
-                > If an unexpected parameter is provided.
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
 
             TypeError
                 - If a parameter has the wrong type.
 
-            ValueError:
+            ValueError
                 - If the specification is missing a valid operation.
 
         """
@@ -50,10 +48,10 @@ class BaseOp:
         Raises:
 
             KeyError
-                If a required parameter is missing.
-                If an unexpected parameter is provided.
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
 
-            TypeError:
+            TypeError
                 - If a parameter has the wrong type.
 
         """

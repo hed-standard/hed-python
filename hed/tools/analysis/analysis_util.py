@@ -2,7 +2,7 @@
 
 import pandas as pd
 from hed.models.tabular_input import TabularInput
-from hed.models.expression_parser import TagExpressionParser
+from hed.models.expression_parser import QueryParser
 from hed.tools.util.data_util import separate_values
 from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
@@ -67,11 +67,11 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
 
     eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
     hed_list = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
-    expression = TagExpressionParser(query)
+    expression = QueryParser(query)
     hed_tags = []
     row_numbers = []
     for index, next_item in enumerate(hed_list):
-        match = expression.search_hed_string(next_item)
+        match = expression.search(next_item)
         if not match:
             continue
         hed_tags.append(next_item)
