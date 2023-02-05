@@ -28,11 +28,12 @@ class RemoveRowsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            - KeyError:
+            KeyError
                 - If a required parameter is missing.
+
                 - If an unexpected parameter is provided.
 
-            - TypeError:
+            TypeError:
                 - If a parameter has the wrong type.
 
         """
@@ -44,7 +45,7 @@ class RemoveRowsOp(BaseOp):
         """ Remove rows with the values indicated in the column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str):  Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Only needed for HED operations.

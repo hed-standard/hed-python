@@ -8,7 +8,7 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 class SummarizeColumnNamesOp(BaseOp):
     """  Summarize the column names in a collection of tabular files.
 
-    The required parameters are:
+    Required parameters:
         - summary_name (str)       The name of the summary.
         - summary_filename (str)   Base filename of the summary.
 
@@ -36,11 +36,12 @@ class SummarizeColumnNamesOp(BaseOp):
 
         Raises:
 
-            - KeyError:
+            KeyError
                 - If a required parameter is missing.
+
                 - If an unexpected parameter is provided.
 
-            - TypeError:
+            TypeError
                 - If a parameter has the wrong type.
 
         """
@@ -52,7 +53,7 @@ class SummarizeColumnNamesOp(BaseOp):
         """ Create factor columns corresponding to values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):   Only needed for HED operations.

@@ -10,7 +10,7 @@ class SplitRowsOp(BaseOp):
 
     The required parameters are:
         - anchor_column (str): The column in which new items are generated.
-        - new_events (dict):  Dictionary mapping new values to combination of values in the anchor_column.
+        - new_events (dict):  Mapping of new values based on values in the anchor_column.
         - remove_parent_row (bool):  If true, columns not in column_order are placed at end.
 
     """
@@ -33,11 +33,12 @@ class SplitRowsOp(BaseOp):
 
         Raises:
 
-            - KeyError:
+            KeyError
                 - If a required parameter is missing.
+
                 - If an unexpected parameter is provided.
 
-            - TypeError:
+            TypeError
                 - If a parameter has the wrong type.
 
         """
@@ -50,8 +51,8 @@ class SplitRowsOp(BaseOp):
         """ Split a row representing a particular event into multiple rows.
 
         Parameters:
-            dispatcher (Dispatcher):  The dispatcher object for managing the operations.
-            df (DataFrame):   The DataFrame to be remodeled.
+            dispatcher (Dispatcher): Manages the operation I/O.
+            df (DataFrame): The DataFrame to be remodeled.
             name (str):  Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):  Only needed for HED operations.
 
@@ -59,8 +60,8 @@ class SplitRowsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            - TypeError:
-                - If bad onset or duration.
+            TypeError:
+                If bad onset or duration.
 
         """
 

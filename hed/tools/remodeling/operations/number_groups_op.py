@@ -1,3 +1,4 @@
+""" Implementation in progress. """
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.util.data_util import get_indices, tuple_to_range
@@ -7,6 +8,8 @@ import itertools
 
 
 class NumberGroupsOp(BaseOp):
+    """ Implementation in progress. """
+
     PARAMS = {
         "operation": "number_groups",
         "required_parameters": {
@@ -52,10 +55,10 @@ class NumberGroupsOp(BaseOp):
         """ Add numbers to groups of events in dataframe.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for context.
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
+            df (DataFrame):  The DataFrame to be remodeled.
+            name (str):  Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
             Dataframe - a new dataframe after processing.

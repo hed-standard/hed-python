@@ -8,11 +8,11 @@ class MergeConsecutiveOp(BaseOp):
     """ Merge consecutive rows with same column value.
 
     Required parameters:
-        - column_name (str): the name of the column whose consecutive values are to be compared (the merge column).
-        - event_code (str or int or float): the particular value in the match column to be merged.
-        - match_columns (list):  A list of columns whose values have to be matched for two events to be the same.
-        - set_durations (bool): If true, set the duration of the merged event to the extent of the merged events.
-        - ignore_missing (bool):  If true, missing match_columns are ignored.
+        - column_name (*str*): the name of the column whose consecutive values are to be compared (the merge column).
+        - event_code (*str* or *int* or *float*): the particular value in the match column to be merged.
+        - match_columns (*list*):  A list of columns whose values have to be matched for two events to be the same.
+        - set_durations (*bool*): If true, set the duration of the merged event to the extent of the merged events.
+        - ignore_missing (*bool*):  If true, missing match_columns are ignored.
 
     """
     PARAMS = {
@@ -32,7 +32,7 @@ class MergeConsecutiveOp(BaseOp):
 
         Parameters:
             op_spec (dict): Specification for required and optional parameters.
-            parameters (dict):  Actual values of the parameters for the operation.
+            parameters (dict): Actual values of the parameters for the operation.
 
         Raises:
 
@@ -59,10 +59,10 @@ class MergeConsecutiveOp(BaseOp):
         self.ignore_missing = parameters["ignore_missing"]
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Merge consecutive events of the same type
+        """ Merge consecutive rows with the same column value.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Only needed for HED operations.

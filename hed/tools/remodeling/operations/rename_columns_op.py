@@ -51,7 +51,7 @@ class RenameColumnsOp (BaseOp):
         """ Rename columns as specified in column_mapping dictionary.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):  Only needed for HED operations.
@@ -60,8 +60,8 @@ class RenameColumnsOp (BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            - KeyError:
-                - When ignore_missing is false and column_mapping has columns not in the data.
+            KeyError
+                When ignore_missing is false and column_mapping has columns not in the data.
 
         """
 

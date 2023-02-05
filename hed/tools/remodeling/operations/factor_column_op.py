@@ -9,15 +9,15 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class FactorColumnOp(BaseOp):
     """ Create tabular file factor columns from column values.
 
-    The required parameters are:
-        - column_name (str):  The name of a column in the DataFrame.
-        - factor_values (list):  Values in the column column_name to create factors for.
-        - factor_names (list):   Names to use as the factor columns.
+    Required parameters:
+        - column_name (*str*):  The name of a column in the DataFrame.
+        - factor_values (*list*):  Values in the column column_name to create factors for.
+        - factor_names (*list*):   Names to use as the factor columns.
 
     Raises:
-        ValueError:
-        - If lengths of factor_values and factor_names are not the same.
-        - If factor_name is already a column and overwrite_existing is False.
+        ValueError
+            If lengths of factor_values and factor_names are not the same.
+            If factor_name is already a column and overwrite_existing is False.
 
     """
 
@@ -62,7 +62,7 @@ class FactorColumnOp(BaseOp):
         """ Create factor columns for values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):  Only needed for HED operations.

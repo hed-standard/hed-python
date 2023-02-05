@@ -21,15 +21,17 @@ class BaseOp:
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
-            KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
+            KeyError
 
-            TypeError:
-            - If a parameter has the wrong type.
+                > If a required parameter is missing.
+
+                > If an unexpected parameter is provided.
+
+            TypeError
+                - If a parameter has the wrong type.
 
             ValueError:
-            - If the specification is missing a valid operation.
+                - If the specification is missing a valid operation.
 
         """
         self.operation = op_spec.get("operation", "")
@@ -40,19 +42,19 @@ class BaseOp:
         self.check_parameters(parameters)
 
     def check_parameters(self, parameters):
-        """ Verify that the parameters meet the specification of the operation.
+        """ Verify that the parameters meet the operation specification.
 
         Parameters:
             parameters (dict): Dictionary of parameters for this operation.
 
         Raises:
 
-           KeyError:
-           - If a required parameter is missing.
-           - If an unexpected parameter is provided.
+            KeyError
+                If a required parameter is missing.
+                If an unexpected parameter is provided.
 
             TypeError:
-            - If a parameter has the wrong type.
+                - If a parameter has the wrong type.
 
         """
 
@@ -78,7 +80,7 @@ class BaseOp:
         """ Base class method to be overridden with by each operation.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The tabular file to be remodeled.
             name (str): Unique identifier for the data -- often the original file path.
             sidecar (Sidecar or file-like):  A JSON sidecar needed for HED operations.

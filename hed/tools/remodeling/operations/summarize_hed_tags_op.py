@@ -66,10 +66,10 @@ class SummarizeHedTagsOp(BaseOp):
         """ Create factor columns corresponding to values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for managing the operations.
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
             DataFrame: A new DataFrame with the factor columns appended.
