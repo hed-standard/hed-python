@@ -61,7 +61,7 @@ class SummarizeHedValidationOp(BaseOp):
         """ Validate the dataframe with the accompanying sidecar, if any.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be validated.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Usually needed unless only HED tags in HED column of event file.

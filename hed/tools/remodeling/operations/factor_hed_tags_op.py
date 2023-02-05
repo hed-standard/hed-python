@@ -13,17 +13,10 @@ class FactorHedTagsOp(BaseOp):
     """ Create tabular file factors from tag queries.
 
     Required parameters:
-    - queries (list):       Queries to be applied successively as filters.
-    - query_names (list):   Column names for the query factors.
-    - remove_types (list):  Structural HED tags to be removed .
-    - expand_context bool): Expand the context if True.
-
-    Raises:
-
-        ValueError:
-        - If the list of query_names is not empty or the same length as queries.
-        - If the query_names list contains duplicate names.
-        - If a query is invalid and cannot be parsed.
+        queries (list): Queries to be applied successively as filters.
+        query_names (list):  Column names for the query factors.
+        remove_types (list):  Structural HED tags to be removed .
+        expand_context bool): Expand the context if True.
 
     Notes:
         - If factor column names are not provided, *query1*, *query2*, ... are used.
@@ -51,17 +44,17 @@ class FactorHedTagsOp(BaseOp):
 
         Raises:
 
-            KeyError:
-            - if a required parameter is missing.
-            - If an unexpected parameter is provided.
+            KeyError
+                - if a required parameter is missing.
+                - If an unexpected parameter is provided.
 
             TypeError:
-            - If a parameter has the wrong type.
+                - If a parameter has the wrong type.
 
             ValueError:
-            - If the specification is missing a valid operation.
-            - If the length of query names is not empty and not same length as queries.
-            - If there are duplicate query names.
+                - If the specification is missing a valid operation.
+                - If the length of query names is not empty and not same length as queries.
+                - If there are duplicate query names.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -88,15 +81,15 @@ class FactorHedTagsOp(BaseOp):
         """ Factor the column using HED tag queries.
 
         Parameters:
-            dispatcher (Dispatcher) - dispatcher object for managing the operations.
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Raises:
 
             ValueError:
-            - If a name for a new query factor column is already a column.
+                - If a name for a new query factor column is already a column.
 
         Returns:
             Dataframe: A new dataframe after processing.

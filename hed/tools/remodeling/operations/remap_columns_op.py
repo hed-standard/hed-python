@@ -1,4 +1,4 @@
-""" Map combinations of values in m columns into a new combinations in n columns. """
+""" Map values in m columns into a new combinations in n columns. """
 
 import pandas as pd
 import numpy as np
@@ -7,25 +7,19 @@ from hed.tools.analysis.key_map import KeyMap
 
 
 class RemapColumnsOp(BaseOp):
-    """ Map combinations of values in m columns into a new combinations in n columns.
+    """ Map values in m columns into a new combinations in n columns.
 
     Required parameters:
-        source_columns (list):  The key columns to map (m key columns).
-        destination_columns (list):  The destination columns to have the mapped values (n destination columns).
-        map_list (list):  A list of lists with the mapping.
+        source_columns (list): The key columns to map (m key columns).
+        destination_columns (list): The destination columns to have the mapped values (n destination columns).
+        map_list (list): A list of lists with the mapping.
                           Each list element list is of length m + n with the key columns followed by mapped columns.
         ignore_missing (bool): If True, entries whose key column values are not in map_list are ignored.
 
     Optional_parameters:
-        integer_sources (list): A list of the source_columns that should be treated as integers rather than strings.
+        integer_sources (list): Sour columns that should be treated as integers rather than strings.
 
-    Raises:
-        ValueError:
-            - If an integer column is not a key column.
-            - If the length of an entry list in the map_list is not m + n.
-              (Both m and n must be greater than 0.)
-
-        TODO: Allow wildcards
+    TODO: Allow wildcards
 
     """
 
@@ -46,20 +40,26 @@ class RemapColumnsOp(BaseOp):
         """ Constructor for the remap columns operation.
 
             Parameters:
-                parameters (dict): Dictionary with the parameter values for required and optional parameters
+                parameters (dict): Parameter values for required and optional parameters.
 
             Raises:
                 - KeyError:
                     - If a required parameter is missing.
                     - If an unexpected parameter is provided.
 
-                - TypeError:
-                    - If a parameter has the wrong type.
+                TypeError:
+                    If a parameter has the wrong type.
 
-                - ValueError:
-                    - If a column designated as an integer source does not have valid integers.
-                    - If no source columns are specified.
-                    - If a map_list entry has the wrong number of items (source columns + destination columns).
+                ValueError
+                    If an integer column is not a key column.
+
+                    If a column designated as an integer source does not have valid integers.
+
+                    If no source columns are specified.
+
+                    If no destination columns are specified.
+
+                    If a map_list entry has the wrong number of items (source columns + destination columns).
 
           """
         super().__init__(self.PARAMS, parameters)
@@ -100,10 +100,10 @@ class RemapColumnsOp(BaseOp):
         """ Remap new columns from combinations of others.
 
         Parameters:
-            dispatcher (Dispatcher):  The dispatcher object for managing the operations.
-            df (DataFrame):  The DataFrame to be remodeled.
+            dispatcher (Dispatcher): Manages the operation I/O.
+            df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like):   Only needed for HED operations.
+            sidecar (Sidecar or file-like): Only needed for HED operations.
 
         Returns:
             Dataframe: A new dataframe after processing.

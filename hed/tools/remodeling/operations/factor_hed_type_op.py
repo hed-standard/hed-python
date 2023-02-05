@@ -11,11 +11,11 @@ from hed.tools.analysis.hed_type_manager import HedTypeManager
 
 
 class FactorHedTypeOp(BaseOp):
-    """ Create tabular file factors from type variables.
+    """ Create tabular file factors from type variables and append to tabular data.
 
-   Required parameters:
-   - type_tag (str): HED tag used to find the factors (most commonly `condition-variable`).
-   - type_values (list): Factor values to include. If empty all values of that type_tag are used.
+    Required parameters:
+        - type_tag ( *str* ): HED tag used to find the factors (most commonly `condition-variable`).
+        - type_values ( *list* ): Factor values to include. If empty all values of that type_tag are used.
 
     """
 
@@ -36,16 +36,15 @@ class FactorHedTypeOp(BaseOp):
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
-
-            KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
+            KeyError
+                If a required parameter is missing.
+                If an unexpected parameter is provided.
 
             TypeError:
-            - If a parameter has the wrong type.
+                - If a parameter has the wrong type.
 
-            - ValueError:
-            - If the specification is missing a valid operation.
+            ValueError:
+                - If the specification is missing a valid operation.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -53,10 +52,10 @@ class FactorHedTypeOp(BaseOp):
         self.type_values = parameters["type_values"]
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Factor columns based on HED type.
+        """ Factor columns based on HED type and append to tabular data.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Only needed for HED operations.

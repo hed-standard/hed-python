@@ -5,9 +5,9 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class RemoveColumnsOp(BaseOp):
     """ Remove columns from a tabular file.
 
-    Notes: The required parameters are:
-        - remove_names (list)      The names of the columns to be removed.
-        - ignore_missing (boolean) If true, the names in remove_names that are not columns in df should be ignored.
+    Required parameters:
+        - remove_names (list): The names of the columns to be removed.
+        - ignore_missing (boolean): If true, the names in remove_names that are not columns in df should be ignored.
 
     """
 
@@ -27,12 +27,13 @@ class RemoveColumnsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
         Raises:
-            - KeyError:
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
+            KeyError:
+                If a required parameter is missing.
 
-            - TypeError:
-                - If a parameter has the wrong type.
+                If an unexpected parameter is provided.
+
+            TypeError:
+                If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -47,17 +48,17 @@ class RemoveColumnsOp(BaseOp):
         """ Remove indicated columns from a dataframe.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
-            name (str):     Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like):   Only needed for HED operations.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
             Dataframe: A new dataframe after processing.
 
         Raises:
-            - KeyError:
-                - If ignore_missing is False and a column not in the data is to be removed.
+            KeyError
+                If ignore_missing is False and a column not in the data is to be removed.
 
         """
 

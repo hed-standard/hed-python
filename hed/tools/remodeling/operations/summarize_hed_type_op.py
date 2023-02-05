@@ -61,7 +61,7 @@ class SummarizeHedTypeOp(BaseOp):
         """ Create factor columns corresponding to values in a specified column.
 
         Parameters:
-            dispatcher (Dispatcher): The dispatcher object for managing the operations.
+            dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be summarized.
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like): Usually required unless event file has a HED column.
