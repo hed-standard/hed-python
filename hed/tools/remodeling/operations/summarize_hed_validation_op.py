@@ -12,10 +12,10 @@ from hed.validator import HedValidator
 class SummarizeHedValidationOp(BaseOp):
     """ Validate the HED tags in a dataset and report errors.
 
-    The required parameters are:
-        - summary_name (str): The name of the summary.
-        - summary_filename (str):  Base filename of the summary.
-        - check_for_warnings (bool):  If true include warnings as well as errors.
+    Required parameters:
+        summary_name (*str*): The name of the summary.
+        summary_filename (*str*): Base filename of the summary.
+        check_for_warnings (*bool*): If true include warnings as well as errors.
 
     The purpose of this op is to produce a summary of the HED validation errors in a file.
 
@@ -40,16 +40,13 @@ class SummarizeHedValidationOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:
+        Raises:  
+            KeyError  
+                If a required parameter is missing.  
+                If an unexpected parameter is provided.  
 
-            - KeyError:
-
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
-
-            - TypeError:
-
-                - If a parameter has the wrong type.
+            TypeError  
+                If a parameter has the wrong type.  
 
         """
         super().__init__(self.PARAMS, parameters)

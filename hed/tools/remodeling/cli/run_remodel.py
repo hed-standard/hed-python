@@ -11,6 +11,12 @@ from hed.tools.remodeling.backup_manager import BackupManager
 
 
 def get_parser():
+    """ Create a parser for the run_remodel command-line arguments. 
+    
+    Returns:
+        argparse.ArgumentParser:  A parser for parsing the command line arguments.
+        
+    """
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
     parser.add_argument("remodel_path", help="Full path of the file with remodeling instructions.")
@@ -40,6 +46,19 @@ def get_parser():
 
 
 def parse_arguments(arg_list=None):
+    """ Parse the command line arguments or arg_list if given. 
+    
+    Parameters:
+        arg_list (list):  List of command line arguments as a list.
+        
+    Returns:
+        Object:  Argument object
+        List: A list of parsed operations (each operation is a dictionary).
+        
+    Raises:
+        ValueError  - If the operations were unable to be correctly parsed.
+    
+    """
     parser = get_parser()
     args = parser.parse_args(arg_list)
     if '*' in args.file_suffix:
@@ -61,6 +80,13 @@ def parse_arguments(arg_list=None):
 
 
 def run_bids_ops(dispatch, args):
+    """ Run the remodeler on a BIDS dataset.
+    
+    Parameters:
+        dispatch (Dispatcher): Manages the execution of the operations.
+        args (Object): The command-line arguments as an object.
+
+    """
     bids = BidsDataset(dispatch.data_root, tabular_types=['events'], exclude_dirs=args.exclude_dirs)
     dispatch.hed_schema = bids.schema
     if args.verbose:
@@ -80,7 +106,6 @@ def run_bids_ops(dispatch, args):
             print(f"Events {events_obj.file_path}  sidecar {sidecar}")
         df = dispatch.run_operations(events_obj.file_path, sidecar=sidecar, verbose=args.verbose)
         df.to_csv(events_obj.file_path, sep='\t', index=False, header=True)
-    return
 
 
 def run_direct_ops(dispatch, args):
@@ -115,9 +140,9 @@ def main(arg_list=None):
                                    Otherwise, called with the command-line parameters as an argument list.
 
     Raises:
-        HedFileError
-            - if the data root directory does not exist.
-            - if the specified backup does not exist.
+        HedFileError   
+            - if the data root directory does not exist.  
+            - if the specified backup does not exist.  
 
     """
     args, operations = parse_arguments(arg_list)

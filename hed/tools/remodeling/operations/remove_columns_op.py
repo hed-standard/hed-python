@@ -57,8 +57,8 @@ class RemoveColumnsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            KeyError
-                If ignore_missing is False and a column not in the data is to be removed.
+            KeyError  
+                If ignore_missing is False and a column not in the data is to be removed.  
 
         """
 

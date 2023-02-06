@@ -72,11 +72,11 @@ class MergeConsecutiveOp(BaseOp):
 
         Raises:
 
-           ValueError:
-           - If dataframe does not have the anchor column and ignore_missing is False.
-           - If a match column is missing and ignore_missing is false.
-           - If the durations were to be set and the dataframe did not have an onset column.
-           - If the durations were to be set and the dataframe did not have a duration column.
+            ValueError  
+                If dataframe does not have the anchor column and ignore_missing is False.  
+                If a match column is missing and ignore_missing is false.  
+                If the durations were to be set and the dataframe did not have an onset column.  
+                If the durations were to be set and the dataframe did not have a duration column.  
 
         """
 
@@ -115,11 +115,11 @@ class MergeConsecutiveOp(BaseOp):
         """ Return a list of same length as match_df with group numbers of consecutive items.
 
         Parameters:
-            match_df (DataFrame): DataFrame containing columns to be matched must contain at least the base column.
+            match_df (DataFrame): DataFrame containing columns to be matched.
             code_mask (DataSeries):  Same length as match_df with the names.
 
         Returns:
-            list with group numbers set (starting at 1).
+            list:  Group numbers set (starting at 1).
 
         # TODO: Handle roundoff in rows for comparison.
         """
