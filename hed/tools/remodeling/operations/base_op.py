@@ -4,10 +4,10 @@
 class BaseOp:
     """ Base class for operations. All remodeling operations should extend this class.
 
-    Attributes:
-        operation (str): Operation name.
-        required_parameters (dict): required parameters for the operation.
-        optional_parameters (dict): optional parameters for the operation.
+    Attributes:  
+        operation (*str*): Operation name.   
+        required_parameters (*dict*): required parameters for the operation.     
+        optional_parameters (*dict*): optional parameters for the operation.   
 
     The base class holds the parameters and does basic parameter checking against the operations specification.
 
@@ -16,20 +16,20 @@ class BaseOp:
     def __init__(self, op_spec, parameters):
         """ Base class constructor for operations.
 
-        Args:
+        Parameters:
             op_spec (dict): Specification for required and optional parameters.
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
-            KeyError
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
+            KeyError  
+                - If a required parameter is missing.  
+                - If an unexpected parameter is provided.  
 
-            TypeError
-                - If a parameter has the wrong type.
+            TypeError  
+                - If a parameter has the wrong type.  
 
-            ValueError
-                - If the specification is missing a valid operation.
+            ValueError  
+                - If the specification is missing a valid operation.  
 
         """
         self.operation = op_spec.get("operation", "")
@@ -47,12 +47,12 @@ class BaseOp:
 
         Raises:
 
-            KeyError
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
+            KeyError  
+                - If a required parameter is missing.  
+                - If an unexpected parameter is provided.  
 
-            TypeError
-                - If a parameter has the wrong type.
+            TypeError  
+                - If a parameter has the wrong type.  
 
         """
 
@@ -96,7 +96,7 @@ class BaseOp:
             param_type (any):    Class to check the param_value against.
 
         Raises:
-            - TypeError: If param_value is not an instance of param_type.
+            TypeError: If param_value is not an instance of param_type.
 
         """
 

@@ -7,6 +7,12 @@ from hed.tools.remodeling.backup_manager import BackupManager
 
 
 def get_parser():
+    """ Create a parser for the run_remodel_backup command-line arguments. 
+
+    Returns:
+        argparse.ArgumentParser:  A parser for parsing the command line arguments.
+
+    """
     parser = argparse.ArgumentParser(description="Creates a backup for the remodeling process.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
@@ -26,6 +32,18 @@ def get_parser():
 
 
 def main(arg_list=None):
+    """ The command-line program for making a remodel backup.
+
+    Parameters:
+        arg_list (list or None):   Called with value None when called from the command line.
+                                   Otherwise, called with the command-line parameters as an argument list.
+
+    Raises:
+        HedFileError   
+            - if the specified backup already exists.  
+
+    """
+
     parser = get_parser()
     args = parser.parse_args(arg_list)
     if '*' in args.file_suffix:

@@ -9,11 +9,11 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 class SummarizeSidecarFromEventsOp(BaseOp):
     """ Create a JSON sidecar from column values in a collection of tabular files.
 
-    The required parameters are:
-        - summary_name (str)   The name of the summary.
-        - summary_filename (str)   Base filename of the summary.
-        - skip_columns (list)  Names of columns to skip in the summary.
-        - value_columns (list) Names of columns to treat as value columns rather than categorical columns
+    Required parameters:  
+        summary_name (*str*): The name of the summary.  
+        summary_filename (*str*): Base filename of the summary.  
+        skip_columns (*list*): Names of columns to skip in the summary.  
+        value_columns (*list*): Names of columns to treat as value columns rather than categorical columns.  
 
     The purpose is to produce a JSON sidecar template for annotating a dataset with HED tags.
 
@@ -39,13 +39,13 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:
-            - KeyError:
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
+        Raises:  
+            KeyError  
+                If a required parameter is missing.  
+                If an unexpected parameter is provided.  
 
-            - TypeError:
-                - If a parameter has the wrong type.
+            TypeError  
+                If a parameter has the wrong type.  
 
         """
 
@@ -108,7 +108,7 @@ class EventsToSidecarSummaryContext(BaseContext):
                 "sidecar": summary_info.extract_sidecar_template()}
 
     def _merge_all(self):
-        """ Return merged information.
+        """ Merge summary information from all of the files
 
         Returns:
            object:  Consolidated summary of information.

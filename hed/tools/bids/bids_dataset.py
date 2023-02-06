@@ -17,9 +17,9 @@ class BidsDataset:
     """ A BIDS dataset representation primarily focused on HED evaluation.
 
     Attributes:
-        root_path (str):  Real root path of the BIDS dataset.
-        schema (HedSchema or HedSchemaGroup):  The schema used for evaluation.
-        tabular_files (dict):  A dictionary of BidsTabularDictionary objects containing a given type.
+        root_path (str):  Real root path of the BIDS dataset.  
+        schema (HedSchema or HedSchemaGroup):  The schema used for evaluation.  
+        tabular_files (dict):  A dictionary of BidsTabularDictionary objects containing a given type.  
 
     """
 

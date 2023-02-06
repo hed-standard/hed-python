@@ -5,10 +5,10 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class ReorderColumnsOp(BaseOp):
     """ Reorder columns in a tabular file.
 
-    The required parameters are:
-        - column_order (list):  The names of the columns to be reordered.
-        - ignore_missing (bool): If false and a column in column_order is not in df, skip the column
-        - keep_others (bool): If true, columns not in column_order are placed at end.
+    Required parameters:
+        column_order (*list*): The names of the columns to be reordered.
+        ignore_missing (*bool*): If false and a column in column_order is not in df, skip the column
+        keep_others (*bool*): If true, columns not in column_order are placed at end.
 
     """
 
@@ -29,13 +29,12 @@ class ReorderColumnsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
+            KeyError  
+                If a required parameter is missing.  
+                If an unexpected parameter is provided.  
 
-            KeyError
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
-
-            - TypeError:
-                - If a parameter has the wrong type.
+            TypeError  
+                If a parameter has the wrong type.  
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -56,8 +55,8 @@ class ReorderColumnsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            ValueError:
-                - When ignore_missing is false and column_order has columns not in the data.
+            ValueError  
+                When ignore_missing is false and column_order has columns not in the data.  
 
         """
 

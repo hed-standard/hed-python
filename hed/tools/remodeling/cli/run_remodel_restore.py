@@ -6,6 +6,12 @@ from hed.tools.remodeling.backup_manager import BackupManager
 
 
 def get_parser():
+    """ Create a parser for the run_remodel_restore command-line arguments. 
+
+    Returns:
+        argparse.ArgumentParser:  A parser for parsing the command line arguments.
+
+    """
     parser = argparse.ArgumentParser(description="Restores the backup files for the original data.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
     parser.add_argument("-n", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
@@ -17,6 +23,17 @@ def get_parser():
 
 
 def main(arg_list=None):
+    """ The command-line program for restoring a remodel backup.
+
+    Parameters:
+        arg_list (list or None):   Called with value None when called from the command line.
+                                   Otherwise, called with the command-line parameters as an argument list.
+
+    Raises:
+        HedFileError   
+            - if the specified backup does not exist.  
+
+    """
     parser = get_parser()
     args = parser.parse_args(arg_list)
     backup_man = BackupManager(args.data_dir)

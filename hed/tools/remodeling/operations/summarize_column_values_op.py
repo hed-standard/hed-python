@@ -8,11 +8,11 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 class SummarizeColumnValuesOp(BaseOp):
     """ Summarize the values in the columns of a tabular file.
 
-    The required parameters are:
-        - summary_name (str)   The name of the summary.
-        - summary_filename (str)   Base filename of the summary.
-        - skip_columns (list)  Names of columns to skip in the summary.
-        - value_columns (list) Names of columns to treat as value columns rather than categorical columns.
+    Required parameters=:
+        summary_name (*str*): The name of the summary.
+        summary_filename (*str*): Base filename of the summary.
+        skip_columns (*list*):  Names of columns to skip in the summary.
+        value_columns (*list*): Names of columns to treat as value columns rather than categorical columns.
 
     The purpose is to produce a summary of the values in a tabular file.
 
@@ -40,12 +40,12 @@ class SummarizeColumnValuesOp(BaseOp):
 
         Raises:
 
-            -KeyError:
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
+            KeyError  
+                If a required parameter is missing.  
+                If an unexpected parameter is provided.  
 
-            - TypeError:
-                - If a parameter has the wrong type.
+            TypeError  
+                If a parameter has the wrong type.  
 
         """
 
@@ -68,7 +68,7 @@ class SummarizeColumnValuesOp(BaseOp):
             DataFrame: A new DataFrame with the factor columns appended.
 
         Side-effect:
-            Updates the context
+            Updates the context.
 
         """
 

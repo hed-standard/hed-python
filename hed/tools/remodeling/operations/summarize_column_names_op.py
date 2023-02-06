@@ -8,9 +8,9 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 class SummarizeColumnNamesOp(BaseOp):
     """  Summarize the column names in a collection of tabular files.
 
-    Required parameters:
-        - summary_name (str)       The name of the summary.
-        - summary_filename (str)   Base filename of the summary.
+    Required parameters:  
+        summary_name (*str*)       The name of the summary.  
+        summary_filename (*str*)   Base filename of the summary.  
 
     The purpose is to check that all of the tabular files have the same columns in same order.
 
@@ -35,14 +35,12 @@ class SummarizeColumnNamesOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
+            KeyError  
+                If a required parameter is missing.  
+                If an unexpected parameter is provided.  
 
-            KeyError
-                - If a required parameter is missing.
-
-                - If an unexpected parameter is provided.
-
-            TypeError
-                - If a parameter has the wrong type.
+            TypeError  
+                If a parameter has the wrong type.  
 
         """
         super().__init__(self.PARAMS, parameters)

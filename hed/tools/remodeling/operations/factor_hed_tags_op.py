@@ -13,15 +13,15 @@ class FactorHedTagsOp(BaseOp):
     """ Create tabular file factors from tag queries.
 
     Required parameters:
-        queries (list): Queries to be applied successively as filters.
-        query_names (list):  Column names for the query factors.
-        remove_types (list):  Structural HED tags to be removed .
-        expand_context bool): Expand the context if True.
+        queries (*list*): Queries to be applied successively as filters.
+        query_names (*list*):  Column names for the query factors.
+        remove_types (*list*):  Structural HED tags to be removed .
+        expand_context (*bool*): Expand the context if True.
 
-    Notes:
-        - If factor column names are not provided, *query1*, *query2*, ... are used.
-        - When the context is expanded, the effect of events for temporal extent is accounted for.
-          This is not implemented in the current version.
+    Notes:  
+        - If factor column names are not provided, *query1*, *query2*, ... are used.  
+        - When the context is expanded, the effect of events for temporal extent is accounted for.  
+        - Context expansion is not implemented in the current version.  
     """
 
     PARAMS = {
@@ -44,17 +44,17 @@ class FactorHedTagsOp(BaseOp):
 
         Raises:
 
-            KeyError
-                - if a required parameter is missing.
-                - If an unexpected parameter is provided.
+            KeyError  
+                If a required parameter is missing.  
+                If an unexpected parameter is provided.  
 
-            TypeError:
-                - If a parameter has the wrong type.
+            TypeError  
+                If a parameter has the wrong type.  
 
-            ValueError:
-                - If the specification is missing a valid operation.
-                - If the length of query names is not empty and not same length as queries.
-                - If there are duplicate query names.
+            ValueError  
+                If the specification is missing a valid operation.  
+                If the length of query names is not empty and not same length as queries.  
+                If there are duplicate query names.  
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -86,13 +86,13 @@ class FactorHedTagsOp(BaseOp):
             name (str): Unique identifier for the dataframe -- often the original file path.
             sidecar (Sidecar or file-like):  Only needed for HED operations.
 
-        Raises:
-
-            ValueError:
-                - If a name for a new query factor column is already a column.
-
         Returns:
             Dataframe: A new dataframe after processing.
+        
+        Raises:
+
+            ValueError  
+                If a name for a new query factor column is already a column.
 
         """
 
@@ -116,16 +116,3 @@ class FactorHedTagsOp(BaseOp):
         df_new = pd.concat(df_list, axis=1)
         df_new.replace('n/a', np.NaN, inplace=True)
         return df_new
-
-    #     hed_strings = get_assembled_strings(input_data, hed_schema=dispatcher.hed_schema, expand_defs=False)
-    #
-    #     definitions = input_data.get_definitions()
-    #     var_manager = HedTypeManager(hed_strings, dispatcher.hed_schema, definitions)
-    #     var_manager.add_type_variable(self.type_tag.lower())
-    #
-    #     df_factors = var_manager.get_factor_vectors(self.type_tag, [], factor_encoding="one-hot")
-    #     if len(df_factors.columns) > 0:
-    #         df_list.append(df_factors)
-    #     df_new = pd.concat(df_list, axis=1)
-    #     df_new.replace('n/a', np.NaN, inplace=True)
-    #     return df_new
