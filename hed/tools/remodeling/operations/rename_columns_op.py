@@ -6,9 +6,9 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class RenameColumnsOp (BaseOp):
     """ Rename columns in a tabular file.
 
-    Required parameters:
-        column_mapping (*dict*): The names of the columns to be removed.  
-        ignore_missing (*bool*): If true, the names in remove_names that are not columns and should be ignored.  
+    Required remodeling parameters:   
+        - **column_mapping** (*dict*): The names of the columns to be removed.   
+        - **ignore_missing** (*bool*): If true, the names in remove_names that are not columns and should be ignored.   
 
     """
 
@@ -28,12 +28,12 @@ class RenameColumnsOp (BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
         Raises:
-            KeyError  
-                If a required parameter is missing.  
-                If an unexpected parameter is provided.  
+            KeyError    
+                - If a required parameter is missing.   
+                - If an unexpected parameter is provided.   
 
-            TypeError  
-                If a parameter has the wrong type.  
+            TypeError   
+                - If a parameter has the wrong type.   
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -56,8 +56,8 @@ class RenameColumnsOp (BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            KeyError  
-                When ignore_missing is false and column_mapping has columns not in the data.  
+            KeyError   
+                - When ignore_missing is false and column_mapping has columns not in the data.   
 
         """
 

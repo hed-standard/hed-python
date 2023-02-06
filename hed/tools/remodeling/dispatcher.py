@@ -26,7 +26,7 @@ class Dispatcher:
             hed_versions (str, list, HedSchema, or HedSchemaGroup): The HED schema.
 
         Raises:
-            - HedFileError:
+            HedFileError
                 - If the specified backup does not exist.
 
             - ValueError:

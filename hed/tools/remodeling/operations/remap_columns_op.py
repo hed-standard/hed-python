@@ -9,16 +9,18 @@ from hed.tools.analysis.key_map import KeyMap
 class RemapColumnsOp(BaseOp):
     """ Map values in m columns into a new combinations in n columns.
 
-    Required parameters:  
-        source_columns (list): The key columns to map (m key columns).  
-        destination_columns (list): The destination columns to have the mapped values (n destination columns).  
-        map_list (list): A list of lists with the mapping.  
-                          Each list element list is of length m + n with the key columns followed by mapped columns.  
-        ignore_missing (bool): If True, entries whose key column values are not in map_list are ignored.  
+    Required remodeling parameters:   
+        - **source_columns** (*list*): The key columns to map (m key columns).   
+        - **destination_columns** (*list*): The destination columns to have the mapped values (n destination columns).   
+        - **map_list** (*list*): A list of lists with the mapping.    
+        - **ignore_missing** (*bool*): If True, entries whose key column values are not in map_list are ignored.   
 
-    Optional_parameters:
-        integer_sources (list): Sour columns that should be treated as integers rather than strings.
+    Optional remodeling parameters:   
+        **integer_sources** (*list*): Sour columns that should be treated as integers rather than strings.   
 
+    Notes:
+        Each list element list is of length m + n with the key columns followed by mapped columns. 
+         
     TODO: Allow wildcards
 
     """
@@ -43,19 +45,19 @@ class RemapColumnsOp(BaseOp):
                 parameters (dict): Parameter values for required and optional parameters.
 
             Raises:
-                KeyError  
-                    If a required parameter is missing.  
-                    If an unexpected parameter is provided.  
+                KeyError   
+                    - If a required parameter is missing.    
+                    - If an unexpected parameter is provided.    
+ 
+                TypeError   
+                    - If a parameter has the wrong type.   
 
-                TypeError  
-                    If a parameter has the wrong type.  
-
-                ValueError
-                    If an integer column is not a key column.  
-                    If a column designated as an integer source does not have valid integers.  
-                    If no source columns are specified.  
-                    If no destination columns are specified.  
-                    If a map_list entry has the wrong number of items (source columns + destination columns).  
+                ValueError   
+                    - If an integer column is not a key column.    
+                    - If a column designated as an integer source does not have valid integers.    
+                    - If no source columns are specified.    
+                    - If no destination columns are specified.    
+                    - If a map_list entry has the wrong number of items (source columns + destination columns).    
 
           """
         super().__init__(self.PARAMS, parameters)
@@ -105,8 +107,8 @@ class RemapColumnsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            ValueError
-                If ignore_missing is false and source values from the data are not in the map.
+            ValueError   
+                - If ignore_missing is false and source values from the data are not in the map.   
 
         """
         df[self.source_columns] = df[self.source_columns].replace(np.NaN, 'n/a')

@@ -12,14 +12,14 @@ from hed.tools.analysis.analysis_util import get_assembled_strings
 class FactorHedTagsOp(BaseOp):
     """ Create tabular file factors from tag queries.
 
-    Required parameters:
-        queries (*list*): Queries to be applied successively as filters.
-        query_names (*list*):  Column names for the query factors.
-        remove_types (*list*):  Structural HED tags to be removed .
-        expand_context (*bool*): Expand the context if True.
+    Required remodeling parameters:   
+        - **queries** (*list*): Queries to be applied successively as filters.    
+        - **query_names** (*list*):  Column names for the query factors.    
+        - **remove_types** (*list*):  Structural HED tags to be removed.    
+        - **expand_context** (*bool*): Expand the context if True.    
 
     Notes:  
-        - If factor column names are not provided, *query1*, *query2*, ... are used.  
+        - If factor column names are not provided, *query1*, *query2*, ... are used.   
         - When the context is expanded, the effect of events for temporal extent is accounted for.  
         - Context expansion is not implemented in the current version.  
     """
@@ -44,17 +44,17 @@ class FactorHedTagsOp(BaseOp):
 
         Raises:
 
-            KeyError  
-                If a required parameter is missing.  
-                If an unexpected parameter is provided.  
+            KeyError   
+                - If a required parameter is missing.   
+                - If an unexpected parameter is provided.   
 
-            TypeError  
-                If a parameter has the wrong type.  
+            TypeError   
+                - If a parameter has the wrong type.   
 
             ValueError  
-                If the specification is missing a valid operation.  
-                If the length of query names is not empty and not same length as queries.  
-                If there are duplicate query names.  
+                - If the specification is missing a valid operation.   
+                - If the length of query names is not empty and not same length as queries.   
+                - If there are duplicate query names.   
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -91,8 +91,8 @@ class FactorHedTagsOp(BaseOp):
         
         Raises:
 
-            ValueError  
-                If a name for a new query factor column is already a column.
+            ValueError   
+                - If a name for a new query factor column is already a column.   
 
         """
 

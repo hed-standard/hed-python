@@ -5,9 +5,9 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class RemoveColumnsOp(BaseOp):
     """ Remove columns from a tabular file.
 
-    Required parameters:
-        - remove_names (list): The names of the columns to be removed.
-        - ignore_missing (boolean): If true, the names in remove_names that are not columns in df should be ignored.
+    Required remodeling parameters:
+        - **remove_names** (*list*): The names of the columns to be removed.  
+        - **ignore_missing** (*boolean*): If true, names in remove_names that are not columns in df should be ignored.  
 
     """
 
@@ -27,13 +27,12 @@ class RemoveColumnsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
         Raises:
-            KeyError:
-                If a required parameter is missing.
+            KeyError
+                - If a required parameter is missing.    
+                - If an unexpected parameter is provided.   
 
-                If an unexpected parameter is provided.
-
-            TypeError:
-                If a parameter has the wrong type.
+            TypeError   
+                - If a parameter has the wrong type.   
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -57,8 +56,8 @@ class RemoveColumnsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            KeyError  
-                If ignore_missing is False and a column not in the data is to be removed.  
+            KeyError   
+                - If ignore_missing is False and a column not in the data is to be removed.   
 
         """
 

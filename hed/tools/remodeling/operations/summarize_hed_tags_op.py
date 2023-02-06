@@ -10,14 +10,14 @@ class SummarizeHedTagsOp(BaseOp):
     """ Summarize the HED tags in collection of tabular files.
 
 
-    Required parameters:  
-        summary_name (*str*): The name of the summary.  
-        summary_filename (*str*): Base filename of the summary.  
-        type_tags (*list*): Type tag to get_summary separately (e.g. 'condition-variable' or 'task').  
-        include_context (*bool*): If True, expand Onset and Offset tags.  
+    Required remodeling parameters:   
+        - **summary_name** (*str*): The name of the summary.   
+        - **summary_filename** (*str*): Base filename of the summary.   
+        - **type_tags** (*list*): Type tag to get_summary separately (e.g. 'condition-variable' or 'task').   
+        - **include_context** (*bool*): If True, expand Onset and Offset tags.   
 
-    Optional parameters:  
-        breakout_list (*list*):  A list of tags to be separated.
+    Optional remodeling parameters:    
+        - **breakout_list** (*list*):  A list of tags to be separated.  
 
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
@@ -46,13 +46,13 @@ class SummarizeHedTagsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:  
-            KeyError  
-                If a required parameter is missing.  
-                If an unexpected parameter is provided.  
+        Raises:   
+            KeyError   
+                - If a required parameter is missing.   
+                - If an unexpected parameter is provided.   
 
-            TypeError  
-                If a parameter has the wrong type.  
+            TypeError   
+                - If a parameter has the wrong type.   
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -74,7 +74,7 @@ class SummarizeHedTagsOp(BaseOp):
             DataFrame: A new DataFrame with the factor columns appended.
 
         Side-effect:
-            Updates the context
+            Updates the context.
 
         """
         summary = dispatcher.context_dict.get(self.summary_name, None)
