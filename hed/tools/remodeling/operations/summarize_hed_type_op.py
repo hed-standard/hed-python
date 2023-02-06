@@ -12,10 +12,10 @@ from hed.tools.remodeling.operations.base_context import BaseContext
 class SummarizeHedTypeOp(BaseOp):
     """ Summarize a HED type tag in a collection of tabular files.
 
-    Required parameters:  
-        summary_name (*str*): The name of the summary.
-        summary_filename (*str*): Base filename of the summary.
-        type_tag (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags)
+    Required remodeling parameters:   
+        - **summary_name** (*str*): The name of the summary.   
+        - **summary_filename** (*str*): Base filename of the summary.   
+        - **type_tag** (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags).   
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
     is often used with `condition-variable` to produce a summary of the experimental design.
@@ -42,12 +42,12 @@ class SummarizeHedTypeOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError  
-                If a required parameter is missing.  
-                If an unexpected parameter is provided.  
+            KeyError   
+                - If a required parameter is missing.   
+                - If an unexpected parameter is provided.   
 
-            TypeError  
-                If a parameter has the wrong type.  
+            TypeError   
+                - If a parameter has the wrong type.   
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -56,7 +56,7 @@ class SummarizeHedTypeOp(BaseOp):
         self.type_tag = parameters['type_tag'].lower()
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create factor columns corresponding to values in a specified column.
+        """ Summarize a specified HED type variable such as Condition-variable .
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.

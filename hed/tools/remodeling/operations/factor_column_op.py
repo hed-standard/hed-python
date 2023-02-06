@@ -9,15 +9,11 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class FactorColumnOp(BaseOp):
     """ Create tabular file factor columns from column values.
 
-    Required parameters:  
-        column_name (*str*):  The name of a column in the DataFrame.  
-        factor_values (*list*):  Values in the column column_name to create factors for.  
-        factor_names (*list*):   Names to use as the factor columns.  
+    Required remodeling parameters:   
+        - **column_name** (*str*):  The name of a column in the DataFrame.   
+        - **factor_values** (*list*):  Values in the column column_name to create factors for.   
+        - **factor_names** (*list*):   Names to use as the factor columns.   
 
-    Raises:
-        ValueError  
-            If lengths of factor_values and factor_names are not the same.  
-            If factor_name is already a column and overwrite_existing is False.  
 
     """
 
@@ -38,15 +34,15 @@ class FactorColumnOp(BaseOp):
             parameters (dict): Parameter values for required and optional parameters.
 
         Raises:  
-            KeyError  
-                If a required parameter is missing.  
-                If an unexpected parameter is provided.  
+            KeyError    
+                - If a required parameter is missing.    
+                - If an unexpected parameter is provided.    
 
-            TypeError  
-                If a parameter has the wrong type.  
+            TypeError   
+                - If a parameter has the wrong type.   
 
-            ValueError  
-                If factor_names is not empty and is not the same length as factor_values.  
+            ValueError   
+                - If factor_names is not empty and is not the same length as factor_values.   
 
         """
         super().__init__(self.PARAMS, parameters)

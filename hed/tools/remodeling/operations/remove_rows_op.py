@@ -6,9 +6,9 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class RemoveRowsOp(BaseOp):
     """ Remove rows from a tabular file.
 
-    Required parameters:  
-        column_name (*str*): The name of column to be tested.
-        remove_values (*list*): The values to test for row removal.
+    Required remodeling parameters:   
+        - **column_name** (*str*): The name of column to be tested.   
+        - **remove_values** (*list*): The values to test for row removal.   
 
     """
 
@@ -28,12 +28,12 @@ class RemoveRowsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError  
-                If a required parameter is missing.  
-                If an unexpected parameter is provided.  
+            KeyError   
+                - If a required parameter is missing.   
+                - If an unexpected parameter is provided.   
 
-            TypeError  
-                If a parameter has the wrong type.  
+            TypeError   
+                - If a parameter has the wrong type.   
 
         """
         super().__init__(self.PARAMS, parameters)

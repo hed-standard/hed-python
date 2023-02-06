@@ -8,10 +8,10 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class SplitRowsOp(BaseOp):
     """ Split rows in a tabular file into multiple rows based on a column.
 
-    Required parameters:  
-        anchor_column (*str*): The column in which new items are generated.  
-        new_events (*dict*):  Mapping of new values based on values in the anchor_column.  
-        remove_parent_row (*bool*):  If true, columns not in column_order are placed at end.  
+    Required remodeling parameters:   
+        - **anchor_column** (*str*): The column in which new items are generated.   
+        - **new_events** (*dict*):  Mapping of new values based on values in the anchor_column.   
+        - **remove_parent_row** (*bool*):  If true, columns not in column_order are placed at end.   
 
     """
 
@@ -32,12 +32,12 @@ class SplitRowsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         Raises:
-            KeyError  
-                If a required parameter is missing.  
-                If an unexpected parameter is provided.  
+            KeyError   
+                - If a required parameter is missing.   
+                - If an unexpected parameter is provided.   
 
-            TypeError  
-                If a parameter has the wrong type.  
+            TypeError   
+                - If a parameter has the wrong type.   
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -58,8 +58,8 @@ class SplitRowsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         Raises:
-            TypeError  
-                If bad onset or duration.  
+            TypeError   
+                -If bad onset or duration.   
 
         """
 

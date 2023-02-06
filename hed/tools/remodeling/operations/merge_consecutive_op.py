@@ -7,12 +7,12 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class MergeConsecutiveOp(BaseOp):
     """ Merge consecutive rows with same column value.
 
-    Required parameters:
-        - column_name (*str*): the name of the column whose consecutive values are to be compared (the merge column).
-        - event_code (*str* or *int* or *float*): the particular value in the match column to be merged.
-        - match_columns (*list*):  A list of columns whose values have to be matched for two events to be the same.
-        - set_durations (*bool*): If true, set the duration of the merged event to the extent of the merged events.
-        - ignore_missing (*bool*):  If true, missing match_columns are ignored.
+    Required remodeling parameters:
+        - **column_name** (*str*): the name of the column whose consecutive values are to be compared (the merge column).  
+        - **event_code** (*str* or *int* or *float*): the particular value in the match column to be merged.  
+        - **match_columns** (*list*):  A list of columns whose values have to be matched for two events to be the same.  
+        - **set_durations** (*bool*): If true, set the duration of the merged event to the extent of the merged events.  
+        - **ignore_missing** (*bool*):  If true, missing match_columns are ignored.  
 
     """
     PARAMS = {
@@ -36,16 +36,16 @@ class MergeConsecutiveOp(BaseOp):
 
         Raises:
 
-            KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
+            KeyError   
+            - If a required parameter is missing.   
+            - If an unexpected parameter is provided.   
+ 
+            TypeError   
+            - If a parameter has the wrong type.   
 
-            TypeError:
-            - If a parameter has the wrong type.
-
-            ValueError:
-            - If the specification is missing a valid operation.
-            - If one of the match column is the merge column.
+            ValueError   
+            - If the specification is missing a valid operation.   
+            - If one of the match column is the merge column.   
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -72,11 +72,11 @@ class MergeConsecutiveOp(BaseOp):
 
         Raises:
 
-            ValueError  
-                If dataframe does not have the anchor column and ignore_missing is False.  
-                If a match column is missing and ignore_missing is false.  
-                If the durations were to be set and the dataframe did not have an onset column.  
-                If the durations were to be set and the dataframe did not have a duration column.  
+            ValueError   
+                - If dataframe does not have the anchor column and ignore_missing is False.   
+                - If a match column is missing and ignore_missing is false.   
+                - If the durations were to be set and the dataframe did not have an onset column.   
+                - If the durations were to be set and the dataframe did not have a duration column.   
 
         """
 
