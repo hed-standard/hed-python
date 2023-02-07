@@ -1,5 +1,6 @@
 """Infrastructure for caching HED schema from remote repositories."""
 
+import shutil
 import os
 
 import json
@@ -35,6 +36,8 @@ HED_CACHE_DIRECTORY = os.path.join(Path.home(), '.hedtools/hed_cache/')
 TIMESTAMP_FILENAME = "last_update.txt"
 CACHE_TIME_THRESHOLD = 300 * 6
 
+# This is the schemas included in the hedtools package.
+INSTALLED_CACHE_LOCATION = os.path.realpath(os.path.join(os.path.dirname(__file__), 'schema_data/'))
 version_pattern = re.compile(HED_VERSION_FINAL)
 
 
@@ -145,7 +148,7 @@ def _cache_specific_url(hed_xml_url, cache_filename):
 
 
 def get_hed_version_path(xml_version=None, library_name=None, local_hed_directory=None):
-    """ Get latest HED XML file path in a directory.
+    """ Get latest HED XML file path in a directory.  Only returns filenames that exist.
 
     Parameters:
         library_name (str or None): Optional the schema library name.
@@ -160,6 +163,8 @@ def get_hed_version_path(xml_version=None, library_name=None, local_hed_director
         local_hed_directory = HED_CACHE_DIRECTORY
 
     hed_versions = get_hed_versions(local_hed_directory, library_name)
+    if not hed_versions:
+        return None
     if xml_version:
         if xml_version in hed_versions:
             latest_hed_version = xml_version
@@ -190,6 +195,16 @@ def get_path_from_hed_version(hed_version, library_name=None, local_hed_director
     return _create_xml_filename(hed_version, library_name, local_hed_directory)
 
 
+def _copy_installed_schemas_to_cache(cache_folder):
+    installed_files = os.listdir(INSTALLED_CACHE_LOCATION)
+    for install_name in installed_files:
+        _, basename = os.path.split(install_name)
+        cache_name = os.path.join(cache_folder, basename)
+        install_name = os.path.join(INSTALLED_CACHE_LOCATION, basename)
+        if not os.path.exists(cache_name):
+            shutil.copy(install_name, cache_name)
+
+
 def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
     """ Cache all schemas at the given URLs.
 
@@ -211,6 +226,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
     """
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
+
     if not isinstance(hed_base_urls, (list, tuple)):
         hed_base_urls = [hed_base_urls]
     os.makedirs(cache_folder, exist_ok=True)
@@ -223,6 +239,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
     try:
         cache_lock_filename = os.path.join(cache_folder, "cache_lock.lock")
         with portalocker.Lock(cache_lock_filename, timeout=1):
+            _copy_installed_schemas_to_cache(cache_folder)
             for hed_base_url in hed_base_urls:
                 all_hed_versions = _get_hed_xml_versions_from_url(hed_base_url, skip_folders=skip_folders,
                                                                   get_libraries=True)
