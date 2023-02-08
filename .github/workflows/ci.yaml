@@ -53,10 +53,27 @@ jobs:
           name: code-coverage-report
           path: .coverage
 
+  check-secret:
+    runs-on: ubuntu-latest
+    outputs:
+      secrets-exist: ${{ steps.check-for-secrets.outputs.defined }}
+    steps:
+      - name: Check for Secret availability
+        id: check-for-secrets
+        # perform secret check & put boolean result as an output
+        shell: bash
+        run: |
+          if [ "${{ secrets.CC_TEST_REPORTER_ID }}" != '' ]; then
+            echo "defined=true" >> $GITHUB_OUTPUT;
+          else
+            echo "defined=false" >> $GITHUB_OUTPUT;
+          fi
+
   coverage:
     name: Publish coverage
-    needs: build
+    needs: [build, check-secret]
     runs-on: ubuntu-latest
+    if: needs.check-secret.outputs.secrets-exist == 'true'
 
     steps:
       - uses: actions/checkout@v3
