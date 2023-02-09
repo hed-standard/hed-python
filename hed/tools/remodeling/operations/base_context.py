@@ -3,8 +3,7 @@
 import os
 from abc import ABC, abstractmethod
 import json
-from werkzeug.utils import secure_filename
-from hed.tools.util.io_util import get_timestamp, extract_suffix_path
+from hed.tools.util.io_util import get_timestamp
 
 
 class BaseContext(ABC):
@@ -91,7 +90,7 @@ class BaseContext(ABC):
 
         return summary
 
-    def save(self, save_dir, file_formats=['.txt'], individual_summaries="separate", prefix_dir=None):
+    def save(self, save_dir, file_formats=['.txt'], individual_summaries="separate"):
 
         for file_format in file_formats:
             if file_format == '.txt':
@@ -100,17 +99,21 @@ class BaseContext(ABC):
                 summary = self.get_summary(individual_summaries=individual_summaries)
             else:
                 continue
-            self._save_separate(save_dir, file_format, summary, prefix_dir)
+            self._save_separate(save_dir, file_format, summary, individual_summaries)
 
-    def _save_separate(self, save_dir, file_format, summary, prefix_dir):
+    def _save_separate(self, save_dir, file_format, summary, individual_summaries):
         time_stamp = '_' + get_timestamp()
         this_save = os.path.join(save_dir, self.context_name + '/')
         os.makedirs(os.path.realpath(this_save), exist_ok=True)
         filename = os.path.realpath(os.path.join(this_save, self.context_filename + time_stamp + file_format))
-        self.dump_summary(filename, summary["Dataset"])
         individual = summary.get("Individual files", {})
-        if not individual:
+        if individual_summaries == "none" or not individual:
+            self.dump_summary(filename, summary["Dataset"])
             return
+        if individual_summaries == "consolidated":
+            self.dump_summary(filename, summary)
+            return
+        self.dump_summary(filename, summary["Dataset"])
         individual_dir = os.path.join(this_save, self.INDIVIDUAL_SUMMARIES_PATH + '/')
         os.makedirs(os.path.realpath(individual_dir), exist_ok=True)
         for name, sum_str in individual.items():
@@ -122,6 +125,7 @@ class BaseContext(ABC):
         this_name = os.path.splitext(this_name)[0]
         count = 1
         match = True
+        filename = None
         while match:
             filename = f"{self.context_filename}_{this_name}_{count}{time_stamp}{file_format}"
             filename = os.path.realpath(os.path.join(individual_dir, filename))
