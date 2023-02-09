@@ -12,7 +12,7 @@ from hed.tools.util.hed_logger import HedLogger
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        bids_base = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../data/bids_tests/eeg_ds003654s_hed'))
+        bids_base = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../data/bids_tests/eeg_ds003645s_hed'))
         cls.json = os.path.realpath(os.path.join(bids_base, 'task-FacePerception_events.json'))
         cls.bids_base_dir = bids_base
         cls.file_list = get_file_list(bids_base, name_suffix="_events", extensions=['.tsv'], exclude_dirs=['stimuli'])

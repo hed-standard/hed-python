@@ -11,15 +11,15 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        description = '../../data/bids/eeg_ds003654s_hed/dataset_description.json'
+        description = '../../data/bids/eeg_ds003645s_hed/dataset_description.json'
         cls.description_path = os.path.realpath(os.path.join(os.path.dirname(__file__), description))
         cls.event_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                       '../../data/bids_tests/eeg_ds003654s_hed/sub-002/',
+                                                       '../../data/bids_tests/eeg_ds003645s_hed/sub-002/',
                                                        'eeg/sub-002_task-FacePerception_run-1_events.tsv'))
-        sidecar = '../../data/bids_tests/eeg_ds003654s_hed/task-FacePerception_events.json'
+        sidecar = '../../data/bids_tests/eeg_ds003645s_hed/task-FacePerception_events.json'
         cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(__file__), sidecar))
 
-        inherit = '../../data/bids_tests/eeg_ds003654s_hed_inheritance'
+        inherit = '../../data/bids_tests/eeg_ds003645s_hed_inheritance'
         upper = 'task-FacePerception_events.json'
         lower2 = 'sub-002/sub-002_task-FacePerception_events.json'
         lower3 = 'sub-003/sub-003_task-FacePerception_events.json'

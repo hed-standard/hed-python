@@ -13,18 +13,18 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.data_zip = os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                     '../../../data/bids_tests/eeg_ds003654s_hed_remodel.zip'))
+                                                     '../../../data/bids_tests/eeg_ds003645s_hed_remodel.zip'))
         cls.extract_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../../data/remodel_tests'))
         cls.data_root = os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                      '../../../data/remodel_tests/eeg_ds003654s_hed_remodel'))
+                                                      '../../../data/remodel_tests/eeg_ds003645s_hed_remodel'))
         cls.model_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                       '../../../data/remodel_tests/eeg_ds003654s_hed_remodel',
+                                                       '../../../data/remodel_tests/eeg_ds003645s_hed_remodel',
                                                        'derivatives/remodel/remodeling_files/remove_extra_rmdl.json'))
         cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                         '../../../data/remodel_tests/eeg_ds003654s_hed_remodel',
+                                                         '../../../data/remodel_tests/eeg_ds003645s_hed_remodel',
                                                          'task-FacePerception_events.json'))
         cls.summary_model_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                               '../../../data/remodel_tests/eeg_ds003654s_hed_remodel',
+                                                               '../../../data/remodel_tests/eeg_ds003645s_hed_remodel',
                                                                'derivatives/remodel/remodeling_files',
                                                                'summarize_hed_types_rmdl.json'))
         cls.bad_remodel_path = os.path.realpath(os.path.join(os.path.dirname(__file__),

@@ -8,8 +8,8 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        events_file = '../../data/bids_tests/eeg_ds003654s_hed/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'
-        sidecar_file = '../../data/bids_tests/eeg_ds003654s_hed/task-FacePerception_events.json'
+        events_file = '../../data/bids_tests/eeg_ds003645s_hed/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'
+        sidecar_file = '../../data/bids_tests/eeg_ds003645s_hed/task-FacePerception_events.json'
         cls.event_path = os.path.realpath(os.path.join(os.path.dirname(__file__), events_file))
         cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(__file__), sidecar_file))
 

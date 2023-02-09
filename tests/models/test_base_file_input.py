@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         os.makedirs(base_output, exist_ok=True)
 
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                       '../data/bids_tests/eeg_ds003654s_hed'))
+                                                       '../data/bids_tests/eeg_ds003645s_hed'))
         schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                     '../data/schema_tests/HED8.0.0.xml'))
         cls.bids_root_path = bids_root_path
