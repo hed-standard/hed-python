@@ -170,8 +170,7 @@ class Dispatcher:
             summary_dir = self.get_summary_save_dir()
         os.makedirs(summary_dir, exist_ok=True)
         for context_name, context_item in self.context_dict.items():
-            context_item.save(summary_dir, save_formats, individual_summaries=individual_summaries,
-                              prefix_dir=self.data_root)
+            context_item.save(summary_dir, save_formats, individual_summaries=individual_summaries)
 
     @staticmethod
     def parse_operations(operation_list):

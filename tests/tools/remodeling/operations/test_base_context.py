@@ -29,13 +29,8 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         summary_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                    '../../../data/remodel_tests/temp'))
-        os.makedirs(summary_dir, exist_ok=True)
+                                                    '../../../data/remodel_tests/temp'))    
         cls.summary_dir = summary_dir
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.summary_dir)
 
     def test_constructor(self):
         with self.assertRaises(TypeError) as context:
@@ -63,7 +58,10 @@ class Test(unittest.TestCase):
         self.assertEqual(out1['Dataset'], out3['Dataset'])
         self.assertIn('data1', out3['Individual files'])
 
-    def test_save(self):
+    def test_save_no_ind(self):
+        if os.path.isdir(self.summary_dir):
+            shutil.rmtree(self.summary_dir)
+        os.makedirs(self.summary_dir)
         test1 = TestContext()
         file_list1 = os.listdir(self.summary_dir)
         self.assertFalse(file_list1)
@@ -71,19 +69,47 @@ class Test(unittest.TestCase):
         dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/'))
         file_list2 = os.listdir(dir_full)
         self.assertEqual(len(file_list2), 1)
+        basename = os.path.basename(file_list2[0])
+        self.assertTrue(basename.startswith('test_context'))
+        self.assertEqual(os.path.splitext(basename)[1], '.txt')
+        shutil.rmtree(self.summary_dir)
+
+    def test_save_consolidated(self):
+        if os.path.isdir(self.summary_dir):
+            shutil.rmtree(self.summary_dir)
+        os.makedirs(self.summary_dir)
+        test1 = TestContext()
+        file_list1 = os.listdir(self.summary_dir)
+        self.assertFalse(file_list1)
         dir_ind = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/',
                                                 "individual_summaries/"))
         self.assertFalse(os.path.isdir(dir_ind))
         test1.save(self.summary_dir, file_formats=['.json', '.tsv'], individual_summaries="consolidated")
-        file_list3 = os.listdir(dir_full)
-        self.assertEqual(len(file_list3), len(file_list2) + 2)
-        self.assertTrue(os.path.isdir(dir_ind))
+        dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/'))
+        file_list2 = os.listdir(dir_full)
+        self.assertEqual(len(file_list2), 1)
+        basename = os.path.basename(file_list2[0])
+        self.assertTrue(basename.startswith('test_context'))
+        self.assertEqual(os.path.splitext(basename)[1], '.json')
+        shutil.rmtree(self.summary_dir)
+        
+    def test_save_separate(self):
+        if os.path.isdir(self.summary_dir):
+            shutil.rmtree(self.summary_dir)
+        os.makedirs(self.summary_dir)
+        test1 = TestContext()
+        file_list1 = os.listdir(self.summary_dir)
+        self.assertFalse(file_list1)
         test1.save(self.summary_dir, file_formats=['.json', '.tsv'], individual_summaries="separate")
+        dir_ind = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/',
+                                                "individual_summaries/"))
+        dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/'))
         self.assertTrue(os.path.isdir(dir_ind))
         file_list4 = os.listdir(dir_full)
-        self.assertEqual(len(file_list4), len(file_list3) + 1)
+        self.assertEqual(len(file_list4), 2)
         file_list5 = os.listdir(dir_ind)
-        self.assertEqual(len(file_list5), 4)
+        self.assertEqual(len(file_list5), 2)
+        shutil.rmtree(self.summary_dir)
 
 
 if __name__ == '__main__':
