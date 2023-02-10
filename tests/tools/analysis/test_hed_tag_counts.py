@@ -33,23 +33,32 @@ class Test(unittest.TestCase):
         self.assertIsInstance(counts, HedTagCounts)
         self.assertFalse(counts.tag_dict)
         for k in range(6):
-            counts.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema))
+            counts.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
+                                       file_name='Base_name')
         self.assertIsInstance(counts.tag_dict, dict)
         self.assertEqual(len(counts.tag_dict), 15)
 
     def test_merge_tag_dicts(self):
-        counts1 = HedTagCounts('Base_name1')
-        counts2 = HedTagCounts('Base_name2')
+        counts1 = HedTagCounts('Base_name1', 50)
+        counts2 = HedTagCounts('Base_name2', 100)
         for k in range(6):
-            counts1.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema))
-            counts2.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema))
-        counts3 = HedTagCounts()
-        HedTagCounts.merge_tag_dicts(counts3.tag_dict, counts1.tag_dict)
-        HedTagCounts.merge_tag_dicts(counts3.tag_dict, counts2.tag_dict)
+            counts1.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
+                                        file_name='Base_name1')
+            counts2.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
+                                        file_name='Base_name2')
+        counts3 = HedTagCounts("All", 0)
+        counts3.merge_tag_dicts(counts1.tag_dict)
+        counts3.merge_tag_dicts(counts2.tag_dict)
+        self.assertEqual(len(counts1.tag_dict), 15)
+        self.assertEqual(len(counts2.tag_dict), 15)
+        self.assertEqual(len(counts3.tag_dict), 15)
+        self.assertEqual(counts3.tag_dict['experiment-structure'].events, 2)
 
     def test_hed_tag_count(self):
-        counts1 = HedTagCounts('Base_name1')
-        counts1.update_event_counts(HedString(self.input_df.iloc[0]['HED_assembled'], self.hed_schema))
+        name = 'Base_name1'
+        counts1 = HedTagCounts(name, 0)
+        counts1.update_event_counts(HedString(self.input_df.iloc[0]['HED_assembled'], self.hed_schema), 
+                                    file_name=name)
         self.assertIsInstance(counts1, HedTagCounts)
 
 
