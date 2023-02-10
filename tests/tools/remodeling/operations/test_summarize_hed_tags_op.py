@@ -87,18 +87,6 @@ class Test(unittest.TestCase):
         sum_obj3 = sum_context2.get_summary_details(include_individual=False)
         self.assertFalse(sum_obj3['Individual files'])
 
-    def test_get_summary_details_verbose(self):
-        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
-        parms = json.loads(self.json_parms)
-        sum_op = SummarizeHedTagsOp(parms)
-        df = dispatch.prep_data(dispatch.get_data_file(self.data_path))
-        sum_op.do_op(dispatch, df, 'subj2_run1', sidecar=self.json_path)
-        sum_op.do_op(dispatch, df, 'subj2_run2', sidecar=self.json_path)
-        sum_context1 = dispatch.context_dict[sum_op.summary_name]
-        sum_obj1 = sum_context1.get_summary_details(include_individual=True)
-        json_str1 = json.dumps(sum_obj1, indent=4)
-        self.assertIsInstance(json_str1, str)
-
     def test_get_summary_text_summary(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         parms = json.loads(self.json_parms)
@@ -106,14 +94,25 @@ class Test(unittest.TestCase):
         df = pd.read_csv(self.data_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
         df = dispatch.prep_data(df)
         sum_op.do_op(dispatch, df, 'subj2_run1', sidecar=self.json_path)
-
         sum_op.do_op(dispatch, df, 'subj2_run2', sidecar=self.json_path)
         sum_context1 = dispatch.context_dict[sum_op.summary_name]
-        text_sum1 = sum_context1.get_text_summary(individual_summaries="consolidated")
-        text_sum1t = sum_context1.get_text_summary(individual_summaries="separated")
-        text_sum1no = sum_context1.get_text_summary(individual_summaries="none")
-        self.assertGreater(len(text_sum1['Dataset']), len(text_sum1t['Dataset']))
-        self.assertGreater(len(text_sum1['Dataset']), len(text_sum1no['Dataset']))
+        text_sum_none = sum_context1.get_text_summary(individual_summaries="none")
+        self.assertIn('Dataset', text_sum_none)
+        self.assertIsInstance(text_sum_none['Dataset'], str)
+        self.assertFalse(text_sum_none.get("Individual files", {}))
+        
+        text_sum_consolidated = sum_context1.get_text_summary(individual_summaries="consolidated")
+        self.assertIn('Dataset', text_sum_consolidated)
+        self.assertIsInstance(text_sum_consolidated['Dataset'], str)
+        self.assertFalse(text_sum_consolidated.get("Individual files", {}))
+        self.assertGreater(len(text_sum_consolidated['Dataset']), len(text_sum_none['Dataset']))
+        
+        text_sum_separate = sum_context1.get_text_summary(individual_summaries="separate")
+        self.assertIn('Dataset', text_sum_separate)
+        self.assertIsInstance(text_sum_separate['Dataset'], str)
+        self.assertIn("Individual files", text_sum_separate)
+        self.assertIsInstance(text_sum_separate["Individual files"], dict)
+        self.assertEqual(len(text_sum_separate["Individual files"]), 2)
 
     def test_sample_example(self):
         remodel_list = [{

@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
 
         curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodel_tests')
         bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                     '../../data/bids_tests/eeg_ds003654s_hed')
+                                     '../../data/bids_tests/eeg_ds003645s_hed')
         cls.bids_base_dir = bids_base_dir
         cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")

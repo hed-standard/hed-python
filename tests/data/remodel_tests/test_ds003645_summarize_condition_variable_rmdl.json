@@ -1,0 +1,12 @@
+[
+    {
+        "operation": "summarize_hed_type",
+        "description": "Summarize the experimental design.",
+        "parameters": {
+            "summary_name": "summarize conditions",
+            "summary_filename": "summarize_condition_variable_type",
+            "type_tag": "condition-variable",
+            "expand_context": false
+        }
+    }
+]
