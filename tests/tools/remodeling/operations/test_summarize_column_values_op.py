@@ -70,9 +70,9 @@ class Test(unittest.TestCase):
         cont = dispatch.context_dict
         context1 = cont.get("test summary", None)
         self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
-        summary1 = context1.get_summary()
-        self.assertIsInstance(summary1, dict, "get_summary returns a dictionary")
-        self.assertIsInstance(summary1["Dataset"], dict)
+        # summary1 = context1.get_summary()
+        # self.assertIsInstance(summary1, dict, "get_summary returns a dictionary")
+        # self.assertIsInstance(summary1["Dataset"], dict)
         summary1a = context1.get_summary()
         self.assertIsInstance(summary1a, dict)
         self.assertIsInstance(summary1a["Dataset"], dict)
