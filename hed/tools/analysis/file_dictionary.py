@@ -1,3 +1,4 @@
+""" Representation of a file dictionary keyed by entity indices. """
 import os
 from hed.errors.exceptions import HedFileError
 
@@ -15,7 +16,7 @@ class FileDictionary:
         """ Create a dictionary with full paths as values.
 
 
-        Args:
+        Parameters:
             collection_name (str): Name of the file collection for reference.
             file_list (list, None):      List containing full paths of files of interest.
             key_indices (tuple, None):   List of order of key-value pieces to assemble for the key.
@@ -58,7 +59,7 @@ class FileDictionary:
     def create_file_dict(self, file_list, key_indices, separator):
         """ Create new dict based on key indices.
 
-        Args:
+        Parameters:
             file_list (list): Paths of the files to include.
             key_indices (tuple): A tuple of integers representing order of entities for key.
             separator (str): The separator used between entities to form the key.
@@ -70,7 +71,7 @@ class FileDictionary:
     def get_file_path(self, key):
         """ Return file path corresponding to key.
 
-        Args:
+        Parameters:
             key (str): Key used to retrieve the file path.
 
         Returns:
@@ -93,7 +94,7 @@ class FileDictionary:
     def key_diffs(self, other_dict):
         """ Return symmetric key difference with other.
 
-        Args:
+        Parameters:
             other_dict (FileDictionary)  A file dictionary object
 
         Returns:
@@ -106,9 +107,9 @@ class FileDictionary:
     def output_files(self, title=None, logger=None):
         """ Return a string with the output of the list.
 
-        Args:
-            title (None, str)    Optional title.
-            logger (HedLogger)   Optional HED logger for recording.
+        Parameters:
+            title (None, str):    Optional title.
+            logger (HedLogger):   Optional HED logger for recording.
 
         Returns:
             str: The dictionary in string form.
@@ -131,7 +132,7 @@ class FileDictionary:
     def make_file_dict(file_list, key_indices=(0, 2), separator='_'):
         """ Return a dictionary of files using entity keys.
 
-        Args:
+        Parameters:
             file_list (list):    Paths to files to use.
             key_indices (tuple): Positions of entities to use for key.
             separator (str):  Separator character used to construct key.
@@ -155,7 +156,7 @@ class FileDictionary:
     def make_key(key_string, indices=(0, 2), separator='_'):
         """ Create a key from specified entities.
 
-        Args:
+        Parameters:
             key_string (str): The string from which to extract the key (usually a filename or path).
             indices (tuple):  Positions of entity pairs to use as key.
             separator (str):  Separator between entity pairs in the created key.

@@ -1,7 +1,8 @@
 import unittest
 import os
 from hed.errors.exceptions import HedFileError
-from hed.tools import FileDictionary, TabularSummary
+from hed.tools.analysis.file_dictionary import FileDictionary
+from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools import get_file_list, get_new_dataframe
 
 
@@ -9,9 +10,9 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
 
-        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodel_tests')
         bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                     '../../data/bids/eeg_ds003654s_hed')
+                                     '../../data/bids_tests/eeg_ds003645s_hed')
         cls.bids_base_dir = bids_base_dir
         cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
@@ -24,21 +25,21 @@ class Test(unittest.TestCase):
     def test_constructor(self):
         dict1 = TabularSummary()
         self.assertIsInstance(dict1, TabularSummary,
-                              "BidsTabularSummary constructor is allowed to have no arguments")
+                              "TabularSummary constructor is allowed to have no arguments")
         self.assertFalse(dict1.value_info)
 
         dict2 = TabularSummary(value_cols=['a', 'b', 'c'], name='baloney')
-        self.assertIsInstance(dict2, TabularSummary, "BidsTabularSummary: multiple values are okay in constructor")
-        self.assertEqual(len(dict2.value_info.keys()), 3, "BidsTabularSummary should have keys for each value column")
+        self.assertIsInstance(dict2, TabularSummary, "TabularSummary: multiple values are okay in constructor")
+        self.assertEqual(len(dict2.value_info.keys()), 3, "TabularSummary should have keys for each value column")
 
     def test_get_number_unique_values(self):
         dict1 = TabularSummary()
         wh_df = get_new_dataframe(self.wh_events_path)
         dict1.update(wh_df)
         self.assertEqual(len(dict1.value_info.keys()), 0,
-                         "BidsTabularSummary value_info should be empty if no value columns")
+                         "TabularSummary value_info should be empty if no value columns")
         self.assertEqual(len(dict1.categorical_info.keys()), len(wh_df.columns),
-                         "BidsTabularSummary categorical_info should have all the columns if no restrictions")
+                         "TabularSummary categorical_info should have all the columns if no restrictions")
         count_dict = dict1.get_number_unique()
         self.assertEqual(len(count_dict), 10, "get_number_unique should have the correct number of entries")
         self.assertEqual(count_dict['onset'], 199, "get_number_unique should have the right number of unique")
@@ -48,12 +49,12 @@ class Test(unittest.TestCase):
         stern_df = get_new_dataframe(self.stern_map_path)
         dict1.update(stern_df)
         self.assertEqual(len(dict1.value_info.keys()), 1,
-                         "BidsTabularSummary value_info should be empty if no value columns")
+                         "TabularSummary value_info should be empty if no value columns")
         self.assertEqual(len(dict1.categorical_info.keys()), len(stern_df.columns)-2,
-                         "BidsTabularSummary categorical_info be columns minus skip and value columns")
+                         "TabularSummary categorical_info be columns minus skip and value columns")
         summary1 = dict1.get_summary(as_json=False)
         self.assertIsInstance(summary1, dict)
-        self.assertEqual(len(summary1), 3)
+        self.assertEqual(len(summary1), 5)
         summary2 = dict1.get_summary(as_json=True).replace('"', '')
         self.assertIsInstance(summary2, str)
 
@@ -63,7 +64,7 @@ class Test(unittest.TestCase):
         df = get_new_dataframe(self.stern_map_path)
         t_map.update(self.stern_map_path)
         self.assertEqual(len(t_map.categorical_info.keys()), len(df.columns),
-                         "BidsTabularSummary should have all columns as categorical if no value or skip are given")
+                         "TabularSummary should have all columns as categorical if no value or skip are given")
         t_map_str = str(t_map)
         self.assertTrue(t_map_str, "__str__ returns a non-empty string when the map has content.")
 
@@ -72,24 +73,24 @@ class Test(unittest.TestCase):
         stern_df = get_new_dataframe(self.stern_map_path)
         dict1.update(stern_df)
         self.assertEqual(len(dict1.value_info.keys()), 0,
-                         "BidsTabularSummary value_info should be empty if no value columns")
+                         "TabularSummary value_info should be empty if no value columns")
         self.assertEqual(len(dict1.categorical_info.keys()), len(stern_df.columns),
-                         "BidsTabularSummary categorical_info should have all the columns if no restrictions")
+                         "TabularSummary categorical_info should have all the columns if no restrictions")
 
         dict2 = TabularSummary(value_cols=['letter'], skip_cols=['event_type'])
         dict2.update(stern_df)
         self.assertEqual(len(dict2.value_info.keys()), 1,
-                         "BidsTabularSummary value_info should have letter value column")
-        self.assertEqual(dict2.value_info['letter'], len(stern_df),
-                         "BidsTabularSummary value counts should length of column")
-        self.assertEqual(len(dict2.skip_cols), 1, "BidsTabularSummary should have one skip column")
+                         "TabularSummary value_info should have letter value column")
+        self.assertEqual(dict2.value_info['letter'], [len(stern_df), 1],
+                         "TabularSummary value counts should length of column")
+        self.assertEqual(len(dict2.skip_cols), 1, "TabularSummary should have one skip column")
         self.assertEqual(len(dict2.categorical_info.keys()), len(stern_df.columns) - 2,
-                         "BidsTabularSummary categorical_info should have all columns except value and skip columns")
+                         "TabularSummary categorical_info should have all columns except value and skip columns")
         dict2.update(stern_df)
         self.assertEqual(len(dict2.value_info.keys()), 1,
-                         "BidsTabularSummary value_info should have letter value column")
-        self.assertEqual(dict2.value_info['letter'], 2*len(stern_df),
-                         "BidsTabularSummary value counts should update by column length each time update is called")
+                         "TabularSummary value_info should have letter value column")
+        self.assertEqual(dict2.value_info['letter'], [2*len(stern_df), 2],
+                         "TabularSummary value counts should update by column length each time update is called")
 
     def test_update_dict(self):
         dict1 = TabularSummary()
@@ -174,7 +175,7 @@ class Test(unittest.TestCase):
         file_dict1 = FileDictionary("my name", files_bids)
         dicts_all1, dicts1 = TabularSummary.make_combined_dicts(file_dict1.file_dict)
         self.assertTrue(isinstance(dicts_all1, TabularSummary),
-                        "make_combined_dicts should return a BidsTabularSummary")
+                        "make_combined_dicts should return a TabularSummary")
         self.assertTrue(isinstance(dicts1, dict), "make_combined_dicts should also return a dictionary of file names")
         self.assertEqual(6, len(dicts1), "make_combined_dicts should return correct number of file names")
         self.assertEqual(10, len(dicts_all1.categorical_info),
@@ -182,7 +183,7 @@ class Test(unittest.TestCase):
         dicts_all2, dicts2 = TabularSummary.make_combined_dicts(file_dict1.file_dict,
                                                                 skip_cols=["onset", "duration", "sample"])
         self.assertTrue(isinstance(dicts_all2, TabularSummary),
-                        "make_combined_dicts should return a BidsTabularSummary")
+                        "make_combined_dicts should return a TabularSummary")
         self.assertTrue(isinstance(dicts2, dict), "make_combined_dicts should also return a dictionary of file names")
         self.assertEqual(6, len(dicts2), "make_combined_dicts should return correct number of file names")
         self.assertEqual(len(dicts_all2.categorical_info), 7,

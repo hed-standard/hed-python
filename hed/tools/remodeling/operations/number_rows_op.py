@@ -1,20 +1,22 @@
+""" Implementation in progress. """
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-PARAMS = {
-    "command": "number_rows",
-    "required_parameters": {
-        "number_column_name": str
-    },
-    "optional_parameters": {"overwrite": bool, "match_value": dict}
-}
+#TODO: This class is under development
 
 
 class NumberRowsOp(BaseOp):
+    """ Implementation in progress. """
+    PARAMS = {
+        "operation": "number_rows",
+        "required_parameters": {
+            "number_column_name": str
+        },
+        "optional_parameters": {"overwrite": bool, "match_value": dict}
+    }
 
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        super().__init__(self.PARAMS, parameters)
         self.number_column_name = parameters['number_column_name']
         self.overwrite = parameters.get('overwrite', False)
         self.match_value = parameters.get('match_value', False)
@@ -30,7 +32,7 @@ class NumberRowsOp(BaseOp):
                     param_type = self.match_value_params[param_name]
                 else:
                     raise KeyError("BadParameter",
-                                   f"{param_name} not a required or optional parameter for {self.command}")
+                                   f"{param_name} not a required or optional parameter for {self.operation}")
                 # TODO: this has a syntax error
                 # if not isinstance(param_value, param_type):
                 #     raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
@@ -38,11 +40,11 @@ class NumberRowsOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Add numbers events dataframe.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+        Parameters:
+            dispatcher (Dispatcher): Manages operation I/O.
+            df (DataFrame): - The DataFrame to be remodeled.
+            name (str): - Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):   Only needed for HED operations.
 
         Returns:
             Dataframe - a new dataframe after processing.

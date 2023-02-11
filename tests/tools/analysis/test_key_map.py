@@ -1,14 +1,16 @@
 import unittest
 import os
 import pandas as pd
-from hed.errors import HedFileError
-from hed.tools import KeyMap, get_file_list, get_new_dataframe
+from hed.errors.exceptions import HedFileError
+from hed.tools.analysis.key_map import KeyMap
+from hed.tools.util.data_util import get_new_dataframe
+from hed.tools.util.io_util import get_file_list
 
 
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodel_tests')
         cls.curation_base_dir = curation_base_dir
         cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
@@ -23,49 +25,32 @@ class Test(unittest.TestCase):
         cls.key_cols2 = ["event_code", "cond_code", "focus_modality"]
         cls.target_cols2 = ["event_type", "attention_status", "task_role"]
 
-    # def test_lookup_cols(self):
-    #     t_map = KeyMap(self.key_cols1, self.target_cols1)
-    #     stern_df = get_new_dataframe(self.stern_map_path)
-    #     t_map.update(stern_df)
-    #     t_col = t_map.col_map
-    #     for index, row in stern_df.iterrows():
-    #         key = get_row_hash(row, self.key_cols1)
-    #         key_value = t_map.map_dict[key]
-    #         self.assertEqual(t_col.iloc[key_value]['type'], row['type'], "The key should be looked up for same map")
-    #
-    #     stern_test1 = get_new_dataframe(self.stern_test1_path)
-    #     for index, row in stern_test1.iterrows():
-    #         key = get_row_hash(row, self.key_cols1)
-    #         key_value = t_map.map_dict[key]
-    #         self.assertEqual(t_col.iloc[key_value]['type'], row['type'], "The key should be looked up for other file")
-
     def test_constructor(self):
         t_map = KeyMap(self.key_cols1, self.target_cols1)
         self.assertIsInstance(t_map, KeyMap)
         df = t_map.col_map
         self.assertIsInstance(df, pd.DataFrame)
-        try:
+        with self.assertRaises(ValueError) as context:
             KeyMap(None, ['a'])
-        except HedFileError:
-            pass
-        except Exception as ex:
-            self.fail(f'KeyMap threw the wrong exception {ex} when no key columns')
-        else:
-            self.fail('KeyMap should have thrown a HedFileError exception when no key columns')
+        self.assertEqual(context.exception.args[0], "KEY_COLUMNS_EMPTY")
 
-        try:
+        with self.assertRaises(ValueError) as context1:
             KeyMap(['a', 'b', 'c'], ['b', 'c', 'd'])
-        except HedFileError:
-            pass
-        except Exception as ex:
-            self.fail(f'KeyMap threw the wrong exception {ex} when key and target columns overlap')
-        else:
-            self.fail('KeyMap should have thrown a HedFileError exception when key and target columns overlap')
+        self.assertEqual(context1.exception.args[0], "KEY_AND_TARGET_COLUMNS_NOT_DISJOINT")
 
         emap1 = KeyMap(['a'], [])
         self.assertIsInstance(emap1, KeyMap, "KeyMap: target columns can be empty")
         self.assertEqual(len(emap1.col_map.columns), 1,
                          "The column map should have only key columns when no target")
+
+    def test_str(self):
+        t_map = KeyMap(self.key_cols1)
+        str1 = str(t_map)
+        stern_df = get_new_dataframe(self.stern_map_path)
+        t_map.update(stern_df)
+        str2 = str(t_map)
+        self.assertGreater(len(str2), len(str1))
+        self.assertIsInstance(str2, str)
 
     def test_make_template(self):
         t_map = KeyMap(self.key_cols1)
@@ -86,14 +71,9 @@ class Test(unittest.TestCase):
     def test_make_template_key_overlap(self):
         t_map = KeyMap(['event_type', 'type'])
         t_map.update(self.stern_map_path)
-        try:
+        with self.assertRaises(HedFileError) as context:
             t_map.make_template(['Bananas', 'type', 'Pears'])
-        except HedFileError:
-            pass
-        except Exception as ex:
-            self.fail(f'make_template threw the wrong exception {ex} when additional columns overlapped keys')
-        else:
-            self.fail('KeyTemplate should have thrown a HedFileError exception when key overlap but threw none')
+        self.assertEqual(context.exception.args[0], "AdditionalColumnsNotDisjoint")
 
     def test_remap(self):
         t_map_stern = KeyMap(self.key_cols1, self.target_cols1)
@@ -151,6 +131,14 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df_dict.keys()), len(stern_df),
                          "update dictionary should contain all the entries")
         self.assertFalse(duplicates, "update should not have any duplicates for stern map")
+
+    def test_update_map_row_list(self):
+        t_map = KeyMap(self.key_cols1, self.target_cols1)
+        stern_df = get_new_dataframe(self.stern_map_path)
+        duplicates1 = t_map.update(stern_df)
+        duplicates2 = t_map.update(stern_df)
+        self.assertFalse(duplicates1)
+        self.assertFalse(duplicates2)
 
     def test_update_map_missing(self):
         keys = self.key_cols1 + ['another']

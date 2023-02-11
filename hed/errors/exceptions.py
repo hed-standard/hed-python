@@ -34,6 +34,8 @@ class HedFileError(Exception):
         self.filename = filename
         # only filled in when this lists multiple errors, such as the HED_WIKI_DELIMITERS_INVALID or BAD_COLUMN_NAMES
         self.issues = issues
+        if self.issues is None:
+            self.issues = []
 
     def format_error_message(self, include_tabbing=True, return_string_only=False,
                              name=None):

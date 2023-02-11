@@ -1,0 +1,12 @@
+[
+    {
+        "operation": "summarize_sidecar_from_events",
+        "description": "Generate a sidecar from the excerpted events file.",
+        "parameters": {
+            "summary_name": "AOMIC_generate_sidecar",
+            "summary_filename": "AOMIC_generate_sidecar",
+            "skip_columns": ["onset", "duration"],
+            "value_columns": ["response_time", "stop_signal_delay"]
+            }
+    }
+]

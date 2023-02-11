@@ -1,0 +1,29 @@
+[
+    {
+        "operation": "summarize_column_names",
+        "description": "Summarize column names.",
+        "parameters": {
+            "summary_name": "AOMIC_column_names",
+            "summary_filename": "AOMIC_column_names"
+            }    
+    },
+    {
+        "operation": "summarize_column_values",
+        "description": "Summarize the column values in an excerpt.",
+        "parameters": {
+            "summary_name": "AOMIC_column_values",
+            "summary_filename": "AOMIC_column_values",
+            "skip_columns": ["onset", "duration"],
+            "value_columns": ["response_time", "stop_signal_delay"]
+            }
+    },
+    {
+        "operation": "summarize_hed_type",
+        "description": "Summarize experimental conditions.",
+        "parameters": {
+            "summary_name": "AOMIC_condition_variables",
+            "summary_filename": "AOMIC_condition_variables",
+            "type_tag": "condition-variable"
+        }
+    }
+]

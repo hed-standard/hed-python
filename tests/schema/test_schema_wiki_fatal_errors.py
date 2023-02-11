@@ -6,7 +6,7 @@ from hed.errors import HedFileError, HedExceptions
 
 
 class TestHedSchema(unittest.TestCase):
-    base_schema_dir = '../data/invalid_wiki_schemas/'
+    base_schema_dir = '../data/schema_tests/wiki_tests/'
 
     @classmethod
     def setUpClass(cls):
@@ -28,6 +28,8 @@ class TestHedSchema(unittest.TestCase):
             "malformed_line3.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
             "malformed_line4.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
             "malformed_line5.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+            "malformed_line6.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+            "malformed_line7.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
             "empty_node.xml": HedExceptions.HED_SCHEMA_NODE_NAME_INVALID
         }
 
@@ -38,19 +40,33 @@ class TestHedSchema(unittest.TestCase):
             "malformed_line3.mediawiki": 2,
             "malformed_line4.mediawiki": 1,
             "malformed_line5.mediawiki": 1,
+            "malformed_line6.mediawiki": 2,
+            "malformed_line7.mediawiki": 2,
             'HED_schema_no_start.mediawiki': 1
+        }
+        cls.expected_line_numbers = {
+            "empty_node.mediawiki": [9],
+            "malformed_line.mediawiki": [9],
+            "malformed_line2.mediawiki": [9, 9],
+            "malformed_line3.mediawiki": [9, 9],
+            "malformed_line4.mediawiki": [9],
+            "malformed_line5.mediawiki": [9],
+            "malformed_line6.mediawiki": [9, 10],
+            "malformed_line7.mediawiki": [9, 10],
         }
 
     def test_invalid_schema(self):
         for filename, error in self.files_and_errors.items():
             full_filename = self.full_base_folder + filename
-
-            try:
-                loaded_schema = schema.load_schema(full_filename)
+            with self.assertRaises(HedFileError) as context:
+                schema.load_schema(full_filename)
                 # all of these should produce exceptions.
-                self.assertFalse(True)
-            except HedFileError as e:
-                self.assertEqual(e.error_type, error)
-                if filename in self.expected_count:
-                    self.assertEqual(len(e.issues), self.expected_count[filename])
-                pass
+
+            # Verify basic properties of exception
+            expected_line_numbers = self.expected_line_numbers.get(filename, [])
+            if expected_line_numbers:
+                for issue, expected in zip(context.exception.issues, expected_line_numbers):
+                    self.assertEqual(issue["line_number"], expected)
+
+            self.assertTrue(context.exception.args[0] == error)
+            self.assertTrue(context.exception.filename == full_filename)

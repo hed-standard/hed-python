@@ -8,24 +8,28 @@ on:
 
 jobs:
   build:
-
     strategy:
       matrix:
         platform: [ubuntu-latest]
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.9]
 
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('dev-requirements.txt') }}
+
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade --upgrade-strategy eager pip
           pip install flake8
           pip install coverage
           pip install -r requirements.txt
@@ -40,12 +44,67 @@ jobs:
 
       - name: Test with unittest
         run: |
-          coverage run -m unittest
+          HED_GITHUB_TOKEN=${{ secrets.HED_GITHUB_TOKEN }} coverage run -m unittest
+
+      - name: Archive code coverage results
+        if: ${{matrix.python-version == '3.9'}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-report
+          path: .coverage
+
+  check-secret:
+    runs-on: ubuntu-latest
+    outputs:
+      secrets-exist: ${{ steps.check-for-secrets.outputs.defined }}
+    steps:
+      - name: Check for Secret availability
+        id: check-for-secrets
+        # perform secret check & put boolean result as an output
+        shell: bash
+        run: |
+          if [ "${{ secrets.CC_TEST_REPORTER_ID }}" != '' ]; then
+            echo "defined=true" >> $GITHUB_OUTPUT;
+          else
+            echo "defined=false" >> $GITHUB_OUTPUT;
+          fi
+
+  coverage:
+    name: Publish coverage
+    needs: [build, check-secret]
+    runs-on: ubuntu-latest
+    if: needs.check-secret.outputs.secrets-exist == 'true'
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('dev-requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade --upgrade-strategy eager pip
+          pip install flake8
+          pip install coverage
+          pip install -r requirements.txt
+          pip install -r docs/requirements.txt
+
+      - name: Download a single artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: code-coverage-report
 
       - name: publish-coverages
-        uses: paambaati/codeclimate-action@v2.7.5
+        with:
+          coverageCommand: coverage xml
+          debug: true
+        uses: paambaati/codeclimate-action@v3.2.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-        with:
-            coverageCommand: coverage xml
-            debug: true
+

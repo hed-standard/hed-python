@@ -5,14 +5,14 @@ from pandas import DataFrame
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import add_columns, check_match, delete_columns, delete_rows_by_column, \
     get_key_hash, get_new_dataframe, get_row_hash, get_value_dict, \
-    make_info_dataframe, remove_quotes, reorder_columns, replace_values, separate_columns
+    make_info_dataframe, reorder_columns, replace_values, separate_values
 
 
 class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodeling')
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodel_tests')
         cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(curation_base_dir, "sternberg_with_quotes_events.tsv")
@@ -122,12 +122,6 @@ class Test(unittest.TestCase):
         self.assertEqual(1, num_replaced2,
                          "replace_values should replace the correct number of values when columns are specified")
 
-    def test_remove_quotes(self):
-        df1 = get_new_dataframe(self.stern_test2_path)
-        remove_quotes(df1)
-        df2 = get_new_dataframe(self.stern_test3_path)
-        self.assertEqual(df1.loc[0, 'stimulus'], df2.loc[0, 'stimulus'], "remove_quotes should have quotes removed")
-
     def test_reorder_columns(self):
         df = get_new_dataframe(self.stern_map_path)
         df_new = reorder_columns(df, ['event_type', 'type'])
@@ -140,31 +134,26 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df_new1.columns), 2, "reorder_columns should return correct number of rows")
 
     def test_reorder_columns_no_skip(self):
-        try:
+        with self.assertRaises(HedFileError) as context:
             reorder_columns(self.stern_map_path, ['event_type', 'type', 'baloney'], skip_missing=False)
-        except HedFileError:
-            pass
-        except Exception as ex:
-            self.fail(f'reorder_columns threw the wrong exception {str(ex)} when missing column')
-        else:
-            self.fail('reorder_columns should have thrown a HedFileError exception when missing')
+        self.assertEqual(context.exception.args[0], 'MissingKeys')
 
     def test_separate_columns(self):
         base_cols = ['a', 'b', 'c', 'd']
-        present, missing = separate_columns(base_cols, [])
-        self.assertFalse(present, "separate_columns should have empty present when no target columns")
-        self.assertFalse(missing, "separate_columns should have empty missing when no target columns")
-        present, missing = separate_columns(base_cols, ['b', 'd'])
+        present, missing = separate_values(base_cols, [])
+        self.assertFalse(present, "separate_values should have empty present when no target columns")
+        self.assertFalse(missing, "separate_values should have empty missing when no target columns")
+        present, missing = separate_values(base_cols, ['b', 'd'])
         self.assertEqual(len(present), len(['b', 'd']),
-                         "separate_columns should have target columns present when target columns subset of base")
-        self.assertFalse(missing, "separate_columns should no missing columns when target columns subset of base")
-        present, missing = separate_columns(base_cols, base_cols)
+                         "separate_values should have target columns present when target columns subset of base")
+        self.assertFalse(missing, "separate_values should no missing columns when target columns subset of base")
+        present, missing = separate_values(base_cols, base_cols)
         self.assertEqual(len(present), len(base_cols),
-                         "separate_columns should have target columns present when target columns equals base")
-        self.assertFalse(missing, "separate_columns should no missing columns when target columns equals base")
-        present, missing = separate_columns(base_cols, ['g', 'h'])
-        self.assertFalse(present, "separate_columns should have empty present when target columns do not overlap base")
-        self.assertEqual(len(missing), 2, "separate_columns should have all target columns missing")
+                         "separate_values should have target columns present when target columns equals base")
+        self.assertFalse(missing, "separate_values should no missing columns when target columns equals base")
+        present, missing = separate_values(base_cols, ['g', 'h'])
+        self.assertFalse(present, "separate_values should have empty present when target columns do not overlap base")
+        self.assertEqual(len(missing), 2, "separate_values should have all target columns missing")
 
 
 if __name__ == '__main__':

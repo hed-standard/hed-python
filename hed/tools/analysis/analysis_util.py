@@ -1,13 +1,17 @@
-""" Utilities for downstream analysis such as searching. """
+""" Utilities for assembly, analysis, and searching. """
 
 import pandas as pd
-from hed.models import TabularInput, TagExpressionParser
+from hed.models.tabular_input import TabularInput
+from hed.models.expression_parser import QueryParser
+from hed.tools.util.data_util import separate_values
+from hed.models.hed_tag import HedTag
+from hed.models.hed_group import HedGroup
 
 
 def assemble_hed(data_input, columns_included=None, expand_defs=False):
     """ Return assembled HED annotations in a dataframe.
 
-    Args:
+    Parameters:
         data_input (TabularInput): The tabular input file whose HED annotations are to be assembled.
         columns_included (list or None):  A list of additional column names to include.
             If None, only the list of assembled tags is included.
@@ -18,12 +22,7 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
         dict: A dictionary with definition names as keys and definition content strings as values.
     """
 
-    if columns_included:
-        columns = frozenset(list(data_input.dataframe.columns))
-        eligible_columns = [x for x in columns_included if x in columns]
-    else:
-        eligible_columns = None
-
+    eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
     hed_obj_list = get_assembled_strings(data_input, expand_defs=expand_defs)
     hed_string_list = [str(hed) for hed in hed_obj_list]
     if not eligible_columns:
@@ -38,7 +37,7 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
 def get_assembled_strings(table, hed_schema=None, expand_defs=False):
     """ Return HED string objects for a tabular file.
 
-    Args:
+    Parameters:
         table (TabularInput): The input file to be searched.
         hed_schema (HedSchema or HedschemaGroup): If provided the HedStrings are converted to canonical form.
         expand_defs (bool): If True, definitions are expanded when the events are assembled.
@@ -55,7 +54,7 @@ def get_assembled_strings(table, hed_schema=None, expand_defs=False):
 def search_tabular(data_input, hed_schema, query, columns_included=None):
     """ Return a dataframe with results of query.
 
-    Args:
+    Parameters:
         data_input (TabularInput): The tabular input file (e.g., events) to be searched.
         hed_schema (HedSchema or HedSchemaGroup):  The schema(s) under which to make the query.
         query (str or list):     The str query or list of string queries to make.
@@ -65,18 +64,14 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
         DataFrame or None: A DataFrame with the results of the query or None if no events satisfied the query.
 
     """
-    if columns_included:
-        columns = frozenset(list(data_input.dataframe.columns))
-        eligible_columns = [x for x in columns_included if x in columns]
-    else:
-        eligible_columns = None
 
+    eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
     hed_list = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
-    expression = TagExpressionParser(query)
+    expression = QueryParser(query)
     hed_tags = []
     row_numbers = []
     for index, next_item in enumerate(hed_list):
-        match = expression.search_hed_string(next_item)
+        match = expression.search(next_item)
         if not match:
             continue
         hed_tags.append(next_item)
@@ -92,18 +87,70 @@ def search_tabular(data_input, hed_schema, query, columns_included=None):
     return df
 
 
-if __name__ == '__main__':
-    import os
-    from hed.models import Sidecar
-    from hed.schema import load_schema_version
-    root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../tests/data/bids/eeg_ds003654s_hed')
-    events_path = os.path.realpath(os.path.join(root_path, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
-    json_path = os.path.realpath(os.path.join(root_path, 'task-FacePerception_events.json'))
-    sidecar = Sidecar(json_path, name='face_sub1_json')
-    input_data = TabularInput(events_path, sidecar=sidecar, name="face_sub1_events")
-    hed_schema1 = load_schema_version(xml_version="8.1.0")
-    query1 = "Sensory-event"
-    df3 = search_tabular(input_data, hed_schema1, query1, columns_included=['onset', 'event_type'])
+# def remove_defs(hed_strings):
+#     """ This removes any def or Def-expand from a list of HedStrings.
+#
+#     Parameters:
+#         hed_strings (list):  A list of HedStrings
+#
+#     Returns:
+#         list: A list of the removed Defs.
+#
+#     """
+#     def_groups = [[] for i in range(len(hed_strings))]
+#     for index, hed in enumerate(hed_strings):
+#         def_groups[index] = extract_defs(hed)
+#     return def_groups
+#
+#
+# def extract_defs(hed_string_obj):
+#     """ This removes any def or Def-expand from a list of HedStrings.
+#
+#     Parameters:
+#         hed_string_obj (HedString):  A HedString
+#
+#     Returns:
+#         list: A list of the removed Defs.
+#
+#     Notes:
+#         - the hed_string_obj passed in no longer has definitions.
+#
+#     """
+#     to_remove = []
+#     to_append = []
+#     tuples = hed_string_obj.find_def_tags(recursive=True, include_groups=3)
+#     for tup in tuples:
+#         if len(tup[2].children) == 1:
+#             to_append.append(tup[0])
+#         else:
+#             to_append.append(tup[2])
+#         to_remove.append(tup[2])
+#     hed_string_obj.remove(to_remove)
+#     return to_append
 
-    print(f"{len(df3)} events match")
-    df1, defs = assemble_hed(input_data, columns_included=None, expand_defs=False)
+
+def hed_to_str(contents, remove_parentheses=False):
+
+    if contents is None:
+        return ''
+    if isinstance(contents, str):
+        return contents
+    if isinstance(contents, HedTag):
+        return str(contents)
+    if isinstance(contents, list):
+        converted = [hed_to_str(element, remove_parentheses) for element in contents if element]
+        return ",".join(converted)
+    if not isinstance(contents, HedGroup):
+        raise TypeError("ContentsWrongClass", "OnsetGroup excepts contents that can be converted to string.")
+    if not remove_parentheses or len(contents.children) != 1:
+        return str(contents)
+    return _handle_remove(contents)
+
+
+def _handle_remove(contents):
+    if contents.is_group or isinstance(contents.children[0], HedTag):
+        return str(contents.children[0])
+    child = contents.children[0]
+    if child.is_group and len(child.children) == 1:
+        return str(child.children[0])
+    return str(child)

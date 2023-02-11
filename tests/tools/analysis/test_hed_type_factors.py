@@ -1,10 +1,16 @@
 import os
 import unittest
 import pandas as pd
-from hed import HedString, load_schema_version, Sidecar, TabularInput
-from hed.errors import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed.models import DefinitionEntry
-from hed.tools import HedContextManager, HedTypeVariable, HedTypeFactors, get_assembled_strings
+from hed.models.hed_string import HedString
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed.schema.hed_schema_io import load_schema_version
+from hed.tools.analysis.hed_context_manager import HedContextManager
+from hed.tools.analysis.hed_type_values import HedTypeValues
+from hed.tools.analysis.hed_type_factors import HedTypeFactors
+from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 class Test(unittest.TestCase):
@@ -13,8 +19,8 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.1.0")
-        cls.test_strings1 = [HedString(f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
-                                       f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4", hed_schema=schema),
+        cls.test_strings1 = [HedString("Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
+                                       "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4", hed_schema=schema),
                              HedString('(Def/Cond1, Offset)', hed_schema=schema),
                              HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast',
                                        hed_schema=schema),
@@ -22,7 +28,7 @@ class Test(unittest.TestCase):
                              HedString('(Def/Cond2, Onset)', hed_schema=schema),
                              HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
                              HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
-        cls.test_strings2 = [HedString(f"Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
+        cls.test_strings2 = [HedString("Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
                                        hed_schema=schema),
                              HedString("Yellow", hed_schema=schema),
                              HedString("Def/Cond2, (Def/Cond6/4, Onset)", hed_schema=schema),
@@ -47,7 +53,7 @@ class Test(unittest.TestCase):
         cls.test_strings3 = [HedString('(Def/Cond3, Offset)', hed_schema=schema)]
 
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../data/bids/eeg_ds003654s_hed'))
+                                          '../../data/bids_tests/eeg_ds003645s_hed'))
         events_path = os.path.realpath(os.path.join(bids_root_path,
                                                     'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
@@ -55,53 +61,78 @@ class Test(unittest.TestCase):
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         cls.schema = schema
 
-    def test_constructor(self):
-        var_manager = HedTypeVariable(HedContextManager(self.test_strings1, self.schema), self.schema, self.defs)
-        var1_summary = var_manager.get_variable('var1')
-        self.assertIsInstance(var1_summary, HedTypeFactors)
+    def test_with_mixed(self):
+        var_manager = HedTypeValues(HedContextManager(self.test_strings1, self.schema), self.defs, 'run-01')
+        var_facts = var_manager.get_type_value_factors('fast')
+        self.assertIsInstance(var_facts, HedTypeFactors)
+        df = var_facts.get_factors()
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertEqual(len(df), len(self.test_strings1))
+        self.assertEqual(len(df.columns), 1)
+        summary1 = var_facts.get_summary()
+        self.assertIsInstance(summary1, dict)
 
-    def test_constructor_from_tabular_input(self):
+    def test_tabular_input(self):
         test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeVariable(HedContextManager(test_strings1, self.schema), self.schema, definitions)
-        self.assertIsInstance(var_manager, HedTypeVariable,
-                              "Constructor should create a HedVariableManager from a tabular input")
-        var_sum = var_manager.get_variable('face-type')
-        self.assertIsInstance(var_sum, HedTypeFactors)
+        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema), definitions, 'run-01')
+        self.assertIsInstance(var_manager, HedTypeValues,
+                              "Constructor should create a HedTypeManager from a tabular input")
+        var_fact = var_manager.get_type_value_factors('face-type')
+        self.assertIsInstance(var_fact, HedTypeFactors)
+        this_str = str(var_fact)
+        self.assertIsInstance(this_str, str)
+        self.assertTrue(len(this_str))
+        fact2 = var_fact.get_factors()
+        self.assertIsInstance(fact2, pd.DataFrame)
+        df2 = var_fact._one_hot_to_categorical(fact2, ["unfamiliar-face-cond", "baloney"])
+        self.assertEqual(len(df2), 200)
+        self.assertEqual(len(df2.columns), 1)
 
     def test_constructor_multiple_values(self):
-        var_manager = HedTypeVariable(HedContextManager(self.test_strings2, self.schema), self.schema, self.defs)
-        self.assertIsInstance(var_manager, HedTypeVariable,
-                              "Constructor should create a HedVariableManager from strings")
-        self.assertEqual(len(var_manager._variable_map), 3,
+        var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs, 'run-01')
+        self.assertIsInstance(var_manager, HedTypeValues,
+                              "Constructor should create a HedTypeManager from strings")
+        self.assertEqual(len(var_manager._type_value_map), 3,
                          "Constructor should have right number of type_variables if multiple")
-        var_sum = var_manager.get_variable('var2')
-        self.assertIsInstance(var_sum, HedTypeFactors)
+        var_fact1 = var_manager.get_type_value_factors('var2')
+        self.assertIsInstance(var_fact1, HedTypeFactors)
+        var_fact2 = var_manager.get_type_value_factors('lumber')
+        fact2 = var_fact2.get_factors()
+        self.assertIsInstance(fact2, pd.DataFrame)
+        self.assertEqual(len(fact2), len(self.test_strings2))
+        with self.assertRaises(HedFileError) as context:
+            var_fact2.get_factors(factor_encoding="categorical")
+        self.assertEqual(context.exception.args[0], "MultipleFactorSameEvent")
+        with self.assertRaises(ValueError) as context:
+            var_fact2.get_factors(factor_encoding="baloney")
+        self.assertEqual(context.exception.args[0], "BadFactorEncoding")
 
     def test_constructor_unmatched(self):
-        with self.assertRaises(HedFileError):
-            HedTypeVariable(HedContextManager(self.test_strings3, self.schema), self.schema, self.defs)
+        with self.assertRaises(HedFileError) as context:
+            HedTypeValues(HedContextManager(self.test_strings3, self.schema), self.defs, 'run-01')
+        self.assertEqual(context.exception.args[0], 'UnmatchedOffset')
 
     def test_variable_summary(self):
-        var_manager = HedTypeVariable(HedContextManager(self.test_strings2, self.schema), self.schema, self.defs)
-        self.assertIsInstance(var_manager, HedTypeVariable,
-                              "Constructor should create a HedVariableManager from strings")
-        self.assertEqual(len(var_manager._variable_map), 3,
+        var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs, 'run-01')
+        self.assertIsInstance(var_manager, HedTypeValues,
+                              "Constructor should create a HedTypeManager from strings")
+        self.assertEqual(len(var_manager._type_value_map), 3,
                          "Constructor should have right number of type_variables if multiple")
-        for variable in var_manager.get_variable_names():
-            var_sum = var_manager.get_variable(variable)
+        for variable in var_manager.get_type_value_names():
+            var_sum = var_manager.get_type_value_factors(variable)
             summary = var_sum.get_summary()
             self.assertIsInstance(summary, dict, "get_summary returns a dictionary summary")
 
     def test_get_variable_factors(self):
-        var_manager = HedTypeVariable(HedContextManager(self.test_strings2, self.schema), self.schema, self.defs)
-        self.assertIsInstance(var_manager, HedTypeVariable,
-                              "Constructor should create a HedVariableManager from strings")
-        self.assertEqual(len(var_manager._variable_map), 3,
+        var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs, 'run-01')
+        self.assertIsInstance(var_manager, HedTypeValues,
+                              "Constructor should create a HedTypeManager from strings")
+        self.assertEqual(len(var_manager._type_value_map), 3,
                          "Constructor should have right number of type_variables if multiple")
 
-        for variable in var_manager.get_variable_names():
-            var_sum = var_manager.get_variable(variable)
+        for variable in var_manager.get_type_value_names():
+            var_sum = var_manager.get_type_value_factors(variable)
             summary = var_sum.get_summary()
             factors = var_sum.get_factors()
             self.assertIsInstance(factors, pd.DataFrame, "get_factors contains dataframe.")
@@ -112,30 +143,30 @@ class Test(unittest.TestCase):
 
     def test_count_events(self):
         list1 = [0, 2, 6, 1, 2, 0, 0]
-        number_events1, number_multiple1, max_multiple1 = HedTypeFactors.count_events(list1)
-        self.assertEqual(number_events1, 4, "count_events should have right number of events")
-        self.assertEqual(number_multiple1, 3, "count_events should have right number of multiple events")
-        self.assertEqual(max_multiple1, 6, "count_events should have right maximum multiples")
+        number_events1, number_multiple1, max_multiple1 = HedTypeFactors._count_level_events(list1)
+        self.assertEqual(number_events1, 4, "_count_level_events should have right number of events")
+        self.assertEqual(number_multiple1, 3, "_count_level_events should have right number of multiple events")
+        self.assertEqual(max_multiple1, 6, "_count_level_events should have right maximum multiples")
         list2 = []
-        number_events2, number_multiple2, max_multiple2 = HedTypeFactors.count_events(list2)
-        self.assertEqual(number_events2, 0, "count_events should have 0 events for empty list")
-        self.assertEqual(number_multiple2, 0, "count_events should have 0 multiples for empty list")
-        self.assertIsNone(max_multiple2, "count_events should not have a max multiple for empty list")
+        number_events2, number_multiple2, max_multiple2 = HedTypeFactors._count_level_events(list2)
+        self.assertEqual(number_events2, 0, "_count_level_events should have 0 events for empty list")
+        self.assertEqual(number_multiple2, 0, "_count_level_events should have 0 multiples for empty list")
+        self.assertIsNone(max_multiple2, "_count_level_events should not have a max multiple for empty list")
 
     def test_get_summary(self):
         hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
         definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeVariable(HedContextManager(hed_strings, self.schema), self.schema, definitions)
-        var_key = var_manager.get_variable('key-assignment')
+        var_manager = HedTypeValues(HedContextManager(hed_strings, self.schema), definitions, 'run-01')
+        var_key = var_manager.get_type_value_factors('key-assignment')
         sum_key = var_key.get_summary()
-        self.assertEqual(sum_key['number_type_events'], 200, "get_summary has right number of events")
-        self.assertEqual(sum_key['multiple_event_maximum'], 1, "Get_summary has right multiple maximum")
+        self.assertEqual(sum_key['events'], 200, "get_summary has right number of events")
+        self.assertEqual(sum_key['max_refs_per_event'], 1, "Get_summary has right multiple maximum")
         self.assertIsInstance(sum_key['level_counts'], dict, "get_summary level counts is a dictionary")
         self.assertEqual(sum_key['level_counts']['right-sym-cond'], 200, "get_summary level counts value correct.")
-        var_face = var_manager.get_variable('face-type')
+        var_face = var_manager.get_type_value_factors('face-type')
         sum_key = var_face.get_summary()
-        self.assertEqual(sum_key['number_type_events'], 52, "get_summary has right number of events")
-        self.assertEqual(sum_key['multiple_event_maximum'], 1, "Get_summary has right multiple maximum")
+        self.assertEqual(sum_key['events'], 52, "get_summary has right number of events")
+        self.assertEqual(sum_key['max_refs_per_event'], 1, "Get_summary has right multiple maximum")
         self.assertIsInstance(sum_key['level_counts'], dict, "get_summary level counts is a dictionary")
         self.assertEqual(sum_key['level_counts']['unfamiliar-face-cond'], 20, "get_summary level counts value correct.")
 

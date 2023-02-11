@@ -1,0 +1,9 @@
+[
+    {
+        "operation": "rename_columns",
+        "description": "Rename the columns to test bad file.",
+        "parameters": {
+             "column_mapping": { "sex": "face_sex"}
+            }    
+    }
+]

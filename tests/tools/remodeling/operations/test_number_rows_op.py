@@ -261,10 +261,8 @@ class Test(unittest.TestCase):
         # Test when existing column name is given with overwrite specified False
         parms = json.loads(self.json_overwrite_false_parms)
         op = NumberRowsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.existing_sample_columns)
         df_test = pd.DataFrame(self.sample_data, columns=self.existing_sample_columns)
-
-        with self.assertRaisesRegex(ValueError, "ExistingNumberColumn"):
+        with self.assertRaisesRegex(ValueError, "ExistingNumberColumn") as context:
             df_new = op.do_op(self.dispatcher, df_test, self.file_name)
 
     def test_existing_column_overwrite_unspecified(self):
@@ -298,9 +296,9 @@ class Test(unittest.TestCase):
 
         # Test that df has not been changed by the op
         self.assertTrue(list(df.columns) == list(df_test.columns),
-                        "split_event should not change the input df columns")
+                        "split_rows should not change the input df columns")
         self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
-                        "split_event should not change the input df values")
+                        "split_rows should not change the input df values")
 
     def test_filter_complete_parameters(self):
         # Test when valid complete filter/match_value parameters are given
@@ -321,9 +319,9 @@ class Test(unittest.TestCase):
 
         # Test that df has not been changed by the op
         self.assertTrue(list(df.columns) == list(df_test.columns),
-                        "split_event should not change the input df columns")
+                        "split_rows should not change the input df columns")
         self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
-                        "split_event should not change the input df values")
+                        "split_rows should not change the input df values")
 
     def test_filter_incomplete_parameters(self):
         # Test when filter/match_value parameters are not complete
@@ -385,9 +383,9 @@ class Test(unittest.TestCase):
 
         # Test that df has not been changed by the op
         self.assertTrue(list(df.columns) == list(df_test.columns),
-                        "split_event should not change the input df columns")
+                        "split_rows should not change the input df columns")
         self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
-                        "split_event should not change the input df values")
+                        "split_rows should not change the input df values")
 
 
 if __name__ == '__main__':

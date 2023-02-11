@@ -7,7 +7,7 @@ from hed.errors.exceptions import HedExceptions, HedFileError
 def validate_library_name(library_name):
     """ Check the validity of the library name.
 
-    Args:
+    Parameters:
         library_name (str): Name of the library.
 
     Returns:
@@ -25,7 +25,7 @@ def validate_library_name(library_name):
 def validate_version_string(version_string):
     """ Check validity of the version.
 
-    Args:
+    Parameters:
         version_string (str):  A version string.
 
     Returns:
@@ -42,7 +42,7 @@ def validate_version_string(version_string):
 def is_hed3_version_number(version_string):
     """ Check validity of the version.
 
-    Args:
+    Parameters:
         version_string (str):  A version string.
 
     Returns:
@@ -67,7 +67,7 @@ attribute_validators = {
 def validate_attributes(attrib_dict, filename):
     """ Validate attributes in the dictionary.
 
-    Args:
+    Parameters:
         attrib_dict (dict): Dictionary of attributes to be evaluated.
         filename (str):  File name to use in reporting errors.
 

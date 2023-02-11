@@ -23,7 +23,7 @@ class SidecarBase:
     def __init__(self, name=None, hed_schema=None):
         """ Initialize a sidecar baseclass
 
-        Args:
+        Parameters:
             name (str or None): Optional name identifying this sidecar, generally a filename.
             hed_schema(HedSchema or None): The schema to use by default in identifying tags
         """
@@ -44,7 +44,7 @@ class SidecarBase:
     def _hed_string_iter(self, tag_funcs, error_handler):
         """ Low level function to retrieve hed string in sidecar
 
-        Args:
+        Parameters:
             tag_funcs(list): A list of functions to apply to returned strings
             error_handler(ErrorHandler): Error handler to use for context
 
@@ -59,7 +59,7 @@ class SidecarBase:
     def _set_hed_string(self, new_hed_string, position):
         """ Low level function to update hed string in sidecar
 
-        Args:
+        Parameters:
             new_hed_string (str or HedString): The new hed_string to replace the value at position.
             position (tuple):   The value returned from hed_string_iter.
         """
@@ -68,7 +68,7 @@ class SidecarBase:
     def validate_structure(self, error_handler):
         """ Validate the raw structure of this sidecar.
 
-        Args:
+        Parameters:
             error_handler(ErrorHandler): The error handler to use for error context
 
         Returns:
@@ -89,7 +89,7 @@ class SidecarBase:
                         allow_placeholders=True, extra_def_dicts=None, **kwargs):
         """ Iterator over hed strings in columns.
 
-        Args:
+        Parameters:
             hed_ops (func, HedOps, list):  A HedOps, funcs or list of these to apply to the hed strings
                                             before returning
             error_handler (ErrorHandler): The error handler to use for context, uses a default one if none.
@@ -120,7 +120,7 @@ class SidecarBase:
     def set_hed_string(self, new_hed_string, position):
         """ Set a provided column/category key/etc.
 
-        Args:
+        Parameters:
             new_hed_string (str or HedString): The new hed_string to replace the value at position.
             position (tuple):   The (HedString, str, list) tuple returned from hed_string_iter.
 
@@ -130,7 +130,7 @@ class SidecarBase:
     def _add_definition_mapper(self, hed_ops, extra_def_dicts=None):
         """ Add a DefMapper if the hed_ops list doesn't have one.
 
-        Args:
+        Parameters:
             hed_ops (list):  A list of HedOps
             extra_def_dicts (list):  DefDicts from outside.
 
@@ -156,7 +156,7 @@ class SidecarBase:
     def get_def_dicts(self, extra_def_dicts=None):
         """ Returns the definition dict for this sidecar.
 
-        Args:
+        Parameters:
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:
@@ -174,11 +174,11 @@ class SidecarBase:
                          error_handler=None, **kwargs):
         """ Run the given hed_ops on all columns in this sidecar.
 
-        Args:
+        Parameters:
             hed_ops (list, func, or HedOps): A HedOps, func or list of these to apply to hed strings in this sidecar.
             name (str): If present, will use this as the filename for context, rather than using the actual filename
                 Useful for temp filenames.
-            extra_def_dicts: (DefinitionDict, list, or None): If present use these in addition to sidecar's def dicts.
+            extra_def_dicts (DefinitionDict, list, or None): If present use these in addition to sidecar's def dicts.
             error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
             kwargs: See models.hed_ops.translate_ops or the specific hed_ops for additional options.
 
@@ -221,9 +221,10 @@ class SidecarBase:
     def extract_definitions(self, hed_schema=None, error_handler=None):
         """ Gather and validate definitions in metadata.
 
-        Args:
+        Parameters:
             error_handler (ErrorHandler): The error handler to use for context, uses a default one if None.
-            hed_schema(HedSchema or None): The schema to used to identify tags
+            hed_schema (HedSchema or None): The schema to used to identify tags.
+
         Returns:
             DefinitionDict: Contains all the definitions located in the column.
             issues: List of issues encountered in extracting the definitions. Each issue is a dictionary.
@@ -246,7 +247,7 @@ class SidecarBase:
     def _validate_pound_sign_count(self, hed_string, column_type):
         """ Check if a given hed string in the column has the correct number of pound signs.
 
-        Args:
+        Parameters:
             hed_string (str or HedString): HED string to be checked.
 
         Returns:

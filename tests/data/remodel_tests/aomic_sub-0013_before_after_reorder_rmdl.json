@@ -1,0 +1,31 @@
+[
+    {
+        "operation": "summarize_column_values",
+        "description": "Summarize the column values in an excerpt before reordering.",
+        "parameters": {
+            "summary_name": "AOMIC_column_values_before_reorder",
+            "summary_filename": "AOMIC_column_values_before_reorder",
+            "skip_columns": ["onset", "duration"],
+            "value_columns": ["response_time", "stop_signal_delay"]
+            }
+    },
+	{
+        "operation": "reorder_columns",
+        "description": "Order columns so that response_time and trial_type come after onset and duration",
+        "parameters": {
+            "column_order": ["onset", "duration", "trial_type", "response_time"],
+            "ignore_missing": true,
+            "keep_others": false
+        }
+    },
+	{
+        "operation": "summarize_column_values",
+        "description": "Summarize the column values in an excerpt after reordering.",
+        "parameters": {
+            "summary_name": "AOMIC_column_values_after_reorder",
+            "summary_filename": "AOMIC_column_values_after_reorder",
+            "skip_columns": ["onset", "duration"],
+            "value_columns": ["response_time", "stop_signal_delay"]
+            }
+    }
+]

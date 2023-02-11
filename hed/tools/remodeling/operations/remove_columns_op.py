@@ -1,38 +1,42 @@
+""" Remove columns from a tabular file. """
 from hed.tools.remodeling.operations.base_op import BaseOp
-
-PARAMS = {
-    "command": "remove_columns",
-    "required_parameters": {
-        "remove_names": list,
-        "ignore_missing": bool
-    },
-    "optional_parameters": {}
-}
 
 
 class RemoveColumnsOp(BaseOp):
-    """ Remove columns from a dataframe.
+    """ Remove columns from a tabular file.
 
-    Notes: The required parameters are:
-        - remove_names (list)      The names of the columns to be removed.
-        - ignore_missing (boolean) If true, the names in remove_names that are not columns in df should be ignored.
+    Required remodeling parameters:
+        - **remove_names** (*list*): The names of the columns to be removed.  
+        - **ignore_missing** (*boolean*): If true, names in remove_names that are not columns in df should be ignored.  
 
     """
 
-    def __init__(self, parameters):
-        """ Constructor for remove columns command.
+    PARAMS = {
+        "operation": "remove_columns",
+        "required_parameters": {
+            "column_names": list,
+            "ignore_missing": bool
+        },
+        "optional_parameters": {}
+    }
 
-        Args:
-            parameters (dict): A dictionary of the parameters for this command.
+    def __init__(self, parameters):
+        """ Constructor for remove columns operation.
+
+        Parameters:
+            parameters (dict): Dictionary with the parameter values for required and optional parameters
 
         Raises:
-            KeyError if an invalid key is included in parameters.
-            TypeError if a value in parameters has an invalid type.
+            KeyError
+                - If a required parameter is missing.    
+                - If an unexpected parameter is provided.   
+
+            TypeError   
+                - If a parameter has the wrong type.   
 
         """
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
-        self.remove_names = parameters['remove_names']
+        super().__init__(self.PARAMS, parameters)
+        self.column_names = parameters['column_names']
         ignore_missing = parameters['ignore_missing']
         if ignore_missing:
             self.error_handling = 'ignore'
@@ -42,18 +46,24 @@ class RemoveColumnsOp(BaseOp):
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Remove indicated columns from a dataframe.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+        Parameters:
+            dispatcher (Dispatcher): Manages the operation I/O.
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         Raises:
-            KeyError if ignore_missing is false and column not in df is to be removed.
+            KeyError   
+                - If ignore_missing is False and a column not in the data is to be removed.   
 
         """
 
-        return df.drop(self.remove_names, axis=1, errors=self.error_handling)
+        try:
+            return df.drop(self.column_names, axis=1, errors=self.error_handling)
+        except KeyError:
+            raise KeyError("MissingColumnCannotBeRemoved",
+                           f"{name}: Ignore missing is False but a column in {str(self.column_names)} is "
+                           f"not in the data columns [{str(df.columns)}]")

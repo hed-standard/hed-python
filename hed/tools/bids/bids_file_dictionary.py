@@ -1,3 +1,5 @@
+""" A dictionary of BIDS files keyed to entity-value pairs. """
+
 from hed.errors.exceptions import HedFileError
 from hed.tools.bids.bids_file import BidsFile
 from hed.tools.analysis.file_dictionary import FileDictionary
@@ -13,7 +15,7 @@ class BidsFileDictionary(FileDictionary):
     def __init__(self, collection_name, files, entities=('sub', 'ses', 'task', 'run')):
         """ Create the dictionary keyed to entities.
 
-        Args:
+        Parameters:
             collection_name (str):      Name of this collection.
             files (list or dict):   Full paths of files to include.
             entities (tuple):  Entity names to use in creating the keys.
@@ -40,36 +42,17 @@ class BidsFileDictionary(FileDictionary):
     @property
     def file_dict(self):
         """ Dictionary of keys and paths. """
-        return {key:file.file_path for key, file in self._file_dict.items()}
+        return {key: file.file_path for key, file in self._file_dict.items()}
 
     @property
     def file_list(self):
         """ Paths of the files in the list. """
         return [file.file_path for file in self._file_dict.values()]
 
-    def correct_file(self, the_file):
-        """ Transform to BidsFile if needed.
-
-        Args:
-            the_file (str or BidsFile): If a str, create a new BidsFile object, otherwise pass the original on.
-
-        Returns:
-            BidsFile:  Either the original file or a newly created BidsTabularFile.
-
-        Raises:
-            HedFileError: If the_file isn't str or BidsFile.
-
-        """
-        if isinstance(the_file, str):
-            the_file = BidsFile(the_file)
-        elif not isinstance(the_file, BidsFile):
-            HedFileError("BadArgument", f"correct_file expects file path or BidsFile but found {str(the_file)}", [])
-        return the_file
-
     def get_file_path(self, key):
         """ Return the file path corresponding to key.
 
-        Args:
+        Parameters:
             key (str):  The key to use to look up the file in this dictionary.
 
         Returns:
@@ -98,7 +81,7 @@ class BidsFileDictionary(FileDictionary):
     def key_diffs(self, other_dict):
         """ Return the symmetric key difference with other.
 
-        Args:
+        Parameters:
             other_dict (FileDictionary)  A file dictionary object
 
         Returns:
@@ -111,7 +94,7 @@ class BidsFileDictionary(FileDictionary):
     def get_new_dict(self, name, files):
         """ Create a dictionary with these files.
 
-        Args:
+        Parameters:
             name (str):  Name of this dictionary
             files (list or dict):  List or dictionary of files. These could be paths or objects.
 
@@ -127,7 +110,7 @@ class BidsFileDictionary(FileDictionary):
     def make_dict(self, files, entities):
         """ Make a dictionary from files or a dict.
 
-        Args:
+        Parameters:
             files (list or dict):  List or dictionary of file-like objs to use.
             entities (tuple):   Tuple of entity names to use as keys, e.g. ('sub', 'run').
 
@@ -145,7 +128,7 @@ class BidsFileDictionary(FileDictionary):
         elif not isinstance(files, list):
             raise HedFileError("BadArgument", "make_bids_file_dict expects a list or dict", [])
         for the_file in files:
-            the_file = self.correct_file(the_file)
+            the_file = self._correct_file(the_file)
             key = the_file.get_key(entities)
             if key in file_dict:
                 raise HedFileError("NonUniqueFileKeys",
@@ -156,7 +139,7 @@ class BidsFileDictionary(FileDictionary):
     def make_query(self, query_dict={'sub': '*'}):
         """ Return a dictionary of files matching query.
 
-        Args:
+        Parameters:
             query_dict (dict): A dictionary whose keys are entities and whose values are entity values to match.
 
         Returns:
@@ -178,7 +161,7 @@ class BidsFileDictionary(FileDictionary):
     def split_by_entity(self, entity):
         """ Split this dictionary based on an entity.
 
-        Args:
+        Parameters:
             entity (str):  Entity name (for example task).
 
         Returns:
@@ -203,7 +186,7 @@ class BidsFileDictionary(FileDictionary):
     def match_query(query_dict, entity_dict):
         """ Return True if query has a match in dictionary.
 
-        Args:
+        Parameters:
             query_dict (dict): A dictionary representing a query about entities.
             entity_dict (dict): A dictionary containing the entity representation for a BIDS file.
 
@@ -230,7 +213,7 @@ class BidsFileDictionary(FileDictionary):
     def _split_dict_by_entity(file_dict, entity):
         """ Split a dict of BidsFile based on an entity.
 
-        Args:
+        Parameters:
             file_dict (dict): Dictionary of BidsFile keyed by entity keys.
             entity (str):     String
 
@@ -250,3 +233,24 @@ class BidsFileDictionary(FileDictionary):
             entity_dict[key] = file
             split_dict[entity_value] = entity_dict
         return split_dict, leftovers
+
+    @classmethod
+    def _correct_file(cls, the_file):
+        """ Transform to BidsFile if needed.
+
+        Parameters:
+            the_file (str or BidsFile): If a str, create a new BidsFile object, otherwise pass the original on.
+
+        Returns:
+            BidsFile:  Either the original file or a newly created BidsTabularFile.
+
+        Raises:
+            HedFileError: If the_file isn't str or BidsFile.
+
+        """
+        if isinstance(the_file, str):
+            the_file = BidsFile(the_file)
+        elif not isinstance(the_file, BidsFile):
+            raise HedFileError("BadBidsFileArgument",
+                               f"_correct_file expects file path or BidsFile but found {str(the_file)}", [])
+        return the_file

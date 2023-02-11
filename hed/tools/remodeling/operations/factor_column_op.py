@@ -1,37 +1,51 @@
+""" Create tabular file factor columns from column values. """
+
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 # TODO: Does not handle empty factor names.
 # TODO: Does not handle optional return columns.
 
-PARAMS = {
-    "command": "factor_column",
-    "required_parameters": {
-        "column_name": str,
-        "factor_values": list,
-        "factor_names": list
-    },
-    "optional_parameters": {}
-}
-
 
 class FactorColumnOp(BaseOp):
-    """ Creates factor columns corresponding to values in specified column.
+    """ Create tabular file factor columns from column values.
 
-        Notes: The required parameters are:
-            - column_name (string)  The name of a column in the DataFrame.
-            - factor_values (list)  Values in the column column_name to create factors for.
-            - factor_names (list)   Names to use as the factor columns.
+    Required remodeling parameters:   
+        - **column_name** (*str*):  The name of a column in the DataFrame.   
+        - **factor_values** (*list*):  Values in the column column_name to create factors for.   
+        - **factor_names** (*list*):   Names to use as the factor columns.   
 
-        Raises:
-            ValueError:
-                - If lengths of factor_values and factor_names are not the same.
-                - If factor_name is already a column and overwrite_existing is False.
 
     """
 
+    PARAMS = {
+        "operation": "factor_column",
+        "required_parameters": {
+            "column_name": str,
+            "factor_values": list,
+            "factor_names": list
+        },
+        "optional_parameters": {}
+    }
+
     def __init__(self, parameters):
-        super().__init__(PARAMS["command"], PARAMS["required_parameters"], PARAMS["optional_parameters"])
-        self.check_parameters(parameters)
+        """ Constructor for the factor column operation.
+
+        Parameters:
+            parameters (dict): Parameter values for required and optional parameters.
+
+        Raises:  
+            KeyError    
+                - If a required parameter is missing.    
+                - If an unexpected parameter is provided.    
+
+            TypeError   
+                - If a parameter has the wrong type.   
+
+            ValueError   
+                - If factor_names is not empty and is not the same length as factor_values.   
+
+        """
+        super().__init__(self.PARAMS, parameters)
         self.column_name = parameters['column_name']
         self.factor_values = parameters['factor_values']
         self.factor_names = parameters['factor_names']
@@ -41,18 +55,16 @@ class FactorColumnOp(BaseOp):
                              f"to the factor_values length {len(self.factor_values)} .")
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create factor columns for values in a specified column.
+        """ Create factor columns based on values in a specified column.
 
-        Args:
-            dispatcher (Dispatcher) - dispatcher object for context
-            df (DataFrame) - The DataFrame to be remodeled.
-            name (str) - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like)   Only needed for HED operations.
+        Parameters:
+            dispatcher (Dispatcher): Manages the operation I/O.
+            df (DataFrame): The DataFrame to be remodeled.
+            name (str): Unique identifier for the dataframe -- often the original file path.
+            sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            DataFrame - a new DataFrame with the factor columns appended.
-
-
+            DataFrame: A new DataFrame with the factor columns appended.
 
         """
 

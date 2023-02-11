@@ -1,16 +1,19 @@
+""" Summarizes the contents of tabular files. """
+
+
 import json
-from hed.errors import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import get_new_dataframe
 from hed.tools.analysis.annotation_util import generate_sidecar_entry
 
 
 class TabularSummary:
-    """ Summarize the contents of BIDS tabular files. """
+    """ Summarize the contents of tabular files. """
 
     def __init__(self, value_cols=None, skip_cols=None, name=''):
         """ Constructor for a BIDS tabular file summary.
 
-        Args:
+        Parameters:
             value_cols (list, None):  List of columns to be treated as value columns.
             skip_cols (list, None):   List of columns to be skipped.
             name (str):               Name associated with the dictionary.
@@ -25,13 +28,14 @@ class TabularSummary:
                                f"Value columns {str(value_cols)} and skip columns {str(skip_cols)} cannot overlap", "")
         if value_cols:
             for value in value_cols:
-                self.value_info[value] = 0
+                self.value_info[value] = [0, 0]
         if skip_cols:
             self.skip_cols = skip_cols.copy()
         else:
             self.skip_cols = []
         self.total_files = 0
         self.total_events = 0
+        self.files = {}
 
     def __str__(self):
         indent = "   "
@@ -72,12 +76,13 @@ class TabularSummary:
             val_dict = {}
             for v_key in sorted_v_keys:
                 val_dict[v_key] = cat_dict[v_key]
-            categorical_cols[f"{key} [categorical column] values"] = val_dict
+            categorical_cols[key] = val_dict
         sorted_cols = sorted(map(str, list(self.value_info)))
         value_cols = {}
         for key in sorted_cols:
-            value_cols[f"{key} [value_column]"] = f"{self.value_info[key]} values"
-        summary = {"Summary name": self.name, "Categorical columns": categorical_cols, "Value columns": value_cols}
+            value_cols[key] = self.value_info[key]
+        summary = {"Summary name": self.name, "Total events": self.total_events, "Total files": self.total_files,
+                   "Categorical columns": categorical_cols, "Value columns": value_cols}
         if as_json:
             return json.dumps(summary, indent=4)
         else:
@@ -86,7 +91,7 @@ class TabularSummary:
     def get_number_unique(self, column_names=None):
         """ Return the number of unique values in columns.
 
-        Args:
+        Parameters:
             column_names (list, None):   A list of column names to analyze or all columns if None.
 
         Returns:
@@ -103,52 +108,64 @@ class TabularSummary:
                 counts[column_name] = len(self.categorical_info[column_name].keys())
         return counts
 
-    def update(self, data):
+    def update(self, data, name=None):
         """ Update the counts based on data.
 
-        Args:
+        Parameters:
             data (DataFrame, str, or list):    DataFrame containing data to update.
 
         """
 
         if isinstance(data, list):
             for filename in data:
-                self._update_dataframe(filename)
+                self._update_dataframe(filename, filename)
+        elif isinstance(data, str):
+            self._update_dataframe(data, data)
         else:
-            self._update_dataframe(data)
+            self._update_dataframe(data, name)
 
-    def update_summary(self, col_sum):
-        """ Add ColumnSummary values to this object.
+    def update_summary(self, tab_sum):
+        """ Add TabularSummary values to this object.
 
-        Args:
-            col_sum (BidsTabularSummary):   A ColumnSummary to be combined.
+        Parameters:
+            tab_sum (TabularSummary):   A TabularSummary to be combined.
 
         Notes:
             - The value_cols and skip_cols are updated as long as they are not contradictory.
             - A new skip column cannot used.
 
         """
-        self._update_dict_skip(col_sum)
-        self._update_dict_value(col_sum)
-        self._update_dict_categorical(col_sum)
+        self.total_files = self.total_files + tab_sum.total_files
+        self.total_events = self.total_events + tab_sum.total_events
+        for file, key in tab_sum.files.items():
+            self.files[file] = ''
+        self._update_dict_skip(tab_sum)
+        self._update_dict_value(tab_sum)
+        self._update_dict_categorical(tab_sum)
 
-    def _update_categorical(self, col_name, values):
-        if col_name not in self.categorical_info:
-            self.categorical_info[col_name] = {}
+    def _update_categorical(self, tab_name, values):
+        if tab_name not in self.categorical_info:
+            self.categorical_info[tab_name] = {}
 
-        total_values = self.categorical_info[col_name]
+        total_values = self.categorical_info[tab_name]
         for name, value in values.items():
-            total_values[name] = total_values.get(name, 0) + value
+            value_list = total_values.get(name, [0, 0])
+            if not isinstance(value, list):
+                value = [value, 1]
+            total_values[name] = [value_list[0] + value[0], value_list[1] + value[1]]
 
-    def _update_dataframe(self, data):
+    def _update_dataframe(self, data, name):
         df = get_new_dataframe(data)
+        if name:
+            self.files[name] = ""
         self.total_files = self.total_files + 1
         self.total_events = self.total_events + len(df.index)
-        for col_name, col_values in df.iteritems():
+        for col_name, col_values in df.items():
             if self.skip_cols and col_name in self.skip_cols:
                 continue
             if col_name in self.value_info.keys():
-                self.value_info[col_name] = self.value_info[col_name] + len(col_values)
+                self.value_info[col_name][0] = self.value_info[col_name][0] + len(col_values)
+                self.value_info[col_name][1] = self.value_info[col_name][1] + 1
             else:
                 col_values = col_values.astype(str)
                 values = col_values.value_counts(ascending=True)
@@ -194,13 +211,14 @@ class TabularSummary:
             elif col not in val_cols:
                 self.value_info[col] = col_dict.value_info[col]
             else:
-                self.value_info[col] = self.value_info[col] + col_dict.value_info[col]
+                self.value_info[col] = [self.value_info[col][0] + col_dict.value_info[col][0],
+                                        self.value_info[col][1] + col_dict.value_info[col][1]]
 
     @staticmethod
     def get_columns_info(dataframe, skip_cols=None):
         """ Extract unique value counts for columns.
 
-        Args:
+        Parameters:
             dataframe (DataFrame):    The DataFrame to be analyzed.
             skip_cols(list):          List of names of columns to be skipped in the extraction.
 
@@ -211,7 +229,7 @@ class TabularSummary:
         """
         col_info = dict()
 
-        for col_name, col_values in dataframe.iteritems():
+        for col_name, col_values in dataframe.items():
             if skip_cols and col_name in skip_cols:
                 continue
             col_info[col_name] = col_values.value_counts(ascending=True).to_dict()
@@ -221,7 +239,7 @@ class TabularSummary:
     def make_combined_dicts(file_dictionary, skip_cols=None):
         """ Return combined and individual summaries.
 
-        Args:
+        Parameters:
             file_dictionary (FileDictionary):  Dictionary of file name keys and full path.
             skip_cols (list):  Name of the column.
 

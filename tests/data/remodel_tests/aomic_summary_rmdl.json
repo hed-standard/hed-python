@@ -1,0 +1,26 @@
+[
+    {
+        "operation": "summarize_column_names",
+        "description": "Summarize column names.",
+        "parameters": {
+            "summary_name": "AOMIC_column_headers1",
+            "summary_filename": "AOMIC_column_headers1"
+            }    
+    },
+        {
+        "operation": "summarize_column_names",
+        "description": "Summarize column names.",
+        "parameters": {
+            "summary_name": "AOMIC_column_headers2",
+            "summary_filename": "AOMIC_column_headers2"
+            }
+    },
+    {
+        "operation": "summarize_column_names",
+        "description": "Summarize column names.",
+        "parameters": {
+            "summary_name": "AOMIC_column_headers3",
+            "summary_filename": "AOMIC_column_headers3"
+            }
+    }
+]

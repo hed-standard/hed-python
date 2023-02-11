@@ -1,3 +1,5 @@
+""" Container for a BIDS sidecar file. """
+
 import os
 from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_file import BidsFile
@@ -7,12 +9,18 @@ class BidsSidecarFile(BidsFile):
     """ A BIDS sidecar file. """
 
     def __init__(self, file_path):
+        """ Constructs a bids sidecar from a file.
+
+        Parameters:
+            file_path (str): The real path of the sidecar.
+
+        """
         super().__init__(file_path)
 
     def is_sidecar_for(self, obj):
         """ Return true if this is a sidecar for obj.
 
-         Args:
+         Parameters:
              obj (BidsFile):  A BidsFile object to check.
 
          Returns:
@@ -38,7 +46,7 @@ class BidsSidecarFile(BidsFile):
     def set_contents(self, content_info=None, overwrite=False):
         """ Set the contents of the sidecar.
 
-        Args:
+        Parameters:
             content_info (list, str, or None): If None, create a Sidecar from the object's file-path.
             overwrite (bool): If True, overwrite contents if already set.
 
@@ -53,15 +61,14 @@ class BidsSidecarFile(BidsFile):
             return
         if not content_info:
             content_info = self.file_path
-        self.contents = Sidecar(files=content_info,
-                                name=os.path.realpath(os.path.basename(self.file_path)))
+        self._contents = Sidecar(files=content_info, name=os.path.basename(self.file_path))
         self.has_hed = self.is_hed(self.contents.loaded_dict)
 
     @staticmethod
     def is_hed(json_dict):
         """ Return True if the json has HED.
 
-        Args:
+        Parameters:
             json_dict (dict): A dictionary representing a JSON file or merged file.
 
         Returns:
@@ -82,18 +89,3 @@ class BidsSidecarFile(BidsFile):
                 return True
 
         return False
-
-
-if __name__ == '__main__':
-    from hed import load_schema, HedValidator, load_schema_version, HedSchemaGroup
-    score_url = f"https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas" \
-                f"/score/prerelease/HED_score_1.0.0.xml"
-    path = f"../../../sub-eegArtifactTUH_ses-eeg01_task-rest_run-001_events.json"
-    bids_json = BidsSidecarFile(path)
-    bids_json.set_contents()
-    schema_base = load_schema_version(xml_version="8.1.0")
-    schema_score = load_schema(score_url, schema_prefix="sc")
-    schemas = HedSchemaGroup([schema_base, schema_score])
-    validator = HedValidator(hed_schema=schemas)
-    issues = bids_json.contents.validate_entries(hed_ops=validator, check_for_warnings=False)
-    print(f"issues:{str(issues)}")

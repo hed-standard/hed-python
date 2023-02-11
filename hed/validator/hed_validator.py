@@ -21,7 +21,7 @@ class HedValidator(HedOps):
     def __init__(self, hed_schema=None, run_semantic_validation=True):
         """ Constructor for the HedValidator class.
 
-        Args:
+        Parameters:
             hed_schema (HedSchema or HedSchemaGroup): HedSchema object to use for validation.
             run_semantic_validation (bool): True if the validator should check the HED data against a schema.
         """
@@ -54,7 +54,7 @@ class HedValidator(HedOps):
     def _validate_groups_in_hed_string(self, hed_string_obj):
         """ Report invalid groups at each level.
 
-        Args:
+        Parameters:
             hed_string_obj (HedString): A HedString object.
 
         Returns:
@@ -70,38 +70,43 @@ class HedValidator(HedOps):
             if not original_tag_group and is_group:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_GROUP_EMPTY,
                                                                tag=original_tag_group)
-
-            validation_issues += self._check_for_duplicate_groups(original_tag_group)
             validation_issues += self._tag_validator.run_tag_level_validators(original_tag_group.tags(), is_top_level,
                                                                               is_group)
+
+        validation_issues += self._check_for_duplicate_groups(hed_string_obj)
         return validation_issues
 
-    def _check_for_duplicate_groups(self, original_group):
-        # Todo: This could be optimized in various ways.  It repeatedly converts subgroups to HedGroupFrozen
-        # This could also be accomplished by sorting the entire hed string.
-        frozen_group_or_string = original_group.get_frozen()
-        if len(frozen_group_or_string._children) != len(original_group.children):
-            validation_issues = []
-            valid_content = set(frozen_group_or_string._children)
-            for child in original_group.children:
+    def _check_for_duplicate_groups_recursive(self, sorted_group, validation_issues):
+        prev_child = None
+        for child in sorted_group:
+            if child == prev_child:
                 if isinstance(child, HedTag):
                     error_code = ValidationErrors.HED_TAG_REPEATED
-                    frozen_child = child
+                    validation_issues += ErrorHandler.format_error(error_code, child)
                 else:
                     error_code = ValidationErrors.HED_TAG_REPEATED_GROUP
-                    frozen_child = child.get_frozen()
-                if frozen_child in valid_content:
-                    valid_content.remove(frozen_child)
-                else:
-                    validation_issues += ErrorHandler.format_error(error_code, child)
+                    found_group = child
+                    base_steps_up = 0
+                    while isinstance(found_group, list):
+                        found_group = found_group[0]
+                        base_steps_up += 1
+                    for _ in range(base_steps_up):
+                        found_group = found_group._parent
+                    validation_issues += ErrorHandler.format_error(error_code, found_group)
+            if not isinstance(child, HedTag):
+                self._check_for_duplicate_groups_recursive(child, validation_issues)
+            prev_child = child
 
-            return validation_issues
-        return ()
+    def _check_for_duplicate_groups(self, original_group):
+        sorted_group = original_group.sorted()
+        validation_issues = []
+        self._check_for_duplicate_groups_recursive(sorted_group, validation_issues)
+        return validation_issues
 
     def _validate_tags_in_hed_string(self, hed_string_obj, check_for_warnings=False):
         """ Report invalid the multi-tag properties.
 
-         Args:
+         Parameters:
             hed_string_obj (HedString): A HedString object.
 
          Returns:
@@ -120,7 +125,7 @@ class HedValidator(HedOps):
                                                 check_for_warnings=False):
         """ Validate individual tags in a HED string.
 
-         Args:
+         Parameters:
             hed_string_obj (HedString): A HedString  object.
 
          Returns:

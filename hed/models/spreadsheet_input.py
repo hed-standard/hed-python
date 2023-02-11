@@ -11,7 +11,7 @@ class SpreadsheetInput(BaseInput):
                  def_dicts=None, name=None, hed_schema=None):
         """Constructor for the SpreadsheetInput class.
 
-        Args:
+        Parameters:
             file (str or file like): An xlsx/tsv file to open or a File object.
             file_type (str or None): ".xlsx" for excel, ".tsv" or ".txt" for tsv. data. If file is a string, the
             worksheet_name (str or None): The name of the Excel workbook worksheet that contains the HED tags.

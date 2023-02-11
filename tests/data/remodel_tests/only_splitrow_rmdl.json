@@ -1,0 +1,16 @@
+[
+   {
+       "operation": "split_rows",
+       "description": "Create separate response event from response time column.",
+       "parameters": {
+           "anchor_column": "event_type",
+           "new_events": {"response": {"onset_source": ["response_time"],
+                                       "duration": [0],
+                                       "copy_columns": ["response_accuracy",
+                                                        "response_hand",
+                                                        "trial_type"]}},
+           "remove_parent_row": false
+       }
+   }
+]
+

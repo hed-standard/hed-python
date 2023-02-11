@@ -14,7 +14,7 @@ DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
 def is_date_time(date_time_string):
     """Check if the specified string is a valid datetime.
 
-    Args:
+    Parameters:
         date_time_string (str): A datetime string.
 
     Returns:
@@ -34,7 +34,7 @@ def is_date_time(date_time_string):
 def validate_numeric_value_class(numeric_string):
     """ Checks to see if valid numeric value.
 
-    Args:
+    Parameters:
         numeric_string (str): A string that should be only a number with no units.
 
     Returns:
@@ -50,7 +50,7 @@ def validate_numeric_value_class(numeric_string):
 def validate_text_value_class(text_string):
     """ Placeholder for eventual text value class validation
 
-    Args:
+    Parameters:
         text_string (str): Text class.
 
     Returns:
@@ -63,7 +63,7 @@ def validate_text_value_class(text_string):
 def is_clock_face_time(time_string):
     """ Check if a valid HH:MM time string.
 
-    Args:
+    Parameters:
         time_string (str): A time string.
 
     Returns:

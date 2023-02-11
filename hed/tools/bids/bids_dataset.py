@@ -1,23 +1,25 @@
+""" The contents of a BIDS dataset. """
+
 import os
 import json
-from hed.errors.error_reporter import ErrorHandler, get_printable_issue_string
+from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_schema import HedSchema
-from hed.schema.hed_schema_io import load_schema, load_schema_version
+from hed.schema.hed_schema_io import load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_file_group import BidsFileGroup
-from hed.validator import HedValidator
+from hed.validator.hed_validator import HedValidator
 
 
-LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/"
+LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/library_schemas/"
 
 
 class BidsDataset:
-    """ A BIDS dataset primarily focused on HED evaluation.
+    """ A BIDS dataset representation primarily focused on HED evaluation.
 
     Attributes:
-        root_path (str):  Real root path of the BIDS dataset.
-        schema (HedSchema or HedSchemaGroup):  The schema used for evaluation.
-        tabular_files (dict):  A dictionary of BidsTabularDictionary objects containing a given type.
+        root_path (str):  Real root path of the BIDS dataset.  
+        schema (HedSchema or HedSchemaGroup):  The schema used for evaluation.  
+        tabular_files (dict):  A dictionary of BidsTabularDictionary objects containing a given type.  
 
     """
 
@@ -25,7 +27,7 @@ class BidsDataset:
                  exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli']):
         """ Constructor for a BIDS dataset.
 
-        Args:
+        Parameters:
             root_path (str):  Root path of the BIDS dataset.
             schema (HedSchema or HedSchemaGroup):  A schema that overrides the one specified in dataset.
             tabular_types (list or None):  List of strings specifying types of tabular types to include.
@@ -54,7 +56,7 @@ class BidsDataset:
     def get_tabular_group(self, obj_type="events"):
         """ Return the specified tabular file group.
 
-        Args:
+        Parameters:
             obj_type (str):  Suffix of the BidsFileGroup to be returned.
 
         Returns:
@@ -69,7 +71,7 @@ class BidsDataset:
     def validate(self, types=None, check_for_warnings=True):
         """ Validate the specified file group types.
 
-        Args:
+        Parameters:
             types (list):  A list of strings indicating the file group types to be validated.
             check_for_warnings (bool):  If True, check for warnings.
 
@@ -115,42 +117,3 @@ class BidsDataset:
             name = prefix + name
             version_list.append(name)
         return version_list
-
-
-if __name__ == '__main__':
-    # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                     '../../../tests/data/bids/eeg_ds003654s_hed_library')
-    # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                     '../../../tests/data/bids/eeg_ds003654s_hed_inheritance')
-    # path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-    #                     '../../../tests/data/bids/eeg_ds003654s_hed')
-    #
-    # path = 'Q:\WakemanHensonON'
-    path = 'G:\WakemanHenson\WH_Released'
-    bids = BidsDataset(path)
-    issue_list = bids.validate(check_for_warnings=False)
-    if issue_list:
-        issue_str = get_printable_issue_string(issue_list, "HED validation errors:", skip_filename=False)
-    else:
-        issue_str = "No issues"
-    print(issue_str)
-    warnings = False
-    # path = '/XXX/bids-examples/xeeg_hed_score/'
-    # bids = BidsDataset(path)
-    # # summary1 = bids.get_summary()
-    # # print(json.dumps(summary1, indent=4))
-    # print("\nNow validating with the prerelease schema.")
-    # base_version = '8.1.0'
-    # score_url = f"https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/library_schemas/" \
-    #             f"score/prerelease/HED_score_1.0.0.xml"
-    #
-    # schema_base = load_schema_version(xml_version="8.1.0")
-    # schema_score = load_schema(score_url, schema_prefix="sc")
-    # bids.schema = HedSchemaGroup([schema_base, schema_score])
-    #
-    # issue_list2 = bids.validate(check_for_warnings=warnings)
-    # if issue_list2:
-    #     issue_str2 = get_printable_issue_string(issue_list2, "HED validation errors: ", skip_filename=False)
-    # else:
-    #     issue_str2 = "No HED validation errors"
-    # print(issue_str2)

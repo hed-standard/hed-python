@@ -2,7 +2,7 @@ import json
 import numpy as np
 import pandas as pd
 import unittest
-from hed.tools.remodeling.operations.dispatcher import Dispatcher
+from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.remove_rows_op import RemoveRowsOp
 
 
@@ -28,28 +28,32 @@ class Test(unittest.TestCase):
             "remove_values": ["succesful_stop", "unsuccesful_stop"]
         }
         cls.json_parms = json.dumps(base_parameters)
-        cls.dispatch = Dispatcher([])
+        cls.dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
 
     @classmethod
     def tearDownClass(cls):
         pass
 
+    def get_dfs(self, op):
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df_new = op.do_op(self.dispatch, self.dispatch.prep_data(df), 'run-01')
+        return df, self.dispatch.post_proc_data(df_new)
+
     def test_valid(self):
         # Test when errors.
         parms = json.loads(self.json_parms)
         op = RemoveRowsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_new = self.get_dfs(op)
+        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         self.assertTrue(list(df.columns) == list(df_new.columns),
                         "remove_rows does not change the number of columns when all valid")
         df_result = pd.DataFrame(self.result_data, columns=self.sample_columns)
         self.assertTrue(np.array_equal(df_result.to_numpy(), df_new.to_numpy()),
                         "remove_rows should have the right values after removal")
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df1.columns),
                         "remove_rows should not change the input df columns when all valid")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df1.to_numpy()),
                         "remove_rows should not change the input df values when all valid")
 
     def test_bad_values(self):
@@ -57,18 +61,17 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         parms["remove_values"] = ["succesful_stop", "unsuccesful_stop", "baloney"]
         op = RemoveRowsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df, df_new = self.get_dfs(op)
         self.assertTrue(list(df.columns) == list(df_new.columns),
                         "remove_rows does not change the number of columns when bad values included")
         df_result = pd.DataFrame(self.result_data, columns=self.sample_columns)
         self.assertTrue(np.array_equal(df_result.to_numpy(), df_new.to_numpy()),
                         "remove_rows should have the right values after removal when bad values")
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df1.columns),
                         "remove_rows should not change the input df columns when bad values")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df1.to_numpy()),
                         "remove_rows should not change the input df values when bad values")
 
     def test_bad_column_name(self):
@@ -76,18 +79,17 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         parms["column_name"] = "baloney"
         op = RemoveRowsOp(parms)
-        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df_new = op.do_op(self.dispatch, df_test, 'sample_data')
+        df, df_new = self.get_dfs(op)
+        df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         self.assertTrue(list(df.columns) == list(df_new.columns),
                         "remove_rows does not change the number of columns when bad column")
 
         self.assertTrue(np.array_equal(df.to_numpy(), df_new.to_numpy()),
                         "remove_rows should have the right values after removal when bad column")
         # Test that df has not been changed by the op
-        self.assertTrue(list(df.columns) == list(df_test.columns),
+        self.assertTrue(list(df.columns) == list(df1.columns),
                         "remove_rows should not change the input df columns when bad column")
-        self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
+        self.assertTrue(np.array_equal(df.to_numpy(), df1.to_numpy()),
                         "remove_rows should not change the input df values when bad column")
 
 

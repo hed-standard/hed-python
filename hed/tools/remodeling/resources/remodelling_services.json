@@ -70,7 +70,7 @@
             "Parameters": [],
             "Returns": ""
         },
-        "split_events": {
+        "split_row": {
             "Name": "factor_column",
             "Description": "Derive a new column from a combination of existing columns.",
             "Long description": "",

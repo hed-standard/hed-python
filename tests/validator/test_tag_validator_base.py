@@ -25,18 +25,14 @@ class TestHedBase(unittest.TestCase):
 
             Note: If you want to pass a tag as a number to this function, you will need to pass tag as a keyword.
 
-        Parameters
-        ----------
-        error_type : str
-            The type of error for this.  Registered with @hed_error or @hed_tag_error.
-        args: args
-            The rest of the unnamed args
-        kwargs :
-            The other parameters to pass down to the error handling func.
-        Returns
-        -------
-        error: [{}]
-            A single error
+        Parameters:
+            error_type (str): The type of error for this.  Registered with @hed_error or @hed_tag_error.
+            args (args): The rest of the unnamed args.
+            kwargs:  The other parameters to pass down to the error handling func.
+
+        Returns:
+            list:  A list consisting of a single dictionary representing an error.
+
         """
         _ = ErrorHandler.format_error(error_type, *args, **kwargs)
         # Save off params

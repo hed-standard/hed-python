@@ -3,14 +3,14 @@
 from .base_input import BaseInput
 from .column_mapper import ColumnMapper
 from .column_metadata import ColumnMetadata, ColumnType
-from .definition_dict import DefinitionDict, DefinitionEntry
+from .definition_dict import DefinitionDict
+from .definition_entry import DefinitionEntry
 from .def_mapper import DefMapper
-from .expression_parser import TagExpressionParser
-from .hed_group import HedGroup, HedGroupFrozen
-from .hed_group_base import HedGroupBase
+from .expression_parser import QueryParser
+from .hed_group import HedGroup
 from .spreadsheet_input import SpreadsheetInput
 from .hed_ops import HedOps
-from .hed_string import HedString, HedStringFrozen
+from .hed_string import HedString
 from .hed_string_group import HedStringGroup
 from .hed_tag import HedTag
 from .onset_mapper import OnsetMapper

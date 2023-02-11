@@ -11,9 +11,10 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/bids/eeg_ds003654s_hed')
+        cls.root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                     '../../data/bids_tests/eeg_ds003645s_hed')
         cls.library_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                            '../../data/bids/eeg_ds003654s_hed_library'))
+                                            '../../data/bids_tests/eeg_ds003645s_hed_library'))
 
     def test_constructor(self):
         bids = BidsDataset(Test.root_path)
@@ -82,9 +83,9 @@ class Test(unittest.TestCase):
 
     def test_with_schema_group(self):
         base_version = '8.0.0'
-        library1_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/" + \
-                       "library_schemas/score/hedxml/HED_score_0.0.1.xml"
-        library2_url = "https://raw.githubusercontent.com/hed-standard/hed-schema-library/main/" + \
+        library1_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/" + \
+                       "library_schemas/score/hedxml/HED_score_1.0.0.xml"
+        library2_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/" + \
                        "library_schemas/testlib/hedxml/HED_testlib_1.0.2.xml"
         schema_list = [load_schema_version(xml_version=base_version)]
         schema_list.append(load_schema(library1_url, schema_prefix="sc"))

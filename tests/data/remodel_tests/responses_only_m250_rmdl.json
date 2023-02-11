@@ -1,0 +1,43 @@
+[
+   {
+        "operation": "remove_rows",
+        "description": "Keep only go trials.",
+        "parameters": {
+            "column_name": "trial_type",
+            "remove_values": ["succesful_stop", "unsuccesful_stop"]
+        }
+    },
+    {
+        "operation": "remove_rows",
+        "description": "Get rid of rows where response_time is n/a",
+        "parameters": {
+            "column_name": "response_time",
+            "remove_values": ["n/a"]
+        }
+    },
+    {
+        "operation": "split_rows",
+        "description": "Create event files that only have response events",
+        "parameters": {
+            "anchor_column": "event_type",
+            "new_events": {
+                "response": {
+                    "onset_source": ["response_time", -0.25],
+                    "duration": [0.5],
+                    "copy_columns": ["trial_type", "response_hand", "sex"]
+                }
+            },
+			"add_trial_numbers": false,
+            "remove_parent_row": true
+        }
+    },
+    {
+        "operation": "reorder_columns",
+        "description": "Order columns for the output",
+        "parameters": {
+            "column_order": ["onset", "duration", "trial_type", "event_type", "response_hand", "sex"],
+            "ignore_missing": true,
+            "keep_others": false
+        }
+    }
+]
