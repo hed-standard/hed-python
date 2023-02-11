@@ -122,7 +122,7 @@ class ColumnValueSummaryContext(BaseContext):
 
     @staticmethod
     def _get_individual_string(name, result, indent=BaseContext.DISPLAY_INDENT):
-        sum_list = [f"{name}: {result.get('Total events', 0)} events"]
+        sum_list = [f"Total events={result.get('Total events', 0)}"]
         cat_cols = result.get("Categorical columns", {})
         if cat_cols:
             sum_list.append(ColumnValueSummaryContext._get_categorical_string(cat_cols, offset=indent, indent=indent))

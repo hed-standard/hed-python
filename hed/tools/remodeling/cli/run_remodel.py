@@ -148,11 +148,12 @@ def main(arg_list=None):
     args, operations = parse_arguments(arg_list)
     if not os.path.isdir(args.data_dir):
         raise HedFileError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist", "")
-    backup_man = BackupManager(args.data_dir)
-    if not backup_man.get_backup(args.backup_name):
-        raise HedFileError("BackupDoesNotExist", f"Backup {args.backup_name} does not exist. "
-                           f"Please run_remodel_backup first", "")
-    backup_man.restore_backup(args.backup_name, args.task_names, verbose=args.verbose)
+    if args.backup_name:
+        backup_man = BackupManager(args.data_dir)
+        if not backup_man.get_backup(args.backup_name):
+            raise HedFileError("BackupDoesNotExist", f"Backup {args.backup_name} does not exist. "
+                               f"Please run_remodel_backup first", "")
+        backup_man.restore_backup(args.backup_name, args.task_names, verbose=args.verbose)
     dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=args.backup_name,
                           hed_versions=args.hed_versions)
     if args.use_bids:

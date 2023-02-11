@@ -116,15 +116,6 @@ class HedTagSummaryContext(BaseContext):
         if name == 'Dataset':
             return self._get_dataset_string(result, indent=indent)
         return self._get_individual_string(name, result, indent=indent)
-        # sum_list = [f"\n{name}\n{indent}Main tags[events,files]:"]
-        # for category, tags in result['Main tags'].items():
-        #     sum_list.append(f"{indent}{indent}{category}:")
-        #     if tags:
-        #         sum_list.append(f"{indent}{indent}{indent}{' '.join(self._tag_details(tags))}")
-        # if result['Other tags']:
-        #     sum_list.append(f"\tOther tags[events,files]:")
-        #     sum_list.append(f"{indent}{indent}{' '.join(self._tag_details(result['Other tags']))}")
-        # return "\n".join(sum_list)
 
     def _merge_all(self):
         all_counts = HedTagCounts('Dataset')
@@ -137,14 +128,14 @@ class HedTagSummaryContext(BaseContext):
     
     @staticmethod
     def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
-        sum_list = [f"Dataset: {len(result.get('files', []))} files with a total of "
-                    f"{result.get('total_events', 0)} events"]
+        sum_list = [f"Dataset: Total events={result.get('total_events', 0)} "
+                    f"Total files={len(result.get('files', []))}"]
         sum_list = sum_list + HedTagSummaryContext._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
     
     @staticmethod
     def _get_individual_string(name, result, indent=BaseContext.DISPLAY_INDENT):
-        sum_list = [f"{name}: {result.get('total_events', 0)} events"]
+        sum_list = [f"Total events={result.get('total_events', 0)}"]
         sum_list = sum_list + HedTagSummaryContext._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
     
