@@ -97,7 +97,7 @@ class ColumnNameSummaryContext(BaseContext):
         if name == "Dataset":
             return self._get_dataset_string(result, indent)
         columns = result["Columns"][0]
-        return f"{indent}{indent}{name}: {str(columns['Column names'])}"
+        return f"{indent}{str(columns['Column names'])}"
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):

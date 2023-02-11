@@ -124,11 +124,11 @@ class HedTypeSummaryContext(BaseContext):
     @staticmethod
     def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
         details = result.get('details', {})
-        sum_list = [f"Dataset: {len(details)} {result['type_tag']} types in {len(result.get('files', []))} files" 
-                    f" with a total of {result.get('total_events', 0)}"]
+        sum_list = [f"Dataset: Type={result['type_tag']} Type values={len(details)} "
+                    f"Total events={result.get('total_events', 0)} Total files={len(result.get('files', []))}"]
 
         for key, item in details.items():
-            str1 = f"{item['events']} events out of {item['total_events']} total events in {len(item['files'])} files"
+            str1 = f"{item['events']} event(s) out of {item['total_events']} total events in {len(item['files'])} file(s)"
             if item['level_counts']:
                 str1 = f"{len(item['level_counts'])} levels in " + str1
             if item['direct_references']:
@@ -142,8 +142,10 @@ class HedTypeSummaryContext(BaseContext):
 
     @staticmethod
     def _get_individual_string(name, result, indent=BaseContext.DISPLAY_INDENT):
-        sum_list = [f"{indent}{name}: Type={result['type_tag']} Total events={result.get('total_events', 0)} "]
         details = result.get('details', {})
+        sum_list = [f"Type={result['type_tag']} Type values={len(details)} "
+                    f"Total events={result.get('total_events', 0)}"]
+        
         for key, item in details.items():
             sum_list.append(f"{indent*2}{key}: {item['levels']} levels in {item['events']} events")
             str1 = ""

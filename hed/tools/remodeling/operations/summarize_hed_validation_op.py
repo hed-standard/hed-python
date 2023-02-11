@@ -110,7 +110,8 @@ class HedValidationSummaryContext(BaseContext):
         sidecar = new_context.get('sidecar', None)
         filtered_issues = []
         if sidecar:
-            sidecar = Sidecar(files=new_context['sidecar'], name=os.path.basename(sidecar))
+            if not isinstance(sidecar, Sidecar):
+                sidecar = Sidecar(files=new_context['sidecar'], name=os.path.basename(sidecar))
             results["sidecar_issues"][sidecar.name] = []
             sidecar_issues = sidecar.validate_entries(validator, check_for_warnings=self.check_for_warnings)
             filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
