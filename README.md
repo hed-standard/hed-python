@@ -6,12 +6,16 @@ HED, itself, is platform-independent, extendable, and data-neutral.
 
 This repository contains the underlying python tools that support validation,
 summarization, and analysis of datasets using HED tags.
+
 Most people will simply annotate their events by creating a spreadsheet
 or a BIDS JSON sidecar that associates HED tags with event codes or the events themselves.
 If you have such a spreadsheet or a JSON, 
 you can use the HED Online Validator currently available at 
 [https://hedtools.ucsd.edu/hed](https://hedtools.ucsd.edu/hed) to validate or transform
-your files without downloading any tools.
+your files without downloading any tools. 
+
+A version of the online tools corresponding to the `develop` branch can be found at:
+[https://hedtools.ucsd.edu/hed_dev](https://hedtools.ucsd.edu/hed_dev).
 
 ### Installation
 Use `pip` to install `hedtools` from PyPI:
@@ -21,39 +25,53 @@ Use `pip` to install `hedtools` from PyPI:
    ```
 
 To install directly from the 
-[GitHub](https://github.com/hed-standard/hed-python) repository:
+[GitHub](https://github.com/hed-standard/hed-python) repository `master` branch:
 
    ```
        pip install git+https://github.com/hed-standard/hed-python/@master
    ```
 
-The HEDTools in this repository require python 3.7 or greater.
+The HEDTools in this repository require Python 3.7 or greater.
+Note: HED is continuing to support Python 3.7 past its deprecation date because
+it is needed for MATLAB versions R2019a through R2020a.
 
 ### Relationship to other repositories
 
 The `hed-python` repository contains the Python infrastructure for validating
 and analyzing HED. This repository has two companion repositories:
 - [`hed-web`](https://github.com/hed-standard/hed-web) contains the web interface
-for HED as well as a deployable docker module that supports web services for HED.
+for HED as well as a deployable docker module that supports web services for HED.  
 - [`hed-examples`](https://github.com/hed-standard/hed-examples) contains examples of
-using HED in Python and MATLAB.
-The site also contains many Jupyter notes illustrating
-various aspect of data curation and analysis using HED.
-The site hosts HED test datasets and the HED user manuals.
+using HED in Python and MATLAB. This repository also houses the HED resources.
+See [https://www.hed-resources.org](https://www.hed-resources.org) for access to these.
+- [`hed-specification`](https://github.com/hed-standard/hed-specification) contains
+the HED specification documents. The `hed-python` validator is keyed to error codes
+in this document.
+- [`hed-schemas`](https://github.com/hed-standard/hed-schemas) contains
+the official HED schemas. The tools access this repository to retrieve and cache schema versions
+during execution. When a new schema is released, the `hed-python` repository must be updated
+to include the new release in its local cache.
 
-#### Develop versus master branches
+#### Develop versus master versus stable branches
 
-Because the three repositories are interrelated, the following conventions are followed.
-The latest stable version is on the master branches of `hed-python` and `hed-web` and the
-`main` branch of `hed-examples`.
-The documentation link on `readthedocs` will describe the stable versions.
+The `hed-python` repository
+
+| Branch |  Meaning | Synchronized with |
+| ------ | -------- | ------------------ |
+| stable | Officially released on PyPI as a tagged version. | `stable@hed-web`<br/>`stable@hed-specification`<br/>`stable@hed-examples` |
+| latest | Most recent usable version. | `latest@hed-web`<br/>`latest@hed-specification`<br/>`latest@hed-examples` |
+| develop | Evolving new feature version. | `develop@hed-web`<br/>`develop@hed-specification`<br/>`develop@hed-examples` |
 
 As features are integrated, they first appear in the `develop` branches of the
-three repositories.
-The `develop` branches of the three repositories will be kept in sync.
+repositories.
+The `develop` branches of the repositories will be kept in sync as much as possible
 If an interface change in `hed-python` triggers a change in `hed-web` or `hed-examples`,
 every effort will be made to get the stable branches of the respective repositories in
 sync.
+
+API documentation is generated on ReadTheDocs when a new version is
+pushed on any of the three branches. For example, the API documentation for the
+`latest` branch can be found on [hed-python.readthedocs.io/en/latest/](hed-python.readthedocs.io/en/latest/).
 
 #### To contribute
 
@@ -62,21 +80,18 @@ Please use the [Github issues](https://github.com/hed-standard/hed-python/issues
 for suggestions or bug reports.
 The [Github pull request](https://github.com/hed-standard/hed-python/pulls)
 may also be used for contributions.
-Usually these updates should be made to the `develop` branch, not the `master`.
+These PRs should be made to the `develop` branch, not the `master` branch.
 
 #### Local Settings Storage
 Cached Schemas by default are stored in "home/.hedtools/" 
 Location of "home" directory varies by OS.
 
-Use hed.schema.set_cache_directory to change the location.
+Use `hed.schema.set_cache_directory` to change the location.
 The HED cache can be shared across processes.
 
+Starting with `hedtools 0.2.0` local copies of the most recent schema versions
+are stored within the code modules for easy access.
+
 ### Other links of interest
-
-HED specification documentation: [https://hed-specification.readthedocs.io/en/latest/](https://hed-specification.readthedocs.io/en/latest/).
-
-Examples: [https://hed-examples.readthedocs.io/en/latest/](https://hed-examples.readthedocs.io/en/latest/).
-
-Documentation: [https://hed-python.readthedocs.io/en/latest/](https://hed-python.readthedocs.io/en/latest/).
 
 Code climate reports: [https://codeclimate.com/github/hed-standard/hed-python](https://codeclimate.com/github/hed-standard/hed-python).
