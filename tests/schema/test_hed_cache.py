@@ -1,3 +1,6 @@
+from hed.errors import HedFileError
+from hed.schema import load_schema_version
+
 import unittest
 import os
 import itertools
@@ -76,7 +79,7 @@ class Test(unittest.TestCase):
         os.rmdir(hed_cache_dir)
 
     def test_cache_specific_url(self):
-        local_filename = hed_cache.cache_specific_url(self.specific_hed_url, None, self.hed_cache_dir)
+        local_filename = hed_cache.cache_specific_url(self.specific_hed_url, None, cache_folder=self.hed_cache_dir)
         self.assertTrue(local_filename)
 
     def test_get_hed_versions_all(self):
@@ -110,6 +113,59 @@ class Test(unittest.TestCase):
             final_version = f"HED{version}.xml"
             self.assertFalse(hed_cache.version_pattern.match(final_version))
 
+class TestLocal(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../schema_cache_test_local/')
+        cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
+        schema.set_cache_directory(cls.hed_cache_dir)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.hed_cache_dir)
+        schema.set_cache_directory(cls.saved_cache_folder)
+
+    def test_local_cache(self):
+        final_hed_xml_file = hed_cache.get_hed_version_path("8.0.0", None, local_hed_directory=self.hed_cache_dir)
+        self.assertFalse(final_hed_xml_file)
+        hed_cache.cache_local_versions(self.hed_cache_dir)
+        final_hed_xml_file = hed_cache.get_hed_version_path("8.0.0", None, local_hed_directory=self.hed_cache_dir)
+        self.assertTrue(final_hed_xml_file)
+
+    def test_schema_load_schema_version_invalid(self):
+        # This test was moved here from schema io as it will throw errors on github rate limiting like the cache tests.
+        with self.assertRaises(HedFileError) as context1:
+            load_schema_version("x.0.1")
+        self.assertEqual(context1.exception.args[0], 'fileNotFound')
+
+        with self.assertRaises(HedFileError) as context2:
+            load_schema_version("base:score_x.0.1")
+        self.assertEqual(context2.exception.args[0], 'fileNotFound')
+
+        with self.assertRaises(HedFileError) as context3:
+            load_schema_version(["", None])
+        self.assertEqual(context3.exception.args[0], 'schemaDuplicatePrefix')
+
+        with self.assertRaises(HedFileError) as context4:
+            load_schema_version(["8.0.0", "score_1.0.0"])
+        self.assertEqual(context4.exception.args[0], 'schemaDuplicatePrefix')
+
+        with self.assertRaises(HedFileError) as context5:
+            load_schema_version(["sc:8.0.0", "sc:score_1.0.0"])
+        self.assertEqual(context5.exception.args[0], 'schemaDuplicatePrefix')
+
+        with self.assertRaises(HedFileError) as context6:
+            load_schema_version(["", "score_1.0.0"])
+        self.assertEqual(context6.exception.args[0], 'schemaDuplicatePrefix')
+
+        with self.assertRaises(HedFileError) as context7:
+            load_schema_version(["", "score_"])
+        self.assertEqual(context7.exception.args[0], 'schemaDuplicatePrefix')
+
+        with self.assertRaises(HedFileError) as context8:
+            load_schema_version(["", "notreallibrary"])
+        self.assertEqual(context8.exception.args[0], 'fileNotFound')
 
 if __name__ == '__main__':
     unittest.main()
+
