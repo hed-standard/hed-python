@@ -32,8 +32,12 @@ To install directly from the
    ```
 
 The HEDTools in this repository require Python 3.7 or greater.
-Note: HED is continuing to support Python 3.7 past its deprecation date because
+**Note:** HED is continuing to support Python 3.7 past its deprecation date because
 it is needed for MATLAB versions R2019a through R2020a.
+
+**Note:** The final exported interface for Python tools has not been 
+completely frozen in 0.1.0 and is expected to undergo minor changes
+in interface until the release of version 1.0.0.
 
 ### Relationship to other repositories
 
@@ -60,7 +64,7 @@ The `hed-python` repository
 | ------ | -------- | ------------------ |
 | stable | Officially released on PyPI as a tagged version. | `stable@hed-web`<br/>`stable@hed-specification`<br/>`stable@hed-examples` |
 | latest | Most recent usable version. | `latest@hed-web`<br/>`latest@hed-specification`<br/>`latest@hed-examples` |
-| develop | Evolving new feature version. | `develop@hed-web`<br/>`develop@hed-specification`<br/>`develop@hed-examples` |
+| develop | Experimental and evolving. | `develop@hed-web`<br/>`develop@hed-specification`<br/>`develop@hed-examples` |
 
 As features are integrated, they first appear in the `develop` branches of the
 repositories.
