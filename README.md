@@ -42,7 +42,7 @@ in interface until the release of version 1.0.0.
 ### Relationship to other repositories
 
 The `hed-python` repository contains the Python infrastructure for validating
-and analyzing HED. This repository has two companion repositories:
+and analyzing HED. This repository has several companion repositories:
 - [`hed-web`](https://github.com/hed-standard/hed-web) contains the web interface
 for HED as well as a deployable docker module that supports web services for HED.  
 - [`hed-examples`](https://github.com/hed-standard/hed-examples) contains examples of
@@ -70,7 +70,8 @@ As features are integrated, they first appear in the `develop` branches of the
 repositories.
 The `develop` branches of the repositories will be kept in sync as much as possible
 If an interface change in `hed-python` triggers a change in `hed-web` or `hed-examples`,
-every effort will be made to get the stable branches of the respective repositories in
+every effort will be made to get the three types of branches
+(`develop`, `latest`, `stable`) of the respective repositories in
 sync.
 
 API documentation is generated on ReadTheDocs when a new version is
