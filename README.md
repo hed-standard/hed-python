@@ -32,7 +32,7 @@ To install directly from the
    ```
 
 The HEDTools in this repository require Python 3.7 or greater.
-**Note:** HED is continuing to support Python 3.7 past its deprecation date because
+**Note:** HED is continuing to support Python 3.7 until 2023, because
 it is needed for MATLAB versions R2019a through R2020a.
 
 **Note:** The final exported interface for Python tools has not been 
@@ -53,8 +53,8 @@ the HED specification documents. The `hed-python` validator is keyed to error co
 in this document.
 - [`hed-schemas`](https://github.com/hed-standard/hed-schemas) contains
 the official HED schemas. The tools access this repository to retrieve and cache schema versions
-during execution. When a new schema is released, the `hed-python` repository must be updated
-to include the new release in its local cache.
+during execution. Starting with `hedtools 0.2.0` local copies of the most recent schema versions
+are stored within the code modules for easy access.
 
 #### Develop versus master versus stable branches
 
