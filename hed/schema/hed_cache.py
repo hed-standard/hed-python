@@ -205,6 +205,28 @@ def _copy_installed_schemas_to_cache(cache_folder):
             shutil.copy(install_name, cache_name)
 
 
+def cache_local_versions(cache_folder):
+    """ Cache all schemas included with the hed installation.
+
+    Parameters:
+        cache_folder (str): The folder holding the cache.
+
+    Returns:
+        int or None: Returns -1 on cache access failure.  None otherwise
+
+    """
+    if not cache_folder:
+        cache_folder = HED_CACHE_DIRECTORY
+    os.makedirs(cache_folder, exist_ok=True)
+
+    try:
+        cache_lock_filename = os.path.join(cache_folder, "cache_lock.lock")
+        with portalocker.Lock(cache_lock_filename, timeout=1):
+            _copy_installed_schemas_to_cache(cache_folder)
+    except portalocker.exceptions.LockException:
+        return -1
+
+
 def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
     """ Cache all schemas at the given URLs.
 
@@ -239,7 +261,6 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
     try:
         cache_lock_filename = os.path.join(cache_folder, "cache_lock.lock")
         with portalocker.Lock(cache_lock_filename, timeout=1):
-            _copy_installed_schemas_to_cache(cache_folder)
             for hed_base_url in hed_base_urls:
                 all_hed_versions = _get_hed_xml_versions_from_url(hed_base_url, skip_folders=skip_folders,
                                                                   get_libraries=True)
