@@ -18,6 +18,7 @@ class TestHedSchema(unittest.TestCase):
             "HED_separator_invalid.mediawiki": HedExceptions.INVALID_SECTION_SEPARATOR,
             "HED_header_missing.mediawiki": HedExceptions.SCHEMA_HEADER_MISSING,
             "HED_header_invalid.mediawiki": HedExceptions.HED_SCHEMA_HEADER_INVALID,
+            "empty_file.mediawiki": HedExceptions.HED_SCHEMA_HEADER_INVALID,
             "HED_header_invalid_version.mediawiki": HedExceptions.HED_SCHEMA_VERSION_INVALID,
             "HED_header_missing_version.mediawiki": HedExceptions.HED_SCHEMA_VERSION_INVALID,
             "HED_header_bad_library.mediawiki": HedExceptions.BAD_HED_LIBRARY_NAME,

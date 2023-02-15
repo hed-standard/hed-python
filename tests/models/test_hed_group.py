@@ -68,6 +68,56 @@ class Test(unittest.TestCase):
         located_tags = basic_hed_string_obj.find_tags_with_term("Item/Object", recursive=True, include_groups=0)
         self.assertEqual(len(located_tags), 0)
 
+    def _compare_strings(self, hed_strings):
+        str1 = HedString(hed_strings[0]).sort()
+        for hed_string in hed_strings:
+            str2 = HedString(hed_string).sort()
+            self.assertEqual(str1, str2)
+
+    def _compare_strings2(self, hed_strings):
+        str1 = HedString(hed_strings[0])
+        for hed_string in hed_strings:
+            str2 = HedString(hed_string)
+            self.assertEqual(str1.sorted(), str2.sorted())
+
+    def test_sort_and_sorted(self):
+        hed_strings = [
+            "A, B, C",
+            "A, C, B",
+            "B, C, A",
+            "C, B, A"
+        ]
+        self._compare_strings(hed_strings)
+        self._compare_strings2(hed_strings)
+        hed_strings = [
+            "A, (B, C)",
+            "(B, C), A"
+        ]
+        self._compare_strings(hed_strings)
+        self._compare_strings2(hed_strings)
+        hed_strings = [
+            "A, (A, (B, C))",
+            "(A, (B, C)), A",
+            "((B, C), A), A",
+            "A, ((B, C), A)"
+        ]
+        self._compare_strings(hed_strings)
+        self._compare_strings2(hed_strings)
+        hed_strings = [
+            "D, A, (A, (B, C))",
+            "(A, (B, C)), A, D",
+            "((B, C), A), A, D",
+            "A, D, ((B, C), A)"
+        ]
+        self._compare_strings(hed_strings)
+        self._compare_strings2(hed_strings)
+        hed_strings = [
+            "D, (E, F), A, (A, (B, C))",
+            "(A, (B, C)), A, D, (F, E)",
+            "((B, C), A), (E, F), A, D",
+            "A, D, ((B, C), A), (F, E)"
+        ]
+        self._compare_strings(hed_strings)
 
 if __name__ == '__main__':
     unittest.main()

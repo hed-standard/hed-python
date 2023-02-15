@@ -309,7 +309,7 @@ class TagValidator:
                     if tag_unit_class_units:
                         validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_INVALID,
                                                                        original_tag,
-                                                                       unit_class_units=tag_unit_class_units)
+                                                                       units=tag_unit_class_units)
         return validation_issues
 
     def check_tag_value_class_valid(self, original_tag):

@@ -16,14 +16,11 @@ VALUE_ELEMENT = "value"
 ATTRIBUTE_ELEMENT = "attribute"
 ATTRIBUTE_PROPERTY_ELEMENT = "property"
 UNIT_CLASS_UNIT_ELEMENT = 'unit'
-UNIT_CLASS_UNITS_ELEMENT = "units"
 PROLOGUE_ELEMENT = "prologue"
 SCHEMA_ELEMENT = "schema"
 EPILOGUE_ELEMENT = "epilogue"
 
 TAG_DEF_ELEMENT = "node"
-
-TRUE_ATTRIBUTE = "true"
 
 
 UNIT_CLASS_SECTION_ELEMENT = "unitClassDefinitions"
@@ -39,6 +36,7 @@ SCHEMA_VALUE_CLASSES_DEF_ELEMENT = "valueClassDefinition"
 
 
 SECTION_NAMES = {
+    HedSectionKey.AllTags: SCHEMA_ELEMENT,
     HedSectionKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
     HedSectionKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
     HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
@@ -50,6 +48,7 @@ SECTION_NAMES = {
 ELEMENT_NAMES = {
     HedSectionKey.AllTags: TAG_DEF_ELEMENT,
     HedSectionKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
+    HedSectionKey.Units: UNIT_CLASS_UNIT_ELEMENT,
     HedSectionKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
     HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_DEF_ELEMENT,
     HedSectionKey.Attributes: SCHEMA_ATTRIBUTES_DEF_ELEMENT,
@@ -64,5 +63,5 @@ ATTRIBUTE_PROPERTY_ELEMENTS = {
     HedSectionKey.UnitModifiers: ATTRIBUTE_ELEMENT,
     HedSectionKey.ValueClasses: ATTRIBUTE_ELEMENT,
     HedSectionKey.Attributes: ATTRIBUTE_PROPERTY_ELEMENT,
-    HedSectionKey.Properties: None
+    HedSectionKey.Properties: ATTRIBUTE_PROPERTY_ELEMENT
 }
