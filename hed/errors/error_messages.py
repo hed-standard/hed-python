@@ -10,10 +10,10 @@ from hed.errors.error_types import ValidationErrors, SchemaErrors, \
 
 
 @hed_tag_error(ValidationErrors.HED_UNITS_INVALID)
-def val_error_invalid_unit(tag, unit_class_units):
-    units_string = ','.join(sorted(unit_class_units))
+def val_error_invalid_unit(tag, units):
+    units_string = ','.join(sorted(units))
     return f'Invalid unit - "{tag}" valid units are "{units_string}"', {
-        "unit_class_units": sorted(unit_class_units)
+        "units": sorted(units)
     }
 
 
@@ -202,8 +202,8 @@ def val_warning_default_units_used(tag, default_unit):
 @hed_error(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE)
 def schema_error_hed_duplicate_node(tag, duplicate_tag_list, section):
     tag_join_delimiter = "\n\t"
-    return f"Duplicate term '{str(tag)}' used {len(duplicate_tag_list)} places in '{section}' section schema as: " + \
-           f"{tag_join_delimiter} {tag_join_delimiter.join(duplicate_tag_list)}", {}
+    return f"Duplicate term '{str(tag)}' used {len(duplicate_tag_list)} places in '{section}' section schema as:" + \
+           f"{tag_join_delimiter}{tag_join_delimiter.join(duplicate_tag_list)}", {}
 
 
 @hed_error(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID)

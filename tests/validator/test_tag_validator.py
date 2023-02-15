@@ -250,16 +250,16 @@ class IndividualHedTagsShort(TestHed):
             'correctNonSymbolCapitalizedUnit': [],
             'correctSymbolCapitalizedUnit': [],
             'incorrectUnit': self.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                               tag=0, unit_class_units=legal_time_units),
+                                               tag=0, units=legal_time_units),
             'incorrectSiUsage': self.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                                  tag=0, unit_class_units=legal_time_units),
+                                                  tag=0, units=legal_time_units),
             'incorrectPluralUnit': self.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                                     tag=0, unit_class_units=legal_freq_units),
+                                                     tag=0, units=legal_freq_units),
             'incorrectSymbolCapitalizedUnit': self.format_error(ValidationErrors.HED_UNITS_INVALID,
                                                                 tag=0,
-                                                                unit_class_units=legal_freq_units),
+                                                                units=legal_freq_units),
             'incorrectSymbolCapitalizedUnitModifier': self.format_error(
-                ValidationErrors.HED_UNITS_INVALID, tag=0, unit_class_units=legal_freq_units),
+                ValidationErrors.HED_UNITS_INVALID, tag=0, units=legal_freq_units),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
             'specialAllowedCharBadUnit': self.format_error(ValidationErrors.HED_VALUE_INVALID,
@@ -267,11 +267,11 @@ class IndividualHedTagsShort(TestHed):
             'specialAllowedCharUnit': [],
             # 'properTime': [],
             # 'invalidTime': self.format_error(ValidationErrors.HED_UNITS_INVALID,  tag=0,
-            #                                 unit_class_units=legal_clock_time_units)
+            #                                 units=legal_clock_time_units)
             # 'specialAllowedCharCurrency': [],
             # 'specialNotAllowedCharCurrency': self.format_error(ValidationErrors.HED_UNITS_INVALID,
             #                                                                    tag=0,
-            #                                                                    unit_class_units=legal_currency_units),
+            #                                                                    units=legal_currency_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -340,12 +340,12 @@ class IndividualHedTagsShort(TestHed):
         tag_unit_class_units = ['day', 'hour', 'minute', 's', 'second']
         expected_issues = {
             'orgTagDifferent': self.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                                 tag=0, unit_class_units=tag_unit_class_units),
+                                                 tag=0, units=tag_unit_class_units),
             'orgTagDifferent2':
                 self.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                  tag=0, unit_class_units=tag_unit_class_units)
+                                  tag=0, units=tag_unit_class_units)
                 + self.format_error(ValidationErrors.HED_UNITS_INVALID, tag=1,
-                                    unit_class_units=tag_unit_class_units),
+                                    units=tag_unit_class_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -390,10 +390,9 @@ class TestTagLevels(TestHed):
             'duplicateGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
                                                 group=HedString("(Sensory-event, Man-made-object/VehicleTrain)")),
             'duplicateSubGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                group=HedString("(Event, (Sensory-event, Man-made-object/VehicleTrain))")),
+                                                group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))")),
             'duplicateSubGroupF': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                   group=HedString(
-                                                       "((Sensory-event, Man-made-object/VehicleTrain), Event)")),
+                                                   group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)")),
         }
         self.validator_syntactic(test_strings, expected_results, expected_issues, False)
 
@@ -913,10 +912,10 @@ class TestHedSpecialUnits(TestHed):
             'specialAllowedCharCurrency': [],
             'specialNotAllowedCharCurrency': self.format_error(ValidationErrors.HED_UNITS_INVALID,
                                                                tag=0,
-                                                               unit_class_units=legal_currency_units),
+                                                               units=legal_currency_units),
             'specialAllowedCharCurrencyAsSuffix': self.format_error(ValidationErrors.HED_UNITS_INVALID,
                                                                     tag=0,
-                                                                    unit_class_units=legal_currency_units),
+                                                                    units=legal_currency_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 

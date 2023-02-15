@@ -1,5 +1,6 @@
+from enum import Enum
 
-class HedSectionKey:
+class HedSectionKey(Enum):
     """ Kegs designating specific sections in a HedSchema object.
     """
     # overarching category listing all tags
@@ -45,6 +46,7 @@ class HedKey:
     UnitProperty = 'unitProperty'
     UnitModifierProperty = 'unitModifierProperty'
     ValueClassProperty = 'valueClassProperty'
+    ElementProperty = 'elementProperty'
 
     SIUnit = 'SIUnit'
     UnitSymbol = 'unitSymbol'
@@ -58,5 +60,11 @@ class HedKey:
     # value class attributes
     AllowedCharacter = 'allowedCharacter'
 
+    # Node attributes
+    InLibrary = "inLibrary"
+
 
 VERSION_ATTRIBUTE = 'version'
+LIBRARY_ATTRIBUTE = 'library'
+WITH_STANDARD_ATTRIBUTE = "with-standard"
+MERGED_ATTRIBUTE = "merged"

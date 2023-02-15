@@ -488,7 +488,7 @@ class HedTag:
         units = []
         unit_classes = self.unit_classes
         for unit_class_entry in unit_classes.values():
-            units += unit_class_entry.unit_class_units.keys()
+            units += unit_class_entry.units.keys()
 
         return units
 

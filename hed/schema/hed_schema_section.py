@@ -20,7 +20,7 @@ class HedSchemaSection:
         """ Construct schema section.
 
         Parameters:
-            section_key (str):  Name of the schema section.
+            section_key (HedSectionKey):  Name of the schema section.
             case_sensitive (bool): If True, names are case sensitive.
 
         """
@@ -34,8 +34,17 @@ class HedSchemaSection:
         self._attribute_cache = {}
 
         self._section_entry = entries_by_section.get(section_key)
-        self.duplicate_names = {}
+        self._duplicate_names = {}
+
         self.all_entries = []
+
+    @property
+    def section_key(self):
+        return self._section_key
+
+    @property
+    def duplicate_names(self):
+        return self._duplicate_names
 
     def _add_to_dict(self, name):
         """ Add a name to the dictionary for this section. """
@@ -45,9 +54,9 @@ class HedSchemaSection:
 
         new_entry = self._section_entry(name, self)
         if name_key in self.all_names:
-            if name_key not in self.duplicate_names:
-                self.duplicate_names[name_key] = [self.all_names[name_key]]
-            self.duplicate_names[name_key].append(new_entry)
+            if name_key not in self._duplicate_names:
+                self._duplicate_names[name_key] = [self.all_names[name_key]]
+            self._duplicate_names[name_key].append(new_entry)
         else:
             self.all_names[name_key] = new_entry
 
@@ -135,6 +144,8 @@ class HedSchemaTagSection(HedSchemaSection):
         # This dict contains all forms of all tags.  The .all_names variable has ONLY the long forms.
         self.long_form_tags = {}
 
+        self._duplicate_terms = {}
+
     def _add_to_dict(self, name):
         name_key = name
         tag_forms = []
@@ -162,9 +173,21 @@ class HedSchemaTagSection(HedSchemaSection):
         new_entry.short_tag_name = short_name
 
         for tag_key in tag_forms:
-            self.long_form_tags[tag_key.lower()] = new_entry
+            name_key = tag_key.lower()
+            if name_key in self.long_form_tags:
+                if name_key not in self._duplicate_terms:
+                    self._duplicate_terms[name_key] = [self.long_form_tags[name_key]]
+                self._duplicate_terms[name_key].append(new_entry)
+            else:
+                self.long_form_tags[name_key] = new_entry
 
         return new_entry
+
+    @property
+    def duplicate_names(self):
+        combined_with_terms = self._duplicate_names.copy()
+        combined_with_terms.update(self._duplicate_terms)
+        return combined_with_terms
 
     def get(self, key):
         if not self.case_sensitive:

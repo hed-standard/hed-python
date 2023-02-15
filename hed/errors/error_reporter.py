@@ -204,7 +204,7 @@ class ErrorHandler:
             error_type (str): The type of error for this.  Registered with @hed_error or @hed_tag_error.
             args (args): Any remaining non keyword args after those required by the error type.
             actual_error (str or None): Code to actually add to report out.
-            kwargs (dict): The other keyword args to pass down to the error handling func.
+            kwargs (kwargs): The other keyword args to pass down to the error handling func.
 
         Returns:
             list:   A list containing a single dictionary representing a single error.

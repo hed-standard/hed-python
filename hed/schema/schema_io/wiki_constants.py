@@ -15,7 +15,7 @@ EPILOGUE_SECTION_ELEMENT = "'''Epilogue'''"
 OLD_SYNTAX_SECTION_NAME = "'''Syntax'''"
 
 wiki_section_headers = {
-    HedSectionKey.AllTags: None,
+    HedSectionKey.AllTags: START_HED_STRING,
     HedSectionKey.UnitClasses: UNIT_CLASS_STRING,
     HedSectionKey.Units: None,
     HedSectionKey.UnitModifiers: UNIT_MODIFIER_STRING,
