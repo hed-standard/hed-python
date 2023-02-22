@@ -1,4 +1,7 @@
-Commands for building(uploading to conda-forge):
+To create the base meta.yaml I used grayskull:
+https://conda-forge.org/docs/maintainer/adding_pkgs.html#build
+
+Commands for building(uploading to conda-forge - note this is just for testing):
 # Make sure conda forge is allowed
 conda config --add channels conda-forge
 # Make sure we try to always get from the same repo if there are conflicts
@@ -8,10 +11,11 @@ conda config --set channel_priority strict
 # Actually build the recipe.
 conda build hedtools
 
-
 To locally install it after building:
 conda install --use-local hedtools
 
+Then you follow the instructions here to make a PR(this is the actual upload to conda forge):
+https://conda-forge.org/docs/maintainer/adding_pkgs.html#staging-test-locally
 
 To install from conda-forge(in theory, doesn't work yet):
 # Note the -c conda-forge shouldn't be required if you called the build config step above.(but users won't have done this)
