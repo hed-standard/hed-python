@@ -1,0 +1,20 @@
+Commands for building(uploading to conda-forge):
+# Make sure conda forge is allowed
+conda config --add channels conda-forge
+# Make sure we try to always get from the same repo if there are conflicts
+# see https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-channels.html for more details on channels
+# this avoids issues with conflicting c libraries and similar.
+conda config --set channel_priority strict
+# Actually build the recipe.
+conda build hedtools
+
+
+To locally install it after building:
+conda install --use-local hedtools
+
+
+To install from conda-forge(in theory, doesn't work yet):
+# Note the -c conda-forge shouldn't be required if you called the build config step above.(but users won't have done this)
+conda install hedtools -c conda-forge
+
+
