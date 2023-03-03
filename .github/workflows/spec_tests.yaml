@@ -1,4 +1,4 @@
-name: CI
+name: Spec_tests
 
 on:
   push:
@@ -16,12 +16,16 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout hed-python
+        uses: actions/checkout@v3
+
+      - name: Checkout spec
+        uses: actions/checkout@v3
         with:
             repository: hed-standard/hed-specification
             ref: develop
+            path: hed-specification
 
-      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
