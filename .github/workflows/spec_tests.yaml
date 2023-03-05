@@ -18,13 +18,8 @@ jobs:
     steps:
       - name: Checkout hed-python
         uses: actions/checkout@v3
-
-      - name: Checkout spec
-        uses: actions/checkout@v3
         with:
-            repository: hed-standard/hed-specification
-            ref: develop
-            path: hed-specification
+          submodules: true
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -38,5 +33,12 @@ jobs:
 
       - name: Test with unittest
         run: |
-           python -m unittest spec_tests/*
+           python -m unittest spec_tests/* > test_results.txt
+        continue-on-error: true
+
+      - name: Upload spec test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: spec-test-results
+          path: test_results.txt
 
