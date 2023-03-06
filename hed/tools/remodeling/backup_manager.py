@@ -44,7 +44,11 @@ class BackupManager:
             bool:  True if the backup was successful. False if a backup of that name already exists.
 
         Raises:
-            Exceptions when file errors of any kind occur during the creation of a backup.
+            HedFileError   
+                - For missing or incorrect files.    
+                
+            OS-related error   
+                - OS-related error when file copying occurs.    
 
         """
         if not backup_name:
@@ -79,6 +83,11 @@ class BackupManager:
 
         Returns:
             The dictionary with the backup info.
+            
+        Notes:
+            - The dictionary with backup information has keys that are the paths of
+              the backed up files relative to the backup root. The values in this
+              dictionary are the dates on which the particular file was backed up.
 
         """
         if backup_name not in self.backups_dict:

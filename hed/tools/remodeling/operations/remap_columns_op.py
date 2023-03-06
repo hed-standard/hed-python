@@ -16,7 +16,7 @@ class RemapColumnsOp(BaseOp):
         - **ignore_missing** (*bool*): If True, entries whose key column values are not in map_list are ignored.   
 
     Optional remodeling parameters:   
-        **integer_sources** (*list*): Sour columns that should be treated as integers rather than strings.   
+        **integer_sources** (*list*): Source columns that should be treated as integers rather than strings.   
 
     Notes:
         Each list element list is of length m + n with the key columns followed by mapped columns. 
