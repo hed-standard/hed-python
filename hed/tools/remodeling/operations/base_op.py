@@ -70,7 +70,7 @@ class BaseOp:
                 raise TypeError("BadType", f"{param_value} has type {type(param_value)} not {param_type}")
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Base class method to be overridden with by each operation.
+        """ Base class method to be overridden by each operation.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
