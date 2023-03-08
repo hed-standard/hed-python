@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
                                                     'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
-        cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        cls.input_data = TabularInput(events_path, sidecar=sidecar1, hed_schema=schema, name="face_sub1_events")
         cls.schema = schema
 
     # def test_onset_group(self):

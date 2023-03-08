@@ -1,6 +1,7 @@
 """ Summarize the HED tags in collection of tabular files.  """
 
 from hed.models.tabular_input import TabularInput
+from hed.models.sidecar import Sidecar
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
@@ -13,11 +14,10 @@ class SummarizeHedTagsOp(BaseOp):
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
         - **summary_filename** (*str*): Base filename of the summary.   
-        - **type_tags** (*list*): Type tag to get_summary separately (e.g. 'condition-variable' or 'task').   
-        - **include_context** (*bool*): If True, expand Onset and Offset tags.   
-
+        - **tags** (*dict*): Type tag to get_summary separately (e.g. 'condition-variable' or 'task').   
+ 
     Optional remodeling parameters:    
-        - **breakout_list** (*list*):  A list of tags to be separated.  
+       - **expand_context** (*bool*): If True, include counts from expanded context (not supported).   
 
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
@@ -31,10 +31,10 @@ class SummarizeHedTagsOp(BaseOp):
         "required_parameters": {
             "summary_name": str,
             "summary_filename": str,
-            "tags": dict,
-            "expand_context": bool
+            "tags": dict
         },
         "optional_parameters": {
+            "expand_context": bool
         }
     }
 
@@ -59,7 +59,7 @@ class SummarizeHedTagsOp(BaseOp):
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.tags = parameters['tags']
-        self.expand_context = parameters['expand_context']
+        self.expand_context = parameters.get('expand_context', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns corresponding to values in a specified column.
@@ -95,10 +95,13 @@ class HedTagSummaryContext(BaseContext):
 
     def update_context(self, new_context):
         counts = HedTagCounts(new_context['name'], total_events=len(new_context['df']))
-        input_data = TabularInput(new_context['df'], hed_schema=new_context['schema'], sidecar=new_context['sidecar'])
-        definitions = input_data.get_definitions().gathered_defs
+        sidecar = new_context['sidecar']
+        if sidecar and not isinstance(sidecar, Sidecar):
+            sidecar = Sidecar(sidecar, hed_schema=new_context['schema'])
+        input_data = TabularInput(new_context['df'], hed_schema=new_context['schema'], sidecar=sidecar)
+        # definitions = input_data.get_definitions().gathered_defs
         for objs in input_data.iter_dataframe(hed_ops=[new_context['schema']], return_string_only=False,
-                                              expand_defs=False, remove_definitions=True):
+                                              expand_defs=True, remove_definitions=True):
             counts.update_event_counts(objs['HED'], new_context['name'])
         self.summary_dict[new_context["name"]] = counts
 
