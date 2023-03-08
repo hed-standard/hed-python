@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
+from hed.models.sidecar import Sidecar
 from hed.models.expression_parser import QueryParser
 from hed.tools.analysis.analysis_util import get_assembled_strings
 
@@ -99,6 +100,8 @@ class FactorHedTagsOp(BaseOp):
 
         """
 
+        if sidecar and not isinstance(sidecar, Sidecar):
+            sidecar = Sidecar(sidecar, hed_schema=dispatcher.hed_schema)
         input_data = TabularInput(df, hed_schema=dispatcher.hed_schema, sidecar=sidecar)
         column_names = list(df.columns)
         for name in self.query_names:

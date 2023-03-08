@@ -59,9 +59,73 @@ class Test(unittest.TestCase):
         self.assertEqual(10, len(df_new.columns), "summarize_hed_type_op has correct number of columns")
         self.assertIn(sum_op.summary_name, dispatch.context_dict)
         self.assertIsInstance(dispatch.context_dict[sum_op.summary_name], HedTagSummaryContext)
-        self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run1'].tag_dict), 18)
+        x = dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run1']
+        self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run1'].tag_dict), 47)
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run2', sidecar=self.json_path)
-        self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run2'].tag_dict), 18)
+        self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run2'].tag_dict), 47)
+
+    def test_quick_test(self):
+        from hed.models.hed_tag import HedTag
+        from hed.schema import load_schema_version
+        my_tag = "Description/This is a test"
+        tag = HedTag(my_tag)
+        x = tag.tag_terms
+        # print(x)
+        my_schema = load_schema_version('8.1.0')
+        tag1 = HedTag(my_tag, hed_schema=my_schema)
+        x1 = tag1.tag_terms
+        # print(x1)
+
+    def test_quick3(self):
+        from hed.models import TabularInput, Sidecar
+        from hed.schema import load_schema_version
+        from hed.tools.analysis.hed_tag_counts import HedTagCounts
+        from io import StringIO
+        my_schema = load_schema_version('8.1.0')
+        my_json = {
+                    "code": {
+                        "HED": {
+                            "code1": "((Def/Blech1, Green), Blue)",
+                            "code2": "((Def/Blech3, Description/Help me), Blue)"
+                        }
+                    },
+                    "defs": {
+                        "HED": {
+                            "def1": "(Definition/Blech1, (Condition-variable/Cat, Description/this is hard))"
+                        }
+                    }
+                  }
+        my_json_str = json.dumps(my_json)
+        my_sidecar = Sidecar(StringIO(my_json_str), hed_schema=my_schema)
+        data = [[0.5, 0, 'code1', 'Description/This is a test, Label/Temp, (Def/Blech1, Green)'],
+                [0.6, 0, 'code2', 'Sensory-event, ((Description/Animal, Condition-variable/Blech))']]
+        df = pd.DataFrame(data, columns=['onset', 'duration', 'code', 'HED'])
+        input_data = TabularInput(df, hed_schema=my_schema, sidecar=my_sidecar)
+        counts = HedTagCounts('myName', 2)
+        summary_dict = {}
+        for objs in input_data.iter_dataframe(hed_ops=[my_schema], return_string_only=False,
+                                              expand_defs=True, remove_definitions=True):
+            counts.update_event_counts(objs['HED'], 'myName')
+        summary_dict['myName'] = counts
+
+    def test_quick4(self):
+        from hed.models import TabularInput, Sidecar
+        from hed.schema import load_schema_version
+        from hed.tools.analysis.hed_tag_counts import HedTagCounts
+        path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                             '../../../data/remodel_tests/'))
+        data_path = os.path.realpath(os.path.join(path, 'sub-002_task-FacePerception_run-1_events.tsv'))
+        json_path = os.path.realpath(os.path.join(path, 'task-FacePerception_events.json'))
+        my_schema = load_schema_version('8.1.0')
+        sidecar = Sidecar(json_path, hed_schema=my_schema)
+        input_data = TabularInput(data_path, hed_schema=my_schema, sidecar=sidecar)
+        counts = HedTagCounts('myName', 2)
+        summary_dict = {}
+        for objs in input_data.iter_dataframe(hed_ops=[my_schema], return_string_only=False,
+                                              expand_defs=True, remove_definitions=True):
+            x = objs['HED']
+            counts.update_event_counts(objs['HED'], 'myName')
+        summary_dict['myName'] = counts
 
     def test_get_summary_details(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])

@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
+from hed.models.sidecar import Sidecar
 from hed.tools.analysis.analysis_util import get_assembled_strings
 from hed.tools.analysis.hed_type_manager import HedTypeManager
 
@@ -68,6 +69,8 @@ class FactorHedTypeOp(BaseOp):
 
         """
 
+        if sidecar and not isinstance(sidecar, Sidecar):
+            sidecar = Sidecar(sidecar, hed_schema=dispatcher.hed_schema)
         input_data = TabularInput(df, hed_schema=dispatcher.hed_schema, sidecar=sidecar)
         df = input_data.dataframe.copy()
         df_list = [df]

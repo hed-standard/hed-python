@@ -20,10 +20,11 @@ class Test(unittest.TestCase):
         events_path = os.path.realpath(os.path.join(bids_root_path,
                                                     'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
 
-        cls.hed_schema = hedschema.load_schema(schema_path)
-        sidecar1 = Sidecar(json_path, name='face_sub1_json')
+        hed_schema = hedschema.load_schema(schema_path)
+        cls.hed_schema = hed_schema
+        sidecar1 = Sidecar(json_path, name='face_sub1_json', hed_schema=hed_schema)
         cls.sidecar_path = sidecar1
-        cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        cls.input_data = TabularInput(events_path, hed_schema=hed_schema, sidecar=sidecar1, name="face_sub1_events")
         cls.input_data_no_sidecar = TabularInput(events_path, name="face_sub1_events_no_sidecar")
 
     def test_assemble_hed_included_no_expand(self):

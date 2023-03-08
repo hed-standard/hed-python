@@ -1,6 +1,7 @@
 """ Summarize a HED type tag in a collection of tabular files. """
 
 from hed.models.tabular_input import TabularInput
+from hed.models.sidecar import Sidecar
 from hed.tools.analysis.analysis_util import get_assembled_strings
 from hed.tools.analysis.hed_type_values import HedTypeValues
 from hed.tools.analysis.hed_type_counts import HedTypeCounts
@@ -87,7 +88,10 @@ class HedTypeSummaryContext(BaseContext):
         self.type_tag = sum_op.type_tag
 
     def update_context(self, new_context):
-        input_data = TabularInput(new_context['df'], hed_schema=new_context['schema'], sidecar=new_context['sidecar'])
+        sidecar = new_context['sidecar']
+        if sidecar and not isinstance(sidecar, Sidecar):
+            sidecar = Sidecar(sidecar, hed_schema=new_context['schema'])
+        input_data = TabularInput(new_context['df'], hed_schema=new_context['schema'], sidecar=sidecar)
         hed_strings = get_assembled_strings(input_data, hed_schema=new_context['schema'], expand_defs=False)
         definitions = input_data.get_definitions().gathered_defs
         context_manager = HedContextManager(hed_strings, new_context['schema'])

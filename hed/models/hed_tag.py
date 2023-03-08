@@ -252,6 +252,7 @@ class HedTag:
 
         # TODO: Potentially remove this.  It's just a quick hack for testing
         return tuple(str(self).lower())
+        #return tuple()
 
     def __str__(self):
         """ Convert this HedTag to a string.

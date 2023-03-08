@@ -26,7 +26,8 @@ class Test(unittest.TestCase):
         # cls.input_data_no_sidecar = TabularInput(events_path, name="face_sub1_events_no_sidecar")
 
     def setUp(self):
-        self.input_data = TabularInput(self.events_path, sidecar=self.json_path, name="face_sub1_events")
+        self.input_data = TabularInput(self.events_path, hed_schema=self.hed_schema, 
+                                       sidecar=self.json_path, name="face_sub1_events")
 
     def test_get_assembled_strings_no_schema_no_def_expand(self):
         hed_list1 = get_assembled_strings(self.input_data, expand_defs=False)

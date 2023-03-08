@@ -19,8 +19,8 @@ class Test(unittest.TestCase):
         events_path = os.path.realpath(os.path.join(bids_root_path,
                                        'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
-        sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
-        input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        sidecar1 = Sidecar(sidecar_path, hed_schema=schema, name='face_sub1_json')
+        input_data = TabularInput(events_path, sidecar=sidecar1, hed_schema=schema, name="face_sub1_events")
         hed_strings1 = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
         definitions1 = input_data.get_definitions(as_strings=False).gathered_defs
         cls.var_type1 = HedTypeValues(HedContextManager(hed_strings1, schema), definitions1, 'run-01',
