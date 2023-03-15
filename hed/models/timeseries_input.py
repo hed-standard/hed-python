@@ -22,4 +22,4 @@ class TimeseriesInput(BaseInput):
         """
 
         super().__init__(file, file_type=".tsv", worksheet_name=None, has_column_names=False, mapper=None,
-                         def_mapper=None, name=name)
+                         name=name)

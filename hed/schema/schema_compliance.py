@@ -62,7 +62,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
                 if validator:
                     error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name, False)
                     new_issues = validator(hed_schema, tag_entry, tag_entry.attributes[attribute_name])
-                    error_handler.add_context_to_issues(new_issues)
+                    error_handler.add_context_and_filter(new_issues)
                     issues_list += new_issues
                     error_handler.pop_error_context()
             error_handler.pop_error_context()

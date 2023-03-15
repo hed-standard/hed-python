@@ -43,8 +43,8 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
             Returns:
                 list: A list of dict with the errors.=
             """
-            base_message, error_vars = func(*args, **kwargs)
-            error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars)
+            base_message = func(*args, **kwargs)
+            error_object = ErrorHandler._create_error_object(actual_code, base_message, severity)
             return error_object
 
         _register_error_function(error_type, wrapper_func=wrapper)
@@ -97,8 +97,8 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 except AttributeError:
                     org_tag_text = str(tag)
 
-                base_message, error_vars = func(org_tag_text, problem_sub_tag, *args, **kwargs)
-                error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
+                base_message = func(org_tag_text, problem_sub_tag, *args, **kwargs)
+                error_object = ErrorHandler._create_error_object(actual_code, base_message, severity,
                                                                  index_in_tag=index_in_tag,
                                                                  index_in_tag_end=index_in_tag_end, source_tag=tag)
 
@@ -129,8 +129,8 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     org_tag_text = tag.get_original_hed_string()
                 else:
                     org_tag_text = str(tag)
-                base_message, error_vars = func(org_tag_text, *args, **kwargs)
-                error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, **error_vars,
+                base_message = func(org_tag_text, *args, **kwargs)
+                error_object = ErrorHandler._create_error_object(actual_code, base_message, severity,
                                                                  source_tag=tag)
 
                 return error_object
@@ -148,9 +148,10 @@ error_messages.mark_as_used = True
 
 
 class ErrorHandler:
-    def __init__(self):
+    def __init__(self, check_for_warnings=True):
         # The current (ordered) dictionary of contexts.
         self.error_context = []
+        self._check_for_warnings = check_for_warnings
 
     def push_error_context(self, context_type, context, increment_depth_after=True):
         """ Push a new error context to narrow down error scope.
@@ -191,8 +192,12 @@ class ErrorHandler:
     def format_error_with_context(self, *args, **kwargs):
         error_object = ErrorHandler.format_error(*args, **kwargs)
         if self is not None:
-            self._add_context_to_errors(error_object[0], self.error_context)
-            self._update_error_with_char_pos(error_object[0])
+            actual_error = error_object[0]
+            # # Filter out warning errors
+            if not self._check_for_warnings and actual_error['severity'] >= ErrorSeverity.WARNING:
+                return []
+            self._add_context_to_errors(actual_error, self.error_context)
+            self._update_error_with_char_pos(actual_error)
 
         return error_object
 
@@ -225,25 +230,18 @@ class ErrorHandler:
 
         return [error_object]
 
-    def add_context_to_issues(self, issues):
+    def add_context_and_filter(self, issues):
+        """ Filter out warnings if requested, while adding context to issues.
+
+            issues(list):
+                list:   A list containing a single dictionary representing a single error.
+        """
+        if not self._check_for_warnings:
+            issues[:] = self.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
+
         for error_object in issues:
             self._add_context_to_errors(error_object, self.error_context)
             self._update_error_with_char_pos(error_object)
-
-    def format_error_list(self, issue_params):
-        """ Convert an issue params list to an issues list.  This means adding the error context primarily.
-
-        Parameters:
-            issue_params (list):  A list of dict containing the unformatted issues list.
-
-        Returns:
-            list: A list of dict containing unformatted errors.
-
-        """
-        formatted_issues = []
-        for issue in issue_params:
-            formatted_issues += self.format_error(**issue)
-        return formatted_issues
 
     @staticmethod
     def format_error_from_context(error_type, error_context, *args, actual_error=None, **kwargs):
@@ -262,6 +260,7 @@ class ErrorHandler:
         Notes:
             - Generally the error_context is returned from _add_context_to_errors.
             - The actual_error is useful for errors that are shared like invalid character.
+            - This can't filter out warnings like the other ones.
 
         """
         error_func = error_functions.get(error_type)

@@ -47,6 +47,7 @@ class ValidationErrors:
     HED_UNITS_DEFAULT_USED = 'HED_UNITS_DEFAULT_USED'
     HED_VALUE_INVALID = 'HED_VALUE_INVALID'
     HED_LIBRARY_UNMATCHED = "HED_LIBRARY_UNMATCHED"
+    TAG_PREFIX_INVALID = "TAG_PREFIX_INVALID"
     # HED_VERSION_WARNING
 
     HED_MISSING_REQUIRED_COLUMN = "HED_MISSING_REQUIRED_COLUMN"
@@ -75,12 +76,14 @@ class ValidationErrors:
 
 class SidecarErrors:
     # These are for json sidecar validation errors(sidecars can also produce most normal validation errors)
+    SIDECAR_INVALID = "SIDECAR_INVALID" # this is the generic error reported for several later ones
     BLANK_HED_STRING = 'blankValueString'
     WRONG_HED_DATA_TYPE = 'wrongHedDataType'
     INVALID_POUND_SIGNS_VALUE = 'invalidNumberPoundSigns'
     INVALID_POUND_SIGNS_CATEGORY = 'tooManyPoundSigns'
     UNKNOWN_COLUMN_TYPE = 'sidecarUnknownColumn'
-
+    SIDECAR_HED_USED = 'SIDECAR_HED_USED'
+    SIDECAR_NA_USED = 'SIDECAR_NA_USED'
 
 class SchemaErrors:
     HED_SCHEMA_DUPLICATE_NODE = 'HED_SCHEMA_DUPLICATE_NODE'

@@ -1,0 +1,78 @@
+from hed.models.hed_string import HedString
+from hed.models.hed_tag import HedTag
+from hed.models.definition_dict import DefinitionDict
+from hed.errors.error_types import ValidationErrors
+from hed.errors.error_reporter import ErrorHandler
+
+
+class DefValidator(DefinitionDict):
+    """ Handles validating Def/ and Def-expand/.
+
+    """
+
+    def __init__(self, def_dicts=None, hed_schema=None):
+        """ Initialize for definitions in hed strings.
+
+        Parameters:
+            def_dicts (list or DefinitionDict or str): DefinitionDicts containing the definitions to pass to baseclass
+
+        """
+        super().__init__(def_dicts, hed_schema=hed_schema)
+
+    def validate_def_tags(self, hed_string_obj):
+        """ Validate Def/Def-Expand tags.
+
+        Parameters:
+            hed_string_obj (HedString): The hed string to process.
+
+        Returns:
+            list: Issues found related to validating defs. Each issue is a dictionary.
+        """
+        hed_string_lower = hed_string_obj.lower()
+        if self._label_tag_name not in hed_string_lower:
+            return []
+
+        def_issues = []
+        # We need to check for labels to expand in ALL groups
+        for def_tag, def_expand_group, def_group in hed_string_obj.find_def_tags(recursive=True):
+            def_issues += self._validate_def_contents(def_tag, def_expand_group)
+
+        return def_issues
+
+    def _validate_def_contents(self, def_tag, def_expand_group):
+        """ Check for issues with expanding a tag from Def to a Def-expand tag group
+
+        Parameters:
+            def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
+            def_expand_group (HedGroup or HedTag):
+            Source group for this def-expand tag.  Same as def_tag if this is not a def-expand tag.
+
+        Returns:
+            issues
+        """
+        def_issues = []
+
+        is_label_tag = def_tag.extension_or_value_portion
+        placeholder = None
+        found_slash = is_label_tag.find("/")
+        if found_slash != -1:
+            placeholder = is_label_tag[found_slash + 1:]
+            is_label_tag = is_label_tag[:found_slash]
+
+        label_tag_lower = is_label_tag.lower()
+        def_entry = self.defs.get(label_tag_lower)
+        if def_entry is None:
+            def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_UNMATCHED, tag=def_tag)
+        else:
+            def_tag_name, def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder)
+            if def_tag_name:
+                if def_expand_group is not def_tag and def_expand_group != def_contents:
+                    def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_INVALID,
+                                                            tag=def_tag, actual_def=def_contents,
+                                                            found_def=def_expand_group)
+            elif def_entry.takes_value:
+                def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_MISSING, tag=def_tag)
+            else:
+                def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_EXTRA, tag=def_tag)
+
+        return def_issues

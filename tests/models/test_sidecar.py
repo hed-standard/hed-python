@@ -8,6 +8,7 @@ from hed.models import ColumnMetadata, HedString, Sidecar
 from hed.validator import HedValidator
 from hed import schema
 from hed.models import DefinitionDict
+from hed.errors import ErrorHandler
 
 
 class Test(unittest.TestCase):
@@ -80,35 +81,28 @@ class Test(unittest.TestCase):
         self.assertEqual(columns_target, columns_count)
 
     def test_validate_column_group(self):
-        validator = HedValidator(hed_schema=None)
-        # validation_issues = self.json_def_sidecar.validate_entries(validator, check_for_warnings=True)
-        # self.assertEqual(len(validation_issues), 0)
-        #
-        # validation_issues = self.default_sidecar.validate_entries(validator, check_for_warnings=True)
-        # self.assertEqual(len(validation_issues), 0)
+        validation_issues = self.errors_sidecar.validate(self.hed_schema)
+        self.assertEqual(len(validation_issues), 22)
 
-        validation_issues = self.errors_sidecar.validate_entries(validator, check_for_warnings=True)
-        self.assertEqual(len(validation_issues), 4)
+        validation_issues2 = self.errors_sidecar_minor.validate(self.hed_schema)
+        self.assertEqual(len(validation_issues2), 18)
 
-        validation_issues2 = self.errors_sidecar_minor.validate_entries(validator, check_for_warnings=True)
-        self.assertEqual(len(validation_issues2), 10)
+        validation_issues = self.json_without_definitions_sidecar.validate(self.hed_schema)
+        self.assertEqual(len(validation_issues), 8)
 
-        validation_issues = self.json_without_definitions_sidecar.validate_entries(validator, check_for_warnings=True)
-        self.assertEqual(len(validation_issues), 1)
-
-        hed_string = HedString("(Definition/JsonFileDef/#, (Item/JsonDef1/#,Item/JsonDef1))")
+        hed_string = HedString("(Definition/JsonFileDef/#, (Item/JsonDef1/#,Item/JsonDef1))", self.hed_schema)
         extra_def_dict = DefinitionDict()
-        hed_string.validate(extra_def_dict)
+        extra_def_dict.check_for_definitions(hed_string)
 
-        validation_issues = self.json_without_definitions_sidecar.validate_entries(validator, check_for_warnings=True,
-                                                                                   extra_def_dicts=extra_def_dict)
-        self.assertEqual(len(validation_issues), 0)
+        validation_issues2 = self.json_without_definitions_sidecar.validate(self.hed_schema, extra_def_dicts=extra_def_dict)
+        # this removes one undef matched error and adds two extended tag warnings
+        self.assertEqual(len(validation_issues2), 9)
 
     def test_duplicate_def(self):
         sidecar = self.json_def_sidecar
-        def_dicts = sidecar.get_def_dicts()
 
-        issues = sidecar.validate_entries(extra_def_dicts=def_dicts)
+        duplicate_dict = sidecar.extract_definitions(hed_schema=self.hed_schema)
+        issues = sidecar.validate(self.hed_schema, extra_def_dicts=duplicate_dict, error_handler=ErrorHandler(False))
         self.assertEqual(len(issues), 5)
         self.assertTrue(issues[0]['code'], ValidationErrors.HED_DEFINITION_INVALID)
 
@@ -120,7 +114,7 @@ class Test(unittest.TestCase):
         reloaded_sidecar = Sidecar(save_filename)
 
         for str1, str2 in zip(sidecar.hed_string_iter(), reloaded_sidecar.hed_string_iter()):
-            self.assertEqual(str1, str2)
+            self.assertEqual(str1[0], str2[0])
 
     def test_save_load2(self):
         sidecar = Sidecar(self.json_def_filename)
@@ -129,7 +123,7 @@ class Test(unittest.TestCase):
         reloaded_sidecar = Sidecar(io.StringIO(json_string))
 
         for str1, str2 in zip(sidecar.hed_string_iter(), reloaded_sidecar.hed_string_iter()):
-            self.assertEqual(str1, str2)
+            self.assertEqual(str1[0], str2[0])
 
     def test_merged_sidecar(self):
         base_folder = self.base_data_dir + "sidecar_tests/"

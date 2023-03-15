@@ -3,9 +3,6 @@ This module is used to split tags in a HED string.
 """
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
-from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
-from hed.errors.error_types import ErrorContext
-from hed.models.hed_ops import translate_ops
 from hed.models.model_constants import DefTagNames
 
 
@@ -15,7 +12,7 @@ class HedString(HedGroup):
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
 
-    def __init__(self, hed_string, hed_schema=None, _contents=None):
+    def __init__(self, hed_string, hed_schema=None, def_dict=None, _contents=None):
         """ Constructor for the HedString class.
 
         Parameters:
@@ -32,7 +29,7 @@ class HedString(HedGroup):
             contents = _contents
         else:
             try:
-                contents = self.split_into_groups(hed_string, hed_schema)
+                contents = self.split_into_groups(hed_string, hed_schema, def_dict)
             except ValueError:
                 contents = []
         super().__init__(hed_string, contents=contents, startpos=0, endpos=len(hed_string))
@@ -59,10 +56,8 @@ class HedString(HedGroup):
     def convert_to_canonical_forms(self, hed_schema):
         """ Identify all tags using the given schema.
 
-            If schema is None, still identify "key" tags such as definitions.
-
         Parameters:
-            hed_schema (HedSchema, HedSchemaGroup, None): The schema to use to validate/convert tags.
+            hed_schema (HedSchema, HedSchemaGroup): The schema to use to validate/convert tags.
 
         Returns:
             list: A list of issues found while converting the string. Each issue is a dictionary.
@@ -88,6 +83,43 @@ class HedString(HedGroup):
             self.remove(definition_groups)
 
         return []
+
+    def shrink_defs(self):
+        """ Replace def-expand tags with def tags
+
+            This does not validate them and will blindly shrink invalid ones as well.
+
+        Returns:
+            self
+        """
+        for def_expand_tag, def_expand_group in self.find_tags({DefTagNames.DEF_EXPAND_KEY}, recursive=True):
+            expanded_parent = def_expand_group._parent
+            if expanded_parent:
+                def_expand_tag.short_base_tag = DefTagNames.DEF_ORG_KEY
+                expanded_parent.replace(def_expand_group, def_expand_tag)
+
+        return self
+
+    def expand_defs(self):
+        """ Replace def tags with def-expand tags
+
+            This does very minimal validation
+
+        Returns:
+            self
+        """
+        def_tags = self.find_def_tags(recursive=True, include_groups=0)
+
+        replacements = []
+        for tag in def_tags:
+            if not tag._expanded:
+                replacements.append((tag, tag._expandable))
+
+        for tag, group in replacements:
+            self.replace(tag, group)
+            tag.short_base_tag = DefTagNames.DEF_EXPAND_KEY
+
+        return self
 
     def convert_to_short(self, hed_schema):
         """ Compute canonical forms and return the short form.
@@ -140,13 +172,13 @@ class HedString(HedGroup):
         return self.get_as_form("org_tag")
 
     @staticmethod
-    def split_into_groups(hed_string, hed_schema=None):
+    def split_into_groups(hed_string, hed_schema=None, def_dict=None):
         """ Split the HED string into a parse tree.
 
         Parameters:
             hed_string (str): A hed string consisting of tags and tag groups to be processed.
-            hed_schema (HedSchema or None): Hed schema to use to identify tags.
-
+            hed_schema (HedSchema or None): HED schema to use to identify tags.
+            def_dict(DefinitionDict): The definitions to identify
         Returns:
             list:  A list of HedTag and/or HedGroup.
 
@@ -162,7 +194,7 @@ class HedString(HedGroup):
         input_tags = HedString.split_hed_string(hed_string)
         for is_hed_tag, (startpos, endpos) in input_tags:
             if is_hed_tag:
-                new_tag = HedTag(hed_string, (startpos, endpos), hed_schema)
+                new_tag = HedTag(hed_string, (startpos, endpos), hed_schema, def_dict)
                 current_tag_group[-1].append(new_tag)
             else:
                 string_portion = hed_string[startpos:endpos]
@@ -178,6 +210,8 @@ class HedString(HedGroup):
                     current_tag_group.append(HedGroup(hed_string, startpos + delimiter_index))
 
                 if delimiter_char is HedString.CLOSING_GROUP_CHARACTER:
+                    # if prev_delimiter == ",":
+                    #     raise ValueError(f"Closing parentheses in hed string {hed_string}")
                     # Terminate existing group, and save it off.
                     paren_end = startpos + delimiter_index + 1
 
@@ -282,54 +316,21 @@ class HedString(HedGroup):
 
         return result_positions
 
-    def apply_funcs(self, string_funcs):
-        """ Run functions on this string.
+    def validate(self, hed_schema, allow_placeholders=True, error_handler=None):
+        """
+        Validate the string using the schema
 
         Parameters:
-            string_funcs (list): A list of functions that take a hed string object and return a list of issues.
-
+            hed_schema(HedSchema): The schema to use to validate
+            allow_placeholders(bool): allow placeholders in the string
+            error_handler(ErrorHandler or None): the error handler to use, creates a default one if none passed
         Returns:
-            list: A list of issues found by these operations. Each issue is a dictionary.
-
-        Notes:
-            - This method potentially modifies the hed string object.
-
+            issues (list of dict): A list of issues for hed string
         """
-        string_issues = []
-        for string_func in string_funcs:
-            string_issues += string_func(self)
-            if string_issues:
-                if check_for_any_errors(string_issues):
-                    break
+        from hed.validator import HedValidator
 
-        return string_issues
-
-    def validate(self, hed_ops=None, error_handler=None, **kwargs):
-        """ Run the given hed_ops on this string.
-
-        Parameters:
-            hed_ops: (func, HedOps, or list): Operations to apply to this object.
-            error_handler (ErrorHandler or None): Used to report errors in context.  Uses a default if None.
-            kwargs:
-                See models.hed_ops.translate_ops or the specific hed_ops for additional options
-
-        Returns:
-            list:  A list of issues encountered in applying these operations. Each issue is a dictionary.
-
-        Notes:
-            - Although this function is called validation, the HedOps can represent other transformations.
-
-        """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-        tag_funcs = translate_ops(hed_ops, **kwargs)
-
-        error_handler.push_error_context(ErrorContext.HED_STRING, self, increment_depth_after=False)
-        issues = self.apply_funcs(tag_funcs)
-        error_handler.add_context_to_issues(issues)
-        error_handler.pop_error_context()
-
-        return issues
+        validator = HedValidator(hed_schema)
+        return validator.validate(self, allow_placeholders=allow_placeholders)
 
     def find_top_level_tags(self, anchor_tags, include_groups=2):
         """ Find top level groups with an anchor tag.
@@ -359,4 +360,3 @@ class HedString(HedGroup):
         if include_groups == 0 or include_groups == 1:
             return [tag[include_groups] for tag in top_level_tags]
         return top_level_tags
-

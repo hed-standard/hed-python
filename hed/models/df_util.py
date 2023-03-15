@@ -1,0 +1,125 @@
+from functools import partial
+
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed import HedString
+
+
+def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_columns=True,
+                  shrink_defs=False, expand_defs=True):
+    """Load a tabular file and its associated HED sidecar file.
+
+    Args:
+        tabular_file: str or TabularInput
+            The path to the tabular file, or a TabularInput object representing it.
+        sidecar: str or Sidecar
+            The path to the sidecar file, or a Sidecar object representing it.
+        hed_schema: str or HedSchema
+            If str, will attempt to load as a version if it doesn't have a valid extension.
+        extra_def_dicts: list of DefinitionDict, optional
+            Any extra DefinitionDict objects to use when parsing the HED tags.
+        join_columns: bool
+            If true, join all hed columns into one.
+        shrink_defs: bool
+            Shrink any def-expand tags found
+        expand_defs: bool
+            Expand any def tags found
+    Returns:
+        A list of HedStrings, or a list of lists of HedStrings
+    """
+    if isinstance(sidecar, str):
+        sidecar = Sidecar(sidecar)
+
+    if isinstance(tabular_file, str):
+        tabular_file = TabularInput(tabular_file, sidecar)
+
+    def_dict = None
+    if sidecar:
+        def_dict = sidecar.get_def_dict(hed_schema=hed_schema, extra_def_dicts=extra_def_dicts)
+
+    if join_columns:
+        if expand_defs:
+            return [HedString(x, hed_schema, def_dict).expand_defs() for x in tabular_file.series_a], def_dict
+        elif shrink_defs:
+            return [HedString(x, hed_schema, def_dict).shrink_defs() for x in tabular_file.series_a], def_dict
+        else:
+            return [HedString(x, hed_schema, def_dict) for x in tabular_file.series_a], def_dict
+    else:
+        return [[HedString(x, hed_schema, def_dict).expand_defs() if expand_defs
+                 else HedString(x, hed_schema, def_dict).shrink_defs() if shrink_defs
+                 else HedString(x, hed_schema, def_dict)
+                 for x in text_file_row] for text_file_row in tabular_file.dataframe_a.itertuples(index=False)], def_dict
+
+
+def convert_to_form(df, hed_schema, tag_form, columns):
+    """ Convert all tags in underlying dataframe to the specified form.
+
+        Converts in place
+    Parameters:
+        df (pd.Dataframe): The dataframe to modify
+        hed_schema (HedSchema): The schema to use to convert tags.
+        tag_form(str): HedTag property to convert tags to.
+        columns (list): The columns to modify on the dataframe
+    """
+    if columns is None:
+        columns = df.columns
+
+    for column in columns:
+        df[column] = df[column].apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
+
+    return df
+
+
+def shrink_defs(df, hed_schema, columns):
+    """ Shrinks any def-expand tags found in the dataframe.
+
+        Converts in place
+    Parameters:
+        df (pd.Dataframe): The dataframe to modify
+        hed_schema (HedSchema or None): The schema to use to identify defs.
+        columns (list): The columns to modify on the dataframe
+    """
+    if columns is None:
+        columns = df.columns
+
+    for column in columns:
+        mask = df[column].str.contains('Def-expand/', case=False)
+        df[column][mask] = df[column][mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
+
+    return df
+
+
+def expand_defs(df, hed_schema, def_dict, columns):
+    """ Expands any def tags found in the dataframe.
+
+        Converts in place
+
+    Parameters:
+        df (pd.Dataframe): The dataframe to modify
+        hed_schema (HedSchema or None): The schema to use to identify defs
+        def_dict (DefinitionDict): The definitions to expand
+        columns (list): The columns to modify on the dataframe
+    """
+    if columns is None:
+        columns = df.columns
+
+    for column in columns:
+        mask = df[column].str.contains('Def/', case=False)
+        df[column][mask] = df[column][mask].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
+
+    return df
+
+
+def _convert_to_form(hed_string, hed_schema, tag_form):
+    from hed import HedString
+    return str(HedString(hed_string, hed_schema).get_as_form(tag_form))
+
+
+def _shrink_defs(hed_string, hed_schema):
+    from hed import HedString
+    return str(HedString(hed_string, hed_schema).shrink_defs())
+
+
+def _expand_defs(hed_string, hed_schema, def_dict):
+    from hed import HedString
+    return str(HedString(hed_string, hed_schema, def_dict).expand_defs())

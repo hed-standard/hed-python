@@ -1,7 +1,6 @@
 import re
 
 
-# todo: Add support for early outs with and(only try to match groups we already matched instead of all groups)
 class search_result:
     def __init__(self, group, tag):
         self.group = group
@@ -179,8 +178,6 @@ class ExpressionAnd(Expression):
                         continue
                     return_list.append(merged_result)
 
-        # finally simplify the list and remove duplicates.
-
         return return_list
 
     def __str__(self):
@@ -192,6 +189,7 @@ class ExpressionAnd(Expression):
             output_str += str(self.right)
         output_str += ")"
         return output_str
+
 
 class ExpressionWildcardNew(Expression):
     def handle_expr(self, hed_group, exact=False):

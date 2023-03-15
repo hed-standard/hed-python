@@ -3,14 +3,18 @@ from hed.models.definition_dict import DefinitionDict
 from hed.errors import ErrorHandler, DefinitionErrors
 from hed.models.hed_string import HedString
 from hed import HedTag
+from hed import load_schema_version
 
 
 class TestDefBase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_schema = load_schema_version("8.0.0")
+
     def check_def_base(self, test_strings, expected_issues):
         for test_key in test_strings:
             def_dict = DefinitionDict()
-            hed_string_obj = HedString(test_strings[test_key])
-            hed_string_obj.convert_to_canonical_forms(None)
+            hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
             test_issues = def_dict.check_for_definitions(hed_string_obj)
             expected_issue = expected_issues[test_key]
             # print(test_issues)
@@ -33,16 +37,16 @@ class TestDefinitionDict(TestDefBase):
     def test_check_for_definitions(self):
         def_dict = DefinitionDict()
         original_def_count = len(def_dict.defs)
-        hed_string_obj = HedString(self.basic_definition_string)
-        hed_string_obj.validate(def_dict)
+        hed_string_obj = HedString(self.placeholder_def_string, hed_schema=self.hed_schema)
+        def_dict.check_for_definitions(hed_string_obj)
         new_def_count = len(def_dict.defs)
         self.assertGreater(new_def_count, original_def_count)
 
     def test_check_for_definitions_placeholder(self):
         def_dict = DefinitionDict()
         original_def_count = len(def_dict.defs)
-        hed_string_obj = HedString(self.placeholder_def_string)
-        hed_string_obj.validate(def_dict)
+        hed_string_obj = HedString(self.placeholder_def_string, hed_schema=self.hed_schema)
+        def_dict.check_for_definitions(hed_string_obj)
         new_def_count = len(def_dict.defs)
         self.assertGreater(new_def_count, original_def_count)
 
@@ -99,6 +103,26 @@ class TestDefinitionDict(TestDefBase):
 
         self.check_def_base(test_strings, expected_results)
 
+    def test_expand_defs(self):
+        test_strings = {
+            1: "Def/TestDefPlaceholder/2471,Event",
+            2: "Event,(Def/TestDefPlaceholder/2471,Event)",
+            3: "Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2),Event",
+        }
+
+        expected_results = {
+            1: "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2)),Event",
+            2: "Event,((Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2)),Event)",
+            # this one shouldn't change as it doesn't have a parent
+            3: "Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2),Event",
+        }
+        def_dict = DefinitionDict()
+        definition_string = "(Definition/TestDefPlaceholder/#,(Item/TestDef1/#,Item/TestDef2))"
+        def_dict.check_for_definitions(HedString(definition_string, hed_schema=self.hed_schema))
+        for key, test_string in test_strings.items():
+            hed_string = HedString(test_string, hed_schema=self.hed_schema)
+            def_dict.expand_def_tags(hed_string)
+            self.assertEqual(str(hed_string), expected_results[key])
 
 if __name__ == '__main__':
     unittest.main()

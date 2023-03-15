@@ -43,8 +43,8 @@ class TestHed3(TestValidatorBase):
 
 class IndividualHedTagsShort(TestHed3):
     @staticmethod
-    def string_obj_func(validator, check_for_warnings):
-        return partial(validator._validate_individual_tags_in_hed_string, check_for_warnings=check_for_warnings)
+    def string_obj_func(validator):
+        return partial(validator._validate_individual_tags_in_hed_string)
 
     def test_exist_in_schema(self):
         test_strings = {
@@ -102,10 +102,10 @@ class IndividualHedTagsShort(TestHed3):
     def test_proper_capitalization(self):
         test_strings = {
             'proper': 'tl:Event/Sensory-event',
-            'camelCase': 'tl:EvEnt/Something',
-            'takesValue': 'tl:Attribute/Temporal rate/20 Hz',
-            'numeric': 'tl:Repetition-number/20',
-            'lowercase': 'tl:Event/something'
+            'camelCase': 'tl:EvEnt/Sensory-event',
+            'takesValue': 'tl:Sampling-rate/20 Hz',
+            'numeric': 'tl:Statistical-uncertainty/20',
+            'lowercase': 'tl:Event/sensory-event'
         }
         expected_results = {
             'proper': True,
@@ -121,7 +121,7 @@ class IndividualHedTagsShort(TestHed3):
             'numeric': [],
             'lowercase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0)
         }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, True)
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
     def test_child_required(self):
         test_strings = {
@@ -302,17 +302,17 @@ class IndividualHedTagsShort(TestHed3):
 
 class TestTagLevels3(TestHed3):
     @staticmethod
-    def string_obj_func(validator, check_for_warnings):
+    def string_obj_func(validator):
         return validator._validate_groups_in_hed_string
 
     def test_no_duplicates(self):
         test_strings = {
             'topLevelDuplicate': 'tl:Event/Sensory-event,tl:Event/Sensory-event',
             'groupDuplicate': 'tl:Item/Object/Man-made-object/VehicleTrain,(tl:Event/Sensory-event,'
-                              'tl:Attribute/Sensory/Visual/Color/CSS-color/Purple-color/Purple,tl:Event/Sensory-event)',
+                              'tl:Purple-color/Purple,tl:Event/Sensory-event)',
             'noDuplicate': 'tl:Event/Sensory-event,'
                            'tl:Item/Object/Man-made-object/VehicleTrain,'
-                           'tl:Attribute/Sensory/Visual/Color/CSS-color/Purple-color/Purple',
+                           'tl:Purple-color/Purple',
             'legalDuplicate': 'tl:Item/Object/Man-made-object/VehicleTrain,\
             (tl:Item/Object/Man-made-object/VehicleTrain,'
                               'tl:Event/Sensory-event)',
@@ -329,7 +329,7 @@ class TestTagLevels3(TestHed3):
             'legalDuplicate': [],
             'noDuplicate': []
         }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_no_duplicates_semantic(self):
         test_strings = {
@@ -417,8 +417,8 @@ class TestTagLevels3(TestHed3):
 
 class RequiredTags(TestHed3):
     @staticmethod
-    def string_obj_func(validator, check_for_warnings):
-        return partial(validator._validate_tags_in_hed_string, check_for_warnings=check_for_warnings)
+    def string_obj_func(validator):
+        return partial(validator._validate_tags_in_hed_string)
 
     def test_includes_all_required_tags(self):
         test_strings = {
@@ -452,12 +452,13 @@ class RequiredTags(TestHed3):
     def test_multiple_copies_unique_tags(self):
         test_strings = {
             'legal': 'tl:Event-context,'
-                     '(Vehicle,Event)',
+                     '(Vehicle,Event), Animal-agent, Action, tl:Animal-agent, tl:Action',
             'multipleDesc': 'tl:Event-context,'
                             'tl:Event-context,'
-                            'Vehicle,(Vehicle,tl:Event-context)',
+                            'Vehicle,(Vehicle,tl:Event-context), Animal-agent, Action, tl:Animal-agent, tl:Action',
             'multipleDescIncShort': 'tl:Event-context,'
-                                    'tl:Organizational-property/Event-context'
+                                    'tl:Organizational-property/Event-context,'
+                                    ' Animal-agent, Action, tl:Animal-agent, tl:Action'
         }
         expected_results = {
             'legal': True,

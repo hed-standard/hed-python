@@ -4,8 +4,8 @@ import shutil
 
 from hed.models import DefinitionEntry, Sidecar, TabularInput
 from hed import schema
-from hed.validator import HedValidator
 from hed.errors import HedFileError
+from hed.errors import ErrorHandler
 
 
 class Test(unittest.TestCase):
@@ -32,38 +32,17 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.base_output_folder)
 
-    def test_get_definitions(self):
-        input_data = TabularInput(self.events_path, sidecar=self.sidecar1, name="face_sub1_events")
-        defs1 = input_data.get_definitions().gathered_defs
-        self.assertIsInstance(defs1, dict, "get_definitions returns dictionary by default")
-        self.assertEqual(len(defs1), 17, "get_definitions should have the right number of definitions")
-        for key, value in defs1.items():
-            self.assertIsInstance(key, str, "get_definitions dictionary keys should be strings")
-            self.assertIsInstance(value, DefinitionEntry,
-                                  "get_definitions dict values should be strings when as strings")
-        defs2 = input_data.get_definitions(as_strings=False).gathered_defs
-        self.assertIsInstance(defs2, dict, "get_definitions returns dictionary by when not as strings")
-        self.assertEqual(len(defs2), 17, "get_definitions should have the right number of definitions when not strings")
-        for key, value in defs2.items():
-            self.assertIsInstance(key, str, "get_definitions dictionary keys should be strings")
-            self.assertIsInstance(value, DefinitionEntry,
-                                  "get_definitions dictionary values should be strings when as strings")
-        self.assertIsInstance(defs2, dict, "get_definitions returns DefinitionDict when not as strings")
-
     def test_missing_column_name_issue(self):
         events_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                     '../data/validator_tests/bids_events_bad_column_name.tsv'))
         json_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                   "../data/validator_tests/bids_events.json"))
-        validator = HedValidator(hed_schema=self.hed_schema)
-        sidecar = Sidecar(json_path, hed_schema=self.hed_schema)
-        issues = sidecar.validate_entries(validator)
+        sidecar = Sidecar(json_path)
+        issues = sidecar.validate(self.hed_schema)
         self.assertEqual(len(issues), 0)
-        input_file = TabularInput(events_path, sidecar=sidecar, hed_schema=self.hed_schema)
+        input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_sidecar(validator)
-        self.assertEqual(len(validation_issues), 0)
-        validation_issues = input_file.validate_file(validator, check_for_warnings=True)
+        validation_issues = input_file.validate(hed_schema=self.hed_schema)
         self.assertEqual(len(validation_issues), 1)
 
     def test_expand_column_issues(self):
@@ -71,16 +50,12 @@ class Test(unittest.TestCase):
                                    '../data/validator_tests/bids_events_bad_category_key.tsv')
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../data/validator_tests/bids_events.json")
-        validator = HedValidator(hed_schema=self.hed_schema)
-        sidecar = Sidecar(json_path, hed_schema=self.hed_schema)
-        issues = sidecar.validate_entries(validator)
+        sidecar = Sidecar(json_path)
+        issues = sidecar.validate(hed_schema=self.hed_schema)
         self.assertEqual(len(issues), 0)
-        input_file = TabularInput(events_path, sidecar=sidecar, hed_schema=self.hed_schema)
+        input_file = TabularInput(events_path, sidecar=sidecar)
 
-        # Fix whatever is wrong with onset tag here.  It's thinking Description/Onset continues is an invalid tag???'
-        validation_issues = input_file.validate_sidecar(validator)
-        self.assertEqual(len(validation_issues), 0)
-        validation_issues = input_file.validate_file(validator, check_for_warnings=True)
+        validation_issues = input_file.validate(hed_schema=self.hed_schema)
         self.assertEqual(len(validation_issues), 1)
 
     def test_blank_and_duplicate_columns(self):
@@ -98,16 +73,14 @@ class Test(unittest.TestCase):
         #     _ = TabularInput(filepath)
 
     def test_validate_file_warnings(self):
-        validator = HedValidator(hed_schema=self.hed_schema)
-        issues1 = self.sidecar1.validate_entries(validator, check_for_warnings=True)
+        issues1 = self.sidecar1.validate(hed_schema=self.hed_schema)
         input_file1 = TabularInput(self.events_path, sidecar=self.sidecar1)
-        issues1a = input_file1.validate_file(validator, check_for_warnings=True)
+        issues1a = input_file1.validate(hed_schema=self.hed_schema)
 
-        issues2 = self.sidecar2.validate_entries(validator, check_for_warnings=False)
+        issues2 = self.sidecar1.validate(hed_schema=self.hed_schema, error_handler=ErrorHandler(False))
         input_file2 = TabularInput(self.events_path, sidecar=self.sidecar2)
-        issues2a = input_file2.validate_file(validator, check_for_warnings=False)
-        # TODO: Currently does not correctly check for warnings.
-
+        issues2a = input_file2.validate(hed_schema=self.hed_schema, error_handler=ErrorHandler(False))
+        breakHere = 3
 
 if __name__ == '__main__':
     unittest.main()

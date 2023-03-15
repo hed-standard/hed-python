@@ -25,7 +25,7 @@ class TestConvertTag(TestTagFormat):
 
             expected_issue = self.format_errors_fully(error_handler, hed_string=test_string_obj,
                                                       params=expected_params)
-            error_handler.add_context_to_issues(test_issues)
+            error_handler.add_context_and_filter(test_issues)
 
             # print(test_key)
             # print(expected_issue)

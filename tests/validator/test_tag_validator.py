@@ -11,8 +11,8 @@ class TestHed(TestValidatorBase):
 
 class IndividualHedTagsShort(TestHed):
     @staticmethod
-    def string_obj_func(validator, check_for_warnings):
-        return partial(validator._validate_individual_tags_in_hed_string, check_for_warnings=check_for_warnings)
+    def string_obj_func(validator):
+        return partial(validator._validate_individual_tags_in_hed_string)
 
     def test_exist_in_schema(self):
         test_strings = {
@@ -66,10 +66,10 @@ class IndividualHedTagsShort(TestHed):
     def test_proper_capitalization(self):
         test_strings = {
             'proper': 'Event/Sensory-event',
-            'camelCase': 'EvEnt/Something',
+            'camelCase': 'EvEnt/Sensory-event',
             'takesValue': 'Sampling-rate/20 Hz',
             'numeric': 'Statistical-uncertainty/20',
-            'lowercase': 'Event/something'
+            'lowercase': 'Event/sensory-event'
         }
         expected_results = {
             'proper': True,
@@ -85,7 +85,7 @@ class IndividualHedTagsShort(TestHed):
             'numeric': [],
             'lowercase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0)
         }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, True)
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
     # def test_proper_capitalization(self):
     #     test_strings = {
@@ -112,7 +112,7 @@ class IndividualHedTagsShort(TestHed):
     #         'lowercase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0),
     #         'multipleUpper': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0)
     #     }
-    #     self.validator_syntactic(test_strings, expected_results, expected_issues, True)
+    #     self.validator_semantic(test_strings, expected_results, expected_issues, True)
     #
     # def test_proper_capitalization_semantic(self):
     #     test_strings = {
@@ -352,7 +352,7 @@ class IndividualHedTagsShort(TestHed):
 
 class TestTagLevels(TestHed):
     @staticmethod
-    def string_obj_func(validator, check_for_warnings):
+    def string_obj_func(validator):
         return validator._validate_groups_in_hed_string
 
     def test_no_duplicates(self):
@@ -394,7 +394,7 @@ class TestTagLevels(TestHed):
             'duplicateSubGroupF': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
                                                    group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)")),
         }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_no_duplicates_semantic(self):
         test_strings = {
@@ -489,14 +489,14 @@ class TestTagLevels(TestHed):
         expected_issues = {
             'emptyGroup': self.format_error(ValidationErrors.HED_GROUP_EMPTY, tag=1000 + 1)
         }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
 
 class FullHedString(TestHed):
     compute_forms = False
 
     @staticmethod
-    def string_obj_func(validator, check_for_warnings):
+    def string_obj_func(validator):
         return validator._tag_validator.run_hed_string_validators
 
     def test_invalid_placeholders(self):
@@ -538,11 +538,13 @@ class FullHedString(TestHed):
                                               closing_parentheses_count=1),
             'extraClosing': self.format_error(ValidationErrors.HED_PARENTHESES_MISMATCH,
                                               opening_parentheses_count=1,
-                                              closing_parentheses_count=2),
+                                              closing_parentheses_count=2)
+            +               self.format_error(ValidationErrors.HED_TAG_EMPTY, source_string=test_strings['extraClosing'],
+                                                   char_index=84),
             'valid': []
         }
 
-        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_malformed_delimiters(self):
         test_strings = {
@@ -676,7 +678,7 @@ class FullHedString(TestHed):
                                                           tag="Thing)) "),
             # 'emptyGroup': []
         }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_invalid_characters(self):
         test_strings = {
@@ -705,7 +707,7 @@ class FullHedString(TestHed):
             'closingBracket': self.format_error(ValidationErrors.HED_CHARACTER_INVALID, char_index=45,
                                                 source_string=test_strings['closingBracket'])
         }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_string_extra_slash_space(self):
         test_strings = {
@@ -778,7 +780,7 @@ class FullHedString(TestHed):
                                                               index_in_tag=15, index_in_tag_end=18,
                                                               tag=0),
         }
-        self.validator_syntactic(test_strings, expected_results, expected_errors, False)
+        self.validator_semantic(test_strings, expected_results, expected_errors, False)
 
     def test_no_more_than_two_tildes(self):
         test_strings = {
@@ -817,15 +819,15 @@ class FullHedString(TestHed):
                 + self.format_error(ValidationErrors.HED_TILDES_UNSUPPORTED,
                                     source_string=test_strings['invalidTildeGroup'], char_index=147)
         }
-        self.validator_syntactic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
 
 class RequiredTags(TestHed):
     schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
 
     @staticmethod
-    def string_obj_func(validator, check_for_warnings):
-        return partial(validator._validate_tags_in_hed_string, check_for_warnings=check_for_warnings)
+    def string_obj_func(validator):
+        return partial(validator._validate_tags_in_hed_string)
 
     def test_includes_all_required_tags(self):
         test_strings = {
@@ -857,13 +859,13 @@ class RequiredTags(TestHed):
     def test_multiple_copies_unique_tags(self):
         test_strings = {
             'legal': 'Event-context,'
-                     '(Vehicle,Event)',
+                     '(Vehicle,Event), Animal-agent, Action',
             'multipleDesc': 'Event-context,'
                             'Event-context,'
-                            'Vehicle,(Vehicle,Event-context)',
+                            'Vehicle,(Vehicle,Event-context), Animal-agent, Action',
             # I think this is illegal in hed2 style schema now.
             'multipleDescIncShort': 'Event-context,'
-                                    'Organizational-property/Event-context'
+                                    'Organizational-property/Event-context, Animal-agent, Action'
         }
         expected_results = {
             'legal': True,
@@ -885,8 +887,8 @@ class TestHedSpecialUnits(TestHed):
     schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
 
     @staticmethod
-    def string_obj_func(validator, check_for_warnings):
-        return partial(validator._validate_individual_tags_in_hed_string, check_for_warnings=check_for_warnings)
+    def string_obj_func(validator):
+        return partial(validator._validate_individual_tags_in_hed_string)
 
     def test_special_units(self):
         test_strings = {
