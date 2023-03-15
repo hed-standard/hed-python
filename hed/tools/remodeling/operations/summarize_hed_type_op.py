@@ -132,7 +132,8 @@ class HedTypeSummaryContext(BaseContext):
                     f"Total events={result.get('total_events', 0)} Total files={len(result.get('files', []))}"]
 
         for key, item in details.items():
-            str1 = f"{item['events']} event(s) out of {item['total_events']} total events in {len(item['files'])} file(s)"
+            str1 = f"{item['events']} event(s) out of {item['total_events']} total events in " + \
+                   f"{len(item['files'])} file(s)"
             if item['level_counts']:
                 str1 = f"{len(item['level_counts'])} levels in " + str1
             if item['direct_references']:
