@@ -30,24 +30,24 @@ class FactorHedTagsOp(BaseOp):
         "required_parameters": {
             "queries": list,
             "query_names": list,
-            "remove_types": list,
-            "expand_context": bool
+            "remove_types": list
         },
-        "optional_parameters": {}
+        "optional_parameters": {
+            "expand_context": bool
+        }
     }
 
     def __init__(self, parameters):
         """ Constructor for the factor HED tags operation.
 
         Parameters:
-            op_spec (dict): Specification for required and optional parameters.
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
 
             KeyError   
                 - If a required parameter is missing.    
-                
+                                
                 - If an unexpected parameter is provided.    
 
             TypeError   
@@ -92,7 +92,7 @@ class FactorHedTagsOp(BaseOp):
 
         Returns:
             Dataframe: A new dataframe after processing.
-        
+
         Raises:
 
             ValueError   

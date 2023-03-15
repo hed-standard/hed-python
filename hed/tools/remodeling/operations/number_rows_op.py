@@ -65,12 +65,12 @@ class NumberRowsOp(BaseOp):
                                  f"{self.match_value['column']}.", "")
 
         df_new = df.copy()
-        df_new[self.number_column_name] = np.nan
-        if self.match_value:
-            filter = df[self.match_value['column']] == self.match_value['value']
-            numbers = [*range(1, sum(filter)+1)]
-            df_new.loc[filter, self.number_column_name] = numbers
-        else:
-            df_new[self.number_column_name] = df_new.index + 1
+        # df_new[self.number_column_name] = np.nan
+        # if self.match_value:
+        #     filter = df[self.match_value['column']] == self.match_value['value']
+        #     numbers = [*range(1, sum(filter)+1)]
+        #     df_new.loc[filter, self.number_column_name] = numbers
+        # else:
+        #     df_new[self.number_column_name] = df_new.index + 1
 
         return df_new

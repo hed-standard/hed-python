@@ -20,7 +20,7 @@ class RemapColumnsOp(BaseOp):
 
     Notes:
         Each list element list is of length m + n with the key columns followed by mapped columns. 
-         
+
     TODO: Allow wildcards
 
     """

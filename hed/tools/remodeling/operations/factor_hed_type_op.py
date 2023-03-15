@@ -33,7 +33,6 @@ class FactorHedTypeOp(BaseOp):
         """ Constructor for the factor HED type operation.
 
         Parameters:
-            op_spec (dict): Specification for required and optional parameters.
             parameters (dict):  Actual values of the parameters for the operation.
 
         Raises:
