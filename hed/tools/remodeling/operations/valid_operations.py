@@ -1,5 +1,6 @@
 """ The valid operations for the remodeling tools. """
 
+# from hed.tools.remodeling.operations.convert_columns_op import ConvertColumnsOp
 from hed.tools.remodeling.operations.factor_column_op import FactorColumnOp
 from hed.tools.remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
 from hed.tools.remodeling.operations.factor_hed_type_op import FactorHedTypeOp
@@ -20,6 +21,7 @@ from hed.tools.remodeling.operations.summarize_hed_tags_op import SummarizeHedTa
 from hed.tools.remodeling.operations.summarize_hed_validation_op import SummarizeHedValidationOp
 
 valid_operations = {
+    # 'convert_columns': ConvertColumnsOp,
     'factor_column': FactorColumnOp,
     'factor_hed_tags': FactorHedTagsOp,
     'factor_hed_type': FactorHedTypeOp,

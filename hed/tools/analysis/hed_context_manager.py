@@ -35,7 +35,7 @@ class HedContextManager:
 
         """
 
-        self.hed_strings = [HedString(str(hed), hed_schema=hed_schema) for hed in hed_strings]
+        self.hed_strings = hed_strings
         if not isinstance(hed_schema, HedSchema) and not isinstance(hed_schema, HedSchemaGroup):
             raise ValueError("ContextRequiresSchema", f"Context manager must have a valid HedSchema of HedSchemaGroup")
         self.hed_schema = hed_schema

@@ -1,7 +1,7 @@
 """ Manages definitions associated with a type such as condition-variable. """
 
 from hed.models.hed_tag import HedTag
-from hed.models.def_mapper import DefMapper
+from hed.models.definition_dict import DefinitionDict
 
 
 class HedTypeDefinitions:
@@ -10,16 +10,18 @@ class HedTypeDefinitions:
         """ Create a definition manager for a type of variable.
 
         Parameters:
-            definitions (dict or DefMapper): A dictionary of DefinitionEntry objects.
+            definitions (dict or DefinitionDict): A dictionary of DefinitionEntry objects.
             hed_schema (Hedschema or HedSchemaGroup): The schema used for parsing.
             type_tag (str): Lower-case HED tag string representing the type managed.
+
+        # TODO: [Refactor] - should dict be allowed for definitions.
 
         """
 
         self.type_tag = type_tag.lower()
         self.hed_schema = hed_schema
-        if isinstance(definitions, DefMapper):
-            self.definitions = definitions.gathered_defs
+        if isinstance(definitions, DefinitionDict):
+            self.definitions = definitions.defs
         elif isinstance(definitions, dict):
             self.definitions = definitions
         else:

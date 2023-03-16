@@ -22,13 +22,14 @@ class Test(unittest.TestCase):
 
         hed_schema = hedschema.load_schema(schema_path)
         cls.hed_schema = hed_schema
-        sidecar1 = Sidecar(json_path, name='face_sub1_json', hed_schema=hed_schema)
+        sidecar1 = Sidecar(json_path, name='face_sub1_json')
         cls.sidecar_path = sidecar1
-        cls.input_data = TabularInput(events_path, hed_schema=hed_schema, sidecar=sidecar1, name="face_sub1_events")
+        cls.sidecar1 = sidecar1
+        cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         cls.input_data_no_sidecar = TabularInput(events_path, name="face_sub1_events_no_sidecar")
 
     def test_assemble_hed_included_no_expand(self):
-        df1, dict1 = assemble_hed(self.input_data,
+        df1, dict1 = assemble_hed(self.input_data, self.sidecar1, self.hed_schema,
                                   columns_included=["onset", "duration", "event_type"], expand_defs=False)
         self.assertIsInstance(df1, DataFrame, "hed_assemble should return a dataframe when columns are included")
         columns1 = list(df1.columns)
@@ -38,11 +39,11 @@ class Test(unittest.TestCase):
         self.assertNotEqual(first_str1.find('Def/'), -1, "assemble_hed with no def expand has Def tags")
         self.assertEqual(first_str1.find('Def-expand'), -1,
                          "assemble_hed with no def expand does not have Def-expand tags")
-        self.assertIsInstance(dict1, dict, "hed_assemble returns a dictionary of definitions")
-        self.assertEqual(len(dict1), 17, "hed_assemble definition dictionary has the right number of elements.")
+        self.assertIsInstance(dict1.defs, dict, "hed_assemble returns a dictionary of definitions")
+        self.assertEqual(len(dict1.defs), 17, "hed_assemble definition dictionary has the right number of elements.")
 
     def test_assemble_hed_included_expand(self):
-        df2, dict2 = assemble_hed(self.input_data,
+        df2, dict2 = assemble_hed(self.input_data, self.sidecar1, self.hed_schema,
                                   columns_included=["onset", "duration", "event_type"], expand_defs=True)
         first_str2 = df2.iloc[0]['HED_assembled']
         self.assertEqual(first_str2.find('Def/'), -1, "assemble_hed with def expand has no Def tag")

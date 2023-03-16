@@ -6,13 +6,16 @@ from hed.models.expression_parser import QueryParser
 from hed.tools.util.data_util import separate_values
 from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
+from hed.models.df_util import get_assembled, expand_defs
 
 
-def assemble_hed(data_input, columns_included=None, expand_defs=False):
+def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs=False):
     """ Return assembled HED annotations in a dataframe.
 
     Parameters:
         data_input (TabularInput): The tabular input file whose HED annotations are to be assembled.
+        sidecar (Sidecar):  Sidecar with definitions.
+        schema (HedSchema):  Hed schema
         columns_included (list or None):  A list of additional column names to include.
             If None, only the list of assembled tags is included.
         expand_defs (bool): If True, definitions are expanded when the events are assembled.
@@ -23,14 +26,19 @@ def assemble_hed(data_input, columns_included=None, expand_defs=False):
     """
 
     eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
-    hed_obj_list = get_assembled_strings(data_input, expand_defs=expand_defs)
-    hed_string_list = [str(hed) for hed in hed_obj_list]
+    hed_string_list = data_input.series_a
+    definitions = sidecar.get_def_dict(hed_schema=schema)
+    if expand_defs:
+        expand_defs(hed_string_list, schema, definitions, columns=None)
+    # hed_obj_list, defs = get_assembled(data_input, sidecar, schema, extra_def_dicts=None, join_columns=True,
+    #                                    shrink_defs=False, expand_defs=True)
+    # hed_string_list = [str(hed) for hed in hed_obj_list]
     if not eligible_columns:
         df = pd.DataFrame({"HED_assembled": hed_string_list})
     else:
         df = data_input.dataframe[eligible_columns].copy(deep=True)
         df['HED_assembled'] = hed_string_list
-    definitions = data_input.get_definitions().gathered_defs
+    # definitions = data_input.get_definitions().gathered_defs
     return df, definitions
 
 
