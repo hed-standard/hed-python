@@ -14,7 +14,7 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
             The path to the tabular file, or a TabularInput object representing it.
         sidecar: str or Sidecar
             The path to the sidecar file, or a Sidecar object representing it.
-        hed_schema: str or HedSchema
+        hed_schema: HedSchema
             If str, will attempt to load as a version if it doesn't have a valid extension.
         extra_def_dicts: list of DefinitionDict, optional
             Any extra DefinitionDict objects to use when parsing the HED tags.

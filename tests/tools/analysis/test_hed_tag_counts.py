@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         schema = hedschema.load_schema(schema_path)
         cls.hed_schema = schema
         sidecar1 = Sidecar(json_path, name='face_sub1_json')
-        input_data = TabularInput(events_path, sidecar=sidecar1, hed_schema=schema, name="face_sub1_events")
+        input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         input_df, def_dict = assemble_hed(input_data, expand_defs=False)
         cls.input_df = input_df
         cls.def_dict = def_dict
