@@ -1,4 +1,5 @@
 from functools import partial
+import pandas as pd
 
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
@@ -51,7 +52,7 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
                  for x in text_file_row] for text_file_row in tabular_file.dataframe_a.itertuples(index=False)], def_dict
 
 
-def convert_to_form(df, hed_schema, tag_form, columns):
+def convert_to_form(df, hed_schema, tag_form, columns=None):
     """ Convert all tags in underlying dataframe to the specified form.
 
         Converts in place
@@ -61,51 +62,62 @@ def convert_to_form(df, hed_schema, tag_form, columns):
         tag_form(str): HedTag property to convert tags to.
         columns (list): The columns to modify on the dataframe
     """
-    if columns is None:
-        columns = df.columns
+    if isinstance(df, pd.Series):
+        df = df.apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
+    else:
+        if columns is None:
+            columns = df.columns
 
-    for column in columns:
-        df[column] = df[column].apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
+        for column in columns:
+            df[column] = df[column].apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
 
     return df
 
 
-def shrink_defs(df, hed_schema, columns):
+def shrink_defs(df, hed_schema, columns=None):
     """ Shrinks any def-expand tags found in the dataframe.
 
         Converts in place
     Parameters:
-        df (pd.Dataframe): The dataframe to modify
+        df (pd.Dataframe or pd.Series): The dataframe or series to modify
         hed_schema (HedSchema or None): The schema to use to identify defs.
-        columns (list): The columns to modify on the dataframe
+        columns (list or None): The columns to modify on the dataframe
     """
-    if columns is None:
-        columns = df.columns
+    if isinstance(df, pd.Series):
+        mask = df.str.contains('Def-expand/', case=False)
+        df[mask] = df[mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
+    else:
+        if columns is None:
+            columns = df.columns
 
-    for column in columns:
-        mask = df[column].str.contains('Def-expand/', case=False)
-        df[column][mask] = df[column][mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
+        for column in columns:
+            mask = df[column].str.contains('Def-expand/', case=False)
+            df[column][mask] = df[column][mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
 
     return df
 
 
-def expand_defs(df, hed_schema, def_dict, columns):
+def expand_defs(df, hed_schema, def_dict, columns=None):
     """ Expands any def tags found in the dataframe.
 
         Converts in place
 
     Parameters:
-        df (pd.Dataframe): The dataframe to modify
+        df (pd.Dataframe or pd.Series): The dataframe or series to modify
         hed_schema (HedSchema or None): The schema to use to identify defs
         def_dict (DefinitionDict): The definitions to expand
-        columns (list): The columns to modify on the dataframe
+        columns (list or None): The columns to modify on the dataframe
     """
-    if columns is None:
-        columns = df.columns
+    if isinstance(df, pd.Series):
+        mask = df.str.contains('Def/', case=False)
+        df[mask] = df[mask].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
+    else:
+        if columns is None:
+            columns = df.columns
 
-    for column in columns:
-        mask = df[column].str.contains('Def/', case=False)
-        df[column][mask] = df[column][mask].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
+        for column in columns:
+            mask = df[column].str.contains('Def/', case=False)
+            df[column][mask] = df[column][mask].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
 
     return df
 

@@ -6,7 +6,7 @@ from hed.models.expression_parser import QueryParser
 from hed.tools.util.data_util import separate_values
 from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
-from hed.models.df_util import get_assembled, expand_defs
+from hed.models import df_util
 
 
 def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs=False):
@@ -29,7 +29,10 @@ def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs
     hed_string_list = data_input.series_a
     definitions = sidecar.get_def_dict(hed_schema=schema)
     if expand_defs:
-        expand_defs(hed_string_list, schema, definitions, columns=None)
+        df_util.expand_defs(hed_string_list, schema, definitions)
+    # Keep in mind hed_string_list is now a Series.  The rest of the function should probably
+    # also be modified
+
     # hed_obj_list, defs = get_assembled(data_input, sidecar, schema, extra_def_dicts=None, join_columns=True,
     #                                    shrink_defs=False, expand_defs=True)
     # hed_string_list = [str(hed) for hed in hed_obj_list]
