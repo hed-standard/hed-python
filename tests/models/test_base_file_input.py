@@ -3,7 +3,6 @@ import os
 import shutil
 from hed import Sidecar
 from hed import BaseInput, TabularInput
-from hed.models.def_mapper import DefMapper
 from hed.models.column_mapper import ColumnMapper
 from hed.models import DefinitionDict
 from hed import schema
@@ -40,32 +39,20 @@ class Test(unittest.TestCase):
         sidecar1 = Sidecar(json_path, name='face_sub1_json')
         mapper1 = ColumnMapper(sidecar=sidecar1, optional_tag_columns=['HED'], warn_on_missing_column=False)
         cls.input_data1 = BaseInput(events_path, file_type='.tsv', has_column_names=True,
-                                    name="face_sub1_events", mapper=mapper1,
-                                    definition_columns=['HED'], allow_blank_names=False)
+                                    name="face_sub1_events", mapper=mapper1, allow_blank_names=False)
         cls.input_data2 = BaseInput(events_path, file_type='.tsv', has_column_names=True, name="face_sub2_events")
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.base_output_folder)
 
-    def test_get_definitions(self):
-        defs1 = self.input_data1.get_definitions(as_strings=True)
-        self.assertIsInstance(defs1, dict, "get_definitions returns dictionary when as strings")
-        self.assertEqual(len(defs1), 17, "get_definitions should have the right number of definitions")
-
-        defs2 = self.input_data1.get_definitions()
-        self.assertIsInstance(defs2, DefMapper, "get_definitions returns a DefMapper by default")
-
-        defs3 = self.input_data2.get_definitions(as_strings=False)
-        self.assertIsInstance(defs3, DefMapper, "get_definitions returns a DefMapper when not as strings")
-
     def test_gathered_defs(self):
         # todo: add unit tests for definitions in tsv file
-        defs = DefinitionDict.get_as_strings(self.tabular_file.def_dict)
+        defs = DefinitionDict.get_as_strings(self.tabular_file._sidecar.extract_definitions(hed_schema=self.hed_schema))
         expected_defs = {
             'jsonfiledef': '(Item/JsonDef1/#,Item/JsonDef1)',
             'jsonfiledef2': '(Item/JsonDef2/#,Item/JsonDef2)',
-            'jsonfiledef3': '(Item/JsonDef3/#,InvalidTag)',
+            'jsonfiledef3': '(Item/JsonDef3/#)',
             'takesvaluedef': '(Age/#)',
             'valueclassdef': '(Acceleration/#)'
         }

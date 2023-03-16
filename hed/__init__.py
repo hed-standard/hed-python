@@ -7,12 +7,13 @@ from hed.models.base_input import BaseInput
 from hed.models.spreadsheet_input import SpreadsheetInput
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
+from hed.models.definition_dict import DefinitionDict
+
 
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.hed_schema_io import get_schema, get_schema_versions, load_schema, load_schema_version
 
-from hed.validator.hed_validator import HedValidator
 
 # from hed import errors, models, schema, tools, validator
 

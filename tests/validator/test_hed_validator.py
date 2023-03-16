@@ -4,10 +4,10 @@ import os
 # from hed import
 from hed.errors import ErrorContext
 from hed import schema
-from hed.models import DefMapper, HedString, SpreadsheetInput, TabularInput, Sidecar
-from hed.validator import HedValidator
+from hed.models import HedString, SpreadsheetInput, TabularInput, Sidecar
+from hed.validator import HedValidator, DefValidator
 
-
+# todo: redo all this so we
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -33,31 +33,29 @@ class Test(unittest.TestCase):
 
     def test__validate_input(self):
         test_string_obj = HedString(self.base_hed_input)
-        validation_issues = test_string_obj.validate(self.hed_validator)
+        validation_issues = test_string_obj.validate(self.hed_schema)
         self.assertIsInstance(validation_issues, list)
 
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.hed_file_with_errors.validate_file(self.hed_validator, name=name)
+        validation_issues = self.hed_file_with_errors.validate(self.hed_schema, name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_input_major_errors(self):
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.hed_file_with_major_errors.validate_file(self.hed_validator, name=name)
+        validation_issues = self.hed_file_with_major_errors.validate(self.hed_schema, name=name)
 
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_input_major_errors_columns(self):
         name = "DummyDisplayFilename.txt"
-        validation_issues = self.hed_file_with_major_errors.validate_file(self.hed_validator,
-                                                                          check_for_warnings=True, name=name)
+        validation_issues = self.hed_file_with_major_errors.validate(self.hed_schema, name=name)
         self.assertIsInstance(validation_issues, list)
         self.assertTrue(name in validation_issues[0][ErrorContext.FILE_NAME])
 
     def test__validate_input_major_errors_multi_column(self):
-        validation_issues = self.hed_file_with_major_errors_multi_column.validate_file(self.hed_validator,
-                                                                                       check_for_warnings=True)
+        validation_issues = self.hed_file_with_major_errors_multi_column.validate(self.hed_schema)
         self.assertIsInstance(validation_issues, list)
         self.assertEqual(len(validation_issues), 2)
 
@@ -66,15 +64,12 @@ class Test(unittest.TestCase):
                                                     '../data/validator_tests/bids_events_no_index.tsv'))
         json_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                   '../data/validator_tests/bids_events.json'))
-        validator = HedValidator(hed_schema=self.hed_schema)
         sidecar = Sidecar(json_path)
-        issues = sidecar.validate_entries(validator)
+        issues = sidecar.validate(self.hed_schema)
         self.assertEqual(len(issues), 0)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_sidecar(validator)
-        self.assertEqual(len(validation_issues), 0)
-        validation_issues = input_file.validate_file(validator)
+        validation_issues = input_file.validate(self.hed_schema)
         self.assertEqual(len(validation_issues), 0)
 
     def test_complex_file_validation_with_index(self):
@@ -84,15 +79,12 @@ class Test(unittest.TestCase):
         # hed_schema = schema.load_schema(schema_path)
         json_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                   '../data/validator_tests/bids_events.json'))
-        validator = HedValidator(hed_schema=self.hed_schema)
         sidecar = Sidecar(json_path)
-        issues = sidecar.validate_entries(validator)
+        issues = sidecar.validate(hed_schema=self.hed_schema)
         self.assertEqual(len(issues), 0)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_sidecar(validator)
-        self.assertEqual(len(validation_issues), 0)
-        validation_issues = input_file.validate_file(validator)
+        validation_issues = input_file.validate(hed_schema=self.hed_schema)
         self.assertEqual(len(validation_issues), 0)
 
     def test_complex_file_validation_invalid(self):
@@ -104,17 +96,13 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                   '../data/validator_tests/bids_events_bad_defs.json'))
-        validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
-        issues = sidecar.validate_entries(hed_ops=validator, check_for_warnings=True)
+        issues = sidecar.validate(hed_schema)
         self.assertEqual(len(issues), 4)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_sidecar(validator, check_for_warnings=True)
-        self.assertEqual(len(validation_issues), 4)
-
-        validation_issues = input_file.validate_file(validator, check_for_warnings=True)
-        self.assertEqual(len(validation_issues), 42)
+        validation_issues = input_file.validate(hed_schema)
+        self.assertEqual(len(validation_issues), 63)
 
     def test_complex_file_validation_invalid_definitions_removed(self):
         # This verifies definitions are being removed from sidecar strings before being added, or it will produce
@@ -128,14 +116,12 @@ class Test(unittest.TestCase):
         json_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                   '../data/validator_tests/bids_events_bad_defs2.json'))
         sidecar = Sidecar(json_path)
+        issues = sidecar.validate(hed_schema)
+        self.assertEqual(len(issues), 4)
         input_file = TabularInput(events_path, sidecar=sidecar)
-        validator = HedValidator(hed_schema=hed_schema)
 
-        validation_issues1 = input_file.validate_sidecar(validator)
-        self.assertEqual(len(validation_issues1), 4)
-
-        validation_issues = input_file.validate_file(validator)
-        self.assertEqual(len(validation_issues), 21)
+        validation_issues = input_file.validate(hed_schema)
+        self.assertEqual(len(validation_issues), 42)
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -150,9 +136,8 @@ class Test(unittest.TestCase):
                                        column_prefix_dictionary=prefixed_needed_tag_columns,
                                        worksheet_name='LKT Events')
 
-        validator = HedValidator(hed_schema=hed_schema)
-        validation_issues = loaded_file.validate_file(validator, check_for_warnings=True)
-        self.assertEqual(len(validation_issues), 4)
+        validation_issues = loaded_file.validate(hed_schema=hed_schema)
+        self.assertEqual(len(validation_issues), 2)
 
     def test_tabular_input_with_HED_col_in_json(self):
         schema_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
@@ -163,28 +148,20 @@ class Test(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         json_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                   '../data/validator_tests/bids_events_HED.json'))
-        validator = HedValidator(hed_schema=hed_schema)
         sidecar = Sidecar(json_path)
-        issues = sidecar.validate_entries(validator)
-        self.assertEqual(len(issues), 0)
+        issues = sidecar.validate(hed_schema)
+        self.assertEqual(len(issues), 1)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
-        validation_issues = input_file.validate_sidecar(validator)
-        self.assertEqual(len(validation_issues), 0)
-        validation_issues = input_file.validate_file(validator)
+        validation_issues = input_file.validate(hed_schema)
         self.assertEqual(len(validation_issues), 1)
 
     def test_error_spans_from_file_and_missing_required_column(self):
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/schema_tests/HED8.0.0.mediawiki')
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/validator_tests/tag_error_span_test.tsv')
 
-        hed_schema = schema.load_schema(schema_path)
-
         input_file = SpreadsheetInput(events_path, tag_columns=[0, 1, "error"])
-        validator = HedValidator(hed_schema=hed_schema)
-        validation_issues = input_file.validate_file(validator)
+        validation_issues = input_file.validate(hed_schema=self.hed_schema)
         self.assertEqual(validation_issues[1]['char_index'], 6)
         self.assertEqual(validation_issues[2]['char_index'], 6)
         self.assertEqual(len(validation_issues), 3)
@@ -201,28 +178,15 @@ class Test(unittest.TestCase):
         source_span = test_string_obj._get_org_span(HedTag("Event"))
         self.assertEqual(source_span, (None, None))
 
-    def test_def_mapping_single_line(self):
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/schema_tests/HED8.0.0.mediawiki')
-        hed_schema = schema.load_schema(schema_path)
-        validator = HedValidator(hed_schema=hed_schema)
-        def_mapper = DefMapper()
-        string_with_def = \
-            '(Definition/TestDefPlaceholder/#,(Item/TestDef1/#,Item/TestDef2)), def/TestDefPlaceholder/2471'
-        test_string = HedString(string_with_def)
-        issues = test_string.validate([validator, def_mapper], check_for_definitions=True)
-        self.assertEqual(len(issues), 0)
 
     def test_duplicate_group_in_definition(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/schema_tests/HED8.0.0.mediawiki')
         hed_schema = schema.load_schema(schema_path)
-        validator = HedValidator(hed_schema=hed_schema)
-        def_mapper = DefMapper()
         string_with_def = \
-            '(Definition/TestDef,(Item/TestDef1,Item/TestDef1))'
-        test_string = HedString(string_with_def)
-        issues = test_string.validate([validator, def_mapper], check_for_definitions=False)
+            '(Definition/TestDef,(Item,Item))'
+        test_string = HedString(string_with_def, hed_schema)
+        issues = test_string.validate(hed_schema)
         self.assertEqual(len(issues), 1)
 
 

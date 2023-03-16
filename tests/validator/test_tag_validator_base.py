@@ -66,30 +66,28 @@ class TestValidatorBase(TestHedBase):
     def setUpClass(cls):
         super().setUpClass()
         cls.error_handler = error_reporter.ErrorHandler()
-        cls.syntactic_hed_input_reader = HedValidator(hed_schema=None,
-                                                      run_semantic_validation=False)
-        cls.syntactic_tag_validator = cls.syntactic_hed_input_reader._tag_validator
-        cls.semantic_hed_input_reader = HedValidator(hed_schema=cls.hed_schema,
-                                                     run_semantic_validation=True)
+        # cls.syntactic_hed_input_reader = HedValidator(hed_schema=None)
+        # cls.syntactic_tag_validator = cls.syntactic_hed_input_reader._tag_validator
+        cls.semantic_hed_input_reader = HedValidator(hed_schema=cls.hed_schema)
         cls.semantic_tag_validator = cls.semantic_hed_input_reader._tag_validator
 
     def validator_base(self, test_strings, expected_results, expected_issues, test_function,
-                       hed_schema=None):
+                       hed_schema=None, check_for_warnings=False):
         for test_key in test_strings:
             hed_string_obj = HedString(test_strings[test_key])
-            error_handler = ErrorHandler()
+            error_handler = ErrorHandler(check_for_warnings=check_for_warnings)
             error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
             test_issues = []
             if self.compute_forms:
                 test_issues += hed_string_obj.convert_to_canonical_forms(hed_schema)
             if not test_issues:
                 test_issues += test_function(hed_string_obj)
-            test_result = not test_issues
             expected_params = expected_issues[test_key]
             expected_result = expected_results[test_key]
             expected_issue = self.format_errors_fully(error_handler, hed_string=hed_string_obj,
                                                       params=expected_params)
-            error_handler.add_context_to_issues(test_issues)
+            error_handler.add_context_and_filter(test_issues)
+            test_result = not test_issues
 
             # print(test_key)
             # print(str(expected_issue))
@@ -98,13 +96,8 @@ class TestValidatorBase(TestHedBase):
             self.assertEqual(test_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 
-    def validator_syntactic(self, test_strings, expected_results, expected_issues, check_for_warnings):
-        validator = self.syntactic_hed_input_reader
-        self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator, check_for_warnings=check_for_warnings))
-
     def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
         validator = self.semantic_hed_input_reader
         self.validator_base(test_strings, expected_results, expected_issues,
-                            self.string_obj_func(validator, check_for_warnings=check_for_warnings),
+                            self.string_obj_func(validator), check_for_warnings=check_for_warnings,
                             hed_schema=validator._hed_schema)
