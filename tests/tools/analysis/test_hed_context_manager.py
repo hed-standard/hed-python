@@ -77,8 +77,8 @@ class Test(unittest.TestCase):
         self.assertEqual(cont.exception.args[0], "ContextRequiresSchema")
 
     def test_iter(self):
-        hed_strings, _ = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
-                                       join_columns=True, shrink_defs=True, expand_defs=False)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
         manager1 = HedContextManager(hed_strings, self.schema)
         i = 0
         for hed, context in manager1.iter_context():
@@ -87,8 +87,8 @@ class Test(unittest.TestCase):
             i = i + 1
 
     def test_constructor_from_assembled(self):
-        hed_strings, _ = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
-                                       join_columns=True, shrink_defs=True, expand_defs=False)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
         manager1 = HedContextManager(hed_strings, self.schema)
         self.assertEqual(len(manager1.hed_strings), 200,
                          "The constructor for assembled strings has expected # of strings")

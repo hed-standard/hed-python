@@ -232,19 +232,19 @@ class Test(unittest.TestCase):
                          "hed_to_df should have right description when in parentheses")
 
     def test_hed_to_df_to_hed(self):
-        validator = HedValidator(self.hed_schema)
+        # validator = HedValidator(self.hed_schema)
         side1 = Sidecar(files=self.json_path, name="sidecar_face.json")
-        issues1 = side1.validate_entries(validator, check_for_warnings=True)
+        issues1 = side1.validate(self.hed_schema)
         self.assertFalse(issues1, "hed_to_df_to_hed is starting with a valid JSON sidecar")
         df1 = hed_to_df(self.sidecar_face)
         self.assertIsInstance(df1, DataFrame, "hed_to_df_to_hed starting sidecar can be converted to df")
         hed2 = df_to_hed(df1, description_tag=True)
         side2 = Sidecar(files=io.StringIO(json.dumps(hed2)), name='JSON_Sidecar2')
-        issues2 = side2.validate_entries(validator, check_for_warnings=True)
+        issues2 = side2.validate(self.hed_schema)
         self.assertFalse(issues2, "hed_to_df_to_hed is valid after conversion back and forth with description True")
         hed3 = df_to_hed(df1, description_tag=False)
         side3 = Sidecar(files=io.StringIO(json.dumps(hed3)), name='JSON_Sidecar2')
-        issues3 = side3.validate_entries(validator, check_for_warnings=True)
+        issues3 = side3.validate(self.hed_schema)
         self.assertFalse(issues3, "hed_to_df_to_hed is valid after conversion back and forth with description False")
 
     def test_merge_hed_dict_cat_col(self):
