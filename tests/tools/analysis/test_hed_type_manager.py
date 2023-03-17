@@ -6,7 +6,7 @@ from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_type_values import HedTypeValues
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 from hed.tools.analysis.hed_type_manager import HedTypeManager
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.models.df_util import get_assembled
 
 
 class Test(unittest.TestCase):
@@ -18,14 +18,16 @@ class Test(unittest.TestCase):
         events_path = os.path.realpath(os.path.join(bids_root_path,
                                        'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
-        sidecar1 = Sidecar(sidecar_path, hed_schema=schema, name='face_sub1_json')
-        self.input_data = TabularInput(events_path, sidecar=sidecar1, hed_schema=schema, name="face_sub1_events")
-        self.hed_strings = get_assembled_strings(self.input_data, hed_schema=schema, expand_defs=False)
-        self.hed_schema = schema
-        self.definitions = self.input_data.get_definitions()
+        sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
+        self.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        self.hed_strings, self.definitions = get_assembled(self.input_data, sidecar1, schema, 
+                                                           extra_def_dicts=None,
+                                                           join_columns=True, shrink_defs=True, expand_defs=False)
+        self.sidecar1 = sidecar1
+        self.schema = schema
 
     def test_constructor(self):
-        var_manager = HedTypeManager(self.hed_strings, self.hed_schema, self.definitions)
+        var_manager = HedTypeManager(self.hed_strings, self.schema, self.definitions)
         self.assertIsInstance(var_manager, HedTypeManager,
                               "Constructor should create a HedTypeManager from a tabular input")
         self.assertEqual(len(var_manager.context_manager.hed_strings), len(var_manager.context_manager.contexts),
@@ -33,7 +35,7 @@ class Test(unittest.TestCase):
         self.assertFalse(var_manager._type_tag_map, "constructor has empty map")
 
     def test_add_type_variable(self):
-        var_manager = HedTypeManager(self.hed_strings, self.hed_schema, self.definitions)
+        var_manager = HedTypeManager(self.hed_strings, self.schema, self.definitions)
         self.assertFalse(var_manager._type_tag_map, "constructor has empty map")
         var_manager.add_type_variable("Condition-variable")
         self.assertEqual(len(var_manager._type_tag_map), 1,
@@ -48,10 +50,10 @@ class Test(unittest.TestCase):
                          "add_type_variable has 2 element map after two types are added")
 
     def test_get_factor_vectors(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
         base_length = len(hed_strings)
-        def_mapper = self.input_data._def_mapper
-        var_manager = HedTypeManager(hed_strings, self.hed_schema, def_mapper)
+        var_manager = HedTypeManager(hed_strings, self.schema, definitions)
         var_manager.add_type_variable("Condition-variable")
         var_manager.add_type_variable("task")
         df_cond = var_manager.get_factor_vectors("condition-variable")
@@ -64,9 +66,9 @@ class Test(unittest.TestCase):
         self.assertIsNone(df_baloney, "get_factor_vectors returns None if no factors")
 
     def test_get_type_variable(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        def_mapper = self.input_data._def_mapper
-        var_manager = HedTypeManager(hed_strings, self.hed_schema, def_mapper)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeManager(hed_strings, self.schema, definitions)
         var_manager.add_type_variable("Condition-variable")
         type_var = var_manager.get_type_variable("condition-variable")
         self.assertIsInstance(type_var, HedTypeValues,
@@ -75,9 +77,9 @@ class Test(unittest.TestCase):
         self.assertIsNone(type_var, "get_type_variable returns None if the key does not exist")
 
     def test_get_type_variable_def_names(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        def_mapper = self.input_data._def_mapper
-        var_manager = HedTypeManager(hed_strings, self.hed_schema, def_mapper)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeManager(hed_strings, self.schema, definitions)
         var_manager.add_type_variable("Condition-variable")
         def_names = var_manager.get_type_tag_def_names("condition-variable")
         self.assertEqual(len(def_names), 7,
@@ -88,9 +90,9 @@ class Test(unittest.TestCase):
         self.assertFalse(def_names, "get_type_tag_def_names returns empty if the type does not exist")
 
     def test_get_variable_type_map(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        def_mapper = self.input_data._def_mapper
-        var_manager = HedTypeManager(hed_strings, self.hed_schema, def_mapper)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeManager(hed_strings, self.schema, definitions)
         var_manager.add_type_variable("Condition-variable")
         this_var = var_manager.get_type_variable("condition-variable")
         self.assertIsInstance(this_var, HedTypeValues,
@@ -104,9 +106,9 @@ class Test(unittest.TestCase):
                          "get_type_variable_map map has right length when key upper case")
 
     def test_get_type_variable_factor(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        def_mapper = self.input_data._def_mapper
-        var_manager = HedTypeManager(hed_strings, self.hed_schema, def_mapper)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeManager(hed_strings, self.schema, definitions)
         var_manager.add_type_variable("Condition-variable")
         var_factor1 = var_manager.get_type_tag_factor("condition-variable", "key-assignment")
         self.assertIsInstance(var_factor1, HedTypeFactors,
@@ -117,9 +119,9 @@ class Test(unittest.TestCase):
         self.assertIsNone(var_factor3, "get_type_tag_factor returns None if type variable does not exist")
 
     def test_type_variables(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = self.input_data.get_definitions
-        var_manager = HedTypeManager(hed_strings, self.hed_schema, definitions)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeManager(hed_strings, self.schema, definitions)
         vars1 = var_manager.type_variables
         self.assertFalse(vars1, "type_variables is empty if no types have been added")
         var_manager.add_type_variable("Condition-variable")
@@ -129,9 +131,9 @@ class Test(unittest.TestCase):
         self.assertEqual(len(vars2), 2, "type_variables return list is right length")
 
     def test_summarize_all(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=False)
-        def_mapper = self.input_data._def_mapper
-        var_manager = HedTypeManager(hed_strings, self.hed_schema, def_mapper)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeManager(hed_strings, self.schema, definitions)
         summary1 = var_manager.summarize_all()
         self.assertIsInstance(summary1, dict, "summarize_all returns a dictionary when nothing has been added")
         self.assertFalse(summary1, "summarize_all return dictionary is empty when nothing has been added")

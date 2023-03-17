@@ -2,7 +2,7 @@
 
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.models.df_util import get_assembled
 from hed.tools.analysis.hed_type_values import HedTypeValues
 from hed.tools.analysis.hed_type_counts import HedTypeCounts
 from hed.tools.analysis.hed_context_manager import HedContextManager
@@ -90,10 +90,11 @@ class HedTypeSummaryContext(BaseContext):
     def update_context(self, new_context):
         sidecar = new_context['sidecar']
         if sidecar and not isinstance(sidecar, Sidecar):
-            sidecar = Sidecar(sidecar, hed_schema=new_context['schema'])
-        input_data = TabularInput(new_context['df'], hed_schema=new_context['schema'], sidecar=sidecar)
-        hed_strings = get_assembled_strings(input_data, hed_schema=new_context['schema'], expand_defs=False)
-        definitions = input_data.get_definitions().gathered_defs
+            sidecar = Sidecar(sidecar)
+        input_data = TabularInput(new_context['df'], sidecar=sidecar, name=new_context['name'])
+        hed_strings, definitions = get_assembled(input_data, sidecar, new_context['schema'], 
+                                                 extra_def_dicts=None, join_columns=True,
+                                                 shrink_defs=False, expand_defs=True)
         context_manager = HedContextManager(hed_strings, new_context['schema'])
         type_values = HedTypeValues(context_manager, definitions, new_context['name'], type_tag=self.type_tag)
 

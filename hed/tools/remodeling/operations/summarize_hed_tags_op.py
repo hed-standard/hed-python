@@ -5,6 +5,7 @@ from hed.models.sidecar import Sidecar
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.models.df_util import get_assembled
 
 
 class SummarizeHedTagsOp(BaseOp):
@@ -97,12 +98,14 @@ class HedTagSummaryContext(BaseContext):
         counts = HedTagCounts(new_context['name'], total_events=len(new_context['df']))
         sidecar = new_context['sidecar']
         if sidecar and not isinstance(sidecar, Sidecar):
-            sidecar = Sidecar(sidecar, hed_schema=new_context['schema'])
-        input_data = TabularInput(new_context['df'], hed_schema=new_context['schema'], sidecar=sidecar)
+            sidecar = Sidecar(sidecar)
+        input_data = TabularInput(new_context['df'], sidecar=sidecar, name=new_context['name'])
+        hed_strings, definitions = get_assembled(input_data, sidecar, new_context['schema'], 
+                                                 extra_def_dicts=None, join_columns=True,
+                                                 shrink_defs=False, expand_defs=True)
         # definitions = input_data.get_definitions().gathered_defs
-        for objs in input_data.iter_dataframe(hed_ops=[new_context['schema']], return_string_only=False,
-                                              expand_defs=True, remove_definitions=True):
-            counts.update_event_counts(objs['HED'], new_context['name'])
+        for hed in hed_strings:
+            counts.update_event_counts(hed, new_context['name'])
         self.summary_dict[new_context["name"]] = counts
 
     def _get_summary_details(self, merge_counts):

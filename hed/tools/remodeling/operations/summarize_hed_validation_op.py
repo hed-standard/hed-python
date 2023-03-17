@@ -102,7 +102,6 @@ class HedValidationSummaryContext(BaseContext):
         return "\n".join(sum_list)
 
     def update_context(self, new_context):
-        validator = HedValidator(hed_schema=new_context['schema'])
         results = self.get_empty_results()
         results["total_event_files"] = 1
         results["event_issues"][new_context["name"]] = []
@@ -111,10 +110,9 @@ class HedValidationSummaryContext(BaseContext):
         filtered_issues = []
         if sidecar:
             if not isinstance(sidecar, Sidecar):
-                sidecar = Sidecar(files=new_context['sidecar'], name=os.path.basename(sidecar),
-                                  hed_schema=new_context['schema'])
+                sidecar = Sidecar(files=new_context['sidecar'], name=os.path.basename(sidecar))
             results["sidecar_issues"][sidecar.name] = []
-            sidecar_issues = sidecar.validate_entries(validator, check_for_warnings=self.check_for_warnings)
+            sidecar_issues = sidecar.validate(new_context['schema'])
             filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
             if not self.check_for_warnings:
                 sidecar_issues = filtered_issues
@@ -123,8 +121,8 @@ class HedValidationSummaryContext(BaseContext):
             results['total_sidecar_files'] = 1
         if not filtered_issues:
             results['validation_completed'] = True
-            input_data = TabularInput(new_context['df'], hed_schema=new_context['schema'],  sidecar=sidecar)
-            issues = input_data.validate_file(validator, check_for_warnings=self.check_for_warnings)
+            input_data = TabularInput(new_context['df'], sidecar=sidecar)
+            issues = input_data.validate(new_context['schema'])
             if not self.check_for_warnings:
                 issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
             results['event_issues'][new_context["name"]] = issues

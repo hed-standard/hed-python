@@ -2,7 +2,6 @@
 
 import pandas as pd
 from hed.models.tabular_input import TabularInput
-from hed.models.expression_parser import QueryParser
 from hed.tools.util.data_util import separate_values
 from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
@@ -45,57 +44,57 @@ def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs
     return df, definitions
 
 
-def get_assembled_strings(table, hed_schema=None, expand_defs=False):
-    """ Return HED string objects for a tabular file.
+# def get_assembled_strings(table, hed_schema=None, expand_defs=False):
+#     """ Return HED string objects for a tabular file.
+# 
+#     Parameters:
+#         table (TabularInput): The input file to be searched.
+#         hed_schema (HedSchema or HedschemaGroup): If provided the HedStrings are converted to canonical form.
+#         expand_defs (bool): If True, definitions are expanded when the events are assembled.
+# 
+#     Returns:
+#         list: A list of HedString or HedStringGroup objects.
+# 
+#     """
+#     hed_list = list(table.iter_dataframe(hed_ops=[hed_schema], return_string_only=True,
+#                                          expand_defs=expand_defs, remove_definitions=True))
+#     return hed_list
+# 
 
-    Parameters:
-        table (TabularInput): The input file to be searched.
-        hed_schema (HedSchema or HedschemaGroup): If provided the HedStrings are converted to canonical form.
-        expand_defs (bool): If True, definitions are expanded when the events are assembled.
-
-    Returns:
-        list: A list of HedString or HedStringGroup objects.
-
-    """
-    hed_list = list(table.iter_dataframe(hed_ops=[hed_schema], return_string_only=True,
-                                         expand_defs=expand_defs, remove_definitions=True))
-    return hed_list
-
-
-def search_tabular(data_input, hed_schema, query, columns_included=None):
-    """ Return a dataframe with results of query.
-
-    Parameters:
-        data_input (TabularInput): The tabular input file (e.g., events) to be searched.
-        hed_schema (HedSchema or HedSchemaGroup):  The schema(s) under which to make the query.
-        query (str or list):     The str query or list of string queries to make.
-        columns_included (list or None):  List of names of columns to include
-
-    Returns:
-        DataFrame or None: A DataFrame with the results of the query or None if no events satisfied the query.
-
-    """
-
-    eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
-    hed_list = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
-    expression = QueryParser(query)
-    hed_tags = []
-    row_numbers = []
-    for index, next_item in enumerate(hed_list):
-        match = expression.search(next_item)
-        if not match:
-            continue
-        hed_tags.append(next_item)
-        row_numbers.append(index)
-
-    if not row_numbers:
-        df = None
-    elif not eligible_columns:
-        df = pd.DataFrame({'row_number': row_numbers, 'HED_assembled': hed_tags})
-    else:
-        df = data_input.dataframe.iloc[row_numbers][eligible_columns].reset_index()
-        df.rename(columns={'index': 'row_number'})
-    return df
+# def search_tabular(data_input, hed_schema, query, columns_included=None):
+#     """ Return a dataframe with results of query.
+# 
+#     Parameters:
+#         data_input (TabularInput): The tabular input file (e.g., events) to be searched.
+#         hed_schema (HedSchema or HedSchemaGroup):  The schema(s) under which to make the query.
+#         query (str or list):     The str query or list of string queries to make.
+#         columns_included (list or None):  List of names of columns to include
+# 
+#     Returns:
+#         DataFrame or None: A DataFrame with the results of the query or None if no events satisfied the query.
+# 
+#     """
+# 
+#     eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
+#     hed_list = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
+#     expression = QueryParser(query)
+#     hed_tags = []
+#     row_numbers = []
+#     for index, next_item in enumerate(hed_list):
+#         match = expression.search(next_item)
+#         if not match:
+#             continue
+#         hed_tags.append(next_item)
+#         row_numbers.append(index)
+# 
+#     if not row_numbers:
+#         df = None
+#     elif not eligible_columns:
+#         df = pd.DataFrame({'row_number': row_numbers, 'HED_assembled': hed_tags})
+#     else:
+#         df = data_input.dataframe.iloc[row_numbers][eligible_columns].reset_index()
+#         df.rename(columns={'index': 'row_number'})
+#     return df
 
 
 # def remove_defs(hed_strings):

@@ -7,7 +7,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
 from hed.models.expression_parser import QueryParser
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.models.df_util import get_assembled
 
 
 class FactorHedTagsOp(BaseOp):
@@ -101,16 +101,16 @@ class FactorHedTagsOp(BaseOp):
         """
 
         if sidecar and not isinstance(sidecar, Sidecar):
-            sidecar = Sidecar(sidecar, hed_schema=dispatcher.hed_schema)
-        input_data = TabularInput(df, hed_schema=dispatcher.hed_schema, sidecar=sidecar)
+            sidecar = Sidecar(sidecar)
+        input_data = TabularInput(df.copy(), sidecar=sidecar, name=name)
         column_names = list(df.columns)
-        for name in self.query_names:
-            if name in column_names:
+        for query_name in self.query_names:
+            if query_name in column_names:
                 raise ValueError("QueryNameAlreadyColumn",
-                                 f"Query [{name}]: is already a column name of the data frame")
-        df = input_data.dataframe.copy()
-        df_list = [df]
-        hed_strings = get_assembled_strings(input_data, hed_schema=dispatcher.hed_schema, expand_defs=True)
+                                 f"Query [{query_name}]: is already a column name of the data frame")
+        df_list = [input_data.dataframe]
+        hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None, 
+                                                 join_columns=True, shrink_defs=False, expand_defs=True)
         df_factors = pd.DataFrame(0, index=range(len(hed_strings)), columns=self.query_names)
         for parse_ind, parser in enumerate(self.expression_parsers):
             for index, next_item in enumerate(hed_strings):

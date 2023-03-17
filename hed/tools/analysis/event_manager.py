@@ -3,25 +3,26 @@
 from hed.schema import HedSchema, HedSchemaGroup
 from hed.tools.analysis.temporal_event import TemporalEvent
 from hed.models.model_constants import DefTagNames
+from hed.models.df_util import get_assembled
 
 
 class EventManager:
 
-    def __init__(self, data, hed_schema):
+    def __init__(self, data, schema):
         """ Create an event manager for an events file.
 
         Parameters:
             data (TabularInput): A tabular input file.
-            hed_schema (HedSchema): A HED schema
+            schema (HedSchema): A HED schema
 
         Raises:
             HedFileError: if there are any unmatched offsets.
 
         """
 
-        if not isinstance(hed_schema, HedSchema) and not isinstance(hed_schema, HedSchemaGroup):
+        if not isinstance(schema, HedSchema) and not isinstance(schema, HedSchemaGroup):
             raise ValueError("ContextRequiresSchema", f"Context manager must have a valid HedSchema of HedSchemaGroup")
-        self.hed_schema = hed_schema
+        self.schema = schema
         self.data = data
         self.event_list = [[] for _ in range(len(self.data.dataframe))]
         self.hed_strings = [None for _ in range(len(self.data.dataframe))]
@@ -56,10 +57,10 @@ class EventManager:
 
         onset_dict = {}
         event_index = 0
-        for hed in self.data.iter_dataframe(hed_ops=[self.hed_schema], return_string_only=True,
-                                            expand_defs=False, remove_definitions=True):
+        self.hed_strings, definitions = get_assembled(self.data, self.data._sidecar, self.schema, extra_def_dicts=None,
+                                                      join_columns=True, shrink_defs=True, expand_defs=False)
+        for hed in self.hed_strings:
             # to_remove = []  # tag_tuples = hed.find_tags(['Onset'], recursive=False, include_groups=1)
-            self.hed_strings[event_index] = hed
             group_tuples = hed.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY},
                                                    include_groups=2)
             for tup in group_tuples:

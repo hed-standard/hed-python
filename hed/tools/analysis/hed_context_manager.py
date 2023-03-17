@@ -5,6 +5,7 @@ from hed.models import HedGroup, HedString
 from hed.schema import HedSchema, HedSchemaGroup
 from hed.tools.analysis.analysis_util import hed_to_str
 
+#TODO: [Refactor] clean up distinction between hed as strings versus objects -- maybe replace by event manager.
 
 class OnsetGroup:
     def __init__(self, name, contents, start_index, end_index=None):
@@ -23,7 +24,8 @@ class HedContextManager:
         """ Create an context manager for an events file.
 
         Parameters:
-            hed_strings (list): A list of hed_strings to be managed.
+            hed_strings (list): A list of HedString objects to be managed.
+            hed_schema (HedSchema):  A HedSchema
 
         Raises:
             HedFileError: if there are any unmatched offsets.
@@ -46,6 +48,12 @@ class HedContextManager:
         self._create_onset_list()
         self._set_event_contexts()
 
+    # def _extract_hed_objs(self, assembled):
+    #     hed_objs = [None for _ in range(len(assembled))]
+    #     for index, value in assembled["HED_assembled"].items():
+    #         hed_objs[index] = HedString(value, hed_schema=self.hed_schema)
+    #     return hed_objs
+    
     def iter_context(self):
         """ Iterate rows of context.
 

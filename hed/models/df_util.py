@@ -26,7 +26,8 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
         expand_defs: bool
             Expand any def tags found
     Returns:
-        A list of HedStrings, or a list of lists of HedStrings
+        tuple: A list of HedStrings, or a list of lists of HedStrings, DefinitionDict
+        
     """
     if isinstance(sidecar, str):
         sidecar = Sidecar(sidecar)
