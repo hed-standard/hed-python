@@ -67,7 +67,10 @@ class BaseInput:
         elif not file:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
         elif input_type in self.TEXT_EXTENSION:
-            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header, dtype=str)
+            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
+                                              dtype=str, keep_default_na=True, na_values=None)
+            # Convert nan values to a known value
+            self._dataframe = self._dataframe.fillna("n/a")
         elif input_type in self.EXCEL_EXTENSION:
             self._loaded_workbook = openpyxl.load_workbook(file)
             loaded_worksheet = self.get_worksheet(self._worksheet_name)
@@ -365,7 +368,7 @@ class BaseInput:
 
         transformers, need_categorical = mapper.get_transformers()
         if not transformers:
-            return None
+            return self._dataframe
         all_columns = self._dataframe
         if need_categorical:
             all_columns[need_categorical] = all_columns[need_categorical].astype('category')
@@ -379,7 +382,7 @@ class BaseInput:
         found_column_references = []
         for column_name in df:
             df_temp = df[column_name].str.findall("\[([a-z_\-0-9]+)\]", re.IGNORECASE)
-            u_vals = pd.Series([j for i in df_temp for j in i], dtype=str)
+            u_vals = pd.Series([j for i in df_temp if isinstance(i, list) for j in i], dtype=str)
             u_vals = u_vals.unique()
             for val in u_vals:
                 if val not in found_column_references:
@@ -392,7 +395,7 @@ class BaseInput:
         if known_columns is None:
             known_columns = list(df.columns)
         possible_column_references = [f"{column_name}" for column_name in df.columns if
-                                      column_name.lower() != "hed"]
+                                      isinstance(column_name, str) and column_name.lower() != "hed"]
         found_column_references = BaseInput._find_column_refs(df)
 
         invalid_replacements = [col for col in found_column_references if col not in possible_column_references]
@@ -426,8 +429,8 @@ class BaseInput:
         Returns:
             Series: the assembled series
         """
-        dataframe = dataframe.agg(
-            lambda x: ', '.join(filter(lambda e: pd.notna(e) and e != "", x)), axis=1
+        dataframe = dataframe.apply(
+            lambda x: ', '.join(filter(lambda e: bool(e) and e != "n/a", map(str, x))),
+            axis=1
         )
-
         return dataframe

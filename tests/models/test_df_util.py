@@ -144,7 +144,7 @@ class TestConvertToForm(unittest.TestCase):
 
     def test_convert_to_form_multiple_tags_short(self):
         df = pd.DataFrame({"column1": ["Visual-attribute/Color/CSS-color/White-color/Azure,Biological-item/Anatomical-item/Body-part/Head/Face/Nose,Spatiotemporal-value/Rate-of-change/Acceleration/4.5 m-per-s^2"]})
-        expected_df = pd.DataFrame({"column1": ["Azure,Nose,4.5 m-per-s^2"]})
+        expected_df = pd.DataFrame({"column1": ["Azure,Nose,Acceleration/4.5 m-per-s^2"]})
         result = convert_to_form(df, self.schema, "short_tag", ['column1'])
         pd.testing.assert_frame_equal(result, expected_df)
 

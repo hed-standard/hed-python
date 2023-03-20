@@ -202,6 +202,8 @@ class TestCombineDataframe(unittest.TestCase):
             'C': ['guitar', 'harmonica', np.nan]
         }
         df = pd.DataFrame(data)
+        # this is called on load normally
+        df = df.fillna("n/a")
         result = BaseInput.combine_dataframe(df)
         expected = pd.Series(['apple, guitar', 'elephant, harmonica', 'cherry, fox'])
         self.assertTrue(result.equals(expected))
@@ -213,6 +215,7 @@ class TestCombineDataframe(unittest.TestCase):
             'C': ['guitar', 'harmonica', '']
         }
         df = pd.DataFrame(data)
+
         result = BaseInput.combine_dataframe(df)
         expected = pd.Series(['apple, guitar', 'elephant, harmonica', 'cherry, fox'])
         self.assertTrue(result.equals(expected))
@@ -224,12 +227,15 @@ class TestCombineDataframe(unittest.TestCase):
             'C': ['guitar', 'harmonica', np.nan, 'n/a', '']
         }
         df = pd.DataFrame(data)
+        # this is called on load normally
+        df = df.fillna("n/a")
         csv_buffer = io.StringIO()
         df.to_csv(csv_buffer, header=False, index=False)
         csv_buffer.seek(0)
 
         # Use the same loading function we normally use to verify n/a translates right.
         loaded_df = pd.read_csv(csv_buffer, header=None)
+        loaded_df = loaded_df.fillna("n/a")
         result = BaseInput.combine_dataframe(loaded_df)
         expected = pd.Series(['apple, guitar', 'elephant, harmonica', 'cherry, fox', '', ''])
         self.assertTrue(result.equals(expected))
