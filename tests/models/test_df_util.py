@@ -3,7 +3,7 @@ import pandas as pd
 
 
 from hed import load_schema_version
-from hed.models.df_util import shrink_defs, expand_defs
+from hed.models.df_util import shrink_defs, expand_defs, convert_to_form
 from hed import DefinitionDict
 
 
@@ -112,3 +112,44 @@ class TestExpandDefs(unittest.TestCase):
         expected_series = pd.Series(["(Def-expand/TestDefPlaceholder/123,(Action/TestDef1/123,Action/TestDef2)),Item/SomeItem"])
         result = expand_defs(series, self.schema, self.def_dict, None)
         pd.testing.assert_series_equal(result, expected_series)
+
+
+class TestConvertToForm(unittest.TestCase):
+    def setUp(self):
+        self.schema = load_schema_version()
+
+    def test_convert_to_form_short_tags(self):
+        df = pd.DataFrame({"column1": ["Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See"]})
+        expected_df = pd.DataFrame({"column1": ["Azure,See"]})
+        result = convert_to_form(df, self.schema, "short_tag", ['column1'])
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_convert_to_form_long_tags(self):
+        df = pd.DataFrame({"column1": ["CSS-color/White-color/Azure,Action/Perceive/See"]})
+        expected_df = pd.DataFrame({"column1": ["Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See"]})
+        result = convert_to_form(df, self.schema, "long_tag", ['column1'])
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_convert_to_form_series_short_tags(self):
+        series = pd.Series(["Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See"])
+        expected_series = pd.Series(["Azure,See"])
+        result = convert_to_form(series, self.schema, "short_tag")
+        pd.testing.assert_series_equal(result, expected_series)
+
+    def test_convert_to_form_series_long_tags(self):
+        series = pd.Series(["CSS-color/White-color/Azure,Action/Perceive/See"])
+        expected_series = pd.Series(["Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See"])
+        result = convert_to_form(series, self.schema, "long_tag")
+        pd.testing.assert_series_equal(result, expected_series)
+
+    def test_convert_to_form_multiple_tags_short(self):
+        df = pd.DataFrame({"column1": ["Visual-attribute/Color/CSS-color/White-color/Azure,Biological-item/Anatomical-item/Body-part/Head/Face/Nose,Spatiotemporal-value/Rate-of-change/Acceleration/4.5 m-per-s^2"]})
+        expected_df = pd.DataFrame({"column1": ["Azure,Nose,Acceleration/4.5 m-per-s^2"]})
+        result = convert_to_form(df, self.schema, "short_tag", ['column1'])
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_convert_to_form_multiple_tags_long(self):
+        df = pd.DataFrame({"column1": ["CSS-color/White-color/Azure,Anatomical-item/Body-part/Head/Face/Nose,Rate-of-change/Acceleration/4.5 m-per-s^2"]})
+        expected_df = pd.DataFrame({"column1": ["Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Item/Biological-item/Anatomical-item/Body-part/Head/Face/Nose,Property/Data-property/Data-value/Spatiotemporal-value/Rate-of-change/Acceleration/4.5 m-per-s^2"]})
+        result = convert_to_form(df, self.schema, "long_tag", ['column1'])
+        pd.testing.assert_frame_equal(result, expected_df)
