@@ -116,7 +116,8 @@ class HedString(HedGroup):
                 replacements.append((tag, tag._expandable))
 
         for tag, group in replacements:
-            self.replace(tag, group)
+            tag_parent = tag._parent
+            tag_parent.replace(tag, group)
             tag.short_base_tag = DefTagNames.DEF_EXPAND_KEY
 
         return self
