@@ -86,9 +86,9 @@ class BidsDataset:
         issues = []
         for tab_type in types:
             files = self.tabular_files[tab_type]
-            issues += files.validate_sidecars(hed_ops=[validator],
+            issues += files.validate_sidecars(self.schema,
                                               check_for_warnings=check_for_warnings, error_handler=error_handler)
-            issues += files.validate_datafiles(hed_ops=[validator],
+            issues += files.validate_datafiles(self.schema,
                                                check_for_warnings=check_for_warnings,
                                                error_handler=error_handler)
         return issues

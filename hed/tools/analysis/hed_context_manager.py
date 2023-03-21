@@ -78,13 +78,13 @@ class HedContextManager:
         onset_dict = {}
         for event_index, hed in enumerate(self.hed_strings):
             to_remove = []  # tag_tuples = hed.find_tags(['Onset'], recursive=False, include_groups=1)
-            onset_tuples = hed.find_tags(["onset"], recursive=True, include_groups=2)
+            onset_tuples = hed.find_top_level_tags(["onset"], include_groups=2)
             self.onset_count += len(onset_tuples)
             for tup in onset_tuples:
                 group = tup[1]
                 group.remove([tup[0]])
                 self._update_onset_list(group, onset_dict, event_index, is_offset=False)
-            offset_tuples = hed.find_tags(["offset"], recursive=True, include_groups=2)
+            offset_tuples = hed.find_top_level_tags(["offset"], include_groups=2)
             self.offset_count += len(offset_tuples)
             for tup in offset_tuples:
                 group = tup[1]
