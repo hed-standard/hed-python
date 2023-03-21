@@ -110,7 +110,7 @@ class FactorHedTagsOp(BaseOp):
                                  f"Query [{query_name}]: is already a column name of the data frame")
         df_list = [input_data.dataframe]
         hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None, 
-                                                 join_columns=True, shrink_defs=False, expand_defs=True)
+                                       join_columns=True, shrink_defs=False, expand_defs=True)
         df_factors = pd.DataFrame(0, index=range(len(hed_strings)), columns=self.query_names)
         for parse_ind, parser in enumerate(self.expression_parsers):
             for index, next_item in enumerate(hed_strings):
