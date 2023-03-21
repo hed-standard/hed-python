@@ -111,11 +111,11 @@ class BidsFileGroup:
         info.update(list(self.datafile_dict.keys()))
         return info
 
-    def validate_sidecars(self, hed_ops, check_for_warnings=True, error_handler=None):
+    def validate_sidecars(self, hed_schema, check_for_warnings=True, error_handler=None):
         """ Validate merged sidecars.
 
         Parameters:
-            hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
+            hed_schema (HedSchema):  HED schema for validation.
             check_for_warnings (bool):  If True, include warnings in the check.
             error_handler (ErrorHandler): The common error handler for the dataset.
 
@@ -130,17 +130,15 @@ class BidsFileGroup:
         for sidecar in self.sidecar_dict.values():
             error_handler.push_error_context(ErrorContext.FILE_NAME, sidecar.file_path)
             if sidecar.has_hed:
-                issues += sidecar.contents.validate_entries(hed_ops=hed_ops,
-                                                            name=sidecar.file_path,
-                                                            check_for_warnings=check_for_warnings)
+                issues += sidecar.contents.validate(hed_schema, name=sidecar.file_path)
                 error_handler.pop_error_context()
         return issues
 
-    def validate_datafiles(self, hed_ops, check_for_warnings=True, keep_contents=False, error_handler=None):
+    def validate_datafiles(self, hed_schema, check_for_warnings=True, keep_contents=False, error_handler=None):
         """ Validate the datafiles and return an error list.
 
         Parameters:
-            hed_ops ([func or HedOps], func, HedOps):  Validation functions to apply.
+            hed_schema (HedSchema):  Schema to apply to the validation.
             check_for_warnings (bool):  If True, include warnings in the check.
             keep_contents (bool):       If True, the underlying data files are read and their contents retained.
             error_handler (ErrorHandler): The common error handler to use for the dataset.
@@ -159,7 +157,8 @@ class BidsFileGroup:
             if not data_obj.has_hed:
                 continue
             data = data_obj.contents
-            issues += data.validate_file(hed_ops=hed_ops, check_for_warnings=check_for_warnings)
+
+            issues += data.validate(hed_schema)
             if not keep_contents:
                 data_obj.clear_contents()
             error_handler.pop_error_context()

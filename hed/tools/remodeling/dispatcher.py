@@ -222,6 +222,10 @@ class Dispatcher:
             DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'
 
         """
+        dtypes = df.dtypes.to_dict()
+        for col_name, typ in dtypes.items():
+            if typ == 'category':
+                df[col_name] = df[col_name].astype(str)
         return df.fillna('n/a')
 
     @staticmethod
