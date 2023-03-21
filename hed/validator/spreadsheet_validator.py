@@ -41,6 +41,7 @@ class SpreadsheetValidator:
         # Check the structure of the input data, if it's a BaseInput
         if isinstance(data, BaseInput):
             issues += self._validate_column_structure(data, error_handler)
+            # todo ian: Add more checks here for column inserters
             data = data.dataframe_a
 
         # Check the rows of the input data

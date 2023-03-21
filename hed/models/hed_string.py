@@ -112,7 +112,7 @@ class HedString(HedGroup):
 
         replacements = []
         for tag in def_tags:
-            if not tag._expanded:
+            if tag.expandable and not tag.expanded:
                 replacements.append((tag, tag._expandable))
 
         for tag, group in replacements:
