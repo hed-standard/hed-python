@@ -354,33 +354,45 @@ class BaseInput:
                 return True
         return False
 
-    def assemble(self, mapper=None):
+    def assemble(self, mapper=None, skip_square_brackets=False):
         """ Assembles the hed strings
 
         Parameters:
             mapper(ColumnMapper or None): Generally pass none here unless you want special behavior.
-
+            skip_square_brackets (bool): If True, don't plug in square bracket values into columns.
         Returns:
             Dataframe: the assembled dataframe
         """
         if mapper is None:
             mapper = self._mapper
 
+        all_columns = self._handle_transforms(mapper)
+        if skip_square_brackets:
+            return all_columns
+        transformers, _ = mapper.get_transformers()
+
+        return self._handle_square_brackets(all_columns, list(transformers))
+
+    def _handle_transforms(self, mapper):
         transformers, need_categorical = mapper.get_transformers()
-        if not transformers:
-            return self._dataframe
-        all_columns = self._dataframe
-        if need_categorical:
-            all_columns[need_categorical] = all_columns[need_categorical].astype('category')
+        if transformers:
+            all_columns = self._dataframe
+            if need_categorical:
+                all_columns[need_categorical] = all_columns[need_categorical].astype('category')
 
-        all_columns = all_columns.transform(transformers)
+            all_columns = all_columns.transform(transformers)
 
-        return self._insert_columns(all_columns, list(transformers.keys()))
+            if need_categorical:
+                all_columns[need_categorical] = all_columns[need_categorical].astype('str')
+        else:
+            all_columns = self._dataframe
+
+        return all_columns
 
     @staticmethod
-    def _find_column_refs(df):
+    def _find_column_refs(df, column_names):
         found_column_references = []
-        for column_name in df:
+        for column_name in column_names:
             df_temp = df[column_name].str.findall("\[([a-z_\-0-9]+)\]", re.IGNORECASE)
             u_vals = pd.Series([j for i in df_temp if isinstance(i, list) for j in i], dtype=str)
             u_vals = u_vals.unique()
@@ -391,21 +403,23 @@ class BaseInput:
         return found_column_references
 
     @staticmethod
-    def _insert_columns(df, known_columns=None):
-        if known_columns is None:
-            known_columns = list(df.columns)
-        possible_column_references = [f"{column_name}" for column_name in df.columns if
-                                      isinstance(column_name, str) and column_name.lower() != "hed"]
-        found_column_references = BaseInput._find_column_refs(df)
+    def _handle_square_brackets(df, known_columns=None):
+        """
+            Plug in square brackets with other columns
 
-        invalid_replacements = [col for col in found_column_references if col not in possible_column_references]
-        if invalid_replacements:
-            # todo: This check may be moved to validation
-            raise ValueError(f"Bad column references found(columns do not exist): {invalid_replacements}")
+            If known columns is passed, only use those columns to find or replace references.
+        """
+        if known_columns is not None:
+            column_names = list(known_columns)
+        else:
+            column_names = list(df.columns)
+        possible_column_references = [f"{column_name}" for column_name in column_names if
+                                      isinstance(column_name, str) and column_name.lower() != "hed"]
+        found_column_references = BaseInput._find_column_refs(df, column_names)
+
         valid_replacements = [col for col in found_column_references if col in possible_column_references]
 
         # todo: break this into a sub function(probably)
-        column_names = known_columns
         for column_name in valid_replacements:
             column_names.remove(column_name)
         saved_columns = df[valid_replacements]

@@ -48,7 +48,7 @@ class Test(TestHedBase):
         for string, expected_params, context in zip(test_strings, test_issues, test_context):
             test_string = HedString(string, self.hed_schema)
             error_handler = ErrorHandler()
-            error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
+            error_handler.push_error_context(ErrorContext.HED_STRING, test_string)
 
             onset_issues = []
             onset_issues += validator.validate_onset_offset(test_string)
@@ -67,7 +67,7 @@ class Test(TestHedBase):
         for string, expected_params in zip(test_strings, test_issues):
             test_string = HedString(string)
             error_handler = ErrorHandler(check_for_warnings=False)
-            error_handler.push_error_context(ErrorContext.HED_STRING, test_string, increment_depth_after=False)
+            error_handler.push_error_context(ErrorContext.HED_STRING, test_string)
             onset_issues = hed_validator.validate(test_string, False)
             error_handler.add_context_and_filter(onset_issues)
             issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)

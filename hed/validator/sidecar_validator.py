@@ -4,6 +4,7 @@ from hed.models import ColumnType
 from hed import HedString
 from hed import Sidecar
 from hed.models.column_metadata import ColumnMetadata
+from hed.errors.error_reporter import sort_issues
 
 
 class SidecarValidator:
@@ -49,8 +50,7 @@ class SidecarValidator:
         for hed_string, column_data, position in sidecar.hed_string_iter(error_handler):
             hed_string_obj = HedString(hed_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
 
-            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
-                                             increment_depth_after=False)
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
             new_issues = hed_validator.run_basic_checks(hed_string_obj, allow_placeholders=True)
             if not new_issues:
                 new_issues = hed_validator.run_full_string_checks(hed_string_obj)
@@ -61,6 +61,7 @@ class SidecarValidator:
             error_handler.pop_error_context()
 
         error_handler.pop_error_context()
+        issues = sort_issues(issues)
         return issues
 
     def validate_structure(self, sidecar, error_handler):

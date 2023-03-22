@@ -76,7 +76,7 @@ class TestValidatorBase(TestHedBase):
         for test_key in test_strings:
             hed_string_obj = HedString(test_strings[test_key])
             error_handler = ErrorHandler(check_for_warnings=check_for_warnings)
-            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj, increment_depth_after=False)
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
             test_issues = []
             if self.compute_forms:
                 test_issues += hed_string_obj.convert_to_canonical_forms(hed_schema)
