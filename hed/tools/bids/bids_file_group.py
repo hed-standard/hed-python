@@ -2,6 +2,8 @@
 
 import os
 from hed.errors.error_reporter import ErrorContext, ErrorHandler
+from hed.validator.sidecar_validator import SidecarValidator
+from hed.validator.spreadsheet_validator import SpreadsheetValidator
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
@@ -111,57 +113,52 @@ class BidsFileGroup:
         info.update(list(self.datafile_dict.keys()))
         return info
 
-    def validate_sidecars(self, hed_schema, check_for_warnings=True, error_handler=None):
+    def validate_sidecars(self, hed_schema, extra_def_dicts=None, check_for_warnings=True):
         """ Validate merged sidecars.
 
         Parameters:
             hed_schema (HedSchema):  HED schema for validation.
+            extra_def_dicts (DefinitionDict): Extra definitions
             check_for_warnings (bool):  If True, include warnings in the check.
-            error_handler (ErrorHandler): The common error handler for the dataset.
 
         Returns:
             list:   A list of validation issues found. Each issue is a dictionary.
 
         """
 
-        if not error_handler:
-            error_handler = ErrorHandler()
+        error_handler = ErrorHandler(check_for_warnings)
         issues = []
+        validator = SidecarValidator(hed_schema)
+        
         for sidecar in self.sidecar_dict.values():
-            error_handler.push_error_context(ErrorContext.FILE_NAME, sidecar.file_path)
-            if sidecar.has_hed:
-                issues += sidecar.contents.validate(hed_schema, name=sidecar.file_path)
-                error_handler.pop_error_context()
+            name = os.path.basename(sidecar.file_path)
+            issues += validator.validate(sidecar.contents, extra_def_dicts=extra_def_dicts, name=name, 
+                                         error_handler=error_handler)
         return issues
 
-    def validate_datafiles(self, hed_schema, check_for_warnings=True, keep_contents=False, error_handler=None):
+    def validate_datafiles(self, hed_schema, extra_def_dicts=None, check_for_warnings=True, keep_contents=False):
         """ Validate the datafiles and return an error list.
 
         Parameters:
             hed_schema (HedSchema):  Schema to apply to the validation.
+            extra_def_dicts (DefinitionDict):  Extra definitions that come from outside.
             check_for_warnings (bool):  If True, include warnings in the check.
             keep_contents (bool):       If True, the underlying data files are read and their contents retained.
-            error_handler (ErrorHandler): The common error handler to use for the dataset.
 
         Returns:
             list:    A list of validation issues found. Each issue is a dictionary.
 
         """
 
-        if not error_handler:
-            error_handler = ErrorHandler()
+        error_handler = ErrorHandler(check_for_warnings)
         issues = []
         for data_obj in self.datafile_dict.values():
-            error_handler.push_error_context(ErrorContext.FILE_NAME, data_obj.file_path)
             data_obj.set_contents(overwrite=False)
-            if not data_obj.has_hed:
-                continue
-            data = data_obj.contents
-
-            issues += data.validate(hed_schema)
+            name = os.path.basename(data_obj.file_path)
+            issues += data_obj.contents.validate(hed_schema, extra_def_dicts=None, name=name, 
+                                                 error_handler=error_handler)
             if not keep_contents:
                 data_obj.clear_contents()
-            error_handler.pop_error_context()
         return issues
 
     def _make_datafile_dict(self):
