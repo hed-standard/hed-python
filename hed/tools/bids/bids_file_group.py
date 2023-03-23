@@ -132,7 +132,8 @@ class BidsFileGroup:
         
         for sidecar in self.sidecar_dict.values():
             name = os.path.basename(sidecar.file_path)
-            issues += validator.validate(extra_def_dicts=extra_def_dicts, name=name, error_handler=error_handler)
+            issues += validator.validate(sidecar.contents, extra_def_dicts=extra_def_dicts, name=name, 
+                                         error_handler=error_handler)
         return issues
 
     def validate_datafiles(self, hed_schema, extra_def_dicts=None, check_for_warnings=True, keep_contents=False):
@@ -154,7 +155,7 @@ class BidsFileGroup:
         for data_obj in self.datafile_dict.values():
             data_obj.set_contents(overwrite=False)
             name = os.path.basename(data_obj.file_path)
-            issues += data_obj.contents.validate(data_obj.contents, extra_def_dicts=None, name=name, 
+            issues += data_obj.contents.validate(hed_schema, extra_def_dicts=None, name=name, 
                                                  error_handler=error_handler)
             if not keep_contents:
                 data_obj.clear_contents()
