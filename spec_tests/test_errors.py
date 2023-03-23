@@ -11,6 +11,13 @@ from hed import HedFileError
 from hed.errors import ErrorHandler, get_printable_issue_string
 
 
+known_errors = [
+    'SIDECAR_INVALID',
+    'CHARACTER_INVALID',
+    'COMMA_MISSING',
+    "DEF_EXPAND_INVALID",
+    "DEF_INVALID",
+]
 
 skip_tests = ["VERSION_DEPRECATED", "CHARACTER_INVALID", "STYLE_WARNING"]
 
@@ -30,6 +37,12 @@ class MyTestCase(unittest.TestCase):
             test_info = json.load(fp)
         for info in test_info:
             error_code = info['error_code']
+            verify_code = False
+            if error_code in known_errors:
+                verify_code = True
+
+            # To be deprecated once we add this to all tests
+            self._verify_code = verify_code
             if error_code in skip_tests:
                 print(f"Skipping {error_code} test")
                 continue
@@ -62,6 +75,13 @@ class MyTestCase(unittest.TestCase):
                 print(f"Passed '{test_type}' (which should fail) '{name}': {test}")
                 print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
+            elif self._verify_code:
+                if any(issue['code'] == error_code for issue in issues):
+                    return
+                print(f"{error_code}: {description}")
+                print(f"Failed '{test_type}' (unexpected errors found) '{name}': {test}")
+                print(get_printable_issue_string(issues))
+                self.fail_count.append(name)
         else:
             if issues:
                 print(f"{error_code}: {description}")
@@ -75,9 +95,6 @@ class MyTestCase(unittest.TestCase):
             for test in tests:
                 test_string = HedString(test, schema)
 
-                # This expand should not be required here.
-                def_dict.expand_def_tags(test_string)
-
                 issues = string_validator.run_basic_checks(test_string, False)
                 issues += string_validator.run_full_string_checks(test_string)
                 error_handler.add_context_and_filter(issues)
@@ -86,7 +103,6 @@ class MyTestCase(unittest.TestCase):
     def _run_single_sidecar_test(self, info, schema, def_dict, error_code, description, name, error_handler):
         for result, tests in info.items():
             for test in tests:
-                # Well this is a disaster
                 buffer = io.BytesIO(json.dumps(test).encode("utf-8"))
                 sidecar = Sidecar(buffer)
                 issues = sidecar.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)

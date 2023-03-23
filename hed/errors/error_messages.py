@@ -277,7 +277,12 @@ def sidecar_error_unknown_column(column_name):
 
 
 @hed_error(SidecarErrors.SIDECAR_HED_USED, actual_code=SidecarErrors.SIDECAR_INVALID)
-def sidecar_hed_used():
+def SIDECAR_HED_USED():
+    return "'HED' is a reserved name and cannot be used as a sidecar except in expected places."
+
+
+@hed_error(SidecarErrors.SIDECAR_HED_USED_COLUMN, actual_code=SidecarErrors.SIDECAR_INVALID)
+def SIDECAR_HED_USED_COLUMN():
     return "'HED' is a reserved name and cannot be used as a sidecar column name"
 
 

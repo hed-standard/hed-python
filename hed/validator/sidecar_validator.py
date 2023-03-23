@@ -81,6 +81,23 @@ class SidecarValidator:
             error_handler.pop_error_context()
         return all_validation_issues
 
+    @staticmethod
+    def _check_for_key(key, data):
+        if isinstance(data, dict):
+            if key in data:
+                return bool(data[key])
+            else:
+                for sub_data in data.values():
+                    result = SidecarValidator._check_for_key(key, sub_data)
+                    if result is not None:
+                        return result
+        elif isinstance(data, list):
+            for sub_data in data:
+                result = SidecarValidator._check_for_key(key, sub_data)
+                if result is not None:
+                    return result
+        return None
+
     def _validate_column_structure(self, column_name, dict_for_entry, error_handler):
         """ Checks primarily for type errors such as expecting a string and getting a list in a json sidecar.
 
@@ -93,13 +110,17 @@ class SidecarValidator:
         """
         val_issues = []
         if column_name in self.reserved_column_names:
-            val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED)
+            val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED_COLUMN)
             return val_issues
 
         column_type = Sidecar._detect_column_type(dict_for_entry=dict_for_entry)
         if column_type is None:
             val_issues += error_handler.format_error_with_context(SidecarErrors.UNKNOWN_COLUMN_TYPE,
                                                                   column_name=column_name)
+        elif column_type == ColumnType.Ignore:
+            found_hed = self._check_for_key("HED", dict_for_entry)
+            if found_hed:
+                val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED)
         elif column_type == ColumnType.Categorical:
             raw_hed_dict = dict_for_entry["HED"]
             if not raw_hed_dict:
