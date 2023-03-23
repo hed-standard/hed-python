@@ -93,8 +93,7 @@ class HedTypeSummaryContext(BaseContext):
             sidecar = Sidecar(sidecar)
         input_data = TabularInput(new_context['df'], sidecar=sidecar, name=new_context['name'])
         hed_strings, definitions = get_assembled(input_data, sidecar, new_context['schema'], 
-                                                 extra_def_dicts=None, join_columns=True,
-                                                 shrink_defs=False, expand_defs=True)
+                                                 extra_def_dicts=None, join_columns=True, expand_defs=False)
         context_manager = HedContextManager(hed_strings, new_context['schema'])
         type_values = HedTypeValues(context_manager, definitions, new_context['name'], type_tag=self.type_tag)
 

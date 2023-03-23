@@ -74,7 +74,7 @@ class FactorHedTypeOp(BaseOp):
         df_list = [input_data.dataframe.copy()]
         hed_strings, definitions = get_assembled(input_data, sidecar, dispatcher.hed_schema, 
                                                  extra_def_dicts=None, join_columns=True,
-                                                 shrink_defs=False, expand_defs=True)
+                                                 shrink_defs=True, expand_defs=False)
 
         var_manager = HedTypeManager(hed_strings, dispatcher.hed_schema, definitions)
         var_manager.add_type_variable(self.type_tag.lower())
