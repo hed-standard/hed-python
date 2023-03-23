@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
         input_data = TabularInput(df, sidecar=my_sidecar)
         counts = HedTagCounts('myName', 2)
         summary_dict = {}
-        hed_strings = get_assembled(input_data, my_sidecar, my_schema, extra_def_dicts=None, join_columns=True,
+        hed_strings, definitions = get_assembled(input_data, my_sidecar, my_schema, extra_def_dicts=None, join_columns=True,
                                     shrink_defs=False, expand_defs=True)
         for hed in hed_strings:
             counts.update_event_counts(hed, 'myName')
@@ -126,10 +126,8 @@ class Test(unittest.TestCase):
         hed_strings, definitions = get_assembled(input_data, sidecar, my_schema, 
                                                  extra_def_dicts=None, join_columns=True,
                                                  shrink_defs=False, expand_defs=True)
-        for objs in input_data.iter_dataframe(hed_ops=[my_schema], return_string_only=False,
-                                              expand_defs=True, remove_definitions=True):
-            x = objs['HED']
-            counts.update_event_counts(objs['HED'], 'myName')
+        for hed in hed_strings:
+            counts.update_event_counts(hed, 'myName')
         summary_dict['myName'] = counts
 
     def test_get_summary_details(self):

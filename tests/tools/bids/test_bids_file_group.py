@@ -34,9 +34,8 @@ class Test(unittest.TestCase):
         events = BidsFileGroup(self.root_path)
         hed = 'https://raw.githubusercontent.com/hed-standard/hed-schemas/main/standard_schema/hedxml/HED8.0.0.xml'
         hed_schema = load_schema(hed)
-        # TODO test after filtering.
-        # validation_issues = events.validate_datafiles(hed_schema, check_for_warnings=False)
-        # self.assertFalse(validation_issues, "BidsFileGroup should have no validation errors")
+        validation_issues = events.validate_datafiles(hed_schema, check_for_warnings=False)
+        self.assertFalse(validation_issues, "BidsFileGroup should have no validation errors")
         validation_issues = events.validate_datafiles(hed_schema, check_for_warnings=True)
         self.assertTrue(validation_issues, "BidsFileGroup should have validation warnings")
         self.assertEqual(len(validation_issues), 6,
