@@ -621,9 +621,9 @@ class FullHedString(TestHed):
             # 'emptyGroup': False
         }
         expected_issues = {
-            'missingOpeningComma': self.format_error(ValidationErrors.HED_COMMA_MISSING,
+            'missingOpeningComma': self.format_error(ValidationErrors.COMMA_MISSING,
                                                      tag="Action/Reach/To touch("),
-            'missingClosingComma': self.format_error(ValidationErrors.HED_COMMA_MISSING,
+            'missingClosingComma': self.format_error(ValidationErrors.COMMA_MISSING,
                                                      tag="Participant/Effect/Body part/Arm)"),
             'extraOpeningComma': self.format_error(ValidationErrors.HED_TAG_EMPTY,
                                                    source_string=test_strings['extraOpeningComma'],
@@ -674,7 +674,7 @@ class FullHedString(TestHed):
             'validNestedParentheses2': [],
             'validNestedParentheses3': [],
             'validNestedParentheses4': [],
-            'invalidNestedParentheses': self.format_error(ValidationErrors.HED_COMMA_MISSING,
+            'invalidNestedParentheses': self.format_error(ValidationErrors.COMMA_MISSING,
                                                           tag="Thing)) "),
             # 'emptyGroup': []
         }
@@ -698,13 +698,13 @@ class FullHedString(TestHed):
             'closingBracket': False
         }
         expected_issues = {
-            'openingBrace': self.format_error(ValidationErrors.HED_CHARACTER_INVALID, char_index=45,
+            'openingBrace': self.format_error(ValidationErrors.CHARACTER_INVALID, char_index=45,
                                               source_string=test_strings['openingBrace']),
-            'closingBrace': self.format_error(ValidationErrors.HED_CHARACTER_INVALID, char_index=45,
+            'closingBrace': self.format_error(ValidationErrors.CHARACTER_INVALID, char_index=45,
                                               source_string=test_strings['closingBrace']),
-            'openingBracket': self.format_error(ValidationErrors.HED_CHARACTER_INVALID, char_index=45,
+            'openingBracket': self.format_error(ValidationErrors.CHARACTER_INVALID, char_index=45,
                                                 source_string=test_strings['openingBracket']),
-            'closingBracket': self.format_error(ValidationErrors.HED_CHARACTER_INVALID, char_index=45,
+            'closingBracket': self.format_error(ValidationErrors.CHARACTER_INVALID, char_index=45,
                                                 source_string=test_strings['closingBracket'])
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)

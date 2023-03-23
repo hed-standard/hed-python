@@ -110,7 +110,7 @@ class TestInsertColumns(unittest.TestCase):
         expected_df = pd.DataFrame({
             "column1": ["Item, Event, Action"]
         })
-        result = BaseInput._insert_columns(df)
+        result = BaseInput._handle_square_brackets(df)
         pd.testing.assert_frame_equal(result, expected_df)
 
     def test_insert_columns_multiple_rows(self):
@@ -121,16 +121,8 @@ class TestInsertColumns(unittest.TestCase):
         expected_df = pd.DataFrame({
             "column1": ["Item, Event, Action", "Event, Action"]
         })
-        result = BaseInput._insert_columns(df)
+        result = BaseInput._handle_square_brackets(df)
         pd.testing.assert_frame_equal(result, expected_df)
-
-    # def test_insert_columns_no_circular_reference(self):
-    #     df = pd.DataFrame({
-    #         "column1": ["[column2], Event, Action"],
-    #         "column2": ["[column1], Item"]
-    #     })
-    #     with self.assertRaises(ValueError):
-    #         result = BaseInput._insert_columns(df)
 
     def test_insert_columns_multiple_columns(self):
         df = pd.DataFrame({
@@ -141,16 +133,8 @@ class TestInsertColumns(unittest.TestCase):
         expected_df = pd.DataFrame({
             "column1": ["Item, Event, Subject, Action"]
         })
-        result = BaseInput._insert_columns(df)
+        result = BaseInput._handle_square_brackets(df)
         pd.testing.assert_frame_equal(result, expected_df)
-
-    def test_insert_columns_invalid_column_name(self):
-        df = pd.DataFrame({
-            "column1": ["[invalid_column], Event, Action"],
-            "column2": ["Item"]
-        })
-        with self.assertRaises(ValueError):
-            result = BaseInput._insert_columns(df)
 
     def test_insert_columns_four_columns(self):
         df = pd.DataFrame({
@@ -163,24 +147,8 @@ class TestInsertColumns(unittest.TestCase):
             "column1": ["Item, Event, Subject, Action"],
             "column4": ["Data"]
         })
-        result = BaseInput._insert_columns(df)
+        result = BaseInput._handle_square_brackets(df)
         pd.testing.assert_frame_equal(result, expected_df)
-
-    # def test_insert_columns_invalid_syntax(self):
-    #     df = pd.DataFrame({
-    #         "column1": ["column2], Event, Action"],
-    #         "column2": ["Item"]
-    #     })
-    #     with self.assertRaises(ValueError):
-    #         result = BaseInput._insert_columns(df)
-
-    # def test_insert_columns_no_self_reference(self):
-    #     df = pd.DataFrame({
-    #         "column1": ["[column1], Event, Action"],
-    #         "column2": ["Item"]
-    #     })
-    #     with self.assertRaises(ValueError):
-    #         result = BaseInput._insert_columns(df)
 
 
 class TestCombineDataframe(unittest.TestCase):
@@ -248,7 +216,7 @@ class TestColumnRefs(unittest.TestCase):
             'B': ['tag3, tag4', '[col3]'],
         }
         df1 = pd.DataFrame(data1)
-        result1 = BaseInput._find_column_refs(df1)
+        result1 = BaseInput._find_column_refs(df1, df1.columns)
         expected1 = ['col1', 'col2', 'col3']
         self.assertEqual(result1, expected1)
 
@@ -257,7 +225,7 @@ class TestColumnRefs(unittest.TestCase):
             'A': ['[Col1], [col2]', 'tag1, [Col3]', 'tag3, [COL4]', '[col5], [col6]'],
         }
         df2 = pd.DataFrame(data2)
-        result2 = BaseInput._find_column_refs(df2)
+        result2 = BaseInput._find_column_refs(df2, df2.columns)
         expected2 = ['Col1', 'col2', 'Col3', 'COL4', 'col5', 'col6']
         self.assertEqual(result2, expected2)
 
@@ -267,7 +235,7 @@ class TestColumnRefs(unittest.TestCase):
             'B': ['tag5, tag6', 'tag7, tag8'],
         }
         df3 = pd.DataFrame(data3)
-        result3 = BaseInput._find_column_refs(df3)
+        result3 = BaseInput._find_column_refs(df3, df3.columns)
         expected3 = []
         self.assertEqual(result3, expected3)
 
@@ -277,6 +245,6 @@ class TestColumnRefs(unittest.TestCase):
             'B': ['tag3, [COL4', '[col5, col6]'],
         }
         df4 = pd.DataFrame(data4)
-        result4 = BaseInput._find_column_refs(df4)
+        result4 = BaseInput._find_column_refs(df4, df4.columns)
         expected4 = ['col2']
         self.assertEqual(result4, expected4)

@@ -255,8 +255,7 @@ class Sidecar:
         if hed_schema:
             for hed_string, column_data, _ in self.hed_string_iter(error_handler):
                 hed_string_obj = HedString(hed_string, hed_schema)
-                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj,
-                                                 increment_depth_after=False)
+                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
                 self._extract_definition_issues += def_dict.check_for_definitions(hed_string_obj, error_handler)
                 error_handler.pop_error_context()
 

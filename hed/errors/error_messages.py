@@ -6,7 +6,7 @@ Add new errors here, or any other file imported after error_reporter.py.
 
 from hed.errors.error_reporter import hed_error, hed_tag_error
 from hed.errors.error_types import ValidationErrors, SchemaErrors, \
-    SidecarErrors, SchemaWarnings, ErrorSeverity, DefinitionErrors, OnsetErrors
+    SidecarErrors, SchemaWarnings, ErrorSeverity, DefinitionErrors, OnsetErrors, ColumnErrors
 
 
 @hed_tag_error(ValidationErrors.HED_UNITS_INVALID)
@@ -31,14 +31,14 @@ def val_error_tag_extended(tag, problem_tag):
     return f"Hed tag is extended. '{problem_tag}' in {tag}"
 
 
-@hed_error(ValidationErrors.HED_CHARACTER_INVALID)
+@hed_error(ValidationErrors.CHARACTER_INVALID)
 def val_error_invalid_char(source_string, char_index):
     character = source_string[char_index]
     return f'Invalid character "{character}" at index {char_index}"'
 
 
 @hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True,
-               actual_code=ValidationErrors.HED_CHARACTER_INVALID)
+               actual_code=ValidationErrors.CHARACTER_INVALID)
 def val_error_invalid_tag_character(tag, problem_tag):
     return f"Invalid character '{problem_tag}' in {tag}"
 
@@ -49,7 +49,7 @@ def val_error_tildes_not_supported(source_string, char_index):
     return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'"
 
 
-@hed_error(ValidationErrors.HED_COMMA_MISSING)
+@hed_error(ValidationErrors.COMMA_MISSING)
 def val_error_comma_missing(tag):
     return f"Comma missing after - '{tag}'"
 
@@ -143,25 +143,42 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
     return f"Category key '{invalid_key}' does not exist in column.  Valid keys are: {category_keys}"
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_UNMATCHED)
-def val_error_def_unmatched(tag):
-    return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'"
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID)
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
     return f"A data-recording’s Def-expand tag does not match the given definition." + \
            f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}"
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.HED_DEF_VALUE_INVALID)
+@hed_tag_error(ValidationErrors.HED_DEF_UNMATCHED, actual_code=ValidationErrors.DEF_INVALID)
+def val_error_def_unmatched(tag):
+    return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'"
+
+
+@hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_value_missing(tag):
     return f"A def tag requires a placeholder value, but was not given one.  Definition: '{tag}'"
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.HED_DEF_VALUE_INVALID)
+@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_value_extra(tag):
     return f"A def tag does not take a placeholder value, but was given one.  Definition: '{tag}"
+
+
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_UNMATCHED, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
+def val_error_def_expand_unmatched(tag):
+    return f"A data-recording’s Def-expand tag cannot be matched to definition.  Tag: '{tag}'"
+
+
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_VALUE_MISSING, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
+def val_error_def_expand_value_missing(tag):
+    return f"A Def-expand tag requires a placeholder value, but was not given one.  Definition: '{tag}'"
+
+
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_VALUE_EXTRA, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
+def val_error_def_expand_value_extra(tag):
+    return f"A Def-expand tag does not take a placeholder value, but was given one.  Definition: '{tag}"
 
 
 @hed_tag_error(ValidationErrors.HED_TOP_LEVEL_TAG, actual_code=ValidationErrors.HED_TAG_GROUP_ERROR)
@@ -342,3 +359,26 @@ def onset_wrong_placeholder(tag, has_placeholder):
     if has_placeholder:
         return f"Onset/offset def tag {tag} expects a placeholder value, but does not have one."
     return f"Onset/offset def tag {tag} should not have a placeholder, but has one."
+
+
+@hed_error(ColumnErrors.INVALID_COLUMN_REF)
+def invalid_column_ref(bad_refs):
+    return f"Bad column references found(columns do not exist): {bad_refs}"
+
+
+@hed_error(ColumnErrors.SELF_COLUMN_REF)
+def self_column_ref(self_ref):
+    return f"Column references itself: {self_ref}"
+
+
+@hed_error(ColumnErrors.NESTED_COLUMN_REF)
+def nested_column_ref(column_name, ref_column):
+    return f"Column {column_name} has a nested reference to {ref_column}.  " \
+           f"Column reference columns cannot contain other column references."
+
+
+@hed_error(ColumnErrors.MALFORMED_COLUMN_REF)
+def nested_column_ref(column_name, index, symbol):
+    return f"Column {column_name} has a malformed column reference.  Improper symbol {symbol} found at index {index}."
+
+

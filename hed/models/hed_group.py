@@ -132,9 +132,6 @@ class HedGroup:
         Returns:
             HedGroup: The copied group.
 
-        Notes:
-            - The parent tag is removed.
-
         """
         save_parent = self._parent
         self._parent = None

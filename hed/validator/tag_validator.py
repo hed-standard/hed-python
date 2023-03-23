@@ -201,13 +201,13 @@ class TagValidator:
                 if current_tag.strip() == self.OPENING_GROUP_CHARACTER:
                     current_tag = ''
                 else:
-                    issues += ErrorHandler.format_error(ValidationErrors.HED_COMMA_MISSING, tag=current_tag)
+                    issues += ErrorHandler.format_error(ValidationErrors.COMMA_MISSING, tag=current_tag)
             elif last_non_empty_valid_character == "," and current_character == self.CLOSING_GROUP_CHARACTER:
                 issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_EMPTY, source_string=hed_string,
                                                     char_index=i)
             elif TagValidator._comma_is_missing_after_closing_parentheses(last_non_empty_valid_character,
                                                                           current_character):
-                issues += ErrorHandler.format_error(ValidationErrors.HED_COMMA_MISSING, tag=current_tag[:-1])
+                issues += ErrorHandler.format_error(ValidationErrors.COMMA_MISSING, tag=current_tag[:-1])
                 break
             last_non_empty_valid_character = current_character
             last_non_empty_valid_index = i
@@ -495,7 +495,7 @@ class TagValidator:
             list: A singleton list with a dictionary representing the error.
 
         """
-        error_type = ValidationErrors.HED_CHARACTER_INVALID
+        error_type = ValidationErrors.CHARACTER_INVALID
         character = hed_string[index]
         if character == "~":
             error_type = ValidationErrors.HED_TILDES_UNSUPPORTED

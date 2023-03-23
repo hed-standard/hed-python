@@ -10,6 +10,27 @@ from hed.errors.error_types import ErrorContext, ErrorSeverity
 
 error_functions = {}
 
+# Controls if the default issue printing skips adding indentation for this context
+no_tab_context = {ErrorContext.HED_STRING, ErrorContext.SCHEMA_ATTRIBUTE}
+
+# Default sort ordering for issues list
+default_sort_list = [
+    ErrorContext.CUSTOM_TITLE,
+    ErrorContext.FILE_NAME,
+    ErrorContext.SIDECAR_COLUMN_NAME,
+    ErrorContext.SIDECAR_KEY_NAME,
+    ErrorContext.ROW,
+    ErrorContext.COLUMN,
+    ErrorContext.HED_STRING,
+    ErrorContext.SCHEMA_SECTION,
+    ErrorContext.SCHEMA_TAG,
+    ErrorContext.SCHEMA_ATTRIBUTE,
+]
+
+# ErrorContext which is expected to be int based.
+int_sort_list = [
+    ErrorContext.ROW,
+]
 
 def _register_error_function(error_type, wrapper_func):
     if error_type in error_functions:
@@ -153,19 +174,23 @@ class ErrorHandler:
         self.error_context = []
         self._check_for_warnings = check_for_warnings
 
-    def push_error_context(self, context_type, context, increment_depth_after=True):
+    def push_error_context(self, context_type, context):
         """ Push a new error context to narrow down error scope.
 
         Parameters:
             context_type (ErrorContext): A value from ErrorContext representing the type of scope.
             context (str, int, or HedString): The main value for the context_type.
-            increment_depth_after (bool): If True, add an extra tab to any subsequent errors in the scope.
 
         Notes:
             The context depends on the context_type. For ErrorContext.FILE_NAME this would be the actual filename.
 
         """
-        self.error_context.append((context_type, context, increment_depth_after))
+        if context is None:
+            if context_type in int_sort_list:
+                context = 0
+            else:
+                context_type = ""
+        self.error_context.append((context_type, context))
 
     def pop_error_context(self):
         """ Remove the last scope from the error context.
@@ -292,8 +317,8 @@ class ErrorHandler:
         """
         if error_object is None:
             error_object = {}
-        for (context_type, context, increment_count) in error_context_to_add:
-            error_object[context_type] = (context, increment_count)
+        for (context_type, context) in error_context_to_add:
+            error_object[context_type] = context
 
         return error_object
 
@@ -330,7 +355,7 @@ class ErrorHandler:
         else:
             return None, None
 
-        hed_string = error_object[ErrorContext.HED_STRING][0]
+        hed_string = error_object[ErrorContext.HED_STRING]
         span = hed_string._get_org_span(source_tag)
         return span
 
@@ -385,6 +410,7 @@ class ErrorHandler:
 
 def get_exception_issue_string(issues, title=None):
     """ Return a string with issues list flatted into single string, one issue per line.
+        Possibly being deprecated.
 
     Parameters:
         issues (list):  A list of strings containing issues to print.
@@ -408,6 +434,29 @@ def get_exception_issue_string(issues, title=None):
     if title:
         issue_str = title + '\n' + issue_str
     return issue_str
+
+
+def sort_issues(issues, reverse=False):
+    """Sorts a list of issues by the error context values.
+
+    Parameters:
+        issues (list): A list of dictionaries representing the issues to be sorted.
+        reverse (bool, optional): If True, sorts the list in descending order. Default is False.
+
+    Returns:
+        list: The sorted list of issues."""
+    def _get_keys(d):
+        result = []
+        for key in default_sort_list:
+            if key in int_sort_list:
+                result.append(d.get(key, -1))
+            else:
+                result.append(d.get(key, ""))
+        return tuple(result)
+
+    issues = sorted(issues, key=_get_keys, reverse=reverse)
+
+    return issues
 
 
 def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True):
@@ -471,7 +520,7 @@ def _get_context_from_issue(val_issue, skip_filename=True):
         if skip_filename and key == ErrorContext.FILE_NAME:
             continue
         if key.startswith("ec_"):
-            single_issue_context.append((key, *val_issue[key]))
+            single_issue_context.append((key, val_issue[key]))
 
     return single_issue_context
 
@@ -512,7 +561,7 @@ def _get_context_string(single_issue_context, last_used_context):
     """ Convert a single context list into the final human readable output form.
 
     Parameters:
-        single_issue_context (list): A list of tuples containing the context(context_type, context, increment_tab)
+        single_issue_context (list): A list of tuples containing the context(context_type, context)
         last_used_context (list): A list of tuples containing the last drawn context.
 
     Returns:
@@ -528,18 +577,18 @@ def _get_context_string(single_issue_context, last_used_context):
     tab_count = 0
     found_difference = False
     for i, context_tuple in enumerate(single_issue_context):
-        (context_type, context, increment_tab) = context_tuple
+        (context_type, context) = context_tuple
         if len(last_used_context) > i and not found_difference:
             last_drawn = last_used_context[i]
             # Was drawn, and hasn't changed.
             if last_drawn == context_tuple:
-                if increment_tab:
+                if context_type not in no_tab_context:
                     tab_count += 1
                 continue
 
         context_string += _format_single_context_string(context_type, context, tab_count)
         found_difference = True
-        if increment_tab:
+        if context_type not in no_tab_context:
             tab_count += 1
 
     tab_string = '\t' * tab_count

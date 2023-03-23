@@ -96,6 +96,7 @@ class HedString(HedGroup):
             expanded_parent = def_expand_group._parent
             if expanded_parent:
                 def_expand_tag.short_base_tag = DefTagNames.DEF_ORG_KEY
+                def_expand_tag._parent = expanded_parent
                 expanded_parent.replace(def_expand_group, def_expand_tag)
 
         return self
@@ -118,6 +119,7 @@ class HedString(HedGroup):
         for tag, group in replacements:
             tag_parent = tag._parent
             tag_parent.replace(tag, group)
+            tag._parent = group
             tag.short_base_tag = DefTagNames.DEF_EXPAND_KEY
 
         return self
