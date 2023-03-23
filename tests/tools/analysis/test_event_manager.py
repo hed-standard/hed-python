@@ -36,7 +36,6 @@ class Test(unittest.TestCase):
                 self.assertEqual(event.start_time, manager1.data.dataframe.loc[index, "onset"])
                 if not event.end_time:
                     self.assertEqual(event.end_index, len(manager1.data.dataframe))
-        print("to here")
 
     # def test_constructor(self):
     #     with self.assertRaises(ValueError) as cont:
