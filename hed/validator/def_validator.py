@@ -51,7 +51,7 @@ class DefValidator(DefinitionDict):
             issues
         """
         def_issues = []
-
+        is_def_tag = def_expand_group is not def_tag
         is_label_tag = def_tag.extension_or_value_portion
         placeholder = None
         found_slash = is_label_tag.find("/")
@@ -62,17 +62,27 @@ class DefValidator(DefinitionDict):
         label_tag_lower = is_label_tag.lower()
         def_entry = self.defs.get(label_tag_lower)
         if def_entry is None:
-            def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_UNMATCHED, tag=def_tag)
+            error_code = ValidationErrors.HED_DEF_UNMATCHED
+            if is_def_tag:
+                error_code = ValidationErrors.HED_DEF_EXPAND_UNMATCHED
+            def_issues += ErrorHandler.format_error(error_code, tag=def_tag)
         else:
-            def_tag_name, def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder)
+            def_tag_name, def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder,
+                                                                  return_copy_of_tag=True)
             if def_tag_name:
-                if def_expand_group is not def_tag and def_expand_group != def_contents:
+                if is_def_tag and def_expand_group != def_contents:
                     def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_INVALID,
                                                             tag=def_tag, actual_def=def_contents,
                                                             found_def=def_expand_group)
             elif def_entry.takes_value:
-                def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_MISSING, tag=def_tag)
+                error_code = ValidationErrors.HED_DEF_VALUE_MISSING
+                if is_def_tag:
+                    error_code = ValidationErrors.HED_DEF_EXPAND_VALUE_MISSING
+                def_issues += ErrorHandler.format_error(error_code, tag=def_tag)
             else:
-                def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_VALUE_EXTRA, tag=def_tag)
+                error_code = ValidationErrors.HED_DEF_VALUE_EXTRA
+                if is_def_tag:
+                    error_code = ValidationErrors.HED_DEF_EXPAND_VALUE_EXTRA
+                def_issues += ErrorHandler.format_error(error_code, tag=def_tag)
 
         return def_issues

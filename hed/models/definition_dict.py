@@ -184,7 +184,9 @@ class DefinitionDict:
             hed_tag(HedTag): The hed tag to identify definition contents in
         """
         if hed_tag.short_base_tag in {DefTagNames.DEF_ORG_KEY, DefTagNames.DEF_EXPAND_ORG_KEY}:
+            save_parent = hed_tag._parent
             def_contents = self._get_definition_contents(hed_tag)
+            hed_tag._parent = save_parent
             if def_contents is not None:
                 hed_tag._expandable = def_contents
                 hed_tag._expanded = hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY

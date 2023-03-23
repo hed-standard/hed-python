@@ -54,6 +54,19 @@ class HedTag:
             if def_dict:
                 def_dict.construct_def_tag(self)
 
+    def copy(self):
+        """ Return a deep copy of this tag.
+
+        Returns:
+            HedTag: The copied group.
+
+        """
+        save_parent = self._parent
+        self._parent = None
+        return_copy = copy.deepcopy(self)
+        self._parent = save_parent
+        return return_copy
+
     @property
     def schema_prefix(self):
         """ Library prefix for this tag if one exists.

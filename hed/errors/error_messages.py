@@ -31,14 +31,14 @@ def val_error_tag_extended(tag, problem_tag):
     return f"Hed tag is extended. '{problem_tag}' in {tag}"
 
 
-@hed_error(ValidationErrors.HED_CHARACTER_INVALID)
+@hed_error(ValidationErrors.CHARACTER_INVALID)
 def val_error_invalid_char(source_string, char_index):
     character = source_string[char_index]
     return f'Invalid character "{character}" at index {char_index}"'
 
 
 @hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True,
-               actual_code=ValidationErrors.HED_CHARACTER_INVALID)
+               actual_code=ValidationErrors.CHARACTER_INVALID)
 def val_error_invalid_tag_character(tag, problem_tag):
     return f"Invalid character '{problem_tag}' in {tag}"
 
@@ -49,7 +49,7 @@ def val_error_tildes_not_supported(source_string, char_index):
     return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'"
 
 
-@hed_error(ValidationErrors.HED_COMMA_MISSING)
+@hed_error(ValidationErrors.COMMA_MISSING)
 def val_error_comma_missing(tag):
     return f"Comma missing after - '{tag}'"
 
@@ -143,25 +143,42 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
     return f"Category key '{invalid_key}' does not exist in column.  Valid keys are: {category_keys}"
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_UNMATCHED)
-def val_error_def_unmatched(tag):
-    return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'"
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID)
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
     return f"A data-recording’s Def-expand tag does not match the given definition." + \
            f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}"
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.HED_DEF_VALUE_INVALID)
+@hed_tag_error(ValidationErrors.HED_DEF_UNMATCHED, actual_code=ValidationErrors.DEF_INVALID)
+def val_error_def_unmatched(tag):
+    return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'"
+
+
+@hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_value_missing(tag):
     return f"A def tag requires a placeholder value, but was not given one.  Definition: '{tag}'"
 
 
-@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.HED_DEF_VALUE_INVALID)
+@hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_value_extra(tag):
     return f"A def tag does not take a placeholder value, but was given one.  Definition: '{tag}"
+
+
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_UNMATCHED, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
+def val_error_def_expand_unmatched(tag):
+    return f"A data-recording’s Def-expand tag cannot be matched to definition.  Tag: '{tag}'"
+
+
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_VALUE_MISSING, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
+def val_error_def_expand_value_missing(tag):
+    return f"A Def-expand tag requires a placeholder value, but was not given one.  Definition: '{tag}'"
+
+
+@hed_tag_error(ValidationErrors.HED_DEF_EXPAND_VALUE_EXTRA, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
+def val_error_def_expand_value_extra(tag):
+    return f"A Def-expand tag does not take a placeholder value, but was given one.  Definition: '{tag}"
 
 
 @hed_tag_error(ValidationErrors.HED_TOP_LEVEL_TAG, actual_code=ValidationErrors.HED_TAG_GROUP_ERROR)
