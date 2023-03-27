@@ -6,6 +6,7 @@ from hed.tools.util.data_util import separate_values
 from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
 from hed.models import df_util
+from hed.models import QueryParser
 
 
 def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs=False):
@@ -44,6 +45,68 @@ def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs
     return df, definitions
 
 
+def get_expression_parsers(queries, query_names=None):
+    """ Returns a list of expression parsers and query_names.
+
+        Parameters:
+            queries (list):  A list of query strings or QueryParser objects
+            query_names (list): A list of column names for results of queries. If missing --- query_1, query_2, etc.
+
+        Returns:
+            DataFrame - containing the search strings
+
+        Raises:   
+            ValueError - if query names are invalid or duplicated.
+
+        """
+    expression_parsers = []
+    if not query_names:
+        query_names = [f"query_{index}" for index in range(len(queries))]
+    elif len(queries) != len(query_names):
+        raise ValueError("QueryNamesLengthBad",
+                         f"The query_names length {len(query_names)} must be empty or equal" +
+                         f"to the queries length {len(queries)}.")
+    elif len(set(query_names)) != len(query_names):
+        raise ValueError("DuplicateQueryNames", f"The query names {str(query_names)} list has duplicates")
+    for index, query in enumerate(queries):
+        if not query:
+            raise ValueError("BadQuery", f"Query [{index}]: {query} cannot be empty")
+        elif isinstance(query, str):
+            try:
+                next_query = QueryParser(query)
+            except Exception:
+                raise ValueError("BadQuery", f"Query [{index}]: {query} cannot be parsed")
+        else:
+            next_query = query
+        expression_parsers.append(next_query)
+    return expression_parsers, query_names
+
+
+def search_strings(hed_strings, queries, query_names=None):
+    """ Returns a DataFrame of factors based on results of queries.
+
+    Parameters:
+        hed_strings (list):  A list of HedString objects (empty entries or None entries are 0's)
+        queries (list):  A list of query strings or QueryParser objects
+        query_names (list): A list of column names for results of queries. If missing --- query_1, query_2, etc.
+
+    Returns:
+        DataFrame - containing the factor vectors with results of the queries
+
+    Raises:   
+        ValueError - if query names are invalid or duplicated.
+            
+    """
+
+    expression_parsers, query_names = get_expression_parsers(queries, query_names=query_names)
+    df_factors = pd.DataFrame(0, index=range(len(hed_strings)), columns=query_names)
+    for parse_ind, parser in enumerate(expression_parsers):
+        for index, next_item in enumerate(hed_strings):
+            match = parser.search(next_item)
+            if match:
+                df_factors.at[index, query_names[parse_ind]] = 1
+    return df_factors
+
 # def get_assembled_strings(table, hed_schema=None, expand_defs=False):
 #     """ Return HED string objects for a tabular file.
 # 
@@ -61,7 +124,7 @@ def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs
 #     return hed_list
 # 
 
-# def search_tabular(data_input, hed_schema, query, columns_included=None):
+# def search_tabular(data_input, sidecar, hed_schema, query, extra_def_dicts=None, columns_included=None):
 #     """ Return a dataframe with results of query.
 # 
 #     Parameters:
@@ -76,7 +139,8 @@ def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs
 #     """
 # 
 #     eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
-#     hed_list = get_assembled_strings(data_input, hed_schema=hed_schema, expand_defs=True)
+#     hed_list, definitions = df_util.get_assembled(data_input, sidecar, hed_schema, extra_def_dicts=None, join_columns=True,
+#                                                   shrink_defs=False, expand_defs=True)
 #     expression = QueryParser(query)
 #     hed_tags = []
 #     row_numbers = []
