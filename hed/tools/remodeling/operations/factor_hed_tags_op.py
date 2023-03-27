@@ -8,6 +8,7 @@ from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
 from hed.models.expression_parser import QueryParser
 from hed.models.df_util import get_assembled
+from hed.tools.analysis.analysis_util import get_expression_parsers, search_strings
 
 
 class FactorHedTagsOp(BaseOp):
@@ -65,21 +66,8 @@ class FactorHedTagsOp(BaseOp):
         self.queries = parameters['queries']
         self.query_names = parameters['query_names']
         self.remove_types = parameters['remove_types']
-        if not self.query_names:
-            self.query_names = [f"query_{index}" for index in range(len(self.queries))]
-        elif len(self.queries) != len(self.query_names):
-            raise ValueError("QueryNamesLengthBad",
-                             f"The query_names length {len(self.query_names)} must be empty or equal" +
-                             f"to the queries length {len(self.queries)} .")
-        elif len(set(self.query_names)) != len(self.query_names):
-            raise ValueError("DuplicateQueryNames",  f"The query names {str(self.query_names)} list has duplicates")
-        self.expression_parsers = []
-        for index, query in enumerate(self.queries):
-            try:
-                next_query = QueryParser(query)
-            except Exception:
-                raise ValueError("BadQuery", f"Query [{index}]: {query} cannot be parsed")
-            self.expression_parsers.append(next_query)
+        self.expression_parsers, self.query_names = get_expression_parsers(self.queries, 
+                                                                           query_names=parameters['query_names'])
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Factor the column using HED tag queries.
@@ -111,12 +99,7 @@ class FactorHedTagsOp(BaseOp):
         df_list = [input_data.dataframe]
         hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None, 
                                        join_columns=True, shrink_defs=False, expand_defs=True)
-        df_factors = pd.DataFrame(0, index=range(len(hed_strings)), columns=self.query_names)
-        for parse_ind, parser in enumerate(self.expression_parsers):
-            for index, next_item in enumerate(hed_strings):
-                match = parser.search(next_item)
-                if match:
-                    df_factors.at[index, self.query_names[parse_ind]] = 1
+        df_factors = search_strings(hed_strings, self.expression_parsers, query_names=self.query_names)
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)

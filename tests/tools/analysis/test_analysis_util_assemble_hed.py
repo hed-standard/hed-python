@@ -3,9 +3,8 @@ import unittest
 from pandas import DataFrame
 from hed import schema as hedschema
 from hed.models import Sidecar, TabularInput, DefinitionDict
-from hed.tools.analysis.analysis_util import assemble_hed
-
-
+from hed.models import df_util
+from hed.tools.analysis.analysis_util import assemble_hed, search_strings
 
 
 # noinspection PyBroadException
@@ -25,7 +24,6 @@ class Test(unittest.TestCase):
         schema = hedschema.load_schema(schema_path)
         cls.schema = schema
         sidecar1 = Sidecar(json_path, name='face_sub1_json')
-        cls.sidecar_path = sidecar1
         cls.sidecar1 = sidecar1
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         cls.input_data_no_sidecar = TabularInput(events_path, name="face_sub1_events_no_sidecar")
@@ -96,27 +94,29 @@ class Test(unittest.TestCase):
         self.assertNotEqual(first_str2.find('Def/'), -1, "assemble_hed with def expand has no Def tag")
         self.assertEqual(first_str2.find('Def-expand/'), -1, "assemble_hed with def expand has Def-expand tags")
 
-    # def test_search_tabular(self):
-    #     query1 = "sensory-event"
-    #     df1 = search_tabular(self.input_data, self.schema, query1, columns_included=None)
-    #     self.assertIsInstance(df1, DataFrame, "search_tabular returns a dataframe when the query is satisfied.")
-    #     self.assertEqual(len(df1.columns), 2, "search_tabular has the right number of columns when query okay")
-    #     self.assertEqual(len(df1.index), 155, "search_tabular has right number of rows when query okay")
-    #     query2 = 'data-feature'
-    #     df2 = search_tabular(self.input_data, self.hed_schema, query2, columns_included=None)
-    #     self.assertFalse(df2, "search_tabular returns None when query is not satisfied.")
-    # 
-    #     query3 = "sensory-event"
-    #     df3 = search_tabular(self.input_data, self.hed_schema, query3, columns_included=['event_type', 'rep_status'])
-    #     self.assertIsInstance(df3, DataFrame, "search_tabular returns a DataFrame when extra columns")
-    #     self.assertEqual(len(df3.columns), 3, "search_tabular returns right number of columns when extra columns")
-    #     self.assertEqual(len(df3.index), 155, "search_tabular has right number of rows when query okay")
-    # 
-    #     df4 = search_tabular(self.input_data, self.hed_schema, query3,
-    #                          columns_included=['onset', 'event_type', 'rep_status'])
-    #     self.assertIsInstance(df4, DataFrame, "search_tabular returns a DataFrame when extra columns")
-    #     self.assertEqual(len(df4.columns), 4, "search_tabular returns right number of columns when extra columns")
-    #     self.assertEqual(len(df4.index), 155, "search_tabular has right number of rows when query okay")
+    def test_search_strings(self):
+        hed_strings, dict1 = df_util.get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None, 
+                                                   join_columns=True, shrink_defs=False, expand_defs=True)
+        queries1 = ["sensory-event"]
+        query_names1 = ["sensory"]
+        df1 = search_strings(hed_strings, queries1, query_names1)
+        self.assertIsInstance(df1, DataFrame, "search_tabular returns a dataframe when the query is satisfied.")
+        self.assertEqual(len(df1.columns), 1, "search_tabular has the right number of columns when query okay")
+        self.assertEqual(len(df1.index), 200, "search_tabular has right number of rows when query okay")
+        queries2 = ['data-feature', "sensory-event"]
+        query_names2 = ['data', 'sensory']
+        df2 = search_strings(hed_strings, queries2, query_names2)
+        self.assertEqual(len(df2.columns), 2, "search_tabular has the right number of columns when query okay")
+        self.assertEqual(len(df2.index), 200, "search_tabular has right number of rows when query okay")
+        totals = df2.sum(axis=0)
+        self.assertFalse(totals.loc['data'])
+        self.assertEqual(totals.loc['sensory'], 155)
+        queries3 = ['image', "sensory-event", "face"]
+        query_names3 = ['image', 'sensory', "faced"]
+        df3 = search_strings(hed_strings, queries3, query_names3)
+        self.assertIsInstance(df3, DataFrame, "search_tabular returns a DataFrame when extra columns")
+        self.assertEqual(len(df3.columns), 3, "search_tabular returns right number of columns when extra columns")
+        self.assertEqual(len(df3.index), 200, "search_tabular has right number of rows when query okay")
 
 
 if __name__ == '__main__':
