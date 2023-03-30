@@ -51,19 +51,12 @@ class Test(unittest.TestCase):
         file_input = SpreadsheetInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
                                       tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
 
-        for column_to_hed_tags in file_input:
-            break_here = 3
+        self.assertTrue(isinstance(file_input.dataframe_a, pd.DataFrame))
+        self.assertTrue(isinstance(file_input.series_a, pd.Series))
+        self.assertTrue(file_input.dataframe_a.size)
 
         # Just make sure this didn't crash for now
         self.assertTrue(True)
-
-    def test_get_row_hed_tags(self):
-        row_dict = self.generic_file_input._mapper.expand_row_tags(self.row_with_hed_tags)
-        column_to_hed_tags_dictionary = row_dict[model_constants.COLUMN_TO_HED_TAGS]
-        # self.assertIsInstance(hed_string, HedString)
-        # self.assertTrue(hed_string)
-        self.assertIsInstance(column_to_hed_tags_dictionary, dict)
-        self.assertTrue(column_to_hed_tags_dictionary)
 
     def test_file_as_string(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -72,15 +65,14 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
-        self.assertEqual(len(sidecar.validate_entries(expand_defs=True)), 0)
+        self.assertEqual(len(sidecar.validate(self.hed_schema)), 0)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
         with open(events_path) as file:
             events_file_as_string = io.StringIO(file.read())
         input_file_from_string = TabularInput(file=events_file_as_string, sidecar=sidecar)
 
-        for column_dict, column_dict in zip(input_file, input_file_from_string):
-            self.assertEqual(column_dict, column_dict)
+        self.assertTrue(input_file._dataframe.equals(input_file_from_string._dataframe))
 
     def test_bad_file_inputs(self):
         self.assertRaises(HedFileError, TabularInput, None)
@@ -115,7 +107,7 @@ class Test(unittest.TestCase):
                                        column_prefix_dictionary={1: 'Label/', 3: 'Description/'},
                                        name='ExcelOneSheet.xlsx')
         buffer = io.BytesIO()
-        spreadsheet.to_excel(buffer, output_processed_file=True)
+        spreadsheet.to_excel(buffer, output_assembled=True)
         buffer.seek(0)
         v = buffer.getvalue()
         self.assertGreater(len(v), 0, "It should have a length greater than 0")
@@ -145,23 +137,13 @@ class Test(unittest.TestCase):
         json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                  "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
-        self.assertEqual(len(sidecar.validate_entries()), 0)
+        self.assertEqual(len(sidecar.validate(self.hed_schema)), 0)
         input_file_1 = TabularInput(events_path, sidecar=sidecar)
         input_file_2 = TabularInput(events_path, sidecar=sidecar)
 
         input_file_2.reset_column_mapper()
 
-        for (row_number, row_dict), (row_number2, row_dict2) in \
-                zip(enumerate(input_file_1.iter_dataframe(return_string_only=False)),
-                    enumerate(input_file_2.iter_dataframe(return_string_only=False))):
-            self.assertEqual(row_number, row_number2,
-                             f"TabularInput should have row {row_number} equal to {row_number2} after reset")
-            column_dict = row_dict["column_to_hed_tags"]
-            self.assertTrue(len(column_dict) == 5,
-                            f"The column dictionary for row {row_number} should have the right length")
-            column_dict2 = row_dict2["column_to_hed_tags"]
-            self.assertTrue(len(column_dict2) == 0,
-                            f"The reset column dictionary for row {row_number2} should have the right length")
+        self.assertTrue(input_file_1.dataframe.equals(input_file_2.dataframe))
 
     def test_no_column_header_and_convert(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -172,18 +154,7 @@ class Test(unittest.TestCase):
         events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         '../data/model_tests/no_column_header_long.tsv')
         hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
-        for column1, column2 in zip(hed_input, hed_input_long):
-            self.assertEqual(column1, column2)
-
-        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/model_tests/no_column_header.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
-        events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                        '../data/model_tests/no_column_header_long.tsv')
-        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
-        hed_input_long.convert_to_short(self.hed_schema)
-        for column1, column2 in zip(hed_input, hed_input_long):
-            self.assertEqual(column1, column2)
+        self.assertTrue(hed_input._dataframe.equals(hed_input_long._dataframe))
 
     def test_convert_short_long_with_definitions(self):
         # Verify behavior works as expected even if definitions are present
@@ -195,37 +166,17 @@ class Test(unittest.TestCase):
         events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         '../data/model_tests/no_column_header_definition_long.tsv')
         hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
-        for column1, column2 in zip(hed_input, hed_input_long):
-            self.assertEqual(column1, column2)
-
-    def test_convert_short_long_with_definitions_new_style(self):
-        # Verify behavior works as expected even if definitions are present
-        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/model_tests/no_column_header_definition.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2],
-                                     hed_schema=self.hed_schema)
-        hed_input.convert_to_long()
-
-        events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                        '../data/model_tests/no_column_header_definition_long.tsv')
-        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
-        for column1, column2 in zip(hed_input, hed_input_long):
-            self.assertEqual(column1, column2)
+        self.assertTrue(hed_input._dataframe.equals(hed_input_long._dataframe))
 
     def test_definitions_identified(self):
-        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/model_tests/no_column_header_definition.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2],
-                                     hed_schema=self.hed_schema)
-        def_entry = hed_input.def_dict['deftest1']
-        tag = def_entry.contents.tags()[0]
-        self.assertTrue(tag._schema_entry)
+        # Todo ian: this test is no longer relevant
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header_definition.tsv')
         hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
-        def_entry = hed_input.def_dict['deftest1']
-        tag = def_entry.contents.tags()[0]
-        self.assertFalse(tag._schema_entry)
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/no_column_header_definition.tsv')
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+
 
     def test_loading_dataframe_directly(self):
         ds_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -236,9 +187,22 @@ class Test(unittest.TestCase):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header_definition.tsv')
         hed_input2 = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
-        for column1, column2 in zip(hed_input, hed_input2):
-            self.assertEqual(column1, column2)
+        self.assertTrue(hed_input._dataframe.equals(hed_input2._dataframe))
 
+    def test_ignoring_na_column(self):
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/na_tag_column.tsv')
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        self.assertTrue(hed_input.dataframe_a.loc[1, 1] == 'n/a')
+
+    def test_ignoring_na_value_column(self):
+        from hed import TabularInput
+        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/na_value_column.tsv')
+        sidecar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/model_tests/na_value_column.json')
+        hed_input = TabularInput(events_path, sidecar=sidecar_path)
+        self.assertTrue(hed_input.dataframe_a.loc[1, 'Value'] == 'n/a')
 
 if __name__ == '__main__':
     unittest.main()

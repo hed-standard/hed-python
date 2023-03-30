@@ -40,6 +40,10 @@ class Test(unittest.TestCase):
         cls.summary_path = \
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+        rel_path = '../../../data/remodel_tests/sub-002_task-FacePerception_run-1_events.tsv'
+        cls.events_wh = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_path))
+        rel_side =  '../../../data/remodel_tests/task-FacePerception_events.json'
+        cls.sidecar_path_wh = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_side))
 
     @classmethod
     def tearDownClass(cls):
@@ -75,9 +79,21 @@ class Test(unittest.TestCase):
         self.assertEqual(len(summary2['Dataset']['Overall summary']['files']), 2)
         summary2a = context2.get_summary(individual_summaries="separate")
         self.assertIsInstance(summary2a["Individual files"]["run-02"], dict)
+        
+    def test_text_summary_with_levels(self):
+        with open(self.summary_path, 'r') as fp:
+            parms = json.load(fp)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        df = dispatch.get_data_file(self.events_wh)
+        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        sum_op = parsed_commands[2]
+        sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-01', sidecar=self.sidecar_path_wh)
+        context1 = dispatch.context_dict['AOMIC_condition_variables']
+        text_summary1 = context1.get_text_summary()
+        self.assertIsInstance(text_summary1, dict)
 
     def test_text_summary(self):
-        sidecar = Sidecar(self.sidecar_path, 'aomic_sidecar', hed_schema=self.hed_schema)
+        sidecar = Sidecar(self.sidecar_path, name='aomic_sidecar')
 
         with open(self.summary_path, 'r') as fp:
             parms = json.load(fp)

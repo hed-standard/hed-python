@@ -42,9 +42,10 @@ class Test(unittest.TestCase):
         events_path = os.path.realpath(os.path.join(bids_root_path,
                                                     'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
-        sidecar1 = Sidecar(sidecar_path, hed_schema=schema, name='face_sub1_json')
-        cls.input_data = TabularInput(events_path, hed_schema=schema, sidecar=sidecar1, name="face_sub1_events")
+        sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
+        cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         cls.schema = schema
+        cls.sidecar1 = sidecar1
 
     def test_constructor(self):
         def_man = HedTypeDefinitions(self.definitions1, self.schema)
@@ -54,8 +55,8 @@ class Test(unittest.TestCase):
         self.assertEqual(len(def_man.def_map), len(def_man.definitions),
                          "Constructor condition_map should be the same length as the definitions dictionary")
 
-    def test_constructor_from_tabular_input(self):
-        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
+    def test_constructor_from_sidecar(self):
+        definitions = self.sidecar1.get_def_dict(self.schema)
         def_man = HedTypeDefinitions(definitions, self.schema)
         self.assertIsInstance(def_man, HedTypeDefinitions,
                               "Constructor should create a HedTypeDefinitions from a tabular input")

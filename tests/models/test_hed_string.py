@@ -1,5 +1,6 @@
 from hed.models import HedString
 import unittest
+from hed import load_schema_version
 
 
 class TestHedStrings(unittest.TestCase):
@@ -170,3 +171,29 @@ class TestHedStringUtil(unittest.TestCase):
         }
 
         self.compare_split_results(test_strings, expected_results)
+
+class TestHedStringShrinkDefs(unittest.TestCase):
+    hed_schema = load_schema_version("8.0.0")
+
+    def test_shrink_defs(self):
+        test_strings = {
+            1: "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2)),Event",
+            2: "Event, ((Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2)),Event)",
+            # this one shouldn't change as it doesn't have a parent
+            3: "Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2),Event",
+            # This one is an obviously invalid def, but still shrinks
+            4: "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2), ThisDefIsInvalid),Event",
+        }
+
+        expected_results = {
+            1: "Def/TestDefPlaceholder/2471,Event",
+            2: "Event,(Def/TestDefPlaceholder/2471,Event)",
+            3: "Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2),Event",
+            4: "Def/TestDefPlaceholder/2471,Event",
+        }
+
+        for key, test_string in test_strings.items():
+            hed_string = HedString(test_string, hed_schema=self.hed_schema)
+            hed_string.shrink_defs()
+            self.assertEqual(str(hed_string), expected_results[key])
+

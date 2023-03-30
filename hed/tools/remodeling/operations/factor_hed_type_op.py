@@ -5,7 +5,7 @@ import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.models.df_util import get_assembled
 from hed.tools.analysis.hed_type_manager import HedTypeManager
 
 # TODO: restricted factor values are not implemented yet.
@@ -69,13 +69,13 @@ class FactorHedTypeOp(BaseOp):
         """
 
         if sidecar and not isinstance(sidecar, Sidecar):
-            sidecar = Sidecar(sidecar, hed_schema=dispatcher.hed_schema)
-        input_data = TabularInput(df, hed_schema=dispatcher.hed_schema, sidecar=sidecar)
-        df = input_data.dataframe.copy()
-        df_list = [df]
-        hed_strings = get_assembled_strings(input_data, hed_schema=dispatcher.hed_schema, expand_defs=False)
+            sidecar = Sidecar(sidecar)
+        input_data = TabularInput(df, sidecar=sidecar, name=name)
+        df_list = [input_data.dataframe.copy()]
+        hed_strings, definitions = get_assembled(input_data, sidecar, dispatcher.hed_schema, 
+                                                 extra_def_dicts=None, join_columns=True,
+                                                 shrink_defs=True, expand_defs=False)
 
-        definitions = input_data.get_definitions()
         var_manager = HedTypeManager(hed_strings, dispatcher.hed_schema, definitions)
         var_manager.add_type_variable(self.type_tag.lower())
 

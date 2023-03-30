@@ -6,7 +6,7 @@ from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.analysis.hed_type_values import HedTypeValues
 from hed.tools.analysis.hed_type_counts import HedTypeCount, HedTypeCounts
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.models.df_util import get_assembled
 
 
 class Test(unittest.TestCase):
@@ -19,10 +19,10 @@ class Test(unittest.TestCase):
         events_path = os.path.realpath(os.path.join(bids_root_path,
                                        'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
-        sidecar1 = Sidecar(sidecar_path, hed_schema=schema, name='face_sub1_json')
-        input_data = TabularInput(events_path, sidecar=sidecar1, hed_schema=schema, name="face_sub1_events")
-        hed_strings1 = get_assembled_strings(input_data, hed_schema=schema, expand_defs=False)
-        definitions1 = input_data.get_definitions(as_strings=False).gathered_defs
+        sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
+        input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        hed_strings1, definitions1 = get_assembled(input_data, sidecar1, schema, extra_def_dicts=None,
+                                                   join_columns=True, shrink_defs=True, expand_defs=False)
         cls.var_type1 = HedTypeValues(HedContextManager(hed_strings1, schema), definitions1, 'run-01',
                                       type_tag='condition-variable')
 

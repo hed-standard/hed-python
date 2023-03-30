@@ -2,6 +2,7 @@ import json
 import os
 import unittest
 import pandas as pd
+from hed.models.df_util import get_assembled
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_hed_tags_op import SummarizeHedTagsOp, HedTagSummaryContext
 
@@ -96,16 +97,17 @@ class Test(unittest.TestCase):
                     }
                   }
         my_json_str = json.dumps(my_json)
-        my_sidecar = Sidecar(StringIO(my_json_str), hed_schema=my_schema)
+        my_sidecar = Sidecar(StringIO(my_json_str))
         data = [[0.5, 0, 'code1', 'Description/This is a test, Label/Temp, (Def/Blech1, Green)'],
                 [0.6, 0, 'code2', 'Sensory-event, ((Description/Animal, Condition-variable/Blech))']]
         df = pd.DataFrame(data, columns=['onset', 'duration', 'code', 'HED'])
-        input_data = TabularInput(df, hed_schema=my_schema, sidecar=my_sidecar)
+        input_data = TabularInput(df, sidecar=my_sidecar)
         counts = HedTagCounts('myName', 2)
         summary_dict = {}
-        for objs in input_data.iter_dataframe(hed_ops=[my_schema], return_string_only=False,
-                                              expand_defs=True, remove_definitions=True):
-            counts.update_event_counts(objs['HED'], 'myName')
+        hed_strings, definitions = get_assembled(input_data, my_sidecar, my_schema, extra_def_dicts=None, join_columns=True,
+                                    shrink_defs=False, expand_defs=True)
+        for hed in hed_strings:
+            counts.update_event_counts(hed, 'myName')
         summary_dict['myName'] = counts
 
     def test_quick4(self):
@@ -117,14 +119,15 @@ class Test(unittest.TestCase):
         data_path = os.path.realpath(os.path.join(path, 'sub-002_task-FacePerception_run-1_events.tsv'))
         json_path = os.path.realpath(os.path.join(path, 'task-FacePerception_events.json'))
         my_schema = load_schema_version('8.1.0')
-        sidecar = Sidecar(json_path, hed_schema=my_schema)
-        input_data = TabularInput(data_path, hed_schema=my_schema, sidecar=sidecar)
+        sidecar = Sidecar(json_path,)
+        input_data = TabularInput(data_path, sidecar=sidecar)
         counts = HedTagCounts('myName', 2)
         summary_dict = {}
-        for objs in input_data.iter_dataframe(hed_ops=[my_schema], return_string_only=False,
-                                              expand_defs=True, remove_definitions=True):
-            x = objs['HED']
-            counts.update_event_counts(objs['HED'], 'myName')
+        hed_strings, definitions = get_assembled(input_data, sidecar, my_schema, 
+                                                 extra_def_dicts=None, join_columns=True,
+                                                 shrink_defs=False, expand_defs=True)
+        for hed in hed_strings:
+            counts.update_event_counts(hed, 'myName')
         summary_dict['myName'] = counts
 
     def test_get_summary_details(self):

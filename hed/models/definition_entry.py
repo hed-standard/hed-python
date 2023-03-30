@@ -26,13 +26,14 @@ class DefinitionEntry:
         if contents:
             add_group_to_dict(contents, self.tag_dict)
 
-    def get_definition(self, replace_tag, placeholder_value=None):
+    def get_definition(self, replace_tag, placeholder_value=None, return_copy_of_tag=False):
         """ Return a copy of the definition with the tag expanded and the placeholder plugged in.
 
         Parameters:
             replace_tag (HedTag): The def hed tag to replace with an expanded version
             placeholder_value (str or None):    If present and required, will replace any pound signs
                                                 in the definition contents.
+            return_copy_of_tag(bool): Set to true for validation
 
         Returns:
             str:          The expanded def tag name
@@ -45,6 +46,8 @@ class DefinitionEntry:
         if self.takes_value == (placeholder_value is None):
             return None, []
 
+        if return_copy_of_tag:
+            replace_tag = replace_tag.copy()
         output_contents = [replace_tag]
         name = self.name
         if self.contents:

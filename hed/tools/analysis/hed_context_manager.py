@@ -5,6 +5,7 @@ from hed.models import HedGroup, HedString
 from hed.schema import HedSchema, HedSchemaGroup
 from hed.tools.analysis.analysis_util import hed_to_str
 
+#TODO: [Refactor] clean up distinction between hed as strings versus objects -- maybe replace by event manager.
 
 class OnsetGroup:
     def __init__(self, name, contents, start_index, end_index=None):
@@ -23,7 +24,8 @@ class HedContextManager:
         """ Create an context manager for an events file.
 
         Parameters:
-            hed_strings (list): A list of hed_strings to be managed.
+            hed_strings (list): A list of HedString objects to be managed.
+            hed_schema (HedSchema):  A HedSchema
 
         Raises:
             HedFileError: if there are any unmatched offsets.
@@ -35,7 +37,7 @@ class HedContextManager:
 
         """
 
-        self.hed_strings = [HedString(str(hed), hed_schema=hed_schema) for hed in hed_strings]
+        self.hed_strings = hed_strings
         if not isinstance(hed_schema, HedSchema) and not isinstance(hed_schema, HedSchemaGroup):
             raise ValueError("ContextRequiresSchema", f"Context manager must have a valid HedSchema of HedSchemaGroup")
         self.hed_schema = hed_schema
@@ -46,6 +48,12 @@ class HedContextManager:
         self._create_onset_list()
         self._set_event_contexts()
 
+    # def _extract_hed_objs(self, assembled):
+    #     hed_objs = [None for _ in range(len(assembled))]
+    #     for index, value in assembled["HED_assembled"].items():
+    #         hed_objs[index] = HedString(value, hed_schema=self.hed_schema)
+    #     return hed_objs
+    
     def iter_context(self):
         """ Iterate rows of context.
 
@@ -70,13 +78,13 @@ class HedContextManager:
         onset_dict = {}
         for event_index, hed in enumerate(self.hed_strings):
             to_remove = []  # tag_tuples = hed.find_tags(['Onset'], recursive=False, include_groups=1)
-            onset_tuples = hed.find_tags(["onset"], recursive=True, include_groups=2)
+            onset_tuples = hed.find_top_level_tags(["onset"], include_groups=2)
             self.onset_count += len(onset_tuples)
             for tup in onset_tuples:
                 group = tup[1]
                 group.remove([tup[0]])
                 self._update_onset_list(group, onset_dict, event_index, is_offset=False)
-            offset_tuples = hed.find_tags(["offset"], recursive=True, include_groups=2)
+            offset_tuples = hed.find_top_level_tags(["offset"], include_groups=2)
             self.offset_count += len(offset_tuples)
             for tup in offset_tuples:
                 group = tup[1]

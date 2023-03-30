@@ -4,6 +4,14 @@ from hed.models.hed_string_group import HedStringGroup
 from hed.models.expression_parser import QueryParser
 import os
 from hed import schema
+from hed import HedTag
+
+
+def tag_terms(self):
+    if isinstance(self, HedTag):
+        if self._schema_entry:
+            return self._tag_terms
+    return (str(self).lower(),)
 
 
 class TestParser(unittest.TestCase):
@@ -13,6 +21,9 @@ class TestParser(unittest.TestCase):
         cls.base_data_dir = base_data_dir
         hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
+
+        HedTag._tag_terms = HedTag.tag_terms
+        HedTag.tag_terms = property(tag_terms)
 
     def base_test(self, parse_expr, search_strings):
         expression = QueryParser(parse_expr)
