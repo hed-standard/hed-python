@@ -69,9 +69,11 @@ class HedValidator:
         # e.g. checking units when a definition placeholder has units
         self._def_validator.construct_def_tags(hed_string)
         issues += self._validate_individual_tags_in_hed_string(hed_string, allow_placeholders=allow_placeholders)
-        if check_for_any_errors(issues):
-            return issues
-        issues += self._def_validator.validate_def_tags(hed_string)
+        # todo: maybe restore this.  Issue is bad def-expand values are caught above,
+        #  so the actual def-expand tag won't be checked if we bail early.
+        # if check_for_any_errors(issues):
+        #     return issues
+        issues += self._def_validator.validate_def_tags(hed_string, self._tag_validator)
         if check_for_any_errors(issues):
             return issues
         issues += self._onset_validator.validate_onset_offset(hed_string)
@@ -165,20 +167,20 @@ class HedValidator:
          """
         from hed.models.definition_dict import DefTagNames
         validation_issues = []
-        def_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1)
-        all_def_groups = [group for sub_group in def_groups for group in sub_group.get_all_groups()]
+        definition_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1)
+        all_definition_groups = [group for sub_group in definition_groups for group in sub_group.get_all_groups()]
         for group in hed_string_obj.get_all_groups():
-            is_definition = group in all_def_groups
+            is_definition = group in all_definition_groups
             for hed_tag in group.tags():
-                if hed_tag.expandable and not hed_tag.expanded:
-                    for tag in hed_tag.expandable.get_all_tags():
-                        validation_issues += self._tag_validator. \
-                            run_individual_tag_validators(tag, allow_placeholders=allow_placeholders,
-                                                          is_definition=is_definition)
-                else:
-                    validation_issues += self._tag_validator. \
-                        run_individual_tag_validators(hed_tag,
-                                                      allow_placeholders=allow_placeholders,
-                                                      is_definition=is_definition)
+                # if hed_tag.expandable and not hed_tag.expanded:
+                #     for tag in hed_tag.expandable.get_all_tags():
+                #         validation_issues += self._tag_validator. \
+                #             run_individual_tag_validators(tag, allow_placeholders=allow_placeholders,
+                #                                           is_definition=is_definition)
+                # else:
+                validation_issues += self._tag_validator. \
+                    run_individual_tag_validators(hed_tag,
+                                                  allow_placeholders=allow_placeholders,
+                                                  is_definition=is_definition)
 
         return validation_issues

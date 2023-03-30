@@ -141,7 +141,7 @@ class HedTypeValues:
             This modifies the HedTypeFactors map.
 
         """
-        level = tag.extension_or_value_portion.lower()
+        level = tag.extension.lower()
         for var_name in hed_vars:
             hed_var = self._type_value_map.get(var_name, None)
             if hed_var is None:
@@ -185,7 +185,7 @@ class HedTypeValues:
 
         """
         for tag in tag_list:
-            tag_value = tag.extension_or_value_portion.lower()
+            tag_value = tag.extension.lower()
             if not tag_value:
                 tag_value = self.type_tag
             hed_var = self._type_value_map.get(tag_value, None)

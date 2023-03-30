@@ -89,11 +89,11 @@ class HedTypeDefinitions:
         for hed_tag in tag_list:
             hed_tag.convert_to_canonical_forms(self.hed_schema)
             if hed_tag.short_base_tag.lower() == 'description':
-                description = hed_tag.extension_or_value_portion
+                description = hed_tag.extension
             elif hed_tag.short_base_tag.lower() != self.type_tag:
                 other_tags.append(hed_tag.short_base_tag)
             else:
-                value = hed_tag.extension_or_value_portion.lower()
+                value = hed_tag.extension.lower()
                 if value:
                     type_tag_values.append(value)
                 else:
@@ -113,9 +113,9 @@ class HedTypeDefinitions:
 
            """
         if isinstance(item, HedTag) and 'def' in item.tag_terms:
-            names = [item.extension_or_value_portion.lower()]
+            names = [item.extension.lower()]
         else:
-            names = [tag.extension_or_value_portion.lower() for tag in item.get_all_tags() if 'def' in tag.tag_terms]
+            names = [tag.extension.lower() for tag in item.get_all_tags() if 'def' in tag.tag_terms]
         if no_value:
             for index, name in enumerate(names):
                 name, name_value = HedTypeDefinitions.split_name(name)

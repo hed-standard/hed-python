@@ -66,7 +66,7 @@ class EventManager:
             for tup in group_tuples:
                 group = tup[1]
                 anchor_tag = group.find_def_tags(recursive=False, include_groups=0)[0]
-                anchor = anchor_tag.extension_or_value_portion.lower()
+                anchor = anchor_tag.extension.lower()
                 if anchor in onset_dict or tup[0].short_base_tag.lower() == "offset":
                     temporal_event = onset_dict.pop(anchor)
                     temporal_event.set_end(event_index, self.data.dataframe.loc[event_index, "onset"])
@@ -114,7 +114,7 @@ class EventManager:
             - Modifies onset_dict and onset_list.
         """
         # def_tags = group.find_def_tags(recursive=False, include_groups=0)
-        # name = def_tags[0].extension_or_value_portion
+        # name = def_tags[0].extension
         # onset_element = onset_dict.pop(name, None)
         # if onset_element:
         #     onset_element.end_index = event_index

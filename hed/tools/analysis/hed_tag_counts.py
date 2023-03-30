@@ -29,7 +29,7 @@ class HedTagCount:
         """
         if not hed_tag:
             return
-        value = hed_tag.extension_or_value_portion
+        value = hed_tag.extension
         if not value:
             value = None
         if value in self.value_dict:
