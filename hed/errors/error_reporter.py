@@ -21,7 +21,6 @@ default_sort_list = [
     ErrorContext.SIDECAR_KEY_NAME,
     ErrorContext.ROW,
     ErrorContext.COLUMN,
-    ErrorContext.HED_STRING,
     ErrorContext.SCHEMA_SECTION,
     ErrorContext.SCHEMA_TAG,
     ErrorContext.SCHEMA_ATTRIBUTE,
@@ -30,6 +29,10 @@ default_sort_list = [
 # ErrorContext which is expected to be int based.
 int_sort_list = [
     ErrorContext.ROW,
+]
+
+hed_string_sort_list = [
+    ErrorContext.HED_STRING
 ]
 
 def _register_error_function(error_type, wrapper_func):
@@ -186,10 +189,13 @@ class ErrorHandler:
 
         """
         if context is None:
+            from hed import HedString
             if context_type in int_sort_list:
                 context = 0
+            elif context_type in hed_string_sort_list:
+                context = HedString("")
             else:
-                context_type = ""
+                context = ""
         self.error_context.append((context_type, context))
 
     def pop_error_context(self):
@@ -446,10 +452,13 @@ def sort_issues(issues, reverse=False):
     Returns:
         list: The sorted list of issues."""
     def _get_keys(d):
+        from hed import HedString
         result = []
         for key in default_sort_list:
             if key in int_sort_list:
                 result.append(d.get(key, -1))
+            elif key in hed_string_sort_list:
+                result.append(d.get(key, HedString("")))
             else:
                 result.append(d.get(key, ""))
         return tuple(result)
