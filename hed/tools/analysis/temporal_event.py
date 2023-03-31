@@ -20,7 +20,7 @@ class TemporalEvent:
     def _split_group(self):
         for item in self.event_group.children:
             if isinstance(item, HedTag) and (item.short_tag.lower() != "onset"):
-                self.anchor = item.extension_or_value_portion.lower()
+                self.anchor = item.extension.lower()
             elif isinstance(item, HedTag):
                 continue
             elif isinstance(item, HedGroup):

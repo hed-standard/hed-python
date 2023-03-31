@@ -51,8 +51,8 @@ class Test(unittest.TestCase):
         # todo: add unit tests for definitions in tsv file
         defs = DefinitionDict.get_as_strings(self.tabular_file._sidecar.extract_definitions(hed_schema=self.hed_schema))
         expected_defs = {
-            'jsonfiledef': '(Item/JsonDef1/#,Item/JsonDef1)',
-            'jsonfiledef2': '(Item/JsonDef2/#,Item/JsonDef2)',
+            'jsonfiledef': '(Item/JsonDef1,Item/JsonDef1/#)',
+            'jsonfiledef2': '(Item/JsonDef2,Item/JsonDef2/#)',
             'jsonfiledef3': '(Item/JsonDef3/#)',
             'takesvaluedef': '(Age/#)',
             'valueclassdef': '(Acceleration/#)'

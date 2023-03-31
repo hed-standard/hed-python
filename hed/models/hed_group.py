@@ -157,15 +157,18 @@ class HedGroup:
         Returns:
             list: The list of all tags in this group, with subgroups being returned as further nested lists
         """
-        output_list = []
+        tag_list = []
+        group_list = []
         queue_list = list(self.children)
         for child in queue_list:
             if isinstance(child, HedTag):
-                output_list.append((child, child))
+                tag_list.append((child, child))
             else:
-                output_list.append((child, child.sorted(update_self)))
+                group_list.append((child, child.sorted(update_self)))
 
-        output_list.sort(key=lambda x: str(x[0]))
+        tag_list.sort(key=lambda x: str(x[0]))
+        group_list.sort(key=lambda x: str(x[0]))
+        output_list = tag_list + group_list
         if update_self:
             self._children = [x[0] for x in output_list]
         return [x[1] for x in output_list]
@@ -260,6 +263,19 @@ class HedGroup:
         """
         return [group for group in self.children if isinstance(group, HedGroup)]
 
+    def get_first_group(self):
+        """ Returns the first group in this hed string or group.
+
+            Useful for things like Def-expand where they only have a single group.
+
+            Raises a ValueError if there are no groups.
+
+        Returns:
+            HedGroup: The first group
+
+        """
+        return self.groups()[0]
+
     def get_original_hed_string(self):
         """ Get the original hed string.
 
@@ -343,7 +359,7 @@ class HedGroup:
 
         """
         for tag in self.get_all_tags():
-            if "#" in tag.org_tag:
+            if tag.is_placeholder():
                 return tag
 
         return None
@@ -356,6 +372,10 @@ class HedGroup:
         if self is other:
             return True
 
+        # Allow us to compare to a list of groups.
+        # Note this comparison will NOT check if the list has the outer parenthesis
+        if isinstance(other, list):
+            return self.children == other
         if isinstance(other, str):
             return str(self) == other
         if not isinstance(other, HedGroup) or self.children != other.children or self.is_group != other.is_group:

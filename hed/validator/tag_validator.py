@@ -84,7 +84,7 @@ class TagValidator:
                 validation_issues += self.check_tag_unit_class_units_are_valid(original_tag)
             elif original_tag.is_value_class_tag():
                 validation_issues += self.check_tag_value_class_valid(original_tag)
-            elif original_tag.extension_or_value_portion:
+            elif original_tag.extension:
                 validation_issues += self.check_for_invalid_extension_chars(original_tag)
 
             if not allow_placeholders:
@@ -278,12 +278,13 @@ class TagValidator:
                                                            index_in_tag_end=None)
         return validation_issues
 
-    def check_tag_unit_class_units_are_valid(self, original_tag):
+    def check_tag_unit_class_units_are_valid(self, original_tag, report_tag_as=None, error_code=None):
         """ Report incorrect unit class or units.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
-
+            report_tag_as (HedTag): Report errors as coming from this tag, rather than original_tag.
+            error_code (str): Override error codes to this
         Returns:
             list: Validation issues. Each issue is a dictionary.
         """
@@ -296,29 +297,36 @@ class TagValidator:
                     if tag_validator_util.validate_numeric_value_class(stripped_value):
                         default_unit = original_tag.get_unit_class_default_unit()
                         validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_DEFAULT_USED,
-                                                                       tag=original_tag,
-                                                                       default_unit=default_unit)
+                                                                       tag=report_tag_as if report_tag_as else original_tag,
+                                                                       default_unit=default_unit,
+                                                                       actual_error=error_code)
                 else:
                     tag_unit_class_units = original_tag.get_tag_unit_class_units()
                     if tag_unit_class_units:
+                        default_code = ValidationErrors.HED_UNITS_INVALID
+                        if not error_code:
+                            error_code = default_code
                         validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                                                       original_tag,
+                                                                       actual_error=error_code,
+                                                                       tag=report_tag_as if report_tag_as else original_tag,
                                                                        units=tag_unit_class_units)
         return validation_issues
 
-    def check_tag_value_class_valid(self, original_tag):
+    def check_tag_value_class_valid(self, original_tag, report_tag_as=None, error_code=None):
         """ Report an invalid value portion.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
-
+            report_tag_as (HedTag): Report errors as coming from this tag, rather than original_tag.
+            error_code (str): Override error codes to this
         Returns:
             list: Validation issues.
         """
         validation_issues = []
-        if not self._validate_value_class_portion(original_tag, original_tag.extension_or_value_portion):
+        if not self._validate_value_class_portion(original_tag, original_tag.extension):
             validation_issues += ErrorHandler.format_error(ValidationErrors.HED_VALUE_INVALID,
-                                                           original_tag)
+                                                           report_tag_as if report_tag_as else original_tag,
+                                                           actual_error=error_code)
 
         return validation_issues
 
@@ -349,7 +357,7 @@ class TagValidator:
         """
         validation_issues = []
         if original_tag.is_unit_class_tag():
-            tag_unit_values = original_tag.extension_or_value_portion
+            tag_unit_values = original_tag.extension
             if tag_validator_util.validate_numeric_value_class(tag_unit_values):
                 default_unit = original_tag.get_unit_class_default_unit()
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_DEFAULT_USED,
@@ -369,7 +377,7 @@ class TagValidator:
         allowed_chars = self.TAG_ALLOWED_CHARS
         allowed_chars += self.DEFAULT_ALLOWED_PLACEHOLDER_CHARS
         allowed_chars += " "
-        return self._check_invalid_chars(original_tag.extension_or_value_portion, allowed_chars, original_tag,
+        return self._check_invalid_chars(original_tag.extension, allowed_chars, original_tag,
                                          starting_index=len(original_tag.org_base_tag) + 1)
 
     def check_capitalization(self, original_tag):
@@ -554,7 +562,7 @@ class TagValidator:
         validation_issues = []
         if not is_definition:
             starting_index = len(original_tag.org_base_tag) + 1
-            for i, character in enumerate(original_tag.extension_or_value_portion):
+            for i, character in enumerate(original_tag.extension):
                 if character == "#":
                     validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
                                                                    tag=original_tag,

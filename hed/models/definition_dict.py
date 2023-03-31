@@ -54,14 +54,20 @@ class DefinitionDict:
              def_dict (DefinitionDict): DefDict whose definitions should be added.
 
         """
-        for def_tag, def_value in def_dict:
+        for def_tag, def_value in def_dict.items():
             self._add_definition(def_tag, def_value)
 
     def get(self, def_name):
         return self.defs.get(def_name.lower())
 
     def __iter__(self):
-        return iter(self.defs.items())
+        return iter(self.defs)
+
+    def __len__(self):
+        return len(self.defs)
+
+    def items(self):
+        return self.defs.items()
 
     @property
     def issues(self):
@@ -94,7 +100,7 @@ class DefinitionDict:
         """
         new_def_issues = []
         for definition_tag, group in hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}):
-            def_tag_name = definition_tag.extension_or_value_portion
+            def_tag_name = definition_tag.extension
 
             # initial validation
             groups = group.groups()
@@ -224,7 +230,7 @@ class DefinitionDict:
             def_contents: HedGroup
             The contents to replace the previous def-tag with.
         """
-        is_label_tag = def_tag.extension_or_value_portion
+        is_label_tag = def_tag.extension
         placeholder = None
         found_slash = is_label_tag.find("/")
         if found_slash != -1:
