@@ -65,18 +65,6 @@ class Test(unittest.TestCase):
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run2', sidecar=self.json_path)
         self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run2'].tag_dict), 47)
 
-    def test_quick_test(self):
-        from hed.models.hed_tag import HedTag
-        from hed.schema import load_schema_version
-        my_tag = "Description/This is a test"
-        tag = HedTag(my_tag)
-        x = tag.tag_terms
-        # print(x)
-        my_schema = load_schema_version('8.1.0')
-        tag1 = HedTag(my_tag, hed_schema=my_schema)
-        x1 = tag1.tag_terms
-        # print(x1)
-
     def test_quick3(self):
         from hed.models import TabularInput, Sidecar
         from hed.schema import load_schema_version

@@ -99,7 +99,6 @@ class Test(unittest.TestCase):
 
         sum_context1 = dispatch.context_dict[sum_op.summary_name]
         text_sum1 = sum_context1.get_text_summary(individual_summaries="separate")
-        # print(text_sum1)
         sum_op.do_op(dispatch, df, 'subj2_run2', sidecar=self.json_path)
         sum_op.do_op(dispatch, df, 'subj2_run3', sidecar=self.bad_json_path)
         text_sum2 = sum_context1.get_text_summary(individual_summaries="none")

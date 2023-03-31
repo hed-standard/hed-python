@@ -15,6 +15,7 @@ from hed.tools.remodeling.operations.rename_columns_op import RenameColumnsOp
 from hed.tools.remodeling.operations.split_rows_op import SplitRowsOp
 from hed.tools.remodeling.operations.summarize_column_names_op import SummarizeColumnNamesOp
 from hed.tools.remodeling.operations.summarize_column_values_op import SummarizeColumnValuesOp
+from hed.tools.remodeling.operations.summarize_definitions_op import SummarizeDefinitionsOp
 from hed.tools.remodeling.operations.summarize_sidecar_from_events_op import SummarizeSidecarFromEventsOp
 from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp
 from hed.tools.remodeling.operations.summarize_hed_tags_op import SummarizeHedTagsOp
@@ -36,6 +37,7 @@ valid_operations = {
     'split_rows': SplitRowsOp,
     'summarize_column_names': SummarizeColumnNamesOp,
     'summarize_column_values': SummarizeColumnValuesOp,
+    'summarize_definitions': SummarizeDefinitionsOp,
     'summarize_sidecar_from_events': SummarizeSidecarFromEventsOp,
     'summarize_hed_type': SummarizeHedTypeOp,
     'summarize_hed_tags': SummarizeHedTagsOp,
