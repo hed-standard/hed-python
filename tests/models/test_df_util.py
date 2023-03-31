@@ -227,7 +227,7 @@ class TestConvertToForm(unittest.TestCase):
             "((Def-expand/C3/12, (Action/12, Joyful, Event)), Alert, Item-Count/8)",
             "((Def-expand/A1/13, (Action/13, Age/5, Item-Count/2)), (Def-expand/B2/13, (Action/13, Collection/animals, Alert)), Event)",
             "((Def-expand/A1/14, (Action/14, Age/5, Item-Count/2)), Joyful, (Def-expand/C3/14, (Action/14, Joyful, Event)))",
-            "(Def-expand/B2/15, (Action/15, Collection/animals, Alert), (Def-expand/C3/15, (Action/15, Joyful, Event)), Age/30)",
+            "(Def-expand/B2/15, (Action/15, Collection/animals, Alert)), (Def-expand/C3/15, (Action/15, Joyful, Event)), Age/30",
             "((Def-expand/A1/16, (Action/16, Age/5, Item-Count/2)), (Def-expand/B2/16, (Action/16, Collection/animals, Alert)), Collection/food)",
             "(Def-expand/C3/17, (Action/17, Joyful, Event)), (Def-expand/A1/17, (Action/17, Age/5, Item-Count/2)), Item-Count/6",
             "((Def-expand/B2/18, (Action/18, Collection/animals, Alert)), (Def-expand/C3/18, (Action/18, Joyful, Event)), Alert)",
@@ -237,14 +237,14 @@ class TestConvertToForm(unittest.TestCase):
             "(Def-expand/E2/Dog, (Collection/Dog, Collection/plants, Attribute/type))",
             "((Def-expand/D1/Elephant, (Task/Elephant, Collection/cars, Attribute/color)), (Def-expand/E2/Fox, (Collection/Fox, Collection/plants, Attribute/type)), Event)",
             "((Def-expand/D1/Giraffe, (Task/Giraffe, Collection/cars, Attribute/color)), Joyful, (Def-expand/E2/Horse, (Collection/Horse, Collection/plants, Attribute/type)))",
-            "(Def-expand/D1/Iguana, (Task/Iguana, Collection/cars, Attribute/color), (Def-expand/E2/Jaguar, (Collection/Jaguar, Collection/plants, Attribute/type)), Age/30)",
+            "(Def-expand/D1/Iguana, (Task/Iguana, Collection/cars, Attribute/color)), (Def-expand/E2/Jaguar, (Collection/Jaguar, Collection/plants, Attribute/type)), Age/30",
             "(Def-expand/F1/Lion, (Task/Lion, Collection/boats, Attribute/length))",
             "(Def-expand/F1/Monkey, (Task/Monkey, Collection/boats, Attribute/length))",
             "(Def-expand/G2/Nest, (Collection/Nest, Collection/instruments, Attribute/material))",
             "(Def-expand/G2/Octopus, (Collection/Octopus, Collection/instruments, Attribute/material))",
             "((Def-expand/F1/Panda, (Task/Panda, Collection/boats, Attribute/length)), (Def-expand/G2/Quail, (Collection/Quail, Collection/instruments, Attribute/material)), Event)",
             "((Def-expand/F1/Rabbit, (Task/Rabbit, Collection/boats, Attribute/length)), Joyful, (Def-expand/G2/Snake, (Collection/Snake, Collection/instruments, Attribute/material)))",
-            "(Def-expand/F1/Turtle, (Task/Turtle, Collection/boats, Attribute/length), (Def-expand/G2/Umbrella, (Collection/Umbrella, Collection/instruments, Attribute/material)))"
+            "(Def-expand/F1/Turtle, (Task/Turtle, Collection/boats, Attribute/length)), (Def-expand/G2/Umbrella, (Collection/Umbrella, Collection/instruments, Attribute/material))"
         ]
 
         def_dict, ambiguous, errors = process_def_expands(test_strings, self.schema)
