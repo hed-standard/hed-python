@@ -70,7 +70,7 @@ class OnsetValidator:
 
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
         is_onset = onset_offset_tag.short_base_tag.lower() == DefTagNames.ONSET_KEY
-        full_def_name = def_name = def_tag.extension_or_value_portion
+        full_def_name = def_name = def_tag.extension
         placeholder = None
         found_slash = def_name.find("/")
         if found_slash != -1:

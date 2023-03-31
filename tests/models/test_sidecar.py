@@ -95,8 +95,8 @@ class Test(unittest.TestCase):
         extra_def_dict.check_for_definitions(hed_string)
 
         validation_issues2 = self.json_without_definitions_sidecar.validate(self.hed_schema, extra_def_dicts=extra_def_dict)
-        # this removes one undef matched error and adds two extended tag warnings
-        self.assertEqual(len(validation_issues2), 9)
+        # this removes one undef matched error
+        self.assertEqual(len(validation_issues2), 7)
 
     def test_duplicate_def(self):
         sidecar = self.json_def_sidecar

@@ -215,7 +215,7 @@ class HedTag:
         self.convert_to_canonical_forms(self._schema)
 
     @property
-    def extension_or_value_portion(self):
+    def extension(self):
         """ Get the extension or value of tag
 
             Generally this is just the portion after the last slash.
@@ -232,6 +232,11 @@ class HedTag:
             return self._extension_value[1:]
 
         return ""
+
+    @extension.setter
+    def extension(self, x):
+        self._extension_value = f"/{x}"
+
 
     @property
     def long_tag(self):
@@ -347,7 +352,7 @@ class HedTag:
         if stripped_value:
             return stripped_value, unit
 
-        return self.extension_or_value_portion, None
+        return self.extension, None
 
     @property
     def unit_classes(self):
@@ -450,7 +455,7 @@ class HedTag:
             bool:  True if this is a known tag without extension or value.
 
         """
-        return bool(self._schema_entry and not self.extension_or_value_portion)
+        return bool(self._schema_entry and not self.extension)
 
     def has_attribute(self, attribute):
         """ Return true if this is an attribute this tag has.
@@ -570,7 +575,7 @@ class HedTag:
             stripped_value (str): The value with the units removed.
 
         """
-        value, _, units = self.extension_or_value_portion.rpartition(" ")
+        value, _, units = self.extension.rpartition(" ")
         if not units:
             return None, None
 
@@ -598,6 +603,11 @@ class HedTag:
 
         return possible_match
 
+    def is_placeholder(self):
+        if "#" in self.org_tag or "#" in self._extension_value:
+            return True
+        return False
+
     def replace_placeholder(self, placeholder_value):
         """ If tag has a placeholder character(#), replace with value.
 
@@ -605,7 +615,7 @@ class HedTag:
             placeholder_value (str): Value to replace placeholder with.
 
         """
-        if "#" in self.org_tag:
+        if self.is_placeholder():
             if self._schema_entry:
                 self._extension_value = self._extension_value.replace("#", placeholder_value)
             else:
