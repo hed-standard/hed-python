@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
         duplicate_dict = sidecar.extract_definitions(hed_schema=self.hed_schema)
         issues = sidecar.validate(self.hed_schema, extra_def_dicts=duplicate_dict, error_handler=ErrorHandler(False))
         self.assertEqual(len(issues), 5)
-        self.assertTrue(issues[0]['code'], ValidationErrors.HED_DEFINITION_INVALID)
+        self.assertTrue(issues[0]['code'], ValidationErrors.DEFINITION_INVALID)
 
     def test_save_load(self):
         sidecar = Sidecar(self.json_def_filename)

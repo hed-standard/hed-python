@@ -291,36 +291,36 @@ def sidecar_na_used(column_name):
     return f"Invalid category key 'n/a' found in column {column_name}."
 
 
-@hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
+@hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_def_tag_in_definition(tag, def_name):
     return f"Invalid tag {tag} found in definition for {def_name}. " +\
            f"Def and Def-expand tags cannot be in definitions."
 
 
-@hed_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
+@hed_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_wrong_group_tags(def_name, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
     return f"Too many group tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}"
 
 
-@hed_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
+@hed_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_wrong_placeholder_count(def_name, expected_count, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
     return f"Incorrect number placeholder tags found in definition for {def_name}.  " + \
            f"Expected {expected_count}, found: {tag_list_strings}"
 
 
-@hed_error(DefinitionErrors.DUPLICATE_DEFINITION, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
+@hed_error(DefinitionErrors.DUPLICATE_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_duplicate_definition(def_name):
     return f"Duplicate definition found for '{def_name}'."
 
 
-@hed_error(DefinitionErrors.TAG_IN_SCHEMA, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
+@hed_error(DefinitionErrors.TAG_IN_SCHEMA, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_tag_already_in_schema(def_name):
     return f"Term '{def_name}' already used as term in schema and cannot be re-used as a definition."
 
 
-@hed_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, actual_code=ValidationErrors.HED_DEFINITION_INVALID)
+@hed_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_invalid_def_extension(def_name):
     return f"Term '{def_name}' has an invalid extension.  Definitions can only have one term."
 
