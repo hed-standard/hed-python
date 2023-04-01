@@ -22,7 +22,7 @@ default_sort_list = [
     ErrorContext.ROW,
     ErrorContext.COLUMN,
     ErrorContext.LINE,
-    ErrorContext.HED_STRING,
+    # ErrorContext.HED_STRING, # temporarily disable hed string sort(maybe perm, not sure it's needed)
     ErrorContext.SCHEMA_SECTION,
     ErrorContext.SCHEMA_TAG,
     ErrorContext.SCHEMA_ATTRIBUTE,
