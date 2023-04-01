@@ -21,6 +21,8 @@ default_sort_list = [
     ErrorContext.SIDECAR_KEY_NAME,
     ErrorContext.ROW,
     ErrorContext.COLUMN,
+    ErrorContext.LINE,
+    ErrorContext.HED_STRING,
     ErrorContext.SCHEMA_SECTION,
     ErrorContext.SCHEMA_TAG,
     ErrorContext.SCHEMA_ATTRIBUTE,
@@ -29,6 +31,7 @@ default_sort_list = [
 # ErrorContext which is expected to be int based.
 int_sort_list = [
     ErrorContext.ROW,
+    ErrorContext.COLUMN,
 ]
 
 hed_string_sort_list = [
@@ -414,34 +417,6 @@ class ErrorHandler:
         return [issue for issue in issues_list if issue['severity'] <= severity]
 
 
-def get_exception_issue_string(issues, title=None):
-    """ Return a string with issues list flatted into single string, one issue per line.
-        Possibly being deprecated.
-
-    Parameters:
-        issues (list):  A list of strings containing issues to print.
-        title (str or None): An optional title that will always show up first if present.
-
-    Returns:
-        str: A str containing printable version of the issues or ''.
-
-    """
-    issue_str = ''
-    if issues:
-        issue_list = []
-        for issue in issues:
-            this_str = f"{issue['message']}"
-            if 'code' in issue:
-                this_str = f"{issue['code']}:" + this_str
-            if 'line_number' in issue:
-                this_str = this_str + f"\n\tLine number {issue['line_number']}: {issue.get('line', '')} "
-            issue_list.append(this_str)
-        issue_str += '\n' + '\n'.join(issue_list)
-    if title:
-        issue_str = title + '\n' + issue_str
-    return issue_str
-
-
 def sort_issues(issues, reverse=False):
     """Sorts a list of issues by the error context values.
 
@@ -556,6 +531,7 @@ def _format_single_context_string(context_type, context, tab_count=0):
         ErrorContext.ROW: f'Issues in row {context}:',
         ErrorContext.COLUMN: f'Issues in column {context}:',
         ErrorContext.CUSTOM_TITLE: context,
+        ErrorContext.LINE: f"Line: {context}",
         ErrorContext.HED_STRING: f"hed string: {context}",
         ErrorContext.SCHEMA_SECTION: f"Schema Section: {context}",
         ErrorContext.SCHEMA_TAG: f"Source tag: {context}",

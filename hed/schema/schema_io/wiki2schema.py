@@ -5,6 +5,7 @@ import re
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.errors import ErrorContext, error_reporter
 from hed.schema import HedSchema
 from hed.schema import schema_validation_util
 from hed.schema.schema_io import wiki_constants
@@ -92,7 +93,7 @@ class HedSchemaWikiParser:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, wiki_file_path)
 
         if self.fatal_errors:
-            self.fatal_errors.sort(key = lambda x: x.get("line_number", -1))
+            self.fatal_errors = error_reporter.sort_issues(self.fatal_errors)
             raise HedFileError(HedExceptions.HED_WIKI_DELIMITERS_INVALID,
                                f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
                                f"parameter on this exception for more details.", self.filename,
@@ -596,6 +597,9 @@ class HedSchemaWikiParser:
 
     def _add_fatal_error(self, line_number, line, warning_message="Schema term is empty or the line is malformed"):
         self.fatal_errors.append(
-            {"line_number": line_number,
-             "line": line,
-             "message": warning_message})
+            {'error_code': HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+             ErrorContext.ROW: line_number,
+             ErrorContext.LINE: line,
+             "message": f"ERROR: {warning_message}"
+             }
+        )
