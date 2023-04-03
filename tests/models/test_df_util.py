@@ -200,13 +200,26 @@ class TestConvertToForm(unittest.TestCase):
         _, ambiguous_defs, _ = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(ambiguous_defs), 5)
 
+    def test_ambiguous_conflicting_defs(self):
+        # This is invalid due to conflicting defs
+        test_strings = [
+            "(Def-expand/A1/2, (Action/2, Age/5, Item-count/2))",
+            "(Def-expand/A1/3, (Action/3, Age/4, Item-count/3))",
+
+            # This could be identified, but fails due to the above raising errors
+            "(Def-expand/A1/4, (Action/4, Age/5, Item-count/2))",
+        ]
+        defs, ambiguous, errors = process_def_expands(test_strings, self.schema)
+        self.assertEqual(len(defs), 0)
+        self.assertEqual(len(ambiguous), 0)
+        self.assertEqual(len(errors["a1"]), 3)
+
     def test_errors(self):
-        # Cases where you can only retroactively identify the first def-expand
+        # Basic recognition of conflicting errors
         test_strings = [
             "(Def-expand/A1/1, (Action/1, Age/5, Item-count/2))",
             "(Def-expand/A1/2, (Action/2, Age/5, Item-count/2))",
             "(Def-expand/A1/3, (Action/3, Age/5, Item-count/3))",
-
         ]
         _, _, errors = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(errors), 1)

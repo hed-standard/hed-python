@@ -139,6 +139,16 @@ def _expand_defs(hed_string, hed_schema, def_dict):
     from hed import HedString
     return str(HedString(hed_string, hed_schema, def_dict).expand_defs())
 
+def _get_matching_value(tags):
+    # Filter out values equal to "#" and get unique values
+    unique_values = set(tag.extension for tag in tags if tag.extension != "#")
+    if len(unique_values) == 0:
+        return "#"
+
+    if len(unique_values) > 1:
+        return None
+
+    return next(iter(unique_values))
 
 def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None):
     """
@@ -181,6 +191,11 @@ def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs
                     errors.setdefault(def_tag_name.lower(), []).append(def_group)
                 continue
 
+            # This is a def we recognized earlier as an error AND it wasn't a known definition.
+            if def_tag_name.lower() in errors:
+                errors.setdefault(def_tag_name.lower(), []).append(def_group)
+                continue
+
             has_extension = "/" in def_tag.extension
 
             # If there's no extension, this is fine.
@@ -206,13 +221,22 @@ def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs
                 if len(these_defs) >= 1:
                     all_tags_list = [group.get_all_tags() for group in these_defs]
                     for tags in zip(*all_tags_list):
-                        value_per_tag.append(next((tag.extension for tag in tags if tag.extension != "#"), None))
-                    ambiguous_values = value_per_tag.count(None)
+                        matching_val = _get_matching_value(tags)
+                        value_per_tag.append(matching_val)
+
+                    if value_per_tag.count(None):
+                        groups = ambiguous_defs.get(def_tag_name.lower(), [])
+                        for group in groups:
+                            errors.setdefault(def_tag_name.lower(), []).append(group)
+
+                        del ambiguous_defs[def_tag_name.lower()]
+                        continue
+                    ambiguous_values = value_per_tag.count("#")
                     if ambiguous_values == 1:
                         new_contents = group_tag.copy()
                         for tag, value in zip(new_contents.get_all_tags(), value_per_tag):
                             if value is not None:
-                                tag.extension = f"/{value}"
+                                tag.extension = f"{value}"
                         def_dict.defs[def_tag_name.lower()] = DefinitionEntry(name=def_tag_name, contents=new_contents,
                                                                               takes_value=True,
                                                                               source_context=[])
