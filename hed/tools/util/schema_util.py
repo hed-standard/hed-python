@@ -1,5 +1,5 @@
 import pandas as pd
-from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 
 
 def flatten_schema(hed_schema, skip_non_tag=False):
@@ -9,23 +9,30 @@ def flatten_schema(hed_schema, skip_non_tag=False):
         skip_non_tag (bool): Skips all sections except tag
 
     """
-    child, parent, desc = [], [], []
+    children, parents, descriptions = [], [], []
     for section in hed_schema._sections.values():
         if skip_non_tag and section.section_key != HedSectionKey.AllTags:
             continue
         for entry in section.all_entries:
+            if entry.has_attribute(HedKey.TakesValue):
+                continue
+            name = ""
+            parent = ""
+            desc = entry.description
             if hasattr(entry, "_parent_tag"):
-                child.append(entry.short_tag_name)
+                name = entry.short_tag_name
                 if entry._parent_tag:
-                    parent.append(entry._parent_tag.short_tag_name)
+                    parent = entry._parent_tag.short_tag_name
                 else:
-                    parent.append("")
+                    parent = ""
             else:
-                child.append(entry.name)
-                parent.append("")
+                name = entry.name
+                parent = ""
 
-            desc.append(entry.description)
+            parents.append(parent)
+            children.append(name)
+            descriptions.append(desc)
 
-    df = pd.DataFrame({"Child": child, "Parent": parent, "Description": desc})
+    df = pd.DataFrame({"Child": children, "Parent": parents, "Description": descriptions})
 
     return df
