@@ -86,7 +86,15 @@ class DefinitionSummaryContext(BaseContext):
         self.errors = {}
 
     def update_context(self, new_context):
-        name = new_context['name']
+        """ Update the summary for a given tabular input file.
+
+        Parameters:
+            new_context (dict):  A dictionary with the parameters needed to update a summary.
+
+        Notes:
+            - The summary needs a "name" str, a "schema" and a "Sidecar".  
+
+        """
         data_input = TabularInput(new_context['df'], sidecar=new_context['sidecar'], name=new_context['name'])
         sidecar = Sidecar(new_context['sidecar'])
         df, _ = assemble_hed(data_input, sidecar, new_context['schema'],
@@ -96,21 +104,63 @@ class DefinitionSummaryContext(BaseContext):
                                                                  known_defs=self.defs, ambiguous_defs=self.unresolved)
         self.errors.update(errors)
 
-    def _get_summary_details(self, summary):
+    def _get_details_dict(self, summary):
         return None
 
     def _merge_all(self):
+        """ Create an Object containing the definition summary.
+
+        Returns:
+            Object - the overall summary object for definitions.
+
+        """
+
         return None
 
     def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return a formatted string with the summary for the indicated name.
+
+        Parameters:
+            name (str):  Identifier (usually the filename) of the individual file.
+            result (dict): The dictionary of the summary results indexed by name.
+            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+
+        Returns:
+            str - The results in a printable format ready to be saved to a text file.
+
+        Notes:
+            This calls _get_dataset_string to get the overall summary string and
+            _get_individual_string to get an individual summary string.
+
+        """
         if name == "Dataset":
             return self._get_dataset_string(result, indent=indent)
-        return self._get_individual_string(name, result, indent=indent)
+        return self._get_individual_string(result, indent=indent)
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return  a string with the overall summary for all of the tabular files.
+
+        Parameters:
+            result (dict): Dictionary of merged summary information.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
         return ""
 
     @staticmethod
-    def _get_individual_string(name, result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_individual_string(result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return  a string with the summary for an individual tabular file.
+
+        Parameters:
+            result (dict): Dictionary of summary information for a particular tabular file.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
         return ""

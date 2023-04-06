@@ -88,28 +88,79 @@ class ColumnValueSummaryContext(BaseContext):
         self.skip_columns = sum_op.skip_columns
 
     def update_context(self, new_context):
+        """ Update the summary for a given tabular input file.
+
+        Parameters:
+            new_context (dict):  A dictionary with the parameters needed to update a summary.
+
+        Notes:
+            - The summary information is kept in separate TabularSummary objects for each file.  
+            - The summary needs a "name" str and a "df" .  
+
+        """
         name = new_context['name']
         if name not in self.summary_dict:
             self.summary_dict[name] = \
                 TabularSummary(value_cols=self.value_columns, skip_cols=self.skip_columns, name=name)
         self.summary_dict[name].update(new_context['df'])
 
-    def _get_summary_details(self, summary):
+    def _get_details_dict(self, summary):
+        """ Return a dictionary with the summary contained in a TabularSummary
+
+        Parameters:
+            summary (TabularSummary): Dictionary of merged summary information.
+
+        Returns:
+            dict: Dictionary with the information suitable for extracting printout.
+
+        """
         return summary.get_summary(as_json=False)
 
     def _merge_all(self):
+        """ Create a TabularSummary containing the overall dataset summary.
+
+        Returns:
+            TabularSummary - the summary object for column values.
+
+        """
         all_sum = TabularSummary(value_cols=self.value_columns, skip_cols=self.skip_columns, name='Dataset')
         for key, counts in self.summary_dict.items():
             all_sum.update_summary(counts)
         return all_sum
 
     def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return a formatted string with the summary for the indicated name.
+
+        Parameters:
+            name (str):  Identifier (usually the filename) of the individual file.
+            result (dict): The dictionary of the summary results indexed by name.
+            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+
+        Returns:
+            str - The results in a printable format ready to be saved to a text file.
+
+        Notes:
+            This calls _get_dataset_string to get the overall summary string and
+            _get_individual_string to get an individual summary string.
+
+        """
+
         if name == "Dataset":
             return self._get_dataset_string(result, indent=indent)
-        return self._get_individual_string(name, result, indent=indent)
+        return self._get_individual_string(result, indent=indent)
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return  a string with the overall summary for all of the tabular files.
+
+        Parameters:
+            result (dict): Dictionary of merged summary information.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
         sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
                     f"Total files={result.get('Total files', 0)}"]
         cat_cols = result.get("Categorical columns", {})
@@ -121,7 +172,17 @@ class ColumnValueSummaryContext(BaseContext):
         return "\n".join(sum_list)
 
     @staticmethod
-    def _get_individual_string(name, result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_individual_string(result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return  a string with the summary for an individual tabular file.
+
+        Parameters:
+            result (dict): Dictionary of summary information for a particular tabular file.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
         sum_list = [f"Total events={result.get('Total events', 0)}"]
         cat_cols = result.get("Categorical columns", {})
         if cat_cols:

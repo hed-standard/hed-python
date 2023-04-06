@@ -88,6 +88,16 @@ class HedTypeSummaryContext(BaseContext):
         self.type_tag = sum_op.type_tag
 
     def update_context(self, new_context):
+        """ Update the summary for a given tabular input file.
+
+        Parameters:
+            new_context (dict):  A dictionary with the parameters needed to update a summary.
+
+        Notes:  
+            - The summary needs a "name" str, a "schema", a "df, and a "Sidecar".
+
+        """
+
         sidecar = new_context['sidecar']
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
@@ -102,17 +112,14 @@ class HedTypeSummaryContext(BaseContext):
         counts.add_descriptions(type_values.definitions)
         self.summary_dict[new_context["name"]] = counts
 
-    def _get_summary_details(self, counts):
+    def _get_details_dict(self, counts):
         return counts.get_summary()
 
     def _merge_all(self):
-        """ Return merged information.
+        """ Create a HedTypeCounts containing the overall dataset HED type summary.
 
         Returns:
-           object:  Consolidated summary of information.
-
-        Notes:
-            Abstract method be implemented by each individual context summary.
+            HedTypeCounts - the overall dataset summary object for HED type summary.
 
         """
         all_counts = HedTypeCounts('Dataset', self.type_tag)
@@ -121,12 +128,37 @@ class HedTypeSummaryContext(BaseContext):
         return all_counts
 
     def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return a formatted string with the summary for the indicated name.
+
+        Parameters:
+            name (str):  Identifier (usually the filename) of the individual file.
+            result (dict): The dictionary of the summary results indexed by name.
+            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+
+        Returns:
+            str - The results in a printable format ready to be saved to a text file.
+
+        Notes:
+            This calls _get_dataset_string to get the overall summary string and
+            _get_individual_string to get an individual summary string.
+
+        """
         if name == "Dataset":
             return self._get_dataset_string(result, indent=indent)
-        return self._get_individual_string(name, result, indent=indent)
+        return self._get_individual_string(result, indent=indent)
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return  a string with the overall summary for all of the tabular files.
+
+        Parameters:
+            result (dict): Dictionary of merged summary information.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
         details = result.get('details', {})
         sum_list = [f"Dataset: Type={result['type_tag']} Type values={len(details)} "
                     f"Total events={result.get('total_events', 0)} Total files={len(result.get('files', []))}"]
@@ -146,11 +178,21 @@ class HedTypeSummaryContext(BaseContext):
         return "\n".join(sum_list)
 
     @staticmethod
-    def _get_individual_string(name, result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_individual_string(result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return  a string with the summary for an individual tabular file.
+
+        Parameters:
+            result (dict): Dictionary of summary information for a particular tabular file.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
         details = result.get('details', {})
         sum_list = [f"Type={result['type_tag']} Type values={len(details)} "
                     f"Total events={result.get('total_events', 0)}"]
-        
+
         for key, item in details.items():
             sum_list.append(f"{indent*2}{key}: {item['levels']} levels in {item['events']} events")
             str1 = ""
