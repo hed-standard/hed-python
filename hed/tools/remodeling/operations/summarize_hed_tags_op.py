@@ -16,10 +16,9 @@ class SummarizeHedTagsOp(BaseOp):
         - **summary_name** (*str*): The name of the summary.   
         - **summary_filename** (*str*): Base filename of the summary.   
         - **tags** (*dict*): Type tag to get_summary separately (e.g. 'condition-variable' or 'task').   
- 
+
     Optional remodeling parameters:    
        - **expand_context** (*bool*): If True, include counts from expanded context (not supported).   
-
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
     is often used with 'condition-variable' to produce a summary of the experimental design.
@@ -95,6 +94,15 @@ class HedTagSummaryContext(BaseContext):
         self.expand_context = sum_op.expand_context
 
     def update_context(self, new_context):
+        """ Update the summary for a given tabular input file.
+
+        Parameters:
+            new_context (dict):  A dictionary with the parameters needed to update a summary.
+
+        Notes:  
+            - The summary needs a "name" str, a "schema", a "df, and a "Sidecar".
+
+        """
         counts = HedTagCounts(new_context['name'], total_events=len(new_context['df']))
         sidecar = new_context['sidecar']
         if sidecar and not isinstance(sidecar, Sidecar):
@@ -108,7 +116,7 @@ class HedTagSummaryContext(BaseContext):
             counts.update_event_counts(hed, new_context['name'])
         self.summary_dict[new_context["name"]] = counts
 
-    def _get_summary_details(self, merge_counts):
+    def _get_details_dict(self, merge_counts):
         template, unmatched = merge_counts.organize_tags(self.tags)
         details = {}
         for key, key_list in self.tags.items():
@@ -119,11 +127,33 @@ class HedTagSummaryContext(BaseContext):
                 "Main tags": details, "Other tags": leftovers}
 
     def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return a formatted string with the summary for the indicated name.
+
+        Parameters:
+            name (str):  Identifier (usually the filename) of the individual file.
+            result (dict): The dictionary of the summary results indexed by name.
+            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+
+        Returns:
+            str - The results in a printable format ready to be saved to a text file.
+
+        Notes:
+            This calls _get_dataset_string to get the overall summary string and
+            _get_individual_string to get an individual summary string.
+
+        """
         if name == 'Dataset':
             return self._get_dataset_string(result, indent=indent)
-        return self._get_individual_string(name, result, indent=indent)
+        return self._get_individual_string(result, indent=indent)
 
     def _merge_all(self):
+        """ Create a HedTagCounts containing the overall dataset HED tag  summary.
+
+        Returns:
+            HedTagCounts - the overall dataset summary object for HED tag counts.
+
+        """
+
         all_counts = HedTagCounts('Dataset')
         for key, counts in self.summary_dict.items():
             all_counts.merge_tag_dicts(counts.tag_dict)
@@ -131,27 +161,47 @@ class HedTagSummaryContext(BaseContext):
                 all_counts.files[file_name] = ""
             all_counts.total_events = all_counts.total_events + counts.total_events
         return all_counts
-    
+
     @staticmethod
     def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return  a string with the overall summary for all of the tabular files.
+
+        Parameters:
+            result (dict): Dictionary of merged summary information.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
         sum_list = [f"Dataset: Total events={result.get('total_events', 0)} "
                     f"Total files={len(result.get('files', []))}"]
         sum_list = sum_list + HedTagSummaryContext._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
-    
+
     @staticmethod
-    def _get_individual_string(name, result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_individual_string(result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return  a string with the summary for an individual tabular file.
+
+        Parameters:
+            result (dict): Dictionary of summary information for a particular tabular file.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
         sum_list = [f"Total events={result.get('total_events', 0)}"]
         sum_list = sum_list + HedTagSummaryContext._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
-    
+
     @staticmethod
     def _tag_details(tags):
         tag_list = []
         for tag in tags:
             tag_list.append(f"{tag['tag']}[{tag['events']},{len(tag['files'])}]")
         return tag_list
-    
+
     @staticmethod
     def _get_tag_list(tag_info, indent=BaseContext.DISPLAY_INDENT):
         sum_list = [f"\n{indent}Main tags[events,files]:"]
@@ -171,5 +221,3 @@ class HedTagSummaryContext(BaseContext):
             for tag_cnt in template[item.lower()]:
                 key_details.append(tag_cnt.get_info(verbose=verbose))
         return key_details
-
- 

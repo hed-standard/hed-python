@@ -166,6 +166,12 @@ class Test(unittest.TestCase):
             main(arg_list)
             self.assertFalse(fp.getvalue())
 
+    def test_temp(self):
+        data_root = "g:/ds002718OpenNeuro"
+        model_path = 'G:/wh_excerpt_rmdl.json'
+        arg_list = [data_root, model_path, '-x', 'derivatives', 'code', 'stimuli', '-b', '-n', '']
+        main(arg_list)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -189,6 +189,23 @@ class Test(unittest.TestCase):
         self.assertEqual(len(dicts_all2.categorical_info), 7,
                          "make_combined_dicts should return right number of entries")
 
+    def test_update_summary(self):
+        files_bids = get_file_list(self.bids_base_dir, extensions=[".tsv"], name_suffix="_events")
+        tab_list = []
+        skip_cols = ['onset', 'duration', 'sample', 'value']
+        value_cols = ['stim_file', 'trial']
+        tab_all = TabularSummary(skip_cols=skip_cols, value_cols=value_cols)
+        for name in files_bids:
+            tab = TabularSummary(skip_cols=skip_cols, value_cols=value_cols)
+            tab_list.append(tab)
+            df = get_new_dataframe(name)
+            tab.update(df, name=name)
+            self.assertEqual(tab.total_events, 200)
+            self.assertEqual(tab.total_files, 1)
+            tab_all.update_summary(tab) 
+        self.assertEqual(len(files_bids), tab_all.total_files)
+        self.assertEqual(len(files_bids)*200, tab_all.total_events)
+
 
 if __name__ == '__main__':
     unittest.main()
