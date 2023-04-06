@@ -2,49 +2,90 @@ from hed.models.definition_entry import DefinitionEntry
 from hed.models.hed_string import HedString
 from hed.errors.error_types import DefinitionErrors
 from hed.errors.error_reporter import ErrorHandler
-from functools import partial
-
 from hed.models.model_constants import DefTagNames
-from hed.models.hed_ops import HedOps
 
 
-class DefinitionDict(HedOps):
+class DefinitionDict:
     """ Gathers definitions from a single source.
-
-        This class extends HedOps because it has string_funcs to check for definitions. It has no tag_funcs.
 
     """
 
-    def __init__(self):
+    def __init__(self, def_dicts=None, hed_schema=None):
         """ Definitions to be considered a single source. """
 
-        super().__init__()
         self.defs = {}
+        self._label_tag_name = DefTagNames.DEF_KEY
+        self._issues = []
+        if def_dicts:
+            self.add_definitions(def_dicts, hed_schema)
 
-        # Definition related issues
-        self._extract_def_issues = []
+    def add_definitions(self, def_dicts, hed_schema=None):
+        """ Add definitions from dict(s) to this dict.
 
-    def get_definition_issues(self):
-        """ Return definition errors found during extraction.
+        Parameters:
+            def_dicts (list or DefinitionDict): DefDict or list of DefDicts/strings whose definitions should be added.
+            hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
+        """
+        if not isinstance(def_dicts, list):
+            def_dicts = [def_dicts]
+        for def_dict in def_dicts:
+            if isinstance(def_dict, DefinitionDict):
+                self._add_definitions_from_dict(def_dict)
+            elif isinstance(def_dict, str) and hed_schema:
+                self.check_for_definitions(HedString(def_dict, hed_schema))
+            elif isinstance(def_dict, list) and hed_schema:
+                for definition in def_dict:
+                    self.check_for_definitions(HedString(definition, hed_schema))
+            else:
+                print(f"Invalid input type '{type(def_dict)} passed to DefDict.  Skipping.")
 
-        Returns:
-            list: List of DefinitionErrors issues found. Each issue is a dictionary.
+    def _add_definition(self, def_tag, def_value):
+        if def_tag in self.defs:
+            error_context = self.defs[def_tag].source_context
+            self._issues += ErrorHandler.format_error_from_context(DefinitionErrors.DUPLICATE_DEFINITION,
+                                                                   error_context=error_context, def_name=def_tag)
+        else:
+            self.defs[def_tag] = def_value
+
+    def _add_definitions_from_dict(self, def_dict):
+        """ Add the definitions found in the given definition dictionary to this mapper.
+
+         Parameters:
+             def_dict (DefinitionDict): DefDict whose definitions should be added.
 
         """
-        return self._extract_def_issues
+        for def_tag, def_value in def_dict.items():
+            self._add_definition(def_tag, def_value)
 
     def get(self, def_name):
         return self.defs.get(def_name.lower())
 
     def __iter__(self):
-        return iter(self.defs.items())
+        return iter(self.defs)
 
-    def __get_string_funcs__(self, **kwargs):
-        error_handler = kwargs.get("error_handler")
-        return [partial(self.check_for_definitions, error_handler=error_handler)]
+    def __len__(self):
+        return len(self.defs)
 
-    def __get_tag_funcs__(self, **kwargs):
-        return []
+    def items(self):
+        return self.defs.items()
+
+    @property
+    def issues(self):
+        """Returns issues about duplicate definitions."""
+        return self._issues
+
+    def get_def_entry(self, def_name):
+        """ Get the definition entry for the definition name.
+
+        Parameters:
+            def_name (str):  Name of the definition to retrieve.
+
+        Returns:
+            DefinitionEntry:  Definition entry for the requested definition.
+
+        """
+
+        return self.defs.get(def_name.lower())
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
         """ Check string for definition tags, adding them to self.
@@ -59,7 +100,7 @@ class DefinitionDict(HedOps):
         """
         new_def_issues = []
         for definition_tag, group in hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}):
-            def_tag_name = definition_tag.extension_or_value_portion
+            def_tag_name = definition_tag.extension
 
             # initial validation
             groups = group.groups()
@@ -128,8 +169,85 @@ class DefinitionDict(HedOps):
                                                        takes_value=def_takes_value,
                                                        source_context=context)
 
-        self._extract_def_issues += new_def_issues
         return new_def_issues
+
+    def construct_def_tags(self, hed_string_obj):
+        """ Identify def/def-expand tag contents in the given string.
+
+        Parameters:
+            hed_string_obj(HedString): The hed string to identify definition contents in
+        """
+        for def_tag, def_expand_group, def_group in hed_string_obj.find_def_tags(recursive=True):
+            def_contents = self._get_definition_contents(def_tag)
+            if def_contents is not None:
+                def_tag._expandable = def_contents
+                def_tag._expanded = def_tag != def_expand_group
+
+    def construct_def_tag(self, hed_tag):
+        """ Identify def/def-expand tag contents in the given HedTag.
+
+        Parameters:
+            hed_tag(HedTag): The hed tag to identify definition contents in
+        """
+        if hed_tag.short_base_tag in {DefTagNames.DEF_ORG_KEY, DefTagNames.DEF_EXPAND_ORG_KEY}:
+            save_parent = hed_tag._parent
+            def_contents = self._get_definition_contents(hed_tag)
+            hed_tag._parent = save_parent
+            if def_contents is not None:
+                hed_tag._expandable = def_contents
+                hed_tag._expanded = hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY
+
+    def expand_def_tags(self, hed_string_obj):
+        """ Expands def tags to def-expand tags.
+
+        Parameters:
+            hed_string_obj (HedString): The hed string to process.
+        """
+        # First see if the "def" is found at all.  This covers def and def-expand.
+        hed_string_lower = hed_string_obj.lower()
+        if self._label_tag_name not in hed_string_lower:
+            return []
+
+        def_issues = []
+        # We need to check for labels to expand in ALL groups
+        for def_tag, def_group in hed_string_obj.find_tags(DefTagNames.DEF_KEY, recursive=True):
+            def_contents = self._get_definition_contents(def_tag)
+            if def_contents is not None:
+                def_tag.short_base_tag = DefTagNames.DEF_EXPAND_ORG_KEY
+                def_group.replace(def_tag, def_contents)
+
+        return def_issues
+
+    def _get_definition_contents(self, def_tag):
+        """ Get the contents for a given def tag.
+
+            Does not validate at all.
+
+        Parameters:
+            def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
+
+        Returns:
+            def_contents: HedGroup
+            The contents to replace the previous def-tag with.
+        """
+        is_label_tag = def_tag.extension
+        placeholder = None
+        found_slash = is_label_tag.find("/")
+        if found_slash != -1:
+            placeholder = is_label_tag[found_slash + 1:]
+            is_label_tag = is_label_tag[:found_slash]
+
+        label_tag_lower = is_label_tag.lower()
+        def_entry = self.defs.get(label_tag_lower)
+        if def_entry is None:
+            # Could raise an error here?
+            return None
+        else:
+            def_tag_name, def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder)
+            if def_tag_name:
+                return def_contents
+
+        return None
 
     @staticmethod
     def get_as_strings(def_dict):
@@ -145,5 +263,3 @@ class DefinitionDict(HedOps):
             def_dict = def_dict.defs
 
         return {key: str(value.contents) for key, value in def_dict.items()}
-
-

@@ -59,8 +59,8 @@ def is_hed3_version_number(version_string):
 
 
 attribute_validators = {
-        "version": (validate_version_string, HedExceptions.HED_SCHEMA_VERSION_INVALID),
-        "library": (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
+        constants.VERSION_ATTRIBUTE: (validate_version_string, HedExceptions.HED_SCHEMA_VERSION_INVALID),
+        constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
     }
 
 

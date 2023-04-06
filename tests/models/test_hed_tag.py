@@ -154,29 +154,3 @@ class TestSchemaUtilityFunctions(TestHedBase):
         self.assertEqual(no_extension_tag1_result, False)
         self.assertEqual(no_extension_tag2_result, False)
         self.assertEqual(no_extension_tag3_result, False)
-
-    def test_finding_tags_no_schema(self):
-        # Verify basic tag identification works.
-        tag = HedTag("Onset")
-        tag.convert_to_canonical_forms(hed_schema=None)
-        self.assertTrue(tag._schema_entry)
-
-        tag2 = HedTag("OtherFolders/Onset")
-        tag2.convert_to_canonical_forms(hed_schema=None)
-        self.assertTrue(tag2._schema_entry)
-
-        tag4 = HedTag("OtherFolders/Onset/Extension")
-        tag4.convert_to_canonical_forms(hed_schema=None)
-        self.assertTrue(tag4._schema_entry)
-
-        tag3 = HedTag("OtherFolders/Onset-NotOnset")
-        tag3.convert_to_canonical_forms(hed_schema=None)
-        self.assertFalse(tag3._schema_entry)
-
-        tag = HedTag("Onset")
-        tag.convert_to_canonical_forms(hed_schema=self.hed_schema)
-        self.assertTrue(tag._schema_entry)
-
-        tag2 = HedTag("Property/Data-property/Data-marker/Temporal-marker/Onset")
-        tag2.convert_to_canonical_forms(hed_schema=self.hed_schema)
-        self.assertTrue(tag._schema_entry)

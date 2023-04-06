@@ -2,29 +2,24 @@ from hed.models.model_constants import DefTagNames
 from hed.models.hed_group import HedGroup
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import OnsetErrors
-from hed.models.hed_ops import HedOps
 
 
-class OnsetMapper(HedOps):
-    """ HedOps responsible for matching onset/offset pairs. """
+class OnsetValidator:
+    """ Validates onset/offset pairs. """
 
-    def __init__(self, def_mapper):
-        super().__init__()
-        self._def_mapper = def_mapper
+    def __init__(self, def_dict, run_full_onset_checks=True):
+        self._defs = def_dict
         self._onsets = {}
+        self._run_full_onset_checks = run_full_onset_checks
 
-    def check_for_onset_offset(self, hed_string_obj):
-        """ Check for onset or offset and track context.
+    def validate_onset_offset(self, hed_string_obj):
+        """ Validate onset/offset
 
         Parameters:
-            hed_string_obj (HedString): The hed string to check.  Finds a maximum of one onset tag.
+            hed_string_obj (HedString): The hed string to check.
 
         Returns:
             list: A list of issues found in validating onsets (i.e., out of order onsets, unknown def names).
-
-        Notes:
-            - Each issue in the return list is a dictionary.
-
         """
         onset_issues = []
         for found_onset, found_group in self._find_onset_tags(hed_string_obj):
@@ -75,35 +70,28 @@ class OnsetMapper(HedOps):
 
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
         is_onset = onset_offset_tag.short_base_tag.lower() == DefTagNames.ONSET_KEY
-        full_def_name = def_name = def_tag.extension_or_value_portion
+        full_def_name = def_name = def_tag.extension
         placeholder = None
         found_slash = def_name.find("/")
         if found_slash != -1:
             placeholder = def_name[found_slash + 1:]
             def_name = def_name[:found_slash]
 
-        def_entry = self._def_mapper.get_def_entry(def_name)
+        def_entry = self._defs.get_def_entry(def_name)
         if def_entry is None:
             return ErrorHandler.format_error(OnsetErrors.ONSET_DEF_UNMATCHED, tag=def_tag)
         if bool(def_entry.takes_value) != bool(placeholder):
             return ErrorHandler.format_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=def_tag,
                                              has_placeholder=bool(def_entry.takes_value))
 
-        if is_onset:
-            # onset can never fail as it implies an offset
-            self._onsets[full_def_name.lower()] = full_def_name
-        else:
-            if full_def_name.lower() not in self._onsets:
-                return ErrorHandler.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=def_tag)
+        if self._run_full_onset_checks:
+            if is_onset:
+                # onset can never fail as it implies an offset
+                self._onsets[full_def_name.lower()] = full_def_name
             else:
-                del self._onsets[full_def_name.lower()]
+                if full_def_name.lower() not in self._onsets:
+                    return ErrorHandler.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=def_tag)
+                else:
+                    del self._onsets[full_def_name.lower()]
 
-        return []
-
-    def __get_string_funcs__(self, **kwargs):
-        string_funcs = []
-        string_funcs.append(self.check_for_onset_offset)
-        return string_funcs
-
-    def __get_tag_funcs__(self, **kwargs):
         return []

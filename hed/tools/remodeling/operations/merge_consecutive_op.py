@@ -8,7 +8,7 @@ class MergeConsecutiveOp(BaseOp):
     """ Merge consecutive rows with same column value.
 
     Required remodeling parameters:
-        - **column_name** (*str*): the name of the column whose consecutive values are to be compared (the merge column).  
+        - **column_name** (*str*): name of column whose consecutive values are to be compared (the merge column).  
         - **event_code** (*str* or *int* or *float*): the particular value in the match column to be merged.  
         - **match_columns** (*list*):  A list of columns whose values have to be matched for two events to be the same.  
         - **set_durations** (*bool*): If true, set the duration of the merged event to the extent of the merged events.  
@@ -31,7 +31,6 @@ class MergeConsecutiveOp(BaseOp):
         """ Constructor for the merge consecutive operation.
 
         Parameters:
-            op_spec (dict): Specification for required and optional parameters.
             parameters (dict): Actual values of the parameters for the operation.
 
         Raises:
@@ -121,7 +120,7 @@ class MergeConsecutiveOp(BaseOp):
         Returns:
             list:  Group numbers set (starting at 1).
 
-        # TODO: Handle roundoff in rows for comparison.
+        # TODO: Handle round off in rows for comparison.
         """
         in_group = False
         remove_groups = [0] * len(match_df)

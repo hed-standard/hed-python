@@ -1,13 +1,12 @@
 import os
 import unittest
 from hed.errors.exceptions import HedFileError
-from hed.models.hed_group import HedGroup
 from hed.models.hed_string import HedString
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.analysis.hed_context_manager import HedContextManager, OnsetGroup
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.tools.analysis.hed_context_manager import HedContextManager
+from hed.models.df_util import get_assembled
 
 
 class Test(unittest.TestCase):
@@ -38,6 +37,7 @@ class Test(unittest.TestCase):
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        cls.sidecar1 = sidecar1
         cls.schema = schema
 
     # def test_onset_group(self):
@@ -71,13 +71,14 @@ class Test(unittest.TestCase):
         self.assertIsInstance(context, list, "The constructor event contexts should be a list")
         self.assertIsInstance(context[1], HedString, "The constructor event contexts has a correct element")
 
-    def test_constructor(self):
+    def test_constructor1(self):
         with self.assertRaises(ValueError) as cont:
             HedContextManager(self.test_strings1, None)
         self.assertEqual(cont.exception.args[0], "ContextRequiresSchema")
 
     def test_iter(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
         manager1 = HedContextManager(hed_strings, self.schema)
         i = 0
         for hed, context in manager1.iter_context():
@@ -86,7 +87,8 @@ class Test(unittest.TestCase):
             i = i + 1
 
     def test_constructor_from_assembled(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
         manager1 = HedContextManager(hed_strings, self.schema)
         self.assertEqual(len(manager1.hed_strings), 200,
                          "The constructor for assembled strings has expected # of strings")

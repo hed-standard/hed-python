@@ -1,6 +1,5 @@
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
-from hed.models.def_mapper import DefMapper
 
 
 class SpreadsheetInput(BaseInput):
@@ -8,7 +7,7 @@ class SpreadsheetInput(BaseInput):
 
     def __init__(self, file=None, file_type=None, worksheet_name=None, tag_columns=None,
                  has_column_names=True, column_prefix_dictionary=None,
-                 def_dicts=None, name=None, hed_schema=None):
+                 name=None):
         """Constructor for the SpreadsheetInput class.
 
         Parameters:
@@ -21,9 +20,7 @@ class SpreadsheetInput(BaseInput):
             has_column_names (bool): True if file has column names. Validation will skip over the
                 first line of the file if the spreadsheet as column names.
             column_prefix_dictionary (dict): A dictionary with column number keys and prefix values.
-            def_dicts (DefinitionDict or list):  A DefinitionDict or list of DefDicts containing definitions for this
-                object other than the ones extracted from the SpreadsheetInput object itself.
-            hed_schema(HedSchema or None): The schema to use by default in identifying tags
+                This is partially deprecated - what this now turns the given columns into Value columns.
         Examples:
             A prefix dictionary {3: 'Label/', 5: 'Description/'} indicates that column 3 and 5 have HED tags
             that need to be prefixed by Label/ and Description/ respectively.
@@ -38,7 +35,4 @@ class SpreadsheetInput(BaseInput):
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   warn_on_missing_column=False)
 
-        def_mapper = DefMapper(def_dicts)
-
-        super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper, def_mapper=def_mapper,
-                         name=name, hed_schema=hed_schema)
+        super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper, name=name)

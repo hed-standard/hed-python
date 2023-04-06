@@ -8,8 +8,7 @@
         "Units": "s"
     },
     "HED": {
-        "Description": "This is a column to verity the often reserved HED name causes no issues.",
+        "Description": "This is a column to verity the often reserved HED name does cause issues.",
         "Units": "s"
     }
-
 }

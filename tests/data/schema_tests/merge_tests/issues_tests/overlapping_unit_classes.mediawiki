@@ -1,0 +1,49 @@
+HED library="score" version="1.0.0" with-standard="8.2.0"
+
+'''Prologue'''
+This schema is a Hierarchical Event Descriptors (HED) Library Schema implementation of Standardized Computer-based Organized Reporting of EEG (SCORE)[1,2] for describing events occurring during neuroimaging time series recordings.
+The HED-SCORE library schema allows neurologists, neurophysiologists, and brain researchers to annotate electrophysiology recordings using terms from an internationally accepted set of defined terms (SCORE) compatible with the HED framework.
+The resulting annotations are understandable to clinicians and directly usable in computer analysis.
+
+Future extensions may be implemented in the HED-SCORE library schema.
+For more information see https://hed-schema-library.readthedocs.io/en/latest/index.html.
+
+!# start schema
+
+'''Modulator''' <nowiki> {requireChild} [External stimuli / interventions or changes in the alertness level (sleep) that modify: the background activity, or how often a graphoelement is occurring, or change other features of the graphoelement (like intra-burst frequency). For each observed finding, there is an option of specifying how they are influenced by the modulators and procedures that were done during the recording.]</nowiki>
+
+    * Sleep-modulator
+        ** Sleep-deprivation
+            *** <nowiki># {takesValue, valueClass=textClass}[Free text.]</nowiki>
+        ** Sleep-following-sleep-deprivation
+            *** <nowiki># {takesValue, valueClass=textClass}[Free text.]</nowiki>
+        ** Natural-sleep
+            *** <nowiki># {takesValue, valueClass=textClass}[Free text.]</nowiki>
+        ** Induced-sleep
+            *** <nowiki># {takesValue, valueClass=textClass}[Free text.]</nowiki>
+        ** Drowsiness
+            *** <nowiki># {takesValue, valueClass=textClass}[Free text.]</nowiki>
+        ** Awakening
+            *** <nowiki># {takesValue, valueClass=textClass}[Free text.]</nowiki>
+
+
+
+!# end schema
+
+'''Unit classes'''
+* weightUnits <nowiki>{defaultUnits=testUnit}</nowiki>
+** testUnit <nowiki>{conversionFactor=100}</nowiki>
+
+
+'''Epilogue'''
+The Standardized Computer-based Organized Reporting of EEG (SCORE) is a standard terminology for scalp EEG data assessment designed for use in clinical practice that may also be used for research purposes.
+The SCORE standard defines terms for describing phenomena observed in scalp EEG data. It is also potentially applicable (with some suitable extensions) to EEG recorded in critical care and neonatal settings.
+The SCORE standard received European consensus and has been endorsed by the European Chapter of the International Federation of Clinical Neurophysiology (IFCN) and the International League Against Epilepsy (ILAE) Commission on European Affairs.
+A second revised and extended version of SCORE achieved international consensus.
+
+[1] Beniczky, Sandor, et al. "Standardized computer based organized reporting of EEG: SCORE." Epilepsia 54.6 (2013).
+[2] Beniczky, Sandor, et al. "Standardized computer based organized reporting of EEG: SCORE second version." Clinical Neurophysiology 128.11 (2017). 
+
+TPA, November 2022
+
+!# end hed

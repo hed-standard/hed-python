@@ -1,0 +1,10 @@
+{
+  "onset": {
+    "Description": "Position of event marker in seconds relative to the start.",
+    "Units": "s"
+  },
+  "duration": {
+    "Description": "Duration of the event in seconds.",
+    "Units": "s"
+  }
+}

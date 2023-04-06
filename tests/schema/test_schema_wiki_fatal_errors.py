@@ -18,6 +18,7 @@ class TestHedSchema(unittest.TestCase):
             "HED_separator_invalid.mediawiki": HedExceptions.INVALID_SECTION_SEPARATOR,
             "HED_header_missing.mediawiki": HedExceptions.SCHEMA_HEADER_MISSING,
             "HED_header_invalid.mediawiki": HedExceptions.HED_SCHEMA_HEADER_INVALID,
+            "empty_file.mediawiki": HedExceptions.HED_SCHEMA_HEADER_INVALID,
             "HED_header_invalid_version.mediawiki": HedExceptions.HED_SCHEMA_VERSION_INVALID,
             "HED_header_missing_version.mediawiki": HedExceptions.HED_SCHEMA_VERSION_INVALID,
             "HED_header_bad_library.mediawiki": HedExceptions.BAD_HED_LIBRARY_NAME,
@@ -61,12 +62,47 @@ class TestHedSchema(unittest.TestCase):
             with self.assertRaises(HedFileError) as context:
                 schema.load_schema(full_filename)
                 # all of these should produce exceptions.
-
+            from hed.errors import ErrorHandler, ErrorContext, SchemaErrors, get_printable_issue_string
             # Verify basic properties of exception
             expected_line_numbers = self.expected_line_numbers.get(filename, [])
             if expected_line_numbers:
                 for issue, expected in zip(context.exception.issues, expected_line_numbers):
-                    self.assertEqual(issue["line_number"], expected)
+                    self.assertEqual(issue[ErrorContext.ROW], expected)
+
+
+            issues = context.exception.issues
+
+            self.assertIsInstance(get_printable_issue_string(issues), str)
+
+            self.assertTrue(context.exception.args[0] == error)
+            self.assertTrue(context.exception.filename == full_filename)
+
+
+    def test_merging_errors_schema(self):
+        for filename, error in self.files_and_errors.items():
+            full_filename = self.full_base_folder + filename
+            with self.assertRaises(HedFileError) as context:
+                schema.load_schema(full_filename)
+                # all of these should produce exceptions.
+            from hed.errors import ErrorHandler, ErrorContext, SchemaErrors, get_printable_issue_string
+            # Verify basic properties of exception
+            expected_line_numbers = self.expected_line_numbers.get(filename, [])
+            if expected_line_numbers:
+                for issue, expected in zip(context.exception.issues, expected_line_numbers):
+                    self.assertEqual(issue[ErrorContext.ROW], expected)
+
+            error_handler = ErrorHandler()
+
+            error_handler.push_error_context(ErrorContext.ROW, 1)
+            error_handler.push_error_context(ErrorContext.COLUMN, 2)
+
+            issues = error_handler.format_error_with_context(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID,
+                                                             "error_attribute", source_tag="error_tag")
+            error_handler.pop_error_context()
+            error_handler.pop_error_context()
+
+            issues += context.exception.issues
+            self.assertIsInstance(get_printable_issue_string(issues), str)
 
             self.assertTrue(context.exception.args[0] == error)
             self.assertTrue(context.exception.filename == full_filename)

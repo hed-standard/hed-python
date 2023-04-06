@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from hed.errors import HedFileError
+from hed.errors import HedFileError, get_printable_issue_string
 from hed.models import HedString, HedTag
 from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup, load_schema_version, HedSchema
 
@@ -25,13 +25,12 @@ class TestHedSchema(unittest.TestCase):
 
     def test_name(self):
         invalid_xml_file = "invalidxmlfile.xml"
-        name = "PrettyDisplayName.xml"
         try:
             load_schema(invalid_xml_file)
             # We should have an error before we reach here.
             self.assertTrue(False)
         except HedFileError as e:
-            self.assertTrue(name in e.format_error_message(return_string_only=True, name=name))
+            self.assertTrue(invalid_xml_file in get_printable_issue_string(e.issues, skip_filename=False))
 
     def test_tag_attribute(self):
         test_strings = {

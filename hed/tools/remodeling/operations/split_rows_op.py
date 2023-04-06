@@ -6,12 +6,12 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class SplitRowsOp(BaseOp):
-    """ Split rows in a tabular file into multiple rows based on a column.
+    """ Split rows in a tabular file into multiple rows based on parameters.
 
     Required remodeling parameters:   
-        - **anchor_column** (*str*): The column in which new items are generated.   
-        - **new_events** (*dict*):  Mapping of new values based on values in the anchor_column.   
-        - **remove_parent_row** (*bool*):  If true, columns not in column_order are placed at end.   
+        - **anchor_column** (*str*): The column in which the names of new items are stored.   
+        - **new_events** (*dict*):  Mapping of new values based on values in the original row.    
+        - **remove_parent_row** (*bool*):  If true, the original row that was split is removed.   
 
     """
 

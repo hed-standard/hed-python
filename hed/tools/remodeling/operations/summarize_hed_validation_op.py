@@ -47,7 +47,7 @@ class SummarizeHedValidationOp(BaseOp):
 
             TypeError   
                 - If a parameter has the wrong type.   
- 
+
         """
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
@@ -86,6 +86,20 @@ class HedValidationSummaryContext(BaseContext):
         self.check_for_warnings = sum_op.check_for_warnings
 
     def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return a formatted string with the summary for the indicated name.
+
+        Parameters:
+            name (str):  Identifier (usually the filename) of the individual file.
+            result (dict): The dictionary of the summary results indexed by name.
+            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+
+        Returns:
+            str - The results in a printable format ready to be saved to a text file.
+
+        Notes:
+            This gets the error list from "sidecar_issues" and "event_issues".
+
+        """
 
         if result["is_merged"]:
             sum_list = [f"{name}: [{result['total_sidecar_files']} sidecar files, "
@@ -102,7 +116,15 @@ class HedValidationSummaryContext(BaseContext):
         return "\n".join(sum_list)
 
     def update_context(self, new_context):
-        validator = HedValidator(hed_schema=new_context['schema'])
+        """ Update the summary for a given tabular input file.
+
+        Parameters:
+            new_context (dict):  A dictionary with the parameters needed to update a summary.
+
+        Notes:
+            - The summary needs a "name" str, a schema, a "df", and a "Sidecar".  
+        """
+
         results = self.get_empty_results()
         results["total_event_files"] = 1
         results["event_issues"][new_context["name"]] = []
@@ -113,7 +135,7 @@ class HedValidationSummaryContext(BaseContext):
             if not isinstance(sidecar, Sidecar):
                 sidecar = Sidecar(files=new_context['sidecar'], name=os.path.basename(sidecar))
             results["sidecar_issues"][sidecar.name] = []
-            sidecar_issues = sidecar.validate_entries(validator, check_for_warnings=self.check_for_warnings)
+            sidecar_issues = sidecar.validate(new_context['schema'])
             filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
             if not self.check_for_warnings:
                 sidecar_issues = filtered_issues
@@ -122,24 +144,30 @@ class HedValidationSummaryContext(BaseContext):
             results['total_sidecar_files'] = 1
         if not filtered_issues:
             results['validation_completed'] = True
-            input_data = TabularInput(new_context['df'], hed_schema=new_context['schema'],  sidecar=sidecar)
-            issues = input_data.validate_file(validator, check_for_warnings=self.check_for_warnings)
+            input_data = TabularInput(new_context['df'], sidecar=sidecar)
+            issues = input_data.validate(new_context['schema'])
             if not self.check_for_warnings:
                 issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
             results['event_issues'][new_context["name"]] = issues
             results['total_event_issues'] = len(issues)
 
-    def _get_summary_details(self, summary_info):
+    def _get_details_dict(self, summary_info):
+        """Return the summary details from the summary_info.
+
+        Parameters:
+            summary_info (dict): Dictionary of issues
+
+        Returns:
+            dict:  Same summary_info as was passed in.
+
+        """
         return summary_info
 
     def _merge_all(self):
-        """ Return merged information.
+        """ Create a dictionary containing all of the errors in the dataset.
 
         Returns:
-           object:  Consolidated summary of information.
-
-        Notes:
-            Abstract method be implemented by each individual context summary.
+            dict - dictionary of issues organized into sidecar_issues and event_issues.
 
         """
 

@@ -97,9 +97,7 @@ class Test(unittest.TestCase):
         os.remove(self.sidecar_path)
         with patch('sys.stdout', new=io.StringIO()) as fp:
             main(arg_list)
-            a = fp.getvalue()
-            print("to here")
-            #self.assertFalse(fp.getvalue())
+            self.assertFalse(fp.getvalue())
 
     def test_main_direct_no_sidecar(self):
         arg_list = [self.data_root, self.model_path, '-x', 'derivatives', 'stimuli']
@@ -167,6 +165,12 @@ class Test(unittest.TestCase):
         with patch('sys.stdout', new=io.StringIO()) as fp:
             main(arg_list)
             self.assertFalse(fp.getvalue())
+
+    # def test_temp(self):
+    #     data_root = "g:/ds002718OpenNeuro"
+    #     model_path = 'G:/wh_excerpt_rmdl.json'
+    #     arg_list = [data_root, model_path, '-x', 'derivatives', 'code', 'stimuli', '-b', '-n', '']
+    #     main(arg_list)
 
 
 if __name__ == '__main__':

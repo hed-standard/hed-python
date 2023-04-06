@@ -132,9 +132,6 @@ class HedGroup:
         Returns:
             HedGroup: The copied group.
 
-        Notes:
-            - The parent tag is removed.
-
         """
         save_parent = self._parent
         self._parent = None
@@ -160,15 +157,18 @@ class HedGroup:
         Returns:
             list: The list of all tags in this group, with subgroups being returned as further nested lists
         """
-        output_list = []
+        tag_list = []
+        group_list = []
         queue_list = list(self.children)
         for child in queue_list:
             if isinstance(child, HedTag):
-                output_list.append((child, child))
+                tag_list.append((child, child))
             else:
-                output_list.append((child, child.sorted(update_self)))
+                group_list.append((child, child.sorted(update_self)))
 
-        output_list.sort(key=lambda x: str(x[0]))
+        tag_list.sort(key=lambda x: str(x[0]))
+        group_list.sort(key=lambda x: str(x[0]))
+        output_list = tag_list + group_list
         if update_self:
             self._children = [x[0] for x in output_list]
         return [x[1] for x in output_list]
@@ -263,6 +263,19 @@ class HedGroup:
         """
         return [group for group in self.children if isinstance(group, HedGroup)]
 
+    def get_first_group(self):
+        """ Returns the first group in this hed string or group.
+
+            Useful for things like Def-expand where they only have a single group.
+
+            Raises a ValueError if there are no groups.
+
+        Returns:
+            HedGroup: The first group
+
+        """
+        return self.groups()[0]
+
     def get_original_hed_string(self):
         """ Get the original hed string.
 
@@ -312,12 +325,11 @@ class HedGroup:
         """
         return self.get_as_form("long_tag")
 
-    def get_as_form(self, tag_attribute, tag_transformer=None):
+    def get_as_form(self, tag_attribute):
         """ Get the string corresponding to the specified form.
 
         Parameters:
             tag_attribute (str): The hed_tag property to use to construct the string (usually short_tag or long_tag).
-            tag_transformer (func or None): A function that is applied to each tag string before returning.
 
         Returns:
             str: The constructed string after transformation
@@ -326,13 +338,8 @@ class HedGroup:
             - The signature of a tag_transformer is str def(HedTag, str).
 
         """
-        if tag_transformer:
-            result = ",".join([tag_transformer(child, child.__getattribute__(tag_attribute))
-                               if isinstance(child, HedTag) else child.get_as_form(tag_attribute, tag_transformer)
-                               for child in self.children])
-        else:
-            result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
-                               child.get_as_form(tag_attribute) for child in self.children])
+        result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
+                           child.get_as_form(tag_attribute) for child in self.children])
         if self.is_group:
             return f"({result})"
         return result
@@ -352,7 +359,7 @@ class HedGroup:
 
         """
         for tag in self.get_all_tags():
-            if "#" in tag.org_tag:
+            if tag.is_placeholder():
                 return tag
 
         return None
@@ -365,6 +372,12 @@ class HedGroup:
         if self is other:
             return True
 
+        # Allow us to compare to a list of groups.
+        # Note this comparison will NOT check if the list has the outer parenthesis
+        if isinstance(other, list):
+            return self.children == other
+        if isinstance(other, str):
+            return str(self) == other
         if not isinstance(other, HedGroup) or self.children != other.children or self.is_group != other.is_group:
             return False
         return True
@@ -484,9 +497,9 @@ class HedGroup:
         """ Find def and def-expand tags
         Parameters:
             recursive (bool): If true, also check subgroups.
-            include_groups (int, 0, 1, 2, 3): options for how to expand or include groups
+            include_groups (int, 0, 1, 2, 3): options for return values
         Returns:
-            list: A list of tuples. The contents depends on the values of the include group.
+            list: A list of tuples. The contents depend on the values of the include_group.
         Notes:
             - The include_groups option controls the tag expansion as follows:
                 - If 0: Return only def and def expand tags/.

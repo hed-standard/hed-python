@@ -18,21 +18,22 @@ class DefinitionEntry:
         """
         self.name = name
         if contents:
-            contents = contents.copy()
+            contents = contents.copy().sort()
         self.contents = contents
         self.takes_value = takes_value
         self.source_context = source_context
-        self.tag_dict = {}
-        if contents:
-            add_group_to_dict(contents, self.tag_dict)
+        # self.tag_dict = {}
+        # if contents:
+        #     add_group_to_dict(contents, self.tag_dict)
 
-    def get_definition(self, replace_tag, placeholder_value=None):
+    def get_definition(self, replace_tag, placeholder_value=None, return_copy_of_tag=False):
         """ Return a copy of the definition with the tag expanded and the placeholder plugged in.
 
         Parameters:
             replace_tag (HedTag): The def hed tag to replace with an expanded version
             placeholder_value (str or None):    If present and required, will replace any pound signs
                                                 in the definition contents.
+            return_copy_of_tag(bool): Set to true for validation
 
         Returns:
             str:          The expanded def tag name
@@ -45,6 +46,8 @@ class DefinitionEntry:
         if self.takes_value == (placeholder_value is None):
             return None, []
 
+        if return_copy_of_tag:
+            replace_tag = replace_tag.copy()
         output_contents = [replace_tag]
         name = self.name
         if self.contents:
@@ -63,28 +66,28 @@ class DefinitionEntry:
                                    startpos=replace_tag.span[0], endpos=replace_tag.span[1], contents=output_contents)
         return f"{DefTagNames.DEF_EXPAND_ORG_KEY}/{name}", output_contents
 
-
-def add_group_to_dict(group, tag_dict=None):
-    """ Add the tags and their values from a HED group to a tag dictionary.
-
-    Parameters:
-        group (HedGroup):   Contents to add to the tag dict.
-        tag_dict (dict):    The starting tag dictionary to add to.
-
-    Returns:
-        dict:  The updated tag_dict containing the tags with a list of values.
-
-    Notes:
-        - Expects tags to have forms calculated already.
-
-    """
-    if tag_dict is None:
-        tag_dict = {}
-    for tag in group.get_all_tags():
-        short_base_tag = tag.short_base_tag
-        value = tag.extension_or_value_portion
-        value_dict = tag_dict.get(short_base_tag, {})
-        if value:
-            value_dict[value] = ''
-        tag_dict[short_base_tag] = value_dict
-    return tag_dict
+#
+# def add_group_to_dict(group, tag_dict=None):
+#     """ Add the tags and their values from a HED group to a tag dictionary.
+#
+#     Parameters:
+#         group (HedGroup):   Contents to add to the tag dict.
+#         tag_dict (dict):    The starting tag dictionary to add to.
+#
+#     Returns:
+#         dict:  The updated tag_dict containing the tags with a list of values.
+#
+#     Notes:
+#         - Expects tags to have forms calculated already.
+#
+#     """
+#     if tag_dict is None:
+#         tag_dict = {}
+#     for tag in group.get_all_tags():
+#         short_base_tag = tag.short_base_tag
+#         value = tag.extension
+#         value_dict = tag_dict.get(short_base_tag, {})
+#         if value:
+#             value_dict[value] = ''
+#         tag_dict[short_base_tag] = value_dict
+#     return tag_dict

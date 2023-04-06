@@ -90,15 +90,16 @@ class Dispatcher:
             DataFrame:  DataFrame after reading the path.
 
         Raises:
-            HedFileError:  If a valid file cannot be found.
+            HedFileError   
+                - If a valid file cannot be found.    
 
-        Note:
+        Notes:   
         - If a string is passed and there is a backup manager,
           the string must correspond to the full path of the file in the original dataset.
-          In this case, the corresponding backup file is read and returned.
+          In this case, the corresponding backup file is read and returned.    
         - If a string is passed and there is no backup manager,
-          the data file corresponding to the file_designator is read and returned.
-        - If a Pandas DataFrame is passed, a copy is returned.
+          the data file corresponding to the file_designator is read and returned.    
+        - If a Pandas DataFrame is passed, a copy is returned.    
 
         """
         if isinstance(file_designator, pd.DataFrame):
@@ -221,6 +222,10 @@ class Dispatcher:
             DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'
 
         """
+        dtypes = df.dtypes.to_dict()
+        for col_name, typ in dtypes.items():
+            if typ == 'category':
+                df[col_name] = df[col_name].astype(str)
         return df.fillna('n/a')
 
     @staticmethod

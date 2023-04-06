@@ -141,8 +141,8 @@ def main(arg_list=None):
 
     Raises:
         HedFileError   
-            - if the data root directory does not exist.  
-            - if the specified backup does not exist.  
+            - if the data root directory does not exist.   
+            - if the specified backup does not exist.   
 
     """
     args, operations = parse_arguments(arg_list)

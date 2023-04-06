@@ -10,7 +10,7 @@ from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.analysis.hed_type_values import HedTypeValues
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.models.df_util import get_assembled
 
 
 class Test(unittest.TestCase):
@@ -53,12 +53,11 @@ class Test(unittest.TestCase):
         cls.events_path = os.path.realpath(os.path.join(bids_root_path,
                                            'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         cls.sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
-        cls.hed_schema = schema
+        cls.schema = schema
 
     def test_constructor(self):
-        strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        strings2 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        con_man = HedContextManager(strings1, hed_schema=self.hed_schema)
+        strings1 = [HedString(hed, hed_schema=self.schema) for hed in self.test_strings1]
+        con_man = HedContextManager(strings1, hed_schema=self.schema)
         type_var = HedTypeValues(con_man, self.defs, 'run-01')
         self.assertIsInstance(type_var, HedTypeValues,
                               "Constructor should create a HedTypeManager from strings")
@@ -68,18 +67,18 @@ class Test(unittest.TestCase):
     def test_constructor_from_tabular_input(self):
         sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
         input_data = TabularInput(self.events_path, sidecar=sidecar1, name="face_sub1_events")
-        test_strings1 = get_assembled_strings(input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.hed_schema), definitions, 'run-01')
+        test_strings1, definitions = get_assembled(input_data, sidecar1, self.schema, extra_def_dicts=None,
+                                                   join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema), definitions, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from a tabular input")
 
     def test_constructor_variable_caps(self):
         sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
-        input_data = TabularInput(self.events_path, sidecar=sidecar1, name="face_sub1_events")
-        test_strings1 = get_assembled_strings(input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.hed_schema),
+        input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
+        test_strings1, definitions = get_assembled(input_data, sidecar1, self.schema, extra_def_dicts=None,
+                                                   join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema),
                                     definitions, 'run-01', type_tag="Condition-variable")
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager variable caps")
@@ -87,33 +86,33 @@ class Test(unittest.TestCase):
     def test_constructor_variable_task(self):
         sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
         input_data = TabularInput(self.events_path, sidecar=sidecar1, name="face_sub1_events")
-        test_strings1 = get_assembled_strings(input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.hed_schema),
+        test_strings1, definitions = get_assembled(input_data, sidecar1, self.schema, extra_def_dicts=None,
+                                                   join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema),
                                     definitions, 'run-01', type_tag="task")
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager variable task")
 
     def test_constructor_multiple_values(self):
-        test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings2]
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.hed_schema), self.defs, 'run-01')
+        hed_strings = [HedString(hed, self.schema) for hed in self.test_strings2]
+        var_manager = HedTypeValues(HedContextManager(hed_strings, self.schema), self.defs, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from strings")
         self.assertEqual(len(var_manager._type_value_map), 3,
                          "Constructor should have right number of type_variables if multiple")
 
     def test_constructor_unmatched(self):
-        test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings3]
+        hed_strings = [HedString(hed, self.schema) for hed in self.test_strings3]
         with self.assertRaises(HedFileError) as context:
-            HedTypeValues(HedContextManager(test_strings1, self.hed_schema), self.defs, 'run-01')
+            HedTypeValues(HedContextManager(hed_strings, self.schema), self.defs, 'run-01')
         self.assertEqual(context.exception.args[0], 'UnmatchedOffset')
 
     def test_get_variable_factors(self):
         sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
-        input_data = TabularInput(self.events_path, sidecar=sidecar1, name="face_sub1_events")
-        test_strings1 = get_assembled_strings(input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.hed_schema), definitions, 'run-01')
+        input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
+        test_strings1, definitions = get_assembled(input_data, sidecar1, self.schema, extra_def_dicts=None,
+                                                   join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema), definitions, 'run-01')
         df_new1 = var_manager.get_type_factors()
         self.assertIsInstance(df_new1, DataFrame)
         self.assertEqual(len(df_new1), 200)
@@ -126,44 +125,44 @@ class Test(unittest.TestCase):
 
     def test_str(self):
         sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
-        input_data = TabularInput(self.events_path, sidecar=sidecar1, name="face_sub1_events")
-        test_strings1 = get_assembled_strings(input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.hed_schema), definitions, 'run-01')
+        input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
+        test_strings1, definitions = get_assembled(input_data, sidecar1, self.schema, extra_def_dicts=None,
+                                                   join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema), definitions, 'run-01')
         new_str = str(var_manager)
         self.assertIsInstance(new_str, str)
 
     def test_summarize_variables(self):
         sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
-        input_data = TabularInput(self.events_path, sidecar=sidecar1, name="face_sub1_events")
-        test_strings1 = get_assembled_strings(input_data, hed_schema=self.hed_schema, expand_defs=False)
-        definitions = input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.hed_schema), definitions, 'run-01')
+        input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
+        test_strings1, definitions = get_assembled(input_data, sidecar1, self.schema, extra_def_dicts=None,
+                                                   join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema), definitions, 'run-01')
         summary = var_manager.get_summary()
         self.assertIsInstance(summary, dict, "get_summary produces a dictionary if not json")
         self.assertEqual(len(summary), 3, "Summarize_variables has right number of condition type_variables")
         self.assertIn("key-assignment", summary, "get_summary has a correct key")
 
     def test_extract_definition_variables(self):
-        test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.hed_schema), self.defs, 'run-01')
+        hed_strings = [HedString(hed, self.schema) for hed in self.test_strings1]
+        var_manager = HedTypeValues(HedContextManager(hed_strings, self.schema), self.defs, 'run-01')
         var_levels = var_manager._type_value_map['var3'].levels
         self.assertNotIn('cond3/7', var_levels,
                          "_extract_definition_variables before extraction def/cond3/7 not in levels")
-        tag = HedTag("Def/Cond3/7", hed_schema=self.hed_schema)
+        tag = HedTag("Def/Cond3/7", hed_schema=self.schema)
         var_manager._extract_definition_variables(tag, 5)
         self.assertIn('cond3/7', var_levels,
                       "_extract_definition_variables after extraction def/cond3/7 not in levels")
 
     def test_get_variable_names(self):
-        test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        conditions1 = HedTypeValues(HedContextManager(test_strings1, self.hed_schema), self.defs, 'run-01')
+        hed_strings = [HedString(hed, self.schema) for hed in self.test_strings1]
+        conditions1 = HedTypeValues(HedContextManager(hed_strings, self.schema), self.defs, 'run-01')
         list1 = conditions1.get_type_value_names()
         self.assertEqual(len(list1), 8, "get_variable_tags list should have the right length")
 
     def test_get_variable_def_names(self):
-        test_strings1 = [HedString(hed, hed_schema=self.hed_schema) for hed in self.test_strings1]
-        conditions1 = HedTypeValues(HedContextManager(test_strings1, self.hed_schema), self.defs, 'run-01')
+        hed_strings = [HedString(hed, self.schema) for hed in self.test_strings1]
+        conditions1 = HedTypeValues(HedContextManager(hed_strings, self.schema), self.defs, 'run-01')
         list1 = conditions1.get_type_def_names()
         self.assertEqual(len(list1), 5, "get_type_def_names list should have the right length")
 

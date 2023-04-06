@@ -78,15 +78,40 @@ class ColumnNameSummaryContext(BaseContext):
         super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
 
     def update_context(self, new_context):
+        """ Update the summary for a given tabular input file.
+
+        Parameters:
+            new_context (dict):  A dictionary with the parameters needed to update a summary.
+
+        Notes:
+            - The summary information is kept in separate ColumnNameSummary objects for each file.  
+            - The summary needs a "name" str and a "column_names" list.  
+            - The summary uses ColumnNameSummary as the summary object.
+        """
         name = new_context['name']
         if name not in self.summary_dict:
             self.summary_dict[name] = ColumnNameSummary(name=name)
         self.summary_dict[name].update(name, new_context["column_names"])
 
-    def _get_summary_details(self, column_summary):
+    def _get_details_dict(self, column_summary):
+        """ Return the summary dictionary extracted from a ColumnNameSummary.
+
+        Parameters:
+            column_summary (ColumnNameSummary):  A column name summary for the data file.
+
+        Returns:
+            dict - a dictionary with the summary information for column names.
+
+        """
         return column_summary.get_summary()
 
     def _merge_all(self):
+        """ Create a ColumnNameSummary containing the overall dataset summary.
+
+        Returns:
+            ColumnNameSummary - the overall summary object for column names.
+
+        """
         all_sum = ColumnNameSummary(name='Dataset')
         for key, counts in self.summary_dict.items():
             for name, pos in counts.file_dict.items():
@@ -94,6 +119,20 @@ class ColumnNameSummaryContext(BaseContext):
         return all_sum
 
     def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return a formatted string with the summary for the indicated name.
+
+        Parameters:
+            name (str):  Identifier (usually the filename) of the individual file.
+            result (dict): The dictionary of the summary results indexed by name.
+            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+
+        Returns:
+            str - The results in a printable format ready to be saved to a text file.
+
+        Notes:
+            This calls _get_dataset_string to get the overall summary string.
+
+        """
         if name == "Dataset":
             return self._get_dataset_string(result, indent)
         columns = result["Columns"][0]
@@ -101,6 +140,16 @@ class ColumnNameSummaryContext(BaseContext):
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
+        """ Return  a string with the overall summary for all of the tabular files.
+
+        Parameters:
+            result (dict): Dictionary of merged summary information.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
         sum_list = [f"Dataset: Number of files={result.get('Number files', 0)}"]
         for element in result.get("Columns", []):
             sum_list.append(f"{indent}Columns: {str(element['Column names'])}")
