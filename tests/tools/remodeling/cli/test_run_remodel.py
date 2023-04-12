@@ -36,6 +36,9 @@ class Test(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.data_root)
+        work_path = os.path.realpath(os.path.join(self.extract_path, 'temp'))
+        if os.path.exists(work_path):
+            shutil.rmtree(work_path)
 
     @classmethod
     def tearDownClass(cls):

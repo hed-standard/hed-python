@@ -85,7 +85,8 @@ class Test(unittest.TestCase):
         dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
         summary_path = dispatch1.get_summary_save_dir()
         self.assertEqual(summary_path,
-                         os.path.realpath(os.path.join(self.test_root_back1, Dispatcher.REMODELING_SUMMARY_PATH)))
+                         os.path.realpath(os.path.join(self.test_root_back1, 'derivatives',
+                                                       Dispatcher.REMODELING_SUMMARY_PATH)))
         dispatch2 = Dispatcher(model1)
         with self.assertRaises(HedFileError) as context:
             dispatch2.get_summary_save_dir()
