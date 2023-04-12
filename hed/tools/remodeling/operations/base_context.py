@@ -62,12 +62,12 @@ class BaseContext(ABC):
 
         Returns:
             dict - dictionary with "Dataset" and "Individual files" keys.
-            
+
         Notes: The individual_summaries value is processed as follows
            -  "separate" individual summaries are to be in separate files
            -  "consolidated" means that the individual summaries are in same file as overall summary
            -  "none" means that only the overall summary is produced.
-            
+
         """
         include_individual = individual_summaries == "separate" or individual_summaries == "consolidated"
         summary_details = self.get_summary_details(include_individual=include_individual)

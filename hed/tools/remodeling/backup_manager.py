@@ -10,16 +10,16 @@ from hed.tools.util.io_util import get_file_list, get_path_components
 
 class BackupManager:
     DEFAULT_BACKUP_NAME = 'default_back'
-    RELATIVE_BACKUP_LOCATION = 'derivatives/remodel/backups'
+    RELATIVE_BACKUP_LOCATION = 'derivatives/remodel'
     BACKUP_DICTIONARY = 'backup_lock.json'
     BACKUP_ROOT = 'backup_root'
 
-    def __init__(self, data_root):
+    def __init__(self, data_root, backups_root=None):
         """ Constructor for the backup manager.
 
         Parameters:
-            data_root (str): full path of the root of the data directory.
-
+            data_root (str): Full path of the root of the data directory.
+            backups_root (str or None):  Full path to the root where backups subdirectory is located.
         Raises:
             - HedFileError:
                 - If the data_root does not correspond to a real directory.
@@ -28,11 +28,15 @@ class BackupManager:
         if not os.path.isdir(data_root):
             raise HedFileError('NonExistentData', f"{data_root} is not an existing directory", "")
         self.data_root = data_root
-        self.backups_root = os.path.join(data_root, self.RELATIVE_BACKUP_LOCATION)
-        os.makedirs(self.backups_root, exist_ok=True)
+        if backups_root:
+            self.backups_path = os.path.join(backups_root, 'backups')
+        else:
+            self.backups_path = os.path.join(data_root, self.RELATIVE_BACKUP_LOCATION, 'backups')
+        self.backups_path = os.path.realpath(self.backups_path)
+        os.makedirs(self.backups_path, exist_ok=True)
         self.backups_dict = self._get_backups()
 
-    def create_backup(self, file_list, backup_name=None, verbose=True):
+    def create_backup(self, file_list, backup_name=None, verbose=False):
         """ Create a new backup from file_list.
 
         Parameters:
@@ -46,7 +50,7 @@ class BackupManager:
         Raises:
             HedFileError   
                 - For missing or incorrect files.    
-                
+
             OS-related error   
                 - OS-related error when file copying occurs.    
 
@@ -59,7 +63,7 @@ class BackupManager:
         time_stamp = f"{str(datetime.now())}"
         if verbose:
             print(f"Creating backup {backup_name}")
-        backup_dir_path = os.path.realpath(os.path.join(self.backups_root, backup_name, BackupManager.BACKUP_ROOT))
+        backup_dir_path = os.path.realpath(os.path.join(self.backups_path, backup_name, BackupManager.BACKUP_ROOT))
         os.makedirs(backup_dir_path, exist_ok=True)
         for file in file_list:
             backup_file = self.get_backup_path(backup_name, file)
@@ -69,7 +73,7 @@ class BackupManager:
             shutil.copy2(file, backup_file)
             backup[self.get_file_key(file)] = time_stamp
         self.backups_dict[backup_name] = backup
-        backup_dict_path = os.path.realpath(os.path.join(self.backups_root, backup_name,
+        backup_dict_path = os.path.realpath(os.path.join(self.backups_path, backup_name,
                                                          self.BACKUP_DICTIONARY))
         with open(backup_dict_path, 'w') as fp:
             json.dump(backup, fp, indent=4)
@@ -83,11 +87,11 @@ class BackupManager:
 
         Returns:
             The dictionary with the backup info.
-            
+
         Notes:
-            - The dictionary with backup information has keys that are the paths of
-              the backed up files relative to the backup root. The values in this
-              dictionary are the dates on which the particular file was backed up.
+            The dictionary with backup information has keys that are the paths of
+            the backed up files relative to the backup root. The values in this
+            dictionary are the dates on which the particular file was backed up.
 
         """
         if backup_name not in self.backups_dict:
@@ -114,7 +118,7 @@ class BackupManager:
             raise HedFileError("NoBackup", f"{backup_name} is not a valid backup", "")
         if original_paths:
             return [os.path.realpath(os.path.join(self.data_root, backup_key)) for backup_key in backup_dict.keys()]
-        return [os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_ROOT, backup_key))
+        return [os.path.realpath(os.path.join(self.backups_path, backup_name, self.BACKUP_ROOT, backup_key))
                 for backup_key in backup_dict.keys()]
 
     def get_backup_path(self, backup_name, file_name):
@@ -128,7 +132,7 @@ class BackupManager:
             str:  Full path of the corresponding file in the backup.
 
         """
-        return os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_ROOT,
+        return os.path.realpath(os.path.join(self.backups_path, backup_name, self.BACKUP_ROOT,
                                              self.get_file_key(file_name)))
 
     def get_file_key(self, file_name):
@@ -163,8 +167,8 @@ class BackupManager:
             HedFileError - if a backup is inconsistent for any reason.
         """
         backups = {}
-        for backup in os.listdir(self.backups_root):
-            backup_root = os.path.realpath(os.path.join(self.backups_root, backup))
+        for backup in os.listdir(self.backups_path):
+            backup_root = os.path.realpath(os.path.join(self.backups_path, backup))
             if not os.path.isdir(backup_root):
                 raise HedFileError('BadBackupPath', f"{backup_root} is not a backup directory.", "")
             if len(os.listdir(backup_root)) != 2:
@@ -195,12 +199,12 @@ class BackupManager:
 
         """
 
-        backup_dict_path = os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_DICTIONARY))
+        backup_dict_path = os.path.realpath(os.path.join(self.backups_path, backup_name, self.BACKUP_DICTIONARY))
         if not os.path.exists(backup_dict_path):
             raise HedFileError("BadBackupDictionaryPath",
                                f"Backup dictionary path {backup_dict_path} for backup "
                                f"{backup_name} does not exist so backup invalid", "")
-        backup_root_path = os.path.realpath(os.path.join(self.backups_root, backup_name, self.BACKUP_ROOT))
+        backup_root_path = os.path.realpath(os.path.join(self.backups_path, backup_name, self.BACKUP_ROOT))
         if not os.path.isdir(backup_root_path):
             raise HedFileError("BadBackupRootPath",
                                f"Backup root path {backup_root_path} for {backup_name} "

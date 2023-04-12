@@ -14,7 +14,7 @@ from hed.tools.util.io_util import generate_filename, extract_suffix_path, get_t
 class Dispatcher:
     """ Controller for applying operations to tabular files and saving the results. """
 
-    REMODELING_SUMMARY_PATH = 'derivatives/remodel/summaries'
+    REMODELING_SUMMARY_PATH = 'remodel/summaries'
 
     def __init__(self, operation_list, data_root=None,
                  backup_name=BackupManager.DEFAULT_BACKUP_NAME, hed_versions=None):
@@ -128,7 +128,7 @@ class Dispatcher:
         """
 
         if self.data_root:
-            return os.path.realpath(os.path.join(self.data_root, Dispatcher.REMODELING_SUMMARY_PATH))
+            return os.path.realpath(os.path.join(self.data_root, 'derivatives', Dispatcher.REMODELING_SUMMARY_PATH))
         raise HedFileError("NoDataRoot", f"Dispatcher must have a data root to produce directories", "")
 
     def run_operations(self, file_path, sidecar=None, verbose=False):
@@ -160,9 +160,10 @@ class Dispatcher:
         Parameters:
             save_formats (list):  A list of formats [".txt", ."json"]
             individual_summaries (str): If True, include summaries of individual files.
-            summary_dir (str or None): Directory for saving summaries
+            summary_dir (str or None): Directory for saving summaries.
 
-        The summaries are saved in the dataset derivatives/remodeling folder if no save_dir is provided.
+        Notes:
+            The summaries are saved in the dataset derivatives/remodeling folder if no save_dir is provided.
 
         """
         if not save_formats:

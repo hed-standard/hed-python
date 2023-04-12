@@ -73,6 +73,15 @@ class Test(unittest.TestCase):
             main(arg_list)
             self.assertFalse(fp.getvalue())
 
+    def test_main_bids_alt_path(self):
+        work_path = os.path.realpath(os.path.join(self.extract_path, 'temp'))
+        arg_list = [self.data_root, self.summary_model_path, '-x', 'derivatives', 'stimuli', '-r', '8.1.0',
+                   '-j', self.sidecar_path, '-w', work_path]
+       
+        with patch('sys.stdout', new=io.StringIO()) as fp:
+            main(arg_list)
+            self.assertFalse(fp.getvalue())
+            
     def test_main_bids_verbose_bad_task(self):
         arg_list = [self.data_root, self.model_path, '-x', 'derivatives', 'stimuli', '-b', '-t', 'junk', '-v']
         with patch('sys.stdout', new=io.StringIO()) as fp:

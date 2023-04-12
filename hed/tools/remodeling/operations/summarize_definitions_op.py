@@ -105,6 +105,15 @@ class DefinitionSummaryContext(BaseContext):
         self.errors.update(errors)
 
     def _get_details_dict(self, summary):
+        """ Return the summary-specific information in a dictionary.
+
+        Parameters:
+            summary (?):  Contains the resolved dictionaries.
+
+        Returns:
+            dict: dictionary with the summary results.
+
+        """
         return None
 
     def _merge_all(self):
