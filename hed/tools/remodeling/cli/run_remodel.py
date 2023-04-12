@@ -12,10 +12,10 @@ from hed.tools.remodeling.backup_manager import BackupManager
 
 def get_parser():
     """ Create a parser for the run_remodel command-line arguments. 
-    
+
     Returns:
         argparse.ArgumentParser:  A parser for parsing the command line arguments.
-        
+
     """
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
@@ -33,6 +33,8 @@ def get_parser():
                         help="Optional path to JSON sidecar with HED information")
     parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
                         help="Name of the default backup for remodeling")
+    parser.add_argument("-nb", "--no-backup", action='store_true', dest="no_backup",
+                        help="If present, the operations are run directly on the files with no backup.")
     parser.add_argument("-r", "--hed-versions", dest="hed_versions", nargs="*", default=[],
                         help="Optional list of HED schema versions used for annotation, include prefixes.")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
@@ -40,6 +42,8 @@ def get_parser():
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The names of the task.")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
+    parser.add_argument("-w", "--work-dir", default="", dest="work_dir",
+                        help="If given, is the path to directory for saving, otherwise derivatives/remodel is used.")
     parser.add_argument("-x", "--exclude-dirs", nargs="*", default=[], dest="exclude_dirs",
                         help="Directories names to exclude from search for files.")
     return parser
@@ -148,19 +152,24 @@ def main(arg_list=None):
     args, operations = parse_arguments(arg_list)
     if not os.path.isdir(args.data_dir):
         raise HedFileError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist", "")
-    if args.backup_name:
+    if args.no_backup:
+        backup_name = None
+    else:
         backup_man = BackupManager(args.data_dir)
         if not backup_man.get_backup(args.backup_name):
             raise HedFileError("BackupDoesNotExist", f"Backup {args.backup_name} does not exist. "
                                f"Please run_remodel_backup first", "")
         backup_man.restore_backup(args.backup_name, args.task_names, verbose=args.verbose)
-    dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=args.backup_name,
-                          hed_versions=args.hed_versions)
+        backup_name = args.backup_name
+    dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=backup_name, hed_versions=args.hed_versions)
     if args.use_bids:
         run_bids_ops(dispatch, args)
     else:
         run_direct_ops(dispatch, args)
-    dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries)
+    save_dir = None
+    if args.work_dir:
+        save_dir = os.path.realpath(os.path.join(args.work_dir, Dispatcher.REMODELING_SUMMARY_PATH))
+    dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries, summary_dir=save_dir)
 
 
 if __name__ == '__main__':

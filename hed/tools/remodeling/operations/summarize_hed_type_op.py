@@ -113,6 +113,15 @@ class HedTypeSummaryContext(BaseContext):
         self.summary_dict[new_context["name"]] = counts
 
     def _get_details_dict(self, counts):
+        """ Return the summary-specific information in a dictionary.
+
+        Parameters:
+            counts (HedTypeCounts):  Contains the counts of the events in which the type occurs.
+
+        Returns:
+            dict: dictionary with the summary results.
+
+        """
         return counts.get_summary()
 
     def _merge_all(self):

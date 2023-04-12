@@ -21,13 +21,19 @@ def get_parser():
                         help="Filename suffix of files to be backed up. A * indicates all files allowed.")
     parser.add_argument("-n", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
                         help="Name of the default backup for remodeling")
+    parser.add_argument("-p", "--path-work", default="", dest="path_work",
+                        help="The root path for remodeling work if given, " +
+                             "otherwise [data_root]/derivatives/remodel is used.")
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
+    parser.add_argument("-w", "--work-dir", default="", dest="work_dir",
+                        help="If given, is the path to directory for saving, " +
+                             "otherwise [data_root]derivatives/remodel is used.")
     parser.add_argument("-x", "--exclude-dirs", nargs="*", default=['derivatives'], dest="exclude_dirs",
                         help="Directories names to exclude from search for files. " +
                              "If omitted, no directories except the backup directory will be excluded." +
-                             "Note data_dir/remodel/backup will always be excluded.")
+                             "Note [data_root]/derivatives/remodel will always be excluded.")
     return parser
 
 
@@ -55,7 +61,11 @@ def main(arg_list=None):
                               exclude_dirs=exclude_dirs)
     if args.task_names:
         file_list = get_filtered_by_element(file_list, args.task_names)
-    backup_man = BackupManager(args.data_dir)
+    if args.work_dir:
+        backups_root = args.work_dir
+    else:
+        backups_root = None
+    backup_man = BackupManager(args.data_dir, backups_root=backups_root)
     if backup_man.get_backup(args.backup_name):
         raise HedFileError("BackupExists", f"Backup {args.backup_name} already exists", "")
     else:

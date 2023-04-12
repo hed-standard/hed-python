@@ -117,6 +117,15 @@ class HedTagSummaryContext(BaseContext):
         self.summary_dict[new_context["name"]] = counts
 
     def _get_details_dict(self, merge_counts):
+        """ Return the summary-specific information in a dictionary.
+
+        Parameters:
+            merge_counts (HedTagCounts):  Contains the counts of tags in the dataset.
+
+        Returns:
+            dict: dictionary with the summary results.
+
+        """
         template, unmatched = merge_counts.organize_tags(self.tags)
         details = {}
         for key, key_list in self.tags.items():
