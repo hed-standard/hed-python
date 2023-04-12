@@ -517,11 +517,11 @@ class HedGroup:
         for group in groups:
             for child in group.children:
                 if isinstance(child, HedTag):
-                    if child.short_base_tag.lower() == DefTagNames.DEF_KEY:
+                    if child.short_base_tag == DefTagNames.DEF_ORG_KEY:
                         def_tags.append((child, child, group))
                 else:
                     for tag in child.tags():
-                        if tag.short_base_tag.lower() == DefTagNames.DEF_EXPAND_KEY:
+                        if tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY:
                             def_tags.append((tag, child, group))
 
         if include_groups == 0 or include_groups == 1 or include_groups == 2:

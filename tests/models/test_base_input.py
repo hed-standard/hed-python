@@ -48,12 +48,13 @@ class Test(unittest.TestCase):
         shutil.rmtree(cls.base_output_folder)
 
     def test_gathered_defs(self):
+        # todo: probably remove this test?
         # todo: add unit tests for definitions in tsv file
         defs = DefinitionDict.get_as_strings(self.tabular_file._sidecar.extract_definitions(hed_schema=self.hed_schema))
         expected_defs = {
-            'jsonfiledef': '(Item/JsonDef1,Item/JsonDef1/#)',
-            'jsonfiledef2': '(Item/JsonDef2,Item/JsonDef2/#)',
-            'jsonfiledef3': '(Item/JsonDef3/#)',
+            'jsonfiledef': '(Acceleration/#,Item/JsonDef1)',
+            'jsonfiledef2': '(Age/#,Item/JsonDef2)',
+            'jsonfiledef3': '(Age/#)',
             'takesvaluedef': '(Age/#)',
             'valueclassdef': '(Acceleration/#)'
         }

@@ -1,10 +1,11 @@
 import copy
-from hed.errors import ErrorHandler, ErrorContext, SidecarErrors
+from hed.errors import ErrorHandler, ErrorContext, SidecarErrors, DefinitionErrors
 from hed.models import ColumnType
 from hed import HedString
 from hed import Sidecar
 from hed.models.column_metadata import ColumnMetadata
 from hed.errors.error_reporter import sort_issues
+from hed.models.model_constants import DefTagNames
 
 
 class SidecarValidator:
@@ -40,26 +41,39 @@ class SidecarValidator:
         sidecar_def_dict = sidecar.get_def_dict(hed_schema=self._schema, extra_def_dicts=extra_def_dicts)
         hed_validator = HedValidator(self._schema,
                                      def_dicts=sidecar_def_dict,
-                                     run_full_onset_checks=False)
+                                     run_full_onset_checks=False,
+                                     definitions_allowed=True)
 
         issues += self.validate_structure(sidecar, error_handler=error_handler)
         issues += sidecar._extract_definition_issues
         issues += sidecar_def_dict.issues
-        # todo: Add the definition validation.
 
+        definition_checks = {}
         for hed_string, column_data, position in sidecar.hed_string_iter(error_handler):
             hed_string_obj = HedString(hed_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
 
             error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
             new_issues = hed_validator.run_basic_checks(hed_string_obj, allow_placeholders=True)
-            if not new_issues:
-                new_issues = hed_validator.run_full_string_checks(hed_string_obj)
-            if not new_issues:
-                new_issues = self._validate_pound_sign_count(hed_string_obj, column_type=column_data.column_type)
+            new_issues += hed_validator.run_full_string_checks(hed_string_obj)
+
+            def_check_list = definition_checks.setdefault(column_data.column_name, [])
+            def_check_list.append(hed_string_obj.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True, include_groups=0))
+            # Might refine this later - for now just skip checking placeholder counts in definition columns.
+            if not def_check_list[-1]:
+                new_issues += self._validate_pound_sign_count(hed_string_obj, column_type=column_data.column_type)
+
             error_handler.add_context_and_filter(new_issues)
             issues += new_issues
             error_handler.pop_error_context()
 
+        for col_name, has_def in definition_checks.items():
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, col_name)
+            def_check = set(bool(d) for d in has_def)
+            if len(def_check) != 1:
+                flat_def_list = [d for defs in has_def for d in defs]
+                for d in flat_def_list:
+                    issues += error_handler.format_error_with_context(DefinitionErrors.BAD_DEFINITION_LOCATION, d)
+            error_handler.pop_error_context()
         error_handler.pop_error_context()
         issues = sort_issues(issues)
         return issues

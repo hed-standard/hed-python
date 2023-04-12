@@ -30,8 +30,7 @@ default_sort_list = [
 
 # ErrorContext which is expected to be int based.
 int_sort_list = [
-    ErrorContext.ROW,
-    ErrorContext.COLUMN,
+    ErrorContext.ROW
 ]
 
 hed_string_sort_list = [

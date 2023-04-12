@@ -1,10 +1,9 @@
 """ Summarize the values in the columns of a tabular file. """
 
-from hed import DefinitionDict, TabularInput, Sidecar
-from hed.models.df_util import process_def_expands
-from hed.tools.analysis.analysis_util import assemble_hed
+from hed import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.models.def_expand_gather import DefExpandGatherer
 
 
 class SummarizeDefinitionsOp(BaseOp):
@@ -67,23 +66,17 @@ class SummarizeDefinitionsOp(BaseOp):
             Updates the context.
 
         """
-
-        summary = dispatcher.context_dict.get(self.summary_name, None)
-        if not summary:
-            summary = DefinitionSummaryContext(self)
-            dispatcher.context_dict[self.summary_name] = summary
+        summary = dispatcher.context_dict.setdefault(self.summary_name, 
+                                                     DefinitionSummaryContext(self, dispatcher.hed_schema))
         summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name, 'sidecar': sidecar,
                                 'schema': dispatcher.hed_schema})
         return df
 
 
 class DefinitionSummaryContext(BaseContext):
-
-    def __init__(self, sum_op):
+    def __init__(self, sum_op, hed_schema, known_defs=None):
         super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
-        self.defs = DefinitionDict()
-        self.unresolved = {}
-        self.errors = {}
+        self.def_gatherer = DefExpandGatherer(hed_schema, known_defs=known_defs)
 
     def update_context(self, new_context):
         """ Update the summary for a given tabular input file.
@@ -96,15 +89,10 @@ class DefinitionSummaryContext(BaseContext):
 
         """
         data_input = TabularInput(new_context['df'], sidecar=new_context['sidecar'], name=new_context['name'])
-        sidecar = Sidecar(new_context['sidecar'])
-        df, _ = assemble_hed(data_input, sidecar, new_context['schema'],
-                             columns_included=None, expand_defs=True)
-        hed_strings = df['HED_assembled']
-        self.defs, self.unresolved, errors = process_def_expands(hed_strings, new_context['schema'],
-                                                                 known_defs=self.defs, ambiguous_defs=self.unresolved)
-        self.errors.update(errors)
+        series, def_dict = data_input.series_a, data_input.get_def_dict(new_context['schema'])
+        self.def_gatherer.process_def_expands(series, def_dict)
 
-    def _get_details_dict(self, summary):
+    def _get_details_dict(self, def_gatherer):
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
@@ -114,7 +102,34 @@ class DefinitionSummaryContext(BaseContext):
             dict: dictionary with the summary results.
 
         """
-        return None
+        def build_summary_dict(items_dict, title, process_func, display_description=False):
+            summary_dict = {}
+            items = {}
+            for key, value in items_dict.items():
+                if process_func:
+                    value = process_func(value)
+                if "#" in str(value):
+                    key = key + "/#"
+                if display_description:
+                    description, value = DefinitionSummaryContext.remove_description(value)
+                    items[key] = {"description": description, "contents": str(value)}
+                else:
+                    if isinstance(value, list):
+                        items[key] = [str(x) for x in value]
+                    else:
+                        items[key] = str(value)
+            summary_dict[title] = items
+            return summary_dict
+
+        known_defs_summary = build_summary_dict(def_gatherer.def_dict, "Known Definitions", None,
+                                                display_description=True)
+        ambiguous_defs_summary = build_summary_dict(def_gatherer.ambiguous_defs, "Ambiguous Definitions",
+                                                    def_gatherer.get_ambiguous_group)
+        errors_summary = build_summary_dict(def_gatherer.errors, "Errors", None)
+
+        known_defs_summary.update(ambiguous_defs_summary)
+        known_defs_summary.update(errors_summary)
+        return known_defs_summary
 
     def _merge_all(self):
         """ Create an Object containing the definition summary.
@@ -123,8 +138,7 @@ class DefinitionSummaryContext(BaseContext):
             Object - the overall summary object for definitions.
 
         """
-
-        return None
+        return self.def_gatherer
 
     def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
         """ Return a formatted string with the summary for the indicated name.
@@ -147,18 +161,33 @@ class DefinitionSummaryContext(BaseContext):
         return self._get_individual_string(result, indent=indent)
 
     @staticmethod
-    def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
-        """ Return  a string with the overall summary for all of the tabular files.
+    def _get_dataset_string(summary_dict, indent=BaseContext.DISPLAY_INDENT):
+        def nested_dict_to_string(data, level=1):
+            result = []
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    result.append(f"{indent * level}{key}: {len(value)} items")
+                    result.append(nested_dict_to_string(value, level + 1))
+                elif isinstance(value, list):
+                    result.append(f"{indent * level}{key}:")
+                    for item in value:
+                        result.append(f"{indent * (level + 1)}{item}")
+                else:
+                    result.append(f"{indent * level}{key}: {value}")
+            return "\n".join(result)
 
-        Parameters:
-            result (dict): Dictionary of merged summary information.
-            indent (str):  String of blanks used as the amount to indent for readability.
+        return nested_dict_to_string(summary_dict)
 
-        Returns:
-            str: Formatted string suitable for saving in a file or printing.
+    def remove_description(def_entry):
+        def_group = def_entry.contents.copy()
+        description = ""
+        desc_tag = def_group.find_tags({"description"}, include_groups=False)
+        if desc_tag:
+            def_group.remove(desc_tag)
+            desc_tag = desc_tag[0]
+            description = desc_tag.extension
 
-        """
-        return ""
+        return description, def_group
 
     @staticmethod
     def _get_individual_string(result, indent=BaseContext.DISPLAY_INDENT):

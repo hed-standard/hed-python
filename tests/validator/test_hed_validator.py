@@ -88,6 +88,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(validation_issues), 0)
 
     def test_complex_file_validation_invalid(self):
+        # todo: Update or remove
         schema_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                     '../data/validator_tests/bids_schema.mediawiki'))
         events_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
@@ -98,13 +99,14 @@ class Test(unittest.TestCase):
                                                   '../data/validator_tests/bids_events_bad_defs.json'))
         sidecar = Sidecar(json_path)
         issues = sidecar.validate(hed_schema)
-        self.assertEqual(len(issues), 4)
+        self.assertEqual(len(issues), 8)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate(hed_schema)
-        self.assertEqual(len(validation_issues), 63)
+        self.assertEqual(len(validation_issues), 105)
 
     def test_complex_file_validation_invalid_definitions_removed(self):
+        # todo: update this/remove
         # This verifies definitions are being removed from sidecar strings before being added, or it will produce
         # extra errors.
         schema_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
@@ -117,11 +119,11 @@ class Test(unittest.TestCase):
                                                   '../data/validator_tests/bids_events_bad_defs2.json'))
         sidecar = Sidecar(json_path)
         issues = sidecar.validate(hed_schema)
-        self.assertEqual(len(issues), 4)
+        self.assertEqual(len(issues), 7)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate(hed_schema)
-        self.assertEqual(len(validation_issues), 42)
+        self.assertEqual(len(validation_issues), 63)
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -137,7 +139,7 @@ class Test(unittest.TestCase):
                                        worksheet_name='LKT Events')
 
         validation_issues = loaded_file.validate(hed_schema=hed_schema)
-        self.assertEqual(len(validation_issues), 2)
+        self.assertEqual(len(validation_issues), 4)
 
     def test_tabular_input_with_HED_col_in_json(self):
         schema_path = os.path.realpath(os.path.join(os.path.dirname(__file__),

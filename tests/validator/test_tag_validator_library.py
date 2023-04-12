@@ -3,7 +3,7 @@ import os
 
 from hed.errors import error_reporter
 from hed import schema
-from hed.errors.error_types import ValidationErrors
+from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.errors.exceptions import HedFileError
 from tests.validator.test_tag_validator_base import TestValidatorBase
@@ -58,7 +58,7 @@ class IndividualHedTagsShort(TestHed3):
             'usedToBeIllegalComma': 'tl:Label/This is a label,tl:This/Is/A/Tag',
             'legalDef': 'tl:Def/Item',
             'legalDefExpand': 'tl:Def-expand/Item',
-            'legalDefinition': 'tl:Definition/Item',
+            'illegalDefinition': 'tl:Definition/Item',
             'unknownPrefix': 'ul:Definition/Item'
         }
         expected_results = {
@@ -72,15 +72,15 @@ class IndividualHedTagsShort(TestHed3):
             'usedToBeIllegalComma': False,
             'legalDef': True,
             'legalDefExpand': True,
-            'legalDefinition': True,
+            'illegalDefinition': False,
             'unknownPrefix': False
         }
         expected_issues = {
             'takesValue': [],
             'full': [],
             'extensionsAllowed': [],
-            'leafExtension': self.format_error(ValidationErrors.INVALID_EXTENSION, tag=0),
-            'nonExtensionsAllowed': self.format_error(ValidationErrors.INVALID_EXTENSION, tag=0),
+            'leafExtension': self.format_error(ValidationErrors.TAG_EXTENSION_INVALID, tag=0),
+            'nonExtensionsAllowed': self.format_error(ValidationErrors.TAG_EXTENSION_INVALID, tag=0),
             'invalidExtension': self.format_error(
                 ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=9, index_in_tag_end=12,
                 expected_parent_tag="Property/Sensory-property/Sensory-attribute/Visual-attribute" +
@@ -93,7 +93,7 @@ class IndividualHedTagsShort(TestHed3):
                                                       index_in_tag=3, index_in_tag_end=7),
             'legalDef': [],
             'legalDefExpand': [],
-            'legalDefinition': [],
+            'illegalDefinition': self.format_error(DefinitionErrors.BAD_DEFINITION_LOCATION, tag=0),
             'unknownPrefix': self.format_error(
                 ValidationErrors.HED_LIBRARY_UNMATCHED, tag=0, unknown_prefix="ul:", known_prefixes=["", "tl:"]),
         }
@@ -119,7 +119,7 @@ class IndividualHedTagsShort(TestHed3):
             'camelCase': [],
             'takesValue': [],
             'numeric': [],
-            'lowercase': self.format_error(ValidationErrors.HED_STYLE_WARNING, tag=0)
+            'lowercase': self.format_error(ValidationErrors.STYLE_WARNING, tag=0)
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -134,7 +134,7 @@ class IndividualHedTagsShort(TestHed3):
         }
         expected_issues = {
             'hasChild': [],
-            'missingChild': self.format_error(ValidationErrors.HED_TAG_REQUIRES_CHILD, tag=0)
+            'missingChild': self.format_error(ValidationErrors.TAG_REQUIRES_CHILD, tag=0)
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -162,14 +162,14 @@ class IndividualHedTagsShort(TestHed3):
         expected_issues = {
             'hasRequiredUnit': [],
             'missingRequiredUnit': self.format_error(
-                ValidationErrors.HED_UNITS_DEFAULT_USED, tag=0, default_unit='s'),
+                ValidationErrors.UNITS_MISSING, tag=0, default_unit='s'),
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
             'notRequiredScientific': [],
             'timeValue': self.format_error(
-                ValidationErrors.HED_TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None),
+                ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None),
             'invalidTimeValue': self.format_error(
-                ValidationErrors.HED_TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None),
+                ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -230,22 +230,22 @@ class IndividualHedTagsShort(TestHed3):
             'correctNonSymbolCapitalizedUnit': [],
             'correctSymbolCapitalizedUnit': [],
             'incorrectUnit': self.format_error(
-                ValidationErrors.HED_UNITS_INVALID, tag=0, units=legal_time_units),
+                ValidationErrors.UNITS_INVALID, tag=0, units=legal_time_units),
             'incorrectPluralUnit': self.format_error(
-                ValidationErrors.HED_UNITS_INVALID, tag=0, units=legal_freq_units),
+                ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units),
             'incorrectSymbolCapitalizedUnit': self.format_error(
-                ValidationErrors.HED_UNITS_INVALID, tag=0, units=legal_freq_units),
+                ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units),
             'incorrectSymbolCapitalizedUnitModifier': self.format_error(
-                ValidationErrors.HED_UNITS_INVALID, tag=0, units=legal_freq_units),
+                ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
-            'specialAllowedCharBadUnit':  self.format_error(ValidationErrors.HED_VALUE_INVALID, tag=0),
+            'specialAllowedCharBadUnit':  self.format_error(ValidationErrors.VALUE_INVALID, tag=0),
             'specialAllowedCharUnit': [],
             # 'properTime': [],
-            # 'invalidTime': self.format_error(ValidationErrors.HED_UNITS_INVALID,  tag=0,
+            # 'invalidTime': self.format_error(ValidationErrors.UNITS_INVALID,  tag=0,
             #                                 units=legal_clock_time_units)
             # 'specialAllowedCharCurrency': [],
-            # 'specialNotAllowedCharCurrency': self.format_error(ValidationErrors.HED_UNITS_INVALID,
+            # 'specialNotAllowedCharCurrency': self.format_error(ValidationErrors.UNITS_INVALID,
             #                                                                    tag=0,
             #                                                                    units=legal_currency_units),
         }
@@ -275,7 +275,7 @@ class IndividualHedTagsShort(TestHed3):
         expected_issues = {
             'invalidPlaceholder': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
                                                     tag=0, index_in_tag=12, index_in_tag_end=13,
-                                                    actual_error=ValidationErrors.HED_VALUE_INVALID),
+                                                    actual_error=ValidationErrors.PLACEHOLDER_INVALID),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -290,11 +290,11 @@ class IndividualHedTagsShort(TestHed3):
         }
         tag_unit_class_units = ['day', 'hour', 'minute', 's', 'second']
         expected_issues = {
-            'orgTagDifferent': self.format_error(ValidationErrors.HED_UNITS_INVALID, tag=0,
+            'orgTagDifferent': self.format_error(ValidationErrors.UNITS_INVALID, tag=0,
                                                  units=tag_unit_class_units),
-            'orgTagDifferent2': self.format_error(ValidationErrors.HED_UNITS_INVALID, tag=0,
+            'orgTagDifferent2': self.format_error(ValidationErrors.UNITS_INVALID, tag=0,
                                                   units=tag_unit_class_units)
-            + self.format_error(ValidationErrors.HED_UNITS_INVALID, tag=1,
+            + self.format_error(ValidationErrors.UNITS_INVALID, tag=1,
                                 units=tag_unit_class_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
@@ -367,10 +367,12 @@ class TestTagLevels3(TestHed3):
         }
         expected_issues = {
             'invalid1': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG,
-                                          tag=0),
+                                          tag=0, actual_error=ValidationErrors.DEFINITION_INVALID)
+            + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0),
             'valid1': [],
             'valid2': [],
-            'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
+            'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.DEFINITION_INVALID)
+            + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             'invalidTwoInOne': self.format_error(
                 ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
                 multiple_tags="tl:Definition/InvalidDef3".split(", ")),
@@ -437,15 +439,15 @@ class RequiredTags(TestHed3):
         }
         expected_issues = {
             'complete': [],
-            'missingAgent': self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING,
+            'missingAgent': self.format_error(ValidationErrors.REQUIRED_TAG_MISSING,
                                               tag_prefix='Agent/Animal-agent'),
-            'missingAction': self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Action'),
+            'missingAction': self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='Action'),
             'inSubGroup': [],
             'missingAll':
-                self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Action')
-                + self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='Agent/Animal-agent')
-                + self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='tl:Action')
-                + self.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING, tag_prefix='tl:Agent/Animal-agent'),
+                self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='Action')
+                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='Agent/Animal-agent')
+                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='tl:Action')
+                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='tl:Agent/Animal-agent'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -467,9 +469,9 @@ class RequiredTags(TestHed3):
         }
         expected_issues = {
             'legal': [],
-            'multipleDesc': self.format_error(ValidationErrors.HED_TAG_NOT_UNIQUE,
+            'multipleDesc': self.format_error(ValidationErrors.TAG_NOT_UNIQUE,
                                               tag_prefix='tl:Property/Organizational-property/Event-context'),
-            'multipleDescIncShort': self.format_error(ValidationErrors.HED_TAG_NOT_UNIQUE,
+            'multipleDescIncShort': self.format_error(ValidationErrors.TAG_NOT_UNIQUE,
                                                       tag_prefix='tl:Property/Organizational-property/Event-context'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)

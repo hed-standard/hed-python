@@ -2,7 +2,6 @@ import json
 import os
 import unittest
 import pandas as pd
-from hed.models.df_util import get_assembled
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_definitions_op import SummarizeDefinitionsOp, DefinitionSummaryContext
 
@@ -27,8 +26,6 @@ class Test(unittest.TestCase):
 
     def test_constructor(self):
         parms = json.loads(self.json_parms)
-        sum_op1 = SummarizeDefinitionsOp(parms)
-        self.assertIsInstance(sum_op1, SummarizeDefinitionsOp, "constructor creates an object of the correct type")
         parms["expand_context"] = ""
         with self.assertRaises(KeyError) as context:
             SummarizeDefinitionsOp(parms)
@@ -43,18 +40,45 @@ class Test(unittest.TestCase):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         parms = json.loads(self.json_parms)
         sum_op = SummarizeDefinitionsOp(parms)
-        self.assertIsInstance(sum_op, SummarizeDefinitionsOp, "constructor creates an object of the correct type")
         df = pd.read_csv(self.data_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
-        self.assertEqual(200, len(df_new), "summarize_hed_type_op dataframe length is correct")
-        self.assertEqual(10, len(df_new.columns), "summarize_hed_type_op has correct number of columns")
+        self.assertEqual(200, len(df_new), " dataframe length is correct")
+        self.assertEqual(10, len(df_new.columns), " has correct number of columns")
         self.assertIn(sum_op.summary_name, dispatch.context_dict)
         self.assertIsInstance(dispatch.context_dict[sum_op.summary_name], DefinitionSummaryContext)
-        # x = dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run1']
-        # self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run1'].tag_dict), 47)
-        # df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run2', sidecar=self.json_path)
-        # self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run2'].tag_dict), 47)
 
+    def test_summary(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        parms = json.loads(self.json_parms)
+        sum_op = SummarizeDefinitionsOp(parms)
+        df = pd.read_csv(self.data_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
+        df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
+        self.assertEqual(200, len(df_new), " dataframe length is correct")
+        self.assertEqual(10, len(df_new.columns), " has correct number of columns")
+        self.assertIn(sum_op.summary_name, dispatch.context_dict)
+        self.assertIsInstance(dispatch.context_dict[sum_op.summary_name], DefinitionSummaryContext)
+        # print(str(dispatch.context_dict[sum_op.summary_name].get_text_summary()['Dataset']))
+
+    def test_summary_errors(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        parms = json.loads(self.json_parms)
+        sum_op = SummarizeDefinitionsOp(parms)
+        df = pd.DataFrame({"HED": [
+            "(Def-expand/A1/1, (Action/1, Acceleration/5, Item-count/2))",
+            "(Def-expand/B2/3, (Action/3, Collection/animals, Acceleration/3))",
+            "(Def-expand/C3/5, (Action/5, Acceleration/5, Item-count/5))",
+            "(Def-expand/D4/7, (Action/7, Acceleration/7, Item-count/8))",
+            "(Def-expand/D5/7, (Action/7, Acceleration/7, Item-count/8, Event))",
+            "(Def-expand/A1/2, (Action/2, Age/5, Item-count/2))",
+            "(Def-expand/A1/3, (Action/3, Age/4, Item-count/3))",
+
+            # This could be identified, but fails due to the above raising errors
+            "(Def-expand/A1/4, (Action/4, Age/5, Item-count/2))",
+        ]})
+        df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
+        self.assertIn(sum_op.summary_name, dispatch.context_dict)
+        self.assertIsInstance(dispatch.context_dict[sum_op.summary_name], DefinitionSummaryContext)
+        #print(str(dispatch.context_dict[sum_op.summary_name].get_text_summary()['Dataset']))
 
 if __name__ == '__main__':
     unittest.main()
