@@ -150,7 +150,7 @@ class TagValidator:
         """
         validation_issues = []
         for index, character in enumerate(hed_string):
-            if character in TagValidator.INVALID_STRING_CHARS:
+            if character in TagValidator.INVALID_STRING_CHARS or ord(character) > 127:
                 validation_issues += self._report_invalid_character_error(hed_string, index)
 
         return validation_issues
@@ -298,7 +298,7 @@ class TagValidator:
             stripped_value, unit = original_tag.get_stripped_unit_value()
             if not unit:
                 bad_units = " " in original_tag.extension
-
+                had_error = False
                 # Todo: in theory this should separately validate the number and the units, for units
                 # that are prefixes like $.  Right now those are marked as unit invalid AND value_invalid.
                 if bad_units:
@@ -306,11 +306,12 @@ class TagValidator:
                 if original_tag.is_takes_value_tag() and\
                         not self._validate_value_class_portion(original_tag, stripped_value):
                     validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
-                                                                   report_tag_as if report_tag_as else original_tag,
-                                                                   actual_error=error_code)
+                                                                   report_tag_as if report_tag_as else original_tag)
                     if error_code:
+                        had_error = True
                         validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
-                                                               report_tag_as if report_tag_as else original_tag)
+                                                                       report_tag_as if report_tag_as else original_tag,
+                                                                       actual_error=error_code)
 
 
                 if bad_units:
@@ -325,7 +326,8 @@ class TagValidator:
                                                                    tag=report_tag_as if report_tag_as else original_tag,
                                                                    default_unit=default_unit)
 
-                if error_code:
+                # We don't want to give this overall error twice
+                if error_code and not had_error:
                     new_issue = validation_issues[0].copy()
                     new_issue['code'] = error_code
                     validation_issues += [new_issue]

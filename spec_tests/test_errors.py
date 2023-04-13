@@ -44,10 +44,8 @@ known_errors = [
 
 skip_tests = {
     "VERSION_DEPRECATED": "Not applicable",
-    "CHARACTER_INVALID": "Not finalized",
-    "STYLE_WARNING": "Bad tests",
     "onset-offset-error-duplicated-onset-or-offset": "TBD how we implement this",
-    "tag-extension-invalid-bad-node-name": "Part of character invalid checking",
+    "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
 }
 
 class MyTestCase(unittest.TestCase):
@@ -77,6 +75,7 @@ class MyTestCase(unittest.TestCase):
             if name in skip_tests:
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
+
             description = info['description']
             schema = info['schema']
             check_for_warnings = info.get("warning", False)
