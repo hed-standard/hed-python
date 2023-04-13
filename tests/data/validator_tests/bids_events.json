@@ -41,9 +41,9 @@
             "3": "Stage 3. BCI was trained on data from stages 1 and 2."
         },
         "HED": {
-            "1": "Description/BCI acts randomly, (Definition/Random-selection, (Condition-variable, (Random, Predict))), Def/Random-selection",
-            "2": "Description/BCI was trained on data from stage 1., (Definition/Trained-on-random, (Condition-variable)), Def/Trained-on-random",
-            "3": "Description/BCI was trained on data from stages 1 and 2., (Definition/Trained-on-all, (Condition-variable)), Def/Trained-on-all"
+            "1": "Description/BCI acts randomly.",
+            "2": "Description/BCI was trained on data from stage 1.",
+            "3": "Description/BCI was trained on data from stages 1 and 2."
         }
     },
     "trial": {
@@ -78,5 +78,12 @@
     },
     "n_repeated": {
         "Description": "Number of trials that had to be repeated until the present trial because of invalid participant behavior (within this stage)."
+    },
+    "defs": {
+        "HED": {
+            "1": "Description/BCI acts randomly, (Definition/Random-selection, (Condition-variable, (Random, Predict))), Def/Random-selection",
+            "2": "Description/BCI was trained on data from stage 1., (Definition/Trained-on-random, (Condition-variable)), Def/Trained-on-random",
+            "3": "Description/BCI was trained on data from stages 1 and 2., (Definition/Trained-on-all, (Condition-variable)), Def/Trained-on-all"
+        }
     }
 }

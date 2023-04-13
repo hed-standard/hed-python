@@ -30,7 +30,7 @@ class HedStringGroup(HedString):
         self._original_children = self._children
 
     def get_original_hed_string(self):
-        return "".join([group._hed_string for group in self._children])
+        return ",".join([group._hed_string for group in self._children])
 
     def sort(self):
         combined_string = HedString.from_hed_strings(self._children)

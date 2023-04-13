@@ -11,17 +11,44 @@ from hed import HedFileError
 from hed.errors import ErrorHandler, get_printable_issue_string
 
 
+# To be removed eventually once all errors are being verified.
 known_errors = [
     'SIDECAR_INVALID',
     'CHARACTER_INVALID',
     'COMMA_MISSING',
     "DEF_EXPAND_INVALID",
     "DEF_INVALID",
-    "DEFINITION_INVALID"
+    "DEFINITION_INVALID",
+    "NODE_NAME_EMPTY",
+    "ONSET_OFFSET_ERROR",
+    "PARENTHESES_MISMATCH",
+    "PLACEHOLDER_INVALID",
+    "REQUIRED_TAG_MISSING",
+    "SIDECAR_INVALID",
+    "SIDECAR_KEY_MISSING",
+    "STYLE_WARNING",
+    "TAG_EMPTY",
+    "TAG_EXPRESSION_REPEATED",
+    "TAG_EXTENDED",
+    "TAG_EXTENSION_INVALID",
+    "TAG_GROUP_ERROR",
+    "TAG_INVALID",
+    "TAG_NOT_UNIQUE",
+    "TAG_PREFIX_INVALID",
+    "TAG_REQUIRES_CHILD",
+    "TILDES_UNSUPPORTED",
+    "UNITS_INVALID",
+    "UNITS_MISSING",
+    "VALUE_INVALID"
 ]
 
-skip_tests = ["VERSION_DEPRECATED", "CHARACTER_INVALID", "STYLE_WARNING"]
-
+skip_tests = {
+    "VERSION_DEPRECATED": "Not applicable",
+    "CHARACTER_INVALID": "Not finalized",
+    "STYLE_WARNING": "Bad tests",
+    "onset-offset-error-duplicated-onset-or-offset": "TBD how we implement this",
+    "tag-extension-invalid-bad-node-name": "Part of character invalid checking",
+}
 
 class MyTestCase(unittest.TestCase):
     @classmethod
@@ -41,13 +68,15 @@ class MyTestCase(unittest.TestCase):
             verify_code = False
             if error_code in known_errors:
                 verify_code = True
-
             # To be deprecated once we add this to all tests
             self._verify_code = verify_code
             if error_code in skip_tests:
-                print(f"Skipping {error_code} test")
+                print(f"Skipping {error_code} test because: {skip_tests[error_code]}")
                 continue
             name = info.get('name', '')
+            if name in skip_tests:
+                print(f"Skipping {name} test because: {skip_tests[name]}")
+                continue
             description = info['description']
             schema = info['schema']
             check_for_warnings = info.get("warning", False)

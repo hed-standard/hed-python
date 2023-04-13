@@ -42,3 +42,18 @@ class TabularInput(BaseInput):
         new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME])
 
         self.reset_mapper(new_mapper)
+
+    def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
+        """ Returns the definition dict for this sidecar.
+
+        Parameters:
+            hed_schema(HedSchema): used to identify tags to find definitions
+            extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
+
+        Returns:
+            DefinitionDict:   A single definition dict representing all the data(and extra def dicts)
+        """
+        if self._sidecar:
+            return self._sidecar.get_def_dict(hed_schema, extra_def_dicts)
+        else:
+            super().get_def_dict(hed_schema, extra_def_dicts)

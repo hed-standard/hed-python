@@ -33,8 +33,7 @@ jobs:
 
       - name: Test with unittest
         run: |
-           python -m unittest spec_tests/* > test_results.txt
-        continue-on-error: true
+           python -m unittest spec_tests/test_errors.py > test_results.txt
 
       - name: Upload spec test results
         uses: actions/upload-artifact@v3

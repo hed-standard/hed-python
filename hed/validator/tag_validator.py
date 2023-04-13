@@ -5,6 +5,7 @@ This module is used to validate the HED tags as strings.
 
 import re
 from hed.errors.error_reporter import ErrorHandler
+from hed.models.model_constants import DefTagNames
 from hed.schema import HedKey
 from hed.errors.error_types import ValidationErrors
 from hed.validator import tag_validator_util
@@ -167,7 +168,7 @@ class TagValidator:
         number_open_parentheses = hed_string.count('(')
         number_closed_parentheses = hed_string.count(')')
         if number_open_parentheses != number_closed_parentheses:
-            validation_issues += ErrorHandler.format_error(ValidationErrors.HED_PARENTHESES_MISMATCH,
+            validation_issues += ErrorHandler.format_error(ValidationErrors.PARENTHESES_MISMATCH,
                                                            opening_parentheses_count=number_open_parentheses,
                                                            closing_parentheses_count=number_closed_parentheses)
         return validation_issues
@@ -192,7 +193,7 @@ class TagValidator:
                 continue
             if TagValidator._character_is_delimiter(current_character):
                 if current_tag.strip() == current_character:
-                    issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_EMPTY, source_string=hed_string,
+                    issues += ErrorHandler.format_error(ValidationErrors.TAG_EMPTY, source_string=hed_string,
                                                         char_index=i)
                     current_tag = ''
                     continue
@@ -203,7 +204,7 @@ class TagValidator:
                 else:
                     issues += ErrorHandler.format_error(ValidationErrors.COMMA_MISSING, tag=current_tag)
             elif last_non_empty_valid_character == "," and current_character == self.CLOSING_GROUP_CHARACTER:
-                issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_EMPTY, source_string=hed_string,
+                issues += ErrorHandler.format_error(ValidationErrors.TAG_EMPTY, source_string=hed_string,
                                                     char_index=i)
             elif TagValidator._comma_is_missing_after_closing_parentheses(last_non_empty_valid_character,
                                                                           current_character):
@@ -212,7 +213,7 @@ class TagValidator:
             last_non_empty_valid_character = current_character
             last_non_empty_valid_index = i
         if TagValidator._character_is_delimiter(last_non_empty_valid_character):
-            issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_EMPTY,
+            issues += ErrorHandler.format_error(ValidationErrors.TAG_EMPTY,
                                                 char_index=last_non_empty_valid_index,
                                                 source_string=hed_string)
         return issues
@@ -230,7 +231,7 @@ class TagValidator:
         """
         validation_issues = []
         for match in self.pattern_doubleslash.finditer(original_tag.org_tag):
-            validation_issues += ErrorHandler.format_error(ValidationErrors.HED_NODE_NAME_EMPTY,
+            validation_issues += ErrorHandler.format_error(ValidationErrors.NODE_NAME_EMPTY,
                                                            tag=original_tag,
                                                            index_in_tag=match.start(),
                                                            index_in_tag_end=match.end())
@@ -271,9 +272,13 @@ class TagValidator:
 
         is_extension_tag = original_tag.is_extension_allowed_tag()
         if not is_extension_tag:
-            validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_EXTENSION, tag=original_tag)
+            actual_error = None
+            if "#" in original_tag.extension:
+                actual_error = ValidationErrors.PLACEHOLDER_INVALID
+            validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_EXTENSION_INVALID, tag=original_tag,
+                                                           actual_error=actual_error)
         else:
-            validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_EXTENDED, tag=original_tag,
+            validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_EXTENDED, tag=original_tag,
                                                            index_in_tag=len(original_tag.org_base_tag),
                                                            index_in_tag_end=None)
         return validation_issues
@@ -292,24 +297,39 @@ class TagValidator:
         if original_tag.is_unit_class_tag():
             stripped_value, unit = original_tag.get_stripped_unit_value()
             if not unit:
-                if self._validate_value_class_portion(original_tag, stripped_value):
-                    # only suggest a unit is missing if this is a valid number
-                    if tag_validator_util.validate_numeric_value_class(stripped_value):
-                        default_unit = original_tag.get_unit_class_default_unit()
-                        validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_DEFAULT_USED,
-                                                                       tag=report_tag_as if report_tag_as else original_tag,
-                                                                       default_unit=default_unit,
-                                                                       actual_error=error_code)
-                else:
+                bad_units = " " in original_tag.extension
+
+                # Todo: in theory this should separately validate the number and the units, for units
+                # that are prefixes like $.  Right now those are marked as unit invalid AND value_invalid.
+                if bad_units:
+                    stripped_value = stripped_value.split(" ")[0]
+                if original_tag.is_takes_value_tag() and\
+                        not self._validate_value_class_portion(original_tag, stripped_value):
+                    validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
+                                                                   report_tag_as if report_tag_as else original_tag,
+                                                                   actual_error=error_code)
+                    if error_code:
+                        validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
+                                                               report_tag_as if report_tag_as else original_tag)
+
+
+                if bad_units:
                     tag_unit_class_units = original_tag.get_tag_unit_class_units()
                     if tag_unit_class_units:
-                        default_code = ValidationErrors.HED_UNITS_INVALID
-                        if not error_code:
-                            error_code = default_code
-                        validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_INVALID,
-                                                                       actual_error=error_code,
+                        validation_issues += ErrorHandler.format_error(ValidationErrors.UNITS_INVALID,
                                                                        tag=report_tag_as if report_tag_as else original_tag,
                                                                        units=tag_unit_class_units)
+                else:
+                    default_unit = original_tag.get_unit_class_default_unit()
+                    validation_issues += ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
+                                                                   tag=report_tag_as if report_tag_as else original_tag,
+                                                                   default_unit=default_unit)
+
+                if error_code:
+                    new_issue = validation_issues[0].copy()
+                    new_issue['code'] = error_code
+                    validation_issues += [new_issue]
+
         return validation_issues
 
     def check_tag_value_class_valid(self, original_tag, report_tag_as=None, error_code=None):
@@ -324,7 +344,7 @@ class TagValidator:
         """
         validation_issues = []
         if not self._validate_value_class_portion(original_tag, original_tag.extension):
-            validation_issues += ErrorHandler.format_error(ValidationErrors.HED_VALUE_INVALID,
+            validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
                                                            report_tag_as if report_tag_as else original_tag,
                                                            actual_error=error_code)
 
@@ -341,7 +361,7 @@ class TagValidator:
         """
         validation_issues = []
         if original_tag.has_attribute(HedKey.RequireChild):
-            validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_REQUIRES_CHILD,
+            validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_REQUIRES_CHILD,
                                                            tag=original_tag)
         return validation_issues
 
@@ -360,7 +380,7 @@ class TagValidator:
             tag_unit_values = original_tag.extension
             if tag_validator_util.validate_numeric_value_class(tag_unit_values):
                 default_unit = original_tag.get_unit_class_default_unit()
-                validation_issues += ErrorHandler.format_error(ValidationErrors.HED_UNITS_DEFAULT_USED,
+                validation_issues += ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
                                                                tag=original_tag,
                                                                default_unit=default_unit)
         return validation_issues
@@ -394,7 +414,7 @@ class TagValidator:
         for tag_name in tag_names:
             correct_tag_name = tag_name.capitalize()
             if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
-                validation_issues += ErrorHandler.format_error(ValidationErrors.HED_STYLE_WARNING,
+                validation_issues += ErrorHandler.format_error(ValidationErrors.STYLE_WARNING,
                                                                tag=original_tag)
                 break
         return validation_issues
@@ -424,6 +444,16 @@ class TagValidator:
                                                                tag=tag_group_tag)
         for top_level_tag in top_level_tags:
             if not is_top_level:
+                actual_code = None
+                if top_level_tag.short_base_tag == DefTagNames.DEFINITION_ORG_KEY:
+                    actual_code = ValidationErrors.DEFINITION_INVALID
+                elif top_level_tag.short_base_tag in {DefTagNames.ONSET_ORG_KEY, DefTagNames.OFFSET_ORG_KEY}:
+                    actual_code = ValidationErrors.ONSET_OFFSET_ERROR
+
+                if actual_code:
+                    validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TOP_LEVEL_TAG,
+                                                                   tag=top_level_tag,
+                                                                   actual_error=actual_code)
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TOP_LEVEL_TAG,
                                                                tag=top_level_tag)
 
@@ -448,7 +478,7 @@ class TagValidator:
         required_prefixes = self._hed_schema.get_tags_with_attribute(HedKey.Required)
         for required_prefix in required_prefixes:
             if not any(tag.long_tag.lower().startswith(required_prefix.lower()) for tag in tags):
-                validation_issues += ErrorHandler.format_error(ValidationErrors.HED_REQUIRED_TAG_MISSING,
+                validation_issues += ErrorHandler.format_error(ValidationErrors.REQUIRED_TAG_MISSING,
                                                                tag_prefix=required_prefix)
         return validation_issues
 
@@ -469,7 +499,7 @@ class TagValidator:
         for unique_prefix in unique_prefixes:
             unique_tag_prefix_bool_mask = [x.long_tag.lower().startswith(unique_prefix.lower()) for x in tags]
             if sum(unique_tag_prefix_bool_mask) > 1:
-                validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_NOT_UNIQUE,
+                validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_NOT_UNIQUE,
                                                                tag_prefix=unique_prefix)
         return validation_issues
 
@@ -506,7 +536,7 @@ class TagValidator:
         error_type = ValidationErrors.CHARACTER_INVALID
         character = hed_string[index]
         if character == "~":
-            error_type = ValidationErrors.HED_TILDES_UNSUPPORTED
+            error_type = ValidationErrors.TILDES_UNSUPPORTED
         return ErrorHandler.format_error(error_type, char_index=index,
                                          source_string=hed_string)
 
@@ -568,7 +598,7 @@ class TagValidator:
                                                                    tag=original_tag,
                                                                    index_in_tag=starting_index + i,
                                                                    index_in_tag_end=starting_index + i + 1,
-                                                                   actual_error=ValidationErrors.HED_VALUE_INVALID)
+                                                                   actual_error=ValidationErrors.PLACEHOLDER_INVALID)
 
         return validation_issues
 

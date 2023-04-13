@@ -72,7 +72,7 @@ class Test(unittest.TestCase):
     #     new_def_count = len(def_dict.defs)
     #     self.assertGreater(new_def_count, original_def_count)
     #
-    # placeholder_invalid_def_contents = "(Item/TestDef1/#,Item/TestDef2/#)"
+    # placeholder_invalid_def_contents = "(Age/#,Item/TestDef2/#)"
     # placeholder_invalid_def_string = f"(Definition/TestDefPlaceholder/#,{placeholder_invalid_def_contents})"
     #
     # def test_definitions(self):
@@ -98,12 +98,12 @@ class Test(unittest.TestCase):
     #                                                            "InvalidDef1", expected_count=1, tag_list=[]),
     #         'placeholderWrongSpot': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
     #                                                           "InvalidDef1#"),
-    #         'twoDefTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+    #         'twoDefTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUPS,
     #                                                 "ValidDef1", ["Definition/InvalidDef2"]),
-    #         'twoGroupTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+    #         'twoGroupTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUPS,
     #                                                   "InvalidDef1",
     #                                                   [self.def_contents_string, self.def_contents_string2]),
-    #         'extraOtherTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1",
+    #         'extraOtherTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUPS, "InvalidDef1",
     #                                                     ['InvalidContents']),
     #         'duplicateDef': ErrorHandler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
     #         'duplicateDef2': ErrorHandler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
     #         'defAlreadyTagInSchema': [],
     #         'defTooManyPlaceholders': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
     #                                                             "TestDefPlaceholder", expected_count=1,
-    #                                                             tag_list=["Item/TestDef1/#", "Item/TestDef2/#"]),
+    #                                                             tag_list=["Age/#", "Item/TestDef2/#"]),
     #         'invalidPlaceholderExtension': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
     #                                                                  "InvalidDef1/this-part-is-not-allowed"),
     #         'invalidPlaceholder': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,

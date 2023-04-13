@@ -111,7 +111,7 @@ class SpreadsheetValidator:
                 for row_number, value in enumerate(base_input.dataframe[column.column_name]):
                     if value != "n/a" and value not in valid_keys:
                         error_handler.push_error_context(ErrorContext.ROW, row_number)
-                        issues += error_handler.format_error_with_context(ValidationErrors.HED_SIDECAR_KEY_MISSING,
+                        issues += error_handler.format_error_with_context(ValidationErrors.SIDECAR_KEY_MISSING,
                                                                           invalid_key=value,
                                                                           category_keys=list(valid_keys))
                         error_handler.pop_error_context()
@@ -133,7 +133,7 @@ class SpreadsheetValidator:
                     if match not in possible_column_references:
                         error_handler.push_error_context(ErrorContext.ROW, row_number)
                         error_handler.push_error_context(ErrorContext.COLUMN, column_name)
-                        error_handler.push_error_context(ErrorContext.HED_STRING, df[column_name][row_number])
+                        error_handler.push_error_context(ErrorContext.HED_STRING, HedString(df[column_name][row_number]))
 
                         issues += error_handler.format_error_with_context(ColumnErrors.INVALID_COLUMN_REF,
                                                                           match)

@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run3', sidecar=self.bad_json_path)
         self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict), 3)
         run3 = dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run3']
-        self.assertEqual(run3["total_sidecar_issues"], 2)
+        self.assertEqual(run3["total_sidecar_issues"], 4)
 
     def test_get_summary_details(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])

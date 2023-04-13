@@ -82,13 +82,13 @@ class Test(unittest.TestCase):
 
     def test_validate_column_group(self):
         validation_issues = self.errors_sidecar.validate(self.hed_schema)
-        self.assertEqual(len(validation_issues), 22)
+        self.assertEqual(len(validation_issues), 23)
 
         validation_issues2 = self.errors_sidecar_minor.validate(self.hed_schema)
-        self.assertEqual(len(validation_issues2), 18)
+        self.assertEqual(len(validation_issues2), 19)
 
         validation_issues = self.json_without_definitions_sidecar.validate(self.hed_schema)
-        self.assertEqual(len(validation_issues), 8)
+        self.assertEqual(len(validation_issues), 7)
 
         hed_string = HedString("(Definition/JsonFileDef/#, (Item/JsonDef1/#,Item/JsonDef1))", self.hed_schema)
         extra_def_dict = DefinitionDict()

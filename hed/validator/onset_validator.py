@@ -44,7 +44,7 @@ class OnsetValidator:
             children = [child for child in found_group.children if
                         def_group is not child and found_onset is not child]
             max_children = 1
-            if found_onset.short_base_tag.lower() == DefTagNames.OFFSET_KEY:
+            if found_onset.short_base_tag == DefTagNames.OFFSET_ORG_KEY:
                 max_children = 0
             if len(children) > max_children:
                 onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS,
@@ -69,7 +69,7 @@ class OnsetValidator:
         return hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY})
 
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
-        is_onset = onset_offset_tag.short_base_tag.lower() == DefTagNames.ONSET_KEY
+        is_onset = onset_offset_tag.short_base_tag == DefTagNames.ONSET_ORG_KEY
         full_def_name = def_name = def_tag.extension
         placeholder = None
         found_slash = def_name.find("/")

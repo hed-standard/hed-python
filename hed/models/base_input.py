@@ -448,3 +448,18 @@ class BaseInput:
             axis=1
         )
         return dataframe
+
+    def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
+        """ Returns the definition dict for this file
+
+        Note: Baseclass implementation returns just extra_def_dicts.
+
+        Parameters:
+            hed_schema(HedSchema): used to identify tags to find definitions(if needed)
+            extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
+
+        Returns:
+            DefinitionDict:   A single definition dict representing all the data(and extra def dicts)
+        """
+        from hed.models.definition_dict import DefinitionDict
+        return DefinitionDict(extra_def_dicts, hed_schema)
