@@ -49,6 +49,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
         HedKey.RelatedTag: tag_exists_check,
         HedKey.UnitClass: tag_is_placeholder_check,
         HedKey.ValueClass: tag_is_placeholder_check,
+        HedKey.Rooted: attribute_does_not_exist_check, # This should be impossible to trigger unless loading fails
     }
 
     # Check attributes
@@ -69,7 +70,11 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
 
         # Check duplicate names
         for name, duplicate_entries in hed_schema[section_key].duplicate_names.items():
-            issues_list += error_handler.format_error_with_context(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE, name,
+            values = set(entry.has_attribute(HedKey.InLibrary) for entry in duplicate_entries)
+            error_code = SchemaErrors.HED_SCHEMA_DUPLICATE_NODE
+            if len(values) == 2:
+                error_code = SchemaErrors.HED_SCHEMA_DUPLICATE_FROM_LIBRARY
+            issues_list += error_handler.format_error_with_context(error_code, name,
                                                                    duplicate_tag_list=[entry.name for entry in
                                                                                        duplicate_entries],
                                                                    section=section_key)
@@ -105,6 +110,30 @@ def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_
     if not tag_entry.name.endswith("/#"):
         issues += ErrorHandler.format_error(SchemaWarnings.NON_PLACEHOLDER_HAS_CLASS, tag_entry.name,
                                             possible_tags)
+
+    if force_issues_as_warnings:
+        for issue in issues:
+            issue['severity'] = ErrorSeverity.WARNING
+
+    return issues
+
+
+def attribute_does_not_exist_check(hed_schema, tag_entry, attribute_name, force_issues_as_warnings=True):
+    """ Throws an error saying this is a bad attribute if found.
+
+    Parameters:
+        hed_schema (HedSchema): The schema to check if the tag exists.
+        tag_entry (HedSchemaEntry): The schema entry for this tag.
+        attribute_name (str): the attribute name we're looking for
+        force_issues_as_warnings (bool): If True sets all the severity levels to warning.
+
+    Returns:
+        list: A list of issues. Each issue is a dictionary.
+
+    """
+    issues = []
+    issues += ErrorHandler.format_error(SchemaWarnings.INVALID_ATTRIBUTE, tag_entry.name,
+                                        attribute_name)
 
     if force_issues_as_warnings:
         for issue in issues:

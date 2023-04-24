@@ -1,5 +1,6 @@
 """Baseclass for mediawiki/xml writers"""
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
+import copy
 
 
 class HedSchema2Base:
@@ -16,8 +17,8 @@ class HedSchema2Base:
         ----------
         hed_schema : HedSchema
         save_merged: bool
-            If true, this will save the schema as a merged schema if it is a "with-standard" schema.
-            If it is not a "with-standard" schema, this setting has no effect.
+            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
 
         Returns
         -------
@@ -70,23 +71,44 @@ class HedSchema2Base:
     def _write_entry(self, entry, parent_node, include_props=True):
         raise NotImplementedError("This needs to be defined in the subclass")
 
+    def _write_rooted_parent_entry(self, tag_entry, schema_node):
+        parent_copy = copy.deepcopy(tag_entry._parent_tag)
+        parent_copy.attributes = {HedKey.Rooted: True}
+        parent_copy.description = ""
+
+        parent_node = self._write_tag_entry(parent_copy, schema_node, 0)
+
+        return parent_node
+
     def _output_tags(self, all_tags):
         schema_node = self._start_section(HedSectionKey.AllTags)
 
-        tag_levels = {}
-        for tag_entry in all_tags.values():
+        # This assumes .all_entries is sorted in a reasonable way for output.
+        level_adj = 0
+        all_nodes = {} # List of all nodes we've written out.
+        for tag_entry in all_tags.all_entries:
             if self._should_skip(tag_entry):
                 continue
             tag = tag_entry.name
             level = tag.count("/")
 
+            if not tag_entry.has_attribute(HedKey.InLibrary):
+                level_adj = 0
             if level == 0:
                 root_tag = self._write_tag_entry(tag_entry, schema_node, level)
-                tag_levels[0] = root_tag
+                all_nodes[tag_entry.name] = root_tag
             else:
-                parent_tag = tag_levels[level - 1]
-                child_tag = self._write_tag_entry(tag_entry, parent_tag, level)
-                tag_levels[level] = child_tag
+                # Only output the rooted parent nodes if they have a parent(for duplicates that don't)
+                if tag_entry.has_attribute(HedKey.InLibrary) and tag_entry.parent and \
+                        not tag_entry.parent.has_attribute(HedKey.InLibrary):
+                    if tag_entry.parent.name not in all_nodes:
+                        parent_node = self._write_rooted_parent_entry(tag_entry, schema_node)
+                        all_nodes[tag_entry.parent.name] = parent_node
+                        level_adj = level - 1
+
+                parent_node = all_nodes.get(tag_entry.parent_name, schema_node)
+                child_node = self._write_tag_entry(tag_entry, parent_node, level - level_adj)
+                all_nodes[tag_entry.name] = child_node
 
         self._end_tag_section()
 

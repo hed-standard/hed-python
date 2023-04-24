@@ -39,6 +39,7 @@ class HedKey:
     ValueClass = "valueClass"
     RelatedTag = "relatedTag"
     SuggestedTag = "suggestedTag"
+    Rooted = "rooted"
 
     # All known properties
     BoolProperty = 'boolProperty'
@@ -66,5 +67,5 @@ class HedKey:
 
 VERSION_ATTRIBUTE = 'version'
 LIBRARY_ATTRIBUTE = 'library'
-WITH_STANDARD_ATTRIBUTE = "with-standard"
-MERGED_ATTRIBUTE = "merged"
+WITH_STANDARD_ATTRIBUTE = "withStandard"
+UNMERGED_ATTRIBUTE = "unmerged"
