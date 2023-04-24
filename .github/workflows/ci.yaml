@@ -104,7 +104,7 @@ jobs:
         with:
           coverageCommand: coverage xml
           debug: true
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v4.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
