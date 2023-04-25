@@ -11,7 +11,7 @@ from hed.tools.remodeling.backup_manager import BackupManager
 
 
 def get_parser():
-    """ Create a parser for the run_remodel command-line arguments. 
+    """ Create a parser for the run_remodel command-line arguments.
 
     Returns:
         argparse.ArgumentParser:  A parser for parsing the command line arguments.
@@ -35,10 +35,14 @@ def get_parser():
                         help="Name of the default backup for remodeling")
     parser.add_argument("-nb", "--no-backup", action='store_true', dest="no_backup",
                         help="If present, the operations are run directly on the files with no backup.")
+    parser.add_argument("-ns", "--no-summaries", action='store_true', dest="no_summaries",
+                        help="If present, the summaries are not saved, but rather discarded.")
+    parser.add_argument("-nu", "--no-update", action='store_true', dest="no_update",
+                        help="If present, the files are not saved, but rather discarded.")
     parser.add_argument("-r", "--hed-versions", dest="hed_versions", nargs="*", default=[],
                         help="Optional list of HED schema versions used for annotation, include prefixes.")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
-                        help="Format for saving any summaries, if any. If empty, then no summaries are saved.")
+                        help="Format for saving any summaries, if any. If no summaries are to be written, use the -ns option.")
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The names of the task.")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
@@ -50,18 +54,18 @@ def get_parser():
 
 
 def parse_arguments(arg_list=None):
-    """ Parse the command line arguments or arg_list if given. 
-    
+    """ Parse the command line arguments or arg_list if given.
+
     Parameters:
         arg_list (list):  List of command line arguments as a list.
-        
+
     Returns:
         Object:  Argument object
         List: A list of parsed operations (each operation is a dictionary).
-        
+
     Raises:
         ValueError  - If the operations were unable to be correctly parsed.
-    
+
     """
     parser = get_parser()
     args = parser.parse_args(arg_list)
@@ -85,7 +89,7 @@ def parse_arguments(arg_list=None):
 
 def run_bids_ops(dispatch, args):
     """ Run the remodeler on a BIDS dataset.
-    
+
     Parameters:
         dispatch (Dispatcher): Manages the execution of the operations.
         args (Object): The command-line arguments as an object.
@@ -109,7 +113,8 @@ def run_bids_ops(dispatch, args):
         if args.verbose:
             print(f"Events {events_obj.file_path}  sidecar {sidecar}")
         df = dispatch.run_operations(events_obj.file_path, sidecar=sidecar, verbose=args.verbose)
-        df.to_csv(events_obj.file_path, sep='\t', index=False, header=True)
+        if not args.no_update:
+            df.to_csv(events_obj.file_path, sep='\t', index=False, header=True)
 
 
 def run_direct_ops(dispatch, args):
@@ -133,7 +138,8 @@ def run_direct_ops(dispatch, args):
         if args.task_names and not BackupManager.get_task(args.task_names, file_path):
             continue
         df = dispatch.run_operations(file_path, verbose=args.verbose, sidecar=sidecar)
-        df.to_csv(file_path, sep='\t', index=False, header=True)
+        if not args.no_update:
+            df.to_csv(file_path, sep='\t', index=False, header=True)
 
 
 def main(arg_list=None):
@@ -169,7 +175,8 @@ def main(arg_list=None):
     save_dir = None
     if args.work_dir:
         save_dir = os.path.realpath(os.path.join(args.work_dir, Dispatcher.REMODELING_SUMMARY_PATH))
-    dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries, summary_dir=save_dir)
+    if not args.no_summaries:
+        dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries, summary_dir=save_dir)
 
 
 if __name__ == '__main__':
