@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
         input_data = TabularInput(self.file_list[0])
         with self.assertRaises(HedFileError) as context:
             BidsTabularDictionary._correct_file(input_data)
-        self.assertEqual(context.exception.error_type, 'BadArgument')
+        self.assertEqual(context.exception.code, 'BadArgument')
 
     def test_correct_file_bids_file(self):
         bids_file = BidsFile(self.file_list[0])

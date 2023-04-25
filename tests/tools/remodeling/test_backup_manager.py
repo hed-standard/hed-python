@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
             shutil.rmtree(remove_dir)
         with self.assertRaises(HedFileError) as context:
             BackupManager(self.test_root_bad)
-        self.assertEqual(context.exception.error_type, "MissingBackupFile")
+        self.assertEqual(context.exception.code, "MissingBackupFile")
 
     def test_constructor_missing_json(self):
         remove_list = ['back1_extra', 'back3_miss_back', 'back4_miss_file']
@@ -95,7 +95,7 @@ class Test(unittest.TestCase):
             shutil.rmtree(remove_dir)
         with self.assertRaises(HedFileError) as context:
             BackupManager(self.test_root_bad)
-        self.assertEqual(context.exception.error_type, "BadBackupFormat")
+        self.assertEqual(context.exception.code, "BadBackupFormat")
 
     def test_constructor_extra_backup_file(self):
         remove_list = ['back1_extra', 'back2_miss_json', 'back4_miss_file']
@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
             shutil.rmtree(remove_dir)
         with self.assertRaises(HedFileError) as context:
             BackupManager(self.test_root_bad)
-        self.assertEqual(context.exception.error_type, "BadBackupFormat")
+        self.assertEqual(context.exception.code, "BadBackupFormat")
 
     def test_create_backup(self):
         test_man = BackupManager(self.test_root)

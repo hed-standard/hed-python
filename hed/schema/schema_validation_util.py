@@ -14,12 +14,11 @@ def validate_library_name(library_name):
         bool or str:  If not False, string indicates the issue.
 
     """
-    if library_name.isalpha():
-        return False
-
     for i, character in enumerate(library_name):
         if not character.isalpha():
             return f"Non alpha character '{character}' at position {i} in '{library_name}'"
+        if character.isupper():
+            return f"Non lowercase character '{character}' at position {i} in '{library_name}'"
 
 
 def validate_version_string(version_string):
@@ -64,6 +63,13 @@ attribute_validators = {
     }
 
 
+def validate_present_attributes(attrib_dict, filename):
+    if constants.WITH_STANDARD_ATTRIBUTE in attrib_dict and constants.LIBRARY_ATTRIBUTE not in attrib_dict:
+        raise HedFileError(HedExceptions.BAD_WITH_STANDARD,
+                           "withStandard header attribute found, but no library attribute is present",
+                           filename)
+
+
 def validate_attributes(attrib_dict, filename):
     """ Validate attributes in the dictionary.
 
@@ -78,6 +84,8 @@ def validate_attributes(attrib_dict, filename):
         HedFileError: if invalid or version not found in the dictionary.
 
     """
+    validate_present_attributes(attrib_dict, filename)
+
     for attribute_name, attribute_value in attrib_dict.items():
         if attribute_name in attribute_validators:
             validator, error_code = attribute_validators[attribute_name]
@@ -88,3 +96,43 @@ def validate_attributes(attrib_dict, filename):
     if constants.VERSION_ATTRIBUTE not in attrib_dict:
         raise HedFileError(HedExceptions.HED_SCHEMA_VERSION_INVALID,
                            "No version attribute found in header", filename=filename)
+
+
+# Might move this to a baseclass version if one is ever made for wiki2schema/xml2schema
+def check_rooted_errors(tag_entry, schema, loading_merged):
+    """ This semi-validates rooted tags, raising an exception on major errors
+
+    Parameters:
+        tag_entry(HedTagEntry): the possibly rooted tag
+        schema(HedSchema): The schema being loaded
+        loading_merged(bool): If this schema was already merged before loading
+
+    Returns:
+        rooted_tag(HedTagEntry or None): The base tag entry from the standard schema
+            Returns None if this tag isn't rooted
+
+    Raises:
+        HedValueError: Raises if the tag doesn't exist or similar
+
+    """
+    if tag_entry.has_attribute(constants.HedKey.Rooted):
+        if tag_entry.parent_name:
+            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                               f'Found rooted tag \'{tag_entry.short_tag_name}\' as a non root node.',
+                               schema.filename)
+        if not schema.with_standard:
+            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                               f"Rooted tag attribute found on '{tag_entry.short_tag_name}' in a standard schema.",
+                               schema.filename)
+        if loading_merged:
+            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                               f'Found rooted tag \'{tag_entry.short_tag_name}\' in schema without unmerged="True"',
+                               schema.filename)
+
+        rooted_entry = schema.all_tags.get(tag_entry.name.lower())
+        if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):
+            raise HedFileError(HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
+                               f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",
+                               schema.filename)
+
+        return rooted_entry

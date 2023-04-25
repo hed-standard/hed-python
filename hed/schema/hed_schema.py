@@ -1,3 +1,5 @@
+import os
+import shutil
 
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.schema import hed_schema_constants as constants
@@ -6,7 +8,7 @@ from hed.schema.schema_io.schema2xml import HedSchema2XML
 from hed.schema.schema_io.schema2wiki import HedSchema2Wiki
 
 from hed.schema import schema_validation_util
-from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection
+from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 
@@ -84,7 +86,7 @@ class HedSchema:
 
 
         """
-        return self.header_attributes.get(constants.MERGED_ATTRIBUTE, "")
+        return not self.header_attributes.get(constants.UNMERGED_ATTRIBUTE, "")
 
     def get_save_header_attributes(self, save_merged=False):
         """ returns the attributes that should be saved.
@@ -93,11 +95,12 @@ class HedSchema:
         sort_to_start = "!!!!!!!!!!!!!!"
         header_attributes = dict(sorted(self.header_attributes.items(), key=lambda x: sort_to_start if x[0] == constants.VERSION_ATTRIBUTE else x[0], reverse=False))
         if save_merged:
-            # make sure it's the last attribute(just to make sure it's in an order)
-            header_attributes.pop(constants.MERGED_ATTRIBUTE, None)
-            header_attributes[constants.MERGED_ATTRIBUTE] = "True"
+            header_attributes.pop(constants.UNMERGED_ATTRIBUTE, None)
         else:
-            header_attributes.pop(constants.MERGED_ATTRIBUTE, None)
+            # make sure it's the last attribute(just to make sure it's in an order)
+            header_attributes.pop(constants.UNMERGED_ATTRIBUTE, None)
+            header_attributes[constants.UNMERGED_ATTRIBUTE] = "True"
+
 
         return header_attributes
 
@@ -137,8 +140,8 @@ class HedSchema:
         """ Return the schema to a mediawiki string.
 
         save_merged: bool
-            If true, this will save the schema as a merged schema if it is a "with-standard" schema.
-            If it is not a "with-standard" schema, this setting has no effect.
+            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
         Returns:
             str:  The schema as a string in mediawiki format.
 
@@ -147,12 +150,12 @@ class HedSchema:
         output_strings = schema2wiki.process_schema(self, save_merged)
         return '\n'.join(output_strings)
 
-    def get_as_xml_string(self, save_merged=False):
+    def get_as_xml_string(self, save_merged=True):
         """ Return the schema to an XML string.
 
         save_merged: bool
-            If true, this will save the schema as a merged schema if it is a "with-standard" schema.
-            If it is not a "with-standard" schema, this setting has no effect.
+            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
         Returns:
             str: Return the schema as an XML string.
 
@@ -161,33 +164,50 @@ class HedSchema:
         xml_tree = schema2xml.process_schema(self, save_merged)
         return schema_util._xml_element_2_str(xml_tree)
 
-    def save_as_mediawiki(self, save_merged=False):
+    def save_as_mediawiki(self, filename=None, save_merged=False):
         """ Save as mediawiki to a temporary file.
 
+        filename: str
+            If present, move the resulting file to this location.
         save_merged: bool
-            If true, this will save the schema as a merged schema if it is a "with-standard" schema.
-            If it is not a "with-standard" schema, this setting has no effect.
+            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
+
         Returns:
             str:    The newly created schema filename.
-
         """
         schema2wiki = HedSchema2Wiki()
         output_strings = schema2wiki.process_schema(self, save_merged)
         local_wiki_file = schema_util.write_strings_to_file(output_strings, ".mediawiki")
+        if filename:
+            directory = os.path.dirname(filename)
+            if directory and not os.path.exists(directory):
+                os.makedirs(directory)
+            shutil.move(local_wiki_file, filename)
+            return filename
         return local_wiki_file
 
-    def save_as_xml(self, save_merged=False):
+    def save_as_xml(self, filename=None, save_merged=True):
         """ Save as XML to a temporary file.
+
+        filename: str
+            If present, move the resulting file to this location.
+        save_merged: bool
+            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
 
         Returns:
             str: The name of the newly created schema file.
-        save_merged: bool
-            If true, this will save the schema as a merged schema if it is a "with-standard" schema.
-            If it is not a "with-standard" schema, this setting has no effect.
         """
         schema2xml = HedSchema2XML()
         xml_tree = schema2xml.process_schema(self, save_merged)
         local_xml_file = schema_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
+        if filename:
+            directory = os.path.dirname(filename)
+            if directory and not os.path.exists(directory):
+                os.makedirs(directory)
+            shutil.move(local_xml_file, filename)
+            return filename
         return local_xml_file
 
     def set_schema_prefix(self, schema_prefix):
@@ -691,7 +711,7 @@ class HedSchema:
         dictionaries[HedSectionKey.Attributes] = HedSchemaSection(HedSectionKey.Attributes)
         dictionaries[HedSectionKey.UnitModifiers] = HedSchemaSection(HedSectionKey.UnitModifiers)
         dictionaries[HedSectionKey.Units] = HedSchemaSection(HedSectionKey.Units)
-        dictionaries[HedSectionKey.UnitClasses] = HedSchemaSection(HedSectionKey.UnitClasses)
+        dictionaries[HedSectionKey.UnitClasses] = HedSchemaUnitClassSection(HedSectionKey.UnitClasses)
         dictionaries[HedSectionKey.ValueClasses] = HedSchemaSection(HedSectionKey.ValueClasses)
         dictionaries[HedSectionKey.AllTags] = HedSchemaTagSection(HedSectionKey.AllTags, case_sensitive=False)
 
@@ -768,6 +788,14 @@ class HedSchema:
     # ===============================================
     # Semi private function used to create a schema in memory(usually from a source file)
     # ===============================================
-    def _add_tag_to_dict(self, long_tag_name, key_class):
+    def _add_tag_to_dict(self, long_tag_name, new_entry, key_class):
+        # No reason we can't add this here always
+        if self.library and not self.merged:
+            new_entry.set_attribute_value(HedKey.InLibrary, self.library)
+
         section = self._sections[key_class]
-        return section._add_to_dict(long_tag_name)
+        return section._add_to_dict(long_tag_name, new_entry)
+
+    def _create_tag_entry(self, long_tag_name, key_class):
+        section = self._sections[key_class]
+        return section._create_tag_entry(long_tag_name)

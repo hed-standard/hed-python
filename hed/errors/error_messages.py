@@ -219,6 +219,13 @@ def schema_error_hed_duplicate_node(tag, duplicate_tag_list, section):
            f"{tag_join_delimiter}{tag_join_delimiter.join(duplicate_tag_list)}"
 
 
+@hed_error(SchemaErrors.HED_SCHEMA_DUPLICATE_FROM_LIBRARY)
+def schema_error_hed_duplicate_node(tag, duplicate_tag_list, section):
+    tag_join_delimiter = "\n\t"
+    return f"Duplicate term '{str(tag)}' was found in the library and in the standard schema in '{section}' section schema as:" + \
+           f"{tag_join_delimiter}{tag_join_delimiter.join(duplicate_tag_list)}"
+
+
 @hed_error(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID)
 def schema_error_unknown_attribute(attribute_name, source_tag):
     return f"Attribute '{attribute_name}' used by '{source_tag}' was not defined in the schema, " \
@@ -247,6 +254,13 @@ def schema_warning_invalid_capitalization(tag_name, problem_char, char_index):
 def schema_warning_non_placeholder_class(tag_name, invalid_attribute_name):
     return "Only placeholder nodes('#') can have a unit or value class." + \
            f"Found {invalid_attribute_name} on {tag_name}"
+
+
+@hed_error(SchemaWarnings.INVALID_ATTRIBUTE, default_severity=ErrorSeverity.ERROR)
+def schema_error_invalid_attribute(tag_name, invalid_attribute_name):
+    return f"'{invalid_attribute_name}' should not be present in a loaded schema, found on '{tag_name}'." \
+           f"Something went very wrong."
+
 
 
 @hed_error(SidecarErrors.BLANK_HED_STRING)

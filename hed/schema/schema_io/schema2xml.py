@@ -1,7 +1,7 @@
 """Allows output of HedSchema objects as .xml format"""
 
 from xml.etree.ElementTree import Element, SubElement
-from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io import xml_constants
 from hed.schema.schema_io.schema2base import HedSchema2Base
 
@@ -107,8 +107,7 @@ class HedSchema2XML(HedSchema2Base):
     # =========================================
     # Output helper functions to create nodes
     # =========================================
-    @staticmethod
-    def _add_tag_node_attributes(tag_node, tag_attributes, attribute_node_name=xml_constants.ATTRIBUTE_ELEMENT):
+    def _add_tag_node_attributes(self, tag_node, tag_attributes, attribute_node_name=xml_constants.ATTRIBUTE_ELEMENT):
         """Adds the attributes to a tag.
 
         Parameters
@@ -125,7 +124,8 @@ class HedSchema2XML(HedSchema2Base):
         for attribute, value in tag_attributes.items():
             if value is False:
                 continue
-
+            if not self._save_merged and attribute == HedKey.InLibrary:
+                continue
             node_name = attribute_node_name
             attribute_node = SubElement(tag_node, node_name)
             name_node = SubElement(attribute_node, xml_constants.NAME_ELEMENT)

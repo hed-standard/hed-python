@@ -169,7 +169,7 @@ class Test(unittest.TestCase):
         self.assertTrue(hed_input._dataframe.equals(hed_input_long._dataframe))
 
     def test_definitions_identified(self):
-        # Todo ian: this test is no longer relevant
+        # Todo: this test is no longer relevant
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header_definition.tsv')
         hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])

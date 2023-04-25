@@ -1,6 +1,6 @@
 """Allows output of HedSchema objects as .mediawiki format"""
 
-from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io import wiki_constants
 from hed.schema.schema_io.schema2base import HedSchema2Base
 
@@ -49,6 +49,8 @@ class HedSchema2Wiki(HedSchema2Base):
     def _write_tag_entry(self, tag_entry, parent_node=None, level=0):
         tag = tag_entry.name
         if level == 0:
+            if "/" in tag:
+                tag = tag_entry.short_tag_name
             self._add_blank_line()
             self.current_tag_string += f"'''{tag}'''"
         else:
@@ -121,8 +123,7 @@ class HedSchema2Wiki(HedSchema2Base):
         final_attrib_string = " ".join(attrib_values)
         return final_attrib_string
 
-    @staticmethod
-    def _format_tag_props(tag_props):
+    def _format_tag_props(self, tag_props):
         """
             Takes a dictionary of tag attributes and returns a string with the .mediawiki representation
 
@@ -138,6 +139,9 @@ class HedSchema2Wiki(HedSchema2Base):
         prop_string = ""
         final_props = []
         for prop, value in tag_props.items():
+            # Never save InLibrary if saving merged.
+            if not self._save_merged and prop == HedKey.InLibrary:
+                continue
             if value is None or value is False:
                 continue
             if value is True:
