@@ -105,41 +105,41 @@ class TestInsertColumns(unittest.TestCase):
 
     def test_insert_columns_simple(self):
         df = pd.DataFrame({
-            "column1": ["[column2], Event, Action"],
+            "column1": ["{column2}, Event, Action"],
             "column2": ["Item"]
         })
         expected_df = pd.DataFrame({
             "column1": ["Item, Event, Action"]
         })
-        result = BaseInput._handle_square_brackets(df)
+        result = BaseInput._handle_curly_braces(df)
         pd.testing.assert_frame_equal(result, expected_df)
 
     def test_insert_columns_multiple_rows(self):
         df = pd.DataFrame({
-            "column1": ["[column2], Event, Action", "Event, Action"],
+            "column1": ["{column2}, Event, Action", "Event, Action"],
             "column2": ["Item", "Subject"]
         })
         expected_df = pd.DataFrame({
             "column1": ["Item, Event, Action", "Event, Action"]
         })
-        result = BaseInput._handle_square_brackets(df)
+        result = BaseInput._handle_curly_braces(df)
         pd.testing.assert_frame_equal(result, expected_df)
 
     def test_insert_columns_multiple_columns(self):
         df = pd.DataFrame({
-            "column1": ["[column2], Event, [column3], Action"],
+            "column1": ["{column2}, Event, {column3}, Action"],
             "column2": ["Item"],
             "column3": ["Subject"]
         })
         expected_df = pd.DataFrame({
             "column1": ["Item, Event, Subject, Action"]
         })
-        result = BaseInput._handle_square_brackets(df)
+        result = BaseInput._handle_curly_braces(df)
         pd.testing.assert_frame_equal(result, expected_df)
 
     def test_insert_columns_four_columns(self):
         df = pd.DataFrame({
-            "column1": ["[column2], Event, [column3], Action"],
+            "column1": ["{column2}, Event, {column3}, Action"],
             "column2": ["Item"],
             "column3": ["Subject"],
             "column4": ["Data"]
@@ -148,7 +148,7 @@ class TestInsertColumns(unittest.TestCase):
             "column1": ["Item, Event, Subject, Action"],
             "column4": ["Data"]
         })
-        result = BaseInput._handle_square_brackets(df)
+        result = BaseInput._handle_curly_braces(df)
         pd.testing.assert_frame_equal(result, expected_df)
 
 
@@ -213,8 +213,8 @@ class TestCombineDataframe(unittest.TestCase):
 class TestColumnRefs(unittest.TestCase):
     def test_simple_column_refs(self):
         data1 = {
-            'A': ['[col1], [col2]', 'tag1, tag2'],
-            'B': ['tag3, tag4', '[col3]'],
+            'A': ['{col1}, {col2}', 'tag1, tag2'],
+            'B': ['tag3, tag4', '{col3}'],
         }
         df1 = pd.DataFrame(data1)
         result1 = BaseInput._find_column_refs(df1, df1.columns)
@@ -223,7 +223,7 @@ class TestColumnRefs(unittest.TestCase):
 
     def test_mixed_cases_and_patterns(self):
         data2 = {
-            'A': ['[Col1], [col2]', 'tag1, [Col3]', 'tag3, [COL4]', '[col5], [col6]'],
+            'A': ['{Col1}, {col2}', 'tag1, {Col3}', 'tag3, {COL4}', '{col5}, {col6}'],
         }
         df2 = pd.DataFrame(data2)
         result2 = BaseInput._find_column_refs(df2, df2.columns)
@@ -240,10 +240,10 @@ class TestColumnRefs(unittest.TestCase):
         expected3 = []
         self.assertEqual(result3, expected3)
 
-    def test_incomplete_square_brackets(self):
+    def test_incomplete_curly_braces(self):
         data4 = {
-            'A': ['[col1, [col2]', 'tag1, [Col3'],
-            'B': ['tag3, [COL4', '[col5, col6]'],
+            'A': ['{col1, {col2}', 'tag1, {Col3'],
+            'B': ['tag3, {COL4', '{col5, col6}'],
         }
         df4 = pd.DataFrame(data4)
         result4 = BaseInput._find_column_refs(df4, df4.columns)

@@ -354,12 +354,12 @@ class BaseInput:
                 return True
         return False
 
-    def assemble(self, mapper=None, skip_square_brackets=False):
+    def assemble(self, mapper=None, skip_curly_braces=False):
         """ Assembles the hed strings
 
         Parameters:
             mapper(ColumnMapper or None): Generally pass none here unless you want special behavior.
-            skip_square_brackets (bool): If True, don't plug in square bracket values into columns.
+            skip_curly_braces (bool): If True, don't plug in curly brace values into columns.
         Returns:
             Dataframe: the assembled dataframe
         """
@@ -367,11 +367,11 @@ class BaseInput:
             mapper = self._mapper
 
         all_columns = self._handle_transforms(mapper)
-        if skip_square_brackets:
+        if skip_curly_braces:
             return all_columns
         transformers, _ = mapper.get_transformers()
 
-        return self._handle_square_brackets(all_columns, list(transformers))
+        return self._handle_curly_braces(all_columns, list(transformers))
 
     def _handle_transforms(self, mapper):
         transformers, need_categorical = mapper.get_transformers()
@@ -393,7 +393,7 @@ class BaseInput:
     def _find_column_refs(df, column_names):
         found_column_references = []
         for column_name in column_names:
-            df_temp = df[column_name].str.findall("\[([a-z_\-0-9]+)\]", re.IGNORECASE)
+            df_temp = df[column_name].str.findall("\{([a-z_\-0-9]+)\}", re.IGNORECASE)
             u_vals = pd.Series([j for i in df_temp if isinstance(i, list) for j in i], dtype=str)
             u_vals = u_vals.unique()
             for val in u_vals:
@@ -403,9 +403,9 @@ class BaseInput:
         return found_column_references
 
     @staticmethod
-    def _handle_square_brackets(df, known_columns=None):
+    def _handle_curly_braces(df, known_columns=None):
         """
-            Plug in square brackets with other columns
+            Plug in curly braces with other columns
 
             If known columns is passed, only use those columns to find or replace references.
         """
@@ -413,6 +413,7 @@ class BaseInput:
             column_names = list(known_columns)
         else:
             column_names = list(df.columns)
+        # Steps: 1. Gather the list of valid references(source doesn't matter)
         possible_column_references = [f"{column_name}" for column_name in column_names if
                                       isinstance(column_name, str) and column_name.lower() != "hed"]
         found_column_references = BaseInput._find_column_refs(df, column_names)
@@ -422,10 +423,12 @@ class BaseInput:
         # todo: break this into a sub function(probably)
         for column_name in valid_replacements:
             column_names.remove(column_name)
+
+        # Step 2: Replace references in the columns we are saving out.
         saved_columns = df[valid_replacements]
         for column_name in column_names:
             for replacing_name in valid_replacements:
-                column_name_brackets = f"[{replacing_name}]"
+                column_name_brackets = f"{{{replacing_name}}}"
                 df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
                                             in zip(df[column_name], saved_columns[replacing_name]))
         df = df[column_names]

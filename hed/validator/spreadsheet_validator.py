@@ -45,7 +45,7 @@ class SpreadsheetValidator:
         # Check the structure of the input data, if it's a BaseInput
         if isinstance(data, BaseInput):
             issues += self._validate_column_structure(data, error_handler)
-            issues += self._validate_square_brackets(data.assemble(skip_square_brackets=True), error_handler)
+            issues += self._validate_curly_braces(data.assemble(skip_curly_braces=True), error_handler)
             data = data.dataframe_a
 
         # Check the rows of the input data
@@ -127,7 +127,7 @@ class SpreadsheetValidator:
         issues = []
         found_column_references = {}
         for column_name in df:
-            matches = df[column_name].str.findall("\[([a-z_\-\s0-9]+)(?<!\[)\]", re.IGNORECASE)
+            matches = df[column_name].str.findall("\{([a-z_\-\s0-9]+)(?<!\{)\}", re.IGNORECASE)
             for row_number, row in enumerate(matches):
                 for match in row:
                     if match not in possible_column_references:
@@ -155,8 +155,8 @@ class SpreadsheetValidator:
 
     @staticmethod
     def _invalid_bracket_locations(text):
-        first_opening = text.find('[')
-        last_closing = text.rfind(']')
+        first_opening = text.find('{')
+        last_closing = text.rfind('}')
 
         invalid_location = None
 
@@ -167,7 +167,7 @@ class SpreadsheetValidator:
                 invalid_location = last_closing
         else:
             for index, char in enumerate(text[first_opening + 1:last_closing]):
-                if char == '[' or char == ']':
+                if char == '{' or char == '}':
                     invalid_location = index + first_opening + 1
                     break
 
@@ -194,7 +194,7 @@ class SpreadsheetValidator:
 
         return issues
 
-    def _validate_square_brackets(self, df, error_handler):
+    def _validate_curly_braces(self, df, error_handler):
         issues = []
         issues += self._validate_column_refs(df, error_handler)
         issues += self._validate_missing_malformed_brackets(df, error_handler)
