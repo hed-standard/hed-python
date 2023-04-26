@@ -1,3 +1,7 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/11bf2329590e7b0164ba/maintainability)](https://codeclimate.com/github/hed-standard/hed-python/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/11bf2329590e7b0164ba/test_coverage)](https://codeclimate.com/github/hed-standard/hed-python/test_coverage)
+![PyPI - Status](https://img.shields.io/pypi/v/hedtools)
+
 # HEDTools - Python
 HED (Hierarchical Event Descriptors) is a framework for systematically describing
 both laboratory and real-world events as well as other experimental metadata.
