@@ -3,9 +3,8 @@ import pandas as pd
 
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
-from hed import HedString
+from hed.models.hed_string import HedString
 from hed.models.definition_dict import DefinitionDict
-from hed.models.definition_entry import DefinitionEntry
 
 
 def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_columns=True,
@@ -29,7 +28,7 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
             Expand any def tags found
     Returns:
         tuple: A list of HedStrings or a list of lists of HedStrings, DefinitionDict
-        
+
     """
     if isinstance(sidecar, str):
         sidecar = Sidecar(sidecar)
@@ -52,7 +51,8 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
         return [[HedString(x, hed_schema, def_dict).expand_defs() if expand_defs
                  else HedString(x, hed_schema, def_dict).shrink_defs() if shrink_defs
                  else HedString(x, hed_schema, def_dict)
-                 for x in text_file_row] for text_file_row in tabular_file.dataframe_a.itertuples(index=False)], def_dict
+                 for x in text_file_row] for text_file_row in tabular_file.dataframe_a.itertuples(index=False)], \
+               def_dict
 
 
 def convert_to_form(df, hed_schema, tag_form, columns=None):
@@ -138,6 +138,7 @@ def _shrink_defs(hed_string, hed_schema):
 def _expand_defs(hed_string, hed_schema, def_dict):
     from hed import HedString
     return str(HedString(hed_string, hed_schema, def_dict).expand_defs())
+
 
 def _get_matching_value(tags):
     # Filter out values equal to "#" and get unique values
