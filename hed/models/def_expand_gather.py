@@ -1,5 +1,7 @@
 import pandas as pd
-from hed.models import DefinitionDict, DefinitionEntry, HedString
+from hed.models.definition_dict import DefinitionDict
+from hed.models.definition_entry import DefinitionEntry
+from hed.models.hed_string import HedString
 
 
 class AmbiguousDef:
