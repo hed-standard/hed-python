@@ -396,10 +396,9 @@ class ErrorHandler:
 
         Returns:
             str: The error message.
-            dict: The extra args.
 
         """
-        return f"Unknown error.  Args: {str(args)}", kwargs
+        return f"Unknown error.  Args: {str(args), str(kwargs)}"
 
     @staticmethod
     def filter_issues_by_severity(issues_list, severity):

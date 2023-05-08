@@ -1,5 +1,6 @@
 from enum import Enum
 from hed.errors.error_types import SidecarErrors
+import pandas as pd
 
 
 class ColumnType(Enum):
@@ -21,30 +22,20 @@ class ColumnType(Enum):
 class ColumnMetadata:
     """ Column in a ColumnMapper. """
 
-    def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None):
+    def __init__(self, column_type=None, name=None, source=None):
         """ A single column entry in the column mapper.
 
         Parameters:
             column_type (ColumnType or None): How to treat this column when reading data.
             name (str, int, or None): The column_name or column number identifying this column.
                 If name is a string, you'll need to use a column map to set the number later.
-            hed_dict (dict or str or None): The loaded data (usually from json) for the given def
-                                     For category columns, this is a dict.
-                                     For value columns, it's a string.
-            column_prefix (str or None): If present, prepend the given column_prefix to all hed tags in the columns.
-                Only works on ColumnType HedTags.
-
-        Notes:
-            - Each column from which data is retrieved must have a ColumnMetadata representing its contents.
-            - The column_prefix dictionaries are used when the column is processed.
+            source (dict or str or None): Either the entire loaded json sidecar or a single HED string
         """
-        if hed_dict is None:
-            hed_dict = {}
-
-        self.column_type = column_type
         self.column_name = name
-        self.column_prefix = column_prefix
-        self._hed_dict = hed_dict
+        self._source = source
+        if column_type is None:
+            column_type = self._detect_column_type(self.source_dict)
+        self.column_type = column_type
 
     @property
     def hed_dict(self):
@@ -54,7 +45,78 @@ class ColumnMetadata:
             dict or str: A string or dict of strings for this column
 
         """
-        return self._hed_dict
+        if self._source is None or isinstance(self._source, str):
+            return self._source
+        return self._source[self.column_name].get("HED", {})
+
+    @property
+    def source_dict(self):
+        """ The raw dict for this entry(if it exists)
+
+        Returns:
+            dict or str: A string or dict of strings for this column
+        """
+        if self._source is None or isinstance(self._source, str):
+            return {"HED": self._source}
+        return self._source[self.column_name]
+
+    def get_hed_strings(self):
+        if not self.column_type:
+            return pd.Series(dtype=str)
+
+        series = pd.Series(self.hed_dict, dtype=str)
+
+        return series
+
+    def set_hed_strings(self, new_strings):
+        if new_strings is None:
+            return False
+
+        if not self.column_type:
+            return False
+
+        if isinstance(new_strings, pd.Series):
+            if self.column_type == ColumnType.Categorical:
+                new_strings = new_strings.to_dict()
+            else:
+                new_strings = new_strings.iloc[0]
+
+        self._source[self.column_name]["HED"] = new_strings
+
+        return True
+
+    @staticmethod
+    def _detect_column_type(dict_for_entry):
+        """ Determine the ColumnType of a given json entry.
+
+        Parameters:
+            dict_for_entry (dict): The loaded json entry a specific column.
+                Generally has a "HED" entry among other optional ones.
+
+        Returns:
+            ColumnType: The determined type of given column.  Returns None if unknown.
+
+        """
+        if not dict_for_entry or not isinstance(dict_for_entry, dict):
+            return ColumnType.Ignore
+
+        minimum_required_keys = ("HED",)
+        if not set(minimum_required_keys).issubset(dict_for_entry.keys()):
+            return ColumnType.Ignore
+
+        hed_entry = dict_for_entry["HED"]
+        if isinstance(hed_entry, dict):
+            if not all(isinstance(entry, str) for entry in hed_entry.values()):
+                return None
+            return ColumnType.Categorical
+
+        if not isinstance(hed_entry, str):
+            return None
+
+        if "#" not in dict_for_entry["HED"]:
+            return None
+
+        return ColumnType.Value
 
     @staticmethod
     def expected_pound_sign_count(column_type):

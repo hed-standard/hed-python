@@ -1,0 +1,25 @@
+{
+    "trial_type": {
+        "LongName": "Event category",
+        "Description": "Indicator of type of action that is expected",
+        "Levels": {
+            "go": "A red square is displayed to indicate starting",
+            "stop": "A blue square is displayed to indicate stopping"
+        },
+        "HED": {
+            "go": "Azure,See,{response_time}",
+            "stop": "{response_time},Azure"
+        }
+    },
+    "response_time": {
+        "LongName": "Response time after stimulus",
+        "Description": "Time from stimulus presentation until subject presses button",
+        "Units": "ms",
+        "HED": "Azure,See,Time-value/#"
+    },
+    "stim_file": {
+        "LongName": "Stimulus file name",
+        "Description": "Relative path of the stimulus image file",
+        "HED": "Time-value/#"
+    }
+}

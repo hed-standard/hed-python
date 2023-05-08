@@ -60,46 +60,6 @@ class Test(unittest.TestCase):
         }
         self.assertEqual(defs, expected_defs)
 
-    # def test_missing_column_name_issue(self):
-    #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                '../data/validator_tests/bids_schema.mediawiki')
-    #     events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                '../data/validator_tests/bids_events_bad_column_name.tsv')
-    #
-    #     hed_schema = schema.load_schema(schema_path)
-    #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                              "../data/validator_tests/bids_events.json")
-    #     validator = HedValidator(hed_schema=hed_schema)
-    #     sidecar = Sidecar(json_path)
-    #     issues = sidecar.validate_entries(validator)
-    #     self.assertEqual(len(issues), 0)
-    #     input_file = TabularInput(events_path, sidecars=sidecar)
-    #
-    #     validation_issues = input_file.validate_sidecar(validator)
-    #     self.assertEqual(len(validation_issues), 0)
-    #     validation_issues = input_file.validate_file(validator, check_for_warnings=True)
-    #     self.assertEqual(len(validation_issues), 1)
-    #
-    # def test_expand_column_issues(self):
-    #     schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                '../data/validator_tests/bids_schema.mediawiki')
-    #     events_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                '../data/validator_tests/bids_events_bad_category_key.tsv')
-    #
-    #     hed_schema = schema.load_schema(schema_path)
-    #     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-    #                                              "../data/validator_tests/bids_events.json")
-    #     validator = HedValidator(hed_schema=hed_schema)
-    #     sidecar = Sidecar(json_path)
-    #     issues = sidecar.validate_entries(validator)
-    #     self.assertEqual(len(issues), 0)
-    #     input_file = TabularInput(events_path, sidecars=sidecar)
-    #
-    #     validation_issues = input_file.validate_sidecar(validator)
-    #     self.assertEqual(len(validation_issues), 0)
-    #     validation_issues = input_file.validate_file(validator, check_for_warnings=True)
-    #     self.assertEqual(len(validation_issues), 1)
-
 
 class TestInsertColumns(unittest.TestCase):
 
@@ -111,7 +71,7 @@ class TestInsertColumns(unittest.TestCase):
         expected_df = pd.DataFrame({
             "column1": ["Item, Event, Action"]
         })
-        result = BaseInput._handle_curly_braces(df)
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
         pd.testing.assert_frame_equal(result, expected_df)
 
     def test_insert_columns_multiple_rows(self):
@@ -122,7 +82,7 @@ class TestInsertColumns(unittest.TestCase):
         expected_df = pd.DataFrame({
             "column1": ["Item, Event, Action", "Event, Action"]
         })
-        result = BaseInput._handle_curly_braces(df)
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
         pd.testing.assert_frame_equal(result, expected_df)
 
     def test_insert_columns_multiple_columns(self):
@@ -134,7 +94,7 @@ class TestInsertColumns(unittest.TestCase):
         expected_df = pd.DataFrame({
             "column1": ["Item, Event, Subject, Action"]
         })
-        result = BaseInput._handle_curly_braces(df)
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3"], column_names=df.columns)
         pd.testing.assert_frame_equal(result, expected_df)
 
     def test_insert_columns_four_columns(self):
@@ -148,7 +108,96 @@ class TestInsertColumns(unittest.TestCase):
             "column1": ["Item, Event, Subject, Action"],
             "column4": ["Data"]
         })
-        result = BaseInput._handle_curly_braces(df)
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["Item"],
+            "column3": ["Subject"],
+            "column4": ["Data"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["(Item, (Subject, Data)), Event, Action"]
+        })
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["Data"],
+            "column3": ["n/a"],
+            "column4": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["(Data), Event, Action"]
+        })
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_na_values2(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["n/a"],
+            "column4": ["Data"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["((Data)), Event, Action"]
+        })
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_mixed_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["Subject"],
+            "column4": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["((Subject)), Event, Action"]
+        })
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_all_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["n/a"],
+            "column4": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Event, Action"]
+        })
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_parentheses(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}), Event, Action"],
+            "column2": ["Item"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["(Item), Event, Action"]
+        })
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_parentheses_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Event, Action"],
+            "column3": ["n/a"]
+        })
+        result = BaseInput._handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
         pd.testing.assert_frame_equal(result, expected_df)
 
 
@@ -209,43 +258,3 @@ class TestCombineDataframe(unittest.TestCase):
         expected = pd.Series(['apple, guitar', 'elephant, harmonica', 'cherry, fox', '', ''])
         self.assertTrue(result.equals(expected))
 
-
-class TestColumnRefs(unittest.TestCase):
-    def test_simple_column_refs(self):
-        data1 = {
-            'A': ['{col1}, {col2}', 'tag1, tag2'],
-            'B': ['tag3, tag4', '{col3}'],
-        }
-        df1 = pd.DataFrame(data1)
-        result1 = BaseInput._find_column_refs(df1, df1.columns)
-        expected1 = ['col1', 'col2', 'col3']
-        self.assertEqual(result1, expected1)
-
-    def test_mixed_cases_and_patterns(self):
-        data2 = {
-            'A': ['{Col1}, {col2}', 'tag1, {Col3}', 'tag3, {COL4}', '{col5}, {col6}'],
-        }
-        df2 = pd.DataFrame(data2)
-        result2 = BaseInput._find_column_refs(df2, df2.columns)
-        expected2 = ['Col1', 'col2', 'Col3', 'COL4', 'col5', 'col6']
-        self.assertEqual(result2, expected2)
-
-    def test_no_column_references(self):
-        data3 = {
-            'A': ['tag1, tag2', 'tag3, tag4'],
-            'B': ['tag5, tag6', 'tag7, tag8'],
-        }
-        df3 = pd.DataFrame(data3)
-        result3 = BaseInput._find_column_refs(df3, df3.columns)
-        expected3 = []
-        self.assertEqual(result3, expected3)
-
-    def test_incomplete_curly_braces(self):
-        data4 = {
-            'A': ['{col1, {col2}', 'tag1, {Col3'],
-            'B': ['tag3, {COL4', '{col5, col6}'],
-        }
-        df4 = pd.DataFrame(data4)
-        result4 = BaseInput._find_column_refs(df4, df4.columns)
-        expected4 = ['col2']
-        self.assertEqual(result4, expected4)
