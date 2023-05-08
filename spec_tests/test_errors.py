@@ -53,6 +53,8 @@ skip_tests = {
     "VERSION_DEPRECATED": "Not applicable",
     "onset-offset-error-duplicated-onset-or-offset": "TBD how we implement this",
     "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
+    "inset-group-has-extras": "Inset tags not in yet",
+    "inset-outside-its-event": "Inset tags not in yet"
 }
 
 
@@ -100,11 +102,6 @@ class MyTestCase(unittest.TestCase):
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
 
-            if error_code != "SIDECAR_BRACES_INVALID":
-                continue
-            #
-            # if name != "sidecar-braces-nested-or-mismatched":
-            #     continue
             description = info['description']
             schema = info['schema']
             check_for_warnings = info.get("warning", False)
