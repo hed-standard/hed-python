@@ -126,17 +126,14 @@ def expand_defs(df, hed_schema, def_dict, columns=None):
 
 
 def _convert_to_form(hed_string, hed_schema, tag_form):
-    from hed import HedString
     return str(HedString(hed_string, hed_schema).get_as_form(tag_form))
 
 
 def _shrink_defs(hed_string, hed_schema):
-    from hed import HedString
     return str(HedString(hed_string, hed_schema).shrink_defs())
 
 
 def _expand_defs(hed_string, hed_schema, def_dict):
-    from hed import HedString
     return str(HedString(hed_string, hed_schema, def_dict).expand_defs())
 
 

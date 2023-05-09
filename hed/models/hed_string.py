@@ -73,16 +73,10 @@ class HedString(HedGroup):
         """ Remove definition tags and groups from this string.
 
             This does not validate definitions and will blindly removing invalid ones as well.
-
-        Returns:
-            list: An empty list as there are no possible issues, this list is always blank.
-
         """
         definition_groups = self.find_top_level_tags({DefTagNames.DEFINITION_KEY}, include_groups=1)
         if definition_groups:
             self.remove(definition_groups)
-
-        return []
 
     def shrink_defs(self):
         """ Replace def-expand tags with def tags
@@ -114,7 +108,7 @@ class HedString(HedGroup):
         replacements = []
         for tag in def_tags:
             if tag.expandable and not tag.expanded:
-                replacements.append((tag, tag._expandable))
+                replacements.append((tag, tag.expandable))
 
         for tag, group in replacements:
             tag_parent = tag._parent
@@ -333,7 +327,7 @@ class HedString(HedGroup):
         from hed.validator import HedValidator
 
         validator = HedValidator(hed_schema)
-        return validator.validate(self, allow_placeholders=allow_placeholders)
+        return validator.validate(self, allow_placeholders=allow_placeholders, error_handler=error_handler)
 
     def find_top_level_tags(self, anchor_tags, include_groups=2):
         """ Find top level groups with an anchor tag.
@@ -363,3 +357,13 @@ class HedString(HedGroup):
         if include_groups == 0 or include_groups == 1:
             return [tag[include_groups] for tag in top_level_tags]
         return top_level_tags
+
+    def remove_refs(self):
+        """ This removes any refs(tags contained entirely inside curly braces) from the string.
+
+            This does NOT validate the contents of the curly braces.  This is only relevant when directly
+            editing sidecar strings.  Tools will naturally ignore these.
+        """
+        ref_tags = [tag for tag in self.get_all_tags() if tag.is_column_ref()]
+        if ref_tags:
+            self.remove(ref_tags)

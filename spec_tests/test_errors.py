@@ -45,15 +45,16 @@ known_errors = [
     "UNITS_MISSING",
     "VALUE_INVALID",
 
-
-    "SCHEMA_LIBRARY_INVALID"
+    "SIDECAR_BRACES_INVALID",
+    "SCHEMA_LIBRARY_INVALID",
 ]
 
 skip_tests = {
     "VERSION_DEPRECATED": "Not applicable",
     "onset-offset-error-duplicated-onset-or-offset": "TBD how we implement this",
     "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
-    "SIDECAR_BRACES_INVALID": "Not in yet as curly braces"
+    "inset-group-has-extras": "Inset tags not in yet",
+    "inset-outside-its-event": "Inset tags not in yet"
 }
 
 
@@ -220,7 +221,6 @@ class MyTestCase(unittest.TestCase):
     def _run_single_schema_test(self, info, error_code, description,name, error_handler):
         for result, tests in info.items():
             for test in tests:
-                issues = []
                 schema_string = "\n".join(test)
                 try:
                     loaded_schema = from_string(schema_string, file_type=".mediawiki")

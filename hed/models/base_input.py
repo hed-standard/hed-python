@@ -251,9 +251,9 @@ class BaseInput:
             Empty if no column names.
 
         Returns:
-            columns(dict): The column number:name pairs
+            columns(list): the column names
         """
-        columns = {}
+        columns = []
         if self._dataframe is not None and self._has_column_names:
             columns = list(self._dataframe.columns)
         return columns
@@ -354,12 +354,12 @@ class BaseInput:
                 return True
         return False
 
-    def assemble(self, mapper=None, skip_square_brackets=False):
+    def assemble(self, mapper=None, skip_curly_braces=False):
         """ Assembles the hed strings
 
         Parameters:
             mapper(ColumnMapper or None): Generally pass none here unless you want special behavior.
-            skip_square_brackets (bool): If True, don't plug in square bracket values into columns.
+            skip_curly_braces (bool): If True, don't plug in curly brace values into columns.
         Returns:
             Dataframe: the assembled dataframe
         """
@@ -367,11 +367,12 @@ class BaseInput:
             mapper = self._mapper
 
         all_columns = self._handle_transforms(mapper)
-        if skip_square_brackets:
+        if skip_curly_braces:
             return all_columns
         transformers, _ = mapper.get_transformers()
-
-        return self._handle_square_brackets(all_columns, list(transformers))
+        refs = self.get_column_refs()
+        column_names = list(transformers)
+        return self._handle_curly_braces_refs(all_columns, refs, column_names)
 
     def _handle_transforms(self, mapper):
         transformers, need_categorical = mapper.get_transformers()
@@ -390,45 +391,67 @@ class BaseInput:
         return all_columns
 
     @staticmethod
-    def _find_column_refs(df, column_names):
-        found_column_references = []
-        for column_name in column_names:
-            df_temp = df[column_name].str.findall("\[([a-z_\-0-9]+)\]", re.IGNORECASE)
-            u_vals = pd.Series([j for i in df_temp if isinstance(i, list) for j in i], dtype=str)
-            u_vals = u_vals.unique()
-            for val in u_vals:
-                if val not in found_column_references:
-                    found_column_references.append(val)
+    def _replace_ref(text, newvalue, column_ref):
+        """ Replace column ref in x with y.  If it's n/a, delete extra commas/parentheses.
 
-        return found_column_references
+        Note: This function could easily be updated to handle non-curly brace values, but it's faster this way.
+        Parameters:
+            text (str): The input string containing the ref enclosed in curly braces.
+            newvalue (str): The replacement value for the ref.
+            column_ref (str): The ref to be replaced, without curly braces
+
+        Returns:
+            str: The modified string with the ref replaced or removed.
+        """
+        # If it's not n/a, we can just replace directly.
+        if newvalue != "n/a":
+            return text.replace(f"{{{column_ref}}}", newvalue)
+
+        def _remover(match):
+            p1 = match.group("p1").count("(")
+            p2 = match.group("p2").count(")")
+            if p1 > p2:  # We have more starting parens than ending.  Make sure we don't remove comma before
+                output = match.group("c1") + "(" * (p1 - p2)
+            elif p2 > p1:  # We have more ending parens.  Make sure we don't remove comma after
+                output = ")" * (p2 - p1) + match.group("c2")
+            else:
+                c1 = match.group("c1")
+                c2 = match.group("c2")
+                if c1:
+                    c1 = ""
+                elif c2:
+                    c2 = ""
+                output = c1 + c2
+
+            return output
+
+        # this finds all surrounding commas and parentheses to a reference.
+        # c1/c2 contain the comma(and possibly spaces) separating this ref from other tags
+        # p1/p2 contain the parentheses directly surrounding the tag
+        # All four groups can have spaces.
+        pattern = r'(?P<c1>[\s,]*)(?P<p1>[(\s]*)\{' + column_ref + r'\}(?P<p2>[\s)]*)(?P<c2>[\s,]*)'
+        return re.sub(pattern, _remover, text)
 
     @staticmethod
-    def _handle_square_brackets(df, known_columns=None):
+    def _handle_curly_braces_refs(df, refs, column_names):
         """
-            Plug in square brackets with other columns
-
-            If known columns is passed, only use those columns to find or replace references.
+            Plug in curly braces with other columns
         """
-        if known_columns is not None:
-            column_names = list(known_columns)
-        else:
-            column_names = list(df.columns)
-        possible_column_references = [f"{column_name}" for column_name in column_names if
-                                      isinstance(column_name, str) and column_name.lower() != "hed"]
-        found_column_references = BaseInput._find_column_refs(df, column_names)
+        # Filter out columns and refs that don't exist.
+        refs = [ref for ref in refs if ref in column_names]
+        remaining_columns = [column for column in column_names if column not in refs]
 
-        valid_replacements = [col for col in found_column_references if col in possible_column_references]
-
-        # todo: break this into a sub function(probably)
-        for column_name in valid_replacements:
-            column_names.remove(column_name)
-        saved_columns = df[valid_replacements]
-        for column_name in column_names:
-            for replacing_name in valid_replacements:
-                column_name_brackets = f"[{replacing_name}]"
-                df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
+        # Replace references in the columns we are saving out.
+        saved_columns = df[refs]
+        for column_name in remaining_columns:
+            for replacing_name in refs:
+                # If the data has no n/a values, this version is MUCH faster.
+                # column_name_brackets = f"{{{replacing_name}}}"
+                # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
+                #                             in zip(df[column_name], saved_columns[replacing_name]))
+                df[column_name] = pd.Series(BaseInput._replace_ref(x, y, replacing_name) for x, y
                                             in zip(df[column_name], saved_columns[replacing_name]))
-        df = df[column_names]
+        df = df[remaining_columns]
 
         return df
 
@@ -463,3 +486,13 @@ class BaseInput:
         """
         from hed.models.definition_dict import DefinitionDict
         return DefinitionDict(extra_def_dicts, hed_schema)
+
+    def get_column_refs(self):
+        """ Returns a list of column refs for this file.
+
+            Default implementation returns none.
+
+        Returns:
+            column_refs(list): A list of unique column refs found
+        """
+        return []

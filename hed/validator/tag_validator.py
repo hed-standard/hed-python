@@ -16,6 +16,7 @@ class TagValidator:
 
     CAMEL_CASE_EXPRESSION = r'([A-Z]+\s*[a-z-]*)+'
     INVALID_STRING_CHARS = '[]{}~'
+    INVALID_STRING_CHARS_PLACEHOLDERS = '[]~'
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
     COMMA = ','
@@ -43,11 +44,12 @@ class TagValidator:
     # ==========================================================================
     # Top level validator functions
     # =========================================================================+
-    def run_hed_string_validators(self, hed_string_obj):
+    def run_hed_string_validators(self, hed_string_obj, allow_placeholders=False):
         """Basic high level checks of the hed string
 
         Parameters:
             hed_string_obj (HedString): A HED string.
+            allow_placeholders: Allow placeholder and curly brace characters
 
         Returns:
             list: The validation issues associated with a HED string. Each issue is a dictionary.
@@ -57,7 +59,8 @@ class TagValidator:
 
          """
         validation_issues = []
-        validation_issues += self.check_invalid_character_issues(hed_string_obj.get_original_hed_string())
+        validation_issues += self.check_invalid_character_issues(hed_string_obj.get_original_hed_string(),
+                                                                 allow_placeholders)
         validation_issues += self.check_count_tag_group_parentheses(hed_string_obj.get_original_hed_string())
         validation_issues += self.check_delimiter_issues_in_hed_string(hed_string_obj.get_original_hed_string())
         for tag in hed_string_obj.get_all_tags():
@@ -136,21 +139,26 @@ class TagValidator:
     # ==========================================================================
     # Mostly internal functions to check individual types of errors
     # =========================================================================+
-    def check_invalid_character_issues(self, hed_string):
+    def check_invalid_character_issues(self, hed_string, allow_placeholders):
         """ Report invalid characters.
 
         Parameters:
             hed_string (str): A hed string.
+            allow_placeholders: Allow placeholder and curly brace characters
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
 
         Notes:
-            - Invalid tag characters are defined by TagValidator.INVALID_STRING_CHARS.
+            - Invalid tag characters are defined by TagValidator.INVALID_STRING_CHARS or
+                                                    TagValidator.INVALID_STRING_CHARS_PLACEHOLDERS
         """
         validation_issues = []
+        invalid_dict = TagValidator.INVALID_STRING_CHARS
+        if allow_placeholders:
+            invalid_dict = TagValidator.INVALID_STRING_CHARS_PLACEHOLDERS
         for index, character in enumerate(hed_string):
-            if character in TagValidator.INVALID_STRING_CHARS or ord(character) > 127:
+            if character in invalid_dict or ord(character) > 127:
                 validation_issues += self._report_invalid_character_error(hed_string, index)
 
         return validation_issues
@@ -283,12 +291,12 @@ class TagValidator:
                                                            index_in_tag_end=None)
         return validation_issues
 
-    def check_tag_unit_class_units_are_valid(self, original_tag, report_tag_as=None, error_code=None):
+    def check_tag_unit_class_units_are_valid(self, original_tag, report_as=None, error_code=None):
         """ Report incorrect unit class or units.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
-            report_tag_as (HedTag): Report errors as coming from this tag, rather than original_tag.
+            report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
             error_code (str): Override error codes to this
         Returns:
             list: Validation issues. Each issue is a dictionary.
@@ -306,24 +314,23 @@ class TagValidator:
                 if original_tag.is_takes_value_tag() and\
                         not self._validate_value_class_portion(original_tag, stripped_value):
                     validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
-                                                                   report_tag_as if report_tag_as else original_tag)
+                                                                   report_as if report_as else original_tag)
                     if error_code:
                         had_error = True
                         validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
-                                                                       report_tag_as if report_tag_as else original_tag,
+                                                                       report_as if report_as else original_tag,
                                                                        actual_error=error_code)
-
 
                 if bad_units:
                     tag_unit_class_units = original_tag.get_tag_unit_class_units()
                     if tag_unit_class_units:
                         validation_issues += ErrorHandler.format_error(ValidationErrors.UNITS_INVALID,
-                                                                       tag=report_tag_as if report_tag_as else original_tag,
+                                                                       tag=report_as if report_as else original_tag,
                                                                        units=tag_unit_class_units)
                 else:
                     default_unit = original_tag.get_unit_class_default_unit()
                     validation_issues += ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
-                                                                   tag=report_tag_as if report_tag_as else original_tag,
+                                                                   tag=report_as if report_as else original_tag,
                                                                    default_unit=default_unit)
 
                 # We don't want to give this overall error twice
@@ -334,12 +341,12 @@ class TagValidator:
 
         return validation_issues
 
-    def check_tag_value_class_valid(self, original_tag, report_tag_as=None, error_code=None):
+    def check_tag_value_class_valid(self, original_tag, report_as=None, error_code=None):
         """ Report an invalid value portion.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
-            report_tag_as (HedTag): Report errors as coming from this tag, rather than original_tag.
+            report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
             error_code (str): Override error codes to this
         Returns:
             list: Validation issues.
@@ -347,7 +354,7 @@ class TagValidator:
         validation_issues = []
         if not self._validate_value_class_portion(original_tag, original_tag.extension):
             validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
-                                                           report_tag_as if report_tag_as else original_tag,
+                                                           report_as if report_as else original_tag,
                                                            actual_error=error_code)
 
         return validation_issues

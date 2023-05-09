@@ -85,12 +85,12 @@ class ColumnMapper:
             if column.column_type == ColumnType.Ignore:
                 continue
             elif column.column_type == ColumnType.Value:
-                value_str = column._hed_dict
+                value_str = column.hed_dict
                 from functools import partial
                 final_transformers[assign_to_column] = partial(self._value_handler, value_str)
             elif column.column_type == ColumnType.Categorical:
                 need_categorical.append(column.column_name)
-                category_values = column._hed_dict
+                category_values = column.hed_dict
                 from functools import partial
                 final_transformers[assign_to_column] = partial(self._category_handler, category_values)
             else:
@@ -243,7 +243,7 @@ class ColumnMapper:
                     prefix = prefix + "#"
                 else:
                     prefix = prefix + "/#"
-                new_def = ColumnMetadata(ColumnType.Value, col, hed_dict=prefix)
+                new_def = ColumnMetadata(ColumnType.Value, col, source=prefix)
                 self._add_column_data(new_def)
 
     def _add_column_data(self, new_column_entry):

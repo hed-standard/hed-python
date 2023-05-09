@@ -1,4 +1,6 @@
 import json
+import re
+
 from hed.models.column_metadata import ColumnMetadata
 from hed.errors.error_types import ErrorContext
 from hed.errors import ErrorHandler
@@ -8,7 +10,6 @@ from hed.models.column_metadata import ColumnType
 from hed.models.definition_dict import DefinitionDict
 
 
-# todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
 class Sidecar:
     """ Contents of a JSON file or merged file.
 
@@ -35,6 +36,24 @@ class Sidecar:
         """
         return iter(self.column_data)
 
+    def __getitem__(self, column_name):
+        if column_name not in self.loaded_dict:
+            return None
+        return ColumnMetadata(name=column_name)
+
+    @property
+    def all_hed_columns(self):
+        """ Returns all columns that are HED compatible
+
+            returns:
+                column_refs(list): A list of all valid hed columns by name
+        """
+        possible_column_references = [column.column_name for column in self if column.column_type != ColumnType.Ignore]
+        if "HED" not in possible_column_references:
+            possible_column_references.append("HED")
+
+        return possible_column_references
+
     @property
     def def_dict(self):
         """This is the definitions from this sidecar.
@@ -53,20 +72,7 @@ class Sidecar:
         Returns:
             list(ColumnMetadata): the list of column metadata defined by this sidecar
         """
-        for col_name, col_dict in self.loaded_dict.items():
-            yield self._generate_single_column(col_name, col_dict)
-
-    def set_hed_string(self, new_hed_string, position):
-        """ Set a provided column/category key/etc.
-
-        Parameters:
-            new_hed_string (str or HedString): The new hed_string to replace the value at position.
-            position (tuple):   The (HedString, str, list) tuple returned from hed_string_iter.
-
-        """
-        column_name, position = position
-        hed_dict = self.loaded_dict[column_name]
-        hed_dict["HED"] = self._set_hed_string_low(new_hed_string, hed_dict["HED"], position)
+        return [ColumnMetadata(name=col_name, source=self.loaded_dict) for col_name in self.loaded_dict]
 
     def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
         """ Returns the definition dict for this sidecar.
@@ -186,56 +192,6 @@ class Sidecar:
         except json.decoder.JSONDecodeError as e:
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name)
 
-    def _generate_single_column(self, column_name, dict_for_entry, column_type=None):
-        """ Create a single column metadata entry and add to this sidecar.
-
-        Parameters:
-            column_name (str or int): The column name or number
-            dict_for_entry (dict): The loaded dictionary for a given column entry (needs the "HED" key if nothing else).
-            column_type (ColumnType): Optional indicator of how to treat the column.
-                This overrides auto-detection from the dict_for_entry.
-
-        """
-        if column_type is None:
-            column_type = self._detect_column_type(dict_for_entry)
-        if dict_for_entry:
-            hed_dict = dict_for_entry.get("HED")
-        else:
-            hed_dict = None
-        column_entry = ColumnMetadata(column_type, column_name, hed_dict)
-        return column_entry
-
-    @staticmethod
-    def _detect_column_type(dict_for_entry):
-        """ Determine the ColumnType of a given json entry.
-
-        Parameters:
-            dict_for_entry (dict): The loaded json entry a specific column.
-                Generally has a "HED" entry among other optional ones.
-
-        Returns:
-            ColumnType: The determined type of given column.  Returns None if unknown.
-
-        """
-        if not dict_for_entry or not isinstance(dict_for_entry, dict):
-            return ColumnType.Ignore
-
-        minimum_required_keys = ("HED",)
-        if not set(minimum_required_keys).issubset(dict_for_entry.keys()):
-            return ColumnType.Ignore
-
-        hed_entry = dict_for_entry["HED"]
-        if isinstance(hed_entry, dict):
-            return ColumnType.Categorical
-
-        if not isinstance(hed_entry, str):
-            return None
-
-        if "#" not in dict_for_entry["HED"]:
-            return None
-
-        return ColumnType.Value
-
     def extract_definitions(self, hed_schema=None, error_handler=None):
         """ Gather and validate definitions in metadata.
 
@@ -253,106 +209,40 @@ class Sidecar:
 
         self._extract_definition_issues = []
         if hed_schema:
-            for hed_string, column_data, _ in self.hed_string_iter(error_handler):
-                hed_string_obj = HedString(hed_string, hed_schema)
-                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
-                self._extract_definition_issues += def_dict.check_for_definitions(hed_string_obj, error_handler)
+            for column_data in self:
+                error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_data.column_name)
+                hed_strings = column_data.get_hed_strings()
+                for key_name, hed_string in hed_strings.items():
+                    hed_string_obj = HedString(hed_string, hed_schema)
+                    if len(hed_strings) > 1:
+                        error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
+                    error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
+                    self._extract_definition_issues += def_dict.check_for_definitions(hed_string_obj, error_handler)
+                    error_handler.pop_error_context()
+                    if len(hed_strings) > 1:
+                        error_handler.pop_error_context()
+
                 error_handler.pop_error_context()
 
         return def_dict
 
-    def hed_string_iter(self, error_handler=None):
-        """ Gather and validate definitions in metadata.
+    def get_column_refs(self):
+        """ Returns a list of column refs found in this sidecar.
 
-        Parameters:
-            error_handler (ErrorHandler): The error handler to use for context, uses a default one if None.
-
-        Yields:
-            str: The hed string at a given column and key position.
-            column_data: the column data for the given string.
-            position: blackbox(pass back to set this string to a new value)
-
-        """
-        if error_handler is None:
-            error_handler = ErrorHandler()
-
-        for column_data in self.column_data:
-            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_data.column_name)
-            hed_dict = column_data.hed_dict
-            for (hed_string, position) in self._hed_string_iter(hed_dict, error_handler):
-                yield hed_string, column_data, position
-            error_handler.pop_error_context()
-
-    @staticmethod
-    def _hed_string_iter(hed_strings, error_handler):
-        """ Iterate over the given dict of strings
-
-        Parameters:
-            hed_strings(dict or str): A hed_string or dict of hed strings
-            error_handler (ErrorHandler): The error handler to use for context, uses a default one if none.
-
-        Yields:
-            tuple:
-                - str: The hed string at a given column and key position.
-                - str: Indication of the where hed string was loaded from, so it can be later set by the user.
-
-        """
-        for hed_string, key_name in Sidecar._hed_iter_low(hed_strings):
-            if key_name:
-                error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
-            yield hed_string, key_name
-            if key_name:
-                error_handler.pop_error_context()
-
-    @staticmethod
-    def _hed_iter_low(hed_strings):
-        """ Iterate over the hed string entries.
-
-            Used by hed_string_iter
-
-        Parameters:
-            hed_strings(dict or str): A hed_string or dict of hed strings
-
-        Yields:
-            tuple:
-                - str: Individual hed strings for different entries.
-                - str: The position to pass back to set this string.
-
-        """
-        if isinstance(hed_strings, dict):
-            for key, hed_string in hed_strings.items():
-                if not isinstance(hed_string, str):
-                    continue
-                yield hed_string, key
-        elif isinstance(hed_strings, str):
-            yield hed_strings, None
-
-    @staticmethod
-    def _set_hed_string_low(new_hed_string, hed_strings, position=None):
-        """ Set a hed string for a category key/etc.
-
-        Parameters:
-            new_hed_string (str or HedString): The new hed_string to replace the value at position.
-            hed_strings(dict or str or HedString): The hed strings we want to update
-            position (str, optional): This should only be a value returned from hed_string_iter.
+            This does not validate
 
         Returns:
-            updated_string (str or dict): The newly updated string/dict.
-        Raises:
-            TypeError: If the mapping cannot occur.
-
+            column_refs(list): A list of unique column refs found
         """
-        if isinstance(hed_strings, dict):
-            if position is None:
-                raise TypeError("Error: Trying to set a category HED string with no category")
-            if position not in hed_strings:
-                raise TypeError("Error: Not allowed to add new categories to a column")
-            hed_strings[position] = str(new_hed_string)
-        elif isinstance(hed_strings, (str, HedString)):
-            if position is not None:
-                raise TypeError("Error: Trying to set a value HED string with a category")
-            hed_strings = str(new_hed_string)
-        else:
-            raise TypeError("Error: Trying to set a HED string on a column_type that doesn't support it.")
 
-        return hed_strings
+        found_vals = set()
+        for column_data in self.column_data:
+            if column_data.column_type == ColumnType.Ignore:
+                continue
+            hed_strings = column_data.get_hed_strings()
+            matches = hed_strings.str.findall(r"\{([a-z_\-0-9]+)\}", re.IGNORECASE)
+            u_vals = [match for sublist in matches for match in sublist]
+
+            found_vals.update(u_vals)
+
+        return list(found_vals)

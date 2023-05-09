@@ -80,11 +80,11 @@ class DefValidator(DefinitionDict):
                         error_code = ValidationErrors.DEF_EXPAND_INVALID
                     if placeholder_tag.is_unit_class_tag():
                         def_issues += tag_validator.check_tag_unit_class_units_are_valid(placeholder_tag,
-                                                                                         report_tag_as=def_tag,
+                                                                                         report_as=def_tag,
                                                                                          error_code=error_code)
                     elif placeholder_tag.is_value_class_tag():
                         def_issues += tag_validator.check_tag_value_class_valid(placeholder_tag,
-                                                                                report_tag_as=def_tag,
+                                                                                report_as=def_tag,
                                                                                 error_code=error_code)
 
             elif def_entry.takes_value:

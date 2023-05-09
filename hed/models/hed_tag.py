@@ -237,7 +237,6 @@ class HedTag:
     def extension(self, x):
         self._extension_value = f"/{x}"
 
-
     @property
     def long_tag(self):
         """ Long form including value or extension.
@@ -297,6 +296,16 @@ class HedTag:
             HedGroup or HedTag or None: Returns the expanded form of this tag
         """
         return self._expandable
+
+    def is_column_ref(self):
+        """ Returns if this tag is a column reference from a sidecar.
+
+            You should only see these if you are directly accessing sidecar strings, tools should remove them otherwise.
+
+        Returns:
+            bool: Returns True if this is a column ref
+        """
+        return self.org_tag.startswith('{') and self.org_tag.endswith('}')
 
     def __str__(self):
         """ Convert this HedTag to a string.

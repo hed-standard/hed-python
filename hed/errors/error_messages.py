@@ -401,23 +401,23 @@ def onset_wrong_placeholder(tag, has_placeholder):
     return f"Onset/offset def tag {tag} should not have a placeholder, but has one."
 
 
-@hed_error(ColumnErrors.INVALID_COLUMN_REF)
-def invalid_column_ref(bad_refs):
-    return f"Bad column references found(columns do not exist): {bad_refs}"
+@hed_error(ColumnErrors.INVALID_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
+def invalid_column_ref(bad_ref):
+    return f"The column '{bad_ref}' is unknown.'"
 
 
-@hed_error(ColumnErrors.SELF_COLUMN_REF)
+@hed_error(ColumnErrors.SELF_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def self_column_ref(self_ref):
     return f"Column references itself: {self_ref}"
 
 
-@hed_error(ColumnErrors.NESTED_COLUMN_REF)
+@hed_error(ColumnErrors.NESTED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def nested_column_ref(column_name, ref_column):
     return f"Column {column_name} has a nested reference to {ref_column}.  " \
            f"Column reference columns cannot contain other column references."
 
 
-@hed_error(ColumnErrors.MALFORMED_COLUMN_REF)
+@hed_error(ColumnErrors.MALFORMED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def nested_column_ref(column_name, index, symbol):
     return f"Column {column_name} has a malformed column reference.  Improper symbol {symbol} found at index {index}."
 

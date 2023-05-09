@@ -61,7 +61,7 @@ class HedValidator:
 
     def run_basic_checks(self, hed_string, allow_placeholders):
         issues = []
-        issues += self._tag_validator.run_hed_string_validators(hed_string)
+        issues += self._tag_validator.run_hed_string_validators(hed_string, allow_placeholders)
         if check_for_any_errors(issues):
             return issues
         if hed_string == "n/a" or not self._hed_schema:
@@ -161,7 +161,8 @@ class HedValidator:
          """
         from hed.models.definition_dict import DefTagNames
         validation_issues = []
-        definition_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1)
+        definition_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY},
+                                                               include_groups=1)
         all_definition_groups = [group for sub_group in definition_groups for group in sub_group.get_all_groups()]
         for group in hed_string_obj.get_all_groups():
             is_definition = group in all_definition_groups
