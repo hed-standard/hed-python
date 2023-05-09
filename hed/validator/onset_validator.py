@@ -89,7 +89,7 @@ class OnsetValidator:
                 # onset can never fail as it implies an offset
                 self._onsets[full_def_name.lower()] = full_def_name
             else:
-                is_offset = onset_offset_tag.short_base_tag == DefTagNames.OFFSET_KEY
+                is_offset = onset_offset_tag.short_base_tag == DefTagNames.OFFSET_ORG_KEY
                 if full_def_name.lower() not in self._onsets:
                     if is_offset:
                         return ErrorHandler.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=def_tag)
