@@ -78,6 +78,8 @@ class ColumnMetadata:
         if isinstance(new_strings, pd.Series):
             if self.column_type == ColumnType.Categorical:
                 new_strings = new_strings.to_dict()
+            elif new_strings.empty:
+                return False
             else:
                 new_strings = new_strings.iloc[0]
 
