@@ -360,41 +360,46 @@ def def_error_bad_location(tag):
     return f"Tag '{str(tag)}' is found in a location it is not allowed to be."
 
 
-@hed_tag_error(OnsetErrors.ONSET_DEF_UNMATCHED, actual_code=ValidationErrors.ONSET_OFFSET_ERROR)
+@hed_tag_error(OnsetErrors.ONSET_DEF_UNMATCHED, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_error_def_unmatched(tag):
     return f"The def tag in an onset/offset tag is unmatched.  Def tag: '{tag}'"
 
 
-@hed_tag_error(OnsetErrors.OFFSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_ERROR)
+@hed_tag_error(OnsetErrors.OFFSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_error_offset_before_onset(tag):
     return f"Offset tag '{tag}' does not have a matching onset."
 
 
-@hed_tag_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, actual_code=ValidationErrors.ONSET_OFFSET_ERROR)
+@hed_tag_error(OnsetErrors.INSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+def onset_error_inset_before_onset(tag):
+    return f"Inset tag '{tag}' does not have a matching onset."
+
+
+@hed_tag_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_no_def_found(tag):
     return f"'{tag}' tag has no def or def-expand tag in string."
 
 
-@hed_tag_error(OnsetErrors.ONSET_TOO_MANY_DEFS, actual_code=ValidationErrors.ONSET_OFFSET_ERROR)
+@hed_tag_error(OnsetErrors.ONSET_TOO_MANY_DEFS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_too_many_defs(tag, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
     return f"Too many def tags found in onset for {tag}.  Expected 1, also found: {tag_list_strings}"
 
 
-@hed_tag_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.ONSET_OFFSET_ERROR)
+@hed_tag_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_too_many_groups(tag, tag_list):
     tag_list_strings = [str(a_tag) for a_tag in tag_list]
     return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1. " +\
            f"Found {len(tag_list_strings)}: {tag_list_strings}"
 
 
-@hed_tag_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.ONSET_OFFSET_ERROR)
+@hed_tag_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_wrong_type_tag(tag, def_tag):
     return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be " + \
            f"in a single group together."
 
 
-@hed_tag_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, actual_code=ValidationErrors.ONSET_OFFSET_ERROR)
+@hed_tag_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_wrong_placeholder(tag, has_placeholder):
     if has_placeholder:
         return f"Onset/offset def tag {tag} expects a placeholder value, but does not have one."

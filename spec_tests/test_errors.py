@@ -24,7 +24,7 @@ known_errors = [
     "DEF_INVALID",
     "DEFINITION_INVALID",
     "NODE_NAME_EMPTY",
-    "ONSET_OFFSET_ERROR",
+    "ONSET_OFFSET_INSET_ERROR",
     "PARENTHESES_MISMATCH",
     "PLACEHOLDER_INVALID",
     "REQUIRED_TAG_MISSING",
@@ -53,8 +53,6 @@ skip_tests = {
     "VERSION_DEPRECATED": "Not applicable",
     "onset-offset-error-duplicated-onset-or-offset": "TBD how we implement this",
     "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
-    "inset-group-has-extras": "Inset tags not in yet",
-    "inset-outside-its-event": "Inset tags not in yet"
 }
 
 
