@@ -263,7 +263,7 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset, Offset)",
         ]
         test_issues = [
-            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.ONSET_OFFSET_ERROR)
+            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
             + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1, multiple_tags=["Onset"])
             + self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=2)

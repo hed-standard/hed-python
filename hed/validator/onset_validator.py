@@ -66,7 +66,7 @@ class OnsetValidator:
         return onset_issues
 
     def _find_onset_tags(self, hed_string_obj):
-        return hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY})
+        return hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.TEMPORAL_KEYS)
 
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
         is_onset = onset_offset_tag.short_base_tag == DefTagNames.ONSET_ORG_KEY
@@ -89,9 +89,13 @@ class OnsetValidator:
                 # onset can never fail as it implies an offset
                 self._onsets[full_def_name.lower()] = full_def_name
             else:
+                is_offset = onset_offset_tag.short_base_tag == DefTagNames.OFFSET_ORG_KEY
                 if full_def_name.lower() not in self._onsets:
-                    return ErrorHandler.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=def_tag)
-                else:
+                    if is_offset:
+                        return ErrorHandler.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=def_tag)
+                    else:
+                        return ErrorHandler.format_error(OnsetErrors.INSET_BEFORE_ONSET, tag=def_tag)
+                elif is_offset:
                     del self._onsets[full_def_name.lower()]
 
         return []

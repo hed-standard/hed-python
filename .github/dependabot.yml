@@ -16,4 +16,3 @@ updates:
         interval: "daily"
     target-branch: "develop"
     directory: /
-    automerge: true

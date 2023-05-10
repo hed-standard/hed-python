@@ -457,7 +457,7 @@ class TagValidator:
                 if top_level_tag.short_base_tag == DefTagNames.DEFINITION_ORG_KEY:
                     actual_code = ValidationErrors.DEFINITION_INVALID
                 elif top_level_tag.short_base_tag in {DefTagNames.ONSET_ORG_KEY, DefTagNames.OFFSET_ORG_KEY}:
-                    actual_code = ValidationErrors.ONSET_OFFSET_ERROR
+                    actual_code = ValidationErrors.ONSET_OFFSET_INSET_ERROR
 
                 if actual_code:
                     validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TOP_LEVEL_TAG,
