@@ -8,7 +8,7 @@ from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_io import get_schema
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
-from hed.tools.util.io_util import generate_filename, extract_suffix_path, get_timestamp
+from hed.tools.util.io_util import clean_filename, extract_suffix_path, get_timestamp
 
 
 class Dispatcher:
@@ -66,7 +66,7 @@ class Dispatcher:
             file_base = context_item.context_filename
             if self.data_root:
                 file_base = extract_suffix_path(self.data_root, file_base)
-            file_base = generate_filename(file_base)
+            file_base = clean_filename(file_base)
             for file_format in file_formats:
                 if file_format == '.txt':
                     summary = context_item.get_text_summary(individual_summaries="consolidated")

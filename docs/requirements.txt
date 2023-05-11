@@ -7,6 +7,3 @@ portalocker>=2.4.0
 semantic_version>=2.9.0
 Sphinx>=5.2.2
 sphinx_rtd_theme>=1.0.0
-
-# This is just needed for secure_filename and should probably be removed
-Werkzeug>=2.1.2

@@ -1,8 +1,8 @@
 """Utilities for generating and handling file names."""
 
 import os
+import re
 from datetime import datetime
-from werkzeug.utils import secure_filename
 from hed.errors.exceptions import HedFileError
 
 TIME_FORMAT = '%Y_%m_%d_T_%H_%M_%S_%f'
@@ -92,39 +92,19 @@ def extract_suffix_path(path, prefix_path):
     return return_path
 
 
-def generate_filename(base_name, name_prefix=None, name_suffix=None, extension=None, append_datetime=False):
-    """ Generate a filename for the attachment.
+def clean_filename(filename):
+    """ Replaces invalid characters with under-bars
 
     Parameters:
-        base_name (str):   Name of the base, usually the name of the file that the issues were generated from.
-        name_prefix (str): Prefix prepended to the front of the base name.
-        name_suffix (str): Suffix appended to the end of the base name.
-        extension (str):   Extension to use.
-        append_datetime (bool): If True, append the current date-time to the base output filename.
+        filename (str):   source filename
 
     Returns:
-        str:  Name of the attachment other containing the issues.
-
-    Notes:
-        - The form prefix_basename_suffix + extension.
-
+        str:  The filename with anything but alphanumeric, period, hyphens, and under-bars removed.
     """
-
-    pieces = []
-    if name_prefix:
-        pieces = pieces + [name_prefix]
-    if base_name:
-        pieces.append(os.path.splitext(base_name)[0])
-    if name_suffix:
-        pieces = pieces + [name_suffix]
-    filename = "".join(pieces)
-    if append_datetime:
-        now = datetime.now()
-        filename = filename + '_' + now.strftime(TIME_FORMAT)[:-3]
-    if filename and extension:
-        filename = filename + extension
-
-    return secure_filename(filename)
+    if not filename:
+        return ""
+    out_name = re.sub(r'[^a-zA-Z0-9._-]+', '_', filename)
+    return out_name
 
 
 def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True,
