@@ -101,7 +101,7 @@ class EventsToSidecarSummaryContext(BaseContext):
         tab_sum.update(new_context['df'], new_context['name'])
         self.summary_dict[new_context["name"]] = tab_sum
 
-    def _get_details_dict(self, summary_info):
+    def get_details_dict(self, summary_info):
         """ Return the summary-specific information.
 
         Parameters:
@@ -116,7 +116,7 @@ class EventsToSidecarSummaryContext(BaseContext):
                 "total_events": summary_info.total_events, "skip_cols": summary_info.skip_cols,
                 "sidecar": summary_info.extract_sidecar_template()}
 
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Merge summary information from all of the files
 
         Returns:

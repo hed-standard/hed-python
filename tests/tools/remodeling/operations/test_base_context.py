@@ -11,13 +11,13 @@ class TestContext(BaseContext):
         self.summary_dict["data1"] = "test data 1"
         self.summary_dict["data2"] = "test data 2"
 
-    def _get_details_dict(self, include_individual=True):
+    def get_details_dict(self, include_individual=True):
         summary = {"name": self.context_name}
         if include_individual:
             summary["more"] = "more stuff"
         return summary
 
-    def _merge_all(self):
+    def merge_all_info(self):
         return {"merged": self.context_name}
 
     def update_context(self, context_dict):

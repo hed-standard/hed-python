@@ -39,19 +39,19 @@ class BaseContext(ABC):
             - The 'Individual files' value is dictionary whose keys are file names and values are
                    their corresponding summaries.
 
-        Users are expected to provide _merge_all and _get_details_dict to support this.
+        Users are expected to provide merge_all_info and get_details_dict to support this.
 
         """
-        merged_summary = self._merge_all()
+        merged_summary = self.merge_all_info()
         if merged_summary:
-            details = self._get_details_dict(merged_summary)
+            details = self.get_details_dict(merged_summary)
         else:
             details = "Overall summary unavailable"
 
         summary_details = {"Dataset": details, "Individual files": {}}
         if include_individual:
             for name, count in self.summary_dict.items():
-                summary_details["Individual files"][name] = self._get_details_dict(count)
+                summary_details["Individual files"][name] = self.get_details_dict(count)
         return summary_details
 
     def get_summary(self, individual_summaries="separate"):
@@ -132,12 +132,12 @@ class BaseContext(ABC):
 
     def _save_summary_files(self, save_dir, file_format, summary, individual_summaries):
         """ Save the files in the appropriate format.
-        
+
         Parameters:
             save_dir (str): Path to the directory in which the summaries will be saved.
             file_format (str): string representing the extension (including .), '.txt' or '.json'.
             summary (dictionary): Dictionary of summaries (has "Dataset" and "Individual files" keys.
-        
+
         """
         time_stamp = '_' + get_timestamp()
         this_save = os.path.join(save_dir, self.context_name + '/')
@@ -159,7 +159,7 @@ class BaseContext(ABC):
 
     def _get_summary_filepath(self, individual_dir, name, time_stamp, file_format):
         """ Return the filepath for the summary including the timestamp
-        
+
         Parameters:
             individual_dir (str):  path of the directory in which the summary should be stored.
             name (str): Path of the original file from which the summary was extracted.
@@ -207,7 +207,7 @@ class BaseContext(ABC):
             text_file.write(summary)
 
     @abstractmethod
-    def _get_details_dict(self, summary_info):
+    def get_details_dict(self, summary_info):
         """ Return the summary-specific information.
 
         Parameters:
@@ -223,7 +223,7 @@ class BaseContext(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Return merged information.
 
         Returns:

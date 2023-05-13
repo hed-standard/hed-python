@@ -116,7 +116,7 @@ class HedTagSummaryContext(BaseContext):
             counts.update_event_counts(hed, new_context['name'])
         self.summary_dict[new_context["name"]] = counts
 
-    def _get_details_dict(self, merge_counts):
+    def get_details_dict(self, merge_counts):
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
@@ -155,7 +155,7 @@ class HedTagSummaryContext(BaseContext):
             return self._get_dataset_string(result, indent=indent)
         return self._get_individual_string(result, indent=indent)
 
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Create a HedTagCounts containing the overall dataset HED tag  summary.
 
         Returns:

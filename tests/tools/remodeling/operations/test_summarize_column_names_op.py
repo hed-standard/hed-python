@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
             self.assertIsInstance(json_value, str)
             new_summary = json.loads(json_value)
             self.assertIsInstance(new_summary, dict)
-        merged1 = this_context._merge_all()
+        merged1 = this_context.merge_all_info()
         self.assertIsInstance(merged1, ColumnNameSummary)
         self.assertEqual(len(merged1.file_dict), 3)
         self.assertEqual(len(merged1.unique_headers), 2)

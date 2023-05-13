@@ -92,7 +92,7 @@ class DefinitionSummaryContext(BaseContext):
         series, def_dict = data_input.series_a, data_input.get_def_dict(new_context['schema'])
         self.def_gatherer.process_def_expands(series, def_dict)
 
-    def _get_details_dict(self, def_gatherer):
+    def get_details_dict(self, def_gatherer):
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
@@ -131,7 +131,7 @@ class DefinitionSummaryContext(BaseContext):
         known_defs_summary.update(errors_summary)
         return known_defs_summary
 
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Create an Object containing the definition summary.
 
         Returns:

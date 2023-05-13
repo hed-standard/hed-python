@@ -151,7 +151,7 @@ class HedValidationSummaryContext(BaseContext):
             results['event_issues'][new_context["name"]] = issues
             results['total_event_issues'] = len(issues)
 
-    def _get_details_dict(self, summary_info):
+    def get_details_dict(self, summary_info):
         """Return the summary details from the summary_info.
 
         Parameters:
@@ -163,7 +163,7 @@ class HedValidationSummaryContext(BaseContext):
         """
         return summary_info
 
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Create a dictionary containing all of the errors in the dataset.
 
         Returns:

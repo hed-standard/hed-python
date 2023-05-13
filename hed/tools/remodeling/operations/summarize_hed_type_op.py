@@ -112,7 +112,7 @@ class HedTypeSummaryContext(BaseContext):
         counts.add_descriptions(type_values.definitions)
         self.summary_dict[new_context["name"]] = counts
 
-    def _get_details_dict(self, counts):
+    def get_details_dict(self, counts):
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
@@ -124,7 +124,7 @@ class HedTypeSummaryContext(BaseContext):
         """
         return counts.get_summary()
 
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Create a HedTypeCounts containing the overall dataset HED type summary.
 
         Returns:

@@ -93,7 +93,7 @@ class ColumnNameSummaryContext(BaseContext):
             self.summary_dict[name] = ColumnNameSummary(name=name)
         self.summary_dict[name].update(name, new_context["column_names"])
 
-    def _get_details_dict(self, column_summary):
+    def get_details_dict(self, column_summary):
         """ Return the summary dictionary extracted from a ColumnNameSummary.
 
         Parameters:
@@ -105,7 +105,7 @@ class ColumnNameSummaryContext(BaseContext):
         """
         return column_summary.get_summary()
 
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Create a ColumnNameSummary containing the overall dataset summary.
 
         Returns:
