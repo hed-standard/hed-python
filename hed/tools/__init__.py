@@ -19,7 +19,7 @@ from .bids.bids_tabular_file import BidsTabularFile
 
 from .remodeling.dispatcher import Dispatcher
 from .remodeling.backup_manager import BackupManager
-from .remodeling.operations.base_context import BaseContext
+from .remodeling.operations.base_summary import BaseSummary
 from .remodeling.operations.base_op import BaseOp
 from .remodeling.operations.factor_column_op import FactorColumnOp
 from .remodeling.operations.factor_hed_tags_op import FactorHedTagsOp

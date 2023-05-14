@@ -3,7 +3,7 @@ import os
 import unittest
 import pandas as pd
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_definitions_op import SummarizeDefinitionsOp, DefinitionSummaryContext
+from hed.tools.remodeling.operations.summarize_definitions_op import SummarizeDefinitionsOp, DefinitionSummary
 
 
 class Test(unittest.TestCase):
@@ -44,8 +44,8 @@ class Test(unittest.TestCase):
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
         self.assertEqual(200, len(df_new), " dataframe length is correct")
         self.assertEqual(10, len(df_new.columns), " has correct number of columns")
-        self.assertIn(sum_op.summary_name, dispatch.context_dict)
-        self.assertIsInstance(dispatch.context_dict[sum_op.summary_name], DefinitionSummaryContext)
+        self.assertIn(sum_op.summary_name, dispatch.summary_dicts)
+        self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], DefinitionSummary)
 
     def test_summary(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
@@ -55,9 +55,9 @@ class Test(unittest.TestCase):
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
         self.assertEqual(200, len(df_new), " dataframe length is correct")
         self.assertEqual(10, len(df_new.columns), " has correct number of columns")
-        self.assertIn(sum_op.summary_name, dispatch.context_dict)
-        self.assertIsInstance(dispatch.context_dict[sum_op.summary_name], DefinitionSummaryContext)
-        # print(str(dispatch.context_dict[sum_op.summary_name].get_text_summary()['Dataset']))
+        self.assertIn(sum_op.summary_name, dispatch.summary_dicts)
+        self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], DefinitionSummary)
+        # print(str(dispatch.summary_dicts[sum_op.summary_name].get_text_summary()['Dataset']))
 
     def test_summary_errors(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
@@ -76,9 +76,9 @@ class Test(unittest.TestCase):
             "(Def-expand/A1/4, (Action/4, Age/5, Item-count/2))",
         ]})
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
-        self.assertIn(sum_op.summary_name, dispatch.context_dict)
-        self.assertIsInstance(dispatch.context_dict[sum_op.summary_name], DefinitionSummaryContext)
-        #print(str(dispatch.context_dict[sum_op.summary_name].get_text_summary()['Dataset']))
+        self.assertIn(sum_op.summary_name, dispatch.summary_dicts)
+        self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], DefinitionSummary)
+        #print(str(dispatch.summary_dicts[sum_op.summary_name].get_text_summary()['Dataset']))
 
 if __name__ == '__main__':
     unittest.main()
