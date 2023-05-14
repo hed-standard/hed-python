@@ -5,7 +5,7 @@ import pandas as pd
 from hed.models import Sidecar
 from hed.schema import load_schema_version
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp, HedTypeSummaryContext
+from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp, HedTypeSummary
 
 
 class Test(unittest.TestCase):
@@ -66,14 +66,14 @@ class Test(unittest.TestCase):
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         sum_op = parsed_commands[2]
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-01', sidecar=self.sidecar_path)
-        context1 = dispatch.context_dict['AOMIC_condition_variables']
+        context1 = dispatch.summary_dicts['AOMIC_condition_variables']
         summary1 = context1.get_summary()
         self.assertIn('run-01', summary1['Individual files'])
         self.assertEqual(len(summary1['Individual files']), 1)
         summary1a = context1.get_summary()
         self.assertIsInstance(summary1a['Dataset'], dict)
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-02', sidecar=self.sidecar_path)
-        context2 = dispatch.context_dict['AOMIC_condition_variables']
+        context2 = dispatch.summary_dicts['AOMIC_condition_variables']
         summary2 = context2.get_summary(individual_summaries="separate")
         self.assertEqual(summary2['Dataset']['Overall summary']['files'][0], 'run-01')
         self.assertEqual(len(summary2['Dataset']['Overall summary']['files']), 2)
@@ -88,7 +88,7 @@ class Test(unittest.TestCase):
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         sum_op = parsed_commands[2]
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-01', sidecar=self.sidecar_path_wh)
-        context1 = dispatch.context_dict['AOMIC_condition_variables']
+        context1 = dispatch.summary_dicts['AOMIC_condition_variables']
         text_summary1 = context1.get_text_summary()
         self.assertIsInstance(text_summary1, dict)
 
@@ -105,14 +105,14 @@ class Test(unittest.TestCase):
         sum_op = parsed_commands[2]
         df = sum_op.do_op(dispatch, dispatch.prep_data(df), os.path.basename(self.events), sidecar=sidecar)
         self.assertEqual(len(df), old_len)
-        context_dict = dispatch.context_dict
+        context_dict = dispatch.summary_dicts
         self.assertIsInstance(context_dict, dict)
-        context1 = dispatch.context_dict['AOMIC_condition_variables']
-        self.assertIsInstance(context1, HedTypeSummaryContext)
+        context1 = dispatch.summary_dicts['AOMIC_condition_variables']
+        self.assertIsInstance(context1, HedTypeSummary)
         text_summary1 = context1.get_text_summary()
         self.assertIsInstance(text_summary1, dict)
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'new_events', sidecar=sidecar)
-        context2 = dispatch.context_dict['AOMIC_condition_variables']
+        context2 = dispatch.summary_dicts['AOMIC_condition_variables']
         text_summary2 = context2.get_text_summary()
         self.assertIsInstance(text_summary2, dict)
         self.assertEqual(len(text_summary1["Individual files"]), 1)

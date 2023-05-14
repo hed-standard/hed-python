@@ -2,7 +2,7 @@
 
 from hed import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_summary import BaseSummary
 from hed.models.def_expand_gather import DefExpandGatherer
 
 
@@ -63,33 +63,33 @@ class SummarizeDefinitionsOp(BaseOp):
             DataFrame: A new DataFrame with the factor columns appended.
 
         Side-effect:
-            Updates the context.
+            Updates the relevant summary.
 
         """
-        summary = dispatcher.context_dict.setdefault(self.summary_name, 
-                                                     DefinitionSummaryContext(self, dispatcher.hed_schema))
-        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name, 'sidecar': sidecar,
+        summary = dispatcher.summary_dicts.setdefault(self.summary_name,
+                                                      DefinitionSummary(self, dispatcher.hed_schema))
+        summary.update_summary({'df': dispatcher.post_proc_data(df), 'name': name, 'sidecar': sidecar,
                                 'schema': dispatcher.hed_schema})
         return df
 
 
-class DefinitionSummaryContext(BaseContext):
+class DefinitionSummary(BaseSummary):
     def __init__(self, sum_op, hed_schema, known_defs=None):
-        super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
+        super().__init__(sum_op)
         self.def_gatherer = DefExpandGatherer(hed_schema, known_defs=known_defs)
 
-    def update_context(self, new_context):
+    def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.
 
         Parameters:
-            new_context (dict):  A dictionary with the parameters needed to update a summary.
+            new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:
             - The summary needs a "name" str, a "schema" and a "Sidecar".  
 
         """
-        data_input = TabularInput(new_context['df'], sidecar=new_context['sidecar'], name=new_context['name'])
-        series, def_dict = data_input.series_a, data_input.get_def_dict(new_context['schema'])
+        data_input = TabularInput(new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
+        series, def_dict = data_input.series_a, data_input.get_def_dict(new_info['schema'])
         self.def_gatherer.process_def_expands(series, def_dict)
 
     def get_details_dict(self, def_gatherer):
@@ -111,7 +111,7 @@ class DefinitionSummaryContext(BaseContext):
                 if "#" in str(value):
                     key = key + "/#"
                 if display_description:
-                    description, value = DefinitionSummaryContext.remove_description(value)
+                    description, value = DefinitionSummary.remove_description(value)
                     items[key] = {"description": description, "contents": str(value)}
                 else:
                     if isinstance(value, list):
@@ -140,7 +140,7 @@ class DefinitionSummaryContext(BaseContext):
         """
         return self.def_gatherer
 
-    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return a formatted string with the summary for the indicated name.
 
         Parameters:
@@ -161,7 +161,7 @@ class DefinitionSummaryContext(BaseContext):
         return self._get_individual_string(result, indent=indent)
 
     @staticmethod
-    def _get_dataset_string(summary_dict, indent=BaseContext.DISPLAY_INDENT):
+    def _get_dataset_string(summary_dict, indent=BaseSummary.DISPLAY_INDENT):
         def nested_dict_to_string(data, level=1):
             result = []
             for key, value in data.items():
@@ -190,7 +190,7 @@ class DefinitionSummaryContext(BaseContext):
         return description, def_group
 
     @staticmethod
-    def _get_individual_string(result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_individual_string(result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return  a string with the summary for an individual tabular file.
 
         Parameters:

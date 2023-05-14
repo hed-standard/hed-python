@@ -4,7 +4,7 @@ import pandas as pd
 import unittest
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_column_values_op import \
-    ColumnValueSummaryContext, SummarizeColumnValuesOp
+    ColumnValueSummary, SummarizeColumnValuesOp
 from hed.tools.util.io_util import get_file_list
 
 
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
         sum_op = SummarizeColumnValuesOp(parms)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         self.get_dfs(sum_op, 'name1', dispatch)
-        context1 = dispatch.context_dict.get(parms['summary_name'], None)
+        context1 = dispatch.summary_dicts.get(parms['summary_name'], None)
         summary1 = context1.summary_dict['name1']
         cat_len = len(summary1.categorical_info)
         self.assertEqual(cat_len, len(self.sample_columns) - 2,
@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
         self.get_dfs(sum_op, 'name2', dispatch)
         self.assertEqual(cat_len, len(self.sample_columns) - 2,
                          "do_ops updating does not change number of categorical columns.")
-        context = dispatch.context_dict['test summary']
+        context = dispatch.summary_dicts['test summary']
         self.assertEqual(len(context.summary_dict), 2)
 
     def test_get_summary(self):
@@ -67,9 +67,9 @@ class Test(unittest.TestCase):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         self.get_dfs(sum_op, 'name1', dispatch)
 
-        cont = dispatch.context_dict
+        cont = dispatch.summary_dicts
         context1 = cont.get("test summary", None)
-        self.assertIsInstance(context1, ColumnValueSummaryContext, "get_summary testing ColumnValueSummary")
+        self.assertIsInstance(context1, ColumnValueSummary, "get_summary testing ColumnValueSummary")
         # summary1 = context1.get_summary()
         # self.assertIsInstance(summary1, dict, "get_summary returns a dictionary")
         # self.assertIsInstance(summary1["Dataset"], dict)
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(text_summary["Dataset"], str)
         self.get_dfs(sum_op, 'name2', dispatch)
         self.get_dfs(sum_op, 'name3', dispatch)
-        context2 = dispatch.context_dict.get(parms['summary_name'], None)
+        context2 = dispatch.summary_dicts.get(parms['summary_name'], None)
         summary2 = context2.get_summary()
         self.assertIsInstance(summary2, dict)
         text_summary2 = context2.get_text_summary(individual_summaries="consolidated")
@@ -101,7 +101,7 @@ class Test(unittest.TestCase):
         sum_op = parsed_commands[1]
         df = sum_op.do_op(dispatch, dispatch.prep_data(df), os.path.basename(events))
         self.assertEqual(len(df), old_len)
-        context_dict = dispatch.context_dict
+        context_dict = dispatch.summary_dicts
         for key, item in context_dict.items():
             text_value = item.get_text_summary()
             self.assertTrue(text_value)

@@ -1,4 +1,4 @@
-""" Abstract base class for the context of summary operations. """
+""" Abstract base class for the contents of summary operations. """
 
 import os
 from abc import ABC, abstractmethod
@@ -6,23 +6,19 @@ import json
 from hed.tools.util.io_util import get_timestamp
 
 
-class BaseContext(ABC):
-    """ Abstract base class for summary contexts. Should not be instantiated.
+class BaseSummary(ABC):
+    """ Abstract base class for summary contents. Should not be instantiated.
 
     Parameters:
-        context_type (str)  Type of summary.
-        context_name (str)  Printable name -- should be unique.
-        context_filename (str)  Base filename for saving the context.
+        sum_op (BaseOp):  Operation corresponding to this summary.
 
     """
 
     DISPLAY_INDENT = "   "
     INDIVIDUAL_SUMMARIES_PATH = 'individual_summaries'
 
-    def __init__(self, context_type, context_name, context_filename):
-        self.context_type = context_type
-        self.context_name = context_name
-        self.context_filename = context_filename
+    def __init__(self, sum_op):
+        self.op = sum_op
         self.summary_dict = {}
 
     def get_summary_details(self, include_individual=True):
@@ -71,8 +67,8 @@ class BaseContext(ABC):
         """
         include_individual = individual_summaries == "separate" or individual_summaries == "consolidated"
         summary_details = self.get_summary_details(include_individual=include_individual)
-        dataset_summary = {"Context name": self.context_name, "Context type": self.context_type,
-                           "Context filename": self.context_filename, "Overall summary": summary_details['Dataset']}
+        dataset_summary = {"Summary name": self.op.summary_name, "Summary type": self.op.SUMMARY_TYPE,
+                           "Summary filename": self.op.summary_filename, "Overall summary": summary_details['Dataset']}
         summary = {"Dataset": dataset_summary, "Individual files": {}}
         if summary_details["Individual files"]:
             summary["Individual files"] = self.get_individual(summary_details["Individual files"],
@@ -83,8 +79,8 @@ class BaseContext(ABC):
         individual_dict = {}
         for name, name_summary in summary_details.items():
             if separately:
-                individual_dict[name] = {"Context name": self.context_name, "Context type": self.context_type,
-                                         "Context filename": self.context_filename, "File summary": name_summary}
+                individual_dict[name] = {"Summary name": self.op.summary_name, "summary type": self.op.SUMMARY_TYPE,
+                                         "Summary filename": self.op.summary_filename, "File summary": name_summary}
             else:
                 individual_dict[name] = name_summary
         return individual_dict
@@ -101,14 +97,16 @@ class BaseContext(ABC):
     def get_text_summary(self, individual_summaries="separate"):
         include_individual = individual_summaries == "separate" or individual_summaries == "consolidated"
         summary_details = self.get_text_summary_details(include_individual=include_individual)
-        summary = {"Dataset": f"Context name: {self.context_name}\n" + f"Context type: {self.context_type}\n" +
-                   f"Context filename: {self.context_filename}\n\n" + f"Overall summary:\n{summary_details['Dataset']}"}
+        summary = {"Dataset": f"Summary name: {self.op.summary_name}\n" +
+                   f"Summary type: {self.op.SUMMARY_TYPE}\n" +
+                   f"Summary filename: {self.op.summary_filename}\n\n" +
+                   f"Overall summary:\n{summary_details['Dataset']}"}
         if individual_summaries == "separate":
             summary["Individual files"] = {}
             for name, name_summary in summary_details["Individual files"].items():
-                summary["Individual files"][name] = f"Context name: {self.context_name}\n" + \
-                                                    f"Context type: {self.context_type}\n" + \
-                                                    f"Context filename: {self.context_filename}\n\n" + \
+                summary["Individual files"][name] = f"Summary name: {self.op.summary_name}\n" + \
+                                                    f"Summary type: {self.op.SUMMARY_TYPE}\n" + \
+                                                    f"Summary filename: {self.op.summary_filename}\n\n" + \
                                                     f"Summary for {name}:\n{name_summary}"
         elif include_individual:
             ind_list = []
@@ -140,9 +138,9 @@ class BaseContext(ABC):
 
         """
         time_stamp = '_' + get_timestamp()
-        this_save = os.path.join(save_dir, self.context_name + '/')
+        this_save = os.path.join(save_dir, self.op.summary_name + '/')
         os.makedirs(os.path.realpath(this_save), exist_ok=True)
-        filename = os.path.realpath(os.path.join(this_save, self.context_filename + time_stamp + file_format))
+        filename = os.path.realpath(os.path.join(this_save, self.op.summary_filename + time_stamp + file_format))
         individual = summary.get("Individual files", {})
         if individual_summaries == "none" or not individual:
             self.dump_summary(filename, summary["Dataset"])
@@ -175,7 +173,7 @@ class BaseContext(ABC):
         match = True
         filename = None
         while match:
-            filename = f"{self.context_filename}_{this_name}_{count}{time_stamp}{file_format}"
+            filename = f"{self.op.summary_filename}_{this_name}_{count}{time_stamp}{file_format}"
             filename = os.path.realpath(os.path.join(individual_dir, filename))
             if not os.path.isfile(filename):
                 break
@@ -217,7 +215,7 @@ class BaseContext(ABC):
             dict: dictionary with the results.
 
         Notes:
-            Abstract method be implemented by each individual context summary.
+            Abstract method be implemented by each individual summary.
 
         """
         raise NotImplementedError
@@ -230,17 +228,17 @@ class BaseContext(ABC):
            object:  Consolidated summary of information.
 
         Notes:
-            Abstract method be implemented by each individual context summary.
+            Abstract method be implemented by each individual summary.
 
         """
         raise NotImplementedError
 
     @abstractmethod
-    def update_context(self, context_dict):
+    def update_summary(self, summary_dict):
         """ Method to update summary for a given tabular input.
 
         Parameters:
-            context_dict (dict)  A context specific dictionary with the update information.
+            summary_dict (dict)  A summary specific dictionary with the update information.
 
         """
         raise NotImplementedError

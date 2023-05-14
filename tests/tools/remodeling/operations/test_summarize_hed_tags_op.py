@@ -4,7 +4,7 @@ import unittest
 import pandas as pd
 from hed.models.df_util import get_assembled
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_hed_tags_op import SummarizeHedTagsOp, HedTagSummaryContext
+from hed.tools.remodeling.operations.summarize_hed_tags_op import SummarizeHedTagsOp, HedTagSummary
 
 
 class Test(unittest.TestCase):
@@ -58,12 +58,12 @@ class Test(unittest.TestCase):
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
         self.assertEqual(200, len(df_new), "summarize_hed_type_op dataframe length is correct")
         self.assertEqual(10, len(df_new.columns), "summarize_hed_type_op has correct number of columns")
-        self.assertIn(sum_op.summary_name, dispatch.context_dict)
-        self.assertIsInstance(dispatch.context_dict[sum_op.summary_name], HedTagSummaryContext)
-        x = dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run1']
-        self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run1'].tag_dict), 47)
+        self.assertIn(sum_op.summary_name, dispatch.summary_dicts)
+        self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], HedTagSummary)
+        x = dispatch.summary_dicts[sum_op.summary_name].summary_dict['subj2_run1']
+        self.assertEqual(len(dispatch.summary_dicts[sum_op.summary_name].summary_dict['subj2_run1'].tag_dict), 47)
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run2', sidecar=self.json_path)
-        self.assertEqual(len(dispatch.context_dict[sum_op.summary_name].summary_dict['subj2_run2'].tag_dict), 47)
+        self.assertEqual(len(dispatch.summary_dicts[sum_op.summary_name].summary_dict['subj2_run2'].tag_dict), 47)
 
     def test_quick3(self):
         from hed.models import TabularInput, Sidecar
@@ -125,9 +125,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(sum_op, SummarizeHedTagsOp, "constructor creates an object of the correct type")
         df = pd.read_csv(self.data_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
-        self.assertIn(sum_op.summary_name, dispatch.context_dict)
-        sum_context = dispatch.context_dict[sum_op.summary_name]
-        self.assertIsInstance(sum_context, HedTagSummaryContext)
+        self.assertIn(sum_op.summary_name, dispatch.summary_dicts)
+        sum_context = dispatch.summary_dicts[sum_op.summary_name]
+        self.assertIsInstance(sum_context, HedTagSummary)
         sum_obj1 = sum_context.get_summary_details()
         self.assertIsInstance(sum_obj1, dict)
         json_str1 = json.dumps(sum_obj1, indent=4)
@@ -135,7 +135,7 @@ class Test(unittest.TestCase):
         json_obj1 = json.loads(json_str1)
         self.assertIsInstance(json_obj1, dict)
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run2', sidecar=self.json_path)
-        sum_context2 = dispatch.context_dict[sum_op.summary_name]
+        sum_context2 = dispatch.summary_dicts[sum_op.summary_name]
         sum_obj2 = sum_context2.get_summary_details()
         json_str2 = json.dumps(sum_obj2, indent=4)
         self.assertIsInstance(json_str2, str)
@@ -150,7 +150,7 @@ class Test(unittest.TestCase):
         df = dispatch.prep_data(df)
         sum_op.do_op(dispatch, df, 'subj2_run1', sidecar=self.json_path)
         sum_op.do_op(dispatch, df, 'subj2_run2', sidecar=self.json_path)
-        sum_context1 = dispatch.context_dict[sum_op.summary_name]
+        sum_context1 = dispatch.summary_dicts[sum_op.summary_name]
         text_sum_none = sum_context1.get_text_summary(individual_summaries="none")
         self.assertIn('Dataset', text_sum_none)
         self.assertIsInstance(text_sum_none['Dataset'], str)
@@ -203,7 +203,7 @@ class Test(unittest.TestCase):
         df = dispatch.prep_data(df)
         for operation in dispatch.parsed_ops:
             df = operation.do_op(dispatch, df, "sample", sidecar=sidecar_path)
-        context_dict = dispatch.context_dict.get("summarize_hed_tags")
+        context_dict = dispatch.summary_dicts.get("summarize_hed_tags")
         text_summary = context_dict.get_text_summary()
         self.assertIsInstance(text_summary["Dataset"], str)
 

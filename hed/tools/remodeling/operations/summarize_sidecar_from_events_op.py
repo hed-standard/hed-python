@@ -3,7 +3,7 @@
 import json
 from hed.tools import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_summary import BaseSummary
 
 
 class SummarizeSidecarFromEventsOp(BaseOp):
@@ -68,38 +68,38 @@ class SummarizeSidecarFromEventsOp(BaseOp):
             DataFrame: A new DataFrame with the factor columns appended.
 
         Side-effect:
-            Updates the context.
+            Updates the associated summary if applicable.
 
         """
 
-        summary = dispatcher.context_dict.get(self.summary_name, None)
+        summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
-            summary = EventsToSidecarSummaryContext(self)
-            dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name})
+            summary = EventsToSidecarSummary(self)
+            dispatcher.summary_dicts[self.summary_name] = summary
+        summary.update_summary({'df': dispatcher.post_proc_data(df), 'name': name})
         return df
 
 
-class EventsToSidecarSummaryContext(BaseContext):
+class EventsToSidecarSummary(BaseSummary):
 
     def __init__(self, sum_op):
-        super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
+        super().__init__(sum_op)
         self.value_cols = sum_op.value_columns
         self.skip_cols = sum_op.skip_columns
 
-    def update_context(self, new_context):
+    def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.
 
         Parameters:
-            new_context (dict):  A dictionary with the parameters needed to update a summary.
+            new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:
             - The summary needs a "name" str and a "df".  
         """
 
-        tab_sum = TabularSummary(value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_context["name"])
-        tab_sum.update(new_context['df'], new_context['name'])
-        self.summary_dict[new_context["name"]] = tab_sum
+        tab_sum = TabularSummary(value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_info["name"])
+        tab_sum.update(new_info['df'], new_info['name'])
+        self.summary_dict[new_info["name"]] = tab_sum
 
     def get_details_dict(self, summary_info):
         """ Return the summary-specific information.
@@ -129,7 +129,7 @@ class EventsToSidecarSummaryContext(BaseContext):
             all_sum.update_summary(tab_sum)
         return all_sum
 
-    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return a formatted string with the summary for the indicated name.
 
         Parameters:
@@ -151,7 +151,7 @@ class EventsToSidecarSummaryContext(BaseContext):
         return self._get_individual_string(result, indent=indent)
 
     @staticmethod
-    def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return  a string with the overall summary for all of the tabular files.
 
         Parameters:
@@ -170,7 +170,7 @@ class EventsToSidecarSummaryContext(BaseContext):
         return "\n".join(sum_list)
 
     @staticmethod
-    def _get_individual_string(result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_individual_string(result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return  a string with the summary for an individual tabular file.
 
         Parameters:

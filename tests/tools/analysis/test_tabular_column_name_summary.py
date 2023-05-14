@@ -1,6 +1,6 @@
 import json
 import unittest
-from hed.tools.analysis.column_name_summary import ColumnNameSummary
+from hed.tools.analysis.tabular_column_name_summary import TabularColumnNameSummary
 
 
 class Test(unittest.TestCase):
@@ -17,16 +17,16 @@ class Test(unittest.TestCase):
         pass
 
     def test_constructor(self):
-        column_summary1 = ColumnNameSummary(name='Dataset')
-        self.assertIsInstance(column_summary1, ColumnNameSummary)
+        column_summary1 = TabularColumnNameSummary(name='Dataset')
+        self.assertIsInstance(column_summary1, TabularColumnNameSummary)
         self.assertEqual(column_summary1.name, 'Dataset')
         self.assertFalse(column_summary1.file_dict)
         self.assertFalse(column_summary1.unique_headers)
-        column_summary2 = ColumnNameSummary()
-        self.assertIsInstance(column_summary2, ColumnNameSummary)
+        column_summary2 = TabularColumnNameSummary()
+        self.assertIsInstance(column_summary2, TabularColumnNameSummary)
 
     def test_update(self):
-        column_summary = ColumnNameSummary()
+        column_summary = TabularColumnNameSummary()
         column_summary.update('run-01', self.columns1)
         column_summary.update('run-02', self.columns1)
         self.assertEqual(len(column_summary.unique_headers), 1)
@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
         self.assertEqual(context.exception.args[0], "FileHasChangedColumnNames")
 
     def test_update_headers(self):
-        column_summary = ColumnNameSummary()
+        column_summary = TabularColumnNameSummary()
         pos1 = column_summary.update_headers(self.columns1)
         self.assertEqual(pos1, 0)
         pos2 = column_summary.update_headers(self.columns1)
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
         self.assertEqual(pos3, 1)
 
     def test_get_summary(self):
-        column_summary = ColumnNameSummary('Dataset')
+        column_summary = TabularColumnNameSummary('Dataset')
         column_summary.update('run-01', self.columns1)
         column_summary.update('run-02', self.columns1)
         summary1 = column_summary.get_summary()

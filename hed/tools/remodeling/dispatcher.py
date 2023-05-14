@@ -47,7 +47,7 @@ class Dispatcher:
             raise ValueError("InvalidOperationList", f"{these_errors}")
         self.parsed_ops = op_list
         self.hed_schema = get_schema(hed_versions)
-        self.context_dict = {}
+        self.summary_dicts = {}
 
     def get_summaries(self, file_formats=['.txt', '.json']):
         """ Return the summaries in a dictionary of strings suitable for saving or archiving.
@@ -62,8 +62,8 @@ class Dispatcher:
 
         summary_list = []
         time_stamp = '_' + get_timestamp()
-        for context_name, context_item in self.context_dict.items():
-            file_base = context_item.context_filename
+        for context_name, context_item in self.summary_dicts.items():
+            file_base = context_item.op.summary_filename
             if self.data_root:
                 file_base = extract_suffix_path(self.data_root, file_base)
             file_base = clean_filename(file_base)
@@ -171,7 +171,7 @@ class Dispatcher:
         if not summary_dir:
             summary_dir = self.get_summary_save_dir()
         os.makedirs(summary_dir, exist_ok=True)
-        for context_name, context_item in self.context_dict.items():
+        for context_name, context_item in self.summary_dicts.items():
             context_item.save(summary_dir, save_formats, individual_summaries=individual_summaries)
 
     @staticmethod

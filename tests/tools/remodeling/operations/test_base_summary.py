@@ -1,26 +1,46 @@
 import os
 import shutil
 import unittest
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_summary import BaseSummary
+from hed.tools.remodeling.operations.base_op import BaseOp
 
 
-class TestContext(BaseContext):
+class TestOp(BaseOp):
+    PARAMS = {
+        "operation": "test_summary_op",
+        "required_parameters": {
+            "summary_name": str,
+            "summary_filename": str
+        },
+        "optional_parameters": {}
+    }
 
-    def __init__(self):
-        super().__init__("TestContext", "test", "test_context")
+    SUMMARY_TYPE = "test_sum"
+
+    def __init__(self, parameters):
+        super().__init__(self.PARAMS, parameters)
+        self.summary_name = parameters['summary_name']
+        self.summary_filename = parameters['summary_filename']
+
+
+class TestSummary(BaseSummary):
+
+    def __init__(self, op):
+
+        super().__init__(op)
         self.summary_dict["data1"] = "test data 1"
         self.summary_dict["data2"] = "test data 2"
 
     def get_details_dict(self, include_individual=True):
-        summary = {"name": self.context_name}
+        summary = {"name": self.op.summary_name}
         if include_individual:
             summary["more"] = "more stuff"
         return summary
 
     def merge_all_info(self):
-        return {"merged": self.context_name}
+        return {"merged": self.op.summary_name}
 
-    def update_context(self, context_dict):
+    def update_summary(self, info_dict):
         pass
 
 
@@ -29,19 +49,17 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         summary_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                    '../../../data/remodel_tests/temp'))    
+                                                    '../../../data/remodel_tests/temp'))
         cls.summary_dir = summary_dir
 
     def test_constructor(self):
-        with self.assertRaises(TypeError) as context:
-            BaseContext('apple', 'banana', 'pear')
-        self.assertTrue(context.exception.args[0])
-
-        test = TestContext()
-        self.assertIsInstance(test, TestContext)
+        op2 = TestOp({"summary_name": "test", "summary_filename": "test_context"})
+        test = TestSummary(op2)
+        self.assertIsInstance(test, TestSummary)
 
     def test_get_text_summary(self):
-        test = TestContext()
+        op = TestOp({"summary_name": "test", "summary_filename": "test_context"})
+        test = TestSummary(op)
         out1 = test.get_text_summary(individual_summaries="none")
         self.assertIsInstance(out1, dict)
         self.assertTrue(out1["Dataset"])
@@ -62,11 +80,12 @@ class Test(unittest.TestCase):
         if os.path.isdir(self.summary_dir):
             shutil.rmtree(self.summary_dir)
         os.makedirs(self.summary_dir)
-        test1 = TestContext()
+        op = TestOp({"summary_name": "test", "summary_filename": "test_context"})
+        test1 = TestSummary(op)
         file_list1 = os.listdir(self.summary_dir)
         self.assertFalse(file_list1)
         test1.save(self.summary_dir, individual_summaries="none")
-        dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/'))
+        dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.op.summary_name + '/'))
         file_list2 = os.listdir(dir_full)
         self.assertEqual(len(file_list2), 1)
         basename = os.path.basename(file_list2[0])
@@ -78,32 +97,34 @@ class Test(unittest.TestCase):
         if os.path.isdir(self.summary_dir):
             shutil.rmtree(self.summary_dir)
         os.makedirs(self.summary_dir)
-        test1 = TestContext()
+        op = TestOp({"summary_name": "test", "summary_filename": "test_context"})
+        test1 = TestSummary(op)
         file_list1 = os.listdir(self.summary_dir)
         self.assertFalse(file_list1)
-        dir_ind = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/',
+        dir_ind = os.path.realpath(os.path.join(self.summary_dir, test1.op.summary_name + '/',
                                                 "individual_summaries/"))
         self.assertFalse(os.path.isdir(dir_ind))
         test1.save(self.summary_dir, file_formats=['.json', '.tsv'], individual_summaries="consolidated")
-        dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/'))
+        dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.op.summary_name + '/'))
         file_list2 = os.listdir(dir_full)
         self.assertEqual(len(file_list2), 1)
         basename = os.path.basename(file_list2[0])
         self.assertTrue(basename.startswith('test_context'))
         self.assertEqual(os.path.splitext(basename)[1], '.json')
         shutil.rmtree(self.summary_dir)
-        
+
     def test_save_separate(self):
         if os.path.isdir(self.summary_dir):
             shutil.rmtree(self.summary_dir)
         os.makedirs(self.summary_dir)
-        test1 = TestContext()
+        op = TestOp({"summary_name": "test", "summary_filename": "test_context"})
+        test1 = TestSummary(op)
         file_list1 = os.listdir(self.summary_dir)
         self.assertFalse(file_list1)
         test1.save(self.summary_dir, file_formats=['.json', '.tsv'], individual_summaries="separate")
-        dir_ind = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/',
+        dir_ind = os.path.realpath(os.path.join(self.summary_dir, test1.op.summary_name + '/',
                                                 "individual_summaries/"))
-        dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.context_name + '/'))
+        dir_full = os.path.realpath(os.path.join(self.summary_dir, test1.op.summary_name + '/'))
         self.assertTrue(os.path.isdir(dir_ind))
         file_list4 = os.listdir(dir_full)
         self.assertEqual(len(file_list4), 2)

@@ -2,9 +2,9 @@ import json
 import os
 import pandas as pd
 import unittest
-from hed.tools.analysis.column_name_summary import ColumnNameSummary
+from hed.tools.analysis.tabular_column_name_summary import TabularColumnNameSummary
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNameSummaryContext, SummarizeColumnNamesOp
+from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNameSummary, SummarizeColumnNamesOp
 
 
 class Test(unittest.TestCase):
@@ -68,7 +68,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df), old_len)
         df1 = df.drop(labels='onset', axis=1)
         sum_op.do_op(dispatch, df1, 'run-03')
-        this_context = dispatch.context_dict[sum_op.summary_name]
+        this_context = dispatch.summary_dicts[sum_op.summary_name]
         for key, item in this_context.summary_dict.items():
             summary = item.get_summary()
             self.assertIsInstance(summary, dict)
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
             new_summary = json.loads(json_value)
             self.assertIsInstance(new_summary, dict)
         merged1 = this_context.merge_all_info()
-        self.assertIsInstance(merged1, ColumnNameSummary)
+        self.assertIsInstance(merged1, TabularColumnNameSummary)
         self.assertEqual(len(merged1.file_dict), 3)
         self.assertEqual(len(merged1.unique_headers), 2)
         with self.assertRaises(ValueError) as except_context:
@@ -90,10 +90,10 @@ class Test(unittest.TestCase):
         op = SummarizeColumnNamesOp(parms)
         df, df_new = self.get_dfs(op, 'run-01', dispatch)
         self.assertEqual(len(df), len(df_new))
-        context_dict = dispatch.context_dict
+        context_dict = dispatch.summary_dicts
         self.assertIsInstance(context_dict, dict)
         self.get_dfs(op, 'run-02', dispatch)
-        context = dispatch.context_dict['columns']
+        context = dispatch.summary_dicts['columns']
         summary = context.get_summary()
         dataset_sum = summary['Dataset']
         json_str = json.dumps(dataset_sum)
@@ -110,8 +110,8 @@ class Test(unittest.TestCase):
         op = SummarizeColumnNamesOp(parms)
         self.get_dfs(op, 'run-01', dispatch)
         self.get_dfs(op, 'run-02', dispatch)
-        context = dispatch.context_dict['columns']
-        self.assertIsInstance(context, ColumnNameSummaryContext)
+        context = dispatch.summary_dicts['columns']
+        self.assertIsInstance(context, ColumnNameSummary)
         text_summary1 = context.get_text_summary()
         self.assertIsInstance(text_summary1, dict)
 
@@ -126,7 +126,7 @@ class Test(unittest.TestCase):
         op.do_op(dispatch, dispatch.prep_data(df1), 'run-03')
         df2 = pd.DataFrame(self.data1, columns=self.sample_columns2)
         op.do_op(dispatch, dispatch.prep_data(df2), 'run-05')
-        context = dispatch.context_dict['columns']
+        context = dispatch.summary_dicts['columns']
         summary = context.get_summary()
         text_summary1 = context.get_text_summary()
         self.assertEqual(len(summary), 2)

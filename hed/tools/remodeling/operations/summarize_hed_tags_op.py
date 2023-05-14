@@ -4,7 +4,7 @@ from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_summary import BaseSummary
 from hed.models.df_util import get_assembled
 
 
@@ -77,44 +77,44 @@ class SummarizeHedTagsOp(BaseOp):
             Updates the context.
 
         """
-        summary = dispatcher.context_dict.get(self.summary_name, None)
+        summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
-            summary = HedTagSummaryContext(self)
-            dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name,
+            summary = HedTagSummary(self)
+            dispatcher.summary_dicts[self.summary_name] = summary
+        summary.update_summary({'df': dispatcher.post_proc_data(df), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df
 
 
-class HedTagSummaryContext(BaseContext):
+class HedTagSummary(BaseSummary):
 
     def __init__(self, sum_op):
-        super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
+        super().__init__(sum_op)
         self.tags = sum_op.tags
         self.expand_context = sum_op.expand_context
 
-    def update_context(self, new_context):
+    def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.
 
         Parameters:
-            new_context (dict):  A dictionary with the parameters needed to update a summary.
+            new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:  
             - The summary needs a "name" str, a "schema", a "df, and a "Sidecar".
 
         """
-        counts = HedTagCounts(new_context['name'], total_events=len(new_context['df']))
-        sidecar = new_context['sidecar']
+        counts = HedTagCounts(new_info['name'], total_events=len(new_info['df']))
+        sidecar = new_info['sidecar']
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
-        input_data = TabularInput(new_context['df'], sidecar=sidecar, name=new_context['name'])
-        hed_strings, definitions = get_assembled(input_data, sidecar, new_context['schema'], 
+        input_data = TabularInput(new_info['df'], sidecar=sidecar, name=new_info['name'])
+        hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'], 
                                                  extra_def_dicts=None, join_columns=True,
                                                  shrink_defs=False, expand_defs=True)
         # definitions = input_data.get_definitions().gathered_defs
         for hed in hed_strings:
-            counts.update_event_counts(hed, new_context['name'])
-        self.summary_dict[new_context["name"]] = counts
+            counts.update_event_counts(hed, new_info['name'])
+        self.summary_dict[new_info["name"]] = counts
 
     def get_details_dict(self, merge_counts):
         """ Return the summary-specific information in a dictionary.
@@ -135,7 +135,7 @@ class HedTagSummaryContext(BaseContext):
                 "files": [name for name in merge_counts.files.keys()],
                 "Main tags": details, "Other tags": leftovers}
 
-    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return a formatted string with the summary for the indicated name.
 
         Parameters:
@@ -172,7 +172,7 @@ class HedTagSummaryContext(BaseContext):
         return all_counts
 
     @staticmethod
-    def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return  a string with the overall summary for all of the tabular files.
 
         Parameters:
@@ -185,11 +185,11 @@ class HedTagSummaryContext(BaseContext):
         """
         sum_list = [f"Dataset: Total events={result.get('total_events', 0)} "
                     f"Total files={len(result.get('files', []))}"]
-        sum_list = sum_list + HedTagSummaryContext._get_tag_list(result, indent=indent)
+        sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
-    def _get_individual_string(result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_individual_string(result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return  a string with the summary for an individual tabular file.
 
         Parameters:
@@ -201,7 +201,7 @@ class HedTagSummaryContext(BaseContext):
 
         """
         sum_list = [f"Total events={result.get('total_events', 0)}"]
-        sum_list = sum_list + HedTagSummaryContext._get_tag_list(result, indent=indent)
+        sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
@@ -212,15 +212,15 @@ class HedTagSummaryContext(BaseContext):
         return tag_list
 
     @staticmethod
-    def _get_tag_list(tag_info, indent=BaseContext.DISPLAY_INDENT):
+    def _get_tag_list(tag_info, indent=BaseSummary.DISPLAY_INDENT):
         sum_list = [f"\n{indent}Main tags[events,files]:"]
         for category, tags in tag_info['Main tags'].items():
             sum_list.append(f"{indent}{indent}{category}:")
             if tags:
-                sum_list.append(f"{indent}{indent}{indent}{' '.join(HedTagSummaryContext._tag_details(tags))}")
+                sum_list.append(f"{indent}{indent}{indent}{' '.join(HedTagSummary._tag_details(tags))}")
         if tag_info['Other tags']:
             sum_list.append(f"{indent}Other tags[events,files]:")
-            sum_list.append(f"{indent}{indent}{' '.join(HedTagSummaryContext._tag_details(tag_info['Other tags']))}")
+            sum_list.append(f"{indent}{indent}{' '.join(HedTagSummary._tag_details(tag_info['Other tags']))}")
         return sum_list
 
     @staticmethod
