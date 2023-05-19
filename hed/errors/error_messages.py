@@ -127,6 +127,11 @@ def val_error_hed_duplicate_column(column_name):
     return f"Multiple columns have name {column_name}.  This is not a fatal error, but discouraged."
 
 
+@hed_error(ValidationErrors.DUPLICATE_NAME_NUMBER_COLUMN, default_severity=ErrorSeverity.WARNING)
+def val_error_hed_duplicate_column_number(column_name, column_number):
+    return f"Column '{column_name}' added as a named column, then also as numbered column {column_number}"
+
+
 @hed_tag_error(ValidationErrors.HED_LIBRARY_UNMATCHED, actual_code=ValidationErrors.TAG_PREFIX_INVALID)
 def val_error_unknown_prefix(tag, unknown_prefix, known_prefixes):
     return f"Tag '{tag} has unknown prefix '{unknown_prefix}'.  Valid prefixes: {known_prefixes}"

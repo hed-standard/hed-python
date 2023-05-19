@@ -23,16 +23,6 @@ class Test(unittest.TestCase):
                                "../data/validator_tests/ExcelMultipleSheets.xlsx")
         cls.default_test_file_name = default
         cls.generic_file_input = SpreadsheetInput(default)
-        cls.integer_key_dictionary = {1: 'one', 2: 'two', 3: 'three'}
-        cls.one_based_tag_columns = [1, 2, 3]
-        cls.zero_based_tag_columns = [0, 1, 2, 3, 4]
-        cls.zero_based_row_column_count = 3
-        cls.zero_based_tag_columns_less_than_row_column_count = [0, 1, 2]
-        cls.column_prefix_dictionary = {3: 'Event/Description/', 4: 'Event/Label/', 5: 'Event/Category/'}
-        cls.category_key = 'Event/Category/'
-        cls.category_participant_and_stimulus_tags = 'Event/Category/Participant response,Event/Category/Stimulus'
-        cls.category_tags = 'Participant response, Stimulus'
-        cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
         base_output = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
         cls.base_output_folder = base_output
         os.makedirs(base_output, exist_ok=True)
@@ -44,8 +34,8 @@ class Test(unittest.TestCase):
     def test_all(self):
         hed_input = self.default_test_file_name
         has_column_names = True
-        column_prefix_dictionary = {2: 'Label', 3: 'Description'}
-        tag_columns = [4]
+        column_prefix_dictionary = {1: 'Label/', 2: 'Description'}
+        tag_columns = [3]
         worksheet_name = 'LKT Events'
 
         file_input = SpreadsheetInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
@@ -54,6 +44,25 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(file_input.dataframe_a, pd.DataFrame))
         self.assertTrue(isinstance(file_input.series_a, pd.Series))
         self.assertTrue(file_input.dataframe_a.size)
+
+        # Just make sure this didn't crash for now
+        self.assertTrue(True)
+
+    def test_all2(self):
+        # This should work, but raise an issue as Short label and column 1 overlap.
+        hed_input = self.default_test_file_name
+        has_column_names = True
+        column_prefix_dictionary = {1: 'Label/', "Short label": 'Description'}
+        tag_columns = [3]
+        worksheet_name = 'LKT Events'
+
+        file_input = SpreadsheetInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
+                                      tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary)
+
+        self.assertTrue(isinstance(file_input.dataframe_a, pd.DataFrame))
+        self.assertTrue(isinstance(file_input.series_a, pd.Series))
+        self.assertTrue(file_input.dataframe_a.size)
+        self.assertTrue(len(file_input._mapper.get_column_mapping_issues()), 1)
 
         # Just make sure this didn't crash for now
         self.assertTrue(True)
@@ -103,8 +112,8 @@ class Test(unittest.TestCase):
 
     def test_to_excel_should_work(self):
         spreadsheet = SpreadsheetInput(file=self.default_test_file_name, file_type='.xlsx',
-                                       tag_columns=[4], has_column_names=True,
-                                       column_prefix_dictionary={1: 'Label/', 3: 'Description/'},
+                                       tag_columns=[3], has_column_names=True,
+                                       column_prefix_dictionary={1: 'Label/', 2: 'Description/'},
                                        name='ExcelOneSheet.xlsx')
         buffer = io.BytesIO()
         spreadsheet.to_excel(buffer, output_assembled=True)
@@ -148,51 +157,51 @@ class Test(unittest.TestCase):
     def test_no_column_header_and_convert(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])
         hed_input.convert_to_long(self.hed_schema)
 
         events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         '../data/model_tests/no_column_header_long.tsv')
-        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
+        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[0, 1])
         self.assertTrue(hed_input._dataframe.equals(hed_input_long._dataframe))
 
     def test_convert_short_long_with_definitions(self):
         # Verify behavior works as expected even if definitions are present
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header_definition.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])
         hed_input.convert_to_long(self.hed_schema)
 
         events_path_long = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         '../data/model_tests/no_column_header_definition_long.tsv')
-        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[1, 2])
+        hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[0, 1])
         self.assertTrue(hed_input._dataframe.equals(hed_input_long._dataframe))
 
     def test_definitions_identified(self):
         # Todo: this test is no longer relevant
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header_definition.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header_definition.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])
 
 
     def test_loading_dataframe_directly(self):
         ds_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '../data/model_tests/no_column_header_definition.tsv')
         ds = pd.read_csv(ds_path, delimiter="\t", header=None)
-        hed_input = SpreadsheetInput(ds, has_column_names=False, tag_columns=[1, 2])
+        hed_input = SpreadsheetInput(ds, has_column_names=False, tag_columns=[0, 1])
 
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header_definition.tsv')
-        hed_input2 = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input2 = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])
         self.assertTrue(hed_input._dataframe.equals(hed_input2._dataframe))
 
     def test_ignoring_na_column(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/na_tag_column.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
+        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])
         self.assertTrue(hed_input.dataframe_a.loc[1, 1] == 'n/a')
 
     def test_ignoring_na_value_column(self):

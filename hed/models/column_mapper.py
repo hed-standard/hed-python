@@ -12,7 +12,7 @@ class ColumnMapper:
     """ Mapping of a base input file columns into HED tags.
 
     Notes:
-        - Functions and type_variables column and row indexing starts at 0.
+        - All column numbers are 0 based.
     """
     def __init__(self, sidecar=None, tag_columns=None, column_prefix_dictionary=None,
                  optional_tag_columns=None, requested_columns=None, warn_on_missing_column=False):
@@ -22,10 +22,12 @@ class ColumnMapper:
             sidecar (Sidecar): A sidecar to gather column data from.
             tag_columns: (list):  A list of ints or strings containing the columns that contain the HED tags.
                 Sidecar column definitions will take precedent if there is a conflict with tag_columns.
-            column_prefix_dictionary (dict): Dictionary with keys that are column numbers and values are HED tag
+            column_prefix_dictionary (dict): Dictionary with keys that are column numbers/names and values are HED tag
                 prefixes to prepend to the tags in that column before processing.
-                May be deprecated.  These are no longer prefixes, but rather converted to value columns.
-                eg. {"key": "Description"} will turn into a value column as {"key": "Description/#"}
+                May be deprecated/renamed.  These are no longer prefixes, but rather converted to value columns.
+                eg. {"key": "Description", 1: "Label/"} will turn into value columns as
+                    {"key": "Description/#", 1: "Label/#"}
+                    Note: It will be a validation issue if column 1 is called "key" in the above example.
                 This means it no longer accepts anything but the value portion only in the columns.
             optional_tag_columns (list): A list of ints or strings containing the columns that contain
                 the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
@@ -36,12 +38,6 @@ class ColumnMapper:
 
         Notes:
             - All column numbers are 0 based.
-
-        Examples:
-            column_prefix_dictionary = {3: 'Description/', 4: 'Label/'}
-
-            The third column contains tags that need Description/ tag prepended, while the fourth column
-            contains tag that needs Label/ prepended.
         """
         # This points to column_type entries based on column names or indexes if columns have no column_name.
         self.column_data = {}
@@ -79,9 +75,9 @@ class ColumnMapper:
             assign_to_column = column.column_name
             if isinstance(assign_to_column, int):
                 if self._column_map:
-                    assign_to_column = self._column_map[assign_to_column - 1]
+                    assign_to_column = self._column_map[assign_to_column]
                 else:
-                    assign_to_column = assign_to_column - 1
+                    assign_to_column = assign_to_column
             if column.column_type == ColumnType.Ignore:
                 continue
             elif column.column_type == ColumnType.Value:
@@ -154,7 +150,7 @@ class ColumnMapper:
             column_identifiers(list): A list of column numbers or names that are ColumnType.HedTags.
             0-based if integer-based, otherwise column name.
         """
-        return [column_entry.column_name - 1 if isinstance(column_entry.column_name, int) else column_entry.column_name
+        return [column_entry.column_name if isinstance(column_entry.column_name, int) else column_entry.column_name
                 for number, column_entry in self._final_column_map.items()
                 if column_entry.column_type == ColumnType.HEDTags]
 
@@ -263,6 +259,7 @@ class ColumnMapper:
     def _get_basic_final_map(column_map, column_data):
         basic_final_map = {}
         unhandled_names = {}
+        issues = []
         if column_map:
             for column_number, column_name in column_map.items():
                 if column_name is None:
@@ -277,11 +274,16 @@ class ColumnMapper:
                 unhandled_names[column_name] = column_number
         for column_number in column_data:
             if isinstance(column_number, int):
+                if column_number in basic_final_map:
+                    issues += ErrorHandler.format_error(ValidationErrors.DUPLICATE_NAME_NUMBER_COLUMN,
+                                                        column_name=basic_final_map[column_number].column_name,
+                                                        column_number=column_number)
+                    continue
                 column_entry = copy.deepcopy(column_data[column_number])
                 column_entry.column_name = column_number
                 basic_final_map[column_number] = column_entry
 
-        return basic_final_map, unhandled_names
+        return basic_final_map, unhandled_names, issues
 
     @staticmethod
     def _convert_to_indexes(name_to_column_map, column_list):
@@ -357,14 +359,15 @@ class ColumnMapper:
         # 2. Add any tag columns and note issues about missing columns
         # 3. Add any numbered columns that have required prefixes
         # 4. Filter to just requested columns, if any
-        final_map, unhandled_names = self._get_basic_final_map(self._column_map, self.column_data)
+        final_map, unhandled_names, issues = self._get_basic_final_map(self._column_map, self.column_data)
 
         # convert all tag lists to indexes -> Issuing warnings at this time potentially for unknown ones
-        all_tag_columns, required_tag_columns, issues = self._convert_tag_columns(self._tag_columns,
+        all_tag_columns, required_tag_columns, tag_issues = self._convert_tag_columns(self._tag_columns,
                                                                                   self._optional_tag_columns,
                                                                                   self._requested_columns,
                                                                                   self._reverse_column_map)
 
+        issues += tag_issues
         # Notes any missing required columns
         issues += self._add_tag_columns(final_map, unhandled_names, all_tag_columns, required_tag_columns,
                                         self._warn_on_missing_column)
