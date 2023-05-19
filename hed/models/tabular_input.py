@@ -15,7 +15,6 @@ class TabularInput(BaseInput):
         Parameters:
             file (str or file like): A tsv file to open.
             sidecar (str or Sidecar): A Sidecar filename or Sidecar
-                Note: If this is a string you MUST also pass hed_schema.
             name (str): The name to display for this file for error purposes.
         """
         if sidecar and not isinstance(sidecar, Sidecar):
