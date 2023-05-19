@@ -6,8 +6,7 @@ from hed.errors import ErrorHandler, sort_issues
 from hed.errors.error_types import ColumnErrors
 
 
-
-class TestInsertColumns(unittest.TestCase):
+class TestSpreadsheetValidation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.schema = load_schema_version("8.1.0")

@@ -177,7 +177,6 @@ class Test(unittest.TestCase):
                                    '../data/model_tests/no_column_header_definition.tsv')
         hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[1, 2])
 
-
     def test_loading_dataframe_directly(self):
         ds_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '../data/model_tests/no_column_header_definition.tsv')
@@ -204,5 +203,6 @@ class Test(unittest.TestCase):
         hed_input = TabularInput(events_path, sidecar=sidecar_path)
         self.assertTrue(hed_input.dataframe_a.loc[1, 'Value'] == 'n/a')
 
+    
 if __name__ == '__main__':
     unittest.main()
