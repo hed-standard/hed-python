@@ -206,22 +206,33 @@ class BaseInput:
             raise ValueError("Empty file name or object passed in to BaseInput.save.")
 
         dataframe = self._dataframe
+        old_columns = dataframe.columns
 
         if output_assembled:
             dataframe = self.dataframe_a
+            new_columns = dataframe.columns
+        else:
+            new_columns = old_columns
 
         if self._loaded_workbook:
+            column_mapping = {}  # assembled dataframe column number to original worksheet number
+            for new_c, column in enumerate(new_columns):
+                for old_c, old_column in enumerate(old_columns):
+                    if column == old_column:
+                        column_mapping[new_c] = old_c
+
             old_worksheet = self.get_worksheet(self._worksheet_name)
             # Excel spreadsheets are 1 based, then add another 1 for column names if present
             adj_row_for_col_names = 1
             if self._has_column_names:
                 adj_row_for_col_names += 1
             adj_for_one_based_cols = 1
-            for row_number, text_file_row in dataframe.iterrows():
-                for column_number, column_text in enumerate(text_file_row):
+            for row_number in range(len(dataframe)):
+                for df_column_number, ws_column_number in column_mapping.items():
+                    cell_value = dataframe.iat[row_number, df_column_number]
+
                     old_worksheet.cell(row_number + adj_row_for_col_names,
-                                       column_number + adj_for_one_based_cols).value = \
-                        dataframe.iloc[row_number, column_number]
+                                       ws_column_number + adj_for_one_based_cols).value = cell_value
             self._loaded_workbook.save(file)
         else:
             dataframe.to_excel(file, header=self._has_column_names)
