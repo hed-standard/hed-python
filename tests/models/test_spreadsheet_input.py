@@ -3,13 +3,10 @@ import os
 import io
 
 from hed.errors import HedFileError
-from hed.models import TabularInput, SpreadsheetInput, model_constants, Sidecar
+from hed.models import TabularInput, SpreadsheetInput,  Sidecar
 import shutil
 from hed import schema
 import pandas as pd
-
-
-# TODO: Add tests about correct handling of 'n/a'
 
 
 class Test(unittest.TestCase):
@@ -20,7 +17,7 @@ class Test(unittest.TestCase):
         hed_xml_file = os.path.join(base, "schema_tests/HED8.0.0t.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         default = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                               "../data/validator_tests/ExcelMultipleSheets.xlsx")
+                               "../data/spreadsheet_validator_tests/ExcelMultipleSheets.xlsx")
         cls.default_test_file_name = default
         cls.generic_file_input = SpreadsheetInput(default)
         base_output = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tests_output/")
@@ -208,10 +205,58 @@ class Test(unittest.TestCase):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/na_value_column.tsv')
         sidecar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/model_tests/na_value_column.json')
+                                    '../data/model_tests/na_value_column.json')
         hed_input = TabularInput(events_path, sidecar=sidecar_path)
         self.assertTrue(hed_input.dataframe_a.loc[1, 'Value'] == 'n/a')
 
-    
+    def test_to_excel_workbook(self):
+        excel_book = SpreadsheetInput(self.default_test_file_name, worksheet_name="LKT 8HED3",
+                                      tag_columns=["HED tags"])
+        test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_assembled.xlsx"
+        excel_book.convert_to_long(self.hed_schema)
+        excel_book.to_excel(test_output_name, True)
+        reloaded_df = SpreadsheetInput(test_output_name, worksheet_name="LKT 8HED3")
+
+        self.assertTrue(excel_book.dataframe.equals(reloaded_df.dataframe))
+
+        excel_book = SpreadsheetInput(self.default_test_file_name, worksheet_name="LKT 8HED3",
+                                      tag_columns=["HED tags"],
+                                      column_prefix_dictionary={
+                                          "Short label": "Label/",
+                                          "Description in text": "Description"
+                                      })
+        test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_assembled_prefix.xlsx"
+        excel_book.convert_to_long(self.hed_schema)
+        excel_book.to_excel(test_output_name, True)
+        reloaded_df = SpreadsheetInput(test_output_name, worksheet_name="LKT 8HED3",
+                                       tag_columns=["Short label", "Description in text", "HED tags"])
+
+        self.assertTrue(excel_book.dataframe_a.equals(reloaded_df.dataframe_a))
+
+    def test_to_excel_workbook_no_col_names(self):
+        excel_book = SpreadsheetInput(self.default_test_file_name, worksheet_name="LKT 8HED3",
+                                      tag_columns=[4], has_column_names=False)
+        test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_assembled_no_col_names.xlsx"
+        excel_book.convert_to_long(self.hed_schema)
+        excel_book.to_excel(test_output_name, True)
+        reloaded_df = SpreadsheetInput(test_output_name, worksheet_name="LKT 8HED3", tag_columns=[4],
+                                       has_column_names=False)
+        self.assertTrue(excel_book.dataframe.equals(reloaded_df.dataframe))
+
+        excel_book = SpreadsheetInput(self.default_test_file_name, worksheet_name="LKT 8HED3", has_column_names=False,
+                                      tag_columns=[4],
+                                      column_prefix_dictionary={
+                                          1: "Label/",
+                                          3: "Description"
+                                      })
+        test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_assembled_prefix.xlsx"
+        excel_book.convert_to_long(self.hed_schema)
+        excel_book.to_excel(test_output_name, True)
+        reloaded_df = SpreadsheetInput(test_output_name, worksheet_name="LKT 8HED3", tag_columns=[1, 3, 4],
+                                       has_column_names=False)
+
+        self.assertTrue(excel_book.dataframe_a.equals(reloaded_df.dataframe_a))
+
+
 if __name__ == '__main__':
     unittest.main()
