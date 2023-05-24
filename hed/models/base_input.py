@@ -193,12 +193,11 @@ class BaseInput:
         from df_util import expand_defs
         expand_defs(self._dataframe, hed_schema=hed_schema, def_dict=def_dict, columns=self._mapper.get_tag_columns())
 
-    def to_excel(self, file, output_assembled=False):
+    def to_excel(self, file):
         """ Output to an Excel file.
 
         Parameters:
             file (str or file-like):      Location to save this base input.
-            output_assembled (bool): Plug in categories and values from the sidecar directly.
         Raises:
             ValueError: if empty file object or file cannot be opened.
         """
@@ -206,52 +205,33 @@ class BaseInput:
             raise ValueError("Empty file name or object passed in to BaseInput.save.")
 
         dataframe = self._dataframe
-        old_columns = dataframe.columns
-
-        if output_assembled:
-            dataframe = self.dataframe_a
-            new_columns = dataframe.columns
-        else:
-            new_columns = old_columns
-
         if self._loaded_workbook:
-            column_mapping = {}  # assembled dataframe column number to original worksheet number
-            for new_c, column in enumerate(new_columns):
-                for old_c, old_column in enumerate(old_columns):
-                    if column == old_column:
-                        column_mapping[new_c] = old_c
-
             old_worksheet = self.get_worksheet(self._worksheet_name)
             # Excel spreadsheets are 1 based, then add another 1 for column names if present
             adj_row_for_col_names = 1
             if self._has_column_names:
                 adj_row_for_col_names += 1
             adj_for_one_based_cols = 1
-            for row_number in range(len(dataframe)):
-                for df_column_number, ws_column_number in column_mapping.items():
-                    cell_value = dataframe.iat[row_number, df_column_number]
-
+            for row_number, text_file_row in dataframe.iterrows():
+                for column_number, column_text in enumerate(text_file_row):
+                    cell_value = dataframe.iloc[row_number, column_number]
                     old_worksheet.cell(row_number + adj_row_for_col_names,
-                                       ws_column_number + adj_for_one_based_cols).value = cell_value
+                                       column_number + adj_for_one_based_cols).value = cell_value
+
             self._loaded_workbook.save(file)
         else:
             dataframe.to_excel(file, header=self._has_column_names)
 
-    def to_csv(self, file=None, output_assembled=False):
+    def to_csv(self, file=None):
         """ Write to file or return as a string.
 
         Parameters:
             file (str, file-like, or None): Location to save this file. If None, return as string.
-            output_assembled (bool): Plug in categories and values from the sidecar directly.
         Returns:
             None or str:  None if file is given or the contents as a str if file is None.
 
         """
         dataframe = self._dataframe
-
-        if output_assembled:
-            dataframe = self.dataframe_a
-
         csv_string_if_filename_none = dataframe.to_csv(file, '\t', index=False, header=self._has_column_names)
         return csv_string_if_filename_none
 
