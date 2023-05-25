@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
         hed_input = self.default_test_file_name
         has_column_names = True
         column_prefix_dictionary = {1: 'Label/', 2: 'Description'}
-        tag_columns = [3]
+        tag_columns = [4]
         worksheet_name = 'LKT Events'
 
         file_input = SpreadsheetInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
         hed_input = self.default_test_file_name
         has_column_names = True
         column_prefix_dictionary = {1: 'Label/', "Short label": 'Description'}
-        tag_columns = [3]
+        tag_columns = [4]
         worksheet_name = 'LKT Events'
 
         file_input = SpreadsheetInput(hed_input, has_column_names=has_column_names, worksheet_name=worksheet_name,
@@ -113,7 +113,7 @@ class Test(unittest.TestCase):
                                        column_prefix_dictionary={1: 'Label/', 2: 'Description/'},
                                        name='ExcelOneSheet.xlsx')
         buffer = io.BytesIO()
-        spreadsheet.to_excel(buffer, output_assembled=True)
+        spreadsheet.to_excel(buffer)
         buffer.seek(0)
         v = buffer.getvalue()
         self.assertGreater(len(v), 0, "It should have a length greater than 0")
@@ -214,48 +214,20 @@ class Test(unittest.TestCase):
                                       tag_columns=["HED tags"])
         test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_assembled.xlsx"
         excel_book.convert_to_long(self.hed_schema)
-        excel_book.to_excel(test_output_name, True)
+        excel_book.to_excel(test_output_name)
         reloaded_df = SpreadsheetInput(test_output_name, worksheet_name="LKT 8HED3")
 
         self.assertTrue(excel_book.dataframe.equals(reloaded_df.dataframe))
-
-        excel_book = SpreadsheetInput(self.default_test_file_name, worksheet_name="LKT 8HED3",
-                                      tag_columns=["HED tags"],
-                                      column_prefix_dictionary={
-                                          "Short label": "Label/",
-                                          "Description in text": "Description"
-                                      })
-        test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_assembled_prefix.xlsx"
-        excel_book.convert_to_long(self.hed_schema)
-        excel_book.to_excel(test_output_name, True)
-        reloaded_df = SpreadsheetInput(test_output_name, worksheet_name="LKT 8HED3",
-                                       tag_columns=["Short label", "Description in text", "HED tags"])
-
-        self.assertTrue(excel_book.dataframe_a.equals(reloaded_df.dataframe_a))
 
     def test_to_excel_workbook_no_col_names(self):
         excel_book = SpreadsheetInput(self.default_test_file_name, worksheet_name="LKT 8HED3",
                                       tag_columns=[4], has_column_names=False)
         test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_assembled_no_col_names.xlsx"
         excel_book.convert_to_long(self.hed_schema)
-        excel_book.to_excel(test_output_name, True)
+        excel_book.to_excel(test_output_name)
         reloaded_df = SpreadsheetInput(test_output_name, worksheet_name="LKT 8HED3", tag_columns=[4],
                                        has_column_names=False)
         self.assertTrue(excel_book.dataframe.equals(reloaded_df.dataframe))
-
-        excel_book = SpreadsheetInput(self.default_test_file_name, worksheet_name="LKT 8HED3", has_column_names=False,
-                                      tag_columns=[4],
-                                      column_prefix_dictionary={
-                                          1: "Label/",
-                                          3: "Description"
-                                      })
-        test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_assembled_prefix.xlsx"
-        excel_book.convert_to_long(self.hed_schema)
-        excel_book.to_excel(test_output_name, True)
-        reloaded_df = SpreadsheetInput(test_output_name, worksheet_name="LKT 8HED3", tag_columns=[1, 3, 4],
-                                       has_column_names=False)
-
-        self.assertTrue(excel_book.dataframe_a.equals(reloaded_df.dataframe_a))
 
 
 if __name__ == '__main__':
