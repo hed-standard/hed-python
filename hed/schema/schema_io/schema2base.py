@@ -34,11 +34,9 @@ class HedSchema2Base:
                 self._save_base = True
         else:
             # Saving a standard schema or a library schema without a standard schema
-            save_merged = False
-            if hed_schema.library:
-                self._save_lib = True
-            else:
-                self._save_base = True
+            save_merged = True
+            self._save_lib = True
+            self._save_base = True
         self._save_merged = save_merged
 
 
