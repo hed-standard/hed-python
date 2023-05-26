@@ -71,7 +71,7 @@ class ColumnMapper:
                 tag_columns(list of str or int): A list of all tag and optional tag columns as labels
         """
         joined_list = self._tag_columns + self._optional_tag_columns
-        return list(set(self._convert_to_names2(self._column_map, joined_list)))
+        return list(set(self._convert_to_names(self._column_map, joined_list)))
 
     @property
     def column_prefix_dictionary(self):
@@ -239,7 +239,7 @@ class ColumnMapper:
         return basic_final_map, unhandled_cols
 
     @staticmethod
-    def _convert_to_names2(column_to_name_map, column_list):
+    def _convert_to_names(column_to_name_map, column_list):
         converted_names = []
         for index in column_list:
             if isinstance(index, int):
@@ -307,18 +307,16 @@ class ColumnMapper:
                         issues += ErrorHandler.format_error(ValidationErrors.HED_MISSING_REQUIRED_COLUMN,
                                                             test_col, list_name)
 
-            duplicates = [item for item, count in Counter(converted_list).items() if count > 1]
-            for duplicate in duplicates:
-                issues += ErrorHandler.format_error(ValidationErrors.DUPLICATE_COLUMN_IN_LIST,
-                                                    duplicate, self._column_map.get(duplicate), list_name)
+            issues += self._check_for_duplicates_between_lists(converted_list, list_name,
+                                                               ValidationErrors.DUPLICATE_COLUMN_IN_LIST)
 
         return issues
 
-    def _check_for_duplicates_between_lists(self, combined_list, list_names):
+    def _check_for_duplicates_between_lists(self, checking_list, list_names, error_type):
         issues = []
-        duplicates = [item for item, count in Counter(combined_list).items() if count > 1]
+        duplicates = [item for item, count in Counter(checking_list).items() if count > 1]
         for duplicate in duplicates:
-            issues += ErrorHandler.format_error(ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES, duplicate,
+            issues += ErrorHandler.format_error(error_type, duplicate,
                                                 self._column_map.get(duplicate), list_names)
         return issues
 
@@ -338,7 +336,8 @@ class ColumnMapper:
 
         combined_list = self.tag_columns + list(self.column_prefix_dictionary)
         # 3. Verify prefix and tag columns do not conflict.
-        issues += self._check_for_duplicates_between_lists(combined_list, list_names)
+        issues += self._check_for_duplicates_between_lists(combined_list, list_names,
+                                                           ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
 
         # 4. Verify we didn't get both a sidecar and a tag column list
         if self._sidecar and combined_list and combined_list != ["HED"]:
