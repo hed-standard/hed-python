@@ -147,13 +147,11 @@ class ColumnMapper:
             raise ValueError("Trying to set a second sidecar on a column mapper.")
         if not sidecar:
             return None
-        # for column_data in sidecar.column_data:
-        #     self._add_column_data(column_data)
 
         self._sidecar = sidecar
 
     @property
-    def column_data(self):
+    def sidecar_column_data(self):
         if self._sidecar:
             return self._sidecar.column_data
 
@@ -345,7 +343,7 @@ class ColumnMapper:
 
         # 5. Verify we handled all columns
         if self._warn_on_missing_column:
-            fully_combined_list = list(self.column_data) + combined_list
+            fully_combined_list = list(self.sidecar_column_data) + combined_list
             for column in self._column_map.values():
                 if column not in fully_combined_list:
                     issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN, column)
@@ -354,7 +352,7 @@ class ColumnMapper:
         return issues
 
     def _finalize_mapping(self):
-        final_map, unhandled_cols = self._get_sidecar_basic_map(self._column_map, self.column_data)
+        final_map, unhandled_cols = self._get_sidecar_basic_map(self._column_map, self.sidecar_column_data)
 
         self._add_tag_columns(final_map, self.tag_columns)
         self._remove_from_list(unhandled_cols, self.tag_columns)

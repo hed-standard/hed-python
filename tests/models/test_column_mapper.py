@@ -191,12 +191,12 @@ class Test(unittest.TestCase):
     def test_add_json_file_events(self):
         mapper = ColumnMapper()
         mapper._set_sidecar(Sidecar(self.basic_events_json))
-        self.assertTrue(len(mapper.column_data) >= 2)
+        self.assertTrue(len(mapper.sidecar_column_data) >= 2)
 
     def test__detect_event_type(self):
         mapper = ColumnMapper()
         mapper._set_sidecar(Sidecar(self.basic_events_json))
-        self.assertTrue(mapper.column_data[self.basic_event_name].column_type == self.basic_event_type)
+        self.assertTrue(mapper.sidecar_column_data[self.basic_event_name].column_type == self.basic_event_type)
 
     def test_tag_mapping_complex(self):
         tag_columns = [0]
