@@ -41,9 +41,7 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(file_input.dataframe_a, pd.DataFrame))
         self.assertTrue(isinstance(file_input.series_a, pd.Series))
         self.assertTrue(file_input.dataframe_a.size)
-
-        # Just make sure this didn't crash for now
-        self.assertTrue(True)
+        self.assertEqual(len(file_input._mapper.get_column_mapping_issues()), 0)
 
     def test_all2(self):
         # This should work, but raise an issue as Short label and column 1 overlap.
@@ -59,10 +57,7 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(file_input.dataframe_a, pd.DataFrame))
         self.assertTrue(isinstance(file_input.series_a, pd.Series))
         self.assertTrue(file_input.dataframe_a.size)
-        self.assertTrue(len(file_input._mapper.get_column_mapping_issues()), 1)
-
-        # Just make sure this didn't crash for now
-        self.assertTrue(True)
+        self.assertEqual(len(file_input._mapper.get_column_mapping_issues()), 1)
 
     def test_file_as_string(self):
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),

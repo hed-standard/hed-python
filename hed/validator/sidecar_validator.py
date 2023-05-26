@@ -58,7 +58,7 @@ class SidecarValidator:
         issues += sidecar_def_dict.issues
 
         definition_checks = {}
-        for column_data in sidecar.column_data:
+        for column_data in sidecar:
             column_name = column_data.column_name
             hed_strings = column_data.get_hed_strings()
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
@@ -113,7 +113,7 @@ class SidecarValidator:
 
         issues = []
         found_column_references = {}
-        for column_data in sidecar.column_data:
+        for column_data in sidecar:
             column_name = column_data.column_name
             hed_strings = column_data.get_hed_strings()
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)

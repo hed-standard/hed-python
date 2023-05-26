@@ -34,7 +34,7 @@ class Sidecar:
             iterator: An iterator over the column metadata values.
 
         """
-        return iter(self.column_data)
+        return iter(self.column_data.values())
 
     def __getitem__(self, column_name):
         if column_name not in self.loaded_dict:
@@ -72,7 +72,7 @@ class Sidecar:
         Returns:
             list(ColumnMetadata): the list of column metadata defined by this sidecar
         """
-        return [ColumnMetadata(name=col_name, source=self.loaded_dict) for col_name in self.loaded_dict]
+        return {col_name: ColumnMetadata(name=col_name, source=self.loaded_dict) for col_name in self.loaded_dict}
 
     def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
         """ Returns the definition dict for this sidecar.
@@ -236,7 +236,7 @@ class Sidecar:
         """
 
         found_vals = set()
-        for column_data in self.column_data:
+        for column_data in self:
             if column_data.column_type == ColumnType.Ignore:
                 continue
             hed_strings = column_data.get_hed_strings()

@@ -139,7 +139,7 @@ class Test(unittest.TestCase):
                                        worksheet_name='LKT Events')
 
         validation_issues = loaded_file.validate(hed_schema=hed_schema)
-        self.assertEqual(len(validation_issues), 4)
+        self.assertEqual(len(validation_issues), 5)
 
     def test_tabular_input_with_HED_col_in_json(self):
         schema_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
