@@ -790,7 +790,7 @@ class HedSchema:
     # ===============================================
     def _add_tag_to_dict(self, long_tag_name, new_entry, key_class):
         # No reason we can't add this here always
-        if self.library and not self.merged:
+        if self.library and not self.merged and self.with_standard:
             new_entry.set_attribute_value(HedKey.InLibrary, self.library)
 
         section = self._sections[key_class]
