@@ -308,8 +308,9 @@ class HedSchemaWikiParser:
                 rooted_entry = schema_validation_util.check_rooted_errors(tag_entry, self._schema, self._loading_merged)
                 if rooted_entry:
                     parent_tags = rooted_entry.long_tag_name.split("/")
-                    level_adj = len(parent_tags) - 1
-                    continue
+                    level_adj = len(parent_tags)
+                    # Create the entry again for rooted tags, to get the full name.
+                    tag_entry = self._add_tag_line(parent_tags, line_number, line)
             except HedFileError as e:
                 self._add_fatal_error(line_number, line, e.message, e.code)
                 continue

@@ -5,7 +5,7 @@ This schema is the first official release that includes an xsd and requires unit
 
 !# start schema
 
-'''NotRealTag'''{rooted}
+'''NotRealTag'''{rooted=AlsoNotRealTag}
 * Oboe-sound
 
 

@@ -5,16 +5,15 @@ This schema is the first official release that includes an xsd and requires unit
 
 !# start schema
 
-'''Instrument-sound'''{rooted}
-* Oboe-sound
-** Oboe-subsound
-* Violin-sound
-** Violin-subsound
-** Violin-subsound2
+'''Oboe-sound''' {rooted=Instrument-sound}
+* Oboe-subsound
+
+'''Violin-sound''' {rooted=Instrument-sound}
+* Violin-subsound
+* Violin-subsound2
 
 
-'''Instrument-sound'''{rooted}
-* Oboe-sound
+'''Oboe-sound''' {rooted=Instrument-sound}
 
 !# end schema
 

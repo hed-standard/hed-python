@@ -212,6 +212,14 @@ class TestHedSchemaMerging(unittest.TestCase):
 
         self._base_merging_test(files)
 
+    def test_saving_merged_rooted(self):
+        files = [
+            load_schema(os.path.join(self.full_base_folder, "basic_root.mediawiki")),
+            load_schema(os.path.join(self.full_base_folder, "basic_root.xml")),
+        ]
+
+        self._base_merging_test(files)
+
     def _base_added_class_tests(self, schema):
         tag_entry = schema.all_tags["Modulator"]
         self.assertEqual(tag_entry.attributes["suggestedTag"], "Event")
@@ -298,6 +306,10 @@ class TestHedSchemaMerging(unittest.TestCase):
         files = [
             os.path.join(self.full_base_folder, "issues_tests/HED_badroot_0.0.1.mediawiki"),
             os.path.join(self.full_base_folder, "issues_tests/HED_root_wrong_place_0.0.1.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid1.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid2.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid3.mediawiki"),
+
         ]
         for file in files:
             with self.assertRaises(HedFileError):

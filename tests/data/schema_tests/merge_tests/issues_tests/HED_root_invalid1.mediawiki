@@ -1,12 +1,14 @@
-HED library="testlib" version="1.0.2" withStandard="8.2.0" unmerged="true"
+HED library="testlib" version="1.0.2"
 
 '''Prologue'''
 This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
 
 !# start schema
 
-'''Instrument-sound'''
-* Oboe-sound {rooted=Instrument-sound}
+'''DummyTagToAvoidIssue'''
+
+'''Instrument-sound'''{rooted=DummyTagToAvoidIssue}
+* Oboe-sound
 
 
 !# end schema

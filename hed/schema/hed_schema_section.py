@@ -220,7 +220,7 @@ class HedSchemaTagSection(HedSchemaSection):
                 parent_entry = self.get(parent_name.lower())
                 parent_index = self.all_entries.index(parent_entry) + 1
                 for i in range(parent_index, len(self.all_entries)):
-                    parent_index = i + 1
+                    parent_index = i
                     if not self.all_entries[i].name.startswith(parent_entry.name):
                         break
 

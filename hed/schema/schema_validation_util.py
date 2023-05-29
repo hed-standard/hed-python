@@ -115,7 +115,8 @@ def check_rooted_errors(tag_entry, schema, loading_merged):
         HedValueError: Raises if the tag doesn't exist or similar
 
     """
-    if tag_entry.has_attribute(constants.HedKey.Rooted):
+    rooted_tag = tag_entry.has_attribute(constants.HedKey.Rooted, return_value=True)
+    if rooted_tag is not None:
         if tag_entry.parent_name:
             raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
                                f'Found rooted tag \'{tag_entry.short_tag_name}\' as a non root node.',
@@ -129,7 +130,12 @@ def check_rooted_errors(tag_entry, schema, loading_merged):
                                f'Found rooted tag \'{tag_entry.short_tag_name}\' in schema without unmerged="True"',
                                schema.filename)
 
-        rooted_entry = schema.all_tags.get(tag_entry.name.lower())
+        if not isinstance(rooted_tag, str):
+            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                               f'Rooted tag \'{tag_entry.short_tag_name}\' is not a string."',
+                               schema.filename)
+
+        rooted_entry = schema.all_tags.get(rooted_tag)
         if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):
             raise HedFileError(HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
                                f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",

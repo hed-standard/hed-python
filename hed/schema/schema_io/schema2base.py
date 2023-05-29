@@ -100,9 +100,7 @@ class HedSchema2Base:
                 if tag_entry.has_attribute(HedKey.InLibrary) and tag_entry.parent and \
                         not tag_entry.parent.has_attribute(HedKey.InLibrary):
                     if tag_entry.parent.name not in all_nodes:
-                        parent_node = self._write_rooted_parent_entry(tag_entry, schema_node)
-                        all_nodes[tag_entry.parent.name] = parent_node
-                        level_adj = level - 1
+                        level_adj = level
 
                 parent_node = all_nodes.get(tag_entry.parent_name, schema_node)
                 child_node = self._write_tag_entry(tag_entry, parent_node, level - level_adj)
