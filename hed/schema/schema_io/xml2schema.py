@@ -122,7 +122,7 @@ class HedSchemaXMLParser:
                 tag = tag.replace(loading_from_chain_short, loading_from_chain)
             tag_entry = self._parse_node(tag_element, HedSectionKey.AllTags, tag)
 
-            rooted_entry = schema_validation_util.check_rooted_errors(tag_entry, self._schema, self._loading_merged)
+            rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
             if rooted_entry:
                 loading_from_chain = rooted_entry.name + "/" + tag_entry.short_tag_name
                 loading_from_chain_short = tag_entry.short_tag_name

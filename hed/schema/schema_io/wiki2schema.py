@@ -305,7 +305,7 @@ class HedSchemaWikiParser:
                 continue
 
             try:
-                rooted_entry = schema_validation_util.check_rooted_errors(tag_entry, self._schema, self._loading_merged)
+                rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
                 if rooted_entry:
                     parent_tags = rooted_entry.long_tag_name.split("/")
                     level_adj = len(parent_tags)

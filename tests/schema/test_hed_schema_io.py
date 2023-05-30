@@ -10,6 +10,7 @@ import shutil
 from hed.errors import HedExceptions
 
 
+# todo: speed up these tests
 class TestHedSchema(unittest.TestCase):
 
     def test_load_invalid_schema(self):
@@ -180,6 +181,9 @@ class TestHedSchemaMerging(unittest.TestCase):
                     # print(s1.filename)
                     # print(s2.filename)
                     self.assertTrue(result)
+                    reload1 = load_schema(path1)
+                    reload2 = load_schema(path2)
+                    self.assertEqual(reload1, reload2)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
@@ -189,6 +193,10 @@ class TestHedSchemaMerging(unittest.TestCase):
                     path2 = s2.save_as_mediawiki(save_merged=save_merged)
                     result = filecmp.cmp(path1, path2)
                     self.assertTrue(result)
+
+                    reload1 = load_schema(path1)
+                    reload2 = load_schema(path2)
+                    self.assertEqual(reload1, reload2)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
