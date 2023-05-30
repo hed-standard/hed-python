@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<HED version="1.0.2" library="testlib" withStandard="8.2.0" unmerged="True">
+   <prologue>This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.</prologue>
+   <schema>
+      <node>
+         <name>Oboe-sound</name>
+         <attribute>
+            <name>rooted</name>
+            <value>Instrument-sound</value>
+         </attribute>
+         <node>
+            <name>Oboe-subsound</name>
+         </node>
+      </node>
+      <node>
+         <name>Violin-sound</name>
+         <attribute>
+            <name>rooted</name>
+            <value>Instrument-sound</value>
+         </attribute>
+         <node>
+            <name>Violin-subsound</name>
+         </node>
+         <node>
+            <name>Violin-subsound2</name>
+         </node>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+</HED>

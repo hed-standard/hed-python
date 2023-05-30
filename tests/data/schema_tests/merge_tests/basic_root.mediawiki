@@ -1,0 +1,29 @@
+HED version="1.0.2" library="testlib" withStandard="8.2.0" unmerged="True"
+
+'''Prologue'''
+This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
+
+!# start schema
+
+'''Oboe-sound''' <nowiki>{rooted=Instrument-sound}</nowiki>
+	* Oboe-subsound
+
+'''Violin-sound''' <nowiki>{rooted=Instrument-sound}</nowiki>
+	* Violin-subsound
+	* Violin-subsound2
+
+
+!# end schema
+
+'''Unit classes'''
+
+'''Unit modifiers'''
+
+'''Value classes'''
+
+'''Schema attributes'''
+
+'''Properties'''
+'''Epilogue'''
+
+!# end hed

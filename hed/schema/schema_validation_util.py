@@ -99,7 +99,7 @@ def validate_attributes(attrib_dict, filename):
 
 
 # Might move this to a baseclass version if one is ever made for wiki2schema/xml2schema
-def check_rooted_errors(tag_entry, schema, loading_merged):
+def find_rooted_entry(tag_entry, schema, loading_merged):
     """ This semi-validates rooted tags, raising an exception on major errors
 
     Parameters:
@@ -115,11 +115,8 @@ def check_rooted_errors(tag_entry, schema, loading_merged):
         HedValueError: Raises if the tag doesn't exist or similar
 
     """
-    if tag_entry.has_attribute(constants.HedKey.Rooted):
-        if tag_entry.parent_name:
-            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                               f'Found rooted tag \'{tag_entry.short_tag_name}\' as a non root node.',
-                               schema.filename)
+    rooted_tag = tag_entry.has_attribute(constants.HedKey.Rooted, return_value=True)
+    if rooted_tag is not None:
         if not schema.with_standard:
             raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
                                f"Rooted tag attribute found on '{tag_entry.short_tag_name}' in a standard schema.",
@@ -129,7 +126,17 @@ def check_rooted_errors(tag_entry, schema, loading_merged):
                                f'Found rooted tag \'{tag_entry.short_tag_name}\' in schema without unmerged="True"',
                                schema.filename)
 
-        rooted_entry = schema.all_tags.get(tag_entry.name.lower())
+        if not isinstance(rooted_tag, str):
+            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                               f'Rooted tag \'{tag_entry.short_tag_name}\' is not a string."',
+                               schema.filename)
+
+        if tag_entry.parent_name:
+            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                               f'Found rooted tag \'{tag_entry.short_tag_name}\' as a non root node.',
+                               schema.filename)
+
+        rooted_entry = schema.all_tags.get(rooted_tag)
         if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):
             raise HedFileError(HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
                                f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",

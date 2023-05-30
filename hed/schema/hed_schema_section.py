@@ -212,17 +212,20 @@ class HedSchemaTagSection(HedSchemaSection):
         return new_entry
 
     def _add_to_dict(self, name, new_entry, parent_index=None):
+        if new_entry.has_attribute(HedKey.Rooted):
+            del new_entry.attributes[HedKey.Rooted]
         if new_entry.has_attribute(HedKey.InLibrary):
             parent_name = new_entry.parent_name
             if parent_name.lower() in self:
                 # Make sure we insert the new entry after all previous relevant ones, as order isn't assured
                 # for rooted tags
                 parent_entry = self.get(parent_name.lower())
-                parent_index = self.all_entries.index(parent_entry) + 1
+                parent_index = self.all_entries.index(parent_entry)
                 for i in range(parent_index, len(self.all_entries)):
-                    parent_index = i + 1
-                    if not self.all_entries[i].name.startswith(parent_entry.name):
-                        break
+                    if self.all_entries[i].name.startswith(parent_entry.name):
+                        parent_index = i + 1
+                        continue
+                    break
 
         return super()._add_to_dict(name, new_entry, parent_index)
 
