@@ -82,7 +82,7 @@ class BaseInput:
             raise HedFileError(HedExceptions.INVALID_DATAFRAME, "Invalid dataframe(malformed datafile, etc)", file)
 
         # todo: Can we get rid of this behavior now that we're using pandas?
-        column_issues = ColumnMapper.validate_column_map(self.columns, allow_blank_names=allow_blank_names)
+        column_issues = ColumnMapper.check_for_blank_names(self.columns, allow_blank_names=allow_blank_names)
         if column_issues:
             raise HedFileError(HedExceptions.BAD_COLUMN_NAMES, "Duplicate or blank columns found.  See issues.",
                                self.name, issues=column_issues)

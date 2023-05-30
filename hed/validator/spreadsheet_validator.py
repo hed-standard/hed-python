@@ -100,7 +100,7 @@ class SpreadsheetValidator:
             List of issues associated with each invalid value. Each issue is a dictionary.
         """
         issues = []
-        col_issues = base_input._mapper.get_column_mapping_issues()
+        col_issues = base_input._mapper.check_for_mapping_issues(base_input)
         error_handler.add_context_and_filter(col_issues)
         issues += col_issues
         for column in base_input.column_metadata().values():

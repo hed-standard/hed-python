@@ -107,8 +107,8 @@ def val_error_no_value(tag):
 
 
 @hed_error(ValidationErrors.HED_MISSING_REQUIRED_COLUMN, default_severity=ErrorSeverity.WARNING)
-def val_error_missing_column(column_name):
-    return f"Required column '{column_name}' not specified or found in file."
+def val_error_missing_column(column_name, column_type):
+    return f"Required {column_type} column '{column_name}' not specified or found in file."
 
 
 @hed_error(ValidationErrors.HED_UNKNOWN_COLUMN, default_severity=ErrorSeverity.WARNING)
@@ -117,19 +117,33 @@ def val_error_extra_column(column_name):
         "or identified in sidecars."
 
 
+@hed_error(ValidationErrors.SIDECAR_AND_OTHER_COLUMNS)
+def val_error_sidecar_with_column(column_names):
+    return f"You cannot use a sidecar and tag or prefix columns at the same time. " \
+            f"Found {column_names}."
+
+
+@hed_error(ValidationErrors.DUPLICATE_COLUMN_IN_LIST)
+def val_error_duplicate_clumn(column_number, column_name, list_name):
+    if column_name:
+        return f"Found column '{column_name}' at index {column_number} twice in {list_name}."
+    else:
+        return f"Found column number {column_number} twice in {list_name}.  This isn't a major concern, but does indicate a mistake."
+
+
+@hed_error(ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
+def val_error_duplicate_clumn(column_number, column_name, list_names):
+    if column_name:
+        return f"Found column '{column_name}' at index {column_number} in the following inputs: {list_names}. " \
+               f"Each entry must be unique."
+    else:
+        return f"Found column number {column_number} in the following inputs: {list_names}. " \
+               f"Each entry must be unique."
+
+
 @hed_error(ValidationErrors.HED_BLANK_COLUMN, default_severity=ErrorSeverity.WARNING)
 def val_error_hed_blank_column(column_number):
     return f"Column number {column_number} has no column name"
-
-
-@hed_error(ValidationErrors.HED_DUPLICATE_COLUMN, default_severity=ErrorSeverity.WARNING)
-def val_error_hed_duplicate_column(column_name):
-    return f"Multiple columns have name {column_name}.  This is not a fatal error, but discouraged."
-
-
-@hed_error(ValidationErrors.DUPLICATE_NAME_NUMBER_COLUMN, default_severity=ErrorSeverity.WARNING)
-def val_error_hed_duplicate_column_number(column_name, column_number):
-    return f"Column '{column_name}' added as a named column, then also as numbered column {column_number}"
 
 
 @hed_tag_error(ValidationErrors.HED_LIBRARY_UNMATCHED, actual_code=ValidationErrors.TAG_PREFIX_INVALID)
