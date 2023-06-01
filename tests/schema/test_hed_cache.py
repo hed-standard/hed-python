@@ -116,7 +116,10 @@ class Test(unittest.TestCase):
 class TestLocal(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../schema_cache_test_local/')
+        hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../schema_cache_test_local/')
+        if os.path.exists(hed_cache_dir) and os.path.isdir(hed_cache_dir):
+            shutil.rmtree(hed_cache_dir)
+        cls.hed_cache_dir = hed_cache_dir
         cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
         schema.set_cache_directory(cls.hed_cache_dir)
 
