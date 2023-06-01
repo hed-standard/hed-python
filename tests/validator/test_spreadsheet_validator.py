@@ -7,8 +7,7 @@ from hed import load_schema_version, load_schema
 from hed.validator import SpreadsheetValidator
 from hed import SpreadsheetInput
 
-
-class TestInsertColumns(unittest.TestCase):
+class TestSpreadsheetValidation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.schema = load_schema_version("8.1.0")

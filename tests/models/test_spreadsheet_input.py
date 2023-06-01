@@ -3,7 +3,7 @@ import os
 import io
 
 from hed.errors import HedFileError
-from hed.models import TabularInput, SpreadsheetInput, model_constants, Sidecar
+from hed.models import TabularInput, SpreadsheetInput,  Sidecar
 import shutil
 from hed import schema
 import pandas as pd
