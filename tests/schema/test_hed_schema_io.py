@@ -10,6 +10,7 @@ import shutil
 from hed.errors import HedExceptions
 
 
+# todo: speed up these tests
 class TestHedSchema(unittest.TestCase):
 
     def test_load_invalid_schema(self):
@@ -180,6 +181,9 @@ class TestHedSchemaMerging(unittest.TestCase):
                     # print(s1.filename)
                     # print(s2.filename)
                     self.assertTrue(result)
+                    reload1 = load_schema(path1)
+                    reload2 = load_schema(path2)
+                    self.assertEqual(reload1, reload2)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
@@ -189,6 +193,10 @@ class TestHedSchemaMerging(unittest.TestCase):
                     path2 = s2.save_as_mediawiki(save_merged=save_merged)
                     result = filecmp.cmp(path1, path2)
                     self.assertTrue(result)
+
+                    reload1 = load_schema(path1)
+                    reload2 = load_schema(path2)
+                    self.assertEqual(reload1, reload2)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
@@ -208,6 +216,14 @@ class TestHedSchemaMerging(unittest.TestCase):
             load_schema(os.path.join(self.full_base_folder, "HED_score_merged.mediawiki")),
             load_schema(os.path.join(self.full_base_folder, "HED_score_merged.xml")),
             load_schema(os.path.join(self.full_base_folder, "HED_score_lib_tags.xml"))
+        ]
+
+        self._base_merging_test(files)
+
+    def test_saving_merged_rooted(self):
+        files = [
+            load_schema(os.path.join(self.full_base_folder, "basic_root.mediawiki")),
+            load_schema(os.path.join(self.full_base_folder, "basic_root.xml")),
         ]
 
         self._base_merging_test(files)
@@ -298,6 +314,10 @@ class TestHedSchemaMerging(unittest.TestCase):
         files = [
             os.path.join(self.full_base_folder, "issues_tests/HED_badroot_0.0.1.mediawiki"),
             os.path.join(self.full_base_folder, "issues_tests/HED_root_wrong_place_0.0.1.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid1.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid2.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid3.mediawiki"),
+
         ]
         for file in files:
             with self.assertRaises(HedFileError):

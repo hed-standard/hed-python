@@ -34,11 +34,9 @@ class HedSchema2Base:
                 self._save_base = True
         else:
             # Saving a standard schema or a library schema without a standard schema
-            save_merged = False
-            if hed_schema.library:
-                self._save_lib = True
-            else:
-                self._save_base = True
+            save_merged = True
+            self._save_lib = True
+            self._save_base = True
         self._save_merged = save_merged
 
 
@@ -71,15 +69,6 @@ class HedSchema2Base:
     def _write_entry(self, entry, parent_node, include_props=True):
         raise NotImplementedError("This needs to be defined in the subclass")
 
-    def _write_rooted_parent_entry(self, tag_entry, schema_node):
-        parent_copy = copy.deepcopy(tag_entry._parent_tag)
-        parent_copy.attributes = {HedKey.Rooted: True}
-        parent_copy.description = ""
-
-        parent_node = self._write_tag_entry(parent_copy, schema_node, 0)
-
-        return parent_node
-
     def _output_tags(self, all_tags):
         schema_node = self._start_section(HedSectionKey.AllTags)
 
@@ -100,11 +89,11 @@ class HedSchema2Base:
             else:
                 # Only output the rooted parent nodes if they have a parent(for duplicates that don't)
                 if tag_entry.has_attribute(HedKey.InLibrary) and tag_entry.parent and \
-                        not tag_entry.parent.has_attribute(HedKey.InLibrary):
+                        not tag_entry.parent.has_attribute(HedKey.InLibrary) and not self._save_merged:
                     if tag_entry.parent.name not in all_nodes:
-                        parent_node = self._write_rooted_parent_entry(tag_entry, schema_node)
-                        all_nodes[tag_entry.parent.name] = parent_node
-                        level_adj = level - 1
+                        level_adj = level
+                        tag_entry = copy.deepcopy(tag_entry)
+                        tag_entry.attributes[HedKey.Rooted] = tag_entry.parent.short_tag_name
 
                 parent_node = all_nodes.get(tag_entry.parent_name, schema_node)
                 child_node = self._write_tag_entry(tag_entry, parent_node, level - level_adj)

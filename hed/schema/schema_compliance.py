@@ -49,7 +49,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
         HedKey.RelatedTag: tag_exists_check,
         HedKey.UnitClass: tag_is_placeholder_check,
         HedKey.ValueClass: tag_is_placeholder_check,
-        HedKey.Rooted: attribute_does_not_exist_check, # This should be impossible to trigger unless loading fails
+        HedKey.Rooted: tag_exists_base_schema_check,
     }
 
     # Check attributes
@@ -163,6 +163,33 @@ def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warni
                                                 org_tag,
                                                 index_in_tag=0,
                                                 index_in_tag_end=len(org_tag))
+
+    if force_issues_as_warnings:
+        for issue in issues:
+            issue['severity'] = ErrorSeverity.WARNING
+    return issues
+
+
+def tag_exists_base_schema_check(hed_schema, tag_entry, tag_name, force_issues_as_warnings=True):
+    """ Check if the single tag is a partnered schema tag
+
+    Parameters:
+        hed_schema (HedSchema): The schema to check if the tag exists.
+        tag_entry (HedSchemaEntry): The schema entry for this tag.
+        tag_name (str): The tag to verify, can be any form.
+        force_issues_as_warnings (bool): If True, set all the severity levels to warning.
+
+    Returns:
+        list: A list of issues. Each issue is a dictionary.
+
+    """
+    issues = []
+    rooted_tag = tag_name.lower()
+    if rooted_tag not in hed_schema.all_tags:
+        issues += ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
+                                            rooted_tag,
+                                            index_in_tag=0,
+                                            index_in_tag_end=len(rooted_tag))
 
     if force_issues_as_warnings:
         for issue in issues:

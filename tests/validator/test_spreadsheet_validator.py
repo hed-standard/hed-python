@@ -6,9 +6,6 @@ import unittest
 from hed import load_schema_version, load_schema
 from hed.validator import SpreadsheetValidator
 from hed import SpreadsheetInput
-from hed.errors import ErrorHandler, sort_issues
-from hed.errors.error_types import ColumnErrors
-
 
 class TestSpreadsheetValidation(unittest.TestCase):
     @classmethod
@@ -47,3 +44,4 @@ class TestSpreadsheetValidation(unittest.TestCase):
 
         issues = file_input.validate(self.schema)
         self.assertTrue(len(issues), 1)
+
