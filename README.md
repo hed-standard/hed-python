@@ -99,7 +99,7 @@ Use `hed.schema.set_cache_directory` to change the location.
 The HED cache can be shared across processes.
 
 Starting with `hedtools 0.2.0` local copies of the most recent schema versions
-are stored within the code modules for easy access.
+are stored within the code modules for easy access.  
 
 ### Other links of interest
 
