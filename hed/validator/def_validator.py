@@ -9,7 +9,6 @@ class DefValidator(DefinitionDict):
     """ Handles validating Def/ and Def-expand/.
 
     """
-
     def __init__(self, def_dicts=None, hed_schema=None):
         """ Initialize for definitions in hed strings.
 
@@ -75,17 +74,17 @@ class DefValidator(DefinitionDict):
                                                             tag=def_tag, actual_def=def_contents,
                                                             found_def=def_expand_group)
                 if def_entry.takes_value and tag_validator:
-                    placeholder_tag = def_contents.find_placeholder_tag()
+                    placeholder_tag = def_contents.get_first_group().find_placeholder_tag()
                     error_code = ValidationErrors.DEF_INVALID
                     if is_def_expand_tag:
                         error_code = ValidationErrors.DEF_EXPAND_INVALID
                     if placeholder_tag.is_unit_class_tag():
                         def_issues += tag_validator.check_tag_unit_class_units_are_valid(placeholder_tag,
-                                                                                         report_tag_as=def_tag,
+                                                                                         report_as=def_tag,
                                                                                          error_code=error_code)
                     elif placeholder_tag.is_value_class_tag():
                         def_issues += tag_validator.check_tag_value_class_valid(placeholder_tag,
-                                                                                report_tag_as=def_tag,
+                                                                                report_as=def_tag,
                                                                                 error_code=error_code)
 
             elif def_entry.takes_value:

@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
         test_root_bad = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                       '../../data/remodel_tests/test_root_bad'))
         cls.test_root_bad = test_root_bad
-        cls.test_root_bad_backups = os.path.join(test_root_bad, BackupManager.RELATIVE_BACKUP_LOCATION)
+        cls.test_root_bad_backups = os.path.join(test_root_bad, BackupManager.RELATIVE_BACKUP_LOCATION, 'backups')
         cls.test_paths_bad = [os.path.join(test_root_bad, file) for file in file_list]
         cls.test_zip_bad = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                          '../../data/remodel_tests/test_root_bad.zip'))
@@ -59,6 +59,21 @@ class Test(unittest.TestCase):
         self.assertIsInstance(back1_man, BackupManager, "constructor creates a BackupManager if no backups")
         self.assertTrue(back1_man.backups_dict)
 
+    def test_constructor_alternative_location(self):
+        alt_path = os.path.realpath(os.path.join(self.extract_path, 'temp_backs'))
+        back1_man = BackupManager(self.test_root_back1, backups_root=alt_path)
+        self.assertIsInstance(back1_man, BackupManager, "constructor creates a BackupManager if no backups")
+        self.assertFalse(back1_man.backups_dict)
+        file_list = get_file_list(self.test_root_back1, name_suffix='events', exclude_dirs=['derivatives'],
+                                  extensions=['.tsv'])
+        self.assertEqual(len(file_list), 3)
+        back1_man.create_backup(file_list, backup_name='my_back')
+        self.assertTrue(back1_man.backups_dict)
+        backup = back1_man.backups_dict['my_back']
+        self.assertEqual(len(backup), len(file_list))
+        if os.path.exists(alt_path):
+            shutil.rmtree(alt_path)
+
     def test_bad_data_root(self):
         with self.assertRaises(HedFileError) as context:
             BackupManager('/baloney/Junk')
@@ -71,7 +86,7 @@ class Test(unittest.TestCase):
             shutil.rmtree(remove_dir)
         with self.assertRaises(HedFileError) as context:
             BackupManager(self.test_root_bad)
-        self.assertEqual(context.exception.error_type, "MissingBackupFile")
+        self.assertEqual(context.exception.code, "MissingBackupFile")
 
     def test_constructor_missing_json(self):
         remove_list = ['back1_extra', 'back3_miss_back', 'back4_miss_file']
@@ -80,7 +95,7 @@ class Test(unittest.TestCase):
             shutil.rmtree(remove_dir)
         with self.assertRaises(HedFileError) as context:
             BackupManager(self.test_root_bad)
-        self.assertEqual(context.exception.error_type, "BadBackupFormat")
+        self.assertEqual(context.exception.code, "BadBackupFormat")
 
     def test_constructor_extra_backup_file(self):
         remove_list = ['back1_extra', 'back2_miss_json', 'back4_miss_file']
@@ -89,7 +104,7 @@ class Test(unittest.TestCase):
             shutil.rmtree(remove_dir)
         with self.assertRaises(HedFileError) as context:
             BackupManager(self.test_root_bad)
-        self.assertEqual(context.exception.error_type, "BadBackupFormat")
+        self.assertEqual(context.exception.code, "BadBackupFormat")
 
     def test_create_backup(self):
         test_man = BackupManager(self.test_root)
@@ -125,6 +140,7 @@ class Test(unittest.TestCase):
         self.assertFalse(task2)
         task3 = BackupManager.get_task(['abc', 'def'], 'temp/alpha_key_task_abc.txt')
         self.assertEqual(task3, 'abc')
+
 
 if __name__ == '__main__':
     unittest.main()

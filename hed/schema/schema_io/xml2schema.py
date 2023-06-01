@@ -5,8 +5,9 @@ This module is used to create a HedSchema object from an XML file or tree.
 from defusedxml import ElementTree
 import xml
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema import HedSchema
+from hed.schema import schema_validation_util
 from hed.schema.schema_io import xml_constants
 
 
@@ -19,14 +20,20 @@ class HedSchemaXMLParser:
         self._schema = HedSchema()
         self._schema.filename = hed_xml_file_path
         self._schema.header_attributes = self._get_header_attributes()
-
+        self._loading_merged = True
         if self._schema.with_standard and not self._schema.merged:
             from hed.schema.hed_schema_io import load_schema_version
             saved_attr = self._schema.header_attributes
-            base_version = load_schema_version(self._schema.with_standard)
+            try:
+                base_version = load_schema_version(self._schema.with_standard)
+            except HedFileError as e:
+                raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
+                                   message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
+                                   filename=e.filename)
             self._schema = base_version
             self._schema.filename = hed_xml_file_path
             self._schema.header_attributes = saved_attr
+            self._loading_merged = False
 
         self._schema.prologue = self._get_prologue()
         self._schema.epilogue = self._get_epilogue()
@@ -90,7 +97,8 @@ class HedSchemaXMLParser:
             def_element_name = xml_constants.ELEMENT_NAMES[key_class]
             attribute_elements = self._get_elements_by_name(def_element_name, section)
             for element in attribute_elements:
-                self._parse_node(element, key_class)
+                new_entry = self._parse_node(element, key_class)
+                self._add_to_dict(new_entry, key_class)
 
     def _populate_tag_dictionaries(self):
         """Populates a dictionary of dictionaries associated with tags and their attributes.
@@ -106,9 +114,23 @@ class HedSchemaXMLParser:
         """
         self._schema._initialize_attributes(HedSectionKey.AllTags)
         tag_elements = self._get_elements_by_name("node")
+        loading_from_chain = ""
+        loading_from_chain_short = ""
         for tag_element in tag_elements:
             tag = self._get_tag_path_from_tag_element(tag_element)
-            self._parse_node(tag_element, HedSectionKey.AllTags, tag)
+            if loading_from_chain:
+                tag = tag.replace(loading_from_chain_short, loading_from_chain)
+            tag_entry = self._parse_node(tag_element, HedSectionKey.AllTags, tag)
+
+            rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
+            if rooted_entry:
+                loading_from_chain = rooted_entry.name + "/" + tag_entry.short_tag_name
+                loading_from_chain_short = tag_entry.short_tag_name
+
+                tag = tag.replace(loading_from_chain_short, loading_from_chain)
+                tag_entry = self._parse_node(tag_element, HedSectionKey.AllTags, tag)
+
+            self._add_to_dict(tag_entry, HedSectionKey.AllTags)
 
     def _populate_unit_class_dictionaries(self):
         """Populates a dictionary of dictionaries associated with all the unit classes, unit class units, and unit
@@ -137,11 +159,13 @@ class HedSchemaXMLParser:
 
         for unit_class_element in unit_class_elements:
             unit_class_entry = self._parse_node(unit_class_element, HedSectionKey.UnitClasses)
+            unit_class_entry = self._add_to_dict(unit_class_entry, HedSectionKey.UnitClasses)
             element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
             element_unit_names = [self._get_element_tag_value(element) for element in element_units]
 
             for unit, element in zip(element_unit_names, element_units):
                 unit_class_unit_entry = self._parse_node(element, HedSectionKey.Units)
+                self._add_to_dict(unit_class_unit_entry, HedSectionKey.Units)
                 unit_class_entry.add_unit(unit_class_unit_entry)
 
     def _reformat_xsd_attrib(self, attrib_dict):
@@ -185,12 +209,9 @@ class HedSchemaXMLParser:
         else:
             node_name = self._get_element_tag_value(node_element)
         attribute_desc = self._get_element_tag_value(node_element, xml_constants.DESCRIPTION_ELEMENT)
-        # todo: improve this check
-        if key_class == HedSectionKey.UnitClasses and not attribute_desc and\
-                node_name in self._schema.unit_classes and self._schema.library:
-            return self._schema.get_tag_entry(node_name, HedSectionKey.UnitClasses)
 
-        tag_entry = self._schema._add_tag_to_dict(node_name, key_class)
+        tag_entry = self._schema._create_tag_entry(node_name, key_class)
+
         if attribute_desc:
             tag_entry.description = attribute_desc
 
@@ -307,3 +328,10 @@ class HedSchemaXMLParser:
         else:
             elements = parent_element.findall('.//%s' % element_name)
         return elements
+
+    def _add_to_dict(self, entry, key_class):
+        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged:
+            raise HedFileError(HedExceptions.IN_LIBRARY_IN_UNMERGED,
+                               f"Library tag in unmerged schema has InLibrary attribute",
+                               self._schema.filename)
+        return self._schema._add_tag_to_dict(entry.name, entry, key_class)

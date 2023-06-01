@@ -15,7 +15,6 @@ class TabularInput(BaseInput):
         Parameters:
             file (str or file like): A tsv file to open.
             sidecar (str or Sidecar): A Sidecar filename or Sidecar
-                Note: If this is a string you MUST also pass hed_schema.
             name (str): The name to display for this file for error purposes.
         """
         if sidecar and not isinstance(sidecar, Sidecar):
@@ -42,3 +41,30 @@ class TabularInput(BaseInput):
         new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME])
 
         self.reset_mapper(new_mapper)
+
+    def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
+        """ Returns the definition dict for this sidecar.
+
+        Parameters:
+            hed_schema(HedSchema): used to identify tags to find definitions
+            extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
+
+        Returns:
+            DefinitionDict:   A single definition dict representing all the data(and extra def dicts)
+        """
+        if self._sidecar:
+            return self._sidecar.get_def_dict(hed_schema, extra_def_dicts)
+        else:
+            super().get_def_dict(hed_schema, extra_def_dicts)
+
+    def get_column_refs(self):
+        """ Returns a list of column refs for this file.
+
+            Default implementation returns none.
+
+        Returns:
+            column_refs(list): A list of unique column refs found
+        """
+        if self._sidecar:
+            return self._sidecar.get_column_refs()
+        return []

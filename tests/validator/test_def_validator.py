@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         cls.basic_definition_string = f"(Definition/TestDef,{cls.def_contents_string})"
         cls.basic_definition_string_no_paren = f"Definition/TestDef,{cls.def_contents_string}"
 
-        cls.placeholder_definition_contents = "(Item/TestDef1/#,Item/TestDef2)"
+        cls.placeholder_definition_contents = "(Acceleration/#,Item/TestDef2)"
         cls.placeholder_definition_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents})"
         cls.placeholder_definition_string_no_paren = \
             f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
         cls.basic_hed_string_with_def_first_paren = f"({cls.label_def_string},{cls.basic_hed_string})"
         cls.placeholder_label_def_string = "Def/TestDefPlaceholder/2471"
 
-        cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2))"
+        cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Acceleration/2471,Item/TestDef2))"
 
         cls.placeholder_hed_string_with_def = f"{cls.basic_hed_string},{cls.placeholder_label_def_string}"
         cls.placeholder_hed_string_with_def_first = f"{cls.placeholder_label_def_string},{cls.basic_hed_string}"
@@ -80,26 +80,10 @@ class Test(unittest.TestCase):
         def_issues = def_validator.validate_def_tags(valid_placeholder)
         self.assertFalse(def_issues)
 
-        invalid_placeholder = HedString("(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/21,Item/TestDef2))", self.hed_schema)
+        invalid_placeholder = HedString("(Def-expand/TestDefPlaceholder/2471,(Acceleration/21,Item/TestDef2))", self.hed_schema)
         def_issues = def_validator.validate_def_tags(invalid_placeholder)
         self.assertTrue(bool(def_issues))
 
-
-    def test_def_no_content(self):
-
-        def_validator = DefValidator()
-        def_string = HedString("(Definition/EmptyDef)", self.hed_schema)
-        def_validator.check_for_definitions(def_string)
-
-        valid_empty = HedString("Def/EmptyDef", self.hed_schema)
-        def_issues = def_validator.validate_def_tags(valid_empty)
-        def_issues += def_validator.expand_def_tags(valid_empty)
-        self.assertEqual(str(valid_empty), "(Def-expand/EmptyDef)")
-        self.assertFalse(def_issues)
-
-        valid_empty = HedString("Def/EmptyDef", self.hed_schema)
-        def_issues = def_validator.validate_def_tags(valid_empty)
-        self.assertFalse(def_issues)
 
     def test_duplicate_def(self):
         def_dict = DefinitionDict()
@@ -137,11 +121,11 @@ class TestDefErrors(unittest.TestCase):
         cls.basic_hed_string_with_def_first = f"{cls.label_def_string},{cls.basic_hed_string}"
         cls.basic_hed_string_with_def_first_paren = f"({cls.label_def_string},{cls.basic_hed_string})"
         cls.placeholder_label_def_string = "Def/TestDefPlaceholder/2471"
-        cls.placeholder_definition_contents = "(Item/TestDef1/#,Item/TestDef2)"
+        cls.placeholder_definition_contents = "(Acceleration/#,Item/TestDef2)"
         cls.placeholder_definition_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents})"
         cls.placeholder_definition_string_no_paren = \
             f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
-        cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2))"
+        cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Acceleration/2471,Item/TestDef2))"
 
         cls.placeholder_hed_string_with_def = f"{cls.basic_hed_string},{cls.placeholder_label_def_string}"
         cls.placeholder_hed_string_with_def_first = f"{cls.placeholder_label_def_string},{cls.basic_hed_string}"
@@ -266,7 +250,7 @@ class TestDefErrors(unittest.TestCase):
                                 remove_definitions=True, basic_definition_string=self.placeholder_definition_string)
 
 
-    # todo ian: finish updating these
+    # todo: finish updating these
     # # special case test
     # def test_changing_tag_then_def_mapping(self):
     #     def_dict = DefinitionDict()

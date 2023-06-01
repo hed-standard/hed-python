@@ -82,5 +82,6 @@ class Test(unittest.TestCase):
         issues2a = input_file2.validate(hed_schema=self.hed_schema, error_handler=ErrorHandler(False))
         breakHere = 3
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -139,7 +139,6 @@ class UnitClassEntry(HedSchemaEntry):
         self._units = []
         self.units = []
         self.derivative_units = []
-        self.unit_class_entry = None
 
     def add_unit(self, unit_entry):
         """ Add the given unit entry to this unit class.
@@ -170,6 +169,12 @@ class UnitClassEntry(HedSchemaEntry):
                     derivative_units[modifier.name + derived_unit] = unit_entry
         self.derivative_units = derivative_units
 
+    def __eq__(self, other):
+        if not super().__eq__(other):
+            return False
+        if self.units != other.units:
+            return False
+        return True
 
 class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
@@ -188,7 +193,6 @@ class UnitEntry(HedSchemaEntry):
         """
         self.unit_modifiers = schema.get_modifiers_for_unit(self.name)
 
-
 class HedTagEntry(HedSchemaEntry):
     """ A single tag entry in the HedSchema. """
     def __init__(self, *args, **kwargs):
@@ -201,36 +205,6 @@ class HedTagEntry(HedSchemaEntry):
         self.takes_value_child_entry = None  # this is a child takes value tag, if one exists
         self._parent_tag = None
         self.tag_terms = tuple()
-
-    @staticmethod
-    def get_fake_tag_entry(tag, tags_to_identify):
-        """ Create a tag entry if a given a tag has a match in a list of possible short tags.
-
-        Parameters:
-            tag (str): The short/mid/long form tag to identify.
-            tags_to_identify (list): A list of lowercase short tags to identify.
-
-        Returns:
-            tuple:
-                - HedTagEntry or None: The fake entry showing the short tag name as the found tag.
-                - str: The remaining text after the located short tag, which may be empty.
-
-        Notes:
-             - The match is done left to right.
-
-        """
-        split_names = tag.split("/")
-        index = 0
-        for name in split_names:
-            if name.lower() in tags_to_identify:
-                fake_entry = HedTagEntry(name=tag[:index + len(name)], section=None)
-                fake_entry.long_tag_name = fake_entry.name
-                fake_entry.short_tag_name = name
-                return fake_entry, tag[index + len(name):]
-
-            index += len(name) + 1
-
-        return None, ""
 
     def any_parent_has_attribute(self, attribute):
         """ Check if tag (or parents) has the attribute.
@@ -270,6 +244,19 @@ class HedTagEntry(HedSchemaEntry):
             base_entry = base_entry._parent_tag
 
         return base_entry.has_attribute(tag_attribute)
+
+    @property
+    def parent(self):
+        """Get the parent entry of this tag"""
+        return self._parent_tag
+
+    @property
+    def parent_name(self):
+        """Gets the parent tag entry name"""
+        if self._parent_tag:
+            return self._parent_tag.name
+        parent_name, _, child_name = self.name.rpartition("/")
+        return parent_name
 
     def finalize_entry(self, schema):
         """ Called once after schema loading to set state.

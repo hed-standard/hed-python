@@ -7,8 +7,10 @@ from hed import schema
 import os
 from hed.schema import hed_cache
 import shutil
+from hed.errors import HedExceptions
 
 
+# todo: speed up these tests
 class TestHedSchema(unittest.TestCase):
 
     def test_load_invalid_schema(self):
@@ -176,7 +178,12 @@ class TestHedSchemaMerging(unittest.TestCase):
                     path1 = s1.save_as_xml(save_merged=save_merged)
                     path2 = s2.save_as_xml(save_merged=save_merged)
                     result = filecmp.cmp(path1, path2)
+                    # print(s1.filename)
+                    # print(s2.filename)
                     self.assertTrue(result)
+                    reload1 = load_schema(path1)
+                    reload2 = load_schema(path2)
+                    self.assertEqual(reload1, reload2)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
@@ -186,6 +193,10 @@ class TestHedSchemaMerging(unittest.TestCase):
                     path2 = s2.save_as_mediawiki(save_merged=save_merged)
                     result = filecmp.cmp(path1, path2)
                     self.assertTrue(result)
+
+                    reload1 = load_schema(path1)
+                    reload2 = load_schema(path2)
+                    self.assertEqual(reload1, reload2)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
@@ -205,6 +216,14 @@ class TestHedSchemaMerging(unittest.TestCase):
             load_schema(os.path.join(self.full_base_folder, "HED_score_merged.mediawiki")),
             load_schema(os.path.join(self.full_base_folder, "HED_score_merged.xml")),
             load_schema(os.path.join(self.full_base_folder, "HED_score_lib_tags.xml"))
+        ]
+
+        self._base_merging_test(files)
+
+    def test_saving_merged_rooted(self):
+        files = [
+            load_schema(os.path.join(self.full_base_folder, "basic_root.mediawiki")),
+            load_schema(os.path.join(self.full_base_folder, "basic_root.xml")),
         ]
 
         self._base_merging_test(files)
@@ -272,8 +291,34 @@ class TestHedSchemaMerging(unittest.TestCase):
             load_schema(os.path.join(self.full_base_folder, "issues_tests/overlapping_tags4.mediawiki")),
             load_schema(os.path.join(self.full_base_folder, "issues_tests/overlapping_unit_classes.mediawiki")),
             load_schema(os.path.join(self.full_base_folder, "issues_tests/overlapping_units.mediawiki")),
+            load_schema(os.path.join(self.full_base_folder, "issues_tests/HED_dupesubroot_0.0.1.mediawiki"))
         ]
-        for schema in files:
+        expected_code = [
+            HedExceptions.SCHEMA_LIBRARY_INVALID,
+            HedExceptions.SCHEMA_LIBRARY_INVALID,
+            HedExceptions.SCHEMA_LIBRARY_INVALID,
+            HedExceptions.SCHEMA_LIBRARY_INVALID,
+            HedExceptions.SCHEMA_LIBRARY_INVALID,
+            HedExceptions.SCHEMA_LIBRARY_INVALID,
+            SchemaErrors.HED_SCHEMA_DUPLICATE_NODE,
+        ]
+        for schema, expected_code in zip(files, expected_code):
+            # print(schema.filename)
             issues = schema.check_compliance()
+            # for issue in issues:
+            #     print(str(issue))
             self.assertEqual(len(issues), 1)
-            self.assertEqual(issues[0]["code"], SchemaErrors.HED_SCHEMA_DUPLICATE_NODE)
+            self.assertEqual(issues[0]["code"], expected_code)
+
+    def test_cannot_load_schemas(self):
+        files = [
+            os.path.join(self.full_base_folder, "issues_tests/HED_badroot_0.0.1.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_wrong_place_0.0.1.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid1.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid2.mediawiki"),
+            os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid3.mediawiki"),
+
+        ]
+        for file in files:
+            with self.assertRaises(HedFileError):
+                load_schema(file)

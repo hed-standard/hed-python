@@ -10,21 +10,21 @@ class Test(unittest.TestCase):
         pass
 
     def test_push_error_context(self):
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(len(error_list) == 1)
         name = "DummyFileName.txt"
         self.error_handler.push_error_context(ErrorContext.FILE_NAME, name)
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(name in error_list[0][ErrorContext.FILE_NAME])
         column_name = "DummyColumnName"
         self.error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(column_name in error_list[0][ErrorContext.SIDECAR_COLUMN_NAME])
         self.error_handler.reset_error_context()
         self.error_handler.push_error_context(ErrorContext.FILE_NAME, name)
         self.error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
         self.error_handler.push_error_context(ErrorContext.COLUMN, column_name)
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(name in error_list[0][ErrorContext.FILE_NAME])
         self.assertTrue(column_name in error_list[0][ErrorContext.SIDECAR_COLUMN_NAME])
         self.assertTrue(column_name == error_list[0][ErrorContext.COLUMN])
@@ -32,24 +32,24 @@ class Test(unittest.TestCase):
         self.error_handler.reset_error_context()
 
     def test_pop_error_context(self):
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(len(error_list) == 1)
         name = "DummyFileName.txt"
         self.error_handler.push_error_context(ErrorContext.FILE_NAME, name)
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(len(error_list) == 1)
         self.assertTrue(name in error_list[0][ErrorContext.FILE_NAME])
         self.error_handler.pop_error_context()
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(len(error_list) == 1)
         column_name = "DummyColumnName"
         self.error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(len(error_list) == 1)
         self.error_handler.push_error_context(ErrorContext.FILE_NAME, name)
         self.error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
         self.error_handler.push_error_context(ErrorContext.COLUMN, column_name)
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(len(error_list) == 1)
         self.assertTrue(name in error_list[0][ErrorContext.FILE_NAME])
         self.assertTrue(column_name in error_list[0][ErrorContext.SIDECAR_COLUMN_NAME])
@@ -57,16 +57,16 @@ class Test(unittest.TestCase):
         self.error_handler.pop_error_context()
         self.error_handler.pop_error_context()
         self.error_handler.pop_error_context()
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(len(error_list) == 1)
         self.assertTrue(ErrorContext.COLUMN not in error_list[0])
         self.error_handler.pop_error_context()
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         self.assertTrue(len(error_list) == 1)
         self.error_handler.reset_error_context()
 
     def test_filter_issues_by_severity(self):
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
         self.assertTrue(len(error_list) == 2)
@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
 
     def test_printable_issue_string(self):
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
 
@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
         myfile = 'my_file.txt'
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
         self.error_handler.push_error_context(ErrorContext.FILE_NAME, myfile)
-        error_list = self.error_handler.format_error_with_context(ValidationErrors.HED_TAG_NOT_UNIQUE, "")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
 

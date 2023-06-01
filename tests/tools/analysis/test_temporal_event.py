@@ -2,8 +2,7 @@ import os
 import unittest
 
 from hed import schema as hedschema
-from hed.models import Sidecar, TabularInput, HedString, HedTag, HedGroup
-from hed.tools import assemble_hed
+from hed.models import HedString, HedGroup
 from hed.tools.analysis.temporal_event import TemporalEvent
 
 

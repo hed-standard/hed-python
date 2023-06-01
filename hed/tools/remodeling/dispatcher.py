@@ -8,13 +8,13 @@ from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_io import get_schema
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
-from hed.tools.util.io_util import generate_filename, extract_suffix_path, get_timestamp
+from hed.tools.util.io_util import clean_filename, extract_suffix_path, get_timestamp
 
 
 class Dispatcher:
     """ Controller for applying operations to tabular files and saving the results. """
 
-    REMODELING_SUMMARY_PATH = 'derivatives/remodel/summaries'
+    REMODELING_SUMMARY_PATH = 'remodel/summaries'
 
     def __init__(self, operation_list, data_root=None,
                  backup_name=BackupManager.DEFAULT_BACKUP_NAME, hed_versions=None):
@@ -47,7 +47,7 @@ class Dispatcher:
             raise ValueError("InvalidOperationList", f"{these_errors}")
         self.parsed_ops = op_list
         self.hed_schema = get_schema(hed_versions)
-        self.context_dict = {}
+        self.summary_dicts = {}
 
     def get_summaries(self, file_formats=['.txt', '.json']):
         """ Return the summaries in a dictionary of strings suitable for saving or archiving.
@@ -62,11 +62,11 @@ class Dispatcher:
 
         summary_list = []
         time_stamp = '_' + get_timestamp()
-        for context_name, context_item in self.context_dict.items():
-            file_base = context_item.context_filename
+        for context_name, context_item in self.summary_dicts.items():
+            file_base = context_item.op.summary_filename
             if self.data_root:
                 file_base = extract_suffix_path(self.data_root, file_base)
-            file_base = generate_filename(file_base)
+            file_base = clean_filename(file_base)
             for file_format in file_formats:
                 if file_format == '.txt':
                     summary = context_item.get_text_summary(individual_summaries="consolidated")
@@ -128,7 +128,7 @@ class Dispatcher:
         """
 
         if self.data_root:
-            return os.path.realpath(os.path.join(self.data_root, Dispatcher.REMODELING_SUMMARY_PATH))
+            return os.path.realpath(os.path.join(self.data_root, 'derivatives', Dispatcher.REMODELING_SUMMARY_PATH))
         raise HedFileError("NoDataRoot", f"Dispatcher must have a data root to produce directories", "")
 
     def run_operations(self, file_path, sidecar=None, verbose=False):
@@ -160,9 +160,10 @@ class Dispatcher:
         Parameters:
             save_formats (list):  A list of formats [".txt", ."json"]
             individual_summaries (str): If True, include summaries of individual files.
-            summary_dir (str or None): Directory for saving summaries
+            summary_dir (str or None): Directory for saving summaries.
 
-        The summaries are saved in the dataset derivatives/remodeling folder if no save_dir is provided.
+        Notes:
+            The summaries are saved in the dataset derivatives/remodeling folder if no save_dir is provided.
 
         """
         if not save_formats:
@@ -170,7 +171,7 @@ class Dispatcher:
         if not summary_dir:
             summary_dir = self.get_summary_save_dir()
         os.makedirs(summary_dir, exist_ok=True)
-        for context_name, context_item in self.context_dict.items():
+        for context_name, context_item in self.summary_dicts.items():
             context_item.save(summary_dir, save_formats, individual_summaries=individual_summaries)
 
     @staticmethod

@@ -18,19 +18,19 @@ class Test(TestHedBase):
         hed_xml_file = os.path.join(cls.base_data_dir, "schema_tests/HED8.0.0.mediawiki")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.placeholder_label_def_string = "Def/TestDefPlaceholder/2471"
-        cls.placeholder_def_contents = "(Action/TestDef1/#,Action/TestDef2)"
+        cls.placeholder_def_contents = "(Acceleration/#,Action/TestDef2)"
         cls.placeholder_definition_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_def_contents})"
-        cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Action/TestDef1/2471,Action/TestDef2))"
+        cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Acceleration/2471,Action/TestDef2))"
 
         cls.label_def_string = "Def/TestDefNormal"
         cls.def_contents = "(Action/TestDef1,Action/TestDef2)"
         cls.definition_string = f"(Definition/TestDefNormal,{cls.def_contents})"
-        cls.expanded_def_string = "(Def-expand/TestDefNormal,(Action/TestDef1/2471,Action/TestDef2))"
+        cls.expanded_def_string = "(Def-expand/TestDefNormal,(Acceleration/2471,Action/TestDef2))"
 
         cls.placeholder_label_def_string2 = "Def/TestDefPlaceholder/123"
-        cls.placeholder_def_contents2 = "(Action/TestDef1/#,Action/TestDef2)"
+        cls.placeholder_def_contents2 = "(Acceleration/#,Action/TestDef2)"
         cls.placeholder_definition_string2 = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_def_contents2})"
-        cls.placeholder_expanded_def_string2 = "(Def-expand/TestDefPlaceholder/123,(Action/TestDef1/123,Action/TestDef2))"
+        cls.placeholder_expanded_def_string2 = "(Def-expand/TestDefPlaceholder/123,(Acceleration/123,Action/TestDef2))"
 
         cls.def_dict_placeholder = DefinitionDict()
         def_string = HedString(cls.placeholder_definition_string, hed_schema=cls.hed_schema)
@@ -263,9 +263,13 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset, Offset)",
         ]
         test_issues = [
-            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
-            self.format_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
-            self.format_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
+            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+            + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
+            self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1, multiple_tags=["Onset"])
+            + self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=2)
+            + self.format_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
+            self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1, multiple_tags=["Offset"])
+            + self.format_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
         ]
 
         self._test_issues_no_context(test_strings, test_issues)

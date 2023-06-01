@@ -5,7 +5,7 @@ the get_validation_issues() function.
 
 """
 
-from hed.errors.error_types import ValidationErrors
+from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 
 from hed.models.hed_string import HedString
@@ -18,11 +18,14 @@ from hed.validator.onset_validator import OnsetValidator
 class HedValidator:
     """ Top level validation of HED strings. """
 
-    def __init__(self, hed_schema=None, def_dicts=None, run_full_onset_checks=True):
+    def __init__(self, hed_schema=None, def_dicts=None, run_full_onset_checks=True, definitions_allowed=False):
         """ Constructor for the HedValidator class.
 
         Parameters:
             hed_schema (HedSchema or HedSchemaGroup): HedSchema object to use for validation.
+            def_dicts(DefinitionDict or list or dict): the def dicts to use for validation
+            run_full_onset_checks(bool): If True, check for matching onset/offset tags
+            definitions_allowed(bool): If False, flag definitions found as errors
         """
         super().__init__()
         self._tag_validator = None
@@ -32,6 +35,7 @@ class HedValidator:
         self._def_validator = DefValidator(def_dicts, hed_schema)
         self._onset_validator = OnsetValidator(def_dict=self._def_validator,
                                                run_full_onset_checks=run_full_onset_checks)
+        self._definitions_allowed = definitions_allowed
 
     def validate(self, hed_string, allow_placeholders, error_handler=None):
         """
@@ -57,7 +61,7 @@ class HedValidator:
 
     def run_basic_checks(self, hed_string, allow_placeholders):
         issues = []
-        issues += self._tag_validator.run_hed_string_validators(hed_string)
+        issues += self._tag_validator.run_hed_string_validators(hed_string, allow_placeholders)
         if check_for_any_errors(issues):
             return issues
         if hed_string == "n/a" or not self._hed_schema:
@@ -69,24 +73,14 @@ class HedValidator:
         # e.g. checking units when a definition placeholder has units
         self._def_validator.construct_def_tags(hed_string)
         issues += self._validate_individual_tags_in_hed_string(hed_string, allow_placeholders=allow_placeholders)
-        # todo: maybe restore this.  Issue is bad def-expand values are caught above,
-        #  so the actual def-expand tag won't be checked if we bail early.
-        # if check_for_any_errors(issues):
-        #     return issues
         issues += self._def_validator.validate_def_tags(hed_string, self._tag_validator)
-        if check_for_any_errors(issues):
-            return issues
-        issues += self._onset_validator.validate_onset_offset(hed_string)
-        if check_for_any_errors(issues):
-            return issues
         return issues
 
     def run_full_string_checks(self, hed_string):
         issues = []
         issues += self._validate_tags_in_hed_string(hed_string)
-        if check_for_any_errors(issues):
-            return issues
         issues += self._validate_groups_in_hed_string(hed_string)
+        issues += self._onset_validator.validate_onset_offset(hed_string)
         return issues
 
     def _validate_groups_in_hed_string(self, hed_string_obj):
@@ -167,11 +161,15 @@ class HedValidator:
          """
         from hed.models.definition_dict import DefTagNames
         validation_issues = []
-        definition_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1)
+        definition_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY},
+                                                               include_groups=1)
         all_definition_groups = [group for sub_group in definition_groups for group in sub_group.get_all_groups()]
         for group in hed_string_obj.get_all_groups():
             is_definition = group in all_definition_groups
             for hed_tag in group.tags():
+                if not self._definitions_allowed and hed_tag.short_base_tag == DefTagNames.DEFINITION_ORG_KEY:
+                    validation_issues += ErrorHandler.format_error(DefinitionErrors.BAD_DEFINITION_LOCATION, hed_tag)
+                # todo: unclear if this should be restored at some point
                 # if hed_tag.expandable and not hed_tag.expanded:
                 #     for tag in hed_tag.expandable.get_all_tags():
                 #         validation_issues += self._tag_validator. \

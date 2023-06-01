@@ -14,7 +14,16 @@ class HedExceptions:
     # These are actual schema issues, not that the file cannot be found or parsed
     SCHEMA_HEADER_MISSING = 'HED_SCHEMA_HEADER_INVALID'
     HED_SCHEMA_HEADER_INVALID = 'HED_SCHEMA_HEADER_INVALID'
-    BAD_HED_LIBRARY_NAME = 'badHedLibraryName'
+
+    SCHEMA_LIBRARY_INVALID = "SCHEMA_LIBRARY_INVALID"
+    BAD_HED_LIBRARY_NAME = 'SCHEMA_LIBRARY_INVALID'
+    BAD_WITH_STANDARD = "SCHEMA_LIBRARY_INVALID"
+    BAD_WITH_STANDARD_VERSION = "SCHEMA_LIBRARY_INVALID"
+    ROOTED_TAG_INVALID = "SCHEMA_LIBRARY_INVALID"
+    ROOTED_TAG_HAS_PARENT = "SCHEMA_LIBRARY_INVALID"
+    ROOTED_TAG_DOES_NOT_EXIST = "SCHEMA_LIBRARY_INVALID"
+    IN_LIBRARY_IN_UNMERGED = "SCHEMA_LIBRARY_INVALID"
+
     HED_SCHEMA_VERSION_INVALID = 'HED_SCHEMA_VERSION_INVALID'
     SCHEMA_START_MISSING = 'HED_WIKI_SEPARATOR_INVALID'
     SCHEMA_END_INVALID = 'HED_WIKI_SEPARATOR_INVALID'
@@ -31,8 +40,8 @@ class HedExceptions:
 
 class HedFileError(Exception):
     """Exception raised when a file cannot be parsed due to being malformed, file IO, etc."""
-    def __init__(self, error_type, message, filename, issues=None):
-        self.error_type = error_type
+    def __init__(self, code, message, filename, issues=None):
+        self.code = code
         self.message = message
         self.filename = filename
         self.issues = issues
@@ -40,5 +49,5 @@ class HedFileError(Exception):
             self.issues = [
                 {'message': message,
                  ErrorContext.FILE_NAME: filename,
-                 'error_code': error_type}
+                 'code': code}
             ]

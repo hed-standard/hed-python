@@ -7,7 +7,7 @@ from hed.tools.analysis.hed_type_values import HedTypeValues
 from hed.tools.analysis.hed_type_counts import HedTypeCounts
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_summary import BaseSummary
 
 
 class SummarizeHedTypeOp(BaseOp):
@@ -69,53 +69,62 @@ class SummarizeHedTypeOp(BaseOp):
             DataFrame: Input DataFrame, unchanged.
 
         Side-effect:
-            Updates the context.
+            Updates the relevant summary.
 
         """
-        summary = dispatcher.context_dict.get(self.summary_name, None)
+        summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
-            summary = HedTypeSummaryContext(self)
-            dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name,
+            summary = HedTypeSummary(self)
+            dispatcher.summary_dicts[self.summary_name] = summary
+        summary.update_summary({'df': dispatcher.post_proc_data(df), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df
 
 
-class HedTypeSummaryContext(BaseContext):
+class HedTypeSummary(BaseSummary):
 
     def __init__(self, sum_op):
-        super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
+        super().__init__(sum_op)
         self.type_tag = sum_op.type_tag
 
-    def update_context(self, new_context):
+    def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.
 
         Parameters:
-            new_context (dict):  A dictionary with the parameters needed to update a summary.
+            new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:  
             - The summary needs a "name" str, a "schema", a "df, and a "Sidecar".
 
         """
 
-        sidecar = new_context['sidecar']
+        sidecar = new_info['sidecar']
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
-        input_data = TabularInput(new_context['df'], sidecar=sidecar, name=new_context['name'])
-        hed_strings, definitions = get_assembled(input_data, sidecar, new_context['schema'], 
+        input_data = TabularInput(new_info['df'], sidecar=sidecar, name=new_info['name'])
+        hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'], 
                                                  extra_def_dicts=None, join_columns=True, expand_defs=False)
-        context_manager = HedContextManager(hed_strings, new_context['schema'])
-        type_values = HedTypeValues(context_manager, definitions, new_context['name'], type_tag=self.type_tag)
+        context_manager = HedContextManager(hed_strings, new_info['schema'])
+        type_values = HedTypeValues(context_manager, definitions, new_info['name'], type_tag=self.type_tag)
 
-        counts = HedTypeCounts(new_context['name'], self.type_tag)
-        counts.update_summary(type_values.get_summary(), type_values.total_events, new_context['name'])
+        counts = HedTypeCounts(new_info['name'], self.type_tag)
+        counts.update_summary(type_values.get_summary(), type_values.total_events, new_info['name'])
         counts.add_descriptions(type_values.definitions)
-        self.summary_dict[new_context["name"]] = counts
+        self.summary_dict[new_info["name"]] = counts
 
-    def _get_details_dict(self, counts):
+    def get_details_dict(self, counts):
+        """ Return the summary-specific information in a dictionary.
+
+        Parameters:
+            counts (HedTypeCounts):  Contains the counts of the events in which the type occurs.
+
+        Returns:
+            dict: dictionary with the summary results.
+
+        """
         return counts.get_summary()
 
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Create a HedTypeCounts containing the overall dataset HED type summary.
 
         Returns:
@@ -127,7 +136,7 @@ class HedTypeSummaryContext(BaseContext):
             all_counts.update(counts)
         return all_counts
 
-    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return a formatted string with the summary for the indicated name.
 
         Parameters:
@@ -148,7 +157,7 @@ class HedTypeSummaryContext(BaseContext):
         return self._get_individual_string(result, indent=indent)
 
     @staticmethod
-    def _get_dataset_string(result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return  a string with the overall summary for all of the tabular files.
 
         Parameters:
@@ -174,11 +183,11 @@ class HedTypeSummaryContext(BaseContext):
                 str1 = str1 + f" Multiple references:{item['events_with_multiple_refs']})"
             sum_list.append(f"{indent}{key}: {str1}")
             if item['level_counts']:
-                sum_list = sum_list + HedTypeSummaryContext._level_details(item['level_counts'], indent=indent)
+                sum_list = sum_list + HedTypeSummary._level_details(item['level_counts'], indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
-    def _get_individual_string(result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_individual_string(result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return  a string with the summary for an individual tabular file.
 
         Parameters:
@@ -203,8 +212,8 @@ class HedTypeSummaryContext(BaseContext):
             if str1:
                 sum_list.append(f"{indent*3}{str1}")
             if item['level_counts']:
-                sum_list = sum_list + HedTypeSummaryContext._level_details(item['level_counts'],
-                                                                           offset=indent, indent=indent)
+                sum_list = sum_list + HedTypeSummary._level_details(item['level_counts'],
+                                                                    offset=indent, indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod

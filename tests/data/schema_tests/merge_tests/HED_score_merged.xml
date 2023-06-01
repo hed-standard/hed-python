@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="1.0.0" library="score" with-standard="8.2.0" merged="True">
+<HED version="1.0.0" library="score" withStandard="8.2.0">
    <prologue>This schema is a Hierarchical Event Descriptors (HED) Library Schema implementation of Standardized Computer-based Organized Reporting of EEG (SCORE)[1,2] for describing events occurring during neuroimaging time series recordings.
 The HED-SCORE library schema allows neurologists, neurophysiologists, and brain researchers to annotate electrophysiology recordings using terms from an internationally accepted set of defined terms (SCORE) compatible with the HED framework.
 The resulting annotations are understandable to clinicians and directly usable in computer analysis.
@@ -935,6 +935,10 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
                      <node>
                         <name>Gentalia</name>
                         <description>The external organs of reproduction.</description>
+                        <attribute>
+                           <name>deprecatedFrom</name>
+                           <value>8.1.0</value>
+                        </attribute>
                      </node>
                      <node>
                         <name>Hip</name>
@@ -2135,17 +2139,48 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
                   <name>Temporal-marker</name>
                   <description>An indicator placed at a particular time in the data.</description>
                   <node>
-                     <name>Onset</name>
-                     <description>Labels the start or beginning of something, usually an event.</description>
+                     <name>Inset</name>
+                     <description>Marks an intermediate point in an ongoing event of temporal extent.</description>
                      <attribute>
                         <name>topLevelTagGroup</name>
+                     </attribute>
+                     <attribute>
+                        <name>reserved</name>
+                     </attribute>
+                     <attribute>
+                        <name>relatedTag</name>
+                        <value>Onset</value>
+                        <value>Offset</value>
+                     </attribute>
+                  </node>
+                  <node>
+                     <name>Onset</name>
+                     <description>Marks the start of an ongoing event of temporal extent.</description>
+                     <attribute>
+                        <name>topLevelTagGroup</name>
+                     </attribute>
+                     <attribute>
+                        <name>reserved</name>
+                     </attribute>
+                     <attribute>
+                        <name>relatedTag</name>
+                        <value>Inset</value>
+                        <value>Offset</value>
                      </attribute>
                   </node>
                   <node>
                      <name>Offset</name>
-                     <description>Labels the time at which something stops.</description>
+                     <description>Marks the end of an event of temporal extent.</description>
                      <attribute>
                         <name>topLevelTagGroup</name>
+                     </attribute>
+                     <attribute>
+                        <name>reserved</name>
+                     </attribute>
+                     <attribute>
+                        <name>relatedTag</name>
+                        <value>Onset</value>
+                        <value>Inset</value>
                      </attribute>
                   </node>
                   <node>
@@ -3423,7 +3458,17 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
                      <description>A characteristic of or relating to time or limited by time.</description>
                      <node>
                         <name>Delay</name>
-                        <description>Time during which some action is awaited.</description>
+                        <description>The time at which an event start time is delayed from the current onset time. This tag defines the start time of an event of temporal extent and may be used with the Duration tag.</description>
+                        <attribute>
+                           <name>topLevelTagGroup</name>
+                        </attribute>
+                        <attribute>
+                           <name>reserved</name>
+                        </attribute>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Duration</value>
+                        </attribute>
                         <node>
                            <name>#</name>
                            <attribute>
@@ -3441,7 +3486,17 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
                      </node>
                      <node>
                         <name>Duration</name>
-                        <description>The period of time during which something occurs or continues.</description>
+                        <description>The period of time during which an event occurs. This tag defines the end time of an event of temporal extent and may be used with the Delay tag.</description>
+                        <attribute>
+                           <name>topLevelTagGroup</name>
+                        </attribute>
+                        <attribute>
+                           <name>reserved</name>
+                        </attribute>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Delay</value>
+                        </attribute>
                         <node>
                            <name>#</name>
                            <attribute>
@@ -3940,6 +3995,9 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
                <attribute>
                   <name>requireChild</name>
                </attribute>
+               <attribute>
+                  <name>reserved</name>
+               </attribute>
                <node>
                   <name>#</name>
                   <description>Name of the definition.</description>
@@ -3957,6 +4015,9 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
                <description>A HED specific utility tag that is grouped with an expanded definition. The child value of the Def-expand is the name of the expanded definition.</description>
                <attribute>
                   <name>requireChild</name>
+               </attribute>
+               <attribute>
+                  <name>reserved</name>
                </attribute>
                <attribute>
                   <name>tagGroup</name>
@@ -3979,6 +4040,9 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
                   <name>requireChild</name>
                </attribute>
                <attribute>
+                  <name>reserved</name>
+               </attribute>
+               <attribute>
                   <name>topLevelTagGroup</name>
                </attribute>
                <node>
@@ -3996,6 +4060,9 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
             <node>
                <name>Event-context</name>
                <description>A special HED tag inserted as part of a top-level tag group to contain information about the interrelated conditions under which the event occurs. The event context includes information about other events that are ongoing when this event happens.</description>
+               <attribute>
+                  <name>reserved</name>
+               </attribute>
                <attribute>
                   <name>topLevelTagGroup</name>
                </attribute>
@@ -16318,6 +16385,16 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
             </attribute>
          </unit>
          <unit>
+            <name>meter</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
+         </unit>
+         <unit>
             <name>metre</name>
             <attribute>
                <name>SIUnit</name>
@@ -17063,10 +17140,10 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
-         <name>deprecated</name>
-         <description>This tag is out of date and should no longer be used.</description>
+         <name>deprecatedFrom</name>
+         <description>Indicates that this element is deprecated. The value of the attribute is the latest schema version in which the element appeared in undeprecated form.</description>
          <property>
-            <name>boolProperty</name>
+            <name>elementProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -17082,10 +17159,16 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+         <property>
+            <name>isInherited</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>inLibrary</name>
-         <description>Indicates this node came from the named library schema, not the standard schema.</description>
+         <description>Indicates this schema element came from the named library schema, not the standard schema. This attribute is added by tools when a library schema is merged into its partnered standard schema.</description>
          <property>
             <name>elementProperty</name>
          </property>
@@ -17096,10 +17179,19 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>relatedTag</name>
          <description>A schema attribute suggesting HED tags that are closely related to this tag. This attribute is used by tagging tools.</description>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+         <property>
+            <name>isInherited</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>requireChild</name>
@@ -17107,12 +17199,35 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>required</name>
          <description>A schema attribute indicating that every event-level HED string should include this tag.</description>
          <property>
             <name>boolProperty</name>
+         </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>reserved</name>
+         <description>A schema attribute indicating that this tag has special meaning and requires special handling by tools.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>rooted</name>
+         <description>Indicates a top-level library schema node is identical to a node of the same name in the partnered standard schema. This attribute can only appear in nodes that have the inLibrary schema attribute.</description>
+         <property>
+            <name>nodeProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -17148,12 +17263,21 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
       <schemaAttributeDefinition>
          <name>suggestedTag</name>
          <description>A schema attribute that indicates another tag  that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.</description>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+         <property>
+            <name>isInherited</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>tagGroup</name>
          <description>A schema attribute indicating the tag can only appear inside a tag group.</description>
          <property>
             <name>boolProperty</name>
+         </property>
+         <property>
+            <name>nodeProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -17162,12 +17286,18 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>topLevelTagGroup</name>
          <description>A schema attribute indicating that this tag (or its descendants) can only appear in a top-level tag group. A tag group can have at most one tag with this attribute.</description>
          <property>
             <name>boolProperty</name>
+         </property>
+         <property>
+            <name>nodeProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -17176,10 +17306,16 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>unitClass</name>
          <description>A schema attribute specifying which unit class this value tag belongs to.</description>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>unitPrefix</name>
@@ -17204,6 +17340,9 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
       <schemaAttributeDefinition>
          <name>valueClass</name>
          <description>A schema attribute specifying which value class this value tag belongs to.</description>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
    </schemaAttributeDefinitions>
    <propertyDefinitions>
@@ -17214,6 +17353,14 @@ For more information see https://hed-schema-library.readthedocs.io/en/latest/ind
       <propertyDefinition>
          <name>elementProperty</name>
          <description>Indicates this schema attribute can apply to any type of element(tag term, unit class, etc).</description>
+      </propertyDefinition>
+      <propertyDefinition>
+         <name>isInherited</name>
+         <description>Indicates that this attribute is inherited by child nodes. This property only applies to schema attributes for nodes.</description>
+      </propertyDefinition>
+      <propertyDefinition>
+         <name>nodeProperty</name>
+         <description>Indicates this schema attribute applies to node (tag-term) elements. This was added to allow for an attribute to apply to multiple elements.</description>
       </propertyDefinition>
       <propertyDefinition>
          <name>unitClassProperty</name>

@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
         dispatch = Dispatcher(model1)
         with self.assertRaises(HedFileError) as context:
             dispatch.get_data_file(sidecar_file)
-        self.assertEqual(context.exception.error_type, 'BadDataFile')
+        self.assertEqual(context.exception.code, 'BadDataFile')
 
     def test_get_summary_save_dir(self):
         model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
@@ -85,11 +85,12 @@ class Test(unittest.TestCase):
         dispatch1 = Dispatcher(model1, data_root=self.test_root_back1, backup_name='back1')
         summary_path = dispatch1.get_summary_save_dir()
         self.assertEqual(summary_path,
-                         os.path.realpath(os.path.join(self.test_root_back1, Dispatcher.REMODELING_SUMMARY_PATH)))
+                         os.path.realpath(os.path.join(self.test_root_back1, 'derivatives',
+                                                       Dispatcher.REMODELING_SUMMARY_PATH)))
         dispatch2 = Dispatcher(model1)
         with self.assertRaises(HedFileError) as context:
             dispatch2.get_summary_save_dir()
-        self.assertEqual(context.exception.error_type, 'NoDataRoot')
+        self.assertEqual(context.exception.code, 'NoDataRoot')
 
     def test_parse_operations_errors(self):
         test = [{"operation": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},

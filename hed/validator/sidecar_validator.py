@@ -1,12 +1,16 @@
 import copy
-from hed.errors import ErrorHandler, ErrorContext, SidecarErrors
+import re
+from hed.errors import ErrorHandler, ErrorContext, SidecarErrors, DefinitionErrors, ColumnErrors
 from hed.models import ColumnType
 from hed import HedString
 from hed import Sidecar
 from hed.models.column_metadata import ColumnMetadata
 from hed.errors.error_reporter import sort_issues
+from hed.models.model_constants import DefTagNames
+from hed.errors.error_reporter import check_for_any_errors
 
 
+# todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
 class SidecarValidator:
     reserved_column_names = ["HED"]
     reserved_category_values = ["n/a"]
@@ -37,31 +41,54 @@ class SidecarValidator:
             error_handler = ErrorHandler()
 
         error_handler.push_error_context(ErrorContext.FILE_NAME, name)
+        issues += self.validate_structure(sidecar, error_handler=error_handler)
+        issues += self._validate_refs(sidecar, error_handler)
+
+        # only allowed early out, something is very wrong with structure or refs
+        if check_for_any_errors(issues):
+            error_handler.pop_error_context()
+            return issues
         sidecar_def_dict = sidecar.get_def_dict(hed_schema=self._schema, extra_def_dicts=extra_def_dicts)
         hed_validator = HedValidator(self._schema,
                                      def_dicts=sidecar_def_dict,
-                                     run_full_onset_checks=False)
+                                     run_full_onset_checks=False,
+                                     definitions_allowed=True)
 
-        issues += self.validate_structure(sidecar, error_handler=error_handler)
         issues += sidecar._extract_definition_issues
         issues += sidecar_def_dict.issues
-        # todo: Add the definition validation.
 
-        for hed_string, column_data, position in sidecar.hed_string_iter(error_handler):
-            hed_string_obj = HedString(hed_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
+        definition_checks = {}
+        for column_data in sidecar:
+            column_name = column_data.column_name
+            hed_strings = column_data.get_hed_strings()
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
+            for key_name, hed_string in hed_strings.items():
+                new_issues = []
+                if len(hed_strings) > 1:
+                    error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
+                hed_string_obj = HedString(hed_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
+                hed_string_obj.remove_refs()
 
-            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
-            new_issues = hed_validator.run_basic_checks(hed_string_obj, allow_placeholders=True)
-            if not new_issues:
-                new_issues = hed_validator.run_full_string_checks(hed_string_obj)
-            if not new_issues:
-                new_issues = self._validate_pound_sign_count(hed_string_obj, column_type=column_data.column_type)
-            error_handler.add_context_and_filter(new_issues)
-            issues += new_issues
+                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
+                new_issues += hed_validator.run_basic_checks(hed_string_obj, allow_placeholders=True)
+                new_issues += hed_validator.run_full_string_checks(hed_string_obj)
+
+                def_check_list = definition_checks.setdefault(column_name, [])
+                def_check_list.append(hed_string_obj.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True,
+                                                               include_groups=0))
+                # Might refine this later - for now just skip checking placeholder counts in definition columns.
+                if not def_check_list[-1]:
+                    new_issues += self._validate_pound_sign_count(hed_string_obj, column_type=column_data.column_type)
+
+                if len(hed_strings) > 1:
+                    error_handler.pop_error_context()
+                error_handler.add_context_and_filter(new_issues)
+                issues += new_issues
             error_handler.pop_error_context()
-
         error_handler.pop_error_context()
+        issues += self._check_definitions_bad_spot(definition_checks, error_handler)
         issues = sort_issues(issues)
+
         return issues
 
     def validate_structure(self, sidecar, error_handler):
@@ -80,6 +107,74 @@ class SidecarValidator:
             all_validation_issues += self._validate_column_structure(column_name, dict_for_entry, error_handler)
             error_handler.pop_error_context()
         return all_validation_issues
+
+    def _validate_refs(self, sidecar, error_handler):
+        possible_column_refs = sidecar.all_hed_columns
+
+        issues = []
+        found_column_references = {}
+        for column_data in sidecar:
+            column_name = column_data.column_name
+            hed_strings = column_data.get_hed_strings()
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
+            matches = []
+            for key_name, hed_string in hed_strings.items():
+                new_issues = []
+                if len(hed_strings) > 1:
+                    error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
+
+                error_handler.push_error_context(ErrorContext.HED_STRING, HedString(hed_string))
+                invalid_locations = self._find_non_matching_braces(hed_string)
+                for loc in invalid_locations:
+                    bad_symbol = hed_string[loc]
+                    new_issues += error_handler.format_error_with_context(ColumnErrors.MALFORMED_COLUMN_REF,
+                                                                          column_name, loc, bad_symbol)
+
+                sub_matches = re.findall(r"\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
+                matches.append(sub_matches)
+                for match in sub_matches:
+                    if match not in possible_column_refs:
+                        new_issues += error_handler.format_error_with_context(ColumnErrors.INVALID_COLUMN_REF, match)
+
+                error_handler.pop_error_context()
+                if len(hed_strings) > 1:
+                    error_handler.pop_error_context()
+                error_handler.add_context_and_filter(new_issues)
+                issues += new_issues
+            error_handler.pop_error_context()
+            references = [match for sublist in matches for match in sublist]
+            if references:
+                found_column_references[column_name] = references
+            if column_name in references:
+                issues += error_handler.format_error_with_context(ColumnErrors.SELF_COLUMN_REF, column_name)
+
+        for column_name, refs in found_column_references.items():
+            for ref in refs:
+                if ref in found_column_references and ref != column_name:
+                    issues += error_handler.format_error_with_context(ColumnErrors.NESTED_COLUMN_REF, column_name, ref)
+
+        return issues
+
+    @staticmethod
+    def _find_non_matching_braces(hed_string):
+        issues = []
+        open_brace_index = -1
+
+        for i, char in enumerate(hed_string):
+            if char == '{':
+                if open_brace_index >= 0:  # Nested brace detected
+                    issues.append(open_brace_index)
+                open_brace_index = i
+            elif char == '}':
+                if open_brace_index >= 0:
+                    open_brace_index = -1
+                else:
+                    issues.append(i)
+
+        if open_brace_index >= 0:
+            issues.append(open_brace_index)
+
+        return issues
 
     @staticmethod
     def _check_for_key(key, data):
@@ -113,7 +208,7 @@ class SidecarValidator:
             val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED_COLUMN)
             return val_issues
 
-        column_type = Sidecar._detect_column_type(dict_for_entry=dict_for_entry)
+        column_type = ColumnMetadata._detect_column_type(dict_for_entry=dict_for_entry)
         if column_type is None:
             val_issues += error_handler.format_error_with_context(SidecarErrors.UNKNOWN_COLUMN_TYPE,
                                                                   column_name=column_name)
@@ -167,3 +262,17 @@ class SidecarValidator:
             return ErrorHandler.format_error(error_type, pound_sign_count=str(hed_string_copy).count("#"))
 
         return []
+
+    def _check_definitions_bad_spot(self, definition_checks, error_handler):
+        issues = []
+        # This could be simplified now
+        for col_name, has_def in definition_checks.items():
+            error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, col_name)
+            def_check = set(bool(d) for d in has_def)
+            if len(def_check) != 1:
+                flat_def_list = [d for defs in has_def for d in defs]
+                for d in flat_def_list:
+                    issues += error_handler.format_error_with_context(DefinitionErrors.BAD_DEFINITION_LOCATION, d)
+            error_handler.pop_error_context()
+
+        return issues

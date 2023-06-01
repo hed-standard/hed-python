@@ -1,0 +1,28 @@
+{
+   "trial_type": {
+       "LongName": "Event category",
+       "Description": "Indicator of type of action that is expected",
+       "Levels": {
+          "go": "A red square is displayed to indicate starting",
+          "stop": "A blue square is displayed to indicate stopping"
+       },
+       "HED": {
+          "go": "Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See",
+          "stop": "Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure"
+       }
+   },
+   "response_time": {
+       "LongName": "Response time after stimulus",
+       "Description": "Time from stimulus presentation until subject presses button",
+       "Units": "ms",
+       "HED": "({stim_file}, Event), Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See, Time-value/# s, {trial_type}"
+   },
+   "stim_file": {
+       "LongName": "Stimulus file name",
+       "Description": "Relative path of the stimulus image file",
+       "HED": "Time-value/# s"
+   },
+  "other_file": {
+       "HED": "{stim_file}, Keyboard-key/#"
+  }
+}

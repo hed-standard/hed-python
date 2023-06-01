@@ -1,5 +1,5 @@
 from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
-from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 
 
 entries_by_section = {
@@ -21,7 +21,7 @@ class HedSchemaSection:
 
         Parameters:
             section_key (HedSectionKey):  Name of the schema section.
-            case_sensitive (bool): If True, names are case sensitive.
+            case_sensitive (bool): If True, names are case-sensitive.
 
         """
         # {lower_case_name: HedSchemaEntry}
@@ -46,13 +46,12 @@ class HedSchemaSection:
     def duplicate_names(self):
         return self._duplicate_names
 
-    def _add_to_dict(self, name):
-        """ Add a name to the dictionary for this section. """
-        name_key = name
-        if not self.case_sensitive:
-            name_key = name.lower()
-
+    def _create_tag_entry(self, name):
         new_entry = self._section_entry(name, self)
+        return new_entry
+
+    def _check_if_duplicate(self, name_key, new_entry):
+        return_entry = new_entry
         if name_key in self.all_names:
             if name_key not in self._duplicate_names:
                 self._duplicate_names[name_key] = [self.all_names[name_key]]
@@ -60,8 +59,20 @@ class HedSchemaSection:
         else:
             self.all_names[name_key] = new_entry
 
-        self.all_entries.append(new_entry)
-        return new_entry
+        return return_entry
+
+    def _add_to_dict(self, name, new_entry, parent_index=None):
+        """ Add a name to the dictionary for this section. """
+        name_key = name
+        if not self.case_sensitive:
+            name_key = name.lower()
+
+        return_entry = self._check_if_duplicate(name_key, new_entry)
+
+        if parent_index is None:
+            parent_index = len(self.all_entries)
+        self.all_entries.insert(parent_index, new_entry)
+        return return_entry
 
     def get_entries_with_attribute(self, attribute_name, return_name_only=False, schema_prefix=""):
         """ Return entries or names with given attribute.
@@ -136,6 +147,14 @@ class HedSchemaSection:
         return bool(self.all_names)
 
 
+class HedSchemaUnitClassSection(HedSchemaSection):
+    def _check_if_duplicate(self, name_key, new_entry):
+        if name_key in self and len(new_entry.attributes) == 1\
+                    and HedKey.InLibrary in new_entry.attributes:
+            return self.all_names[name_key]
+        return super()._check_if_duplicate(name_key, new_entry)
+
+
 class HedSchemaTagSection(HedSchemaSection):
     """ A section of the schema. """
 
@@ -144,24 +163,28 @@ class HedSchemaTagSection(HedSchemaSection):
         # This dict contains all forms of all tags.  The .all_names variable has ONLY the long forms.
         self.long_form_tags = {}
 
-        self._duplicate_terms = {}
-
-    def _add_to_dict(self, name):
+    @staticmethod
+    def _get_tag_forms(name):
         name_key = name
         tag_forms = []
         while name_key:
             tag_forms.append(name_key)
             slash_index = name_key.find("/")
             if slash_index == -1:
-                name_key = None
+                break
             else:
                 name_key = name_key[slash_index + 1:]
 
         # We can't add value tags by themselves
         if tag_forms[-1] == "#":
             tag_forms = tag_forms[:-1]
-        new_entry = super()._add_to_dict(name)
 
+        return name_key, tag_forms
+
+    def _create_tag_entry(self, name):
+        new_entry = super()._create_tag_entry(name)
+
+        _, tag_forms = self._get_tag_forms(name)
         # remove the /# if present, but only from the entry, not from the lookups
         # This lets us easily use source_tag + remainder instead of having to strip off the /# later.
         short_name = tag_forms[-1]
@@ -172,22 +195,39 @@ class HedSchemaTagSection(HedSchemaSection):
         new_entry.long_tag_name = long_tag_name
         new_entry.short_tag_name = short_name
 
-        for tag_key in tag_forms:
-            name_key = tag_key.lower()
-            if name_key in self.long_form_tags:
-                if name_key not in self._duplicate_terms:
-                    self._duplicate_terms[name_key] = [self.long_form_tags[name_key]]
-                self._duplicate_terms[name_key].append(new_entry)
-            else:
+        return new_entry
+
+    def _check_if_duplicate(self, name, new_entry):
+        name_key, tag_forms = self._get_tag_forms(name)
+        if name_key in self:
+            if name_key not in self._duplicate_names:
+                self._duplicate_names[name_key] = [self.get(name_key)]
+            self._duplicate_names[name_key].append(new_entry)
+        else:
+            self.all_names[name] = new_entry
+            for tag_key in tag_forms:
+                name_key = tag_key.lower()
                 self.long_form_tags[name_key] = new_entry
 
         return new_entry
 
-    @property
-    def duplicate_names(self):
-        combined_with_terms = self._duplicate_names.copy()
-        combined_with_terms.update(self._duplicate_terms)
-        return combined_with_terms
+    def _add_to_dict(self, name, new_entry, parent_index=None):
+        if new_entry.has_attribute(HedKey.Rooted):
+            del new_entry.attributes[HedKey.Rooted]
+        if new_entry.has_attribute(HedKey.InLibrary):
+            parent_name = new_entry.parent_name
+            if parent_name.lower() in self:
+                # Make sure we insert the new entry after all previous relevant ones, as order isn't assured
+                # for rooted tags
+                parent_entry = self.get(parent_name.lower())
+                parent_index = self.all_entries.index(parent_entry)
+                for i in range(parent_index, len(self.all_entries)):
+                    if self.all_entries[i].name.startswith(parent_entry.name):
+                        parent_index = i + 1
+                        continue
+                    break
+
+        return super()._add_to_dict(name, new_entry, parent_index)
 
     def get(self, key):
         if not self.case_sensitive:
