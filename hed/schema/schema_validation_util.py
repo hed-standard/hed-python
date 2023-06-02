@@ -121,19 +121,20 @@ def find_rooted_entry(tag_entry, schema, loading_merged):
             raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
                                f"Rooted tag attribute found on '{tag_entry.short_tag_name}' in a standard schema.",
                                schema.filename)
-        if loading_merged:
-            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                               f'Found rooted tag \'{tag_entry.short_tag_name}\' in schema without unmerged="True"',
-                               schema.filename)
 
         if not isinstance(rooted_tag, str):
             raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
                                f'Rooted tag \'{tag_entry.short_tag_name}\' is not a string."',
                                schema.filename)
 
-        if tag_entry.parent_name:
+        if tag_entry.parent_name and not loading_merged:
             raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
                                f'Found rooted tag \'{tag_entry.short_tag_name}\' as a non root node.',
+                               schema.filename)
+
+        if not tag_entry.parent_name and loading_merged:
+            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                               f'Found rooted tag \'{tag_entry.short_tag_name}\' as a root node in a merged schema.',
                                schema.filename)
 
         rooted_entry = schema.all_tags.get(rooted_tag)
@@ -141,5 +142,8 @@ def find_rooted_entry(tag_entry, schema, loading_merged):
             raise HedFileError(HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
                                f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",
                                schema.filename)
+
+        if loading_merged:
+            return None
 
         return rooted_entry

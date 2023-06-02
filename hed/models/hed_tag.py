@@ -35,7 +35,7 @@ class HedTag:
         # This is not generally used anymore, but you can use it to replace a tag in place.
         self._tag = None
 
-        self._schema_prefix = self._get_schema_prefix(self.org_tag)
+        self._namespace = self._get_schema_namespace(self.org_tag)
 
         # This is the schema this tag was converted to.
         self._schema = None
@@ -68,14 +68,14 @@ class HedTag:
         return return_copy
 
     @property
-    def schema_prefix(self):
-        """ Library prefix for this tag if one exists.
+    def schema_namespace(self):
+        """ Library namespace for this tag if one exists.
 
         Returns:
-            prefix (str): The library prefix, including the colon.
+            namespace (str): The library namespace, including the colon.
 
         """
-        return self._schema_prefix
+        return self._namespace
 
     @property
     def short_tag(self):
@@ -89,7 +89,7 @@ class HedTag:
 
         """
         if self._schema_entry:
-            return f"{self._schema_prefix}{self._schema_entry.short_tag_name}{self._extension_value}"
+            return f"{self._namespace}{self._schema_entry.short_tag_name}{self._extension_value}"
 
         return str(self)
 
@@ -141,7 +141,7 @@ class HedTag:
             if self._schema:
                 if self.is_takes_value_tag():
                     new_tag_val = new_tag_val + "/#"
-                tag_entry = self._schema.get_tag_entry(new_tag_val, schema_prefix=self.schema_prefix)
+                tag_entry = self._schema.get_tag_entry(new_tag_val, schema_namespace=self.schema_namespace)
 
             self._schema_entry = tag_entry
         else:
@@ -246,7 +246,7 @@ class HedTag:
 
         """
         if self._schema_entry:
-            return f"{self._schema_prefix}{self._schema_entry.long_tag_name}{self._extension_value}"
+            return f"{self._namespace}{self._schema_entry.long_tag_name}{self._extension_value}"
         return str(self)
 
     @property
@@ -336,7 +336,7 @@ class HedTag:
             list:  A list of issues found during conversion. Each element is a dictionary.
 
         """
-        tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(self, self.schema_prefix)
+        tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(self, self.schema_namespace)
         self._schema_entry = tag_entry
         self._schema = hed_schema
         if self._schema_entry:
@@ -554,14 +554,14 @@ class HedTag:
             return self._schema_entry.any_parent_has_attribute(attribute=attribute)
 
     @staticmethod
-    def _get_schema_prefix(org_tag):
-        """ Finds the library prefix for the tag.
+    def _get_schema_namespace(org_tag):
+        """ Finds the library namespace for the tag.
 
         Parameters:
             org_tag (str): A string representing a tag.
 
         Returns:
-            str: Library prefix string or empty.
+            str: Library namespace string or empty.
 
         """
         first_slash = org_tag.find("/")
@@ -633,7 +633,7 @@ class HedTag:
     def __hash__(self):
         if self._schema_entry:
             return hash(
-                self._schema_prefix + self._schema_entry.short_tag_name.lower() + self._extension_value.lower())
+                self._namespace + self._schema_entry.short_tag_name.lower() + self._extension_value.lower())
         else:
             return hash(self.lower())
 
@@ -667,7 +667,7 @@ class HedTag:
 
         # copy all other attributes except schema and schema_entry
         new_tag._tag = copy.deepcopy(self._tag, memo)
-        new_tag._schema_prefix = copy.deepcopy(self._schema_prefix, memo)
+        new_tag._namespace = copy.deepcopy(self._namespace, memo)
         new_tag._extension_value = copy.deepcopy(self._extension_value, memo)
         new_tag._parent = copy.deepcopy(self._parent, memo)
         new_tag._expandable = copy.deepcopy(self._expandable, memo)

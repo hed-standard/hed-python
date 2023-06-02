@@ -74,13 +74,13 @@ class HedSchemaSection:
         self.all_entries.insert(parent_index, new_entry)
         return return_entry
 
-    def get_entries_with_attribute(self, attribute_name, return_name_only=False, schema_prefix=""):
+    def get_entries_with_attribute(self, attribute_name, return_name_only=False, schema_namespace=""):
         """ Return entries or names with given attribute.
 
         Parameters:
             attribute_name (str): The name of the attribute(generally a HedKey entry).
             return_name_only (bool): If true, return the name as a string rather than the tag entry.
-            schema_prefix (str): Prepends given prefix to each name if returning names.
+            schema_namespace (str): Prepends given namespace to each name if returning names.
 
         Returns:
             list: List of HedSchemaEntry or strings representing the names.
@@ -92,7 +92,7 @@ class HedSchemaSection:
 
         cache_val = self._attribute_cache[attribute_name]
         if return_name_only:
-            return [f"{schema_prefix}{tag_entry.name}" for tag_entry in cache_val]
+            return [f"{schema_namespace}{tag_entry.name}" for tag_entry in cache_val]
         return cache_val
 
     # ===============================================
@@ -212,8 +212,6 @@ class HedSchemaTagSection(HedSchemaSection):
         return new_entry
 
     def _add_to_dict(self, name, new_entry, parent_index=None):
-        if new_entry.has_attribute(HedKey.Rooted):
-            del new_entry.attributes[HedKey.Rooted]
         if new_entry.has_attribute(HedKey.InLibrary):
             parent_name = new_entry.parent_name
             if parent_name.lower() in self:

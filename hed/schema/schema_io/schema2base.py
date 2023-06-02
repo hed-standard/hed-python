@@ -92,8 +92,6 @@ class HedSchema2Base:
                         not tag_entry.parent.has_attribute(HedKey.InLibrary) and not self._save_merged:
                     if tag_entry.parent.name not in all_nodes:
                         level_adj = level
-                        tag_entry = copy.deepcopy(tag_entry)
-                        tag_entry.attributes[HedKey.Rooted] = tag_entry.parent.short_tag_name
 
                 parent_node = all_nodes.get(tag_entry.parent_name, schema_node)
                 child_node = self._write_tag_entry(tag_entry, parent_node, level - level_adj)

@@ -77,13 +77,13 @@ def val_error_require_child(tag):
 
 
 @hed_error(ValidationErrors.TAG_NOT_UNIQUE)
-def val_error_multiple_unique(tag_prefix):
-    return f"Multiple unique tags with prefix - '{tag_prefix}'"
+def val_error_multiple_unique(tag_namespace):
+    return f"Multiple unique tags with namespace - '{tag_namespace}'"
 
 
-@hed_tag_error(ValidationErrors.TAG_PREFIX_INVALID)
-def val_error_prefix_invalid(tag, tag_prefix):
-    return f"Prefixes can only contain alpha characters. - '{tag_prefix}'"
+@hed_tag_error(ValidationErrors.TAG_NAMESPACE_PREFIX_INVALID)
+def val_error_prefix_invalid(tag, tag_namespace):
+    return f"Prefixes can only contain alpha characters. - '{tag_namespace}'"
 
 
 @hed_tag_error(ValidationErrors.TAG_EXTENSION_INVALID)
@@ -146,9 +146,9 @@ def val_error_hed_blank_column(column_number):
     return f"Column number {column_number} has no column name"
 
 
-@hed_tag_error(ValidationErrors.HED_LIBRARY_UNMATCHED, actual_code=ValidationErrors.TAG_PREFIX_INVALID)
-def val_error_unknown_prefix(tag, unknown_prefix, known_prefixes):
-    return f"Tag '{tag} has unknown prefix '{unknown_prefix}'.  Valid prefixes: {known_prefixes}"
+@hed_tag_error(ValidationErrors.HED_LIBRARY_UNMATCHED, actual_code=ValidationErrors.TAG_NAMESPACE_PREFIX_INVALID)
+def val_error_unknown_namespace(tag, unknown_prefix, known_prefixes):
+    return f"Tag '{tag} has unknown namespace '{unknown_prefix}'.  Valid prefixes: {known_prefixes}"
 
 
 @hed_tag_error(ValidationErrors.NODE_NAME_EMPTY, has_sub_tag=True)
@@ -217,8 +217,8 @@ def val_error_top_level_tags(tag, multiple_tags):
 
 
 @hed_error(ValidationErrors.REQUIRED_TAG_MISSING)
-def val_warning_required_prefix_missing(tag_prefix):
-    return f"Tag with prefix '{tag_prefix}' is required"
+def val_warning_required_prefix_missing(tag_namespace):
+    return f"Tag with namespace '{tag_namespace}' is required"
 
 
 @hed_tag_error(ValidationErrors.STYLE_WARNING, default_severity=ErrorSeverity.WARNING)
