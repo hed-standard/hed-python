@@ -38,7 +38,7 @@ known_errors = [
     "TAG_GROUP_ERROR",
     "TAG_INVALID",
     "TAG_NOT_UNIQUE",
-    "TAG_PREFIX_INVALID",
+    "TAG_NAMESPACE_PREFIX_INVALID",
     "TAG_REQUIRES_CHILD",
     "TILDES_UNSUPPORTED",
     "UNITS_INVALID",
@@ -51,7 +51,7 @@ known_errors = [
 
 skip_tests = {
     "VERSION_DEPRECATED": "Not applicable",
-    "onset-offset-error-duplicated-onset-or-offset": "TBD how we implement this",
+    "onset-offset-inset-error-duplicated-onset-or-offset": "TBD how we implement this",
     "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
 }
 

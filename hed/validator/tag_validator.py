@@ -488,7 +488,7 @@ class TagValidator:
         for required_prefix in required_prefixes:
             if not any(tag.long_tag.lower().startswith(required_prefix.lower()) for tag in tags):
                 validation_issues += ErrorHandler.format_error(ValidationErrors.REQUIRED_TAG_MISSING,
-                                                               tag_prefix=required_prefix)
+                                                               tag_namespace=required_prefix)
         return validation_issues
 
     def check_multiple_unique_tags_exist(self, tags):
@@ -509,19 +509,19 @@ class TagValidator:
             unique_tag_prefix_bool_mask = [x.long_tag.lower().startswith(unique_prefix.lower()) for x in tags]
             if sum(unique_tag_prefix_bool_mask) > 1:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_NOT_UNIQUE,
-                                                               tag_prefix=unique_prefix)
+                                                               tag_namespace=unique_prefix)
         return validation_issues
 
     # ==========================================================================
     # Private utility functions
     # =========================================================================+
     def _check_invalid_prefix_issues(self, original_tag):
-        """Check for invalid schema prefix."""
+        """Check for invalid schema namespace."""
         issues = []
-        schema_prefix = original_tag.schema_prefix
-        if schema_prefix and not schema_prefix[:-1].isalpha():
-            issues += ErrorHandler.format_error(ValidationErrors.TAG_PREFIX_INVALID,
-                                                tag=original_tag, tag_prefix=schema_prefix)
+        schema_namespace = original_tag.schema_namespace
+        if schema_namespace and not schema_namespace[:-1].isalpha():
+            issues += ErrorHandler.format_error(ValidationErrors.TAG_NAMESPACE_PREFIX_INVALID,
+                                                tag=original_tag, tag_namespace=schema_namespace)
         return issues
 
     def _validate_value_class_portion(self, original_tag, portion_to_validate):

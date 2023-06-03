@@ -849,12 +849,12 @@ class RequiredTags(TestHed):
         expected_issues = {
             'complete': [],
             'missingAgent': self.format_error(ValidationErrors.REQUIRED_TAG_MISSING,
-                                              tag_prefix='Agent/Animal-agent'),
-            'missingAction': self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='Action'),
+                                              tag_namespace='Agent/Animal-agent'),
+            'missingAction': self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace='Action'),
             'inSubGroup': [],
             'missingAll':
-                self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='Action')
-                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='Agent/Animal-agent'),
+                self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace='Action')
+                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace='Agent/Animal-agent'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -877,9 +877,9 @@ class RequiredTags(TestHed):
         expected_issues = {
             'legal': [],
             'multipleDesc': self.format_error(ValidationErrors.TAG_NOT_UNIQUE,
-                                              tag_prefix='Property/Organizational-property/Event-context'),
+                                              tag_namespace='Property/Organizational-property/Event-context'),
             'multipleDescIncShort': self.format_error(ValidationErrors.TAG_NOT_UNIQUE,
-                                                      tag_prefix='Property/Organizational-property/Event-context'),
+                                                      tag_namespace='Property/Organizational-property/Event-context'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 

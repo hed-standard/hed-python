@@ -33,12 +33,12 @@ class HedSchemaGroup:
         if len(schema_list) == 0:
             raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty list passed to HedSchemaGroup constructor.",
                                filename="Combined Schema")
-        schema_prefixes = [hed_schema._schema_prefix for hed_schema in schema_list]
+        schema_prefixes = [hed_schema._namespace for hed_schema in schema_list]
         if len(set(schema_prefixes)) != len(schema_prefixes):
             raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
                                "Multiple schema share the same tag name_prefix.  This is not allowed.",
                                filename="Combined Schema")
-        self._schemas = {hed_schema._schema_prefix: hed_schema for hed_schema in schema_list}
+        self._schemas = {hed_schema._namespace: hed_schema for hed_schema in schema_list}
 
     # ===============================================
     # General schema properties/functions
@@ -87,17 +87,17 @@ class HedSchemaGroup:
     def __eq__(self, other):
         return self._schemas == other._schemas
 
-    def schema_for_prefix(self, prefix):
-        """ Return the HedSchema for the library prefix.
+    def schema_for_namespace(self, namespace):
+        """ Return the HedSchema for the library namespace.
 
         Parameters:
-            prefix (str): A schema library name prefix.
+            namespace (str): A schema library name namespace.
 
         Returns:
-            HedSchema or None: The specific schema for this library name prefix if exists.
+            HedSchema or None: The specific schema for this library name namespace if exists.
 
         """
-        schema = self._schemas.get(prefix)
+        schema = self._schemas.get(namespace)
         return schema
 
     @property
@@ -142,14 +142,14 @@ class HedSchemaGroup:
             all_tags.update(schema.get_tags_with_attribute(key))
         return all_tags
 
-    # todo: maybe tweak this API so you don't have to pass in library prefix?
-    def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, schema_prefix=""):
+    # todo: maybe tweak this API so you don't have to pass in library namespace?
+    def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, schema_namespace=""):
         """ Return the schema entry for this tag, if one exists.
 
         Parameters:
             name (str): Any form of basic tag(or other section entry) to look up.
             key_class (HedSectionKey): The tag section to search.
-            schema_prefix (str or None): An optional prefix associated with this tag.
+            schema_namespace (str or None): An optional namespace associated with this tag.
 
         Returns:
             HedSchemaEntry:  The schema entry for the given tag.
@@ -158,18 +158,18 @@ class HedSchemaGroup:
             - This will not handle extensions or similar.
 
         """
-        specific_schema = self.schema_for_prefix(schema_prefix)
+        specific_schema = self.schema_for_namespace(schema_namespace)
         if not specific_schema:
             return None
 
-        return specific_schema.get_tag_entry(name, key_class, schema_prefix)
+        return specific_schema.get_tag_entry(name, key_class, schema_namespace)
 
-    def find_tag_entry(self, tag, schema_prefix=""):
+    def find_tag_entry(self, tag, schema_namespace=""):
         """ Find a schema entry for a source tag.
 
         Parameters:
             tag (str or HedTag): Any form of tag to look up.  Can have an extension, value, etc.
-            schema_prefix (str): The prefix the library, if any.
+            schema_namespace (str): The namespace the library, if any.
 
         Returns:
             tuple:
@@ -181,10 +181,10 @@ class HedSchemaGroup:
             - Works right to left.(mostly relevant for errors).
 
         """
-        specific_schema = self.schema_for_prefix(schema_prefix)
+        specific_schema = self.schema_for_namespace(schema_namespace)
         if not specific_schema:
             validation_issues = ErrorHandler.format_error(ValidationErrors.HED_LIBRARY_UNMATCHED, tag,
-                                                          schema_prefix, self.valid_prefixes)
+                                                          schema_namespace, self.valid_prefixes)
             return None, None, validation_issues
 
-        return specific_schema._find_tag_entry(tag, schema_prefix)
+        return specific_schema._find_tag_entry(tag, schema_namespace)
