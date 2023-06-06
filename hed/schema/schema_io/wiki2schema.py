@@ -290,6 +290,7 @@ class HedSchemaWikiParser:
         for line_number, line in lines:
             if line.startswith(wiki_constants.ROOT_TAG):
                 parent_tags = []
+                level_adj = 0
             else:
                 level = self._get_tag_level(line) + level_adj
                 if level < len(parent_tags):

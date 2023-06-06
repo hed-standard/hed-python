@@ -18,7 +18,7 @@ class TestHed3(TestValidatorBase):
         schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
         hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
         hed_schema1 = schema.load_schema(hed_xml)
-        hed_schema2 = schema.load_schema(hed_xml, schema_prefix="tl:")
+        hed_schema2 = schema.load_schema(hed_xml, schema_namespace="tl:")
         cls.hed_schema = HedSchemaGroup([hed_schema1, hed_schema2])
 
         cls.error_handler = error_reporter.ErrorHandler()
@@ -27,8 +27,8 @@ class TestHed3(TestValidatorBase):
     def test_invalid_load(self):
         schema_file = '../data/schema_tests/HED8.0.0t.xml'
         hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
-        hed_schema1 = schema.load_schema(hed_xml, schema_prefix="tl:")
-        hed_schema2 = schema.load_schema(hed_xml, schema_prefix="tl:")
+        hed_schema1 = schema.load_schema(hed_xml, schema_namespace="tl:")
+        hed_schema2 = schema.load_schema(hed_xml, schema_namespace="tl:")
 
         self.assertRaises(HedFileError, HedSchemaGroup, [hed_schema1, hed_schema2])
 
@@ -440,14 +440,14 @@ class RequiredTags(TestHed3):
         expected_issues = {
             'complete': [],
             'missingAgent': self.format_error(ValidationErrors.REQUIRED_TAG_MISSING,
-                                              tag_prefix='Agent/Animal-agent'),
-            'missingAction': self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='Action'),
+                                              tag_namespace='Agent/Animal-agent'),
+            'missingAction': self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace='Action'),
             'inSubGroup': [],
             'missingAll':
-                self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='Action')
-                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='Agent/Animal-agent')
-                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='tl:Action')
-                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_prefix='tl:Agent/Animal-agent'),
+                self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace='Action')
+                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace='Agent/Animal-agent')
+                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace='tl:Action')
+                + self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace='tl:Agent/Animal-agent'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -470,9 +470,9 @@ class RequiredTags(TestHed3):
         expected_issues = {
             'legal': [],
             'multipleDesc': self.format_error(ValidationErrors.TAG_NOT_UNIQUE,
-                                              tag_prefix='tl:Property/Organizational-property/Event-context'),
+                                              tag_namespace='tl:Property/Organizational-property/Event-context'),
             'multipleDescIncShort': self.format_error(ValidationErrors.TAG_NOT_UNIQUE,
-                                                      tag_prefix='tl:Property/Organizational-property/Event-context'),
+                                                      tag_namespace='tl:Property/Organizational-property/Event-context'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 

@@ -61,7 +61,7 @@ class HedSchemaSection:
 
         return return_entry
 
-    def _add_to_dict(self, name, new_entry, parent_index=None):
+    def _add_to_dict(self, name, new_entry):
         """ Add a name to the dictionary for this section. """
         name_key = name
         if not self.case_sensitive:
@@ -69,18 +69,16 @@ class HedSchemaSection:
 
         return_entry = self._check_if_duplicate(name_key, new_entry)
 
-        if parent_index is None:
-            parent_index = len(self.all_entries)
-        self.all_entries.insert(parent_index, new_entry)
+        self.all_entries.append(new_entry)
         return return_entry
 
-    def get_entries_with_attribute(self, attribute_name, return_name_only=False, schema_prefix=""):
+    def get_entries_with_attribute(self, attribute_name, return_name_only=False, schema_namespace=""):
         """ Return entries or names with given attribute.
 
         Parameters:
             attribute_name (str): The name of the attribute(generally a HedKey entry).
             return_name_only (bool): If true, return the name as a string rather than the tag entry.
-            schema_prefix (str): Prepends given prefix to each name if returning names.
+            schema_namespace (str): Prepends given namespace to each name if returning names.
 
         Returns:
             list: List of HedSchemaEntry or strings representing the names.
@@ -92,7 +90,7 @@ class HedSchemaSection:
 
         cache_val = self._attribute_cache[attribute_name]
         if return_name_only:
-            return [f"{schema_prefix}{tag_entry.name}" for tag_entry in cache_val]
+            return [f"{schema_namespace}{tag_entry.name}" for tag_entry in cache_val]
         return cache_val
 
     # ===============================================
@@ -145,6 +143,10 @@ class HedSchemaSection:
 
     def __bool__(self):
         return bool(self.all_names)
+
+    def _finalize_section(self, hed_schema):
+        for entry in self.values():
+            entry.finalize_entry(hed_schema)
 
 
 class HedSchemaUnitClassSection(HedSchemaSection):
@@ -211,24 +213,6 @@ class HedSchemaTagSection(HedSchemaSection):
 
         return new_entry
 
-    def _add_to_dict(self, name, new_entry, parent_index=None):
-        if new_entry.has_attribute(HedKey.Rooted):
-            del new_entry.attributes[HedKey.Rooted]
-        if new_entry.has_attribute(HedKey.InLibrary):
-            parent_name = new_entry.parent_name
-            if parent_name.lower() in self:
-                # Make sure we insert the new entry after all previous relevant ones, as order isn't assured
-                # for rooted tags
-                parent_entry = self.get(parent_name.lower())
-                parent_index = self.all_entries.index(parent_entry)
-                for i in range(parent_index, len(self.all_entries)):
-                    if self.all_entries[i].name.startswith(parent_entry.name):
-                        parent_index = i + 1
-                        continue
-                    break
-
-        return super()._add_to_dict(name, new_entry, parent_index)
-
     def get(self, key):
         if not self.case_sensitive:
             key = key.lower()
@@ -243,3 +227,36 @@ class HedSchemaTagSection(HedSchemaSection):
         if not self.case_sensitive:
             key = key.lower()
         return key in self.long_form_tags
+
+    @staticmethod
+    def _divide_tags_into_dict(divide_list):
+        result = {}
+        for item in divide_list:
+            key, _, value = item.long_tag_name.partition('/')
+            if key not in result:
+                result[key] = []
+            result[key].append(item)
+
+        return list(result.values())
+
+    def _finalize_section(self, hed_schema):
+        split_list = self._divide_tags_into_dict(self.all_entries)
+
+        # Sort the extension allowed lists
+        extension_allowed_node = 0
+        for values in split_list:
+            node = values[0]
+            if node.has_attribute(HedKey.ExtensionAllowed):
+                # Make sure we sort / characters to the front.
+                values.sort(key=lambda x: x.long_tag_name.replace("/", "\0"))
+                extension_allowed_node += 1
+
+        # sort the top level nodes so extension allowed is at the bottom
+        split_list.sort(key=lambda x: x[0].has_attribute(HedKey.ExtensionAllowed))
+
+        # sort the extension allowed top level nodes
+        if extension_allowed_node:
+            split_list[extension_allowed_node:] = sorted(split_list[extension_allowed_node:], key=lambda x: x[0].long_tag_name)
+        self.all_entries = [subitem for tag_list in split_list for subitem in tag_list]
+        super()._finalize_section(hed_schema)
+
