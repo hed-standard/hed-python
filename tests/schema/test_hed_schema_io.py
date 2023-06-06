@@ -228,6 +228,24 @@ class TestHedSchemaMerging(unittest.TestCase):
 
         self._base_merging_test(files)
 
+    def test_saving_merged_rooted_sorting(self):
+        files = [
+            load_schema(os.path.join(self.full_base_folder, "sorted_root.mediawiki")),
+            load_schema(os.path.join(self.full_base_folder, "sorted_root_merged.xml")),
+        ]
+
+        self._base_merging_test(files)
+
+    def test_saving_bad_sort(self):
+        loaded_schema = load_schema(os.path.join(self.full_base_folder, "bad_sort_test.mediawiki"))
+        filename = loaded_schema.save_as_mediawiki()
+        try:
+            reloaded_schema = load_schema(filename)
+        finally:
+            os.remove(filename)
+
+        self.assertEqual(loaded_schema, reloaded_schema)
+
     def _base_added_class_tests(self, schema):
         tag_entry = schema.all_tags["Modulator"]
         self.assertEqual(tag_entry.attributes["suggestedTag"], "Event")

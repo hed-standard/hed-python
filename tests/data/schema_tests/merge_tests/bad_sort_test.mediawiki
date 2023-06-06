@@ -1,0 +1,18 @@
+HED library="testlib" version="1.0.2"
+
+'''Prologue'''
+This is to make sure it's properly handling tags that are a previous tag name extended with a dash.
+
+!# start schema
+
+'''BaseTag'''{extensionAllowed}
+* Node
+** Subnode1
+* Node-extended
+** Subnode3
+
+!# end schema
+
+'''Epilogue'''
+
+!# end hed

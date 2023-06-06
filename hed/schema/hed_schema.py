@@ -581,8 +581,7 @@ class HedSchema:
         """ Call finalize_entry on every schema entry(tag, unit, etc). """
         for key_class, section in self._sections.items():
             self._initialize_attributes(key_class)
-            for entry in section.values():
-                entry.finalize_entry(self)
+            section._finalize_section(self)
 
     def _initialize_attributes(self, key_class):
         """ Set the valid attributes for a section.
