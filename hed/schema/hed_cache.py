@@ -6,6 +6,7 @@ import os
 import json
 from hashlib import sha1
 from shutil import copyfile
+import urllib
 import re
 from semantic_version import Version
 import portalocker
@@ -371,9 +372,13 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
                 continue
             if file_entry['name'] in skip_folders:
                 continue
-            sub_folder_versions = \
-                _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
-                                               skip_folders=skip_folders, get_libraries=True)
+            try:
+                sub_folder_versions = \
+                    _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
+                                                   skip_folders=skip_folders, get_libraries=True)
+            except urllib.error.HTTPError as e:
+                # Silently ignore ones without a hedxml section for now.
+                continue
             _merge_in_versions(all_hed_versions, sub_folder_versions)
         expression_match = version_pattern.match(file_entry["name"])
         if expression_match is not None:
