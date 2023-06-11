@@ -24,10 +24,11 @@ class SummarizeHedValidationOp(BaseOp):
         "operation": "summarize_hed_validation",
         "required_parameters": {
             "summary_name": str,
-            "summary_filename": str,
-            "check_for_warnings": bool
+            "summary_filename": str 
         },
         "optional_parameters": {
+            "append_timecode": bool,
+            "check_for_warnings": bool
         }
     }
 
@@ -51,7 +52,8 @@ class SummarizeHedValidationOp(BaseOp):
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
-        self.check_for_warnings = parameters['check_for_warnings']
+        self.append_timecode = parameters.get('append_timecode', False)
+        self.check_for_warnings = parameters.get('check_for_warnings', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Validate the dataframe with the accompanying sidecar, if any.
@@ -220,7 +222,7 @@ class HedValidationSummary(BaseSummary):
         HedValidationSummary.update_error_location(error_locations, "row", "ec_row", error)
         HedValidationSummary.update_error_location(error_locations, "column", "ec_column", error)
         HedValidationSummary.update_error_location(error_locations, "sidecar column",
-                                                          "ec_sidecarColumnName", error)
+                                                   "ec_sidecarColumnName", error)
         HedValidationSummary.update_error_location(error_locations, "sidecar key", "ec_sidecarKeyName", error)
         location_str = ",".join(error_locations)
         if location_str:

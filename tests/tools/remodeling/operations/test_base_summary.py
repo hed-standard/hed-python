@@ -12,7 +12,9 @@ class TestOp(BaseOp):
             "summary_name": str,
             "summary_filename": str
         },
-        "optional_parameters": {}
+        "optional_parameters": {
+            "append_timecode": bool
+        }
     }
 
     SUMMARY_TYPE = "test_sum"
@@ -21,6 +23,7 @@ class TestOp(BaseOp):
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
+        self.append_timecode = parameters.get('append_timecode', False)
 
 
 class TestSummary(BaseSummary):

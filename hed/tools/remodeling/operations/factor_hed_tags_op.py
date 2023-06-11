@@ -6,7 +6,6 @@ import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
-from hed.models.expression_parser import QueryParser
 from hed.models.df_util import get_assembled
 from hed.tools.analysis.analysis_util import get_expression_parsers, search_strings
 
@@ -48,7 +47,7 @@ class FactorHedTagsOp(BaseOp):
 
             KeyError   
                 - If a required parameter is missing.    
-                                
+
                 - If an unexpected parameter is provided.    
 
             TypeError   
@@ -56,9 +55,9 @@ class FactorHedTagsOp(BaseOp):
 
             ValueError  
                 - If the specification is missing a valid operation.    
-                
+
                 - If the length of query names is not empty and not same length as queries.    
-                
+
                 - If there are duplicate query names.    
 
         """

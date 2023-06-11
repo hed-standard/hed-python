@@ -42,7 +42,8 @@ def get_parser():
     parser.add_argument("-r", "--hed-versions", dest="hed_versions", nargs="*", default=[],
                         help="Optional list of HED schema versions used for annotation, include prefixes.")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
-                        help="Format for saving any summaries, if any. If no summaries are to be written, use the -ns option.")
+                        help="Format for saving any summaries, if any. If no summaries are to be written," +
+                             "use the -ns option.")
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The names of the task.")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
@@ -122,7 +123,7 @@ def run_direct_ops(dispatch, args):
 
     Parameters:
         dispatch (Dispatcher):  Controls the application of the operations and backup.
-        args (dict): Dictionary of arguments and their values.
+        args (argparse.Namespace): Dictionary of arguments and their values.
 
     """
 
