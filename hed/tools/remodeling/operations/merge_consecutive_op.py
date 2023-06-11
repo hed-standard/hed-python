@@ -38,7 +38,7 @@ class MergeConsecutiveOp(BaseOp):
             KeyError   
             - If a required parameter is missing.   
             - If an unexpected parameter is provided.   
- 
+
             TypeError   
             - If a parameter has the wrong type.   
 

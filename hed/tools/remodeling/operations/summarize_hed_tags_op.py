@@ -34,6 +34,7 @@ class SummarizeHedTagsOp(BaseOp):
             "tags": dict
         },
         "optional_parameters": {
+            "append_timecode": bool,
             "expand_context": bool
         }
     }
@@ -59,6 +60,7 @@ class SummarizeHedTagsOp(BaseOp):
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.tags = parameters['tags']
+        self.append_timecode = parameters.get('append_timecode', False)
         self.expand_context = parameters.get('expand_context', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):

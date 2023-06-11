@@ -30,8 +30,9 @@ class SummarizeColumnValuesOp(BaseOp):
             "value_columns": list
         },
         "optional_parameters": {
-            "values_per_line": int,
-            "max_categorical": int
+            "append_timecode": bool,
+            "max_categorical": int,
+            "values_per_line": int
         }
     }
 
@@ -61,6 +62,7 @@ class SummarizeColumnValuesOp(BaseOp):
         self.summary_filename = parameters['summary_filename']
         self.skip_columns = parameters['skip_columns']
         self.value_columns = parameters['value_columns']
+        self.append_timecode = parameters.get('append_timecode', False)
         self.max_categorical = parameters.get('max_categorical', float('inf'))
         self.values_per_line = parameters.get('values_per_line', self.VALUES_PER_LINE)
 
@@ -125,7 +127,7 @@ class ColumnValueSummary(BaseSummary):
         unique_counts = [(key, len(count_dict)) for key, count_dict in this_summary['Categorical columns'].items()]
         this_summary['Categorical counts'] = dict(unique_counts)
         for key, dict_entry in this_summary['Categorical columns'].items():
-            num_disp, sorted_tuples = ColumnValueSummary.sort_dict(self, dict_entry, reverse=True)
+            num_disp, sorted_tuples = ColumnValueSummary.sort_dict(dict_entry, reverse=True)
             this_summary['Categorical columns'][key] = dict(sorted_tuples[:min(num_disp, self.op.max_categorical)])
         return this_summary
 
@@ -166,7 +168,7 @@ class ColumnValueSummary(BaseSummary):
         """ Return  a string with the summary for a particular categorical dictionary.
 
          Parameters:
-             cat_dict (dict): Dictionary of summary information for a particular tabular file.
+             result (dict): Dictionary of summary information for a particular tabular file.
              offset (str): String of blanks used as offset for every item
              indent (str):  String of blanks used as the additional amount to indent an item's for readability.
 
@@ -230,7 +232,8 @@ class ColumnValueSummary(BaseSummary):
         """ Return  a string with the summary for a particular categorical column.
 
          Parameters:
-             dict_entry(tuple): (Name of the column, summary dict for that column)
+             entry(tuple): (Name of the column, summary dict for that column)
+             count_dict (dict): Count of the total number of unique values indexed by the name
              offset(str): String of blanks used as offset for all items
              indent (str):  String of blanks used as the additional amount to indent for this item's readability.
 
@@ -273,6 +276,6 @@ class ColumnValueSummary(BaseSummary):
         return "\n".join(sum_list)
 
     @staticmethod
-    def sort_dict(self, count_dict, reverse=False):
+    def sort_dict(count_dict, reverse=False):
         sorted_tuples = sorted(count_dict.items(), key=lambda x: x[1][0], reverse=reverse)
         return len(sorted_tuples), sorted_tuples

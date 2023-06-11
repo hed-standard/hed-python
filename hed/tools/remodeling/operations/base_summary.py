@@ -137,7 +137,10 @@ class BaseSummary(ABC):
             summary (dictionary): Dictionary of summaries (has "Dataset" and "Individual files" keys.
 
         """
-        time_stamp = '_' + get_timestamp()
+        if self.op.append_timecode:
+            time_stamp = '_' + get_timestamp()
+        else:
+            time_stamp = ''
         this_save = os.path.join(save_dir, self.op.summary_name + '/')
         os.makedirs(os.path.realpath(this_save), exist_ok=True)
         filename = os.path.realpath(os.path.join(this_save, self.op.summary_filename + time_stamp + file_format))
