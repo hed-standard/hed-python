@@ -23,6 +23,7 @@ class SummarizeColumnNamesOp(BaseOp):
             "summary_filename": str
         },
         "optional_parameters": {
+            "append_timecode": bool
         }
     }
 
@@ -46,6 +47,7 @@ class SummarizeColumnNamesOp(BaseOp):
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
+        self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns corresponding to values in a specified column.

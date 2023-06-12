@@ -28,6 +28,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
             "value_columns": list,
         },
         "optional_parameters": {
+            "append_timecode": bool
         }
     }
 
@@ -54,6 +55,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         self.summary_filename = parameters['summary_filename']
         self.skip_columns = parameters['skip_columns']
         self.value_columns = parameters['value_columns']
+        self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns corresponding to values in a specified column.
