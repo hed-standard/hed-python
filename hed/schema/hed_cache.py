@@ -89,7 +89,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=
         if expression_match is not None:
             version = expression_match.group(3)
             found_library_name = expression_match.group(2)
-            if found_library_name != library_name:
+            if not get_libraries and found_library_name != library_name:
                 continue
             if found_library_name not in all_hed_versions:
                 all_hed_versions[found_library_name] = []
