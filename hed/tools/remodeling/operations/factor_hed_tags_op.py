@@ -47,15 +47,15 @@ class FactorHedTagsOp(BaseOp):
 
             KeyError   
                 - If a required parameter is missing.    
-
+                  |
                 - If an unexpected parameter is provided.    
 
             TypeError   
                 - If a parameter has the wrong type.    
 
             ValueError  
-                - If the specification is missing a valid operation.    
-
+                - If the specification is missing a valid operation.
+                  |
                 - If the length of query names is not empty and not same length as queries.    
 
                 - If there are duplicate query names.    
