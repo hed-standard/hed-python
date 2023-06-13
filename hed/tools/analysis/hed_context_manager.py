@@ -27,8 +27,8 @@ class HedContextManager:
             hed_strings (list): A list of HedString objects to be managed.
             hed_schema (HedSchema):  A HedSchema
 
-        Raises:
-            HedFileError: if there are any unmatched offsets.
+        :raises HedFileError:
+            - If there are any unmatched offsets.
 
         Notes:
             The constructor has the side-effect of splitting each element of the hed_strings list into two
@@ -69,8 +69,8 @@ class HedContextManager:
     def _create_onset_list(self):
         """ Create a list of events of extended duration.
 
-        Raises:
-            HedFileError: If the hed_strings contain unmatched offsets.
+        :raises HedFileError:
+            - If the hed_strings contain unmatched offsets.
 
         """
 
@@ -122,8 +122,8 @@ class HedContextManager:
             event_index (int): The event number in the list.
             is_offset (bool):  True if processing an offset.
 
-        Raises:
-            HedFileError if an unmatched offset is encountered.
+        :raises HedFileError:
+            - If an unmatched offset is encountered.
 
         Notes:
             - Modifies onset_dict and onset_list.

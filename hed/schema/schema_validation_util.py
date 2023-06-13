@@ -80,8 +80,8 @@ def validate_attributes(attrib_dict, filename):
     Returns:
         list: List of issues. Each issue is a dictionary.
 
-    Raises:
-        HedFileError: if invalid or version not found in the dictionary.
+    :raises  HedFileError:
+        - If invalid or version not found in the dictionary.
 
     """
     validate_present_attributes(attrib_dict, filename)
@@ -111,8 +111,8 @@ def find_rooted_entry(tag_entry, schema, loading_merged):
         rooted_tag(HedTagEntry or None): The base tag entry from the standard schema
             Returns None if this tag isn't rooted
 
-    Raises:
-        HedValueError: Raises if the tag doesn't exist or similar
+    :raises HedValueError:
+        - If the tag doesn't exist or similar
 
     """
     rooted_tag = tag_entry.has_attribute(constants.HedKey.Rooted, return_value=True)

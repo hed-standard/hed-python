@@ -19,8 +19,8 @@ class HedTypeValues:
             name (str): Name of the tabular file as a unique identifier.
             type_tag (str): Lowercase short form of the tag to be managed.
 
-        Raises:
-            HedFileError:  On errors such as unmatched onsets or missing definitions.
+        :raises HedFileError:
+            - On errors such as unmatched onsets or missing definitions.
 
         """
         self.name = name

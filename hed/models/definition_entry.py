@@ -36,8 +36,8 @@ class DefinitionEntry:
             str:          The expanded def tag name
             HedGroup:     The contents of this definition(including the def tag itself)
 
-        Raises:
-            ValueError:  If a placeholder_value is passed, but this definition doesn't have a placeholder.
+        :raises ValueError:
+            - If a placeholder_value is passed, but this definition doesn't have a placeholder.
 
         """
         if self.takes_value == (placeholder_value is None):

@@ -37,8 +37,8 @@ class HedGroup:
         Parameters:
             tag_or_group (HedTag or HedGroup): The new object to add to this group.
 
-        Raises:
-            ValueError: If a HedGroupFrozen.
+        :raises ValueError:
+            If a HedGroupFrozen.
 
         """
         tag_or_group._parent = self

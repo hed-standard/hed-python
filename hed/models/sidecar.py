@@ -120,8 +120,9 @@ class Sidecar:
         Parameters:
             file (str or FileLike): If a string, this is a filename. Otherwise, it will be parsed as a file-like.
 
-        Raises:
-            HedFileError: If the file was not found or could not be parsed into JSON.
+        :raises HedFileError:
+            - If the file was not found or could not be parsed into JSON.
+            
         """
         if not file:
             return {}
@@ -143,8 +144,10 @@ class Sidecar:
 
         Parameters:
             files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
-        Raises:
-            HedFileError: If the file was not found or could not be parsed into JSON.
+
+        :raises HedFileError:
+            - If the file was not found or could not be parsed into JSON.
+            
         """
         if not files:
             return {}
@@ -184,8 +187,9 @@ class Sidecar:
         Parameters:
             fp (File-like): The JSON source stream.
 
-        Raises:
-            HedFileError:  If the file cannot be parsed.
+        :raises HedFileError:
+            - If the file cannot be parsed.
+            
         """
         try:
             return json.load(fp)

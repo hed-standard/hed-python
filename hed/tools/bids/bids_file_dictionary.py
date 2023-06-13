@@ -20,8 +20,8 @@ class BidsFileDictionary(FileDictionary):
             files (list or dict):   Full paths of files to include.
             entities (tuple):  Entity names to use in creating the keys.
 
-        Raises:
-            HedFileError: If files has inappropriate values.
+        :raises HedFileError:
+            - If files has inappropriate values.
 
         Notes:
             - This function is used for cross listing BIDS style files for different studies.
@@ -117,8 +117,8 @@ class BidsFileDictionary(FileDictionary):
         Returns:
             dict:  A dictionary whose keys are entity keys and values are BidsFile objects.
 
-        Raises:
-            HedFileError: If incorrect format is passed or something not recognizable as a Bids file.
+        :raises HedFileError:
+            - If incorrect format is passed or something not recognizable as a Bids file.
 
         """
         file_dict = {}
@@ -244,8 +244,8 @@ class BidsFileDictionary(FileDictionary):
         Returns:
             BidsFile:  Either the original file or a newly created BidsTabularFile.
 
-        Raises:
-            HedFileError: If the_file isn't str or BidsFile.
+        :raises HedFileError:
+            - If the_file isn't str or BidsFile.
 
         """
         if isinstance(the_file, str):

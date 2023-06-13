@@ -179,8 +179,8 @@ class HedString(HedGroup):
         Returns:
             list:  A list of HedTag and/or HedGroup.
 
-        Raises:
-            ValueError: If the string is significantly malformed, such as mismatched parentheses.
+        :raises ValueError:
+            - If the string is significantly malformed, such as mismatched parentheses.
 
         Notes:
             - The parse tree consists of tag groups, tags, and delimiters.

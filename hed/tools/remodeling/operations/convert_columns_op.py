@@ -31,16 +31,15 @@ class ConvertColumnsOp(BaseOp):
         Parameters:
             parameters (dict): Parameter values for required and optional parameters.
 
-        Raises:  
-            KeyError    
-                - If a required parameter is missing.    
-                - If an unexpected parameter is provided.    
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
-            ValueError   
-                - If convert_to is not one of the allowed values.   
+        :raises ValueError:
+            - If convert_to is not one of the allowed values.
 
         """
         super().__init__(self.PARAMS, parameters)

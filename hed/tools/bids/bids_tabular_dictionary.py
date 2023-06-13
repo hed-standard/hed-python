@@ -190,8 +190,8 @@ class BidsTabularDictionary(BidsFileDictionary):
         Returns:
             BidsTabularFile:  Either the original file or a newly created BidsTabularFile.
 
-        Raises:
-            HedFileError: If the_file isn't str or BidsTabularFile.
+        :raises HedFileError:
+            - If the_file isn't str or BidsTabularFile.
 
         """
         if isinstance(the_file, str):

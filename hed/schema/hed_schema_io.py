@@ -22,8 +22,8 @@ def from_string(schema_string, file_type=".xml", schema_namespace=None):
     Returns:
         (HedSchema):  The loaded schema.
 
-    Raises:
-        HedFileError:  If empty string or invalid extension is passed.
+    :raises HedFileError:
+        - If empty string or invalid extension is passed.
 
     Notes:
         - The loading is determined by file type.
@@ -78,8 +78,8 @@ def load_schema(hed_path=None, schema_namespace=None):
     Returns:
         HedSchema: The loaded schema.
 
-    Raises:
-         HedFileError: If there are any fatal issues when loading the schema.
+    :raises HedFileError:
+        - If there are any fatal issues when loading the schema.
 
     """
     if not hed_path:
@@ -129,8 +129,8 @@ def _load_schema_version(xml_version=None, xml_folder=None):
     Returns:
         HedSchema or HedSchemaGroup: The requested HedSchema object.
 
-    Raises:
-        HedFileError: If the xml_version is not valid.
+    :raises HedFileError:
+        - If the xml_version is not valid.
 
     Notes:
         - The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
@@ -178,8 +178,8 @@ def load_schema_version(xml_version=None, xml_folder=None):
     Returns:
         HedSchema or HedSchemaGroup: The schema or schema group extracted.
 
-    Raises:
-        HedFileError: If the xml_version is not valid.
+    :raises HedFileError:
+        - If the xml_version is not valid.
 
     Notes:
         - Loads the latest schema value if an empty version is given (string or list).

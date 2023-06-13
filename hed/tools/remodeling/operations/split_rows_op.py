@@ -31,13 +31,12 @@ class SplitRowsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -57,9 +56,8 @@ class SplitRowsOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-            TypeError   
-                -If bad onset or duration.   
+        :raises TypeError:
+            -If bad onset or duration.
 
         """
 
@@ -121,8 +119,8 @@ class SplitRowsOp(BaseOp):
         Returns:
             list:  list of same length as df with the onsets.
 
-        Raises:
-            HedFileError: raised if one of the onset specifiers is invalid.
+        :raises HedFileError:
+            - If one of the onset specifiers is invalid.
 
         """
 

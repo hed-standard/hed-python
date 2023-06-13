@@ -130,8 +130,8 @@ class HedTag:
         Parameters:
             new_tag_val (str): The new short_base_tag for this tag.
 
-        Raises:
-            ValueError: If tags cannot unidentified.
+        :raises ValueError:
+            - If tags cannot unidentified.
 
         Note:
             - Generally this is used to swap def to def-expand.

@@ -44,20 +44,19 @@ class RemapColumnsOp(BaseOp):
             Parameters:
                 parameters (dict): Parameter values for required and optional parameters.
 
-            Raises:
-                KeyError   
-                    - If a required parameter is missing.    
-                    - If an unexpected parameter is provided.    
+            :raises KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
 
-                TypeError   
-                    - If a parameter has the wrong type.   
+            :raises TypeError:
+                - If a parameter has the wrong type.
 
-                ValueError   
-                    - If an integer column is not a key column.    
-                    - If a column designated as an integer source does not have valid integers.    
-                    - If no source columns are specified.    
-                    - If no destination columns are specified.    
-                    - If a map_list entry has the wrong number of items (source columns + destination columns).    
+            :raises ValueError:
+                - If an integer column is not a key column.
+                - If a column designated as an integer source does not have valid integers.
+                - If no source columns are specified.
+                - If no destination columns are specified.
+                - If a map_list entry has the wrong number of items (source columns + destination columns).
 
           """
         super().__init__(self.PARAMS, parameters)
@@ -106,9 +105,8 @@ class RemapColumnsOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-            ValueError   
-                - If ignore_missing is false and source values from the data are not in the map.   
+        :raises ValueError:
+            - If ignore_missing is false and source values from the data are not in the map.
 
         """
         df[self.source_columns] = df[self.source_columns].replace(np.NaN, 'n/a')

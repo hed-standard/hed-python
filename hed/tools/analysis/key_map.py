@@ -63,8 +63,8 @@ class KeyMap:
         Returns:
             DataFrame:  A dataframe containing the template.
 
-        Raises:
-            HedFileError: If additional columns are not disjoint from the key columns.
+        :raises HedFileError:
+            - If additional columns are not disjoint from the key columns.
 
         Notes:
             -  The template consists of the unique key columns in this map plus additional columns.
@@ -90,8 +90,8 @@ class KeyMap:
                 - DataFrame: New dataframe with columns remapped.
                 - list:  List of row numbers that had no correspondence in the mapping.
 
-        Raises:
-            HedFileError:  If data is missing some of the key columns.
+        :raises HedFileError:
+            - If data is missing some of the key columns.
 
         """
 
@@ -145,8 +145,8 @@ class KeyMap:
         Returns:
             list: The indices of duplicates.
 
-        Raises:
-            HedFileError:  If there are missing keys and allow_missing is False.
+        :raises HedFileError:
+            - If there are missing keys and allow_missing is False.
 
         """
         df = get_new_dataframe(data)
