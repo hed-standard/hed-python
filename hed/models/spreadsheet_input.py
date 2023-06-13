@@ -21,11 +21,15 @@ class SpreadsheetInput(BaseInput):
                 first line of the file if the spreadsheet as column names.
             column_prefix_dictionary (dict): Dictionary with keys that are column numbers/names and values are HED tag
                 prefixes to prepend to the tags in that column before processing.
-                May be deprecated/renamed.  These are no longer prefixes, but rather converted to value columns.
-                eg. {"key": "Description", 1: "Label/"} will turn into value columns as
-                    {"key": "Description/#", 1: "Label/#"}
-                    Note: It will be a validation issue if column 1 is called "key" in the above example.
-                This means it no longer accepts anything but the value portion only in the columns.
+
+        Notes:
+            - column_prefix_dictionary may be deprecated/renamed.  These are no longer prefixes,
+              but rather converted to value columns.
+              eg. {"key": "Description", 1: "Label/"} will turn into value columns as
+              {"key": "Description/#", 1: "Label/#"}
+              It will be a validation issue if column 1 is called "key" in the above example.
+              This means it no longer accepts anything but the value portion only in the columns.
+
         """
         if tag_columns is None:
             tag_columns = [1]

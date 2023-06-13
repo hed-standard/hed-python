@@ -266,10 +266,10 @@ def parse_bids_filename(file_path):
         dict:  Dictionary with key-value pair being (entity type, entity value).
 
     :raises HedFileError:
-    - If filename does not conform to name-value_suffix format.
+        - If filename does not conform to name-value_suffix format.
 
-    Notes:
-            into BIDS suffix, extension, and a dictionary of entity name-value pairs.
+    Notes:  
+        - splits into BIDS suffix, extension, and a dictionary of entity name-value pairs.
 
     """
 

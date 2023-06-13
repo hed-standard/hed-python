@@ -277,9 +277,9 @@ def separate_values(values, target_values):
             list:  Target values present in values.
             list:  Target values missing from values.
 
-     Notes:
+     Notes:  
          - The function computes the set difference of target_cols and base_cols and returns a list
-         of columns of target_cols that are in base_cols and a list of those missing.
+           of columns of target_cols that are in base_cols and a list of those missing.
 
      """
 

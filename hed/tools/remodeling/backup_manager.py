@@ -222,12 +222,12 @@ class BackupManager:
     def get_task(task_names, file_path):
         """ Return the task if the file name contains a task_xxx where xxx is in task_names.
 
-        Args:
+        Parameters:
             task_names (list):  List of task names (without the task_ prefix).
             file_path (str):    Path of the filename to be tested.
 
         Returns:
-            str  the task name or '' if there is no task_xxx or xxx is not in task_names.
+            str:  the task name or '' if there is no task_xxx or xxx is not in task_names.
 
         """
 
