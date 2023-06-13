@@ -27,13 +27,12 @@ class RenameColumnsOp (BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
-        Raises:
-            KeyError    
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -55,9 +54,8 @@ class RenameColumnsOp (BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-            KeyError   
-                - When ignore_missing is false and column_mapping has columns not in the data.   
+        :raises KeyError:
+            - When ignore_missing is false and column_mapping has columns not in the data.
 
         """
 

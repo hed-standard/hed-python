@@ -43,29 +43,24 @@ class FactorHedTagsOp(BaseOp):
         Parameters:
             parameters (dict):  Actual values of the parameters for the operation.
 
-        Raises:
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            KeyError   
-                - If a required parameter is missing.    
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
-                - If an unexpected parameter is provided.    
-
-            TypeError   
-                - If a parameter has the wrong type.    
-
-            ValueError  
-                - If the specification is missing a valid operation.    
-
-                - If the length of query names is not empty and not same length as queries.    
-
-                - If there are duplicate query names.    
+        :raises ValueError:
+            - If the specification is missing a valid operation.
+            - If the length of query names is not empty and not same length as queries.
+            - If there are duplicate query names.
 
         """
         super().__init__(self.PARAMS, parameters)
         self.queries = parameters['queries']
         self.query_names = parameters['query_names']
         self.remove_types = parameters['remove_types']
-        self.expression_parsers, self.query_names = get_expression_parsers(self.queries, 
+        self.expression_parsers, self.query_names = get_expression_parsers(self.queries,
                                                                            query_names=parameters['query_names'])
 
     def do_op(self, dispatcher, df, name, sidecar=None):
@@ -80,10 +75,8 @@ class FactorHedTagsOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-
-            ValueError   
-                - If a name for a new query factor column is already a column.   
+        :raises ValueError:
+            - If a name for a new query factor column is already a column.
 
         """
 
@@ -96,7 +89,7 @@ class FactorHedTagsOp(BaseOp):
                 raise ValueError("QueryNameAlreadyColumn",
                                  f"Query [{query_name}]: is already a column name of the data frame")
         df_list = [input_data.dataframe]
-        hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None, 
+        hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None,
                                        join_columns=True, shrink_defs=False, expand_defs=True)
         df_factors = search_strings(hed_strings, self.expression_parsers, query_names=self.query_names)
         if len(df_factors.columns) > 0:

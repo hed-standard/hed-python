@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
     def test_get_hed_versions_all(self):
         cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, get_libraries=True)
         self.assertIsInstance(cached_versions, dict)
-        self.assertTrue(len(cached_versions) > 0)
+        self.assertTrue(len(cached_versions) > 1)
 
     def test_get_hed_versions(self):
         cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir)

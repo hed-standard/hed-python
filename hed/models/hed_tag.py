@@ -130,11 +130,12 @@ class HedTag:
         Parameters:
             new_tag_val (str): The new short_base_tag for this tag.
 
-        Raises:
-            ValueError: If tags cannot unidentified.
+        :raises ValueError:
+            - If tags cannot unidentified.
 
         Note:
             - Generally this is used to swap def to def-expand.
+
         """
         if self._schema_entry:
             tag_entry = None
@@ -156,8 +157,7 @@ class HedTag:
 
         Notes:
             - Warning: This could be empty if the original tag had a name_prefix prepended.
-            e.g. a column where "Label/" is prepended, thus the column value has zero base portion.
-
+              e.g. a column where "Label/" is prepended, thus the column value has zero base portion.
             - Only valid after calling convert_to_canonical_forms.
 
         """

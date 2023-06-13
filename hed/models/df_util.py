@@ -56,14 +56,14 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
 
 
 def convert_to_form(df, hed_schema, tag_form, columns=None):
-    """ Convert all tags in underlying dataframe to the specified form.
+    """ Convert all tags in underlying dataframe to the specified form (in place).
 
-        Converts in place
     Parameters:
         df (pd.Dataframe): The dataframe to modify
         hed_schema (HedSchema): The schema to use to convert tags.
         tag_form(str): HedTag property to convert tags to.
-        columns (list): The columns to modify on the dataframe
+        columns (list): The columns to modify on the dataframe.
+
     """
     if isinstance(df, pd.Series):
         df = df.apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
@@ -78,13 +78,13 @@ def convert_to_form(df, hed_schema, tag_form, columns=None):
 
 
 def shrink_defs(df, hed_schema, columns=None):
-    """ Shrinks any def-expand tags found in the specified columns in the dataframe.
+    """ Shrink (in place) any def-expand tags found in the specified columns in the dataframe.
 
-        Converts in place
     Parameters:
         df (pd.Dataframe or pd.Series): The dataframe or series to modify
         hed_schema (HedSchema or None): The schema to use to identify defs.
         columns (list or None): The columns to modify on the dataframe.
+
     """
     if isinstance(df, pd.Series):
         mask = df.str.contains('Def-expand/', case=False)

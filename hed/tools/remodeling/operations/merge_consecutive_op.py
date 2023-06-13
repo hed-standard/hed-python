@@ -33,18 +33,16 @@ class MergeConsecutiveOp(BaseOp):
         Parameters:
             parameters (dict): Actual values of the parameters for the operation.
 
-        Raises:
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            KeyError   
-            - If a required parameter is missing.   
-            - If an unexpected parameter is provided.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
-            TypeError   
-            - If a parameter has the wrong type.   
-
-            ValueError   
-            - If the specification is missing a valid operation.   
-            - If one of the match column is the merge column.   
+        :raises ValueError:
+            - If the specification is missing a valid operation.
+            - If one of the match column is the merge column.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -69,13 +67,11 @@ class MergeConsecutiveOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-
-            ValueError   
-                - If dataframe does not have the anchor column and ignore_missing is False.   
-                - If a match column is missing and ignore_missing is false.   
-                - If the durations were to be set and the dataframe did not have an onset column.   
-                - If the durations were to be set and the dataframe did not have a duration column.   
+        :raises ValueError:
+            - If dataframe does not have the anchor column and ignore_missing is False.
+            - If a match column is missing and ignore_missing is false.
+            - If the durations were to be set and the dataframe did not have an onset column.
+            - If the durations were to be set and the dataframe did not have a duration column.
 
         """
 

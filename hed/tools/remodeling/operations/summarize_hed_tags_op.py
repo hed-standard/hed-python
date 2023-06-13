@@ -47,13 +47,12 @@ class SummarizeHedTagsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:   
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -110,7 +109,7 @@ class HedTagSummary(BaseSummary):
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
         input_data = TabularInput(new_info['df'], sidecar=sidecar, name=new_info['name'])
-        hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'], 
+        hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'],
                                                  extra_def_dicts=None, join_columns=True,
                                                  shrink_defs=False, expand_defs=True)
         # definitions = input_data.get_definitions().gathered_defs

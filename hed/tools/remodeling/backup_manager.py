@@ -20,9 +20,9 @@ class BackupManager:
         Parameters:
             data_root (str): Full path of the root of the data directory.
             backups_root (str or None):  Full path to the root where backups subdirectory is located.
-        Raises:
-            - HedFileError:
-                - If the data_root does not correspond to a real directory.
+
+        :raises HedFileError:
+            - If the data_root does not correspond to a real directory.
 
         """
         if not os.path.isdir(data_root):
@@ -47,12 +47,11 @@ class BackupManager:
         Returns:
             bool:  True if the backup was successful. False if a backup of that name already exists.
 
-        Raises:
-            HedFileError   
-                - For missing or incorrect files.    
+        :raises HedFileError:
+            - For missing or incorrect files.
 
-            OS-related error   
-                - OS-related error when file copying occurs.    
+        :raises OS-related error:
+            - OS-related error when file copying occurs.
 
         """
         if not backup_name:
@@ -108,8 +107,8 @@ class BackupManager:
         Returns:
             list:  Full paths of the original files backed (original_paths=True) or the paths in the backup.
 
-        Raises:
-            HedFileError - if not backup named backup_name exists.
+        :raises HedFileError:
+            - If not backup named backup_name exists.
 
         """
 
@@ -163,8 +162,9 @@ class BackupManager:
     def _get_backups(self):
         """ Set the manager's backup-dictionary based on backup directory contents.
 
-        Raises:
-            HedFileError - if a backup is inconsistent for any reason.
+        :raises HedFileError:
+            - If a backup is inconsistent for any reason.
+            
         """
         backups = {}
         for backup in os.listdir(self.backups_path):
@@ -222,12 +222,12 @@ class BackupManager:
     def get_task(task_names, file_path):
         """ Return the task if the file name contains a task_xxx where xxx is in task_names.
 
-        Args:
+        Parameters:
             task_names (list):  List of task names (without the task_ prefix).
             file_path (str):    Path of the filename to be tested.
 
         Returns:
-            str  the task name or '' if there is no task_xxx or xxx is not in task_names.
+            str:  the task name or '' if there is no task_xxx or xxx is not in task_names.
 
         """
 

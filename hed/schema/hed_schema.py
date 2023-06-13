@@ -12,6 +12,7 @@ from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection,
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 
+
 class HedSchema:
     """ A HED schema suitable for processing. """
 
@@ -93,14 +94,15 @@ class HedSchema:
 
         """
         sort_to_start = "!!!!!!!!!!!!!!"
-        header_attributes = dict(sorted(self.header_attributes.items(), key=lambda x: sort_to_start if x[0] == constants.VERSION_ATTRIBUTE else x[0], reverse=False))
+        header_attributes = dict(sorted(self.header_attributes.items(),
+                                        key=lambda x: sort_to_start if x[0] == constants.VERSION_ATTRIBUTE else x[0],
+                                        reverse=False))
         if save_merged:
             header_attributes.pop(constants.UNMERGED_ATTRIBUTE, None)
         else:
             # make sure it's the last attribute(just to make sure it's in an order)
             header_attributes.pop(constants.UNMERGED_ATTRIBUTE, None)
             header_attributes[constants.UNMERGED_ATTRIBUTE] = "True"
-
 
         return header_attributes
 
@@ -139,9 +141,10 @@ class HedSchema:
     def get_as_mediawiki_string(self, save_merged=False):
         """ Return the schema to a mediawiki string.
 
-        save_merged: bool
-            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
-            If it is not a "withStandard" schema, this setting has no effect.
+        Parameters:
+            save_merged (bool): If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+                                If it is not a "withStandard" schema, this setting has no effect.
+
         Returns:
             str:  The schema as a string in mediawiki format.
 
@@ -153,7 +156,8 @@ class HedSchema:
     def get_as_xml_string(self, save_merged=True):
         """ Return the schema to an XML string.
 
-        save_merged: bool
+        Parameters:
+            save_merged (bool):
             If true, this will save the schema as a merged schema if it is a "withStandard" schema.
             If it is not a "withStandard" schema, this setting has no effect.
         Returns:
@@ -250,7 +254,7 @@ class HedSchema:
 
         Notes:
             - The returned dictionary has the short-form tags as keys and lists
-            of long tags sharing the short form as the values.
+              of long tags sharing the short form as the values.
 
         """
         return self.all_tags.duplicate_names
@@ -651,9 +655,8 @@ class HedSchema:
             dict: The keys are attribute names and the values are lists of tags with this attribute.
 
         Notes:
-            This includes attributes found in the wrong section for example
-                unitClass attribute found on a Tag.
-            The return tag list is in long form.
+            - This includes attributes found in the wrong section for example unitClass attribute found on a Tag.
+            - The return tag list is in long form.
 
         """
         unknown_attributes = {}
@@ -762,7 +765,7 @@ class HedSchema:
         if key_class == HedSectionKey.AllTags:
             return self.get_tag_attribute_names()
         elif key_class == HedSectionKey.Attributes:
-            prop_added_dict = {key:value for key, value in self._sections[HedSectionKey.Properties].items()}
+            prop_added_dict = {key: value for key, value in self._sections[HedSectionKey.Properties].items()}
             self._add_element_property_attributes(prop_added_dict)
             return prop_added_dict
         elif key_class == HedSectionKey.Properties:

@@ -64,8 +64,8 @@ def parse_arguments(arg_list=None):
         Object:  Argument object
         List: A list of parsed operations (each operation is a dictionary).
 
-    Raises:
-        ValueError  - If the operations were unable to be correctly parsed.
+    :raises ValueError:
+        - If the operations were unable to be correctly parsed.
 
     """
     parser = get_parser()
@@ -150,10 +150,9 @@ def main(arg_list=None):
         arg_list (list or None):   Called with value None when called from the command line.
                                    Otherwise, called with the command-line parameters as an argument list.
 
-    Raises:
-        HedFileError   
-            - if the data root directory does not exist.   
-            - if the specified backup does not exist.   
+    :raises HedFileError:
+        - if the data root directory does not exist.
+        - if the specified backup does not exist.
 
     """
     args, operations = parse_arguments(arg_list)

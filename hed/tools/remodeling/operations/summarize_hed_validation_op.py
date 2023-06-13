@@ -40,13 +40,12 @@ class SummarizeHedValidationOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:  
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -123,7 +122,7 @@ class HedValidationSummary(BaseSummary):
             new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:
-            - The summary needs a "name" str, a schema, a "df", and a "Sidecar".  
+            - The summary needs a "name" str, a schema, a "df", and a "Sidecar".
         """
 
         results = self.get_empty_results()
