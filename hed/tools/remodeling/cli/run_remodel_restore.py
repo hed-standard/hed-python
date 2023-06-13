@@ -33,9 +33,8 @@ def main(arg_list=None):
         arg_list (list or None):   Called with value None when called from the command line.
                                    Otherwise, called with the command-line parameters as an argument list.
 
-    Raises:
-        HedFileError   
-            - if the specified backup does not exist.  
+    :raises HedFileError:
+        - if the specified backup does not exist.
 
     """
     parser = get_parser()

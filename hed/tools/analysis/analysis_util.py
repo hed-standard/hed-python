@@ -55,8 +55,8 @@ def get_expression_parsers(queries, query_names=None):
         Returns:
             DataFrame - containing the search strings
 
-        Raises:   
-            ValueError - if query names are invalid or duplicated.
+        :raises ValueError:
+            - If query names are invalid or duplicated.
 
         """
     expression_parsers = []
@@ -93,8 +93,8 @@ def search_strings(hed_strings, queries, query_names=None):
     Returns:
         DataFrame - containing the factor vectors with results of the queries
 
-    Raises:   
-        ValueError - if query names are invalid or duplicated.
+    :raises ValueError:
+        - If query names are invalid or duplicated.
             
     """
 

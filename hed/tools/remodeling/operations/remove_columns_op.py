@@ -26,13 +26,12 @@ class RemoveColumnsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
-        Raises:
-            KeyError
-                - If a required parameter is missing.    
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -55,9 +54,8 @@ class RemoveColumnsOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-            KeyError   
-                - If ignore_missing is False and a column not in the data is to be removed.   
+        :raises KeyError:
+            - If ignore_missing is False and a column not in the data is to be removed.
 
         """
 

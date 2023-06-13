@@ -15,8 +15,8 @@ class EventManager:
             data (TabularInput): A tabular input file.
             schema (HedSchema): A HED schema
 
-        Raises:
-            HedFileError: if there are any unmatched offsets.
+        :raises HedFileError:
+            - if there are any unmatched offsets.
 
         """
 
@@ -46,8 +46,8 @@ class EventManager:
     def _create_event_list(self):
         """ Create a list of events of extended duration.
 
-        Raises:
-            HedFileError: If the hed_strings contain unmatched offsets.
+        :raises HedFileError:
+            - If the hed_strings contain unmatched offsets.
 
         """
 
@@ -107,8 +107,8 @@ class EventManager:
             onset_dict (dict): A dictionary of OnsetGroup objects that keep track of span of an event.
             event_index (int): The event number in the list.
 
-        Raises:
-            HedFileError if an unmatched offset is encountered.
+        :raises HedFileError:
+            - if an unmatched offset is encountered.
 
         Notes:
             - Modifies onset_dict and onset_list.

@@ -25,12 +25,12 @@ class Dispatcher:
             data_root (str or None):  Root directory for the dataset. If none, then backups are not made.
             hed_versions (str, list, HedSchema, or HedSchemaGroup): The HED schema.
 
-        Raises:
-            HedFileError
-                - If the specified backup does not exist.
+        :raises HedFileError:
+            - If the specified backup does not exist.
 
-            - ValueError:
-                - If any of the operations cannot be parsed correctly.
+        :raises ValueError:
+            - If any of the operations cannot be parsed correctly.
+
         """
         self.data_root = data_root
         self.backup_name = backup_name
@@ -89,9 +89,8 @@ class Dispatcher:
         Returns:
             DataFrame:  DataFrame after reading the path.
 
-        Raises:
-            HedFileError   
-                - If a valid file cannot be found.    
+        :raises HedFileError:
+            - If a valid file cannot be found.
 
         Notes:   
         - If a string is passed and there is a backup manager,
@@ -122,8 +121,8 @@ class Dispatcher:
         Returns:
             str: the data_root + remodeling summary path
 
-        Raises:
-            HedFileError  if this dispatcher does not have a data_root.
+        :raises HedFileError:
+            - If this dispatcher does not have a data_root.
 
         """
 

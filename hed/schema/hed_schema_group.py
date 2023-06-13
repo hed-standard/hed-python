@@ -26,8 +26,8 @@ class HedSchemaGroup:
         Returns:
             HedSchemaGroup: the container created.
 
-        Raises:
-            HedFileError:  If multiple schemas have the same library prefixes.
+        :raises HedFileError:
+            - If multiple schemas have the same library prefixes.
 
         """
         if len(schema_list) == 0:

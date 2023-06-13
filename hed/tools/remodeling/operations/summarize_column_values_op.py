@@ -46,14 +46,12 @@ class SummarizeColumnValuesOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
-
-            TypeError   
-                - If a parameter has the wrong type.    
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
 

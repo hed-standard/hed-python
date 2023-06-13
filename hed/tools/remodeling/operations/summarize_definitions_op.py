@@ -36,14 +36,12 @@ class SummarizeDefinitionsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
-
-            TypeError   
-                - If a parameter has the wrong type.    
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
 
@@ -87,7 +85,7 @@ class DefinitionSummary(BaseSummary):
             new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:
-            - The summary needs a "name" str, a "schema" and a "Sidecar".  
+            - The summary needs a "name" str, a "schema" and a "Sidecar".
 
         """
         data_input = TabularInput(new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])

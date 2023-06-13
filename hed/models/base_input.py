@@ -198,8 +198,10 @@ class BaseInput:
 
         Parameters:
             file (str or file-like):      Location to save this base input.
-        Raises:
-            ValueError: if empty file object or file cannot be opened.
+
+        :raises ValueError:
+            - if empty file object or file cannot be opened.
+            
         """
         if not file:
             raise ValueError("Empty file name or object passed in to BaseInput.save.")
