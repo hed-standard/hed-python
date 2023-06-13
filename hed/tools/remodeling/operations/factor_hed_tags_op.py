@@ -43,22 +43,17 @@ class FactorHedTagsOp(BaseOp):
         Parameters:
             parameters (dict):  Actual values of the parameters for the operation.
 
-        Raises:
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            KeyError   
-                - If a required parameter is missing.    
-                  |
-                - If an unexpected parameter is provided.    
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
-            TypeError   
-                - If a parameter has the wrong type.    
-
-            ValueError  
-                - If the specification is missing a valid operation.
-                  |
-                - If the length of query names is not empty and not same length as queries.    
-
-                - If there are duplicate query names.    
+        :raises ValueError:
+            - If the specification is missing a valid operation.
+            - If the length of query names is not empty and not same length as queries.
+            - If there are duplicate query names.
 
         """
         super().__init__(self.PARAMS, parameters)
