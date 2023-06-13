@@ -26,19 +26,23 @@ class ColumnMapper:
                 Sidecar column definitions will take precedent if there is a conflict with tag_columns.
             column_prefix_dictionary (dict): Dictionary with keys that are column numbers/names and values are HED tag
                 prefixes to prepend to the tags in that column before processing.
-                May be deprecated/renamed.  These are no longer prefixes, but rather converted to value columns.
-                eg. {"key": "Description", 1: "Label/"} will turn into value columns as
-                    {"key": "Description/#", 1: "Label/#"}
-                    Note: It will be a validation issue if column 1 is called "key" in the above example.
-                This means it no longer accepts anything but the value portion only in the columns.
+                
             optional_tag_columns (list): A list of ints or strings containing the columns that contain
                 the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
             warn_on_missing_column (bool): If True, issue mapping warnings on column names that are missing from
                                             the sidecar.
 
         Notes:
-            - All column numbers are 0 based.
+            - All column numbers are 0 based.  
+            - The column_prefix_dictionary may be deprecated/renamed in the future.
+                - These are no longer prefixes, but rather converted to value columns:  
+                  {"key": "Description", 1: "Label/"} will turn into value columns as
+                  {"key": "Description/#", 1: "Label/#"}
+                  It will be a validation issue if column 1 is called "key" in the above example.
+                  This means it no longer accepts anything but the value portion only in the columns.
+
         """
+        
         # Maps column number to column_entry.  This is what's actually used by most code.
         self._final_column_map = {}
         self._no_mapping_info = True
@@ -384,7 +388,9 @@ class ColumnMapper:
     def get_column_mapping_issues(self):
         """ Get all the issues with finalizing column mapping(duplicate columns, missing required, etc)
 
-            Note: this is deprecated and now a wrapper for "check_for_mapping_issues()"
+        Notes:
+            - This is deprecated and now a wrapper for "check_for_mapping_issues()"
+
         Returns:
             list: A list dictionaries of all issues found from mapping column names to numbers.
 
