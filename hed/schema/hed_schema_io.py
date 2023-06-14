@@ -24,6 +24,7 @@ def from_string(schema_string, file_type=".xml", schema_namespace=None):
 
     :raises HedFileError:
         - If empty string or invalid extension is passed.
+        - Other fatal formatting issues with file
 
     Notes:
         - The loading is determined by file type.
@@ -79,7 +80,9 @@ def load_schema(hed_path=None, schema_namespace=None):
         HedSchema: The loaded schema.
 
     :raises HedFileError:
-        - If there are any fatal issues when loading the schema.
+        - Empty path passed
+        - Unknown extension
+        - Any fatal issues when loading the schema.
 
     """
     if not hed_path:
@@ -114,6 +117,8 @@ def get_hed_xml_version(xml_file_path):
     Returns:
         str: The version number of the HED XML file.
 
+    :raises HedFileError:
+        - There is an issue loading the schema
     """
     root_node = HedSchemaXMLParser._parse_hed_xml(xml_file_path)
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
@@ -130,10 +135,9 @@ def _load_schema_version(xml_version=None, xml_folder=None):
         HedSchema or HedSchemaGroup: The requested HedSchema object.
 
     :raises HedFileError:
-        - If the xml_version is not valid.
-
-    Notes:
-        - The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
+        - The xml_version is not valid.
+        - The specified version cannot be found or loaded
+        - Other fatal errors loading the schema (These are unlikely if you are not editing them locally)
     """
     schema_namespace = ""
     library_name = None
@@ -179,10 +183,8 @@ def load_schema_version(xml_version=None, xml_folder=None):
         HedSchema or HedSchemaGroup: The schema or schema group extracted.
 
     :raises HedFileError:
-        - If the xml_version is not valid.
-
-    Notes:
-        - Loads the latest schema value if an empty version is given (string or list).
+        - The xml_version is not valid.
+        - A fatal error was encountered in parsing
     """
     if xml_version and isinstance(xml_version, list):
         schemas = [_load_schema_version(xml_version=version, xml_folder=xml_folder) for version in xml_version]

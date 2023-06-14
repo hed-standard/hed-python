@@ -27,8 +27,8 @@ class HedSchemaGroup:
             HedSchemaGroup: the container created.
 
         :raises HedFileError:
-            - If multiple schemas have the same library prefixes.
-
+            - Multiple schemas have the same library prefixes.
+            - Empty list passed
         """
         if len(schema_list) == 0:
             raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty list passed to HedSchemaGroup constructor.",

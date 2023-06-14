@@ -96,7 +96,7 @@ class TestHedSchema(unittest.TestCase):
             error_handler.push_error_context(ErrorContext.ROW, 1)
             error_handler.push_error_context(ErrorContext.COLUMN, 2)
 
-            issues = error_handler.format_error_with_context(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID,
+            issues = error_handler.format_error_with_context(SchemaErrors.SCHEMA_ATTRIBUTE_INVALID,
                                                              "error_attribute", source_tag="error_tag")
             error_handler.pop_error_context()
             error_handler.pop_error_context()

@@ -36,10 +36,6 @@ class HedGroup:
 
         Parameters:
             tag_or_group (HedTag or HedGroup): The new object to add to this group.
-
-        :raises ValueError:
-            If a HedGroupFrozen.
-
         """
         tag_or_group._parent = self
         self._children.append(tag_or_group)
@@ -469,11 +465,6 @@ class HedGroup:
             - This can only find identified tags.
             - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
             - If this is a HedGroup, order matters.  (b, a) != (a, b)
-            - If this is a HedGroupFrozen:
-                    if "(a, b)" in tags_or_groups, then it will match 1 and 2, but not 3.
-                        1. (a, b)
-                        2. (b, a)
-                        3. (a, b, c)
 
         """
         found_tags = []
