@@ -270,7 +270,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
                         _cache_hed_version(version, library_name, version_info, cache_folder=cache_folder)
 
             _write_last_cached_time(current_timestamp, cache_folder)
-    except portalocker.exceptions.LockException:
+    except portalocker.exceptions.LockException or ValueError:
         return -1
 
     return 0
@@ -303,6 +303,8 @@ def _write_last_cached_time(new_time, cache_folder):
         new_time (float): The time this was updated.
         cache_folder (str): The folder used for caching the hed schema.
 
+    :raises ValueError:
+        - something went wrong writing to the file
     """
     timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
     try:

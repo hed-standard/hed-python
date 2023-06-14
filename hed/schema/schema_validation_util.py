@@ -64,6 +64,18 @@ attribute_validators = {
 
 
 def validate_present_attributes(attrib_dict, filename):
+    """ Validate combinations of attributes
+
+        Parameters:
+            attrib_dict (dict): Dictionary of attributes to be evaluated.
+            filename (str):  File name to use in reporting errors.
+
+        Returns:
+            list: List of issues. Each issue is a dictionary.
+
+        :raises  HedFileError:
+            - withStandard is found in th header, but a library attribute is not specified
+        """
     if constants.WITH_STANDARD_ATTRIBUTE in attrib_dict and constants.LIBRARY_ATTRIBUTE not in attrib_dict:
         raise HedFileError(HedExceptions.BAD_WITH_STANDARD,
                            "withStandard header attribute found, but no library attribute is present",
@@ -81,8 +93,9 @@ def validate_attributes(attrib_dict, filename):
         list: List of issues. Each issue is a dictionary.
 
     :raises  HedFileError:
-        - If invalid or version not found in the dictionary.
-
+        - Invalid library name
+        - Version not present
+        - Invalid combinations of attributes in header
     """
     validate_present_attributes(attrib_dict, filename)
 
@@ -111,9 +124,12 @@ def find_rooted_entry(tag_entry, schema, loading_merged):
         rooted_tag(HedTagEntry or None): The base tag entry from the standard schema
             Returns None if this tag isn't rooted
 
-    :raises HedValueError:
-        - If the tag doesn't exist or similar
-
+    :raises HedFileError:
+        - A rooted attribute is found in a non-paired schema
+        - A rooted attribute is not a string
+        - A rooted attribute was found on a non-root node in an unmerged schema.
+        - A rooted attribute is found on a root node in a merged schema.
+        - A rooted attribute indicates a tag that doesn't exist in the base schema.
     """
     rooted_tag = tag_entry.has_attribute(constants.HedKey.Rooted, return_value=True)
     if rooted_tag is not None:
