@@ -58,17 +58,6 @@ def get_schema(hed_versions):
         raise ValueError("InvalidHedSchemaOrSchemaVersion", "Expected schema or schema version")
 
 
-def get_schema_versions(hed_schema, as_string=True):
-    if not hed_schema and as_string:
-        return ''
-    elif not hed_schema:
-        return None
-    elif isinstance(hed_schema, HedSchema) or isinstance(hed_schema, HedSchemaGroup):
-        return hed_schema.get_formatted_version(as_string=as_string)
-    else:
-        raise ValueError("InvalidHedSchemaOrHedSchemaGroup", "Expected schema or schema group")
-
-
 def load_schema(hed_path=None, schema_namespace=None):
     """ Load a schema from the given file or URL path.
 
