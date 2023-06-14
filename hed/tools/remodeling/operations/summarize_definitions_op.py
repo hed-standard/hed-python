@@ -1,4 +1,4 @@
-""" Summarize the values in the columns of a tabular file. """
+""" Summarize the definitions in the dataset. """
 
 from hed import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -7,7 +7,7 @@ from hed.models.def_expand_gather import DefExpandGatherer
 
 
 class SummarizeDefinitionsOp(BaseOp):
-    """ Summarize the definitions in the columns of a tabular file.
+    """ Summarize the definitions in the dataset.
 
     Required remodeling parameters:
         - **summary_name** (*str*): The name of the summary.   
@@ -102,11 +102,10 @@ class DefinitionSummary(BaseSummary):
             if display_description:
                 description, value = DefinitionSummary._remove_description(value)
                 items[key] = {"description": description, "contents": str(value)}
+            elif isinstance(value, list):
+                items[key] = [str(x) for x in value]
             else:
-                if isinstance(value, list):
-                    items[key] = [str(x) for x in value]
-                else:
-                    items[key] = str(value)
+                items[key] = str(value)
         summary_dict[title] = items
         return summary_dict
 

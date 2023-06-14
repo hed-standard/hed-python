@@ -12,7 +12,7 @@ from hed.models.definition_dict import DefinitionDict
 
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
-from hed.schema.hed_schema_io import get_schema, get_schema_versions, load_schema, load_schema_version
+from hed.schema.hed_schema_io import get_schema, load_schema, load_schema_version
 
 
 # from hed import errors, models, schema, tools, validator
