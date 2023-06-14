@@ -7,7 +7,7 @@ from hed.models.def_expand_gather import DefExpandGatherer
 
 
 class SummarizeDefinitionsOp(BaseOp):
-    """ Summarize the values in the columns of a tabular file.
+    """ Summarize the definitions in the columns of a tabular file.
 
     Required remodeling parameters:
         - **summary_name** (*str*): The name of the summary.   
@@ -42,16 +42,14 @@ class SummarizeDefinitionsOp(BaseOp):
 
         :raises TypeError:
             - If a parameter has the wrong type.
-
         """
-
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create factor columns corresponding to values in a specified column.
+        """ Create summaries of definitions
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -60,7 +58,7 @@ class SummarizeDefinitionsOp(BaseOp):
             sidecar (Sidecar or file-like): Only needed for HED operations.
 
         Returns:
-            DataFrame: A new DataFrame with the factor columns appended.
+            DataFrame: the same datafarme
 
         Side-effect:
             Updates the relevant summary.
@@ -92,40 +90,41 @@ class DefinitionSummary(BaseSummary):
         series, def_dict = data_input.series_a, data_input.get_def_dict(new_info['schema'])
         self.def_gatherer.process_def_expands(series, def_dict)
 
+    @staticmethod
+    def _build_summary_dict(items_dict, title, process_func, display_description=False):
+        summary_dict = {}
+        items = {}
+        for key, value in items_dict.items():
+            if process_func:
+                value = process_func(value)
+            if "#" in str(value):
+                key = key + "/#"
+            if display_description:
+                description, value = DefinitionSummary._remove_description(value)
+                items[key] = {"description": description, "contents": str(value)}
+            else:
+                if isinstance(value, list):
+                    items[key] = [str(x) for x in value]
+                else:
+                    items[key] = str(value)
+        summary_dict[title] = items
+        return summary_dict
+
     def get_details_dict(self, def_gatherer):
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
-            summary (?):  Contains the resolved dictionaries.
+            def_gatherer (DefExpandGatherer):  Contains the resolved dictionaries.
 
         Returns:
             dict: dictionary with the summary results.
 
         """
-        def build_summary_dict(items_dict, title, process_func, display_description=False):
-            summary_dict = {}
-            items = {}
-            for key, value in items_dict.items():
-                if process_func:
-                    value = process_func(value)
-                if "#" in str(value):
-                    key = key + "/#"
-                if display_description:
-                    description, value = DefinitionSummary.remove_description(value)
-                    items[key] = {"description": description, "contents": str(value)}
-                else:
-                    if isinstance(value, list):
-                        items[key] = [str(x) for x in value]
-                    else:
-                        items[key] = str(value)
-            summary_dict[title] = items
-            return summary_dict
-
-        known_defs_summary = build_summary_dict(def_gatherer.def_dict, "Known Definitions", None,
-                                                display_description=True)
-        ambiguous_defs_summary = build_summary_dict(def_gatherer.ambiguous_defs, "Ambiguous Definitions",
-                                                    def_gatherer.get_ambiguous_group)
-        errors_summary = build_summary_dict(def_gatherer.errors, "Errors", None)
+        known_defs_summary = self._build_summary_dict(def_gatherer.def_dict, "Known Definitions", None,
+                                                      display_description=True)
+        ambiguous_defs_summary = self._build_summary_dict(def_gatherer.ambiguous_defs, "Ambiguous Definitions",
+                                                          def_gatherer.get_ambiguous_group)
+        errors_summary = self._build_summary_dict(def_gatherer.errors, "Errors", None)
 
         known_defs_summary.update(ambiguous_defs_summary)
         known_defs_summary.update(errors_summary)
@@ -161,25 +160,26 @@ class DefinitionSummary(BaseSummary):
         return self._get_individual_string(result, indent=indent)
 
     @staticmethod
-    def _get_dataset_string(summary_dict, indent=BaseSummary.DISPLAY_INDENT):
-        def nested_dict_to_string(data, level=1):
-            result = []
-            for key, value in data.items():
-                if isinstance(value, dict):
-                    result.append(f"{indent * level}{key}: {len(value)} items")
-                    result.append(nested_dict_to_string(value, level + 1))
-                elif isinstance(value, list):
-                    result.append(f"{indent * level}{key}:")
-                    for item in value:
-                        result.append(f"{indent * (level + 1)}{item}")
-                else:
-                    result.append(f"{indent * level}{key}: {value}")
-            return "\n".join(result)
-
-        return nested_dict_to_string(summary_dict)
+    def _nested_dict_to_string(data, indent, level=1):
+        result = []
+        for key, value in data.items():
+            if isinstance(value, dict):
+                result.append(f"{indent * level}{key}: {len(value)} items")
+                result.append(DefinitionSummary._nested_dict_to_string(value, indent, level + 1))
+            elif isinstance(value, list):
+                result.append(f"{indent * level}{key}:")
+                for item in value:
+                    result.append(f"{indent * (level + 1)}{item}")
+            else:
+                result.append(f"{indent * level}{key}: {value}")
+        return "\n".join(result)
 
     @staticmethod
-    def remove_description(def_entry):
+    def _get_dataset_string(summary_dict, indent=BaseSummary.DISPLAY_INDENT):
+        return DefinitionSummary._nested_dict_to_string(summary_dict, indent)
+
+    @staticmethod
+    def _remove_description(def_entry):
         def_group = def_entry.contents.copy()
         description = ""
         desc_tag = def_group.find_tags({"description"}, include_groups=False)

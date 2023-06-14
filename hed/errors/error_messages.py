@@ -245,7 +245,7 @@ def schema_error_hed_duplicate_node(tag, duplicate_tag_list, section):
            f"{tag_join_delimiter}{tag_join_delimiter.join(duplicate_tag_list)}"
 
 
-@hed_error(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID)
+@hed_error(SchemaErrors.SCHEMA_ATTRIBUTE_INVALID)
 def schema_error_unknown_attribute(attribute_name, source_tag):
     return f"Attribute '{attribute_name}' used by '{source_tag}' was not defined in the schema, " \
            f"or was used outside of it's defined class."
