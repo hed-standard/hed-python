@@ -130,8 +130,8 @@ class TestDefinitionDict(TestDefBase):
         definition_string = "(Definition/TestDefPlaceholder/#,(Age/#,Item/TestDef2))"
         def_dict.check_for_definitions(HedString(definition_string, hed_schema=self.hed_schema))
         for key, test_string in test_strings.items():
-            hed_string = HedString(test_string, hed_schema=self.hed_schema)
-            def_dict.expand_def_tags(hed_string)
+            hed_string = HedString(test_string, hed_schema=self.hed_schema, def_dict=def_dict)
+            hed_string.expand_defs()
             self.assertEqual(str(hed_string), expected_results[key])
 
 if __name__ == '__main__':

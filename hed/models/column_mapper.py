@@ -26,7 +26,6 @@ class ColumnMapper:
                 Sidecar column definitions will take precedent if there is a conflict with tag_columns.
             column_prefix_dictionary (dict): Dictionary with keys that are column numbers/names and values are HED tag
                 prefixes to prepend to the tags in that column before processing.
-                
             optional_tag_columns (list): A list of ints or strings containing the columns that contain
                 the HED tags. If the column is otherwise unspecified, convert this column type to HEDTags.
             warn_on_missing_column (bool): If True, issue mapping warnings on column names that are missing from
@@ -89,6 +88,10 @@ class ColumnMapper:
     def get_transformers(self):
         """ Return the transformers to use on a dataframe
 
+            Returns:
+                tuple(dict, list):
+                    dict({str or int: func}): the functions to use to transform each column
+                    need_categorical(list of int): a list of columns to treat as categoriacl
         """
         final_transformers = {}
         need_categorical = []
@@ -144,8 +147,8 @@ class ColumnMapper:
         Parameters:
             sidecar (Sidecar or None): the sidecar to use
 
-        Returns:
-
+        :raises ValueError:
+            - A sidecar was prevoiusly set
         """
         if self._sidecar:
             raise ValueError("Trying to set a second sidecar on a column mapper.")
@@ -156,6 +159,11 @@ class ColumnMapper:
 
     @property
     def sidecar_column_data(self):
+        """ Pass through to get the sidecar ColumnMetadata
+
+        Returns:
+            dict({str:ColumnMetadata}): the column metadata defined by this sidecar
+        """
         if self._sidecar:
             return self._sidecar.column_data
 
@@ -168,7 +176,7 @@ class ColumnMapper:
 
         Returns:
             column_identifiers(list): A list of column numbers or names that are ColumnType.HedTags.
-            0-based if integer-based, otherwise column name.
+                0-based if integer-based, otherwise column name.
         """
         return [column_entry.column_name for number, column_entry in self._final_column_map.items()
                 if column_entry.column_type == ColumnType.HEDTags]
