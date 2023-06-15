@@ -142,7 +142,7 @@ class Test(unittest.TestCase):
 
         for column_data in sidecar:
             hed_strings = column_data.get_hed_strings()
-            hed_strings = df_util.convert_to_form(hed_strings, self.hed_schema, "long_tag")
+            df_util.convert_to_form(hed_strings, self.hed_schema, "long_tag")
             column_data.set_hed_strings(hed_strings)
         sidecar_long = Sidecar(os.path.join(self.base_data_dir, "sidecar_tests/long_tag_test.json"))
         self.assertEqual(sidecar.loaded_dict, sidecar_long.loaded_dict)
@@ -151,7 +151,7 @@ class Test(unittest.TestCase):
 
         for column_data in sidecar:
             hed_strings = column_data.get_hed_strings()
-            hed_strings = df_util.convert_to_form(hed_strings, self.hed_schema, "short_tag")
+            df_util.convert_to_form(hed_strings, self.hed_schema, "short_tag")
             column_data.set_hed_strings(hed_strings)
         sidecar_short = Sidecar(os.path.join(self.base_data_dir, "sidecar_tests/short_tag_test.json"))
         self.assertEqual(sidecar.loaded_dict, sidecar_short.loaded_dict)

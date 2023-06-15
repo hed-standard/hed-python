@@ -59,22 +59,20 @@ def convert_to_form(df, hed_schema, tag_form, columns=None):
     """ Convert all tags in underlying dataframe to the specified form (in place).
 
     Parameters:
-        df (pd.Dataframe): The dataframe to modify
+        df (pd.Dataframe or pd.Series): The dataframe or series to modify
         hed_schema (HedSchema): The schema to use to convert tags.
         tag_form(str): HedTag property to convert tags to.
         columns (list): The columns to modify on the dataframe.
 
     """
     if isinstance(df, pd.Series):
-        df = df.apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
+        df[:] = df.apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
     else:
         if columns is None:
             columns = df.columns
 
         for column in columns:
             df[column] = df[column].apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
-
-    return df
 
 
 def shrink_defs(df, hed_schema, columns=None):
@@ -97,8 +95,6 @@ def shrink_defs(df, hed_schema, columns=None):
             mask = df[column].str.contains('Def-expand/', case=False)
             df[column][mask] = df[column][mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
 
-    return df
-
 
 def expand_defs(df, hed_schema, def_dict, columns=None):
     """ Expands any def tags found in the dataframe.
@@ -120,9 +116,7 @@ def expand_defs(df, hed_schema, def_dict, columns=None):
 
         for column in columns:
             mask = df[column].str.contains('Def/', case=False)
-            df[column][mask] = df[column][mask].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
-
-    return df
+            df.loc[mask, column] = df.loc[mask, column].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
 
 
 def _convert_to_form(hed_string, hed_schema, tag_form):
