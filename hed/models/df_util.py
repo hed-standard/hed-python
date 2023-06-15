@@ -27,8 +27,9 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
         expand_defs: bool
             Expand any def tags found
     Returns:
-        tuple: A list of HedStrings or a list of lists of HedStrings, DefinitionDict
-
+        tuple:
+            hed_strings(list of HedStrings):A list of HedStrings or a list of lists of HedStrings
+            def_dict(DefinitionDict): The definitions from this Sidecar
     """
     if isinstance(sidecar, str):
         sidecar = Sidecar(sidecar)
@@ -131,23 +132,11 @@ def _expand_defs(hed_string, hed_schema, def_dict):
     return str(HedString(hed_string, hed_schema, def_dict).expand_defs())
 
 
-def _get_matching_value(tags):
-    # Filter out values equal to "#" and get unique values
-    unique_values = set(tag.extension for tag in tags if tag.extension != "#")
-    if len(unique_values) == 0:
-        return "#"
-
-    if len(unique_values) > 1:
-        return None
-
-    return next(iter(unique_values))
-
-
 def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None):
-    """
-    Processes a list of HED strings according to a given HED schema, using known definitions and ambiguous definitions.
+    """ Processes a list of HED strings according to a given HED schema,
+            using known definitions and ambiguous definitions.
 
-    Args:
+    Parameters:
         hed_strings (list or pd.Series): A list of HED strings to process.
         hed_schema (HedSchema): The schema to use
         known_defs (DefinitionDict or list or str), optional):

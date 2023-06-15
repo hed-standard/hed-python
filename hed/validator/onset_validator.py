@@ -77,7 +77,7 @@ class OnsetValidator:
             placeholder = def_name[found_slash + 1:]
             def_name = def_name[:found_slash]
 
-        def_entry = self._defs.get_def_entry(def_name)
+        def_entry = self._defs.get(def_name)
         if def_entry is None:
             return ErrorHandler.format_error(OnsetErrors.ONSET_DEF_UNMATCHED, tag=def_tag)
         if bool(def_entry.takes_value) != bool(placeholder):

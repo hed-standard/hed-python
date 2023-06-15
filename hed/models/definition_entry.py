@@ -26,6 +26,8 @@ class DefinitionEntry:
     def get_definition(self, replace_tag, placeholder_value=None, return_copy_of_tag=False):
         """ Return a copy of the definition with the tag expanded and the placeholder plugged in.
 
+            Returns None if placeholder_value passed when it doesn't take value, or vice versa.
+
         Parameters:
             replace_tag (HedTag): The def hed tag to replace with an expanded version
             placeholder_value (str or None):    If present and required, will replace any pound signs
@@ -33,12 +35,12 @@ class DefinitionEntry:
             return_copy_of_tag(bool): Set to true for validation
 
         Returns:
-            str:          The expanded def tag name
-            HedGroup:     The contents of this definition(including the def tag itself)
+            tuple:
+                str:          The expanded def tag name
+                HedGroup:     The contents of this definition(including the def tag itself)
 
         :raises ValueError:
-            - If a placeholder_value is passed, but this definition doesn't have a placeholder.
-
+            - Something internally went wrong with finding the placeholder tag.  This should not be possible.
         """
         if self.takes_value == (placeholder_value is None):
             return None, []
@@ -49,7 +51,7 @@ class DefinitionEntry:
         name = self.name
         if self.contents:
             output_group = self.contents
-            if placeholder_value:
+            if placeholder_value is not None:
                 output_group = copy.deepcopy(self.contents)
                 placeholder_tag = output_group.find_placeholder_tag()
                 if not placeholder_tag:

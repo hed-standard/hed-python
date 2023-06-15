@@ -34,11 +34,21 @@ class BaseInput:
             has_column_names (bool): True if file has column names.
                 This value is ignored if you pass in a pandas dataframe.
             mapper (ColumnMapper or None):  Indicates which columns have HED tags.
+                See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
             name (str or None): Optional field for how this file will report errors.
             allow_blank_names(bool): If True, column names can be blank
-        Notes:
-            - See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
 
+        :raises HedFileError:
+            - file is blank
+            - An invalid dataframe was passed with size 0
+            - An invalid extension was provided
+            - A duplicate or empty column name appears
+
+        :raises OSError:
+            - Cannot open the indicated file
+
+        :raises KeyError:
+            - The specified worksheet name does not exist
          """
         if mapper is None:
             mapper = ColumnMapper()
@@ -94,7 +104,6 @@ class BaseInput:
 
         Parameters:
             new_mapper (ColumnMapper): A column mapper to be associated with this base input.
-
         """
         self._mapper = new_mapper
         if not self._mapper:
@@ -200,8 +209,10 @@ class BaseInput:
             file (str or file-like):      Location to save this base input.
 
         :raises ValueError:
-            - if empty file object or file cannot be opened.
-            
+            - if empty file object was passed
+
+        :raises OSError:
+            - Cannot open the indicated file
         """
         if not file:
             raise ValueError("Empty file name or object passed in to BaseInput.save.")
@@ -232,6 +243,8 @@ class BaseInput:
         Returns:
             None or str:  None if file is given or the contents as a str if file is None.
 
+        :raises OSError:
+            - Cannot open the indicated file
         """
         dataframe = self._dataframe
         csv_string_if_filename_none = dataframe.to_csv(file, '\t', index=False, header=self._has_column_names)
@@ -272,6 +285,15 @@ class BaseInput:
 
         Notes:
              Any attribute of a HedTag that returns a string is a valid value of tag_form.
+             
+        :raises ValueError:
+            - There is not a loaded dataframe
+
+        :raises KeyError:
+            - the indicated row/column does not exist
+
+        :raises AttributeError:
+            - The indicated tag_form is not an attribute of HedTag
         """
         if self._dataframe is None:
             raise ValueError("No data frame loaded")
@@ -291,6 +313,8 @@ class BaseInput:
         Notes:
             If None, returns the first worksheet.
 
+        :raises KeyError:
+            - The specified worksheet name does not exist
         """
         if worksheet_name and self._loaded_workbook:
             # return self._loaded_workbook.get_sheet_by_name(worksheet_name)

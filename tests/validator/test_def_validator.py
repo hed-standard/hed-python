@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
 
         test_string = HedString(placeholder_label_def_string_no_placeholder, self.hed_schema)
         def_issues = def_validator.validate_def_tags(test_string)
-        def_issues += def_validator.expand_def_tags(test_string)
+        test_string.expand_defs()
         self.assertEqual(str(test_string), placeholder_label_def_string_no_placeholder)
         self.assertTrue(def_issues)
 
@@ -66,7 +66,7 @@ class Test(unittest.TestCase):
 
         test_string = HedString(label_def_string_has_invalid_placeholder, self.hed_schema)
         def_issues = def_validator.validate_def_tags(test_string)
-        def_issues += def_validator.expand_def_tags(test_string)
+        test_string.expand_defs()
         self.assertEqual(str(test_string), label_def_string_has_invalid_placeholder)
         self.assertTrue(def_issues)
 

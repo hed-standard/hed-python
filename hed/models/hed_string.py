@@ -180,12 +180,11 @@ class HedString(HedGroup):
             list:  A list of HedTag and/or HedGroup.
 
         :raises ValueError:
-            - If the string is significantly malformed, such as mismatched parentheses.
+            - The string is significantly malformed, such as mismatched parentheses.
 
         Notes:
             - The parse tree consists of tag groups, tags, and delimiters.
         """
-
         current_tag_group = [[]]
 
         input_tags = HedString.split_hed_string(hed_string)
@@ -332,19 +331,16 @@ class HedString(HedGroup):
     def find_top_level_tags(self, anchor_tags, include_groups=2):
         """ Find top level groups with an anchor tag.
 
+            A max of 1 tag located per top level group.
+
         Parameters:
             anchor_tags (container):     A list/set/etc of short_base_tags to find groups by.
             include_groups (0, 1 or 2):  Parameter indicating what return values to include.
-
+                If 0: return only tags.
+                If 1: return only groups.
+                If 2 or any other value: return both.
         Returns:
             list or tuple: The returned result depends on include_groups:
-                - If 0: return only tags.
-                - If 1: return only groups.
-                - If 2 or any other value: return both.
-
-        Notes:
-            - A max of 1 tag located per top level group.
-
         """
         top_level_tags = []
         for group in self.groups():

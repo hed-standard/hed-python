@@ -61,6 +61,11 @@ class ColumnMetadata:
         return self._source[self.column_name]
 
     def get_hed_strings(self):
+        """ Returns the hed strings for this entry as a series.
+
+        Returns:
+            hed_strings(pd.Series): the hed strings for this series.(potentially empty)
+        """
         if not self.column_type:
             return pd.Series(dtype=str)
 
@@ -69,6 +74,15 @@ class ColumnMetadata:
         return series
 
     def set_hed_strings(self, new_strings):
+        """ Sets the hed strings for this entry.
+
+        Parameters:
+            new_strings(pd.Series, dict, or str): The hed strings to set.
+                This should generally be the return value from get_hed_strings
+
+        Returns:
+            hed_strings(pd.Series): the hed strings for this series.(potentially empty)
+        """
         if new_strings is None:
             return False
 

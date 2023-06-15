@@ -16,6 +16,18 @@ class TabularInput(BaseInput):
             file (str or file like): A tsv file to open.
             sidecar (str or Sidecar): A Sidecar filename or Sidecar
             name (str): The name to display for this file for error purposes.
+
+        :raises HedFileError:
+            - file is blank
+            - An invalid dataframe was passed with size 0
+            - An invalid extension was provided
+            - A duplicate or empty column name appears
+
+        :raises OSError:
+            - Cannot open the indicated file
+
+        :raises ValueError:
+            - This file has no column names
         """
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)

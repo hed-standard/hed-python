@@ -19,9 +19,8 @@ class HedTag:
             span  (int, int): The start and end indexes of the tag in the hed_string.
             hed_schema (HedSchema or None): A convenience parameter for calculating canonical forms on creation.
 
-        Notes:
-            - This does not produce issues and is used primarily for testing.
-
+        :raises ValueError:
+            - You cannot pass a def_dict without also passing a schema.
         """
         if def_dict and not hed_schema:
             raise ValueError("Passing a def_dict without also passing a schema is invalid.")
@@ -131,11 +130,10 @@ class HedTag:
             new_tag_val (str): The new short_base_tag for this tag.
 
         :raises ValueError:
-            - If tags cannot unidentified.
+            - If the tag wasn't already identified
 
         Note:
             - Generally this is used to swap def to def-expand.
-
         """
         if self._schema_entry:
             tag_entry = None
@@ -159,7 +157,6 @@ class HedTag:
             - Warning: This could be empty if the original tag had a name_prefix prepended.
               e.g. a column where "Label/" is prepended, thus the column value has zero base portion.
             - Only valid after calling convert_to_canonical_forms.
-
         """
         if self._schema_entry:
             extension_len = len(self._extension_value)

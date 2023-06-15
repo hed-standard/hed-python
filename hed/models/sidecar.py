@@ -67,10 +67,10 @@ class Sidecar:
 
     @property
     def column_data(self):
-        """ Generates the list of ColumnMetadata for this sidecar
+        """ Generates the ColumnMetadata for this sidecar
 
         Returns:
-            list(ColumnMetadata): the list of column metadata defined by this sidecar
+            dict({str:ColumnMetadata}): the column metadata defined by this sidecar
         """
         return {col_name: ColumnMetadata(name=col_name, source=self.loaded_dict) for col_name in self.loaded_dict}
 
@@ -200,8 +200,8 @@ class Sidecar:
         """ Gather and validate definitions in metadata.
 
         Parameters:
-            error_handler (ErrorHandler): The error handler to use for context, uses a default one if None.
             hed_schema (HedSchema or None): The schema to used to identify tags.
+            error_handler (ErrorHandler or None): The error handler to use for context, uses a default one if None.
 
         Returns:
             DefinitionDict: Contains all the definitions located in the sidecar.
@@ -238,7 +238,6 @@ class Sidecar:
         Returns:
             column_refs(list): A list of unique column refs found
         """
-
         found_vals = set()
         for column_data in self:
             if column_data.column_type == ColumnType.Ignore:
