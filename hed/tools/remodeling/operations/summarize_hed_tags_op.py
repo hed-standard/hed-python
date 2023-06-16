@@ -63,7 +63,7 @@ class SummarizeHedTagsOp(BaseOp):
         self.expand_context = parameters.get('expand_context', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create factor columns corresponding to values in a specified column.
+        """ Summarize the HED tags present in the dataset.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -72,19 +72,20 @@ class SummarizeHedTagsOp(BaseOp):
             sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            DataFrame: A new DataFrame with the factor columns appended.
+            DataFrame: A copy of df.
 
         Side-effect:
             Updates the context.
 
         """
+        df_new = df.copy()
         summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
             summary = HedTagSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({'df': dispatcher.post_proc_data(df), 'name': name,
+        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
-        return df
+        return df_new
 
 
 class HedTagSummary(BaseSummary):
@@ -100,7 +101,7 @@ class HedTagSummary(BaseSummary):
         Parameters:
             new_info (dict):  A dictionary with the parameters needed to update a summary.
 
-        Notes:  
+        Notes:
             - The summary needs a "name" str, a "schema", a "df, and a "Sidecar".
 
         """

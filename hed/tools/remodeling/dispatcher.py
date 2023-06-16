@@ -203,7 +203,7 @@ class Dispatcher:
 
     @staticmethod
     def prep_data(df):
-        """ Replace all n/a entries in the data frame by np.NaN for processing.
+        """ Make a copy and replace all n/a entries in the data frame by np.NaN for processing.
 
         Parameters:
             df (DataFrame) - The DataFrame to be processed.

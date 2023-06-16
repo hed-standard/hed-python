@@ -46,15 +46,15 @@ class RemoveRowsOp(BaseOp):
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str):  Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like): Only needed for HED operations.
+            sidecar (Sidecar or file-like): Not needed for this operation.
 
         Returns:
             Dataframe: A new dataframe after processing.
 
         """
-
-        if self.column_name not in df.columns:
-            return df
+        df_new = df.copy()
+        if self.column_name not in df_new.columns:
+            return df_new
         for value in self.remove_values:
-            df = df.loc[df[self.column_name] != value, :]
-        return df
+            df_new = df_new.loc[df_new[self.column_name] != value, :]
+        return df_new

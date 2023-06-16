@@ -49,28 +49,28 @@ class SummarizeColumnNamesOp(BaseOp):
         self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create factor columns corresponding to values in a specified column.
+        """ Create a column name summary for df.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like):   Only needed for HED operations.
+            sidecar (Sidecar or file-like):  Not needed for this operation.
 
         Returns:
-            DataFrame: A new DataFrame with the factor columns appended.
+            DataFrame: A copy of df.
 
         Side-effect:
             Updates the relevant summary.
 
         """
-
+        df_new = df.copy()
         summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
             summary = ColumnNameSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({"name": name, "column_names": list(df.columns)})
-        return df
+        summary.update_summary({"name": name, "column_names": list(df_new.columns)})
+        return df_new
 
 
 class ColumnNameSummary(BaseSummary):

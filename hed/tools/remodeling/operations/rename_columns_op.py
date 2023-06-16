@@ -49,7 +49,7 @@ class RenameColumnsOp (BaseOp):
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like):  Only needed for HED operations.
+            sidecar (Sidecar or file-like):  Not needed for this operation.
 
         Returns:
             Dataframe: A new dataframe after processing.
@@ -58,9 +58,9 @@ class RenameColumnsOp (BaseOp):
             - When ignore_missing is false and column_mapping has columns not in the data.
 
         """
-
+        df_new = df.copy()
         try:
-            return df.rename(columns=self.column_mapping, errors=self.error_handling)
+            return df_new.rename(columns=self.column_mapping, errors=self.error_handling)
         except KeyError:
             raise KeyError("MappedColumnsMissingFromData",
                            f"{name}: ignore_missing is False, mapping columns [{self.column_mapping}]"
