@@ -77,7 +77,7 @@ class BaseOp:
 
         """
 
-        return df
+        return df.copy()
 
     @staticmethod
     def _check_list_type(param_value, param_type):

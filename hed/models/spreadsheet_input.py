@@ -30,6 +30,17 @@ class SpreadsheetInput(BaseInput):
               It will be a validation issue if column 1 is called "key" in the above example.
               This means it no longer accepts anything but the value portion only in the columns.
 
+        :raises HedFileError:
+            - file is blank
+            - An invalid dataframe was passed with size 0
+            - An invalid extension was provided
+            - A duplicate or empty column name appears
+
+        :raises OSError:
+            - Cannot open the indicated file
+
+        :raises KeyError:
+            - The specified worksheet name does not exist
         """
         if tag_columns is None:
             tag_columns = [1]

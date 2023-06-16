@@ -13,10 +13,7 @@ class HedGroup:
             startpos (int or None):   Starting index of group(including parentheses) in hed_string.
             endpos (int or None):     Position after the end (including parentheses) in hed_string.
             contents (list or None):  A list of HedTags and/or HedGroups that will be set as the contents of this group.
-
-        Notes:
-            - contents parameter is mainly used for processing definitions.
-
+                                      Mostly used during definition expansion.
         """
         self._startpos = startpos
         self._endpos = endpos
@@ -36,10 +33,6 @@ class HedGroup:
 
         Parameters:
             tag_or_group (HedTag or HedGroup): The new object to add to this group.
-
-        :raises ValueError:
-            If a HedGroupFrozen.
-
         """
         tag_or_group._parent = self
         self._children.append(tag_or_group)
@@ -72,6 +65,8 @@ class HedGroup:
             item_to_replace (HedTag or HedGroup): The item to replace must exist or this will raise an error.
             new_contents (HedTag or HedGroup): Replacement contents.
 
+        :raises KeyError:
+            - item_to_replace does not exist
         """
         if self._original_children is self._children:
             self._original_children = self._children.copy()
@@ -88,24 +83,15 @@ class HedGroup:
         """ Remove any tags/groups in items_to_remove.
 
         Parameters:
-            items_to_remove (list):  List of HedGroups and/or HedTags to remove.
+            items_to_remove (list):  List of HedGroups and/or HedTags to remove by identity.
 
         Notes:
             - Any groups that become empty will also be pruned.
-            - Identity, not equivalence is used in determining whether to remove.
-
         """
         all_groups = self.get_all_groups()
         self._remove(items_to_remove, all_groups)
 
     def _remove(self, items_to_remove, all_groups):
-        """ Needs to be documented.
-
-        Parameters:
-            items_to_remove (list):  List of HedGroups and/or HedTags to remove.
-            all_groups (list):   List of HedGroups.
-
-        """
         empty_groups = []
         for remove_child in items_to_remove:
             for group in all_groups:
@@ -333,10 +319,6 @@ class HedGroup:
 
         Returns:
             str: The constructed string after transformation
-
-        Notes:
-            - The signature of a tag_transformer is str def(HedTag, str).
-
         """
         result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
                            child.get_as_form(tag_attribute) for child in self.children])
@@ -356,7 +338,6 @@ class HedGroup:
 
         Notes:
             - Assumes a valid HedString with no erroneous "#" characters.
-
         """
         for tag in self.get_all_tags():
             if tag.is_placeholder():
@@ -368,7 +349,10 @@ class HedGroup:
         return bool(self._children)
 
     def __eq__(self, other):
-        """ Test whether other is equal to this object. """
+        """ Test whether other is equal to this object.
+
+            Note: This does not account for sorting.  Objects must be in the same order to match.
+        """
         if self is other:
             return True
 
@@ -423,17 +407,16 @@ class HedGroup:
             search_tags (container):    A container of the starts of short tags to search.
             recursive (bool):           If true, also check subgroups.
             include_groups (0, 1 or 2): Specify return values.
+                If 0: return a list of the HedTags.
+                If 1: return a list of the HedGroups containing the HedTags.
+                If 2: return a list of tuples (HedTag, HedGroup) for the found tags.
 
         Returns:
             list: The contents of the list depends on the value of include_groups.
 
         Notes:
-            - If include_groups is 0, return a list of the HedTags.
-            - If include_groups is 1, return a list of the HedGroups containing the HedTags.
-            - If include_groups is 2, return a list of tuples (HedTag, HedGroup) for the found tags.
             - This can only find identified tags.
             - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
-
         """
         found_tags = []
         if recursive:
@@ -469,11 +452,6 @@ class HedGroup:
             - This can only find identified tags.
             - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
             - If this is a HedGroup, order matters.  (b, a) != (a, b)
-            - If this is a HedGroupFrozen:
-                    if "(a, b)" in tags_or_groups, then it will match 1 and 2, but not 3.
-                        1. (a, b)
-                        2. (b, a)
-                        3. (a, b, c)
 
         """
         found_tags = []
@@ -495,17 +473,16 @@ class HedGroup:
 
     def find_def_tags(self, recursive=False, include_groups=3):
         """ Find def and def-expand tags
+
         Parameters:
             recursive (bool): If true, also check subgroups.
             include_groups (int, 0, 1, 2, 3): options for return values
+                If 0: Return only def and def expand tags/.
+                If 1: Return only def tags and def-expand groups.
+                If 2: Return only groups containing defs, or def-expand groups.
+                If 3 or any other value: Return all 3 as a tuple.
         Returns:
             list: A list of tuples. The contents depend on the values of the include_group.
-        Notes:
-            - The include_groups option controls the tag expansion as follows:
-                - If 0: Return only def and def expand tags/.
-                - If 1: Return only def tags and def-expand groups.
-                - If 2: Return only groups containing defs, or def-expand groups.
-                - If 3 or any other value: Return all 3 as a tuple.
         """
         from hed.models.definition_dict import DefTagNames
         if recursive:
@@ -536,16 +513,14 @@ class HedGroup:
         Parameters:
             term (str): A single term to search for.
             recursive (bool): If true, recursively check subgroups.
-            include_groups: 0, 1 or 2
+            include_groups(0, 1 or 2): Controls return values
                 If 0: Return only tags
                 If 1: Return only groups
                 If 2 or any other value: Return both
 
         Returns:
             list:
-
         """
-
         found_tags = []
         if recursive:
             groups = self.get_all_groups()

@@ -65,28 +65,29 @@ class SummarizeColumnValuesOp(BaseOp):
         self.values_per_line = parameters.get('values_per_line', self.VALUES_PER_LINE)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create factor columns corresponding to values in a specified column.
+        """ Create a summary of the column values in df.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str):  Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like): Only needed for HED operations.
+            sidecar (Sidecar or file-like): Not needed for this operation.
 
         Returns:
-            DataFrame: A new DataFrame with the factor columns appended.
+            DataFrame: A copy of df.
 
         Side-effect:
             Updates the relevant summary.
 
         """
-
+       
+        df_new = df.copy()
         summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
             summary = ColumnValueSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({'df': dispatcher.post_proc_data(df), 'name': name})
-        return df
+        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name})
+        return df_new
 
 
 class ColumnValueSummary(BaseSummary):

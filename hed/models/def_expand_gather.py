@@ -93,7 +93,6 @@ class DefExpandGatherer:
         """
         self.hed_schema = hed_schema
         self.ambiguous_defs = ambiguous_defs if ambiguous_defs else {}
-        self.ambiguous_defs_new = ambiguous_defs if ambiguous_defs else {}
         self.errors = errors if errors else {}
         self.def_dict = DefinitionDict(known_defs, self.hed_schema)
 

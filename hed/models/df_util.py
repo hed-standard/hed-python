@@ -27,8 +27,9 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
         expand_defs: bool
             Expand any def tags found
     Returns:
-        tuple: A list of HedStrings or a list of lists of HedStrings, DefinitionDict
-
+        tuple:
+            hed_strings(list of HedStrings):A list of HedStrings or a list of lists of HedStrings
+            def_dict(DefinitionDict): The definitions from this Sidecar
     """
     if isinstance(sidecar, str):
         sidecar = Sidecar(sidecar)
@@ -59,22 +60,20 @@ def convert_to_form(df, hed_schema, tag_form, columns=None):
     """ Convert all tags in underlying dataframe to the specified form (in place).
 
     Parameters:
-        df (pd.Dataframe): The dataframe to modify
+        df (pd.Dataframe or pd.Series): The dataframe or series to modify
         hed_schema (HedSchema): The schema to use to convert tags.
         tag_form(str): HedTag property to convert tags to.
         columns (list): The columns to modify on the dataframe.
 
     """
     if isinstance(df, pd.Series):
-        df = df.apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
+        df[:] = df.apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
     else:
         if columns is None:
             columns = df.columns
 
         for column in columns:
             df[column] = df[column].apply(partial(_convert_to_form, hed_schema=hed_schema, tag_form=tag_form))
-
-    return df
 
 
 def shrink_defs(df, hed_schema, columns=None):
@@ -97,8 +96,6 @@ def shrink_defs(df, hed_schema, columns=None):
             mask = df[column].str.contains('Def-expand/', case=False)
             df[column][mask] = df[column][mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
 
-    return df
-
 
 def expand_defs(df, hed_schema, def_dict, columns=None):
     """ Expands any def tags found in the dataframe.
@@ -120,9 +117,7 @@ def expand_defs(df, hed_schema, def_dict, columns=None):
 
         for column in columns:
             mask = df[column].str.contains('Def/', case=False)
-            df[column][mask] = df[column][mask].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
-
-    return df
+            df.loc[mask, column] = df.loc[mask, column].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
 
 
 def _convert_to_form(hed_string, hed_schema, tag_form):
@@ -137,23 +132,11 @@ def _expand_defs(hed_string, hed_schema, def_dict):
     return str(HedString(hed_string, hed_schema, def_dict).expand_defs())
 
 
-def _get_matching_value(tags):
-    # Filter out values equal to "#" and get unique values
-    unique_values = set(tag.extension for tag in tags if tag.extension != "#")
-    if len(unique_values) == 0:
-        return "#"
-
-    if len(unique_values) > 1:
-        return None
-
-    return next(iter(unique_values))
-
-
 def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None):
-    """
-    Processes a list of HED strings according to a given HED schema, using known definitions and ambiguous definitions.
+    """ Processes a list of HED strings according to a given HED schema,
+            using known definitions and ambiguous definitions.
 
-    Args:
+    Parameters:
         hed_strings (list or pd.Series): A list of HED strings to process.
         hed_schema (HedSchema): The schema to use
         known_defs (DefinitionDict or list or str), optional):

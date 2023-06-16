@@ -24,7 +24,7 @@ class SummarizeHedValidationOp(BaseOp):
         "operation": "summarize_hed_validation",
         "required_parameters": {
             "summary_name": str,
-            "summary_filename": str 
+            "summary_filename": str
         },
         "optional_parameters": {
             "append_timecode": bool,
@@ -64,19 +64,20 @@ class SummarizeHedValidationOp(BaseOp):
             sidecar (Sidecar or file-like): Usually needed unless only HED tags in HED column of event file.
 
         Returns:
-            DataFrame: Input DataFrame, unchanged.
+            DataFrame: A copy of df
 
         Side-effect:
             Updates the relevant summary.
 
         """
+        df_new = df.copy()
         summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
             summary = HedValidationSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({'df': dispatcher.post_proc_data(df), 'name': name,
+        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
-        return df
+        return df_new
 
 
 class HedValidationSummary(BaseSummary):

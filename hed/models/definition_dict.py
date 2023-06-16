@@ -12,7 +12,16 @@ class DefinitionDict:
     """
 
     def __init__(self, def_dicts=None, hed_schema=None):
-        """ Definitions to be considered a single source. """
+        """ Definitions to be considered a single source. 
+            
+        Parameters:
+            def_dicts (str or list or DefinitionDict): DefDict or list of DefDicts/strings or 
+                a single string whose definitions should be added.
+            hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
+
+        :raises TypeError:
+            - Bad type passed as def_dicts
+        """
 
         self.defs = {}
         self._label_tag_name = DefTagNames.DEF_KEY
@@ -26,6 +35,9 @@ class DefinitionDict:
         Parameters:
             def_dicts (list or DefinitionDict): DefDict or list of DefDicts/strings whose definitions should be added.
             hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
+            
+        :raises TypeError:
+            - Bad type passed as def_dicts
         """
         if not isinstance(def_dicts, list):
             def_dicts = [def_dicts]
@@ -38,7 +50,7 @@ class DefinitionDict:
                 for definition in def_dict:
                     self.check_for_definitions(HedString(definition, hed_schema))
             else:
-                print(f"Invalid input type '{type(def_dict)} passed to DefDict.  Skipping.")
+                raise TypeError("Invalid type '{type(def_dict)}' passed to DefinitionDict")
 
     def _add_definition(self, def_tag, def_value):
         if def_tag in self.defs:
@@ -59,6 +71,16 @@ class DefinitionDict:
             self._add_definition(def_tag, def_value)
 
     def get(self, def_name):
+        """ Get the definition entry for the definition name.
+
+            Not case-sensitive
+
+        Parameters:
+            def_name (str):  Name of the definition to retrieve.
+
+        Returns:
+            DefinitionEntry:  Definition entry for the requested definition.
+        """
         return self.defs.get(def_name.lower())
 
     def __iter__(self):
@@ -68,25 +90,19 @@ class DefinitionDict:
         return len(self.defs)
 
     def items(self):
+        """ Returns the dictionary of definitions
+
+            Alias for .defs.items()
+
+        Returns:
+            def_entries({str: DefinitionEntry}): A list of definitions
+        """
         return self.defs.items()
 
     @property
     def issues(self):
         """Returns issues about duplicate definitions."""
         return self._issues
-
-    def get_def_entry(self, def_name):
-        """ Get the definition entry for the definition name.
-
-        Parameters:
-            def_name (str):  Name of the definition to retrieve.
-
-        Returns:
-            DefinitionEntry:  Definition entry for the requested definition.
-
-        """
-
-        return self.defs.get(def_name.lower())
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
         """ Check string for definition tags, adding them to self.
@@ -97,7 +113,6 @@ class DefinitionDict:
 
         Returns:
             list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
-
         """
         def_issues = []
         for definition_tag, group in hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}):
@@ -208,8 +223,8 @@ class DefinitionDict:
     def _validate_contents(self, definition_tag, group, error_handler):
         issues = []
         if group:
-            for def_tag in group.find_tags({DefTagNames.DEF_KEY, DefTagNames.DEF_EXPAND_KEY, DefTagNames.DEFINITION_KEY}, recursive=True,
-                                           include_groups=0):
+            def_keys = {DefTagNames.DEF_KEY, DefTagNames.DEF_EXPAND_KEY, DefTagNames.DEFINITION_KEY}
+            for def_tag in group.find_tags(def_keys, recursive=True, include_groups=0):
                 issues += ErrorHandler.format_error_with_context(error_handler,
                                                                  DefinitionErrors.DEF_TAG_IN_DEFINITION,
                                                                  tag=def_tag,
@@ -249,27 +264,6 @@ class DefinitionDict:
             if def_contents is not None:
                 hed_tag._expandable = def_contents
                 hed_tag._expanded = hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY
-
-    def expand_def_tags(self, hed_string_obj):
-        """ Expands def tags to def-expand tags.
-
-        Parameters:
-            hed_string_obj (HedString): The hed string to process.
-        """
-        # First see if the "def" is found at all.  This covers def and def-expand.
-        hed_string_lower = hed_string_obj.lower()
-        if self._label_tag_name not in hed_string_lower:
-            return []
-
-        def_issues = []
-        # We need to check for labels to expand in ALL groups
-        for def_tag, def_group in hed_string_obj.find_tags(DefTagNames.DEF_KEY, recursive=True):
-            def_contents = self._get_definition_contents(def_tag)
-            if def_contents is not None:
-                def_tag.short_base_tag = DefTagNames.DEF_EXPAND_ORG_KEY
-                def_group.replace(def_tag, def_contents)
-
-        return def_issues
 
     def _get_definition_contents(self, def_tag):
         """ Get the contents for a given def tag.

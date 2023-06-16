@@ -47,6 +47,8 @@ known_errors = [
 
     "SIDECAR_BRACES_INVALID",
     "SCHEMA_LIBRARY_INVALID",
+
+    "SCHEMA_ATTRIBUTE_INVALID"
 ]
 
 skip_tests = {

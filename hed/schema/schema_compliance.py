@@ -21,9 +21,8 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     Returns:
         list: A list of all warnings and errors found in the file. Each issue is a dictionary.
 
-    Notes:
-        - Useful for temp filenames in support of web services.
-
+    :raises ValueError:
+        - Trying to validate a HedSchemaGroup directly
     """
     if not isinstance(hed_schema, HedSchema):
         raise ValueError("To check compliance of a HedGroupSchema, call self.check_compliance on the schema itself.")
@@ -40,7 +39,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     if unknown_attributes:
         for attribute_name, source_tags in unknown_attributes.items():
             for tag in source_tags:
-                issues_list += error_handler.format_error_with_context(SchemaErrors.HED_SCHEMA_ATTRIBUTE_INVALID,
+                issues_list += error_handler.format_error_with_context(SchemaErrors.SCHEMA_ATTRIBUTE_INVALID,
                                                                        attribute_name,
                                                                        source_tag=tag)
 
@@ -62,7 +61,10 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
                 validator = schema_attribute_validators.get(attribute_name)
                 if validator:
                     error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name)
-                    new_issues = validator(hed_schema, tag_entry, tag_entry.attributes[attribute_name])
+                    new_issues = validator(hed_schema, tag_entry, attribute_name)
+                    # if force_issues_as_warnings:
+                    for issue in new_issues:
+                        issue['severity'] = ErrorSeverity.WARNING
                     error_handler.add_context_and_filter(new_issues)
                     issues_list += new_issues
                     error_handler.pop_error_context()
@@ -75,8 +77,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
             if len(values) == 2:
                 error_code = SchemaErrors.HED_SCHEMA_DUPLICATE_FROM_LIBRARY
             issues_list += error_handler.format_error_with_context(error_code, name,
-                                                                   duplicate_tag_list=[entry.name for entry in
-                                                                                       duplicate_entries],
+                                                                   duplicate_tag_list=[entry.name for entry in duplicate_entries],
                                                                    section=section_key)
 
         error_handler.pop_error_context()
@@ -92,15 +93,19 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     error_handler.pop_error_context()
     return issues_list
 
+# attribute_checker_template(hed_schema, tag_entry, attribute_name, possible_values):
+#     hed_schema (HedSchema): The schema to use for validation
+#     tag_entry (HedSchemaEntry): The schema entry for this tag.
+#     attribute_name (str): The name of this attribute
 
-def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
+
+def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name):
     """ Check if comma separated list has valid HedTags.
 
     Parameters:
-        hed_schema (HedSchema): The schema to check if the tag exists.
+        hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        possible_tags (str): Comma separated list of tags.  Short long or mixed form valid.
-        force_issues_as_warnings (bool): If True sets all the severity levels to warning.
+        attribute_name (str): The name of this attribute
 
     Returns:
         list: A list of issues. Each issue is a dictionary.
@@ -109,91 +114,55 @@ def tag_is_placeholder_check(hed_schema, tag_entry, possible_tags, force_issues_
     issues = []
     if not tag_entry.name.endswith("/#"):
         issues += ErrorHandler.format_error(SchemaWarnings.NON_PLACEHOLDER_HAS_CLASS, tag_entry.name,
-                                            possible_tags)
-
-    if force_issues_as_warnings:
-        for issue in issues:
-            issue['severity'] = ErrorSeverity.WARNING
+                                            attribute_name)
 
     return issues
 
 
-def attribute_does_not_exist_check(hed_schema, tag_entry, attribute_name, force_issues_as_warnings=True):
-    """ Throws an error saying this is a bad attribute if found.
+def tag_exists_check(hed_schema, tag_entry, attribute_name):
+    """ Check if the list of possible tags exists in the schema.
 
     Parameters:
-        hed_schema (HedSchema): The schema to check if the tag exists.
+        hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): the attribute name we're looking for
-        force_issues_as_warnings (bool): If True sets all the severity levels to warning.
+        attribute_name (str): The name of this attribute
 
     Returns:
         list: A list of issues. Each issue is a dictionary.
 
     """
     issues = []
-    issues += ErrorHandler.format_error(SchemaWarnings.INVALID_ATTRIBUTE, tag_entry.name,
-                                        attribute_name)
-
-    if force_issues_as_warnings:
-        for issue in issues:
-            issue['severity'] = ErrorSeverity.WARNING
-
-    return issues
-
-
-def tag_exists_check(hed_schema, tag_entry, possible_tags, force_issues_as_warnings=True):
-    """ Check if comma separated list are valid HedTags.
-
-    Parameters:
-        hed_schema (HedSchema): The schema to check if the tag exists.
-        tag_entry (HedSchemaEntry): The schema entry for this tag.
-        possible_tags (str): Comma separated list of tags.  Short long or mixed form valid.
-        force_issues_as_warnings (bool): If True, set all the severity levels to warning.
-
-    Returns:
-        list: A list of issues. Each issue is a dictionary.
-
-    """
-    issues = []
+    possible_tags = tag_entry.attributes.get(attribute_name, "")
     split_tags = possible_tags.split(",")
     for org_tag in split_tags:
-        if org_tag not in hed_schema.all_tags:
+        if org_tag and org_tag not in hed_schema.all_tags:
             issues += ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
                                                 org_tag,
                                                 index_in_tag=0,
                                                 index_in_tag_end=len(org_tag))
 
-    if force_issues_as_warnings:
-        for issue in issues:
-            issue['severity'] = ErrorSeverity.WARNING
     return issues
 
 
-def tag_exists_base_schema_check(hed_schema, tag_entry, tag_name, force_issues_as_warnings=True):
+def tag_exists_base_schema_check(hed_schema, tag_entry, attribute_name):
     """ Check if the single tag is a partnered schema tag
 
     Parameters:
-        hed_schema (HedSchema): The schema to check if the tag exists.
+        hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        tag_name (str): The tag to verify, can be any form.
-        force_issues_as_warnings (bool): If True, set all the severity levels to warning.
+        attribute_name (str): The name of this attribute
 
     Returns:
         list: A list of issues. Each issue is a dictionary.
-
     """
     issues = []
-    rooted_tag = tag_name.lower()
-    if rooted_tag not in hed_schema.all_tags:
+    rooted_tag = tag_entry.attributes.get(attribute_name, "")
+    if rooted_tag and rooted_tag not in hed_schema.all_tags:
         issues += ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
                                             rooted_tag,
                                             index_in_tag=0,
                                             index_in_tag_end=len(rooted_tag))
 
-    if force_issues_as_warnings:
-        for issue in issues:
-            issue['severity'] = ErrorSeverity.WARNING
     return issues
 
 

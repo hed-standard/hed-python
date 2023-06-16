@@ -1,18 +1,15 @@
 import unittest
 import os
+import copy
 from hed.schema import schema_compliance
 from hed import schema
 from hed.errors import ErrorHandler, SchemaWarnings
 
 
 class Test(unittest.TestCase):
-    # a known schema with some issues
-    schema_file = '../data/schema_tests/HED8.0.0.mediawiki'
-
     @classmethod
     def setUpClass(cls):
-        cls.error_handler = ErrorHandler()
-        cls.schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file)
+        cls.hed_schema = schema.load_schema_version("8.1.0")
 
     def validate_term_base(self, input_text, expected_issues):
         for text, issues in zip(input_text, expected_issues):
@@ -25,7 +22,9 @@ class Test(unittest.TestCase):
             self.assertCountEqual(issues, test_issues)
 
     def test_validate_schema(self):
-        hed_schema = schema.load_schema(self.schema_path)
+        schema_path_with_issues = '../data/schema_tests/HED8.0.0.mediawiki'
+        schema_path_with_issues = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_path_with_issues)
+        hed_schema = schema.load_schema(schema_path_with_issues)
         issues = hed_schema.check_compliance()
         self.assertTrue(isinstance(issues, list))
         self.assertTrue(len(issues) > 1)
@@ -72,3 +71,34 @@ class Test(unittest.TestCase):
 
         ]
         self.validate_desc_base(test_descs, expected_issues)
+
+    def test_util_placeholder(self):
+        tag_entry = self.hed_schema.all_tags["Event"]
+        attribute_name = "unitClass"
+        self.assertTrue(schema_compliance.tag_is_placeholder_check(self.hed_schema, tag_entry, attribute_name))
+        attribute_name = "unitClass"
+        tag_entry = self.hed_schema.all_tags["Age/#"]
+        self.assertFalse(schema_compliance.tag_is_placeholder_check(self.hed_schema, tag_entry, attribute_name))
+
+    def test_util_suggested(self):
+        tag_entry = self.hed_schema.all_tags["Event/Sensory-event"]
+        attribute_name = "suggestedTag"
+        self.assertFalse(schema_compliance.tag_exists_check(self.hed_schema, tag_entry, attribute_name))
+        tag_entry = self.hed_schema.all_tags["Property"]
+        self.assertFalse(schema_compliance.tag_exists_check(self.hed_schema, tag_entry, attribute_name))
+        tag_entry = copy.deepcopy(tag_entry)
+        tag_entry.attributes["suggestedTag"] = "InvalidSuggestedTag"
+        self.assertTrue(schema_compliance.tag_exists_check(self.hed_schema, tag_entry, attribute_name))
+
+    def test_util_rooted(self):
+        tag_entry = self.hed_schema.all_tags["Event"]
+        attribute_name = "rooted"
+        self.assertFalse(schema_compliance.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name))
+        tag_entry = self.hed_schema.all_tags["Property"]
+        self.assertFalse(schema_compliance.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name))
+        tag_entry = copy.deepcopy(tag_entry)
+        tag_entry.attributes["rooted"] = "Event"
+        self.assertFalse(schema_compliance.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name))
+        tag_entry = copy.deepcopy(tag_entry)
+        tag_entry.attributes["rooted"] = "NotRealTag"
+        self.assertTrue(schema_compliance.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name))
