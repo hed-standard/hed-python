@@ -57,28 +57,29 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create factor columns corresponding to values in a specified column.
+        """ Extract a sidecar from events file.
 
         Parameters:
             dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The tabular file to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like): Only needed for HED operations.
+            sidecar (Sidecar or file-like): Not needed for this operation.
 
         Returns:
-            DataFrame: A new DataFrame with the factor columns appended.
+            DataFrame: A copy of df.
 
         Side-effect:
             Updates the associated summary if applicable.
 
         """
 
+        df_new = df.copy()
         summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
             summary = EventsToSidecarSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({'df': dispatcher.post_proc_data(df), 'name': name})
-        return df
+        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name})
+        return df_new
 
 
 class EventsToSidecarSummary(BaseSummary):
@@ -95,7 +96,8 @@ class EventsToSidecarSummary(BaseSummary):
             new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:
-            - The summary needs a "name" str and a "df".  
+            - The summary needs a "name" str and a "df".
+
         """
 
         tab_sum = TabularSummary(value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_info["name"])
@@ -164,7 +166,7 @@ class EventsToSidecarSummary(BaseSummary):
 
         """
         sum_list = [f"Dataset: Total events={result.get('total_events', 0)} "
-                    f"Total files={result.get('total_files', 0)}", 
+                    f"Total files={result.get('total_files', 0)}",
                     f"Skip columns: {str(result.get('skip_cols', []))}",
                     f"Value columns: {str(result.get('value_cols', []))}",
                     f"Sidecar:\n{json.dumps(result['sidecar'], indent=indent)}"]

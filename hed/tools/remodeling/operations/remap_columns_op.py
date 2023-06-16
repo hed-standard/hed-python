@@ -100,7 +100,7 @@ class RemapColumnsOp(BaseOp):
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like): Only needed for HED operations.
+            sidecar (Sidecar or file-like): Not needed for this operation.
 
         Returns:
             Dataframe: A new dataframe after processing.
@@ -109,12 +109,13 @@ class RemapColumnsOp(BaseOp):
             - If ignore_missing is false and source values from the data are not in the map.
 
         """
-        df[self.source_columns] = df[self.source_columns].replace(np.NaN, 'n/a')
+        df1 = df.copy()
+        df1[self.source_columns] = df1[self.source_columns].replace(np.NaN, 'n/a')
         for column in self.integer_sources:
-            int_mask = df[column] != 'n/a'
-            df.loc[int_mask, column] = df.loc[int_mask, column].astype(int)
-        df[self.source_columns] = df[self.source_columns].astype(str)
-        df_new, missing = self.key_map.remap(df)
+            int_mask = df1[column] != 'n/a'
+            df1.loc[int_mask, column] = df1.loc[int_mask, column].astype(int)
+        df1[self.source_columns] = df1[self.source_columns].astype(str)
+        df_new, missing = self.key_map.remap(df1)
         if missing and not self.ignore_missing:
             raise ValueError("MapSourceValueMissing",
                              f"{name}: Ignore missing is false, but source values [{missing}] are in data but not map")

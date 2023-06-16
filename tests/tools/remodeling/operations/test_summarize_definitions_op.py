@@ -41,7 +41,7 @@ class Test(unittest.TestCase):
         parms = json.loads(self.json_parms)
         sum_op = SummarizeDefinitionsOp(parms)
         df = pd.read_csv(self.data_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
-        df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
+        df_new = sum_op.do_op(dispatch, df, 'subj2_run1', sidecar=self.json_path)
         self.assertEqual(200, len(df_new), " dataframe length is correct")
         self.assertEqual(10, len(df_new.columns), " has correct number of columns")
         self.assertIn(sum_op.summary_name, dispatch.summary_dicts)

@@ -58,17 +58,18 @@ class SummarizeDefinitionsOp(BaseOp):
             sidecar (Sidecar or file-like): Only needed for HED operations.
 
         Returns:
-            DataFrame: the same datafarme
+            DataFrame: a copy of df
 
         Side-effect:
             Updates the relevant summary.
 
         """
+        df_new = df.copy()
         summary = dispatcher.summary_dicts.setdefault(self.summary_name,
                                                       DefinitionSummary(self, dispatcher.hed_schema))
-        summary.update_summary({'df': dispatcher.post_proc_data(df), 'name': name, 'sidecar': sidecar,
+        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name, 'sidecar': sidecar,
                                 'schema': dispatcher.hed_schema})
-        return df
+        return df_new
 
 
 class DefinitionSummary(BaseSummary):
