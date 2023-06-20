@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.models.sidecar import Sidecar
+from hed.models.df_util import get_assembled
 from hed.tools.analysis.hed_type_manager import HedTypeManager
 
 # TODO: restricted factor values are not implemented yet.
@@ -32,19 +33,17 @@ class FactorHedTypeOp(BaseOp):
         """ Constructor for the factor HED type operation.
 
         Parameters:
-            op_spec (dict): Specification for required and optional parameters.
             parameters (dict):  Actual values of the parameters for the operation.
 
-        Raises:
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
-            ValueError   
-                - If the specification is missing a valid operation.   
+        :raises ValueError:
+            - If the specification is missing a valid operation.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -68,12 +67,14 @@ class FactorHedTypeOp(BaseOp):
 
         """
 
-        input_data = TabularInput(df, hed_schema=dispatcher.hed_schema, sidecar=sidecar)
-        df = input_data.dataframe.copy()
-        df_list = [df]
-        hed_strings = get_assembled_strings(input_data, hed_schema=dispatcher.hed_schema, expand_defs=False)
+        if sidecar and not isinstance(sidecar, Sidecar):
+            sidecar = Sidecar(sidecar)
+        input_data = TabularInput(df, sidecar=sidecar, name=name)
+        df_list = [input_data.dataframe.copy()]
+        hed_strings, definitions = get_assembled(input_data, sidecar, dispatcher.hed_schema, 
+                                                 extra_def_dicts=None, join_columns=True,
+                                                 shrink_defs=True, expand_defs=False)
 
-        definitions = input_data.get_definitions()
         var_manager = HedTypeManager(hed_strings, dispatcher.hed_schema, definitions)
         var_manager.add_type_variable(self.type_tag.lower())
 

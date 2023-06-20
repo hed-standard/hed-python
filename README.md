@@ -1,3 +1,9 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8056010.svg)](https://doi.org/10.5281/zenodo.8056010)
+[![Maintainability](https://api.codeclimate.com/v1/badges/11bf2329590e7b0164ba/maintainability)](https://codeclimate.com/github/hed-standard/hed-python/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/11bf2329590e7b0164ba/test_coverage)](https://codeclimate.com/github/hed-standard/hed-python/test_coverage)
+![PyPI - Status](https://img.shields.io/pypi/v/hedtools)
+
+
 # HEDTools - Python
 HED (Hierarchical Event Descriptors) is a framework for systematically describing
 both laboratory and real-world events as well as other experimental metadata.
@@ -11,11 +17,11 @@ Most people will simply annotate their events by creating a spreadsheet
 or a BIDS JSON sidecar that associates HED tags with event codes or the events themselves.
 If you have such a spreadsheet or a JSON, 
 you can use the HED Online Validator currently available at 
-[https://hedtools.ucsd.edu/hed](https://hedtools.ucsd.edu/hed) to validate or transform
+[https://hedtools.org](https://hedtools.org) to validate or transform
 your files without downloading any tools. 
 
 A version of the online tools corresponding to the `develop` branch can be found at:
-[https://hedtools.ucsd.edu/hed_dev](https://hedtools.ucsd.edu/hed_dev).
+[https://hedtools.org/hed_dev](https://hedtools.org/hed_dev).
 
 ### Installation
 Use `pip` to install `hedtools` from PyPI:
@@ -95,7 +101,7 @@ Use `hed.schema.set_cache_directory` to change the location.
 The HED cache can be shared across processes.
 
 Starting with `hedtools 0.2.0` local copies of the most recent schema versions
-are stored within the code modules for easy access.
+are stored within the code modules for easy access.  
 
 ### Other links of interest
 

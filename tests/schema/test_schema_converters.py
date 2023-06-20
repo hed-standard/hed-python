@@ -173,7 +173,7 @@ class TestConverterSavingPrefix(unittest.TestCase):
     def setUpClass(cls):
         cls.xml_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.xml_file)
         cls.hed_schema_xml = schema.load_schema(cls.xml_file)
-        cls.hed_schema_xml_prefix = schema.load_schema(cls.xml_file, schema_prefix="tl:")
+        cls.hed_schema_xml_prefix = schema.load_schema(cls.xml_file, schema_namespace="tl:")
 
     def test_saving_prefix(self):
         saved_filename = self.hed_schema_xml_prefix.save_as_xml()

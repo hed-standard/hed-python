@@ -1,0 +1,49 @@
+HED library="testlib" version="1.0.2" withStandard="8.2.0" unmerged="true"
+
+'''Prologue'''
+This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
+
+!# start schema
+
+'''Violin-sound''' {rooted=Instrument-sound} [These should be sorted.  Violin should be last]
+* Violin-subsound3
+* Violin-subsound1
+* Violin-subsound2
+
+'''Oboe-sound''' {rooted=Instrument-sound} [These should be sorted.  Oboe should be second]
+* Oboe-subsound2
+* Oboe-subsound1
+
+'''B-nonextension''' [These should not be sorted.  B should be first]
+* SubnodeB1
+* SubnodeB2
+
+'''A-nonextension''' [These should not be sorted.  A should be second]
+* SubnodeA3
+* SubnodeA1
+* SubnodeA2
+
+'''Flute-sound''' {rooted=Instrument-sound} [These should be sorted.  Flute should be first]
+* Flute-subsound2
+* Flute-subsound1
+
+'''C-nonextension''' [These should not be sorted.  C should be last]
+* SubnodeC3
+* SubnodeC1
+* SubnodeC2
+
+'''B-extensionallowed'''{extensionAllowed} [These should be sorted.  This section should be second.]
+* SubnodeE3
+* SubnodeE1
+* SubnodeE2
+
+'''A-extensionallowed'''{extensionAllowed} [These should be sorted.  This section should be first.]
+* SubnodeD3
+* SubnodeD1
+* SubnodeD2
+
+!# end schema
+
+'''Epilogue'''
+
+!# end hed

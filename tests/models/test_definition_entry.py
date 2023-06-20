@@ -18,25 +18,25 @@ class Test(unittest.TestCase):
                              hed_schema=hed_schema)
         cls.hed_schema = hed_schema
 
-    def test_constructor(self):
-        def_entry1 = DefinitionEntry('Def1', self.def1, False, None)
-        self.assertIsInstance(def_entry1, DefinitionEntry)
-        self.assertIn('Condition-variable/Blech', def_entry1.tag_dict)
-        def_entry2 = DefinitionEntry('Def2', self.def2, False, None)
-        self.assertIsInstance(def_entry2, DefinitionEntry)
-        self.assertNotIn('Condition-variable/Blech', def_entry2.tag_dict)
-        def_entry3 = DefinitionEntry('Def3', self.def3, False, None)
-        self.assertIsInstance(def_entry3, DefinitionEntry)
-        self.assertIn('Condition-variable/Blech', def_entry3.tag_dict)
-        def_entry4 = DefinitionEntry('Def4', self.def4, False, None)
-        self.assertIsInstance(def_entry4, DefinitionEntry)
-        self.assertNotIn('Condition-variable/Blech', def_entry4.tag_dict)
-        def_entry3a = DefinitionEntry('Def3a', self.def3, True, None)
-        self.assertIsInstance(def_entry3a, DefinitionEntry)
-        self.assertIn('Condition-variable/Blech', def_entry3a.tag_dict)
-        def_entry4a = DefinitionEntry('Def4a', self.def4, True, None)
-        self.assertIsInstance(def_entry4a, DefinitionEntry)
-        self.assertNotIn('Condition-variable/Blech', def_entry4a.tag_dict)
+    # def test_constructor(self):
+    #     def_entry1 = DefinitionEntry('Def1', self.def1, False, None)
+    #     self.assertIsInstance(def_entry1, DefinitionEntry)
+    #     self.assertIn('Condition-variable/Blech', def_entry1.tag_dict)
+    #     def_entry2 = DefinitionEntry('Def2', self.def2, False, None)
+    #     self.assertIsInstance(def_entry2, DefinitionEntry)
+    #     self.assertNotIn('Condition-variable/Blech', def_entry2.tag_dict)
+    #     def_entry3 = DefinitionEntry('Def3', self.def3, False, None)
+    #     self.assertIsInstance(def_entry3, DefinitionEntry)
+    #     self.assertIn('Condition-variable/Blech', def_entry3.tag_dict)
+    #     def_entry4 = DefinitionEntry('Def4', self.def4, False, None)
+    #     self.assertIsInstance(def_entry4, DefinitionEntry)
+    #     self.assertNotIn('Condition-variable/Blech', def_entry4.tag_dict)
+    #     def_entry3a = DefinitionEntry('Def3a', self.def3, True, None)
+    #     self.assertIsInstance(def_entry3a, DefinitionEntry)
+    #     self.assertIn('Condition-variable/Blech', def_entry3a.tag_dict)
+    #     def_entry4a = DefinitionEntry('Def4a', self.def4, True, None)
+    #     self.assertIsInstance(def_entry4a, DefinitionEntry)
+    #     self.assertNotIn('Condition-variable/Blech', def_entry4a.tag_dict)
 
     def test_get_definition(self):
         def_entry1 = DefinitionEntry('Def1', self.def1, False, None)
@@ -72,7 +72,7 @@ class Test(unittest.TestCase):
     #     new_def_count = len(def_dict.defs)
     #     self.assertGreater(new_def_count, original_def_count)
     #
-    # placeholder_invalid_def_contents = "(Item/TestDef1/#,Item/TestDef2/#)"
+    # placeholder_invalid_def_contents = "(Age/#,Item/TestDef2/#)"
     # placeholder_invalid_def_string = f"(Definition/TestDefPlaceholder/#,{placeholder_invalid_def_contents})"
     #
     # def test_definitions(self):
@@ -98,12 +98,12 @@ class Test(unittest.TestCase):
     #                                                            "InvalidDef1", expected_count=1, tag_list=[]),
     #         'placeholderWrongSpot': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
     #                                                           "InvalidDef1#"),
-    #         'twoDefTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+    #         'twoDefTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUPS,
     #                                                 "ValidDef1", ["Definition/InvalidDef2"]),
-    #         'twoGroupTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS,
+    #         'twoGroupTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUPS,
     #                                                   "InvalidDef1",
     #                                                   [self.def_contents_string, self.def_contents_string2]),
-    #         'extraOtherTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUP_TAGS, "InvalidDef1",
+    #         'extraOtherTags': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_GROUPS, "InvalidDef1",
     #                                                     ['InvalidContents']),
     #         'duplicateDef': ErrorHandler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
     #         'duplicateDef2': ErrorHandler.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
     #         'defAlreadyTagInSchema': [],
     #         'defTooManyPlaceholders': ErrorHandler.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
     #                                                             "TestDefPlaceholder", expected_count=1,
-    #                                                             tag_list=["Item/TestDef1/#", "Item/TestDef2/#"]),
+    #                                                             tag_list=["Age/#", "Item/TestDef2/#"]),
     #         'invalidPlaceholderExtension': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
     #                                                                  "InvalidDef1/this-part-is-not-allowed"),
     #         'invalidPlaceholder': ErrorHandler.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,

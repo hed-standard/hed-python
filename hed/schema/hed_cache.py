@@ -6,6 +6,7 @@ import os
 import json
 from hashlib import sha1
 from shutil import copyfile
+import urllib
 import re
 from semantic_version import Version
 import portalocker
@@ -88,7 +89,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=
         if expression_match is not None:
             version = expression_match.group(3)
             found_library_name = expression_match.group(2)
-            if found_library_name != library_name:
+            if not get_libraries and found_library_name != library_name:
                 continue
             if found_library_name not in all_hed_versions:
                 all_hed_versions[found_library_name] = []
@@ -269,7 +270,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
                         _cache_hed_version(version, library_name, version_info, cache_folder=cache_folder)
 
             _write_last_cached_time(current_timestamp, cache_folder)
-    except portalocker.exceptions.LockException:
+    except portalocker.exceptions.LockException or ValueError:
         return -1
 
     return 0
@@ -302,6 +303,8 @@ def _write_last_cached_time(new_time, cache_folder):
         new_time (float): The time this was updated.
         cache_folder (str): The folder used for caching the hed schema.
 
+    :raises ValueError:
+        - something went wrong writing to the file
     """
     timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
     try:
@@ -371,9 +374,13 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
                 continue
             if file_entry['name'] in skip_folders:
                 continue
-            sub_folder_versions = \
-                _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
-                                               skip_folders=skip_folders, get_libraries=True)
+            try:
+                sub_folder_versions = \
+                    _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
+                                                   skip_folders=skip_folders, get_libraries=True)
+            except urllib.error.HTTPError as e:
+                # Silently ignore ones without a hedxml section for now.
+                continue
             _merge_in_versions(all_hed_versions, sub_folder_versions)
         expression_match = version_pattern.match(file_entry["name"])
         if expression_match is not None:

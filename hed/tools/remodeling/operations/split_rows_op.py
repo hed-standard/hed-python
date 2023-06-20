@@ -6,12 +6,12 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class SplitRowsOp(BaseOp):
-    """ Split rows in a tabular file into multiple rows based on a column.
+    """ Split rows in a tabular file into multiple rows based on parameters.
 
     Required remodeling parameters:   
-        - **anchor_column** (*str*): The column in which new items are generated.   
-        - **new_events** (*dict*):  Mapping of new values based on values in the anchor_column.   
-        - **remove_parent_row** (*bool*):  If true, columns not in column_order are placed at end.   
+        - **anchor_column** (*str*): The column in which the names of new items are stored.   
+        - **new_events** (*dict*):  Mapping of new values based on values in the original row.    
+        - **remove_parent_row** (*bool*):  If true, the original row that was split is removed.   
 
     """
 
@@ -31,13 +31,12 @@ class SplitRowsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -52,14 +51,13 @@ class SplitRowsOp(BaseOp):
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str):  Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like):  Only needed for HED operations.
+            sidecar (Sidecar or file-like):  Not needed for this operation.
 
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-            TypeError   
-                -If bad onset or duration.   
+        :raises TypeError:
+            -If bad onset or duration.
 
         """
 
@@ -121,8 +119,8 @@ class SplitRowsOp(BaseOp):
         Returns:
             list:  list of same length as df with the onsets.
 
-        Raises:
-            HedFileError: raised if one of the onset specifiers is invalid.
+        :raises HedFileError:
+            - If one of the onset specifiers is invalid.
 
         """
 

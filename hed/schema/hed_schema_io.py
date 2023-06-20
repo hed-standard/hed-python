@@ -11,19 +11,20 @@ from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.schema_validation_util import validate_version_string
 
 
-def from_string(schema_string, file_type=".xml", schema_prefix=None):
+def from_string(schema_string, file_type=".xml", schema_namespace=None):
     """ Create a schema from the given string.
 
     Parameters:
         schema_string (str):         An XML or mediawiki file as a single long string.
         file_type (str):             The extension(including the .) corresponding to a file source.
-        schema_prefix (str, None):  The name_prefix all tags in this schema will accept.
+        schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
 
     Returns:
         (HedSchema):  The loaded schema.
 
-    Raises:
-        HedFileError:  If empty string or invalid extension is passed.
+    :raises HedFileError:
+        - If empty string or invalid extension is passed.
+        - Other fatal formatting issues with file
 
     Notes:
         - The loading is determined by file type.
@@ -40,8 +41,8 @@ def from_string(schema_string, file_type=".xml", schema_prefix=None):
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
 
-    if schema_prefix:
-        hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
+    if schema_namespace:
+        hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
 
     return hed_schema
 
@@ -57,29 +58,20 @@ def get_schema(hed_versions):
         raise ValueError("InvalidHedSchemaOrSchemaVersion", "Expected schema or schema version")
 
 
-def get_schema_versions(hed_schema, as_string=True):
-    if not hed_schema and as_string:
-        return ''
-    elif not hed_schema:
-        return None
-    elif isinstance(hed_schema, HedSchema) or isinstance(hed_schema, HedSchemaGroup):
-        return hed_schema.get_formatted_version(as_string=as_string)
-    else:
-        raise ValueError("InvalidHedSchemaOrHedSchemaGroup", "Expected schema or schema group")
-
-
-def load_schema(hed_path=None, schema_prefix=None):
+def load_schema(hed_path=None, schema_namespace=None):
     """ Load a schema from the given file or URL path.
 
     Parameters:
         hed_path (str or None): A filepath or url to open a schema from.
-        schema_prefix (str or None): The name_prefix all tags in this schema will accept.
+        schema_namespace (str or None): The name_prefix all tags in this schema will accept.
 
     Returns:
         HedSchema: The loaded schema.
 
-    Raises:
-         HedFileError: If there are any fatal issues when loading the schema.
+    :raises HedFileError:
+        - Empty path passed
+        - Unknown extension
+        - Any fatal issues when loading the schema.
 
     """
     if not hed_path:
@@ -98,8 +90,8 @@ def load_schema(hed_path=None, schema_prefix=None):
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_path)
 
-    if schema_prefix:
-        hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
+    if schema_namespace:
+        hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
 
     return hed_schema
 
@@ -114,6 +106,8 @@ def get_hed_xml_version(xml_file_path):
     Returns:
         str: The version number of the HED XML file.
 
+    :raises HedFileError:
+        - There is an issue loading the schema
     """
     root_node = HedSchemaXMLParser._parse_hed_xml(xml_file_path)
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
@@ -124,22 +118,21 @@ def _load_schema_version(xml_version=None, xml_folder=None):
 
     Parameters:
         xml_folder (str): Path to a folder containing schema.
-        xml_version (str or list): HED version format string. Expected format: '[schema_prefix:][library_name_]X.Y.Z'.
+        xml_version (str or list): HED version format string. Expected format: '[schema_namespace:][library_name_]X.Y.Z'.
 
     Returns:
         HedSchema or HedSchemaGroup: The requested HedSchema object.
 
-    Raises:
-        HedFileError: If the xml_version is not valid.
-
-    Notes:
-        - The library schema files have names of the form HED_(LIBRARY_NAME)_(version).xml.
+    :raises HedFileError:
+        - The xml_version is not valid.
+        - The specified version cannot be found or loaded
+        - Other fatal errors loading the schema (These are unlikely if you are not editing them locally)
     """
-    schema_prefix = ""
+    schema_namespace = ""
     library_name = None
     if xml_version:
         if ":" in xml_version:
-            schema_prefix, _, xml_version = xml_version.partition(":")
+            schema_namespace, _, xml_version = xml_version.partition(":")
         if "_" in xml_version:
             library_name, _, xml_version = xml_version.rpartition("_")
         elif validate_version_string(xml_version):
@@ -152,7 +145,7 @@ def _load_schema_version(xml_version=None, xml_folder=None):
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
         hed_schema = load_schema(final_hed_xml_file)
     except HedFileError as e:
-        if e.error_type == HedExceptions.FILE_NOT_FOUND:
+        if e.code == HedExceptions.FILE_NOT_FOUND:
             hed_cache.cache_xml_versions(cache_folder=xml_folder)
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
             if not final_hed_xml_file:
@@ -161,8 +154,8 @@ def _load_schema_version(xml_version=None, xml_folder=None):
         else:
             raise e
 
-    if schema_prefix:
-        hed_schema.set_schema_prefix(schema_prefix=schema_prefix)
+    if schema_namespace:
+        hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
 
     return hed_schema
 
@@ -178,11 +171,9 @@ def load_schema_version(xml_version=None, xml_folder=None):
     Returns:
         HedSchema or HedSchemaGroup: The schema or schema group extracted.
 
-    Raises:
-        HedFileError: If the xml_version is not valid.
-
-    Notes:
-        - Loads the latest schema value if an empty version is given (string or list).
+    :raises HedFileError:
+        - The xml_version is not valid.
+        - A fatal error was encountered in parsing
     """
     if xml_version and isinstance(xml_version, list):
         schemas = [_load_schema_version(xml_version=version, xml_folder=xml_folder) for version in xml_version]

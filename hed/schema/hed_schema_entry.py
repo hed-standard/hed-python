@@ -38,7 +38,15 @@ class HedSchemaEntry:
             schema (HedSchema): The schema that holds the rules.
 
         """
-        pass
+        # Clear out any known attributes from the unknown section
+        to_remove = []
+        if self._unknown_attributes:
+            for attribute in self._unknown_attributes:
+                if attribute in self._section.valid_attributes:
+                    to_remove.append(attribute)
+
+            for item in to_remove:
+                self._unknown_attributes.pop(item)
 
     def set_attribute_value(self, attribute_name, attribute_value):
         """ Add attribute and set its value.
@@ -54,6 +62,8 @@ class HedSchemaEntry:
         if not attribute_value:
             return
 
+        # todo: remove this patch and redo the code
+        # This check doesn't need to be done if the schema is valid.
         if attribute_name not in self._section.valid_attributes:
             # print(f"Unknown attribute {attribute_name}")
             if self._unknown_attributes is None:
@@ -95,6 +105,10 @@ class HedSchemaEntry:
         if attr_entry and attr_entry.has_attribute(property_name):
             return True
 
+    @property
+    def section_key(self):
+        return self._section.section_key
+
     def __eq__(self, other):
         if self.name != other.name:
             return False
@@ -111,7 +125,7 @@ class HedSchemaEntry:
         return True
 
     def __hash__(self):
-        return hash((self.name, self._section._section_key))
+        return hash(self.name)
 
     def __str__(self):
         return self.name
@@ -123,9 +137,8 @@ class UnitClassEntry(HedSchemaEntry):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._units = []
-        self.unit_class_units = []
+        self.units = []
         self.derivative_units = []
-        self.unit_class_entry = None
 
     def add_unit(self, unit_entry):
         """ Add the given unit entry to this unit class.
@@ -144,8 +157,8 @@ class UnitClassEntry(HedSchemaEntry):
 
         """
         derivative_units = {}
-        self.unit_class_units = {unit_entry.name: unit_entry for unit_entry in self._units}
-        for unit_name, unit_entry in self.unit_class_units.items():
+        self.units = {unit_entry.name: unit_entry for unit_entry in self._units}
+        for unit_name, unit_entry in self.units.items():
             new_derivative_units = [unit_name]
             if not unit_entry.has_attribute(HedKey.UnitSymbol):
                 new_derivative_units.append(pluralize.plural(unit_name))
@@ -156,6 +169,12 @@ class UnitClassEntry(HedSchemaEntry):
                     derivative_units[modifier.name + derived_unit] = unit_entry
         self.derivative_units = derivative_units
 
+    def __eq__(self, other):
+        if not super().__eq__(other):
+            return False
+        if self.units != other.units:
+            return False
+        return True
 
 class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
@@ -174,7 +193,6 @@ class UnitEntry(HedSchemaEntry):
         """
         self.unit_modifiers = schema.get_modifiers_for_unit(self.name)
 
-
 class HedTagEntry(HedSchemaEntry):
     """ A single tag entry in the HedSchema. """
     def __init__(self, *args, **kwargs):
@@ -187,36 +205,6 @@ class HedTagEntry(HedSchemaEntry):
         self.takes_value_child_entry = None  # this is a child takes value tag, if one exists
         self._parent_tag = None
         self.tag_terms = tuple()
-
-    @staticmethod
-    def get_fake_tag_entry(tag, tags_to_identify):
-        """ Create a tag entry if a given a tag has a match in a list of possible short tags.
-
-        Parameters:
-            tag (str): The short/mid/long form tag to identify.
-            tags_to_identify (list): A list of lowercase short tags to identify.
-
-        Returns:
-            tuple:
-                - HedTagEntry or None: The fake entry showing the short tag name as the found tag.
-                - str: The remaining text after the located short tag, which may be empty.
-
-        Notes:
-             - The match is done left to right.
-
-        """
-        split_names = tag.split("/")
-        index = 0
-        for name in split_names:
-            if name.lower() in tags_to_identify:
-                fake_entry = HedTagEntry(name=tag[:index + len(name)], section=None)
-                fake_entry.long_tag_name = fake_entry.name
-                fake_entry.short_tag_name = name
-                return fake_entry, tag[index + len(name):]
-
-            index += len(name) + 1
-
-        return None, ""
 
     def any_parent_has_attribute(self, attribute):
         """ Check if tag (or parents) has the attribute.
@@ -256,6 +244,19 @@ class HedTagEntry(HedSchemaEntry):
             base_entry = base_entry._parent_tag
 
         return base_entry.has_attribute(tag_attribute)
+
+    @property
+    def parent(self):
+        """Get the parent entry of this tag"""
+        return self._parent_tag
+
+    @property
+    def parent_name(self):
+        """Gets the parent tag entry name"""
+        if self._parent_tag:
+            return self._parent_tag.name
+        parent_name, _, child_name = self.name.rpartition("/")
+        return parent_name
 
     def finalize_entry(self, schema):
         """ Called once after schema loading to set state.

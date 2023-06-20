@@ -19,8 +19,8 @@ class HedTypeValues:
             name (str): Name of the tabular file as a unique identifier.
             type_tag (str): Lowercase short form of the tag to be managed.
 
-        Raises:
-            HedFileError:  On errors such as unmatched onsets or missing definitions.
+        :raises HedFileError:
+            - On errors such as unmatched onsets or missing definitions.
 
         """
         self.name = name
@@ -141,7 +141,7 @@ class HedTypeValues:
             This modifies the HedTypeFactors map.
 
         """
-        level = tag.extension_or_value_portion.lower()
+        level = tag.extension.lower()
         for var_name in hed_vars:
             hed_var = self._type_value_map.get(var_name, None)
             if hed_var is None:
@@ -185,7 +185,7 @@ class HedTypeValues:
 
         """
         for tag in tag_list:
-            tag_value = tag.extension_or_value_portion.lower()
+            tag_value = tag.extension.lower()
             if not tag_value:
                 tag_value = self.type_tag
             hed_var = self._type_value_map.get(tag_value, None)

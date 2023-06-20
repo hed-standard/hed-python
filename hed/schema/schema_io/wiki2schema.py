@@ -2,8 +2,10 @@
 This module is used to create a HedSchema object from a .mediawiki file.
 """
 import re
-from hed.schema.hed_schema_constants import HedSectionKey
+
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.errors import ErrorContext, error_reporter
 from hed.schema import HedSchema
 from hed.schema import schema_validation_util
 from hed.schema.schema_io import wiki_constants
@@ -74,6 +76,7 @@ class HedSchemaWikiParser:
         self.fatal_errors = []
         self._schema = HedSchema()
         self._schema.filename = wiki_file_path
+        self._loading_merged = True
 
         try:
             if wiki_file_path and schema_as_string:
@@ -91,7 +94,7 @@ class HedSchemaWikiParser:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, wiki_file_path)
 
         if self.fatal_errors:
-            self.fatal_errors.sort(key = lambda x: x.get("line_number", -1))
+            self.fatal_errors = error_reporter.sort_issues(self.fatal_errors)
             raise HedFileError(HedExceptions.HED_WIKI_DELIMITERS_INVALID,
                                f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
                                f"parameter on this exception for more details.", self.filename,
@@ -113,7 +116,21 @@ class HedSchemaWikiParser:
             An opened .mediawiki file
         """
         # Read header line as we need it to determine if this is a hed3 schema or not before locating sections
-        self._read_header_line(wiki_lines[0])
+        self._read_header_line(wiki_lines)
+
+        if self._schema.with_standard and not self._schema.merged:
+            from hed.schema.hed_schema_io import load_schema_version
+            saved_attr = self._schema.header_attributes
+            try:
+                base_version = load_schema_version(self._schema.with_standard)
+            except HedFileError as e:
+                raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
+                                   message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
+                                   filename=e.filename)
+            self._schema = base_version
+            self._schema.filename = self.filename
+            self._schema.header_attributes = saved_attr
+            self._loading_merged = False
 
         wiki_lines_by_section = self._split_lines_into_sections(wiki_lines)
         parse_order = {
@@ -203,13 +220,15 @@ class HedSchemaWikiParser:
             parse_func = parse_order[section]
             parse_func(lines_for_section)
 
-    def _read_header_line(self, line):
-        if line.startswith(wiki_constants.HEADER_LINE_STRING):
-            hed_attributes = self._get_header_attributes(line[len(wiki_constants.HEADER_LINE_STRING):])
-            schema_validation_util.validate_attributes(hed_attributes, filename=self.filename)
-            self.header_attributes = hed_attributes
-            self._schema.header_attributes = hed_attributes
-            return
+    def _read_header_line(self, lines):
+        line = ""
+        if lines:
+            line = lines[0]
+            if line.startswith(wiki_constants.HEADER_LINE_STRING):
+                hed_attributes = self._get_header_attributes(line[len(wiki_constants.HEADER_LINE_STRING):])
+                schema_validation_util.validate_attributes(hed_attributes, filename=self.filename)
+                self._schema.header_attributes = hed_attributes
+                return
         msg = f"First line of file should be HED, instead found: {line}"
         raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING, msg, filename=self.filename)
 
@@ -265,24 +284,41 @@ class HedSchemaWikiParser:
         lines: [(int, str)]
             Lines for this section
         """
+        self._schema._initialize_attributes(HedSectionKey.AllTags)
         parent_tags = []
+        level_adj = 0
         for line_number, line in lines:
             if line.startswith(wiki_constants.ROOT_TAG):
                 parent_tags = []
+                level_adj = 0
             else:
-                level = self._get_tag_level(line)
+                level = self._get_tag_level(line) + level_adj
                 if level < len(parent_tags):
                     parent_tags = parent_tags[:level]
                 elif level > len(parent_tags):
-                    self._add_fatal_error(line, "Line has too many *'s at the front.  You cannot skip a level.")
+                    self._add_fatal_error(line_number, line, "Line has too many *'s at the front.  You cannot skip a level.")
                     continue
-            new_tag_name = self._add_tag_line(parent_tags, line_number, line)
-            if not new_tag_name:
-                if new_tag_name != "":
-                    self._add_fatal_error(line_number, line)
+            # Create the entry
+            tag_entry = self._add_tag_line(parent_tags, line_number, line)
+
+            if not tag_entry:
+                # This will have already raised an error
                 continue
 
-            parent_tags.append(new_tag_name)
+            try:
+                rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
+                if rooted_entry:
+                    parent_tags = rooted_entry.long_tag_name.split("/")
+                    level_adj = len(parent_tags)
+                    # Create the entry again for rooted tags, to get the full name.
+                    tag_entry = self._add_tag_line(parent_tags, line_number, line)
+            except HedFileError as e:
+                self._add_fatal_error(line_number, line, e.message, e.code)
+                continue
+
+            tag_entry = self._add_to_dict(line_number, line, tag_entry, HedSectionKey.AllTags)
+
+            parent_tags.append(tag_entry.short_tag_name)
 
     def _read_unit_classes(self, lines):
         """Adds the unit classes section
@@ -292,20 +328,30 @@ class HedSchemaWikiParser:
         lines: [(int, str)]
             Lines for this section
         """
+        self._schema._initialize_attributes(HedSectionKey.UnitClasses)
+        self._schema._initialize_attributes(HedSectionKey.Units)
         unit_class_entry = None
         for line_number, line in lines:
-            unit_class_unit, _ = self._get_tag_name(line)
-            if unit_class_unit is None:
+            unit, _ = self._get_tag_name(line)
+            if unit is None:
                 self._add_fatal_error(line_number, line)
                 continue
             level = self._get_tag_level(line)
             # This is a unit class
             if level == 1:
-                unit_class_entry = self._add_single_line(line_number, line, HedSectionKey.UnitClasses)
+                unit_class_entry = self._create_entry(line_number, line, HedSectionKey.UnitClasses)
+                unit_class_entry = self._add_to_dict(line_number, line, unit_class_entry, HedSectionKey.UnitClasses)
             # This is a unit class unit
             else:
-                unit_class_unit_entry = self._add_single_line(line_number, line, HedSectionKey.Units)
+                unit_class_unit_entry = self._create_entry(line_number, line, HedSectionKey.Units)
+                self._add_to_dict(line_number, line, unit_class_unit_entry, HedSectionKey.Units)
                 unit_class_entry.add_unit(unit_class_unit_entry)
+
+    def _read_section(self, lines, section_key):
+        self._schema._initialize_attributes(section_key)
+        for line_number, line in lines:
+            new_entry = self._create_entry(line_number, line, section_key)
+            self._add_to_dict(line_number, line, new_entry, section_key)
 
     def _read_unit_modifiers(self, lines):
         """Adds the unit modifiers section
@@ -315,8 +361,7 @@ class HedSchemaWikiParser:
         lines: [(int, str)]
             Lines for this section
         """
-        for line_number, line in lines:
-            self._add_single_line(line_number, line, HedSectionKey.UnitModifiers)
+        self._read_section(lines, HedSectionKey.UnitModifiers)
 
     def _read_value_classes(self, lines):
         """Adds the unit modifiers section
@@ -326,17 +371,13 @@ class HedSchemaWikiParser:
         lines: [(int, str)]
             Lines for this section
         """
-        for line_number, line in lines:
-            self._add_single_line(line_number, line, HedSectionKey.ValueClasses)
+        self._read_section(lines, HedSectionKey.ValueClasses)
 
     def _read_properties(self, lines):
-        for line_number, line in lines:
-            self._add_single_line(line_number, line, HedSectionKey.Properties)
+        self._read_section(lines, HedSectionKey.Properties)
 
     def _read_attributes(self, lines):
-        self.attributes = {}
-        for line_number, line in lines:
-            self._add_single_line(line_number, line, HedSectionKey.Attributes)
+        self._read_section(lines, HedSectionKey.Attributes)
 
     def _get_header_attributes(self, version_line):
         """Extracts all valid attributes like version from the HED line in .mediawiki format.
@@ -387,6 +428,13 @@ class HedSchemaWikiParser:
             final_attributes[key] = value
 
         return final_attributes
+
+    def _add_to_dict(self, line_number, line, entry, key_class):
+        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged:
+            self._add_fatal_error(line_number, line,
+                                  f"Library tag in unmerged schema has InLibrary attribute",
+                                  HedExceptions.IN_LIBRARY_IN_UNMERGED)
+        return self._schema._add_tag_to_dict(entry.name, entry, key_class)
 
     @staticmethod
     def _get_tag_level(tag_line):
@@ -540,11 +588,12 @@ class HedSchemaWikiParser:
                 long_tag_name = "/".join(parent_tags) + "/" + tag_name
             else:
                 long_tag_name = tag_name
-            self._add_single_line(line_number, tag_line, HedSectionKey.AllTags, long_tag_name)
+            return self._create_entry(line_number, tag_line, HedSectionKey.AllTags, long_tag_name)
 
-        return tag_name
+        self._add_fatal_error(line_number, tag_line)
+        return None
 
-    def _add_single_line(self, line_number, tag_line, key_class, element_name=None):
+    def _create_entry(self, line_number, tag_line, key_class, element_name=None):
         node_name, index = self._get_tag_name(tag_line)
         if node_name is None:
             self._add_fatal_error(line_number, tag_line)
@@ -562,7 +611,8 @@ class HedSchemaWikiParser:
             self._add_fatal_error(line_number, tag_line, "Description has mismatched delimiters")
             return
 
-        tag_entry = self._schema._add_tag_to_dict(node_name, key_class)
+        tag_entry = self._schema._create_tag_entry(node_name, key_class)
+
         if node_desc:
             tag_entry.description = node_desc.strip()
 
@@ -571,8 +621,12 @@ class HedSchemaWikiParser:
 
         return tag_entry
 
-    def _add_fatal_error(self, line_number, line, warning_message="Schema term is empty or the line is malformed"):
+    def _add_fatal_error(self, line_number, line, warning_message="Schema term is empty or the line is malformed",
+                         error_code=HedExceptions.HED_WIKI_DELIMITERS_INVALID):
         self.fatal_errors.append(
-            {"line_number": line_number,
-             "line": line,
-             "message": warning_message})
+            {'code': error_code,
+             ErrorContext.ROW: line_number,
+             ErrorContext.LINE: line,
+             "message": f"ERROR: {warning_message}"
+             }
+        )

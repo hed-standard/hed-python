@@ -1,4 +1,4 @@
-""" Abstract base class for the context of summary operations. """
+""" Abstract base class for the contents of summary operations. """
 
 import os
 from abc import ABC, abstractmethod
@@ -6,44 +6,69 @@ import json
 from hed.tools.util.io_util import get_timestamp
 
 
-class BaseContext(ABC):
-    """ Abstract base class for summary contexts. Should not be instantiated.
+class BaseSummary(ABC):
+    """ Abstract base class for summary contents. Should not be instantiated.
 
     Parameters:
-        context_type (str)  Type of summary.
-        context_name (str)  Printable name -- should be unique.
-        context_filename (str)  Base filename for saving the context.
+        sum_op (BaseOp):  Operation corresponding to this summary.
 
     """
 
     DISPLAY_INDENT = "   "
     INDIVIDUAL_SUMMARIES_PATH = 'individual_summaries'
 
-    def __init__(self, context_type, context_name, context_filename):
-        self.context_type = context_type
-        self.context_name = context_name
-        self.context_filename = context_filename
+    def __init__(self, sum_op):
+        self.op = sum_op
         self.summary_dict = {}
 
     def get_summary_details(self, include_individual=True):
-        merged_summary = self._merge_all()
+        """ Return a dictionary with the details for individual files and the overall dataset.
+
+        Parameters:
+            include_individual (bool):  If True, summaries for individual files are included.
+
+        Returns:
+            dict - a dictionary with 'Dataset' and 'Individual files' keys.
+
+        Notes:
+            - The 'Dataset' value is either a string or a dictionary with the overall summary.
+            - The 'Individual files' value is dictionary whose keys are file names and values are
+                   their corresponding summaries.
+
+        Users are expected to provide merge_all_info and get_details_dict to support this.
+
+        """
+        merged_summary = self.merge_all_info()
         if merged_summary:
-            details = self._get_summary_details(merged_summary)
+            details = self.get_details_dict(merged_summary)
         else:
             details = "Overall summary unavailable"
 
         summary_details = {"Dataset": details, "Individual files": {}}
         if include_individual:
             for name, count in self.summary_dict.items():
-                summary_details["Individual files"][name] = self._get_summary_details(count)
+                summary_details["Individual files"][name] = self.get_details_dict(count)
         return summary_details
 
     def get_summary(self, individual_summaries="separate"):
+        """ Return a summary dictionary with the information.
 
+        Parameters:
+            individual_summaries (str): "separate", "consolidated", or "none"
+
+        Returns:
+            dict - dictionary with "Dataset" and "Individual files" keys.
+
+        Notes: The individual_summaries value is processed as follows
+           -  "separate" individual summaries are to be in separate files
+           -  "consolidated" means that the individual summaries are in same file as overall summary
+           -  "none" means that only the overall summary is produced.
+
+        """
         include_individual = individual_summaries == "separate" or individual_summaries == "consolidated"
         summary_details = self.get_summary_details(include_individual=include_individual)
-        dataset_summary = {"Context name": self.context_name, "Context type": self.context_type,
-                           "Context filename": self.context_filename, "Overall summary": summary_details['Dataset']}
+        dataset_summary = {"Summary name": self.op.summary_name, "Summary type": self.op.SUMMARY_TYPE,
+                           "Summary filename": self.op.summary_filename, "Overall summary": summary_details['Dataset']}
         summary = {"Dataset": dataset_summary, "Individual files": {}}
         if summary_details["Individual files"]:
             summary["Individual files"] = self.get_individual(summary_details["Individual files"],
@@ -54,8 +79,8 @@ class BaseContext(ABC):
         individual_dict = {}
         for name, name_summary in summary_details.items():
             if separately:
-                individual_dict[name] = {"Context name": self.context_name, "Context type": self.context_type,
-                                         "Context filename": self.context_filename, "File summary": name_summary}
+                individual_dict[name] = {"Summary name": self.op.summary_name, "summary type": self.op.SUMMARY_TYPE,
+                                         "Summary filename": self.op.summary_filename, "File summary": name_summary}
             else:
                 individual_dict[name] = name_summary
         return individual_dict
@@ -72,14 +97,16 @@ class BaseContext(ABC):
     def get_text_summary(self, individual_summaries="separate"):
         include_individual = individual_summaries == "separate" or individual_summaries == "consolidated"
         summary_details = self.get_text_summary_details(include_individual=include_individual)
-        summary = {"Dataset": f"Context name: {self.context_name}\n" + f"Context type: {self.context_type}\n" +
-                   f"Context filename: {self.context_filename}\n\n" + f"Overall summary:\n{summary_details['Dataset']}"}
+        summary = {"Dataset": f"Summary name: {self.op.summary_name}\n" +
+                   f"Summary type: {self.op.SUMMARY_TYPE}\n" +
+                   f"Summary filename: {self.op.summary_filename}\n\n" +
+                   f"Overall summary:\n{summary_details['Dataset']}"}
         if individual_summaries == "separate":
             summary["Individual files"] = {}
             for name, name_summary in summary_details["Individual files"].items():
-                summary["Individual files"][name] = f"Context name: {self.context_name}\n" + \
-                                                    f"Context type: {self.context_type}\n" + \
-                                                    f"Context filename: {self.context_filename}\n\n" + \
+                summary["Individual files"][name] = f"Summary name: {self.op.summary_name}\n" + \
+                                                    f"Summary type: {self.op.SUMMARY_TYPE}\n" + \
+                                                    f"Summary filename: {self.op.summary_filename}\n\n" + \
                                                     f"Summary for {name}:\n{name_summary}"
         elif include_individual:
             ind_list = []
@@ -99,13 +126,24 @@ class BaseContext(ABC):
                 summary = self.get_summary(individual_summaries=individual_summaries)
             else:
                 continue
-            self._save_separate(save_dir, file_format, summary, individual_summaries)
+            self._save_summary_files(save_dir, file_format, summary, individual_summaries)
 
-    def _save_separate(self, save_dir, file_format, summary, individual_summaries):
-        time_stamp = '_' + get_timestamp()
-        this_save = os.path.join(save_dir, self.context_name + '/')
+    def _save_summary_files(self, save_dir, file_format, summary, individual_summaries):
+        """ Save the files in the appropriate format.
+
+        Parameters:
+            save_dir (str): Path to the directory in which the summaries will be saved.
+            file_format (str): string representing the extension (including .), '.txt' or '.json'.
+            summary (dictionary): Dictionary of summaries (has "Dataset" and "Individual files" keys.
+
+        """
+        if self.op.append_timecode:
+            time_stamp = '_' + get_timestamp()
+        else:
+            time_stamp = ''
+        this_save = os.path.join(save_dir, self.op.summary_name + '/')
         os.makedirs(os.path.realpath(this_save), exist_ok=True)
-        filename = os.path.realpath(os.path.join(this_save, self.context_filename + time_stamp + file_format))
+        filename = os.path.realpath(os.path.join(this_save, self.op.summary_filename + time_stamp + file_format))
         individual = summary.get("Individual files", {})
         if individual_summaries == "none" or not individual:
             self.dump_summary(filename, summary["Dataset"])
@@ -117,17 +155,28 @@ class BaseContext(ABC):
         individual_dir = os.path.join(this_save, self.INDIVIDUAL_SUMMARIES_PATH + '/')
         os.makedirs(os.path.realpath(individual_dir), exist_ok=True)
         for name, sum_str in individual.items():
-            filename = self._get_individual_filename(individual_dir, name, time_stamp, file_format)
+            filename = self._get_summary_filepath(individual_dir, name, time_stamp, file_format)
             self.dump_summary(filename, sum_str)
 
-    def _get_individual_filename(self, individual_dir, name, time_stamp, file_format):
+    def _get_summary_filepath(self, individual_dir, name, time_stamp, file_format):
+        """ Return the filepath for the summary including the timestamp
+
+        Parameters:
+            individual_dir (str):  path of the directory in which the summary should be stored.
+            name (str): Path of the original file from which the summary was extracted.
+            time_stamp (str):  Formatted date-time string to be included in the filename of the summary.
+
+        Returns:
+            str: Full path name of the summary.
+
+        """
         this_name = os.path.basename(name)
         this_name = os.path.splitext(this_name)[0]
         count = 1
         match = True
         filename = None
         while match:
-            filename = f"{self.context_filename}_{this_name}_{count}{time_stamp}{file_format}"
+            filename = f"{self.op.summary_filename}_{this_name}_{count}{time_stamp}{file_format}"
             filename = os.path.realpath(os.path.join(individual_dir, filename))
             if not os.path.isfile(filename):
                 break
@@ -135,6 +184,20 @@ class BaseContext(ABC):
         return filename
 
     def _get_result_string(self, name, result, indent=DISPLAY_INDENT):
+        """ Return a formatted string with the summary for the indicated name.
+
+        Parameters:
+            name (str):  Identifier (usually the filename) of the individual file.
+            result (dict): The dictionary of the summary results indexed by name.
+            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+
+        Returns:
+            str - The results in a printable format ready to be saved to a text file.
+
+        Notes:
+            This file should be overridden by each summary.
+
+        """
         return f"\n{name}\n{indent}{str(result)}"
 
     @staticmethod
@@ -145,37 +208,40 @@ class BaseContext(ABC):
             text_file.write(summary)
 
     @abstractmethod
-    def _get_summary_details(self, summary_info):
+    def get_details_dict(self, summary_info):
         """ Return the summary-specific information.
 
         Parameters:
             summary_info (object):  Summary to return info from
 
+        Returns:
+            dict: dictionary with the results.
+
         Notes:
-            Abstract method be implemented by each individual context summary.
+            Abstract method be implemented by each individual summary.
 
         """
         raise NotImplementedError
 
     @abstractmethod
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Return merged information.
 
         Returns:
            object:  Consolidated summary of information.
 
         Notes:
-            Abstract method be implemented by each individual context summary.
+            Abstract method be implemented by each individual summary.
 
         """
         raise NotImplementedError
 
     @abstractmethod
-    def update_context(self, context_dict):
+    def update_summary(self, summary_dict):
         """ Method to update summary for a given tabular input.
 
         Parameters:
-            context_dict (dict)  A context specific dictionary with the update information.
+            summary_dict (dict)  A summary specific dictionary with the update information.
 
         """
         raise NotImplementedError

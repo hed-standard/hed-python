@@ -1,11 +1,10 @@
 from enum import Enum
-from hed.models.hed_string import HedString
-from hed.errors.error_types import SidecarErrors, ValidationErrors
-from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import SidecarErrors
+import pandas as pd
 
 
 class ColumnType(Enum):
-    """ The overall column_type of a column in column mapper, eg treat it as HED tags.
+    """ The overall column_type of a column in column mapper, e.g. treat it as HED tags.
 
         Mostly internal to column mapper related code
     """
@@ -14,7 +13,7 @@ class ColumnType(Enum):
     Ignore = "ignore"
     # This column is a category with a list of possible values to replace with hed strings.
     Categorical = "categorical"
-    # This column has a value(eg filename) that is added to a hed tag in place of a # sign.
+    # This column has a value(e.g. filename) that is added to a hed tag in place of a # sign.
     Value = "value"
     # Return this column exactly as given, it is HED tags.
     HEDTags = "hed_tags"
@@ -23,30 +22,20 @@ class ColumnType(Enum):
 class ColumnMetadata:
     """ Column in a ColumnMapper. """
 
-    def __init__(self, column_type=None, name=None, hed_dict=None, column_prefix=None):
+    def __init__(self, column_type=None, name=None, source=None):
         """ A single column entry in the column mapper.
 
         Parameters:
             column_type (ColumnType or None): How to treat this column when reading data.
             name (str, int, or None): The column_name or column number identifying this column.
                 If name is a string, you'll need to use a column map to set the number later.
-            hed_dict (dict or str or None): The loaded data (usually from json) for the given def
-                                     For category columns, this is a dict.
-                                     For value columns, it's a string.
-            column_prefix (str or None): If present, prepend the given column_prefix to all hed tags in the columns.
-                Only works on ColumnType HedTags.
-
-        Notes:
-            - Each column from which data is retrieved must have a ColumnMetadata representing its contents.
-            - The column_prefix dictionaries are used when the column is processed.
+            source (dict or str or None): Either the entire loaded json sidecar or a single HED string
         """
-        if hed_dict is None:
-            hed_dict = {}
-
-        self.column_type = column_type
         self.column_name = name
-        self.column_prefix = column_prefix
-        self._hed_dict = hed_dict
+        self._source = source
+        if column_type is None:
+            column_type = self._detect_column_type(self.source_dict)
+        self.column_type = column_type
 
     @property
     def hed_dict(self):
@@ -56,106 +45,94 @@ class ColumnMetadata:
             dict or str: A string or dict of strings for this column
 
         """
-        return self._hed_dict
+        if self._source is None or isinstance(self._source, str):
+            return self._source
+        return self._source[self.column_name].get("HED", {})
 
-    def _get_category_hed_string(self, category):
-        """ Fetch the hed string for a category key.
+    @property
+    def source_dict(self):
+        """ The raw dict for this entry(if it exists)
+
+        Returns:
+            dict or str: A string or dict of strings for this column
+        """
+        if self._source is None or isinstance(self._source, str):
+            return {"HED": self._source}
+        return self._source[self.column_name]
+
+    def get_hed_strings(self):
+        """ Returns the hed strings for this entry as a series.
+
+        Returns:
+            hed_strings(pd.Series): the hed strings for this series.(potentially empty)
+        """
+        if not self.column_type:
+            return pd.Series(dtype=str)
+
+        series = pd.Series(self.hed_dict, dtype=str)
+
+        return series
+
+    def set_hed_strings(self, new_strings):
+        """ Sets the hed strings for this entry.
 
         Parameters:
-            category (str): The category key to retrieve the string from.
+            new_strings(pd.Series, dict, or str): The hed strings to set.
+                This should generally be the return value from get_hed_strings
 
         Returns:
-            str: The hed string for a given category entry in a category column.
-
+            hed_strings(pd.Series): the hed strings for this series.(potentially empty)
         """
-        if self.column_type != ColumnType.Categorical:
-            return None
+        if new_strings is None:
+            return False
 
-        return self._hed_dict.get(category, None)
+        if not self.column_type:
+            return False
 
-    def _get_value_hed_string(self):
-        """ Fetch the hed string in a value column.
-
-        Returns:
-            str: The hed string for a given value column.
-
-        """
-        if self.column_type != ColumnType.Value:
-            return None
-
-        return self._hed_dict
-
-    def expand(self, input_text):
-        """ Expand text using the rules for this column.
-
-        Parameters:
-            input_text (str): Text to expand (generally from a single cell in a spreadsheet).
-
-        Returns:
-            str or None: The expanded column as a hed_string.
-            str or dict: If this is a string, contains the name of this column
-                as an attribute. If the first return value is None, this is an error message dictionary.
-
-        Notes:
-            - Examples are adding name_prefix, inserting a column hed_string from a category key, etc.
-
-        """
-        column_type = self.column_type
-
-        if column_type == ColumnType.Categorical:
-            final_text = self._get_category_hed_string(input_text)
-            if final_text:
-                return HedString(final_text), False
+        if isinstance(new_strings, pd.Series):
+            if self.column_type == ColumnType.Categorical:
+                new_strings = new_strings.to_dict()
+            elif new_strings.empty:
+                return False
             else:
-                return None, ErrorHandler.format_error(ValidationErrors.HED_SIDECAR_KEY_MISSING, invalid_key=input_text,
-                                                       category_keys=list(self._hed_dict.keys()))
-        elif column_type == ColumnType.Value:
-            prelim_text = self._get_value_hed_string()
-            final_text = prelim_text.replace("#", input_text)
-            return HedString(final_text), False
-        elif column_type == ColumnType.HEDTags:
-            hed_string_obj = HedString(input_text)
-            self._prepend_required_prefix(hed_string_obj, self.column_prefix)
-            return hed_string_obj, False
-        elif column_type == ColumnType.Ignore:
-            return None, False
+                new_strings = new_strings.iloc[0]
 
-        return None, {"error_type": "INTERNAL_ERROR"}
+        self._source[self.column_name]["HED"] = new_strings
+
+        return True
 
     @staticmethod
-    def _prepend_required_prefix(required_tag_column_tags, required_tag_prefix):
-        """ Prepend the tag paths to the required tag column tags that need them.
+    def _detect_column_type(dict_for_entry):
+        """ Determine the ColumnType of a given json entry.
 
         Parameters:
-            required_tag_column_tags (HedString): A string containing HED tags associated with a
-                required tag column that may need a tag name_prefix prepended to its tags.
-            required_tag_prefix (str): A string that will be added if missing to any given tag.
-        """
-        if not required_tag_prefix:
-            return required_tag_column_tags
-
-        for tag in required_tag_column_tags.get_all_tags():
-            tag.add_prefix_if_needed(required_tag_prefix)
-
-        return required_tag_column_tags
-
-    def remove_prefix(self, original_tag, current_tag_text):
-        """ Remove column_prefix if present from tag.
-
-        Parameters:
-            original_tag (HedTag): The original hed tag being written.
-            current_tag_text (str): A single tag as a string, in any form.
+            dict_for_entry (dict): The loaded json entry a specific column.
+                Generally has a "HED" entry among other optional ones.
 
         Returns:
-            str: current_tag_text with required prefixes removed
-        """
-        prefix_to_remove = self.column_prefix
-        if not prefix_to_remove:
-            return current_tag_text
+            ColumnType: The determined type of given column.  Returns None if unknown.
 
-        if current_tag_text.lower().startswith(prefix_to_remove.lower()):
-            current_tag_text = current_tag_text[len(prefix_to_remove):]
-        return current_tag_text
+        """
+        if not dict_for_entry or not isinstance(dict_for_entry, dict):
+            return ColumnType.Ignore
+
+        minimum_required_keys = ("HED",)
+        if not set(minimum_required_keys).issubset(dict_for_entry.keys()):
+            return ColumnType.Ignore
+
+        hed_entry = dict_for_entry["HED"]
+        if isinstance(hed_entry, dict):
+            if not all(isinstance(entry, str) for entry in hed_entry.values()):
+                return None
+            return ColumnType.Categorical
+
+        if not isinstance(hed_entry, str):
+            return None
+
+        if "#" not in dict_for_entry["HED"]:
+            return None
+
+        return ColumnType.Value
 
     @staticmethod
     def expected_pound_sign_count(column_type):

@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
         input_data = TabularInput(self.file_list[0])
         with self.assertRaises(HedFileError) as context:
             BidsTabularDictionary._correct_file(input_data)
-        self.assertEqual(context.exception.error_type, 'BadArgument')
+        self.assertEqual(context.exception.code, 'BadArgument')
 
     def test_correct_file_bids_file(self):
         bids_file = BidsFile(self.file_list[0])
@@ -130,6 +130,24 @@ class Test(unittest.TestCase):
         output = dict1.report_diffs(dict2, logger)
         self.assertTrue(output, "report_diffs has differences")
         self.assertTrue(logger.log, "report_diffs the logger is empty before report is called")
+
+    def test_with_tabular_summary(self):
+        from hed.tools.analysis.tabular_summary import TabularSummary
+        bids_root_path = os.path.realpath('../../data/bids_tests/eeg_ds003645s_hed')
+        name = 'eeg_ds003645s_hed'
+        exclude_dirs = ['stimuli']
+        entities = ('sub', 'run')
+        skip_columns = ["onset", "duration", "sample", "stim_file", "trial", "response_time"]
+
+        # Construct the file dictionary for the BIDS event files
+        event_files = get_file_list(bids_root_path, extensions=[".tsv"], name_suffix="_events",
+                                    exclude_dirs=exclude_dirs)
+        bids_tab = BidsTabularDictionary(name, event_files, entities=entities)
+
+        # Create a summary of the original BIDS events file content
+        bids_dicts_all, bids_dicts = TabularSummary.make_combined_dicts(bids_tab.file_dict, skip_cols=skip_columns)
+        self.assertIsInstance(bids_dicts, dict)
+        self.assertEqual(len(bids_dicts), len(event_files))
 
 
 if __name__ == '__main__':

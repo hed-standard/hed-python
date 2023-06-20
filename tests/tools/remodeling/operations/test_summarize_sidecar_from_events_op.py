@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import unittest
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_sidecar_from_events_op import EventsToSidecarSummaryContext, \
+from hed.tools.remodeling.operations.summarize_sidecar_from_events_op import EventsToSidecarSummary, \
     SummarizeSidecarFromEventsOp
 
 
@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         df1a = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         sum_op.do_op(dispatch, dispatch.prep_data(df1), 'name1')
-        context1 = dispatch.context_dict.get(self.base_parameters['summary_name'], None)
+        context1 = dispatch.summary_dicts.get(self.base_parameters['summary_name'], None)
         summary = context1.summary_dict["name1"]
         cat_len = len(summary.categorical_info)
         cat_base = len(self.sample_columns) - len(self.base_parameters["skip_columns"]) -  \
@@ -57,8 +57,8 @@ class Test(unittest.TestCase):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df1 = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         sum_op.do_op(dispatch, dispatch.prep_data(df1), 'name1')
-        context1 = dispatch.context_dict.get(self.base_parameters['summary_name'], None)
-        self.assertIsInstance(context1, EventsToSidecarSummaryContext, "get_summary testing EventsToSidecarSummary")
+        context1 = dispatch.summary_dicts.get(self.base_parameters['summary_name'], None)
+        self.assertIsInstance(context1, EventsToSidecarSummary, "get_summary testing EventsToSidecarSummary")
         summary1 = context1.get_summary()
         self.assertIsInstance(summary1, dict, "get_summary returns a dictionary by default")
         self.assertIsInstance(summary1["Dataset"], dict)
@@ -76,8 +76,8 @@ class Test(unittest.TestCase):
         self.assertIsInstance(summary_text5, dict)
         self.assertGreater(len(summary_text4['Dataset']), len(summary_text5['Dataset']))
         sum_op.do_op(dispatch, dispatch.prep_data(df1), 'name2')
-        context2 = dispatch.context_dict.get(self.base_parameters['summary_name'], None)
-        self.assertIsInstance(context1, EventsToSidecarSummaryContext, "get_summary testing EventsToSidecarSummary")
+        context2 = dispatch.summary_dicts.get(self.base_parameters['summary_name'], None)
+        self.assertIsInstance(context1, EventsToSidecarSummary, "get_summary testing EventsToSidecarSummary")
         summary_text6 = context2.get_text_summary(individual_summaries="separate")
         self.assertIsInstance(summary_text6, dict)
 

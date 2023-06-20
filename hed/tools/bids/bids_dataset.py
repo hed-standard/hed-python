@@ -79,18 +79,14 @@ class BidsDataset:
             list:  List of issues encountered during validation. Each issue is a dictionary.
 
         """
-        validator = HedValidator(hed_schema=self.schema)
-        error_handler = ErrorHandler()
+
         if not types:
             types = list(self.tabular_files.keys())
         issues = []
         for tab_type in types:
             files = self.tabular_files[tab_type]
-            issues += files.validate_sidecars(hed_ops=[validator],
-                                              check_for_warnings=check_for_warnings, error_handler=error_handler)
-            issues += files.validate_datafiles(hed_ops=[validator],
-                                               check_for_warnings=check_for_warnings,
-                                               error_handler=error_handler)
+            issues += files.validate_sidecars(self.schema, check_for_warnings=check_for_warnings)
+            issues += files.validate_datafiles(self.schema, check_for_warnings=check_for_warnings)
         return issues
 
     def get_summary(self):

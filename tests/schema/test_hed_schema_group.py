@@ -10,7 +10,7 @@ class TestHedSchema(unittest.TestCase):
         schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
         hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
         hed_schema1 = load_schema(hed_xml)
-        hed_schema2 = load_schema(hed_xml, schema_prefix="tl:")
+        hed_schema2 = load_schema(hed_xml, schema_namespace="tl:")
         cls.hed_schema_group = HedSchemaGroup([hed_schema1, hed_schema2])
 
     def test_schema_compliance(self):
@@ -18,7 +18,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(len(warnings), 10)
 
     def test_get_tag_entry(self):
-        tag_entry = self.hed_schema_group.get_tag_entry("Event", schema_prefix="tl:")
+        tag_entry = self.hed_schema_group.get_tag_entry("Event", schema_namespace="tl:")
         self.assertTrue(tag_entry)
 
     def test_bad_prefixes(self):
@@ -29,11 +29,11 @@ class TestHedSchema(unittest.TestCase):
         self.assertFalse(schema.get_tag_entry("unknown:Event"))
         self.assertFalse(schema.get_tag_entry(":Event"))
 
-        self.assertTrue(schema.get_tag_entry("tl:Event", schema_prefix="tl:"))
-        self.assertFalse(schema.get_tag_entry("sc:Event", schema_prefix="tl:"))
-        self.assertTrue(schema.get_tag_entry("Event", schema_prefix="tl:"))
-        self.assertFalse(schema.get_tag_entry("unknown:Event", schema_prefix="tl:"))
-        self.assertFalse(schema.get_tag_entry(":Event", schema_prefix="tl:"))
+        self.assertTrue(schema.get_tag_entry("tl:Event", schema_namespace="tl:"))
+        self.assertFalse(schema.get_tag_entry("sc:Event", schema_namespace="tl:"))
+        self.assertTrue(schema.get_tag_entry("Event", schema_namespace="tl:"))
+        self.assertFalse(schema.get_tag_entry("unknown:Event", schema_namespace="tl:"))
+        self.assertFalse(schema.get_tag_entry(":Event", schema_namespace="tl:"))
 
-        self.assertFalse(schema.get_tag_entry("Event", schema_prefix=None))
-        self.assertTrue(schema.get_tag_entry("Event", schema_prefix=""))
+        self.assertFalse(schema.get_tag_entry("Event", schema_namespace=None))
+        self.assertTrue(schema.get_tag_entry("Event", schema_namespace=""))

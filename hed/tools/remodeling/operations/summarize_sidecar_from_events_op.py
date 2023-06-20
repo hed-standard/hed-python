@@ -3,7 +3,7 @@
 import json
 from hed.tools import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
+from hed.tools.remodeling.operations.base_summary import BaseSummary
 
 
 class SummarizeSidecarFromEventsOp(BaseOp):
@@ -28,6 +28,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
             "value_columns": list,
         },
         "optional_parameters": {
+            "append_timecode": bool
         }
     }
 
@@ -39,13 +40,12 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:   
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
- 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
+
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
 
@@ -54,49 +54,61 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         self.summary_filename = parameters['summary_filename']
         self.skip_columns = parameters['skip_columns']
         self.value_columns = parameters['value_columns']
+        self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create factor columns corresponding to values in a specified column.
+        """ Extract a sidecar from events file.
 
         Parameters:
             dispatcher (Dispatcher): The dispatcher object for managing the operations.
             df (DataFrame): The tabular file to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like): Only needed for HED operations.
+            sidecar (Sidecar or file-like): Not needed for this operation.
 
         Returns:
-            DataFrame: A new DataFrame with the factor columns appended.
+            DataFrame: A copy of df.
 
         Side-effect:
-            Updates the context.
+            Updates the associated summary if applicable.
 
         """
 
-        summary = dispatcher.context_dict.get(self.summary_name, None)
+        df_new = df.copy()
+        summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
-            summary = EventsToSidecarSummaryContext(self)
-            dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name})
-        return df
+            summary = EventsToSidecarSummary(self)
+            dispatcher.summary_dicts[self.summary_name] = summary
+        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name})
+        return df_new
 
 
-class EventsToSidecarSummaryContext(BaseContext):
+class EventsToSidecarSummary(BaseSummary):
 
     def __init__(self, sum_op):
-        super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
+        super().__init__(sum_op)
         self.value_cols = sum_op.value_columns
         self.skip_cols = sum_op.skip_columns
 
-    def update_context(self, new_context):
-        tab_sum = TabularSummary(value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_context["name"])
-        tab_sum.update(new_context['df'], new_context['name'])
-        self.summary_dict[new_context["name"]] = tab_sum
+    def update_summary(self, new_info):
+        """ Update the summary for a given tabular input file.
 
-    def _get_summary_details(self, summary_info):
+        Parameters:
+            new_info (dict):  A dictionary with the parameters needed to update a summary.
+
+        Notes:
+            - The summary needs a "name" str and a "df".
+
+        """
+
+        tab_sum = TabularSummary(value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_info["name"])
+        tab_sum.update(new_info['df'], new_info['name'])
+        self.summary_dict[new_info["name"]] = tab_sum
+
+    def get_details_dict(self, summary_info):
         """ Return the summary-specific information.
 
         Parameters:
-            summary_info (Object):  Summary to return info from
+            summary_info (TabularSummary):  Summary to return info from
 
         Notes:
             Abstract method be implemented by each individual context summary.
@@ -107,20 +119,73 @@ class EventsToSidecarSummaryContext(BaseContext):
                 "total_events": summary_info.total_events, "skip_cols": summary_info.skip_cols,
                 "sidecar": summary_info.extract_sidecar_template()}
 
-    def _merge_all(self):
+    def merge_all_info(self):
         """ Merge summary information from all of the files
 
         Returns:
-           object:  Consolidated summary of information.
-
-        Notes:
-            Abstract method be implemented by each individual context summary.
+           TabularSummary:  Consolidated summary of information.
 
         """
-        return {}
 
-    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+        all_sum = TabularSummary(name='Dataset')
+        for key, tab_sum in self.summary_dict.items():
+            all_sum.update_summary(tab_sum)
+        return all_sum
+
+    def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
+        """ Return a formatted string with the summary for the indicated name.
+
+        Parameters:
+            name (str):  Identifier (usually the filename) of the individual file.
+            result (dict): The dictionary of the summary results indexed by name.
+            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+
+        Returns:
+            str - The results in a printable format ready to be saved to a text file.
+
+        Notes:
+            This calls _get_dataset_string to get the overall summary string and
+            _get_individual_string to get an individual summary string.
+
+        """
+
         if name == "Dataset":
-            return "Dataset: Currently no overall sidecar extraction is available"
-        json_str = f"\nSidecar:\n{json.dumps(result['sidecar'], indent=4)}"
-        return f"{name}: Total events={result['total_events']} Skip columns: {str(result['skip_cols'])}{json_str}"
+            return self._get_dataset_string(result, indent=indent)
+        return self._get_individual_string(result, indent=indent)
+
+    @staticmethod
+    def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
+        """ Return  a string with the overall summary for all of the tabular files.
+
+        Parameters:
+            result (dict): Dictionary of merged summary information.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
+        sum_list = [f"Dataset: Total events={result.get('total_events', 0)} "
+                    f"Total files={result.get('total_files', 0)}",
+                    f"Skip columns: {str(result.get('skip_cols', []))}",
+                    f"Value columns: {str(result.get('value_cols', []))}",
+                    f"Sidecar:\n{json.dumps(result['sidecar'], indent=indent)}"]
+        return "\n".join(sum_list)
+
+    @staticmethod
+    def _get_individual_string(result, indent=BaseSummary.DISPLAY_INDENT):
+        """ Return  a string with the summary for an individual tabular file.
+
+        Parameters:
+            result (dict): Dictionary of summary information for a particular tabular file.
+            indent (str):  String of blanks used as the amount to indent for readability.
+
+        Returns:
+            str: Formatted string suitable for saving in a file or printing.
+
+        """
+        sum_list = [f"Total events={result.get('total_events', 0)}",
+                    f"Skip columns: {str(result.get('skip_cols', []))}",
+                    f"Value columns: {str(result.get('value_cols', []))}",
+                    f"Sidecar:\n{json.dumps(result['sidecar'], indent=indent)}"]
+        return "\n".join(sum_list)

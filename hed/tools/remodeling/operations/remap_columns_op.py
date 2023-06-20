@@ -16,11 +16,11 @@ class RemapColumnsOp(BaseOp):
         - **ignore_missing** (*bool*): If True, entries whose key column values are not in map_list are ignored.   
 
     Optional remodeling parameters:   
-        **integer_sources** (*list*): Sour columns that should be treated as integers rather than strings.   
+        **integer_sources** (*list*): Source columns that should be treated as integers rather than strings.   
 
     Notes:
         Each list element list is of length m + n with the key columns followed by mapped columns. 
-         
+
     TODO: Allow wildcards
 
     """
@@ -44,20 +44,19 @@ class RemapColumnsOp(BaseOp):
             Parameters:
                 parameters (dict): Parameter values for required and optional parameters.
 
-            Raises:
-                KeyError   
-                    - If a required parameter is missing.    
-                    - If an unexpected parameter is provided.    
- 
-                TypeError   
-                    - If a parameter has the wrong type.   
+            :raises KeyError:
+                - If a required parameter is missing.
+                - If an unexpected parameter is provided.
 
-                ValueError   
-                    - If an integer column is not a key column.    
-                    - If a column designated as an integer source does not have valid integers.    
-                    - If no source columns are specified.    
-                    - If no destination columns are specified.    
-                    - If a map_list entry has the wrong number of items (source columns + destination columns).    
+            :raises TypeError:
+                - If a parameter has the wrong type.
+
+            :raises ValueError:
+                - If an integer column is not a key column.
+                - If a column designated as an integer source does not have valid integers.
+                - If no source columns are specified.
+                - If no destination columns are specified.
+                - If a map_list entry has the wrong number of items (source columns + destination columns).
 
           """
         super().__init__(self.PARAMS, parameters)
@@ -101,22 +100,22 @@ class RemapColumnsOp(BaseOp):
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like): Only needed for HED operations.
+            sidecar (Sidecar or file-like): Not needed for this operation.
 
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-            ValueError   
-                - If ignore_missing is false and source values from the data are not in the map.   
+        :raises ValueError:
+            - If ignore_missing is false and source values from the data are not in the map.
 
         """
-        df[self.source_columns] = df[self.source_columns].replace(np.NaN, 'n/a')
+        df1 = df.copy()
+        df1[self.source_columns] = df1[self.source_columns].replace(np.NaN, 'n/a')
         for column in self.integer_sources:
-            int_mask = df[column] != 'n/a'
-            df.loc[int_mask, column] = df.loc[int_mask, column].astype(int)
-        df[self.source_columns] = df[self.source_columns].astype(str)
-        df_new, missing = self.key_map.remap(df)
+            int_mask = df1[column] != 'n/a'
+            df1.loc[int_mask, column] = df1.loc[int_mask, column].astype(int)
+        df1[self.source_columns] = df1[self.source_columns].astype(str)
+        df_new, missing = self.key_map.remap(df1)
         if missing and not self.ignore_missing:
             raise ValueError("MapSourceValueMissing",
                              f"{name}: Ignore missing is false, but source values [{missing}] are in data but not map")

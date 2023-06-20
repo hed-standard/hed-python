@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from hed.errors import HedFileError
+from hed.errors import HedFileError, get_printable_issue_string
 from hed.models import HedString, HedTag
 from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup, load_schema_version, HedSchema
 
@@ -20,18 +20,17 @@ class TestHedSchema(unittest.TestCase):
         schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
         hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
         hed_schema1 = load_schema(hed_xml)
-        hed_schema2 = load_schema(hed_xml, schema_prefix="tl:")
+        hed_schema2 = load_schema(hed_xml, schema_namespace="tl:")
         cls.hed_schema_group = HedSchemaGroup([hed_schema1, hed_schema2])
 
     def test_name(self):
         invalid_xml_file = "invalidxmlfile.xml"
-        name = "PrettyDisplayName.xml"
         try:
             load_schema(invalid_xml_file)
             # We should have an error before we reach here.
             self.assertTrue(False)
         except HedFileError as e:
-            self.assertTrue(name in e.format_error_message(return_string_only=True, name=name))
+            self.assertTrue(invalid_xml_file in get_printable_issue_string(e.issues, skip_filename=False))
 
     def test_tag_attribute(self):
         test_strings = {
@@ -157,19 +156,19 @@ class TestHedSchema(unittest.TestCase):
         self.assertFalse(schema.get_tag_entry("sc:Event"))
         self.assertFalse(schema.get_tag_entry("unknown:Event"))
         self.assertFalse(schema.get_tag_entry(":Event"))
-        self.assertFalse(schema.get_tag_entry("Event", schema_prefix=None))
-        self.assertTrue(schema.get_tag_entry("Event", schema_prefix=''))
-        self.assertFalse(schema.get_tag_entry("Event", schema_prefix='unknown'))
+        self.assertFalse(schema.get_tag_entry("Event", schema_namespace=None))
+        self.assertTrue(schema.get_tag_entry("Event", schema_namespace=''))
+        self.assertFalse(schema.get_tag_entry("Event", schema_namespace='unknown'))
 
     def test_bad_prefixes_library(self):
         schema = load_schema_version(xml_version="tl:8.0.0")
 
-        self.assertTrue(schema.get_tag_entry("tl:Event", schema_prefix="tl:"))
-        self.assertFalse(schema.get_tag_entry("sc:Event", schema_prefix="tl:"))
-        self.assertTrue(schema.get_tag_entry("Event", schema_prefix="tl:"))
-        self.assertFalse(schema.get_tag_entry("unknown:Event", schema_prefix="tl:"))
-        self.assertFalse(schema.get_tag_entry(":Event", schema_prefix="tl:"))
-        self.assertFalse(schema.get_tag_entry("Event", schema_prefix=None))
-        self.assertFalse(schema.get_tag_entry("Event", schema_prefix=''))
-        self.assertFalse(schema.get_tag_entry("Event", schema_prefix='unknown'))
+        self.assertTrue(schema.get_tag_entry("tl:Event", schema_namespace="tl:"))
+        self.assertFalse(schema.get_tag_entry("sc:Event", schema_namespace="tl:"))
+        self.assertTrue(schema.get_tag_entry("Event", schema_namespace="tl:"))
+        self.assertFalse(schema.get_tag_entry("unknown:Event", schema_namespace="tl:"))
+        self.assertFalse(schema.get_tag_entry(":Event", schema_namespace="tl:"))
+        self.assertFalse(schema.get_tag_entry("Event", schema_namespace=None))
+        self.assertFalse(schema.get_tag_entry("Event", schema_namespace=''))
+        self.assertFalse(schema.get_tag_entry("Event", schema_namespace='unknown'))
 

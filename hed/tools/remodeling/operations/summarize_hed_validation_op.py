@@ -5,8 +5,7 @@ from hed.errors import ErrorSeverity, ErrorHandler
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.remodeling.operations.base_context import BaseContext
-from hed.validator import HedValidator
+from hed.tools.remodeling.operations.base_summary import BaseSummary
 
 
 class SummarizeHedValidationOp(BaseOp):
@@ -25,10 +24,11 @@ class SummarizeHedValidationOp(BaseOp):
         "operation": "summarize_hed_validation",
         "required_parameters": {
             "summary_name": str,
-            "summary_filename": str,
-            "check_for_warnings": bool
+            "summary_filename": str
         },
         "optional_parameters": {
+            "append_timecode": bool,
+            "check_for_warnings": bool
         }
     }
 
@@ -40,19 +40,19 @@ class SummarizeHedValidationOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:  
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
- 
+        :raises TypeError:
+            - If a parameter has the wrong type.
+
         """
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
-        self.check_for_warnings = parameters['check_for_warnings']
+        self.append_timecode = parameters.get('append_timecode', False)
+        self.check_for_warnings = parameters.get('check_for_warnings', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Validate the dataframe with the accompanying sidecar, if any.
@@ -64,28 +64,43 @@ class SummarizeHedValidationOp(BaseOp):
             sidecar (Sidecar or file-like): Usually needed unless only HED tags in HED column of event file.
 
         Returns:
-            DataFrame: Input DataFrame, unchanged.
+            DataFrame: A copy of df
 
         Side-effect:
-            Updates the context.
+            Updates the relevant summary.
 
         """
-        summary = dispatcher.context_dict.get(self.summary_name, None)
+        df_new = df.copy()
+        summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
-            summary = HedValidationSummaryContext(self)
-            dispatcher.context_dict[self.summary_name] = summary
-        summary.update_context({'df': dispatcher.post_proc_data(df), 'name': name,
+            summary = HedValidationSummary(self)
+            dispatcher.summary_dicts[self.summary_name] = summary
+        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
-        return df
+        return df_new
 
 
-class HedValidationSummaryContext(BaseContext):
+class HedValidationSummary(BaseSummary):
 
     def __init__(self, sum_op):
-        super().__init__(sum_op.SUMMARY_TYPE, sum_op.summary_name, sum_op.summary_filename)
+        super().__init__(sum_op)
         self.check_for_warnings = sum_op.check_for_warnings
 
-    def _get_result_string(self, name, result, indent=BaseContext.DISPLAY_INDENT):
+    def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
+        """ Return a formatted string with the summary for the indicated name.
+
+        Parameters:
+            name (str):  Identifier (usually the filename) of the individual file.
+            result (dict): The dictionary of the summary results indexed by name.
+            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+
+        Returns:
+            str - The results in a printable format ready to be saved to a text file.
+
+        Notes:
+            This gets the error list from "sidecar_issues" and "event_issues".
+
+        """
 
         if result["is_merged"]:
             sum_list = [f"{name}: [{result['total_sidecar_files']} sidecar files, "
@@ -101,19 +116,27 @@ class HedValidationSummaryContext(BaseContext):
                 sum_list = sum_list + [f"{indent*2}Event file validation was incomplete because of sidecar errors"]
         return "\n".join(sum_list)
 
-    def update_context(self, new_context):
-        validator = HedValidator(hed_schema=new_context['schema'])
+    def update_summary(self, new_info):
+        """ Update the summary for a given tabular input file.
+
+        Parameters:
+            new_info (dict):  A dictionary with the parameters needed to update a summary.
+
+        Notes:
+            - The summary needs a "name" str, a schema, a "df", and a "Sidecar".
+        """
+
         results = self.get_empty_results()
         results["total_event_files"] = 1
-        results["event_issues"][new_context["name"]] = []
-        self.summary_dict[new_context["name"]] = results
-        sidecar = new_context.get('sidecar', None)
+        results["event_issues"][new_info["name"]] = []
+        self.summary_dict[new_info["name"]] = results
+        sidecar = new_info.get('sidecar', None)
         filtered_issues = []
         if sidecar:
             if not isinstance(sidecar, Sidecar):
-                sidecar = Sidecar(files=new_context['sidecar'], name=os.path.basename(sidecar))
+                sidecar = Sidecar(files=new_info['sidecar'], name=os.path.basename(sidecar))
             results["sidecar_issues"][sidecar.name] = []
-            sidecar_issues = sidecar.validate_entries(validator, check_for_warnings=self.check_for_warnings)
+            sidecar_issues = sidecar.validate(new_info['schema'])
             filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
             if not self.check_for_warnings:
                 sidecar_issues = filtered_issues
@@ -122,24 +145,30 @@ class HedValidationSummaryContext(BaseContext):
             results['total_sidecar_files'] = 1
         if not filtered_issues:
             results['validation_completed'] = True
-            input_data = TabularInput(new_context['df'], hed_schema=new_context['schema'],  sidecar=sidecar)
-            issues = input_data.validate_file(validator, check_for_warnings=self.check_for_warnings)
+            input_data = TabularInput(new_info['df'], sidecar=sidecar)
+            issues = input_data.validate(new_info['schema'])
             if not self.check_for_warnings:
                 issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-            results['event_issues'][new_context["name"]] = issues
+            results['event_issues'][new_info["name"]] = issues
             results['total_event_issues'] = len(issues)
 
-    def _get_summary_details(self, summary_info):
-        return summary_info
+    def get_details_dict(self, summary_info):
+        """Return the summary details from the summary_info.
 
-    def _merge_all(self):
-        """ Return merged information.
+        Parameters:
+            summary_info (dict): Dictionary of issues
 
         Returns:
-           object:  Consolidated summary of information.
+            dict:  Same summary_info as was passed in.
 
-        Notes:
-            Abstract method be implemented by each individual context summary.
+        """
+        return summary_info
+
+    def merge_all_info(self):
+        """ Create a dictionary containing all of the errors in the dataset.
+
+        Returns:
+            dict - dictionary of issues organized into sidecar_issues and event_issues.
 
         """
 
@@ -167,7 +196,7 @@ class HedValidationSummaryContext(BaseContext):
                 "validation_completed": False}
 
     @staticmethod
-    def get_error_list(error_dict, count_only=False, indent=BaseContext.DISPLAY_INDENT):
+    def get_error_list(error_dict, count_only=False, indent=BaseSummary.DISPLAY_INDENT):
         error_list = []
         for key, item in error_dict.items():
             if count_only and isinstance(item, list):
@@ -179,7 +208,7 @@ class HedValidationSummaryContext(BaseContext):
             else:
                 error_list.append(f"{indent}{key} issues:")
                 for this_item in item:
-                    error_list.append(f"{indent*2}{HedValidationSummaryContext.format_error(this_item)}")
+                    error_list.append(f"{indent*2}{HedValidationSummary.format_error(this_item)}")
         return error_list
 
     @staticmethod
@@ -190,11 +219,11 @@ class HedValidationSummaryContext(BaseContext):
     def format_error(error):
         error_str = error['code']
         error_locations = []
-        HedValidationSummaryContext.update_error_location(error_locations, "row", "ec_row", error)
-        HedValidationSummaryContext.update_error_location(error_locations, "column", "ec_column", error)
-        HedValidationSummaryContext.update_error_location(error_locations, "sidecar column",
-                                                          "ec_sidecarColumnName", error)
-        HedValidationSummaryContext.update_error_location(error_locations, "sidecar key", "ec_sidecarKeyName", error)
+        HedValidationSummary.update_error_location(error_locations, "row", "ec_row", error)
+        HedValidationSummary.update_error_location(error_locations, "column", "ec_column", error)
+        HedValidationSummary.update_error_location(error_locations, "sidecar column",
+                                                   "ec_sidecarColumnName", error)
+        HedValidationSummary.update_error_location(error_locations, "sidecar key", "ec_sidecarKeyName", error)
         location_str = ",".join(error_locations)
         if location_str:
             error_str = error_str + f"[{location_str}]"

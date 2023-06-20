@@ -26,10 +26,9 @@ class Test(unittest.TestCase):
         cls.semantic_version_two = '1.2.4'
         cls.semantic_version_three = '1.2.5'
         cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5']
-        cls.specific_base_url = "https://api.github.com/repos/hed-standard/hed-specification/contents/hedxml"
+        cls.specific_base_url = "https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml"
+        cls.specific_hed_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/master/standard_schema/hedxml/HED8.0.0.xml"
         try:
-            cls.specific_hed_url = \
-                """https://raw.githubusercontent.com/hed-standard/hed-specification/master/hedxml/HED8.0.0.xml"""
             hed_cache.cache_xml_versions(cache_folder=cls.hed_cache_dir)
         except urllib.error.HTTPError as e:
             schema.set_cache_directory(cls.saved_cache_folder)
@@ -85,7 +84,7 @@ class Test(unittest.TestCase):
     def test_get_hed_versions_all(self):
         cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, get_libraries=True)
         self.assertIsInstance(cached_versions, dict)
-        self.assertTrue(len(cached_versions) > 0)
+        self.assertTrue(len(cached_versions) > 1)
 
     def test_get_hed_versions(self):
         cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir)
@@ -116,7 +115,10 @@ class Test(unittest.TestCase):
 class TestLocal(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../schema_cache_test_local/')
+        hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../schema_cache_test_local/')
+        if os.path.exists(hed_cache_dir) and os.path.isdir(hed_cache_dir):
+            shutil.rmtree(hed_cache_dir)
+        cls.hed_cache_dir = hed_cache_dir
         cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
         schema.set_cache_directory(cls.hed_cache_dir)
 

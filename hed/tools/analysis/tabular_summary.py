@@ -113,6 +113,7 @@ class TabularSummary:
 
         Parameters:
             data (DataFrame, str, or list):    DataFrame containing data to update.
+            name (str): Name of the summary
 
         """
 

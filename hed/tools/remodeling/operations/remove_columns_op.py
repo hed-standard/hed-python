@@ -26,13 +26,12 @@ class RemoveColumnsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
-        Raises:
-            KeyError
-                - If a required parameter is missing.    
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -50,20 +49,20 @@ class RemoveColumnsOp(BaseOp):
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like):  Only needed for HED operations.
+            sidecar (Sidecar or file-like):  Not needed for this operation.
 
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-            KeyError   
-                - If ignore_missing is False and a column not in the data is to be removed.   
+        :raises KeyError:
+            - If ignore_missing is False and a column not in the data is to be removed.
 
         """
-
+        df_new = df.copy()
         try:
-            return df.drop(self.column_names, axis=1, errors=self.error_handling)
+            return df_new.drop(self.column_names, axis=1, errors=self.error_handling)
         except KeyError:
             raise KeyError("MissingColumnCannotBeRemoved",
                            f"{name}: Ignore missing is False but a column in {str(self.column_names)} is "
-                           f"not in the data columns [{str(df.columns)}]")
+                           f"not in the data columns [{str(df_new.columns)}]")
+        return df_new

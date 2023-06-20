@@ -5,8 +5,8 @@ class HedTypeCount:
     """ Keeps a summary of one value of one type of variable.
 
     Parameters:
-        type_value (str)  The value of the variable to be counted
-        type_tag (str)   The type of variable.
+        type_value (str):  The value of the variable to be counted
+        type_tag (str):   The type of variable.
 
     Examples:
         HedTypeCounts('SymmetricCond', 'condition-variable') keeps counts of Condition-variable/Symmetric

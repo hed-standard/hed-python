@@ -8,13 +8,13 @@ from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_io import get_schema
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
-from hed.tools.util.io_util import generate_filename, extract_suffix_path, get_timestamp
+from hed.tools.util.io_util import clean_filename, extract_suffix_path, get_timestamp
 
 
 class Dispatcher:
     """ Controller for applying operations to tabular files and saving the results. """
 
-    REMODELING_SUMMARY_PATH = 'derivatives/remodel/summaries'
+    REMODELING_SUMMARY_PATH = 'remodel/summaries'
 
     def __init__(self, operation_list, data_root=None,
                  backup_name=BackupManager.DEFAULT_BACKUP_NAME, hed_versions=None):
@@ -25,12 +25,12 @@ class Dispatcher:
             data_root (str or None):  Root directory for the dataset. If none, then backups are not made.
             hed_versions (str, list, HedSchema, or HedSchemaGroup): The HED schema.
 
-        Raises:
-            HedFileError
-                - If the specified backup does not exist.
+        :raises HedFileError:
+            - If the specified backup does not exist.
 
-            - ValueError:
-                - If any of the operations cannot be parsed correctly.
+        :raises ValueError:
+            - If any of the operations cannot be parsed correctly.
+
         """
         self.data_root = data_root
         self.backup_name = backup_name
@@ -47,7 +47,7 @@ class Dispatcher:
             raise ValueError("InvalidOperationList", f"{these_errors}")
         self.parsed_ops = op_list
         self.hed_schema = get_schema(hed_versions)
-        self.context_dict = {}
+        self.summary_dicts = {}
 
     def get_summaries(self, file_formats=['.txt', '.json']):
         """ Return the summaries in a dictionary of strings suitable for saving or archiving.
@@ -62,11 +62,11 @@ class Dispatcher:
 
         summary_list = []
         time_stamp = '_' + get_timestamp()
-        for context_name, context_item in self.context_dict.items():
-            file_base = context_item.context_filename
+        for context_name, context_item in self.summary_dicts.items():
+            file_base = context_item.op.summary_filename
             if self.data_root:
                 file_base = extract_suffix_path(self.data_root, file_base)
-            file_base = generate_filename(file_base)
+            file_base = clean_filename(file_base)
             for file_format in file_formats:
                 if file_format == '.txt':
                     summary = context_item.get_text_summary(individual_summaries="consolidated")
@@ -89,16 +89,16 @@ class Dispatcher:
         Returns:
             DataFrame:  DataFrame after reading the path.
 
-        Raises:
-            HedFileError:  If a valid file cannot be found.
+        :raises HedFileError:
+            - If a valid file cannot be found.
 
-        Note:
-        - If a string is passed and there is a backup manager,
-          the string must correspond to the full path of the file in the original dataset.
-          In this case, the corresponding backup file is read and returned.
-        - If a string is passed and there is no backup manager,
-          the data file corresponding to the file_designator is read and returned.
-        - If a Pandas DataFrame is passed, a copy is returned.
+        Notes:  
+            - If a string is passed and there is a backup manager,
+              the string must correspond to the full path of the file in the original dataset.
+              In this case, the corresponding backup file is read and returned.    
+            - If a string is passed and there is no backup manager,
+              the data file corresponding to the file_designator is read and returned.    
+            - If a Pandas DataFrame is passed, a copy is returned.    
 
         """
         if isinstance(file_designator, pd.DataFrame):
@@ -121,13 +121,13 @@ class Dispatcher:
         Returns:
             str: the data_root + remodeling summary path
 
-        Raises:
-            HedFileError  if this dispatcher does not have a data_root.
+        :raises HedFileError:
+            - If this dispatcher does not have a data_root.
 
         """
 
         if self.data_root:
-            return os.path.realpath(os.path.join(self.data_root, Dispatcher.REMODELING_SUMMARY_PATH))
+            return os.path.realpath(os.path.join(self.data_root, 'derivatives', Dispatcher.REMODELING_SUMMARY_PATH))
         raise HedFileError("NoDataRoot", f"Dispatcher must have a data root to produce directories", "")
 
     def run_operations(self, file_path, sidecar=None, verbose=False):
@@ -159,9 +159,10 @@ class Dispatcher:
         Parameters:
             save_formats (list):  A list of formats [".txt", ."json"]
             individual_summaries (str): If True, include summaries of individual files.
-            summary_dir (str or None): Directory for saving summaries
+            summary_dir (str or None): Directory for saving summaries.
 
-        The summaries are saved in the dataset derivatives/remodeling folder if no save_dir is provided.
+        Notes:
+            The summaries are saved in the dataset derivatives/remodeling folder if no save_dir is provided.
 
         """
         if not save_formats:
@@ -169,7 +170,7 @@ class Dispatcher:
         if not summary_dir:
             summary_dir = self.get_summary_save_dir()
         os.makedirs(summary_dir, exist_ok=True)
-        for context_name, context_item in self.context_dict.items():
+        for context_name, context_item in self.summary_dicts.items():
             context_item.save(summary_dir, save_formats, individual_summaries=individual_summaries)
 
     @staticmethod
@@ -202,7 +203,7 @@ class Dispatcher:
 
     @staticmethod
     def prep_data(df):
-        """ Replace all n/a entries in the data frame by np.NaN for processing.
+        """ Make a copy and replace all n/a entries in the data frame by np.NaN for processing.
 
         Parameters:
             df (DataFrame) - The DataFrame to be processed.
@@ -221,6 +222,10 @@ class Dispatcher:
             DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'
 
         """
+        dtypes = df.dtypes.to_dict()
+        for col_name, typ in dtypes.items():
+            if typ == 'category':
+                df[col_name] = df[col_name].astype(str)
         return df.fillna('n/a')
 
     @staticmethod

@@ -1,10 +1,9 @@
 """ Implementation in progress. """
-import numpy as np
-from hed.tools.remodeling.operations.base_op import BaseOp
-from hed.tools.util.data_util import get_indices, tuple_to_range
-import itertools
 
-#TODO: This class is under development
+from hed.tools.remodeling.operations.base_op import BaseOp
+
+
+# TODO: This class is under development
 
 
 class NumberGroupsOp(BaseOp):
@@ -35,7 +34,8 @@ class NumberGroupsOp(BaseOp):
             required_missing = required.difference(set(param_to_test.keys()))
             if required_missing:
                 raise KeyError("MissingRequiredParameters",
-                               f"Specified {param_to_test} for number_rows requires parameters {list(required_missing)}")
+                               f"Specified {param_to_test} for number_rows requires parameters"
+                               f"{list(required_missing)}")
             for param_name, param_value in param_to_test.items():
                 param_type = str
                 if param_name in required:
@@ -93,14 +93,14 @@ class NumberGroupsOp(BaseOp):
                              f"Start value(s) {missing} does not exist in {self.source_column} of event file {name}")
 
         df_new = df.copy()
-        # create number column
-        df_new[self.number_column_name] = np.nan
-
-        # find group indices
-        indices = tuple_to_range(
-            get_indices(df, self.source_column, self.start['values'], self.stop['values']),
-            [self.start['inclusion'], self.stop['inclusion']])
-        for i, group in enumerate(indices):
-            df_new.loc[group, self.number_column_name] = i + 1
+        # # create number column
+        # df_new[self.number_column_name] = np.nan
+        #
+        # # find group indices
+        # indices = tuple_to_range(
+        #     get_indices(df, self.source_column, self.start['values'], self.stop['values']),
+        #     [self.start['inclusion'], self.stop['inclusion']])
+        # for i, group in enumerate(indices):
+        #     df_new.loc[group, self.number_column_name] = i + 1
 
         return df_new

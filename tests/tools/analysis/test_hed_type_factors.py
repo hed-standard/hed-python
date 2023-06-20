@@ -10,7 +10,7 @@ from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.analysis.hed_type_values import HedTypeValues
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.models.df_util import get_assembled
 
 
 class Test(unittest.TestCase):
@@ -59,6 +59,7 @@ class Test(unittest.TestCase):
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
+        cls.sidecar1 = sidecar1
         cls.schema = schema
 
     def test_with_mixed(self):
@@ -73,9 +74,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(summary1, dict)
 
     def test_tabular_input(self):
-        test_strings1 = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema), definitions, 'run-01')
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
+        var_manager = HedTypeValues(HedContextManager(hed_strings, self.schema), definitions, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from a tabular input")
         var_fact = var_manager.get_type_value_factors('face-type')
@@ -154,8 +155,8 @@ class Test(unittest.TestCase):
         self.assertIsNone(max_multiple2, "_count_level_events should not have a max multiple for empty list")
 
     def test_get_summary(self):
-        hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-        definitions = self.input_data.get_definitions(as_strings=False).gathered_defs
+        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
+                                                 join_columns=True, shrink_defs=True, expand_defs=False)
         var_manager = HedTypeValues(HedContextManager(hed_strings, self.schema), definitions, 'run-01')
         var_key = var_manager.get_type_value_factors('key-assignment')
         sum_key = var_key.get_summary()

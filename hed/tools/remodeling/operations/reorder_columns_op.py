@@ -28,13 +28,12 @@ class ReorderColumnsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        Raises:
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError  
-                If a parameter has the wrong type.  
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -49,27 +48,26 @@ class ReorderColumnsOp(BaseOp):
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame):  The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like):   Only needed for HED operations.
+            sidecar (Sidecar or file-like):  Not needed for this operation.
 
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-            ValueError   
-                - When ignore_missing is false and column_order has columns not in the data.   
+        :raises ValueError:
+            - When ignore_missing is false and column_order has columns not in the data.
 
         """
-
-        current_columns = list(df.columns)
-        missing_columns = set(self.column_order).difference(set(df.columns))
+        df_new = df.copy()
+        current_columns = list(df_new.columns)
+        missing_columns = set(self.column_order).difference(set(df_new.columns))
         ordered = self.column_order
         if missing_columns and not self.ignore_missing:
             raise ValueError("MissingReorderedColumns",
                              f"{str(missing_columns)} are not in dataframe columns "
-                             f" [{str(df.columns)}] and not ignored.")
+                             f" [{str(df_new.columns)}] and not ignored.")
         elif missing_columns:
             ordered = [elem for elem in self.column_order if elem not in list(missing_columns)]
         if self.keep_others:
             ordered += [elem for elem in current_columns if elem not in ordered]
-        df = df.loc[:, ordered]
-        return df
+        df_new = df_new.loc[:, ordered]
+        return df_new

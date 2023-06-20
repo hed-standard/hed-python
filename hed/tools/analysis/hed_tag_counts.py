@@ -1,11 +1,11 @@
-""" Keeps the counts of HED tags in a file's annotations. """
+""" Counts of HED tags in a file's annotations. """
 
 import copy
 
 
 class HedTagCount:
     def __init__(self, hed_tag, file_name):
-        """ Keeps the counts for a particular HedTag.
+        """ Counts for a particular HedTag in particular file.
 
         Parameters:
             hed_tag (HedTag):  The HedTag to keep track of.
@@ -21,9 +21,15 @@ class HedTagCount:
         self.set_value(hed_tag)
 
     def set_value(self, hed_tag):
+        """ Update the tag term value counts for a HedTag. 
+        
+        Parameters:
+            hed_tag (HedTag or None):  Item to use to update the value counts. 
+        
+        """
         if not hed_tag:
             return
-        value = hed_tag.extension_or_value_portion
+        value = hed_tag.extension
         if not value:
             value = None
         if value in self.value_dict:
@@ -39,6 +45,12 @@ class HedTagCount:
         return {'tag': self.tag, 'events': self.events, 'files': files}
     
     def get_summary(self):
+        """ Return a dictionary summary of the events and files for this tag.
+        
+        Returns:
+            dict:  dictionary summary of events and files that contain this tag.
+        
+        """
         return {'tag': self.tag, 'events': self.events, 'files': [name for name in self.files]}
 
     def get_empty(self):
@@ -50,7 +62,11 @@ class HedTagCount:
 
 
 class HedTagCounts:
-    """ Keeps a summary of tag counts for a tabular file.
+    """ Counts of HED tags for a tabular file.
+    
+    Parameters:
+        name (str):  An identifier for these counts (usually the filename of the tabular file)
+        total_events (int):  The total number of events in the tabular file.
 
 
     """
@@ -61,7 +77,15 @@ class HedTagCounts:
         self.files = {}
         self.total_events = total_events
      
-    def update_event_counts(self, hed_string_obj, file_name):
+    def update_event_counts(self, hed_string_obj, file_name, definitions=None):
+        """ Update the tag counts based on a hed string object. 
+        
+        Parameters:
+            hed_string_obj (HedString): The HED string whose tags should be counted.
+            file_name (str): The name of the file corresponding to these counts.
+            definitions (dict): The definitions associated with the HED string.
+            
+        """
         if file_name not in self.files:
             self.files[file_name] = ""
         tag_list = hed_string_obj.get_all_tags()

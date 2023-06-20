@@ -1,11 +1,14 @@
+import os
+import shutil
 
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema import hed_schema_constants as constants
 from hed.schema.schema_io import schema_util
 from hed.schema.schema_io.schema2xml import HedSchema2XML
 from hed.schema.schema_io.schema2wiki import HedSchema2Wiki
 
 from hed.schema import schema_validation_util
-from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection
+from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 
@@ -20,38 +23,19 @@ class HedSchema:
         """
         self._has_duplicate_tags = False
         self.header_attributes = {}
-        self._filename = None
+        self.filename = None
         self.prologue = ""
         self.epilogue = ""
 
         self._is_hed3_schema = None
-        # This is the specified library name_prefix - tags will be {schema_prefix}:{tag_name}
-        self._schema_prefix = ""
+        # This is the specified library name_prefix - tags will be {schema_namespace}:{tag_name}
+        self._namespace = ""
 
         self._sections = self._create_empty_sections()
 
     # ===============================================
     # Basic schema properties
     # ===============================================
-    @property
-    def filename(self):
-        """ The filename if one is known.
-
-        Returns:
-            str: The filename of this schema.
-        """
-        return self._filename
-
-    @filename.setter
-    def filename(self, value):
-        """ Set the filename, if one has not already been set.
-
-        Parameters:
-            value (str): The source filename for this file
-        """
-        if self._filename is None:
-            self._filename = value
-
     @property
     def version(self):
         """ The HED version of this schema.
@@ -62,33 +46,71 @@ class HedSchema:
         """
         return self.header_attributes['version']
 
-    def get_formatted_version(self, as_string=True):
-        """ The HED version string including prefix and library name if any of this schema.
+    def get_formatted_version(self, as_string=False):
+        """ The HED version string including namespace and library name if any of this schema.
 
         Returns:
-            str: The complete version of this schema including library name and prefix.
+            str: The complete version of this schema including library name and namespace.
 
         """
-        library = self.header_attributes.get('library', '')
+        library = self.library
         if library:
             library = library + '_'
-        return self._schema_prefix + library + self.header_attributes.get('version', '')
+        return self._namespace + library + self.version
 
     @property
     def library(self):
         """ The name of this library schema if one exists.
 
         Returns:
-            str or None: Library name if any.
+            str: Library name if any.
 
         """
-        return self.header_attributes.get('library')
+        return self.header_attributes.get(constants.LIBRARY_ATTRIBUTE, "")
 
-    def schema_for_prefix(self, prefix):
-        """ Return HedSchema object for this prefix.
+    @property
+    def with_standard(self):
+        """ The version of the base schema this is extended from, if it exists..
+
+        Returns:
+            str: HED version or ""
+
+        """
+        return self.header_attributes.get(constants.WITH_STANDARD_ATTRIBUTE, "")
+
+    @property
+    def merged(self):
+        """ Returns if this schema was loaded from a merged file
+
+        Returns:
+            bool: True if file was loaded from a merged file
+
+
+        """
+        return not self.header_attributes.get(constants.UNMERGED_ATTRIBUTE, "")
+
+    def get_save_header_attributes(self, save_merged=False):
+        """ returns the attributes that should be saved.
+
+        """
+        sort_to_start = "!!!!!!!!!!!!!!"
+        header_attributes = dict(sorted(self.header_attributes.items(),
+                                        key=lambda x: sort_to_start if x[0] == constants.VERSION_ATTRIBUTE else x[0],
+                                        reverse=False))
+        if save_merged:
+            header_attributes.pop(constants.UNMERGED_ATTRIBUTE, None)
+        else:
+            # make sure it's the last attribute(just to make sure it's in an order)
+            header_attributes.pop(constants.UNMERGED_ATTRIBUTE, None)
+            header_attributes[constants.UNMERGED_ATTRIBUTE] = "True"
+
+        return header_attributes
+
+    def schema_for_namespace(self, namespace):
+        """ Return HedSchema object for this namespace.
 
         Parameters:
-            prefix (str): The schema library name prefix.
+            namespace (str): The schema library name namespace.
 
         Returns:
             HedSchema: The HED schema object for this schema.
@@ -97,7 +119,7 @@ class HedSchema:
             -This is mostly a placeholder for HedSchemaGroup and may be refactored out later.
 
         """
-        if self._schema_prefix != prefix:
+        if self._namespace != namespace:
             return None
         return self
 
@@ -111,68 +133,98 @@ class HedSchema:
         Notes:
             - The return value is always length 1 if using a HedSchema.
         """
-        return [self._schema_prefix]
+        return [self._namespace]
 
     # ===============================================
     # Creation and saving functions
     # ===============================================
-    def get_as_mediawiki_string(self):
+    def get_as_mediawiki_string(self, save_merged=False):
         """ Return the schema to a mediawiki string.
+
+        Parameters:
+            save_merged (bool): If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+                                If it is not a "withStandard" schema, this setting has no effect.
 
         Returns:
             str:  The schema as a string in mediawiki format.
 
         """
         schema2wiki = HedSchema2Wiki()
-        output_strings = schema2wiki.process_schema(self)
+        output_strings = schema2wiki.process_schema(self, save_merged)
         return '\n'.join(output_strings)
 
-    def get_as_xml_string(self):
+    def get_as_xml_string(self, save_merged=True):
         """ Return the schema to an XML string.
 
+        Parameters:
+            save_merged (bool):
+            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
         Returns:
             str: Return the schema as an XML string.
 
         """
         schema2xml = HedSchema2XML()
-        xml_tree = schema2xml.process_schema(self)
+        xml_tree = schema2xml.process_schema(self, save_merged)
         return schema_util._xml_element_2_str(xml_tree)
 
-    def save_as_xml(self):
-        """ Save as XML to a temporary file.
-
-        Returns:
-            str: The name of the newly created schema file.
-
-        """
-        schema2xml = HedSchema2XML()
-        xml_tree = schema2xml.process_schema(self)
-        local_xml_file = schema_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
-        return local_xml_file
-
-    def save_as_mediawiki(self):
+    def save_as_mediawiki(self, filename=None, save_merged=False):
         """ Save as mediawiki to a temporary file.
+
+        filename: str
+            If present, move the resulting file to this location.
+        save_merged: bool
+            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
 
         Returns:
             str:    The newly created schema filename.
-
         """
         schema2wiki = HedSchema2Wiki()
-        output_strings = schema2wiki.process_schema(self)
+        output_strings = schema2wiki.process_schema(self, save_merged)
         local_wiki_file = schema_util.write_strings_to_file(output_strings, ".mediawiki")
+        if filename:
+            directory = os.path.dirname(filename)
+            if directory and not os.path.exists(directory):
+                os.makedirs(directory)
+            shutil.move(local_wiki_file, filename)
+            return filename
         return local_wiki_file
 
-    def set_schema_prefix(self, schema_prefix):
-        """ Set library prefix associated for this schema.
+    def save_as_xml(self, filename=None, save_merged=True):
+        """ Save as XML to a temporary file.
+
+        filename: str
+            If present, move the resulting file to this location.
+        save_merged: bool
+            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
+
+        Returns:
+            str: The name of the newly created schema file.
+        """
+        schema2xml = HedSchema2XML()
+        xml_tree = schema2xml.process_schema(self, save_merged)
+        local_xml_file = schema_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
+        if filename:
+            directory = os.path.dirname(filename)
+            if directory and not os.path.exists(directory):
+                os.makedirs(directory)
+            shutil.move(local_xml_file, filename)
+            return filename
+        return local_xml_file
+
+    def set_schema_prefix(self, schema_namespace):
+        """ Set library namespace associated for this schema.
 
         Parameters:
-            schema_prefix (str): Should be empty, or end with a colon.(Colon will be automated added if missing).
+            schema_namespace (str): Should be empty, or end with a colon.(Colon will be automated added if missing).
 
         """
-        if schema_prefix and schema_prefix[-1] != ":":
-            schema_prefix += ":"
+        if schema_namespace and schema_namespace[-1] != ":":
+            schema_namespace += ":"
 
-        self._schema_prefix = schema_prefix
+        self._namespace = schema_namespace
 
     def check_compliance(self, check_for_warnings=True, name=None, error_handler=None):
         """ Check for HED3 compliance of this schema.
@@ -202,7 +254,7 @@ class HedSchema:
 
         Notes:
             - The returned dictionary has the short-form tags as keys and lists
-            of long tags sharing the short form as the values.
+              of long tags sharing the short form as the values.
 
         """
         return self.all_tags.duplicate_names
@@ -261,6 +313,26 @@ class HedSchema:
         return self._sections[HedSectionKey.ValueClasses]
 
     @property
+    def attributes(self):
+        """ Return the attributes schema section.
+
+        Returns:
+            HedSchemaSection: The attributes section.
+
+        """
+        return self._sections[HedSectionKey.Attributes]
+
+    @property
+    def properties(self):
+        """ Return the properties schema section.
+
+        Returns:
+            HedSchemaSection: The properties section.
+
+        """
+        return self._sections[HedSectionKey.Properties]
+
+    @property
     def is_hed3_schema(self):
         """ Return true if this is at least version HED3.
 
@@ -291,7 +363,7 @@ class HedSchema:
         """
         if other is None:
             return False
-        if self.header_attributes != other.header_attributes:
+        if self.get_save_header_attributes() != other.get_save_header_attributes():
             return False
         if self._has_duplicate_tags != other._has_duplicate_tags:
             return False
@@ -316,10 +388,10 @@ class HedSchema:
             #                     print(f"{key} not in dict2")
             #                     continue
             #                 if dict1[key] != dict2[key]:
-            #                     s = f"{key} unmatched: '{str(dict1[key].long_name)}' vs '{str(dict2[key].long_name)}'"
+            #                     s = f"{key} unmatched: '{str(dict1[key].name)}' vs '{str(dict2[key].name)}'"
             #                     print(s)
             return False
-        if self._schema_prefix != other._schema_prefix:
+        if self._namespace != other._namespace:
             return False
         return True
 
@@ -338,7 +410,7 @@ class HedSchema:
         """
         unit_class_entry = self.get_tag_entry(unit_class_type, HedSectionKey.UnitClasses)
         if unit_class_entry:
-            return unit_class_entry.unit_class_units
+            return unit_class_entry.units
         return []
 
     def get_tags_with_attribute(self, key, section_key=HedSectionKey.AllTags):
@@ -346,7 +418,7 @@ class HedSchema:
 
         Parameters:
             key (str): A tag attribute.  Eg HedKey.ExtensionAllowed
-            section_key (str): The HedSectionKey for the section to retrieve from.
+            section_key (HedSectionKey): The HedSectionKey for the section to retrieve from.
 
         Returns:
             list: A list of all tags with this attribute.
@@ -356,27 +428,27 @@ class HedSchema:
 
         """
         return self._sections[section_key].get_entries_with_attribute(key, return_name_only=True,
-                                                                      schema_prefix=self._schema_prefix)
+                                                                      schema_namespace=self._namespace)
 
-    def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, schema_prefix=""):
+    def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, schema_namespace=""):
         """ Return the schema entry for this tag, if one exists.
 
         Parameters:
             name (str): Any form of basic tag(or other section entry) to look up.
                 This will not handle extensions or similar.
-                If this is a tag, it can have a schema prefix, but it's not required
+                If this is a tag, it can have a schema namespace, but it's not required
             key_class (HedSectionKey or str):  The type of entry to return.
-            schema_prefix (str): Only used on AllTags.  If incorrect, will return None.
+            schema_namespace (str): Only used on AllTags.  If incorrect, will return None.
 
         Returns:
             HedSchemaEntry: The schema entry for the given tag.
 
         """
         if key_class == HedSectionKey.AllTags:
-            if schema_prefix != self._schema_prefix:
+            if schema_namespace != self._namespace:
                 return None
-            if name.startswith(self._schema_prefix):
-                name = name[len(self._schema_prefix):]
+            if name.startswith(self._namespace):
+                name = name[len(self._namespace):]
 
         return self._get_tag_entry(name, key_class)
 
@@ -394,14 +466,14 @@ class HedSchema:
         """
         return self._sections[key_class].get(name)
 
-    def find_tag_entry(self, tag, schema_prefix=""):
+    def find_tag_entry(self, tag, schema_namespace=""):
         """ Find the schema entry for a given source tag.
 
-            Note: Will not identify tags if schema_prefix is set incorrectly
+            Note: Will not identify tags if schema_namespace is set incorrectly
 
         Parameters:
             tag (str, HedTag):     Any form of tag to look up.  Can have an extension, value, etc.
-            schema_prefix (str):  The schema prefix of the tag, if any.
+            schema_namespace (str):  The schema namespace of the tag, if any.
 
         Returns:
             HedTagEntry: The located tag entry for this tag.
@@ -412,18 +484,18 @@ class HedSchema:
             Works left to right (which is mostly relevant for errors).
 
         """
-        if schema_prefix != self._schema_prefix:
+        if schema_namespace != self._namespace:
             validation_issues = ErrorHandler.format_error(ValidationErrors.HED_LIBRARY_UNMATCHED, tag,
-                                                          schema_prefix, self.valid_prefixes)
+                                                          schema_namespace, self.valid_prefixes)
             return None, None, validation_issues
-        return self._find_tag_entry(tag, schema_prefix)
+        return self._find_tag_entry(tag, schema_namespace)
 
-    def _find_tag_entry(self, tag, schema_prefix=""):
+    def _find_tag_entry(self, tag, schema_namespace=""):
         """ Find the schema entry for a given source tag.
 
         Parameters:
             tag (str, HedTag):     Any form of tag to look up.  Can have an extension, value, etc.
-            schema_prefix (str):  The schema prefix of the tag, if any.
+            schema_namespace (str):  The schema namespace of the tag, if any.
 
         Returns:
             HedTagEntry: The located tag entry for this tag.
@@ -435,9 +507,9 @@ class HedSchema:
 
         """
         clean_tag = str(tag)
-        prefix = schema_prefix
-        clean_tag = clean_tag[len(prefix):]
-        prefix_tag_adj = len(prefix)
+        namespace = schema_namespace
+        clean_tag = clean_tag[len(namespace):]
+        prefix_tag_adj = len(namespace)
         working_tag = clean_tag.lower()
 
         # Most tags are in the schema directly, so test that first
@@ -511,15 +583,15 @@ class HedSchema:
 
     def _update_all_entries(self):
         """ Call finalize_entry on every schema entry(tag, unit, etc). """
-        for section in self._sections.values():
-            for entry in section.values():
-                entry.finalize_entry(self)
+        for key_class, section in self._sections.items():
+            self._initialize_attributes(key_class)
+            section._finalize_section(self)
 
     def _initialize_attributes(self, key_class):
         """ Set the valid attributes for a section.
 
         Parameters:
-            key_class (str): The section key for the section to update.
+            key_class (HedSectionKey): The section key for the section to update.
 
         """
         self._sections[key_class].valid_attributes = self._get_attributes_for_section(key_class)
@@ -573,6 +645,7 @@ class HedSchema:
                 final_list.append(tag_entry.name.split('/')[-1])
             else:
                 final_list.append(tag_entry.name)
+
         return final_list
 
     def get_unknown_attributes(self):
@@ -582,9 +655,8 @@ class HedSchema:
             dict: The keys are attribute names and the values are lists of tags with this attribute.
 
         Notes:
-            This includes attributes found in the wrong section for example
-                unitClass attribute found on a Tag.
-            The return tag list is in long form.
+            - This includes attributes found in the wrong section for example unitClass attribute found on a Tag.
+            - The return tag list is in long form.
 
         """
         unknown_attributes = {}
@@ -641,7 +713,7 @@ class HedSchema:
         dictionaries[HedSectionKey.Attributes] = HedSchemaSection(HedSectionKey.Attributes)
         dictionaries[HedSectionKey.UnitModifiers] = HedSchemaSection(HedSectionKey.UnitModifiers)
         dictionaries[HedSectionKey.Units] = HedSchemaSection(HedSectionKey.Units)
-        dictionaries[HedSectionKey.UnitClasses] = HedSchemaSection(HedSectionKey.UnitClasses)
+        dictionaries[HedSectionKey.UnitClasses] = HedSchemaUnitClassSection(HedSectionKey.UnitClasses)
         dictionaries[HedSectionKey.ValueClasses] = HedSchemaSection(HedSectionKey.ValueClasses)
         dictionaries[HedSectionKey.AllTags] = HedSchemaTagSection(HedSectionKey.AllTags, case_sensitive=False)
 
@@ -674,11 +746,17 @@ class HedSchema:
         valid_modifiers = self.unit_modifiers.get_entries_with_attribute(modifier_attribute_name)
         return valid_modifiers
 
+    def _add_element_property_attributes(self, attribute_dict):
+        attributes = {attribute: entry for attribute, entry in self._sections[HedSectionKey.Attributes].items()
+                      if entry.has_attribute(HedKey.ElementProperty)}
+
+        attribute_dict.update(attributes)
+
     def _get_attributes_for_section(self, key_class):
         """ Return the valid attributes for this section.
 
         Parameters:
-            key_class (str): The HedKey for this section.
+            key_class (HedSectionKey): The HedKey for this section.
 
         Returns:
             dict or HedSchemaSection: A dict of all the attributes and this section.
@@ -687,7 +765,13 @@ class HedSchema:
         if key_class == HedSectionKey.AllTags:
             return self.get_tag_attribute_names()
         elif key_class == HedSectionKey.Attributes:
-            return self._sections[HedSectionKey.Properties]
+            prop_added_dict = {key: value for key, value in self._sections[HedSectionKey.Properties].items()}
+            self._add_element_property_attributes(prop_added_dict)
+            return prop_added_dict
+        elif key_class == HedSectionKey.Properties:
+            prop_added_dict = {}
+            self._add_element_property_attributes(prop_added_dict)
+            return prop_added_dict
         else:
             attrib_classes = {
                 HedSectionKey.UnitClasses: HedKey.UnitClassProperty,
@@ -700,14 +784,20 @@ class HedSchema:
                 return []
 
             attributes = {attribute: entry for attribute, entry in self._sections[HedSectionKey.Attributes].items()
-                          if entry.has_attribute(attrib_class)}
+                          if entry.has_attribute(attrib_class) or entry.has_attribute(HedKey.ElementProperty)}
             return attributes
 
     # ===============================================
     # Semi private function used to create a schema in memory(usually from a source file)
     # ===============================================
-    def _add_tag_to_dict(self, long_tag_name, key_class):
+    def _add_tag_to_dict(self, long_tag_name, new_entry, key_class):
+        # No reason we can't add this here always
+        if self.library and not self.merged and self.with_standard:
+            new_entry.set_attribute_value(HedKey.InLibrary, self.library)
+
         section = self._sections[key_class]
-        if not section:
-            self._initialize_attributes(key_class)
-        return section._add_to_dict(long_tag_name)
+        return section._add_to_dict(long_tag_name, new_entry)
+
+    def _create_tag_entry(self, long_tag_name, key_class):
+        section = self._sections[key_class]
+        return section._create_tag_entry(long_tag_name)

@@ -5,7 +5,7 @@ import pandas as pd
 from hed.models import Sidecar
 from hed.schema import load_schema_version
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp, HedTypeSummaryContext
+from hed.tools.remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp, HedTypeSummary
 
 
 class Test(unittest.TestCase):
@@ -40,6 +40,10 @@ class Test(unittest.TestCase):
         cls.summary_path = \
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
+        rel_path = '../../../data/remodel_tests/sub-002_task-FacePerception_run-1_events.tsv'
+        cls.events_wh = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_path))
+        rel_side =  '../../../data/remodel_tests/task-FacePerception_events.json'
+        cls.sidecar_path_wh = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_side))
 
     @classmethod
     def tearDownClass(cls):
@@ -62,22 +66,34 @@ class Test(unittest.TestCase):
         parsed_commands, errors = Dispatcher.parse_operations(parms)
         sum_op = parsed_commands[2]
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-01', sidecar=self.sidecar_path)
-        context1 = dispatch.context_dict['AOMIC_condition_variables']
+        context1 = dispatch.summary_dicts['AOMIC_condition_variables']
         summary1 = context1.get_summary()
         self.assertIn('run-01', summary1['Individual files'])
         self.assertEqual(len(summary1['Individual files']), 1)
         summary1a = context1.get_summary()
         self.assertIsInstance(summary1a['Dataset'], dict)
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-02', sidecar=self.sidecar_path)
-        context2 = dispatch.context_dict['AOMIC_condition_variables']
+        context2 = dispatch.summary_dicts['AOMIC_condition_variables']
         summary2 = context2.get_summary(individual_summaries="separate")
         self.assertEqual(summary2['Dataset']['Overall summary']['files'][0], 'run-01')
         self.assertEqual(len(summary2['Dataset']['Overall summary']['files']), 2)
         summary2a = context2.get_summary(individual_summaries="separate")
         self.assertIsInstance(summary2a["Individual files"]["run-02"], dict)
+        
+    def test_text_summary_with_levels(self):
+        with open(self.summary_path, 'r') as fp:
+            parms = json.load(fp)
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        df = dispatch.get_data_file(self.events_wh)
+        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        sum_op = parsed_commands[2]
+        sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-01', sidecar=self.sidecar_path_wh)
+        context1 = dispatch.summary_dicts['AOMIC_condition_variables']
+        text_summary1 = context1.get_text_summary()
+        self.assertIsInstance(text_summary1, dict)
 
     def test_text_summary(self):
-        sidecar = Sidecar(self.sidecar_path, 'aomic_sidecar', hed_schema=self.hed_schema)
+        sidecar = Sidecar(self.sidecar_path, name='aomic_sidecar')
 
         with open(self.summary_path, 'r') as fp:
             parms = json.load(fp)
@@ -89,14 +105,14 @@ class Test(unittest.TestCase):
         sum_op = parsed_commands[2]
         df = sum_op.do_op(dispatch, dispatch.prep_data(df), os.path.basename(self.events), sidecar=sidecar)
         self.assertEqual(len(df), old_len)
-        context_dict = dispatch.context_dict
+        context_dict = dispatch.summary_dicts
         self.assertIsInstance(context_dict, dict)
-        context1 = dispatch.context_dict['AOMIC_condition_variables']
-        self.assertIsInstance(context1, HedTypeSummaryContext)
+        context1 = dispatch.summary_dicts['AOMIC_condition_variables']
+        self.assertIsInstance(context1, HedTypeSummary)
         text_summary1 = context1.get_text_summary()
         self.assertIsInstance(text_summary1, dict)
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'new_events', sidecar=sidecar)
-        context2 = dispatch.context_dict['AOMIC_condition_variables']
+        context2 = dispatch.summary_dicts['AOMIC_condition_variables']
         text_summary2 = context2.get_text_summary()
         self.assertIsInstance(text_summary2, dict)
         self.assertEqual(len(text_summary1["Individual files"]), 1)

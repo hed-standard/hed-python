@@ -131,8 +131,8 @@ def get_new_dataframe(data):
         DataFrame:  A dataframe containing the contents of the tsv file or if data was
              a DataFrame to start with, a new copy of the DataFrame.
 
-    Raises:
-        HedFileError: If a filename is given and it cannot be read into a Dataframe.
+    :raises HedFileError: 
+        - If a filename is given and it cannot be read into a Dataframe.
 
     """
 
@@ -155,8 +155,8 @@ def get_row_hash(row, key_list):
     Returns:
         str: Hash key constructed from the entries of row in the columns specified by key_list.
 
-    Raises:
-        HedFileError: If row doesn't have all of the columns in key_list HedFileError is raised.
+    :raises HedFileError: 
+        - If row doesn't have all of the columns in key_list HedFileError is raised.
 
     """
     columns_present, columns_missing = separate_values(list(row.index.values), key_list)
@@ -177,8 +177,8 @@ def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate')
     Returns:
         dict:  Dictionary with key_col values as the keys and the corresponding value_col values as the values.
 
-    Raises:
-        HedFileError: When tsv_path does not correspond to a file that can be read into a DataFrame.
+    :raises HedFileError: 
+        - When tsv_path does not correspond to a file that can be read into a DataFrame.
 
     """
 
@@ -252,9 +252,10 @@ def reorder_columns(data, col_order, skip_missing=True):
     Returns:
         DataFrame:                  A new reordered dataframe.
 
-    Raises:
-        HedFileError:  If col_order contains columns not in data and skip_missing is False or if
-            data corresponds to a filename from which a dataframe cannot be created.
+    :raises HedFileError:  
+        - If col_order contains columns not in data and skip_missing is False.
+        - If data corresponds to a filename from which a dataframe cannot be created.
+
     """
     df = get_new_dataframe(data)
     present_cols, missing_cols = separate_values(df.columns.values.tolist(), col_order)
@@ -276,9 +277,9 @@ def separate_values(values, target_values):
             list:  Target values present in values.
             list:  Target values missing from values.
 
-     Notes:
+     Notes:  
          - The function computes the set difference of target_cols and base_cols and returns a list
-         of columns of target_cols that are in base_cols and a list of those missing.
+           of columns of target_cols that are in base_cols and a list of those missing.
 
      """
 

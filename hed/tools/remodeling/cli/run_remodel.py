@@ -11,11 +11,11 @@ from hed.tools.remodeling.backup_manager import BackupManager
 
 
 def get_parser():
-    """ Create a parser for the run_remodel command-line arguments. 
-    
+    """ Create a parser for the run_remodel command-line arguments.
+
     Returns:
         argparse.ArgumentParser:  A parser for parsing the command line arguments.
-        
+
     """
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
@@ -33,31 +33,40 @@ def get_parser():
                         help="Optional path to JSON sidecar with HED information")
     parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
                         help="Name of the default backup for remodeling")
+    parser.add_argument("-nb", "--no-backup", action='store_true', dest="no_backup",
+                        help="If present, the operations are run directly on the files with no backup.")
+    parser.add_argument("-ns", "--no-summaries", action='store_true', dest="no_summaries",
+                        help="If present, the summaries are not saved, but rather discarded.")
+    parser.add_argument("-nu", "--no-update", action='store_true', dest="no_update",
+                        help="If present, the files are not saved, but rather discarded.")
     parser.add_argument("-r", "--hed-versions", dest="hed_versions", nargs="*", default=[],
                         help="Optional list of HED schema versions used for annotation, include prefixes.")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
-                        help="Format for saving any summaries, if any. If empty, then no summaries are saved.")
+                        help="Format for saving any summaries, if any. If no summaries are to be written," +
+                             "use the -ns option.")
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The names of the task.")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
+    parser.add_argument("-w", "--work-dir", default="", dest="work_dir",
+                        help="If given, is the path to directory for saving, otherwise derivatives/remodel is used.")
     parser.add_argument("-x", "--exclude-dirs", nargs="*", default=[], dest="exclude_dirs",
                         help="Directories names to exclude from search for files.")
     return parser
 
 
 def parse_arguments(arg_list=None):
-    """ Parse the command line arguments or arg_list if given. 
-    
+    """ Parse the command line arguments or arg_list if given.
+
     Parameters:
         arg_list (list):  List of command line arguments as a list.
-        
+
     Returns:
         Object:  Argument object
         List: A list of parsed operations (each operation is a dictionary).
-        
-    Raises:
-        ValueError  - If the operations were unable to be correctly parsed.
-    
+
+    :raises ValueError:
+        - If the operations were unable to be correctly parsed.
+
     """
     parser = get_parser()
     args = parser.parse_args(arg_list)
@@ -81,7 +90,7 @@ def parse_arguments(arg_list=None):
 
 def run_bids_ops(dispatch, args):
     """ Run the remodeler on a BIDS dataset.
-    
+
     Parameters:
         dispatch (Dispatcher): Manages the execution of the operations.
         args (Object): The command-line arguments as an object.
@@ -105,7 +114,8 @@ def run_bids_ops(dispatch, args):
         if args.verbose:
             print(f"Events {events_obj.file_path}  sidecar {sidecar}")
         df = dispatch.run_operations(events_obj.file_path, sidecar=sidecar, verbose=args.verbose)
-        df.to_csv(events_obj.file_path, sep='\t', index=False, header=True)
+        if not args.no_update:
+            df.to_csv(events_obj.file_path, sep='\t', index=False, header=True)
 
 
 def run_direct_ops(dispatch, args):
@@ -113,7 +123,7 @@ def run_direct_ops(dispatch, args):
 
     Parameters:
         dispatch (Dispatcher):  Controls the application of the operations and backup.
-        args (dict): Dictionary of arguments and their values.
+        args (argparse.Namespace): Dictionary of arguments and their values.
 
     """
 
@@ -129,7 +139,8 @@ def run_direct_ops(dispatch, args):
         if args.task_names and not BackupManager.get_task(args.task_names, file_path):
             continue
         df = dispatch.run_operations(file_path, verbose=args.verbose, sidecar=sidecar)
-        df.to_csv(file_path, sep='\t', index=False, header=True)
+        if not args.no_update:
+            df.to_csv(file_path, sep='\t', index=False, header=True)
 
 
 def main(arg_list=None):
@@ -139,28 +150,33 @@ def main(arg_list=None):
         arg_list (list or None):   Called with value None when called from the command line.
                                    Otherwise, called with the command-line parameters as an argument list.
 
-    Raises:
-        HedFileError   
-            - if the data root directory does not exist.  
-            - if the specified backup does not exist.  
+    :raises HedFileError:
+        - if the data root directory does not exist.
+        - if the specified backup does not exist.
 
     """
     args, operations = parse_arguments(arg_list)
     if not os.path.isdir(args.data_dir):
         raise HedFileError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist", "")
-    if args.backup_name:
+    if args.no_backup:
+        backup_name = None
+    else:
         backup_man = BackupManager(args.data_dir)
         if not backup_man.get_backup(args.backup_name):
             raise HedFileError("BackupDoesNotExist", f"Backup {args.backup_name} does not exist. "
                                f"Please run_remodel_backup first", "")
         backup_man.restore_backup(args.backup_name, args.task_names, verbose=args.verbose)
-    dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=args.backup_name,
-                          hed_versions=args.hed_versions)
+        backup_name = args.backup_name
+    dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=backup_name, hed_versions=args.hed_versions)
     if args.use_bids:
         run_bids_ops(dispatch, args)
     else:
         run_direct_ops(dispatch, args)
-    dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries)
+    save_dir = None
+    if args.work_dir:
+        save_dir = os.path.realpath(os.path.join(args.work_dir, Dispatcher.REMODELING_SUMMARY_PATH))
+    if not args.no_summaries:
+        dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries, summary_dir=save_dir)
 
 
 if __name__ == '__main__':

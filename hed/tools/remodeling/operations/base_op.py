@@ -15,16 +15,15 @@ class BaseOp:
             op_spec (dict): Specification for required and optional parameters.
             parameters (dict):  Actual values of the parameters for the operation.
 
-        Raises:
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
-            ValueError   
-                - If the specification is missing a valid operation.   
+        :raises ValueError:
+            - If the specification is missing a valid operation.
 
         """
         self.operation = op_spec.get("operation", "")
@@ -40,14 +39,12 @@ class BaseOp:
         Parameters:
             parameters (dict): Dictionary of parameters for this operation.
 
-        Raises:
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.    
-
-            TypeError   
-                - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
         """
 
@@ -70,7 +67,7 @@ class BaseOp:
                 raise TypeError("BadType", f"{param_value} has type {type(param_value)} not {param_type}")
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Base class method to be overridden with by each operation.
+        """ Base class method to be overridden by each operation.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -80,7 +77,7 @@ class BaseOp:
 
         """
 
-        return df
+        return df.copy()
 
     @staticmethod
     def _check_list_type(param_value, param_type):
@@ -90,8 +87,8 @@ class BaseOp:
             param_value (any):   The value to be checked.
             param_type (any):    Class to check the param_value against.
 
-        Raises:
-            TypeError: If param_value is not an instance of param_type.
+        :raises TypeError:
+            - If param_value is not an instance of param_type.
 
         """
 

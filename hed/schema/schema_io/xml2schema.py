@@ -5,8 +5,9 @@ This module is used to create a HedSchema object from an XML file or tree.
 from defusedxml import ElementTree
 import xml
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema import HedSchema
+from hed.schema import schema_validation_util
 from hed.schema.schema_io import xml_constants
 
 
@@ -19,14 +20,29 @@ class HedSchemaXMLParser:
         self._schema = HedSchema()
         self._schema.filename = hed_xml_file_path
         self._schema.header_attributes = self._get_header_attributes()
-
-        self._populate_property_dictionaries()
-        self._populate_attribute_dictionaries()
-        self._populate_value_class_dictionaries()
+        self._loading_merged = True
+        if self._schema.with_standard and not self._schema.merged:
+            from hed.schema.hed_schema_io import load_schema_version
+            saved_attr = self._schema.header_attributes
+            try:
+                base_version = load_schema_version(self._schema.with_standard)
+            except HedFileError as e:
+                raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
+                                   message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
+                                   filename=e.filename)
+            self._schema = base_version
+            self._schema.filename = hed_xml_file_path
+            self._schema.header_attributes = saved_attr
+            self._loading_merged = False
 
         self._schema.prologue = self._get_prologue()
         self._schema.epilogue = self._get_epilogue()
-        self._populate_unit_modifier_dictionaries()
+
+        self._populate_section(HedSectionKey.Properties)
+        self._populate_section(HedSectionKey.Attributes)
+        self._populate_section(HedSectionKey.ValueClasses)
+        self._populate_section(HedSectionKey.UnitModifiers)
+
         self._populate_unit_class_dictionaries()
         self._populate_tag_dictionaries()
         self._schema.finalize_dictionaries()
@@ -71,54 +87,18 @@ class HedSchemaXMLParser:
 
         return root
 
-    def _populate_property_dictionaries(self):
-        """Populates a dictionary of dictionaries associated with properties
+    def _populate_section(self, key_class):
+        self._schema._initialize_attributes(key_class)
+        section_name = xml_constants.SECTION_NAMES[key_class]
+        section = self._get_elements_by_name(section_name)
+        if section:
+            section = section[0]
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
-        section_name = xml_constants.SECTION_NAMES[HedSectionKey.Properties]
-        properties_section = self._get_elements_by_name(section_name)
-        if properties_section:
-            properties_section = properties_section[0]
-
-            def_element_name = xml_constants.ELEMENT_NAMES[HedSectionKey.Properties]
-            attribute_elements = self._get_elements_by_name(def_element_name, properties_section)
+            def_element_name = xml_constants.ELEMENT_NAMES[key_class]
+            attribute_elements = self._get_elements_by_name(def_element_name, section)
             for element in attribute_elements:
-                self._parse_node(element, HedSectionKey.Properties)
-
-    def _populate_attribute_dictionaries(self):
-        """Populates a dictionary of dictionaries associated with attributes and their properties
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        """
-        section_name = xml_constants.SECTION_NAMES[HedSectionKey.Attributes]
-        attribute_section = self._get_elements_by_name(section_name)
-        if attribute_section:
-            attribute_section = attribute_section[0]
-
-            def_element_name = xml_constants.ELEMENT_NAMES[HedSectionKey.Attributes]
-            attribute_elements = self._get_elements_by_name(def_element_name, attribute_section)
-            for element in attribute_elements:
-                self._parse_node(element, HedSectionKey.Attributes)
-
-    def _populate_value_class_dictionaries(self):
-        section_name = xml_constants.SECTION_NAMES[HedSectionKey.ValueClasses]
-        value_class_section = self._get_elements_by_name(section_name)
-        if not value_class_section:
-            return
-        value_class_section = value_class_section[0]
-        def_element_name = xml_constants.ELEMENT_NAMES[HedSectionKey.ValueClasses]
-        attribute_elements = self._get_elements_by_name(def_element_name, value_class_section)
-        for element in attribute_elements:
-            self._parse_node(element, HedSectionKey.ValueClasses)
+                new_entry = self._parse_node(element, key_class)
+                self._add_to_dict(new_entry, key_class)
 
     def _populate_tag_dictionaries(self):
         """Populates a dictionary of dictionaries associated with tags and their attributes.
@@ -132,10 +112,29 @@ class HedSchemaXMLParser:
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
+        self._schema._initialize_attributes(HedSectionKey.AllTags)
         tag_elements = self._get_elements_by_name("node")
+        loading_from_chain = ""
+        loading_from_chain_short = ""
         for tag_element in tag_elements:
             tag = self._get_tag_path_from_tag_element(tag_element)
-            self._parse_node(tag_element, HedSectionKey.AllTags, tag)
+            if loading_from_chain:
+                if loading_from_chain_short == tag or not tag.startswith(loading_from_chain_short):
+                    loading_from_chain_short = ""
+                    loading_from_chain = ""
+                else:
+                    tag = tag.replace(loading_from_chain_short, loading_from_chain)
+            tag_entry = self._parse_node(tag_element, HedSectionKey.AllTags, tag)
+
+            rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
+            if rooted_entry:
+                loading_from_chain = rooted_entry.name + "/" + tag_entry.short_tag_name
+                loading_from_chain_short = tag_entry.short_tag_name
+
+                tag = tag.replace(loading_from_chain_short, loading_from_chain)
+                tag_entry = self._parse_node(tag_element, HedSectionKey.AllTags, tag)
+
+            self._add_to_dict(tag_entry, HedSectionKey.AllTags)
 
     def _populate_unit_class_dictionaries(self):
         """Populates a dictionary of dictionaries associated with all the unit classes, unit class units, and unit
@@ -151,6 +150,8 @@ class HedSchemaXMLParser:
             default units.
 
         """
+        self._schema._initialize_attributes(HedSectionKey.UnitClasses)
+        self._schema._initialize_attributes(HedSectionKey.Units)
         section_name = xml_constants.SECTION_NAMES[HedSectionKey.UnitClasses]
         units_section_nodes = self._get_elements_by_name(section_name)
         if len(units_section_nodes) == 0:
@@ -162,30 +163,14 @@ class HedSchemaXMLParser:
 
         for unit_class_element in unit_class_elements:
             unit_class_entry = self._parse_node(unit_class_element, HedSectionKey.UnitClasses)
+            unit_class_entry = self._add_to_dict(unit_class_entry, HedSectionKey.UnitClasses)
             element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
             element_unit_names = [self._get_element_tag_value(element) for element in element_units]
 
             for unit, element in zip(element_unit_names, element_units):
                 unit_class_unit_entry = self._parse_node(element, HedSectionKey.Units)
+                self._add_to_dict(unit_class_unit_entry, HedSectionKey.Units)
                 unit_class_entry.add_unit(unit_class_unit_entry)
-
-    def _populate_unit_modifier_dictionaries(self):
-        """
-        Gets all unit modifier definitions from the
-
-        Returns
-        -------
-
-        """
-        section_name = xml_constants.SECTION_NAMES[HedSectionKey.UnitModifiers]
-        unit_modifier_section_nodes = self._get_elements_by_name(section_name)
-        if len(unit_modifier_section_nodes) == 0:
-            return
-        unit_modifier_section = unit_modifier_section_nodes[0]
-        def_element_name = xml_constants.ELEMENT_NAMES[HedSectionKey.UnitModifiers]
-        node_elements = self._get_elements_by_name(def_element_name, unit_modifier_section)
-        for node_element in node_elements:
-            self._parse_node(node_element, key_class=HedSectionKey.UnitModifiers)
 
     def _reformat_xsd_attrib(self, attrib_dict):
         final_attrib = {}
@@ -228,7 +213,9 @@ class HedSchemaXMLParser:
         else:
             node_name = self._get_element_tag_value(node_element)
         attribute_desc = self._get_element_tag_value(node_element, xml_constants.DESCRIPTION_ELEMENT)
-        tag_entry = self._schema._add_tag_to_dict(node_name, key_class)
+
+        tag_entry = self._schema._create_tag_entry(node_name, key_class)
+
         if attribute_desc:
             tag_entry.description = attribute_desc
 
@@ -345,3 +332,10 @@ class HedSchemaXMLParser:
         else:
             elements = parent_element.findall('.//%s' % element_name)
         return elements
+
+    def _add_to_dict(self, entry, key_class):
+        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged:
+            raise HedFileError(HedExceptions.IN_LIBRARY_IN_UNMERGED,
+                               f"Library tag in unmerged schema has InLibrary attribute",
+                               self._schema.filename)
+        return self._schema._add_tag_to_dict(entry.name, entry, key_class)

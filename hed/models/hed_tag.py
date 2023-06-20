@@ -1,5 +1,5 @@
 from hed.schema.hed_schema_constants import HedKey
-from hed.schema.hed_schema_entry import HedTagEntry
+import copy
 
 
 class HedTag:
@@ -11,7 +11,7 @@ class HedTag:
 
     """
 
-    def __init__(self, hed_string, span=None, hed_schema=None):
+    def __init__(self, hed_string, span=None, hed_schema=None, def_dict=None):
         """ Creates a HedTag.
 
         Parameters:
@@ -19,21 +19,22 @@ class HedTag:
             span  (int, int): The start and end indexes of the tag in the hed_string.
             hed_schema (HedSchema or None): A convenience parameter for calculating canonical forms on creation.
 
-        Notes:
-            - This does not produce issues and is used primarily for testing.
-
+        :raises ValueError:
+            - You cannot pass a def_dict without also passing a schema.
         """
+        if def_dict and not hed_schema:
+            raise ValueError("Passing a def_dict without also passing a schema is invalid.")
         self._hed_string = hed_string
         if span is None:
             span = (0, len(hed_string))
         # This is the span into the original hed string for this tag
         self.span = span
 
-        # If this is present, use this as the org tag for most purposes.  This is generally only filled out
-        # if the tag has a name_prefix added, or is an expanded def.
+        # If this is present, use this as the org tag for most purposes.
+        # This is not generally used anymore, but you can use it to replace a tag in place.
         self._tag = None
 
-        self._schema_prefix = self._get_schema_prefix(self.org_tag)
+        self._namespace = self._get_schema_namespace(self.org_tag)
 
         # This is the schema this tag was converted to.
         self._schema = None
@@ -42,18 +43,38 @@ class HedTag:
         self._extension_value = ""
         self._parent = None
 
+        # Downsides: two new parameters
+        # Have to check for this value, slowing everything down potentially.
+        self._expandable = None
+        self._expanded = False
+
         if hed_schema:
             self.convert_to_canonical_forms(hed_schema)
+            if def_dict:
+                def_dict.construct_def_tag(self)
 
-    @property
-    def schema_prefix(self):
-        """ Library prefix for this tag if one exists.
+    def copy(self):
+        """ Return a deep copy of this tag.
 
         Returns:
-            prefix (str): The library prefix, including the colon.
+            HedTag: The copied group.
 
         """
-        return self._schema_prefix
+        save_parent = self._parent
+        self._parent = None
+        return_copy = copy.deepcopy(self)
+        self._parent = save_parent
+        return return_copy
+
+    @property
+    def schema_namespace(self):
+        """ Library namespace for this tag if one exists.
+
+        Returns:
+            namespace (str): The library namespace, including the colon.
+
+        """
+        return self._namespace
 
     @property
     def short_tag(self):
@@ -67,7 +88,7 @@ class HedTag:
 
         """
         if self._schema_entry:
-            return f"{self._schema_prefix}{self._schema_entry.short_tag_name}{self._extension_value}"
+            return f"{self._namespace}{self._schema_entry.short_tag_name}{self._extension_value}"
 
         return str(self)
 
@@ -108,17 +129,18 @@ class HedTag:
         Parameters:
             new_tag_val (str): The new short_base_tag for this tag.
 
-        Raises:
-            ValueError: If tags cannot unidentified.
+        :raises ValueError:
+            - If the tag wasn't already identified
 
         Note:
             - Generally this is used to swap def to def-expand.
         """
         if self._schema_entry:
+            tag_entry = None
             if self._schema:
-                tag_entry = self._schema.get_tag_entry(new_tag_val, schema_prefix=self.schema_prefix)
-            else:
-                tag_entry, remainder = HedTagEntry.get_fake_tag_entry(new_tag_val, [new_tag_val.lower()])
+                if self.is_takes_value_tag():
+                    new_tag_val = new_tag_val + "/#"
+                tag_entry = self._schema.get_tag_entry(new_tag_val, schema_namespace=self.schema_namespace)
 
             self._schema_entry = tag_entry
         else:
@@ -133,10 +155,8 @@ class HedTag:
 
         Notes:
             - Warning: This could be empty if the original tag had a name_prefix prepended.
-            e.g. a column where "Label/" is prepended, thus the column value has zero base portion.
-
+              e.g. a column where "Label/" is prepended, thus the column value has zero base portion.
             - Only valid after calling convert_to_canonical_forms.
-
         """
         if self._schema_entry:
             extension_len = len(self._extension_value)
@@ -185,18 +205,14 @@ class HedTag:
             new_tag_val (str): New (implicitly long form) of tag to set.
 
         Notes:
-            - Primarily used to add prefixes from column metadata to tags.
-            - Only valid before calling convert_to_canonical_forms.
-
+            - You probably don't actually want to call this.
         """
-
-        if self._schema_entry:
-            raise ValueError("Can only edit tags before calculating canonical forms. " +
-                             "This could be updated to instead remove computed forms.")
         self._tag = new_tag_val
+        self._schema_entry = None
+        self.convert_to_canonical_forms(self._schema)
 
     @property
-    def extension_or_value_portion(self):
+    def extension(self):
         """ Get the extension or value of tag
 
             Generally this is just the portion after the last slash.
@@ -214,6 +230,10 @@ class HedTag:
 
         return ""
 
+    @extension.setter
+    def extension(self, x):
+        self._extension_value = f"/{x}"
+
     @property
     def long_tag(self):
         """ Long form including value or extension.
@@ -223,7 +243,7 @@ class HedTag:
 
         """
         if self._schema_entry:
-            return f"{self._schema_prefix}{self._schema_entry.long_tag_name}{self._extension_value}"
+            return f"{self._namespace}{self._schema_entry.long_tag_name}{self._extension_value}"
         return str(self)
 
     @property
@@ -250,8 +270,39 @@ class HedTag:
         if self._schema_entry:
             return self._schema_entry.tag_terms
 
-        # TODO: Potentially remove this.  It's just a quick hack for testing
-        return tuple(str(self).lower())
+        return tuple()
+
+    @property
+    def expanded(self):
+        """Returns if this is currently expanded or not.
+
+           Will always be false unless expandable is set.  This is primarily used for Def/Def-expand tags at present.
+
+        Returns:
+            bool: Returns true if this is currently expanded
+        """
+        return self._expanded
+
+    @property
+    def expandable(self):
+        """Returns if this is expandable
+
+           This is primarily used for Def/Def-expand tags at present.
+
+        Returns:
+            HedGroup or HedTag or None: Returns the expanded form of this tag
+        """
+        return self._expandable
+
+    def is_column_ref(self):
+        """ Returns if this tag is a column reference from a sidecar.
+
+            You should only see these if you are directly accessing sidecar strings, tools should remove them otherwise.
+
+        Returns:
+            bool: Returns True if this is a column ref
+        """
+        return self.org_tag.startswith('{') and self.org_tag.endswith('}')
 
     def __str__(self):
         """ Convert this HedTag to a string.
@@ -268,39 +319,6 @@ class HedTag:
 
         return self._hed_string[self.span[0]:self.span[1]]
 
-    def add_prefix_if_needed(self, required_prefix):
-        """ Add a prefix to this tag *unless* already formatted.
-
-        Parameters:
-            required_prefix (str): The full name_prefix to add if not present.
-
-        Notes:
-            - This means we verify the tag does not have the required name_prefix, or any partial name_prefix.
-
-        Examples:
-            Required: KnownTag1/KnownTag2
-
-            Case 1: KnownTag1/KnownTag2/ColumnValue
-                Will not be changed, has name_prefix already.
-
-            Case 2: KnownTag2/ColumnValue
-                Will not be changed, has partial name_prefix already.
-
-            Case 3: ColumnValue
-                Prefix will be added.
-
-        """
-
-        checking_prefix = required_prefix
-        while checking_prefix:
-            if self.lower().startswith(checking_prefix.lower()):
-                return
-            slash_index = checking_prefix.find("/") + 1
-            if slash_index == 0:
-                break
-            checking_prefix = checking_prefix[slash_index:]
-        self.tag = required_prefix + self.org_tag
-
     def lower(self):
         """ Convenience function, equivalent to str(self).lower(). """
         return str(self).lower()
@@ -315,10 +333,7 @@ class HedTag:
             list:  A list of issues found during conversion. Each element is a dictionary.
 
         """
-        if not hed_schema:
-            return self._convert_key_tags_to_canonical_form()
-
-        tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(self, self.schema_prefix)
+        tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(self, self.schema_namespace)
         self._schema_entry = tag_entry
         self._schema = hed_schema
         if self._schema_entry:
@@ -343,7 +358,7 @@ class HedTag:
         if stripped_value:
             return stripped_value, unit
 
-        return self.extension_or_value_portion, None
+        return self.extension, None
 
     @property
     def unit_classes(self):
@@ -432,7 +447,7 @@ class HedTag:
         """ Return true if this is a value class tag.
 
         Returns:
-            bool:  True if this is a a tag with a value class.
+            bool:  True if this is a tag with a value class.
 
         """
         if self._schema_entry:
@@ -446,7 +461,7 @@ class HedTag:
             bool:  True if this is a known tag without extension or value.
 
         """
-        return bool(self._schema_entry and not self.extension_or_value_portion)
+        return bool(self._schema_entry and not self.extension)
 
     def has_attribute(self, attribute):
         """ Return true if this is an attribute this tag has.
@@ -488,7 +503,7 @@ class HedTag:
         units = []
         unit_classes = self.unit_classes
         for unit_class_entry in unit_classes.values():
-            units += unit_class_entry.unit_class_units.keys()
+            units += unit_class_entry.units.keys()
 
         return units
 
@@ -535,33 +550,15 @@ class HedTag:
         if self._schema_entry:
             return self._schema_entry.any_parent_has_attribute(attribute=attribute)
 
-    def _convert_key_tags_to_canonical_form(self):
-        """ Find the canonical form for basic known tags.
-
-        Returns:
-            list: Always return an empty list.
-
-        Notes:
-            -  This is used for such as definition and def when no schema present
-
-        """
-        tags_to_identify = ["onset", "definition", "offset", "def-expand", "def"]
-        tag_entry, remainder = HedTagEntry.get_fake_tag_entry(str(self), tags_to_identify)
-        if tag_entry:
-            self._schema_entry = tag_entry
-            self._schema = None
-            self._extension_value = remainder
-
-        return []
-
-    def _get_schema_prefix(self, org_tag):
-        """ Finds the library prefix for the tag.
+    @staticmethod
+    def _get_schema_namespace(org_tag):
+        """ Finds the library namespace for the tag.
 
         Parameters:
             org_tag (str): A string representing a tag.
 
         Returns:
-            str: Library prefix string or empty.
+            str: Library namespace string or empty.
 
         """
         first_slash = org_tag.find("/")
@@ -584,7 +581,7 @@ class HedTag:
             stripped_value (str): The value with the units removed.
 
         """
-        value, _, units = self.extension_or_value_portion.rpartition(" ")
+        value, _, units = self.extension.rpartition(" ")
         if not units:
             return None, None
 
@@ -612,6 +609,11 @@ class HedTag:
 
         return possible_match
 
+    def is_placeholder(self):
+        if "#" in self.org_tag or "#" in self._extension_value:
+            return True
+        return False
+
     def replace_placeholder(self, placeholder_value):
         """ If tag has a placeholder character(#), replace with value.
 
@@ -619,7 +621,7 @@ class HedTag:
             placeholder_value (str): Value to replace placeholder with.
 
         """
-        if "#" in self.org_tag:
+        if self.is_placeholder():
             if self._schema_entry:
                 self._extension_value = self._extension_value.replace("#", placeholder_value)
             else:
@@ -628,7 +630,7 @@ class HedTag:
     def __hash__(self):
         if self._schema_entry:
             return hash(
-                self._schema_prefix + self._schema_entry.short_tag_name.lower() + self._extension_value.lower())
+                self._namespace + self._schema_entry.short_tag_name.lower() + self._extension_value.lower())
         else:
             return hash(self.lower())
 
@@ -648,3 +650,28 @@ class HedTag:
         if self.org_tag.lower() == other.org_tag.lower():
             return True
         return False
+
+    def __deepcopy__(self, memo):
+        # check if the object has already been copied
+        if id(self) in memo:
+            return memo[id(self)]
+
+        # create a new instance of HedTag class
+        new_tag = HedTag(self._hed_string, self.span)
+
+        # add the new object to the memo dictionary
+        memo[id(self)] = new_tag
+
+        # copy all other attributes except schema and schema_entry
+        new_tag._tag = copy.deepcopy(self._tag, memo)
+        new_tag._namespace = copy.deepcopy(self._namespace, memo)
+        new_tag._extension_value = copy.deepcopy(self._extension_value, memo)
+        new_tag._parent = copy.deepcopy(self._parent, memo)
+        new_tag._expandable = copy.deepcopy(self._expandable, memo)
+        new_tag._expanded = copy.deepcopy(self._expanded, memo)
+
+        # reference the schema and schema_entry from the original object
+        new_tag._schema = self._schema
+        new_tag._schema_entry = self._schema_entry
+
+        return new_tag

@@ -5,8 +5,9 @@ import pandas as pd
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
-from hed.models.expression_parser import QueryParser
-from hed.tools.analysis.analysis_util import get_assembled_strings
+from hed.models.sidecar import Sidecar
+from hed.models.df_util import get_assembled
+from hed.tools.analysis.analysis_util import get_expression_parsers, search_strings
 
 
 class FactorHedTagsOp(BaseOp):
@@ -29,53 +30,38 @@ class FactorHedTagsOp(BaseOp):
         "required_parameters": {
             "queries": list,
             "query_names": list,
-            "remove_types": list,
-            "expand_context": bool
+            "remove_types": list
         },
-        "optional_parameters": {}
+        "optional_parameters": {
+            "expand_context": bool
+        }
     }
 
     def __init__(self, parameters):
         """ Constructor for the factor HED tags operation.
 
         Parameters:
-            op_spec (dict): Specification for required and optional parameters.
             parameters (dict):  Actual values of the parameters for the operation.
 
-        Raises:
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            KeyError   
-                - If a required parameter is missing.   
-                - If an unexpected parameter is provided.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
-            TypeError   
-                - If a parameter has the wrong type.   
-
-            ValueError  
-                - If the specification is missing a valid operation.   
-                - If the length of query names is not empty and not same length as queries.   
-                - If there are duplicate query names.   
+        :raises ValueError:
+            - If the specification is missing a valid operation.
+            - If the length of query names is not empty and not same length as queries.
+            - If there are duplicate query names.
 
         """
         super().__init__(self.PARAMS, parameters)
         self.queries = parameters['queries']
         self.query_names = parameters['query_names']
         self.remove_types = parameters['remove_types']
-        if not self.query_names:
-            self.query_names = [f"query_{index}" for index in range(len(self.queries))]
-        elif len(self.queries) != len(self.query_names):
-            raise ValueError("QueryNamesLengthBad",
-                             f"The query_names length {len(self.query_names)} must be empty or equal" +
-                             f"to the queries length {len(self.queries)} .")
-        elif len(set(self.query_names)) != len(self.query_names):
-            raise ValueError("DuplicateQueryNames",  f"The query names {str(self.query_names)} list has duplicates")
-        self.expression_parsers = []
-        for index, query in enumerate(self.queries):
-            try:
-                next_query = QueryParser(query)
-            except Exception:
-                raise ValueError("BadQuery", f"Query [{index}]: {query} cannot be parsed")
-            self.expression_parsers.append(next_query)
+        self.expression_parsers, self.query_names = get_expression_parsers(self.queries,
+                                                                           query_names=parameters['query_names'])
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Factor the column using HED tag queries.
@@ -88,29 +74,24 @@ class FactorHedTagsOp(BaseOp):
 
         Returns:
             Dataframe: A new dataframe after processing.
-        
-        Raises:
 
-            ValueError   
-                - If a name for a new query factor column is already a column.   
+        :raises ValueError:
+            - If a name for a new query factor column is already a column.
 
         """
 
-        input_data = TabularInput(df, hed_schema=dispatcher.hed_schema, sidecar=sidecar)
+        if sidecar and not isinstance(sidecar, Sidecar):
+            sidecar = Sidecar(sidecar)
+        input_data = TabularInput(df.copy(), sidecar=sidecar, name=name)
         column_names = list(df.columns)
-        for name in self.query_names:
-            if name in column_names:
+        for query_name in self.query_names:
+            if query_name in column_names:
                 raise ValueError("QueryNameAlreadyColumn",
-                                 f"Query [{name}]: is already a column name of the data frame")
-        df = input_data.dataframe.copy()
-        df_list = [df]
-        hed_strings = get_assembled_strings(input_data, hed_schema=dispatcher.hed_schema, expand_defs=True)
-        df_factors = pd.DataFrame(0, index=range(len(hed_strings)), columns=self.query_names)
-        for parse_ind, parser in enumerate(self.expression_parsers):
-            for index, next_item in enumerate(hed_strings):
-                match = parser.search(next_item)
-                if match:
-                    df_factors.at[index, self.query_names[parse_ind]] = 1
+                                 f"Query [{query_name}]: is already a column name of the data frame")
+        df_list = [input_data.dataframe]
+        hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None,
+                                       join_columns=True, shrink_defs=False, expand_defs=True)
+        df_factors = search_strings(hed_strings, self.expression_parsers, query_names=self.query_names)
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)

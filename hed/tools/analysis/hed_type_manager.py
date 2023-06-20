@@ -16,8 +16,9 @@ class HedTypeManager:
             hed_schema (HedSchema or HedSchemaGroup): The HED schema to use for processing.
             definitions (dict): A dictionary of DefinitionEntry objects.
 
-        Raises:
-            HedFileError:  On errors such as unmatched onsets or missing definitions.
+        :raises HedFileError:
+            - On errors such as unmatched onsets or missing definitions.
+
         """
 
         self.definitions = definitions

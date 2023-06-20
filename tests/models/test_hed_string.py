@@ -1,5 +1,6 @@
 from hed.models import HedString
 import unittest
+from hed import load_schema_version
 
 
 class TestHedStrings(unittest.TestCase):
@@ -68,12 +69,19 @@ class HedTagLists(TestHedStrings):
         hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
                      '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
         string_obj = HedString(hed_string)
-        # result = HedString.split_into_groups(hed_string)
         tags_as_strings = [str(tag) for tag in string_obj.children]
         self.assertCountEqual(tags_as_strings,
                               ['/Action/Reach/To touch',
                                '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)',
                                '/Attribute/Location/Screen/Top/70 px', '/Attribute/Location/Screen/Left/23 px'])
+
+    def test_square_brackets_in_string(self):
+        # just verifying this parses, square brackets do not validate
+        hed_string = '[test_ref], Event/Sensory-event, Participant, ([test_ref2], Event)'
+        string_obj = HedString(hed_string)
+        tags_as_strings = [str(tag) for tag in string_obj.children]
+        self.assertCountEqual(tags_as_strings,
+                              ['[test_ref]', 'Event/Sensory-event', 'Participant', '([test_ref2],Event)'])
 
     # Potentially restore some similar behavior later if desired.
     # We no longer automatically remove things like quotes.
@@ -170,3 +178,29 @@ class TestHedStringUtil(unittest.TestCase):
         }
 
         self.compare_split_results(test_strings, expected_results)
+
+class TestHedStringShrinkDefs(unittest.TestCase):
+    hed_schema = load_schema_version("8.0.0")
+
+    def test_shrink_defs(self):
+        test_strings = {
+            1: "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2)),Event",
+            2: "Event, ((Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2)),Event)",
+            # this one shouldn't change as it doesn't have a parent
+            3: "Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2),Event",
+            # This one is an obviously invalid def, but still shrinks
+            4: "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2), ThisDefIsInvalid),Event",
+        }
+
+        expected_results = {
+            1: "Def/TestDefPlaceholder/2471,Event",
+            2: "Event,(Def/TestDefPlaceholder/2471,Event)",
+            3: "Def-expand/TestDefPlaceholder/2471,(Item/TestDef1/2471,Item/TestDef2),Event",
+            4: "Def/TestDefPlaceholder/2471,Event",
+        }
+
+        for key, test_string in test_strings.items():
+            hed_string = HedString(test_string, hed_schema=self.hed_schema)
+            hed_string.shrink_defs()
+            self.assertEqual(str(hed_string), expected_results[key])
+

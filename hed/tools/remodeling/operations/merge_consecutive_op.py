@@ -8,7 +8,7 @@ class MergeConsecutiveOp(BaseOp):
     """ Merge consecutive rows with same column value.
 
     Required remodeling parameters:
-        - **column_name** (*str*): the name of the column whose consecutive values are to be compared (the merge column).  
+        - **column_name** (*str*): name of column whose consecutive values are to be compared (the merge column).  
         - **event_code** (*str* or *int* or *float*): the particular value in the match column to be merged.  
         - **match_columns** (*list*):  A list of columns whose values have to be matched for two events to be the same.  
         - **set_durations** (*bool*): If true, set the duration of the merged event to the extent of the merged events.  
@@ -31,21 +31,18 @@ class MergeConsecutiveOp(BaseOp):
         """ Constructor for the merge consecutive operation.
 
         Parameters:
-            op_spec (dict): Specification for required and optional parameters.
             parameters (dict): Actual values of the parameters for the operation.
 
-        Raises:
+        :raises KeyError:
+            - If a required parameter is missing.
+            - If an unexpected parameter is provided.
 
-            KeyError   
-            - If a required parameter is missing.   
-            - If an unexpected parameter is provided.   
- 
-            TypeError   
-            - If a parameter has the wrong type.   
+        :raises TypeError:
+            - If a parameter has the wrong type.
 
-            ValueError   
-            - If the specification is missing a valid operation.   
-            - If one of the match column is the merge column.   
+        :raises ValueError:
+            - If the specification is missing a valid operation.
+            - If one of the match column is the merge column.
 
         """
         super().__init__(self.PARAMS, parameters)
@@ -65,18 +62,16 @@ class MergeConsecutiveOp(BaseOp):
             dispatcher (Dispatcher): Manages the operation I/O.
             df (DataFrame): The DataFrame to be remodeled.
             name (str): Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like): Only needed for HED operations.
+            sidecar (Sidecar or file-like): Not needed for this operation.
 
         Returns:
             Dataframe: A new dataframe after processing.
 
-        Raises:
-
-            ValueError   
-                - If dataframe does not have the anchor column and ignore_missing is False.   
-                - If a match column is missing and ignore_missing is false.   
-                - If the durations were to be set and the dataframe did not have an onset column.   
-                - If the durations were to be set and the dataframe did not have a duration column.   
+        :raises ValueError:
+            - If dataframe does not have the anchor column and ignore_missing is False.
+            - If a match column is missing and ignore_missing is false.
+            - If the durations were to be set and the dataframe did not have an onset column.
+            - If the durations were to be set and the dataframe did not have a duration column.
 
         """
 
@@ -121,7 +116,7 @@ class MergeConsecutiveOp(BaseOp):
         Returns:
             list:  Group numbers set (starting at 1).
 
-        # TODO: Handle roundoff in rows for comparison.
+        # TODO: Handle round off in rows for comparison.
         """
         in_group = False
         remove_groups = [0] * len(match_df)

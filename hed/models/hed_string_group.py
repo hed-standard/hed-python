@@ -30,7 +30,7 @@ class HedStringGroup(HedString):
         self._original_children = self._children
 
     def get_original_hed_string(self):
-        return "".join([group._hed_string for group in self._children])
+        return ",".join([group._hed_string for group in self._children])
 
     def sort(self):
         combined_string = HedString.from_hed_strings(self._children)
@@ -60,15 +60,13 @@ class HedStringGroup(HedString):
         return [child for sub_string in self._children for child in sub_string._children]
 
     def remove(self, items_to_remove):
-        """ Remove any tags/groups in items_to_remove.
+        """ Remove tags/groups by identity.
 
         Parameters:
             items_to_remove (list): A list of HedGroup and HedTag objects to remove.
 
         Notes:
             - Any groups that become empty will also be pruned.
-            - This goes by identity, not equivalence.
-
         """
         all_groups = [group for sub_group in self._children for group in sub_group.get_all_groups()]
         self._remove(items_to_remove, all_groups)
@@ -85,12 +83,9 @@ class HedStringGroup(HedString):
             item_to_replace (HedTag or HedGroup): The tag to replace.
             new_contents (HedTag or HedGroup or list): The replacements for the tag.
 
-        Notes:
-            - It tag must exist in this an error is raised.
-
+        :raises KeyError:
+            - item_to_replace does not exist
         """
-
-        # this needs to pass the tag off to the appropriate group
         replace_sub_string = None
         for sub_string in self._children:
             for i, child in enumerate(sub_string.children):

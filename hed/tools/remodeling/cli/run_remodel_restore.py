@@ -16,9 +16,13 @@ def get_parser():
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
     parser.add_argument("-n", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
                         help="Name of the default backup for remodeling")
+
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The names of the task.")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
+    parser.add_argument("-w", "--work_dir", default="", dest="work_dir",
+                        help="The root path for remodeling work if given, " +
+                             "otherwise [data_root]/derivatives/remodel is used.")
     return parser
 
 
@@ -29,14 +33,17 @@ def main(arg_list=None):
         arg_list (list or None):   Called with value None when called from the command line.
                                    Otherwise, called with the command-line parameters as an argument list.
 
-    Raises:
-        HedFileError   
-            - if the specified backup does not exist.  
+    :raises HedFileError:
+        - if the specified backup does not exist.
 
     """
     parser = get_parser()
     args = parser.parse_args(arg_list)
-    backup_man = BackupManager(args.data_dir)
+    if args.work_dir:
+        backups_root = args.work_dir
+    else:
+        backups_root = None
+    backup_man = BackupManager(args.data_dir, backups_root=backups_root)
     if not backup_man.get_backup(args.backup_name):
         raise HedFileError("BackupDoesNotExist", f"{args.backup_name}", "")
     backup_man.restore_backup(args.backup_name, task_names=args.task_names, verbose=args.verbose)
