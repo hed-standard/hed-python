@@ -155,55 +155,60 @@ class HedSchemaWikiParser:
                 msg = f"Required section separator '{SectionNames[section]}' not found in file"
                 raise HedFileError(error_code, msg, filename=self.filename)
 
+    def _check_for_new_section(self, line, strings_for_section, current_section):
+        new_section = None
+        for key, section_string in SectionStarts.items():
+            if line.startswith(section_string):
+                if key in strings_for_section:
+                    msg = f"Found section {SectionNames[key]} twice"
+                    raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
+                                       msg, filename=self.filename)
+                if current_section < key:
+                    new_section = key
+                else:
+                    error_code = HedExceptions.INVALID_SECTION_SEPARATOR
+                    if key in ErrorsBySection:
+                        error_code = ErrorsBySection[key]
+                    msg = f"Found section {SectionNames[key]} out of order in file"
+                    raise HedFileError(error_code, msg, filename=self.filename)
+                break
+        return new_section
+
+    def _handle_bad_section_sep(self, line, current_section):
+        if current_section != HedWikiSection.Schema and line.startswith(wiki_constants.ROOT_TAG):
+            msg = f"Invalid section separator '{line.strip()}'"
+            raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR, msg, filename=self.filename)
+
+        if line.startswith("!#"):
+            msg = f"Invalid section separator '{line.strip()}'"
+            raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR, msg, filename=self.filename)
+
     def _split_lines_into_sections(self, wiki_lines):
-        """
-            Takes a list of lines, and splits it into valid wiki sections.
+        """ Takes a list of lines, and splits it into valid wiki sections.
 
-        Parameters
-        ----------
-        wiki_lines : [str]
+        Parameters:
+           wiki_lines : [str]
 
-        Returns
-        -------
-        sections: {str: [str]}
+        Returns:
+            sections: {str: [str]}
             A list of lines for each section of the schema(not including the identifying section line)
         """
-        # We start having found the header and may still be in it
         current_section = HedWikiSection.HeaderLine
-        found_section = True
         strings_for_section = {}
+        strings_for_section[HedWikiSection.HeaderLine] = []
         for line_number, line in enumerate(wiki_lines):
-            for key, section_string in SectionStarts.items():
-                if line.startswith(section_string):
-                    if key in strings_for_section:
-                        msg = f"Found section {SectionNames[key]} twice"
-                        raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR,
-                                           msg, filename=self.filename)
-
-                    if current_section < key:
-                        current_section = key
-                        found_section = True
-                        break
-                    else:
-                        error_code = HedExceptions.INVALID_SECTION_SEPARATOR
-                        if key in ErrorsBySection:
-                            error_code = ErrorsBySection[key]
-                        msg = f"Found section {SectionNames[key]} out of order in file"
-                        raise HedFileError(error_code, msg, filename=self.filename)
-
-            if found_section:
-                strings_for_section[current_section] = []
-                found_section = False
+            # Header is handled earlier
+            if line_number == 0:
                 continue
 
-            if (current_section != HedWikiSection.Schema and line.startswith(wiki_constants.ROOT_TAG) and
-                    not (line.startswith(wiki_constants.OLD_SYNTAX_SECTION_NAME) and not self._schema.is_hed3_schema)):
-                msg = f"Invalid section separator '{line.strip()}'"
-                raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR, msg, filename=self.filename)
+            new_section = self._check_for_new_section(line, strings_for_section, current_section)
 
-            if line.startswith("!#"):
-                msg = f"Invalid section separator '{line.strip()}'"
-                raise HedFileError(HedExceptions.INVALID_SECTION_SEPARATOR, msg, filename=self.filename)
+            if new_section:
+                strings_for_section[new_section] = []
+                current_section = new_section
+                continue
+
+            self._handle_bad_section_sep(line, current_section)
 
             if current_section == HedWikiSection.Prologue or current_section == HedWikiSection.Epilogue:
                 strings_for_section[current_section].append((line_number + 1, line))

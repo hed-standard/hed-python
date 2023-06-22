@@ -291,6 +291,29 @@ class TagValidator:
                                                            index_in_tag_end=None)
         return validation_issues
 
+    def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None):
+        """Returns any issues found if this is a value tag"""
+        validation_issues = []
+        if original_tag.is_takes_value_tag() and \
+                not self._validate_value_class_portion(original_tag, stripped_value):
+            validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID, report_as)
+            if error_code:
+                validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
+                                                               report_as, actual_error=error_code)
+        return validation_issues
+
+    def _check_units(self, original_tag, bad_units, report_as):
+        """Returns an issue noting this is either bad units, or missing units"""
+        if bad_units:
+            tag_unit_class_units = original_tag.get_tag_unit_class_units()
+            validation_issue = ErrorHandler.format_error(ValidationErrors.UNITS_INVALID,
+                                                         tag=report_as, units=tag_unit_class_units)
+        else:
+            default_unit = original_tag.get_unit_class_default_unit()
+            validation_issue = ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
+                                                         tag=report_as, default_unit=default_unit)
+        return validation_issue
+
     def check_tag_unit_class_units_are_valid(self, original_tag, report_as=None, error_code=None):
         """ Report incorrect unit class or units.
 
@@ -305,36 +328,19 @@ class TagValidator:
         if original_tag.is_unit_class_tag():
             stripped_value, unit = original_tag.get_stripped_unit_value()
             if not unit:
-                bad_units = " " in original_tag.extension
-                had_error = False
                 # Todo: in theory this should separately validate the number and the units, for units
                 # that are prefixes like $.  Right now those are marked as unit invalid AND value_invalid.
+                bad_units = " " in original_tag.extension
+                report_as = report_as if report_as else original_tag
+
                 if bad_units:
                     stripped_value = stripped_value.split(" ")[0]
-                if original_tag.is_takes_value_tag() and\
-                        not self._validate_value_class_portion(original_tag, stripped_value):
-                    validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
-                                                                   report_as if report_as else original_tag)
-                    if error_code:
-                        had_error = True
-                        validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
-                                                                       report_as if report_as else original_tag,
-                                                                       actual_error=error_code)
 
-                if bad_units:
-                    tag_unit_class_units = original_tag.get_tag_unit_class_units()
-                    if tag_unit_class_units:
-                        validation_issues += ErrorHandler.format_error(ValidationErrors.UNITS_INVALID,
-                                                                       tag=report_as if report_as else original_tag,
-                                                                       units=tag_unit_class_units)
-                else:
-                    default_unit = original_tag.get_unit_class_default_unit()
-                    validation_issues += ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
-                                                                   tag=report_as if report_as else original_tag,
-                                                                   default_unit=default_unit)
+                validation_issues += self._check_value_class(original_tag, stripped_value, report_as, error_code)
+                validation_issues += self._check_units(original_tag, bad_units, report_as)
 
                 # We don't want to give this overall error twice
-                if error_code and not had_error:
+                if error_code and not any(error_code == issue['code'] for issue in validation_issues):
                     new_issue = validation_issues[0].copy()
                     new_issue['code'] = error_code
                     validation_issues += [new_issue]
