@@ -38,16 +38,68 @@ class DefValidator(DefinitionDict):
 
         return def_issues
 
+    @staticmethod
+    def _validate_def_units(def_tag, placeholder_tag, tag_validator, is_def_expand_tag):
+        """Validate units and value classes on def/def-expand tags
+
+        Parameters:
+            def_tag(HedTag): The source tag
+            placeholder_tag(HedTag): The placeholder tag this def fills in
+            tag_validator(TagValidator): Used to validate the units/values
+            is_def_expand_tag(bool): If the given def_tag is a def-expand tag or not.
+
+        Returns:
+            issues(list): Issues found from validating placeholders.
+        """
+        def_issues = []
+        error_code = ValidationErrors.DEF_INVALID
+        if is_def_expand_tag:
+            error_code = ValidationErrors.DEF_EXPAND_INVALID
+        if placeholder_tag.is_unit_class_tag():
+            def_issues += tag_validator.check_tag_unit_class_units_are_valid(placeholder_tag,
+                                                                             report_as=def_tag,
+                                                                             error_code=error_code)
+        elif placeholder_tag.is_value_class_tag():
+            def_issues += tag_validator.check_tag_value_class_valid(placeholder_tag,
+                                                                    report_as=def_tag,
+                                                                    error_code=error_code)
+        return def_issues
+
+    @staticmethod
+    def _report_missing_or_invalid_value(def_tag, def_entry, is_def_expand_tag):
+        """Returns the correct error for this type of def tag
+
+        Parameters:
+            def_tag(HedTag): The source tag
+            def_entry(DefinitionEntry): The entry for this definition
+            is_def_expand_tag(bool): If the given def_tag is a def-expand tag or not.
+
+        Returns:
+            issues(list): Issues found from validating placeholders.
+        """
+        def_issues = []
+        if def_entry.takes_value:
+            error_code = ValidationErrors.HED_DEF_VALUE_MISSING
+            if is_def_expand_tag:
+                error_code = ValidationErrors.HED_DEF_EXPAND_VALUE_MISSING
+        else:
+            error_code = ValidationErrors.HED_DEF_VALUE_EXTRA
+            if is_def_expand_tag:
+                error_code = ValidationErrors.HED_DEF_EXPAND_VALUE_EXTRA
+        def_issues += ErrorHandler.format_error(error_code, tag=def_tag)
+        return def_issues
+
     def _validate_def_contents(self, def_tag, def_expand_group, tag_validator):
         """ Check for issues with expanding a tag from Def to a Def-expand tag group
 
         Parameters:
             def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
-            def_expand_group (HedGroup or HedTag):
-            Source group for this def-expand tag.  Same as def_tag if this is not a def-expand tag.
+            def_expand_group (HedGroup or HedTag): Source group for this def-expand tag.
+                                                   Same as def_tag if this is not a def-expand tag.
             tag_validator (TagValidator): Used to validate the placeholder replacement.
+
         Returns:
-            issues
+            issues(list): Issues found from validating placeholders.
         """
         def_issues = []
         is_def_expand_tag = def_expand_group != def_tag
@@ -75,27 +127,9 @@ class DefValidator(DefinitionDict):
                                                             found_def=def_expand_group)
                 if def_entry.takes_value and tag_validator:
                     placeholder_tag = def_contents.get_first_group().find_placeholder_tag()
-                    error_code = ValidationErrors.DEF_INVALID
-                    if is_def_expand_tag:
-                        error_code = ValidationErrors.DEF_EXPAND_INVALID
-                    if placeholder_tag.is_unit_class_tag():
-                        def_issues += tag_validator.check_tag_unit_class_units_are_valid(placeholder_tag,
-                                                                                         report_as=def_tag,
-                                                                                         error_code=error_code)
-                    elif placeholder_tag.is_value_class_tag():
-                        def_issues += tag_validator.check_tag_value_class_valid(placeholder_tag,
-                                                                                report_as=def_tag,
-                                                                                error_code=error_code)
-
-            elif def_entry.takes_value:
-                error_code = ValidationErrors.HED_DEF_VALUE_MISSING
-                if is_def_expand_tag:
-                    error_code = ValidationErrors.HED_DEF_EXPAND_VALUE_MISSING
-                def_issues += ErrorHandler.format_error(error_code, tag=def_tag)
+                    def_issues += self._validate_def_units(def_tag, placeholder_tag, tag_validator,
+                                                           is_def_expand_tag)
             else:
-                error_code = ValidationErrors.HED_DEF_VALUE_EXTRA
-                if is_def_expand_tag:
-                    error_code = ValidationErrors.HED_DEF_EXPAND_VALUE_EXTRA
-                def_issues += ErrorHandler.format_error(error_code, tag=def_tag)
+                def_issues += self._report_missing_or_invalid_value(def_tag, def_entry, is_def_expand_tag)
 
         return def_issues
