@@ -136,7 +136,7 @@ class HedTagSummary(BaseSummary):
         return {"Name": merge_counts.name, "Total events": merge_counts.total_events,
                 "Total files": len(merge_counts.files.keys()),
                 "Files": [name for name in merge_counts.files.keys()],
-                "Main tags": details, "Other tags": leftovers}
+                "Specifics": {"Main tags": details, "Other tags": leftovers}}
 
     def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return a formatted string with the summary for the indicated name.
@@ -215,7 +215,8 @@ class HedTagSummary(BaseSummary):
         return tag_list
 
     @staticmethod
-    def _get_tag_list(tag_info, indent=BaseSummary.DISPLAY_INDENT):
+    def _get_tag_list(result, indent=BaseSummary.DISPLAY_INDENT):
+        tag_info = result["Specifics"]
         sum_list = [f"\n{indent}Main tags[events,files]:"]
         for category, tags in tag_info['Main tags'].items():
             sum_list.append(f"{indent}{indent}{category}:")

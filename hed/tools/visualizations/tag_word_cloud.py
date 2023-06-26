@@ -36,7 +36,8 @@ def summary_to_dict(summary):
         
     """
     overall_summary = summary.get("Overall summary", {})
-    tag_dict = overall_summary.get("Main tags", {})
+    specifics = overall_summary.get("Specifics", {})
+    tag_dict = specifics.get("Main tags", {})
     word_dict = {}
     for tag_sub_list in tag_dict.values():
         for tag_sub_dict in tag_sub_list:
