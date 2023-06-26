@@ -32,6 +32,22 @@ class Test(unittest.TestCase):
         self.assertIsInstance(dict2, TabularSummary, "TabularSummary: multiple values are okay in constructor")
         self.assertEqual(len(dict2.value_info.keys()), 3, "TabularSummary should have keys for each value column")
 
+    def test_extract_summary(self):
+        tab1 = TabularSummary()
+        stern_df = get_new_dataframe(self.stern_map_path)
+        tab1.update(stern_df)
+        sum_info = tab1.get_summary()
+        new_tab1 = TabularSummary.extract_summary(sum_info)
+        tab2 = TabularSummary(value_cols=['letter'], skip_cols=['event_type'])
+        tabular_info = {}
+        new_tab = TabularSummary.extract_summary(tabular_info)
+        self.assertIsInstance(new_tab, TabularSummary)
+
+    def test_extract_summary_empty(self):
+        tabular_info = {}
+        new_tab = TabularSummary.extract_summary(tabular_info)
+        self.assertIsInstance(new_tab, TabularSummary)
+        
     def test_get_number_unique_values(self):
         dict1 = TabularSummary()
         wh_df = get_new_dataframe(self.wh_events_path)
@@ -54,7 +70,7 @@ class Test(unittest.TestCase):
                          "TabularSummary categorical_info be columns minus skip and value columns")
         summary1 = dict1.get_summary(as_json=False)
         self.assertIsInstance(summary1, dict)
-        self.assertEqual(len(summary1), 5)
+        self.assertEqual(len(summary1), 7)
         summary2 = dict1.get_summary(as_json=True).replace('"', '')
         self.assertIsInstance(summary2, str)
 

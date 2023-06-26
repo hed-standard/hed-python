@@ -3,7 +3,7 @@
 import json
 
 
-class TabularColumnNameSummary:
+class ColumnNameSummary:
     def __init__(self, name=''):
         self.name = name
         self.file_dict = {}

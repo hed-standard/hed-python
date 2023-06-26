@@ -1,6 +1,6 @@
 """  Summarize the column names in a collection of tabular files. """
 
-from hed.tools.analysis.tabular_column_name_summary import TabularColumnNameSummary
+from hed.tools.analysis.column_name_summary import ColumnNameSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
 
@@ -67,13 +67,13 @@ class SummarizeColumnNamesOp(BaseOp):
         df_new = df.copy()
         summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
-            summary = ColumnNameSummary(self)
+            summary = ColumnNamesSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
         summary.update_summary({"name": name, "column_names": list(df_new.columns)})
         return df_new
 
 
-class ColumnNameSummary(BaseSummary):
+class ColumnNamesSummary(BaseSummary):
 
     def __init__(self, sum_op):
         super().__init__(sum_op)
@@ -85,35 +85,39 @@ class ColumnNameSummary(BaseSummary):
             new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:
-            - The summary information is kept in separate TabularColumnNameSummary objects for each file.  
+            - The summary information is kept in separate ColumnNameSummary objects for each file.  
             - The summary needs a "name" str and a "column_names" list.  
-            - The summary uses TabularColumnNameSummary as the summary object.
+            - The summary uses ColumnNameSummary as the summary object.
         """
         name = new_info['name']
         if name not in self.summary_dict:
-            self.summary_dict[name] = TabularColumnNameSummary(name=name)
+            self.summary_dict[name] = ColumnNameSummary(name=name)
         self.summary_dict[name].update(name, new_info["column_names"])
 
     def get_details_dict(self, column_summary):
         """ Return the summary dictionary extracted from a ColumnNameSummary.
 
         Parameters:
-            column_summary (TabularColumnNameSummary):  A column name summary for the data file.
+            column_summary (ColumnNameSummary):  A column name summary for the data file.
 
         Returns:
             dict - a dictionary with the summary information for column names.
 
         """
-        return column_summary.get_summary()
+        summary = column_summary.get_summary()
+        return {"Name": summary['Summary name'], "Total events": "n/a",
+                "Total files": summary['Number files'],
+                "Files": [name for name in column_summary.file_dict.keys()],
+                "Columns": summary['Columns']}
 
     def merge_all_info(self):
-        """ Create a TabularColumnNameSummary containing the overall dataset summary.
+        """ Create a ColumnNameSummary containing the overall dataset summary.
 
         Returns:
-            TabularColumnNameSummary - the overall summary object for column names.
+            ColumnNameSummary - the overall summary object for column names.
 
         """
-        all_sum = TabularColumnNameSummary(name='Dataset')
+        all_sum = ColumnNameSummary(name='Dataset')
         for key, counts in self.summary_dict.items():
             for name, pos in counts.file_dict.items():
                 all_sum.update(name, counts.unique_headers[pos])
@@ -152,7 +156,7 @@ class ColumnNameSummary(BaseSummary):
 
         """
         sum_list = [f"Dataset: Number of files={result.get('Number files', 0)}"]
-        for element in result.get("Columns", []):
+        for element in result.get("Unique headers", []):
             sum_list.append(f"{indent}Columns: {str(element['Column names'])}")
             for file in element.get("Files", []):
                 sum_list.append(f"{indent}{indent}{file}")

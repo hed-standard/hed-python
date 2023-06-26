@@ -1,6 +1,7 @@
 import unittest
 from wordcloud import WordCloud
-from hed.tools.visualizations import tag_summary_word_cloud
+from hed.tools.visualizations import tag_word_cloud
+
 
 class TestWordCloudFunctions(unittest.TestCase):
 
@@ -23,14 +24,14 @@ class TestWordCloudFunctions(unittest.TestCase):
         }
         expected_output = {'tag1': 5, 'tag2': 3, 'tag3': 7}
 
-        word_dict = tag_summary_word_cloud.convert_summary_to_word_dict(summary_json)
+        word_dict = tag_word_cloud.summary_to_dict(summary_json)
         self.assertEqual(word_dict, expected_output)
 
     def test_create_wordcloud(self):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
         width = 400
         height = 200
-        wc = tag_summary_word_cloud.create_wordcloud(word_dict, width, height)
+        wc = tag_word_cloud.create_wordcloud(word_dict, width, height)
 
         self.assertIsInstance(wc, WordCloud)
         self.assertEqual(wc.width, width)
@@ -40,12 +41,12 @@ class TestWordCloudFunctions(unittest.TestCase):
         # Test creation of word cloud with an empty dictionary
         word_dict = {}
         with self.assertRaises(ValueError):
-            tag_summary_word_cloud.create_wordcloud(word_dict)
+            tag_word_cloud.create_wordcloud(word_dict)
 
     def test_create_wordcloud_with_single_word(self):
         # Test creation of word cloud with a single word
         word_dict = {'single_word': 1}
-        wc = tag_summary_word_cloud.create_wordcloud(word_dict)
+        wc = tag_word_cloud.create_wordcloud(word_dict)
         self.assertIsInstance(wc, WordCloud)
         # Check that the single word is in the word cloud
         self.assertIn('single_word', wc.words_)

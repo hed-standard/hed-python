@@ -81,8 +81,9 @@ class TabularSummary:
         value_cols = {}
         for key in sorted_cols:
             value_cols[key] = self.value_info[key]
-        summary = {"Summary name": self.name, "Total events": self.total_events, "Total files": self.total_files,
-                   "Categorical columns": categorical_cols, "Value columns": value_cols}
+        summary = {"Name": self.name, "Total events": self.total_events, "Total files": self.total_files,
+                   "Categorical columns": categorical_cols, "Value columns": value_cols,
+                   "Skip columns": self.skip_cols, "Files": self.files}
         if as_json:
             return json.dumps(summary, indent=4)
         else:
@@ -214,6 +215,30 @@ class TabularSummary:
             else:
                 self.value_info[col] = [self.value_info[col][0] + col_dict.value_info[col][0],
                                         self.value_info[col][1] + col_dict.value_info[col][1]]
+
+    @staticmethod
+    def extract_summary(summary_info):
+        """ Create a TabularSummary object from a serialized summary
+
+        Parameters:
+            summary_info (dict or str):  A JSON string or a dictionary containing contents of a TabularSummary.
+            
+        Returns:
+            TabularSummary:  contains the information in summary_info as a TabularSummary object.
+        """
+
+        if isinstance(summary_info, str):
+            summary_info = json.loads(summary_info)
+        new_tab = TabularSummary(value_cols=summary_info.get('Value columns', {}).keys(),
+                                 skip_cols=summary_info.get('Skip columns', []),
+                                 name=summary_info.get('Summary name', ''))
+        new_tab.value_info = summary_info.get('Value_columns', {})
+        new_tab.total_files = summary_info.get('Total files', 0)
+        new_tab.total_events = summary_info.get('Total events', 0)
+        new_tab.skip_cols = summary_info.get('Skip columns', [])
+        new_tab.categorical_info = summary_info.get('Categorical columns', {})
+        new_tab.files = summary_info.get('Files', {})
+        return new_tab
 
     @staticmethod
     def get_columns_info(dataframe, skip_cols=None):
