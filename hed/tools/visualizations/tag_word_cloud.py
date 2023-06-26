@@ -22,19 +22,22 @@ def create_wordcloud(word_dict, width=400, height=200):
     return wc
 
 
-def convert_summary_to_word_dict(summary_json):
+def summary_to_dict(summary):
     """Converts a HedTagSummary json dict into the word cloud input format
 
     Parameters:
-        summary_json(dict): The summary from a summarize hed tags op
+        summary(dict): The summary from a summarize hed tags op
 
     Returns:
         word_dict(dict): a dict of the words and their occurrence count
         
     :raises KeyError:
         A malformed dictionary was passed
+        
     """
-    tag_dict = summary_json['Dataset']['Overall summary']['Main tags']
+    overall_summary = summary.get("Overall summary", {})
+    specifics = overall_summary.get("Specifics", {})
+    tag_dict = specifics.get("Main tags", {})
     word_dict = {}
     for tag_sub_list in tag_dict.values():
         for tag_sub_dict in tag_sub_list:
