@@ -602,10 +602,14 @@ class HedTag:
     @staticmethod
     def _find_modifier_unit_entry(units, all_valid_unit_permutations):
         possible_match = all_valid_unit_permutations.get(units)
-        if not possible_match or not possible_match.has_attribute(HedKey.UnitSymbol):
-            possible_match = all_valid_unit_permutations.get(units.lower())
-            if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
-                possible_match = None
+        # If we have a match that's a unit symbol, we're done, return it.
+        if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
+            return possible_match
+
+        possible_match = all_valid_unit_permutations.get(units.lower())
+        # Unit symbols must match including case, a match of a unit symbol now is something like M becoming m.
+        if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
+            possible_match = None
 
         return possible_match
 

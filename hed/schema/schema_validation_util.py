@@ -1,7 +1,12 @@
-"""Utilities used in HED validation using a HED schema."""
+"""Utilities used in HED validation/loading using a HED schema."""
 from semantic_version import Version
+
+from hed.errors import ErrorHandler, SchemaWarnings
 from hed.schema import hed_schema_constants as constants
 from hed.errors.exceptions import HedExceptions, HedFileError
+
+ALLOWED_TAG_CHARS = "-"
+ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 
 
 def validate_library_name(library_name):
@@ -57,7 +62,7 @@ def is_hed3_version_number(version_string):
     return False
 
 
-attribute_validators = {
+header_attribute_validators = {
         constants.VERSION_ATTRIBUTE: (validate_version_string, HedExceptions.HED_SCHEMA_VERSION_INVALID),
         constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
     }
@@ -100,8 +105,8 @@ def validate_attributes(attrib_dict, filename):
     validate_present_attributes(attrib_dict, filename)
 
     for attribute_name, attribute_value in attrib_dict.items():
-        if attribute_name in attribute_validators:
-            validator, error_code = attribute_validators[attribute_name]
+        if attribute_name in header_attribute_validators:
+            validator, error_code = header_attribute_validators[attribute_name]
             had_error = validator(attribute_value)
             if had_error:
                 raise HedFileError(error_code, had_error, filename)
@@ -163,3 +168,55 @@ def find_rooted_entry(tag_entry, schema, loading_merged):
             return None
 
         return rooted_entry
+
+
+def validate_schema_term(hed_term):
+    """ Check short tag for capitalization and illegal characters.
+
+    Parameters:
+        hed_term (str): A single hed term.
+
+    Returns:
+        list: A list of all formatting issues found in the term. Each issue is a dictionary.
+
+    """
+    issues_list = []
+    # Any # terms will have already been validated as the previous entry.
+    if hed_term == "#":
+        return issues_list
+
+    for i, char in enumerate(hed_term):
+        if i == 0 and not (char.isdigit() or char.isupper()):
+            issues_list += ErrorHandler.format_error(SchemaWarnings.INVALID_CAPITALIZATION,
+                                                     hed_term, char_index=i, problem_char=char)
+            continue
+        if char in ALLOWED_TAG_CHARS or char.isalnum():
+            continue
+        issues_list += ErrorHandler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG,
+                                                 hed_term, char_index=i, problem_char=char)
+    return issues_list
+
+
+def validate_schema_description(tag_name, hed_description):
+    """ Check the description of a single schema term.
+
+    Parameters:
+        tag_name (str): A single hed tag - not validated here, just used for error messages.
+        hed_description (str): The description string to validate.
+
+    Returns:
+        list: A list of all formatting issues found in the description.
+
+    """
+    issues_list = []
+    # Blank description is fine
+    if not hed_description:
+        return issues_list
+    for i, char in enumerate(hed_description):
+        if char.isalnum():
+            continue
+        if char in ALLOWED_DESC_CHARS:
+            continue
+        issues_list += ErrorHandler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC,
+                                                 hed_description, tag_name, char_index=i, problem_char=char)
+    return issues_list

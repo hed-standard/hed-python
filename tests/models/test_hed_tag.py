@@ -120,11 +120,15 @@ class TestSchemaUtilityFunctions(TestHedBase):
         volume_string = HedTag('Volume/100 m^3', hed_schema=self.hed_schema)
         prefixed_volume_string = HedTag('Volume/100 cm^3', hed_schema=self.hed_schema)
         invalid_volume_string = HedTag('Volume/200 cm', hed_schema=self.hed_schema)
+        invalid_distance_string = HedTag('Distance/200 M', hed_schema=self.hed_schema)
         # currency_units = {
         #     'currency':self.schema.unit_classes['currency']
         # }
         volume_units = {
             'volume': self.hed_schema.unit_classes['volumeUnits']
+        }
+        distance_units = {
+            'distance': self.hed_schema.unit_classes['physicalLengthUnits']
         }
         # stripped_dollars_string_no_space = dollars_string_no_space._get_tag_units_portion(currency_units)
         # stripped_dollars_string = dollars_string._get_tag_units_portion(currency_units)
@@ -133,6 +137,7 @@ class TestSchemaUtilityFunctions(TestHedBase):
         stripped_volume_string_no_space, _ = volume_string_no_space._get_tag_units_portion(volume_units)
         stripped_prefixed_volume_string, _ = prefixed_volume_string._get_tag_units_portion(volume_units)
         stripped_invalid_volume_string, _ = invalid_volume_string._get_tag_units_portion(volume_units)
+        stripped_invalid_distance_string, _ = invalid_distance_string._get_tag_units_portion(distance_units)
         # self.assertEqual(stripped_dollars_string_no_space, None)
         # self.assertEqual(stripped_dollars_string, '25.99')
         # self.assertEqual(stripped_dollars_string_invalid, None)
@@ -140,6 +145,7 @@ class TestSchemaUtilityFunctions(TestHedBase):
         self.assertEqual(stripped_volume_string_no_space, None)
         self.assertEqual(stripped_prefixed_volume_string, '100')
         self.assertEqual(stripped_invalid_volume_string, None)
+        self.assertEqual(stripped_invalid_distance_string, None)
 
     def test_determine_allows_extensions(self):
         extension_tag1 = HedTag('boat', hed_schema=self.hed_schema)

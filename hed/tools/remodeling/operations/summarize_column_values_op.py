@@ -138,7 +138,7 @@ class ColumnValueSummary(BaseSummary):
 
         """
         all_sum = TabularSummary(value_cols=self.op.value_columns, skip_cols=self.op.skip_columns, name='Dataset')
-        for key, counts in self.summary_dict.items():
+        for counts in self.summary_dict.values():
             all_sum.update_summary(counts)
         return all_sum
 
