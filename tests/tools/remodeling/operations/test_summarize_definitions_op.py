@@ -59,6 +59,16 @@ class Test(unittest.TestCase):
         self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], DefinitionSummary)
         # print(str(dispatch.summary_dicts[sum_op.summary_name].get_text_summary()['Dataset']))
 
+        cont = dispatch.summary_dicts
+        context = cont.get("get_definition_summary", None)
+        self.assertIsInstance(context, DefinitionSummary, "get_summary testing DefinitionSummary")
+        summary1a = context.get_summary()
+        self.assertIsInstance(summary1a, dict)
+        self.assertIsInstance(summary1a["Dataset"], dict)
+        text_summary1 = context.get_text_summary(individual_summaries=None)
+        self.assertIsInstance(text_summary1, dict)
+        self.assertIsInstance(text_summary1["Dataset"], str)
+
     def test_summary_errors(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         parms = json.loads(self.json_parms)

@@ -108,7 +108,7 @@ class ColumnNamesSummary(BaseSummary):
         return {"Name": summary['Summary name'], "Total events": "n/a",
                 "Total files": summary['Number files'],
                 "Files": [name for name in column_summary.file_dict.keys()],
-                "Columns": summary['Columns']}
+                "Specifics": {"Columns": summary['Columns']}}
 
     def merge_all_info(self):
         """ Create a ColumnNameSummary containing the overall dataset summary.
@@ -140,8 +140,11 @@ class ColumnNamesSummary(BaseSummary):
         """
         if name == "Dataset":
             return self._get_dataset_string(result, indent)
-        columns = result["Columns"][0]
-        return f"{indent}{str(columns['Column names'])}"
+        columns = result.get("Specifics", {}).get("Columns", [])
+        if columns:
+            return f"{indent}{str(columns[0])}"
+        else:
+            return ""
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
@@ -155,8 +158,10 @@ class ColumnNamesSummary(BaseSummary):
             str: Formatted string suitable for saving in a file or printing.
 
         """
-        sum_list = [f"Dataset: Number of files={result.get('Number files', 0)}"]
-        for element in result.get("Unique headers", []):
+        sum_list = [f"Dataset: Number of files={result.get('Total files', 0)}"]
+        specifics = result.get("Specifics", {})
+        columns = specifics.get("Columns", {})
+        for element in columns:
             sum_list.append(f"{indent}Columns: {str(element['Column names'])}")
             for file in element.get("Files", []):
                 sum_list.append(f"{indent}{indent}{file}")

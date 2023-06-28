@@ -101,17 +101,16 @@ class HedValidationSummary(BaseSummary):
             This gets the error list from "sidecar_issues" and "event_issues".
 
         """
-
-        if result["is_merged"]:
-            sum_list = [f"{name}: [{result['total_sidecar_files']} sidecar files, "
-                        f"{result['total_event_files']} event files]"]
-            sum_list = sum_list + self.get_error_list(result['sidecar_issues'], count_only=True, indent=indent)
-            sum_list = sum_list + self.get_error_list(result['event_issues'], count_only=True, indent=indent)
+        specifics = result.get("Specifics", {})
+        sum_list = [f"{name}: [{len(specifics['sidecar_files'])} sidecar files, "
+                    f"{len(specifics['event_files'])} event files]"]
+        if specifics.get('is_merged'):
+            sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], count_only=True, indent=indent)
+            sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=True, indent=indent)
         else:
-            sum_list = [f"{indent}{name}: {result['total_sidecar_files']} sidecar files"]
-            sum_list = sum_list + self.get_error_list(result['sidecar_issues'], indent=indent*2)
-            if result['validation_completed']:
-                sum_list = sum_list + self.get_error_list(result['event_issues'], count_only=False, indent=indent*2)
+            sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], indent=indent*2)
+            if specifics['validation_completed']:
+                sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=False, indent=indent*2)
             else:
                 sum_list = sum_list + [f"{indent*2}Event file validation was incomplete because of sidecar errors"]
         return "\n".join(sum_list)
@@ -127,14 +126,14 @@ class HedValidationSummary(BaseSummary):
         """
 
         results = self.get_empty_results()
-        results["total_event_files"] = 1
+        results["event_files"].append(new_info["name"])
         results["event_issues"][new_info["name"]] = []
-        self.summary_dict[new_info["name"]] = results
         sidecar = new_info.get('sidecar', None)
         filtered_issues = []
         if sidecar:
             if not isinstance(sidecar, Sidecar):
                 sidecar = Sidecar(files=new_info['sidecar'], name=os.path.basename(sidecar))
+            results["sidecar_files"].append(sidecar.name)
             results["sidecar_issues"][sidecar.name] = []
             sidecar_issues = sidecar.validate(new_info['schema'])
             filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
@@ -142,7 +141,6 @@ class HedValidationSummary(BaseSummary):
                 sidecar_issues = filtered_issues
             results['sidecar_issues'][sidecar.name] = sidecar_issues
             results['total_sidecar_issues'] = len(sidecar_issues)
-            results['total_sidecar_files'] = 1
         if not filtered_issues:
             results['validation_completed'] = True
             input_data = TabularInput(new_info['df'], sidecar=sidecar)
@@ -151,6 +149,7 @@ class HedValidationSummary(BaseSummary):
                 issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
             results['event_issues'][new_info["name"]] = issues
             results['total_event_issues'] = len(issues)
+        self.summary_dict[new_info["name"]] = results
 
     def get_details_dict(self, summary_info):
         """Return the summary details from the summary_info.
@@ -162,7 +161,11 @@ class HedValidationSummary(BaseSummary):
             dict:  Same summary_info as was passed in.
 
         """
-        return summary_info
+
+        return {"Name": "", "Total events": "n/a",
+                "Total files": len(summary_info.get("event_files", [])),
+                "Files": summary_info.get("event_files", []),
+                "Specifics": summary_info}
 
     def merge_all_info(self):
         """ Create a dictionary containing all of the errors in the dataset.
@@ -175,9 +178,10 @@ class HedValidationSummary(BaseSummary):
         results = self.get_empty_results()
         results["is_merged"] = True
         for key, ind_results in self.summary_dict.items():
-            results["total_event_files"] += ind_results["total_event_files"]
+            results["event_files"].append(key)
             results["total_event_issues"] += ind_results["total_event_issues"]
-
+            results["total_sidecar_issues"] += ind_results["total_sidecar_issues"]
+            results["sidecar_files"] = results["sidecar_files"] + ind_results["sidecar_files"]
             for ikey, errors in ind_results["sidecar_issues"].items():
                 results["sidecar_issues"][ikey] = errors
             for ikey, errors in ind_results["event_issues"].items():
@@ -186,13 +190,12 @@ class HedValidationSummary(BaseSummary):
                        f"Validation incomplete due to {ind_results['total_sidecar_issues']} sidecar issues"
                 else:
                     results["event_issues"][ikey] = f"{len(errors)}"
-            results["total_sidecar_files"] += ind_results["total_sidecar_files"]
         return results
 
     @staticmethod
     def get_empty_results():
-        return {"total_event_files": 0, "total_event_issues": 0, "event_issues": {}, "is_merged": False,
-                "total_sidecar_files": 0, "total_sidecar_issues": 0, "sidecar_issues": {},
+        return {"event_files": [], "total_event_issues": 0, "event_issues": {}, "is_merged": False,
+                "sidecar_files": [], "total_sidecar_issues": 0, "sidecar_issues": {},
                 "validation_completed": False}
 
     @staticmethod

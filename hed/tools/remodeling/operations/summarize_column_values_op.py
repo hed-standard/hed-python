@@ -128,7 +128,14 @@ class ColumnValueSummary(BaseSummary):
         for key, dict_entry in this_summary['Categorical columns'].items():
             num_disp, sorted_tuples = ColumnValueSummary.sort_dict(dict_entry, reverse=True)
             this_summary['Categorical columns'][key] = dict(sorted_tuples[:min(num_disp, self.op.max_categorical)])
-        return this_summary
+        return {"Name": this_summary['Name'], "Total events": this_summary["Total events"],
+                "Total files": this_summary['Total files'],
+                "Files": [name for name in this_summary['Files'].keys()],
+                "Specifics": {"Value columns": this_summary['Value columns'].keys(),
+                              "Skip columns": this_summary['Skip columns'],
+                              "Value columns": this_summary['Value columns'],
+                              "Categorical columns": this_summary['Categorical columns'],
+                              "Categorical counts": this_summary['Categorical counts']}}
 
     def merge_all_info(self):
         """ Create a TabularSummary containing the overall dataset summary.
@@ -198,10 +205,11 @@ class ColumnValueSummary(BaseSummary):
         """
         sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
                     f"Total files={result.get('Total files', 0)}"]
-        cat_string = self._get_categorical_string(result, offset="", indent=indent)
+        specifics = result["Specifics"]
+        cat_string = self._get_categorical_string(specifics, offset="", indent=indent)
         if cat_string:
             sum_list.append(cat_string)
-        val_cols = result.get("Value columns", {})
+        val_cols = specifics.get("Value columns", {})
         if val_cols:
             sum_list.append(ColumnValueSummary._get_value_string(val_cols, offset="", indent=indent))
         return "\n".join(sum_list)
@@ -219,6 +227,7 @@ class ColumnValueSummary(BaseSummary):
 
         """
         sum_list = [f"Total events={result.get('Total events', 0)}"]
+        specifics = result.get("Specifics", {})
         cat_cols = result.get("Categorical columns", {})
         if cat_cols:
             sum_list.append(self._get_categorical_string(cat_cols, offset=indent, indent=indent))
