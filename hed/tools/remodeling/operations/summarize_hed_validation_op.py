@@ -161,23 +161,30 @@ class HedValidationSummary(BaseSummary):
             dict - dictionary of issues organized into sidecar_issues and event_issues.
 
         """
-
         results = self.get_empty_results()
         results["is_merged"] = True
         for key, ind_results in self.summary_dict.items():
+            HedValidationSummary._update_sidecar_results(results, ind_results)
             results["event_files"].append(key)
-            results["total_event_issues"] += ind_results["total_event_issues"]
-            results["total_sidecar_issues"] += ind_results["total_sidecar_issues"]
-            results["sidecar_files"] = results["sidecar_files"] + ind_results["sidecar_files"]
-            for ikey, errors in ind_results["sidecar_issues"].items():
-                results["sidecar_issues"][ikey] = errors
-            for ikey, errors in ind_results["event_issues"].items():
-                if not ind_results["sidecar_had_issues"]:
-                    results["event_issues"][ikey] = \
-                       f"Validation incomplete due to {ind_results['total_sidecar_issues']} sidecar issues"
-                else:
-                    results["event_issues"][ikey] = f"{len(errors)}"
+            HedValidationSummary._update_events_results(results, ind_results)
         return results
+
+    @staticmethod
+    def _update_events_results(results, ind_results):
+        results["total_event_issues"] += ind_results["total_event_issues"]
+        for ikey, errors in ind_results["event_issues"].items():
+            if ind_results["sidecar_had_issues"]:
+                results["event_issues"][ikey] = \
+                    f"Validation incomplete due to {ind_results['total_sidecar_issues']} sidecar issues"
+            else:
+                results["event_issues"][ikey] = f"{len(errors)}"
+
+    @staticmethod
+    def _update_sidecar_results(results, ind_results):
+        results["total_sidecar_issues"] += ind_results["total_sidecar_issues"]
+        results["sidecar_files"] = results["sidecar_files"] + ind_results["sidecar_files"]
+        for ikey, errors in ind_results["sidecar_issues"].items():
+            results["sidecar_issues"][ikey] = errors
 
     @staticmethod
     def get_empty_results():
@@ -196,17 +203,17 @@ class HedValidationSummary(BaseSummary):
             elif not len(item):
                 error_list.append(f"{indent}{key} has no issues")
             else:
-                error_list.append(f"{indent}{key} issues:")
-                for this_item in item:
-                    error_list.append(f"{indent*2}{HedValidationSummary.format_error(this_item)}")
+                HedValidationSummary._format_errors(error_list, key, item, indent)
         return error_list
 
     @staticmethod
-    def format_errors(error_list):
-        pass
+    def _format_errors(error_list, name, errors, indent):
+        error_list.append(f"{indent}{name} issues:")
+        for this_item in errors:
+            error_list.append(f"{indent * 2}{HedValidationSummary._format_error(this_item)}")
 
     @staticmethod
-    def format_error(error):
+    def _format_error(error):
         error_str = error['code']
         error_locations = []
         HedValidationSummary.update_error_location(error_locations, "row", "ec_row", error)
