@@ -109,7 +109,7 @@ class HedValidationSummary(BaseSummary):
             sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=True, indent=indent)
         else:
             sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], indent=indent*2)
-            if specifics['validation_completed']:
+            if specifics['sidecar_had_issues']:
                 sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=False, indent=indent*2)
             else:
                 sum_list = sum_list + [f"{indent*2}Event file validation was incomplete because of sidecar errors"]
@@ -125,24 +125,11 @@ class HedValidationSummary(BaseSummary):
             - The summary needs a "name" str, a schema, a "df", and a "Sidecar".
         """
 
-        results = self.get_empty_results()
-        results["event_files"].append(new_info["name"])
-        results["event_issues"][new_info["name"]] = []
         sidecar = new_info.get('sidecar', None)
-        filtered_issues = []
-        if sidecar:
-            if not isinstance(sidecar, Sidecar):
-                sidecar = Sidecar(files=new_info['sidecar'], name=os.path.basename(sidecar))
-            results["sidecar_files"].append(sidecar.name)
-            results["sidecar_issues"][sidecar.name] = []
-            sidecar_issues = sidecar.validate(new_info['schema'])
-            filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
-            if not self.check_for_warnings:
-                sidecar_issues = filtered_issues
-            results['sidecar_issues'][sidecar.name] = sidecar_issues
-            results['total_sidecar_issues'] = len(sidecar_issues)
-        if not filtered_issues:
-            results['validation_completed'] = True
+        if sidecar and not isinstance(sidecar, Sidecar):
+            sidecar = Sidecar(files=new_info['sidecar'], name=os.path.basename(sidecar))
+        results = self._get_sidecar_results(sidecar, new_info, self.check_for_warnings)
+        if not results['sidecar_had_issues']:
             input_data = TabularInput(new_info['df'], sidecar=sidecar)
             issues = input_data.validate(new_info['schema'])
             if not self.check_for_warnings:
@@ -185,7 +172,7 @@ class HedValidationSummary(BaseSummary):
             for ikey, errors in ind_results["sidecar_issues"].items():
                 results["sidecar_issues"][ikey] = errors
             for ikey, errors in ind_results["event_issues"].items():
-                if not ind_results["validation_completed"]:
+                if not ind_results["sidecar_had_issues"]:
                     results["event_issues"][ikey] = \
                        f"Validation incomplete due to {ind_results['total_sidecar_issues']} sidecar issues"
                 else:
@@ -196,7 +183,7 @@ class HedValidationSummary(BaseSummary):
     def get_empty_results():
         return {"event_files": [], "total_event_issues": 0, "event_issues": {}, "is_merged": False,
                 "sidecar_files": [], "total_sidecar_issues": 0, "sidecar_issues": {},
-                "validation_completed": False}
+                "sidecar_had_issues": False}
 
     @staticmethod
     def get_error_list(error_dict, count_only=False, indent=BaseSummary.DISPLAY_INDENT):
@@ -237,3 +224,21 @@ class HedValidationSummary(BaseSummary):
     def update_error_location(error_locations, location_name, location_key, error):
         if location_key in error:
             error_locations.append(f"{location_name}={error[location_key][0]}")
+
+    @staticmethod
+    def _get_sidecar_results(sidecar, new_info, check_for_warnings):
+        results = HedValidationSummary.get_empty_results()
+        results["event_files"].append(new_info["name"])
+        results["event_issues"][new_info["name"]] = []
+        if sidecar:
+            results["sidecar_files"].append(sidecar.name)
+            results["sidecar_issues"][sidecar.name] = []
+            sidecar_issues = sidecar.validate(new_info['schema'])
+            filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
+            if filtered_issues:
+                results["sidecar_had_issues"] = True
+            if not check_for_warnings:
+                sidecar_issues = filtered_issues
+            results['sidecar_issues'][sidecar.name] = sidecar_issues
+            results['total_sidecar_issues'] = len(sidecar_issues)
+        return results
