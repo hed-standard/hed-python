@@ -1,6 +1,6 @@
 import unittest
 from wordcloud import WordCloud
-from hed.tools.visualizations import tag_word_cloud
+from hed.tools.visualization import tag_word_cloud
 
 
 class TestWordCloudFunctions(unittest.TestCase):

@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
         sum_obj4 = sum_context2.get_summary_details(include_individual=True)
         self.assertIsInstance(sum_obj4, dict)
 
-    def test_get_summary_text_summary(self):
+    def test_get_summary(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         parms = json.loads(self.json_parms)
         sum_op = SummarizeHedValidationOp(parms)
@@ -97,14 +97,42 @@ class Test(unittest.TestCase):
         df = dispatch.prep_data(df)
         sum_op.do_op(dispatch, df, 'subj2_run1', sidecar=self.bad_json_path)
 
-        sum_context1 = dispatch.summary_dicts[sum_op.summary_name]
-        text_sum1 = sum_context1.get_text_summary(individual_summaries="separate")
+        context = dispatch.summary_dicts[sum_op.summary_name]
+        sum1a = context.get_summary(individual_summaries="separate")
+        self.assertEqual(len(sum1a['Dataset']['Overall summary']['Files']), 1)
+        self.assertEqual(sum1a['Dataset']['Overall summary']['Files'][0], 'subj2_run1')
+        self.assertEqual(len(sum1a['Dataset']['Overall summary']), 5)
+        sum2a = context.get_summary(individual_summaries="separate")
+        self.assertIsInstance(sum2a["Individual files"]["subj2_run1"], dict)
         sum_op.do_op(dispatch, df, 'subj2_run2', sidecar=self.json_path)
         sum_op.do_op(dispatch, df, 'subj2_run3', sidecar=self.bad_json_path)
-        text_sum2 = sum_context1.get_text_summary(individual_summaries="none")
-        text_sum3 = sum_context1.get_text_summary(individual_summaries="consolidated")
+        sum3a = context.get_summary(individual_summaries="none")
+        self.assertIsInstance(sum3a, dict)
+        self.assertFalse(sum3a["Individual files"])
+        self.assertEqual(len(sum3a['Dataset']['Overall summary']['Files']), 3)
+        sum3b = context.get_summary(individual_summaries="consolidated")
+        self.assertEqual(len(sum3b["Individual files"]), 3)
+        self.assertEqual(sum3b['Dataset']['Overall summary']['Total files'], 3)
+        self.assertIsInstance(sum3b, dict)
+
+    def test_get_text_summary(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        parms = json.loads(self.json_parms)
+        sum_op = SummarizeHedValidationOp(parms)
+        df = pd.read_csv(self.data_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
+        df = dispatch.prep_data(df)
+        sum_op.do_op(dispatch, df, 'subj2_run1', sidecar=self.bad_json_path)
+        context = dispatch.summary_dicts[sum_op.summary_name]
+        text_sum1 = context.get_text_summary(individual_summaries="separate")
+        self.assertEqual(len(text_sum1), 2)
+        sum_op.do_op(dispatch, df, 'subj2_run2', sidecar=self.json_path)
+        sum_op.do_op(dispatch, df, 'subj2_run3', sidecar=self.bad_json_path)
+        text_sum2 = context.get_text_summary(individual_summaries="none")
+        text_sum3 = context.get_text_summary(individual_summaries="consolidated")
         self.assertIsInstance(text_sum3, dict)
         self.assertIsInstance(text_sum2, dict)
+        self.assertEqual(len(text_sum2), 1)
+        self.assertEqual(len(text_sum3), 1)
 
     def test_with_sample_data(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
@@ -113,6 +141,8 @@ class Test(unittest.TestCase):
         sum_op = SummarizeHedValidationOp(parms)
         sum_op.do_op(dispatch, df, 'sub-0013_task-stopsignal_acq-seq_events.tsv', sidecar=self.sample_sidecar_path)
         sum_context1 = dispatch.summary_dicts[sum_op.summary_name]
+        self.assertIsInstance(sum_context1, HedValidationSummary)
+        self.assertEqual(len(sum_context1.summary_dict), 1)
 
 
 if __name__ == '__main__':
