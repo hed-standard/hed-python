@@ -35,6 +35,7 @@ class SummarizeHedTagsOp(BaseOp):
         },
         "optional_parameters": {
             "append_timecode": bool,
+            "expand_definitions": bool,
             "expand_context": bool
         }
     }
