@@ -115,22 +115,6 @@ class HedTagCounts:
             self._update_template(tag_count, template, unmatched)
         return template, unmatched
 
-    @staticmethod
-    def _update_template(tag_count, template, unmatched):
-        """ Update the template or unmatched with info in the tag_count.
-
-        Parameters:
-            tag_count (HedTagCount): Information for a particular tag.
-            template (dict):  The 
-
-        """
-        tag_list = reversed(list(tag_count.tag_terms))
-        for tkey in tag_list:
-            if tkey in template.keys():
-                template[tkey].append(tag_count)
-                return
-        unmatched.append(tag_count)
-            
     def merge_tag_dicts(self, other_dict):
         for tag, count in other_dict.items():
             if tag not in self.tag_dict:
@@ -160,3 +144,19 @@ class HedTagCounts:
             for element in key_list:
                 template_dict[element.lower()] = []
         return template_dict
+
+    @staticmethod
+    def _update_template(tag_count, template, unmatched):
+        """ Update the template or unmatched with info in the tag_count.
+
+        Parameters:
+            tag_count (HedTagCount): Information for a particular tag.
+            template (dict):  The 
+
+        """
+        tag_list = reversed(list(tag_count.tag_terms))
+        for tkey in tag_list:
+            if tkey in template.keys():
+                template[tkey].append(tag_count)
+                return
+        unmatched.append(tag_count)
