@@ -44,19 +44,21 @@ class HedTypeManager:
             factor_encoding (str):   Specifies type of factor encoding (one-hot or categorical).
 
         Returns:
-            DataFrame:   DataFrame containing the factor vectors as the columns.
+            DataFrame or None:   DataFrame containing the factor vectors as the columns.
 
         """
-        this_var = self.get_type_variable(type_tag)
+        this_var = self.get_type_variable(type_tag.lower())
         if this_var is None:
             return None
         variables = this_var.get_type_value_names()
-        if variables is None:
-            variables = type_values
-        df_list = [0]*len(variables)
-        for index, variable in enumerate(variables):
+        if not type_values:
+            type_values = variables
+        df_list = [0]*len(type_values)
+        for index, variable in enumerate(type_values):
             var_sum = this_var._type_value_map[variable]
             df_list[index] = var_sum.get_factors(factor_encoding=factor_encoding)
+        if not df_list:
+            return None
         return pd.concat(df_list, axis=1)
 
     def get_type_variable(self, type_tag):

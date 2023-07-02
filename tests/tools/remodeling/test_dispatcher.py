@@ -182,8 +182,8 @@ class Test(unittest.TestCase):
         df = dispatch.run_operations(events_path, sidecar=sidecar_path, verbose=False)
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(len(df), 200)
-        self.assertEqual(len(df.columns), 20)
-        self.assertIn('key-assignment', df.columns)
+        self.assertEqual(len(df.columns), 17)
+        self.assertIn('key-assignment.right-sym-cond', df.columns)
 
     def test_save_summaries(self):
         with open(self.summarize_model) as fp:

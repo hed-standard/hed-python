@@ -78,7 +78,7 @@ class FactorHedTypeOp(BaseOp):
         var_manager = HedTypeManager(hed_strings, dispatcher.hed_schema, definitions)
         var_manager.add_type_variable(self.type_tag.lower())
 
-        df_factors = var_manager.get_factor_vectors(self.type_tag, [], factor_encoding="one-hot")
+        df_factors = var_manager.get_factor_vectors(self.type_tag, self.type_values, factor_encoding="one-hot")
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
