@@ -60,8 +60,8 @@ class Test(unittest.TestCase):
         df_task = var_manager.get_factor_vectors("task")
         self.assertEqual(len(df_cond), base_length, "get_factor_vectors returns df same length as original")
         self.assertEqual(len(df_task), base_length, "get_factor_vectors returns df same length as original if 2 types")
-        self.assertEqual(len(df_cond.columns), 10, "get_factor_vectors has right number of factors")
-        self.assertEqual(len(df_task.columns), 4, "get_factor_vectors has right number of factors if 2 types")
+        self.assertEqual(len(df_cond.columns), 7, "get_factor_vectors has right number of factors")
+        self.assertEqual(len(df_task.columns), 2, "get_factor_vectors has right number of factors if 2 types")
         df_baloney = var_manager.get_factor_vectors("baloney")
         self.assertIsNone(df_baloney, "get_factor_vectors returns None if no factors")
 

@@ -33,11 +33,9 @@ class Test(unittest.TestCase):
         op = FactorHedTypeOp(self.base_parameters)
         df_new = op.do_op(self.dispatch, self.data_path, 'subj2_run1', sidecar=self.json_path)
         self.assertEqual(len(df_new), 200, "factor_hed_type_op length is correct")
-        self.assertEqual(len(df_new.columns), 20,  "factor_hed_type_op has correct number of columns")
+        self.assertEqual(len(df_new.columns), 17,  "factor_hed_type_op has correct number of columns")
 
     def test_valid_specific_column(self):
-        # Not implemented yet
-        # Test correct when all valid and no unwanted information
         parms = self.base_parameters
         parms["type_values"] = ["key-assignment"]
         op = FactorHedTypeOp(parms)
@@ -46,7 +44,7 @@ class Test(unittest.TestCase):
         df_new = op.do_op(dispatch, dispatch.prep_data(df_new), 'run-01', sidecar=self.json_path)
         df_new = dispatch.post_proc_data(df_new)
         self.assertEqual(len(df_new), 200, "factor_hed_type_op length is correct when type_values specified")
-        self.assertEqual(len(df_new.columns), 20,
+        self.assertEqual(len(df_new.columns), 11,
                          "factor_hed_type_op has correct number of columns when type_values specified")
 
 

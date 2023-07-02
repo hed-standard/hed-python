@@ -39,18 +39,18 @@ class HedTypeFactors:
             DataFrame:   DataFrame containing the factor vectors as the columns.
 
         """
-        df = pd.DataFrame(0, index=range(self.number_elements), columns=[self.type_value])
-        df.loc[list(self.direct_indices.keys()), [self.type_value]] = 1
+
         if not self.levels:
+            df = pd.DataFrame(0, index=range(self.number_elements), columns=[self.type_value])
+            df.loc[list(self.direct_indices.keys()), [self.type_value]] = 1
             return df
 
         levels = list(self.levels.keys())
         levels_list = [f"{self.type_value}.{level}" for level in levels]
-        df_levels = pd.DataFrame(0, index=range(self.number_elements), columns=levels_list)
+        factors = pd.DataFrame(0, index=range(self.number_elements), columns=levels_list)
         for index, level in enumerate(levels):
             index_keys = list(self.levels[level].keys())
-            df_levels.loc[index_keys, [levels_list[index]]] = 1
-        factors = pd.concat([df, df_levels], axis=1)
+            factors.loc[index_keys, [levels_list[index]]] = 1
         if factor_encoding == "one-hot":
             return factors
         sum_factors = factors.sum(axis=1)

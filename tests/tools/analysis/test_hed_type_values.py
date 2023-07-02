@@ -116,10 +116,10 @@ class Test(unittest.TestCase):
         df_new1 = var_manager.get_type_factors()
         self.assertIsInstance(df_new1, DataFrame)
         self.assertEqual(len(df_new1), 200)
-        self.assertEqual(len(df_new1.columns), 10)
+        self.assertEqual(len(df_new1.columns), 7)
         df_new2 = var_manager.get_type_factors(type_values=["face-type"])
         self.assertEqual(len(df_new2), 200)
-        self.assertEqual(len(df_new2.columns), 4)
+        self.assertEqual(len(df_new2.columns), 3)
         df_new3 = var_manager.get_type_factors(type_values=["junk"])
         self.assertIsNone(df_new3)
 
