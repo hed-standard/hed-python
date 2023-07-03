@@ -43,11 +43,7 @@ class BaseInput:
             - An invalid dataframe was passed with size 0
             - An invalid extension was provided
             - A duplicate or empty column name appears
-
-        :raises OSError:
             - Cannot open the indicated file
-
-        :raises KeyError:
             - The specified worksheet name does not exist
          """
         if mapper is None:
@@ -77,14 +73,20 @@ class BaseInput:
         elif not file:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
         elif input_type in self.TEXT_EXTENSION:
-            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
-                                              dtype=str, keep_default_na=True, na_values=None)
+            try:
+                self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
+                                                  dtype=str, keep_default_na=True, na_values=None)
+            except Exception as e:
+                raise HedFileError(HedExceptions.GENERIC_ERROR, str(e), self.name) from e
             # Convert nan values to a known value
             self._dataframe = self._dataframe.fillna("n/a")
         elif input_type in self.EXCEL_EXTENSION:
-            self._loaded_workbook = openpyxl.load_workbook(file)
-            loaded_worksheet = self.get_worksheet(self._worksheet_name)
-            self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
+            try:
+                self._loaded_workbook = openpyxl.load_workbook(file)
+                loaded_worksheet = self.get_worksheet(self._worksheet_name)
+                self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
+            except Exception as e:
+                raise HedFileError(HedExceptions.GENERIC_ERROR, str(e), self.name) from e
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
 

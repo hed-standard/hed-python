@@ -132,10 +132,10 @@ class Sidecar:
                     if not self.name:
                         self.name = file
                     return self._load_json_file(fp)
-            except FileNotFoundError as e:
-                raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, file)
+            except OSError as e:
+                raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, file) from e
             except TypeError as e:
-                raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), file)
+                raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), file) from e
         else:
             return self._load_json_file(file)
 
@@ -189,12 +189,11 @@ class Sidecar:
 
         :raises HedFileError:
             - If the file cannot be parsed.
-            
         """
         try:
             return json.load(fp)
-        except json.decoder.JSONDecodeError as e:
-            raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name)
+        except (json.decoder.JSONDecodeError, AttributeError) as e:
+            raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name) from e
 
     def extract_definitions(self, hed_schema=None, error_handler=None):
         """ Gather and validate definitions in metadata.
