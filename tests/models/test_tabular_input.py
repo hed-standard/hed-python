@@ -28,6 +28,8 @@ class Test(unittest.TestCase):
         cls.sidecar2 = Sidecar(sidecar2_path, name='face_small_json')
         cls.base_output_folder = base_output_folder
 
+        cls.invalid_inputs = [123, {'key': 'value'}, 'nonexistent_file.tsv']
+
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.base_output_folder)
@@ -81,6 +83,19 @@ class Test(unittest.TestCase):
         input_file2 = TabularInput(self.events_path, sidecar=self.sidecar2)
         issues2a = input_file2.validate(hed_schema=self.hed_schema, error_handler=ErrorHandler(False))
         breakHere = 3
+
+    def test_invalid_file(self):
+        for invalid_input in self.invalid_inputs:
+            with self.subTest(input=invalid_input):
+                with self.assertRaises(HedFileError):
+                    TabularInput(file=invalid_input)
+
+    def test_invalid_sidecar(self):
+        for invalid_input in self.invalid_inputs:
+            with self.subTest(input=invalid_input):
+                with self.assertRaises(HedFileError):
+                    # Replace 'valid_path.tsv' with a path to an existing .tsv file
+                    TabularInput(file=self.events_path, sidecar=invalid_input)
 
 
 if __name__ == '__main__':
