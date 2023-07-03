@@ -1,3 +1,10 @@
+Release 0.3.1 July 3, 2023
+- Pinned the version of the pydantic and inflect libraries due to inflict.
+- Reorganized JSON output of remodeling summaries so that all of consistent form.
+- Fixed summarize_hed_tags_op so that tags were correctly categorized for output.
+- Minor refactoring to reduce code complexity.
+
+
 Release 0.3.0 June 20, 2023
 - Introduction of partnered schema.
 - Improved error handling for schema validation.
