@@ -5,7 +5,6 @@ import unittest
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_column_values_op import \
     ColumnValueSummary, SummarizeColumnValuesOp
-from hed.tools.util.io_util import get_file_list
 
 
 class Test(unittest.TestCase):
@@ -68,17 +67,16 @@ class Test(unittest.TestCase):
         self.get_dfs(sum_op, 'name1', dispatch)
 
         cont = dispatch.summary_dicts
-        context1 = cont.get("test summary", None)
-        self.assertIsInstance(context1, ColumnValueSummary, "get_summary testing ColumnValueSummary")
-        # summary1 = context1.get_summary()
-        # self.assertIsInstance(summary1, dict, "get_summary returns a dictionary")
-        # self.assertIsInstance(summary1["Dataset"], dict)
-        summary1a = context1.get_summary()
+        context = cont.get("test summary", None)
+        self.assertIsInstance(context, ColumnValueSummary, "get_summary testing ColumnValueSummary")
+        summary1a = context.get_summary()
         self.assertIsInstance(summary1a, dict)
         self.assertIsInstance(summary1a["Dataset"], dict)
-        text_summary = context1.get_text_summary(individual_summaries="separate")
-        self.assertIsInstance(text_summary, dict)
-        self.assertIsInstance(text_summary["Dataset"], str)
+        text_summary1 = context.get_text_summary(individual_summaries=None)
+        self.assertIsInstance(text_summary1, dict)
+        self.assertIsInstance(text_summary1["Dataset"], str)
+        text_summary1a = context.get_text_summary(individual_summaries="separate")
+        self.assertIsInstance(text_summary1a, dict)
         self.get_dfs(sum_op, 'name2', dispatch)
         self.get_dfs(sum_op, 'name3', dispatch)
         context2 = dispatch.summary_dicts.get(parms['summary_name'], None)

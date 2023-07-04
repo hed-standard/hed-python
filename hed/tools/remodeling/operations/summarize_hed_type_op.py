@@ -95,7 +95,7 @@ class HedTypeSummary(BaseSummary):
         Parameters:
             new_info (dict):  A dictionary with the parameters needed to update a summary.
 
-        Notes:  
+        Notes:
             - The summary needs a "name" str, a "schema", a "df, and a "Sidecar".
 
         """
@@ -104,7 +104,7 @@ class HedTypeSummary(BaseSummary):
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
         input_data = TabularInput(new_info['df'], sidecar=sidecar, name=new_info['name'])
-        hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'], 
+        hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'],
                                                  extra_def_dicts=None, join_columns=True, expand_defs=False)
         context_manager = HedContextManager(hed_strings, new_info['schema'])
         type_values = HedTypeValues(context_manager, definitions, new_info['name'], type_tag=self.type_tag)
@@ -124,7 +124,12 @@ class HedTypeSummary(BaseSummary):
             dict: dictionary with the summary results.
 
         """
-        return counts.get_summary()
+        summary = counts.get_summary()
+        files = summary.get('files', [])
+        return {"Name": summary.get("name", ""), "Total events": summary.get("total_events", 0),
+                "Total files": len(files), "Files": files,
+                "Specifics": {"Type tag": summary.get('type_tag', 'condition-variable'),
+                              "Type info": summary.get('details', {})}}
 
     def merge_all_info(self):
         """ Create a HedTypeCounts containing the overall dataset HED type summary.
@@ -170,11 +175,12 @@ class HedTypeSummary(BaseSummary):
             str: Formatted string suitable for saving in a file or printing.
 
         """
-        details = result.get('details', {})
-        sum_list = [f"Dataset: Type={result['type_tag']} Type values={len(details)} "
-                    f"Total events={result.get('total_events', 0)} Total files={len(result.get('files', []))}"]
+        specifics = result.get('Specifics', {})
+        type_info = specifics.get('Type info', {})
+        sum_list = [f"Dataset: Type={specifics.get('Type tag', 'condition-variable')} Type values={len(type_info)} "
+                    f"Total events={result.get('Total events', 0)} Total files={len(result.get('Files', []))}"]
 
-        for key, item in details.items():
+        for key, item in type_info.items():
             str1 = f"{item['events']} event(s) out of {item['total_events']} total events in " + \
                    f"{len(item['files'])} file(s)"
             if item['level_counts']:
@@ -200,11 +206,12 @@ class HedTypeSummary(BaseSummary):
             str: Formatted string suitable for saving in a file or printing.
 
         """
-        details = result.get('details', {})
-        sum_list = [f"Type={result['type_tag']} Type values={len(details)} "
-                    f"Total events={result.get('total_events', 0)}"]
+        specifics = result.get('Specifics', {})
+        type_info = specifics.get('Type info', {})
+        sum_list = [f"Type={specifics.get('Type tag', 'condition-variable')} Type values={len(type_info)} "
+                    f"Total events={result.get('Total events', 0)}"]
 
-        for key, item in details.items():
+        for key, item in type_info.items():
             sum_list.append(f"{indent*2}{key}: {item['levels']} levels in {item['events']} events")
             str1 = ""
             if item['direct_references']:

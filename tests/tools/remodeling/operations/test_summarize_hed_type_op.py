@@ -75,8 +75,8 @@ class Test(unittest.TestCase):
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-02', sidecar=self.sidecar_path)
         context2 = dispatch.summary_dicts['AOMIC_condition_variables']
         summary2 = context2.get_summary(individual_summaries="separate")
-        self.assertEqual(summary2['Dataset']['Overall summary']['files'][0], 'run-01')
-        self.assertEqual(len(summary2['Dataset']['Overall summary']['files']), 2)
+        self.assertEqual(summary2['Dataset']['Overall summary']['Files'][0], 'run-01')
+        self.assertEqual(len(summary2['Dataset']['Overall summary']['Files']), 2)
         summary2a = context2.get_summary(individual_summaries="separate")
         self.assertIsInstance(summary2a["Individual files"]["run-02"], dict)
         

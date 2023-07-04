@@ -35,6 +35,7 @@ class SummarizeHedTagsOp(BaseOp):
         },
         "optional_parameters": {
             "append_timecode": bool,
+            "expand_definitions": bool,
             "expand_context": bool
         }
     }
@@ -118,24 +119,24 @@ class HedTagSummary(BaseSummary):
             counts.update_event_counts(hed, new_info['name'])
         self.summary_dict[new_info["name"]] = counts
 
-    def get_details_dict(self, merge_counts):
+    def get_details_dict(self, tag_counts):
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
-            merge_counts (HedTagCounts):  Contains the counts of tags in the dataset.
+            tag_counts (HedTagCounts):  Contains the counts of tags in the dataset.
 
         Returns:
             dict: dictionary with the summary results.
 
         """
-        template, unmatched = merge_counts.organize_tags(self.tags)
+        template, unmatched = tag_counts.organize_tags(self.tags)
         details = {}
         for key, key_list in self.tags.items():
             details[key] = self._get_details(key_list, template, verbose=True)
         leftovers = [value.get_info(verbose=True) for value in unmatched]
-        return {"Name": merge_counts.name, "Total events": merge_counts.total_events,
-                "Total files": len(merge_counts.files.keys()),
-                "Files": [name for name in merge_counts.files.keys()],
+        return {"Name": tag_counts.name, "Total events": tag_counts.total_events,
+                "Total files": len(tag_counts.files.keys()),
+                "Files": [name for name in tag_counts.files.keys()],
                 "Specifics": {"Main tags": details, "Other tags": leftovers}}
 
     def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):

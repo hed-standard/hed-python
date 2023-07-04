@@ -24,6 +24,7 @@ class Test(unittest.TestCase):
         cls.base_output_folder = base_output
         os.makedirs(base_output, exist_ok=True)
 
+
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.base_output_folder)

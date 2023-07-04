@@ -5,7 +5,8 @@ from hed.models import HedGroup, HedString
 from hed.schema import HedSchema, HedSchemaGroup
 from hed.tools.analysis.analysis_util import hed_to_str
 
-#TODO: [Refactor] clean up distinction between hed as strings versus objects -- maybe replace by event manager.
+# TODO: [Refactor] clean up distinction between hed as strings versus objects -- maybe replace by event manager.
+# TODO: Implement insets
 
 class OnsetGroup:
     def __init__(self, name, contents, start_index, end_index=None):

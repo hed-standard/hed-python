@@ -98,7 +98,7 @@ class Test(unittest.TestCase):
         dataset_sum = summary['Dataset']
         json_str = json.dumps(dataset_sum)
         json_obj = json.loads(json_str)
-        columns = json_obj["Overall summary"]["Columns"]
+        columns = json_obj["Overall summary"]["Specifics"]["Columns"]
         self.assertEqual(len(columns), 1)
         self.assertEqual(len(columns[0]['Files']), 2)
         ind_sum = summary['Individual files']
