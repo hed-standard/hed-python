@@ -11,7 +11,7 @@ class HedExceptions:
     INVALID_EXTENSION = 'invalidExtension'
 
     INVALID_DATAFRAME = 'INVALID_DATAFRAME'
-
+    INVALID_FILE_FORMAT = 'INVALID_FILE_FORMAT'
     # These are actual schema issues, not that the file cannot be found or parsed
     SCHEMA_HEADER_MISSING = 'HED_SCHEMA_HEADER_INVALID'
     HED_SCHEMA_HEADER_INVALID = 'HED_SCHEMA_HEADER_INVALID'

@@ -3,6 +3,7 @@ Release 0.3.1 July 3, 2023
 - Reorganized JSON output of remodeling summaries so that all of consistent form.
 - Fixed summarize_hed_tags_op so that tags were correctly categorized for output.
 - Minor refactoring to reduce code complexity.
+- BaseInput and Sidecar now raise HedFileError if input could not be read.
 
 
 Release 0.3.0 June 20, 2023
