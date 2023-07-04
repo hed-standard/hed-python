@@ -509,7 +509,6 @@ class HedSchema:
         clean_tag = str(tag)
         namespace = schema_namespace
         clean_tag = clean_tag[len(namespace):]
-        prefix_tag_adj = len(namespace)
         working_tag = clean_tag.lower()
 
         # Most tags are in the schema directly, so test that first
@@ -523,9 +522,26 @@ class HedSchema:
 
             return found_entry, remainder, []
 
+        prefix_tag_adj = len(namespace)
+
+        try:
+            found_entry, current_slash_index = self._find_tag_subfunction(tag, working_tag, prefix_tag_adj)
+        except self._TagIdentifyError as e:
+            issue = e.issue
+            return None, None, issue
+
+        remainder = None
+        if current_slash_index != -1:
+            remainder = clean_tag[current_slash_index:]
+        if remainder and found_entry.takes_value_child_entry:
+            found_entry = found_entry.takes_value_child_entry
+
+        return found_entry, remainder, []
+
+    def _find_tag_subfunction(self, tag, working_tag, prefix_tag_adj):
+        """Finds the base tag and remainder from the left, raising exception on issues"""
         current_slash_index = -1
         current_entry = None
-
         # Loop left to right, checking each word.  Once we find an invalid word, we stop.
         while True:
             next_index = working_tag.find("/", current_slash_index + 1)
@@ -541,36 +557,37 @@ class HedSchema:
                                                       tag,
                                                       index_in_tag=prefix_tag_adj,
                                                       index_in_tag_end=prefix_tag_adj + next_index)
-                    return None, None, error
+                    raise self._TagIdentifyError(error)
                 # If this is not a takes value node, validate each term in the remainder.
                 if not current_entry.takes_value_child_entry:
-                    child_names = working_tag[current_slash_index + 1:].split("/")
-                    word_start_index = current_slash_index + 1 + prefix_tag_adj
-                    for name in child_names:
-                        if self._get_tag_entry(name):
-                            error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE,
-                                                              tag,
-                                                              index_in_tag=word_start_index,
-                                                              index_in_tag_end=word_start_index + len(name),
-                                                              expected_parent_tag=self.all_tags[name].name)
-                            return None, None, error
-                        word_start_index += len(name) + 1
+                    # This will raise _TagIdentifyError on any issues
+                    self._validate_remaining_terms(tag, working_tag, prefix_tag_adj, current_slash_index)
                 break
 
             current_entry = parent_entry
             current_slash_index = next_index
             if next_index == len(working_tag):
                 break
-            continue
 
-        remainder = None
-        if current_slash_index != -1:
-            remainder = clean_tag[current_slash_index:]
-        if remainder and current_entry.takes_value_child_entry:
-            current_entry = current_entry.takes_value_child_entry
-        found_entry = current_entry
+        return current_entry, current_slash_index
 
-        return found_entry, remainder, []
+    def _validate_remaining_terms(self, tag, working_tag, prefix_tag_adj, current_slash_index):
+        """ Validates the terms past current_slash_index.
+        
+        :raises _TagIdentifyError:
+            - One of the extension terms already exists as a schema term.
+        """
+        child_names = working_tag[current_slash_index + 1:].split("/")
+        word_start_index = current_slash_index + 1 + prefix_tag_adj
+        for name in child_names:
+            if self._get_tag_entry(name):
+                error = ErrorHandler.format_error(ValidationErrors.INVALID_PARENT_NODE,
+                                                  tag,
+                                                  index_in_tag=word_start_index,
+                                                  index_in_tag_end=word_start_index + len(name),
+                                                  expected_parent_tag=self.all_tags[name].name)
+                raise self._TagIdentifyError(error)
+            word_start_index += len(name) + 1
 
     # ===============================================
     # Semi-private creation finalizing functions
@@ -801,3 +818,8 @@ class HedSchema:
     def _create_tag_entry(self, long_tag_name, key_class):
         section = self._sections[key_class]
         return section._create_tag_entry(long_tag_name)
+
+    class _TagIdentifyError(Exception):
+        """Used internally to note when a tag cannot be identified."""
+        def __init__(self, issue):
+            self.issue = issue

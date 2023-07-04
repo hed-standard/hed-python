@@ -43,12 +43,10 @@ class BaseInput:
             - An invalid dataframe was passed with size 0
             - An invalid extension was provided
             - A duplicate or empty column name appears
-
-        :raises OSError:
             - Cannot open the indicated file
-
-        :raises KeyError:
             - The specified worksheet name does not exist
+            - If the sidecar file or tabular file had invalid format and could not be read.
+
          """
         if mapper is None:
             mapper = ColumnMapper()
@@ -77,14 +75,20 @@ class BaseInput:
         elif not file:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
         elif input_type in self.TEXT_EXTENSION:
-            self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
-                                              dtype=str, keep_default_na=True, na_values=None)
+            try:
+                self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
+                                                  dtype=str, keep_default_na=True, na_values=None)
+            except Exception as e:
+                raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
             # Convert nan values to a known value
             self._dataframe = self._dataframe.fillna("n/a")
         elif input_type in self.EXCEL_EXTENSION:
-            self._loaded_workbook = openpyxl.load_workbook(file)
-            loaded_worksheet = self.get_worksheet(self._worksheet_name)
-            self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
+            try:
+                self._loaded_workbook = openpyxl.load_workbook(file)
+                loaded_worksheet = self.get_worksheet(self._worksheet_name)
+                self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
+            except Exception as e:
+                raise HedFileError(HedExceptions.GENERIC_ERROR, str(e), self.name) from e
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
 
@@ -94,7 +98,7 @@ class BaseInput:
         # todo: Can we get rid of this behavior now that we're using pandas?
         column_issues = ColumnMapper.check_for_blank_names(self.columns, allow_blank_names=allow_blank_names)
         if column_issues:
-            raise HedFileError(HedExceptions.BAD_COLUMN_NAMES, "Duplicate or blank columns found.  See issues.",
+            raise HedFileError(HedExceptions.BAD_COLUMN_NAMES, "Duplicate or blank columns found. See issues.",
                                self.name, issues=column_issues)
 
         self.reset_mapper(mapper)
@@ -285,7 +289,7 @@ class BaseInput:
 
         Notes:
              Any attribute of a HedTag that returns a string is a valid value of tag_form.
-             
+
         :raises ValueError:
             - There is not a loaded dataframe
 

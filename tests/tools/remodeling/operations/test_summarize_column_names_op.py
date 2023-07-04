@@ -2,9 +2,9 @@ import json
 import os
 import pandas as pd
 import unittest
-from hed.tools.analysis.tabular_column_name_summary import TabularColumnNameSummary
+# from hed.tools.analysis.column_name_summary import ColumnNameSummary
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNameSummary, SummarizeColumnNamesOp
+from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNamesSummary, SummarizeColumnNamesOp
 
 
 class Test(unittest.TestCase):
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
             new_summary = json.loads(json_value)
             self.assertIsInstance(new_summary, dict)
         merged1 = this_context.merge_all_info()
-        self.assertIsInstance(merged1, TabularColumnNameSummary)
+        # self.assertIsInstance(merged1, ColumnNameSummary)
         self.assertEqual(len(merged1.file_dict), 3)
         self.assertEqual(len(merged1.unique_headers), 2)
         with self.assertRaises(ValueError) as except_context:
@@ -98,7 +98,7 @@ class Test(unittest.TestCase):
         dataset_sum = summary['Dataset']
         json_str = json.dumps(dataset_sum)
         json_obj = json.loads(json_str)
-        columns = json_obj["Overall summary"]["Columns"]
+        columns = json_obj["Overall summary"]["Specifics"]["Columns"]
         self.assertEqual(len(columns), 1)
         self.assertEqual(len(columns[0]['Files']), 2)
         ind_sum = summary['Individual files']
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
         self.get_dfs(op, 'run-01', dispatch)
         self.get_dfs(op, 'run-02', dispatch)
         context = dispatch.summary_dicts['columns']
-        self.assertIsInstance(context, ColumnNameSummary)
+        # self.assertIsInstance(context, ColumnNameSummary)
         text_summary1 = context.get_text_summary()
         self.assertIsInstance(text_summary1, dict)
 

@@ -115,9 +115,13 @@ class EventsToSidecarSummary(BaseSummary):
 
         """
 
-        return {"files": summary_info.files, "total_files": summary_info.total_files,
-                "total_events": summary_info.total_events, "skip_cols": summary_info.skip_cols,
-                "sidecar": summary_info.extract_sidecar_template()}
+        return {"Name": summary_info.name, "Total events": summary_info.total_events,
+                "Total files": summary_info.total_files,
+                "Files": summary_info.files.keys(),
+                "Specifics": {"Categorical info": summary_info.categorical_info,
+                              "Value info": summary_info.value_info,
+                              "Skip columns": summary_info.skip_cols,
+                              "Sidecar": summary_info.extract_sidecar_template()}}
 
     def merge_all_info(self):
         """ Merge summary information from all of the files
@@ -165,11 +169,12 @@ class EventsToSidecarSummary(BaseSummary):
             str: Formatted string suitable for saving in a file or printing.
 
         """
-        sum_list = [f"Dataset: Total events={result.get('total_events', 0)} "
-                    f"Total files={result.get('total_files', 0)}",
-                    f"Skip columns: {str(result.get('skip_cols', []))}",
-                    f"Value columns: {str(result.get('value_cols', []))}",
-                    f"Sidecar:\n{json.dumps(result['sidecar'], indent=indent)}"]
+        specifics = result.get("Specifics", {})
+        sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
+                    f"Total files={result.get('Total files', 0)}",
+                    f"Skip columns: {str(specifics.get('Skip columns', []))}",
+                    f"Value columns: {str(specifics.get('Value info', {}).keys())}",
+                    f"Sidecar:\n{json.dumps(specifics.get('Sidecar', {}), indent=indent)}"]
         return "\n".join(sum_list)
 
     @staticmethod
@@ -184,8 +189,9 @@ class EventsToSidecarSummary(BaseSummary):
             str: Formatted string suitable for saving in a file or printing.
 
         """
-        sum_list = [f"Total events={result.get('total_events', 0)}",
-                    f"Skip columns: {str(result.get('skip_cols', []))}",
-                    f"Value columns: {str(result.get('value_cols', []))}",
-                    f"Sidecar:\n{json.dumps(result['sidecar'], indent=indent)}"]
+        specifics = result.get("Specifics", {})
+        sum_list = [f"Total events={result.get('Total events', 0)}",
+                    f"Skip columns: {str(specifics.get('Slip columns', []))}",
+                    f"Value columns: {str(specifics.get('Value info', {}).keys())}",
+                    f"Sidecar:\n{json.dumps(specifics['Sidecar'], indent=indent)}"]
         return "\n".join(sum_list)

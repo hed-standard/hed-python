@@ -35,6 +35,7 @@ class SummarizeHedTagsOp(BaseOp):
         },
         "optional_parameters": {
             "append_timecode": bool,
+            "expand_definitions": bool,
             "expand_context": bool
         }
     }
@@ -118,24 +119,25 @@ class HedTagSummary(BaseSummary):
             counts.update_event_counts(hed, new_info['name'])
         self.summary_dict[new_info["name"]] = counts
 
-    def get_details_dict(self, merge_counts):
+    def get_details_dict(self, tag_counts):
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
-            merge_counts (HedTagCounts):  Contains the counts of tags in the dataset.
+            tag_counts (HedTagCounts):  Contains the counts of tags in the dataset.
 
         Returns:
             dict: dictionary with the summary results.
 
         """
-        template, unmatched = merge_counts.organize_tags(self.tags)
+        template, unmatched = tag_counts.organize_tags(self.tags)
         details = {}
         for key, key_list in self.tags.items():
             details[key] = self._get_details(key_list, template, verbose=True)
         leftovers = [value.get_info(verbose=True) for value in unmatched]
-        return {"name": merge_counts.name, "total_events": merge_counts.total_events,
-                "files": [name for name in merge_counts.files.keys()],
-                "Main tags": details, "Other tags": leftovers}
+        return {"Name": tag_counts.name, "Total events": tag_counts.total_events,
+                "Total files": len(tag_counts.files.keys()),
+                "Files": [name for name in tag_counts.files.keys()],
+                "Specifics": {"Main tags": details, "Other tags": leftovers}}
 
     def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
         """ Return a formatted string with the summary for the indicated name.
@@ -185,8 +187,8 @@ class HedTagSummary(BaseSummary):
             str: Formatted string suitable for saving in a file or printing.
 
         """
-        sum_list = [f"Dataset: Total events={result.get('total_events', 0)} "
-                    f"Total files={len(result.get('files', []))}"]
+        sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
+                    f"Total files={len(result.get('Files', 0))}"]
         sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
@@ -202,7 +204,7 @@ class HedTagSummary(BaseSummary):
             str: Formatted string suitable for saving in a file or printing.
 
         """
-        sum_list = [f"Total events={result.get('total_events', 0)}"]
+        sum_list = [f"Total events={result.get('Total events', 0)}"]
         sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
@@ -214,7 +216,8 @@ class HedTagSummary(BaseSummary):
         return tag_list
 
     @staticmethod
-    def _get_tag_list(tag_info, indent=BaseSummary.DISPLAY_INDENT):
+    def _get_tag_list(result, indent=BaseSummary.DISPLAY_INDENT):
+        tag_info = result["Specifics"]
         sum_list = [f"\n{indent}Main tags[events,files]:"]
         for category, tags in tag_info['Main tags'].items():
             sum_list.append(f"{indent}{indent}{category}:")

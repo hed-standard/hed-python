@@ -139,8 +139,11 @@ class Test(unittest.TestCase):
             self.assertIsInstance(factors, pd.DataFrame, "get_factors contains dataframe.")
             self.assertEqual(len(factors), var_sum.number_elements,
                              "get_factors has factors of same length as number of elements")
-            self.assertEqual(len(factors.columns), summary["levels"] + 1,
-                             'get_factors has factors levels + 1 (direct references)')
+            if not var_manager._type_value_map[variable].levels:
+                self.assertEqual(len(factors.columns), 1)
+            else:
+                self.assertEqual(len(factors.columns), summary["levels"], 'get_factors has factors levels')
+                self.assertEqual(len(factors.columns), len(var_manager._type_value_map[variable].levels))
 
     def test_count_events(self):
         list1 = [0, 2, 6, 1, 2, 0, 0]

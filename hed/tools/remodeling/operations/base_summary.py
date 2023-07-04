@@ -38,9 +38,9 @@ class BaseSummary(ABC):
         Users are expected to provide merge_all_info and get_details_dict to support this.
 
         """
-        merged_summary = self.merge_all_info()
-        if merged_summary:
-            details = self.get_details_dict(merged_summary)
+        merged_counts = self.merge_all_info()
+        if merged_counts:
+            details = self.get_details_dict(merged_counts)
         else:
             details = "Overall summary unavailable"
 
@@ -219,6 +219,11 @@ class BaseSummary(ABC):
 
         Notes:
             Abstract method be implemented by each individual summary.
+
+        Notes:
+            The expected return value is a dictionary of the form:
+
+               {"Name": "", "Total events": 0, "Total files": 0, "Files": [], "Specifics": {}}"
 
         """
         raise NotImplementedError

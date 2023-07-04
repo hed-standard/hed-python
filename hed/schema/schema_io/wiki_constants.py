@@ -12,7 +12,6 @@ ATTRIBUTE_PROPERTY_STRING = "'''Properties'''"
 VALUE_CLASS_STRING = "'''Value classes'''"
 PROLOGUE_SECTION_ELEMENT = "'''Prologue'''"
 EPILOGUE_SECTION_ELEMENT = "'''Epilogue'''"
-OLD_SYNTAX_SECTION_NAME = "'''Syntax'''"
 
 wiki_section_headers = {
     HedSectionKey.AllTags: START_HED_STRING,

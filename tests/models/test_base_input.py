@@ -7,6 +7,8 @@ from hed import BaseInput, TabularInput
 from hed.models.column_mapper import ColumnMapper
 from hed.models import DefinitionDict
 from hed import schema
+from hed import HedFileError
+
 import pandas as pd
 import numpy as np
 
@@ -59,6 +61,19 @@ class Test(unittest.TestCase):
             'valueclassdef': '(Acceleration/#)'
         }
         self.assertEqual(defs, expected_defs)
+
+    def test_file_not_found(self):
+        with self.assertRaises(HedFileError):
+            BaseInput('nonexistent_file.tsv')
+
+    def test_invalid_input_type_int(self):
+        with self.assertRaises(HedFileError):
+            BaseInput(123)
+
+    def test_invalid_input_type_dict(self):
+        with self.assertRaises(HedFileError):
+            BaseInput({'key': 'value'})
+
 
 
 class TestInsertColumns(unittest.TestCase):

@@ -40,6 +40,18 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.base_output_folder)
 
+    def test_file_not_found(self):
+        with self.assertRaises(HedFileError):
+            Sidecar('nonexistent_file.json')
+
+    def test_invalid_input_type_int(self):
+        with self.assertRaises(HedFileError):
+            Sidecar(123)
+
+    def test_invalid_input_type_dict(self):
+        with self.assertRaises(HedFileError):
+            Sidecar({'key': 'value'})
+
     def test_invalid_filenames(self):
         # Handle missing or invalid files.
         invalid_json = "invalidxmlfile.json"
