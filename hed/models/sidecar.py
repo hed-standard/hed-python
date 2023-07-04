@@ -127,15 +127,13 @@ class Sidecar:
         if not file:
             return {}
         elif isinstance(file, str):
+            if not self.name:
+                self.name = file
             try:
                 with open(file, "r") as fp:
-                    if not self.name:
-                        self.name = file
                     return self._load_json_file(fp)
             except OSError as e:
                 raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, file) from e
-            except TypeError as e:
-                raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), file) from e
         else:
             return self._load_json_file(file)
 
