@@ -18,7 +18,8 @@ class DefinitionEntry:
         """
         self.name = name
         if contents:
-            contents = contents.copy().sort()
+            contents = contents.copy()
+            contents.sort()
         self.contents = contents
         self.takes_value = takes_value
         self.source_context = source_context

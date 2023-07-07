@@ -111,6 +111,9 @@ class SidecarValidator:
     def _validate_refs(self, sidecar, error_handler):
         possible_column_refs = sidecar.all_hed_columns
 
+        if "HED" not in possible_column_refs:
+            possible_column_refs.append("HED")
+
         issues = []
         found_column_references = {}
         for column_data in sidecar:
@@ -123,7 +126,7 @@ class SidecarValidator:
                 if len(hed_strings) > 1:
                     error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
 
-                error_handler.push_error_context(ErrorContext.HED_STRING, HedString(hed_string))
+                error_handler.push_error_context(ErrorContext.HED_STRING, HedString(hed_string, hed_schema=self._schema))
                 invalid_locations = self._find_non_matching_braces(hed_string)
                 for loc in invalid_locations:
                     bad_symbol = hed_string[loc]

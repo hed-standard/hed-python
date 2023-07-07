@@ -99,7 +99,7 @@ def run_bids_ops(dispatch, args):
     bids = BidsDataset(dispatch.data_root, tabular_types=['events'], exclude_dirs=args.exclude_dirs)
     dispatch.hed_schema = bids.schema
     if args.verbose:
-        print(f"Successfully parsed BIDS dataset with HED schema {str(bids.get_schema_versions())}")
+        print(f"Successfully parsed BIDS dataset with HED schema {str(bids.schema.get_schema_versions())}")
     events = bids.get_tabular_group(args.file_suffix)
     if args.verbose:
         print(f"Processing {dispatch.data_root}")

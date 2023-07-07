@@ -26,7 +26,7 @@ class TagValidator:
     # Placeholder characters are checked elsewhere, but by default allowed
     TAG_ALLOWED_CHARS = "-_/"
 
-    def __init__(self, hed_schema=None):
+    def __init__(self, hed_schema):
         """Constructor for the Tag_Validator class.
 
         Parameters:
@@ -258,8 +258,6 @@ class TagValidator:
         """
         validation_issues = self._check_invalid_prefix_issues(original_tag)
         allowed_chars = self.TAG_ALLOWED_CHARS
-        if not self._hed_schema or not self._hed_schema.is_hed3_schema:
-            allowed_chars += " "
         if allow_placeholders:
             allowed_chars += "#"
         validation_issues += self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)

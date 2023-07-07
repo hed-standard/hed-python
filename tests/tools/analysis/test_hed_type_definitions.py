@@ -92,7 +92,7 @@ class Test(unittest.TestCase):
                                   no_value=False)
         self.assertEqual(len(d), 3, "get_def_names returns right number of items if multiple defs")
         self.assertEqual(d[0], 'cond3/6', "get_def_names returns the correct item if multiple def")
-        e = def_man.get_def_names(HedString('((Red, Blue, (Green), Black))'))
+        e = def_man.get_def_names(HedString('((Red, Blue, (Green), Black))', hed_schema=self.schema))
         self.assertFalse(e, "get_def_names returns no items if no defs")
 
     def test_split_name(self):

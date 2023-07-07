@@ -23,7 +23,7 @@ class TestDefBase(TestHedBase):
             # print(test_key)
             # print(test_issues)
             # print(expected_issue)
-            self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
+            self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key], self.hed_schema))
 
 
 class TestDefinitionDict(TestDefBase):
@@ -100,10 +100,10 @@ class TestDefinitionDict(TestDefBase):
             'invalidPlaceholder': self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
                                                             tag=0, def_name="InvalidDef1/InvalidPlaceholder"),
             'defInGroup': self.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
-                                                    tag=HedTag("Def/ImproperlyPlacedDef"), def_name="ValidDefName"),
+                                            tag=HedTag("Def/ImproperlyPlacedDef", self.hed_schema), def_name="ValidDefName"),
             'defExpandInGroup': self.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
-                                                          tag=HedTag("Def-expand/ImproperlyPlacedDef"),
-                                                          def_name="ValidDefName"),
+                                                  tag=HedTag("Def-expand/ImproperlyPlacedDef", self.hed_schema),
+                                                  def_name="ValidDefName"),
             'doublePoundSignPlaceholder': self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
                                                                      tag=0, def_name="InvalidDef/##"),
             'doublePoundSignDiffPlaceholder': self.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,

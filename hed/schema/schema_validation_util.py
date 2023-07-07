@@ -43,24 +43,6 @@ def validate_version_string(version_string):
     return False
 
 
-def is_hed3_version_number(version_string):
-    """ Check validity of the version.
-
-    Parameters:
-        version_string (str):  A version string.
-
-    Returns:
-        bool:  If True the version corresponds to a HED3 schema.
-
-    """
-    try:
-        version = Version(version_string)
-        if version.major >= 8:
-            return True
-    except ValueError:
-        return False
-    return False
-
 
 header_attribute_validators = {
         constants.VERSION_ATTRIBUTE: (validate_version_string, HedExceptions.HED_SCHEMA_VERSION_INVALID),

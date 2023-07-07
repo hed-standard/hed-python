@@ -9,7 +9,6 @@ from .expression_parser import QueryParser
 from .hed_group import HedGroup
 from .spreadsheet_input import SpreadsheetInput
 from .hed_string import HedString
-from .hed_string_group import HedStringGroup
 from .hed_tag import HedTag
 from .sidecar import Sidecar
 from .tabular_input import TabularInput

@@ -14,7 +14,7 @@ class DefValidator(DefinitionDict):
 
         Parameters:
             def_dicts (list or DefinitionDict or str): DefinitionDicts containing the definitions to pass to baseclass
-
+            hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
         """
         super().__init__(def_dicts, hed_schema=hed_schema)
 

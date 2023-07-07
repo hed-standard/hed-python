@@ -18,7 +18,7 @@ from hed.validator.onset_validator import OnsetValidator
 class HedValidator:
     """ Top level validation of HED strings. """
 
-    def __init__(self, hed_schema=None, def_dicts=None, run_full_onset_checks=True, definitions_allowed=False):
+    def __init__(self, hed_schema, def_dicts=None, run_full_onset_checks=True, definitions_allowed=False):
         """ Constructor for the HedValidator class.
 
         Parameters:
@@ -66,7 +66,7 @@ class HedValidator:
             return issues
         if hed_string == "n/a" or not self._hed_schema:
             return issues
-        issues += hed_string.convert_to_canonical_forms(self._hed_schema)
+        issues += hed_string._calculate_to_canonical_forms(self._hed_schema)
         if check_for_any_errors(issues):
             return issues
         # This is required so it can validate the tag a tag expands into

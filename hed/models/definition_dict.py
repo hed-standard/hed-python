@@ -50,7 +50,7 @@ class DefinitionDict:
                 for definition in def_dict:
                     self.check_for_definitions(HedString(definition, hed_schema))
             else:
-                raise TypeError("Invalid type '{type(def_dict)}' passed to DefinitionDict")
+                raise TypeError(f"Invalid type '{type(def_dict)}' passed to DefinitionDict")
 
     def _add_definition(self, def_tag, def_value):
         if def_tag in self.defs:

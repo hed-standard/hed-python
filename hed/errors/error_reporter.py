@@ -22,7 +22,6 @@ default_sort_list = [
     ErrorContext.ROW,
     ErrorContext.COLUMN,
     ErrorContext.LINE,
-    # ErrorContext.HED_STRING, # temporarily disable hed string sort(maybe perm, not sure it's needed)
     ErrorContext.SCHEMA_SECTION,
     ErrorContext.SCHEMA_TAG,
     ErrorContext.SCHEMA_ATTRIBUTE,
@@ -31,10 +30,6 @@ default_sort_list = [
 # ErrorContext which is expected to be int based.
 int_sort_list = [
     ErrorContext.ROW
-]
-
-hed_string_sort_list = [
-    ErrorContext.HED_STRING
 ]
 
 def _register_error_function(error_type, wrapper_func):
@@ -191,11 +186,8 @@ class ErrorHandler:
 
         """
         if context is None:
-            from hed import HedString
             if context_type in int_sort_list:
                 context = 0
-            elif context_type in hed_string_sort_list:
-                context = HedString("")
             else:
                 context = ""
         self.error_context.append((context_type, context))
@@ -430,8 +422,6 @@ def sort_issues(issues, reverse=False):
         for key in default_sort_list:
             if key in int_sort_list:
                 result.append(d.get(key, -1))
-            elif key in hed_string_sort_list:
-                result.append(d.get(key, HedString("")))
             else:
                 result.append(d.get(key, ""))
         return tuple(result)

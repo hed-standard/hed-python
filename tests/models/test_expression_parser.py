@@ -1,6 +1,5 @@
 import unittest
 from hed.models.hed_string import HedString
-from hed.models.hed_string_group import HedStringGroup
 from hed.models.expression_parser import QueryParser
 import os
 from hed import schema
@@ -36,22 +35,6 @@ class TestParser(unittest.TestCase):
             # if result2:
             #    print(f"\t\tFound as group(s) {str([str(r) for r in result2])}")
             self.assertEqual(bool(result2), expected_result)
-
-            # Same test with HedStringGroup in
-            hed_string_comb = HedStringGroup([hed_string])
-            result3 = expression.search(hed_string_comb)
-            # print(f"\tSearching string '{str(hed_string)}'")
-            # if result3:
-            #    print(f"\t\tFound as group(s) {str([str(r) for r in result3])}")
-            self.assertEqual(bool(result3), expected_result)
-
-            for r2, r3 in zip(result2, result3):
-                # Ensure r2 is only a HedString if r3 is.
-                if isinstance(r3, HedStringGroup):
-                    self.assertIsInstance(r2, HedString)
-                else:
-                    self.assertNotIsInstance(r2, HedString)
-                self.assertEqual(r2, r3)
 
     def test_broken_search_strings(self):
         test_search_strings = [
@@ -637,29 +620,29 @@ class TestParser(unittest.TestCase):
 
     def test_logical_negation(self):
         expression = QueryParser("~a")
-        hed_string = HedString("A")
+        hed_string = HedString("A", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
-        hed_string = HedString("B")
+        hed_string = HedString("B", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
 
         expression = QueryParser("~a and b")
-        hed_string = HedString("A")
+        hed_string = HedString("A", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
-        hed_string = HedString("B")
+        hed_string = HedString("B", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
-        hed_string = HedString("A, B")
+        hed_string = HedString("A, B", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
 
         expression = QueryParser("~( (a or b) and c)")
-        hed_string = HedString("A")
+        hed_string = HedString("A", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
-        hed_string = HedString("B")
+        hed_string = HedString("B", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
-        hed_string = HedString("C")
+        hed_string = HedString("C", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
-        hed_string = HedString("A, B")
+        hed_string = HedString("A, B", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
-        hed_string = HedString("A, C")
+        hed_string = HedString("A, C", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
 
     def test_not_in_line(self):

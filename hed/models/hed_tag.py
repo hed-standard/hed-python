@@ -11,19 +11,15 @@ class HedTag:
 
     """
 
-    def __init__(self, hed_string, span=None, hed_schema=None, def_dict=None):
+    def __init__(self, hed_string, hed_schema, span=None, def_dict=None):
         """ Creates a HedTag.
 
         Parameters:
             hed_string (str): Source hed string for this tag.
+            hed_schema (HedSchema): A parameter for calculating canonical forms on creation.
             span  (int, int): The start and end indexes of the tag in the hed_string.
-            hed_schema (HedSchema or None): A convenience parameter for calculating canonical forms on creation.
-
-        :raises ValueError:
-            - You cannot pass a def_dict without also passing a schema.
+            def_dict(DefinitionDict or None): The def dict to use to identify def/def expand tags.
         """
-        if def_dict and not hed_schema:
-            raise ValueError("Passing a def_dict without also passing a schema is invalid.")
         self._hed_string = hed_string
         if span is None:
             span = (0, len(hed_string))
@@ -43,15 +39,12 @@ class HedTag:
         self._extension_value = ""
         self._parent = None
 
-        # Downsides: two new parameters
-        # Have to check for this value, slowing everything down potentially.
         self._expandable = None
         self._expanded = False
 
-        if hed_schema:
-            self.convert_to_canonical_forms(hed_schema)
-            if def_dict:
-                def_dict.construct_def_tag(self)
+        self._calculate_to_canonical_forms(hed_schema)
+        if def_dict:
+            def_dict.construct_def_tag(self)
 
     def copy(self):
         """ Return a deep copy of this tag.
@@ -83,9 +76,6 @@ class HedTag:
         Returns:
             short_tag (str): The short form of the tag, including value or extension.
 
-         Note:
-             Only valid after calling convert_to_canonical_forms
-
         """
         if self._schema_entry:
             return f"{self._namespace}{self._schema_entry.short_tag_name}{self._extension_value}"
@@ -98,10 +88,6 @@ class HedTag:
 
         Returns:
             base_tag (str): The long form of the tag, without value or extension.
-
-        Notes:
-            - Only valid after calling convert_to_canonical_forms.
-
         """
         if self._schema_entry:
             return self._schema_entry.long_tag_name
@@ -156,7 +142,6 @@ class HedTag:
         Notes:
             - Warning: This could be empty if the original tag had a name_prefix prepended.
               e.g. a column where "Label/" is prepended, thus the column value has zero base portion.
-            - Only valid after calling convert_to_canonical_forms.
         """
         if self._schema_entry:
             extension_len = len(self._extension_value)
@@ -209,7 +194,7 @@ class HedTag:
         """
         self._tag = new_tag_val
         self._schema_entry = None
-        self.convert_to_canonical_forms(self._schema)
+        self._calculate_to_canonical_forms(self._schema)
 
     @property
     def extension(self):
@@ -323,7 +308,7 @@ class HedTag:
         """ Convenience function, equivalent to str(self).lower(). """
         return str(self).lower()
 
-    def convert_to_canonical_forms(self, hed_schema):
+    def _calculate_to_canonical_forms(self, hed_schema):
         """ Update internal state based on schema.
 
         Parameters:
@@ -661,21 +646,15 @@ class HedTag:
             return memo[id(self)]
 
         # create a new instance of HedTag class
-        new_tag = HedTag(self._hed_string, self.span)
+        new_tag = self.__class__.__new__(self.__class__)
+        new_tag.__dict__.update(self.__dict__)
 
         # add the new object to the memo dictionary
         memo[id(self)] = new_tag
 
-        # copy all other attributes except schema and schema_entry
-        new_tag._tag = copy.deepcopy(self._tag, memo)
-        new_tag._namespace = copy.deepcopy(self._namespace, memo)
-        new_tag._extension_value = copy.deepcopy(self._extension_value, memo)
+        # Deep copy the attributes that need it(most notably, we don't copy schema/schema entry)
         new_tag._parent = copy.deepcopy(self._parent, memo)
         new_tag._expandable = copy.deepcopy(self._expandable, memo)
         new_tag._expanded = copy.deepcopy(self._expanded, memo)
-
-        # reference the schema and schema_entry from the original object
-        new_tag._schema = self._schema
-        new_tag._schema_entry = self._schema_entry
 
         return new_tag
