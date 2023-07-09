@@ -153,6 +153,7 @@ class HedSchema(HedSchemaBase):
         Returns:
             str: A json formatted string of the complete version of this schema including library name and namespace.
         """
+
         return json.dumps(self.version)
 
     def get_save_header_attributes(self, save_merged=False):
