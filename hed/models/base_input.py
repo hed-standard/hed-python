@@ -70,14 +70,14 @@ class BaseInput:
         self._dataframe = None
 
         if isinstance(file, pandas.DataFrame):
-            self._dataframe = file
+            self._dataframe = file.astype(str)
             self._has_column_names = self._dataframe_has_names(self._dataframe)
         elif not file:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
         elif input_type in self.TEXT_EXTENSION:
             try:
                 self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
-                                                  dtype=str, keep_default_na=True, na_values=None)
+                                                  dtype=str, keep_default_na=True, na_values=["", "null"])
             except Exception as e:
                 raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
             # Convert nan values to a known value

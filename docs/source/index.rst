@@ -1,6 +1,10 @@
 Hierarchical Event Descriptor (HED) Python Tools
 ================================================
 
+.. image:: _static/images/croppedWideLogo.png
+  :width: 220
+  :alt: HedLogo
+
 .. sidebar:: **Links**
 
    * `PDF docs <https://hed-python.readthedocs.io/_/downloads/en/latest/pdf/>`_
