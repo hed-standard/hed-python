@@ -49,8 +49,6 @@ class Sidecar:
                 column_refs(list): A list of all valid hed columns by name
         """
         possible_column_references = [column.column_name for column in self if column.column_type != ColumnType.Ignore]
-        if "HED" not in possible_column_references:
-            possible_column_references.append("HED")
 
         return possible_column_references
 
@@ -74,7 +72,7 @@ class Sidecar:
         """
         return {col_name: ColumnMetadata(name=col_name, source=self.loaded_dict) for col_name in self.loaded_dict}
 
-    def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None):
         """ Returns the definition dict for this sidecar.
 
         Parameters:
@@ -193,11 +191,11 @@ class Sidecar:
         except (json.decoder.JSONDecodeError, AttributeError) as e:
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name) from e
 
-    def extract_definitions(self, hed_schema=None, error_handler=None):
+    def extract_definitions(self, hed_schema, error_handler=None):
         """ Gather and validate definitions in metadata.
 
         Parameters:
-            hed_schema (HedSchema or None): The schema to used to identify tags.
+            hed_schema (HedSchema): The schema to used to identify tags.
             error_handler (ErrorHandler or None): The error handler to use for context, uses a default one if None.
 
         Returns:

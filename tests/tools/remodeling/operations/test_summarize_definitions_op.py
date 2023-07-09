@@ -90,6 +90,22 @@ class Test(unittest.TestCase):
         self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], DefinitionSummary)
         # print(str(dispatch.summary_dicts[sum_op.summary_name].get_text_summary()['Dataset']))
 
+    def test_ambiguous_def_errors(self):
+        dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
+        parms = json.loads(self.json_parms)
+        sum_op = SummarizeDefinitionsOp(parms)
+        df = pd.DataFrame({"HED": [
+            "(Def-expand/B2/3, (Action/3, Collection/animals, Acceleration/3))",
+        ]})
+        df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
+        self.assertIn(sum_op.summary_name, dispatch.summary_dicts)
+        self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], DefinitionSummary)
+        # print(str(dispatch.summary_dicts[sum_op.summary_name].get_text_summary()['Dataset']))
+        cont = dispatch.summary_dicts
+        context = cont.get("get_definition_summary", None)
+        self.assertIsInstance(context, DefinitionSummary, "get_summary testing DefinitionSummary")
+        summary1a = context.get_summary()
+
 
 if __name__ == '__main__':
     unittest.main()

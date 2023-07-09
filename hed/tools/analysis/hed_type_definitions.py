@@ -87,7 +87,6 @@ class HedTypeDefinitions:
         description = ''
         other_tags = []
         for hed_tag in tag_list:
-            hed_tag.convert_to_canonical_forms(self.hed_schema)
             if hed_tag.short_base_tag.lower() == 'description':
                 description = hed_tag.extension
             elif hed_tag.short_base_tag.lower() != self.type_tag:

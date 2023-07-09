@@ -250,29 +250,6 @@ class TestDefErrors(unittest.TestCase):
                                 remove_definitions=True, basic_definition_string=self.placeholder_definition_string)
 
 
-    # todo: finish updating these
-    # # special case test
-    # def test_changing_tag_then_def_mapping(self):
-    #     def_dict = DefinitionDict()
-    #     def_string = HedString(self.basic_definition_string)
-    #     def_string.convert_to_canonical_forms(None)
-    #     def_dict.check_for_definitions(def_string)
-    #     def_mapper = DefMapper(def_dict)
-    #     validator = HedValidator(self.hed_schema)
-    #     hed_ops = [validator, def_mapper]
-    #
-    #     test_string = HedString(self.label_def_string)
-    #     tag = test_string.children[0]
-    #     tag.tag = "Organizational-property/" + str(tag)
-    #     def_issues = test_string.validate(hed_ops, expand_defs=True)
-    #     self.assertFalse(def_issues)
-    #     self.assertEqual(test_string.get_as_short(), f"{self.expanded_def_string}")
-    #
-    #     test_string = HedString(self.label_def_string)
-    #     tag = test_string.children[0]
-    #     tag.tag = "Organizational-property22/" + str(tag)
-    #     def_issues = test_string.validate(hed_ops, expand_defs=True)
-    #     self.assertTrue(def_issues)
 
 
 

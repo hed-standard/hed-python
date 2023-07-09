@@ -4,7 +4,6 @@ from hed.errors import ErrorHandler, ValidationErrors, ErrorContext
 from hed.errors.error_types import ColumnErrors
 from hed.models import ColumnType
 from hed import HedString
-from hed.models.hed_string_group import HedStringGroup
 from hed.errors.error_reporter import sort_issues, check_for_any_errors
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
@@ -66,7 +65,7 @@ class SpreadsheetValidator:
 
                 error_handler.push_error_context(ErrorContext.COLUMN, columns[column_number])
 
-                column_hed_string = HedString(cell)
+                column_hed_string = HedString(cell, self._schema)
                 row_strings.append(column_hed_string)
                 error_handler.push_error_context(ErrorContext.HED_STRING, column_hed_string)
                 new_column_issues = self._hed_validator.run_basic_checks(column_hed_string, allow_placeholders=False)
@@ -78,8 +77,8 @@ class SpreadsheetValidator:
                 issues += new_column_issues
             if check_for_any_errors(new_column_issues):
                 continue
-            else:
-                row_string = HedStringGroup(row_strings)
+            elif row_strings:
+                row_string = HedString.from_hed_strings(row_strings)
                 error_handler.push_error_context(ErrorContext.HED_STRING, row_string)
                 new_column_issues = self._hed_validator.run_full_string_checks(row_string)
 

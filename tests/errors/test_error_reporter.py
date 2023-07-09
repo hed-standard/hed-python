@@ -1,6 +1,8 @@
 import unittest
 from hed.errors import ErrorHandler, ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings, \
-    get_printable_issue_string
+    get_printable_issue_string, sort_issues
+from hed import HedString
+from hed import load_schema_version
 
 
 class Test(unittest.TestCase):
@@ -113,3 +115,30 @@ class Test(unittest.TestCase):
         self.assertEqual(printable_issues3.count(myfile), 1)
 
         self.error_handler.reset_error_context()
+
+    def test_sort_issues(self):
+        schema = load_schema_version("8.1.0")
+        issues = [
+            {ErrorContext.CUSTOM_TITLE: 'issue3', ErrorContext.FILE_NAME: 'File2', ErrorContext.ROW: 5,
+             ErrorContext.HED_STRING: HedString('Test C', schema)},
+            {ErrorContext.CUSTOM_TITLE: 'issue1', ErrorContext.FILE_NAME: 'File1', ErrorContext.ROW: 10,
+             ErrorContext.HED_STRING: HedString('Test A', schema)},
+            {ErrorContext.CUSTOM_TITLE: 'issue2', ErrorContext.FILE_NAME: 'File1', ErrorContext.ROW: 2},
+            {ErrorContext.CUSTOM_TITLE: 'issue4', ErrorContext.FILE_NAME: 'File2', ErrorContext.ROW: 1,
+             ErrorContext.HED_STRING: HedString('Test D', schema)},
+            {ErrorContext.CUSTOM_TITLE: 'issue5', ErrorContext.FILE_NAME: 'File3', ErrorContext.ROW: 15}
+        ]
+
+        sorted_issues = sort_issues(issues)
+        self.assertEqual(sorted_issues[0][ErrorContext.CUSTOM_TITLE], 'issue1')
+        self.assertEqual(sorted_issues[1][ErrorContext.CUSTOM_TITLE], 'issue2')
+        self.assertEqual(sorted_issues[2][ErrorContext.CUSTOM_TITLE], 'issue3')
+        self.assertEqual(sorted_issues[3][ErrorContext.CUSTOM_TITLE], 'issue4')
+        self.assertEqual(sorted_issues[4][ErrorContext.CUSTOM_TITLE], 'issue5')
+
+        reversed_issues = sort_issues(issues, reverse=True)
+        self.assertEqual(reversed_issues[0][ErrorContext.CUSTOM_TITLE], 'issue5')
+        self.assertEqual(reversed_issues[1][ErrorContext.CUSTOM_TITLE], 'issue4')
+        self.assertEqual(reversed_issues[2][ErrorContext.CUSTOM_TITLE], 'issue3')
+        self.assertEqual(reversed_issues[3][ErrorContext.CUSTOM_TITLE], 'issue2')
+        self.assertEqual(reversed_issues[4][ErrorContext.CUSTOM_TITLE], 'issue1')

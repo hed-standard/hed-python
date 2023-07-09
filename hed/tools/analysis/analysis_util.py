@@ -116,7 +116,7 @@ def search_strings(hed_strings, queries, query_names=None):
 #         expand_defs (bool): If True, definitions are expanded when the events are assembled.
 # 
 #     Returns:
-#         list: A list of HedString or HedStringGroup objects.
+#         list: A list of HedString objects.
 # 
 #     """
 #     hed_list = list(table.iter_dataframe(hed_ops=[hed_schema], return_string_only=True,

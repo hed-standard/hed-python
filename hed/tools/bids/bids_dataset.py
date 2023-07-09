@@ -92,24 +92,6 @@ class BidsDataset:
     def get_summary(self):
         """ Return an abbreviated summary of the dataset. """
         summary = {"dataset": self.dataset_description['Name'],
-                   "hed_schema_versions": self.get_schema_versions(),
+                   "hed_schema_versions": self.schema.get_schema_versions(),
                    "file_group_types": f"{str(list(self.tabular_files.keys()))}"}
         return summary
-
-    def get_schema_versions(self):
-        """ Return the schema versions used in this dataset.
-
-        Returns:
-            list:  List of schema versions used in this dataset.
-
-        """
-        if isinstance(self.schema, HedSchema):
-            return [self.schema.version]
-        version_list = []
-        for prefix, schema in self.schema._schemas.items():
-            name = schema.version
-            if schema.library:
-                name = schema.library + '_' + name
-            name = prefix + name
-            version_list.append(name)
-        return version_list

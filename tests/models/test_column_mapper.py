@@ -4,19 +4,21 @@ import os
 from hed.models import ColumnMapper, ColumnType, HedString
 from hed.models.sidecar import Sidecar
 from hed.errors import ValidationErrors
-
+from hed import load_schema
 
 class Test(unittest.TestCase):
-    schema_file = '../data/schema_tests/HED8.0.0t.xml'
-
     @classmethod
     def setUpClass(cls):
+        base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        schema_file = 'schema_tests/HED8.0.0t.xml'
+
+        cls.hed_schema = load_schema(os.path.join(base_data_dir, schema_file))
         cls.integer_key_dictionary = {0: 'one', 1: 'two', 2: 'three'}
         cls.zero_based_row_column_count = 3
         cls.column_prefix_dictionary = {2: 'Event/Description/', 3: 'Event/Label/', 4: 'Event/Category/'}
         cls.category_key = 'Event/Category/'
         cls.category_participant_and_stimulus_tags = \
-            HedString('Event/Category/Participant response, Event/Category/Stimulus')
+            HedString('Event/Category/Participant response, Event/Category/Stimulus', cls.hed_schema)
 
         cls.row_with_hed_tags = ['event1', 'tag1', 'tag2']
 

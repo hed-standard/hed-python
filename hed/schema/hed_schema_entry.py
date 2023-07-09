@@ -176,6 +176,7 @@ class UnitClassEntry(HedSchemaEntry):
             return False
         return True
 
+
 class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
 
@@ -191,7 +192,8 @@ class UnitEntry(HedSchemaEntry):
             schema (HedSchema): The schema rules come from.
 
         """
-        self.unit_modifiers = schema.get_modifiers_for_unit(self.name)
+        self.unit_modifiers = schema._get_modifiers_for_unit(self.name)
+
 
 class HedTagEntry(HedSchemaEntry):
     """ A single tag entry in the HedSchema. """

@@ -36,7 +36,7 @@ class EventManager:
 
         Yields:
             int:  position in the dataFrame
-            HedStringGroup: Context
+            HedString: Context
 
         """
 

@@ -378,11 +378,11 @@ class ColumnMapper:
     def _remove_from_list(list_to_alter, to_remove):
         return [item for item in list_to_alter if item not in to_remove]
 
-    def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None):
         """ Return def dicts from every column description.
 
         Parameters:
-            hed_schema (Schema or None): A HED schema object to use for extracting definitions.
+            hed_schema (Schema): A HED schema object to use for extracting definitions.
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:

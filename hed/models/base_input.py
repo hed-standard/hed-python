@@ -493,7 +493,7 @@ class BaseInput:
         )
         return dataframe
 
-    def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None):
         """ Returns the definition dict for this file
 
         Note: Baseclass implementation returns just extra_def_dicts.
