@@ -151,20 +151,7 @@ class TestHedSchemaMerging(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # note: most of this code can be removed once 8.2 is officially released.
-        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../merging_schema_cache/')
-        cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
-        schema.set_cache_directory(cls.hed_cache_dir)
-        cls.full_base_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.base_schema_dir)
-        cls.source_schema_path = os.path.join(cls.full_base_folder, "HED8.2.0.xml")
-        cls.cache_folder = hed_cache.get_cache_directory()
-        cls.schema_path_in_cache = os.path.join(cls.cache_folder, "HED8.2.0.xml")
-        shutil.copy(cls.source_schema_path, cls.schema_path_in_cache)
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.hed_cache_dir)
-        schema.set_cache_directory(cls.saved_cache_folder)
+         cls.full_base_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.base_schema_dir)
 
     def _base_merging_test(self, files):
         import filecmp
