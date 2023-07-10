@@ -60,7 +60,7 @@ class HedContextManager:
 
         Yields:
             HedString:  The HedString.
-            HedStringGroup: Context
+            HedString: Context
 
         """
 

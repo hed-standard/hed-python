@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
             SpreadsheetInput(cls.hed_filepath_major_errors_multi_column, tag_columns=[1, 2])
 
     def test__validate_input(self):
-        test_string_obj = HedString(self.base_hed_input)
+        test_string_obj = HedString(self.base_hed_input, self.hed_schema)
         validation_issues = test_string_obj.validate(self.hed_schema)
         self.assertIsInstance(validation_issues, list)
 
@@ -170,14 +170,14 @@ class Test(unittest.TestCase):
 
     # todo: move this test somewhere more appropriate
     def test_org_tag_missing(self):
-        test_string_obj = HedString("Event, Item/NotItem")
+        test_string_obj = HedString("Event, Item/NotItem", self.hed_schema)
         removed_tag = test_string_obj.tags()[0]
         test_string_obj.remove([removed_tag])
         from hed import HedTag
         source_span = test_string_obj._get_org_span(removed_tag)
         self.assertEqual(source_span, (0, 5))
 
-        source_span = test_string_obj._get_org_span(HedTag("Event"))
+        source_span = test_string_obj._get_org_span(HedTag("Event", self.hed_schema))
         self.assertEqual(source_span, (None, None))
 
 

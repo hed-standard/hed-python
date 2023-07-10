@@ -126,13 +126,8 @@ class HedGroup:
         return return_copy
 
     def sort(self):
-        """ Sort the tags and groups in this HedString in a consistent order.
-
-        Returns:
-            self
-        """
+        """ Sort the tags and groups in this HedString in a consistent order."""
         self.sorted(update_self=True)
-        return self
 
     def sorted(self, update_self=False):
         """ Returns a sorted copy of this hed group as a list of it's children

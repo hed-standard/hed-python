@@ -65,7 +65,7 @@ class Test(TestHedBase):
     def _test_issues_no_context(self, test_strings, test_issues):
         hed_validator = HedValidator(self.hed_schema, self.def_dict_both)
         for string, expected_params in zip(test_strings, test_issues):
-            test_string = HedString(string)
+            test_string = HedString(string, self.hed_schema)
             error_handler = ErrorHandler(check_for_warnings=False)
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string)
             onset_issues = hed_validator.validate(test_string, False)

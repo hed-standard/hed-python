@@ -388,11 +388,11 @@ class TestTagLevels(TestHed):
             'legalDuplicate': [],
             'noDuplicate': [],
             'duplicateGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                group=HedString("(Sensory-event, Man-made-object/VehicleTrain)")),
+                                                group=HedString("(Sensory-event, Man-made-object/VehicleTrain)", self.hed_schema)),
             'duplicateSubGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))")),
+                                                group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))", self.hed_schema)),
             'duplicateSubGroupF': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                   group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)")),
+                                                   group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)", self.hed_schema)),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 

@@ -69,15 +69,17 @@ class Test(unittest.TestCase):
         self.assertEqual(len(located_tags), 0)
 
     def _compare_strings(self, hed_strings):
-        str1 = HedString(hed_strings[0]).sort()
+        str1 = HedString(hed_strings[0], self.hed_schema)
+        str1.sort()
         for hed_string in hed_strings:
-            str2 = HedString(hed_string).sort()
+            str2 = HedString(hed_string, self.hed_schema)
+            str2.sort()
             self.assertEqual(str1, str2)
 
     def _compare_strings2(self, hed_strings):
-        str1 = HedString(hed_strings[0])
+        str1 = HedString(hed_strings[0], self.hed_schema)
         for hed_string in hed_strings:
-            str2 = HedString(hed_string)
+            str2 = HedString(hed_string, self.hed_schema)
             self.assertEqual(str1.sorted(), str2.sorted())
 
     def test_sort_and_sorted(self):

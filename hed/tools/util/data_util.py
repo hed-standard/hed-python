@@ -131,13 +131,13 @@ def get_new_dataframe(data):
         DataFrame:  A dataframe containing the contents of the tsv file or if data was
              a DataFrame to start with, a new copy of the DataFrame.
 
-    :raises HedFileError: 
+    :raises HedFileError:
         - If a filename is given and it cannot be read into a Dataframe.
 
     """
 
     if isinstance(data, str):
-        df = pd.read_csv(data, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
+        df = pd.read_csv(data, delimiter='\t', header=0, keep_default_na=True, na_values=[",", "null"])
     elif isinstance(data, pd.DataFrame):
         df = data.copy()
     else:
@@ -155,7 +155,7 @@ def get_row_hash(row, key_list):
     Returns:
         str: Hash key constructed from the entries of row in the columns specified by key_list.
 
-    :raises HedFileError: 
+    :raises HedFileError:
         - If row doesn't have all of the columns in key_list HedFileError is raised.
 
     """
@@ -177,7 +177,7 @@ def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate')
     Returns:
         dict:  Dictionary with key_col values as the keys and the corresponding value_col values as the values.
 
-    :raises HedFileError: 
+    :raises HedFileError:
         - When tsv_path does not correspond to a file that can be read into a DataFrame.
 
     """
@@ -252,7 +252,7 @@ def reorder_columns(data, col_order, skip_missing=True):
     Returns:
         DataFrame:                  A new reordered dataframe.
 
-    :raises HedFileError:  
+    :raises HedFileError:
         - If col_order contains columns not in data and skip_missing is False.
         - If data corresponds to a filename from which a dataframe cannot be created.
 
@@ -277,7 +277,7 @@ def separate_values(values, target_values):
             list:  Target values present in values.
             list:  Target values missing from values.
 
-     Notes:  
+     Notes:
          - The function computes the set difference of target_cols and base_cols and returns a list
            of columns of target_cols that are in base_cols and a list of those missing.
 

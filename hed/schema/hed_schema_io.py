@@ -1,5 +1,6 @@
 """ Utilities for loading and outputting HED schema. """
 import os
+import json
 from hed.schema.schema_io.xml2schema import HedSchemaXMLParser
 from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
@@ -166,6 +167,8 @@ def load_schema_version(xml_version=None, xml_folder=None):
     Parameters:
         xml_version (str or list or None): List or str specifying which official HED schemas to use.
                                            An empty string returns the latest version
+                                           A json str format is also supported,
+                                           based on the output of HedSchema.get_formatted_version
         xml_folder (str): Path to a folder containing schema.
 
     Returns:
@@ -175,6 +178,13 @@ def load_schema_version(xml_version=None, xml_folder=None):
         - The xml_version is not valid.
         - A fatal error was encountered in parsing
     """
+    if xml_version and isinstance(xml_version, str) and \
+            ((xml_version.startswith("[") and xml_version.endswith("]")) or
+             (xml_version.startswith('"') and xml_version.endswith('"'))):
+        try:
+            xml_version = json.loads(xml_version)
+        except json.decoder.JSONDecodeError as e:
+            raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), xml_version) from e
     if xml_version and isinstance(xml_version, list):
         schemas = [_load_schema_version(xml_version=version, xml_folder=xml_folder) for version in xml_version]
         if len(schemas) == 1:

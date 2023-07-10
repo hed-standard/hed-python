@@ -1,9 +1,14 @@
 from hed.models import HedString
 import unittest
 from hed import load_schema_version
+import copy
 
 
 class TestHedStrings(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.schema = load_schema_version("8.0.0")
+        
     def validator_scalar(self, test_strings, expected_results, test_function):
         for test_key in test_strings:
             test_result = test_function(test_strings[test_key])
@@ -20,6 +25,7 @@ class TestHedStrings(unittest.TestCase):
 class TestHedString(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.schema = load_schema_version("8.0.0")
         pass
 
     def test_constructor(self):
@@ -44,7 +50,7 @@ class TestHedString(unittest.TestCase):
 
         # Just make sure it doesn't crash while parsing super invalid strings.
         for name, string in test_strings.items():
-            hed_string = HedString(string)
+            hed_string = HedString(string, self.schema)
 
             self.assertEqual(bool(hed_string), expected_result[name])
             if bool(hed_string):
@@ -55,12 +61,12 @@ class TestHedString(unittest.TestCase):
 class HedTagLists(TestHedStrings):
     def test_type(self):
         hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
-        result = HedString.split_into_groups(hed_string)
+        result = HedString.split_into_groups(hed_string, self.schema)
         self.assertIsInstance(result, list)
 
     def test_top_level_tags(self):
         hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
-        result = HedString.split_into_groups(hed_string)
+        result = HedString.split_into_groups(hed_string, self.schema)
         tags_as_strings = [str(tag) for tag in result]
         self.assertCountEqual(tags_as_strings, ['Event/Category/Experimental stimulus', 'Item/Object/Vehicle/Train',
                                                 'Attribute/Visual/Color/Purple'])
@@ -68,7 +74,7 @@ class HedTagLists(TestHedStrings):
     def test_group_tags(self):
         hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
                      '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
-        string_obj = HedString(hed_string)
+        string_obj = HedString(hed_string, self.schema)
         tags_as_strings = [str(tag) for tag in string_obj.children]
         self.assertCountEqual(tags_as_strings,
                               ['/Action/Reach/To touch',
@@ -78,10 +84,10 @@ class HedTagLists(TestHedStrings):
     def test_square_brackets_in_string(self):
         # just verifying this parses, square brackets do not validate
         hed_string = '[test_ref], Event/Sensory-event, Participant, ([test_ref2], Event)'
-        string_obj = HedString(hed_string)
+        string_obj = HedString(hed_string, self.schema)
         tags_as_strings = [str(tag) for tag in string_obj.children]
         self.assertCountEqual(tags_as_strings,
-                              ['[test_ref]', 'Event/Sensory-event', 'Participant', '([test_ref2],Event)'])
+                              ['[test_ref]', 'Sensory-event', 'Participant', '([test_ref2],Event)'])
 
     # Potentially restore some similar behavior later if desired.
     # We no longer automatically remove things like quotes.
@@ -118,7 +124,7 @@ class HedTagLists(TestHedStrings):
         }
 
         def test_function(string):
-            return [str(child) for child in HedString.split_into_groups(string)]
+            return [str(child) for child in HedString.split_into_groups(string, self.schema)]
 
         self.validator_list(test_strings, expected_results, test_function)
 
@@ -127,7 +133,7 @@ class ProcessedHedTags(TestHedStrings):
     def test_parsed_tags(self):
         hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
                      '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
-        parsed_string = HedString(hed_string)
+        parsed_string = HedString(hed_string, self.schema)
         self.assertCountEqual([str(tag) for tag in parsed_string.get_all_tags()], [
             '/Action/Reach/To touch',
             '/Attribute/Object side/Left',
@@ -204,3 +210,100 @@ class TestHedStringShrinkDefs(unittest.TestCase):
             hed_string.shrink_defs()
             self.assertEqual(str(hed_string), expected_results[key])
 
+
+class TestFromHedStrings(unittest.TestCase):
+    def setUp(self):
+        self.schema = load_schema_version("8.1.0")
+        self.hed_strings = [
+            HedString('Event', self.schema),
+            HedString('Action', self.schema),
+            HedString('Age/20', self.schema),
+            HedString('Item', self.schema),
+        ]
+
+    def test_from_hed_strings(self):
+        combined_hed_string = HedString.from_hed_strings(self.hed_strings)
+
+        # Test that the combined hed string is as expected
+        self.assertEqual(combined_hed_string._hed_string, 'Event,Action,Age/20,Item')
+
+        # Test that the schema of the combined hed string is the same as the first hed string
+        self.assertEqual(combined_hed_string._schema, self.schema)
+
+        # Test that the contents of the combined hed string is the concatenation of the contents of all hed strings
+        expected_contents = [child for hed_string in self.hed_strings for child in hed_string.children]
+        self.assertEqual(combined_hed_string.children, expected_contents)
+
+        # Test that the _from_strings attribute of the combined hed string is the list of original hed strings
+        self.assertEqual(combined_hed_string._from_strings, self.hed_strings)
+
+    def test_empty_hed_strings_list(self):
+        with self.assertRaises(TypeError):
+            HedString.from_hed_strings([])
+
+    def test_none_hed_strings_list(self):
+        with self.assertRaises(TypeError):
+            HedString.from_hed_strings(None)
+
+    def test_complex_hed_strings(self):
+        complex_hed_strings = [
+            HedString('Event,Action', self.schema),
+            HedString('Age/20,Hand', self.schema),
+            HedString('Item,(Leg, Nose)', self.schema),
+        ]
+
+        combined_hed_string = HedString.from_hed_strings(complex_hed_strings)
+
+        # Test that the combined hed string is as expected
+        self.assertEqual(combined_hed_string._hed_string, 'Event,Action,Age/20,Hand,Item,(Leg, Nose)')
+
+        # Test that the schema of the combined hed string is the same as the first hed string
+        self.assertEqual(combined_hed_string._schema, self.schema)
+
+        # Test that the contents of the combined hed string is the concatenation of the contents of all hed strings
+        expected_contents = [child for hed_string in complex_hed_strings for child in hed_string.children]
+        self.assertEqual(combined_hed_string.children, expected_contents)
+
+        # Test that the _from_strings attribute of the combined hed string is the list of original hed strings
+        self.assertEqual(combined_hed_string._from_strings, complex_hed_strings)
+
+    def _verify_copied_string(self, original_hed_string):
+        # Make a deepcopy of the original HedString
+        copied_hed_string = copy.deepcopy(original_hed_string)
+
+        # The copied HedString should not be the same object as the original
+        self.assertNotEqual(id(original_hed_string), id(copied_hed_string))
+
+        # The copied HedString should have the same _hed_string as the original
+        self.assertEqual(copied_hed_string._hed_string, original_hed_string._hed_string)
+
+        # The _children attribute of copied HedString should not be the same object as the original
+        self.assertNotEqual(id(original_hed_string._children), id(copied_hed_string._children))
+
+        # The _children attribute of copied HedString should have the same contents as the original
+        self.assertEqual(copied_hed_string._children, original_hed_string._children)
+
+        # The parent of each child in copied_hed_string._children should point to copied_hed_string
+        for child in copied_hed_string._children:
+            self.assertEqual(child._parent, copied_hed_string)
+
+        # The _original_children and _from_strings attributes should also be deepcopied
+        self.assertNotEqual(id(original_hed_string._original_children), id(copied_hed_string._original_children))
+        self.assertEqual(copied_hed_string._original_children, original_hed_string._original_children)
+        if original_hed_string._from_strings:
+            self.assertNotEqual(id(original_hed_string._from_strings), id(copied_hed_string._from_strings))
+            self.assertEqual(copied_hed_string._from_strings, original_hed_string._from_strings)
+
+    def test_deepcopy(self):
+        original_hed_string = HedString('Event,Action', self.schema)
+
+        self._verify_copied_string(original_hed_string)
+        complex_hed_strings = [
+            HedString('Event,Action', self.schema),
+            HedString('Age/20,Hand', self.schema),
+            HedString('Item,(Leg, Nose)', self.schema),
+        ]
+
+        combined_hed_string = HedString.from_hed_strings(complex_hed_strings)
+
+        self._verify_copied_string(combined_hed_string)

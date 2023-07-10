@@ -82,7 +82,6 @@ class Test(unittest.TestCase):
         issues2 = self.sidecar1.validate(hed_schema=self.hed_schema, error_handler=ErrorHandler(False))
         input_file2 = TabularInput(self.events_path, sidecar=self.sidecar2)
         issues2a = input_file2.validate(hed_schema=self.hed_schema, error_handler=ErrorHandler(False))
-        breakHere = 3
 
     def test_invalid_file(self):
         for invalid_input in self.invalid_inputs:

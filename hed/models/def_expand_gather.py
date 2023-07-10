@@ -201,7 +201,4 @@ class DefExpandGatherer:
         Returns:
             HedGroup: the ambiguous definition with known placeholders filled in
         """
-        if not ambiguous_def:
-            # mostly to not crash, this shouldn't happen.
-            return HedString("")
         return ambiguous_def.get_group()

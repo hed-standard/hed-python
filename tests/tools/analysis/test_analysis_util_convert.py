@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
         pass
 
     def test_convert_hed_tag(self):
-        tag1 = HedTag('Label/Cond1')
+        tag1 = HedTag('Label/Cond1', self.hed_schema)
         str1 = hed_to_str(tag1)
         self.assertIsInstance(str1, str)
         self.assertEqual(str1, 'Label/Cond1')
@@ -28,7 +28,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(str2, str)
         self.assertEqual(str2, 'Label/Cond1')
         tag3 = HedTag('Label/Cond1', hed_schema=self.hed_schema)
-        tag3.convert_to_canonical_forms(tag3._schema)
         str3 = hed_to_str(tag3)
         self.assertIsInstance(str3, str)
         self.assertEqual(str3, 'Label/Cond1')
@@ -47,7 +46,7 @@ class Test(unittest.TestCase):
 
 
     def test_hed_to_str_obj(self):
-        str_obj1 = HedString('Label/Cond1')
+        str_obj1 = HedString('Label/Cond1', self.hed_schema)
         str1 = hed_to_str(str_obj1)
         self.assertIsInstance(str1, str)
         self.assertEqual(str1, 'Label/Cond1')
@@ -56,7 +55,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(str2, str)
         self.assertEqual(str2, 'Label/Cond1')
         str_obj3 = HedString('Label/Cond1', hed_schema=self.hed_schema)
-        str_obj3.convert_to_canonical_forms(self.hed_schema)
         str3 = hed_to_str(str_obj3)
         self.assertIsInstance(str3, str)
         self.assertEqual(str3, 'Label/Cond1')

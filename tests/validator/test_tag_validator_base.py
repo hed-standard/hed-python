@@ -66,20 +66,18 @@ class TestValidatorBase(TestHedBase):
     def setUpClass(cls):
         super().setUpClass()
         cls.error_handler = error_reporter.ErrorHandler()
-        # cls.syntactic_hed_input_reader = HedValidator(hed_schema=None)
-        # cls.syntactic_tag_validator = cls.syntactic_hed_input_reader._tag_validator
         cls.semantic_hed_input_reader = HedValidator(hed_schema=cls.hed_schema)
         cls.semantic_tag_validator = cls.semantic_hed_input_reader._tag_validator
 
     def validator_base(self, test_strings, expected_results, expected_issues, test_function,
-                       hed_schema=None, check_for_warnings=False):
+                       hed_schema, check_for_warnings=False):
         for test_key in test_strings:
-            hed_string_obj = HedString(test_strings[test_key])
+            hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
             error_handler = ErrorHandler(check_for_warnings=check_for_warnings)
             error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
             test_issues = []
             if self.compute_forms:
-                test_issues += hed_string_obj.convert_to_canonical_forms(hed_schema)
+                test_issues += hed_string_obj._calculate_to_canonical_forms(hed_schema)
             if not test_issues:
                 test_issues += test_function(hed_string_obj)
             expected_params = expected_issues[test_key]
