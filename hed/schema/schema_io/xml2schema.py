@@ -9,6 +9,7 @@ from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema import HedSchema
 from hed.schema import schema_validation_util
 from hed.schema.schema_io import xml_constants
+import copy
 
 
 class HedSchemaXMLParser:
@@ -30,7 +31,7 @@ class HedSchemaXMLParser:
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
                                    message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
                                    filename=e.filename)
-            self._schema = base_version
+            self._schema = copy.deepcopy(base_version)
             self._schema.filename = hed_xml_file_path
             self._schema.header_attributes = saved_attr
             self._loading_merged = False

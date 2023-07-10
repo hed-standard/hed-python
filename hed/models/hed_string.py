@@ -332,12 +332,11 @@ class HedString(HedGroup):
 
         return result_positions
 
-    def validate(self, hed_schema, allow_placeholders=True, error_handler=None):
+    def validate(self, allow_placeholders=True, error_handler=None):
         """
         Validate the string using the schema
 
         Parameters:
-            hed_schema(HedSchema): The schema to use to validate
             allow_placeholders(bool): allow placeholders in the string
             error_handler(ErrorHandler or None): the error handler to use, creates a default one if none passed
         Returns:
@@ -345,7 +344,7 @@ class HedString(HedGroup):
         """
         from hed.validator import HedValidator
 
-        validator = HedValidator(hed_schema)
+        validator = HedValidator(self._schema)
         return validator.validate(self, allow_placeholders=allow_placeholders, error_handler=error_handler)
 
     def find_top_level_tags(self, anchor_tags, include_groups=2):

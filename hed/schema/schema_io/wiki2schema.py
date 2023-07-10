@@ -2,6 +2,7 @@
 This module is used to create a HedSchema object from a .mediawiki file.
 """
 import re
+import copy
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -127,7 +128,7 @@ class HedSchemaWikiParser:
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
                                    message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
                                    filename=e.filename)
-            self._schema = base_version
+            self._schema = copy.deepcopy(base_version)
             self._schema.filename = self.filename
             self._schema.header_attributes = saved_attr
             self._loading_merged = False

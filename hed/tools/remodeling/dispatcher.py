@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 import json
 from hed.errors.exceptions import HedFileError
-from hed.schema.hed_schema_io import get_schema
+from hed.schema.hed_schema_io import load_schema_version
+from hed.schema import HedSchema, HedSchemaGroup
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
 from hed.tools.util.io_util import clean_filename, extract_suffix_path, get_timestamp
@@ -46,7 +47,7 @@ class Dispatcher:
             these_errors = self.errors_to_str(errors, 'Dispatcher failed due to invalid operations')
             raise ValueError("InvalidOperationList", f"{these_errors}")
         self.parsed_ops = op_list
-        self.hed_schema = get_schema(hed_versions)
+        self.hed_schema = self.get_schema(hed_versions)
         self.summary_dicts = {}
 
     def get_summaries(self, file_formats=['.txt', '.json']):
@@ -240,3 +241,13 @@ class Dispatcher:
         if title:
             return title + sep + errors
         return errors
+
+    def get_schema(self, hed_versions):
+        if not hed_versions:
+            return None
+        elif isinstance(hed_versions, str) or isinstance(hed_versions, list):
+            return load_schema_version(hed_versions)
+        elif isinstance(hed_versions, HedSchema) or isinstance(hed_versions, HedSchemaGroup):
+            return hed_versions
+        else:
+            raise ValueError("InvalidHedSchemaOrSchemaVersion", "Expected schema or schema version")
