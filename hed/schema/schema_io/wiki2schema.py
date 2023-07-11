@@ -623,7 +623,7 @@ class HedSchemaWikiParser:
             tag_entry.description = node_desc.strip()
 
         for attribute_name, attribute_value in node_attributes.items():
-            tag_entry.set_attribute_value(attribute_name, attribute_value)
+            tag_entry._set_attribute_value(attribute_name, attribute_value)
 
         return tag_entry
 

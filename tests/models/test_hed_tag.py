@@ -1,5 +1,6 @@
 from hed.models.hed_tag import HedTag
 from tests.validator.test_tag_validator_base import TestHedBase
+from hed.schema import HedKey
 
 
 class TestValidatorUtilityFunctions(TestHedBase):
@@ -152,10 +153,10 @@ class TestSchemaUtilityFunctions(TestHedBase):
         no_extension_tag1 = HedTag('duration/22 s', hed_schema=self.hed_schema)
         no_extension_tag2 = HedTag('id/45', hed_schema=self.hed_schema)
         no_extension_tag3 = HedTag('RGB-red/0.5', hed_schema=self.hed_schema)
-        extension_tag1_result = extension_tag1.is_extension_allowed_tag()
-        no_extension_tag1_result = no_extension_tag1.is_extension_allowed_tag()
-        no_extension_tag2_result = no_extension_tag2.is_extension_allowed_tag()
-        no_extension_tag3_result = no_extension_tag3.is_extension_allowed_tag()
+        extension_tag1_result = extension_tag1.has_attribute(HedKey.ExtensionAllowed)
+        no_extension_tag1_result = no_extension_tag1.has_attribute(HedKey.ExtensionAllowed)
+        no_extension_tag2_result = no_extension_tag2.has_attribute(HedKey.ExtensionAllowed)
+        no_extension_tag3_result = no_extension_tag3.has_attribute(HedKey.ExtensionAllowed)
         self.assertEqual(extension_tag1_result, True)
         self.assertEqual(no_extension_tag1_result, False)
         self.assertEqual(no_extension_tag2_result, False)

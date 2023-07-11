@@ -229,7 +229,7 @@ class HedSchemaXMLParser:
             # Todo: do we need to validate this here?
             if not attribute_value:
                 attribute_value = True
-            tag_entry.set_attribute_value(attribute_name, attribute_value)
+            tag_entry._set_attribute_value(attribute_name, attribute_value)
 
         return tag_entry
 

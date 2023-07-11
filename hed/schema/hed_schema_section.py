@@ -164,6 +164,7 @@ class HedSchemaTagSection(HedSchemaSection):
         super().__init__(*args, **kwargs, case_sensitive=case_sensitive)
         # This dict contains all forms of all tags.  The .all_names variable has ONLY the long forms.
         self.long_form_tags = {}
+        self.inheritable_attributes = {}
 
     @staticmethod
     def _get_tag_forms(name):
@@ -241,6 +242,15 @@ class HedSchemaTagSection(HedSchemaSection):
 
     def _finalize_section(self, hed_schema):
         split_list = self._divide_tags_into_dict(self.all_entries)
+
+        # Find the attributes with the inherited property
+        attribute_section = hed_schema.attributes
+        self.inheritable_attributes = [name for name, value in attribute_section.items()
+                                       if value.has_attribute(HedKey.IsInheritedProperty)]
+
+        # Hardcode in extension allowed as it is critical for validation in older schemas
+        if not self.inheritable_attributes:
+            self.inheritable_attributes = [HedKey.ExtensionAllowed]
 
         # Sort the extension allowed lists
         extension_allowed_node = 0
