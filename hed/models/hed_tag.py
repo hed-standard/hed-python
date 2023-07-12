@@ -462,22 +462,6 @@ class HedTag:
             return self._schema_entry.has_attribute(attribute)
         return False
 
-    def is_extension_allowed_tag(self):
-        """ Check if tag has 'extensionAllowed' attribute.
-
-            Recursively checks parent tag entries for the attribute as well.
-
-        Returns:
-            bool: True if the tag has the 'extensionAllowed' attribute. False, if otherwise.
-
-        """
-        if self.is_takes_value_tag():
-            return False
-
-        if self._schema_entry:
-            return self._schema_entry.any_parent_has_attribute(HedKey.ExtensionAllowed)
-        return False
-
     def get_tag_unit_class_units(self):
         """ Get the unit class units associated with a particular tag.
 
@@ -510,6 +494,8 @@ class HedTag:
     def base_tag_has_attribute(self, tag_attribute):
         """ Check to see if the tag has a specific attribute.
 
+            This is primarily used to check for things like TopLevelTag on Definitions and similar.
+
         Parameters:
             tag_attribute (str): A tag attribute.
 
@@ -521,19 +507,6 @@ class HedTag:
             return False
 
         return self._schema_entry.base_tag_has_attribute(tag_attribute)
-
-    def any_parent_has_attribute(self, attribute):
-        """ Check if the tag or any of its parents has the attribute.
-
-        Parameters:
-            attribute (str): The name of the attribute to check for.
-
-        Returns:
-            bool: True if the tag has the given attribute. False, if otherwise.
-
-        """
-        if self._schema_entry:
-            return self._schema_entry.any_parent_has_attribute(attribute=attribute)
 
     @staticmethod
     def _get_schema_namespace(org_tag):

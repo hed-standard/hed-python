@@ -1,15 +1,18 @@
 """ Utilities for loading and outputting HED schema. """
 import os
 import json
+import functools
 from hed.schema.schema_io.xml2schema import HedSchemaXMLParser
 from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
 from hed.schema import hed_schema_constants, hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema import HedSchema
 from hed.schema.schema_io import schema_util
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.schema_validation_util import validate_version_string
+
+
+MAX_MEMORY_CACHE = 20
 
 
 def from_string(schema_string, file_type=".xml", schema_namespace=None):
@@ -46,17 +49,6 @@ def from_string(schema_string, file_type=".xml", schema_namespace=None):
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
 
     return hed_schema
-
-
-def get_schema(hed_versions):
-    if not hed_versions:
-        return None
-    elif isinstance(hed_versions, str) or isinstance(hed_versions, list):
-        return load_schema_version(hed_versions)
-    elif isinstance(hed_versions, HedSchema) or isinstance(hed_versions, HedSchemaGroup):
-        return hed_versions
-    else:
-        raise ValueError("InvalidHedSchemaOrSchemaVersion", "Expected schema or schema version")
 
 
 def load_schema(hed_path=None, schema_namespace=None):
@@ -114,12 +106,13 @@ def get_hed_xml_version(xml_file_path):
     return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
 
 
+@functools.lru_cache(maxsize=MAX_MEMORY_CACHE)
 def _load_schema_version(xml_version=None, xml_folder=None):
     """ Return specified version or latest if not specified.
 
     Parameters:
         xml_folder (str): Path to a folder containing schema.
-        xml_version (str or list): HED version format string. Expected format: '[schema_namespace:][library_name_]X.Y.Z'.
+        xml_version (str): HED version format string. Expected format: '[schema_namespace:][library_name_]X.Y.Z'.
 
     Returns:
         HedSchema or HedSchemaGroup: The requested HedSchema object.

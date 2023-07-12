@@ -48,6 +48,7 @@ class HedKey:
     UnitModifierProperty = 'unitModifierProperty'
     ValueClassProperty = 'valueClassProperty'
     ElementProperty = 'elementProperty'
+    IsInheritedProperty = 'isInheritedProperty'
 
     SIUnit = 'SIUnit'
     UnitSymbol = 'unitSymbol'
