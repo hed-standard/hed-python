@@ -230,7 +230,7 @@ class HedSchemaTagSection(HedSchemaSection):
         return key in self.long_form_tags
 
     @staticmethod
-    def _divide_tags_into_dict(divide_list):
+    def _group_by_top_level_tag(divide_list):
         result = {}
         for item in divide_list:
             key, _, value = item.long_tag_name.partition('/')
@@ -241,8 +241,6 @@ class HedSchemaTagSection(HedSchemaSection):
         return list(result.values())
 
     def _finalize_section(self, hed_schema):
-        split_list = self._divide_tags_into_dict(self.all_entries)
-
         # Find the attributes with the inherited property
         attribute_section = hed_schema.attributes
         self.inheritable_attributes = [name for name, value in attribute_section.items()
@@ -252,6 +250,7 @@ class HedSchemaTagSection(HedSchemaSection):
         if not self.inheritable_attributes:
             self.inheritable_attributes = [HedKey.ExtensionAllowed]
 
+        split_list = self._group_by_top_level_tag(self.all_entries)
         # Sort the extension allowed lists
         extension_allowed_node = 0
         for values in split_list:

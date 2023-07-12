@@ -208,8 +208,8 @@ class HedTagEntry(HedSchemaEntry):
         self.takes_value_child_entry = None  # this is a child takes value tag, if one exists
         self._parent_tag = None
         self.tag_terms = tuple()
-        self._inheritable_attributes = []
-        self.inherited_attributes = {}
+        # During setup, it's better to have attributes shadow inherited before getting its own copy later.
+        self.inherited_attributes = self.attributes
 
     def has_attribute(self, attribute, return_value=False):
         """ Returns th existence or value of an attribute in this entry.
@@ -228,12 +228,10 @@ class HedTagEntry(HedSchemaEntry):
         Notes:
             - The existence of an attribute does not guarantee its validity.
         """
-        if attribute in self._inheritable_attributes:
-            val = self.inherited_attributes.get(attribute)
-            if not return_value:
-                val = val is not None
-            return val
-        return super().has_attribute(attribute, return_value)
+        val = self.inherited_attributes.get(attribute)
+        if not return_value:
+            val = val is not None
+        return val
 
     def _check_inherited_attribute(self, attribute, return_value=False, return_union=False):
         """
@@ -328,8 +326,8 @@ class HedTagEntry(HedSchemaEntry):
                         self.value_classes[value_class_name] = entry
 
     def _finalize_inherited_attributes(self):
-        self._inheritable_attributes = self._section.inheritable_attributes
-        self.inherited_attributes = {}
+        # Replace the list with a copy we can modify.
+        self.inherited_attributes = self.attributes.copy()
         for attribute in self._section.inheritable_attributes:
             if self._check_inherited_attribute(attribute):
                 treat_as_string = not self.attribute_has_property(attribute, HedKey.BoolProperty)

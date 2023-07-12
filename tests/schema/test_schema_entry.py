@@ -8,6 +8,7 @@ class MockEntry:
 
     _check_inherited_attribute = HedTagEntry._check_inherited_attribute
 
+
 class TestMockEntry(unittest.TestCase):
 
     def setUp(self):
