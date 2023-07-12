@@ -262,7 +262,7 @@ class HedTagEntry(HedSchemaEntry):
                 if return_value:
                     attribute_values.append(iter_entry.attributes[attribute])
                     if not return_union:
-                        break
+                        return attribute_values[0]
                 else:
                     return True
             iter_entry = iter_entry._parent_tag
@@ -270,10 +270,8 @@ class HedTagEntry(HedSchemaEntry):
         if return_value:
             if not attribute_values:
                 return None
-            if return_union:
-                return ",".join(attribute_values)
-            else:
-                return attribute_values[0]
+            # Always return the union as a non-union would've been returned above
+            return ",".join(attribute_values)
         else:
             return False
 
