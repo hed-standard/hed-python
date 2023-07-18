@@ -43,7 +43,7 @@ def split_def_tags(hed_string, def_names, remove_group=False):
     Returns:
         tuple: A tuple containing two HedString objects:
             - The first HedString object contains the remaining tags from hed_string.
-            - The second HedString object contains the tags from hed_string that match the base_tags.
+            - The second HedString object contains the tags from hed_string that match the def_names.
     """
     include_groups = 0
     if remove_group:

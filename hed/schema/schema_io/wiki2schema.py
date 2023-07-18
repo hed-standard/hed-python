@@ -290,7 +290,7 @@ class HedSchemaWikiParser:
         lines: [(int, str)]
             Lines for this section
         """
-        self._schema._initialize_attributes(HedSectionKey.AllTags)
+        self._schema._initialize_attributes(HedSectionKey.Tags)
         parent_tags = []
         level_adj = 0
         for line_number, line in lines:
@@ -322,7 +322,7 @@ class HedSchemaWikiParser:
                 self._add_fatal_error(line_number, line, e.message, e.code)
                 continue
 
-            tag_entry = self._add_to_dict(line_number, line, tag_entry, HedSectionKey.AllTags)
+            tag_entry = self._add_to_dict(line_number, line, tag_entry, HedSectionKey.Tags)
 
             parent_tags.append(tag_entry.short_tag_name)
 
@@ -594,7 +594,7 @@ class HedSchemaWikiParser:
                 long_tag_name = "/".join(parent_tags) + "/" + tag_name
             else:
                 long_tag_name = tag_name
-            return self._create_entry(line_number, tag_line, HedSectionKey.AllTags, long_tag_name)
+            return self._create_entry(line_number, tag_line, HedSectionKey.Tags, long_tag_name)
 
         self._add_fatal_error(line_number, tag_line)
         return None

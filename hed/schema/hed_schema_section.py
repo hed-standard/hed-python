@@ -9,7 +9,7 @@ entries_by_section = {
     HedSectionKey.Units: UnitEntry,
     HedSectionKey.UnitClasses: UnitClassEntry,
     HedSectionKey.ValueClasses: HedSchemaEntry,
-    HedSectionKey.AllTags: HedTagEntry,
+    HedSectionKey.Tags: HedTagEntry,
 }
 
 

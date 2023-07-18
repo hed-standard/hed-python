@@ -36,7 +36,7 @@ SCHEMA_VALUE_CLASSES_DEF_ELEMENT = "valueClassDefinition"
 
 
 SECTION_NAMES = {
-    HedSectionKey.AllTags: SCHEMA_ELEMENT,
+    HedSectionKey.Tags: SCHEMA_ELEMENT,
     HedSectionKey.UnitClasses: UNIT_CLASS_SECTION_ELEMENT,
     HedSectionKey.UnitModifiers: UNIT_MODIFIER_SECTION_ELEMENT,
     HedSectionKey.ValueClasses: SCHEMA_VALUE_CLASSES_SECTION_ELEMENT,
@@ -46,7 +46,7 @@ SECTION_NAMES = {
 
 
 ELEMENT_NAMES = {
-    HedSectionKey.AllTags: TAG_DEF_ELEMENT,
+    HedSectionKey.Tags: TAG_DEF_ELEMENT,
     HedSectionKey.UnitClasses: UNIT_CLASS_DEF_ELEMENT,
     HedSectionKey.Units: UNIT_CLASS_UNIT_ELEMENT,
     HedSectionKey.UnitModifiers: UNIT_MODIFIER_DEF_ELEMENT,
@@ -57,7 +57,7 @@ ELEMENT_NAMES = {
 
 
 ATTRIBUTE_PROPERTY_ELEMENTS = {
-    HedSectionKey.AllTags: ATTRIBUTE_ELEMENT,
+    HedSectionKey.Tags: ATTRIBUTE_ELEMENT,
     HedSectionKey.UnitClasses: ATTRIBUTE_ELEMENT,
     HedSectionKey.Units: ATTRIBUTE_ELEMENT,
     HedSectionKey.UnitModifiers: ATTRIBUTE_ELEMENT,

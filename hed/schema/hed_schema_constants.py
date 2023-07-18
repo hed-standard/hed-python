@@ -4,7 +4,7 @@ class HedSectionKey(Enum):
     """ Kegs designating specific sections in a HedSchema object.
     """
     # overarching category listing all tags
-    AllTags = 'tags'
+    Tags = 'tags'
     # Overarching category listing all unit classes
     UnitClasses = 'unitClasses'
     # Overarching category listing all units(not divided by type)

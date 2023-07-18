@@ -41,7 +41,7 @@ class HedSchema2Base:
 
 
         self._output_header(hed_schema.get_save_header_attributes(self._save_merged), hed_schema.prologue)
-        self._output_tags(hed_schema.all_tags)
+        self._output_tags(hed_schema.tags)
         self._output_units(hed_schema.unit_classes)
         self._output_section(hed_schema, HedSectionKey.UnitModifiers)
         self._output_section(hed_schema, HedSectionKey.ValueClasses)
@@ -69,13 +69,13 @@ class HedSchema2Base:
     def _write_entry(self, entry, parent_node, include_props=True):
         raise NotImplementedError("This needs to be defined in the subclass")
 
-    def _output_tags(self, all_tags):
-        schema_node = self._start_section(HedSectionKey.AllTags)
+    def _output_tags(self, tags):
+        schema_node = self._start_section(HedSectionKey.Tags)
 
         # This assumes .all_entries is sorted in a reasonable way for output.
         level_adj = 0
         all_nodes = {} # List of all nodes we've written out.
-        for tag_entry in all_tags.all_entries:
+        for tag_entry in tags.all_entries:
             if self._should_skip(tag_entry):
                 continue
             tag = tag_entry.name
