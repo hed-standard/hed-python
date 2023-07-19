@@ -2,6 +2,7 @@
 This module is used to create a HedSchema object from a .mediawiki file.
 """
 import re
+import copy
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -127,7 +128,7 @@ class HedSchemaWikiParser:
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
                                    message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
                                    filename=e.filename)
-            self._schema = base_version
+            self._schema = copy.deepcopy(base_version)
             self._schema.filename = self.filename
             self._schema.header_attributes = saved_attr
             self._loading_merged = False
@@ -289,7 +290,7 @@ class HedSchemaWikiParser:
         lines: [(int, str)]
             Lines for this section
         """
-        self._schema._initialize_attributes(HedSectionKey.AllTags)
+        self._schema._initialize_attributes(HedSectionKey.Tags)
         parent_tags = []
         level_adj = 0
         for line_number, line in lines:
@@ -321,7 +322,7 @@ class HedSchemaWikiParser:
                 self._add_fatal_error(line_number, line, e.message, e.code)
                 continue
 
-            tag_entry = self._add_to_dict(line_number, line, tag_entry, HedSectionKey.AllTags)
+            tag_entry = self._add_to_dict(line_number, line, tag_entry, HedSectionKey.Tags)
 
             parent_tags.append(tag_entry.short_tag_name)
 
@@ -593,7 +594,7 @@ class HedSchemaWikiParser:
                 long_tag_name = "/".join(parent_tags) + "/" + tag_name
             else:
                 long_tag_name = tag_name
-            return self._create_entry(line_number, tag_line, HedSectionKey.AllTags, long_tag_name)
+            return self._create_entry(line_number, tag_line, HedSectionKey.Tags, long_tag_name)
 
         self._add_fatal_error(line_number, tag_line)
         return None
@@ -622,7 +623,7 @@ class HedSchemaWikiParser:
             tag_entry.description = node_desc.strip()
 
         for attribute_name, attribute_value in node_attributes.items():
-            tag_entry.set_attribute_value(attribute_name, attribute_value)
+            tag_entry._set_attribute_value(attribute_name, attribute_value)
 
         return tag_entry
 

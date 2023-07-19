@@ -14,7 +14,7 @@ PROLOGUE_SECTION_ELEMENT = "'''Prologue'''"
 EPILOGUE_SECTION_ELEMENT = "'''Epilogue'''"
 
 wiki_section_headers = {
-    HedSectionKey.AllTags: START_HED_STRING,
+    HedSectionKey.Tags: START_HED_STRING,
     HedSectionKey.UnitClasses: UNIT_CLASS_STRING,
     HedSectionKey.Units: None,
     HedSectionKey.UnitModifiers: UNIT_MODIFIER_STRING,

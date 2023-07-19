@@ -9,6 +9,7 @@ from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema import HedSchema
 from hed.schema import schema_validation_util
 from hed.schema.schema_io import xml_constants
+import copy
 
 
 class HedSchemaXMLParser:
@@ -30,7 +31,7 @@ class HedSchemaXMLParser:
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
                                    message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
                                    filename=e.filename)
-            self._schema = base_version
+            self._schema = copy.deepcopy(base_version)
             self._schema.filename = hed_xml_file_path
             self._schema.header_attributes = saved_attr
             self._loading_merged = False
@@ -112,7 +113,7 @@ class HedSchemaXMLParser:
             A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
 
         """
-        self._schema._initialize_attributes(HedSectionKey.AllTags)
+        self._schema._initialize_attributes(HedSectionKey.Tags)
         tag_elements = self._get_elements_by_name("node")
         loading_from_chain = ""
         loading_from_chain_short = ""
@@ -124,7 +125,7 @@ class HedSchemaXMLParser:
                     loading_from_chain = ""
                 else:
                     tag = tag.replace(loading_from_chain_short, loading_from_chain)
-            tag_entry = self._parse_node(tag_element, HedSectionKey.AllTags, tag)
+            tag_entry = self._parse_node(tag_element, HedSectionKey.Tags, tag)
 
             rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
             if rooted_entry:
@@ -132,9 +133,9 @@ class HedSchemaXMLParser:
                 loading_from_chain_short = tag_entry.short_tag_name
 
                 tag = tag.replace(loading_from_chain_short, loading_from_chain)
-                tag_entry = self._parse_node(tag_element, HedSectionKey.AllTags, tag)
+                tag_entry = self._parse_node(tag_element, HedSectionKey.Tags, tag)
 
-            self._add_to_dict(tag_entry, HedSectionKey.AllTags)
+            self._add_to_dict(tag_entry, HedSectionKey.Tags)
 
     def _populate_unit_class_dictionaries(self):
         """Populates a dictionary of dictionaries associated with all the unit classes, unit class units, and unit
@@ -228,7 +229,7 @@ class HedSchemaXMLParser:
             # Todo: do we need to validate this here?
             if not attribute_value:
                 attribute_value = True
-            tag_entry.set_attribute_value(attribute_name, attribute_value)
+            tag_entry._set_attribute_value(attribute_name, attribute_value)
 
         return tag_entry
 

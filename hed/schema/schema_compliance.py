@@ -114,3 +114,5 @@ class SchemaValidator:
             for tag_name, desc in self.hed_schema.get_desc_iter():
                 issues_list += validate_schema_description(tag_name, desc)
         return issues_list
+
+

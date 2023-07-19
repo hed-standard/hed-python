@@ -276,7 +276,7 @@ class TagValidator:
         if original_tag.is_basic_tag() or original_tag.is_takes_value_tag():
             return validation_issues
 
-        is_extension_tag = original_tag.is_extension_allowed_tag()
+        is_extension_tag = original_tag.has_attribute(HedKey.ExtensionAllowed)
         if not is_extension_tag:
             actual_error = None
             if "#" in original_tag.extension:

@@ -52,7 +52,7 @@ class HedSchema2XML(HedSchema2Base):
         SubElement
             The added node
         """
-        key_class = HedSectionKey.AllTags
+        key_class = HedSectionKey.Tags
         tag_element = xml_constants.ELEMENT_NAMES[key_class]
         tag_description = tag_entry.description
         tag_attributes = tag_entry.attributes
