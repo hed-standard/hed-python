@@ -1,8 +1,6 @@
 import unittest
 import os
 
-
-
 from hed import schema
 
 

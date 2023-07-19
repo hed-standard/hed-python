@@ -235,10 +235,10 @@ class TestHedSchemaMerging(unittest.TestCase):
         self.assertEqual(loaded_schema, reloaded_schema)
 
     def _base_added_class_tests(self, schema):
-        tag_entry = schema.all_tags["Modulator"]
+        tag_entry = schema.tags["Modulator"]
         self.assertEqual(tag_entry.attributes["suggestedTag"], "Event")
 
-        tag_entry = schema.all_tags["Sleep-modulator"]
+        tag_entry = schema.tags["Sleep-modulator"]
         self.assertEqual(tag_entry.attributes["relatedTag"], "Sensory-event")
 
         unit_class_entry = schema.unit_classes["weightUnits"]

@@ -50,7 +50,7 @@ def tag_exists_check(hed_schema, tag_entry, attribute_name):
     possible_tags = tag_entry.attributes.get(attribute_name, "")
     split_tags = possible_tags.split(",")
     for org_tag in split_tags:
-        if org_tag and org_tag not in hed_schema.all_tags:
+        if org_tag and org_tag not in hed_schema.tags:
             issues += ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
                                                 org_tag,
                                                 index_in_tag=0,
@@ -72,7 +72,7 @@ def tag_exists_base_schema_check(hed_schema, tag_entry, attribute_name):
     """
     issues = []
     rooted_tag = tag_entry.attributes.get(attribute_name, "")
-    if rooted_tag and rooted_tag not in hed_schema.all_tags:
+    if rooted_tag and rooted_tag not in hed_schema.tags:
         issues += ErrorHandler.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
                                             rooted_tag,
                                             index_in_tag=0,

@@ -101,7 +101,7 @@ class HedSchemaGroup(HedSchemaBase):
             issues_list += schema.check_compliance(check_for_warnings, name, error_handler)
         return issues_list
 
-    def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.AllTags):
+    def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags):
         """ Return tag entries with the given attribute.
 
         Parameters:
@@ -114,12 +114,12 @@ class HedSchemaGroup(HedSchemaBase):
         Notes:
             - The result is cached so will be fast after first call.
         """
-        all_tags = set()
+        tags = set()
         for schema in self._schemas.values():
-            all_tags.update(schema.get_tags_with_attribute(attribute, key_class))
-        return list(all_tags)
+            tags.update(schema.get_tags_with_attribute(attribute, key_class))
+        return list(tags)
 
-    def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, schema_namespace=""):
+    def get_tag_entry(self, name, key_class=HedSectionKey.Tags, schema_namespace=""):
         """ Return the schema entry for this tag, if one exists.
 
         Parameters:
@@ -127,7 +127,7 @@ class HedSchemaGroup(HedSchemaBase):
                 This will not handle extensions or similar.
                 If this is a tag, it can have a schema namespace, but it's not required
             key_class (HedSectionKey or str):  The type of entry to return.
-            schema_namespace (str): Only used on AllTags.  If incorrect, will return None.
+            schema_namespace (str): Only used on Tags.  If incorrect, will return None.
 
         Returns:
             HedSchemaEntry: The schema entry for the given tag.
