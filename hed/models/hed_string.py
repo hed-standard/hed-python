@@ -103,7 +103,7 @@ class HedString(HedGroup):
         """ Return a deep copy of this string.
 
         Returns:
-            HedGroup: The copied group.
+            HedString: The copied group.
 
         """
         return_copy = copy.deepcopy(self)

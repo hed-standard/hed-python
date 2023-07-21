@@ -1,5 +1,6 @@
 from hed.models.hed_tag import HedTag
 import copy
+from typing import Iterable, Union
 
 
 class HedGroup:
@@ -79,7 +80,7 @@ class HedGroup:
         self._children[replace_index] = new_contents
         new_contents._parent = self
 
-    def remove(self, items_to_remove):
+    def remove(self, items_to_remove: Iterable[Union[HedTag, 'HedGroup']]):
         """ Remove any tags/groups in items_to_remove.
 
         Parameters:
@@ -87,27 +88,27 @@ class HedGroup:
 
         Notes:
             - Any groups that become empty will also be pruned.
+            - If you pass a child and parent group, the child will also be removed from the parent.
         """
-        all_groups = self.get_all_groups()
-        self._remove(items_to_remove, all_groups)
-
-    def _remove(self, items_to_remove, all_groups):
         empty_groups = []
-        for remove_child in items_to_remove:
-            for group in all_groups:
-                # only proceed if we have an EXACT match for this child
-                if any(remove_child is child for child in group._children):
-                    if group._original_children is group._children:
-                        group._original_children = group._children.copy()
+        # Filter out duplicates
+        items_to_remove = {id(item):item for item in items_to_remove}.values()
 
-                    group._children = [child for child in group._children if child is not remove_child]
-                    # If this was the last child, flag this group to be removed on a second pass
-                    if not group._children and group is not self:
-                        empty_groups.append(group)
-                    break
+        for item in items_to_remove:
+            group = item._parent
+            if group._original_children is group._children:
+                group._original_children = group._children.copy()
+
+            group._children.remove(item)
+            if not group._children and group is not self:
+                empty_groups.append(group)
 
         if empty_groups:
             self.remove(empty_groups)
+
+        # Do this last to avoid confusing typing
+        for item in items_to_remove:
+            item._parent = None
 
     def __copy__(self):
         raise ValueError("Cannot make shallow copies of HedGroups")
@@ -368,14 +369,15 @@ class HedGroup:
             search_tags (container):    A container of short_base_tags to locate
             recursive (bool):           If true, also check subgroups.
             include_groups (0, 1 or 2): Specify return values.
+                If 0: return a list of the HedTags.
+                If 1: return a list of the HedGroups containing the HedTags.
+                If 2: return a list of tuples (HedTag, HedGroup) for the found tags.
 
         Returns:
             list: The contents of the list depends on the value of include_groups.
 
         Notes:
-            - If include_groups is 0, return a list of the HedTags.
-            - If include_groups is 1, return a list of the HedGroups containing the HedTags.
-            - If include_groups is 2, return a list of tuples (HedTag, HedGroup) for the found tags.
+
             - This can only find identified tags.
             - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
 
@@ -408,10 +410,6 @@ class HedGroup:
 
         Returns:
             list: The contents of the list depends on the value of include_groups.
-
-        Notes:
-            - This can only find identified tags.
-            - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
         """
         found_tags = []
         if recursive:

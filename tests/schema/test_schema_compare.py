@@ -62,7 +62,7 @@ class TestSchemaComparison(unittest.TestCase):
 
         match_string = find_matching_tags(schema1, schema2, return_string=True)
         self.assertIsInstance(match_string, str)
-        print(match_string)
+        # print(match_string)
 
     def test_compare_schemas(self):
         schema1 = self.load_schema1()
@@ -102,4 +102,4 @@ class TestSchemaComparison(unittest.TestCase):
 
         diff_string = compare_differences(schema1, schema2, return_string=True)
         self.assertIsInstance(diff_string, str)
-        print(diff_string)
+        # print(diff_string)
