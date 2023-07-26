@@ -210,6 +210,8 @@ class HedTagEntry(HedSchemaEntry):
         self.tag_terms = tuple()
         # During setup, it's better to have attributes shadow inherited before getting its own copy later.
         self.inherited_attributes = self.attributes
+        # Descendent tags below this one
+        self.children = {}
 
     def has_attribute(self, attribute, return_value=False):
         """ Returns th existence or value of an attribute in this entry.
@@ -344,6 +346,8 @@ class HedTagEntry(HedSchemaEntry):
         if parent_name:
             parent_tag = schema._get_tag_entry(parent_name)
         self._parent_tag = parent_tag
+        if self._parent_tag:
+            self._parent_tag.children[self.short_tag_name] = self
         self.takes_value_child_entry = schema._get_tag_entry(self.name + "/#")
         self.tag_terms = tuple(self.long_tag_name.lower().split("/"))
 

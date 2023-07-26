@@ -165,6 +165,7 @@ class HedSchemaTagSection(HedSchemaSection):
         # This dict contains all forms of all tags.  The .all_names variable has ONLY the long forms.
         self.long_form_tags = {}
         self.inheritable_attributes = {}
+        self.root_tags = {}
 
     @staticmethod
     def _get_tag_forms(name):
@@ -267,5 +268,6 @@ class HedSchemaTagSection(HedSchemaSection):
         if extension_allowed_node:
             split_list[extension_allowed_node:] = sorted(split_list[extension_allowed_node:], key=lambda x: x[0].long_tag_name)
         self.all_entries = [subitem for tag_list in split_list for subitem in tag_list]
-        super()._finalize_section(hed_schema)
 
+        super()._finalize_section(hed_schema)
+        self.root_tags = {tag.short_tag_name:tag for tag in self.all_entries if not tag._parent_tag}
