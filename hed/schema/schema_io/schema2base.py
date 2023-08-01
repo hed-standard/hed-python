@@ -1,15 +1,18 @@
 """Baseclass for mediawiki/xml writers"""
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-import copy
 
 
-class HedSchema2Base:
+class Schema2Base:
     def __init__(self):
         # Placeholder output variable
         self.output = None
-        pass
+        self._save_lib = False
+        self._save_base = False
+        self._save_merged = False
+        self._strip_out_in_library = False
 
-    def process_schema(self, hed_schema, save_merged=False):
+    @classmethod
+    def process_schema(cls, hed_schema, save_merged=False):
         """
         Takes a HedSchema object and returns a list of strings representing its .mediawiki version.
 
@@ -17,39 +20,42 @@ class HedSchema2Base:
         ----------
         hed_schema : HedSchema
         save_merged: bool
-            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
             If it is not a "withStandard" schema, this setting has no effect.
 
         Returns
         -------
-        mediawiki_strings: [str]
-            A list of strings representing the .mediawiki version of this schema.
+        converted_output: Any
+            Varies based on inherited class
 
         """
-        self._save_lib = False
-        self._save_base = False
+        saver = cls()
+        saver._save_lib = False
+        saver._save_base = False
+        saver._strip_out_in_library = True
         if hed_schema.with_standard:
-            self._save_lib = True
+            saver._save_lib = True
             if save_merged:
-                self._save_base = True
+                saver._save_base = True
+                saver._strip_out_in_library = False
         else:
             # Saving a standard schema or a library schema without a standard schema
             save_merged = True
-            self._save_lib = True
-            self._save_base = True
-        self._save_merged = save_merged
+            saver._save_lib = True
+            saver._save_base = True
 
+        saver._save_merged = save_merged
 
-        self._output_header(hed_schema.get_save_header_attributes(self._save_merged), hed_schema.prologue)
-        self._output_tags(hed_schema.tags)
-        self._output_units(hed_schema.unit_classes)
-        self._output_section(hed_schema, HedSectionKey.UnitModifiers)
-        self._output_section(hed_schema, HedSectionKey.ValueClasses)
-        self._output_section(hed_schema, HedSectionKey.Attributes)
-        self._output_section(hed_schema, HedSectionKey.Properties)
-        self._output_footer(hed_schema.epilogue)
+        saver._output_header(hed_schema.get_save_header_attributes(saver._save_merged), hed_schema.prologue)
+        saver._output_tags(hed_schema.tags)
+        saver._output_units(hed_schema.unit_classes)
+        saver._output_section(hed_schema, HedSectionKey.UnitModifiers)
+        saver._output_section(hed_schema, HedSectionKey.ValueClasses)
+        saver._output_section(hed_schema, HedSectionKey.Attributes)
+        saver._output_section(hed_schema, HedSectionKey.Properties)
+        saver._output_footer(hed_schema.epilogue)
 
-        return self.output
+        return saver.output
 
     def _output_header(self, attributes, prologue):
         raise NotImplementedError("This needs to be defined in the subclass")
@@ -74,7 +80,7 @@ class HedSchema2Base:
 
         # This assumes .all_entries is sorted in a reasonable way for output.
         level_adj = 0
-        all_nodes = {} # List of all nodes we've written out.
+        all_nodes = {}  # List of all nodes we've written out.
         for tag_entry in tags.all_entries:
             if self._should_skip(tag_entry):
                 continue
@@ -137,3 +143,6 @@ class HedSchema2Base:
         if not self._save_lib and has_lib_attr:
             return True
         return False
+
+    def _attribute_disallowed(self, attribute):
+        return self._strip_out_in_library and attribute == HedKey.InLibrary

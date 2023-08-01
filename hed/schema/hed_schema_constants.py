@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class HedSectionKey(Enum):
     """ Kegs designating specific sections in a HedSchema object.
     """
@@ -70,3 +71,15 @@ VERSION_ATTRIBUTE = 'version'
 LIBRARY_ATTRIBUTE = 'library'
 WITH_STANDARD_ATTRIBUTE = "withStandard"
 UNMERGED_ATTRIBUTE = "unmerged"
+NS_ATTRIB = "xmlns:xsi"
+NO_LOC_ATTRIB = "xsi:noNamespaceSchemaLocation"
+
+# A list of all attributes that can appear in the header line
+valid_header_attributes = {
+    VERSION_ATTRIBUTE,
+    LIBRARY_ATTRIBUTE,
+    WITH_STANDARD_ATTRIBUTE,
+    NS_ATTRIB,
+    NO_LOC_ATTRIB,
+    UNMERGED_ATTRIBUTE
+}
