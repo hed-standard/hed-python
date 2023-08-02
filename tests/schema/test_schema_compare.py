@@ -1,10 +1,13 @@
 import unittest
 import os
 import io
+import json
+
 
 from hed.schema import HedKey, HedSectionKey, from_string
 from hed.schema.schema_compare import compare_schemas, find_matching_tags, \
-    pretty_print_diff_all, pretty_print_missing_all, compare_differences
+    _pretty_print_diff_all, _pretty_print_missing_all, compare_differences
+from hed import load_schema_version
 
 
 class TestSchemaComparison(unittest.TestCase):
@@ -60,9 +63,15 @@ class TestSchemaComparison(unittest.TestCase):
         self.assertNotIn("TestNode4", result[HedSectionKey.Tags])
         self.assertNotIn("TestNode5", result[HedSectionKey.Tags])
 
-        match_string = find_matching_tags(schema1, schema2, return_string=True)
+        match_string = find_matching_tags(schema1, schema2, output='string')
         self.assertIsInstance(match_string, str)
         # print(match_string)
+
+        json_style_dict = find_matching_tags(schema1, schema2, output='dict')
+        self.assertIsInstance(json_style_dict, dict)
+
+        result_string = json.dumps(json_style_dict, indent=4)
+        self.assertIsInstance(result_string, str)
 
     def test_compare_schemas(self):
         schema1 = self.load_schema1()
@@ -100,6 +109,27 @@ class TestSchemaComparison(unittest.TestCase):
         self.assertEqual(len(unequal_entries[HedSectionKey.Tags]), 1)  # No unequal entries should be found
         self.assertIn("TestNode3", unequal_entries[HedSectionKey.Tags])
 
-        diff_string = compare_differences(schema1, schema2, return_string=True)
+        diff_string = compare_differences(schema1, schema2, output='string')
         self.assertIsInstance(diff_string, str)
         # print(diff_string)
+
+    def test_compare_score_lib_versions(self):
+        schema1 = load_schema_version("score_1.0.0")
+        schema2 = load_schema_version("score_1.1.0")
+        not_in_schema1, not_in_schema2, unequal_entries = compare_differences(schema1, schema2,
+                                                                              attribute_filter=HedKey.InLibrary)
+        self.assertEqual(len(not_in_schema1[HedSectionKey.Tags]), 21)
+        self.assertEqual(len(not_in_schema2[HedSectionKey.Tags]), 10)
+        self.assertEqual(len(unequal_entries[HedSectionKey.Tags]), 61)
+
+        diff_string = compare_differences(schema1, schema2, attribute_filter=HedKey.InLibrary, output='string',
+                                          sections=None)
+        self.assertIsInstance(diff_string, str)
+        # print(diff_string)
+
+        json_style_dict = compare_differences(schema1, schema2, attribute_filter=HedKey.InLibrary, output='dict',
+                                          sections=None)
+        self.assertIsInstance(json_style_dict, dict)
+
+        result_string = json.dumps(json_style_dict, indent=4)
+        self.assertIsInstance(result_string, str)

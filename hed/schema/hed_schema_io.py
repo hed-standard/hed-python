@@ -2,9 +2,9 @@
 import os
 import json
 import functools
-from hed.schema.schema_io.xml2schema import HedSchemaXMLParser
-from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
-from hed.schema import hed_schema_constants, hed_cache
+from hed.schema.schema_io.xml2schema import SchemaLoaderXML
+from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
+from hed.schema import hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.schema_io import schema_util
@@ -39,9 +39,9 @@ def from_string(schema_string, file_type=".xml", schema_namespace=None):
                            filename=schema_string)
 
     if file_type.endswith(".xml"):
-        hed_schema = HedSchemaXMLParser.load_xml(schema_as_string=schema_string)
+        hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string)
     elif file_type.endswith(".mediawiki"):
-        hed_schema = HedSchemaWikiParser.load_wiki(schema_as_string=schema_string)
+        hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
 
@@ -77,9 +77,9 @@ def load_schema(hed_path=None, schema_namespace=None):
         file_as_string = schema_util.url_to_string(hed_path)
         hed_schema = from_string(file_as_string, file_type=os.path.splitext(hed_path.lower())[1])
     elif hed_path.lower().endswith(".xml"):
-        hed_schema = HedSchemaXMLParser.load_xml(hed_path)
+        hed_schema = SchemaLoaderXML.load(hed_path)
     elif hed_path.lower().endswith(".mediawiki"):
-        hed_schema = HedSchemaWikiParser.load_wiki(hed_path)
+        hed_schema = SchemaLoaderWiki.load(hed_path)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_path)
 
@@ -89,7 +89,7 @@ def load_schema(hed_path=None, schema_namespace=None):
     return hed_schema
 
 
-# todo: this could be updated to also support .mediawiki format.
+# If this is actually used, we could easily add other versions/update this one
 def get_hed_xml_version(xml_file_path):
     """ Get the version number from a HED XML file.
 
@@ -102,8 +102,8 @@ def get_hed_xml_version(xml_file_path):
     :raises HedFileError:
         - There is an issue loading the schema
     """
-    root_node = HedSchemaXMLParser._parse_hed_xml(xml_file_path)
-    return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
+    parser = SchemaLoaderXML(xml_file_path)
+    return parser.schema.version
 
 
 @functools.lru_cache(maxsize=MAX_MEMORY_CACHE)
@@ -143,7 +143,9 @@ def _load_schema_version(xml_version=None, xml_folder=None):
             hed_cache.cache_xml_versions(cache_folder=xml_folder)
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
             if not final_hed_xml_file:
-                raise HedFileError(HedExceptions.FILE_NOT_FOUND, f"HED version '{xml_version}' not found in cache: {hed_cache.get_cache_directory()}", filename=xml_folder)
+                raise HedFileError(HedExceptions.FILE_NOT_FOUND,
+                                   f"HED version '{xml_version}' not found in cache: {hed_cache.get_cache_directory()}",
+                                   filename=xml_folder)
             hed_schema = load_schema(final_hed_xml_file)
         else:
             raise e

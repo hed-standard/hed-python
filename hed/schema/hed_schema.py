@@ -1,12 +1,10 @@
-import os
-import shutil
 import json
 
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.schema import hed_schema_constants as constants
 from hed.schema.schema_io import schema_util
-from hed.schema.schema_io.schema2xml import HedSchema2XML
-from hed.schema.schema_io.schema2wiki import HedSchema2Wiki
+from hed.schema.schema_io.schema2xml import Schema2XML
+from hed.schema.schema_io.schema2wiki import Schema2Wiki
 from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ValidationErrors
@@ -212,8 +210,7 @@ class HedSchema(HedSchemaBase):
             str:  The schema as a string in mediawiki format.
 
         """
-        schema2wiki = HedSchema2Wiki()
-        output_strings = schema2wiki.process_schema(self, save_merged)
+        output_strings = Schema2Wiki.process_schema(self, save_merged)
         return '\n'.join(output_strings)
 
     def get_as_xml_string(self, save_merged=True):
@@ -227,12 +224,11 @@ class HedSchema(HedSchemaBase):
             str: Return the schema as an XML string.
 
         """
-        schema2xml = HedSchema2XML()
-        xml_tree = schema2xml.process_schema(self, save_merged)
+        xml_tree = Schema2XML.process_schema(self, save_merged)
         return schema_util._xml_element_2_str(xml_tree)
 
     def save_as_mediawiki(self, filename=None, save_merged=False):
-        """ Save as mediawiki to a temporary file.
+        """ Save as mediawiki to a file.
 
         filename: str
             If present, move the resulting file to this location.
@@ -243,19 +239,12 @@ class HedSchema(HedSchemaBase):
         Returns:
             str:    The newly created schema filename.
         """
-        schema2wiki = HedSchema2Wiki()
-        output_strings = schema2wiki.process_schema(self, save_merged)
+        output_strings = Schema2Wiki.process_schema(self, save_merged)
         local_wiki_file = schema_util.write_strings_to_file(output_strings, ".mediawiki")
-        if filename:
-            directory = os.path.dirname(filename)
-            if directory and not os.path.exists(directory):
-                os.makedirs(directory)
-            shutil.move(local_wiki_file, filename)
-            return filename
-        return local_wiki_file
+        return schema_util.move_file(local_wiki_file, filename)
 
     def save_as_xml(self, filename=None, save_merged=True):
-        """ Save as XML to a temporary file.
+        """ Save as XML to a file.
 
         filename: str
             If present, move the resulting file to this location.
@@ -266,16 +255,9 @@ class HedSchema(HedSchemaBase):
         Returns:
             str: The name of the newly created schema file.
         """
-        schema2xml = HedSchema2XML()
-        xml_tree = schema2xml.process_schema(self, save_merged)
+        xml_tree = Schema2XML.process_schema(self, save_merged)
         local_xml_file = schema_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
-        if filename:
-            directory = os.path.dirname(filename)
-            if directory and not os.path.exists(directory):
-                os.makedirs(directory)
-            shutil.move(local_xml_file, filename)
-            return filename
-        return local_xml_file
+        return schema_util.move_file(local_xml_file, filename)
 
     def set_schema_prefix(self, schema_namespace):
         """ Set library namespace associated for this schema.
@@ -746,8 +728,9 @@ class HedSchema(HedSchemaBase):
     # Semi private function used to create a schema in memory(usually from a source file)
     # ===============================================
     def _add_tag_to_dict(self, long_tag_name, new_entry, key_class):
-        # No reason we can't add this here always
-        if self.library and not self.merged and self.with_standard:
+        # Add the InLibrary attribute to any library schemas as they are loaded
+        # These are later removed when they are saved out, if saving unmerged
+        if self.library and (not self.with_standard or (not self.merged and self.with_standard)):
             new_entry._set_attribute_value(HedKey.InLibrary, self.library)
 
         section = self._sections[key_class]
