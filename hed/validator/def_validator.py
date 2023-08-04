@@ -103,14 +103,9 @@ class DefValidator(DefinitionDict):
         """
         def_issues = []
         is_def_expand_tag = def_expand_group != def_tag
-        is_label_tag = def_tag.extension
-        placeholder = None
-        found_slash = is_label_tag.find("/")
-        if found_slash != -1:
-            placeholder = is_label_tag[found_slash + 1:]
-            is_label_tag = is_label_tag[:found_slash]
+        tag_label, _, placeholder = def_tag.extension.partition('/')
 
-        label_tag_lower = is_label_tag.lower()
+        label_tag_lower = tag_label.lower()
         def_entry = self.defs.get(label_tag_lower)
         if def_entry is None:
             error_code = ValidationErrors.HED_DEF_UNMATCHED
@@ -118,9 +113,9 @@ class DefValidator(DefinitionDict):
                 error_code = ValidationErrors.HED_DEF_EXPAND_UNMATCHED
             def_issues += ErrorHandler.format_error(error_code, tag=def_tag)
         else:
-            def_tag_name, def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder,
+            def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder,
                                                                   return_copy_of_tag=True)
-            if def_tag_name:
+            if def_contents is not None:
                 if is_def_expand_tag and def_expand_group != def_contents:
                     def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_INVALID,
                                                             tag=def_tag, actual_def=def_contents,
