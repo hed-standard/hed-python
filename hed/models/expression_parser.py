@@ -78,10 +78,10 @@ class Token:
             "(": Token.LogicalGroup,
             ")": Token.LogicalGroupEnd,
             "~": Token.LogicalNegation,
-            "?": Token.Wildcard, # Any tag or group
-            "??": Token.Wildcard, # Any tag
-            "???": Token.Wildcard, # Any Group
-            "{": Token.ExactMatch, # Nothing else
+            "?": Token.Wildcard,  # Any tag or group
+            "??": Token.Wildcard,  # Any tag
+            "???": Token.Wildcard,  # Any Group
+            "{": Token.ExactMatch,  # Nothing else
             "}": Token.ExactMatchEnd,  # Nothing else
             "@": Token.NotInLine
         }
@@ -218,6 +218,7 @@ class ExpressionWildcardNew(Expression):
         all_found_groups = [search_result(group, tag) for tag, group in groups_found]
         return all_found_groups
 
+
 class ExpressionOr(Expression):
     def handle_expr(self, hed_group, exact=False):
         groups1 = self.left.handle_expr(hed_group, exact=exact)
@@ -229,7 +230,7 @@ class ExpressionOr(Expression):
         for group in groups1:
             for other_group in groups2:
                 if group.has_same_tags(other_group):
-                        duplicates.append(group)
+                    duplicates.append(group)
 
         groups1 = [group for group in groups1 if not any(other_group is group for other_group in duplicates)]
 
@@ -245,12 +246,13 @@ class ExpressionOr(Expression):
         output_str += ")"
         return output_str
 
+
 class ExpressionNegation(Expression):
     def handle_expr(self, hed_group, exact=False):
         found_groups = self.right.handle_expr(hed_group, exact=exact)
 
         # Todo: this may need more thought with respects to wildcards and negation
-        #negated_groups = [group for group in hed_group.get_all_groups() if group not in groups]
+        # negated_groups = [group for group in hed_group.get_all_groups() if group not in groups]
         # This simpler version works on python >= 3.9
         # negated_groups = [search_result(group, []) for group in hed_group.get_all_groups() if group not in groups]
         # Python 3.7/8 compatible version.
@@ -258,6 +260,7 @@ class ExpressionNegation(Expression):
                           if not any(group is found_group.group for found_group in found_groups)]
 
         return negated_groups
+
 
 class ExpressionContainingGroup(Expression):
     def handle_expr(self, hed_group, exact=False):
@@ -310,7 +313,32 @@ class ExpressionExactMatch(Expression):
 
 class QueryParser:
     """Parse a search expression into a form than can be used to search a hed string."""
+
     def __init__(self, expression_string):
+        """Compiles a QueryParser for a particular expression, so it can be used to search hed strings.
+
+
+        Basic Input Examples:
+
+        'Event' - Finds any strings with Event, or a descendent tag of Event such as Sensory-event
+
+        'Event and Action' - Find any strings with Event and Action, including descendant tags
+
+        'Event or Action' - Same as above, but it has either
+
+        '"Event"' - Finds the Event tag, but not any descendent tags
+
+        'Def/DefName/*' - Find Def/DefName instances with placeholders, regardless of the value of the placeholder
+
+        'Eve*' - Find any short tags that begin with Eve*, such as Event, but not Sensory-event
+
+        '[Event and Action]' - Find a group that contains both Event and Action(at any level)
+
+        '[[Event and Action]]' - Find a group with Event And Action at the same level.
+
+        Parameters:
+            expression_string(str): The query string
+        """
         self.tokens = []
         self.at_token = -1
         self.tree = self._parse(expression_string.lower())
@@ -360,7 +388,8 @@ class QueryParser:
             return self._handle_grouping_op()
 
     def _handle_grouping_op(self):
-        next_token = self._next_token_is([Token.ContainingGroup, Token.LogicalGroup, Token.DescendantGroup, Token.ExactMatch])
+        next_token = self._next_token_is(
+            [Token.ContainingGroup, Token.LogicalGroup, Token.DescendantGroup, Token.ExactMatch])
         if next_token == Token.ContainingGroup:
             interior = self._handle_and_op()
             expr = ExpressionContainingGroup(next_token, right=interior)

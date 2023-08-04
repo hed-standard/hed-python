@@ -7,6 +7,7 @@ class MockEntry:
         self._parent_tag = parent
 
     _check_inherited_attribute = HedTagEntry._check_inherited_attribute
+    _check_inherited_attribute_internal = HedTagEntry._check_inherited_attribute_internal
 
 
 class TestMockEntry(unittest.TestCase):

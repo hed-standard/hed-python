@@ -92,7 +92,7 @@ class HedGroup:
         """
         empty_groups = []
         # Filter out duplicates
-        items_to_remove = {id(item):item for item in items_to_remove}.values()
+        items_to_remove = {id(item): item for item in items_to_remove}.values()
 
         for item in items_to_remove:
             group = item._parent
@@ -363,7 +363,8 @@ class HedGroup:
         return True
 
     def find_tags(self, search_tags, recursive=False, include_groups=2):
-        """ Find the tags and their containing groups.
+        """ Find the base tags and their containing groups.
+        This searches by short_base_tag, ignoring any ancestors or extensions/values.
 
         Parameters:
             search_tags (container):    A container of short_base_tags to locate
@@ -375,23 +376,16 @@ class HedGroup:
 
         Returns:
             list: The contents of the list depends on the value of include_groups.
-
-        Notes:
-
-            - This can only find identified tags.
-            - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
-
         """
         found_tags = []
         if recursive:
-            groups = self.get_all_groups()
+            tags = self.get_all_tags()
         else:
-            groups = (self, )
+            tags = self.tags()
 
-        for sub_group in groups:
-            for tag in sub_group.tags():
-                if tag.short_base_tag.lower() in search_tags:
-                    found_tags.append((tag, sub_group))
+        for tag in tags:
+            if tag.short_base_tag.lower() in search_tags:
+                found_tags.append((tag, tag._parent))
 
         if include_groups == 0 or include_groups == 1:
             return [tag[include_groups] for tag in found_tags]
@@ -399,6 +393,10 @@ class HedGroup:
 
     def find_wildcard_tags(self, search_tags, recursive=False, include_groups=2):
         """ Find the tags and their containing groups.
+
+            This searches tag.short_tag, with an implicit wildcard on the end.
+
+            e.g. "Eve" will find Event, but not Sensory-event
 
         Parameters:
             search_tags (container):    A container of the starts of short tags to search.
@@ -413,55 +411,46 @@ class HedGroup:
         """
         found_tags = []
         if recursive:
-            groups = self.get_all_groups()
+            tags = self.get_all_tags()
         else:
-            groups = (self, )
+            tags = self.tags()
 
-        for sub_group in groups:
-            for tag in sub_group.tags():
-                for search_tag in search_tags:
-                    if tag.short_tag.lower().startswith(search_tag):
-                        found_tags.append((tag, sub_group))
+        for tag in tags:
+            for search_tag in search_tags:
+                if tag.short_tag.lower().startswith(search_tag):
+                    found_tags.append((tag, tag._parent))
+                    # We can't find the same tag twice
+                    break
 
         if include_groups == 0 or include_groups == 1:
             return [tag[include_groups] for tag in found_tags]
         return found_tags
 
-    def find_exact_tags(self, tags_or_groups, recursive=False, include_groups=1):
-        """  Find the given tags or groups.
+    def find_exact_tags(self, exact_tags, recursive=False, include_groups=1):
+        """  Find the given tags.  This will only find complete matches, any extension or value must also match.
 
         Parameters:
-            tags_or_groups (HedTag, HedGroup): A container of tags to locate.
+            exact_tags (list of HedTag): A container of tags to locate.
             recursive (bool): If true, also check subgroups.
             include_groups(bool): 0, 1 or 2
                 If 0: Return only tags
                 If 1: Return only groups
                 If 2 or any other value: Return both
         Returns:
-            list: A list of HedGroups the given tags/groups were found in.
-
-        Notes:
-            - If you pass in groups it will only find EXACT matches.
-            - This can only find identified tags.
-            - By default, definition, def, def-expand, onset, and offset are identified, even without a schema.
-            - If this is a HedGroup, order matters.  (b, a) != (a, b)
-
+            list: A list of tuples. The contents depend on the values of the include_group.
         """
         found_tags = []
         if recursive:
-            groups = self.get_all_groups()
+            tags = self.get_all_tags()
         else:
-            groups = (self,)
+            tags = self.tags()
 
-        for sub_group in groups:
-            for search_tag in tags_or_groups:
-                for tag in sub_group.children:
-                    if tag == search_tag:
-                        found_tags.append((tag, sub_group))
+        for tag in tags:
+            if tag in exact_tags:
+                found_tags.append((tag, tag._parent))
 
         if include_groups == 0 or include_groups == 1:
             return [tag[include_groups] for tag in found_tags]
-
         return found_tags
 
     def find_def_tags(self, recursive=False, include_groups=3):
@@ -481,7 +470,7 @@ class HedGroup:
         if recursive:
             groups = self.get_all_groups()
         else:
-            groups = (self, )
+            groups = (self,)
 
         def_tags = []
         for group in groups:
@@ -516,15 +505,14 @@ class HedGroup:
         """
         found_tags = []
         if recursive:
-            groups = self.get_all_groups()
+            tags = self.get_all_tags()
         else:
-            groups = (self,)
+            tags = self.tags()
 
         search_for = term.lower()
-        for sub_group in groups:
-            for tag in sub_group.tags():
-                if search_for in tag.tag_terms:
-                    found_tags.append((tag, sub_group))
+        for tag in tags:
+            if search_for in tag.tag_terms:
+                found_tags.append((tag, tag._parent))
 
         if include_groups == 0 or include_groups == 1:
             return [tag[include_groups] for tag in found_tags]

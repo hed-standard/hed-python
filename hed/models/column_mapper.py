@@ -134,6 +134,7 @@ class ColumnMapper:
             return []
 
         issues = []
+
         for column_number, name in enumerate(column_map):
             if name is None or not name or name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
                 issues += ErrorHandler.format_error(ValidationErrors.HED_BLANK_COLUMN, column_number)

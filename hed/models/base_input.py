@@ -56,9 +56,7 @@ class BaseInput:
         # This is the loaded workbook if we loaded originally from an Excel file.
         self._loaded_workbook = None
         self._worksheet_name = worksheet_name
-        pandas_header = 0
-        if not self._has_column_names:
-            pandas_header = None
+        self._dataframe = None
 
         input_type = file_type
         if isinstance(file, str):
@@ -67,35 +65,8 @@ class BaseInput:
             if self.name is None:
                 self._name = file
 
-        self._dataframe = None
+        self._open_dataframe_file(file, has_column_names, input_type)
 
-        if isinstance(file, pandas.DataFrame):
-            self._dataframe = file.astype(str)
-            self._has_column_names = self._dataframe_has_names(self._dataframe)
-        elif not file:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
-        elif input_type in self.TEXT_EXTENSION:
-            try:
-                self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
-                                                  dtype=str, keep_default_na=True, na_values=["", "null"])
-            except Exception as e:
-                raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
-            # Convert nan values to a known value
-            self._dataframe = self._dataframe.fillna("n/a")
-        elif input_type in self.EXCEL_EXTENSION:
-            try:
-                self._loaded_workbook = openpyxl.load_workbook(file)
-                loaded_worksheet = self.get_worksheet(self._worksheet_name)
-                self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
-            except Exception as e:
-                raise HedFileError(HedExceptions.GENERIC_ERROR, str(e), self.name) from e
-        else:
-            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
-
-        if self._dataframe.size == 0:
-            raise HedFileError(HedExceptions.INVALID_DATAFRAME, "Invalid dataframe(malformed datafile, etc)", file)
-
-        # todo: Can we get rid of this behavior now that we're using pandas?
         column_issues = ColumnMapper.check_for_blank_names(self.columns, allow_blank_names=allow_blank_names)
         if column_issues:
             raise HedFileError(HedExceptions.BAD_COLUMN_NAMES, "Duplicate or blank columns found. See issues.",
@@ -517,3 +488,34 @@ class BaseInput:
             column_refs(list): A list of unique column refs found
         """
         return []
+
+    def _open_dataframe_file(self, file, has_column_names, input_type):
+        pandas_header = 0
+        if not has_column_names:
+            pandas_header = None
+
+        if isinstance(file, pandas.DataFrame):
+            self._dataframe = file.astype(str)
+            self._has_column_names = self._dataframe_has_names(self._dataframe)
+        elif not file:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
+        elif input_type in self.TEXT_EXTENSION:
+            try:
+                self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
+                                                  dtype=str, keep_default_na=True, na_values=["", "null"])
+            except Exception as e:
+                raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
+            # Convert nan values to a known value
+            self._dataframe = self._dataframe.fillna("n/a")
+        elif input_type in self.EXCEL_EXTENSION:
+            try:
+                self._loaded_workbook = openpyxl.load_workbook(file)
+                loaded_worksheet = self.get_worksheet(self._worksheet_name)
+                self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
+            except Exception as e:
+                raise HedFileError(HedExceptions.GENERIC_ERROR, str(e), self.name) from e
+        else:
+            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
+
+        if self._dataframe.size == 0:
+            raise HedFileError(HedExceptions.INVALID_DATAFRAME, "Invalid dataframe(malformed datafile, etc)", file)
