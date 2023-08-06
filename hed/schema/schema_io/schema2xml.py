@@ -1,12 +1,12 @@
 """Allows output of HedSchema objects as .xml format"""
 
 from xml.etree.ElementTree import Element, SubElement
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
+from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.schema_io import xml_constants
-from hed.schema.schema_io.schema2base import HedSchema2Base
+from hed.schema.schema_io.schema2base import Schema2Base
 
 
-class HedSchema2XML(HedSchema2Base):
+class Schema2XML(Schema2Base):
     def __init__(self):
         super().__init__()
         self.hed_node = Element('HED')
@@ -29,7 +29,7 @@ class HedSchema2XML(HedSchema2Base):
             prologue_node.text = epilogue
 
     def _start_section(self, key_class):
-        unit_modifier_node = SubElement(self.hed_node, xml_constants.SECTION_NAMES[key_class])
+        unit_modifier_node = SubElement(self.hed_node, xml_constants.SECTION_ELEMENTS[key_class])
         return unit_modifier_node
 
     def _end_tag_section(self):
@@ -65,7 +65,7 @@ class HedSchema2XML(HedSchema2Base):
         if tag_attributes:
             attribute_node_name = xml_constants.ATTRIBUTE_PROPERTY_ELEMENTS[key_class]
             self._add_tag_node_attributes(tag_node, tag_attributes,
-                                                   attribute_node_name=attribute_node_name)
+                                          attribute_node_name=attribute_node_name)
 
         return tag_node
 
@@ -100,7 +100,7 @@ class HedSchema2XML(HedSchema2Base):
             if tag_attributes:
                 attribute_node_name = xml_constants.ATTRIBUTE_PROPERTY_ELEMENTS[key_class]
                 self._add_tag_node_attributes(tag_node, tag_attributes,
-                                                       attribute_node_name=attribute_node_name)
+                                              attribute_node_name=attribute_node_name)
 
         return tag_node
 
@@ -122,9 +122,7 @@ class HedSchema2XML(HedSchema2Base):
         -------
         """
         for attribute, value in tag_attributes.items():
-            if value is False:
-                continue
-            if not self._save_merged and attribute == HedKey.InLibrary:
+            if self._attribute_disallowed(attribute):
                 continue
             node_name = attribute_node_name
             attribute_node = SubElement(tag_node, node_name)

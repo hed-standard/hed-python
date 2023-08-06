@@ -36,35 +36,31 @@ class DefinitionEntry:
             return_copy_of_tag(bool): Set to true for validation
 
         Returns:
-            tuple:
-                str:          The expanded def tag name
-                HedGroup:     The contents of this definition(including the def tag itself)
+            HedGroup:     The contents of this definition(including the def tag itself)
 
         :raises ValueError:
             - Something internally went wrong with finding the placeholder tag.  This should not be possible.
         """
-        if self.takes_value == (placeholder_value is None):
-            return None, []
+        if self.takes_value == (not placeholder_value):
+            return None
 
         if return_copy_of_tag:
             replace_tag = replace_tag.copy()
         output_contents = [replace_tag]
-        name = self.name
         if self.contents:
             output_group = self.contents
-            if placeholder_value is not None:
+            if placeholder_value:
                 output_group = copy.deepcopy(self.contents)
                 placeholder_tag = output_group.find_placeholder_tag()
                 if not placeholder_tag:
                     raise ValueError("Internal error related to placeholders in definition mapping")
-                name = f"{name}/{placeholder_value}"
                 placeholder_tag.replace_placeholder(placeholder_value)
 
             output_contents = [replace_tag, output_group]
 
         output_contents = HedGroup(replace_tag._hed_string,
                                    startpos=replace_tag.span[0], endpos=replace_tag.span[1], contents=output_contents)
-        return f"{DefTagNames.DEF_EXPAND_ORG_KEY}/{name}", output_contents
+        return output_contents
 
     def __str__(self):
         return str(self.contents)

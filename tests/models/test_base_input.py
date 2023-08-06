@@ -75,7 +75,6 @@ class Test(unittest.TestCase):
             BaseInput({'key': 'value'})
 
 
-
 class TestInsertColumns(unittest.TestCase):
 
     def test_insert_columns_simple(self):
@@ -272,4 +271,3 @@ class TestCombineDataframe(unittest.TestCase):
         result = BaseInput.combine_dataframe(loaded_df)
         expected = pd.Series(['apple, guitar', 'elephant, harmonica', 'cherry, fox', '', ''])
         self.assertTrue(result.equals(expected))
-

@@ -1,42 +1,60 @@
 from hed.schema.hed_schema import HedSchema, HedKey
 from hed.schema.hed_schema_constants import HedSectionKey
 
+# This is still in design, means header attributes, epilogue, and prologue
+MiscSection = "misc"
 
-def find_matching_tags(schema1, schema2, return_string=False):
+
+def find_matching_tags(schema1, schema2, output='default', sections=(HedSectionKey.Tags,)):
     """
     Compare the tags in two library schemas.  This finds tags with the same term.
 
     Parameters:
         schema1 (HedSchema): The first schema to be compared.
         schema2 (HedSchema): The second schema to be compared.
-        return_string (bool): Return this as a string if true
+        output (str): Defaults to returning a python object dicts.
+                      'string' returns a single string
+                      'dict' returns a json style dictionary
+        sections(list): the list of sections to compare.  By default, just the tags section.
+                        If None, checks all sections including header, prologue, and epilogue.
 
     Returns:
         dict or str: A dictionary containing matching entries in the Tags section of both schemas.
     """
-    matches, _, _, unequal_entries = compare_schemas(schema1, schema2)
+    matches, _, _, unequal_entries = compare_schemas(schema1, schema2, sections=sections)
 
     for section_key, section_dict in matches.items():
         section_dict.update(unequal_entries[section_key])
 
-    if return_string:
-        return "\n".join([pretty_print_diff_all(entries,
-                                                prompt="Found matching node ") for entries in matches.values()])
+    if output == 'string':
+        return "\n".join([_pretty_print_diff_all(entries, prompt="Found matching node ") for entries in matches.values()])
+    elif output == 'dict':
+        output_dict = {}
+        for section_name, section_entries in matches.items():
+            output_dict[str(section_name)] = {}
+            for key, (entry1, entry2) in section_entries.items():
+                output_dict[str(section_name)][key] = _dict_diff_entries(entry1, entry2)
+        return output_dict
     return matches
 
 
-def compare_differences(schema1, schema2, return_string=False, attribute_filter=None):
+def compare_differences(schema1, schema2, output='default', attribute_filter=None, sections=(HedSectionKey.Tags,)):
     """
     Compare the tags in two schemas, this finds any differences
 
     Parameters:
         schema1 (HedSchema): The first schema to be compared.
         schema2 (HedSchema): The second schema to be compared.
-        return_string (bool): Return this as a string if true
+        output (str): Defaults to returning a set of python object dicts.
+                      'string' returns a single string
+                      'dict' returns a json style dictionary
         attribute_filter (str, optional): The attribute to filter entries by.
                                           Entries without this attribute are skipped.
                                           The most common use would be HedKey.InLibrary
                                           If it evaluates to False, no filtering is performed.
+        sections(list or None): the list of sections to compare.  By default, just the tags section.
+                If None, checks all sections including header, prologue, and epilogue.
+
     Returns:
     tuple or str: A tuple containing three dictionaries:
         - not_in_schema1(dict): Entries present in schema2 but not in schema1.
@@ -44,13 +62,38 @@ def compare_differences(schema1, schema2, return_string=False, attribute_filter=
         - unequal_entries(dict): Entries that differ between the two schemas.
         - or a formatted string of the differences
     """
-    _, not_in_1, not_in_2, unequal_entries = compare_schemas(schema1, schema2, attribute_filter=attribute_filter)
+    _, not_in_1, not_in_2, unequal_entries = compare_schemas(schema1, schema2, attribute_filter=attribute_filter,
+                                                             sections=sections)
 
-    if return_string:
-        str1 = "\n".join([pretty_print_diff_all(entries) for entries in unequal_entries.values()]) + "\n"
-        str2 = "\n".join([pretty_print_missing_all(entries, "Schema1") for entries in not_in_1.values()]) + "\n"
-        str3 = "\n".join([pretty_print_missing_all(entries, "Schema2") for entries in not_in_2.values()])
+    if output == 'string':
+        str1 = "\n".join([_pretty_print_diff_all(entries) for entries in unequal_entries.values()]) + "\n"
+        str2 = "\n".join([_pretty_print_missing_all(entries, "Schema1") for entries in not_in_1.values()]) + "\n"
+        str3 = "\n".join([_pretty_print_missing_all(entries, "Schema2") for entries in not_in_2.values()])
         return str1 + str2 + str3
+    elif output == 'dict':
+        # todo: clean this part up
+        output_dict = {}
+        current_section = {}
+        output_dict["unequal"] = current_section
+        for section_name, section_entries in unequal_entries.items():
+            current_section[str(section_name)] = {}
+            for key, (entry1, entry2) in section_entries.items():
+                current_section[str(section_name)][key] = _dict_diff_entries(entry1, entry2)
+
+        current_section = {}
+        output_dict["not_in_1"] = current_section
+        for section_name, section_entries in not_in_1.items():
+            current_section[str(section_name)] = {}
+            for key, entry in section_entries.items():
+                current_section[str(section_name)][key] = _entry_to_dict(entry)
+
+        current_section = {}
+        output_dict["not_in_2"] = current_section
+        for section_name, section_entries in not_in_2.items():
+            current_section[str(section_name)] = {}
+            for key, entry in section_entries.items():
+                current_section[str(section_name)][key] = _entry_to_dict(entry)
+        return output_dict
     return not_in_1, not_in_2, unequal_entries
 
 
@@ -63,9 +106,11 @@ def compare_schemas(schema1, schema2, attribute_filter=HedKey.InLibrary, section
         schema1 (HedSchema): The first schema to be compared.
         schema2 (HedSchema): The second schema to be compared.
         attribute_filter (str, optional): The attribute to filter entries by.
-                                          Entries without this attribute are skipped.
-                                          If it evaluates to False, no filtering is performed.
-        sections(tuple): the list of sections to compare.  By default, just the tags section.
+                                        Entries without this attribute are skipped.
+                                        The most common use would be HedKey.InLibrary
+                                        If it evaluates to False, no filtering is performed.
+        sections(list): the list of sections to compare.  By default, just the tags section.
+                        If None, checks all sections including header, prologue, and epilogue.
 
     Returns:
     tuple: A tuple containing four dictionaries:
@@ -80,9 +125,19 @@ def compare_schemas(schema1, schema2, attribute_filter=HedKey.InLibrary, section
     not_in_schema1 = {}
     unequal_entries = {}
 
+    if sections is None or MiscSection in sections:
+        unequal_entries[MiscSection] = {}
+        if schema1.get_save_header_attributes() != schema2.get_save_header_attributes():
+            unequal_entries[MiscSection]['header_attributes'] = \
+                (str(schema1.get_save_header_attributes()), str(schema2.get_save_header_attributes()))
+        if schema1.prologue != schema2.prologue:
+            unequal_entries[MiscSection]['prologue'] = (schema1.prologue, schema2.prologue)
+        if schema1.epilogue != schema2.epilogue:
+            unequal_entries[MiscSection]['epilogue'] = (schema1.epilogue, schema2.epilogue)
+
     # Iterate over keys in HedSectionKey
     for section_key in HedSectionKey:
-        if not sections or section_key not in sections:
+        if sections is not None and section_key not in sections:
             continue
         # Dictionaries to record (short_tag_name or name): entry pairs
         dict1 = {}
@@ -93,6 +148,7 @@ def compare_schemas(schema1, schema2, attribute_filter=HedKey.InLibrary, section
 
         attribute = 'short_tag_name' if section_key == HedSectionKey.Tags else 'name'
 
+        # Get the name we're comparing things by
         for entry in section1.all_entries:
             if not attribute_filter or entry.has_attribute(attribute_filter):
                 dict1[getattr(entry, attribute)] = entry
@@ -116,35 +172,7 @@ def compare_schemas(schema1, schema2, attribute_filter=HedKey.InLibrary, section
     return matches, not_in_schema1, not_in_schema2, unequal_entries
 
 
-def pretty_print_diff_entry(entry1, entry2):
-    """
-    Returns the differences between two HedSchemaEntry objects as a list of strings
-
-    Parameters:
-        entry1 (HedSchemaEntry): The first entry.
-        entry2 (HedSchemaEntry): The second entry.
-
-    Returns:
-        diff_lines(list): the differences as a list of strings
-    """
-    output = []
-    # Checking if both entries have the same name
-    if entry1.name != entry2.name:
-        output.append(f"\tName differs: '{entry1.name}' vs '{entry2.name}'")
-
-    # Checking if both entries have the same description
-    if entry1.description != entry2.description:
-        output.append(f"\tDescription differs: '{entry1.description}' vs '{entry2.description}'")
-
-    # Comparing attributes
-    for attr in set(entry1.attributes.keys()).union(entry2.attributes.keys()):
-        if entry1.attributes.get(attr) != entry2.attributes.get(attr):
-            output.append(f"\tAttribute '{attr}' differs: '{entry1.attributes.get(attr)}' vs '{entry2.attributes.get(attr)}'")
-
-    return output
-
-
-def pretty_print_entry(entry):
+def _pretty_print_entry(entry):
     """ Returns the contents of a HedSchemaEntry object as a list of strings.
 
     Parameters:
@@ -167,7 +195,92 @@ def pretty_print_entry(entry):
     return output
 
 
-def pretty_print_diff_all(entries, prompt="Differences for "):
+def _entry_to_dict(entry):
+    """
+    Returns the contents of a HedSchemaEntry object as a dictionary.
+
+    Parameters:
+        entry (HedSchemaEntry): The HedSchemaEntry object to be displayed.
+
+    Returns:
+        Dictionary representing the entry.
+    """
+    output = {
+        "Name": entry.name,
+        "Description": entry.description,
+        "Attributes": entry.attributes
+    }
+    return output
+
+
+def _dict_diff_entries(entry1, entry2):
+    """
+    Returns the differences between two HedSchemaEntry objects as a dictionary.
+
+    Parameters:
+        entry1 (HedSchemaEntry or str): The first entry.
+        entry2 (HedSchemaEntry or str): The second entry.
+
+    Returns:
+        Dictionary representing the differences.
+    """
+    diff_dict = {}
+
+    if isinstance(entry1, str):
+        # Handle special case ones like prologue
+        if entry1 != entry2:
+            diff_dict["value"] = {
+                "Schema1": entry1,
+                "Schema2": entry2
+            }
+    else:
+        if entry1.name != entry2.name:
+            diff_dict["name"] = {
+                "Schema1": entry1.name,
+                "Schema2": entry2.name
+            }
+
+        # Checking if both entries have the same description
+        if entry1.description != entry2.description:
+            diff_dict["description"] = {
+                "Schema1": entry1.description,
+                "Schema2": entry2.description
+            }
+
+        # Comparing attributes
+        for attr in set(entry1.attributes.keys()).union(entry2.attributes.keys()):
+            if entry1.attributes.get(attr) != entry2.attributes.get(attr):
+                diff_dict[attr] = {
+                    "Schema1": entry1.attributes.get(attr),
+                    "Schema2": entry2.attributes.get(attr)
+                }
+
+    return diff_dict
+
+
+def _pretty_print_diff_entry(entry1, entry2):
+    """
+    Returns the differences between two HedSchemaEntry objects as a list of strings.
+
+    Parameters:
+        entry1 (HedSchemaEntry): The first entry.
+        entry2 (HedSchemaEntry): The second entry.
+
+    Returns:
+        List of strings representing the differences.
+    """
+    diff_dict = _dict_diff_entries(entry1, entry2)
+    diff_lines = []
+
+    for key, value in diff_dict.items():
+        diff_lines.append(f"\t{key}:")
+        for schema, val in value.items():
+            diff_lines.append(f"\t\t{schema}: {val}")
+
+    return diff_lines
+
+
+def _pretty_print_diff_all(entries, prompt="Differences for "):
     """
     Formats the differences between pairs of HedSchemaEntry objects.
 
@@ -180,12 +293,12 @@ def pretty_print_diff_all(entries, prompt="Differences for "):
     output = []
     for key, (entry1, entry2) in entries.items():
         output.append(f"{prompt}'{key}':")
-        output += pretty_print_diff_entry(entry1, entry2)
+        output += _pretty_print_diff_entry(entry1, entry2)
 
     return "\n".join(output)
 
 
-def pretty_print_missing_all(entries, schema_name):
+def _pretty_print_missing_all(entries, schema_name):
     """
     Formats the missing entries from schema_name.
 
@@ -197,7 +310,7 @@ def pretty_print_missing_all(entries, schema_name):
     """
     output = []
     for key, entry in entries.items():
-        output.append(f"'{key}' not in {schema_name}':")
-        output += pretty_print_entry(entry)
+        output.append(f"'{key}' not in '{schema_name}':")
+        output += _pretty_print_entry(entry)
 
     return "\n".join(output)

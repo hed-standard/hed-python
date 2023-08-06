@@ -117,14 +117,9 @@ class DefinitionDict:
         def_issues = []
         for definition_tag, group in hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}):
             group_tag, new_def_issues = self._find_group(definition_tag, group, error_handler)
-            def_tag_name = definition_tag.extension
+            def_tag_name, def_takes_value = self._strip_value_placeholder(definition_tag.extension)
 
-            def_takes_value = def_tag_name.lower().endswith("/#")
-            if def_takes_value:
-                def_tag_name = def_tag_name[:-len("/#")]
-
-            def_tag_lower = def_tag_name.lower()
-            if "/" in def_tag_lower or "#" in def_tag_lower:
+            if "/" in def_tag_name or "#" in def_tag_name:
                 new_def_issues += ErrorHandler.format_error_with_context(error_handler,
                                                                          DefinitionErrors.INVALID_DEFINITION_EXTENSION,
                                                                          tag=definition_tag,
@@ -134,28 +129,41 @@ class DefinitionDict:
                 def_issues += new_def_issues
                 continue
 
-            new_def_issues += self._validate_contents(definition_tag, group_tag, error_handler)
+            new_def_issues = self._validate_contents(definition_tag, group_tag, error_handler)
             new_def_issues += self._validate_placeholders(def_tag_name, group_tag, def_takes_value, error_handler)
 
             if new_def_issues:
                 def_issues += new_def_issues
                 continue
 
-            if error_handler:
-                context = error_handler.get_error_context_copy()
-            else:
-                context = []
-            if def_tag_lower in self.defs:
-                new_def_issues += ErrorHandler.format_error_with_context(error_handler,
-                                                                         DefinitionErrors.DUPLICATE_DEFINITION,
-                                                                         def_name=def_tag_name)
+            new_def_issues, context = self._validate_name_and_context(def_tag_name, error_handler)
+            if new_def_issues:
                 def_issues += new_def_issues
                 continue
-            self.defs[def_tag_lower] = DefinitionEntry(name=def_tag_name, contents=group_tag,
-                                                       takes_value=def_takes_value,
-                                                       source_context=context)
+
+            self.defs[def_tag_name.lower()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
+                                                              takes_value=def_takes_value,
+                                                              source_context=context)
 
         return def_issues
+
+    def _strip_value_placeholder(self, def_tag_name):
+        def_takes_value = def_tag_name.lower().endswith("/#")
+        if def_takes_value:
+            def_tag_name = def_tag_name[:-len("/#")]
+        return def_tag_name, def_takes_value
+
+    def _validate_name_and_context(self, def_tag_name, error_handler):
+        if error_handler:
+            context = error_handler.get_error_context_copy()
+        else:
+            context = []
+        new_def_issues = []
+        if def_tag_name.lower() in self.defs:
+            new_def_issues += ErrorHandler.format_error_with_context(error_handler,
+                                                                     DefinitionErrors.DUPLICATE_DEFINITION,
+                                                                     def_name=def_tag_name)
+        return new_def_issues, context
 
     def _validate_placeholders(self, def_tag_name, group, def_takes_value, error_handler):
         new_issues = []
@@ -245,11 +253,8 @@ class DefinitionDict:
         Parameters:
             hed_string_obj(HedString): The hed string to identify definition contents in
         """
-        for def_tag, def_expand_group, def_group in hed_string_obj.find_def_tags(recursive=True):
-            def_contents = self._get_definition_contents(def_tag)
-            if def_contents is not None:
-                def_tag._expandable = def_contents
-                def_tag._expanded = def_tag != def_expand_group
+        for tag in hed_string_obj.get_all_tags():
+            self.construct_def_tag(tag)
 
     def construct_def_tag(self, hed_tag):
         """ Identify def/def-expand tag contents in the given HedTag.
@@ -257,6 +262,8 @@ class DefinitionDict:
         Parameters:
             hed_tag(HedTag): The hed tag to identify definition contents in
         """
+        # Finish tracking down why parent is set incorrectly on def tags sometimes
+        # It should be ALWAYS set
         if hed_tag.short_base_tag in {DefTagNames.DEF_ORG_KEY, DefTagNames.DEF_EXPAND_ORG_KEY}:
             save_parent = hed_tag._parent
             def_contents = self._get_definition_contents(hed_tag)
@@ -277,24 +284,16 @@ class DefinitionDict:
             def_contents: HedGroup
             The contents to replace the previous def-tag with.
         """
-        is_label_tag = def_tag.extension
-        placeholder = None
-        found_slash = is_label_tag.find("/")
-        if found_slash != -1:
-            placeholder = is_label_tag[found_slash + 1:]
-            is_label_tag = is_label_tag[:found_slash]
+        tag_label, _, placeholder = def_tag.extension.partition('/')
 
-        label_tag_lower = is_label_tag.lower()
+        label_tag_lower = tag_label.lower()
         def_entry = self.defs.get(label_tag_lower)
         if def_entry is None:
             # Could raise an error here?
             return None
-        else:
-            def_tag_name, def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder)
-            if def_tag_name:
-                return def_contents
 
-        return None
+        def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder)
+        return def_contents
 
     @staticmethod
     def get_as_strings(def_dict):

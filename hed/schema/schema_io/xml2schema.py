@@ -4,104 +4,127 @@ This module is used to create a HedSchema object from an XML file or tree.
 
 from defusedxml import ElementTree
 import xml
+
+import hed.schema.hed_schema_constants
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.schema import HedSchema
 from hed.schema import schema_validation_util
 from hed.schema.schema_io import xml_constants
-import copy
+from .base2schema import SchemaLoader
+from functools import partial
 
 
-class HedSchemaXMLParser:
-    def __init__(self, hed_xml_file_path, schema_as_string=None):
-        self._root_element = self._parse_hed_xml(hed_xml_file_path, schema_as_string)
-        # Used to find parent elements of XML nodes during file parsing
-        self._parent_map = {c: p for p in self._root_element.iter() for c in p}
+class SchemaLoaderXML(SchemaLoader):
+    """ Loads XML schemas from filenames or strings.
 
-        self._schema = HedSchema()
-        self._schema.filename = hed_xml_file_path
-        self._schema.header_attributes = self._get_header_attributes()
-        self._loading_merged = True
-        if self._schema.with_standard and not self._schema.merged:
-            from hed.schema.hed_schema_io import load_schema_version
-            saved_attr = self._schema.header_attributes
-            try:
-                base_version = load_schema_version(self._schema.with_standard)
-            except HedFileError as e:
-                raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
-                                   message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
-                                   filename=e.filename)
-            self._schema = copy.deepcopy(base_version)
-            self._schema.filename = hed_xml_file_path
-            self._schema.header_attributes = saved_attr
-            self._loading_merged = False
+        Expected usage is SchemaLoaderXML.load(filename)
 
-        self._schema.prologue = self._get_prologue()
-        self._schema.epilogue = self._get_epilogue()
+        SchemaLoaderXML(filename) will load just the header_attributes
+    """
+    def __init__(self, filename, schema_as_string=None):
+        super().__init__(filename, schema_as_string)
+        self._root_element = None
+        self._parent_map = {}
 
-        self._populate_section(HedSectionKey.Properties)
-        self._populate_section(HedSectionKey.Attributes)
-        self._populate_section(HedSectionKey.ValueClasses)
-        self._populate_section(HedSectionKey.UnitModifiers)
-
-        self._populate_unit_class_dictionaries()
-        self._populate_tag_dictionaries()
-        self._schema.finalize_dictionaries()
-
-    @staticmethod
-    def load_xml(xml_file_path=None, schema_as_string=None):
-        parser = HedSchemaXMLParser(xml_file_path, schema_as_string)
-        return parser._schema
-
-    @staticmethod
-    def _parse_hed_xml(hed_xml_file_path, schema_as_string=None):
+    def _open_file(self):
         """Parses an XML file and returns the root element.
 
         Parameters
         ----------
-        hed_xml_file_path: str
-            The path to a HED XML file.
-        schema_as_string: str
-            Alternate input, a full schema XML file as a string.
         Returns
         -------
         RestrictedElement
             The root element of the HED XML file.
 
         """
-        if schema_as_string and hed_xml_file_path:
-            raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.",
-                               hed_xml_file_path)
-
         try:
-            if hed_xml_file_path:
-                hed_xml_tree = ElementTree.parse(hed_xml_file_path)
+            if self.filename:
+                hed_xml_tree = ElementTree.parse(self.filename)
                 root = hed_xml_tree.getroot()
             else:
-                root = ElementTree.fromstring(schema_as_string)
+                root = ElementTree.fromstring(self.schema_as_string)
         except xml.etree.ElementTree.ParseError as e:
-            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, hed_xml_file_path)
-        except FileNotFoundError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, hed_xml_file_path)
-        except TypeError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), hed_xml_file_path)
+            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, self.schema_as_string)
 
         return root
 
-    def _populate_section(self, key_class):
+    def _get_header_attributes(self, root_element):
+        """
+            Gets the schema attributes form the XML root node
+
+        Returns
+        -------
+        attribute_dict: {str: str}
+        """
+        return self._reformat_xsd_attrib(root_element.attrib)
+
+    def _parse_data(self):
+        self._root_element = self.input_data
+        self._parent_map = {c: p for p in self._root_element.iter() for c in p}
+
+        parse_order = {
+            HedSectionKey.Properties: partial(self._populate_section, HedSectionKey.Properties),
+            HedSectionKey.Attributes: partial(self._populate_section, HedSectionKey.Attributes),
+            HedSectionKey.UnitModifiers: partial(self._populate_section, HedSectionKey.UnitModifiers),
+            HedSectionKey.UnitClasses: self._populate_unit_class_dictionaries,
+            HedSectionKey.ValueClasses: partial(self._populate_section, HedSectionKey.ValueClasses),
+            HedSectionKey.Tags: self._populate_tag_dictionaries,
+        }
+        self._schema.prologue = self._read_prologue()
+        self._schema.epilogue = self._read_epilogue()
+        self._parse_sections(self._root_element, parse_order)
+
+    def _parse_sections(self, root_element, parse_order):
+        for section_key in parse_order:
+            section_name = xml_constants.SECTION_ELEMENTS[section_key]
+            section_element = self._get_elements_by_name(section_name, root_element)
+            if section_element:
+                section_element = section_element[0]
+            parse_func = parse_order[section_key]
+            parse_func(section_element)
+
+    def _populate_section(self, key_class, section):
         self._schema._initialize_attributes(key_class)
-        section_name = xml_constants.SECTION_NAMES[key_class]
-        section = self._get_elements_by_name(section_name)
-        if section:
-            section = section[0]
+        def_element_name = xml_constants.ELEMENT_NAMES[key_class]
+        attribute_elements = self._get_elements_by_name(def_element_name, section)
+        for element in attribute_elements:
+            new_entry = self._parse_node(element, key_class)
+            self._add_to_dict(new_entry, key_class)
 
-            def_element_name = xml_constants.ELEMENT_NAMES[key_class]
-            attribute_elements = self._get_elements_by_name(def_element_name, section)
-            for element in attribute_elements:
-                new_entry = self._parse_node(element, key_class)
-                self._add_to_dict(new_entry, key_class)
+    def _read_prologue(self):
+        prologue_elements = self._get_elements_by_name(xml_constants.PROLOGUE_ELEMENT)
+        if len(prologue_elements) == 1:
+            return prologue_elements[0].text
+        return ""
 
-    def _populate_tag_dictionaries(self):
+    def _read_epilogue(self):
+        epilogue_elements = self._get_elements_by_name(xml_constants.EPILOGUE_ELEMENT)
+        if len(epilogue_elements) == 1:
+            return epilogue_elements[0].text
+        return ""
+
+    def _add_tags_recursive(self, new_tags, parent_tags):
+        for tag_element in new_tags:
+            current_tag = self._get_element_tag_value(tag_element)
+            parents_and_child = parent_tags + [current_tag]
+            full_tag = "/".join(parents_and_child)
+
+            tag_entry = self._parse_node(tag_element, HedSectionKey.Tags, full_tag)
+
+            rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
+            if rooted_entry:
+                loading_from_chain = rooted_entry.name + "/" + tag_entry.short_tag_name
+                loading_from_chain_short = tag_entry.short_tag_name
+
+                full_tag = full_tag.replace(loading_from_chain_short, loading_from_chain)
+                tag_entry = self._parse_node(tag_element, HedSectionKey.Tags, full_tag)
+                parents_and_child = full_tag.split("/")
+
+            self._add_to_dict(tag_entry, HedSectionKey.Tags)
+            child_tags = tag_element.findall("node")
+            self._add_tags_recursive(child_tags, parents_and_child)
+
+    def _populate_tag_dictionaries(self, tag_section):
         """Populates a dictionary of dictionaries associated with tags and their attributes.
 
         Parameters
@@ -114,30 +137,11 @@ class HedSchemaXMLParser:
 
         """
         self._schema._initialize_attributes(HedSectionKey.Tags)
-        tag_elements = self._get_elements_by_name("node")
-        loading_from_chain = ""
-        loading_from_chain_short = ""
-        for tag_element in tag_elements:
-            tag = self._get_tag_path_from_tag_element(tag_element)
-            if loading_from_chain:
-                if loading_from_chain_short == tag or not tag.startswith(loading_from_chain_short):
-                    loading_from_chain_short = ""
-                    loading_from_chain = ""
-                else:
-                    tag = tag.replace(loading_from_chain_short, loading_from_chain)
-            tag_entry = self._parse_node(tag_element, HedSectionKey.Tags, tag)
+        root_tags = tag_section.findall("node")
 
-            rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
-            if rooted_entry:
-                loading_from_chain = rooted_entry.name + "/" + tag_entry.short_tag_name
-                loading_from_chain_short = tag_entry.short_tag_name
+        self._add_tags_recursive(root_tags, [])
 
-                tag = tag.replace(loading_from_chain_short, loading_from_chain)
-                tag_entry = self._parse_node(tag_element, HedSectionKey.Tags, tag)
-
-            self._add_to_dict(tag_entry, HedSectionKey.Tags)
-
-    def _populate_unit_class_dictionaries(self):
+    def _populate_unit_class_dictionaries(self, unit_section):
         """Populates a dictionary of dictionaries associated with all the unit classes, unit class units, and unit
            class default units.
 
@@ -153,14 +157,8 @@ class HedSchemaXMLParser:
         """
         self._schema._initialize_attributes(HedSectionKey.UnitClasses)
         self._schema._initialize_attributes(HedSectionKey.Units)
-        section_name = xml_constants.SECTION_NAMES[HedSectionKey.UnitClasses]
-        units_section_nodes = self._get_elements_by_name(section_name)
-        if len(units_section_nodes) == 0:
-            return
-        units_section = units_section_nodes[0]
-
         def_element_name = xml_constants.ELEMENT_NAMES[HedSectionKey.UnitClasses]
-        unit_class_elements = self._get_elements_by_name(def_element_name, units_section)
+        unit_class_elements = self._get_elements_by_name(def_element_name, unit_section)
 
         for unit_class_element in unit_class_elements:
             unit_class_entry = self._parse_node(unit_class_element, HedSectionKey.UnitClasses)
@@ -178,35 +176,12 @@ class HedSchemaXMLParser:
         for attrib_name in attrib_dict:
             if attrib_name == xml_constants.NO_NAMESPACE_XSD_KEY:
                 xsd_value = attrib_dict[attrib_name]
-                final_attrib[xml_constants.NS_ATTRIB] = xml_constants.XSI_SOURCE
-                final_attrib[xml_constants.NO_LOC_ATTRIB] = xsd_value
+                final_attrib[hed.schema.hed_schema_constants.NS_ATTRIB] = xml_constants.XSI_SOURCE
+                final_attrib[hed.schema.hed_schema_constants.NO_LOC_ATTRIB] = xsd_value
             else:
                 final_attrib[attrib_name] = attrib_dict[attrib_name]
 
         return final_attrib
-
-    def _get_header_attributes(self):
-        """
-            Gets the schema attributes form the XML root node
-
-        Returns
-        -------
-        attribute_dict: {str: str}
-
-        """
-        return self._reformat_xsd_attrib(self._root_element.attrib)
-
-    def _get_prologue(self):
-        prologue_elements = self._get_elements_by_name(xml_constants.PROLOGUE_ELEMENT)
-        if len(prologue_elements) == 1:
-            return prologue_elements[0].text
-        return ""
-
-    def _get_epilogue(self):
-        epilogue_elements = self._get_elements_by_name(xml_constants.EPILOGUE_ELEMENT)
-        if len(epilogue_elements) == 1:
-            return epilogue_elements[0].text
-        return ""
 
     def _parse_node(self, node_element, key_class, element_name=None):
         if element_name:
@@ -233,26 +208,6 @@ class HedSchemaXMLParser:
 
         return tag_entry
 
-    def _get_ancestor_tag_names(self, tag_element):
-        """ Get all ancestor tag names of a tag element.
-
-        Parameters:
-            tag_element (Element): A tag element in the HED XML file.
-
-        Returns:
-            list: Contains all the ancestor tag names of a given tag.
-
-        """
-        ancestor_tags = []
-        parent_tag_name = self._get_parent_tag_name(tag_element)
-        parent_element = self._parent_map[tag_element]
-        while parent_tag_name:
-            ancestor_tags.append(parent_tag_name)
-            parent_tag_name = self._get_parent_tag_name(parent_element)
-            if parent_tag_name:
-                parent_element = self._parent_map[parent_element]
-        return ancestor_tags
-
     def _get_element_tag_value(self, element, tag_name=xml_constants.NAME_ELEMENT):
         """ Get the value of the element's tag.
 
@@ -275,43 +230,6 @@ class HedSchemaXMLParser:
                                    self._schema.filename)
             return element.text
         return ""
-
-    def _get_parent_tag_name(self, tag_element):
-        """ Return the name of the tag parent element.
-
-        Parameters:
-            tag_element (Element): A tag element in the HED XML file.
-
-        Returns:
-            str: The name of the tag element's parent.
-
-        Notes:
-            If there is no parent tag then an empty string is returned.
-
-        """
-        parent_tag_element = self._parent_map[tag_element]
-        if parent_tag_element is not None:
-            return parent_tag_element.findtext(xml_constants.NAME_ELEMENT)
-        else:
-            return ''
-
-    def _get_tag_path_from_tag_element(self, tag_element):
-        """ Get the tag path from a given tag element.
-
-        Parameters:
-            tag_element (Element): A tag element in the HED XML file.
-
-        Returns:
-            str: A tag path which is typically referred to as a tag.
-
-        Notes:
-            The tag and it's ancestor tags will be separated by /'s.
-
-        """
-        ancestor_tag_names = self._get_ancestor_tag_names(tag_element)
-        ancestor_tag_names.insert(0, self._get_element_tag_value(tag_element))
-        ancestor_tag_names.reverse()
-        return '/'.join(ancestor_tag_names)
 
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """ Get the elements that have a specific element name.

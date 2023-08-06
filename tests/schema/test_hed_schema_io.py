@@ -3,11 +3,9 @@ import unittest
 from hed.errors import HedFileError
 from hed.errors.error_types import SchemaErrors
 from hed.schema import load_schema, HedSchemaGroup, load_schema_version, HedSchema
-from hed import schema
 import os
-from hed.schema import hed_cache
-import shutil
 from hed.errors import HedExceptions
+from hed.schema import HedKey
 
 
 # todo: speed up these tests
@@ -126,7 +124,6 @@ class TestHedSchema(unittest.TestCase):
         with self.assertRaises(HedFileError) as context:
             load_schema_version("[Malformed,,json]")
 
-
     # def test_load_schema_version_empty(self):
     #     schemas = load_schema_version("")
     #     self.assertIsInstance(schemas, HedSchema, "load_schema_version for empty string returns latest version")
@@ -145,13 +142,14 @@ class TestHedSchema(unittest.TestCase):
     #     self.assertTrue(schemas.version_number, "load_schema_version for empty string has a version")
     #     self.assertFalse(schemas.library, "load_schema_version for empty string is not a library")
 
+
 class TestHedSchemaMerging(unittest.TestCase):
     # Verify all 5 schemas produce the same results
     base_schema_dir = '../data/schema_tests/merge_tests/'
 
     @classmethod
     def setUpClass(cls):
-         cls.full_base_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.base_schema_dir)
+        cls.full_base_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.base_schema_dir)
 
     def _base_merging_test(self, files):
         import filecmp
@@ -329,3 +327,58 @@ class TestHedSchemaMerging(unittest.TestCase):
             with self.assertRaises(HedFileError):
                 # print(file)
                 load_schema(file)
+
+    def test_saving_in_library_wiki(self):
+        old_score_schema = load_schema_version("score_1.0.0")
+
+        tag_entry = old_score_schema.get_tag_entry("Modulator")
+        self.assertTrue(tag_entry.has_attribute(HedKey.InLibrary))
+
+        schema_string = old_score_schema.get_as_mediawiki_string()
+        score_count = schema_string.count("inLibrary=score")
+        self.assertEqual(score_count, 0, "InLibrary should not be saved to the file")
+
+        # This should make no difference
+        schema_string = old_score_schema.get_as_mediawiki_string(save_merged=True)
+        score_count = schema_string.count("inLibrary=score")
+        self.assertEqual(score_count, 0, "InLibrary should not be saved to the file")
+
+        score_schema = load_schema_version("score_1.1.0")
+
+        tag_entry = score_schema.get_tag_entry("Modulator")
+        self.assertTrue(tag_entry.has_attribute(HedKey.InLibrary))
+        schema_string = score_schema.get_as_mediawiki_string(save_merged=False)
+        score_count = schema_string.count("inLibrary=score")
+        self.assertEqual(score_count, 0, "InLibrary should not be saved to the file")
+
+        schema_string = score_schema.get_as_mediawiki_string(save_merged=True)
+        score_count = schema_string.count("inLibrary=score")
+        self.assertEqual(score_count, 853, "There should be 853 in library entries in the saved score schema")
+
+    def test_saving_in_library_xml(self):
+        old_score_schema = load_schema_version("score_1.0.0")
+
+        tag_entry = old_score_schema.get_tag_entry("Modulator")
+        self.assertTrue(tag_entry.has_attribute(HedKey.InLibrary))
+
+        schema_string = old_score_schema.get_as_xml_string()
+        score_count = schema_string.count("<name>inLibrary</name>")
+        self.assertEqual(score_count, 0, "InLibrary should not be saved to the file")
+
+        # This should make no difference
+        schema_string = old_score_schema.get_as_xml_string(save_merged=True)
+        score_count = schema_string.count("<name>inLibrary</name>")
+        self.assertEqual(score_count, 0, "InLibrary should not be saved to the file")
+
+        score_schema = load_schema_version("score_1.1.0")
+
+        tag_entry = score_schema.get_tag_entry("Modulator")
+        self.assertTrue(tag_entry.has_attribute(HedKey.InLibrary))
+        schema_string = score_schema.get_as_xml_string(save_merged=False)
+        score_count = schema_string.count("<name>inLibrary</name>")
+        self.assertEqual(score_count, 0, "InLibrary should not be saved to the file")
+
+        schema_string = score_schema.get_as_xml_string(save_merged=True)
+        score_count = schema_string.count("<name>inLibrary</name>")
+        # One extra because this also finds the attribute definition, whereas in wiki it's a different format.
+        self.assertEqual(score_count, 854, "There should be 854 in library entries in the saved score schema")
