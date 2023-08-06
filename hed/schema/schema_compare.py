@@ -27,7 +27,8 @@ def find_matching_tags(schema1, schema2, output='default', sections=(HedSectionK
         section_dict.update(unequal_entries[section_key])
 
     if output == 'string':
-        return "\n".join([_pretty_print_diff_all(entries, prompt="Found matching node ") for entries in matches.values()])
+        return "\n".join([_pretty_print_diff_all(entries, prompt="Found matching node ")
+                          for entries in matches.values()])
     elif output == 'dict':
         output_dict = {}
         for section_name, section_entries in matches.items():
@@ -38,16 +39,16 @@ def find_matching_tags(schema1, schema2, output='default', sections=(HedSectionK
     return matches
 
 
-def compare_differences(schema1, schema2, output='default', attribute_filter=None, sections=(HedSectionKey.Tags,)):
+def compare_differences(schema1, schema2, output='raw', attribute_filter=None, sections=(HedSectionKey.Tags,)):
     """
     Compare the tags in two schemas, this finds any differences
 
     Parameters:
         schema1 (HedSchema): The first schema to be compared.
         schema2 (HedSchema): The second schema to be compared.
-        output (str): Defaults to returning a set of python object dicts.
+        output (str): 'raw' (default) returns a tuple of python object dicts with raw results.
                       'string' returns a single string
-                      'dict' returns a json style dictionary
+                      'dict' returns a json-style python dictionary that can be converted to JSON
         attribute_filter (str, optional): The attribute to filter entries by.
                                           Entries without this attribute are skipped.
                                           The most common use would be HedKey.InLibrary
@@ -56,11 +57,16 @@ def compare_differences(schema1, schema2, output='default', attribute_filter=Non
                 If None, checks all sections including header, prologue, and epilogue.
 
     Returns:
-    tuple or str: A tuple containing three dictionaries:
+        tuple, str or dict: 
+        - Tuple with dict entries (not_in_schema1, not_in_schema1, unequal_entries).
+        - Formatted string with the output ready for printing.
+        - A Python dictionary with the output ready to be converted to JSON (for web output).
+
+    Notes: The underlying dictionaries are:
         - not_in_schema1(dict): Entries present in schema2 but not in schema1.
         - not_in_schema2(dict): Entries present in schema1 but not in schema2.
         - unequal_entries(dict): Entries that differ between the two schemas.
-        - or a formatted string of the differences
+
     """
     _, not_in_1, not_in_2, unequal_entries = compare_schemas(schema1, schema2, attribute_filter=attribute_filter,
                                                              sections=sections)
