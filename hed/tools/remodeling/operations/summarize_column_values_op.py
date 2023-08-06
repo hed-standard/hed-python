@@ -80,7 +80,7 @@ class SummarizeColumnValuesOp(BaseOp):
             Updates the relevant summary.
 
         """
-       
+
         df_new = df.copy()
         summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
@@ -133,8 +133,8 @@ class ColumnValueSummary(BaseSummary):
                 "Files": [name for name in this_summary['Files'].keys()],
                 "Specifics": {"Value columns": this_summary['Value columns'].keys(),
                               "Skip columns": this_summary['Skip columns'],
-                              "Value columns": this_summary['Value columns'],
-                              "Categorical columns": this_summary['Categorical columns'],
+                              "Value column summaries": this_summary['Value columns'],
+                              "Categorical column summaries": this_summary['Categorical columns'],
                               "Categorical counts": this_summary['Categorical counts']}}
 
     def merge_all_info(self):

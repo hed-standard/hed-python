@@ -20,7 +20,8 @@ def find_matching_tags(schema1, schema2, return_string=False):
         section_dict.update(unequal_entries[section_key])
 
     if return_string:
-        return "\n".join([pretty_print_diff_all(entries, prompt="Found matching node ") for entries in matches.values()])
+        return "\n".join([pretty_print_diff_all(entries,
+                                                prompt="Found matching node ") for entries in matches.values()])
     return matches
 
 
@@ -64,7 +65,7 @@ def compare_schemas(schema1, schema2, attribute_filter=HedKey.InLibrary, section
         attribute_filter (str, optional): The attribute to filter entries by.
                                           Entries without this attribute are skipped.
                                           If it evaluates to False, no filtering is performed.
-        sections(list): the list of sections to compare.  By default, just the tags section.
+        sections(tuple): the list of sections to compare.  By default, just the tags section.
 
     Returns:
     tuple: A tuple containing four dictionaries:
