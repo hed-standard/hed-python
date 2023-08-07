@@ -325,9 +325,9 @@ class ErrorHandler:
     @staticmethod
     def _create_error_object(error_type, base_message, severity, **kwargs):
         if severity == ErrorSeverity.ERROR:
-            error_prefix = "ERROR: "
+            error_prefix = f"{error_type}: "
         else:
-            error_prefix = "WARNING: "
+            error_prefix = f"{error_type} (Warning): "
         error_message = error_prefix + base_message
         error_object = {'code': error_type,
                         'message': error_message,
