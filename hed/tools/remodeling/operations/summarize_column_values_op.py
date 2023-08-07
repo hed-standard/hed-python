@@ -80,7 +80,7 @@ class SummarizeColumnValuesOp(BaseOp):
             Updates the relevant summary.
 
         """
-       
+
         df_new = df.copy()
         summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
@@ -130,11 +130,11 @@ class ColumnValueSummary(BaseSummary):
             this_summary['Categorical columns'][key] = dict(sorted_tuples[:min(num_disp, self.op.max_categorical)])
         return {"Name": this_summary['Name'], "Total events": this_summary["Total events"],
                 "Total files": this_summary['Total files'],
-                "Files": [name for name in this_summary['Files'].keys()],
-                "Specifics": {"Value columns": this_summary['Value columns'].keys(),
+                "Files": list(this_summary['Files'].keys()),
+                "Specifics": {"Value columns": list(this_summary['Value columns']),
                               "Skip columns": this_summary['Skip columns'],
-                              "Value columns": this_summary['Value columns'],
-                              "Categorical columns": this_summary['Categorical columns'],
+                              "Value column summaries": this_summary['Value columns'],
+                              "Categorical column summaries": this_summary['Categorical columns'],
                               "Categorical counts": this_summary['Categorical counts']}}
 
     def merge_all_info(self):
@@ -209,9 +209,9 @@ class ColumnValueSummary(BaseSummary):
         cat_string = self._get_categorical_string(specifics, offset="", indent=indent)
         if cat_string:
             sum_list.append(cat_string)
-        val_cols = specifics.get("Value columns", {})
-        if val_cols:
-            sum_list.append(ColumnValueSummary._get_value_string(val_cols, offset="", indent=indent))
+        val_dict = specifics.get("Value column summaries", {})
+        if val_dict:
+            sum_list.append(ColumnValueSummary._get_value_string(val_dict, offset="", indent=indent))
         return "\n".join(sum_list)
 
     def _get_individual_string(self, result, indent=BaseSummary.DISPLAY_INDENT):
@@ -228,12 +228,12 @@ class ColumnValueSummary(BaseSummary):
         """
         sum_list = [f"Total events={result.get('Total events', 0)}"]
         specifics = result.get("Specifics", {})
-        cat_cols = result.get("Categorical columns", {})
-        if cat_cols:
-            sum_list.append(self._get_categorical_string(cat_cols, offset=indent, indent=indent))
-        val_cols = result.get("Value columns", {})
-        if val_cols:
-            sum_list.append(ColumnValueSummary._get_value_string(val_cols, offset=indent, indent=indent))
+        cat_dict = specifics.get("Categorical column summaries", {})
+        if cat_dict:
+            sum_list.append(self._get_categorical_string(cat_dict, offset=indent, indent=indent))
+        val_dict = specifics.get("Value column summaries", {})
+        if val_dict:
+            sum_list.append(ColumnValueSummary._get_value_string(val_dict, offset=indent, indent=indent))
         return "\n".join(sum_list)
 
     def _get_categorical_col(self, entry, count_dict, offset="", indent="   "):

@@ -15,12 +15,12 @@ from hed.schema.schema_validation_util import validate_version_string
 MAX_MEMORY_CACHE = 20
 
 
-def from_string(schema_string, file_type=".xml", schema_namespace=None):
+def from_string(schema_string, schema_format=".xml", schema_namespace=None):
     """ Create a schema from the given string.
 
     Parameters:
         schema_string (str):         An XML or mediawiki file as a single long string.
-        file_type (str):             The extension(including the .) corresponding to a file source.
+        schema_format (str):         The schema format of the source schema string.
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
 
     Returns:
@@ -38,12 +38,12 @@ def from_string(schema_string, file_type=".xml", schema_namespace=None):
         raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string",
                            filename=schema_string)
 
-    if file_type.endswith(".xml"):
+    if schema_format.endswith(".xml"):
         hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string)
-    elif file_type.endswith(".mediawiki"):
+    elif schema_format.endswith(".mediawiki"):
         hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string)
     else:
-        raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
+        raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=schema_format)
 
     if schema_namespace:
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
@@ -75,7 +75,7 @@ def load_schema(hed_path=None, schema_namespace=None):
 
     if is_url:
         file_as_string = schema_util.url_to_string(hed_path)
-        hed_schema = from_string(file_as_string, file_type=os.path.splitext(hed_path.lower())[1])
+        hed_schema = from_string(file_as_string, schema_format=os.path.splitext(hed_path.lower())[1])
     elif hed_path.lower().endswith(".xml"):
         hed_schema = SchemaLoaderXML.load(hed_path)
     elif hed_path.lower().endswith(".mediawiki"):

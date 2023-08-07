@@ -223,7 +223,7 @@ class MyTestCase(unittest.TestCase):
             for test in tests:
                 schema_string = "\n".join(test)
                 try:
-                    loaded_schema = from_string(schema_string, file_type=".mediawiki")
+                    loaded_schema = from_string(schema_string, schema_format=".mediawiki")
                     issues = loaded_schema.check_compliance()
                 except HedFileError as e:
                     issues = e.issues
