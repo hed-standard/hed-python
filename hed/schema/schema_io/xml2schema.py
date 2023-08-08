@@ -80,6 +80,9 @@ class SchemaLoaderXML(SchemaLoader):
             section_element = self._get_elements_by_name(section_name, root_element)
             if section_element:
                 section_element = section_element[0]
+            if isinstance(section_element, list):
+                raise HedFileError(HedExceptions.INVALID_HED_FORMAT,
+                                   "Attempting to load an outdated or invalid XML schema", self.filename)
             parse_func = parse_order[section_key]
             parse_func(section_element)
 
