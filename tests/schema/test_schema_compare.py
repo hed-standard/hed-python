@@ -63,7 +63,7 @@ class TestSchemaComparison(unittest.TestCase):
         match_string = find_matching_tags(schema1, schema2, output='string', include_summary=True)
         self.assertIsInstance(match_string, str)
         self.assertIn("Tags:", match_string)
-        print(match_string)
+        # print(match_string)
 
         json_style_dict = find_matching_tags(schema1, schema2, output='dict', include_summary=True)
         self.assertIsInstance(json_style_dict, dict)

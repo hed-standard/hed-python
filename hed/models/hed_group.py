@@ -466,25 +466,30 @@ class HedGroup:
         Returns:
             list: A list of tuples. The contents depend on the values of the include_group.
         """
-        from hed.models.definition_dict import DefTagNames
         if recursive:
             groups = self.get_all_groups()
+            def_tags = []
+            for group in groups:
+                def_tags += self._get_def_tags_from_group(group)
         else:
-            groups = (self,)
-
-        def_tags = []
-        for group in groups:
-            for child in group.children:
-                if isinstance(child, HedTag):
-                    if child.short_base_tag == DefTagNames.DEF_ORG_KEY:
-                        def_tags.append((child, child, group))
-                else:
-                    for tag in child.tags():
-                        if tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY:
-                            def_tags.append((tag, child, group))
+            def_tags =  self._get_def_tags_from_group(self)
 
         if include_groups == 0 or include_groups == 1 or include_groups == 2:
             return [tag[include_groups] for tag in def_tags]
+        return def_tags
+
+    @staticmethod
+    def _get_def_tags_from_group(group):
+        from hed.models.definition_dict import DefTagNames
+        def_tags = []
+        for child in group.children:
+            if isinstance(child, HedTag):
+                if child.short_base_tag == DefTagNames.DEF_ORG_KEY:
+                    def_tags.append((child, child, group))
+            else:
+                for tag in child.tags():
+                    if tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY:
+                        def_tags.append((tag, child, group))
         return def_tags
 
     def find_tags_with_term(self, term, recursive=False, include_groups=2):
