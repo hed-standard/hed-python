@@ -494,7 +494,7 @@ class SchemaLoaderWiki(SchemaLoader):
             {'code': error_code,
              ErrorContext.ROW: line_number,
              ErrorContext.LINE: line,
-             "message": f"{error_code}: {warning_message}"
+             "message": f"{warning_message}"
              }
         )
 

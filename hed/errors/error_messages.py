@@ -165,13 +165,13 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
-    return f"A data-recording’s Def-expand tag does not match the given definition." + \
+    return f"A data-recording's Def-expand tag does not match the given definition." + \
            f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_UNMATCHED, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_unmatched(tag):
-    return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'"
+    return f"A data-recording's Def tag cannot be matched to definition.  Tag: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.DEF_INVALID)
@@ -186,7 +186,7 @@ def val_error_def_value_extra(tag):
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_UNMATCHED, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_def_expand_unmatched(tag):
-    return f"A data-recording’s Def-expand tag cannot be matched to definition.  Tag: '{tag}'"
+    return f"A data-recording's Def-expand tag cannot be matched to definition.  Tag: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_VALUE_MISSING, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
