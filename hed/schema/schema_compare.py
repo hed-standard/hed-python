@@ -12,11 +12,21 @@ SectionEntryNames = {
     HedSectionKey.UnitModifiers: "Unit Modifier",
     HedSectionKey.Properties: "Property",
     HedSectionKey.Attributes: "Attribute",
+}
 
+SectionEntryNamesPlural = {
+    HedSectionKey.Tags: "Tags",
+    HedSectionKey.Units: "Units",
+    HedSectionKey.UnitClasses: "Unit Classes",
+    HedSectionKey.ValueClasses: "Value Classes",
+    HedSectionKey.UnitModifiers: "Unit Modifiers",
+    HedSectionKey.Properties: "Properties",
+    HedSectionKey.Attributes: "Attributes",
 }
 
 
-def find_matching_tags(schema1, schema2, output='raw', sections=(HedSectionKey.Tags,)):
+def find_matching_tags(schema1, schema2, output='raw', sections=(HedSectionKey.Tags,),
+                       include_summary=True):
     """
     Compare the tags in two library schemas.  This finds tags with the same term.
 
@@ -28,7 +38,8 @@ def find_matching_tags(schema1, schema2, output='raw', sections=(HedSectionKey.T
                       'dict' returns a json style dictionary
         sections(list): the list of sections to compare.  By default, just the tags section.
                         If None, checks all sections including header, prologue, and epilogue.
-
+        include_summary(bool): If True, adds the 'summary' dict to the dict return option, and prints it with the
+                               string option.  Lists the names of all the nodes that are missing or different.
     Returns:
         dict, json style dict, or str: A dictionary containing matching entries in the Tags section of both schemas.
     """
@@ -37,8 +48,12 @@ def find_matching_tags(schema1, schema2, output='raw', sections=(HedSectionKey.T
     for section_key, section_dict in matches.items():
         section_dict.update(unequal_entries[section_key])
 
+    header_summary = _get_tag_name_summary((matches, unequal_entries))
+
     if output == 'string':
         final_string = ""
+        if include_summary:
+            final_string += _pretty_print_header(header_summary)
         if sections is None:
             sections = HedSectionKey
         for section_key in sections:
@@ -51,6 +66,9 @@ def find_matching_tags(schema1, schema2, output='raw', sections=(HedSectionKey.T
         return final_string
     elif output == 'dict':
         output_dict = {}
+        if include_summary:
+            output_dict["summary"] = {str(key): value for key, value in header_summary.items()}
+
         for section_name, section_entries in matches.items():
             output_dict[str(section_name)] = {}
             for key, (entry1, entry2) in section_entries.items():
@@ -59,7 +77,8 @@ def find_matching_tags(schema1, schema2, output='raw', sections=(HedSectionKey.T
     return matches
 
 
-def compare_differences(schema1, schema2, output='raw', attribute_filter=None, sections=(HedSectionKey.Tags,)):
+def compare_differences(schema1, schema2, output='raw', attribute_filter=None, sections=(HedSectionKey.Tags,),
+                        include_summary=True):
     """
     Compare the tags in two schemas, this finds any differences
 
@@ -75,6 +94,8 @@ def compare_differences(schema1, schema2, output='raw', attribute_filter=None, s
                                           If it evaluates to False, no filtering is performed.
         sections(list or None): the list of sections to compare.  By default, just the tags section.
                 If None, checks all sections including header, prologue, and epilogue.
+        include_summary(bool): If True, adds the 'summary' dict to the dict return option, and prints it with the
+                               string option.  Lists the names of all the nodes that are missing or different.
 
     Returns:
         tuple, str or dict: 
@@ -94,14 +115,15 @@ def compare_differences(schema1, schema2, output='raw', attribute_filter=None, s
     if sections is None:
         sections = HedSectionKey
 
+    header_summary = _get_tag_name_summary((not_in_1, not_in_2, unequal_entries))
     if output == 'string':
         final_string = ""
+        if include_summary:
+            final_string += _pretty_print_header(header_summary)
         for section_key in sections:
             val1, val2, val3 = unequal_entries[section_key], not_in_1[section_key], not_in_2[section_key]
             type_name = SectionEntryNames[section_key]
             if val1 or val2 or val3:
-                if final_string:
-                    final_string += "\n\n"
                 final_string += f"{type_name} differences:\n"
                 if val1:
                     final_string += _pretty_print_diff_all(val1, type_name=type_name) + "\n"
@@ -109,11 +131,15 @@ def compare_differences(schema1, schema2, output='raw', attribute_filter=None, s
                     final_string += _pretty_print_missing_all(val2, "Schema1", type_name) + "\n"
                 if val3:
                     final_string += _pretty_print_missing_all(val3, "Schema2", type_name) + "\n"
+                final_string += "\n\n"
         return final_string
     elif output == 'dict':
         # todo: clean this part up
         output_dict = {}
         current_section = {}
+        if include_summary:
+            output_dict["summary"] = {str(key): value for key, value in header_summary.items()}
+
         output_dict["unequal"] = current_section
         for section_name, section_entries in unequal_entries.items():
             current_section[str(section_name)] = {}
@@ -210,6 +236,36 @@ def compare_schemas(schema1, schema2, attribute_filter=HedKey.InLibrary, section
                                 if key in dict2 and dict1[key] == dict2[key]}
 
     return matches, not_in_schema1, not_in_schema2, unequal_entries
+
+
+def _get_tag_name_summary(tag_dicts):
+    out_dict = {section_key: [] for section_key in HedSectionKey}
+    for tag_dict in tag_dicts:
+        for section_key, section in tag_dict.items():
+            if section_key == MiscSection:
+                continue
+            out_dict[section_key].extend(section.keys())
+
+    return out_dict
+
+
+def _pretty_print_header(summary_dict):
+    output_string = ""
+    first_entry = True
+    for section_key, tag_names in summary_dict.items():
+        if not tag_names:
+            continue
+        type_name = SectionEntryNamesPlural[section_key]
+        if not first_entry:
+            output_string += "\n"
+        output_string += f"{type_name}: "
+
+        output_string += ", ".join(sorted(tag_names))
+
+        output_string += "\n"
+        first_entry = False
+    output_string += "\n"
+    return output_string
 
 
 def _pretty_print_entry(entry):
