@@ -173,9 +173,9 @@ def load_schema_version(xml_version=None, xml_folder=None):
         - The xml_version is not valid.
         - A fatal error was encountered in parsing
     """
+    # Check if we start and end with a square bracket, or double quote.  This might be valid json
     if xml_version and isinstance(xml_version, str) and \
-            ((xml_version.startswith("[") and xml_version.endswith("]")) or
-             (xml_version.startswith('"') and xml_version.endswith('"'))):
+        ((xml_version[0], xml_version[-1]) in [('[', ']'), ('"', '"')]):
         try:
             xml_version = json.loads(xml_version)
         except json.decoder.JSONDecodeError as e:
