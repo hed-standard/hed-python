@@ -143,14 +143,20 @@ class TestSchemaComparison(unittest.TestCase):
         schema2 = load_schema_version("score_1.1.0")
         not_in_schema1, not_in_schema2, unequal_entries = compare_differences(schema1, schema2,
                                                                               attribute_filter=HedKey.InLibrary)
+ 
+        
         self.assertEqual(len(not_in_schema1[HedSectionKey.Tags]), 21)
         self.assertEqual(len(not_in_schema2[HedSectionKey.Tags]), 10)
         self.assertEqual(len(unequal_entries[HedSectionKey.Tags]), 61)
 
+        diff_string = compare_differences(schema1, schema1, attribute_filter=HedKey.InLibrary, output='string',
+                                          sections=None)
+        self.assertFalse(diff_string)
         diff_string = compare_differences(schema1, schema2, attribute_filter=HedKey.InLibrary, output='string',
                                           sections=None)
+
         self.assertIsInstance(diff_string, str)
-        # print(diff_string)
+        print(diff_string)
 
         json_style_dict = compare_differences(schema1, schema2, attribute_filter=HedKey.InLibrary, output='dict',
                                               sections=None)

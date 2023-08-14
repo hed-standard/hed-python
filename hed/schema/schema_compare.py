@@ -120,6 +120,10 @@ def compare_differences(schema1, schema2, output='raw', attribute_filter=None, s
         final_string = ""
         if include_summary:
             final_string += _pretty_print_header(header_summary)
+            if not final_string:
+                return final_string
+            final_string = ("Overall summary:\n================\n" + final_string + \
+                            "\n\n\nSummary details:\n================\n\n")
         for section_key in sections:
             val1, val2, val3 = unequal_entries[section_key], not_in_1[section_key], not_in_2[section_key]
             type_name = SectionEntryNames[section_key]
@@ -250,6 +254,7 @@ def _get_tag_name_summary(tag_dicts):
 
 
 def _pretty_print_header(summary_dict):
+    
     output_string = ""
     first_entry = True
     for section_key, tag_names in summary_dict.items():
@@ -264,7 +269,6 @@ def _pretty_print_header(summary_dict):
 
         output_string += "\n"
         first_entry = False
-    output_string += "\n"
     return output_string
 
 
