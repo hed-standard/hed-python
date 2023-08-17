@@ -48,7 +48,7 @@ class HedTypeDefinitions:
         return type_tag_values
 
     def _extract_def_map(self):
-        """ Extract all of the type_variables associated with each definition and add them to def_map. """
+        """ Extract type_variables associated with each definition and add them to def_map. """
         def_map = {}
         for entry in self.definitions.values():
             type_values, description, other_tags = self._extract_entry_values(entry)
@@ -57,7 +57,7 @@ class HedTypeDefinitions:
         return def_map
 
     def _extract_type_map(self):
-        """ Extract all of the definitions associated with each type value and add them to the dictionary. """
+        """ Extract the definitions associated with each type value and add them to the dictionary. """
 
         type_map = {}
         for def_name, def_values in self.def_map.items():
@@ -78,8 +78,6 @@ class HedTypeDefinitions:
         Returns:
             list: A list of type_variables associated with this definition.
             str:  The contents of a description tag if any.
-
-
 
         """
         tag_list = entry.contents.get_all_tags()

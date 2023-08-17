@@ -1,6 +1,6 @@
 """ Basic analysis tools. """
 from .file_dictionary import FileDictionary
-from .hed_context_manager import OnsetGroup, HedContextManager
+# from .hed_context_manager import OnsetGroup, HedContextManager
 from .hed_type_definitions import HedTypeDefinitions
 from .hed_type_factors import HedTypeFactors
 from .hed_type_values import HedTypeValues

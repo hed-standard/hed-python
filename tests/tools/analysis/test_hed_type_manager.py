@@ -34,6 +34,14 @@ class Test(unittest.TestCase):
                          "Variable managers have context same length as hed_strings")
         self.assertFalse(var_manager._type_tag_map, "constructor has empty map")
 
+    def test_summarize(self):
+        var_manager = HedTypeManager(self.hed_strings, self.schema, self.definitions)
+        self.assertIsInstance(var_manager, HedTypeManager,
+                              "Constructor should create a HedTypeManager from a tabular input")
+        self.assertEqual(len(var_manager.context_manager.hed_strings), len(var_manager.context_manager.contexts),
+                         "Variable managers have context same length as hed_strings")
+        self.assertFalse(var_manager._type_tag_map, "constructor has empty map")
+
     def test_add_type_variable(self):
         var_manager = HedTypeManager(self.hed_strings, self.schema, self.definitions)
         self.assertFalse(var_manager._type_tag_map, "constructor has empty map")

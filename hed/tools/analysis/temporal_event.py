@@ -1,30 +1,32 @@
-from hed.models import HedTag, HedGroup, HedString
+from hed.models import HedTag, HedGroup
 
 
 class TemporalEvent:
-    def __init__(self, event_group, start_index, start_time):
-        self.event_group = event_group
+    """ Represents an event process. 
+    
+    Note:  the contents must have a De
+    """
+    def __init__(self, contents, start_index, start_time):
+        self.contents = contents    # Must not have definition expanded if there is a definition.
         self.start_index = start_index
-        self.start_time = start_time
-        self.duration = None
+        self.start_time = float(start_time)
         self.end_index = None
         self.end_time = None
-        self.anchor = None
+        self.anchor = None    # Lowercase def name with value
         self.internal_group = None
+        self.insets = []
         self._split_group()
-        
+
     def set_end(self, end_index, end_time):
         self.end_index = end_index
         self.end_time = end_time
 
     def _split_group(self):
-        for item in self.event_group.children:
-            if isinstance(item, HedTag) and (item.short_tag.lower() != "onset"):
-                self.anchor = item.extension.lower()
-            elif isinstance(item, HedTag):
-                continue
-            elif isinstance(item, HedGroup):
+        for item in self.contents.children:
+            if isinstance(item, HedGroup):
                 self.internal_group = item
+            elif item.short_base_tag.lower() == "def":
+                self.anchor = item.extension.lower()
 
     def __str__(self):
-        return f"{self.name}:[event markers {self.start_index}:{self.end_index} contents:{self.contents}]"
+        return f"{self.start_index}:{self.end_index} contents:{self.contents}"
