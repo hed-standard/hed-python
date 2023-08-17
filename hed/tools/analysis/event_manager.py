@@ -1,15 +1,13 @@
-""" Manages context and events of temporal extent. """
+""" Manages events of temporal extent. """
 
-from hed.schema import HedSchema, HedSchemaGroup
 from hed.tools.analysis.temporal_event import TemporalEvent
 from hed.models.model_constants import DefTagNames
-from hed.models.df_util import get_assembled
 
 
 class EventManager:
 
-    def __init__(self, data, schema):
-        """ Create an event manager for an events file.
+    def __init__(self, hed_strings, onsets, def_dict):
+        """ Create an event manager for an events file. Manages events of temporal extent. This
 
         Parameters:
             data (TabularInput): A tabular input file.
@@ -18,16 +16,15 @@ class EventManager:
         :raises HedFileError:
             - if there are any unmatched offsets.
 
+        Notes:  Keeps the events of temporal extend by their starting index in events file. These events
+        are separated from the rest of the annotations.
+
         """
 
-        if not isinstance(schema, HedSchema) and not isinstance(schema, HedSchemaGroup):
-            raise ValueError("ContextRequiresSchema", f"Context manager must have a valid HedSchema of HedSchemaGroup")
-        self.schema = schema
-        self.data = data
-        self.event_list = [[] for _ in range(len(self.data.dataframe))]
-        self.hed_strings = [None for _ in range(len(self.data.dataframe))]
-        self.onset_count = 0
-        self.offset_count = 0
+        self.event_list = [[] for _ in range(len(onsets))]
+        self.onsets = onsets
+        self.hed_strings = hed_strings
+        self.def_dict = def_dict
         self.contexts = []
         self._create_event_list()
 
@@ -49,44 +46,51 @@ class EventManager:
         :raises HedFileError:
             - If the hed_strings contain unmatched offsets.
 
+        Notes:
+
         """
-
-        # self.hed_strings = [HedString(str(hed), hed_schema=hed_schema) for hed in hed_strings]
-        # hed_list = list(self.data.iter_dataframe(hed_ops=[self.hed_schema], return_string_only=False,
-        #                                     expand_defs=False, remove_definitions=True))
-
-        onset_dict = {}
-        event_index = 0
-        self.hed_strings, definitions = get_assembled(self.data, self.data._sidecar, self.schema, extra_def_dicts=None,
-                                                      join_columns=True, shrink_defs=True, expand_defs=False)
-        for hed in self.hed_strings:
-            # to_remove = []  # tag_tuples = hed.find_tags(['Onset'], recursive=False, include_groups=1)
-            group_tuples = hed.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY},
-                                                   include_groups=2)
-            for tup in group_tuples:
-                group = tup[1]
-                anchor_tag = group.find_def_tags(recursive=False, include_groups=0)[0]
-                anchor = anchor_tag.extension.lower()
-                if anchor in onset_dict or tup[0].short_base_tag.lower() == "offset":
-                    temporal_event = onset_dict.pop(anchor)
-                    temporal_event.set_end(event_index, self.data.dataframe.loc[event_index, "onset"])
-                if tup[0] == DefTagNames.ONSET_KEY:
-                    new_event = TemporalEvent(tup[1], event_index, self.data.dataframe.loc[event_index, "onset"])
-                    self.event_list[event_index].append(new_event)
-                    onset_dict[anchor] = new_event
-                # to_remove.append(tup[1])
-            # hed.remove(to_remove)
-            event_index = event_index + 1
-
+        onset_dict = {}  # Temporary dictionary keeping track of temporal events that haven't ended yet.
+        for event_index, hed in enumerate(self.hed_strings):
+            self._extract_temporal_events(hed, event_index, onset_dict)
         # Now handle the events that extend to end of list
         for item in onset_dict.values():
-            item.set_end(len(self.data.dataframe), None)
+            item.set_end(len(self.onsets), None)
+
+    def _extract_temporal_events(self, hed, event_index, onset_dict):
+        """ Extract the temporal events and remove them from the other HED strings.
+
+        Parameters:
+            hed (HedString):  The assembled HedString at position event_index in the data.
+            event_index (int): The position of this string in the data.
+            onset_dict (dict):  Running dict that keeps track of temporal events that haven't yet ended.
+
+        Note:
+            This removes the events of temporal extent from the HED string.
+
+         """
+        if not hed:
+            return
+        group_tuples = hed.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY},
+                                               include_groups=2)
+        to_remove = []
+        for tup in group_tuples:
+            anchor_tag = tup[1].find_def_tags(recursive=False, include_groups=0)[0]
+            anchor = anchor_tag.extension.lower()
+            if anchor in onset_dict or tup[0].short_base_tag.lower() == DefTagNames.OFFSET_KEY:
+                temporal_event = onset_dict.pop(anchor)
+                temporal_event.set_end(event_index, self.onsets[event_index])
+            if tup[0] == DefTagNames.ONSET_KEY:
+                new_event = TemporalEvent(tup[1], event_index, self.onsets[event_index])
+                self.event_list[event_index].append(new_event)
+                onset_dict[anchor] = new_event
+            to_remove.append(tup[1])
+        hed.remove(to_remove)
 
     def _set_event_contexts(self):
         """ Creates an event context for each hed string.
 
         Notes:
-            The event context would be placed in a event context group, but is kept in a separate array without the
+            The event context would be placed in an event context group, but is kept in a separate array without the
             event context group or tag.
 
         """

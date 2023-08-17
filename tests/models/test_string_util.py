@@ -74,26 +74,26 @@ class TestHedStringSplitDef(unittest.TestCase):
 
     def check_split_def_tags(self, hed_string, def_names, expected_string, expected_string2):
         # Test case 1: remove_group=False
-        hed_string_copy = copy.deepcopy(hed_string)
-        remaining_hed, found_hed = split_def_tags(hed_string_copy, def_names, remove_group=False)
+        hed_string_copy1 = copy.deepcopy(hed_string)
+        remaining_hed1, found_hed1 = split_def_tags(hed_string_copy1, def_names, remove_group=False)
 
-        self.assertIsInstance(remaining_hed, HedString)
-        self.assertIsInstance(found_hed, HedString)
-        self.assertEqual(str(remaining_hed), expected_string)
+        self.assertIsInstance(remaining_hed1, HedString)
+        self.assertIsInstance(found_hed1, HedString)
+        self.assertEqual(str(remaining_hed1), expected_string)
 
-        self.assertTrue(all(tag.short_base_tag == "Def" for tag in found_hed.get_all_tags()))
-        self.assertTrue(all(tag.short_base_tag != "Def" for tag in remaining_hed.get_all_tags()))
+        self.assertTrue(all(tag.short_base_tag == "Def" for tag in found_hed1.get_all_tags()))
+        self.assertTrue(all(tag.short_base_tag != "Def" for tag in remaining_hed1.get_all_tags()))
 
         # Test case 2: remove_group=True
-        hed_string_copy = copy.deepcopy(hed_string)
-        remaining_hed, found_hed = split_def_tags(hed_string_copy, def_names, remove_group=True)
+        hed_string_copy2 = copy.deepcopy(hed_string)
+        remaining_hed2, found_hed2 = split_def_tags(hed_string_copy2, def_names, remove_group=True)
 
-        self.assertIsInstance(remaining_hed, HedString)
-        self.assertIsInstance(found_hed, HedString)
-        self.assertEqual(str(remaining_hed), expected_string2)
+        self.assertIsInstance(remaining_hed2, HedString)
+        self.assertIsInstance(found_hed2, HedString)
+        self.assertEqual(str(remaining_hed2), expected_string2)
 
         #self.assertTrue(all(tag.short_base_tag == "Def" for tag in found_hed.get_all_tags()))
-        self.assertTrue(all(tag.short_base_tag != "Def" for tag in remaining_hed.get_all_tags()))
+        self.assertTrue(all(tag.short_base_tag != "Def" for tag in remaining_hed2.get_all_tags()))
 
     def test_case_1(self):
         hed_string = HedString('Memorize,Action,def/CustomTag1', self.schema)

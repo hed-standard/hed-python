@@ -156,7 +156,6 @@ class TestSchemaComparison(unittest.TestCase):
                                           sections=None)
 
         self.assertIsInstance(diff_string, str)
-        print(diff_string)
 
         json_style_dict = compare_differences(schema1, schema2, attribute_filter=HedKey.InLibrary, output='dict',
                                               sections=None)

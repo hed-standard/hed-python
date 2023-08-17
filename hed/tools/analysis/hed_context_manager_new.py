@@ -4,28 +4,19 @@ from hed.errors.exceptions import HedFileError
 from hed.models import HedGroup, HedString
 from hed.schema import HedSchema, HedSchemaGroup
 from hed.tools.analysis.analysis_util import hed_to_str
+from hed.tools.analysis.temporal_event import TemporalEvent
 
 # TODO: [Refactor] clean up distinction between hed as strings versus objects -- maybe replace by event manager.
 # TODO: Implement insets
 
-class OnsetGroup:
-    def __init__(self, name, contents, start_index, end_index=None):
-        self.name = name
-        self.start_index = start_index
-        self.end_index = end_index
-        self.contents = hed_to_str(contents, remove_parentheses=True)
 
-    def __str__(self):
-        return f"{self.name}:[events {self.start_index}:{self.end_index} contents:{self.contents}]"
+class HedContextManagerNew:
 
-
-class HedContextManager:
-
-    def __init__(self, hed_strings, hed_schema):
+    def __init__(self, data, hed_schema):
         """ Create a context manager for an events file.
 
         Parameters:
-            hed_strings (list): A list of HedString objects to be managed.
+            data (TabularInput): A TabularInput representing a data frame.
             hed_schema (HedSchema):  A HedSchema
 
         :raises HedFileError:
@@ -37,11 +28,11 @@ class HedContextManager:
             For users wanting to use only Onset events, self.hed_strings contains the information.
 
         """
-
-        self.hed_strings = hed_strings
+        self.data = data
+        self.hed_schema = hed_schema
         if not isinstance(hed_schema, HedSchema) and not isinstance(hed_schema, HedSchemaGroup):
             raise ValueError("ContextRequiresSchema", f"Context manager must have a valid HedSchema of HedSchemaGroup")
-        self.hed_schema = hed_schema
+        self.event_manager = EventManager
         self.onset_list = []
         self.onset_count = 0
         self.offset_count = 0
@@ -138,5 +129,5 @@ class HedContextManager:
         elif is_offset:
             raise HedFileError("UnmatchedOffset", f"Unmatched {name} offset at event {event_index}", " ")
         if not is_offset:
-            onset_element = OnsetGroup(name, group, event_index)
+            onset_element = TemporalEvent(name, group, event_index)
             onset_dict[name] = onset_element
