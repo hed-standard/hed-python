@@ -167,8 +167,11 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
 # Import after hed_error decorators are defined.
 from hed.errors import error_messages
+from hed.errors import schema_error_messages
+
 # Intentional to make sure tools don't think the import is unused
 error_messages.mark_as_used = True
+schema_error_messages.mark_as_used = True
 
 
 class ErrorHandler:
@@ -545,6 +548,8 @@ def _add_single_error_to_dict(items, root=None, issue_to_add=None):
 
 def _error_dict_to_string(print_dict, add_link=True, level=0):
     output = ""
+    if print_dict is None:
+        return output
     for context, value in print_dict.items():
         if context == "children":
             for child in value:

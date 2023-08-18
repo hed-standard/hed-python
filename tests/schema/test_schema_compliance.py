@@ -17,3 +17,8 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(issues, list))
         self.assertTrue(len(issues) > 1)
 
+    def test_validate_schema_deprecated(self):
+        hed_schema = schema.load_schema_version("score_1.1.0")
+        issues = hed_schema.check_compliance()
+        self.assertTrue(isinstance(issues, list))
+        self.assertTrue(len(issues) > 1)

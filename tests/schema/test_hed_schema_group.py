@@ -15,7 +15,7 @@ class TestHedSchema(unittest.TestCase):
 
     def test_schema_compliance(self):
         warnings = self.hed_schema_group.check_compliance(True)
-        self.assertEqual(len(warnings), 10)
+        self.assertEqual(len(warnings), 14)
 
     def test_get_tag_entry(self):
         tag_entry = self.hed_schema_group.get_tag_entry("Event", schema_namespace="tl:")

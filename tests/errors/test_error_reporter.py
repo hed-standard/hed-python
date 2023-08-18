@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
 
     def test_filter_issues_by_severity(self):
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
         self.assertTrue(len(error_list) == 2)
         filtered_list = self.error_handler.filter_issues_by_severity(issues_list=error_list,
@@ -79,7 +79,7 @@ class Test(unittest.TestCase):
     def test_printable_issue_string(self):
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
 
         printable_issues = get_printable_issue_string(error_list)
@@ -99,7 +99,7 @@ class Test(unittest.TestCase):
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
         self.error_handler.push_error_context(ErrorContext.FILE_NAME, myfile)
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
 
         printable_issues = get_printable_issue_string(error_list, skip_filename=False)
