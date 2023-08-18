@@ -270,7 +270,7 @@ class HedTag:
 
     @property
     def expandable(self):
-        """Returns if this is expandable
+        """Returns what this expands to
 
            This is primarily used for Def/Def-expand tags at present.
 

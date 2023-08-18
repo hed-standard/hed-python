@@ -82,7 +82,7 @@ class Test(unittest.TestCase):
         self.assertTrue(local_filename)
 
     def test_get_hed_versions_all(self):
-        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, get_libraries=True)
+        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="all")
         self.assertIsInstance(cached_versions, dict)
         self.assertTrue(len(cached_versions) > 1)
 

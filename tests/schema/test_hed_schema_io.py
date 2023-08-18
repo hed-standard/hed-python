@@ -287,7 +287,7 @@ class TestHedSchemaMerging(unittest.TestCase):
                 os.remove(path2)
 
     def test_bad_schemas(self):
-        """These should all have one HED_SCHEMA_DUPLICATE_NODE issue"""
+        """These should all have one SCHEMA_DUPLICATE_NODE issue"""
         files = [
             load_schema(os.path.join(self.full_base_folder, "issues_tests/overlapping_tags1.mediawiki")),
             load_schema(os.path.join(self.full_base_folder, "issues_tests/overlapping_tags2.mediawiki")),
@@ -304,7 +304,7 @@ class TestHedSchemaMerging(unittest.TestCase):
             HedExceptions.SCHEMA_LIBRARY_INVALID,
             HedExceptions.SCHEMA_LIBRARY_INVALID,
             HedExceptions.SCHEMA_LIBRARY_INVALID,
-            SchemaErrors.HED_SCHEMA_DUPLICATE_NODE,
+            SchemaErrors.SCHEMA_DUPLICATE_NODE,
         ]
         for schema, expected_code in zip(files, expected_code):
             # print(schema.filename)
