@@ -45,12 +45,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(te.internal_group, HedGroup)
 
     def test_constructor_on_files(self):
-        hed_strings, def_dict = get_assembled(self.input_data, self.sidecar, self.schema,
-                                              extra_def_dicts=None, join_columns=True,
-                                              shrink_defs=True, expand_defs=False)
-        def_dict = self.sidecar.get_def_dict(self.schema)
-        onsets = self.input_data.dataframe["onset"].tolist()
-        manager1 = EventManager(hed_strings, onsets, def_dict)
+        manager1 = EventManager(self.input_data, self.schema)
         event_list = manager1.event_list
         for events in event_list:
             if not events:

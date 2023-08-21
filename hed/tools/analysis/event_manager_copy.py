@@ -1,19 +1,18 @@
 """ Manages events of temporal extent. """
 
-from hed.models.model_constants import DefTagNames
-from hed.models.df_util import get_assembled
 from hed.tools.analysis.temporal_event import TemporalEvent
+from hed.models.model_constants import DefTagNames
 
 
-class EventManager:
+class EventManagerCopy:
 
-    def __init__(self, input_data, hed_schema, extra_defs=None):
-        """ Create an event manager for an events file. Manages events of temporal extent.
+    def __init__(self, input_data, hed_schema, extra_def_dict=None):
+        """ Create an event manager for an events file. Manages events of temporal extent. This
 
         Parameters:
-            input_data (TabularInput): Represents an events file with its sidecar.
-            hed_schema (HedSchema): HED schema used in this
-            extra_defs (DefinitionDict):  Extra definitions not included in the input_data information.
+            hed_strings (list): A list of HED strings
+            onsets (list): A list of onset times that is the same length as hed_strings
+            def_dict (DefinitionDict):  Contains the definitions for this dataset.
 
         :raises HedFileError:
             - if there are any unmatched offsets.
@@ -23,24 +22,23 @@ class EventManager:
 
         """
 
-        self.event_list = [[] for _ in range(len(input_data.dataframe))]
-        self.hed_schema = hed_schema
-        self.def_dict = input_data.get_def_dict(hed_schema, extra_def_dicts=extra_defs)
-        self.onsets = input_data.dataframe['onset'].tolist()
-        self.hed_strings = None  # Remaining HED strings copy.deepcopy(hed_strings)
-        self.anchor_dict = {}
-        self._create_event_list(input_data)
+        self.event_list = [[] for _ in range(len(onsets))]
+        self.onsets = onsets
+        self.hed_strings = hed_strings ## copy.deepcopy(hed_strings)
+        self.def_dict = def_dict
+        self.anchor_dict ={}
+        self._create_event_list()
         self._create_anchor_list()
 
     # def iter_context(self):
     #     """ Iterate rows of context.
-    #
+    # 
     #     Yields:
     #         int:  position in the dataFrame
     #         HedString: Context
-    #
+    # 
     #     """
-    #
+    # 
     #     for index in range(len(self.contexts)):
     #         yield index, self.contexts[index]
 
@@ -59,7 +57,7 @@ class EventManager:
                 index_list.append(event)
                 self.anchor_dict[event.anchor] = index_list
 
-    def _create_event_list(self, input_data):
+    def _create_event_list(self):
         """ Populate the event_list with the events with temporal extent indexed by event number.
 
         :raises HedFileError:
@@ -68,16 +66,12 @@ class EventManager:
         Notes:
 
         """
-        hed_strings, def_dict = get_assembled(input_data, input_data._sidecar, self.hed_schema,
-                                              extra_def_dicts=None, join_columns=True,
-                                              shrink_defs=True, expand_defs=False)
         onset_dict = {}  # Temporary dictionary keeping track of temporal events that haven't ended yet.
-        for event_index, hed in enumerate(hed_strings):
+        for event_index, hed in enumerate(self.hed_strings):
             self._extract_temporal_events(hed, event_index, onset_dict)
         # Now handle the events that extend to end of list
         for item in onset_dict.values():
             item.set_end(len(self.onsets), None)
-        self.hed_strings = hed_strings
 
     def _extract_temporal_events(self, hed, event_index, onset_dict):
         """ Extract the temporal events and remove them from the other HED strings.

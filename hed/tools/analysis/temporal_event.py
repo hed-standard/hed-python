@@ -29,4 +29,4 @@ class TemporalEvent:
                 self.anchor = item.extension.lower()
 
     def __str__(self):
-        return f"{self.start_index}:{self.end_index} contents:{self.contents}"
+        return f"[{self.start_index}:{self.end_index}] anchor:{self.anchor} contents:{self.contents}"

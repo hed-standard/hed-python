@@ -25,19 +25,12 @@ class Test(unittest.TestCase):
         cls.schema = schema
 
     def test_constructor(self):
-        self.assertTrue(True)
-        hed_strings, def_dict = get_assembled(self.input_data, self.sidecar, self.schema,
-                                              extra_def_dicts=None, join_columns=True,
-                                              shrink_defs=True, expand_defs=False)
-        def_dict = self.sidecar.get_def_dict(self.schema)
-        onsets = self.input_data.dataframe["onset"].tolist()
-        manager1 = EventManager(hed_strings, onsets, def_dict)
+        manager1 = EventManager(self.input_data, self.schema)
         self.assertIsInstance(manager1.event_list, list)
-        self.assertEqual(len(manager1.event_list), len(onsets))
+        self.assertEqual(len(manager1.event_list), len(self.input_data.dataframe))
         self.assertEqual(len(manager1.event_list[0]), 2)
         self.assertIsInstance(manager1.hed_strings, list)
-        self.assertEqual(len(manager1.hed_strings), len(onsets))
-
+        self.assertEqual(len(manager1.hed_strings), len(self.input_data.dataframe))
         # self.assertEqual(len(manager1.event_list), len(self.input_data.dataframe))
         # event_count = 0
         # for index, item in enumerate(manager1.event_list):
