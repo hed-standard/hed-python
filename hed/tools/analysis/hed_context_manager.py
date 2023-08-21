@@ -45,7 +45,6 @@ class HedContextManager:
         self.onset_list = []
         self.onset_count = 0
         self.offset_count = 0
-        self.contexts = []
         self._create_onset_list()
         self._set_event_contexts()
 

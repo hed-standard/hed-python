@@ -32,17 +32,18 @@ def df_to_hed(dataframe, description_tag=True):
         description_tag (bool):  If True description tag is included.
 
     Returns:
-        dict:  A dictionary compatible compatible with BIDS JSON tabular file that includes HED.
+        dict:  A dictionary compatible with BIDS JSON tabular file that includes HED.
 
     Notes:
         - The DataFrame must have the columns with names: column_name, column_value, description, and HED.
 
     """
-    missing_cols = check_df_columns(dataframe)
+    df = dataframe.fillna('n/a')
+    missing_cols = check_df_columns(df)
     if missing_cols:
         raise HedFileError("RequiredColumnsMissing", f"Columns {str(missing_cols)} are missing from dataframe", "")
     hed_dict = {}
-    for index, row in dataframe.iterrows():
+    for index, row in df.iterrows():
         if row['HED'] == 'n/a' and row['description'] == 'n/a':
             continue
         if row['column_value'] == 'n/a':
