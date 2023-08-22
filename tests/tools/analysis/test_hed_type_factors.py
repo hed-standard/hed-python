@@ -8,7 +8,7 @@ from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.hed_context_manager import HedContextManager
-from hed.tools.analysis.hed_type_values import HedTypeValues
+from hed.tools.analysis.hed_types import HedTypes
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 from hed.models.df_util import get_assembled
 
@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
         var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from strings")
-        self.assertEqual(len(var_manager._type_value_map), 3,
+        self.assertEqual(len(var_manager._type_map), 3,
                          "Constructor should have right number of type_variables if multiple")
         var_fact1 = var_manager.get_type_value_factors('var2')
         self.assertIsInstance(var_fact1, HedTypeFactors)
@@ -118,7 +118,7 @@ class Test(unittest.TestCase):
         var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from strings")
-        self.assertEqual(len(var_manager._type_value_map), 3,
+        self.assertEqual(len(var_manager._type_map), 3,
                          "Constructor should have right number of type_variables if multiple")
         for variable in var_manager.get_type_value_names():
             var_sum = var_manager.get_type_value_factors(variable)
@@ -129,7 +129,7 @@ class Test(unittest.TestCase):
         var_manager = HedTypeValues(HedContextManager(self.test_strings2, self.schema), self.defs, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from strings")
-        self.assertEqual(len(var_manager._type_value_map), 3,
+        self.assertEqual(len(var_manager._type_map), 3,
                          "Constructor should have right number of type_variables if multiple")
 
         for variable in var_manager.get_type_value_names():
@@ -139,11 +139,11 @@ class Test(unittest.TestCase):
             self.assertIsInstance(factors, pd.DataFrame, "get_factors contains dataframe.")
             self.assertEqual(len(factors), var_sum.number_elements,
                              "get_factors has factors of same length as number of elements")
-            if not var_manager._type_value_map[variable].levels:
+            if not var_manager._type_map[variable].levels:
                 self.assertEqual(len(factors.columns), 1)
             else:
                 self.assertEqual(len(factors.columns), summary["levels"], 'get_factors has factors levels')
-                self.assertEqual(len(factors.columns), len(var_manager._type_value_map[variable].levels))
+                self.assertEqual(len(factors.columns), len(var_manager._type_map[variable].levels))
 
     def test_count_events(self):
         list1 = [0, 2, 6, 1, 2, 0, 0]

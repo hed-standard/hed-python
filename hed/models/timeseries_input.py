@@ -17,7 +17,7 @@ class TimeseriesInput(BaseInput):
             name (str): The name to display for this file for error purposes.
 
         Notes:
-             - The extra_def_dicts are external definitions that override the ones in the object.
+             - The extra_def_dicts are external type_defs that override the ones in the object.
 
         """
 

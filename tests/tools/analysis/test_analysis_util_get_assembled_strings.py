@@ -1,9 +1,7 @@
 import os
 import unittest
 from hed import schema as hedschema
-from hed.models.hed_string import HedString
 from hed.models.tabular_input import TabularInput
-# from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 # noinspection PyBroadException

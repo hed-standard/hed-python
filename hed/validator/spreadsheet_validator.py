@@ -27,7 +27,7 @@ class SpreadsheetValidator:
         Parameters:
             data (BaseInput or pd.DataFrame): Input data to be validated.
                 If a dataframe, it is assumed to be assembled already.
-            def_dicts(list of DefDict or DefDict): all definitions to use for validation
+            def_dicts(list of DefDict or DefDict): all type_defs to use for validation
             name(str): The name to report errors from this file as
             error_handler (ErrorHandler): Error context to use.  Creates a new one if None
         Returns:

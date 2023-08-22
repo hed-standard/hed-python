@@ -23,7 +23,7 @@ class ColumnMapper:
         Parameters:
             sidecar (Sidecar): A sidecar to gather column data from.
             tag_columns: (list):  A list of ints or strings containing the columns that contain the HED tags.
-                Sidecar column definitions will take precedent if there is a conflict with tag_columns.
+                Sidecar column type_defs will take precedent if there is a conflict with tag_columns.
             column_prefix_dictionary (dict): Dictionary with keys that are column numbers/names and values are HED tag
                 prefixes to prepend to the tags in that column before processing.
             optional_tag_columns (list): A list of ints or strings containing the columns that contain
@@ -383,7 +383,7 @@ class ColumnMapper:
         """ Return def dicts from every column description.
 
         Parameters:
-            hed_schema (Schema): A HED schema object to use for extracting definitions.
+            hed_schema (Schema): A HED schema object to use for extracting type_defs.
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:

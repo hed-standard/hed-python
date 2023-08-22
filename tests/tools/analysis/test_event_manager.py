@@ -2,7 +2,6 @@ import os
 import unittest
 
 from hed.models.sidecar import Sidecar
-from hed.models.df_util import get_assembled
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager

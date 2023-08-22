@@ -1,40 +1,39 @@
-""" Manages definitions associated with a type such as condition-variable. """
+""" Manages type_defs associated with a type such as condition-variable. """
 
 from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
 
 
-class HedTypeDefinitions:
+class HedTypeDefs:
     """
 
     Properties:
         def_map (dict):  keys are definition names, values are dict {type_values, description, tags}
-                         Example: A definition 'famous-face-cond' with contents 
-                         `(Condition-variable/Face-type,Description/A face that should be recognized by the participants,(Image,(Face,Famous)))`
+                         Example: A definition 'famous-face-cond' with contents
+                         `(Condition-variable/Face-type,Description/A face that should be recognized by the
+                                                   participants,(Image,(Face,Famous)))`
                          would have type_values ['face_type'].  All items are strings not objects.
 
 
     """
-    def __init__(self, definitions, hed_schema, type_tag='condition-variable'):
+    def __init__(self, definitions, type_tag='condition-variable'):
         """ Create a definition manager for a type of variable.
 
         Parameters:
             definitions (dict or DefinitionDict): A dictionary of DefinitionEntry objects.
-            hed_schema (Hedschema or HedSchemaGroup): The schema used for parsing.
             type_tag (str): Lower-case HED tag string representing the type managed.
 
         """
 
         self.type_tag = type_tag.lower()
-        self.hed_schema = hed_schema
         if isinstance(definitions, DefinitionDict):
             self.definitions = definitions.defs
         elif isinstance(definitions, dict):
             self.definitions = definitions
         else:
             self.definitions = {}
-        self.def_map = self._extract_def_map()   
-        self.type_map = self._extract_type_map() #
+        self.def_map = self._extract_def_map()
+        self.type_map = self._extract_type_map() 
 
     def get_type_values(self, item):
         """ Return a list of type_tag values in item.
@@ -64,7 +63,7 @@ class HedTypeDefinitions:
         return def_map
 
     def _extract_type_map(self):
-        """ Extract the definitions associated with each type value and add them to the dictionary. """
+        """ Extract the type_defs associated with each type value and add them to the dictionary. """
 
         type_map = {}
         for def_name, def_values in self.def_map.items():
@@ -122,7 +121,7 @@ class HedTypeDefinitions:
             names = [tag.extension.lower() for tag in item.get_all_tags() if 'def' in tag.tag_terms]
         if no_value:
             for index, name in enumerate(names):
-                name, name_value = HedTypeDefinitions.split_name(name)
+                name, name_value = HedTypeDefs.split_name(name)
                 names[index] = name
         return names
 

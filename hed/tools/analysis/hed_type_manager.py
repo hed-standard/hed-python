@@ -1,28 +1,25 @@
-""" Manager for type factors and type definitions. """
+""" Manager for type factors and type type_defs. """
 
 import pandas as pd
 import json
-from hed.tools.analysis.hed_type_values import HedTypeValues
+from hed.tools.analysis.hed_types import HedTypes
 from hed.tools.analysis.hed_context_manager import HedContextManager
 
 
 class HedTypeManager:
 
-    def __init__(self, hed_strings, hed_schema, definitions):
+    def __init__(self, event_manager):
         """ Create a variable manager for one tabular file for all type variables.
 
         Parameters:
-            hed_strings (list): A list of HED strings.
-            hed_schema (HedSchema or HedSchemaGroup): The HED schema to use for processing.
-            definitions (dict): A dictionary of DefinitionEntry objects.
+            event_manager (EventManager): an event manager for the tabular file.
 
         :raises HedFileError:
-            - On errors such as unmatched onsets or missing definitions.
+            - On errors such as unmatched onsets or missing type_defs.
 
         """
 
-        self.definitions = definitions
-        self.context_manager = HedContextManager(hed_strings, hed_schema)
+        self.event_manager = event_manager
         self._type_tag_map = {}   # a map of type tag into HedTypeValues objects
 
     @property
@@ -33,7 +30,7 @@ class HedTypeManager:
         if type_name.lower() in self._type_tag_map:
             return
         self._type_tag_map[type_name.lower()] = \
-            HedTypeValues(self.context_manager, self.definitions, 'run-01', type_tag=type_name)
+            HedTypes(self.event_manager, 'run-01', type_tag=type_name)
 
     def get_factor_vectors(self, type_tag, type_values=None, factor_encoding="one-hot"):
         """ Return a DataFrame of factor vectors for the indicated HED tag and values

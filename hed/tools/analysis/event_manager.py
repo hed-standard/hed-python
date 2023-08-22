@@ -13,7 +13,7 @@ class EventManager:
         Parameters:
             input_data (TabularInput): Represents an events file with its sidecar.
             hed_schema (HedSchema): HED schema used in this
-            extra_defs (DefinitionDict):  Extra definitions not included in the input_data information.
+            extra_defs (DefinitionDict):  Extra type_defs not included in the input_data information.
 
         :raises HedFileError:
             - if there are any unmatched offsets.
@@ -25,12 +25,13 @@ class EventManager:
 
         self.event_list = [[] for _ in range(len(input_data.dataframe))]
         self.hed_schema = hed_schema
+        self.input_data = input_data
         self.def_dict = input_data.get_def_dict(hed_schema, extra_def_dicts=extra_defs)
         self.onsets = input_data.dataframe['onset'].tolist()
         self.hed_strings = None  # Remaining HED strings copy.deepcopy(hed_strings)
-        self.anchor_dict = {}
+        # self.anchor_dict = {}  # Dictionary of definition names to list of TemporalEvent
         self._create_event_list(input_data)
-        self._create_anchor_list()
+        # self._create_anchor_dict()
 
     # def iter_context(self):
     #     """ Iterate rows of context.
@@ -44,23 +45,26 @@ class EventManager:
     #     for index in range(len(self.contexts)):
     #         yield index, self.contexts[index]
 
-    def _create_anchor_list(self):
-        """ Populate the dictionary of def names to list of temporal events.
-
-        :raises HedFileError:
-            - If the hed_strings contain unmatched offsets.
-
-        Notes:
-
-        """
-        for index, events in enumerate(self.event_list):
-            for event in events:
-                index_list = self.anchor_dict.get(event.anchor, [])
-                index_list.append(event)
-                self.anchor_dict[event.anchor] = index_list
+    # def _create_anchor_dict(self):
+    #     """ Populate the dictionary of def names to list of temporal events.
+    #
+    #     :raises HedFileError:
+    #         - If the hed_strings contain unmatched offsets.
+    #
+    #     Notes:
+    #
+    #     """
+    #     for events in self.event_list:
+    #         for event in events:
+    #             elist = self.anchor_dict.get(event.anchor, [])
+    #             elist.append(event)
+    #             self.anchor_dict[event.anchor] = elist
 
     def _create_event_list(self, input_data):
         """ Populate the event_list with the events with temporal extent indexed by event number.
+
+        Parameters:
+            input_data (TabularInput): A tabular input that includes its relevant sidecar.
 
         :raises HedFileError:
             - If the hed_strings contain unmatched offsets.
@@ -109,7 +113,7 @@ class EventManager:
             to_remove.append(tup[1])
         hed.remove(to_remove)
 
-    def _set_event_contexts(self):
+    # def _set_event_contexts(self):
         """ Creates an event context for each hed string.
 
         Notes:
@@ -124,7 +128,7 @@ class EventManager:
         # for i in range(len(self.hed_strings)):
         #     contexts[i] = HedString(",".join(contexts[i]), hed_schema=self.hed_schema)
         # self.contexts = contexts
-        print("_set_event_contexts not implemented yet")
+        
 
     def _update_onset_list(self, group, onset_dict, event_index):
         """ Process one onset or offset group to create onset_list.

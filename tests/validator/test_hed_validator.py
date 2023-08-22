@@ -107,7 +107,7 @@ class Test(unittest.TestCase):
 
     def test_complex_file_validation_invalid_definitions_removed(self):
         # todo: update this/remove
-        # This verifies definitions are being removed from sidecar strings before being added, or it will produce
+        # This verifies type_defs are being removed from sidecar strings before being added, or it will produce
         # extra errors.
         schema_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                     '../data/validator_tests/bids_schema.mediawiki'))

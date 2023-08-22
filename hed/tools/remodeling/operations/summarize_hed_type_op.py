@@ -3,7 +3,7 @@
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
 from hed.models.df_util import get_assembled
-from hed.tools.analysis.hed_type_values import HedTypeValues
+from hed.tools.analysis.hed_types import HedTypes
 from hed.tools.analysis.hed_type_counts import HedTypeCounts
 from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -107,11 +107,11 @@ class HedTypeSummary(BaseSummary):
         hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'],
                                                  extra_def_dicts=None, join_columns=True, expand_defs=False)
         context_manager = HedContextManager(hed_strings, new_info['schema'])
-        type_values = HedTypeValues(context_manager, definitions, new_info['name'], type_tag=self.type_tag)
+        type_values = HedTypes(context_manager, definitions, new_info['name'], type_tag=self.type_tag)
 
         counts = HedTypeCounts(new_info['name'], self.type_tag)
         counts.update_summary(type_values.get_summary(), type_values.total_events, new_info['name'])
-        counts.add_descriptions(type_values.definitions)
+        counts.add_descriptions(type_values.type_defs)
         self.summary_dict[new_info["name"]] = counts
 
     def get_details_dict(self, counts):

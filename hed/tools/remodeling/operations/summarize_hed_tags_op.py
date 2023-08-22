@@ -114,7 +114,7 @@ class HedTagSummary(BaseSummary):
         hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'],
                                                  extra_def_dicts=None, join_columns=True,
                                                  shrink_defs=False, expand_defs=True)
-        # definitions = input_data.get_definitions().gathered_defs
+        # type_defs = input_data.get_definitions().gathered_defs
         for hed in hed_strings:
             counts.update_event_counts(hed, new_info['name'])
         self.summary_dict[new_info["name"]] = counts

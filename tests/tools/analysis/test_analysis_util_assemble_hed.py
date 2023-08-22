@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         self.assertNotEqual(first_str1.find('Def/'), -1, "assemble_hed with no def expand has Def tags")
         self.assertEqual(first_str1.find('Def-expand'), -1,
                          "assemble_hed with no def expand does not have Def-expand tags")
-        self.assertIsInstance(dict1.defs, dict, "hed_assemble returns a dictionary of definitions")
+        self.assertIsInstance(dict1.defs, dict, "hed_assemble returns a dictionary of type_defs")
         self.assertEqual(len(dict1.defs), 17, "hed_assemble definition dictionary has the right number of elements.")
 
     def test_assemble_hed_included_expand(self):
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
         self.assertNotEqual(first_str1.find('Def/'), -1, "assemble_hed with no def expand has Def tags")
         self.assertEqual(first_str1.find('Def-expand'), -1,
                          "assemble_hed with no def expand does not have Def-expand tags")
-        self.assertIsInstance(dict1, DefinitionDict, "hed_assemble returns a dictionary of definitions")
+        self.assertIsInstance(dict1, DefinitionDict, "hed_assemble returns a dictionary of type_defs")
         self.assertEqual(len(dict1.defs), 17, "hed_assemble definition dictionary has the right number of elements.")
 
     def test_assemble_hed_no_included_expand(self):
@@ -95,7 +95,7 @@ class Test(unittest.TestCase):
         self.assertEqual(first_str2.find('Def-expand/'), -1, "assemble_hed with def expand has Def-expand tags")
 
     def test_search_strings(self):
-        hed_strings, dict1 = df_util.get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None, 
+        hed_strings, dict1 = df_util.get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
                                                    join_columns=True, shrink_defs=False, expand_defs=True)
         queries1 = ["sensory-event"]
         query_names1 = ["sensory"]

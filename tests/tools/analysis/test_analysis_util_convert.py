@@ -1,8 +1,7 @@
 import os
 import unittest
-from pandas import DataFrame
 from hed import schema as hedschema
-from hed.models import HedTag, HedString, HedGroup
+from hed.models import HedTag, HedString
 from hed.tools.analysis.analysis_util import hed_to_str
 
 
@@ -43,7 +42,6 @@ class Test(unittest.TestCase):
         with self.assertRaises(TypeError) as context:
             hed_to_str(dict1)
         self.assertEqual(context.exception.args[0], "ContentsWrongClass")
-
 
     def test_hed_to_str_obj(self):
         str_obj1 = HedString('Label/Cond1', self.hed_schema)
@@ -105,6 +103,7 @@ class Test(unittest.TestCase):
         str3 = hed_to_str(str_obj3, remove_parentheses=True)
         self.assertIsInstance(str3, str)
         self.assertEqual(str3, 'Label/Cond1')
+
 
 if __name__ == '__main__':
     unittest.main()

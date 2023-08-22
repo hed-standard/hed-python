@@ -82,7 +82,7 @@ class HedTagCounts:
         Parameters:
             hed_string_obj (HedString): The HED string whose tags should be counted.
             file_name (str): The name of the file corresponding to these counts.
-            definitions (dict): The definitions associated with the HED string.
+            definitions (dict): The type_defs associated with the HED string.
 
         """
         if file_name not in self.files:

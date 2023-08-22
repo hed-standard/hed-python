@@ -12,7 +12,6 @@ from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, 
     generate_sidecar_entry
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.util.io_util import get_file_list
-from hed.validator import HedValidator
 
 
 # noinspection PyBroadException

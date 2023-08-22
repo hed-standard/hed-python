@@ -2,14 +2,14 @@ import os
 import unittest
 from pandas import DataFrame
 from hed.errors.exceptions import HedFileError
-from hed.models import DefinitionEntry
+from hed.models import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.analysis.hed_context_manager import HedContextManager
-from hed.tools.analysis.hed_type_values import HedTypeValues
+from hed.tools.analysis.event_manager import EventManager
+from hed.tools.analysis.hed_types import HedTypes
 from hed.models.df_util import get_assembled
 
 
@@ -18,35 +18,41 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.1.0")
-        cls.test_strings1 = ["Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
-                             "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4",
-                             '(Def/Cond1, Offset)',
-                             'White, Black, Condition-variable/Wonder, Condition-variable/Fast',
-                             '',
-                             '(Def/Cond2, Onset)',
-                             '(Def/Cond3/4.3, Onset)',
-                             'Arm, Leg, Condition-variable/Fast']
+        # Set up the definition dictionary
+        defs = [HedString('(Definition/Cond1, (Condition-variable/Var1, Circle, Square))', hed_schema=schema),
+                HedString('(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))', 
+                          hed_schema=schema),
+                HedString('(Definition/Cond3, (Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross))',
+                          hed_schema=schema),
+                HedString('(Definition/Cond4, (Condition-variable, Apple, Banana))', hed_schema=schema),
+                HedString('(Definition/Cond5, (Condition-variable/Lumber, Apple, Banana))', hed_schema=schema),
+                HedString('(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Apple, Banana))', 
+                          hed_schema=schema)]
+        def_dict = DefinitionDict()
+        for value in defs:
+            def_dict.check_for_definitions(value)
+
+        test_strings1 = ["Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset)",
+                         "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4",
+                         "(Def/Cond1, Offset)",
+                         "White, Black, Condition-variable/Wonder, Condition-variable/Fast",
+                         "",
+                         "(Def/Cond2, Onset)",
+                         "(Def/Cond3/4.3, Onset)",
+                         "Arm, Leg, Condition-variable/Fast"]
+        test_onsets1 = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+        df1 = DataFrame(test_onsets1, columns=['onset'])
+        df1['HED'] = test_strings1
+        input_data = TabularInput(df1)
+        event_man1 = EventManager(input_data, schema, extra_defs=def_dict)
+        event_man1.def_dict = def_dict
+        cls.event_man1 = event_man1
         cls.test_strings2 = ["Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
                              "Yellow",
                              "Def/Cond2, (Def/Cond6/4, Onset)",
                              "Def/Cond2, Def/Cond6/5.2 (Def/Cond6/7.8, Offset)",
                              "Def/Cond2, Def/Cond6/4"]
         cls.test_strings3 = ['(Def/Cond3, Offset)']
-
-        def1 = HedString('(Condition-variable/Var1, Circle, Square)', hed_schema=schema)
-        def2 = HedString('(condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere)', hed_schema=schema)
-        def3 = HedString('(Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross)',
-                         hed_schema=schema)
-        def4 = HedString('(Condition-variable, Apple, Banana)', hed_schema=schema)
-        def5 = HedString('(Condition-variable/Lumber, Apple, Banana)', hed_schema=schema)
-        def6 = HedString('(Condition-variable/Lumber, Label/#, Apple, Banana)', hed_schema=schema)
-        cls.defs = {'Cond1': DefinitionEntry('Cond1', def1, False, None),
-                    'Cond2': DefinitionEntry('Cond2', def2, False, None),
-                    'Cond3': DefinitionEntry('Cond3', def3, True, None),
-                    'Cond4': DefinitionEntry('Cond4', def4, False, None),
-                    'Cond5': DefinitionEntry('Cond5', def5, False, None),
-                    'Cond6': DefinitionEntry('Cond6', def6, True, None)
-                    }
 
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/bids_tests/eeg_ds003645s_hed'))
@@ -56,29 +62,23 @@ class Test(unittest.TestCase):
         cls.schema = schema
 
     def test_constructor(self):
-        strings1 = [HedString(hed, hed_schema=self.schema) for hed in self.test_strings1]
-        con_man = HedContextManager(strings1, hed_schema=self.schema)
-        type_var = HedTypeValues(con_man, self.defs, 'run-01')
-        self.assertIsInstance(type_var, HedTypeValues,
-                              "Constructor should create a HedTypeManager from strings")
-        self.assertEqual(len(type_var._type_value_map), 8,
+        type_var = HedTypes(self.event_man1, 'test-it')
+        self.assertIsInstance(type_var, HedTypes,"Constructor should create a HedTypes from an event manager")
+        self.assertEqual(len(type_var._type_map), 8,
                          "Constructor ConditionVariables should have the right length")
 
     def test_constructor_from_tabular_input(self):
         sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
         input_data = TabularInput(self.events_path, sidecar=sidecar1, name="face_sub1_events")
-        test_strings1, definitions = get_assembled(input_data, sidecar1, self.schema, extra_def_dicts=None,
-                                                   join_columns=True, shrink_defs=True, expand_defs=False)
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema), definitions, 'run-01')
-        self.assertIsInstance(var_manager, HedTypeValues,
-                              "Constructor should create a HedTypeManager from a tabular input")
+        event_man = EventManager(input_data, self.schema)
+        var_man = HedTypes(event_man, 'face')
+        self.assertIsInstance(var_man, HedTypes,"Constructor should create a HedTypeManager from a tabular input")
 
     def test_constructor_variable_caps(self):
         sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
         input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
-        test_strings1, definitions = get_assembled(input_data, sidecar1, self.schema, extra_def_dicts=None,
-                                                   join_columns=True, shrink_defs=True, expand_defs=False)
-        var_manager = HedTypeValues(HedContextManager(test_strings1, self.schema),
+        event_man = EventManager(input_data, self.schema)
+        var_manager = HedTypes(HedContextManager(test_strings1, self.schema),
                                     definitions, 'run-01', type_tag="Condition-variable")
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager variable caps")
@@ -98,7 +98,7 @@ class Test(unittest.TestCase):
         var_manager = HedTypeValues(HedContextManager(hed_strings, self.schema), self.defs, 'run-01')
         self.assertIsInstance(var_manager, HedTypeValues,
                               "Constructor should create a HedTypeManager from strings")
-        self.assertEqual(len(var_manager._type_value_map), 3,
+        self.assertEqual(len(var_manager._type_map), 3,
                          "Constructor should have right number of type_variables if multiple")
 
     def test_constructor_unmatched(self):
@@ -146,7 +146,7 @@ class Test(unittest.TestCase):
     def test_extract_definition_variables(self):
         hed_strings = [HedString(hed, self.schema) for hed in self.test_strings1]
         var_manager = HedTypeValues(HedContextManager(hed_strings, self.schema), self.defs, 'run-01')
-        var_levels = var_manager._type_value_map['var3'].levels
+        var_levels = var_manager._type_map['var3'].levels
         self.assertNotIn('cond3/7', var_levels,
                          "_extract_definition_variables before extraction def/cond3/7 not in levels")
         tag = HedTag("Def/Cond3/7", hed_schema=self.schema)

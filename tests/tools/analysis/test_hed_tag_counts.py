@@ -78,7 +78,7 @@ class Test(unittest.TestCase):
         hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.hed_schema,
                                                  extra_def_dicts=None, join_columns=True,
                                                  shrink_defs=False, expand_defs=True)
-        # definitions = input_data.get_definitions().gathered_defs
+        # type_defs = input_data.get_definitions().gathered_defs
         for hed in hed_strings:
             counts.update_event_counts(hed, 'run-1')
         self.assertIsInstance(counts.tag_dict, dict)

@@ -36,18 +36,25 @@ class Test(unittest.TestCase):
         tab1 = TabularSummary()
         stern_df = get_new_dataframe(self.stern_map_path)
         tab1.update(stern_df)
-        sum_info = tab1.get_summary()
-        new_tab1 = TabularSummary.extract_summary(sum_info)
+        sum_info1 = tab1.get_summary()
+        self.assertIsInstance(sum_info1, dict)
+        self.assertEqual(len(sum_info1['Categorical columns']), 4)
+        new_tab1 = TabularSummary.extract_summary(sum_info1)
+        self.assertIsInstance(new_tab1, TabularSummary)
         tab2 = TabularSummary(value_cols=['letter'], skip_cols=['event_type'])
+        sum_info2 = tab2.get_summary()
+        self.assertIsInstance(sum_info2, dict)
+        new_tab2 = TabularSummary.extract_summary(sum_info2)
+        self.assertIsInstance(new_tab2, TabularSummary)
         tabular_info = {}
-        new_tab = TabularSummary.extract_summary(tabular_info)
-        self.assertIsInstance(new_tab, TabularSummary)
+        new_tab3 = TabularSummary.extract_summary(tabular_info)
+        self.assertIsInstance(new_tab3, TabularSummary)
 
     def test_extract_summary_empty(self):
         tabular_info = {}
         new_tab = TabularSummary.extract_summary(tabular_info)
         self.assertIsInstance(new_tab, TabularSummary)
-        
+
     def test_get_number_unique_values(self):
         dict1 = TabularSummary()
         wh_df = get_new_dataframe(self.wh_events_path)
@@ -218,7 +225,7 @@ class Test(unittest.TestCase):
             tab.update(df, name=name)
             self.assertEqual(tab.total_events, 200)
             self.assertEqual(tab.total_files, 1)
-            tab_all.update_summary(tab) 
+            tab_all.update_summary(tab)
         self.assertEqual(len(files_bids), tab_all.total_files)
         self.assertEqual(len(files_bids)*200, tab_all.total_events)
 

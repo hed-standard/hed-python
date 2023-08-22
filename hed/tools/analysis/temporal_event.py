@@ -2,7 +2,7 @@ from hed.models import HedTag, HedGroup
 
 
 class TemporalEvent:
-    """ Represents an event process. 
+    """ Represents an event process with starting and ending.
     
     Note:  the contents must have a De
     """
