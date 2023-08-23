@@ -2,6 +2,8 @@ from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.hed_schema_constants import HedKey
 
 import inflect
+import copy
+
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -133,6 +135,20 @@ class HedSchemaEntry:
         return {key: value for key, value in self.attributes.items()
                 if not self._unknown_attributes or key not in self._unknown_attributes}
 
+    # Give a default deep copy that excludes the _section attribute
+    def __deepcopy__(self, memo):
+        # Create a new instance
+        new_obj = self.__class__.__new__(self.__class__)
+        memo[id(self)] = new_obj  # Add the new object to the memo to handle cyclic references
+
+        for k, v in self.__dict__.items():
+            if k != "_section":
+                new_val = copy.deepcopy(v, memo)
+            else:
+                new_val = v
+            setattr(new_obj, k, new_val)
+        return new_obj
+
 
 class UnitClassEntry(HedSchemaEntry):
     """ A single unit class entry in the HedSchema. """
@@ -169,7 +185,11 @@ class UnitClassEntry(HedSchemaEntry):
             for derived_unit in new_derivative_units:
                 derivative_units[derived_unit] = unit_entry
                 for modifier in unit_entry.unit_modifiers:
-                    derivative_units[modifier.name + derived_unit] = unit_entry
+                    new_entry = copy.deepcopy(unit_entry)
+                    derivative_units[modifier.name + derived_unit] = new_entry
+                    new_entry.unit_class_name = derived_unit
+                    new_entry.attributes["conversionFactor"] = new_entry.get_conversion_factor(modifier_entry=modifier)
+
         self.derivative_units = derivative_units
 
     def __eq__(self, other):
@@ -182,7 +202,6 @@ class UnitClassEntry(HedSchemaEntry):
 
 class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.unit_class_name = None
@@ -196,6 +215,19 @@ class UnitEntry(HedSchemaEntry):
 
         """
         self.unit_modifiers = schema._get_modifiers_for_unit(self.name)
+
+    def get_conversion_factor(self, modifier_entry):
+        """Returns the conversion factor from combining this unit with the specified modifier
+
+        Parameters:
+            modifier_entry (HedSchemaEntry): The modifier to apply
+
+        Returns:
+            conversion_factor(float): Defaults to 1.0 conversion factor if not present on unit and modifier.
+        """
+        base_factor = float(self.attributes.get("conversionFactor", "1.0").replace("^", "e"))
+        modifier_factor = float(modifier_entry.attributes.get("conversionFactor", "1.0").replace("^", "e"))
+        return base_factor * modifier_factor
 
 
 class HedTagEntry(HedSchemaEntry):
