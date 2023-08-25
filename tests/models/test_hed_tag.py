@@ -1,10 +1,16 @@
 from hed.models.hed_tag import HedTag
 from tests.validator.test_tag_validator_base import TestHedBase
 from hed.schema import HedKey
+from hed import load_schema_version
+
+from tests.schema import util_create_schemas
 
 
 class TestValidatorUtilityFunctions(TestHedBase):
-    schema_file = '../data/schema_tests/HED8.0.0t.xml'
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_schema = load_schema_version("8.2.0")
 
     def test_if_tag_exists(self):
         valid_tag1 = HedTag('Left-handed', hed_schema=self.hed_schema)
@@ -37,7 +43,9 @@ class TestValidatorUtilityFunctions(TestHedBase):
 
 
 class TestSchemaUtilityFunctions(TestHedBase):
-    schema_file = '../data/schema_tests/HED8.0.0t.xml'
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_schema = load_schema_version("8.2.0")
 
     def test_correctly_determine_tag_takes_value(self):
         value_tag1 = HedTag('Distance/35 px', hed_schema=self.hed_schema)
@@ -65,14 +73,14 @@ class TestSchemaUtilityFunctions(TestHedBase):
         #                          schema=self.schema)
         no_unit_class_tag = HedTag('RGB-red/0.5', hed_schema=self.hed_schema)
         no_value_tag = HedTag('Black', hed_schema=self.hed_schema)
-        unit_class_tag1_result = unit_class_tag1.get_unit_class_default_unit()
-        # unit_class_tag2_result = unit_class_tag2.get_unit_class_default_unit()
-        no_unit_class_tag_result = no_unit_class_tag.get_unit_class_default_unit()
-        no_value_tag_result = no_value_tag.get_unit_class_default_unit()
-        self.assertEqual(unit_class_tag1_result, 's')
+        unit_class_tag1_result = unit_class_tag1.default_unit
+        # unit_class_tag2_result = unit_class_tag2.default_unit
+        no_unit_class_tag_result = no_unit_class_tag.default_unit
+        no_value_tag_result = no_value_tag.default_unit
+        self.assertEqual(unit_class_tag1_result.name, 's')
         # self.assertEqual(unit_class_tag2_result, '$')
-        self.assertEqual(no_unit_class_tag_result, '')
-        self.assertEqual(no_value_tag_result, '')
+        self.assertEqual(no_unit_class_tag_result, None)
+        self.assertEqual(no_value_tag_result, None)
 
     def test_correctly_determine_tag_unit_classes(self):
         unit_class_tag1 = HedTag('distance/35 px', hed_schema=self.hed_schema)
@@ -97,13 +105,14 @@ class TestSchemaUtilityFunctions(TestHedBase):
         unit_class_tag1_result = unit_class_tag1.get_tag_unit_class_units()
         # unit_class_tag2_result = unit_class_tag2.get_tag_unit_class_units()
         no_unit_class_tag_result = no_unit_class_tag.get_tag_unit_class_units()
-        self.assertCountEqual(unit_class_tag1_result, [
+        self.assertCountEqual(sorted(unit_class_tag1_result), sorted([
             'inch',
             'm',
             'foot',
             'metre',
+            'meter',
             'mile',
-        ])
+        ]))
         # self.assertCountEqual(unit_class_tag2_result, [
         #     'dollar',
         #     '$',
@@ -161,3 +170,19 @@ class TestSchemaUtilityFunctions(TestHedBase):
         self.assertEqual(no_extension_tag1_result, False)
         self.assertEqual(no_extension_tag2_result, False)
         self.assertEqual(no_extension_tag3_result, False)
+
+    def test_get_as_default_units(self):
+        tag = HedTag("Duration/300 ms", hed_schema=self.hed_schema)
+        self.assertAlmostEqual(0.3, tag.value_as_default_unit())
+
+        tag2 = HedTag("Duration/300", hed_schema=self.hed_schema)
+        self.assertAlmostEqual(300, tag2.value_as_default_unit())
+
+        tag3 = HedTag("Duration/300 m", hed_schema=self.hed_schema)
+        self.assertEqual(None, tag3.value_as_default_unit())
+
+        tag4 = HedTag("IntensityTakesValue/300", hed_schema=util_create_schemas.load_schema_intensity())
+        self.assertEqual(300, tag4.value_as_default_unit())
+
+        tag5 = HedTag("IntensityTakesValue/300 cd", hed_schema=util_create_schemas.load_schema_intensity())
+        self.assertEqual(None, tag5.value_as_default_unit())

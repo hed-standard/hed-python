@@ -328,7 +328,7 @@ class HedTag:
         return tag_issues
 
     def get_stripped_unit_value(self):
-        """ Return the extension portion without units.
+        """ Return the extension divided into value and units, if the units are valid.
 
         Returns:
             stripped_unit_value (str): The extension portion with the units removed.
@@ -344,6 +344,32 @@ class HedTag:
             return stripped_value, unit
 
         return self.extension, None
+
+    def value_as_default_unit(self):
+        """ Returns the value converted to default units if possible.
+
+            Returns None if the units are invalid.(No default unit or invalid)
+
+        Returns:
+            value (float or None): The extension value as default units.
+                                   If there are not default units, returns None.
+
+        Examples:
+            'Duration/300 ms' will return .3
+
+        """
+        tag_unit_classes = self.unit_classes
+        value, _, units = self.extension.rpartition(" ")
+        if not value:
+            stripped_value = units
+            unit = self.default_unit
+        else:
+            stripped_value, unit = self._get_tag_units_portion(tag_unit_classes)
+
+        if stripped_value:
+            if unit.attributes.get("conversionFactor"):
+                conversion_factor = unit.attributes.get("conversionFactor", 1.0)
+                return float(stripped_value) * float(conversion_factor)
 
     @property
     def unit_classes(self):
@@ -476,20 +502,19 @@ class HedTag:
 
         return units
 
-    def get_unit_class_default_unit(self):
+    @property
+    def default_unit(self):
         """ Get the default unit class unit for this tag.
 
+            Only a tag with a single unit class can have default units.
         Returns:
-            str: The default unit class unit associated with the specific tag or an empty string.
-
+            unit(UnitEntry or None): the default unit entry for this tag, or None
         """
-        default_unit = ''
         unit_classes = self.unit_classes.values()
-        if unit_classes:
+        if len(unit_classes) == 1:
             first_unit_class_entry = list(unit_classes)[0]
             default_unit = first_unit_class_entry.has_attribute(HedKey.DefaultUnits, return_value=True)
-
-        return default_unit
+            return first_unit_class_entry.units.get(default_unit, None)
 
     def base_tag_has_attribute(self, tag_attribute):
         """ Check to see if the tag has a specific attribute.
@@ -536,8 +561,9 @@ class HedTag:
             tag_unit_classes (dict): Dictionary of valid UnitClassEntry objects for this tag.
 
         Returns:
-            stripped_value (str): The value with the units removed.
-
+            stripped_value (str or None): The value with the units removed.
+                                          This is filled in if there are no units as well.
+            unit (UnitEntry or None): The matching unit entry if one is found
         """
         value, _, units = self.extension.rpartition(" ")
         if not units:
@@ -548,12 +574,12 @@ class HedTag:
 
             possible_match = self._find_modifier_unit_entry(units, all_valid_unit_permutations)
             if possible_match and not possible_match.has_attribute(HedKey.UnitPrefix):
-                return value, units
+                return value, possible_match
 
             # Repeat the above, but as a prefix
             possible_match = self._find_modifier_unit_entry(value, all_valid_unit_permutations)
             if possible_match and possible_match.has_attribute(HedKey.UnitPrefix):
-                return units, value
+                return possible_match, value
 
         return None, None
 
