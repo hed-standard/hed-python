@@ -193,7 +193,7 @@ class ColumnValueSummary(BaseSummary):
         return "\n".join(sum_list)
 
     def _get_dataset_string(self, result, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return  a string with the overall summary for all of the tabular files.
+        """ Return  a string with the overall summary for all the tabular files.
 
         Parameters:
             result (dict): Dictionary of merged summary information.

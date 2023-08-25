@@ -12,7 +12,7 @@ class SummarizeColumnNamesOp(BaseOp):
         - **summary_name** (*str*)       The name of the summary.   
         - **summary_filename** (*str*)   Base filename of the summary.   
 
-    The purpose is to check that all of the tabular files have the same columns in same order.
+    The purpose is to check that all the tabular files have the same columns in same order.
 
     """
 
@@ -148,7 +148,7 @@ class ColumnNamesSummary(BaseSummary):
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return  a string with the overall summary for all of the tabular files.
+        """ Return  a string with the overall summary for all the tabular files.
 
         Parameters:
             result (dict): Dictionary of merged summary information.

@@ -32,8 +32,8 @@ class HedTypeDefs:
             self.definitions = definitions
         else:
             self.definitions = {}
-        self.def_map = self._extract_def_map()
-        self.type_map = self._extract_type_map() 
+        self.def_map = self._extract_def_map()  # dict def names vs {description, tags, type_values}
+        self.type_to_def_map = self._extract_type_map()  # Dictionary of type_values vs dict definition names
 
     def get_type_values(self, item):
         """ Return a list of type_tag values in item.
@@ -53,13 +53,27 @@ class HedTypeDefs:
                 type_tag_values = type_tag_values + values["type_values"]
         return type_tag_values
 
+    def get_type_def_names(self):
+        """ Return a list of definition names that have a type.
+
+        Returns:
+            list:  definition names that have this type.
+
+        """
+        def_names = []
+        for name, def_entry in self.def_map.items():
+            if def_entry['type_values']:
+                def_names.append(name) 
+        return def_names
+
     def _extract_def_map(self):
         """ Extract type_variables associated with each definition and add them to def_map. """
         def_map = {}
         for entry in self.definitions.values():
             type_values, description, other_tags = self._extract_entry_values(entry)
-            def_map[entry.name.lower()] = \
-                {'type_values': type_values, 'description': description, 'tags': other_tags}
+            if type_values:
+                def_map[entry.name.lower()] = \
+                    {'type_values': type_values, 'description': description, 'tags': other_tags}
         return def_map
 
     def _extract_type_map(self):

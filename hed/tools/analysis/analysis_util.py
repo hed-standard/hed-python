@@ -95,7 +95,7 @@ def search_strings(hed_strings, queries, query_names=None):
 
     :raises ValueError:
         - If query names are invalid or duplicated.
-            
+
     """
 
     expression_parsers, query_names = get_expression_parsers(queries, query_names=query_names)

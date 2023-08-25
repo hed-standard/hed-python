@@ -99,7 +99,7 @@ class Dispatcher:
               In this case, the corresponding backup file is read and returned.    
             - If a string is passed and there is no backup manager,
               the data file corresponding to the file_designator is read and returned.    
-            - If a Pandas DataFrame is passed, a copy is returned.    
+            - If a Pandas DataFrame is passed, return a copy.    
 
         """
         if isinstance(file_designator, pd.DataFrame):

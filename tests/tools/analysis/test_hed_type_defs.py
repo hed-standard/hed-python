@@ -63,9 +63,11 @@ class Test(unittest.TestCase):
         def_man = HedTypeDefs(definitions)
         self.assertIsInstance(def_man, HedTypeDefs,
                               "Constructor should create a HedTypeDefinitions from a tabular input")
-        self.assertEqual(len(def_man.def_map), 17, "Constructor condition_map should have the right length")
-        self.assertEqual(len(def_man.def_map), len(def_man.definitions),
-                         "Constructor condition_map should be the same length as the type_defs dictionary")
+        self.assertEqual(len(def_man.def_map), 8, "Constructor condition_map should have the right length")
+        self.assertEqual(len(def_man.definitions), len(definitions))
+        defs = def_man.get_type_def_names()
+        self.assertIsInstance(defs, list)
+        self.assertEqual(len(defs), 8)
 
     def test_get_vars(self):
         def_man = HedTypeDefs(self.definitions1)

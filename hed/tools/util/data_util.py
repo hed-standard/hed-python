@@ -132,7 +132,7 @@ def get_new_dataframe(data):
              a DataFrame to start with, a new copy of the DataFrame.
 
     :raises HedFileError:
-        - If a filename is given and it cannot be read into a Dataframe.
+        - A filename is given, and it cannot be read into a Dataframe.
 
     """
 
@@ -156,7 +156,7 @@ def get_row_hash(row, key_list):
         str: Hash key constructed from the entries of row in the columns specified by key_list.
 
     :raises HedFileError:
-        - If row doesn't have all of the columns in key_list HedFileError is raised.
+        - If row doesn't have all the columns in key_list HedFileError is raised.
 
     """
     columns_present, columns_missing = separate_values(list(row.index.values), key_list)
@@ -216,7 +216,7 @@ def replace_values(df, values=None, replace_value='n/a', column_list=None):
     """ Replace string values in specified columns.
 
     Parameters:
-        df (DataFrame):            Dataframe whose values will replaced.
+        df (DataFrame):            Dataframe whose values will be replaced.
         values (list, None):       List of strings to replace. If None, only empty strings are replaced.
         replace_value (str):       String replacement value.
         column_list (list, None):  List of columns in which to do replacement. If None all columns are processed.

@@ -25,12 +25,12 @@ class Test(unittest.TestCase):
         cls.schema = schema
 
     def test_constructor_no_group(self):
-        test1 = HedString("(Onset, Def/Blech)", hed_schema=self.schema)
+        test1 = HedString("(Onset, def/blech)", hed_schema=self.schema)
         groups = test1.find_top_level_tags(["onset"], include_groups=1)
         te = TemporalEvent(groups[0], 3, 4.5)
         self.assertEqual(te.start_index, 3)
         self.assertEqual(te.start_time, 4.5)
-        self.assertEqual(te.anchor, 'blech')
+        self.assertEqual(te.anchor, 'Def/blech')
         self.assertFalse(te.internal_group)
 
     def test_constructor_group(self):
@@ -40,7 +40,7 @@ class Test(unittest.TestCase):
         self.assertEqual(te.start_index, 3)
         self.assertEqual(te.start_time, 4.5)
         self.assertTrue(te.internal_group)
-        self.assertEqual(te.anchor, 'blech/54.3')
+        self.assertEqual(te.anchor, 'Def/Blech/54.3')
         self.assertIsInstance(te.internal_group, HedGroup)
 
     def test_constructor_on_files(self):

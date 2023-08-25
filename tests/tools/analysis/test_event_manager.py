@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from hed.models.sidecar import Sidecar
+from hed.models.sidecar import Sidecar, HedString
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager
@@ -43,10 +43,22 @@ class Test(unittest.TestCase):
         #         if not event.end_time:
         #             self.assertEqual(event.end_index, len(manager1.data.dataframe))
 
-    # def test_constructor(self):
-    #     with self.assertRaises(ValueError) as cont:
-    #         HedContextManager(self.test_strings1, None)
-    #     self.assertEqual(cont.exception.args[0], "ContextRequiresSchema")
+    def test_unfold_context(self):
+        manager1 = EventManager(self.input_data, self.schema)
+        hed, base, context = manager1.unfold_context()
+        for index in range(len(manager1.onsets)):
+            self.assertIsInstance(hed[index], list)
+            self.assertIsInstance(base[index], list)
+        # ToDo  finish tests
+        
+    def test_fix_list(self):
+        list1 = [[], [HedString('Red,Black', self.schema), HedString('(Green,Blue)', self.schema)],
+                 [HedString('Red,Black', self.schema), HedString('(Green,Blue)', self.schema)]]
+        # a = EventManager.fix_list(list1, self.schema)
+        # b = EventManager.fix_list(list1, self.schema, as_string=True)
+        x = HedString("Red,Black", self.schema)
+        y = [HedString('Red,Black', self.schema), HedString('(Green,Blue)', self.schema)]
+        # ToDo finish test
 
     # def test_iter(self):
     #     hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)

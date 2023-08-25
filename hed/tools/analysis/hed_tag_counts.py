@@ -151,7 +151,8 @@ class HedTagCounts:
 
         Parameters:
             tag_count (HedTagCount): Information for a particular tag.
-            template (dict):  The 
+            template (dict):  The dictionary to match.
+            unmatched (list): List of tag counts not matched so far.
 
         """
         tag_list = reversed(list(tag_count.tag_terms))

@@ -9,12 +9,12 @@ class HedTypeFactors:
 
     ALLOWED_ENCODINGS = ("categorical", "one-hot")
 
-    def __init__(self, type_value, type_tag, number_elements):
+    def __init__(self, type_tag, type_value, number_elements):
         """ Constructor for HedTypeFactors.
 
         Parameters:
-            type_value (str): The value of the type summarized by this class.
             type_tag (str):  Lowercase string corresponding to a HED tag which has a takes value child.
+            type_value (str): The value of the type summarized by this class.
             number_elements (int): Number of elements in the data column
 
         """

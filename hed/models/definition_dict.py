@@ -12,10 +12,10 @@ class DefinitionDict:
     """
 
     def __init__(self, def_dicts=None, hed_schema=None):
-        """ Definitions to be considered a single source. 
-            
+        """ Definitions to be considered a single source.
+
         Parameters:
-            def_dicts (str or list or DefinitionDict): DefDict or list of DefDicts/strings or 
+            def_dicts (str or list or DefinitionDict): DefDict or list of DefDicts/strings or
                 a single string whose type_defs should be added.
             hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
@@ -33,16 +33,18 @@ class DefinitionDict:
         """ Add type_defs from dict(s) to this dict.
 
         Parameters:
-            def_dicts (list or DefinitionDict): DefDict or list of DefDicts/strings whose type_defs should be added.
+            def_dicts (list, DefinitionDict, or dict): DefinitionDict or list of DefinitionDicts/strings/dicts whose
+                                                definitions should be added.
+                                        Note dict form expects DefinitionEntries in the same form as a DefinitionDict
             hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
-            
+
         :raises TypeError:
             - Bad type passed as def_dicts
         """
         if not isinstance(def_dicts, list):
             def_dicts = [def_dicts]
         for def_dict in def_dicts:
-            if isinstance(def_dict, DefinitionDict):
+            if isinstance(def_dict, (DefinitionDict, dict)):
                 self._add_definitions_from_dict(def_dict)
             elif isinstance(def_dict, str) and hed_schema:
                 self.check_for_definitions(HedString(def_dict, hed_schema))
@@ -64,7 +66,7 @@ class DefinitionDict:
         """ Add the type_defs found in the given definition dictionary to this mapper.
 
          Parameters:
-             def_dict (DefinitionDict): DefDict whose type_defs should be added.
+             def_dict (DefinitionDict or dict): DefDict whose definitions should be added.
 
         """
         for def_tag, def_value in def_dict.items():

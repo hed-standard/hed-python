@@ -1,14 +1,11 @@
 """ Manages a type variable and its associated context. """
-
 import pandas as pd
-from hed.models.hed_tag import HedTag
-from hed.models.hed_group import HedGroup
+from hed.models import HedGroup, HedString, HedTag
 from hed.tools.analysis.hed_type_defs import HedTypeDefs
-from hed.tools.analysis.hed_context_manager import HedContextManager
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 
-class HedTypes:
+class HedType:
 
     def __init__(self, event_manager, name, type_tag="condition-variable"):
         """ Create a variable manager for one type-variable for one tabular file.
@@ -26,16 +23,13 @@ class HedTypes:
         self.type_tag = type_tag.lower()
         self.event_manager = event_manager
         self.type_defs = HedTypeDefs(event_manager.def_dict, type_tag=type_tag)
-        # hed_strings = context_manager.hed_strings
-        # hed_contexts = context_manager.contexts
-        # self.total_events = len(hed_strings)
-        self._type_map = {}
+        self._type_map = {}  # Dictionary of type tags versus dictionary with keys being definition names.
         self._extract_variables()
 
     @property
     def total_events(self):
         return len(self.event_manager.event_list)
-    
+
     def get_type_value_factors(self, type_value):
         """ Return the HedTypeFactors associated with type_name or None.
 
@@ -157,28 +151,36 @@ class HedTypes:
 
     def _extract_variables(self):
         """ Extract all type_variables from hed_strings and event_contexts. """
-        for index, hed in enumerate(self.event_manager.hed_strings):
-            self._extract_direct_variables(hed, index)
-            self._extract_definition_variables(hed, index)
 
-            # self._extract_direct_variables(hed_contexts[index], index)
-            # self._extract_definition_variables(hed_contexts[index], index)
+        hed, base, context = self.event_manager.unfold_context()
+        for index in range(len(hed)):
+            this_list = hed[index] + base[index] + context[index]  # list of strings
+            if not this_list:    # empty lists don't contribute
+                continue
+            this_hed = HedString(this_list, self.event_manager.hed_schema)
+            tag_list = self.get_type_list(self.type_tag, this_hed)
+            self._update_variables(tag_list, index)
+            self._extract_definition_variables(this_hed, index)
 
-    def _extract_direct_variables(self, item, index):
-        """ Extract the condition type_variables from a HedTag, HedGroup, or HedString.
+    @staticmethod
+    def get_type_list(type_tag, item):
+        """ Find a list of the given type tag from a HedTag, HedGroup, or HedString.
 
         Parameters:
+            type_tag (str): a tag whose direct items you wish to remove
             item (HedTag or HedGroup): The item from which to extract condition type_variables.
-            index (int):  Position in the array.
+
+        Returns:
+            list:  List of the items with this type_tag
 
         """
-        if isinstance(item, HedTag) and item.short_base_tag.lower() == self.type_tag:
+        if isinstance(item, HedTag) and item.short_base_tag.lower() == type_tag:
             tag_list = [item]
         elif isinstance(item, HedGroup) and item.children:
-            tag_list = item.find_tags_with_term(self.type_tag, recursive=True, include_groups=0)
+            tag_list = item.find_tags_with_term(type_tag, recursive=True, include_groups=0)
         else:
             tag_list = []
-        self._update_variables(tag_list, index)
+        return tag_list
 
     def _update_variables(self, tag_list, index):
         """ Update the HedTypeFactors based on tags in the list.
@@ -197,70 +199,3 @@ class HedTypes:
                 hed_var = HedTypeFactors(self.type_tag, tag_value, self.total_events)
             self._type_map[tag_value] = hed_var
             hed_var.direct_indices[index] = ''
-
-
-# if __name__ == '__main__':
-#     import os
-#     from hed import Sidecar, TabularInput, HedString
-#     from hed.models import DefinitionEntry
-#     from hed.tools.analysis.analysis_util import get_assembled_strings
-#     hed_schema = load_schema_version(xml_version="8.1.0")
-#     test_strings1 = [HedString(f"Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset),"
-#                                f"(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4", hed_schema=hed_schema),
-#                      HedString('(Def/Cond1, Offset)', hed_schema=hed_schema),
-#                      HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast',
-#                                hed_schema=hed_schema),
-#                      HedString('', hed_schema=hed_schema),
-#                      HedString('(Def/Cond2, Onset)', hed_schema=hed_schema),
-#                      HedString('(Def/Cond3/4.3, Onset)', hed_schema=hed_schema),
-#                      HedString('Arm, Leg, Condition-variable/Fast, Def/Cond6/7.2', hed_schema=hed_schema)]
-#
-#     test_strings2 = [HedString(f"Def/Cond2, Def/Cond6/4, Def/Cond6/7.8, Def/Cond6/Alpha", hed_schema=hed_schema),
-#                      HedString("Yellow", hed_schema=hed_schema),
-#                      HedString("Def/Cond2", hed_schema=hed_schema),
-#                      HedString("Def/Cond2, Def/Cond6/5.2", hed_schema=hed_schema)]
-#     test_strings3 = [HedString(f"Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
-#                                hed_schema=hed_schema),
-#                      HedString("Yellow", hed_schema=hed_schema),
-#                      HedString("Def/Cond2, (Def/Cond6/4, Onset)", hed_schema=hed_schema),
-#                      HedString("Def/Cond2, Def/Cond6/5.2 (Def/Cond6/7.8, Offset)", hed_schema=hed_schema),
-#                      HedString("Def/Cond2, Def/Cond6/4", hed_schema=hed_schema)]
-#     def1 = HedString('(Condition-variable/Var1, Circle, Square)', hed_schema=hed_schema)
-#     def2 = HedString('(condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere)', hed_schema=hed_schema)
-#     def3 = HedString('(Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross)',
-#                      hed_schema=hed_schema)
-#     def4 = HedString('(Condition-variable, Apple, Banana)', hed_schema=hed_schema)
-#     def5 = HedString('(Condition-variable/Lumber, Apple, Banana)', hed_schema=hed_schema)
-#     def6 = HedString('(Condition-variable/Lumber, Label/#, Apple, Banana)', hed_schema=hed_schema)
-#     defs = {'Cond1': DefinitionEntry('Cond1', def1, False, None),
-#             'Cond2': DefinitionEntry('Cond2', def2, False, None),
-#             'Cond3': DefinitionEntry('Cond3', def3, True, None),
-#             'Cond4': DefinitionEntry('Cond4', def4, False, None),
-#             'Cond5': DefinitionEntry('Cond5', def5, False, None),
-#             'Cond6': DefinitionEntry('Cond6', def6, True, None)
-#             }
-#
-#     conditions1 = HedTypes(HedContextManager(test_strings1), hed_schema, defs)
-#     conditions2 = HedTypes(HedContextManager(test_strings2), hed_schema, defs)
-#     conditions3 = HedTypes(HedContextManager(test_strings3), hed_schema, defs)
-#     bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-#                                                    '../../../tests/data/bids_tests/eeg_ds003645s_hed'))
-#     events_path = os.path.realpath(os.path.join(bids_root_path,
-#                                                 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
-#     sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
-#     sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
-#     input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
-#     hed_strings = get_assembled_strings(input_data, hed_schema=hed_schema, expand_defs=False)
-#     onset_man = HedContextManager(hed_strings)
-#     type_defs = input_data.get_definitions().gathered_defs
-#     var_type = HedTypes(onset_man, hed_schema, type_defs)
-#     df = var_type.get_type_factors()
-#     summary = var_type.get_summary()
-#     df.to_csv("D:/wh_conditionslong.csv", sep='\t', index=False)
-#     with open('d:/wh_summary.json', 'w') as f:
-#         json.dump(summary, f, indent=4)
-#
-#     df_no_hot = var_type.get_type_factors(factor_encoding="categorical")
-#     df_no_hot.to_csv("D:/wh_conditions_no_hot.csv", sep='\t', index=False)
-#     with open('d:/wh_summarylong.json', 'w') as f:
-#         json.dump(summary, f, indent=4)

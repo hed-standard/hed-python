@@ -1,8 +1,10 @@
 """ Manages events of temporal extent. """
 
+from hed.models import HedString
 from hed.models.model_constants import DefTagNames
 from hed.models.df_util import get_assembled
 from hed.tools.analysis.temporal_event import TemporalEvent
+from hed.tools.analysis.hed_type_defs import HedTypeDefs
 
 
 class EventManager:
@@ -29,36 +31,7 @@ class EventManager:
         self.def_dict = input_data.get_def_dict(hed_schema, extra_def_dicts=extra_defs)
         self.onsets = input_data.dataframe['onset'].tolist()
         self.hed_strings = None  # Remaining HED strings copy.deepcopy(hed_strings)
-        # self.anchor_dict = {}  # Dictionary of definition names to list of TemporalEvent
         self._create_event_list(input_data)
-        # self._create_anchor_dict()
-
-    # def iter_context(self):
-    #     """ Iterate rows of context.
-    #
-    #     Yields:
-    #         int:  position in the dataFrame
-    #         HedString: Context
-    #
-    #     """
-    #
-    #     for index in range(len(self.contexts)):
-    #         yield index, self.contexts[index]
-
-    # def _create_anchor_dict(self):
-    #     """ Populate the dictionary of def names to list of temporal events.
-    #
-    #     :raises HedFileError:
-    #         - If the hed_strings contain unmatched offsets.
-    #
-    #     Notes:
-    #
-    #     """
-    #     for events in self.event_list:
-    #         for event in events:
-    #             elist = self.anchor_dict.get(event.anchor, [])
-    #             elist.append(event)
-    #             self.anchor_dict[event.anchor] = elist
 
     def _create_event_list(self, input_data):
         """ Populate the event_list with the events with temporal extent indexed by event number.
@@ -92,7 +65,7 @@ class EventManager:
             onset_dict (dict):  Running dict that keeps track of temporal events that haven't yet ended.
 
         Note:
-            This removes the events of temporal extent from the HED string.
+            This removes the events of temporal extent from hed.
 
          """
         if not hed:
@@ -128,30 +101,75 @@ class EventManager:
         # for i in range(len(self.hed_strings)):
         #     contexts[i] = HedString(",".join(contexts[i]), hed_schema=self.hed_schema)
         # self.contexts = contexts
-        
 
-    def _update_onset_list(self, group, onset_dict, event_index):
-        """ Process one onset or offset group to create onset_list.
+    def unfold_context(self):
+        """ Creates an event context for each hed string.
 
-        Parameters:
-            group (HedGroup):  The HedGroup containing the onset or offset.
-            onset_dict (dict): A dictionary of OnsetGroup objects that keep track of span of an event.
-            event_index (int): The event number in the list.
+        Returns:
+            list of str
+            list of list of str
+            list of list of str
 
-        :raises HedFileError:
-            - if an unmatched offset is encountered.
-
-        Notes:
-            - Modifies onset_dict and onset_list.
         """
-        # def_tags = group.find_def_tags(recursive=False, include_groups=0)
-        # name = def_tags[0].extension
-        # onset_element = onset_dict.pop(name, None)
-        # if onset_element:
-        #     onset_element.end_index = event_index
-        #     self.onset_list.append(onset_element)
-        # elif is_offset:
-        #     raise HedFileError("UnmatchedOffset", f"Unmatched {name} offset at event {event_index}", " ")
-        # if not is_offset:
-        #     onset_element = TemporalEvent(name, group, event_index)
-        #     onset_dict[name] = onset_element
+        hed = ["" for _ in range(len(self.hed_strings))]
+        for index, item in enumerate(self.hed_strings):
+            if item:
+                hed[index] = str(item)
+        base = [[] for _ in range(len(self.hed_strings))]
+        contexts = [[] for _ in range(len(self.hed_strings))]
+        for events in self.event_list:
+            for event in events:
+                this_str = str(event.contents)
+                base[event.start_index].append(this_str)
+                for i in range(event.start_index + 1, event.end_index):
+                    contexts[i].append(this_str)
+        return hed, self.compress_strings(base), self.compress_strings(contexts)    # these are each a list of lists of strings
+
+    @staticmethod
+    def compress_strings(list_to_compress):
+        result_list = ["" for _ in range(len(list_to_compress))]
+        for index, item in enumerate(list_to_compress):
+            if item:
+                result_list[index] = ",".join(item)
+        return result_list
+            
+    def find_type_defs(self, types):
+        def_names = {}
+        for type_tag in types:
+            type_defs = HedTypeDefs(self.def_dict, type_tag=type_tag)
+            def_names[type_tag] = type_defs.def_map
+        return def_names
+    
+    def filter_type(self): 
+        print("to here")
+    
+    # def unfold_context(self):
+    #     """ Creates an event context for each hed string.
+    # 
+    #     Returns:
+    #         (tuple): list of hed str, list of list of hed str
+    # 
+    #     """
+    #     hed = [[] for _ in range(len(self.hed_strings))]
+    #     for index, item in enumerate(self.hed_strings):
+    #         if item:
+    #             hed[index] = [str(item)]
+    #     contexts = [[] for _ in range(len(self.hed_strings))]
+    #     for events in self.event_list:
+    #         for event in events:
+    #             this_str = str(event.contents)
+    #             hed[event.start_index].append(this_str)
+    #             for i in range(event.start_index + 1, event.end_index):
+    #                 contexts[i].append(this_str)
+    #     return hed, contexts  # these are each a list of lists of strings
+    
+    @staticmethod
+    def fix_list(hed_list, hed_schema, as_string=False):
+        for index, item in enumerate(hed_list):
+            if not item:
+                hed_list[index] = None
+            elif as_string:
+                hed_list[index] = ",".join(str(item))
+            else:
+                hed_list[index] = HedString(",".join(str(item)), hed_schema)
+        return hed_list

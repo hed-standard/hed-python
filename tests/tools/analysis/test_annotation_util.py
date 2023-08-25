@@ -358,7 +358,8 @@ class Test(unittest.TestCase):
                          "_flatten_cat_col should use the Description tag if available")
 
     def test_flatten_cat_col_only_description(self):
-        keys, values, descriptions, tags = _flatten_cat_col("event_type", {"HED": {"code1": "Description/Code 1 here."}})
+        keys, values, descriptions, tags = _flatten_cat_col("event_type",
+                                                            {"HED": {"code1": "Description/Code 1 here."}})
         self.assertIsInstance(tags, list)
         self.assertEqual(tags[0], 'n/a')
 

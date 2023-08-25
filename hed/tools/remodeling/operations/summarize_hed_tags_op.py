@@ -15,13 +15,13 @@ class SummarizeHedTagsOp(BaseOp):
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
         - **summary_filename** (*str*): Base filename of the summary.   
-        - **tags** (*dict*): Type tag to get_summary separately (e.g. 'condition-variable' or 'task').   
+        - **tags** (*dict*): Specifies how to organize the tag output. 
 
     Optional remodeling parameters:    
        - **expand_context** (*bool*): If True, include counts from expanded context (not supported).   
 
-    The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
-    is often used with 'condition-variable' to produce a summary of the experimental design.
+    The purpose of this op is to produce a summary of the occurrences of hed tags organized in a specified manner.
+    The
 
 
     """
@@ -177,7 +177,7 @@ class HedTagSummary(BaseSummary):
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return  a string with the overall summary for all of the tabular files.
+        """ Return  a string with the overall summary for all the tabular files.
 
         Parameters:
             result (dict): Dictionary of merged summary information.
