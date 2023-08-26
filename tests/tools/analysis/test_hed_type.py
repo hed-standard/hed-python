@@ -22,22 +22,23 @@ class Test(unittest.TestCase):
                           hed_schema=schema),
                 HedString('(Definition/Cond3/#, (Condition-variable/Var3, Label/#, Ellipse, Cross))',
                           hed_schema=schema),
-                HedString('(Definition/Cond4, (Condition-variable, Apple, Banana))', hed_schema=schema),
-                HedString('(Definition/Cond5, (Condition-variable/Lumber, Apple, Banana))', hed_schema=schema),
-                HedString('(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Apple, Banana))',
+                HedString('(Definition/Cond4, (Condition-variable, Rectangle, Triangle))', hed_schema=schema),
+                HedString('(Definition/Cond5, (Condition-variable/Lumber, Action, Sensory-presentation))',
+                          hed_schema=schema),
+                HedString('(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Agent, Move))',
                           hed_schema=schema)]
         def_dict = DefinitionDict()
         for value in defs:
             def_dict.check_for_definitions(value)
 
-        test_strings1 = ["Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset)",
+        test_strings1 = ["Sensory-event,(Def/Cond1,(Elbow, Hip, Condition-variable/Trouble),Onset)",
                          "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4",
                          "(Def/Cond1, Offset)",
                          "White, Black, Condition-variable/Wonder, Condition-variable/Fast",
                          "",
                          "(Def/Cond2, Onset)",
                          "(Def/Cond3/4.3, Onset)",
-                         "Arm, Leg, Condition-variable/Fast"]
+                         "Upper-arm, Head, Condition-variable/Fast"]
         test_onsets1 = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
         df1 = DataFrame(test_onsets1, columns=['onset'])
         df1['HED'] = test_strings1

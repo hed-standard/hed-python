@@ -61,9 +61,9 @@ class Test(unittest.TestCase):
         self.assertIn(sum_op.summary_name, dispatch.summary_dicts)
         self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], HedTagSummary)
         x = dispatch.summary_dicts[sum_op.summary_name].summary_dict['subj2_run1']
-        self.assertEqual(len(dispatch.summary_dicts[sum_op.summary_name].summary_dict['subj2_run1'].tag_dict), 47)
+        self.assertEqual(len(dispatch.summary_dicts[sum_op.summary_name].summary_dict['subj2_run1'].tag_dict), 44)
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run2', sidecar=self.json_path)
-        self.assertEqual(len(dispatch.summary_dicts[sum_op.summary_name].summary_dict['subj2_run2'].tag_dict), 47)
+        self.assertEqual(len(dispatch.summary_dicts[sum_op.summary_name].summary_dict['subj2_run2'].tag_dict), 44)
 
     def test_quick3(self):
         from hed.models import TabularInput, Sidecar

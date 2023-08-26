@@ -154,13 +154,11 @@ class HedType:
 
         hed, base, context = self.event_manager.unfold_context()
         for index in range(len(hed)):
-            this_list = hed[index] + base[index] + context[index]  # list of strings
-            if not this_list:    # empty lists don't contribute
-                continue
-            this_hed = HedString(this_list, self.event_manager.hed_schema)
-            tag_list = self.get_type_list(self.type_tag, this_hed)
-            self._update_variables(tag_list, index)
-            self._extract_definition_variables(this_hed, index)
+            this_hed = self.event_manager.str_list_to_hed([hed[index], base[index], context[index]])
+            if this_hed:
+                tag_list = self.get_type_list(self.type_tag, this_hed)
+                self._update_variables(tag_list, index)
+                self._extract_definition_variables(this_hed, index)
 
     @staticmethod
     def get_type_list(type_tag, item):

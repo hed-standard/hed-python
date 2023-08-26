@@ -8,6 +8,7 @@ from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
 from hed.models.df_util import get_assembled
 from hed.tools.analysis.analysis_util import get_expression_parsers, search_strings
+from hed.tools.analysis.event_manager import EventManager
 
 
 class FactorHedTagsOp(BaseOp):
@@ -89,6 +90,7 @@ class FactorHedTagsOp(BaseOp):
                 raise ValueError("QueryNameAlreadyColumn",
                                  f"Query [{query_name}]: is already a column name of the data frame")
         df_list = [input_data.dataframe]
+        event_man = EventManager(input_data, dispatcher.hed_schema)
         hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None,
                                        join_columns=True, shrink_defs=False, expand_defs=True)
         df_factors = search_strings(hed_strings, self.expression_parsers, query_names=self.query_names)

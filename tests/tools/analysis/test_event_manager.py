@@ -47,10 +47,23 @@ class Test(unittest.TestCase):
         manager1 = EventManager(self.input_data, self.schema)
         hed, base, context = manager1.unfold_context()
         for index in range(len(manager1.onsets)):
-            self.assertIsInstance(hed[index], list)
-            self.assertIsInstance(base[index], list)
+            self.assertIsInstance(hed[index], str)
+            self.assertIsInstance(base[index], str)
         # ToDo  finish tests
-        
+
+    def test_str_list_to_hed(self):
+        manager1 = EventManager(self.input_data, self.schema)
+        hed, base, context = manager1.unfold_context()
+        hedObj1 = manager1.str_list_to_hed(['', '', ''])
+        self.assertFalse(hedObj1)
+        hedObj2 = manager1.str_list_to_hed([hed[0], base[0]])
+        self.assertIsInstance(hedObj2, HedString)
+
+    def test_get_type_defs(self):
+        manager1 = EventManager(self.input_data, self.schema)
+        def_names = manager1.get_type_defs(["Condition-variable", "task"])
+        self.assertIsInstance(def_names, list)
+
     def test_fix_list(self):
         list1 = [[], [HedString('Red,Black', self.schema), HedString('(Green,Blue)', self.schema)],
                  [HedString('Red,Black', self.schema), HedString('(Green,Blue)', self.schema)]]

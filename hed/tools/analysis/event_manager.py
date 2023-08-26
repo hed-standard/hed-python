@@ -3,6 +3,7 @@
 from hed.models import HedString
 from hed.models.model_constants import DefTagNames
 from hed.models.df_util import get_assembled
+from hed.models.string_util import split_base_tags, split_def_tags
 from hed.tools.analysis.temporal_event import TemporalEvent
 from hed.tools.analysis.hed_type_defs import HedTypeDefs
 
@@ -102,19 +103,39 @@ class EventManager:
         #     contexts[i] = HedString(",".join(contexts[i]), hed_schema=self.hed_schema)
         # self.contexts = contexts
 
-    def unfold_context(self):
-        """ Creates an event context for each hed string.
+    def unfold_context(self, remove_types=[]):
+        """ Unfolds the event information into hed, base, and contexts either as arrays of str or of HedString.
+
+        Parameters:
+            remove_types (list):  List of types to remove.
+            replace_defs (bool):  If True the def term is replaced by its definition group.
 
         Returns:
-            list of str
-            list of list of str
-            list of list of str
+            list of str or HedString representing the information without the events of temporal extent
+            list of str or HedString representing the onsets of the events of temporal extent
+            list of str or HedString representing the ongoing context information.
 
         """
-        hed = ["" for _ in range(len(self.hed_strings))]
+
+        placeholder = ""
+        remove_defs = self.find_type_defs(remove_types)
+        hed = [placeholder for _ in range(len(self.hed_strings))]
+        new_base = [placeholder for _ in range(len(self.hed_strings))]
+        new_contexts = [placeholder for _ in range(len(self.hed_strings))]
+        base, contexts = self.expand_context()
         for index, item in enumerate(self.hed_strings):
-            if item:
-                hed[index] = str(item)
+            hed[index] = self._process_hed(item, remove_types=remove_types, 
+                                           remove_defs=remove_defs, remove_group=False)
+            new_base[index] = self._process_hed(base[index], remove_types=remove_types,
+                                                remove_defs=remove_defs, remove_group=True)
+            new_contexts[index] = self._process_hed(contexts[index], remove_types=remove_types,
+                                                    remove_defs=remove_defs, remove_group=True)
+        return hed, new_base, new_contexts   # these are each a list of strings
+
+    def expand_context(self):
+        """ Expands the onset and the ongoing context for additional processing.
+
+        """
         base = [[] for _ in range(len(self.hed_strings))]
         contexts = [[] for _ in range(len(self.hed_strings))]
         for events in self.event_list:
@@ -123,7 +144,33 @@ class EventManager:
                 base[event.start_index].append(this_str)
                 for i in range(event.start_index + 1, event.end_index):
                     contexts[i].append(this_str)
-        return hed, self.compress_strings(base), self.compress_strings(contexts)    # these are each a list of lists of strings
+
+        return self.compress_strings(base), self.compress_strings(contexts)
+
+    def _process_hed(self, hed, remove_types=[], remove_defs=[], remove_group=False):
+        if not hed:
+            return ""
+        # Reconvert even if hed is already a HedString to make sure a copy and expandable.
+        hed_obj = HedString(str(hed), hed_schema=self.hed_schema, def_dict=self.def_dict)
+        hed_obj, temp1 = split_base_tags(hed_obj, remove_types, remove_group=False)
+        if remove_defs:
+            hed_obj, temp2 = split_def_tags(hed_obj, remove_defs, remove_group=remove_group)
+        return str(hed_obj)
+
+    def str_list_to_hed(self, str_list):
+        """ Create a HedString object from a list of strings.
+
+        Parameters:
+            str_list (list): A list of strings to be concatenated with commas and then converted.
+
+        Returns:
+            HedString or None:  The converted list.
+
+        """
+        filtered_list = [item for item in str_list if item != '']  # list of strings
+        if not filtered_list:  # empty lists don't contribute
+            return None
+        return HedString(",".join(filtered_list), self.hed_schema, def_dict=self.def_dict)
 
     @staticmethod
     def compress_strings(list_to_compress):
@@ -132,44 +179,48 @@ class EventManager:
             if item:
                 result_list[index] = ",".join(item)
         return result_list
-            
+
     def find_type_defs(self, types):
+        """ Return a list of definition names (lower case) that correspond to one of the specified types.
+
+        Parameters:
+            types (list):  List of tags that are treated as types such as 'Condition-variable'
+
+        Returns:
+            list:  List of definition names (lower-case) that correspond to the specified types
+
+        """
         def_names = {}
+        if not types:
+            return
         for type_tag in types:
             type_defs = HedTypeDefs(self.def_dict, type_tag=type_tag)
             def_names[type_tag] = type_defs.def_map
         return def_names
-    
-    def filter_type(self): 
-        print("to here")
-    
-    # def unfold_context(self):
-    #     """ Creates an event context for each hed string.
-    # 
-    #     Returns:
-    #         (tuple): list of hed str, list of list of hed str
-    # 
-    #     """
-    #     hed = [[] for _ in range(len(self.hed_strings))]
-    #     for index, item in enumerate(self.hed_strings):
-    #         if item:
-    #             hed[index] = [str(item)]
-    #     contexts = [[] for _ in range(len(self.hed_strings))]
-    #     for events in self.event_list:
-    #         for event in events:
-    #             this_str = str(event.contents)
-    #             hed[event.start_index].append(this_str)
-    #             for i in range(event.start_index + 1, event.end_index):
-    #                 contexts[i].append(this_str)
-    #     return hed, contexts  # these are each a list of lists of strings
-    
-    @staticmethod
-    def fix_list(hed_list, hed_schema, as_string=False):
-        for index, item in enumerate(hed_list):
-            if not item:
-                hed_list[index] = None
-            elif as_string:
-                hed_list[index] = ",".join(str(item))
-            else:
-                hed_list[index] = HedString(",".join(str(item)), hed_schema)
-        return hed_list
+
+    def get_type_defs(self, types):
+        """ Return a list of definition names (lower case) that correspond to one of the specified types.
+
+        Parameters:
+            types (list):  List of tags that are treated as types such as 'Condition-variable'
+
+        Returns:
+            list:  List of definition names (lower-case) that correspond to the specified types
+
+        """
+        def_list = []
+        for this_type in types:
+            type_defs = HedTypeDefs(self.def_dict, type_tag=this_type)
+            def_list = def_list + list(type_defs.def_map.keys())
+        return def_list
+
+    # @staticmethod
+    # def fix_list(hed_list, hed_schema, as_string=False):
+    #     for index, item in enumerate(hed_list):
+    #         if not item:
+    #             hed_list[index] = None
+    #         elif as_string:
+    #             hed_list[index] = ",".join(str(item))
+    #         else:
+    #             hed_list[index] = HedString(",".join(str(item)), hed_schema)
+    #     return hed_list

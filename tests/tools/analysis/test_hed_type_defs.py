@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed.models import DefinitionEntry
+from hed.models import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 from hed.models.sidecar import Sidecar
@@ -14,32 +14,29 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.1.0")
-        cls.test_strings1 = [HedString('Sensory-event,(Def/Cond1,(Red, Blue),Onset),(Def/Cond2,Onset),Green,Yellow',
-                                       hed_schema=schema),
-                             HedString('(Def/Cond1, Offset)', hed_schema=schema),
-                             HedString('White, Black, Condition-variable/Wonder, Condition-variable/Fast',
-                                       hed_schema=schema),
-                             HedString('', hed_schema=schema),
-                             HedString('(Def/Cond2, Onset)', hed_schema=schema),
-                             HedString('(Def/Cond3/4.3, Onset)', hed_schema=schema),
-                             HedString('Arm, Leg, Condition-variable/Fast', hed_schema=schema)]
-        def1 = HedString('(Condition-variable/Var1, Circle, Square, Description/This is def1)', hed_schema=schema)
-        def2 = HedString('(condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere)',
-                         hed_schema=schema)
-        def3 = HedString('(Organizational-property/Condition-variable/Var3, Physical-length/#, Ellipse, Cross)',
-                         hed_schema=schema)
-        def4 = HedString('(Condition-variable, Apple, Banana, Description/This is def4)', hed_schema=schema)
-        def5 = HedString('(Condition-variable/Lumber, Apple, Banana, Description/This is def5)',
-                         hed_schema=schema)
-        def6 = HedString('(Condition-variable/Lumber, Label/#, Apple, Banana, Description/This is def6)',
-                         hed_schema=schema)
-        cls.definitions1 = {'Cond1': DefinitionEntry('Cond1', def1, False, None),
-                            'Cond2': DefinitionEntry('Cond2', def2, False, None),
-                            'Cond3': DefinitionEntry('Cond3', def3, True, None),
-                            'Cond4': DefinitionEntry('Cond4', def4, False, None),
-                            'Cond5': DefinitionEntry('Cond5', def5, False, None),
-                            'Cond6': DefinitionEntry('Cond6', def6, True, None)
-                            }
+        defs = [HedString('(Definition/Cond1, (Condition-variable/Var1, Circle, Square))', hed_schema=schema),
+                HedString('(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))',
+                          hed_schema=schema),
+                HedString('(Definition/Cond3/#, (Condition-variable/Var3, Label/#, Ellipse, Cross))',
+                          hed_schema=schema),
+                HedString('(Definition/Cond4, (Condition-variable, Rectangle, Triangle))', hed_schema=schema),
+                HedString('(Definition/Cond5, (Condition-variable/Lumber, Action, Sensory-presentation))',
+                          hed_schema=schema),
+                HedString('(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Agent, Move))',
+                          hed_schema=schema)]
+        def_dict = DefinitionDict()
+        for value in defs:
+            def_dict.check_for_definitions(value)
+
+        cls.test_strings1 = ["Sensory-event,(Def/Cond1,(Elbow, Hip, Condition-variable/Trouble),Onset)",
+                             "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4",
+                             "(Def/Cond1, Offset)",
+                             "White, Black, Condition-variable/Wonder, Condition-variable/Fast",
+                             "",
+                             "(Def/Cond2, Onset)",
+                             "(Def/Cond3/4.3, Onset)",
+                             "Upper-arm, Head, Condition-variable/Fast"]
+        cls.definitions1 = def_dict
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/bids_tests/eeg_ds003645s_hed'))
         events_path = os.path.realpath(os.path.join(bids_root_path,
