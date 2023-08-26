@@ -695,3 +695,38 @@ class TestParser(unittest.TestCase):
             "(A, B, (C)), (D), E": True,
         }
         self.base_test("@C or B", test_strings)
+
+    def test_optional_exact_group(self):
+        test_strings = {
+            "A, C": True,
+        }
+        self.base_test("{a and (b or c)}", test_strings)
+
+        test_strings = {
+            "A, B, C, D": True,
+        }
+        self.base_test("{a and b: c and d}", test_strings)
+
+        test_strings = {
+            "A, B, C": True,
+            "A, B, C, D": False,
+        }
+        self.base_test("{a and b: c or d}", test_strings)
+
+        test_strings = {
+            "A, C": True,
+            "A, D": True,
+            "A, B, C": False,
+            "A, B, C, D": False,
+        }
+        self.base_test("{a or b: c or d}", test_strings)
+
+        test_strings = {
+            "(Onset, (Def-expand/taco))": True,
+            "(Onset, (Def-expand/taco, (Label/DefContents)))": True,
+            "(Onset, (Def-expand/taco), (Label/OnsetContents))": True,
+            "(Onset, (Def-expand/taco), (Label/OnsetContents, Description/MoreContents))": True,
+            "Onset, (Def-expand/taco), (Label/OnsetContents)": False,
+            "(Onset, (Def-expand/taco), Label/OnsetContents)": False,
+        }
+        self.base_test("[[{(Onset or Offset), (Def or [[Def-expand]]): ???}]]", test_strings)

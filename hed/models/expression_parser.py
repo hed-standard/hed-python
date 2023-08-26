@@ -64,6 +64,7 @@ class Token:
     Wildcard = 10
     ExactMatch = 11
     ExactMatchEnd = 12
+    ExactMatchOptional = 14
     NotInLine = 13  # Not currently a token. In development and may become one.
 
     def __init__(self, text):
@@ -83,6 +84,7 @@ class Token:
             "???": Token.Wildcard,  # Any Group
             "{": Token.ExactMatch,  # Nothing else
             "}": Token.ExactMatchEnd,  # Nothing else
+            ":": Token.ExactMatchOptional,
             "@": Token.NotInLine
         }
         self.kind = tokens.get(text, Token.Tag)
@@ -158,7 +160,11 @@ class ExpressionAnd(Expression):
         if not groups1:
             return groups1
         groups2 = self.right.handle_expr(hed_group, exact=exact)
-        # this is slow...
+
+        return self.merge_groups(groups1, groups2)
+
+    @staticmethod
+    def merge_groups(groups1, groups2):
         return_list = []
         for group in groups1:
             for other_group in groups2:
@@ -308,6 +314,20 @@ class ExpressionExactMatch(Expression):
             if return_list:
                 return return_list
 
+        # Basically if we don't have an exact match above, do the more complex matching including optional
+        if self.left:
+            optional_groups = self.left.handle_expr(hed_group, exact=True)
+            found_groups = ExpressionAnd.merge_groups(found_groups, optional_groups)
+
+        if found_groups:
+            return_list = []
+            for group in found_groups:
+                if len(group.group.children) == len(group.tags):
+                    return_list.append(group)
+
+            if return_list:
+                return return_list
+
         return []
 
 
@@ -335,6 +355,11 @@ class QueryParser:
         '[Event and Action]' - Find a group that contains both Event and Action(at any level)
 
         '[[Event and Action]]' - Find a group with Event And Action at the same level.
+
+        Practical Complex Example:
+
+        [[{(Onset or Offset), (Def or [[Def-expand]]): ???}]] - A group with an onset tag,
+                                    a def tag or def-expand group, and an optional wildcard group
 
         Parameters:
             expression_string(str): The query string
@@ -382,6 +407,9 @@ class QueryParser:
         next_token = self._next_token_is([Token.LogicalNegation])
         if next_token == Token.LogicalNegation:
             interior = self._handle_grouping_op()
+            if "?" in str(interior):
+                raise ValueError("Cannot negate wildcards, or expressions that contain wildcards."
+                                 "Use {required_expression : optional_expression}.")
             expr = ExpressionNegation(next_token, right=interior)
             return expr
         else:
@@ -411,8 +439,12 @@ class QueryParser:
         elif next_token == Token.ExactMatch:
             interior = self._handle_and_op()
             expr = ExpressionExactMatch(next_token, right=interior)
-            next_token = self._next_token_is([Token.ExactMatchEnd])
-            if next_token != Token.ExactMatchEnd:
+            next_token = self._next_token_is([Token.ExactMatchEnd, Token.ExactMatchOptional])
+            if next_token == Token.ExactMatchOptional:
+                optional_portion = self._handle_and_op()
+                expr.left = optional_portion
+                next_token = self._next_token_is([Token.ExactMatchEnd])
+            if next_token is None:
                 raise ValueError("Parse error: Missing closing curly bracket")
         else:
             next_token = self._get_next_token()
@@ -434,7 +466,7 @@ class QueryParser:
         return expr
 
     def _tokenize(self, expression_string):
-        grouping_re = r"\[\[|\[|\]\]|\]|}|{"
+        grouping_re = r"\[\[|\[|\]\]|\]|}|{|:"
         paren_re = r"\)|\(|~"
         word_re = r"\?+|\band\b|\bor\b|,|[\"_\-a-zA-Z0-9/.^#\*@]+"
         re_string = fr"({grouping_re}|{paren_re}|{word_re})"
