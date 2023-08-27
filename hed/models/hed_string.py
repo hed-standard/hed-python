@@ -56,7 +56,8 @@ class HedString(HedGroup):
         hed_string = ",".join([group._hed_string for group in hed_strings])
         contents = [child for sub_string in hed_strings for child in sub_string.children]
         first_schema = hed_strings[0]._schema
-        new_string.__init__(hed_string=hed_string, _contents=contents, hed_schema=first_schema)
+        first_dict = hed_strings[0]._def_dict
+        new_string.__init__(hed_string=hed_string, _contents=contents, hed_schema=first_schema, def_dict=first_dict)
         new_string._from_strings = hed_strings
         return new_string
 
