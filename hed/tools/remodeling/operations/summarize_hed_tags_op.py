@@ -6,7 +6,6 @@ from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_tag_manager import HedTagManager
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
-from hed.models.df_util import get_assembled
 
 
 class SummarizeHedTagsOp(BaseOp):
@@ -36,7 +35,7 @@ class SummarizeHedTagsOp(BaseOp):
         },
         "optional_parameters": {
             "append_timecode": bool,
-            "expand_context": bool,
+            "include_context": bool,
             "replace_defs": bool,
             "remove_types": list
         }
@@ -45,7 +44,7 @@ class SummarizeHedTagsOp(BaseOp):
     SUMMARY_TYPE = "hed_tag_summary"
 
     def __init__(self, parameters):
-        """ Constructor for the summarize hed tags operation.
+        """ Constructor for the summarize_hed_tags operation.
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
@@ -63,7 +62,7 @@ class SummarizeHedTagsOp(BaseOp):
         self.summary_filename = parameters['summary_filename']
         self.tags = parameters['tags']
         self.append_timecode = parameters.get('append_timecode', False)
-        self.expand_context = parameters.get('expand_context', True)
+        self.include_context = parameters.get('include_context', True)
         self.replace_defs = parameters.get("replace_defs", True)
         self.remove_types = parameters.get("remove_types", ["Condition-variable", "Task"])
 
@@ -111,8 +110,10 @@ class HedTagSummary(BaseSummary):
         """
         counts = HedTagCounts(new_info['name'], total_events=len(new_info['df']))
         input_data = TabularInput(new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
-        tag_man = HedTagManager(EventManager(input_data, new_info['schema']))
-        hed_objs = tag_man.get_hed_objs(self.sum_op.expand_context, self.sum_op.replace_defs)
+        tag_man = HedTagManager(EventManager(input_data, new_info['schema']), 
+                                remove_types=self.sum_op.remove_types)
+        hed_objs = tag_man.get_hed_objs(include_context=self.sum_op.include_context, 
+                                        replace_defs=self.sum_op.replace_defs)
         for hed in hed_objs:
             counts.update_event_counts(hed, new_info['name'])
         self.summary_dict[new_info["name"]] = counts
