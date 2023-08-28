@@ -286,7 +286,7 @@ class HedGroup:
         """
         if self.is_group:
             return "(" + ",".join([str(child) for child in self.children]) + ")"
-        return ",".join([str(child) for child in self.children])
+        return ", ".join([str(child) for child in self.children])
 
     def get_as_short(self):
         """ Return this HedGroup as a short tag string.
@@ -531,3 +531,5 @@ class HedGroup:
         if include_groups == 0 or include_groups == 1:
             return [tag[include_groups] for tag in found_tags]
         return found_tags
+
+    

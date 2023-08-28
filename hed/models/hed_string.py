@@ -383,3 +383,29 @@ class HedString(HedGroup):
         ref_tags = [tag for tag in self.get_all_tags() if tag.is_column_ref()]
         if ref_tags:
             self.remove(ref_tags)
+            
+    def indent(self):
+        self.sort()
+        hed_string = self.__str__()
+
+        level_open = []
+        level = 0
+        indented = ""
+        prev = ''
+        for c in hed_string:
+            if c == "(":
+                level_open.append(level)
+                indented += "\n" + "\t"*level + c
+                level += 1	
+            elif c == ")":
+                level = level_open.pop()
+                if prev == ")":
+                    indented += "\n" + "\t"*level + c
+                else:
+                    indented += c
+                
+            else:
+                indented += c
+            prev = c
+        
+        return indented
