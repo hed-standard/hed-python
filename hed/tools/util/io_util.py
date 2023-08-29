@@ -21,7 +21,7 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
         bool: True if file has the appropriate format.
 
     Notes:
-        - Everything is converted to lower case prior to testing so this test should be case insensitive.
+        - Everything is converted to lower case prior to testing so this test should be case-insensitive.
         - None indicates that all are accepted.
 
 
@@ -158,13 +158,13 @@ def get_filtered_by_element(file_list, elements):
 def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=None):
     """ Get list of filenames satisfying the criteria.
 
-    Everything is converted to lower case prior to testing so this test should be case insensitive.
+    Everything is converted to lower case prior to testing so this test should be case-insensitive.
 
     Parameters:
         file_list (list):      List of files to test.
         name_prefix (str):     Optional name_prefix for the base filename.
         name_suffix (str):     Optional name_suffix for the base filename.
-        extensions (list):     Optional list of file extensions (allows two periods (.tsv.gz)
+        extensions (list):     Optional list of file extensions (allows two periods (.tsv.gz))
 
      Returns:
          list:  The filtered file names.
@@ -299,7 +299,7 @@ def parse_bids_filename(file_path):
 
 
 def _split_entity(piece):
-    """Splits an piece into an entity or suffix.
+    """Splits a piece into an entity or suffix.
 
     Parameters:
         piece (str):   A string to be parsed.

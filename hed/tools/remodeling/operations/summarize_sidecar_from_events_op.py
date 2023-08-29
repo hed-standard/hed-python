@@ -68,7 +68,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         Returns:
             DataFrame: A copy of df.
 
-        Side-effect:
+        Side effect:
             Updates the associated summary if applicable.
 
         """
@@ -124,7 +124,7 @@ class EventsToSidecarSummary(BaseSummary):
                               "Sidecar": summary_info.extract_sidecar_template()}}
 
     def merge_all_info(self):
-        """ Merge summary information from all of the files
+        """ Merge summary information from all the files.
 
         Returns:
            TabularSummary:  Consolidated summary of information.
@@ -159,7 +159,7 @@ class EventsToSidecarSummary(BaseSummary):
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return  a string with the overall summary for all of the tabular files.
+        """ Return  a string with the overall summary for all the tabular files.
 
         Parameters:
             result (dict): Dictionary of merged summary information.

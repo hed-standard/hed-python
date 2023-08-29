@@ -114,7 +114,7 @@ class HedString(HedGroup):
     def remove_definitions(self):
         """ Remove definition tags and groups from this string.
 
-            This does not validate definitions and will blindly removing invalid ones as well.
+            This does not validate type_defs and will blindly removing invalid ones as well.
         """
         definition_groups = self.find_top_level_tags({DefTagNames.DEFINITION_KEY}, include_groups=1)
         if definition_groups:
@@ -178,7 +178,7 @@ class HedString(HedGroup):
         Parameters:
             hed_string (str): A hed string consisting of tags and tag groups to be processed.
             hed_schema (HedSchema): HED schema to use to identify tags.
-            def_dict(DefinitionDict): The definitions to identify
+            def_dict(DefinitionDict): The type_defs to identify
         Returns:
             list:  A list of HedTag and/or HedGroup.
 

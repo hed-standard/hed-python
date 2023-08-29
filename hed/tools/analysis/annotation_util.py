@@ -319,7 +319,7 @@ def _flatten_val_col(col_key, col_dict):
 #
 #     Returns:
 #         str:  A HED string extracted from the row.
-#         str:  A string representing the description (without the Description tag.
+#         str:  A string representing the description (without the Description tag).
 #
 #     Notes:
 #         If description_tag is True the entire tag string is included with description.

@@ -39,6 +39,7 @@ def _draw_contour(wc, img):
 
     return Image.fromarray(ret)
 
+
 # Replace WordCloud function with one that can handle transparency
 WordCloud._draw_contour = _draw_contour
 

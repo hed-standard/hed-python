@@ -14,11 +14,11 @@ def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs
 
     Parameters:
         data_input (TabularInput): The tabular input file whose HED annotations are to be assembled.
-        sidecar (Sidecar):  Sidecar with definitions.
+        sidecar (Sidecar):  Sidecar with type_defs.
         schema (HedSchema):  Hed schema
         columns_included (list or None):  A list of additional column names to include.
             If None, only the list of assembled tags is included.
-        expand_defs (bool): If True, definitions are expanded when the events are assembled.
+        expand_defs (bool): If True, type_defs are expanded when the events are assembled.
 
     Returns:
         DataFrame or None: A DataFrame with the assembled events.
@@ -41,7 +41,7 @@ def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs
     else:
         df = data_input.dataframe[eligible_columns].copy(deep=True)
         df['HED_assembled'] = hed_string_list
-    # definitions = data_input.get_definitions().gathered_defs
+    # type_defs = data_input.get_definitions().gathered_defs
     return df, definitions
 
 
@@ -95,7 +95,7 @@ def search_strings(hed_strings, queries, query_names=None):
 
     :raises ValueError:
         - If query names are invalid or duplicated.
-            
+
     """
 
     expression_parsers, query_names = get_expression_parsers(queries, query_names=query_names)
@@ -113,7 +113,7 @@ def search_strings(hed_strings, queries, query_names=None):
 #     Parameters:
 #         table (TabularInput): The input file to be searched.
 #         hed_schema (HedSchema or HedschemaGroup): If provided the HedStrings are converted to canonical form.
-#         expand_defs (bool): If True, definitions are expanded when the events are assembled.
+#         expand_defs (bool): If True, type_defs are expanded when the events are assembled.
 # 
 #     Returns:
 #         list: A list of HedString objects.
@@ -139,7 +139,7 @@ def search_strings(hed_strings, queries, query_names=None):
 #     """
 # 
 #     eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
-#     hed_list, definitions = df_util.get_assembled(data_input, sidecar, hed_schema, extra_def_dicts=None, join_columns=True,
+#     hed_list, type_defs = df_util.get_assembled(data_input, sidecar, hed_schema, extra_def_dicts=None, join_columns=True,
 #                                                   shrink_defs=False, expand_defs=True)
 #     expression = QueryParser(query)
 #     hed_tags = []
@@ -187,7 +187,7 @@ def search_strings(hed_strings, queries, query_names=None):
 #         list: A list of the removed Defs.
 #
 #     Notes:
-#         - the hed_string_obj passed in no longer has definitions.
+#         - the hed_string_obj passed in no longer has type_defs.
 #
 #     """
 #     to_remove = []

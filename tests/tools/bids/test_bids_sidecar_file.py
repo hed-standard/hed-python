@@ -79,7 +79,7 @@ class Test(unittest.TestCase):
         self.assertFalse(sidecar1.contents, "set_contents before has no contents")
         self.assertFalse(sidecar1.has_hed, "set_contents before has_hed false")
         sidecar1.set_contents()
-        self.assertIsInstance(sidecar1.contents, Sidecar, "set_contents creates a sidecar on setcontents")
+        self.assertIsInstance(sidecar1.contents, Sidecar, "set_contents creates a sidecar on set_contents")
         self.assertTrue(sidecar1.has_hed, "set_contents before has_hed false")
         a = sidecar1.contents
         sidecar1.set_contents({'HED': 'xyz'})

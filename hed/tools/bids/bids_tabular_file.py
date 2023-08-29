@@ -1,4 +1,4 @@
-""" A BIDS tabular file including its associatedd sidecar. """
+""" A BIDS tabular file including its associated sidecar. """
 
 import os
 from hed.models.tabular_input import TabularInput

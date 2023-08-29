@@ -4,7 +4,7 @@
 class BaseOp:
     """ Base class for operations. All remodeling operations should extend this class.
 
-    The base class holds the parameters and does basic parameter checking against the operations specification.
+    The base class holds the parameters and does basic parameter checking against the operation's specification.
 
     """
 

@@ -2,12 +2,10 @@
 
 import os
 import json
-from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_io import load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_file_group import BidsFileGroup
-from hed.validator.hed_validator import HedValidator
 
 
 LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/library_schemas/"
@@ -32,7 +30,7 @@ class BidsDataset:
             schema (HedSchema or HedSchemaGroup):  A schema that overrides the one specified in dataset.
             tabular_types (list or None):  List of strings specifying types of tabular types to include.
                 If None or empty, then ['events'] is assumed.
-            exclude_dirs=['sourcedata', 'derivatives', 'code']):
+            exclude_dirs=['sourcedata', 'derivatives', 'code']:
 
         """
         self.root_path = os.path.realpath(root_path)

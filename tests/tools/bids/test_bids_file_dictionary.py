@@ -118,5 +118,6 @@ class Test(unittest.TestCase):
             BidsFileDictionary._correct_file(["junk.tsv"])
         self.assertEqual(context.exception.args[0], "BadBidsFileArgument")
 
+
 if __name__ == '__main__':
     unittest.main()

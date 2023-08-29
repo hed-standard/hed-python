@@ -134,7 +134,7 @@ class BaseSummary(ABC):
         Parameters:
             save_dir (str): Path to the directory in which the summaries will be saved.
             file_format (str): string representing the extension (including .), '.txt' or '.json'.
-            summary (dictionary): Dictionary of summaries (has "Dataset" and "Individual files" keys.
+            summary (dictionary): Dictionary of summaries (has "Dataset" and "Individual files" keys).
 
         """
         if self.op.append_timecode:

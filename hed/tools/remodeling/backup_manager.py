@@ -164,7 +164,7 @@ class BackupManager:
 
         :raises HedFileError:
             - If a backup is inconsistent for any reason.
-            
+
         """
         backups = {}
         for backup in os.listdir(self.backups_path):

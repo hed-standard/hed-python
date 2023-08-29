@@ -10,7 +10,7 @@ from hed.models.model_constants import DefTagNames
 from hed.errors.error_reporter import check_for_any_errors
 
 
-# todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
+# todo: Add/improve validation for type_defs being in known columns(right now it just assumes they aren't)
 class SidecarValidator:
     reserved_column_names = ["HED"]
     reserved_category_values = ["n/a"]
@@ -255,7 +255,7 @@ class SidecarValidator:
             presence of definition tags.
 
         """
-        # Make a copy without definitions to check placeholder count.
+        # Make a copy without type_defs to check placeholder count.
         expected_count, error_type = ColumnMetadata.expected_pound_sign_count(column_type)
         hed_string_copy = copy.deepcopy(hed_string)
         hed_string_copy.remove_definitions()

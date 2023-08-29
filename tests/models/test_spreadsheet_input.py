@@ -159,7 +159,7 @@ class Test(unittest.TestCase):
         self.assertTrue(hed_input._dataframe.equals(hed_input_long._dataframe))
 
     def test_convert_short_long_with_definitions(self):
-        # Verify behavior works as expected even if definitions are present
+        # Verify behavior works as expected even if type_defs are present
         events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    '../data/model_tests/no_column_header_definition.tsv')
         hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])

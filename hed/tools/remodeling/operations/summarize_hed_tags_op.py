@@ -1,11 +1,11 @@
 """ Summarize the HED tags in collection of tabular files.  """
 
 from hed.models.tabular_input import TabularInput
-from hed.models.sidecar import Sidecar
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
+from hed.tools.analysis.event_manager import EventManager
+from hed.tools.analysis.hed_tag_manager import HedTagManager
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
-from hed.models.df_util import get_assembled
 
 
 class SummarizeHedTagsOp(BaseOp):
@@ -15,13 +15,13 @@ class SummarizeHedTagsOp(BaseOp):
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
         - **summary_filename** (*str*): Base filename of the summary.   
-        - **tags** (*dict*): Type tag to get_summary separately (e.g. 'condition-variable' or 'task').   
+        - **tags** (*dict*): Specifies how to organize the tag output. 
 
     Optional remodeling parameters:    
        - **expand_context** (*bool*): If True, include counts from expanded context (not supported).   
 
-    The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
-    is often used with 'condition-variable' to produce a summary of the experimental design.
+    The purpose of this op is to produce a summary of the occurrences of hed tags organized in a specified manner.
+    The
 
 
     """
@@ -35,15 +35,16 @@ class SummarizeHedTagsOp(BaseOp):
         },
         "optional_parameters": {
             "append_timecode": bool,
-            "expand_context": bool,
-            "expand_definitions": bool
+            "include_context": bool,
+            "replace_defs": bool,
+            "remove_types": list
         }
     }
 
     SUMMARY_TYPE = "hed_tag_summary"
 
     def __init__(self, parameters):
-        """ Constructor for the summarize hed tags operation.
+        """ Constructor for the summarize_hed_tags operation.
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
@@ -61,7 +62,9 @@ class SummarizeHedTagsOp(BaseOp):
         self.summary_filename = parameters['summary_filename']
         self.tags = parameters['tags']
         self.append_timecode = parameters.get('append_timecode', False)
-        self.expand_context = parameters.get('expand_context', False)
+        self.include_context = parameters.get('include_context', True)
+        self.replace_defs = parameters.get("replace_defs", True)
+        self.remove_types = parameters.get("remove_types", ["Condition-variable", "Task"])
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Summarize the HED tags present in the dataset.
@@ -75,7 +78,7 @@ class SummarizeHedTagsOp(BaseOp):
         Returns:
             DataFrame: A copy of df.
 
-        Side-effect:
+        Side effect:
             Updates the context.
 
         """
@@ -93,8 +96,7 @@ class HedTagSummary(BaseSummary):
 
     def __init__(self, sum_op):
         super().__init__(sum_op)
-        self.tags = sum_op.tags
-        self.expand_context = sum_op.expand_context
+        self.sum_op = sum_op
 
     def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.
@@ -107,15 +109,12 @@ class HedTagSummary(BaseSummary):
 
         """
         counts = HedTagCounts(new_info['name'], total_events=len(new_info['df']))
-        sidecar = new_info['sidecar']
-        if sidecar and not isinstance(sidecar, Sidecar):
-            sidecar = Sidecar(sidecar)
-        input_data = TabularInput(new_info['df'], sidecar=sidecar, name=new_info['name'])
-        hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'],
-                                                 extra_def_dicts=None, join_columns=True,
-                                                 shrink_defs=False, expand_defs=True)
-        # definitions = input_data.get_definitions().gathered_defs
-        for hed in hed_strings:
+        input_data = TabularInput(new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
+        tag_man = HedTagManager(EventManager(input_data, new_info['schema']), 
+                                remove_types=self.sum_op.remove_types)
+        hed_objs = tag_man.get_hed_objs(include_context=self.sum_op.include_context, 
+                                        replace_defs=self.sum_op.replace_defs)
+        for hed in hed_objs:
             counts.update_event_counts(hed, new_info['name'])
         self.summary_dict[new_info["name"]] = counts
 
@@ -129,9 +128,9 @@ class HedTagSummary(BaseSummary):
             dict: dictionary with the summary results.
 
         """
-        template, unmatched = tag_counts.organize_tags(self.tags)
+        template, unmatched = tag_counts.organize_tags(self.sum_op.tags)
         details = {}
-        for key, key_list in self.tags.items():
+        for key, key_list in self.sum_op.tags.items():
             details[key] = self._get_details(key_list, template, verbose=True)
         leftovers = [value.get_info(verbose=True) for value in unmatched]
         return {"Name": tag_counts.name, "Total events": tag_counts.total_events,
@@ -177,7 +176,7 @@ class HedTagSummary(BaseSummary):
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return  a string with the overall summary for all of the tabular files.
+        """ Return  a string with the overall summary for all the tabular files.
 
         Parameters:
             result (dict): Dictionary of merged summary information.

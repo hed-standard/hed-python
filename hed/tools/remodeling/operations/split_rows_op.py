@@ -110,7 +110,7 @@ class SplitRowsOp(BaseOp):
 
     @staticmethod
     def _create_onsets(df, onset_source):
-        """ Create a vector of onsets for the the new events.
+        """ Create a vector of onsets for the new events.
 
         Parameters:
             df (DataFrame):  The dataframe to process.

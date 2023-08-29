@@ -1,4 +1,4 @@
-""" Summarizes the contents of tabular files. """
+""" Summarize the contents of tabular files. """
 
 
 import json
@@ -134,7 +134,7 @@ class TabularSummary:
 
         Notes:
             - The value_cols and skip_cols are updated as long as they are not contradictory.
-            - A new skip column cannot used.
+            - A new skip column cannot be used.
 
         """
         self.total_files = self.total_files + tab_sum.total_files
@@ -222,7 +222,7 @@ class TabularSummary:
 
         Parameters:
             summary_info (dict or str):  A JSON string or a dictionary containing contents of a TabularSummary.
-            
+
         Returns:
             TabularSummary:  contains the information in summary_info as a TabularSummary object.
         """

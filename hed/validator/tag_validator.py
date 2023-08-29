@@ -110,7 +110,7 @@ class TagValidator:
 
         Notes:
             - This is for the top-level, all groups, and nested groups.
-            - This can contain definitions, Onset, etc tags.
+            - This can contain type_defs, Onset, etc tags.
 
         """
         validation_issues = []
@@ -424,7 +424,7 @@ class TagValidator:
             list: Validation issues. Each issue is a dictionary.
 
         Notes:
-            - Top-level groups can contain definitions, Onset, etc tags.
+            - Top-level groups can contain type_defs, Onset, etc tags.
         """
         validation_issues = []
         top_level_tags = [tag for tag in original_tag_list if

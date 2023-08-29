@@ -7,7 +7,7 @@ from hed.tools.remodeling.backup_manager import BackupManager
 
 
 def get_parser():
-    """ Create a parser for the run_remodel_backup command-line arguments. 
+    """ Create a parser for the run_remodel_backup command-line arguments.
 
     Returns:
         argparse.ArgumentParser:  A parser for parsing the command line arguments.
@@ -45,7 +45,7 @@ def main(arg_list=None):
                                    Otherwise, called with the command-line parameters as an argument list.
 
     :raises HedFileError:
-        - If the specified backup already exists.  
+        - If the specified backup already exists.
 
     """
 
