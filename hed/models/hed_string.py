@@ -97,7 +97,7 @@ class HedString(HedGroup):
         # Deep copy the attributes that need it(most notably, we don't copy schema/schema entry)
         new_string._original_children = copy.deepcopy(self._original_children, memo)
         new_string._from_strings = copy.deepcopy(self._from_strings, memo)
-        new_string._children = copy.deepcopy(self._children, memo)
+        new_string.children = copy.deepcopy(self.children, memo)
 
         return new_string
 

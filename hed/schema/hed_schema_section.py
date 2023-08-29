@@ -145,7 +145,7 @@ class HedSchemaSection:
         return bool(self.all_names)
 
     def _finalize_section(self, hed_schema):
-        for entry in self.values():
+        for entry in self.all_entries:
             entry.finalize_entry(hed_schema)
 
 
