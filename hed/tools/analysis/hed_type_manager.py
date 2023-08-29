@@ -1,4 +1,4 @@
-""" Manager for type factors and type type_defs. """
+""" Manager for type factors and type definitions. """
 
 import pandas as pd
 import json
@@ -14,7 +14,7 @@ class HedTypeManager:
             event_manager (EventManager): an event manager for the tabular file.
 
         :raises HedFileError:
-            - On errors such as unmatched onsets or missing type_defs.
+            - On errors such as unmatched onsets or missing definitions.
 
         """
 

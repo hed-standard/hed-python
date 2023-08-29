@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         self.assertNotEqual(first_str1.find('Def/'), -1, "assemble_hed with no def expand has Def tags")
         self.assertEqual(first_str1.find('Def-expand'), -1,
                          "assemble_hed with no def expand does not have Def-expand tags")
-        self.assertIsInstance(dict1.defs, dict, "hed_assemble returns a dictionary of type_defs")
+        self.assertIsInstance(dict1.defs, dict, "hed_assemble returns a dictionary of definitions")
         self.assertEqual(len(dict1.defs), 17, "hed_assemble definition dictionary has the right number of elements.")
 
     def test_assemble_hed_included_expand(self):
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
         self.assertNotEqual(first_str1.find('Def/'), -1, "assemble_hed with no def expand has Def tags")
         self.assertEqual(first_str1.find('Def-expand'), -1,
                          "assemble_hed with no def expand does not have Def-expand tags")
-        self.assertIsInstance(dict1, DefinitionDict, "hed_assemble returns a dictionary of type_defs")
+        self.assertIsInstance(dict1, DefinitionDict, "hed_assemble returns a dictionary of definitions")
         self.assertEqual(len(dict1.defs), 17, "hed_assemble definition dictionary has the right number of elements.")
 
     def test_assemble_hed_no_included_expand(self):

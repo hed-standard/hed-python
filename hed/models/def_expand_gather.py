@@ -81,14 +81,14 @@ class AmbiguousDef:
 
 
 class DefExpandGatherer:
-    """Class for gathering type_defs from a series of def-expands, including possibly ambiguous ones"""
+    """Class for gathering definitions from a series of def-expands, including possibly ambiguous ones"""
     def __init__(self, hed_schema, known_defs=None, ambiguous_defs=None, errors=None):
         """Initialize the DefExpandGatherer class.
 
         Parameters:
             hed_schema (HedSchema): The HED schema to be used for processing.
-            known_defs (dict, optional): A dictionary of known type_defs.
-            ambiguous_defs (dict, optional): A dictionary of ambiguous def-expand type_defs.
+            known_defs (dict, optional): A dictionary of known definitions.
+            ambiguous_defs (dict, optional): A dictionary of ambiguous def-expand definitions.
 
         """
         self.hed_schema = hed_schema
@@ -101,10 +101,10 @@ class DefExpandGatherer:
 
         Parameters:
             hed_strings (pd.Series or list): A Pandas Series or list of HED strings to be processed.
-            known_defs (dict, optional): A dictionary of known type_defs to be added.
+            known_defs (dict, optional): A dictionary of known definitions to be added.
 
         Returns:
-            tuple: A tuple containing the DefinitionDict, ambiguous type_defs, and errors.
+            tuple: A tuple containing the DefinitionDict, ambiguous definitions, and errors.
         """
         if not isinstance(hed_strings, pd.Series):
             hed_strings = pd.Series(hed_strings)
@@ -120,7 +120,7 @@ class DefExpandGatherer:
         return self.def_dict, self.ambiguous_defs, self.errors
 
     def _process_def_expand(self, string):
-        """Process a single HED string to extract type_defs and handle known and ambiguous type_defs.
+        """Process a single HED string to extract definitions and handle known and ambiguous definitions.
 
         Parameters:
             string (str): The HED string to be processed.

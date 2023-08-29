@@ -10,10 +10,10 @@ class DefValidator(DefinitionDict):
 
     """
     def __init__(self, def_dicts=None, hed_schema=None):
-        """ Initialize for type_defs in hed strings.
+        """ Initialize for definitions in hed strings.
 
         Parameters:
-            def_dicts (list or DefinitionDict or str): DefinitionDicts containing the type_defs to pass to baseclass
+            def_dicts (list or DefinitionDict or str): DefinitionDicts containing the definitions to pass to baseclass
             hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
         """
         super().__init__(def_dicts, hed_schema=hed_schema)

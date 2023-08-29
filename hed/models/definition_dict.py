@@ -7,7 +7,7 @@ from hed.schema.hed_schema_constants import HedKey
 
 
 class DefinitionDict:
-    """ Gathers type_defs from a single source.
+    """ Gathers definitions from a single source.
 
     """
 
@@ -16,7 +16,7 @@ class DefinitionDict:
 
         Parameters:
             def_dicts (str or list or DefinitionDict): DefDict or list of DefDicts/strings or
-                a single string whose type_defs should be added.
+                a single string whose definitions should be added.
             hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
         :raises TypeError:
@@ -30,7 +30,7 @@ class DefinitionDict:
             self.add_definitions(def_dicts, hed_schema)
 
     def add_definitions(self, def_dicts, hed_schema=None):
-        """ Add type_defs from dict(s) to this dict.
+        """ Add definitions from dict(s) to this dict.
 
         Parameters:
             def_dicts (list, DefinitionDict, or dict): DefinitionDict or list of DefinitionDicts/strings/dicts whose
@@ -63,7 +63,7 @@ class DefinitionDict:
             self.defs[def_tag] = def_value
 
     def _add_definitions_from_dict(self, def_dict):
-        """ Add the type_defs found in the given definition dictionary to this mapper.
+        """ Add the definitions found in the given definition dictionary to this mapper.
 
          Parameters:
              def_dict (DefinitionDict or dict): DefDict whose definitions should be added.
@@ -92,29 +92,29 @@ class DefinitionDict:
         return len(self.defs)
 
     def items(self):
-        """ Returns the dictionary of type_defs
+        """ Returns the dictionary of definitions
 
             Alias for .defs.items()
 
         Returns:
-            def_entries({str: DefinitionEntry}): A list of type_defs
+            def_entries({str: DefinitionEntry}): A list of definitions
         """
         return self.defs.items()
 
     @property
     def issues(self):
-        """Returns issues about duplicate type_defs."""
+        """Returns issues about duplicate definitions."""
         return self._issues
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
         """ Check string for definition tags, adding them to self.
 
         Parameters:
-            hed_string_obj (HedString): A single hed string to gather type_defs from.
-            error_handler (ErrorHandler or None): Error context used to identify where type_defs are found.
+            hed_string_obj (HedString): A single hed string to gather definitions from.
+            error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
 
         Returns:
-            list:  List of issues encountered in checking for type_defs. Each issue is a dictionary.
+            list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
         """
         def_issues = []
         for definition_tag, group in hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}):
@@ -302,7 +302,7 @@ class DefinitionDict:
         """ Convert the entries to strings of the contents
 
         Parameters:
-            def_dict(DefinitionDict or dict): A dict of type_defs
+            def_dict(DefinitionDict or dict): A dict of definitions
 
         Returns:
             dict(str: str): definition name and contents

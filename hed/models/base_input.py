@@ -172,7 +172,7 @@ class BaseInput:
 
         Parameters:
             hed_schema (HedSchema or None): The schema to use to identify defs
-            def_dict (DefinitionDict): The type_defs to expand
+            def_dict (DefinitionDict): The definitions to expand
         """
         from df_util import expand_defs
         expand_defs(self._dataframe, hed_schema=hed_schema, def_dict=def_dict, columns=self._mapper.get_tag_columns())
@@ -325,7 +325,7 @@ class BaseInput:
 
         Parameters:
             hed_schema(HedSchema): The schema to use for validation
-            extra_def_dicts(list of DefDict or DefDict): all type_defs to use for validation
+            extra_def_dicts(list of DefDict or DefDict): all definitions to use for validation
             name(str): The name to report errors from this file as
             error_handler (ErrorHandler): Error context to use.  Creates a new one if None
         Returns:
@@ -470,7 +470,7 @@ class BaseInput:
         Note: Baseclass implementation returns just extra_def_dicts.
 
         Parameters:
-            hed_schema(HedSchema): used to identify tags to find type_defs(if needed)
+            hed_schema(HedSchema): used to identify tags to find definitions(if needed)
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:

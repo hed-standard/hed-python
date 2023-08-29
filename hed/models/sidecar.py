@@ -54,12 +54,12 @@ class Sidecar:
 
     @property
     def def_dict(self):
-        """This is the type_defs from this sidecar.
+        """This is the definitions from this sidecar.
 
-            Generally you should instead call get_def_dict to get the relevant type_defs
+            Generally you should instead call get_def_dict to get the relevant definitions
 
         Returns:
-            DefinitionDict: The type_defs for this sidecar
+            DefinitionDict: The definitions for this sidecar
         """
         return self._def_dict
 
@@ -76,7 +76,7 @@ class Sidecar:
         """ Returns the definition dict for this sidecar.
 
         Parameters:
-            hed_schema(HedSchema): used to identify tags to find type_defs
+            hed_schema(HedSchema): used to identify tags to find definitions
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:
@@ -192,14 +192,14 @@ class Sidecar:
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name) from e
 
     def extract_definitions(self, hed_schema, error_handler=None):
-        """ Gather and validate type_defs in metadata.
+        """ Gather and validate definitions in metadata.
 
         Parameters:
             hed_schema (HedSchema): The schema to used to identify tags.
             error_handler (ErrorHandler or None): The error handler to use for context, uses a default one if None.
 
         Returns:
-            DefinitionDict: Contains all the type_defs located in the sidecar.
+            DefinitionDict: Contains all the definitions located in the sidecar.
 
         """
         if error_handler is None:

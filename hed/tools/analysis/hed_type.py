@@ -16,7 +16,7 @@ class HedType:
             type_tag (str): Lowercase short form of the tag to be managed.
 
         :raises HedFileError:
-            - On errors such as unmatched onsets or missing type_defs.
+            - On errors such as unmatched onsets or missing definitions.
 
         """
         self.name = name
@@ -59,7 +59,7 @@ class HedType:
         return set(self._type_map.keys())
 
     def get_type_def_names(self):
-        """ Return the type_defs """
+        """ Return the type defs names """
         tag_list = []
         for variable, factor in self._type_map.items():
             tag_list = tag_list + [key for key in factor.levels.keys()]

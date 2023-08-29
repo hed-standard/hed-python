@@ -58,7 +58,7 @@ class TabularInput(BaseInput):
         """ Returns the definition dict for this sidecar.
 
         Parameters:
-            hed_schema(HedSchema): used to identify tags to find type_defs
+            hed_schema(HedSchema): used to identify tags to find definitions
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:
