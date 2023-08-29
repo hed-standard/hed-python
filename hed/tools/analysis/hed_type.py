@@ -1,6 +1,6 @@
 """ Manages a type variable and its associated context. """
 import pandas as pd
-from hed.models import HedGroup, HedString, HedTag
+from hed.models import HedGroup, HedTag
 from hed.tools.analysis.hed_type_defs import HedTypeDefs
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 

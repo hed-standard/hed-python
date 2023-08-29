@@ -66,7 +66,7 @@ class SummarizeHedValidationOp(BaseOp):
         Returns:
             DataFrame: A copy of df
 
-        Side-effect:
+        Side effect:
             Updates the relevant summary.
 
         """

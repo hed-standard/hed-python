@@ -68,7 +68,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         Returns:
             DataFrame: A copy of df.
 
-        Side-effect:
+        Side effect:
             Updates the associated summary if applicable.
 
         """

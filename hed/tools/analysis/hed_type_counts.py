@@ -123,9 +123,9 @@ class HedTypeCounts:
         """
 
         for type_val, type_count in self.type_dict.items():
-            if type_val not in type_defs.type_to_def_map:
+            if type_val not in type_defs.type_map:
                 continue
-            for level in type_defs.type_to_def_map[type_val]:
+            for level in type_defs.type_map[type_val]:
                 if level not in type_count.level_counts:
                     continue
                 level_dict = type_defs.def_map[level]

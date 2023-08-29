@@ -3,8 +3,6 @@ import unittest
 from pandas import DataFrame
 from hed.models import DefinitionDict
 from hed.models.hed_string import HedString
-from hed.models.hed_tag import HedTag
-from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager
@@ -61,7 +59,7 @@ class Test(unittest.TestCase):
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                           '../../data/bids_tests/eeg_ds003645s_hed'))
         events_path = os.path.realpath(os.path.join(bids_root_path,
-                                           'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
+                                       'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         cls.input_data = TabularInput(events_path, sidecar_path)
         cls.schema = schema
@@ -75,21 +73,23 @@ class Test(unittest.TestCase):
 
     def test_constructor_from_tabular_input(self):
         event_man = EventManager(self.input_data, self.schema)
-        remove_types = []
         tag_man1 = HedTagManager(EventManager(self.input_data, self.schema))
         self.assertIsInstance(tag_man1, HedTagManager)
-        hed_objs1a = tag_man1.get_hed_objs(include_context=False)
-        hed_objs1b = tag_man1.get_hed_objs(include_context=True)
+        hed_objs1a = tag_man1.get_hed_objs(include_context=False, replace_defs=False)
+        hed_objs1b = tag_man1.get_hed_objs(include_context=True, replace_defs=False)
         hed_objs1c = tag_man1.get_hed_objs(include_context=False, replace_defs=True)
         hed_objs1d = tag_man1.get_hed_objs(include_context=True, replace_defs=True)
         tag_man2 = HedTagManager(event_man, remove_types=['Condition-variable', 'Task'])
-        hed_objs2a = tag_man2.get_hed_objs(include_context=False)
-        hed_objs2b = tag_man2.get_hed_objs(include_context=True)
-        self.assertIsInstance(tag_man1, HedTagManager)
-        self.assertIsInstance(tag_man1, HedTagManager)
+        hed_objs2a = tag_man2.get_hed_objs(include_context=False, replace_defs=False)
+        hed_objs2b = tag_man2.get_hed_objs(include_context=True, replace_defs=False)
+        hed_objs1c = tag_man2.get_hed_objs(include_context=False, replace_defs=True)
+        hed_objs1d = tag_man2.get_hed_objs(include_context=True, replace_defs=True)
+        self.assertIsInstance(tag_man2, HedTagManager)
+        self.assertIsInstance(tag_man2, HedTagManager)
 
     def test_get_hed_objs(self):
         event_man = EventManager(self.input_data, self.schema)
+        tag_man1 = HedTagManager(EventManager(self.input_data, self.schema))
         # tag_man = HedTagManager(event_man, remove_types=['Condition-variable', 'Task'])
         # hed_objs = tag_man.get_hed_objs()
         # self.assertIsInstance(hed_objs, list)
@@ -101,19 +101,19 @@ class Test(unittest.TestCase):
     #     event_man = EventManager(input_data, self.schema)
     #     var_manager = HedType(event_man, 'run-01')
     #     self.assertIsInstance(var_manager, HedType, "Constructor should create a HedTypeManager variable caps")
-    # 
+    #
     # def test_constructor_multiple_values(self):
     #     type_var = HedType(self.event_man2, 'test-it')
     #     self.assertIsInstance(type_var, HedType, "Constructor should create a HedType from an event manager")
     #     self.assertEqual(len(type_var._type_map), 3,
     #                      "Constructor should have right number of type_variables if multiple")
-    # 
+    #
     # def test_constructor_unmatched(self):
     #     with self.assertRaises(KeyError) as context:
     #         event_man = EventManager(self.input_data3, self.schema, extra_defs=self.def_dict)
     #         HedType(event_man, 'run-01')
     #     self.assertEqual(context.exception.args[0], 'cond3')
-    # 
+    #
     # def test_get_variable_factors(self):
     #     sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
     #     input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
@@ -128,7 +128,7 @@ class Test(unittest.TestCase):
     #     self.assertEqual(len(df_new2.columns), 3)
     #     df_new3 = var_manager.get_type_factors(type_values=["junk"])
     #     self.assertIsNone(df_new3)
-    # 
+    #
     # def test_str(self):
     #     sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
     #     input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
@@ -136,7 +136,7 @@ class Test(unittest.TestCase):
     #     var_manager = HedType(event_man, 'run-01')
     #     new_str = str(var_manager)
     #     self.assertIsInstance(new_str, str)
-    # 
+    #
     # def test_summarize_variables(self):
     #     sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
     #     input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
@@ -146,7 +146,7 @@ class Test(unittest.TestCase):
     #     self.assertIsInstance(summary, dict, "get_summary produces a dictionary if not json")
     #     self.assertEqual(len(summary), 3, "Summarize_variables has right number of condition type_variables")
     #     self.assertIn("key-assignment", summary, "get_summary has a correct key")
-    # 
+    #
     # def test_extract_definition_variables(self):
     #     var_manager = HedType(self.event_man1, 'run-01')
     #     var_levels = var_manager._type_map['var3'].levels
@@ -156,12 +156,12 @@ class Test(unittest.TestCase):
     #     var_manager._extract_definition_variables(tag, 5)
     #     self.assertIn('cond3/7', var_levels,
     #                   "_extract_definition_variables after extraction def/cond3/7 not in levels")
-    # 
+    #
     # def test_get_variable_names(self):
     #     conditions1 = HedType(self.event_man1, 'run-01')
     #     list1 = conditions1.get_type_value_names()
     #     self.assertEqual(len(list1), 8, "get_variable_tags list should have the right length")
-    # 
+    #
     # def test_get_variable_def_names(self):
     #     conditions1 = HedType(self.event_man1, 'run-01')
     #     list1 = conditions1.get_type_def_names()

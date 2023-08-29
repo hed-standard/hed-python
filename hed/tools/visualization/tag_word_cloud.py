@@ -51,10 +51,10 @@ def summary_to_dict(summary, transform=np.log10, adjustment=5):
         adjustment(int): Value added after transform.
     Returns:
         word_dict(dict): a dict of the words and their occurrence count
-        
+
     :raises KeyError:
         A malformed dictionary was passed
-        
+
     """
     if transform is None:
         transform = lambda x: x

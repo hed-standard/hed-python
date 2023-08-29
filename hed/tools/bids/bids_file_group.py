@@ -1,9 +1,8 @@
 """ A group of BIDS files with specified suffix name. """
 
 import os
-from hed.errors.error_reporter import ErrorContext, ErrorHandler
+from hed.errors.error_reporter import ErrorHandler
 from hed.validator.sidecar_validator import SidecarValidator
-from hed.validator.spreadsheet_validator import SpreadsheetValidator
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
@@ -129,10 +128,10 @@ class BidsFileGroup:
         error_handler = ErrorHandler(check_for_warnings)
         issues = []
         validator = SidecarValidator(hed_schema)
-        
+
         for sidecar in self.sidecar_dict.values():
             name = os.path.basename(sidecar.file_path)
-            issues += validator.validate(sidecar.contents, extra_def_dicts=extra_def_dicts, name=name, 
+            issues += validator.validate(sidecar.contents, extra_def_dicts=extra_def_dicts, name=name,
                                          error_handler=error_handler)
         return issues
 
@@ -155,7 +154,7 @@ class BidsFileGroup:
         for data_obj in self.datafile_dict.values():
             data_obj.set_contents(overwrite=False)
             name = os.path.basename(data_obj.file_path)
-            issues += data_obj.contents.validate(hed_schema, extra_def_dicts=None, name=name, 
+            issues += data_obj.contents.validate(hed_schema, extra_def_dicts=extra_def_dicts, name=name,
                                                  error_handler=error_handler)
             if not keep_contents:
                 data_obj.clear_contents()
@@ -185,7 +184,7 @@ class BidsFileGroup:
             dict:   a dictionary of BidsSidecarFile objects keyed by real path for the specified suffix type
 
         Notes:
-            - This function creates the sidecars and but does not set their contents.
+            - This function creates the sidecars, but does not set their contents.
 
         """
         files = get_file_list(self.root_path, name_suffix=self.suffix,

@@ -32,7 +32,7 @@ class TemporalEvent:
                 to_remove.append(item)
             elif item.short_base_tag.lower() == "duration":
                 to_remove.append(item)
-                self.end_time = self.short_time + float(item.extension.lower()) # Will need to be fixed for units
+                self.end_time = self.short_time + float(item.extension.lower())  # Will need to be fixed for units
             elif item.short_base_tag.lower() == "def":
                 self.anchor = item.short_tag
         contents.remove(to_remove)

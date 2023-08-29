@@ -62,39 +62,55 @@ class Test(unittest.TestCase):
                               "Constructor should create a HedTypeDefinitions from a tabular input")
         self.assertEqual(len(def_man.def_map), 8, "Constructor condition_map should have the right length")
         self.assertEqual(len(def_man.definitions), len(definitions))
-        defs = def_man.get_type_def_names()
+        defs = def_man.type_def_names
         self.assertIsInstance(defs, list)
         self.assertEqual(len(defs), 8)
 
-    def test_get_vars(self):
+    def test_constructor_from_tabular(self):
+        def_dict = self.input_data.get_def_dict(self.schema)
+        def_man = HedTypeDefs(def_dict, type_tag="Condition-variable")
+        self.assertIsInstance(def_man, HedTypeDefs)
+        self.assertEqual(len(def_man.def_map), 8)
+        self.assertEqual(len(def_man.type_map), 3)
+        self.assertEqual(len(def_man.type_def_names), 8)
+
+    def test_get_type_values_tabular(self):
+        def_dict = self.input_data.get_def_dict(self.schema)
+        def_man = HedTypeDefs(def_dict, type_tag="Condition-variable")
+        test_str = HedString("Sensory-event, Def/Right-sym-cond", self.schema)
+        values1 = def_man.get_type_values(test_str)
+        self.assertIsInstance(values1, list)
+        self.assertEqual(1, len(values1))
+
+    def test_get_type_values(self):
         def_man = HedTypeDefs(self.definitions1)
         item1 = HedString("Sensory-event,((Red,Blue)),", self.schema)
         vars1 = def_man.get_type_values(item1)
         self.assertFalse(vars1, "get_type_values should return None if no condition type_variables")
         item2 = HedString(f"Sensory-event,(Def/Cond1,(Red,Blue,Condition-variable/Trouble))", self.schema)
         vars2 = def_man.get_type_values(item2)
-        self.assertEqual(len(vars2), 1, "get_type_values should return correct number of condition type_variables")
+        self.assertEqual(1, len(vars2), "get_type_values should return correct number of condition type_variables")
         item3 = HedString(f"Sensory-event,(Def/Cond1,(Red,Blue,Condition-variable/Trouble)),"
                           f"(Def/Cond2),Green,Yellow,Def/Cond5, Def/Cond6/4, Description/Tell me", self.schema)
         vars3 = def_man.get_type_values(item3)
         self.assertEqual(len(vars3), 5, "get_type_values should return multiple condition type_variables")
 
-    def test_get_def_names(self):
+    def test_extract_def_names(self):
         def_man = HedTypeDefs(self.definitions1)
-        a = def_man.get_def_names(HedTag('Def/Cond3/4', hed_schema=self.schema))
+        a = def_man.extract_def_names(HedTag('Def/Cond3/4', hed_schema=self.schema))
         self.assertEqual(len(a), 1, "get_def_names returns 1 item if single tag")
         self.assertEqual(a[0], 'cond3', "get_def_names returns the correct item if single tag")
-        b = def_man.get_def_names(HedTag('Def/Cond3/4', hed_schema=self.schema), no_value=False)
+        b = def_man.extract_def_names(HedTag('Def/Cond3/4', hed_schema=self.schema), no_value=False)
         self.assertEqual(len(b), 1, "get_def_names returns 1 item if single tag")
         self.assertEqual(b[0], 'cond3/4', "get_def_names returns the correct item if single tag")
-        c = def_man.get_def_names(HedString('(Def/Cond3/5,(Red, Blue))', hed_schema=self.schema))
+        c = def_man.extract_def_names(HedString('(Def/Cond3/5,(Red, Blue))', hed_schema=self.schema))
         self.assertEqual(len(c), 1, "get_def_names returns 1 item if single group def")
         self.assertEqual(c[0], 'cond3', "get_def_names returns the correct item if single group def")
-        d = def_man.get_def_names(HedString('(Def/Cond3/6,(Red, Blue, Def/Cond1), Def/Cond2)', hed_schema=self.schema),
-                                  no_value=False)
+        d = def_man.extract_def_names(HedString('(Def/Cond3/6,(Red, Blue, Def/Cond1), Def/Cond2)',
+                                                hed_schema=self.schema), no_value=False)
         self.assertEqual(len(d), 3, "get_def_names returns right number of items if multiple defs")
         self.assertEqual(d[0], 'cond3/6', "get_def_names returns the correct item if multiple def")
-        e = def_man.get_def_names(HedString('((Red, Blue, (Green), Black))', hed_schema=self.schema))
+        e = def_man.extract_def_names(HedString('((Red, Blue, (Green), Black))', hed_schema=self.schema))
         self.assertFalse(e, "get_def_names returns no items if no defs")
 
     def test_split_name(self):

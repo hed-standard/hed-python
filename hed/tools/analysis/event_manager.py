@@ -87,28 +87,11 @@ class EventManager:
             to_remove.append(tup[1])
         hed.remove(to_remove)
 
-    # def _set_event_contexts(self):
-        """ Creates an event context for each hed string.
-
-        Notes:
-            The event context would be placed in an event context group, but is kept in a separate array without the
-            event context group or tag.
-
-        """
-        # contexts = [[] for _ in range(len(self.hed_strings))]
-        # for onset in self.onset_list:
-        #     for i in range(onset.start_index+1, onset.end_index):
-        #         contexts[i].append(onset.contents)
-        # for i in range(len(self.hed_strings)):
-        #     contexts[i] = HedString(",".join(contexts[i]), hed_schema=self.hed_schema)
-        # self.contexts = contexts
-
     def unfold_context(self, remove_types=[]):
         """ Unfolds the event information into hed, base, and contexts either as arrays of str or of HedString.
 
         Parameters:
             remove_types (list):  List of types to remove.
-            replace_defs (bool):  If True the def term is replaced by its definition group.
 
         Returns:
             list of str or HedString representing the information without the events of temporal extent
@@ -118,21 +101,21 @@ class EventManager:
         """
 
         placeholder = ""
-        remove_defs = self.find_type_defs(remove_types)
-        hed = [placeholder for _ in range(len(self.hed_strings))]
+        remove_defs = self.get_type_defs(remove_types)
+        new_hed = [placeholder for _ in range(len(self.hed_strings))]
         new_base = [placeholder for _ in range(len(self.hed_strings))]
         new_contexts = [placeholder for _ in range(len(self.hed_strings))]
-        base, contexts = self.expand_context()
+        base, contexts = self._expand_context()
         for index, item in enumerate(self.hed_strings):
-            hed[index] = self._process_hed(item, remove_types=remove_types, 
-                                           remove_defs=remove_defs, remove_group=False)
+            new_hed[index] = self._process_hed(item, remove_types=remove_types,
+                                               remove_defs=remove_defs, remove_group=False)
             new_base[index] = self._process_hed(base[index], remove_types=remove_types,
                                                 remove_defs=remove_defs, remove_group=True)
             new_contexts[index] = self._process_hed(contexts[index], remove_types=remove_types,
                                                     remove_defs=remove_defs, remove_group=True)
-        return hed, new_base, new_contexts   # these are each a list of strings
+        return new_hed, new_base, new_contexts   # these are each a list of strings
 
-    def expand_context(self):
+    def _expand_context(self):
         """ Expands the onset and the ongoing context for additional processing.
 
         """
@@ -152,7 +135,7 @@ class EventManager:
             return ""
         # Reconvert even if hed is already a HedString to make sure a copy and expandable.
         hed_obj = HedString(str(hed), hed_schema=self.hed_schema, def_dict=self.def_dict)
-        hed_obj, temp1 = split_base_tags(hed_obj, remove_types, remove_group=False)
+        hed_obj, temp1 = split_base_tags(hed_obj, remove_types, remove_group=remove_group)
         if remove_defs:
             hed_obj, temp2 = split_def_tags(hed_obj, remove_defs, remove_group=remove_group)
         return str(hed_obj)
@@ -179,24 +162,6 @@ class EventManager:
             if item:
                 result_list[index] = ",".join(item)
         return result_list
-
-    def find_type_defs(self, types):
-        """ Return a list of definition names (lower case) that correspond to one of the specified types.
-
-        Parameters:
-            types (list):  List of tags that are treated as types such as 'Condition-variable'
-
-        Returns:
-            list:  List of definition names (lower-case) that correspond to the specified types
-
-        """
-        def_names = {}
-        if not types:
-            return
-        for type_tag in types:
-            type_defs = HedTypeDefs(self.def_dict, type_tag=type_tag)
-            def_names[type_tag] = type_defs.def_map
-        return def_names
 
     def get_type_defs(self, types):
         """ Return a list of definition names (lower case) that correspond to one of the specified types.

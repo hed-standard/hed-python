@@ -30,74 +30,53 @@ class Test(unittest.TestCase):
         self.assertEqual(len(manager1.event_list[0]), 2)
         self.assertIsInstance(manager1.hed_strings, list)
         self.assertEqual(len(manager1.hed_strings), len(self.input_data.dataframe))
-        # self.assertEqual(len(manager1.event_list), len(self.input_data.dataframe))
-        # event_count = 0
-        # for index, item in enumerate(manager1.event_list):
-        #     for event in item:
-        #         event_count = event_count + 1
-        #         self.assertFalse(event.duration)
-        #         self.assertTrue(event.end_index)
-        #         self.assertEqual(event.start_index, index)
-        #         self.assertEqual(event.start_index, index)
-        #         self.assertEqual(event.start_time, manager1.data.dataframe.loc[index, "onset"])
-        #         if not event.end_time:
-        #             self.assertEqual(event.end_index, len(manager1.data.dataframe))
+        self.assertEqual(len(manager1.event_list), len(self.input_data.dataframe))
+        event_count = 0
+        for index, item in enumerate(manager1.event_list):
+            for event in item:
+                event_count = event_count + 1
+                self.assertTrue(event.end_index)
+                self.assertEqual(event.start_index, index)
+                self.assertEqual(event.start_index, index)
+                self.assertEqual(event.start_time, float(manager1.input_data.dataframe.loc[index, "onset"]))
+                if not event.end_time:
+                    self.assertEqual(event.end_index, len(manager1.input_data.dataframe))
 
-    def test_unfold_context(self):
+    def test_unfold_context_no_remove(self):
         manager1 = EventManager(self.input_data, self.schema)
         hed, base, context = manager1.unfold_context()
+        for index in range(len(manager1.onsets)):
+            self.assertIsInstance(hed[index], str)
+            self.assertIsInstance(base[index], str)
+
+    def test_unfold_context_remove(self):
+        manager1 = EventManager(self.input_data, self.schema)
+        hed, base, context = manager1.unfold_context(remove_types=['Condition-variable', 'Task'])
         for index in range(len(manager1.onsets)):
             self.assertIsInstance(hed[index], str)
             self.assertIsInstance(base[index], str)
         # ToDo  finish tests
 
     def test_str_list_to_hed(self):
-        manager1 = EventManager(self.input_data, self.schema)
-        hed, base, context = manager1.unfold_context()
-        hedObj1 = manager1.str_list_to_hed(['', '', ''])
-        self.assertFalse(hedObj1)
-        hedObj2 = manager1.str_list_to_hed([hed[0], base[0]])
-        self.assertIsInstance(hedObj2, HedString)
+        manager = EventManager(self.input_data, self.schema)
+        hed_obj1 = manager.str_list_to_hed(['', '', ''])
+        self.assertFalse(hed_obj1)
+        hed, base, context = manager.unfold_context()
+
+        hed_obj2 = manager.str_list_to_hed([hed[1], base[1], '(Event-context, (' + context[1] + '))'])
+        self.assertIsInstance(hed_obj2, HedString)
+        self.assertEqual(10, len(hed_obj2.children))
+        hed3, base3, context3 = manager.unfold_context(remove_types=['Condition-variable', 'Task'])
+
+        hed_obj3 = manager.str_list_to_hed([hed3[1], base3[1], '(Event-context, (' + context3[1] + '))'])
+        self.assertIsInstance(hed_obj3, HedString)
+        self.assertEqual(6, len(hed_obj3.children))
 
     def test_get_type_defs(self):
         manager1 = EventManager(self.input_data, self.schema)
         def_names = manager1.get_type_defs(["Condition-variable", "task"])
         self.assertIsInstance(def_names, list)
-
-    def test_fix_list(self):
-        list1 = [[], [HedString('Red,Black', self.schema), HedString('(Green,Blue)', self.schema)],
-                 [HedString('Red,Black', self.schema), HedString('(Green,Blue)', self.schema)]]
-        # a = EventManager.fix_list(list1, self.schema)
-        # b = EventManager.fix_list(list1, self.schema, as_string=True)
-        x = HedString("Red,Black", self.schema)
-        y = [HedString('Red,Black', self.schema), HedString('(Green,Blue)', self.schema)]
-        # ToDo finish test
-
-    # def test_iter(self):
-    #     hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-    #     manager1 = HedContextManager(hed_strings, self.schema)
-    #     i = 0
-    #     for hed, context in manager1.iter_context():
-    #         self.assertEqual(hed, manager1.hed_strings[i])
-    #         self.assertEqual(context, manager1.contexts[i])
-    #         i = i + 1
-
-    # def test_constructor_from_assembled(self):
-    #     hed_strings = get_assembled_strings(self.input_data, hed_schema=self.schema, expand_defs=False)
-    #     manager1 = HedContextManager(hed_strings, self.schema)
-    #     self.assertEqual(len(manager1.hed_strings), 200,
-    #                      "The constructor for assembled strings has expected # of strings")
-    #     self.assertEqual(len(manager1.onset_list), 261,
-    #                      "The constructor for assembled strings has onset_list of correct length")
-
-    # def test_constructor_unmatched(self):
-    #     with self.assertRaises(HedFileError) as context:
-    #         HedContextManager(self.test_strings2, self.schema)
-    #     self.assertEqual(context.exception.args[0], 'UnmatchedOffset')
-
-    # def test_constructor_multiple_values(self):
-    #     manager = HedContextManager(self.test_strings3, self.schema)
-    #     self.assertEqual(len(manager.onset_list), 3, "Constructor should have right number of onsets")
+        self.assertEqual(11, len(def_names))
 
 
 if __name__ == '__main__':
