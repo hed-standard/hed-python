@@ -100,7 +100,7 @@ class MyTestCase(unittest.TestCase):
             error_handler = ErrorHandler(check_for_warnings)
             if schema:
                 schema = load_schema_version(schema)
-                definitions = info['type_defs']
+                definitions = info['definitions']
                 def_dict = DefinitionDict(definitions, schema)
                 self.assertFalse(def_dict.issues)
             else:

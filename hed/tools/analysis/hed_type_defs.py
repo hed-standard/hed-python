@@ -1,4 +1,4 @@
-""" Manages type_defs associated with a type such as condition-variable. """
+""" Manages definitions associated with a type such as condition-variable. """
 
 from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
@@ -84,7 +84,7 @@ class HedTypeDefs:
         return def_map
 
     def _extract_type_map(self):
-        """ Extract the type_defs associated with each type value and add them to the dictionary. """
+        """ Extract the definitions associated with each type value and add them to the dictionary. """
 
         type_map = {}
         for def_name, def_values in self.def_map.items():

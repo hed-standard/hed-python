@@ -118,7 +118,7 @@ class HedTypeCounts:
         """ Update this summary based on the type variable map.
 
         Parameters:
-            type_defs (HedTypeDefinitions):  Contains the information about the value of a type.
+            type_defs (HedTypeDefs):  Contains the information about the value of a type.
 
         """
 

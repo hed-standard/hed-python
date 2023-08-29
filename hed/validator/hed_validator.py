@@ -25,7 +25,7 @@ class HedValidator:
             hed_schema (HedSchema or HedSchemaGroup): HedSchema object to use for validation.
             def_dicts(DefinitionDict or list or dict): the def dicts to use for validation
             run_full_onset_checks(bool): If True, check for matching onset/offset tags
-            definitions_allowed(bool): If False, flag type_defs found as errors
+            definitions_allowed(bool): If False, flag definitions found as errors
         """
         super().__init__()
         self._tag_validator = None

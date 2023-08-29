@@ -16,7 +16,7 @@ class EventManager:
         Parameters:
             input_data (TabularInput): Represents an events file with its sidecar.
             hed_schema (HedSchema): HED schema used in this
-            extra_defs (DefinitionDict):  Extra type_defs not included in the input_data information.
+            extra_defs (DefinitionDict):  Extra definitions not included in the input_data information.
 
         :raises HedFileError:
             - if there are any unmatched offsets.

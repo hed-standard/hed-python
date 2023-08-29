@@ -29,7 +29,7 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
     Returns:
         tuple:
             hed_strings(list of HedStrings):A list of HedStrings or a list of lists of HedStrings
-            def_dict(DefinitionDict): The type_defs from this Sidecar
+            def_dict(DefinitionDict): The definitions from this Sidecar
     """
     if isinstance(sidecar, str):
         sidecar = Sidecar(sidecar)
@@ -105,7 +105,7 @@ def expand_defs(df, hed_schema, def_dict, columns=None):
     Parameters:
         df (pd.Dataframe or pd.Series): The dataframe or series to modify
         hed_schema (HedSchema or None): The schema to use to identify defs
-        def_dict (DefinitionDict): The type_defs to expand
+        def_dict (DefinitionDict): The definitions to expand
         columns (list or None): The columns to modify on the dataframe
     """
     if isinstance(df, pd.Series):
@@ -133,18 +133,18 @@ def _expand_defs(hed_string, hed_schema, def_dict):
 
 
 def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None):
-    """ Gather def-expand tags in the strings/compare with known type_defs to find any differences
+    """ Gather def-expand tags in the strings/compare with known definitions to find any differences
 
     Parameters:
         hed_strings (list or pd.Series): A list of HED strings to process.
         hed_schema (HedSchema): The schema to use
         known_defs (DefinitionDict or list or str or None):
-            A DefinitionDict or anything its constructor takes.  These are the known type_defs going in, that must
+            A DefinitionDict or anything its constructor takes.  These are the known definitions going in, that must
             match perfectly.
-        ambiguous_defs (dict): A dictionary containing ambiguous type_defs
+        ambiguous_defs (dict): A dictionary containing ambiguous definitions
             format TBD.  Currently def name key: list of lists of HED tags values
     Returns:
-        tuple: A tuple containing the DefinitionDict, ambiguous type_defs, and errors.
+        tuple: A tuple containing the DefinitionDict, ambiguous definitions, and errors.
     """
     
     from hed.models.def_expand_gather import DefExpandGatherer

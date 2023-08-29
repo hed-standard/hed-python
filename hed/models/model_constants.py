@@ -5,7 +5,7 @@ ROW_ISSUES = "row_issues"
 
 
 class DefTagNames:
-    """ Source names for type_defs, def labels, and expanded labels"""
+    """ Source names for definitions, def labels, and expanded labels"""
 
     DEF_ORG_KEY = 'Def'
     DEF_EXPAND_ORG_KEY = 'Def-expand'
