@@ -130,7 +130,7 @@ class HedValidator:
             prev_child = child
 
     def _check_for_duplicate_groups(self, original_group):
-        sorted_group = original_group.sorted()
+        sorted_group = original_group._sorted()
         validation_issues = []
         self._check_for_duplicate_groups_recursive(sorted_group, validation_issues)
         return validation_issues

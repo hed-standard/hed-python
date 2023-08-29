@@ -22,12 +22,12 @@ class HedGroup:
         self._parent = None
 
         if contents:
-            self._children = contents
-            for child in self._children:
+            self.children = contents
+            for child in self.children:
                 child._parent = self
         else:
-            self._children = []
-        self._original_children = self._children
+            self.children = []
+        self._original_children = self.children
 
     def append(self, tag_or_group):
         """ Add a tag or group to this group.
@@ -36,7 +36,7 @@ class HedGroup:
             tag_or_group (HedTag or HedGroup): The new object to add to this group.
         """
         tag_or_group._parent = self
-        self._children.append(tag_or_group)
+        self.children.append(tag_or_group)
 
     def check_if_in_original(self, tag_or_group):
         """ Check if the tag or group in original string.
@@ -69,15 +69,15 @@ class HedGroup:
         :raises KeyError:
             - item_to_replace does not exist
         """
-        if self._original_children is self._children:
-            self._original_children = self._children.copy()
+        if self._original_children is self.children:
+            self._original_children = self.children.copy()
 
         replace_index = -1
-        for i, child in enumerate(self._children):
+        for i, child in enumerate(self.children):
             if item_to_replace is child:
                 replace_index = i
                 break
-        self._children[replace_index] = new_contents
+        self.children[replace_index] = new_contents
         new_contents._parent = self
 
     def remove(self, items_to_remove: Iterable[Union[HedTag, 'HedGroup']]):
@@ -96,11 +96,11 @@ class HedGroup:
 
         for item in items_to_remove:
             group = item._parent
-            if group._original_children is group._children:
-                group._original_children = group._children.copy()
+            if group._original_children is group.children:
+                group._original_children = group.children.copy()
 
-            group._children.remove(item)
-            if not group._children and group is not self:
+            group.children.remove(item)
+            if not group.children and group is not self:
                 empty_groups.append(group)
 
         if empty_groups:
@@ -128,9 +128,18 @@ class HedGroup:
 
     def sort(self):
         """ Sort the tags and groups in this HedString in a consistent order."""
-        self.sorted(update_self=True)
+        self._sorted(update_self=True)
 
-    def sorted(self, update_self=False):
+    def sorted(self):
+        """ Returns a sorted copy of this hed group
+
+        Returns:
+            sorted_copy (HedGroup): The sorted copy
+        """
+        string_copy = self.copy()
+        return string_copy._sorted(update_self=True)
+
+    def _sorted(self, update_self=False):
         """ Returns a sorted copy of this hed group as a list of it's children
 
         Parameters:
@@ -146,19 +155,14 @@ class HedGroup:
             if isinstance(child, HedTag):
                 tag_list.append((child, child))
             else:
-                group_list.append((child, child.sorted(update_self)))
+                group_list.append((child, child._sorted(update_self)))
 
         tag_list.sort(key=lambda x: str(x[0]))
         group_list.sort(key=lambda x: str(x[0]))
         output_list = tag_list + group_list
         if update_self:
-            self._children = [x[0] for x in output_list]
+            self.children = [x[0] for x in output_list]
         return [x[1] for x in output_list]
-
-    @property
-    def children(self):
-        """ A list of the direct children. """
-        return self._children
 
     @property
     def is_group(self):
@@ -342,7 +346,7 @@ class HedGroup:
         return None
 
     def __bool__(self):
-        return bool(self._children)
+        return bool(self.children)
 
     def __eq__(self, other):
         """ Test whether other is equal to this object.

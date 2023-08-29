@@ -68,8 +68,8 @@ class Test(unittest.TestCase):
         str5 = str(str_obj5)
         self.assertEqual(str5, '(Label/Cond1),Red')
         for tup in tuples:
-            if len(tup[1]._children) == 1:
-                str_obj5.replace(tup[1], tup[1]._children[0])
+            if len(tup[1].children) == 1:
+                str_obj5.replace(tup[1], tup[1].children[0])
         str5a = str(str_obj5)
         self.assertEqual(str5a, 'Label/Cond1,Red')
 

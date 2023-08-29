@@ -42,7 +42,9 @@ class HedTag:
         self._expandable = None
         self._expanded = False
 
+        self.tag_terms = None  # tuple of all the terms in this tag Lowercase.
         self._calculate_to_canonical_forms(hed_schema)
+
         if def_dict:
             def_dict.construct_def_tag(self)
 
@@ -242,22 +244,6 @@ class HedTag:
         return self._hed_string[self.span[0]:self.span[1]]
 
     @property
-    def tag_terms(self):
-        """ Return a tuple of all the terms in this tag Lowercase.
-
-        Returns:
-            tag_terms (str): Tuple of terms or empty tuple for unidentified tag.
-
-        Notes:
-            - Does not include any extension.
-
-        """
-        if self._schema_entry:
-            return self._schema_entry.tag_terms
-
-        return tuple()
-
-    @property
     def expanded(self):
         """Returns if this is currently expanded or not.
 
@@ -322,8 +308,11 @@ class HedTag:
         self._schema_entry = tag_entry
         self._schema = hed_schema
         if self._schema_entry:
+            self.tag_terms = self._schema_entry.tag_terms
             if remainder:
                 self._extension_value = remainder
+        else:
+            self.tag_terms = tuple()
 
         return tag_issues
 
@@ -339,7 +328,7 @@ class HedTag:
 
         """
         tag_unit_classes = self.unit_classes
-        stripped_value, unit = self._get_tag_units_portion(tag_unit_classes)
+        stripped_value, unit, _ = self._get_tag_units_portion(tag_unit_classes)
         if stripped_value:
             return stripped_value, unit
 
@@ -362,14 +351,14 @@ class HedTag:
         value, _, units = self.extension.rpartition(" ")
         if not value:
             stripped_value = units
-            unit = self.default_unit
+            unit_entry = self.default_unit
+            unit = unit_entry.name
         else:
-            stripped_value, unit = self._get_tag_units_portion(tag_unit_classes)
+            stripped_value, unit, unit_entry = self._get_tag_units_portion(tag_unit_classes)
 
         if stripped_value:
-            if unit.attributes.get("conversionFactor"):
-                conversion_factor = unit.attributes.get("conversionFactor", 1.0)
-                return float(stripped_value) * float(conversion_factor)
+            if unit_entry.get_conversion_factor(unit) is not None:
+                return float(stripped_value) * unit_entry.get_conversion_factor(unit)
 
     @property
     def unit_classes(self):
@@ -567,21 +556,21 @@ class HedTag:
         """
         value, _, units = self.extension.rpartition(" ")
         if not units:
-            return None, None
+            return None, None, None
 
         for unit_class_entry in tag_unit_classes.values():
             all_valid_unit_permutations = unit_class_entry.derivative_units
 
             possible_match = self._find_modifier_unit_entry(units, all_valid_unit_permutations)
             if possible_match and not possible_match.has_attribute(HedKey.UnitPrefix):
-                return value, possible_match
+                return value, units, possible_match
 
             # Repeat the above, but as a prefix
             possible_match = self._find_modifier_unit_entry(value, all_valid_unit_permutations)
             if possible_match and possible_match.has_attribute(HedKey.UnitPrefix):
-                return possible_match, value
+                return units, value, possible_match
 
-        return None, None
+        return None, None, None
 
     @staticmethod
     def _find_modifier_unit_entry(units, all_valid_unit_permutations):
