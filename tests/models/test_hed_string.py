@@ -278,13 +278,13 @@ class TestFromHedStrings(unittest.TestCase):
         self.assertEqual(copied_hed_string._hed_string, original_hed_string._hed_string)
 
         # The _children attribute of copied HedString should not be the same object as the original
-        self.assertNotEqual(id(original_hed_string._children), id(copied_hed_string._children))
+        self.assertNotEqual(id(original_hed_string.children), id(copied_hed_string.children))
 
         # The _children attribute of copied HedString should have the same contents as the original
-        self.assertEqual(copied_hed_string._children, original_hed_string._children)
+        self.assertEqual(copied_hed_string.children, original_hed_string.children)
 
         # The parent of each child in copied_hed_string._children should point to copied_hed_string
-        for child in copied_hed_string._children:
+        for child in copied_hed_string.children:
             self.assertEqual(child._parent, copied_hed_string)
 
         # The _original_children and _from_strings attributes should also be deepcopied
