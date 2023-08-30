@@ -136,8 +136,8 @@ class Test(unittest.TestCase):
         self.assertIsInstance(dispatch.summary_dicts[sum_op3.summary_name], HedTagSummary)
         counts3 = dispatch.summary_dicts[sum_op3.summary_name].summary_dict['subj2_run1']
         self.assertIsInstance(counts3, HedTagCounts)
-        self.assertEqual(32, len(counts3.tag_dict))
-        # self.assertIn('event-context', counts3.tag_dict) TODO: Fix this
+        self.assertEqual(33, len(counts3.tag_dict))
+        self.assertIn('event-context', counts3.tag_dict)
         self.assertNotIn('def', counts3.tag_dict)
         self.assertNotIn('task', counts3.tag_dict)
         self.assertNotIn('condition-variable', counts3.tag_dict)

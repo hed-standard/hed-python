@@ -59,11 +59,31 @@ class HedGroup:
 
         return self._check_in_group(tag_or_group, final_list)
 
-    def replace(self, item_to_replace, new_contents):
+    @staticmethod
+    def replace(item_to_replace, new_contents):
         """ Replace an existing tag or group.
+
+            Note: This is a static method that relies on the parent attribute of item_to_replace.
 
         Parameters:
             item_to_replace (HedTag or HedGroup): The item to replace must exist or this will raise an error.
+            new_contents (HedTag or HedGroup): Replacement contents.
+
+        :raises KeyError:
+            - item_to_replace does not exist
+
+        :raises AttributeError:
+            - item_to_replace has no parent set
+        """
+        parent = item_to_replace._parent
+        parent._replace(item_to_replace=item_to_replace, new_contents=new_contents)
+
+    def _replace(self, item_to_replace, new_contents):
+        """ Replace an existing tag or group.
+
+        Parameters:
+            item_to_replace (HedTag or HedGroup): The item to replace must exist and be a direct child,
+                                                  or this will raise an error.
             new_contents (HedTag or HedGroup): Replacement contents.
 
         :raises KeyError:
@@ -72,13 +92,13 @@ class HedGroup:
         if self._original_children is self.children:
             self._original_children = self.children.copy()
 
-        replace_index = -1
         for i, child in enumerate(self.children):
             if item_to_replace is child:
-                replace_index = i
-                break
-        self.children[replace_index] = new_contents
-        new_contents._parent = self
+                self.children[i] = new_contents
+                new_contents._parent = self
+                return
+
+        raise KeyError(f"The tag {item_to_replace} not found in the group.")
 
     def remove(self, items_to_remove: Iterable[Union[HedTag, 'HedGroup']]):
         """ Remove any tags/groups in items_to_remove.
@@ -476,7 +496,7 @@ class HedGroup:
             for group in groups:
                 def_tags += self._get_def_tags_from_group(group)
         else:
-            def_tags =  self._get_def_tags_from_group(self)
+            def_tags = self._get_def_tags_from_group(self)
 
         if include_groups == 0 or include_groups == 1 or include_groups == 2:
             return [tag[include_groups] for tag in def_tags]
