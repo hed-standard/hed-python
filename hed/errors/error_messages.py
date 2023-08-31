@@ -339,6 +339,11 @@ def onset_error_offset_before_onset(tag):
     return f"Offset tag '{tag}' does not have a matching onset."
 
 
+@hed_tag_error(OnsetErrors.ONSET_SAME_DEFS_ONE_ROW, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+def onset_error_same_defs_one_row(tag, def_name):
+    return f"'{tag}' uses name '{def_name}', which was already used at this onset time."
+
+
 @hed_tag_error(OnsetErrors.INSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_error_inset_before_onset(tag):
     return f"Inset tag '{tag}' does not have a matching onset."

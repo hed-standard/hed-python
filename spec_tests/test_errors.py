@@ -57,7 +57,6 @@ known_errors = [
 
 skip_tests = {
     "VERSION_DEPRECATED": "Not applicable",
-    "onset-offset-inset-error-duplicated-onset-or-offset": "TBD how we implement this",
     "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
 }
 
@@ -139,7 +138,7 @@ class MyTestCase(unittest.TestCase):
                 self.fail_count.append(name)
 
     def _run_single_string_test(self, info, schema, def_dict, error_code, description, name, error_handler):
-        string_validator = HedValidator(hed_schema=schema, def_dicts=def_dict, run_full_onset_checks=False)
+        string_validator = HedValidator(hed_schema=schema, def_dicts=def_dict)
         for result, tests in info.items():
             for test in tests:
                 test_string = HedString(test, schema)

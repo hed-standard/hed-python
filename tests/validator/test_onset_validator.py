@@ -5,7 +5,7 @@ import os
 from hed.errors import ErrorHandler, OnsetErrors, ErrorContext, ValidationErrors
 from hed.models import HedString, DefinitionDict
 from hed import schema
-from hed.validator import HedValidator, OnsetValidator
+from hed.validator import HedValidator, OnsetValidator, DefValidator
 
 from tests.validator.test_tag_validator_base import TestHedBase
 
@@ -39,27 +39,32 @@ class Test(TestHedBase):
         def_string = HedString(cls.definition_string, hed_schema=cls.hed_schema)
         cls.def_dict_both.check_for_definitions(def_string)
 
-
     def _test_issues_base(self, test_strings, test_issues, test_context, placeholder_def_only):
         if placeholder_def_only:
-            validator = OnsetValidator(self.def_dict_placeholder)
+            onset_validator = OnsetValidator()
+            def_validator = DefValidator(self.def_dict_placeholder)
         else:
-            validator = OnsetValidator(self.def_dict_both)
+            onset_validator = OnsetValidator()
+            def_validator = DefValidator(self.def_dict_both)
+
         for string, expected_params, context in zip(test_strings, test_issues, test_context):
             test_string = HedString(string, self.hed_schema)
             error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string)
 
             onset_issues = []
-            onset_issues += validator.validate_onset_offset(test_string)
+            onset_issues += def_validator.validate_onset_offset(test_string)
+            if not onset_issues:
+                onset_issues += onset_validator.validate_temporal_relations(test_string)
 
             error_handler.add_context_and_filter(onset_issues)
             test_string.shrink_defs()
             issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)
             # print(str(onset_issues))
             # print(str(issues))
+            # print(onset_validator._onsets)
             error_handler.pop_error_context()
-            self.assertEqual(len(validator._onsets), context)
+            self.assertEqual(len(onset_validator._onsets), context)
             self.assertCountEqual(onset_issues, issues)
 
     def _test_issues_no_context(self, test_strings, test_issues):
@@ -299,7 +304,7 @@ class Test(TestHedBase):
             [],
             [],
             [],
-            []
+            self.format_error(OnsetErrors.ONSET_SAME_DEFS_ONE_ROW, tag=3, def_name="TestDefPlaceholder/2471")
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=False)

@@ -51,7 +51,6 @@ class SidecarValidator:
         sidecar_def_dict = sidecar.get_def_dict(hed_schema=self._schema, extra_def_dicts=extra_def_dicts)
         hed_validator = HedValidator(self._schema,
                                      def_dicts=sidecar_def_dict,
-                                     run_full_onset_checks=False,
                                      definitions_allowed=True)
 
         issues += sidecar._extract_definition_issues
