@@ -671,3 +671,31 @@ def _create_error_tree(error_dict, parent_element=None, add_link=True):
         _create_error_tree(value, context_ul, add_link)
 
     return parent_element
+
+
+def replace_tag_references(list_or_dict):
+    """Utility function to remove any references to tags, strings, etc from any type of nested list or dict
+
+       Use this if you want to save out issues to a file.
+
+       If you'd prefer a copy returned, use replace_tag_references(list_or_dict.copy())
+
+    Parameters:
+       list_or_dict(list or dict): An arbitrarily nested list/dict structure
+    """
+    if isinstance(list_or_dict, dict):
+        for key, value in list_or_dict.items():
+            if isinstance(value, (dict, list)):
+                replace_tag_references(value)
+            elif isinstance(value, (bool, float, int)):
+                list_or_dict[key] = value
+            else:
+                list_or_dict[key] = str(value)
+    elif isinstance(list_or_dict, list):
+        for key, value in enumerate(list_or_dict):
+            if isinstance(value, (dict, list)):
+                replace_tag_references(value)
+            elif isinstance(value, (bool, float, int)):
+                list_or_dict[key] = value
+            else:
+                list_or_dict[key] = str(value)

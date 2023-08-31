@@ -105,11 +105,53 @@ class BaseInput:
     @property
     def series_a(self):
         """Return the assembled dataframe as a series
-            Probably a placeholder name.
 
         Returns:
-            Series: the assembled dataframe with columns merged"""
+            Series: the assembled dataframe with columns merged
+        """
         return self.combine_dataframe(self.assemble())
+
+    @property
+    def series_filtered(self):
+        """Return the assembled dataframe as a series, with rows that have the same onset combined
+
+        Returns:
+            Series: the assembled dataframe with columns merged, and the rows filtered together
+        """
+        if self.onsets is not None:
+            indexed_dict = self._indexed_dict_from_onsets(self.onsets.astype(float))
+            return self._filter_by_index_list(self.series_a, indexed_dict=indexed_dict)
+
+    @staticmethod
+    def _indexed_dict_from_onsets(onsets):
+        current_onset = -1000000.0
+        tol = 1e-9
+        from collections import defaultdict
+        indexed_dict = defaultdict(list)
+        for i, onset in enumerate(onsets):
+            if abs(onset - current_onset) > tol:
+                current_onset = onset
+            indexed_dict[current_onset].append(i)
+
+        return indexed_dict
+
+    @staticmethod
+    def _filter_by_index_list(original_series, indexed_dict):
+        new_series = ["n/a"] * len(original_series)  # Initialize new_series with "n/a"
+
+        for onset, indices in indexed_dict.items():
+            if indices:
+                first_index = indices[0]  # Take the first index of each onset group
+                # Join the corresponding original series entries and place them at the first index
+                new_series[first_index] = ",".join([str(original_series[i]) for i in indices])
+
+        return new_series
+
+    @property
+    def onsets(self):
+        """Returns the onset column if it exists"""
+        if "onset" in self.columns:
+            return self._dataframe["onset"]
 
     @property
     def name(self):
