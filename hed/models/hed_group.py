@@ -157,7 +157,8 @@ class HedGroup:
             sorted_copy (HedGroup): The sorted copy
         """
         string_copy = self.copy()
-        return string_copy._sorted(update_self=True)
+        string_copy._sorted(update_self=True)
+        return string_copy
 
     def _sorted(self, update_self=False):
         """ Returns a sorted copy of this hed group as a list of it's children
@@ -349,6 +350,39 @@ class HedGroup:
     def lower(self):
         """ Convenience function, equivalent to str(self).lower() """
         return str(self).lower()
+
+    def get_as_indented(self, tag_attribute="short_tag"):
+        """Returns the string as a multiline indented format
+
+        Parameters:
+            tag_attribute (str): The hed_tag property to use to construct the string (usually short_tag or long_tag).
+
+        Returns:
+            formatted_hed (str): the indented string
+        """
+        hed_string = self.sorted().get_as_form(tag_attribute)
+
+        level_open = []
+        level = 0
+        indented = ""
+        prev = ''
+        for c in hed_string:
+            if c == "(":
+                level_open.append(level)
+                indented += "\n" + "\t" * level + c
+                level += 1
+            elif c == ")":
+                level = level_open.pop()
+                if prev == ")":
+                    indented += "\n" + "\t" * level + c
+                else:
+                    indented += c
+
+            else:
+                indented += c
+            prev = c
+
+        return indented
 
     def find_placeholder_tag(self):
         """ Return a placeholder tag, if present in this group.
