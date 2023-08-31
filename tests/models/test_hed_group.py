@@ -3,6 +3,7 @@ import os
 
 from hed import schema
 from hed.models import HedString
+import copy
 
 
 class Test(unittest.TestCase):
@@ -120,6 +121,16 @@ class Test(unittest.TestCase):
             "A, D, ((B, C), A), (F, E)"
         ]
         self._compare_strings(hed_strings)
+
+    def test_sorted_structure(self):
+        hed_string = HedString("(Tag3, Tag1, Tag5, Tag2, Tag4)", self.hed_schema)
+        original_hed_string = copy.deepcopy(hed_string)
+
+        sorted_hed_string = hed_string.sorted()
+
+        self.assertIsInstance(sorted_hed_string, HedString)
+        self.assertEqual(str(original_hed_string), str(hed_string))
+        self.assertIsNot(sorted_hed_string, hed_string)
 
 if __name__ == '__main__':
     unittest.main()
