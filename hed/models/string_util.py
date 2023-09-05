@@ -1,6 +1,27 @@
 from hed.models.hed_string import HedString
 
 
+def gather_descriptions(hed_string):
+    """Removes any description tags from the string and concatenates them
+
+    Parameters:
+        hed_string(HedString): To be modified
+
+    Returns: tuple
+        description(str): The concatenated values of all description tags.
+ 
+    Side-effect:
+         The input HedString has its Definition tags removed.
+
+    """
+    desc_tags = hed_string.find_tags("description", recursive=True, include_groups=0)
+    desc_string = " ".join([tag.extension if tag.extension.endswith(".") else tag.extension + "." for tag in desc_tags])
+
+    hed_string.remove(desc_tags)
+
+    return desc_string
+
+
 def split_base_tags(hed_string, base_tags, remove_group=False):
     """ Splits a HedString object into two separate HedString objects based on the presence of base tags.
 

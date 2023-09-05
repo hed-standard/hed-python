@@ -65,12 +65,11 @@ class Test(unittest.TestCase):
 
         hed_obj2 = manager.str_list_to_hed([hed[1], base[1], '(Event-context, (' + context[1] + '))'])
         self.assertIsInstance(hed_obj2, HedString)
-        self.assertEqual(10, len(hed_obj2.children))
+        self.assertEqual(9, len(hed_obj2.children))
         hed3, base3, context3 = manager.unfold_context(remove_types=['Condition-variable', 'Task'])
-
         hed_obj3 = manager.str_list_to_hed([hed3[1], base3[1], '(Event-context, (' + context3[1] + '))'])
         self.assertIsInstance(hed_obj3, HedString)
-        self.assertEqual(6, len(hed_obj3.children))
+        self.assertEqual(5, len(hed_obj3.children))
 
     def test_get_type_defs(self):
         manager1 = EventManager(self.input_data, self.schema)

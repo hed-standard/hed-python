@@ -165,6 +165,7 @@ def merge_hed_dict(sidecar_dict, hed_dict):
         hed_dict(dict):       Dictionary derived from a dataframe representation of HED in sidecar.
 
     """
+
     for key, value_dict in hed_dict.items():
         if key not in sidecar_dict:
             sidecar_dict[key] = value_dict
