@@ -48,9 +48,8 @@ class DefinitionEntry:
             replace_tag = replace_tag.copy()
         output_contents = [replace_tag]
         if self.contents:
-            output_group = self.contents
+            output_group = copy.deepcopy(self.contents)
             if placeholder_value:
-                output_group = copy.deepcopy(self.contents)
                 placeholder_tag = output_group.find_placeholder_tag()
                 if not placeholder_tag:
                     raise ValueError("Internal error related to placeholders in definition mapping")

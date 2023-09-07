@@ -1,6 +1,6 @@
 import unittest
 from hed import HedString, load_schema_version
-from hed.models.string_util import split_base_tags, split_def_tags
+from hed.models.string_util import split_base_tags, split_def_tags, gather_descriptions
 import copy
 
 
@@ -129,6 +129,61 @@ class TestHedStringSplitDef(unittest.TestCase):
         expected_string = '(Memorize,(Action,(LightBlue)),Wink)'
         expected_string2 = '(Memorize,Wink)'
         self.check_split_def_tags(hed_string, def_names, expected_string, expected_string2)
+
+
+class TestGatherDescriptions(unittest.TestCase):
+    def setUp(self):
+        self.schema = load_schema_version()
+
+    def test_gather_single_description(self):
+        input_str = "Sensory-event, Description/This is a test."
+        hed_string = HedString(input_str, hed_schema=self.schema)
+
+        result = gather_descriptions(hed_string)
+        expected_result = "This is a test."
+
+        self.assertEqual(result, expected_result)
+        self.assertNotIn("Description", str(result))
+
+    def test_gather_multiple_descriptions(self):
+        input_str = "Sensory-event, Description/First description, Second-tag, Description/Second description."
+        hed_string = HedString(input_str, hed_schema=self.schema)
+
+        result = gather_descriptions(hed_string)
+        expected_result = "First description. Second description."
+
+        self.assertEqual(result, expected_result)
+        self.assertNotIn("Description", str(result))
+
+    def test_gather_no_descriptions(self):
+        input_str = "Sensory-event, No-description-here, Another-tag"
+        hed_string = HedString(input_str, hed_schema=self.schema)
+
+        result = gather_descriptions(hed_string)
+        expected_result = ""
+
+        self.assertEqual(result, expected_result)
+        self.assertNotIn("Description", str(result))
+
+    def test_gather_descriptions_mixed_order(self):
+        input_str = "Sensory-event, Description/First., Another-tag, Description/Second, Third-tag, Description/Third."
+        hed_string = HedString(input_str, hed_schema=self.schema)
+
+        result = gather_descriptions(hed_string)
+        expected_result = "First. Second. Third."
+
+        self.assertEqual(result, expected_result)
+        self.assertNotIn("Description", str(result))
+
+    def test_gather_descriptions_missing_period(self):
+        input_str = "Sensory-event, Description/First, Description/Second"
+        hed_string = HedString(input_str, hed_schema=self.schema)
+
+        result = gather_descriptions(hed_string)
+        expected_result = "First. Second."
+
+        self.assertEqual(result, expected_result)
+        self.assertNotIn("Description", str(result))
 
 
 if __name__ == '__main__':
