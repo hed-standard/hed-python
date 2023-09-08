@@ -7,20 +7,46 @@ from matplotlib import cm
 from wordcloud import WordCloud
 
 
-def _draw_contour(wc, img):
+def generate_contour_svg(wc, width, height):
+    """Generates an SVG contour mask based on a word cloud object and dimensions.
+
+    Parameters:
+        wc (WordCloud): The word cloud object.
+        width (int): SVG image width in pixels.
+        height (int): SVG image height in pixels.
+
+    Returns:
+        str: SVG point list for the contour mask, or empty string if not generated.
+    """
+    contour = _get_contour_mask(wc, width, height)
+    if contour is None:
+        return ""
+    return _numpy_to_svg(contour)
+
+
+def _get_contour_mask(wc, width, height):
     """Slightly tweaked copy of internal WorldCloud function to allow transparency"""
     if wc.mask is None or wc.contour_width == 0 or wc.contour_color is None:
-        return img
+        return None
 
     mask = wc._get_bolean_mask(wc.mask) * 255
     contour = Image.fromarray(mask.astype(np.uint8))
-    contour = contour.resize(img.size)
+    contour = contour.resize((width, height))
     contour = contour.filter(ImageFilter.FIND_EDGES)
     contour = np.array(contour)
 
     # make sure borders are not drawn before changing width
     contour[[0, -1], :] = 0
     contour[:, [0, -1]] = 0
+
+    return contour
+
+
+def _draw_contour(wc, img):
+    """Slightly tweaked copy of internal WorldCloud function to allow transparency"""
+    contour = _get_contour_mask(wc, img.width, img.height)
+    if contour is None:
+        return img
 
     # use gaussian to change width, divide by 10 to give more resolution
     radius = wc.contour_width / 10
@@ -42,6 +68,15 @@ def _draw_contour(wc, img):
 
 # Replace WordCloud function with one that can handle transparency
 WordCloud._draw_contour = _draw_contour
+
+
+def _numpy_to_svg(contour):
+    svg_elements = []
+    points = np.array(contour.nonzero()).T
+    for y, x in points:
+        svg_elements.append(f'<circle cx="{x}" cy="{y}" r="1" stroke="black" fill="black" />')
+
+    return '\n'.join(svg_elements)
 
 
 def random_color_darker(word=None, font_size=None, position=None, orientation=None, font_path=None, random_state=None):

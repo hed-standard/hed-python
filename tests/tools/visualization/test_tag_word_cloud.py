@@ -2,12 +2,19 @@ import unittest
 from wordcloud import WordCloud
 from hed.tools.visualization import tag_word_cloud
 from hed.tools.visualization.tag_word_cloud import load_and_resize_mask
+from hed.tools.visualization.word_cloud_util import generate_contour_svg
+
 import numpy as np
 from PIL import Image, ImageDraw
 import os
 
 
 class TestWordCloudFunctions(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.mask_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                      '../../data/visualization/word_mask.png'))
+
     def test_convert_summary_to_word_dict(self):
         # Assume we have a valid summary_json
         summary_json = {
@@ -40,6 +47,30 @@ class TestWordCloudFunctions(unittest.TestCase):
         self.assertEqual(wc.width, width)
         self.assertEqual(wc.height, height)
 
+    def test_create_wordcloud_default_params(self):
+        word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
+        wc = tag_word_cloud.create_wordcloud(word_dict)
+
+        self.assertIsInstance(wc, WordCloud)
+        self.assertEqual(wc.width, 400)
+        self.assertEqual(wc.height, 200)
+
+    def test_mask_scaling(self):
+        word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
+        wc = tag_word_cloud.create_wordcloud(word_dict, self.mask_path, width=300, height=300)
+
+        self.assertIsInstance(wc, WordCloud)
+        self.assertEqual(wc.width, 300)
+        self.assertEqual(wc.height, 300)
+
+    def test_mask_scaling2(self):
+        word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
+        wc = tag_word_cloud.create_wordcloud(word_dict, self.mask_path, width=300, height=None)
+
+        self.assertIsInstance(wc, WordCloud)
+        self.assertEqual(wc.width, 300)
+        self.assertLess(wc.height, 300)
+
     def test_create_wordcloud_with_empty_dict(self):
         # Test creation of word cloud with an empty dictionary
         word_dict = {}
@@ -53,6 +84,15 @@ class TestWordCloudFunctions(unittest.TestCase):
         self.assertIsInstance(wc, WordCloud)
         # Check that the single word is in the word cloud
         self.assertIn('single_word', wc.words_)
+
+    def test_valid_word_cloud(self):
+        word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
+        wc = tag_word_cloud.create_wordcloud(word_dict, mask_path=self.mask_path, width=400, height=None)
+        svg_output = tag_word_cloud.word_cloud_to_svg(wc)
+        self.assertTrue(svg_output.startswith('<svg'))
+        self.assertIn("<circle cx=", svg_output)
+        self.assertTrue(svg_output.endswith('</svg>'))
+        self.assertIn('fill:rgb', svg_output)
 
 
 class TestLoadAndResizeMask(unittest.TestCase):
