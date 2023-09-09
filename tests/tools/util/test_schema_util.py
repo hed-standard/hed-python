@@ -1,7 +1,5 @@
-import os
 import pandas as pd
 import unittest
-from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.util.schema_util import flatten_schema
 
