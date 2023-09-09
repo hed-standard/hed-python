@@ -318,3 +318,13 @@ def _split_entity(piece):
         return {"key": split_piece[0].strip(), "value": split_piece[1].strip()}
     else:
         return {"bad": piece}
+
+
+def get_task_from_file(file_path):
+    filename = os.path.splitext(os.path.basename(file_path))
+    basename = filename[0].strip()
+    position = basename.lower().find("task-")
+    if position == -1:
+        return ""
+    splits = re.split(r'[_.]', basename[position+5:])
+    return splits[0]

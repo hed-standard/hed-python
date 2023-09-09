@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 import zipfile
 from hed.errors import HedFileError
-from hed.tools.remodeling.cli.run_remodel import parse_arguments, main
+from hed.tools.remodeling.cli.run_remodel import parse_arguments, parse_tasks, main
 
 
 class Test(unittest.TestCase):
@@ -27,8 +27,13 @@ class Test(unittest.TestCase):
                                                                '../../../data/remodel_tests/eeg_ds003645s_hed_remodel',
                                                                'derivatives/remodel/remodeling_files',
                                                                'summarize_hed_types_rmdl.json'))
-        cls.bad_remodel_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
+        cls.bad_model_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                              '../../../data/remodel_tests/bad_rename_rmdl.json'))
+        cls.files = ['/datasets/fmri_ds002790s_hed_aomic/sub-0001/func/sub-0001_task-stopsignal_acq-seq_events.tsv',
+                     '/datasets/fmri_ds002790s_hed_aomic/sub-0001/func/sub-0001_task-workingmemory_acq-seq_events.tsv',
+                     '/datasets/fmri_ds002790s_hed_aomic/sub-0002/func/sub-0002_task-emomatching_acq-seq_events.tsv',
+                     '/datasets/fmri_ds002790s_hed_aomic/sub-0002/func/sub-0002_task-stopsignal_acq-seq_events.tsv',
+                     '/datasets/fmri_ds002790s_hed_aomic/sub-0002/func/sub-0002_task-workingmemory_acq-seq_events.tsv']
 
     def setUp(self):
         with zipfile.ZipFile(self.data_zip, 'r') as zip_ref:
@@ -65,10 +70,20 @@ class Test(unittest.TestCase):
         self.assertIsNone(args2.extensions)
 
         # Test not able to parse
-        arg_list3 = [self.data_root, self.bad_remodel_path, '-x', 'derivatives']
+        arg_list3 = [self.data_root, self.bad_model_path, '-x', 'derivatives']
         with self.assertRaises(ValueError) as context3:
             parse_arguments(arg_list3)
         self.assertEqual(context3.exception.args[0], "UnableToFullyParseOperations")
+ 
+    def test_parse_tasks(self):
+        tasks1 = parse_tasks(self.files, "*")
+        self.assertIn('stopsignal', tasks1)
+        self.assertEqual(3, len(tasks1))
+        self.assertEqual(2, len(tasks1["workingmemory"]))
+        tasks2 = parse_tasks(self.files, ["workingmemory"])
+        self.assertEqual(1, len(tasks2))
+        files2 = ['task-.tsv', '/base/']
+        tasks3 = parse_tasks(files2, "*")
 
     def test_main_bids(self):
         arg_list = [self.data_root, self.model_path, '-x', 'derivatives', 'stimuli', '-b']

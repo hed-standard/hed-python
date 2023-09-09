@@ -99,7 +99,7 @@ class Dispatcher:
               In this case, the corresponding backup file is read and returned.    
             - If a string is passed and there is no backup manager,
               the data file corresponding to the file_designator is read and returned.    
-            - If a Pandas DataFrame is passed, return a copy.    
+            - If a Pandas DataFrame, return a copy.   
 
         """
         if isinstance(file_designator, pd.DataFrame):
@@ -154,16 +154,23 @@ class Dispatcher:
             df = self.post_proc_data(df)
         return df
 
-    def save_summaries(self, save_formats=['.json', '.txt'], individual_summaries="separate", summary_dir=None):
+    def save_summaries(self, save_formats=['.json', '.txt'], individual_summaries="separate",
+                       summary_dir=None, task_name=""):
         """ Save the summary files in the specified formats.
 
         Parameters:
             save_formats (list):  A list of formats [".txt", ."json"]
-            individual_summaries (str): If True, include summaries of individual files.
+            individual_summaries (str):  "consolidated", "individual", or "none".
             summary_dir (str or None): Directory for saving summaries.
+            task_name (str): Name of task if summaries separated by task or "" if not separated.
 
         Notes:
             The summaries are saved in the dataset derivatives/remodeling folder if no save_dir is provided.
+
+        Notes:
+            - "consolidated" means that the overall summary and summaries of individual files are in one summary file.  
+            - "individual" means that the summaries of individual files are in separate files.
+            - "none" means that only the overall summary is produced.
 
         """
         if not save_formats:
@@ -171,8 +178,8 @@ class Dispatcher:
         if not summary_dir:
             summary_dir = self.get_summary_save_dir()
         os.makedirs(summary_dir, exist_ok=True)
-        for context_name, context_item in self.summary_dicts.items():
-            context_item.save(summary_dir, save_formats, individual_summaries=individual_summaries)
+        for summary_name, summary_item in self.summary_dicts.items():
+            summary_item.save(summary_dir, save_formats, individual_summaries=individual_summaries, task_name=task_name)
 
     @staticmethod
     def parse_operations(operation_list):
@@ -242,7 +249,8 @@ class Dispatcher:
             return title + sep + errors
         return errors
 
-    def get_schema(self, hed_versions):
+    @staticmethod
+    def get_schema(hed_versions):
         if not hed_versions:
             return None
         elif isinstance(hed_versions, str) or isinstance(hed_versions, list):

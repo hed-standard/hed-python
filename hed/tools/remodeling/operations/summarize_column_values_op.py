@@ -182,7 +182,7 @@ class ColumnValueSummary(BaseSummary):
              str: Formatted string suitable for saving in a file or printing.
 
          """
-        cat_dict = result.get('Categorical columns', {})
+        cat_dict = result.get('Categorical column summaries', {})
         if not cat_dict:
             return ""
         count_dict = result['Categorical counts']

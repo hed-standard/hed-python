@@ -21,7 +21,7 @@ Note:  this is a work in progress. More information is coming.
    user_guide.rst
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: HED Python API:
 
    api2.rst
