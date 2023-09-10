@@ -117,7 +117,7 @@ class EventsToSidecarSummary(BaseSummary):
 
         return {"Name": summary_info.name, "Total events": summary_info.total_events,
                 "Total files": summary_info.total_files,
-                "Files": summary_info.files.keys(),
+                "Files": list(summary_info.files.keys()),
                 "Specifics": {"Categorical info": summary_info.categorical_info,
                               "Value info": summary_info.value_info,
                               "Skip columns": summary_info.skip_cols,
