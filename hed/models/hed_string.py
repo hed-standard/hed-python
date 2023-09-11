@@ -37,6 +37,7 @@ class HedString(HedGroup):
         super().__init__(hed_string, contents=contents, startpos=0, endpos=len(hed_string))
         self._schema = hed_schema
         self._from_strings = None
+        self._def_dict = def_dict
 
     @classmethod
     def from_hed_strings(cls, hed_strings):
@@ -55,7 +56,8 @@ class HedString(HedGroup):
         hed_string = ",".join([group._hed_string for group in hed_strings])
         contents = [child for sub_string in hed_strings for child in sub_string.children]
         first_schema = hed_strings[0]._schema
-        new_string.__init__(hed_string=hed_string, _contents=contents, hed_schema=first_schema)
+        first_dict = hed_strings[0]._def_dict
+        new_string.__init__(hed_string=hed_string, _contents=contents, hed_schema=first_schema, def_dict=first_dict)
         new_string._from_strings = hed_strings
         return new_string
 
@@ -95,7 +97,7 @@ class HedString(HedGroup):
         # Deep copy the attributes that need it(most notably, we don't copy schema/schema entry)
         new_string._original_children = copy.deepcopy(self._original_children, memo)
         new_string._from_strings = copy.deepcopy(self._from_strings, memo)
-        new_string._children = copy.deepcopy(self._children, memo)
+        new_string.children = copy.deepcopy(self.children, memo)
 
         return new_string
 
@@ -103,7 +105,7 @@ class HedString(HedGroup):
         """ Return a deep copy of this string.
 
         Returns:
-            HedGroup: The copied group.
+            HedString: The copied group.
 
         """
         return_copy = copy.deepcopy(self)
@@ -332,12 +334,11 @@ class HedString(HedGroup):
 
         return result_positions
 
-    def validate(self, hed_schema, allow_placeholders=True, error_handler=None):
+    def validate(self, allow_placeholders=True, error_handler=None):
         """
         Validate the string using the schema
 
         Parameters:
-            hed_schema(HedSchema): The schema to use to validate
             allow_placeholders(bool): allow placeholders in the string
             error_handler(ErrorHandler or None): the error handler to use, creates a default one if none passed
         Returns:
@@ -345,7 +346,7 @@ class HedString(HedGroup):
         """
         from hed.validator import HedValidator
 
-        validator = HedValidator(hed_schema)
+        validator = HedValidator(self._schema, def_dicts=self._def_dict)
         return validator.validate(self, allow_placeholders=allow_placeholders, error_handler=error_handler)
 
     def find_top_level_tags(self, anchor_tags, include_groups=2):

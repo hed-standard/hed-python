@@ -3,10 +3,9 @@ import unittest
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.analysis.hed_context_manager import HedContextManager
-from hed.tools.analysis.hed_type_values import HedTypeValues
+from hed.tools.analysis.event_manager import EventManager
+from hed.tools.analysis.hed_type import HedType
 from hed.tools.analysis.hed_type_counts import HedTypeCount, HedTypeCounts
-from hed.models.df_util import get_assembled
 
 
 class Test(unittest.TestCase):
@@ -21,10 +20,7 @@ class Test(unittest.TestCase):
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
         input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
-        hed_strings1, definitions1 = get_assembled(input_data, sidecar1, schema, extra_def_dicts=None,
-                                                   join_columns=True, shrink_defs=True, expand_defs=False)
-        cls.var_type1 = HedTypeValues(HedContextManager(hed_strings1, schema), definitions1, 'run-01',
-                                      type_tag='condition-variable')
+        cls.var_type1 = HedType(EventManager(input_data, schema), 'run-01', type_tag='condition-variable')
 
     def test_type_count_one_level(self):
         type_counts1 = HedTypeCounts('Dummy', "condition-variable")
@@ -62,7 +58,7 @@ class Test(unittest.TestCase):
         self.assertEqual(face_type.total_events, 400)
         self.assertEqual(face_type.events, 104)
         self.assertEqual(len(face_type.files), 2)
-        counts.add_descriptions(self.var_type1.definitions)
+        counts.add_descriptions(self.var_type1.type_defs)
         self.assertTrue(face_type.level_counts['famous-face-cond']['description'])
 
 

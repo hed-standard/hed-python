@@ -137,11 +137,11 @@ class TestHedSchema(unittest.TestCase):
         self.assertFalse(self.hed_schema_3g._has_duplicate_tags)
 
     def test_short_tag_mapping(self):
-        self.assertEqual(len(self.hed_schema_3g.all_tags.keys()), 1110)
+        self.assertEqual(len(self.hed_schema_3g.tags.keys()), 1110)
 
     def test_schema_compliance(self):
         warnings = self.hed_schema_group.check_compliance(True)
-        self.assertEqual(len(warnings), 10)
+        self.assertEqual(len(warnings), 14)
 
     def test_bad_prefixes(self):
         schema = load_schema_version(xml_version="8.0.0")

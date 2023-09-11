@@ -5,8 +5,10 @@ You can scope the formatted errors with calls to push_error_context and pop_erro
 """
 
 from functools import wraps
+import xml.etree.ElementTree as ET
 import copy
 from hed.errors.error_types import ErrorContext, ErrorSeverity
+from hed.errors.known_error_codes import known_error_codes
 
 error_functions = {}
 
@@ -31,6 +33,7 @@ default_sort_list = [
 int_sort_list = [
     ErrorContext.ROW
 ]
+
 
 def _register_error_function(error_type, wrapper_func):
     if error_type in error_functions:
@@ -96,7 +99,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 Parameters:
                     tag (HedTag): The hed tag object with the problem,
                     index_in_tag (int): The index into the tag with a problem(usually 0),
-                    index_in_tag_end (int): The last index into the tag with a problem(usually len(tag),
+                    index_in_tag_end (int): The last index into the tag with a problem - usually len(tag),
                     args (args): Any other non keyword args.
                     severity (ErrorSeverity): Used to include warnings as well as errors.
                     kwargs (**kwargs): Any keyword args to be passed down to error message function.
@@ -164,8 +167,11 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
 # Import after hed_error decorators are defined.
 from hed.errors import error_messages
+from hed.errors import schema_error_messages
+
 # Intentional to make sure tools don't think the import is unused
 error_messages.mark_as_used = True
+schema_error_messages.mark_as_used = True
 
 
 class ErrorHandler:
@@ -324,13 +330,8 @@ class ErrorHandler:
 
     @staticmethod
     def _create_error_object(error_type, base_message, severity, **kwargs):
-        if severity == ErrorSeverity.ERROR:
-            error_prefix = "ERROR: "
-        else:
-            error_prefix = "WARNING: "
-        error_message = error_prefix + base_message
         error_object = {'code': error_type,
-                        'message': error_message,
+                        'message': base_message,
                         'severity': severity
                         }
 
@@ -417,7 +418,6 @@ def sort_issues(issues, reverse=False):
     Returns:
         list: The sorted list of issues."""
     def _get_keys(d):
-        from hed import HedString
         result = []
         for key in default_sort_list:
             if key in int_sort_list:
@@ -431,7 +431,16 @@ def sort_issues(issues, reverse=False):
     return issues
 
 
-def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True):
+def check_for_any_errors(issues_list):
+    """Returns True if there are any errors with a severity of warning"""
+    for issue in issues_list:
+        if issue['severity'] < ErrorSeverity.WARNING:
+            return True
+
+    return False
+
+
+def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True, add_link=False):
     """ Return a string with issues list flatted into single string, one per line.
 
     Parameters:
@@ -439,41 +448,124 @@ def get_printable_issue_string(issues, title=None, severity=None, skip_filename=
         title (str):  Optional title that will always show up first if present(even if there are no validation issues).
         severity (int):        Return only warnings >= severity.
         skip_filename (bool):  If true, don't add the filename context to the printable string.
-
+        add_link (bool): Add a link at the end of message to the appropriate error if True
     Returns:
         str:   A string containing printable version of the issues or ''.
 
     """
-    last_used_error_context = []
-
     if severity is not None:
         issues = ErrorHandler.filter_issues_by_severity(issues, severity)
 
-    issue_string = ""
-    for single_issue in issues:
-        single_issue_context = _get_context_from_issue(single_issue, skip_filename)
-        context_string, tab_string = _get_context_string(single_issue_context, last_used_error_context)
+    output_dict = _build_error_context_dict(issues, skip_filename)
+    issue_string = _error_dict_to_string(output_dict, add_link=add_link)
 
-        issue_string += context_string
-        single_issue_message = tab_string + single_issue['message']
-        if "\n" in single_issue_message:
-            single_issue_message = single_issue_message.replace("\n", "\n" + tab_string)
-        issue_string += f"{single_issue_message}\n"
-        last_used_error_context = single_issue_context.copy()
-
-    if issue_string:
-        issue_string += "\n"
     if title:
         issue_string = title + '\n' + issue_string
     return issue_string
 
 
-def check_for_any_errors(issues_list):
-    for issue in issues_list:
-        if issue['severity'] < ErrorSeverity.WARNING:
-            return True
+def get_printable_issue_string_html(issues, title=None, severity=None, skip_filename=True):
+    """ Return a string with issues list as an HTML tree.
 
-    return False
+    Parameters:
+        issues (list):  Issues to print.
+        title (str):  Optional title that will always show up first if present.
+        severity (int): Return only warnings >= severity.
+        skip_filename (bool): If true, don't add the filename context to the printable string.
+
+    Returns:
+        str: An HTML string containing the issues or ''.
+    """
+    if severity is not None:
+        issues = ErrorHandler.filter_issues_by_severity(issues, severity)
+
+    output_dict = _build_error_context_dict(issues, skip_filename)
+
+    root_element = _create_error_tree(output_dict)
+    if title:
+        title_element = ET.Element("h1")
+        title_element.text = title
+        root_element.insert(0, title_element)
+    return ET.tostring(root_element, encoding='unicode')
+
+
+def create_doc_link(error_code):
+    """If error code is a known code, return a documentation url for it
+
+    Parameters:
+        error_code(str): A HED error code
+
+    Returns:
+        url(str or None): The URL if it's a valid code
+    """
+    if error_code in known_error_codes["hed_validation_errors"] \
+            or error_code in known_error_codes["schema_validation_errors"]:
+        modified_error_code = error_code.replace("_", "-").lower()
+        return f"https://hed-specification.readthedocs.io/en/latest/Appendix_B.html#{modified_error_code}"
+    return None
+
+
+def _build_error_context_dict(issues, skip_filename):
+    """Builds the context -> error dictionary for an entire list of issues
+
+    Returns:
+        dict: A nested dictionary structure with a "children" key at each level for unrelated children.
+    """
+    output_dict = None
+    for single_issue in issues:
+        single_issue_context = _get_context_from_issue(single_issue, skip_filename)
+        output_dict = _add_single_error_to_dict(single_issue_context, output_dict, single_issue)
+
+    return output_dict
+
+
+def _add_single_error_to_dict(items, root=None, issue_to_add=None):
+    """ Build a nested dictionary out of the context lists
+
+    Parameters:
+        items (list): A list of error contexts
+        root (dict, optional): An existing nested dictionary structure to update.
+        issue_to_add (dict, optional): The issue to add at this level of context
+
+    Returns:
+        dict: A nested dictionary structure with a "children" key at each level for unrelated children.
+    """
+    if root is None:
+        root = {"children": []}
+
+    current_dict = root
+    for item in items:
+        # Navigate to the next level if the item already exists, or create a new level
+        next_dict = current_dict.get(item, {"children": []})
+        current_dict[item] = next_dict
+        current_dict = next_dict
+
+    if issue_to_add:
+        current_dict["children"].append(issue_to_add)
+
+    return root
+
+
+def _error_dict_to_string(print_dict, add_link=True, level=0):
+    output = ""
+    if print_dict is None:
+        return output
+    for context, value in print_dict.items():
+        if context == "children":
+            for child in value:
+                single_issue_message = child["message"]
+                issue_string = level * "\t" + _get_error_prefix(child)
+                issue_string += f"{single_issue_message}\n"
+                if add_link:
+                    link_url = create_doc_link(child['code'])
+                    if link_url:
+                        single_issue_message += f"   See... {link_url}"
+                output += issue_string
+            continue
+        output += _format_single_context_string(context[0], context[1], level)
+        output += _error_dict_to_string(value, add_link, level + 1)
+
+    return output
 
 
 def _get_context_from_issue(val_issue, skip_filename=True):
@@ -488,17 +580,38 @@ def _get_context_from_issue(val_issue, skip_filename=True):
 
     """
     single_issue_context = []
-    for key in val_issue:
+    for key, value in val_issue.items():
         if skip_filename and key == ErrorContext.FILE_NAME:
             continue
+        if key == ErrorContext.HED_STRING:
+            value = value.get_original_hed_string()
         if key.startswith("ec_"):
-            single_issue_context.append((key, val_issue[key]))
+            single_issue_context.append((key, str(value)))
 
     return single_issue_context
 
 
+def _get_error_prefix(single_issue):
+    """Returns the prefix for the error message based on severity and error code.
+
+    Parameters:
+        single_issue(dict): A single issue object
+
+    Returns:
+        error_prefix(str):  the prefix to use
+    """
+    severity = single_issue.get('severity', ErrorSeverity.ERROR)
+    error_code = single_issue['code']
+
+    if severity == ErrorSeverity.ERROR:
+        error_prefix = f"{error_code}: "
+    else:
+        error_prefix = f"{error_code}: (Warning) "
+    return error_prefix
+
+
 def _format_single_context_string(context_type, context, tab_count=0):
-    """ Return the human readable form of a single context tuple.
+    """ Return the human-readable form of a single context tuple.
 
     Parameters:
         context_type (str): The context type of this entry.
@@ -510,8 +623,6 @@ def _format_single_context_string(context_type, context, tab_count=0):
 
     """
     tab_string = tab_count * '\t'
-    if context_type == ErrorContext.HED_STRING:
-        context = context.get_original_hed_string()
     error_types = {
         ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
         ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
@@ -530,39 +641,61 @@ def _format_single_context_string(context_type, context, tab_count=0):
     return context_string
 
 
-def _get_context_string(single_issue_context, last_used_context):
-    """ Convert a single context list into the final human readable output form.
+def _create_error_tree(error_dict, parent_element=None, add_link=True):
+    if parent_element is None:
+        parent_element = ET.Element("ul")
+
+    for context, value in error_dict.items():
+        if context == "children":
+            for child in value:
+                child_li = ET.SubElement(parent_element, "li")
+                error_prefix = _get_error_prefix(child)
+                single_issue_message = child["message"]
+
+                # Create a link for the error prefix if add_link is True
+                if add_link:
+                    link_url = create_doc_link(child['code'])
+                    if link_url:
+                        a_element = ET.SubElement(child_li, "a", href=link_url)
+                        a_element.text = error_prefix
+                        a_element.tail = " " + single_issue_message
+                    else:
+                        child_li.text = error_prefix + " " + single_issue_message
+                else:
+                    child_li.text = error_prefix + " " + single_issue_message
+            continue
+
+        context_li = ET.SubElement(parent_element, "li")
+        context_li.text = _format_single_context_string(context[0], context[1])
+        context_ul = ET.SubElement(context_li, "ul")
+        _create_error_tree(value, context_ul, add_link)
+
+    return parent_element
+
+
+def replace_tag_references(list_or_dict):
+    """Utility function to remove any references to tags, strings, etc from any type of nested list or dict
+
+       Use this if you want to save out issues to a file.
+
+       If you'd prefer a copy returned, use replace_tag_references(list_or_dict.copy())
 
     Parameters:
-        single_issue_context (list): A list of tuples containing the context(context_type, context)
-        last_used_context (list): A list of tuples containing the last drawn context.
-
-    Returns:
-        str: The full string of context(potentially multiline) to add before the error.
-        str: The tab string to add to the front of any message line with this context.
-
-    Notes:
-        The last used context is always the same format as single_issue_context and used
-        so that the error handling can only add the parts that have changed.
-
+       list_or_dict(list or dict): An arbitrarily nested list/dict structure
     """
-    context_string = ""
-    tab_count = 0
-    found_difference = False
-    for i, context_tuple in enumerate(single_issue_context):
-        (context_type, context) = context_tuple
-        if len(last_used_context) > i and not found_difference:
-            last_drawn = last_used_context[i]
-            # Was drawn, and hasn't changed.
-            if last_drawn == context_tuple:
-                if context_type not in no_tab_context:
-                    tab_count += 1
-                continue
-
-        context_string += _format_single_context_string(context_type, context, tab_count)
-        found_difference = True
-        if context_type not in no_tab_context:
-            tab_count += 1
-
-    tab_string = '\t' * tab_count
-    return context_string, tab_string
+    if isinstance(list_or_dict, dict):
+        for key, value in list_or_dict.items():
+            if isinstance(value, (dict, list)):
+                replace_tag_references(value)
+            elif isinstance(value, (bool, float, int)):
+                list_or_dict[key] = value
+            else:
+                list_or_dict[key] = str(value)
+    elif isinstance(list_or_dict, list):
+        for key, value in enumerate(list_or_dict):
+            if isinstance(value, (dict, list)):
+                replace_tag_references(value)
+            elif isinstance(value, (bool, float, int)):
+                list_or_dict[key] = value
+            else:
+                list_or_dict[key] = str(value)

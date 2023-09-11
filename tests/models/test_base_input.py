@@ -75,7 +75,6 @@ class Test(unittest.TestCase):
             BaseInput({'key': 'value'})
 
 
-
 class TestInsertColumns(unittest.TestCase):
 
     def test_insert_columns_simple(self):
@@ -273,3 +272,57 @@ class TestCombineDataframe(unittest.TestCase):
         expected = pd.Series(['apple, guitar', 'elephant, harmonica', 'cherry, fox', '', ''])
         self.assertTrue(result.equals(expected))
 
+
+class TestOnsetDict(unittest.TestCase):
+    def test_empty_and_single_onset(self):
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([]), {})
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5]), {3.5: [0]})
+
+    def test_identical_and_approx_equal_onsets(self):
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.5]), {3.5: [0, 1]})
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.500000001]), {3.5: [0], 3.500000001: [1]})
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.5000000000001]), {3.5: [0, 1]})
+
+    def test_distinct_and_mixed_onsets(self):
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 4.0, 4.4]), {3.5: [0], 4.0: [1], 4.4: [2]})
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.5, 4.0, 4.4]), {3.5: [0, 1], 4.0: [2], 4.4: [3]})
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([4.0, 3.5, 4.4, 4.4]), {4.0: [0], 3.5: [1], 4.4: [2, 3]})
+
+    def test_complex_onsets(self):
+        # Negative, zero, and positive onsets
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([-1.0, 0.0, 1.0]), {-1.0: [0], 0.0: [1], 1.0: [2]})
+
+        # Very close but distinct onsets
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([1.0, 1.0 + 1e-8, 1.0 + 2e-8]),
+                         {1.0: [0], 1.0 + 1e-8: [1], 1.0 + 2e-8: [2]})
+        # Very close
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([1.0, 1.0 + 1e-10, 1.0 + 2e-10]),
+                         {1.0: [0, 1, 2]})
+
+        # Mixed scenario
+        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.5, 4.0, 4.4, 4.4, -1.0]),
+                         {3.5: [0, 1], 4.0: [2], 4.4: [3, 4], -1.0: [5]})
+
+    def test_empty_and_single_item_series(self):
+        self.assertEqual(BaseInput._filter_by_index_list([], {}), [])
+        self.assertEqual(BaseInput._filter_by_index_list(["apple"], {0: [0]}), ["apple"])
+
+    def test_two_item_series_with_same_onset(self):
+        self.assertEqual(BaseInput._filter_by_index_list(["apple", "orange"], {0: [0, 1]}), ["apple,orange", "n/a"])
+
+    def test_multiple_item_series(self):
+        original = ["apple", "orange", "banana", "mango"]
+        indexed_dict = {0: [0, 1], 1: [2], 2: [3]}
+        self.assertEqual(BaseInput._filter_by_index_list(original, indexed_dict), ["apple,orange", "n/a", "banana", "mango"])
+
+    def test_complex_scenarios(self):
+        # Test with negative, zero and positive onsets
+        original = ["negative", "zero", "positive"]
+        indexed_dict = {-1: [0], 0: [1], 1: [2]}
+        self.assertEqual(BaseInput._filter_by_index_list(original, indexed_dict), ["negative", "zero", "positive"])
+
+        # Test with more complex indexed_dict
+        original = ["apple", "orange", "banana", "mango", "grape"]
+        indexed_dict = {0: [0, 1], 1: [2], 2: [3, 4]}
+        self.assertEqual(BaseInput._filter_by_index_list(original, indexed_dict),
+                         ["apple,orange", "n/a", "banana", "mango,grape", "n/a"])

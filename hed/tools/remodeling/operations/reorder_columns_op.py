@@ -6,9 +6,9 @@ class ReorderColumnsOp(BaseOp):
     """ Reorder columns in a tabular file.
 
     Required parameters:
-        column_order (*list*): The names of the columns to be reordered.
-        ignore_missing (*bool*): If false and a column in column_order is not in df, skip the column
-        keep_others (*bool*): If true, columns not in column_order are placed at end.
+        - column_order (*list*): The names of the columns to be reordered.
+        - ignore_missing (*bool*): If false and a column in column_order is not in df, skip the column
+        - keep_others (*bool*): If true, columns not in column_order are placed at end.
 
     """
 

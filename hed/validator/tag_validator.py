@@ -276,7 +276,7 @@ class TagValidator:
         if original_tag.is_basic_tag() or original_tag.is_takes_value_tag():
             return validation_issues
 
-        is_extension_tag = original_tag.is_extension_allowed_tag()
+        is_extension_tag = original_tag.has_attribute(HedKey.ExtensionAllowed)
         if not is_extension_tag:
             actual_error = None
             if "#" in original_tag.extension:
@@ -307,7 +307,7 @@ class TagValidator:
             validation_issue = ErrorHandler.format_error(ValidationErrors.UNITS_INVALID,
                                                          tag=report_as, units=tag_unit_class_units)
         else:
-            default_unit = original_tag.get_unit_class_default_unit()
+            default_unit = original_tag.default_unit
             validation_issue = ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
                                                          tag=report_as, default_unit=default_unit)
         return validation_issue
@@ -376,26 +376,6 @@ class TagValidator:
         if original_tag.has_attribute(HedKey.RequireChild):
             validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_REQUIRES_CHILD,
                                                            tag=original_tag)
-        return validation_issues
-
-    def check_tag_unit_class_units_exist(self, original_tag):
-        """ Report warning if tag has a unit class tag with no units.
-
-        Parameters:
-            original_tag (HedTag): The original tag that is used to report the error.
-
-        Returns:
-            list: Validation issues.  Each issue is a dictionary.
-
-        """
-        validation_issues = []
-        if original_tag.is_unit_class_tag():
-            tag_unit_values = original_tag.extension
-            if tag_validator_util.validate_numeric_value_class(tag_unit_values):
-                default_unit = original_tag.get_unit_class_default_unit()
-                validation_issues += ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
-                                                               tag=original_tag,
-                                                               default_unit=default_unit)
         return validation_issues
 
     def check_for_invalid_extension_chars(self, original_tag):

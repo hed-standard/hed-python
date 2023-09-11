@@ -48,7 +48,7 @@ class Test(unittest.TestCase):
             counts.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
                                        file_name='Base_name')
         self.assertIsInstance(counts.tag_dict, dict)
-        self.assertEqual(len(counts.tag_dict), 15)
+        self.assertEqual(14, len(counts.tag_dict))
 
     def test_merge_tag_dicts(self):
         counts1 = HedTagCounts('Base_name1', 50)
@@ -61,10 +61,10 @@ class Test(unittest.TestCase):
         counts3 = HedTagCounts("All", 0)
         counts3.merge_tag_dicts(counts1.tag_dict)
         counts3.merge_tag_dicts(counts2.tag_dict)
-        self.assertEqual(len(counts1.tag_dict), 15)
-        self.assertEqual(len(counts2.tag_dict), 15)
-        self.assertEqual(len(counts3.tag_dict), 15)
-        self.assertEqual(counts3.tag_dict['experiment-structure'].events, 2)
+        self.assertEqual(14, len(counts1.tag_dict))
+        self.assertEqual(14, len(counts2.tag_dict))
+        self.assertEqual(14, len(counts3.tag_dict))
+        self.assertEqual(2, counts3.tag_dict['experiment-structure'].events)
 
     def test_hed_tag_count(self):
         name = 'Base_name1'
@@ -78,14 +78,14 @@ class Test(unittest.TestCase):
         hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.hed_schema,
                                                  extra_def_dicts=None, join_columns=True,
                                                  shrink_defs=False, expand_defs=True)
-        # definitions = input_data.get_definitions().gathered_defs
+        # type_defs = input_data.get_definitions().gathered_defs
         for hed in hed_strings:
             counts.update_event_counts(hed, 'run-1')
         self.assertIsInstance(counts.tag_dict, dict)
-        self.assertEqual(len(counts.tag_dict), 47)
+        self.assertEqual(46, len(counts.tag_dict))
         org_tags, leftovers = counts.organize_tags(self.tag_template)
-        self.assertEqual(len(org_tags), 19)
-        self.assertEqual(len(leftovers), 22)
+        self.assertEqual(19, len(org_tags))
+        self.assertEqual(21, len(leftovers))
 
 
 if __name__ == '__main__':

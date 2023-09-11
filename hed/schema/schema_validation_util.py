@@ -140,7 +140,7 @@ def find_rooted_entry(tag_entry, schema, loading_merged):
                                f'Found rooted tag \'{tag_entry.short_tag_name}\' as a root node in a merged schema.',
                                schema.filename)
 
-        rooted_entry = schema.all_tags.get(rooted_tag)
+        rooted_entry = schema.tags.get(rooted_tag)
         if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):
             raise HedFileError(HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
                                f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",
@@ -169,12 +169,12 @@ def validate_schema_term(hed_term):
 
     for i, char in enumerate(hed_term):
         if i == 0 and not (char.isdigit() or char.isupper()):
-            issues_list += ErrorHandler.format_error(SchemaWarnings.INVALID_CAPITALIZATION,
+            issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
                                                      hed_term, char_index=i, problem_char=char)
             continue
         if char in ALLOWED_TAG_CHARS or char.isalnum():
             continue
-        issues_list += ErrorHandler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG,
+        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
                                                  hed_term, char_index=i, problem_char=char)
     return issues_list
 
@@ -199,6 +199,6 @@ def validate_schema_description(tag_name, hed_description):
             continue
         if char in ALLOWED_DESC_CHARS:
             continue
-        issues_list += ErrorHandler.format_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC,
+        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
                                                  hed_description, tag_name, char_index=i, problem_char=char)
     return issues_list

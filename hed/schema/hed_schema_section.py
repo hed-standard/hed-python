@@ -9,7 +9,7 @@ entries_by_section = {
     HedSectionKey.Units: UnitEntry,
     HedSectionKey.UnitClasses: UnitClassEntry,
     HedSectionKey.ValueClasses: HedSchemaEntry,
-    HedSectionKey.AllTags: HedTagEntry,
+    HedSectionKey.Tags: HedTagEntry,
 }
 
 
@@ -145,7 +145,7 @@ class HedSchemaSection:
         return bool(self.all_names)
 
     def _finalize_section(self, hed_schema):
-        for entry in self.values():
+        for entry in self.all_entries:
             entry.finalize_entry(hed_schema)
 
 
@@ -164,6 +164,8 @@ class HedSchemaTagSection(HedSchemaSection):
         super().__init__(*args, **kwargs, case_sensitive=case_sensitive)
         # This dict contains all forms of all tags.  The .all_names variable has ONLY the long forms.
         self.long_form_tags = {}
+        self.inheritable_attributes = {}
+        self.root_tags = {}
 
     @staticmethod
     def _get_tag_forms(name):
@@ -229,7 +231,7 @@ class HedSchemaTagSection(HedSchemaSection):
         return key in self.long_form_tags
 
     @staticmethod
-    def _divide_tags_into_dict(divide_list):
+    def _group_by_top_level_tag(divide_list):
         result = {}
         for item in divide_list:
             key, _, value = item.long_tag_name.partition('/')
@@ -240,8 +242,16 @@ class HedSchemaTagSection(HedSchemaSection):
         return list(result.values())
 
     def _finalize_section(self, hed_schema):
-        split_list = self._divide_tags_into_dict(self.all_entries)
+        # Find the attributes with the inherited property
+        attribute_section = hed_schema.attributes
+        self.inheritable_attributes = [name for name, value in attribute_section.items()
+                                       if value.has_attribute(HedKey.IsInheritedProperty)]
 
+        # Hardcode in extension allowed as it is critical for validation in older schemas
+        if not self.inheritable_attributes:
+            self.inheritable_attributes = [HedKey.ExtensionAllowed]
+
+        split_list = self._group_by_top_level_tag(self.all_entries)
         # Sort the extension allowed lists
         extension_allowed_node = 0
         for values in split_list:
@@ -258,5 +268,6 @@ class HedSchemaTagSection(HedSchemaSection):
         if extension_allowed_node:
             split_list[extension_allowed_node:] = sorted(split_list[extension_allowed_node:], key=lambda x: x[0].long_tag_name)
         self.all_entries = [subitem for tag_list in split_list for subitem in tag_list]
-        super()._finalize_section(hed_schema)
 
+        super()._finalize_section(hed_schema)
+        self.root_tags = {tag.short_tag_name:tag for tag in self.all_entries if not tag._parent_tag}

@@ -1,6 +1,6 @@
 import unittest
 from hed.errors import ErrorHandler, ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings, \
-    get_printable_issue_string, sort_issues
+    get_printable_issue_string, sort_issues, replace_tag_references
 from hed import HedString
 from hed import load_schema_version
 
@@ -9,6 +9,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.error_handler = ErrorHandler()
+        cls._schema = load_schema_version()
         pass
 
     def test_push_error_context(self):
@@ -69,7 +70,7 @@ class Test(unittest.TestCase):
 
     def test_filter_issues_by_severity(self):
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
         self.assertTrue(len(error_list) == 2)
         filtered_list = self.error_handler.filter_issues_by_severity(issues_list=error_list,
@@ -79,7 +80,7 @@ class Test(unittest.TestCase):
     def test_printable_issue_string(self):
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
 
         printable_issues = get_printable_issue_string(error_list)
@@ -99,7 +100,7 @@ class Test(unittest.TestCase):
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
         self.error_handler.push_error_context(ErrorContext.FILE_NAME, myfile)
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.INVALID_CAPITALIZATION,
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
 
         printable_issues = get_printable_issue_string(error_list, skip_filename=False)
@@ -142,3 +143,20 @@ class Test(unittest.TestCase):
         self.assertEqual(reversed_issues[2][ErrorContext.CUSTOM_TITLE], 'issue3')
         self.assertEqual(reversed_issues[3][ErrorContext.CUSTOM_TITLE], 'issue2')
         self.assertEqual(reversed_issues[4][ErrorContext.CUSTOM_TITLE], 'issue1')
+
+
+    def test_replace_tag_references(self):
+        # Test with mixed data types and HedString in a nested dict
+        nested_dict = {'a': HedString('Hed1', self._schema), 'b': {'c': 2, 'd': [3, {'e': HedString('Hed2', self._schema)}]}, 'f': [5, 6]}
+        replace_tag_references(nested_dict)
+        self.assertEqual(nested_dict, {'a': 'Hed1', 'b': {'c': 2, 'd': [3, {'e': 'Hed2'}]}, 'f': [5, 6]})
+
+        # Test with mixed data types and HedString in a nested list
+        nested_list = [HedString('Hed1', self._schema), {'a': 2, 'b': [3, {'c': HedString('Hed2', self._schema)}]}]
+        replace_tag_references(nested_list)
+        self.assertEqual(nested_list, ['Hed1', {'a': 2, 'b': [3, {'c': 'Hed2'}]}])
+
+        # Test with mixed data types and HedString in a list within a dict
+        mixed = {'a': HedString('Hed1', self._schema), 'b': [2, 3, {'c': HedString('Hed2', self._schema)}, 4]}
+        replace_tag_references(mixed)
+        self.assertEqual(mixed, {'a': 'Hed1', 'b': [2, 3, {'c': 'Hed2'}, 4]})

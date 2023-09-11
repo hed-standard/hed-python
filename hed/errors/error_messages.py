@@ -5,8 +5,7 @@ Add new errors here, or any other file imported after error_reporter.py.
 """
 
 from hed.errors.error_reporter import hed_error, hed_tag_error
-from hed.errors.error_types import ValidationErrors, SchemaErrors, \
-    SidecarErrors, SchemaWarnings, ErrorSeverity, DefinitionErrors, OnsetErrors, ColumnErrors
+from hed.errors.error_types import ValidationErrors, SidecarErrors, ErrorSeverity, DefinitionErrors, OnsetErrors, ColumnErrors
 
 
 @hed_tag_error(ValidationErrors.UNITS_INVALID)
@@ -165,13 +164,13 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
-    return f"A data-recording’s Def-expand tag does not match the given definition." + \
+    return f"A data-recording's Def-expand tag does not match the given definition." + \
            f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_UNMATCHED, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_unmatched(tag):
-    return f"A data-recording’s Def tag cannot be matched to definition.  Tag: '{tag}'"
+    return f"A data-recording's Def tag cannot be matched to definition.  Tag: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.DEF_INVALID)
@@ -186,7 +185,7 @@ def val_error_def_value_extra(tag):
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_UNMATCHED, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_def_expand_unmatched(tag):
-    return f"A data-recording’s Def-expand tag cannot be matched to definition.  Tag: '{tag}'"
+    return f"A data-recording's Def-expand tag cannot be matched to definition.  Tag: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_VALUE_MISSING, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
@@ -228,58 +227,9 @@ def val_warning_capitalization(tag):
 
 @hed_tag_error(ValidationErrors.UNITS_MISSING, default_severity=ErrorSeverity.WARNING)
 def val_warning_default_units_used(tag, default_unit):
+    if default_unit is None:
+        return f"No unit specified on - '{tag}'.  Multiple default values exist and cannot be inferred"
     return f"No unit specified. Using '{default_unit}' as the default - '{tag}'"
-
-
-@hed_error(SchemaErrors.HED_SCHEMA_DUPLICATE_NODE)
-def schema_error_hed_duplicate_node(tag, duplicate_tag_list, section):
-    tag_join_delimiter = "\n\t"
-    return f"Duplicate term '{str(tag)}' used {len(duplicate_tag_list)} places in '{section}' section schema as:" + \
-           f"{tag_join_delimiter}{tag_join_delimiter.join(duplicate_tag_list)}"
-
-
-@hed_error(SchemaErrors.HED_SCHEMA_DUPLICATE_FROM_LIBRARY)
-def schema_error_hed_duplicate_node(tag, duplicate_tag_list, section):
-    tag_join_delimiter = "\n\t"
-    return f"Duplicate term '{str(tag)}' was found in the library and in the standard schema in '{section}' section schema as:" + \
-           f"{tag_join_delimiter}{tag_join_delimiter.join(duplicate_tag_list)}"
-
-
-@hed_error(SchemaErrors.SCHEMA_ATTRIBUTE_INVALID)
-def schema_error_unknown_attribute(attribute_name, source_tag):
-    return f"Attribute '{attribute_name}' used by '{source_tag}' was not defined in the schema, " \
-           f"or was used outside of it's defined class."
-
-
-@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_DESC, default_severity=ErrorSeverity.WARNING,
-           actual_code=SchemaWarnings.HED_SCHEMA_CHARACTER_INVALID)
-def schema_warning_invalid_chars_desc(desc_string, tag_name, problem_char, char_index):
-    return f"Invalid character '{problem_char}' in desc for '{tag_name}' at position {char_index}.  '{desc_string}"
-
-
-@hed_error(SchemaWarnings.INVALID_CHARACTERS_IN_TAG, default_severity=ErrorSeverity.WARNING,
-           actual_code=SchemaWarnings.HED_SCHEMA_CHARACTER_INVALID)
-def schema_warning_invalid_chars_tag(tag_name, problem_char, char_index):
-    return f"Invalid character '{problem_char}' in tag '{tag_name}' at position {char_index}."
-
-
-@hed_error(SchemaWarnings.INVALID_CAPITALIZATION, default_severity=ErrorSeverity.WARNING)
-def schema_warning_invalid_capitalization(tag_name, problem_char, char_index):
-    return "First character must be a capital letter or number.  " + \
-           f"Found character '{problem_char}' in tag '{tag_name}' at position {char_index}."
-
-
-@hed_error(SchemaWarnings.NON_PLACEHOLDER_HAS_CLASS, default_severity=ErrorSeverity.WARNING)
-def schema_warning_non_placeholder_class(tag_name, invalid_attribute_name):
-    return "Only placeholder nodes('#') can have a unit or value class." + \
-           f"Found {invalid_attribute_name} on {tag_name}"
-
-
-@hed_error(SchemaWarnings.INVALID_ATTRIBUTE, default_severity=ErrorSeverity.ERROR)
-def schema_error_invalid_attribute(tag_name, invalid_attribute_name):
-    return f"'{invalid_attribute_name}' should not be present in a loaded schema, found on '{tag_name}'." \
-           f"Something went very wrong."
-
 
 
 @hed_error(SidecarErrors.BLANK_HED_STRING)
@@ -387,6 +337,11 @@ def onset_error_def_unmatched(tag):
 @hed_tag_error(OnsetErrors.OFFSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_error_offset_before_onset(tag):
     return f"Offset tag '{tag}' does not have a matching onset."
+
+
+@hed_tag_error(OnsetErrors.ONSET_SAME_DEFS_ONE_ROW, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+def onset_error_same_defs_one_row(tag, def_name):
+    return f"'{tag}' uses name '{def_name}', which was already used at this onset time."
 
 
 @hed_tag_error(OnsetErrors.INSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)

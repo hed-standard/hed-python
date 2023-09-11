@@ -5,6 +5,7 @@ import pandas as pd
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_hed_validation_op import SummarizeHedValidationOp, \
     HedValidationSummary
+from hed.errors import error_reporter
 
 
 class Test(unittest.TestCase):
@@ -74,6 +75,7 @@ class Test(unittest.TestCase):
         sum_context = dispatch.summary_dicts[sum_op.summary_name]
         sum_obj1 = sum_context.get_summary_details()
         self.assertIsInstance(sum_obj1, dict)
+        error_reporter.replace_tag_references(sum_obj1)
         json_str1 = json.dumps(sum_obj1, indent=4)
         self.assertIsInstance(json_str1, str)
         json_obj1 = json.loads(json_str1)
@@ -81,6 +83,7 @@ class Test(unittest.TestCase):
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run2', sidecar=self.json_path)
         sum_context2 = dispatch.summary_dicts[sum_op.summary_name]
         sum_obj2 = sum_context2.get_summary_details()
+        error_reporter.replace_tag_references(sum_obj2)
         json_str2 = json.dumps(sum_obj2, indent=4)
         self.assertIsInstance(json_str2, str)
         sum_obj3 = sum_context2.get_summary_details(include_individual=False)

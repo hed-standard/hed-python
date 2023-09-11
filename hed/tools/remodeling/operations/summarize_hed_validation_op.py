@@ -66,7 +66,7 @@ class SummarizeHedValidationOp(BaseOp):
         Returns:
             DataFrame: A copy of df
 
-        Side-effect:
+        Side effect:
             Updates the relevant summary.
 
         """
@@ -155,7 +155,7 @@ class HedValidationSummary(BaseSummary):
                 "Specifics": summary_info}
 
     def merge_all_info(self):
-        """ Create a dictionary containing all of the errors in the dataset.
+        """ Create a dictionary containing all the errors in the dataset.
 
         Returns:
             dict - dictionary of issues organized into sidecar_issues and event_issues.

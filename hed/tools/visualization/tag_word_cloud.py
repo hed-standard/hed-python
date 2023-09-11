@@ -1,9 +1,9 @@
 import numpy as np
 from PIL import Image
-from hed.tools.visualization.word_cloud_util import default_color_func, WordCloud
+from hed.tools.visualization.word_cloud_util import default_color_func, WordCloud, generate_contour_svg
 
 
-def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400, height=200, **kwargs):
+def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400, height=None, **kwargs):
     """Takes a word dict and returns a generated word cloud object
 
     Parameters:
@@ -25,6 +25,13 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
         mask_image = load_and_resize_mask(mask_path, width, height)
         width = mask_image.shape[1]
         height = mask_image.shape[0]
+    if height is None:
+        if width is None:
+            width = 400
+        height = width // 2
+    if width is None:
+        width = height * 2
+
     kwargs.setdefault('contour_width', 3)
     kwargs.setdefault('contour_color', 'black')
     kwargs.setdefault('prefer_horizontal', 0.75)
@@ -41,6 +48,20 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     return wc
 
 
+def word_cloud_to_svg(wc):
+    """Takes word cloud and returns it as an SVG string.
+
+    Parameters:
+        wc(WordCloud): the word cloud object
+    Returns:
+        svg_string(str): The svg for the word cloud
+    """
+    svg_string = wc.to_svg()
+    svg_string = svg_string.replace("fill:", "fill:rgb")
+    svg_string = svg_string.replace("</svg>", generate_contour_svg(wc, wc.width, wc.height) + "</svg>")
+    return svg_string
+
+
 def summary_to_dict(summary, transform=np.log10, adjustment=5):
     """Converts a HedTagSummary json dict into the word cloud input format
 
@@ -51,10 +72,10 @@ def summary_to_dict(summary, transform=np.log10, adjustment=5):
         adjustment(int): Value added after transform.
     Returns:
         word_dict(dict): a dict of the words and their occurrence count
-        
+
     :raises KeyError:
         A malformed dictionary was passed
-        
+
     """
     if transform is None:
         transform = lambda x: x

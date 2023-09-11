@@ -55,7 +55,7 @@ class HedSchemaBase(ABC):
         raise NotImplemented("This function must be implemented in the baseclass")
 
     @abstractmethod
-    def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.AllTags):
+    def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags):
         """ Return tag entries with the given attribute.
 
         Parameters:
@@ -72,7 +72,7 @@ class HedSchemaBase(ABC):
 
     # todo: maybe tweak this API so you don't have to pass in library namespace?
     @abstractmethod
-    def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, schema_namespace=""):
+    def get_tag_entry(self, name, key_class=HedSectionKey.Tags, schema_namespace=""):
         """ Return the schema entry for this tag, if one exists.
 
         Parameters:
@@ -80,7 +80,7 @@ class HedSchemaBase(ABC):
                 This will not handle extensions or similar.
                 If this is a tag, it can have a schema namespace, but it's not required
             key_class (HedSectionKey or str):  The type of entry to return.
-            schema_namespace (str): Only used on AllTags.  If incorrect, will return None.
+            schema_namespace (str): Only used on Tags.  If incorrect, will return None.
 
         Returns:
             HedSchemaEntry: The schema entry for the given tag.

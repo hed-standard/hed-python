@@ -1,8 +1,7 @@
 import os
 import unittest
-from pandas import DataFrame
 from hed import schema as hedschema
-from hed.models import HedTag, HedString, HedGroup
+from hed.models import HedTag, HedString
 from hed.tools.analysis.analysis_util import hed_to_str
 
 
@@ -44,7 +43,6 @@ class Test(unittest.TestCase):
             hed_to_str(dict1)
         self.assertEqual(context.exception.args[0], "ContentsWrongClass")
 
-
     def test_hed_to_str_obj(self):
         str_obj1 = HedString('Label/Cond1', self.hed_schema)
         str1 = hed_to_str(str_obj1)
@@ -68,8 +66,8 @@ class Test(unittest.TestCase):
         str5 = str(str_obj5)
         self.assertEqual(str5, '(Label/Cond1),Red')
         for tup in tuples:
-            if len(tup[1]._children) == 1:
-                str_obj5.replace(tup[1], tup[1]._children[0])
+            if len(tup[1].children) == 1:
+                str_obj5.replace(tup[1], tup[1].children[0])
         str5a = str(str_obj5)
         self.assertEqual(str5a, 'Label/Cond1,Red')
 
@@ -105,6 +103,7 @@ class Test(unittest.TestCase):
         str3 = hed_to_str(str_obj3, remove_parentheses=True)
         self.assertIsInstance(str3, str)
         self.assertEqual(str3, 'Label/Cond1')
+
 
 if __name__ == '__main__':
     unittest.main()

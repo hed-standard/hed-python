@@ -6,7 +6,7 @@ from hed.tools.remodeling.backup_manager import BackupManager
 
 
 def get_parser():
-    """ Create a parser for the run_remodel_restore command-line arguments. 
+    """ Create a parser for the run_remodel_restore command-line arguments.
 
     Returns:
         argparse.ArgumentParser:  A parser for parsing the command line arguments.

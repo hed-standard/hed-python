@@ -40,8 +40,8 @@ class KeyMap:
                              f"Key cols {str(key_cols)} and target cols {str(target_cols)} must be disjoint", "")
         self.name = name
         self.col_map = pd.DataFrame(columns=self.key_cols + self.target_cols)
-        self.map_dict = {}
-        self.count_dict = {}
+        self.map_dict = {}  # Index of key to position in the col_map DataFrame
+        self.count_dict = {}  # Keeps a running count of the number of times a key appears in the data
 
     @property
     def columns(self):
@@ -51,15 +51,15 @@ class KeyMap:
         temp_list = [f"{self.name} counts for key [{str(self.key_cols)}]:"]
         for index, row in self.col_map.iterrows():
             key_hash = get_row_hash(row, self.columns)
-            temp_list.append(f"{str(list(row.values))}\t{self.count_dict[key_hash]}")
+            temp_list.append(f"{str(list(row.values))}:\t{self.count_dict[key_hash]}")
         return "\n".join(temp_list)
 
-    def make_template(self, additional_cols=None):
+    def make_template(self, additional_cols=None, show_counts=True):
         """ Return a dataframe template.
 
         Parameters:
             additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
-
+            show_counts (bool): If true, number of times each key combination appears is in first column
         Returns:
             DataFrame:  A dataframe containing the template.
 
@@ -77,7 +77,16 @@ class KeyMap:
         df = self.col_map[self.key_cols].copy()
         if additional_cols:
             df[additional_cols] = 'n/a'
+        if show_counts:
+            df.insert(0, 'key_counts', self._get_counts())
         return df
+
+    def _get_counts(self):
+        counts = [0 for _ in range(len(self.col_map))]
+        for index, row in self.col_map.iterrows():
+            key_hash = get_row_hash(row, self.key_cols)
+            counts[index] = self.count_dict[key_hash]
+        return counts
 
     def remap(self, data):
         """ Remap the columns of a dataframe or columnar file.
@@ -134,16 +143,12 @@ class KeyMap:
             key_hash = get_row_hash(row, self.key_cols)
             self.map_dict[key_hash] = index
 
-    def update(self, data, allow_missing=True, keep_counts=True):
+    def update(self, data, allow_missing=True):
         """ Update the existing map with information from data.
 
         Parameters:
             data (DataFrame or str):     DataFrame or filename of an events file or event map.
             allow_missing (bool):        If true allow missing keys and add as n/a columns.
-            keep_counts (bool):          If true keep a count of the times each key is present.
-
-        Returns:
-            list: The indices of duplicates.
 
         :raises HedFileError:
             - If there are missing keys and allow_missing is False.
@@ -165,41 +170,35 @@ class KeyMap:
             targets_present, targets_missing = separate_values(col_list, self.target_cols)
             if targets_present:
                 base_df[targets_present] = df[targets_present].values
-        return self._update(base_df, track_duplicates=keep_counts)
+        self._update(base_df)
 
-    def _update(self, base_df, track_duplicates=True):
+    def _update(self, base_df):
         """ Update the dictionary of key values based on information in the dataframe.
 
         Parameters:
             base_df (DataFrame):       DataFrame of consisting of the columns in the KeyMap
-            track_duplicates (bool):        If true, keep counts of the indices.
-
-        Returns:
-            list:         List of key positions that appeared more than once or an empty list of no duplicates or
-                          track_duplicates was false.
 
         """
 
-        duplicate_indices = []
         row_list = []
         next_pos = len(self.col_map)
         for index, row in base_df.iterrows():
-            key, pos_update = self._handle_update(row, row_list, next_pos, track_duplicates)
+            key, pos_update = self._handle_update(row, row_list, next_pos)
             next_pos += pos_update
-            if not track_duplicates and not pos_update:
-                duplicate_indices.append(index)
         if row_list:
             df = pd.DataFrame(row_list)
             self.col_map = pd.concat([self.col_map, df], axis=0, ignore_index=True)
-        return duplicate_indices
 
-    def _handle_update(self, row, row_list, next_pos, keep_counts):
+    def _handle_update(self, row, row_list, next_pos):
         """ Update the dictionary and counts of the number of times this combination of key columns appears.
 
         Parameters:
             row (DataSeries):  Data the values in a row.
             row_list (list):   A list of rows to be appended to hold the unique rows
             next_pos (int):    Index into the
+
+        Returns:
+            tuple: (key, pos_update)  key is the row hash and pos_update is 1 if new row or 0 otherwise.
 
         """
         key = get_row_hash(row, self.key_cols)
@@ -208,10 +207,8 @@ class KeyMap:
             self.map_dict[key] = next_pos
             row_list.append(row)
             pos_update = 1
-            if keep_counts:
-                self.count_dict[key] = 0
-        if keep_counts:
-            self.count_dict[key] += 1
+            self.count_dict[key] = 0
+        self.count_dict[key] = self.count_dict[key] + 1
         return key, pos_update
 
     @staticmethod

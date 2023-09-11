@@ -1,5 +1,6 @@
 """ Utilities for writing content to files and for other file manipulation."""
 
+import shutil
 import tempfile
 import os
 import urllib.request
@@ -12,10 +13,10 @@ github_api_access_token = ""
 
 def get_api_key():
     """
-        Tries to get the Github access token from the environment.  Defaults to above value if not found.
+        Tries to get the GitHub access token from the environment.  Defaults to above value if not found.
 
     Returns:
-        A Github access key or an empty string.
+        A GitHub access key or an empty string.
     """
     try:
         return os.environ["HED_GITHUB_TOKEN"]
@@ -24,7 +25,7 @@ def get_api_key():
 
 
 def make_url_request(resource_url, try_authenticate=True):
-    """ Make a request and adds the above Github access credentials.
+    """ Make a request and adds the above GitHub access credentials.
 
     Parameters:
         resource_url (str): The url to retrieve.
@@ -91,8 +92,29 @@ def write_strings_to_file(output_strings, extension=None):
         return opened_file.name
 
 
+def move_file(input_path, target_path):
+    """
+    If target_path is not empty, move input file to target file
+
+    Parameters:
+        input_path(str): Path to an existing file
+        target_path(str or None): Path to move this file to
+                                  If None, the function does nothing and returns input_path
+
+    Returns:
+        filepath(str): the original or moved filepath
+    """
+    if target_path:
+        directory = os.path.dirname(target_path)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory)
+        shutil.move(input_path, target_path)
+        return target_path
+    return input_path
+
+
 def write_xml_tree_2_xml_file(xml_tree, extension=".xml"):
-    """ Write an XML element tree object into a XML file.
+    """ Write an XML element tree object into an XML file.
 
     Parameters:
         xml_tree (Element):  An element representing an XML file.
@@ -119,5 +141,5 @@ def _xml_element_2_str(elem):
 
     """
     rough_string = ElementTree.tostring(elem, method='xml')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="   ")
+    parsed = minidom.parseString(rough_string)
+    return parsed.toprettyxml(indent="   ")

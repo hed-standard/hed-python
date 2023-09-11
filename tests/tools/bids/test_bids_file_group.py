@@ -3,7 +3,6 @@ import unittest
 from hed.schema.hed_schema_io import load_schema
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_file_group import BidsFileGroup
-from hed.validator.hed_validator import HedValidator
 
 # TODO: Add test when exclude directories have files of the type needed (such as JSON in code directory).
 

@@ -41,7 +41,6 @@ def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs
     else:
         df = data_input.dataframe[eligible_columns].copy(deep=True)
         df['HED_assembled'] = hed_string_list
-    # definitions = data_input.get_definitions().gathered_defs
     return df, definitions
 
 
@@ -95,7 +94,7 @@ def search_strings(hed_strings, queries, query_names=None):
 
     :raises ValueError:
         - If query names are invalid or duplicated.
-            
+
     """
 
     expression_parsers, query_names = get_expression_parsers(queries, query_names=query_names)

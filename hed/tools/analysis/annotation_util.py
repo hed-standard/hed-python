@@ -32,17 +32,18 @@ def df_to_hed(dataframe, description_tag=True):
         description_tag (bool):  If True description tag is included.
 
     Returns:
-        dict:  A dictionary compatible compatible with BIDS JSON tabular file that includes HED.
+        dict:  A dictionary compatible with BIDS JSON tabular file that includes HED.
 
     Notes:
         - The DataFrame must have the columns with names: column_name, column_value, description, and HED.
 
     """
-    missing_cols = check_df_columns(dataframe)
+    df = dataframe.fillna('n/a')
+    missing_cols = check_df_columns(df)
     if missing_cols:
         raise HedFileError("RequiredColumnsMissing", f"Columns {str(missing_cols)} are missing from dataframe", "")
     hed_dict = {}
-    for index, row in dataframe.iterrows():
+    for index, row in df.iterrows():
         if row['HED'] == 'n/a' and row['description'] == 'n/a':
             continue
         if row['column_value'] == 'n/a':
@@ -164,6 +165,7 @@ def merge_hed_dict(sidecar_dict, hed_dict):
         hed_dict(dict):       Dictionary derived from a dataframe representation of HED in sidecar.
 
     """
+
     for key, value_dict in hed_dict.items():
         if key not in sidecar_dict:
             sidecar_dict[key] = value_dict
@@ -318,7 +320,7 @@ def _flatten_val_col(col_key, col_dict):
 #
 #     Returns:
 #         str:  A HED string extracted from the row.
-#         str:  A string representing the description (without the Description tag.
+#         str:  A string representing the description (without the Description tag).
 #
 #     Notes:
 #         If description_tag is True the entire tag string is included with description.

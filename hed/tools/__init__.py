@@ -1,10 +1,10 @@
 """ HED remodeling, analysis and summarization tools. """
 
 from .analysis.file_dictionary import FileDictionary
-from .analysis.hed_context_manager import OnsetGroup, HedContextManager
-from .analysis.hed_type_definitions import HedTypeDefinitions
+# from .analysis.hed_context_manager import OnsetGroup, HedContextManager
+from .analysis.hed_type_defs import HedTypeDefs
 from .analysis.hed_type_factors import HedTypeFactors
-from .analysis.hed_type_values import HedTypeValues
+from .analysis.hed_type import HedType
 from .analysis.hed_type_manager import HedTypeManager
 from .analysis.hed_type_counts import HedTypeCount
 from .analysis.key_map import KeyMap

@@ -60,13 +60,14 @@ def get_cache_directory():
     return HED_CACHE_DIRECTORY
 
 
-def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=False):
+def get_hed_versions(local_hed_directory=None, library_name=None):
     """ Get the HED versions in the hed directory.
 
     Parameters:
         local_hed_directory (str): Directory to check for versions which defaults to hed_cache.
         library_name (str or None): An optional schema library name.
-        get_libraries (bool): If true, return a dictionary of version numbers, with an entry for each library name.
+                                    None retrieves the standard schema only.
+                                    Pass "all" to retrieve all standard and library schemas as a dict.
 
     Returns:
         list or dict: List of version numbers or dictionary {library_name: [versions]}.
@@ -89,18 +90,16 @@ def get_hed_versions(local_hed_directory=None, library_name=None, get_libraries=
         if expression_match is not None:
             version = expression_match.group(3)
             found_library_name = expression_match.group(2)
-            if not get_libraries and found_library_name != library_name:
+            if library_name != "all" and found_library_name != library_name:
                 continue
             if found_library_name not in all_hed_versions:
                 all_hed_versions[found_library_name] = []
             all_hed_versions[found_library_name].append(version)
     for name, hed_versions in all_hed_versions.items():
         all_hed_versions[name] = _sort_version_list(hed_versions)
-    if get_libraries:
-        return all_hed_versions
     if library_name in all_hed_versions:
         return all_hed_versions[library_name]
-    return []
+    return all_hed_versions
 
 
 def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_folder=None):

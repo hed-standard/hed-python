@@ -4,30 +4,36 @@ from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
 
 
-class HedTypeDefinitions:
+class HedTypeDefs:
+    """
 
-    def __init__(self, definitions, hed_schema, type_tag='condition-variable'):
+    Properties:
+        def_map (dict):  keys are definition names, values are dict {type_values, description, tags}
+                         Example: A definition 'famous-face-cond' with contents
+                         `(Condition-variable/Face-type,Description/A face that should be recognized by the
+                                                   participants,(Image,(Face,Famous)))`
+                         would have type_values ['face_type'].  All items are strings not objects.
+
+
+    """
+    def __init__(self, definitions, type_tag='condition-variable'):
         """ Create a definition manager for a type of variable.
 
         Parameters:
             definitions (dict or DefinitionDict): A dictionary of DefinitionEntry objects.
-            hed_schema (Hedschema or HedSchemaGroup): The schema used for parsing.
             type_tag (str): Lower-case HED tag string representing the type managed.
-
-        # TODO: [Refactor] - should dict be allowed for definitions.
 
         """
 
         self.type_tag = type_tag.lower()
-        self.hed_schema = hed_schema
         if isinstance(definitions, DefinitionDict):
             self.definitions = definitions.defs
         elif isinstance(definitions, dict):
             self.definitions = definitions
         else:
             self.definitions = {}
-        self.def_map = self._extract_def_map()   # maps def names to conditions.
-        self.type_map = self._extract_type_map()
+        self.def_map = self._extract_def_map()  # dict def names vs {description, tags, type_values}
+        self.type_map = self._extract_type_map()  # Dictionary of type_values vs dict definition names
 
     def get_type_values(self, item):
         """ Return a list of type_tag values in item.
@@ -39,25 +45,46 @@ class HedTypeDefinitions:
             list:  A list of the unique values associated with this type
 
         """
-        def_names = self.get_def_names(item, no_value=True)
-        type_tag_values = []
+        def_names = self.extract_def_names(item, no_value=True)
+        type_values = []
         for def_name in def_names:
-            values = self.def_map.get(def_name.lower(), None)
-            if values and values["type_values"]:
-                type_tag_values = type_tag_values + values["type_values"]
-        return type_tag_values
+            values = self.def_map.get(def_name.lower(), {})
+            if "type_values" in values:
+                type_values = type_values + values["type_values"]
+        return type_values
+
+    @property
+    def type_def_names(self):
+        """ List of names of definition that have this type-variable.
+
+        Returns:
+            list:  definition names that have this type.
+
+        """
+        return list(self.def_map.keys())
+
+    @property
+    def type_names(self):
+        """ List of names of the type-variables associated with type definitions.
+
+        Returns:
+            list:  type names associated with the type definitions
+
+        """
+        return list(self.type_map.keys())
 
     def _extract_def_map(self):
-        """ Extract all of the type_variables associated with each definition and add them to def_map. """
+        """ Extract type_variables associated with each definition and add them to def_map. """
         def_map = {}
         for entry in self.definitions.values():
-            type_values, description, other_tags = self._extract_entry_values(entry)
-            def_map[entry.name.lower()] = \
-                {'type_values': type_values, 'description': description, 'tags': other_tags}
+            type_def, type_values, description, other_tags = self._extract_entry_values(entry)
+            if type_def:
+                def_map[type_def.lower()] = \
+                    {'def_name': type_def, 'type_values': type_values, 'description': description, 'tags': other_tags}
         return def_map
 
     def _extract_type_map(self):
-        """ Extract all of the definitions associated with each type value and add them to the dictionary. """
+        """ Extract the definitions associated with each type value and add them to the dictionary. """
 
         type_map = {}
         for def_name, def_values in self.def_map.items():
@@ -79,11 +106,10 @@ class HedTypeDefinitions:
             list: A list of type_variables associated with this definition.
             str:  The contents of a description tag if any.
 
-
-
         """
         tag_list = entry.contents.get_all_tags()
-        type_tag_values = []
+        type_values = []
+        type_def = ""
         description = ''
         other_tags = []
         for hed_tag in tag_list:
@@ -92,15 +118,12 @@ class HedTypeDefinitions:
             elif hed_tag.short_base_tag.lower() != self.type_tag:
                 other_tags.append(hed_tag.short_base_tag)
             else:
-                value = hed_tag.extension.lower()
-                if value:
-                    type_tag_values.append(value)
-                else:
-                    type_tag_values.append(entry.name)
-        return type_tag_values, description, other_tags
+                type_values.append(hed_tag.extension.lower())
+                type_def = entry.name
+        return type_def, type_values, description, other_tags
 
     @staticmethod
-    def get_def_names(item, no_value=True):
+    def extract_def_names(item, no_value=True):
         """ Return a list of Def values in item.
 
            Parameters:
@@ -117,7 +140,7 @@ class HedTypeDefinitions:
             names = [tag.extension.lower() for tag in item.get_all_tags() if 'def' in tag.tag_terms]
         if no_value:
             for index, name in enumerate(names):
-                name, name_value = HedTypeDefinitions.split_name(name)
+                name, name_value = HedTypeDefs.split_name(name)
                 names[index] = name
         return names
 

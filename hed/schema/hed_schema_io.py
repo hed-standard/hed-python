@@ -1,23 +1,26 @@
 """ Utilities for loading and outputting HED schema. """
 import os
 import json
-from hed.schema.schema_io.xml2schema import HedSchemaXMLParser
-from hed.schema.schema_io.wiki2schema import HedSchemaWikiParser
-from hed.schema import hed_schema_constants, hed_cache
+import functools
+from hed.schema.schema_io.xml2schema import SchemaLoaderXML
+from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
+from hed.schema import hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema import HedSchema
 from hed.schema.schema_io import schema_util
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.schema_validation_util import validate_version_string
 
 
-def from_string(schema_string, file_type=".xml", schema_namespace=None):
+MAX_MEMORY_CACHE = 20
+
+
+def from_string(schema_string, schema_format=".xml", schema_namespace=None):
     """ Create a schema from the given string.
 
     Parameters:
         schema_string (str):         An XML or mediawiki file as a single long string.
-        file_type (str):             The extension(including the .) corresponding to a file source.
+        schema_format (str):         The schema format of the source schema string.
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
 
     Returns:
@@ -35,28 +38,17 @@ def from_string(schema_string, file_type=".xml", schema_namespace=None):
         raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string",
                            filename=schema_string)
 
-    if file_type.endswith(".xml"):
-        hed_schema = HedSchemaXMLParser.load_xml(schema_as_string=schema_string)
-    elif file_type.endswith(".mediawiki"):
-        hed_schema = HedSchemaWikiParser.load_wiki(schema_as_string=schema_string)
+    if schema_format.endswith(".xml"):
+        hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string)
+    elif schema_format.endswith(".mediawiki"):
+        hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string)
     else:
-        raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=file_type)
+        raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=schema_format)
 
     if schema_namespace:
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
 
     return hed_schema
-
-
-def get_schema(hed_versions):
-    if not hed_versions:
-        return None
-    elif isinstance(hed_versions, str) or isinstance(hed_versions, list):
-        return load_schema_version(hed_versions)
-    elif isinstance(hed_versions, HedSchema) or isinstance(hed_versions, HedSchemaGroup):
-        return hed_versions
-    else:
-        raise ValueError("InvalidHedSchemaOrSchemaVersion", "Expected schema or schema version")
 
 
 def load_schema(hed_path=None, schema_namespace=None):
@@ -83,11 +75,11 @@ def load_schema(hed_path=None, schema_namespace=None):
 
     if is_url:
         file_as_string = schema_util.url_to_string(hed_path)
-        hed_schema = from_string(file_as_string, file_type=os.path.splitext(hed_path.lower())[1])
+        hed_schema = from_string(file_as_string, schema_format=os.path.splitext(hed_path.lower())[1])
     elif hed_path.lower().endswith(".xml"):
-        hed_schema = HedSchemaXMLParser.load_xml(hed_path)
+        hed_schema = SchemaLoaderXML.load(hed_path)
     elif hed_path.lower().endswith(".mediawiki"):
-        hed_schema = HedSchemaWikiParser.load_wiki(hed_path)
+        hed_schema = SchemaLoaderWiki.load(hed_path)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_path)
 
@@ -97,7 +89,7 @@ def load_schema(hed_path=None, schema_namespace=None):
     return hed_schema
 
 
-# todo: this could be updated to also support .mediawiki format.
+# If this is actually used, we could easily add other versions/update this one
 def get_hed_xml_version(xml_file_path):
     """ Get the version number from a HED XML file.
 
@@ -110,16 +102,17 @@ def get_hed_xml_version(xml_file_path):
     :raises HedFileError:
         - There is an issue loading the schema
     """
-    root_node = HedSchemaXMLParser._parse_hed_xml(xml_file_path)
-    return root_node.attrib[hed_schema_constants.VERSION_ATTRIBUTE]
+    parser = SchemaLoaderXML(xml_file_path)
+    return parser.schema.version
 
 
+@functools.lru_cache(maxsize=MAX_MEMORY_CACHE)
 def _load_schema_version(xml_version=None, xml_folder=None):
     """ Return specified version or latest if not specified.
 
     Parameters:
         xml_folder (str): Path to a folder containing schema.
-        xml_version (str or list): HED version format string. Expected format: '[schema_namespace:][library_name_]X.Y.Z'.
+        xml_version (str): HED version format string. Expected format: '[schema_namespace:][library_name_]X.Y.Z'.
 
     Returns:
         HedSchema or HedSchemaGroup: The requested HedSchema object.
@@ -150,7 +143,9 @@ def _load_schema_version(xml_version=None, xml_folder=None):
             hed_cache.cache_xml_versions(cache_folder=xml_folder)
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
             if not final_hed_xml_file:
-                raise HedFileError(HedExceptions.FILE_NOT_FOUND, f"HED version '{xml_version}' not found in cache: {hed_cache.get_cache_directory()}", filename=xml_folder)
+                raise HedFileError(HedExceptions.FILE_NOT_FOUND,
+                                   f"HED version '{xml_version}' not found in cache: {hed_cache.get_cache_directory()}",
+                                   filename=xml_folder)
             hed_schema = load_schema(final_hed_xml_file)
         else:
             raise e
@@ -178,9 +173,9 @@ def load_schema_version(xml_version=None, xml_folder=None):
         - The xml_version is not valid.
         - A fatal error was encountered in parsing
     """
+    # Check if we start and end with a square bracket, or double quote.  This might be valid json
     if xml_version and isinstance(xml_version, str) and \
-            ((xml_version.startswith("[") and xml_version.endswith("]")) or
-             (xml_version.startswith('"') and xml_version.endswith('"'))):
+        ((xml_version[0], xml_version[-1]) in [('[', ']'), ('"', '"')]):
         try:
             xml_version = json.loads(xml_version)
         except json.decoder.JSONDecodeError as e:

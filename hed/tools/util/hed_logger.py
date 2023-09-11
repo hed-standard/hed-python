@@ -1,5 +1,6 @@
 """ Logger class with messages organized by key """
 
+
 class HedLogger:
     """ Log status messages organized by key. """
     def __init__(self, name=None):

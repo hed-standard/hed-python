@@ -134,5 +134,15 @@ class TestDefinitionDict(TestDefBase):
             hed_string.expand_defs()
             self.assertEqual(str(hed_string), expected_results[key])
 
+    def test_altering_definition_contents(self):
+        def_dict = DefinitionDict("(Definition/DefName, (Event, Action))", self.hed_schema)
+        hed_string1 = HedString("Def/DefName", self.hed_schema, def_dict)
+        hed_string2 = HedString("Def/DefName", self.hed_schema, def_dict)
+        hed_string1.expand_defs()
+        hed_string2.expand_defs()
+        hed_string1.remove([hed_string1.get_all_tags()[2]])
+
+        self.assertNotEqual(hed_string1, hed_string2)
+
 if __name__ == '__main__':
     unittest.main()
