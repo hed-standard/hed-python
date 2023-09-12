@@ -197,14 +197,15 @@ def main(arg_list=None):
     if not os.path.isdir(args.data_dir):
         raise HedFileError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist", "")
     backup_name = handle_backup(args)
-    dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=backup_name, hed_versions=args.hed_versions)
     save_dir = None
     if args.work_dir:
         save_dir = os.path.realpath(os.path.join(args.work_dir, Dispatcher.REMODELING_SUMMARY_PATH))
-    files = get_file_list(dispatch.data_root, name_suffix=args.file_suffix, extensions=args.extensions,
+    files = get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
                           exclude_dirs=args.exclude_dirs)
     task_dict = parse_tasks(files, args.task_names)
     for task, files in task_dict.items():
+        dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=backup_name,
+                              hed_versions=args.hed_versions)
         if args.use_bids:
             run_bids_ops(dispatch, args, files)
         else:

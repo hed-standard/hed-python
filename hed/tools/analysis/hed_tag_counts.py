@@ -86,6 +86,8 @@ class HedTagCounts:
         """
         if file_name not in self.files:
             self.files[file_name] = ""
+        if not hed_string_obj:
+            return
         tag_list = hed_string_obj.get_all_tags()
         tag_dict = {}
         for tag in tag_list:

@@ -143,11 +143,11 @@ class BaseSummary(ABC):
             time_stamp = '_' + get_timestamp()
         else:
             time_stamp = ''
-        if task_name: 
+        if task_name:
             task_name = "_" + task_name
         this_save = os.path.join(save_dir, self.op.summary_name + '/')
         os.makedirs(os.path.realpath(this_save), exist_ok=True)
-        filename = os.path.realpath(os.path.join(this_save, 
+        filename = os.path.realpath(os.path.join(this_save,
                                                  self.op.summary_filename + task_name + time_stamp + file_format))
         individual = summary.get("Individual files", {})
         if individual_summaries == "none" or not individual:
