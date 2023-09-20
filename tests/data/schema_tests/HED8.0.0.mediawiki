@@ -170,7 +170,7 @@ This schema is the first official release that includes an xsd and requires unit
 ** Learn <nowiki>[Adaptively change behavior as the result of experience.]</nowiki>
 ** Memorize <nowiki>[Adaptively change behavior as the result of experience.]</nowiki>
 ** Plan <nowiki>[Think about the activities required to achieve a desired goal. ]</nowiki>
-** Predict <nowiki>[Say or estimate that something will happen or will be a consequence of something without having exact informaton.]</nowiki>
+** Predict <nowiki>[Say or estimate that something will happen or will be a consequence of something without having exact information.]</nowiki>
 ** Recognize <nowiki>[Identify someone or something from having encountered them before.]</nowiki>
 ** Respond <nowiki>[React to something such as a treatment or a stimulus.]</nowiki>
 ** Recall <nowiki>[Remember information by mental effort.]</nowiki>
@@ -324,7 +324,7 @@ This schema is the first official release that includes an xsd and requires unit
 ***** Clock <nowiki>[A device designed to indicate the time of day or to measure the time duration of an event or action.]</nowiki>
 ****** Clock-face <nowiki>[A location identifier based on clockface numbering or anatomic subregion.]</nowiki>
 **** Robot <nowiki>[A mechanical device that sometimes resembles a living animal and is capable of performing a variety of often complex human tasks on command or by being programmed in advance.]</nowiki>
-**** Tool <nowiki>[A component that is not part of a device but is designed to support its assemby or operation.]</nowiki>
+**** Tool <nowiki>[A component that is not part of a device but is designed to support its assembly or operation.]</nowiki>
 ***	Document <nowiki>[A physical object, or electronic counterpart, that is characterized by containing writing which is meant to be human-readable.]</nowiki>
 **** Letter <nowiki>[A written message addressed to a person or organization.]</nowiki>
 **** Note <nowiki>[A brief written record.]</nowiki>
@@ -370,7 +370,7 @@ This schema is the first official release that includes an xsd and requires unit
 **** Cart <nowiki>[A cart is a vehicle which has two wheels and is designed to transport human passengers or cargo.]</nowiki>
 **** Tractor <nowiki>[A mobile machine specifically designed to deliver a high tractive effort at slow speeds, and mainly used for the purposes of hauling a trailer or machinery used in agriculture or construction.]</nowiki>
 **** Train <nowiki>[A connected line of railroad cars with or without a locomotive.]</nowiki>
-**** Truck <nowiki>[A motor vehicle which, as its primary funcion, transports cargo rather than human passangers.]</nowiki>
+**** Truck <nowiki>[A motor vehicle which, as its primary function, transports cargo rather than human passangers.]</nowiki>
 ** Natural-object <nowiki>[Something that exists in or is produced by nature, and is not artificial or man-made.]</nowiki>
 *** Mineral <nowiki>[A solid, homogeneous, inorganic substance occurring in nature and having a definite chemical composition.]</nowiki>
 *** Natural-feature <nowiki>[A feature that occurs in nature. A prominent or identifiable aspect, region, or site of interest.]</nowiki>
@@ -380,7 +380,7 @@ This schema is the first official release that includes an xsd and requires unit
 **** River <nowiki>[A natural freshwater surface stream of considerable volume and a permanent or seasonal flow, moving in a definite channel toward a sea, lake, or another river.]</nowiki>
 **** Waterfall <nowiki>[A sudden descent of water over a step or ledge in the bed of a river.]</nowiki>
 * Sound <nowiki>[Mechanical vibrations transmitted by an elastic medium. Something that can be heard.]</nowiki>
-** Environmental-sound<nowiki>[Sounds occuring in the environment. An accumulation of noise pollution that occurs outside. This noise can be caused by transport, industrial, and recreational activities.]</nowiki>
+** Environmental-sound<nowiki>[Sounds occurring in the environment. An accumulation of noise pollution that occurs outside. This noise can be caused by transport, industrial, and recreational activities.]</nowiki>
 *** Crowd-sound <nowiki>[Noise produced by a mixture of sounds from a large group of people.]</nowiki>
 *** Signal-noise <nowiki>[Any part of a signal that is not the true or original signal but is introduced by the communication mechanism.]</nowiki>
 ** Musical-sound <nowiki>[Sound produced by continuous and regular vibrations, as opposed to noise.]</nowiki>
@@ -581,7 +581,7 @@ This schema is the first official release that includes an xsd and requires unit
 **** Weight <nowiki>[The relative mass or the quantity of matter contained by something.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass, unitClass=weightUnits}</nowiki>
 *** Quantitative-value <nowiki>[Something capable of being estimated or expressed with numeric values.] </nowiki> 
-**** Fraction <nowiki>[A numerical value betwee 0 and 1.]</nowiki>
+**** Fraction <nowiki>[A numerical value between 0 and 1.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
 **** Item-count <nowiki>[The integer count of something which is usually grouped with the entity it is counting. (Item-count/3, A) indicates that 3 of A have occurred up to this point.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>  
@@ -608,7 +608,7 @@ This schema is the first official release that includes an xsd and requires unit
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
 **** Statistical-precision <nowiki>[A quantitative representation of the degree of accuracy necessary for or associated with a particular action.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
-**** Statistical-recall <nowiki>[Sensitivity is a measurement datum qualifying a binary classification test and is computed by substracting the false negative rate to the integral numeral 1.]</nowiki>
+**** Statistical-recall <nowiki>[Sensitivity is a measurement datum qualifying a binary classification test and is computed by subtracting the false negative rate to the integral numeral 1.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki> 
 **** Statistical-uncertainty <nowiki> [A measure of the inherent variability of repeated observation measurements of a quantity including quantities evaluated by statistical methods and by other means.]</nowiki>
 ***** <nowiki># {takesValue, valueClass=numericClass}</nowiki>
@@ -689,7 +689,7 @@ This schema is the first official release that includes an xsd and requires unit
 ** Urban <nowiki>[Relating to, located in, or characteristic of a city or densely populated area.]</nowiki>
 ** Rural <nowiki>[Of or pertaining to the country as opposed to the city.]</nowiki>
 ** Terrain <nowiki>[Characterization of the physical features of a tract of land.]</nowiki>
-*** Composite-terrain <nowiki>[Tracts of land characterized by a mixure of physical features.]</nowiki>
+*** Composite-terrain <nowiki>[Tracts of land characterized by a mixture of physical features.]</nowiki>
 *** Dirt-terrain <nowiki>[Tracts of land characterized by a soil surface and lack of vegetation.]</nowiki>
 *** Grassy-terrain <nowiki>[Tracts of land covered by grass.]</nowiki>
 *** Gravel-terrain <nowiki>[Tracts of land covered by a surface consisting a loose aggregation of small water-worn or pounded stones.]</nowiki>

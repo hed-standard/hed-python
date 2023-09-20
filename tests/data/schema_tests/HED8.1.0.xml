@@ -771,7 +771,7 @@
             </node>
             <node>
                <name>Predict</name>
-               <description>Say or estimate that something will happen or will be a consequence of something without having exact informaton.</description>
+               <description>Say or estimate that something will happen or will be a consequence of something without having exact information.</description>
             </node>
             <node>
                <name>Recognize</name>
@@ -1406,7 +1406,7 @@
                   </node>
                   <node>
                      <name>Tool</name>
-                     <description>A component that is not part of a device but is designed to support its assemby or operation.</description>
+                     <description>A component that is not part of a device but is designed to support its assembly or operation.</description>
                   </node>
                </node>
                <node>
@@ -1594,7 +1594,7 @@
                   </node>
                   <node>
                      <name>Truck</name>
-                     <description>A motor vehicle which, as its primary funcion, transports cargo rather than human passangers.</description>
+                     <description>A motor vehicle which, as its primary function, transports cargo rather than human passangers.</description>
                   </node>
                </node>
             </node>
@@ -1636,7 +1636,7 @@
             <description>Mechanical vibrations transmitted by an elastic medium. Something that can be heard.</description>
             <node>
                <name>Environmental-sound</name>
-               <description>Sounds occuring in the environment. An accumulation of noise pollution that occurs outside. This noise can be caused by transport, industrial, and recreational activities.</description>
+               <description>Sounds occurring in the environment. An accumulation of noise pollution that occurs outside. This noise can be caused by transport, industrial, and recreational activities.</description>
                <node>
                   <name>Crowd-sound</name>
                   <description>Noise produced by a mixture of sounds from a large group of people.</description>
@@ -3045,7 +3045,7 @@
                   </node>
                   <node>
                      <name>Statistical-recall</name>
-                     <description>Sensitivity is a measurement datum qualifying a binary classification test and is computed by substracting the false negative rate to the integral numeral 1.</description>
+                     <description>Sensitivity is a measurement datum qualifying a binary classification test and is computed by subtracting the false negative rate to the integral numeral 1.</description>
                      <node>
                         <name>#</name>
                         <attribute>
@@ -3631,7 +3631,7 @@
                <description>Characterization of the physical features of a tract of land.</description>
                <node>
                   <name>Composite-terrain</name>
-                  <description>Tracts of land characterized by a mixure of physical features.</description>
+                  <description>Tracts of land characterized by a mixture of physical features.</description>
                </node>
                <node>
                   <name>Dirt-terrain</name>

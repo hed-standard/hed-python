@@ -270,11 +270,11 @@ HED version: 8.0.0-alpha.2
 **** Tractor
 **** Train 
 **** Truck 
-** Natural-object <nowiki>[An object occuring naturally in contrast to a man-made object.]</nowiki>
+** Natural-object <nowiki>[An object occurring naturally in contrast to a man-made object.]</nowiki>
 
 
 *** Mineral <nowiki>[An inorganic substance]</nowiki>
-*** Natural-feature <nowiki>[Some terrain occuring in the outdoors.]</nowiki>
+*** Natural-feature <nowiki>[Some terrain occurring in the outdoors.]</nowiki>
 **** Field
 **** Hill
 **** Mountain

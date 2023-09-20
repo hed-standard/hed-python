@@ -228,7 +228,7 @@ class ExpressionWildcardNew(Expression):
 class ExpressionOr(Expression):
     def handle_expr(self, hed_group, exact=False):
         groups1 = self.left.handle_expr(hed_group, exact=exact)
-        # Don't early out as we need to gather all groups incase tags appear more than once etc
+        # Don't early out as we need to gather all groups in case tags appear more than once etc
         groups2 = self.right.handle_expr(hed_group, exact=exact)
         # todo: optimize this eventually
         # Filter out duplicates
