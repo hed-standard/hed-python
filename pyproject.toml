@@ -4,5 +4,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.codespell]
 skip = '.git,*.pdf,*.svg,versioneer.py'
-#
-# ignore-words-list = ''
+ignore-words-list = 'te,parms'
