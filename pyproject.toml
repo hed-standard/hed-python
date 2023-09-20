@@ -4,4 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.codespell]
 skip = '.git,*.pdf,*.svg,versioneer.py'
+# ignore a specific test case with explicit typo/incomplete word
+ignore-regex = 'find_tags_with_term\("bject"'
 ignore-words-list = 'te,parms'
