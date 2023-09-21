@@ -170,6 +170,8 @@ class TestHedSchemaMerging(unittest.TestCase):
                     reload1 = load_schema(path1)
                     reload2 = load_schema(path2)
                     self.assertEqual(reload1, reload2)
+                except Exception:
+                    self.assertTrue(False)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
@@ -183,6 +185,8 @@ class TestHedSchemaMerging(unittest.TestCase):
                     reload1 = load_schema(path1)
                     reload2 = load_schema(path2)
                     self.assertEqual(reload1, reload2)
+                except Exception:
+                    self.assertTrue(False)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
