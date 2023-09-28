@@ -106,9 +106,6 @@ class Schema2Base:
         self._end_tag_section()
 
     def _output_units(self, unit_classes):
-        if not unit_classes:
-            return
-
         section_node = self._start_section(HedSectionKey.UnitClasses)
 
         for unit_class_entry in unit_classes.values():
@@ -128,8 +125,6 @@ class Schema2Base:
                 self._write_entry(unit_entry, unit_class_node)
 
     def _output_section(self, hed_schema, key_class):
-        if not hed_schema[key_class]:
-            return
         parent_node = self._start_section(key_class)
         for entry in hed_schema[key_class].values():
             if self._should_skip(entry):
