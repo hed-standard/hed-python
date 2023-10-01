@@ -176,7 +176,6 @@ class UnitClassEntry(HedSchemaEntry):
             return False
         return True
 
-
 class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
     def __init__(self, *args, **kwargs):
@@ -207,12 +206,13 @@ class UnitEntry(HedSchemaEntry):
         self.derivative_units = derivative_units
 
     def _get_conversion_factor(self, modifier_entry):
-
-        base_factor = float(self.attributes.get("conversionFactor", "1.0").replace("^", "e"))
-        if modifier_entry:
-            modifier_factor = float(modifier_entry.attributes.get("conversionFactor", "1.0").replace("^", "e"))
-        else:
-            modifier_factor = 1.0
+        base_factor = modifier_factor = 1.0
+        try:
+            base_factor = float(self.attributes.get(HedKey.ConversionFactor, "1.0").replace("^", "e"))
+            if modifier_entry:
+                modifier_factor = float(modifier_entry.attributes.get(HedKey.ConversionFactor, "1.0").replace("^", "e"))
+        except (ValueError, AttributeError) as e:
+            pass  # Just default to 1.0
         return base_factor * modifier_factor
 
     def get_conversion_factor(self, unit_name):
@@ -224,7 +224,7 @@ class UnitEntry(HedSchemaEntry):
         Returns:
             conversion_factor(float or None): Returns the conversion factor or None
         """
-        if "conversionFactor" in self.attributes:
+        if HedKey.ConversionFactor in self.attributes:
             return float(self.derivative_units.get(unit_name))
 
 class HedTagEntry(HedSchemaEntry):

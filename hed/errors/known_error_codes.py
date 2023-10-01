@@ -31,6 +31,7 @@ known_error_codes = {
     ],
     "schema_validation_errors": [
         "SCHEMA_ATTRIBUTE_INVALID",
+        "SCHEMA_ATTRIBUTE_VALUE_INVALID",
         "SCHEMA_CHARACTER_INVALID",
         "SCHEMA_DUPLICATE_NODE",
         "SCHEMA_HEADER_INVALID",

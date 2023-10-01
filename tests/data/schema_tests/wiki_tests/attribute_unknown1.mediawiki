@@ -1,0 +1,41 @@
+HED version="8.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd"
+
+'''Prologue'''
+This schema tests AppendixB  SCHEMA_ATTRIBUTE_INVALID
+
+!# start schema
+
+'''Tag1''' <nowiki>{suggestedTag=Tag1}[suggested tag is not registered in the schema]</nowiki>
+* Tag2 <nowiki>{valueClassAttribute}[value attribute is the wrong tag class]</nowiki>
+* Tag3 <nowiki>{unitAttribute}[unit attribute is the wrong tag class]</nowiki>
+
+!# end schema
+'''Unit classes''' <nowiki></nowiki>
+* unitClass1 <nowiki>{unitAttribute}[Wrong attribute type]</nowiki>
+** unit1 <nowiki>{tagAttribute}[Wrong attribute type]</nowiki>
+
+'''Unit modifiers''' <nowiki></nowiki>
+* mod1 <nowiki>{tagAttribute}[Wrong attribute type]</nowiki>
+
+'''Value classes''' <nowiki></nowiki>
+* valueClass1 <nowiki>{tagAttribute}[Wrong attribute type]</nowiki>
+
+'''Schema attributes''' <nowiki></nowiki>
+* tagAttribute <nowiki></nowiki>
+* unitAttribute <nowiki>{unitProperty}</nowiki>
+* unitClassAttribute <nowiki>{unitClassProperty}</nowiki>
+* unitModifierAttribute <nowiki>{unitModifierProperty}</nowiki>
+* valueClassAttribute <nowiki>{valueClassProperty}</nowiki>
+* attribute1 <nowiki>{valueClassProperty}</nowiki>
+
+'''Properties''' <nowiki></nowiki>
+* boolProperty <nowiki></nowiki>
+* unitClassProperty <nowiki></nowiki>
+* unitModifierProperty <nowiki></nowiki>
+* unitProperty <nowiki></nowiki>
+* valueClassProperty <nowiki></nowiki>
+
+'''Epilogue'''
+This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+
+!# end hed

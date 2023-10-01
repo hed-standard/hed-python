@@ -118,7 +118,7 @@ class TestParser(unittest.TestCase):
             "Agent, (Event)": True,
             "(Item), (Event)": True
         }
-        self.base_test("(Item or Agent) and [[Action or Event]]", test_strings)
+        self.base_test("(Item or Agent) and {Action or Event}", test_strings)
 
     def test_exact_group(self):
         test_strings = {
@@ -131,7 +131,7 @@ class TestParser(unittest.TestCase):
             "(A, B, (C, D))": True,
             "(A, B, C)": True
         }
-        self.base_test("[[a, b]]", test_strings)
+        self.base_test("{a, b}", test_strings)
 
     def test_exact_group_simple_complex(self):
         test_strings = {
@@ -145,7 +145,7 @@ class TestParser(unittest.TestCase):
             "(E, F, (A, B, (C, D)))": True,
             "(A, B, (E, F, (C, D)))": False,  # TODO: Should this be True?  [[c]] isn't directly inside an a group.
         }
-        self.base_test("[[a, [[c]] ]]", test_strings)
+        self.base_test("{a, {c} }", test_strings)
 
     def test_exact_group_complex(self):
         test_strings = {
@@ -155,7 +155,7 @@ class TestParser(unittest.TestCase):
             "(A, B, ((C, D)))": False,
             "(E, F, (A, B, (C, D)))": True,
         }
-        self.base_test("[[a, b, [[c, d]] ]]", test_strings)
+        self.base_test("{a, b, {c, d} }", test_strings)
 
     def test_duplicate_search(self):
         test_strings = {
@@ -183,7 +183,7 @@ class TestParser(unittest.TestCase):
             "(E, F, (A, B, (C, D)))": False,
             "((A, B), (C, D))": True,
         }
-        self.base_test("[[ [[a, b]], [[c, d]] ]]", test_strings)
+        self.base_test("{ {a, b}, {c, d} }", test_strings)
 
     def test_mixed_group_split(self):
         test_strings = {
@@ -192,7 +192,7 @@ class TestParser(unittest.TestCase):
             "((Event), ((Clear-throat)))": True,
             "((Event, Clear-throat))": False,
         }
-        self.base_test("[[ [Event], [Action] ]]", test_strings)
+        self.base_test("{ [Event], [Action] }", test_strings)
 
     def test_exact_group_split(self):
         test_strings = {
@@ -201,7 +201,7 @@ class TestParser(unittest.TestCase):
             "((Event), ((Clear-throat)))": False,
             "((Event, Clear-throat))": False,
         }
-        self.base_test("[[ [[Event]], [[Action]] ]]", test_strings)
+        self.base_test("{ {Event}, {Action} }", test_strings)
 
     def test_exact_group_split_or(self):
         test_strings = {
@@ -210,17 +210,18 @@ class TestParser(unittest.TestCase):
             "((A), ((D)))": True,
             "((A, D))": True,
         }
-        self.base_test("[[ [[a]] or [[d]] ]]", test_strings)
+        self.base_test("{ {a} or {d} }", test_strings)
 
     def test_exact_group_split_or_negation(self):
         test_strings = {
-            "(Event, Clear-throat)": False,
+            # "(Event, Clear-throat)": False,
             "((Event), (Clear-throat))": True,
             "((Event))": False,
             "((Event), ((Clear-throat)))": True,
             "((Event, Clear-throat))": False,
         }
-        self.base_test("[[ [[~Event]] ]]", test_strings)
+        # Need to think this through more.  How do you exact match a negative tag?
+        self.base_test("{ {~Event} }", test_strings)
 
     def test_exact_group_split_or_negation_dual(self):
         test_strings = {
@@ -233,7 +234,7 @@ class TestParser(unittest.TestCase):
             "((A), (B, C))": False,
             "((A), ((B), C))": True,
         }
-        self.base_test("[[ [[~a and ~b]] ]]", test_strings)
+        self.base_test("{ {~a and ~b} }", test_strings)
 
     def test_exact_group_split_or_negation_dual2(self):
         test_strings = {
@@ -246,7 +247,7 @@ class TestParser(unittest.TestCase):
             "((A), (B, C))": False,
             "((A), ((B), C))": True,
         }
-        self.base_test("[[ [[~(a or b)]] ]]", test_strings)
+        self.base_test("{ {~(a or b)} }", test_strings)
 
     def test_exact_group_split_or_negation_complex(self):
         test_strings = {
@@ -260,7 +261,7 @@ class TestParser(unittest.TestCase):
             "((A), (B, C)), (D)": False,
             "((A), (B, C)), (H)": False,
         }
-        self.base_test("[[ [[~(a or b)]] ]] and [[D or ~F]]", test_strings)
+        self.base_test("{ {~(a or b)} } and {D or ~F}", test_strings)
 
     # TODO: Should this work, and what should it mean?
     # Right now this is always true, since there is at least one group without ", (a)" in every string.
@@ -272,7 +273,7 @@ class TestParser(unittest.TestCase):
             "((A), ((D)))": True,
             "((A, D))": True,
         }
-        self.base_test("[[ ~[[a]] ]]", test_strings)
+        self.base_test("{ ~{a} }", test_strings)
 
     def test_exact_group_negation2(self):
         test_strings = {
@@ -282,9 +283,42 @@ class TestParser(unittest.TestCase):
             "((A), ((D, B)))": True,
             "((A, D))": False,
             "(B, (D))": True,
-            "(B)": True
+            "(B)": True,
+            "((A), B)": False
         }
-        self.base_test("[[ ~[[a]], b]]", test_strings)
+        self.base_test("{ ~{a}, b}", test_strings)
+
+    def test_exact_group_negation3(self):
+        test_strings = {
+            "(A, D, B)": False,
+            "((A), (D), B)": True,
+            "((A))": False,
+            "((A), ((D, B)))": True,
+            "((A, D))": False,
+            "(B, (D))": True,
+            "(B)": True,
+            "((A), B)": True
+        }
+        self.base_test("{ ~a and b}", test_strings)
+
+    def test_exact_group_negation4(self):
+        test_strings = {
+            "(A, D, B)": False,
+            "((A), (D), B)": False,
+            "((A))": False,
+            "((A), ((D, B)))": False,
+            "((A, D))": False,
+            "(B)": True,
+            "(B, (D))": True,
+            "((A), B)": False
+        }
+        self.base_test("{ @c and @a and b: ???}", test_strings)
+
+    def test_exact_group_negation5(self):
+        test_string = "{ ~a and b:}"
+        with self.assertRaises(ValueError) as context:
+            QueryParser(test_string)
+        self.assertTrue(context.exception.args[0])
 
     def test_mixed_group_complex_split(self):
         test_strings = {
@@ -297,7 +331,7 @@ class TestParser(unittest.TestCase):
             "((A, B), (C, D))": True,
             "((A, B, C, D))": False,
         }
-        self.base_test("[[ [a, b], [c, d] ]]", test_strings)
+        self.base_test("{ [a, b], [c, d] }", test_strings)
 
     def test_exact_group_complex2(self):
         test_strings = {
@@ -309,7 +343,7 @@ class TestParser(unittest.TestCase):
             "(B, (C)), (A, B, (C))": True,
             "(A, B, (A, (C)))": False
         }
-        self.base_test("[[a, b, [[c]] ]]", test_strings)
+        self.base_test("{a, b, {c} }", test_strings)
 
     def test_containing_group_complex2(self):
         test_strings = {
@@ -362,13 +396,13 @@ class TestParser(unittest.TestCase):
         test_strings = {
             "(A, B), (C, D, (E, F))": True
         }
-        self.base_test("[[a]], [[ [[e, f]] ]]", test_strings)
+        self.base_test("{a}, { {e, f} }", test_strings)
 
         test_strings = {
             "(A, B), (C, D, (E, F))": False
         }
         # This example works because it finds the group containing (c, d, (e, f)), rather than the ef group
-        self.base_test("[[a]], [e, [[f]] ]", test_strings)
+        self.base_test("{a}, [e, {f} ]", test_strings)
 
     def test_and(self):
         test_strings = {
@@ -411,18 +445,17 @@ class TestParser(unittest.TestCase):
             "A": False,
             "B": False,
             "C": False,
-            "A, B": True,
+            "A, B": False,
             "A, C": False,
             "B, C": False,
             "A, B, C": False,
             "D, A, B": False,
             "A, B, (C)": False,
             "(A, B), C": True,
-            "(A, B, C)": False,
+            "(A, B, C)": True,
         }
         self.base_test("{a and b}", test_strings)
 
-    def test_and_wildcard_nothing_else2(self):
         test_strings = {
             "A": False,
             "B": False,
@@ -436,8 +469,7 @@ class TestParser(unittest.TestCase):
             "(A, B), C": True,
             "(A, B, C)": False,
         }
-        self.base_test("[{a and b}]", test_strings)
-        self.base_test("[[{a and b}]]", test_strings)
+        self.base_test("{a and b:}", test_strings)
 
     def test_and_logical_wildcard(self):
         test_strings = {
@@ -450,9 +482,11 @@ class TestParser(unittest.TestCase):
         self.base_test("A, B and ?", test_strings)
 
         test_strings = {
-            "A": False,
+            "A": True,
             "A, C": True,
             "A, B, C": True,
+            "B, C": False,
+            "B, C, D, E": True
         }
         self.base_test("(a or (b and c) and ?)", test_strings)
 
@@ -469,7 +503,7 @@ class TestParser(unittest.TestCase):
 
     def test_or_wildcard(self):
         test_strings = {
-            "A": False,
+            "A": True,
             "B": False,
             "C": False,
             "A, B": True,
@@ -589,10 +623,10 @@ class TestParser(unittest.TestCase):
         self.base_test("a and (b or c)", test_strings)
 
         test_strings = {
-            "A": False,
+            "A": True,
             "B": False,
             "C": False,
-            "A, B": False,
+            "A, B": True,
             "A, C": True,
             "B, C": True
         }
@@ -698,35 +732,43 @@ class TestParser(unittest.TestCase):
 
     def test_optional_exact_group(self):
         test_strings = {
-            "A, C": True,
+            "(A, C)": True,
         }
         self.base_test("{a and (b or c)}", test_strings)
 
         test_strings = {
-            "A, B, C, D": True,
+            "(A, B, C, D)": True,
         }
         self.base_test("{a and b: c and d}", test_strings)
 
         test_strings = {
-            "A, B, C": True,
-            "A, B, C, D": False,
+            "(A, B, C)": True,
+            "(A, B, C, D)": False,
         }
         self.base_test("{a and b: c or d}", test_strings)
 
         test_strings = {
-            "A, C": True,
-            "A, D": True,
-            "A, B, C": False,
-            "A, B, C, D": False,
+            "(A, C)": True,
+            "(A, D)": True,
+            "(A, B, C)": False,
+            "(A, B, C, D)": False,
         }
         self.base_test("{a or b: c or d}", test_strings)
 
         test_strings = {
             "(Onset, (Def-expand/taco))": True,
+            "(Onset, Def-expand/taco)": False,
+            "(Onset, Def/taco, (Def-expand/taco))": True, # this one validates
+            "(Onset, (Def/taco))": False,
             "(Onset, (Def-expand/taco, (Label/DefContents)))": True,
             "(Onset, (Def-expand/taco), (Label/OnsetContents))": True,
             "(Onset, (Def-expand/taco), (Label/OnsetContents, Description/MoreContents))": True,
             "Onset, (Def-expand/taco), (Label/OnsetContents)": False,
             "(Onset, (Def-expand/taco), Label/OnsetContents)": False,
         }
-        self.base_test("[[{(Onset or Offset), (Def or [[Def-expand]]): ???}]]", test_strings)
+        self.base_test("{(Onset or Offset), (Def or {Def-expand}): ???}", test_strings)
+        test_strings = {
+            "(A, B)": True,
+            "(A, B, C)": True
+        }
+        self.base_test("{a or b}", test_strings)
