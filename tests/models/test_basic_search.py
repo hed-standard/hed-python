@@ -35,37 +35,37 @@ class TestNewSearch(unittest.TestCase):
 class TestFindWords(unittest.TestCase):
     def test_basic(self):
         search_string = "@global (local1, local2)"
-        anywhere_words, specific_words = find_words(search_string)
+        anywhere_words, _, specific_words = find_words(search_string)
         self.assertEqual(anywhere_words, ['global'])
         self.assertEqual(specific_words, ['local1', 'local2'])
 
     def test_no_anywhere_words(self):
         search_string = "(local1, local2)"
-        anywhere_words, specific_words = find_words(search_string)
+        anywhere_words, _, specific_words = find_words(search_string)
         self.assertEqual(anywhere_words, [])
         self.assertEqual(specific_words, ['local1', 'local2'])
 
     def test_no_specific_words(self):
         search_string = "@global1, @global2"
-        anywhere_words, specific_words = find_words(search_string)
+        anywhere_words, _, specific_words = find_words(search_string)
         self.assertEqual(anywhere_words, ['global1', 'global2'])
         self.assertEqual(specific_words, [])
 
     def test_empty_string(self):
         search_string = ""
-        anywhere_words, specific_words = find_words(search_string)
+        anywhere_words, _, specific_words = find_words(search_string)
         self.assertEqual(anywhere_words, [])
         self.assertEqual(specific_words, [])
 
     def test_mixed_words(self):
         search_string = "@global (local1, local2), @another_global"
-        anywhere_words, specific_words = find_words(search_string)
+        anywhere_words, _, specific_words = find_words(search_string)
         self.assertEqual(anywhere_words, ['global', 'another_global'])
         self.assertEqual(specific_words, ['local1', 'local2'])
 
     def test_whitespace(self):
         search_string = " @Global ,  ( local1 , local2 ) "
-        anywhere_words, specific_words = find_words(search_string)
+        anywhere_words, _, specific_words = find_words(search_string)
         self.assertEqual(anywhere_words, ['Global'])
         self.assertEqual(specific_words, ['local1', 'local2'])
 
@@ -138,118 +138,30 @@ class TestConstructDelimiterMap(unittest.TestCase):
 
 
 class TestVerifyDelimiters(unittest.TestCase):
-    def base_verify_func(self, query_text, text, anywhere_words, specific_words, expected_result):
+    def base_verify_func(self, query_text, text, specific_words, expected_result):
         delimiter_map = construct_delimiter_map(query_text, specific_words)
-        actual_result = verify_search_delimiters(text, anywhere_words, specific_words, delimiter_map)
+        actual_result = verify_search_delimiters(text, specific_words, delimiter_map)
         self.assertEqual(actual_result, expected_result)
 
     def test_all_conditions_met(self):
         query_text = "word0,((word1),word2)"
         specific_words = ["word0", "word1", "word2"]
         text = "word0,((word1),word2)"
-        self.base_verify_func(query_text, text, [], specific_words, True)
+        self.base_verify_func(query_text, text, specific_words, True)
         text = "((word1),word2), word0"
-        self.base_verify_func(query_text, text, [], specific_words, True)
+        self.base_verify_func(query_text, text, specific_words, True)
         text = "word0,(word2, (word1))"
-        self.base_verify_func(query_text, text, [], specific_words, True)
+        self.base_verify_func(query_text, text, specific_words, True)
         text = "word0,((word1),(ExtraGroup),word2)"
-        self.base_verify_func(query_text, text, [], specific_words, True)
+        self.base_verify_func(query_text, text, specific_words, True)
         text = "word0,((word2),word1)"
-        self.base_verify_func(query_text, text, [], specific_words, False)
+        self.base_verify_func(query_text, text, specific_words, False)
         text = "((word1),word0), word2"
-        self.base_verify_func(query_text, text, [], specific_words, False)
+        self.base_verify_func(query_text, text, specific_words, False)
         text = "word0,((word1))"
-        self.base_verify_func(query_text, text, [], specific_words, False)
+        self.base_verify_func(query_text, text, specific_words, False)
         text = "(word1),(ExtraGroup),word2)"
-        self.base_verify_func(query_text, text, [], specific_words, False)
-
-    def test_complex_case_with_word_identifiers(self):
-        query_text = "word0,((word1),@word2,@word3,word4)"
-        specific_words = ["word0", "word1", "word4"]
-        anywhere_words = ["word2", "word3"]
-        text = "word0,((word1),word2,word3,word4)"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-        text = "word2,word0,((word1),word3,word4)"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-        text = "word3,((word1),word2,word4),word0"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-        text = "word0,((word1),word4),word2,word3"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-        text = "word0,word1,word4,word2"  # Incorrect delimiters
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, False)
-        text = "word2,word3"  # Missing specific words
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, False)
-
-    def test_very_complex_case_with_word_identifiers(self):
-        query_text = "word0,(((word1,word2),@word3)),((word4,word5)))"
-        specific_words = ["word0", "word1", "word2", "word4", "word5"]
-        anywhere_words = ["word3"]
-
-        # Test case where all conditions are met
-        text = "word0,(((word1,word2),word3)),((word4,word5)))"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-
-        # Test case with anywhere words out of specific context but still in the string
-        text = "word3,word0,(((word1,word2))),((word4,word5)))"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-
-        # Test case with correct specific words but incorrect delimiters
-        text = "word0,((word1,word2),word3),(word4,word5)"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, False)
-
-        # Test case missing one specific word
-        text = "word0,(((word1,word2),word3)),(word4))"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, False)
-
-        # Test case missing anywhere word
-        text = "word0,(((word1,word2))),((word4,word5)))"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, False)
-
-    def test_incorrect_single_delimiter(self):
-        query_text = "word0,((word1)),word2"
-        specific_words = ["word0", "word1", "word2"]
-        anywhere_words = []
-
-        # Positive case 1: Exact match
-        text = "word0,((word1)),word2"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-
-        # Positive case 2: Additional parentheses around the entire sequence
-        text = "(word0,((word1)),word2)"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-
-        # Single closing parenthesis missing between word1 and word2
-        text = "word0,((word1),word2)"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, False)
-
-        # Single opening parenthesis missing between word0 and word1
-        text = "word0,(word1)),word2"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, False)
-
-    def test_mismatched_parentheses(self):
-        query_text = "word0,((word1)),(word2,word3)"
-        specific_words = ["word0", "word1", "word2", "word3"]
-        anywhere_words = []
-
-        # Positive case 1: Exact match
-        text = "word0,((word1)),(word2,word3)"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-
-        # Positive case 2: Reordered sequence with the same delimiters
-        text = "(word2,word3),word0,((word1))"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-
-        # Positive case 3: Additional text in between but the delimiters remain the same
-        text = "word0,someExtraText,((word1)),someMoreText,(word2,word3)"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, True)
-
-        # Extra closing parenthesis between word2 and word3
-        text = "word0,((word1),(word2,word3))"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, False)
-
-        # Extra opening parenthesis between word1 and word2
-        text = "word0,((word1),((word2,word3)"
-        self.base_verify_func(query_text, text, anywhere_words, specific_words, False)
+        self.base_verify_func(query_text, text, specific_words, False)
 
     def test_wildcard_matching_verify_delimiters(self):
         query_text = "word0, ((word1.*?)), word2.*?"
@@ -257,14 +169,15 @@ class TestVerifyDelimiters(unittest.TestCase):
 
         # Positive test cases
         text = "((word1)), word0, word2X"
-        self.assertTrue(verify_search_delimiters(text, [], ["word0", "word1.*?", "word2.*?"], delimiter_map))
+        self.assertTrue(verify_search_delimiters(text, ["word0", "word1.*?", "word2.*?"], delimiter_map))
 
         text = "word0, ((word1Y)), word2Z"
-        self.assertTrue(verify_search_delimiters(text, [], ["word0", "word1.*?", "word2.*?"], delimiter_map))
+        self.assertTrue(verify_search_delimiters(text, ["word0", "word1.*?", "word2.*?"], delimiter_map))
 
         # Negative test cases
         text = "word0, (word1), word2"
-        self.assertFalse(verify_search_delimiters(text, [], ["word0", "word1.*?", "word2.*?"], delimiter_map))
+        self.assertFalse(verify_search_delimiters(text, ["word0", "word1.*?", "word2.*?"], delimiter_map))
+
 
 class TestFindMatching(unittest.TestCase):
     def base_find_matching(self, series, search_string, expected):
@@ -272,6 +185,18 @@ class TestFindMatching(unittest.TestCase):
         self.assertTrue(all(mask == expected), f"Expected {expected}, got {mask}")
 
     def test_basic_matching(self):
+        series = pd.Series([
+            "word0, word1, word2",
+            "word0, (word1, word2)"
+        ])
+        search_string = "word0, word1"
+        expected = pd.Series([True, True])
+        self.base_find_matching(series, search_string, expected)
+        search_string = "(word0, word1)"
+        expected = pd.Series([True, False])
+        self.base_find_matching(series, search_string, expected)
+
+    def test_group_matching(self):
         series = pd.Series([
             "(word1), word0, ((word2))",
             "word0, ((word1)), word2",
@@ -306,8 +231,110 @@ class TestFindMatching(unittest.TestCase):
         series = pd.Series([
             "word2, word0, ((word1X))",
             "word0, ((word1Y)), word2Z",
+            "word0, ((word1)), word2",
             "word0, (word1), word2"
         ])
         search_string = "word0, ((word1*)), word2*"
-        expected = pd.Series([True, True, False])
+        expected = pd.Series([True, True, True, False])
+        self.base_find_matching(series, search_string, expected)
+
+    def test_complex_case_with_word_identifiers(self):
+        query_text = "word0, ((word1), @word2, @word3, word4)"
+        series = pd.Series([
+            "word0, ((word1), word2, word3, word4)",
+            "word2, word0, ((word1), word3, word4)",
+            "word3, ((word1), word2, word4), word0",
+            "word0, ((word1), word4), word2, word3",
+            "word0, word1, word4, word2",
+            "word2, word3"
+        ])
+        expected = pd.Series([True, True, True, True, False, False])
+
+        self.base_find_matching(series, query_text, expected)
+
+    def test_very_complex_case_with_word_identifiers(self):
+        query_text = "word0, (((word1, word2), @word3)), ((word4, word5)))"
+        series = pd.Series([
+            "word0, (((word1, word2), word3)), ((word4, word5)))",
+            "word3, word0, (((word1, word2))), ((word4, word5)))",
+            "word0, ((word1, word2), word3), (word4, word5)",
+            "word0, (((word1, word2), word3)), (word4)",
+            "word0, (((word1, word2))), ((word4, word5)))"
+        ])
+        expected = pd.Series([True, True, False, False, False])
+
+        self.base_find_matching(series, query_text, expected)
+
+    def test_incorrect_single_delimiter(self):
+        query_text = "word0, ((word1)), word2"
+        series = pd.Series([
+            "word0, ((word1)), word2",
+            "(word0, ((word1)), word2)",
+            "word0, ((word1), word2)",
+            "word0, (word1)), word2"
+        ])
+        expected = pd.Series([True, True, False, False])
+        self.base_find_matching(series, query_text, expected)
+
+    def test_mismatched_parentheses2(self):
+        query_text = "word0, ((word1)), (word2, word3)"
+        series = pd.Series([
+            "word0, ((word1)), (word2, word3)",
+            "(word2, word3), word0, ((word1))",
+            "word0, someExtraText, ((word1)), someMoreText, (word2, word3)",
+            "word0, ((word1), (word2, word3))",
+            "word0, ((word1), ((word2, word3)"
+        ])
+        expected = pd.Series([True, True, True, False, False])
+        self.base_find_matching(series, query_text, expected)
+
+    def test_negative_words(self):
+        series = pd.Series([
+            "word0, word1",
+            "word0, word2",
+            "word0, word2, word3",
+            "word0, (word1), word2",
+            "word0, (word2, word3), word1",
+            "word0, word1suffix",
+        ])
+
+        # 1. Basic Negative Test Case
+        search_string1 = "~word1, word0"
+        expected1 = pd.Series([False, True, True, False, False, True])
+
+        # 2. Two Negative Words
+        search_string2 = "~word1, ~word3, word0"
+        expected2 = pd.Series([False, True, False, False, False, True])
+
+        # 3. Combination of Negative and Mandatory Words
+        search_string3 = "@word2, ~word1, word0"
+        expected3 = pd.Series([False, True, True, False, False, False])
+
+        # 4. Negative Words with Wildcards
+        search_string4 = "word0, ~word1*"
+        expected4 = pd.Series([False, True, True, False, False, False])
+
+        # Running tests
+        self.base_find_matching(series, search_string1, expected1)
+        self.base_find_matching(series, search_string2, expected2)
+        self.base_find_matching(series, search_string3, expected3)
+        self.base_find_matching(series, search_string4, expected4)
+
+    def test_negative_words_group(self):
+        series = pd.Series([
+            "word0, (word1, (word2))",
+            "word0, (word1, (word2)), word3",
+            "word0, (word1, (word2), word3)",
+            "word0, (word1, (word2, word3))",
+            ])
+        search_string = "word0, (word1, (word2))"
+        expected = pd.Series([True, True, True, True])
+        self.base_find_matching(series, search_string, expected)
+
+        search_string = "word0, (word1, (word2)), ~word3"
+        expected = pd.Series([True, False, False, False])
+        self.base_find_matching(series, search_string, expected)
+
+        search_string = "word0, (word1, (word2), ~word3)"
+        expected = pd.Series([True, False, False, False])
         self.base_find_matching(series, search_string, expected)
