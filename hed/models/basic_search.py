@@ -8,14 +8,18 @@ def find_matching(series, search_string, regex=False):
     """ Finds lines in the series that match the search string and returns a mask.
 
     Syntax Rules:
-        - '@': Prefixing a term in the search string means the object must appear anywhere within a line.
+        - '@': Prefixing a term in the search string means the term must appear anywhere within a line.
+        - '~': Prefixing a term in the search string means the term must NOT appear within a line.
         - Parentheses: Elements within parentheses must appear in the line with the same level of nesting.
-                eg: Search string: "(A), (B)" will match "(A), (B, C)", but not "(A, B)", since they don't
-                    start in the same group.
+                e.g.: Search string: "(A), (B)" will match "(A), (B, C)", but not "(A, B)", since they don't
+                      start in the same group.
         - "LongFormTag*": A * will match any remaining word(anything but a comma or parenthesis)
         - An individual term can be arbitrary regex, but it is limited to single continuous words.
 
     Notes:
+        - Specific words only care about their level relative to other specific words, not overall.
+              e.g. "(A, B)" will find: "A, B", "(A, B)", (A, (C), B)", or ((A, B))"
+        - If you have no grouping or anywhere words in the search, it assumes all terms are anywhere words.
         - The format of the series should match the format of the search string, whether it's in short or long form.
         - To enable support for matching parent tags, ensure that both the series and search string are in long form.
 
@@ -33,19 +37,19 @@ def find_matching(series, search_string, regex=False):
     if not regex:
         # Replace *'s with a reasonable value for people who don't know regex
         search_string = re.sub(r'(?<!\.)\*', '.*?', search_string)
-    anywhere_words, specific_words = find_words(search_string)
+    anywhere_words, negative_words, specific_words = find_words(search_string)
+    # If we have no nesting or anywhere words, assume they don't care about level
+    if "(" not in search_string and "@" not in search_string:
+        anywhere_words += specific_words
+        specific_words = []
     delimiter_map = construct_delimiter_map(search_string, specific_words)
-    source_words = anywhere_words + specific_words
+    candidate_indexes = _verify_basic_words(series, anywhere_words, negative_words)
 
-    # Create a set of series of masks to determine which rows contain each individual word
-    candidate_indexes = set(series.index)
-
-    # Loop through source_words to filter down candidate_indexes
-    for word in source_words:
+    # do a basic check for all specific words(this doesn't verify word delimiters)
+    for word in specific_words:
         matches = series.str.contains(word, regex=True)
         current_word_indexes = set(matches[matches].index.tolist())
 
-        # Update candidate_indexes by taking the intersection with current_word_indexes
         candidate_indexes &= current_word_indexes
 
         if not candidate_indexes:
@@ -53,40 +57,63 @@ def find_matching(series, search_string, regex=False):
 
     candidate_indexes = sorted(candidate_indexes)
 
-    full_mask = pd.Series(False, index=series.index)
+    full_mask = pd.Series(False, index=series.index, dtype=bool)
 
-    candidate_series = series[candidate_indexes]
-
-    mask = candidate_series.apply(verify_search_delimiters, args=(anywhere_words, specific_words, delimiter_map))
-    full_mask.loc[candidate_indexes] = mask
+    if candidate_indexes:
+        if specific_words:
+            candidate_series = series[candidate_indexes]
+            mask = candidate_series.apply(verify_search_delimiters, args=(specific_words, delimiter_map))
+            full_mask.loc[candidate_indexes] = mask
+        else:
+            full_mask.loc[candidate_indexes] = True
 
     return full_mask
 
 
+def _get_word_indexes(series, word):
+    pattern = r'(?:[ ,()]|^)' + word + r'(?:[ ,()]|$)'
+    matches = series.str.contains(pattern, regex=True)
+    return set(matches[matches].index.tolist())
+
+
+def _verify_basic_words(series, anywhere_words, negative_words):
+    candidate_indexes = set(series.index)
+    for word in anywhere_words:
+        current_word_indexes = _get_word_indexes(series, word)
+        candidate_indexes &= current_word_indexes
+
+    for word in negative_words:
+        current_word_indexes = _get_word_indexes(series, word)
+        candidate_indexes -= current_word_indexes
+    return candidate_indexes
+
+
 def find_words(search_string):
-    """ Extract all words in the search string.  Dividing them into words that must be relative to each other,
-         and words that can be anywhere.
+    """
+    Extract words in the search string based on their prefixes.
 
     Args:
         search_string (str): The search query string to parse.
-                             Words prefixed with '@' are 'anywhere' words.
+                             Words can be prefixed with '@' or '~'.
 
     Returns:
-        tuple: A tuple containing two lists:
-            - anywhere_words (list of str): Words that can appear anywhere in the text.
-            - specific_words (list of str): Words that must appear relative to other terms.
+        list: A list containing three lists:
+            - Words prefixed with '@'
+            - Words prefixed with '~'
+            - Words with no prefix
     """
-    # Match sequences of characters that are not commas, parentheses, or standalone spaces.
+    # Match sequences of characters that are not commas or parentheses.
     pattern = r'[^,()]+'
     words = re.findall(pattern, search_string)
 
     # Remove any extraneous whitespace from each word
     words = [word.strip() for word in words if word.strip()]
 
-    anywhere_words = [word[1:] for word in words if word.startswith("@")]
-    specific_words = [word for word in words if not word.startswith("@")]
+    at_words = [word[1:] for word in words if word.startswith("@")]
+    tilde_words = [word[1:] for word in words if word.startswith("~")]
+    no_prefix_words = [word for word in words if not word.startswith("~") and not word.startswith("@")]
 
-    return anywhere_words, specific_words
+    return [at_words, tilde_words, no_prefix_words]
 
 
 def check_parentheses(text):
@@ -180,12 +207,11 @@ def construct_delimiter_map(text, words):
     return delimiter_map
 
 
-def verify_search_delimiters(text, anywhere_words, specific_words, delimiter_map):
+def verify_search_delimiters(text, specific_words, delimiter_map):
     """ Verifies if the text contains specific words with expected delimiters between them.
 
     Args:
         text (str): The text to search in.
-        anywhere_words (list of str): Words that can appear anywhere in the text.
         specific_words (list of str): Words that must appear relative to other words in the text
         delimiter_map (dict): A dictionary specifying expected delimiters between pairs of specific words.
 
@@ -193,12 +219,6 @@ def verify_search_delimiters(text, anywhere_words, specific_words, delimiter_map
         bool: True if all conditions are met, otherwise False.
     """
     locations = defaultdict(list)
-
-    # Check for anywhere words
-    for word in anywhere_words:
-        pattern = r'(?:[ ,()]|^)(' + word + r')(?:[ ,()]|$)'
-        if not any(re.finditer(pattern, text)):
-            return False
 
     # Find all locations for each word in the text
     for word in specific_words:
