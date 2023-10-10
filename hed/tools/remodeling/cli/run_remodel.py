@@ -6,6 +6,7 @@ import argparse
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import get_file_list, get_task_from_file
 from hed.tools.bids.bids_dataset import BidsDataset
+from hed.tools.remodeling.validator import RemodelerValidator
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.backup_manager import BackupManager
 
@@ -105,10 +106,11 @@ def parse_arguments(arg_list=None):
         print(f"Data directory: {args.data_dir}\nModel path: {args.model_path}")
     with open(args.model_path, 'r') as fp:
         operations = json.load(fp)
-    parsed_operations, errors = Dispatcher.parse_operations(operations)
+    validator = RemodelerValidator()
+    errors = validator.validate(operations)
     if errors:
         raise ValueError("UnableToFullyParseOperations",
-                         f"Fatal operation error, cannot continue:\n{Dispatcher.errors_to_str(errors)}")
+                         f"Fatal operation error, cannot continue:\n{validator.error_to_str(errors, operations)}")
     return args, operations
 
 

@@ -1,0 +1,954 @@
+{
+    "type": "array",
+    "items": {
+        "type": "object",
+        "required": [
+            "operation",
+            "description",
+            "parameters"
+        ],
+        "additionalProperties": false,
+        "properties": {
+            "operation": {
+                "type": "string",
+                "enum": [
+                    "convert_columns",
+                    "factor_column",
+                    "factor_hed_tags",
+                    "factor_hed_type",
+                    "merge_consecutive",
+                    "number_groups",
+                    "number_rows",
+                    "remap_columns",
+                    "remove_columns",
+                    "remove_rows",
+                    "rename_columns",
+                    "reorder_columns",
+                    "split_rows",
+                    "summarize_column_names",
+                    "summarize_column_values",
+                    "summarize_definitions",
+                    "summarize_hed_tags",
+                    "summarize_hed_type",
+                    "summarize_hed_validation",
+                    "summarize_sidecar_from_events"
+                ],
+                "default": "convert_columns"
+            },
+            "description": {
+                "type": "string"
+            },
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        },
+        "allOf": [
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "convert_column"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "column_names": {
+                                    "type": "array"
+                                },
+                                "convert_to": {
+                                    "type": "string"
+                                },
+                                "decimal_places": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "column_names",
+                                "convert_to"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "factor_column"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "column_name": {
+                                    "type": "string"
+                                },
+                                "factor_values": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "factor_names": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "column_name",
+                                "factor_values",
+                                "factor_names"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "factor_hed_tags"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "queries": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "minItems": 1
+                                },
+                                "query_names": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "minItems": 1
+                                },
+                                "remove_types": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "minItems": 0
+                                },
+                                "expand_context": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "queries",
+                                "query_names",
+                                "remove_types"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "factor_hed_type"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "type_tag": {
+                                    "type": "string"
+                                },
+                                "type_values": {
+                                    "type": "array"
+                                }
+                            },
+                            "required": [
+                                "type_tag",
+                                "type_values"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "merge_consecutive"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "column_name": {
+                                    "type": "string"
+                                },
+                                "event_code": {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                },
+                                "match_columns": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "set_durations": {
+                                    "type": "boolean"
+                                },
+                                "ignore_missing": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "column_name",
+                                "event_code",
+                                "match_columns",
+                                "set_durations",
+                                "ignore_missing"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "number_groups"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "number_column_name": {
+                                    "type": "string"
+                                },
+                                "source_column": {
+                                    "type": "string"
+                                },
+                                "start": {
+                                    "type": "object",
+                                    "properties": {
+                                        "values": {
+                                            "type": "array"
+                                        },
+                                        "inclusion": {
+                                            "type": "string",
+                                            "enum": [
+                                                "include",
+                                                "exclude"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "values",
+                                        "inclusion"
+                                    ],
+                                    "additionalProperties": false
+                                },
+                                "stop": {
+                                    "type": "object",
+                                    "properties": {
+                                        "values": {
+                                            "type": "array"
+                                        },
+                                        "inclusion": {
+                                            "type": "string",
+                                            "enum": [
+                                                "include",
+                                                "exclude"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "values",
+                                        "inclusion"
+                                    ],
+                                    "additionalProperties": false
+                                },
+                                "overwrite": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "number_column_name",
+                                "source_column",
+                                "start",
+                                "stop"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "number_rows"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "number_column_name": {
+                                    "type": "string"
+                                },
+                                "overwrite": {
+                                    "type": "boolean"
+                                },
+                                "match_value": {
+                                    "type": "object",
+                                    "properties": {
+                                        "column": {
+                                            "type": "string"
+                                        },
+                                        "value": {
+                                            "type": [
+                                                "string",
+                                                "number"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "column",
+                                        "value"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "required": [
+                                "number_column_name"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "remap_columns"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "source_columns": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "destination_columns": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "map_list": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": [
+                                                "string",
+                                                "number"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "ignore_missing": {
+                                    "type": "boolean"
+                                },
+                                "integer_sources": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "source_columns",
+                                "destination_columns",
+                                "map_list",
+                                "ignore_missing"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "remove_columns"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "column_names": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "ignore_missing": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "column_names",
+                                "ignore_missing"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "remove_rows"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "column_name": {
+                                    "type": "string"
+                                },
+                                "remove_values": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": [
+                                            "string",
+                                            "number"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "column_name",
+                                "remove_values"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "rename_columns"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "column_mapping": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                        "(.*?)": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "minProperties":1
+                                },
+                                "ignore_missing": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "column_mapping",
+                                "ignore_missing"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "reorder_columns"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "column_order": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "ignore_missing": {
+                                    "type": "boolean"
+                                },
+                                "keep_others": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "column_order",
+                                "ignore_missing",
+                                "keep_others"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "split_rows"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "anchor_column": {
+                                    "type": "string"
+                                },
+                                "new_events": {
+                                    "type": "object",
+                                    "patternProperties": {
+                                        "^[a-zA-Z0-9_]*$": {
+                                            "type": "object",
+                                            "properties": {
+                                                "onset_source": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": [
+                                                            "string",
+                                                            "number"
+                                                        ]
+                                                    }
+                                                },
+                                                "duration": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": [
+                                                            "string",
+                                                            "number"
+                                                        ]
+                                                    }
+                                                },
+                                                "copy_columns": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "onset_source",
+                                                "duration",
+                                                "copy_columns"
+                                            ],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "minProperties": 1
+                                },
+                                "remove_parent_event": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "remove_parent_event"
+                            ],
+                            "minProperties": 2,
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "summarize_column_names"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "summary_name": {
+                                    "type": "string"
+                                },
+                                "summary_filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "summary_name",
+                                "summary_filename"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "summarize_column_values"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "summary_name": {
+                                    "type": "string"
+                                },
+                                "summary_filename": {
+                                    "type": "string"
+                                },
+                                "skip_columns": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "value_columns": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "summary_name",
+                                "summary_filename",
+                                "skip_columns",
+                                "value_columns"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "summarize_definitions"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "summary_name": {
+                                    "type": "string"
+                                },
+                                "summary_filename": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "summary_name",
+                                "summary_filename"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "summarize_hed_tags"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "summary_name": {
+                                    "type": "string"
+                                },
+                                "summary_filename": {
+                                    "type": "string"
+                                },
+                                "tags": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Sensory events": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "Agent actions": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "Objects": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "Sensory events",
+                                        "Agent actions",
+                                        "Objects"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "required": [
+                                "summary_name",
+                                "summary_filename",
+                                "tags"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "summarize_hed_type"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "summary_name": {
+                                    "type": "string"
+                                },
+                                "summary_filename": {
+                                    "type": "string"
+                                },
+                                "type_tag": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "summary_name",
+                                "summary_filename",
+                                "type_tag"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "summarize_hed_validation"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "summary_name": {
+                                    "type": "string"
+                                },
+                                "summary_filename": {
+                                    "type": "string"
+                                },
+                                "check_for_warnings": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "summary_name",
+                                "summary_filename",
+                                "check_for_warnings"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "summarize_hed_type"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "summary_name": {
+                                    "type": "string"
+                                },
+                                "summary_filename": {
+                                    "type": "string"
+                                },
+                                "type_tag": {
+                                    "type": "string"
+                                },
+                                "append_timecode": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "summary_name",
+                                "summary_filename",
+                                "type_tag"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            }
+        ]
+    },
+    "minItems": 1
+}
