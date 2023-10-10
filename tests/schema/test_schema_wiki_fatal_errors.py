@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from hed import schema
+from hed import load_schema
 from hed.errors import HedFileError, HedExceptions
 
 
@@ -12,25 +12,25 @@ class TestHedSchema(unittest.TestCase):
     def setUpClass(cls):
         cls.full_base_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.base_schema_dir)
         cls.files_and_errors = {
-            "HED_schema_no_start.mediawiki": HedExceptions.SCHEMA_START_MISSING,
-            "HED_schema_no_end.mediawiki": HedExceptions.SCHEMA_END_INVALID,
-            "HED_hed_no_end.mediawiki": HedExceptions.HED_END_INVALID,
-            "HED_separator_invalid.mediawiki": HedExceptions.INVALID_SECTION_SEPARATOR,
+            "HED_schema_no_start.mediawiki": HedExceptions.SCHEMA_SECTION_MISSING,
+            "HED_schema_no_end.mediawiki": HedExceptions.SCHEMA_SECTION_MISSING,
+            "HED_hed_no_end.mediawiki": HedExceptions.SCHEMA_SECTION_MISSING,
+            "HED_separator_invalid.mediawiki": HedExceptions.WIKI_SEPARATOR_INVALID,
             "HED_header_missing.mediawiki": HedExceptions.SCHEMA_HEADER_MISSING,
-            "HED_header_invalid.mediawiki": HedExceptions.HED_SCHEMA_HEADER_INVALID,
-            "empty_file.mediawiki": HedExceptions.HED_SCHEMA_HEADER_INVALID,
-            "HED_header_invalid_version.mediawiki": HedExceptions.HED_SCHEMA_VERSION_INVALID,
-            "HED_header_missing_version.mediawiki": HedExceptions.HED_SCHEMA_VERSION_INVALID,
+            "HED_header_invalid.mediawiki": HedExceptions.SCHEMA_HEADER_INVALID,
+            "empty_file.mediawiki": HedExceptions.SCHEMA_HEADER_INVALID,
+            "HED_header_invalid_version.mediawiki": HedExceptions.SCHEMA_VERSION_INVALID,
+            "HED_header_missing_version.mediawiki": HedExceptions.SCHEMA_VERSION_INVALID,
             "HED_header_bad_library.mediawiki": HedExceptions.BAD_HED_LIBRARY_NAME,
-            "HED_schema_out_of_order.mediawiki": HedExceptions.SCHEMA_START_MISSING,
-            "empty_node.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line2.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line3.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line4.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line5.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line6.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
-            "malformed_line7.mediawiki": HedExceptions.HED_WIKI_DELIMITERS_INVALID,
+            "HED_schema_out_of_order.mediawiki": HedExceptions.SCHEMA_SECTION_MISSING,
+            "empty_node.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
+            "malformed_line.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
+            "malformed_line2.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
+            "malformed_line3.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
+            "malformed_line4.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
+            "malformed_line5.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
+            "malformed_line6.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
+            "malformed_line7.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
             "empty_node.xml": HedExceptions.HED_SCHEMA_NODE_NAME_INVALID
         }
 
@@ -60,9 +60,10 @@ class TestHedSchema(unittest.TestCase):
         for filename, error in self.files_and_errors.items():
             full_filename = self.full_base_folder + filename
             with self.assertRaises(HedFileError) as context:
-                schema.load_schema(full_filename)
+                load_schema(full_filename)
                 # all of these should produce exceptions.
-            from hed.errors import ErrorHandler, ErrorContext, SchemaErrors, get_printable_issue_string
+            from hed.errors import ErrorHandler, ErrorContext, get_printable_issue_string
+
             # Verify basic properties of exception
             expected_line_numbers = self.expected_line_numbers.get(filename, [])
             if expected_line_numbers:
@@ -82,9 +83,10 @@ class TestHedSchema(unittest.TestCase):
         for filename, error in self.files_and_errors.items():
             full_filename = self.full_base_folder + filename
             with self.assertRaises(HedFileError) as context:
-                schema.load_schema(full_filename)
+                load_schema(full_filename)
                 # all of these should produce exceptions.
-            from hed.errors import ErrorHandler, ErrorContext, SchemaErrors, get_printable_issue_string
+            from hed.errors import ErrorHandler, ErrorContext, get_printable_issue_string
+            from hed.errors.error_types import SchemaAttributeErrors
             # Verify basic properties of exception
             expected_line_numbers = self.expected_line_numbers.get(filename, [])
             if expected_line_numbers:
@@ -96,7 +98,7 @@ class TestHedSchema(unittest.TestCase):
             error_handler.push_error_context(ErrorContext.ROW, 1)
             error_handler.push_error_context(ErrorContext.COLUMN, 2)
 
-            issues = error_handler.format_error_with_context(SchemaErrors.SCHEMA_ATTRIBUTE_INVALID,
+            issues = error_handler.format_error_with_context(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID,
                                                              "error_attribute", source_tag="error_tag")
             error_handler.pop_error_context()
             error_handler.pop_error_context()
@@ -106,3 +108,9 @@ class TestHedSchema(unittest.TestCase):
 
             self.assertTrue(context.exception.args[0] == error)
             self.assertTrue(context.exception.filename == full_filename)
+
+    def test_attribute_invalid(self):
+        path = os.path.join(self.full_base_folder, "attribute_unknown1.mediawiki")
+        schema = load_schema(path)
+        issues = schema.check_compliance()
+        self.assertEqual(len(issues), 7)

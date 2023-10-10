@@ -170,6 +170,8 @@ class TestHedSchemaMerging(unittest.TestCase):
                     reload1 = load_schema(path1)
                     reload2 = load_schema(path2)
                     self.assertEqual(reload1, reload2)
+                except Exception:
+                    self.assertTrue(False)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
@@ -183,6 +185,8 @@ class TestHedSchemaMerging(unittest.TestCase):
                     reload1 = load_schema(path1)
                     reload2 = load_schema(path2)
                     self.assertEqual(reload1, reload2)
+                except Exception:
+                    self.assertTrue(False)
                 finally:
                     os.remove(path1)
                     os.remove(path2)
@@ -241,10 +245,10 @@ class TestHedSchemaMerging(unittest.TestCase):
 
         unit_class_entry = schema.unit_classes["weightUnits"]
         unit_entry = unit_class_entry.units["testUnit"]
-        self.assertEqual(unit_entry.attributes["conversionFactor"], str(100))
+        self.assertEqual(unit_entry.attributes[HedKey.ConversionFactor], str(100))
 
         unit_modifier_entry = schema.unit_modifiers["huge"]
-        self.assertEqual(unit_modifier_entry.attributes["conversionFactor"], "10^100")
+        self.assertEqual(unit_modifier_entry.attributes[HedKey.ConversionFactor], "10^100")
         self.assertTrue(unit_modifier_entry.attributes["customElementAttribute"])
 
         value_class_entry = schema.value_classes["customValueClass"]
@@ -324,9 +328,9 @@ class TestHedSchemaMerging(unittest.TestCase):
 
         ]
         for file in files:
-            with self.assertRaises(HedFileError):
-                # print(file)
+            with self.assertRaises(HedFileError) as context:
                 load_schema(file)
+            self.assertEqual(context.exception.code, HedExceptions.SCHEMA_LIBRARY_INVALID)
 
     def test_saving_in_library_wiki(self):
         old_score_schema = load_schema_version("score_1.0.0")
