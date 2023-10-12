@@ -15,9 +15,9 @@ jobs:
       - id: set-matrix
         run: |
           if [[ "${{ github.ref }}" == 'refs/heads/master' ]]; then
-            echo "::set-output name=matrix::[3.7, 3.9, 3.10, 3.11]"
+            echo "matrix=[3.7, 3.9, 3.10, 3.11]" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=matrix::[3.9]"
+            echo "matrix=[3.9]" >> $GITHUB_OUTPUT
           fi
 
   build:
