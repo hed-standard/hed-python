@@ -1,7 +1,7 @@
 """ Validate the HED tags in a dataset and report errors. """
 
 import os
-from hed.errors import ErrorSeverity, ErrorHandler
+from hed.errors import ErrorSeverity, ErrorHandler, get_printable_issue_string
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -110,9 +110,9 @@ class HedValidationSummary(BaseSummary):
         else:
             sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], indent=indent*2)
             if specifics['sidecar_had_issues']:
-                sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=False, indent=indent*2)
+                sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], count_only=False, indent=indent*2)
             else:
-                sum_list = sum_list + [f"{indent*2}Event file validation was incomplete because of sidecar errors"]
+                sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=False, indent=indent*2)
         return "\n".join(sum_list)
 
     def update_summary(self, new_info):
@@ -134,6 +134,7 @@ class HedValidationSummary(BaseSummary):
             issues = input_data.validate(new_info['schema'])
             if not self.check_for_warnings:
                 issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
+            issues = [get_printable_issue_string([issue], skip_filename=True) for issue in issues]
             results['event_issues'][new_info["name"]] = issues
             results['total_event_issues'] = len(issues)
         self.summary_dict[new_info["name"]] = results
@@ -197,13 +198,15 @@ class HedValidationSummary(BaseSummary):
         error_list = []
         for key, item in error_dict.items():
             if count_only and isinstance(item, list):
-                error_list.append(f"{indent}{key}: {len(item)} issues")
+                error_list.append(f"{key}: {len(item)} issues")
             elif count_only:
-                error_list.append(f"{indent}{key}: {item} issues")
+                error_list.append(f"{key}: {item} issues")
             elif not len(item):
-                error_list.append(f"{indent}{key} has no issues")
+                error_list.append(f"{key} has no issues")
             else:
-                HedValidationSummary._format_errors(error_list, key, item, indent)
+                error_list.append(f"{key}:")
+                error_list = error_list + item
+                #HedValidationSummary._format_errors(error_list, key, item, indent)
         return error_list
 
     @staticmethod
@@ -246,6 +249,7 @@ class HedValidationSummary(BaseSummary):
                 results["sidecar_had_issues"] = True
             if not check_for_warnings:
                 sidecar_issues = filtered_issues
-            results['sidecar_issues'][sidecar.name] = sidecar_issues
+            str_issues = [get_printable_issue_string([issue], skip_filename=True) for issue in sidecar_issues]
+            results['sidecar_issues'][sidecar.name] = str_issues
             results['total_sidecar_issues'] = len(sidecar_issues)
         return results

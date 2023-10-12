@@ -142,21 +142,21 @@ def run_bids_ops(dispatch, args, tabular_files):
     dispatch.hed_schema = bids.schema
     if args.verbose:
         print(f"Successfully parsed BIDS dataset with HED schema {str(bids.schema.get_schema_versions())}")
-    events = bids.get_tabular_group(args.file_suffix)
+    data = bids.get_tabular_group(args.file_suffix)
     if args.verbose:
         print(f"Processing {dispatch.data_root}")
-    filtered_events = [events.datafile_dict[key] for key in tabular_files]
-    for events_obj in filtered_events:
-        sidecar_list = events.get_sidecars_from_path(events_obj)
+    filtered_events = [data.datafile_dict[key] for key in tabular_files]
+    for data_obj in filtered_events:
+        sidecar_list = data.get_sidecars_from_path(data_obj)
         if sidecar_list:
-            sidecar = events.sidecar_dict[sidecar_list[-1]].contents
+            sidecar = data.sidecar_dict[sidecar_list[-1]].contents
         else:
             sidecar = None
         if args.verbose:
-            print(f"Events {events_obj.file_path}  sidecar {sidecar}")
-        df = dispatch.run_operations(events_obj.file_path, sidecar=sidecar, verbose=args.verbose)
+            print(f"Tabular file {data_obj.file_path}  sidecar {sidecar}")
+        df = dispatch.run_operations(data_obj.file_path, sidecar=sidecar, verbose=args.verbose)
         if not args.no_update:
-            df.to_csv(events_obj.file_path, sep='\t', index=False, header=True)
+            df.to_csv(data_obj.file_path, sep='\t', index=False, header=True)
 
 
 def run_direct_ops(dispatch, args, tabular_files):
@@ -176,6 +176,8 @@ def run_direct_ops(dispatch, args, tabular_files):
     else:
         sidecar = None
     for file_path in tabular_files:
+        if args.verbose:
+            print(f"Tabular file {file_path}  sidecar {sidecar}")
         df = dispatch.run_operations(file_path, verbose=args.verbose, sidecar=sidecar)
         if not args.no_update:
             df.to_csv(file_path, sep='\t', index=False, header=True)
