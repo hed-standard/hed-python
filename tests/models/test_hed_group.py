@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
         # located tags now has found all 5 hed tags
 
         # This will find no tags
-        located_tags = basic_hed_string_obj.find_tags_with_term("bject", recursive=True, include_groups=0)
+        located_tags = basic_hed_string_obj.find_tags_with_term("reject", recursive=True, include_groups=0)
         self.assertEqual(len(located_tags), 0)
 
         # this will also find no tags
