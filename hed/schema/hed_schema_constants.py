@@ -42,6 +42,7 @@ class HedKey:
     SuggestedTag = "suggestedTag"
     Rooted = "rooted"
     DeprecatedFrom = "deprecatedFrom"
+    ConversionFactor = "conversionFactor"
 
     # All known properties
     BoolProperty = 'boolProperty'
