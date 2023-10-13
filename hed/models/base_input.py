@@ -137,7 +137,7 @@ class BaseInput:
 
     @staticmethod
     def _filter_by_index_list(original_series, indexed_dict):
-        new_series = pd.Series(["n/a"] * len(original_series))
+        new_series = pd.Series(["n/a"] * len(original_series), dtype=str)
 
         for onset, indices in indexed_dict.items():
             if indices:
