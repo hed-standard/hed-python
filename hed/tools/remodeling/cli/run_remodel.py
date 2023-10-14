@@ -110,7 +110,7 @@ def parse_arguments(arg_list=None):
     errors = validator.validate(operations)
     if errors:
         raise ValueError("UnableToFullyParseOperations",
-                         f"Fatal operation error, cannot continue:\n{validator.error_to_str(errors, operations)}")
+                         f"Fatal operation error, cannot continue:\n{errors}")
     return args, operations
 
 
