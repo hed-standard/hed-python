@@ -8,7 +8,7 @@ class RenameColumnsOp (BaseOp):
 
     Required remodeling parameters:   
         - **column_mapping** (*dict*): The names of the columns to be removed.   
-        - **ignore_missing** (*bool*): If true, the names in remove_names that are not columns and should be ignored.   
+        - **ignore_missing** (*bool*): If true, the names in column_mapping that are not columns and should be ignored.
 
     """
 
