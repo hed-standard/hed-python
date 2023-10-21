@@ -1,5 +1,5 @@
-HED API reference (Auto style)
-==============================
+HED API reference
+=================
 
 .. currentmodule:: hed
 
