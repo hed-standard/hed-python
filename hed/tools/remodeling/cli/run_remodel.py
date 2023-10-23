@@ -20,6 +20,10 @@ def get_parser():
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
     parser.add_argument("model_path", help="Full path of the file with remodeling instructions.")
+    parser.add_argument("-bd", "--backup_dir", default="", dest="backup_dir",
+                        help="Directory for the backup that is being created")
+    parser.add_argument("-bn", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
+                        help="Name of the default backup for remodeling")
     parser.add_argument("-b", "--bids-format", action='store_true', dest="use_bids",
                         help="If present, the dataset is in BIDS format with sidecars. HED analysis is available.")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
@@ -31,8 +35,8 @@ def get_parser():
                         help="Controls individual file summaries ('none', 'separate', 'consolidated')")
     parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
                         help="Optional path to JSON sidecar with HED information")
-    parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
-                        help="Name of the default backup for remodeling")
+#    parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
+#                        help="Name of the default backup for remodeling")
     parser.add_argument("-nb", "--no-backup", action='store_true', dest="no_backup",
                         help="If present, the operations are run directly on the files with no backup.")
     parser.add_argument("-ns", "--no-summaries", action='store_true', dest="no_summaries",
