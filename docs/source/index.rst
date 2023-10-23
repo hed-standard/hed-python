@@ -14,14 +14,14 @@ Hierarchical Event Descriptor (HED) Python Tools
 Note:  this is a work in progress. More information is coming.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 6
    :caption: Contents:
 
    introduction.md
    user_guide.rst
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 6
    :caption: HED Python API:
 
    api2.rst
