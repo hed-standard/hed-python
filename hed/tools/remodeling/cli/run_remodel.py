@@ -20,6 +20,10 @@ def get_parser():
     parser = argparse.ArgumentParser(description="Converts event files based on a json file specifying operations.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
     parser.add_argument("model_path", help="Full path of the file with remodeling instructions.")
+    parser.add_argument("-bd", "--backup_dir", default="", dest="backup_dir",
+                        help="Directory for the backup that is being created")
+    parser.add_argument("-bn", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
+                        help="Name of the default backup for remodeling")
     parser.add_argument("-b", "--bids-format", action='store_true', dest="use_bids",
                         help="If present, the dataset is in BIDS format with sidecars. HED analysis is available.")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
@@ -31,8 +35,8 @@ def get_parser():
                         help="Controls individual file summaries ('none', 'separate', 'consolidated')")
     parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
                         help="Optional path to JSON sidecar with HED information")
-    parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
-                        help="Name of the default backup for remodeling")
+#    parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
+#                        help="Name of the default backup for remodeling")
     parser.add_argument("-nb", "--no-backup", action='store_true', dest="no_backup",
                         help="If present, the operations are run directly on the files with no backup.")
     parser.add_argument("-ns", "--no-summaries", action='store_true', dest="no_summaries",
@@ -142,21 +146,21 @@ def run_bids_ops(dispatch, args, tabular_files):
     dispatch.hed_schema = bids.schema
     if args.verbose:
         print(f"Successfully parsed BIDS dataset with HED schema {str(bids.schema.get_schema_versions())}")
-    events = bids.get_tabular_group(args.file_suffix)
+    data = bids.get_tabular_group(args.file_suffix)
     if args.verbose:
         print(f"Processing {dispatch.data_root}")
-    filtered_events = [events.datafile_dict[key] for key in tabular_files]
-    for events_obj in filtered_events:
-        sidecar_list = events.get_sidecars_from_path(events_obj)
+    filtered_events = [data.datafile_dict[key] for key in tabular_files]
+    for data_obj in filtered_events:
+        sidecar_list = data.get_sidecars_from_path(data_obj)
         if sidecar_list:
-            sidecar = events.sidecar_dict[sidecar_list[-1]].contents
+            sidecar = data.sidecar_dict[sidecar_list[-1]].contents
         else:
             sidecar = None
         if args.verbose:
-            print(f"Events {events_obj.file_path}  sidecar {sidecar}")
-        df = dispatch.run_operations(events_obj.file_path, sidecar=sidecar, verbose=args.verbose)
+            print(f"Tabular file {data_obj.file_path}  sidecar {sidecar}")
+        df = dispatch.run_operations(data_obj.file_path, sidecar=sidecar, verbose=args.verbose)
         if not args.no_update:
-            df.to_csv(events_obj.file_path, sep='\t', index=False, header=True)
+            df.to_csv(data_obj.file_path, sep='\t', index=False, header=True)
 
 
 def run_direct_ops(dispatch, args, tabular_files):
@@ -176,6 +180,8 @@ def run_direct_ops(dispatch, args, tabular_files):
     else:
         sidecar = None
     for file_path in tabular_files:
+        if args.verbose:
+            print(f"Tabular file {file_path}  sidecar {sidecar}")
         df = dispatch.run_operations(file_path, verbose=args.verbose, sidecar=sidecar)
         if not args.no_update:
             df.to_csv(file_path, sep='\t', index=False, header=True)

@@ -151,3 +151,65 @@ def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name):
                                                 tag_entry.name,
                                                 child.name)
     return issues
+
+
+def conversion_factor(hed_schema, tag_entry, attribute_name):
+    issues = []
+    conversion_factor = tag_entry.attributes.get(attribute_name, "1.0")
+    try:
+        conversion_factor = float(conversion_factor.replace("^", "e"))
+    except (ValueError, AttributeError) as e:
+        pass
+    if not isinstance(conversion_factor, float) or conversion_factor <= 0.0:
+        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE,
+                                            tag_entry.name,
+                                            conversion_factor)
+
+    return issues
+
+
+def allowed_characters_check(hed_schema, tag_entry, attribute_name):
+    """ Check allowed character has a valid value
+
+    Parameters:
+        hed_schema (HedSchema): The schema to use for validation
+        tag_entry (HedSchemaEntry): The schema entry for this attribute.
+        attribute_name (str): The name of this attribute
+
+    Returns:
+        list: A list of issues. Each issue is a dictionary.
+
+    """
+    issues = []
+    allowed_strings = {'letters', 'blank', 'digits', 'alphanumeric'}
+
+    char_string = tag_entry.attributes.get(attribute_name, "")
+    characters = char_string.split(",")
+    for character in characters:
+        if character not in allowed_strings and len(character) != 1:
+            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ALLOWED_CHARACTERS_INVALID,
+                                                tag_entry.name,
+                                                character)
+    return issues
+
+
+def in_library_check(hed_schema, tag_entry, attribute_name):
+    """ Check allowed character has a valid value
+
+    Parameters:
+        hed_schema (HedSchema): The schema to use for validation
+        tag_entry (HedSchemaEntry): The schema entry for this attribute.
+        attribute_name (str): The name of this attribute
+
+    Returns:
+        list: A list of issues. Each issue is a dictionary.
+
+    """
+    issues = []
+
+    library = tag_entry.attributes.get(attribute_name, "")
+    if hed_schema.library != library:
+        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ALLOWED_CHARACTERS_INVALID,
+                                            tag_entry.name,
+                                            library)
+    return issues

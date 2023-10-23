@@ -304,25 +304,30 @@ class TestOnsetDict(unittest.TestCase):
                          {3.5: [0, 1], 4.0: [2], 4.4: [3, 4], -1.0: [5]})
 
     def test_empty_and_single_item_series(self):
-        self.assertEqual(BaseInput._filter_by_index_list([], {}), [])
-        self.assertEqual(BaseInput._filter_by_index_list(["apple"], {0: [0]}), ["apple"])
+        self.assertTrue(BaseInput._filter_by_index_list(pd.Series([], dtype=str), {}).equals(pd.Series([], dtype=str)))
+        self.assertTrue(BaseInput._filter_by_index_list(pd.Series(["apple"]), {0: [0]}).equals(pd.Series(["apple"])))
 
     def test_two_item_series_with_same_onset(self):
-        self.assertEqual(BaseInput._filter_by_index_list(["apple", "orange"], {0: [0, 1]}), ["apple,orange", "n/a"])
+        input_series = pd.Series(["apple", "orange"])
+        expected_series = pd.Series(["apple,orange", "n/a"])
+        self.assertTrue(BaseInput._filter_by_index_list(input_series, {0: [0, 1]}).equals(expected_series))
 
     def test_multiple_item_series(self):
-        original = ["apple", "orange", "banana", "mango"]
+        input_series = pd.Series(["apple", "orange", "banana", "mango"])
         indexed_dict = {0: [0, 1], 1: [2], 2: [3]}
-        self.assertEqual(BaseInput._filter_by_index_list(original, indexed_dict), ["apple,orange", "n/a", "banana", "mango"])
+        expected_series = pd.Series(["apple,orange", "n/a", "banana", "mango"])
+        self.assertTrue(BaseInput._filter_by_index_list(input_series, indexed_dict).equals(expected_series))
 
     def test_complex_scenarios(self):
         # Test with negative, zero and positive onsets
-        original = ["negative", "zero", "positive"]
+        original = pd.Series(["negative", "zero", "positive"])
         indexed_dict = {-1: [0], 0: [1], 1: [2]}
-        self.assertEqual(BaseInput._filter_by_index_list(original, indexed_dict), ["negative", "zero", "positive"])
+        expected_series1 = pd.Series(["negative", "zero", "positive"])
+        self.assertTrue(BaseInput._filter_by_index_list(original, indexed_dict).equals(expected_series1))
 
         # Test with more complex indexed_dict
-        original = ["apple", "orange", "banana", "mango", "grape"]
-        indexed_dict = {0: [0, 1], 1: [2], 2: [3, 4]}
-        self.assertEqual(BaseInput._filter_by_index_list(original, indexed_dict),
-                         ["apple,orange", "n/a", "banana", "mango,grape", "n/a"])
+        original2 = ["apple", "orange", "banana", "mango", "grape"]
+        indexed_dict2= {0: [0, 1], 1: [2], 2: [3, 4]}
+        expected_series2 = pd.Series(["apple,orange", "n/a", "banana", "mango,grape", "n/a"])
+        self.assertTrue(BaseInput._filter_by_index_list(original2, indexed_dict2).equals(expected_series2))
+

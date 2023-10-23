@@ -45,23 +45,28 @@ class SpreadsheetValidator:
         self._hed_validator = HedValidator(self._schema, def_dicts=def_dicts)
         self._onset_validator = OnsetValidator()
         onset_filtered = None
+        # Adjust to account for 1 based
+        row_adj = 1
         if isinstance(data, BaseInput):
-            issues += self._validate_column_structure(data, error_handler)
+            # Adjust to account for column names
+            if data.has_column_names:
+                row_adj += 1
+            issues += self._validate_column_structure(data, error_handler, row_adj)
             onset_filtered = data.series_filtered
             data = data.dataframe_a
 
         # Check the rows of the input data
-        issues += self._run_checks(data, onset_filtered, error_handler=error_handler)
+        issues += self._run_checks(data, onset_filtered, error_handler=error_handler, row_adj=row_adj)
         error_handler.pop_error_context()
 
         issues = sort_issues(issues)
         return issues
 
-    def _run_checks(self, hed_df, onset_filtered, error_handler):
+    def _run_checks(self, hed_df, onset_filtered, error_handler, row_adj):
         issues = []
         columns = list(hed_df.columns)
         for row_number, text_file_row in enumerate(hed_df.itertuples(index=False)):
-            error_handler.push_error_context(ErrorContext.ROW, row_number)
+            error_handler.push_error_context(ErrorContext.ROW, row_number + row_adj)
             row_strings = []
             new_column_issues = []
             for column_number, cell in enumerate(text_file_row):
@@ -100,13 +105,14 @@ class SpreadsheetValidator:
             error_handler.pop_error_context()
         return issues
 
-    def _validate_column_structure(self, base_input, error_handler):
+    def _validate_column_structure(self, base_input, error_handler, row_adj):
         """
         Validate that each column in the input data has valid values.
 
         Parameters:
             base_input (BaseInput): The input data to be validated.
             error_handler (ErrorHandler): Holds context
+            row_adj(int): Number to adjust row by for reporting errors
         Returns:
             List of issues associated with each invalid value. Each issue is a dictionary.
         """
@@ -120,7 +126,7 @@ class SpreadsheetValidator:
                 valid_keys = column.hed_dict.keys()
                 for row_number, value in enumerate(base_input.dataframe[column.column_name]):
                     if value != "n/a" and value not in valid_keys:
-                        error_handler.push_error_context(ErrorContext.ROW, row_number)
+                        error_handler.push_error_context(ErrorContext.ROW, row_number + row_adj)
                         issues += error_handler.format_error_with_context(ValidationErrors.SIDECAR_KEY_MISSING,
                                                                           invalid_key=value,
                                                                           category_keys=list(valid_keys))

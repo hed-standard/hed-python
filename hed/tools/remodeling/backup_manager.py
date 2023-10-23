@@ -10,7 +10,7 @@ from hed.tools.util.io_util import get_file_list, get_path_components
 
 class BackupManager:
     DEFAULT_BACKUP_NAME = 'default_back'
-    RELATIVE_BACKUP_LOCATION = 'derivatives/remodel'
+    RELATIVE_BACKUP_LOCATION = './derivatives/remodel/backups'
     BACKUP_DICTIONARY = 'backup_lock.json'
     BACKUP_ROOT = 'backup_root'
 
@@ -24,14 +24,15 @@ class BackupManager:
         :raises HedFileError:
             - If the data_root does not correspond to a real directory.
 
+        Notes: The backup_root will have remodeling/backups appended.
         """
         if not os.path.isdir(data_root):
             raise HedFileError('NonExistentData', f"{data_root} is not an existing directory", "")
         self.data_root = data_root
         if backups_root:
-            self.backups_path = os.path.join(backups_root, 'backups')
+            self.backups_path = backups_root
         else:
-            self.backups_path = os.path.join(data_root, self.RELATIVE_BACKUP_LOCATION, 'backups')
+            self.backups_path = os.path.join(data_root, self.RELATIVE_BACKUP_LOCATION)
         self.backups_path = os.path.realpath(self.backups_path)
         os.makedirs(self.backups_path, exist_ok=True)
         self.backups_dict = self._get_backups()

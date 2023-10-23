@@ -4,6 +4,7 @@ from semantic_version import Version
 from hed.errors import ErrorHandler, SchemaWarnings
 from hed.schema import hed_schema_constants as constants
 from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema.hed_schema_constants import valid_header_attributes
 
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
@@ -45,9 +46,9 @@ def validate_version_string(version_string):
 
 
 header_attribute_validators = {
-        constants.VERSION_ATTRIBUTE: (validate_version_string, HedExceptions.HED_SCHEMA_VERSION_INVALID),
-        constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
-    }
+    constants.VERSION_ATTRIBUTE: (validate_version_string, HedExceptions.SCHEMA_VERSION_INVALID),
+    constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
+}
 
 
 def validate_present_attributes(attrib_dict, filename):
@@ -92,9 +93,12 @@ def validate_attributes(attrib_dict, filename):
             had_error = validator(attribute_value)
             if had_error:
                 raise HedFileError(error_code, had_error, filename)
+        if attribute_name not in valid_header_attributes:
+            raise HedFileError(HedExceptions.SCHEMA_UNKNOWN_HEADER_ATTRIBUTE,
+                               f"Unknown attribute {attribute_name} found in header line", filename=filename)
 
     if constants.VERSION_ATTRIBUTE not in attrib_dict:
-        raise HedFileError(HedExceptions.HED_SCHEMA_VERSION_INVALID,
+        raise HedFileError(HedExceptions.SCHEMA_VERSION_INVALID,
                            "No version attribute found in header", filename=filename)
 
 

@@ -1,6 +1,6 @@
 HED version:8.0.0-alpha.1
 
-
+'''Prologue'''
 This is a prologue line.
 This is a second prologue line.
 
@@ -1098,7 +1098,15 @@ This is a second prologue line.
 * z <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-21]</nowiki>
 * yocto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-24]</nowiki>
 * y <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-24]</nowiki>
-!# end hed
 
+'''Value classes'''
+
+'''Schema attributes'''
+
+'''Properties'''
+
+'''Epilogue'''
 This is an epilogue.
 This is a second line of an epilogue.
+
+!# end hed
