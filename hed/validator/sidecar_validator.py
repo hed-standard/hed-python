@@ -59,6 +59,7 @@ class SidecarValidator:
         definition_checks = {}
         for column_data in sidecar:
             column_name = column_data.column_name
+            column_data = column_data._get_unvalidated_data()
             hed_strings = column_data.get_hed_strings()
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
             for key_name, hed_string in hed_strings.items():
@@ -218,7 +219,7 @@ class SidecarValidator:
             val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED_COLUMN)
             return val_issues
 
-        column_type = ColumnMetadata._detect_column_type(dict_for_entry=dict_for_entry)
+        column_type = ColumnMetadata._detect_column_type(dict_for_entry=dict_for_entry, basic_validation=False)
         if column_type is None:
             val_issues += error_handler.format_error_with_context(SidecarErrors.UNKNOWN_COLUMN_TYPE,
                                                                   column_name=column_name)
@@ -241,7 +242,11 @@ class SidecarValidator:
             error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
             if not hed_string:
                 val_issues += error_handler.format_error_with_context(SidecarErrors.BLANK_HED_STRING)
-            if key_name in self.reserved_category_values:
+            elif not isinstance(hed_string, str):
+                val_issues += error_handler.format_error_with_context(SidecarErrors.WRONG_HED_DATA_TYPE,
+                                                                      given_type=type(hed_string),
+                                                                      expected_type="str")
+            elif key_name in self.reserved_category_values:
                 val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_NA_USED, column_name)
             error_handler.pop_error_context()
         return val_issues

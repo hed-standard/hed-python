@@ -321,7 +321,7 @@ def def_error_no_takes_value(def_name, placeholder_tag):
 
 @hed_tag_error(DefinitionErrors.BAD_PROP_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_no_takes_value(tag, def_name):
-    return f"Tag '{str(tag)}' in Definition '{def_name}' has has a tag with the unique or required attribute."
+    return f"Tag '{str(tag)}' in Definition '{def_name}' has has a the unique or required attribute."
 
 
 @hed_tag_error(DefinitionErrors.BAD_DEFINITION_LOCATION, actual_code=ValidationErrors.DEFINITION_INVALID)
