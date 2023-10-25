@@ -99,4 +99,4 @@ class Test(unittest.TestCase):
     '''
         sidecar = Sidecar(io.StringIO(sidecar_with_na_json))
         issues = sidecar.validate(self.hed_schema)
-        self.assertEqual(len(issues), 3)
+        self.assertEqual(len(issues), 2)

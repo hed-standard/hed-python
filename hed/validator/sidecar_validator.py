@@ -199,8 +199,6 @@ class SidecarValidator:
     @staticmethod
     def _check_list(key, data_list):
         for sub_data in data_list:
-            if sub_data == key:
-                return True
             if SidecarValidator._check_for_key(key, sub_data):
                 return True
         return False
