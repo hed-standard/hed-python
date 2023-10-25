@@ -180,20 +180,30 @@ class SidecarValidator:
 
     @staticmethod
     def _check_for_key(key, data):
+        # Probably can be cleaned up more -> Return True if any data or subdata is key
         if isinstance(data, dict):
-            if key in data:
-                return bool(data[key])
-            else:
-                for sub_data in data.values():
-                    result = SidecarValidator._check_for_key(key, sub_data)
-                    if result is not None:
-                        return result
+            return SidecarValidator._check_dict(key, data)
         elif isinstance(data, list):
-            for sub_data in data:
-                result = SidecarValidator._check_for_key(key, sub_data)
-                if result is not None:
-                    return result
-        return None
+            return SidecarValidator._check_list(key, data)
+        return False
+
+    @staticmethod
+    def _check_dict(key, data_dict):
+        if key in data_dict:
+            return True
+        for sub_data in data_dict.values():
+            if SidecarValidator._check_for_key(key, sub_data):
+                return True
+        return False
+
+    @staticmethod
+    def _check_list(key, data_list):
+        for sub_data in data_list:
+            if sub_data == key:
+                return True
+            if SidecarValidator._check_for_key(key, sub_data):
+                return True
+        return False
 
     def _validate_column_structure(self, column_name, dict_for_entry, error_handler):
         """ Checks primarily for type errors such as expecting a string and getting a list in a json sidecar.
@@ -219,25 +229,23 @@ class SidecarValidator:
             if found_hed:
                 val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED)
         elif column_type == ColumnType.Categorical:
-            raw_hed_dict = dict_for_entry["HED"]
-            if not raw_hed_dict:
-                val_issues += error_handler.format_error_with_context(SidecarErrors.BLANK_HED_STRING)
-            if not isinstance(raw_hed_dict, dict):
-                val_issues += error_handler.format_error_with_context(SidecarErrors.WRONG_HED_DATA_TYPE,
-                                                                      given_type=type(raw_hed_dict),
-                                                                      expected_type="dict")
-            for key_name, hed_string in raw_hed_dict.items():
-                error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
-                if not isinstance(hed_string, str):
-                    val_issues += error_handler.format_error_with_context(SidecarErrors.WRONG_HED_DATA_TYPE,
-                                                                          given_type=type(hed_string),
-                                                                          expected_type="str")
-                if not hed_string:
-                    val_issues += error_handler.format_error_with_context(SidecarErrors.BLANK_HED_STRING)
-                if key_name in self.reserved_category_values:
-                    val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_NA_USED, column_name)
-                error_handler.pop_error_context()
+            val_issues += self._validate_categorical_column(column_name, dict_for_entry, error_handler)
 
+        return val_issues
+
+    def _validate_categorical_column(self, column_name, dict_for_entry, error_handler):
+        """Validates a categorical column in a json sidecar."""
+        val_issues = []
+        raw_hed_dict = dict_for_entry["HED"]
+        if not raw_hed_dict:
+            val_issues += error_handler.format_error_with_context(SidecarErrors.BLANK_HED_STRING)
+        for key_name, hed_string in raw_hed_dict.items():
+            error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
+            if not hed_string:
+                val_issues += error_handler.format_error_with_context(SidecarErrors.BLANK_HED_STRING)
+            if key_name in self.reserved_category_values:
+                val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_NA_USED, column_name)
+            error_handler.pop_error_context()
         return val_issues
 
     def _validate_pound_sign_count(self, hed_string, column_type):
