@@ -64,3 +64,39 @@ class Test(unittest.TestCase):
 
             self.assertEqual(len(issues), error_count)
 
+
+    def test_bad_structure_na(self):
+        sidecar_with_na_json = '''
+{
+  "column3": {
+       "HED": {
+         "cat1": "Event",
+         "n/a": "Description/invalid category name"
+       }
+   }
+}
+'''
+        sidecar = Sidecar(io.StringIO(sidecar_with_na_json))
+        issues = sidecar.validate(self.hed_schema)
+        self.assertEqual(len(issues), 1)
+
+    def test_bad_structure_HED_in_ignored(self):
+        sidecar_with_na_json = '''
+    {
+      "column3": {
+           "other": {
+             "HED": "Event",
+             "n/a": "Description/invalid category name"
+           }
+       },
+       "HED": {
+       
+       },
+       "OtherBad": {
+           "subbad": ["thing1", "HED", "Other"]
+       }
+    }
+    '''
+        sidecar = Sidecar(io.StringIO(sidecar_with_na_json))
+        issues = sidecar.validate(self.hed_schema)
+        self.assertEqual(len(issues), 3)
