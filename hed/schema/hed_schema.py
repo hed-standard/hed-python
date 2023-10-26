@@ -9,6 +9,7 @@ from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection,
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.schema.hed_schema_base import HedSchemaBase
+from hed.errors.exceptions import HedFileError, HedExceptions
 
 
 class HedSchema(HedSchemaBase):
@@ -265,9 +266,16 @@ class HedSchema(HedSchemaBase):
         Parameters:
             schema_namespace (str): Should be empty, or end with a colon.(Colon will be automated added if missing).
 
+        :raises HedFileError:
+            - The prefix is invalid
         """
         if schema_namespace and schema_namespace[-1] != ":":
             schema_namespace += ":"
+
+        if schema_namespace and not schema_namespace[:-1].isalpha():
+            raise HedFileError(HedExceptions.INVALID_LIBRARY_PREFIX,
+                               "Schema namespace must contain only alpha characters",
+                               self.filename)
 
         self._namespace = schema_namespace
 
