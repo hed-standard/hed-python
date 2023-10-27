@@ -499,6 +499,7 @@ class HedTag:
         Returns:
             unit(UnitEntry or None): the default unit entry for this tag, or None
         """
+        # todo: Make this cached
         unit_classes = self.unit_classes.values()
         if len(unit_classes) == 1:
             first_unit_class_entry = list(unit_classes)[0]

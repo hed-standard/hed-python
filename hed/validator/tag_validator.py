@@ -67,6 +67,19 @@ class TagValidator:
             validation_issues += self.check_tag_formatting(tag)
         return validation_issues
 
+    def run_validate_tag_characters(self, original_tag, allow_placeholders):
+        """ Basic character validation of tags
+
+        Parameters:
+            original_tag (HedTag): A original tag.
+            allow_placeholders (bool): Allow value class or extensions to be placeholders rather than a specific value.
+
+        Returns:
+            list: The validation issues associated with the characters. Each issue is dictionary.
+
+        """
+        return self.check_tag_invalid_chars(original_tag, allow_placeholders)
+
     def run_individual_tag_validators(self, original_tag, allow_placeholders=False,
                                       is_definition=False):
         """ Runs the hed_ops on the individual tags.
@@ -77,11 +90,11 @@ class TagValidator:
             is_definition (bool): This tag is part of a Definition, not a normal line.
 
         Returns:
-            list: The validation issues associated with the top-level tags. Each issue is dictionary.
+            list: The validation issues associated with the tags. Each issue is dictionary.
 
          """
         validation_issues = []
-        validation_issues += self.check_tag_invalid_chars(original_tag, allow_placeholders)
+        # validation_issues += self.check_tag_invalid_chars(original_tag, allow_placeholders)
         if self._hed_schema:
             validation_issues += self.check_tag_exists_in_schema(original_tag)
             if original_tag.is_unit_class_tag():
