@@ -124,6 +124,12 @@ class TestHedSchema(unittest.TestCase):
         with self.assertRaises(HedFileError) as context:
             load_schema_version("[Malformed,,json]")
 
+        # Invalid prefix
+        with self.assertRaises(HedFileError) as context:
+            load_schema_version("sc1:score_1.0.0")
+
+        with self.assertRaises(HedFileError) as context:
+            load_schema_version("sc1:")
     # def test_load_schema_version_empty(self):
     #     schemas = load_schema_version("")
     #     self.assertIsInstance(schemas, HedSchema, "load_schema_version for empty string returns latest version")
