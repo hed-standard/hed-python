@@ -298,10 +298,9 @@ class ErrorHandler:
         if not error_func:
             error_object = ErrorHandler.val_error_unknown(*args, **kwargs)
             error_object['code'] = error_type
-            ErrorHandler._add_context_to_errors(error_object, error_context)
-            return [error_object]
+        else:
+            error_object = error_func(*args, **kwargs)
 
-        error_object = error_func(*args, **kwargs)
         if actual_error:
             error_object['code'] = actual_error
 
@@ -321,8 +320,6 @@ class ErrorHandler:
             list: A list of dict with needed context strings added at the beginning of the list.
 
         """
-        if error_object is None:
-            error_object = {}
         for (context_type, context) in error_context_to_add:
             error_object[context_type] = context
 
@@ -345,11 +342,7 @@ class ErrorHandler:
         if ErrorContext.HED_STRING not in error_object:
             return None, None
 
-        if 'char_index' in error_object:
-            char_index = error_object['char_index']
-            char_index_end = error_object.get('char_index_end', char_index + 1)
-            return char_index, char_index_end
-        elif 'source_tag' in error_object:
+        if 'source_tag' in error_object:
             source_tag = error_object['source_tag']
             if isinstance(source_tag, int):
                 return None, None
@@ -364,7 +357,9 @@ class ErrorHandler:
     def _update_error_with_char_pos(error_object):
         # This part is optional as you can always generate these as needed.
         start, end = ErrorHandler._get_tag_span_to_error_object(error_object)
-        if start is not None and end is not None:
+        if start is not None:
+            # silence warning in pycharm
+            start = int(start)
             source_tag = error_object.get('source_tag', None)
             # Todo: Move this functionality somewhere more centralized.
             # If the tag has been modified from the original, don't try to use sub indexing.

@@ -1,6 +1,7 @@
 import unittest
 from hed.errors import ErrorHandler, ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings, \
     get_printable_issue_string, sort_issues, replace_tag_references
+from hed.errors.error_reporter import hed_tag_error, get_printable_issue_string_html
 from hed import HedString
 from hed import load_schema_version
 
@@ -32,6 +33,9 @@ class Test(unittest.TestCase):
         self.assertTrue(column_name in error_list[0][ErrorContext.SIDECAR_COLUMN_NAME])
         self.assertTrue(column_name == error_list[0][ErrorContext.COLUMN])
         self.assertTrue(len(error_list) == 1)
+        self.error_handler.reset_error_context()
+        self.error_handler.push_error_context(ErrorContext.ROW, None)
+        self.assertTrue(self.error_handler.error_context[0][1] == 0)
         self.error_handler.reset_error_context()
 
     def test_pop_error_context(self):
@@ -115,6 +119,18 @@ class Test(unittest.TestCase):
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
         self.assertEqual(printable_issues3.count(myfile), 1)
 
+        printable_issues = get_printable_issue_string_html(error_list, skip_filename=False)
+        self.assertTrue(len(printable_issues) > 10)
+        self.assertEqual(printable_issues.count(myfile), 1)
+
+        printable_issues2 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR, skip_filename=False)
+        self.assertTrue(len(printable_issues) > len(printable_issues2))
+        self.assertEqual(printable_issues2.count(myfile), 1)
+        printable_issues3 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR, skip_filename=False,
+                                                       title="Later added custom title that is longer")
+        self.assertTrue(len(printable_issues3) > len(printable_issues2))
+        self.assertEqual(printable_issues3.count(myfile), 1)
+
         self.error_handler.reset_error_context()
 
     def test_sort_issues(self):
@@ -160,3 +176,25 @@ class Test(unittest.TestCase):
         mixed = {'a': HedString('Hed1', self._schema), 'b': [2, 3, {'c': HedString('Hed2', self._schema)}, 4]}
         replace_tag_references(mixed)
         self.assertEqual(mixed, {'a': 'Hed1', 'b': [2, 3, {'c': 'Hed2'}, 4]})
+
+
+    def test_register_error_twice(self):
+        test_code = "test_error_code"
+        @hed_tag_error(test_code)
+        def test_error_code(tag):
+            pass
+
+        with self.assertRaises(KeyError):
+            @hed_tag_error(test_code)
+            def test_error_code(tag):
+                pass
+
+    def test_format_unknown_error(self):
+        error_code = "Unknown error type"
+        error_list = self.error_handler.format_error(error_code, "param1", param2=0)
+        self.assertEqual(error_list[0]['code'], error_code)
+
+        actual_code = "Actual unknown error type"
+        error_list = self.error_handler.format_error_from_context(error_code, self.error_handler.error_context, "param1", param2=0,
+                                                                  actual_error=actual_code)
+        self.assertEqual(error_list[0]['code'], actual_code)
