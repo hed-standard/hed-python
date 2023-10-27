@@ -24,8 +24,8 @@ copyright = '2017-{}, HED Working Group'.format(date.today().year)
 author = 'HED Working Group'
 
 # The full version, including alpha/beta/rc tags
-version = '0.3.1'
-release = '0.3.1'
+version = '0.4.0'
+release = '0.4.0'
 
 currentdir = os.path.realpath(os.path.dirname(__file__))
 
@@ -89,7 +89,7 @@ html_theme_options = {
     # Toc options
     'collapse_navigation': False,
     'sticky_navigation': True,
-    'navigation_depth': 4,
+    'navigation_depth': 7,
     'includehidden': True,
     'titles_only': False
 }

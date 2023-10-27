@@ -86,6 +86,7 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset)",
             f"({self.placeholder_label_def_string},Offset)",
             f"({self.placeholder_label_def_string},Offset)",
+            f"({self.placeholder_label_def_string},Inset)",
             f"({self.placeholder_label_def_string}, Onset, (Event), (Event))",
             f"({self.placeholder_label_def_string}, Onset, (Event))",
             "(Onset)",
@@ -97,6 +98,7 @@ class Test(TestHedBase):
         # count of how many onset names are in the mapper after the line is run
         expected_context = [
             1,
+            0,
             0,
             0,
             0,
@@ -112,6 +114,7 @@ class Test(TestHedBase):
             [],
             [],
             self.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=0),
+            self.format_error(OnsetErrors.INSET_BEFORE_ONSET, tag=0),
             self.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
                               tag_list=['Def/TestDefPlaceholder/2471', 'Onset', '(Event)', '(Event)']),
             [],

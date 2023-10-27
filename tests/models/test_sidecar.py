@@ -94,7 +94,7 @@ class Test(unittest.TestCase):
 
     def test_validate_column_group(self):
         validation_issues = self.errors_sidecar.validate(self.hed_schema)
-        self.assertEqual(len(validation_issues), 5)
+        self.assertEqual(len(validation_issues), 4)
 
         validation_issues2 = self.errors_sidecar_minor.validate(self.hed_schema)
         self.assertEqual(len(validation_issues2), 1)

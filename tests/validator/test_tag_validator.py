@@ -884,6 +884,28 @@ class RequiredTags(TestHed):
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
 
+class RequiredTagInDefinition(TestHed):
+    schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
+
+    @staticmethod
+    def string_obj_func(validator):
+        from hed.validator import DefValidator
+        def_dict = DefValidator()
+        return partial(def_dict.check_for_definitions)
+
+    def test_includes_all_required_tags(self):
+        test_strings = {
+            'complete': 'Animal-agent, Action, (Definition/labelWithRequired, (Action))',
+        }
+        expected_results = {
+            'complete': False,
+        }
+        expected_issues = {
+            'complete': self.format_error(DefinitionErrors.BAD_PROP_IN_DEFINITION, tag=3, def_name='labelWithRequired'),
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
+
+
 class TestHedSpecialUnits(TestHed):
     compute_forms = True
     schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
