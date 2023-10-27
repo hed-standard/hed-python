@@ -62,6 +62,8 @@ class HedValidator:
             return issues
         if hed_string == "n/a" or not self._hed_schema:
             return issues
+        for tag in hed_string.get_all_tags():
+            self._tag_validator.run_validate_tag_characters(tag, allow_placeholders=allow_placeholders)
         issues += hed_string._calculate_to_canonical_forms(self._hed_schema)
         if check_for_any_errors(issues):
             return issues

@@ -227,8 +227,9 @@ def val_warning_capitalization(tag):
 
 @hed_tag_error(ValidationErrors.UNITS_MISSING, default_severity=ErrorSeverity.WARNING)
 def val_warning_default_units_used(tag, default_unit):
+    # todo: add a test case for no default unit.
     if default_unit is None:
-        return f"No unit specified on - '{tag}'.  Multiple default values exist and cannot be inferred"
+        return f"No unit specified on - '{tag}'.  No default unit is specified for type."
     return f"No unit specified. Using '{default_unit}' as the default - '{tag}'"
 
 

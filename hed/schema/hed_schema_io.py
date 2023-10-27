@@ -111,8 +111,8 @@ def _load_schema_version(xml_version=None, xml_folder=None):
     """ Return specified version or latest if not specified.
 
     Parameters:
-        xml_folder (str): Path to a folder containing schema.
         xml_version (str): HED version format string. Expected format: '[schema_namespace:][library_name_]X.Y.Z'.
+        xml_folder (str): Path to a folder containing schema.
 
     Returns:
         HedSchema or HedSchemaGroup: The requested HedSchema object.
@@ -121,6 +121,7 @@ def _load_schema_version(xml_version=None, xml_folder=None):
         - The xml_version is not valid.
         - The specified version cannot be found or loaded
         - Other fatal errors loading the schema (These are unlikely if you are not editing them locally)
+        - The prefix is invalid
     """
     schema_namespace = ""
     library_name = None
@@ -164,6 +165,7 @@ def load_schema_version(xml_version=None, xml_folder=None):
                                            An empty string returns the latest version
                                            A json str format is also supported,
                                            based on the output of HedSchema.get_formatted_version
+                                           Basic format: '[schema_namespace:][library_name_]X.Y.Z'.
         xml_folder (str): Path to a folder containing schema.
 
     Returns:
@@ -171,7 +173,9 @@ def load_schema_version(xml_version=None, xml_folder=None):
 
     :raises HedFileError:
         - The xml_version is not valid.
-        - A fatal error was encountered in parsing
+        - The specified version cannot be found or loaded
+        - Other fatal errors loading the schema (These are unlikely if you are not editing them locally)
+        - The prefix is invalid
     """
     # Check if we start and end with a square bracket, or double quote.  This might be valid json
     if xml_version and isinstance(xml_version, str) and \
