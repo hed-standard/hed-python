@@ -134,6 +134,7 @@ class ColumnMapper:
             return []
 
         issues = []
+
         for column_number, name in enumerate(column_map):
             if name is None or not name or name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
                 issues += ErrorHandler.format_error(ValidationErrors.HED_BLANK_COLUMN, column_number)
@@ -148,7 +149,7 @@ class ColumnMapper:
             sidecar (Sidecar or None): the sidecar to use
 
         :raises ValueError:
-            - A sidecar was prevoiusly set
+            - A sidecar was previously set
         """
         if self._sidecar:
             raise ValueError("Trying to set a second sidecar on a column mapper.")
@@ -378,11 +379,11 @@ class ColumnMapper:
     def _remove_from_list(list_to_alter, to_remove):
         return [item for item in list_to_alter if item not in to_remove]
 
-    def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None):
         """ Return def dicts from every column description.
 
         Parameters:
-            hed_schema (Schema or None): A HED schema object to use for extracting definitions.
+            hed_schema (Schema): A HED schema object to use for extracting definitions.
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:

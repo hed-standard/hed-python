@@ -2,7 +2,7 @@ import os
 import unittest
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import check_filename, extract_suffix_path, clean_filename, \
-    get_dir_dictionary, get_file_list, get_path_components, parse_bids_filename, \
+    get_dir_dictionary, get_file_list, get_path_components, get_task_from_file, parse_bids_filename, \
     _split_entity, get_allowed, get_filtered_by_element
 
 
@@ -81,11 +81,6 @@ class Test(unittest.TestCase):
         # filename = clean_filename('HED7.2.0.xml', name_suffix='_blech', extension='.txt')
         # self.assertEqual('HED7.2.0_blech.txt', filename, "Returns correct string when base_name has periods")
 
-    def test_get_dir_dictionary(self):
-        dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
-        self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")
-        self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
-
     def test_get_allowed(self):
         test_value = 'events.tsv'
         value = get_allowed(test_value, 'events')
@@ -97,6 +92,11 @@ class Test(unittest.TestCase):
         self.assertEqual(value1, "events", "get_allowed is case insensitive")
         value2 = get_allowed(test_value1, [])
         self.assertEqual(value2, test_value1)
+        
+    def test_get_dir_dictionary(self):
+        dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
+        self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")
+        self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
 
     def test_get_file_list_case(self):
         dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
@@ -184,6 +184,12 @@ class Test(unittest.TestCase):
         #     self.fail("parse_bids_filename threw the wrong exception when filename invalid")
         # else:
         #     self.fail("parse_bids_filename should have thrown an exception")
+
+    def test_get_task_from_file(self):
+        task1 = get_task_from_file("H:/alpha/base_task-blech.tsv")
+        self.assertEqual("blech", task1)
+        task2 = get_task_from_file("task-blech")
+        self.assertEqual("blech", task2)
 
     def test_parse_bids_filename_full(self):
         the_path1 = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'

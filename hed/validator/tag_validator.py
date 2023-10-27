@@ -26,7 +26,7 @@ class TagValidator:
     # Placeholder characters are checked elsewhere, but by default allowed
     TAG_ALLOWED_CHARS = "-_/"
 
-    def __init__(self, hed_schema=None):
+    def __init__(self, hed_schema):
         """Constructor for the Tag_Validator class.
 
         Parameters:
@@ -67,6 +67,19 @@ class TagValidator:
             validation_issues += self.check_tag_formatting(tag)
         return validation_issues
 
+    def run_validate_tag_characters(self, original_tag, allow_placeholders):
+        """ Basic character validation of tags
+
+        Parameters:
+            original_tag (HedTag): A original tag.
+            allow_placeholders (bool): Allow value class or extensions to be placeholders rather than a specific value.
+
+        Returns:
+            list: The validation issues associated with the characters. Each issue is dictionary.
+
+        """
+        return self.check_tag_invalid_chars(original_tag, allow_placeholders)
+
     def run_individual_tag_validators(self, original_tag, allow_placeholders=False,
                                       is_definition=False):
         """ Runs the hed_ops on the individual tags.
@@ -77,11 +90,11 @@ class TagValidator:
             is_definition (bool): This tag is part of a Definition, not a normal line.
 
         Returns:
-            list: The validation issues associated with the top-level tags. Each issue is dictionary.
+            list: The validation issues associated with the tags. Each issue is dictionary.
 
          """
         validation_issues = []
-        validation_issues += self.check_tag_invalid_chars(original_tag, allow_placeholders)
+        # validation_issues += self.check_tag_invalid_chars(original_tag, allow_placeholders)
         if self._hed_schema:
             validation_issues += self.check_tag_exists_in_schema(original_tag)
             if original_tag.is_unit_class_tag():
@@ -258,8 +271,6 @@ class TagValidator:
         """
         validation_issues = self._check_invalid_prefix_issues(original_tag)
         allowed_chars = self.TAG_ALLOWED_CHARS
-        if not self._hed_schema or not self._hed_schema.is_hed3_schema:
-            allowed_chars += " "
         if allow_placeholders:
             allowed_chars += "#"
         validation_issues += self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
@@ -278,7 +289,7 @@ class TagValidator:
         if original_tag.is_basic_tag() or original_tag.is_takes_value_tag():
             return validation_issues
 
-        is_extension_tag = original_tag.is_extension_allowed_tag()
+        is_extension_tag = original_tag.has_attribute(HedKey.ExtensionAllowed)
         if not is_extension_tag:
             actual_error = None
             if "#" in original_tag.extension:
@@ -309,7 +320,7 @@ class TagValidator:
             validation_issue = ErrorHandler.format_error(ValidationErrors.UNITS_INVALID,
                                                          tag=report_as, units=tag_unit_class_units)
         else:
-            default_unit = original_tag.get_unit_class_default_unit()
+            default_unit = original_tag.default_unit
             validation_issue = ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
                                                          tag=report_as, default_unit=default_unit)
         return validation_issue
@@ -378,26 +389,6 @@ class TagValidator:
         if original_tag.has_attribute(HedKey.RequireChild):
             validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_REQUIRES_CHILD,
                                                            tag=original_tag)
-        return validation_issues
-
-    def check_tag_unit_class_units_exist(self, original_tag):
-        """ Report warning if tag has a unit class tag with no units.
-
-        Parameters:
-            original_tag (HedTag): The original tag that is used to report the error.
-
-        Returns:
-            list: Validation issues.  Each issue is a dictionary.
-
-        """
-        validation_issues = []
-        if original_tag.is_unit_class_tag():
-            tag_unit_values = original_tag.extension
-            if tag_validator_util.validate_numeric_value_class(tag_unit_values):
-                default_unit = original_tag.get_unit_class_default_unit()
-                validation_issues += ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
-                                                               tag=original_tag,
-                                                               default_unit=default_unit)
         return validation_issues
 
     def check_for_invalid_extension_chars(self, original_tag):

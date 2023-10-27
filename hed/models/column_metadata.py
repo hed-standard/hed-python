@@ -1,6 +1,7 @@
 from enum import Enum
 from hed.errors.error_types import SidecarErrors
 import pandas as pd
+import copy
 
 
 class ColumnType(Enum):
@@ -102,13 +103,15 @@ class ColumnMetadata:
         return True
 
     @staticmethod
-    def _detect_column_type(dict_for_entry):
+    def _detect_column_type(dict_for_entry, basic_validation=True):
         """ Determine the ColumnType of a given json entry.
 
         Parameters:
             dict_for_entry (dict): The loaded json entry a specific column.
                 Generally has a "HED" entry among other optional ones.
-
+            basic_validation (bool): If False, does not verify past "HED" exists and the type
+                                     This is used to issue more precise errors that are normally just silently ignored,
+                                     but also not crash.
         Returns:
             ColumnType: The determined type of given column.  Returns None if unknown.
 
@@ -122,14 +125,14 @@ class ColumnMetadata:
 
         hed_entry = dict_for_entry["HED"]
         if isinstance(hed_entry, dict):
-            if not all(isinstance(entry, str) for entry in hed_entry.values()):
+            if basic_validation and not all(isinstance(entry, str) for entry in hed_entry.values()):
                 return None
             return ColumnType.Categorical
 
         if not isinstance(hed_entry, str):
             return None
 
-        if "#" not in dict_for_entry["HED"]:
+        if basic_validation and "#" not in dict_for_entry["HED"]:
             return None
 
         return ColumnType.Value
@@ -155,3 +158,10 @@ class ColumnMetadata:
         else:
             return 0, None
         return expected_count, error_type
+
+    def _get_unvalidated_data(self):
+        """Returns a copy with less preliminary validation done(such as verifying all data types)"""
+        return_copy = copy.deepcopy(self)
+        return_copy.column_type = ColumnMetadata._detect_column_type(dict_for_entry=return_copy.source_dict,
+                                                                     basic_validation=False)
+        return return_copy

@@ -47,7 +47,7 @@ class TestConverterBase(unittest.TestCase):
         with open(self.wiki_file) as file:
             hed_schema_as_string = "".join([line for line in file])
 
-        string_schema = schema.from_string(hed_schema_as_string, file_type=".mediawiki")
+        string_schema = schema.from_string(hed_schema_as_string, schema_format=".mediawiki")
         self.assertEqual(string_schema, self.hed_schema_wiki)
 
     def test_wikischema2xml(self):
@@ -79,7 +79,7 @@ class TestComplianceBase(unittest.TestCase):
     xml_file = '../data/schema_tests/HED8.0.0t.xml'
     wiki_file = '../data/schema_tests/HED8.0.0.mediawiki'
     can_compare = True
-    expected_issues = 5
+    expected_issues = 7
 
     @classmethod
     def setUpClass(cls):

@@ -95,7 +95,7 @@ class Test(unittest.TestCase):
         self.assertEqual(first_str2.find('Def-expand/'), -1, "assemble_hed with def expand has Def-expand tags")
 
     def test_search_strings(self):
-        hed_strings, dict1 = df_util.get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None, 
+        hed_strings, dict1 = df_util.get_assembled(self.input_data, self.sidecar1, self.schema, extra_def_dicts=None,
                                                    join_columns=True, shrink_defs=False, expand_defs=True)
         queries1 = ["sensory-event"]
         query_names1 = ["sensory"]

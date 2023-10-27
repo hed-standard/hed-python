@@ -54,6 +54,7 @@ class Test(unittest.TestCase):
         column_summary.update('run-01', self.columns1)
         column_summary.update('run-02', self.columns1)
         summary1 = column_summary.get_summary()
+        self.assertIsInstance(summary1, dict)
         column_summary.update('run-03', self.columns2)
         column_summary.update('run-04', self.columns3)
         summary2 = column_summary.get_summary()

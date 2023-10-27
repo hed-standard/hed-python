@@ -10,53 +10,12 @@ import io
 import json
 from hed import HedFileError
 from hed.errors import ErrorHandler, get_printable_issue_string
-import shutil
-from hed import schema
-from hed.schema import hed_cache
 
-
-# To be removed eventually once all errors are being verified.
-known_errors = [
-    'SIDECAR_INVALID',
-    'CHARACTER_INVALID',
-    'COMMA_MISSING',
-    "DEF_EXPAND_INVALID",
-    "DEF_INVALID",
-    "DEFINITION_INVALID",
-    "NODE_NAME_EMPTY",
-    "ONSET_OFFSET_INSET_ERROR",
-    "PARENTHESES_MISMATCH",
-    "PLACEHOLDER_INVALID",
-    "REQUIRED_TAG_MISSING",
-    "SIDECAR_INVALID",
-    "SIDECAR_KEY_MISSING",
-    "STYLE_WARNING",
-    "TAG_EMPTY",
-    "TAG_EXPRESSION_REPEATED",
-    "TAG_EXTENDED",
-    "TAG_EXTENSION_INVALID",
-    "TAG_GROUP_ERROR",
-    "TAG_INVALID",
-    "TAG_NOT_UNIQUE",
-    "TAG_NAMESPACE_PREFIX_INVALID",
-    "TAG_REQUIRES_CHILD",
-    "TILDES_UNSUPPORTED",
-    "UNITS_INVALID",
-    "UNITS_MISSING",
-    "VALUE_INVALID",
-
-    "SIDECAR_BRACES_INVALID",
-    "SCHEMA_LIBRARY_INVALID",
-
-    "SCHEMA_ATTRIBUTE_INVALID"
-]
 
 skip_tests = {
     "VERSION_DEPRECATED": "Not applicable",
-    "onset-offset-inset-error-duplicated-onset-or-offset": "TBD how we implement this",
     "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
 }
-
 
 class MyTestCase(unittest.TestCase):
     @classmethod
@@ -68,30 +27,16 @@ class MyTestCase(unittest.TestCase):
         cls.fail_count = []
         cls.default_sidecar = Sidecar(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_sidecar.json')))
 
-        # this is just to make sure 8.2.0 is in the cache(as you can't find it online yet) and could be cleaned up
-        cls.hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_errors_cache/')
-        base_schema_dir = '../tests/data/schema_tests/merge_tests/'
-        cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
-        schema.set_cache_directory(cls.hed_cache_dir)
-        cls.full_base_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), base_schema_dir)
-        cls.source_schema_path = os.path.join(cls.full_base_folder, "HED8.2.0.xml")
-        cls.cache_folder = hed_cache.get_cache_directory()
-        cls.schema_path_in_cache = os.path.join(cls.cache_folder, "HED8.2.0.xml")
-        shutil.copy(cls.source_schema_path, cls.schema_path_in_cache)
-
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.hed_cache_dir)
-        schema.set_cache_directory(cls.saved_cache_folder)
+        pass
 
     def run_single_test(self, test_file):
         with open(test_file, "r") as fp:
             test_info = json.load(fp)
         for info in test_info:
             error_code = info['error_code']
-            verify_code = False
-            if error_code in known_errors:
-                verify_code = True
+            verify_code = True
             # To be deprecated once we add this to all tests
             self._verify_code = verify_code
             if error_code in skip_tests:
@@ -102,6 +47,8 @@ class MyTestCase(unittest.TestCase):
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
 
+            # if name != "attribute-invalid-in-library":
+            #     continue
             description = info['description']
             schema = info['schema']
             check_for_warnings = info.get("warning", False)
@@ -147,7 +94,7 @@ class MyTestCase(unittest.TestCase):
                 self.fail_count.append(name)
 
     def _run_single_string_test(self, info, schema, def_dict, error_code, description, name, error_handler):
-        string_validator = HedValidator(hed_schema=schema, def_dicts=def_dict, run_full_onset_checks=False)
+        string_validator = HedValidator(hed_schema=schema, def_dicts=def_dict)
         for result, tests in info.items():
             for test in tests:
                 test_string = HedString(test, schema)
@@ -223,7 +170,7 @@ class MyTestCase(unittest.TestCase):
             for test in tests:
                 schema_string = "\n".join(test)
                 try:
-                    loaded_schema = from_string(schema_string, file_type=".mediawiki")
+                    loaded_schema = from_string(schema_string, schema_format=".mediawiki")
                     issues = loaded_schema.check_compliance()
                 except HedFileError as e:
                     issues = e.issues

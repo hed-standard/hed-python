@@ -26,7 +26,7 @@ class ColumnNameSummary:
         return len(self.unique_headers) - 1
 
     def get_summary(self, as_json=False):
-        patterns = [list() for element in self.unique_headers]
+        patterns = [list() for _ in self.unique_headers]
         for key, value in self.file_dict.items():
             patterns[value].append(key)
         column_headers = []

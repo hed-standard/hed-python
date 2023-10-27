@@ -56,9 +56,7 @@ class BaseInput:
         # This is the loaded workbook if we loaded originally from an Excel file.
         self._loaded_workbook = None
         self._worksheet_name = worksheet_name
-        pandas_header = 0
-        if not self._has_column_names:
-            pandas_header = None
+        self._dataframe = None
 
         input_type = file_type
         if isinstance(file, str):
@@ -67,35 +65,8 @@ class BaseInput:
             if self.name is None:
                 self._name = file
 
-        self._dataframe = None
+        self._open_dataframe_file(file, has_column_names, input_type)
 
-        if isinstance(file, pandas.DataFrame):
-            self._dataframe = file
-            self._has_column_names = self._dataframe_has_names(self._dataframe)
-        elif not file:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
-        elif input_type in self.TEXT_EXTENSION:
-            try:
-                self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
-                                                  dtype=str, keep_default_na=True, na_values=None)
-            except Exception as e:
-                raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
-            # Convert nan values to a known value
-            self._dataframe = self._dataframe.fillna("n/a")
-        elif input_type in self.EXCEL_EXTENSION:
-            try:
-                self._loaded_workbook = openpyxl.load_workbook(file)
-                loaded_worksheet = self.get_worksheet(self._worksheet_name)
-                self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
-            except Exception as e:
-                raise HedFileError(HedExceptions.GENERIC_ERROR, str(e), self.name) from e
-        else:
-            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
-
-        if self._dataframe.size == 0:
-            raise HedFileError(HedExceptions.INVALID_DATAFRAME, "Invalid dataframe(malformed datafile, etc)", file)
-
-        # todo: Can we get rid of this behavior now that we're using pandas?
         column_issues = ColumnMapper.check_for_blank_names(self.columns, allow_blank_names=allow_blank_names)
         if column_issues:
             raise HedFileError(HedExceptions.BAD_COLUMN_NAMES, "Duplicate or blank columns found. See issues.",
@@ -134,11 +105,53 @@ class BaseInput:
     @property
     def series_a(self):
         """Return the assembled dataframe as a series
-            Probably a placeholder name.
 
         Returns:
-            Series: the assembled dataframe with columns merged"""
+            Series: the assembled dataframe with columns merged
+        """
         return self.combine_dataframe(self.assemble())
+
+    @property
+    def series_filtered(self):
+        """Return the assembled dataframe as a series, with rows that have the same onset combined
+
+        Returns:
+            Series: the assembled dataframe with columns merged, and the rows filtered together
+        """
+        if self.onsets is not None:
+            indexed_dict = self._indexed_dict_from_onsets(self.onsets.astype(float))
+            return self._filter_by_index_list(self.series_a, indexed_dict=indexed_dict)
+
+    @staticmethod
+    def _indexed_dict_from_onsets(onsets):
+        current_onset = -1000000.0
+        tol = 1e-9
+        from collections import defaultdict
+        indexed_dict = defaultdict(list)
+        for i, onset in enumerate(onsets):
+            if abs(onset - current_onset) > tol:
+                current_onset = onset
+            indexed_dict[current_onset].append(i)
+
+        return indexed_dict
+
+    @staticmethod
+    def _filter_by_index_list(original_series, indexed_dict):
+        new_series = pd.Series(["n/a"] * len(original_series), dtype=str)
+
+        for onset, indices in indexed_dict.items():
+            if indices:
+                first_index = indices[0]  # Take the first index of each onset group
+                # Join the corresponding original series entries and place them at the first index
+                new_series[first_index] = ",".join([str(original_series[i]) for i in indices])
+
+        return new_series
+
+    @property
+    def onsets(self):
+        """Returns the onset column if it exists"""
+        if "onset" in self.columns:
+            return self._dataframe["onset"]
 
     @property
     def name(self):
@@ -493,7 +506,7 @@ class BaseInput:
         )
         return dataframe
 
-    def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None):
         """ Returns the definition dict for this file
 
         Note: Baseclass implementation returns just extra_def_dicts.
@@ -517,3 +530,34 @@ class BaseInput:
             column_refs(list): A list of unique column refs found
         """
         return []
+
+    def _open_dataframe_file(self, file, has_column_names, input_type):
+        pandas_header = 0
+        if not has_column_names:
+            pandas_header = None
+
+        if isinstance(file, pandas.DataFrame):
+            self._dataframe = file.astype(str)
+            self._has_column_names = self._dataframe_has_names(self._dataframe)
+        elif not file:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
+        elif input_type in self.TEXT_EXTENSION:
+            try:
+                self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
+                                                  dtype=str, keep_default_na=True, na_values=["", "null"])
+            except Exception as e:
+                raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
+            # Convert nan values to a known value
+            self._dataframe = self._dataframe.fillna("n/a")
+        elif input_type in self.EXCEL_EXTENSION:
+            try:
+                self._loaded_workbook = openpyxl.load_workbook(file)
+                loaded_worksheet = self.get_worksheet(self._worksheet_name)
+                self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
+            except Exception as e:
+                raise HedFileError(HedExceptions.GENERIC_ERROR, str(e), self.name) from e
+        else:
+            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
+
+        if self._dataframe.size == 0:
+            raise HedFileError(HedExceptions.INVALID_DATAFRAME, "Invalid dataframe(malformed datafile, etc)", file)

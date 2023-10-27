@@ -1,4 +1,4 @@
-""" Summarize the definitions in the dataset. """
+""" Summarize the type_defs in the dataset. """
 
 from hed import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -7,7 +7,7 @@ from hed.models.def_expand_gather import DefExpandGatherer
 
 
 class SummarizeDefinitionsOp(BaseOp):
-    """ Summarize the definitions in the dataset.
+    """ Summarize the type_defs in the dataset.
 
     Required remodeling parameters:
         - **summary_name** (*str*): The name of the summary.   
@@ -28,7 +28,7 @@ class SummarizeDefinitionsOp(BaseOp):
         }
     }
 
-    SUMMARY_TYPE = 'definitions'
+    SUMMARY_TYPE = 'type_defs'
 
     def __init__(self, parameters):
         """ Constructor for the summarize column values operation.
@@ -49,7 +49,7 @@ class SummarizeDefinitionsOp(BaseOp):
         self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create summaries of definitions
+        """ Create summaries of type_defs
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -129,14 +129,13 @@ class DefinitionSummary(BaseSummary):
         known_defs_summary.update(ambiguous_defs_summary)
         known_defs_summary.update(errors_summary)
         return {"Name": "", "Total events": 0, "Total files": 0, "Files": [], "Specifics": known_defs_summary}
-        
-        return known_defs_summary
+        # return known_defs_summary
 
     def merge_all_info(self):
         """ Create an Object containing the definition summary.
 
         Returns:
-            Object - the overall summary object for definitions.
+            Object - the overall summary object for type_defs.
 
         """
         return self.def_gatherer

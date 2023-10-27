@@ -1,6 +1,7 @@
 """
 This module is used to split tags in a HED string.
 """
+import copy
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
 from hed.models.model_constants import DefTagNames
@@ -12,14 +13,15 @@ class HedString(HedGroup):
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
 
-    def __init__(self, hed_string, hed_schema=None, def_dict=None, _contents=None):
+    def __init__(self, hed_string, hed_schema, def_dict=None, _contents=None):
         """ Constructor for the HedString class.
 
         Parameters:
             hed_string (str): A HED string consisting of tags and tag groups.
-            hed_schema (HedSchema or None): The schema to use to identify tags.  Can be passed later.
+            hed_schema (HedSchema): The schema to use to identify tags.
+            def_dict(DefinitionDict or None): The def dict to use to identify def/def expand tags.
             _contents ([HedGroup and/or HedTag] or None): Create a HedString from this exact list of children.
-                                                              Does not make a copy.
+                                                          Does not make a copy.
         Notes:
             - The HedString object parses its component tags and groups into a tree-like structure.
 
@@ -33,27 +35,38 @@ class HedString(HedGroup):
             except ValueError:
                 contents = []
         super().__init__(hed_string, contents=contents, startpos=0, endpos=len(hed_string))
+        self._schema = hed_schema
+        self._from_strings = None
+        self._def_dict = def_dict
 
     @classmethod
-    def from_hed_strings(cls, contents):
+    def from_hed_strings(cls, hed_strings):
         """ Factory for creating HedStrings via combination.
 
         Parameters:
-            contents (list or None): A list of HedString objects to combine.  This takes ownership of their children.
+            hed_strings (list or None): A list of HedString objects to combine.
+                                        This takes ownership of their children.
 
+        Returns:
+            new_string(HedString): The newly combined HedString
         """
-        result = HedString.__new__(HedString)
-        hed_string = "".join([group._hed_string for group in contents])
-        contents = [child for sub_string in contents for child in sub_string.children]
-        result.__init__(hed_string=hed_string, _contents=contents)
-        return result
+        if not hed_strings:
+            raise TypeError("Passed an empty list to from_hed_strings")
+        new_string = HedString.__new__(HedString)
+        hed_string = ",".join([group._hed_string for group in hed_strings])
+        contents = [child for sub_string in hed_strings for child in sub_string.children]
+        first_schema = hed_strings[0]._schema
+        first_dict = hed_strings[0]._def_dict
+        new_string.__init__(hed_string=hed_string, _contents=contents, hed_schema=first_schema, def_dict=first_dict)
+        new_string._from_strings = hed_strings
+        return new_string
 
     @property
     def is_group(self):
         """ Always False since the underlying string is not a group with parentheses. """
         return False
 
-    def convert_to_canonical_forms(self, hed_schema):
+    def _calculate_to_canonical_forms(self, hed_schema):
         """ Identify all tags using the given schema.
 
         Parameters:
@@ -65,9 +78,38 @@ class HedString(HedGroup):
         """
         validation_issues = []
         for tag in self.get_all_tags():
-            validation_issues += tag.convert_to_canonical_forms(hed_schema)
+            validation_issues += tag._calculate_to_canonical_forms(hed_schema)
 
         return validation_issues
+
+    def __deepcopy__(self, memo):
+        # check if the object has already been copied
+        if id(self) in memo:
+            return memo[id(self)]
+
+        # create a new instance of HedString class, and direct copy all parameters
+        new_string = self.__class__.__new__(self.__class__)
+        new_string.__dict__.update(self.__dict__)
+
+        # add the new object to the memo dictionary
+        memo[id(self)] = new_string
+
+        # Deep copy the attributes that need it(most notably, we don't copy schema/schema entry)
+        new_string._original_children = copy.deepcopy(self._original_children, memo)
+        new_string._from_strings = copy.deepcopy(self._from_strings, memo)
+        new_string.children = copy.deepcopy(self.children, memo)
+
+        return new_string
+
+    def copy(self):
+        """ Return a deep copy of this string.
+
+        Returns:
+            HedString: The copied group.
+
+        """
+        return_copy = copy.deepcopy(self)
+        return return_copy
 
     def remove_definitions(self):
         """ Remove definition tags and groups from this string.
@@ -118,45 +160,7 @@ class HedString(HedGroup):
 
         return self
 
-    def convert_to_short(self, hed_schema):
-        """ Compute canonical forms and return the short form.
-
-        Parameters:
-            hed_schema (HedSchema or None): The schema to use to calculate forms.
-
-        Returns:
-            tuple:
-                - str:   The string with all tags converted to short form.
-                - list:  A list of issues found during conversion. Each issue is a dictionary.
-
-        Notes:
-            - No issues will be found if no schema is passed.
-
-        """
-        conversion_issues = self.convert_to_canonical_forms(hed_schema)
-        short_string = self.get_as_short()
-        return short_string, conversion_issues
-
-    def convert_to_long(self, hed_schema):
-        """ Compute canonical forms and return the long form.
-
-        Parameters:
-            hed_schema (HedSchema or None): The schema to use to calculate forms.
-
-        Returns:
-            tuple:
-                - str:   The string with all tags converted to long form.
-                - list:  A list of issues found during conversion.  Each issue is a dictionary.
-
-        Notes:
-            - No issues will be found if no schema is passed.
-
-        """
-        conversion_issues = self.convert_to_canonical_forms(hed_schema)
-        short_string = self.get_as_long()
-        return short_string, conversion_issues
-
-    def convert_to_original(self):
+    def get_as_original(self):
         """ Return the original form of this string.
 
         Returns:
@@ -164,17 +168,16 @@ class HedString(HedGroup):
 
         Notes:
             Potentially with some extraneous spaces removed on returned string.
-
         """
         return self.get_as_form("org_tag")
 
     @staticmethod
-    def split_into_groups(hed_string, hed_schema=None, def_dict=None):
+    def split_into_groups(hed_string, hed_schema, def_dict=None):
         """ Split the HED string into a parse tree.
 
         Parameters:
             hed_string (str): A hed string consisting of tags and tag groups to be processed.
-            hed_schema (HedSchema or None): HED schema to use to identify tags.
+            hed_schema (HedSchema): HED schema to use to identify tags.
             def_dict(DefinitionDict): The definitions to identify
         Returns:
             list:  A list of HedTag and/or HedGroup.
@@ -190,7 +193,7 @@ class HedString(HedGroup):
         input_tags = HedString.split_hed_string(hed_string)
         for is_hed_tag, (startpos, endpos) in input_tags:
             if is_hed_tag:
-                new_tag = HedTag(hed_string, (startpos, endpos), hed_schema, def_dict)
+                new_tag = HedTag(hed_string, hed_schema, (startpos, endpos), def_dict)
                 current_tag_group[-1].append(new_tag)
             else:
                 string_portion = hed_string[startpos:endpos]
@@ -239,10 +242,29 @@ class HedString(HedGroup):
             - If the hed tag or group was not in the original string, returns (None, None).
 
         """
+        if self._from_strings:
+            return self._get_org_span_from_strings(tag_or_group)
+
         if self.check_if_in_original(tag_or_group):
             return tag_or_group.span
 
         return None, None
+
+    def _get_org_span_from_strings(self, tag_or_group):
+        """A different case of the above, to handle if this was created from hed string objects."""
+        found_string = None
+        string_start_index = 0
+        for string in self._from_strings:
+            if string.check_if_in_original(tag_or_group):
+                found_string = string
+                break
+            # Add 1 for comma
+            string_start_index += string.span[1] + 1
+
+        if not found_string:
+            return None, None
+
+        return tag_or_group.span[0] + string_start_index, tag_or_group.span[1] + string_start_index
 
     @staticmethod
     def split_hed_string(hed_string):
@@ -312,12 +334,11 @@ class HedString(HedGroup):
 
         return result_positions
 
-    def validate(self, hed_schema, allow_placeholders=True, error_handler=None):
+    def validate(self, allow_placeholders=True, error_handler=None):
         """
         Validate the string using the schema
 
         Parameters:
-            hed_schema(HedSchema): The schema to use to validate
             allow_placeholders(bool): allow placeholders in the string
             error_handler(ErrorHandler or None): the error handler to use, creates a default one if none passed
         Returns:
@@ -325,7 +346,7 @@ class HedString(HedGroup):
         """
         from hed.validator import HedValidator
 
-        validator = HedValidator(hed_schema)
+        validator = HedValidator(self._schema, def_dicts=self._def_dict)
         return validator.validate(self, allow_placeholders=allow_placeholders, error_handler=error_handler)
 
     def find_top_level_tags(self, anchor_tags, include_groups=2):

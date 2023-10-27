@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
         test_root_bad = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                       '../../data/remodel_tests/test_root_bad'))
         cls.test_root_bad = test_root_bad
-        cls.test_root_bad_backups = os.path.join(test_root_bad, BackupManager.RELATIVE_BACKUP_LOCATION, 'backups')
+        cls.test_root_bad_backups = os.path.join(test_root_bad, BackupManager.RELATIVE_BACKUP_LOCATION)
         cls.test_paths_bad = [os.path.join(test_root_bad, file) for file in file_list]
         cls.test_zip_bad = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                          '../../data/remodel_tests/test_root_bad.zip'))

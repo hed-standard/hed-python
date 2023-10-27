@@ -1,9 +1,7 @@
 import os
 import unittest
 from hed import schema as hedschema
-from hed.models.hed_string import HedString
 from hed.models.tabular_input import TabularInput
-# from hed.tools.analysis.analysis_util import get_assembled_strings
 
 
 # noinspection PyBroadException
@@ -40,7 +38,7 @@ class Test(unittest.TestCase):
     #                      "get_assembled_strings should not have Def-expand when expand_defs is False")
     #     self.assertNotEqual(hed_strings_joined1.find("Def/"), -1,
     #                         "get_assembled_strings should have Def/ when expand_defs is False")
-    # 
+    #
     # def test_get_assembled_strings_no_schema_def_expand(self):
     #     hed_list2 = get_assembled_strings(self.input_data, self.hed_schema, expand_defs=True)
     #     self.assertIsInstance(hed_list2, list, "get_assembled_groups should return a list")
@@ -53,7 +51,7 @@ class Test(unittest.TestCase):
     #                         "get_assembled_strings should have Def-expand when expand_defs is True")
     #     self.assertEqual(hed_strings_joined2.find("Def/"), -1,
     #                      "get_assembled_strings should not have Def/ when expand_defs is True")
-    # 
+    #
     # def test_get_assembled_strings_with_schema_no_def_expand(self):
     #     hed_list1 = get_assembled_strings(self. input_data, hed_schema=self.hed_schema, expand_defs=False)
     #     self.assertIsInstance(hed_list1, list, "get_assembled_strings returns a list when expand defs is False")
@@ -66,7 +64,7 @@ class Test(unittest.TestCase):
     #                      "get_assembled_strings does not have Def-expand when expand_defs is False")
     #     self.assertNotEqual(hed_strings_joined1.find("Def/"), -1,
     #                         "get_assembled_strings should have Def/ when expand_defs is False")
-    # 
+    #
     # def test_get_assembled_strings_with_schema_def_expand(self):
     #     hed_list2 = get_assembled_strings(self.input_data, hed_schema=self.hed_schema, expand_defs=True)
     #     self.assertIsInstance(hed_list2, list, "get_assembled_groups should return a list")
@@ -79,7 +77,7 @@ class Test(unittest.TestCase):
     #                         "get_assembled_strings should have Def-expand when expand_defs is True")
     #     self.assertEqual(hed_strings_joined2.find("Def/"), -1,
     #                      "get_assembled_strings should not have Def/ when expand_defs is True")
-    # 
+    #
     # def test_get_assembled_strings_no_sidecar_no_schema(self):
     #     input_data = TabularInput(self.events_path, name="face_sub1_events")
     #     hed_list1 = get_assembled_strings(input_data, expand_defs=False)
@@ -94,7 +92,7 @@ class Test(unittest.TestCase):
     #     self.assertIsInstance(hed_list2[0], HedString,
     #                           "get_assembled_string should return an HedString when no sidecar")
     #     self.assertFalse(hed_list2[0].children, "get_assembled_string returned HedString is empty when no sidecar")
-    # 
+    #
     # def test_get_assembled_strings_no_sidecar_schema(self):
     #     input_data = TabularInput(self.events_path, hed_schema=self.hed_schema, name="face_sub1_events")
     #     hed_list1 = get_assembled_strings(input_data, expand_defs=False)

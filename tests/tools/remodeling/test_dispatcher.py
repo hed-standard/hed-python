@@ -198,10 +198,16 @@ class Test(unittest.TestCase):
         dispatch1.save_summaries()
         self.assertTrue(os.path.exists(summary_path))
         file_list1 = os.listdir(summary_path)
-        self.assertEqual(len(file_list1), 2, "save_summaries creates correct number of summary files when run.")
+        self.assertEqual(2, len(file_list1), "save_summaries creates correct number of summary files when run.")
         dispatch1.save_summaries(save_formats=[])
-        file_list2 = os.listdir(summary_path)
-        self.assertEqual(len(file_list2), 2, "save_summaries must have a format to save")
+        dir_list2 = os.listdir(summary_path)
+        self.assertEqual(2, len(dir_list2), "save both summaries")
+        path_before = os.path.realpath(os.path.join(summary_path, "test summary_values_before"))
+        file_list2 = [f for f in os.listdir(path_before) if os.path.isfile(os.path.join(path_before, f))]
+        self.assertEqual(2, len(file_list2))
+        dispatch1.save_summaries(task_name="task-blech")
+        file_list3 = [f for f in os.listdir(path_before) if os.path.isfile(os.path.join(path_before, f))]
+        self.assertEqual(4, len(file_list3), "saving with task has different name than without")
 
     def test_get_summaries(self):
         with open(self.summarize_excerpt) as fp:

@@ -3,6 +3,7 @@ import os
 
 from hed import schema
 from hed.models import HedString
+import copy
 
 
 class Test(unittest.TestCase):
@@ -61,7 +62,7 @@ class Test(unittest.TestCase):
         # located tags now has found all 5 hed tags
 
         # This will find no tags
-        located_tags = basic_hed_string_obj.find_tags_with_term("bject", recursive=True, include_groups=0)
+        located_tags = basic_hed_string_obj.find_tags_with_term("reject", recursive=True, include_groups=0)
         self.assertEqual(len(located_tags), 0)
 
         # this will also find no tags
@@ -69,15 +70,17 @@ class Test(unittest.TestCase):
         self.assertEqual(len(located_tags), 0)
 
     def _compare_strings(self, hed_strings):
-        str1 = HedString(hed_strings[0]).sort()
+        str1 = HedString(hed_strings[0], self.hed_schema)
+        str1.sort()
         for hed_string in hed_strings:
-            str2 = HedString(hed_string).sort()
+            str2 = HedString(hed_string, self.hed_schema)
+            str2.sort()
             self.assertEqual(str1, str2)
 
     def _compare_strings2(self, hed_strings):
-        str1 = HedString(hed_strings[0])
+        str1 = HedString(hed_strings[0], self.hed_schema)
         for hed_string in hed_strings:
-            str2 = HedString(hed_string)
+            str2 = HedString(hed_string, self.hed_schema)
             self.assertEqual(str1.sorted(), str2.sorted())
 
     def test_sort_and_sorted(self):
@@ -118,6 +121,16 @@ class Test(unittest.TestCase):
             "A, D, ((B, C), A), (F, E)"
         ]
         self._compare_strings(hed_strings)
+
+    def test_sorted_structure(self):
+        hed_string = HedString("(Tag3, Tag1, Tag5, Tag2, Tag4)", self.hed_schema)
+        original_hed_string = copy.deepcopy(hed_string)
+
+        sorted_hed_string = hed_string.sorted()
+
+        self.assertIsInstance(sorted_hed_string, HedString)
+        self.assertEqual(str(original_hed_string), str(hed_string))
+        self.assertIsNot(sorted_hed_string, hed_string)
 
 if __name__ == '__main__':
     unittest.main()

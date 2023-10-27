@@ -1,6 +1,10 @@
 Hierarchical Event Descriptor (HED) Python Tools
 ================================================
 
+.. image:: _static/images/croppedWideLogo.png
+  :width: 220
+  :alt: HedLogo
+
 .. sidebar:: **Links**
 
    * `PDF docs <https://hed-python.readthedocs.io/_/downloads/en/latest/pdf/>`_
@@ -10,14 +14,14 @@ Hierarchical Event Descriptor (HED) Python Tools
 Note:  this is a work in progress. More information is coming.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 6
    :caption: Contents:
 
    introduction.md
    user_guide.rst
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 6
    :caption: HED Python API:
 
    api2.rst

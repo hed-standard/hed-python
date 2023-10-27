@@ -1,8 +1,5 @@
-import pandas as pd
-import numpy as np
 import unittest
 from hed.tools.remodeling.operations.convert_columns_op import ConvertColumnsOp
-from hed.tools.remodeling.dispatcher import Dispatcher
 
 
 class Test(unittest.TestCase):

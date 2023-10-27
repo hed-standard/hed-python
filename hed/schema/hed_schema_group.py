@@ -7,9 +7,10 @@ import json
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.errors import ErrorHandler, ValidationErrors
 from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_base import HedSchemaBase
 
 
-class HedSchemaGroup:
+class HedSchemaGroup(HedSchemaBase):
     """ Container for multiple HedSchema objects.
 
     Notes:
@@ -30,6 +31,7 @@ class HedSchemaGroup:
             - Multiple schemas have the same library prefixes.
             - Empty list passed
         """
+        super().__init__()
         if len(schema_list) == 0:
             raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty list passed to HedSchemaGroup constructor.",
                                filename="Combined Schema")
@@ -40,49 +42,21 @@ class HedSchemaGroup:
                                filename="Combined Schema")
         self._schemas = {hed_schema._namespace: hed_schema for hed_schema in schema_list}
 
-    # ===============================================
-    # General schema properties/functions
-    # ===============================================
-
-    def get_formatted_version(self, as_string=True):
-        x = [schema.get_formatted_version() for schema in self._schemas.values()]
-        if as_string:
-            return json.dumps(x)
-        return x
-
-    @property
-    def has_duplicate_tags(self):
-        """ Return True if valid hed3 schema with no duplicate short tags.
+    def get_schema_versions(self):
+        """ A list of HED version strings including namespace and library name if any of this schema.
 
         Returns:
-            bool: True if this is a valid hed3 schema with no duplicate short tags.
-
+            list: The complete version of this schema including library name and namespace.
         """
-        return any([schema.has_duplicate_tags for schema in self._schemas.values()])
+        return [schema.version for schema in self._schemas.values()]
 
-    @property
-    def unit_classes(self):
-        """ A list of all unit classes represented in this group. """
-        return all([schema.unit_classes for schema in self._schemas.values()])
+    def get_formatted_version(self):
+        """ The HED version string including namespace and library name if any of this schema.
 
-    @property
-    def is_hed3_compatible(self):
-        """ A list of HED3-compliant schemas in this group. """
-        return all([schema.is_hed3_compatible for schema in self._schemas.values()])
-
-    @property
-    def is_hed3_schema(self):
-        """ HedSchemaGroup objects are always HED3."""
-        return True
-
-    @property
-    def unit_modifiers(self):
-        """ Return a list of all unit modifiers for all schema. """
-        return all([schema.unit_modifiers for schema in self._schemas.values()])
-
-    @property
-    def value_classes(self):
-        return all([schema.value_classes for schema in self._schemas.values()])
+        Returns:
+            str: The complete version of this schema including library name and namespace.
+        """
+        return json.dumps(self.get_schema_versions())
 
     def __eq__(self, other):
         return self._schemas == other._schemas
@@ -111,52 +85,52 @@ class HedSchemaGroup:
         return list(self._schemas.keys())
 
     def check_compliance(self, check_for_warnings=True, name=None, error_handler=None):
-        """ Check for hed3 compliance of this schema.
+        """ Check for HED3 compliance of this schema.
 
         Parameters:
             check_for_warnings (bool): If True, checks for formatting issues like invalid characters, capitalization.
             name (str): If present, use as the filename for context, rather than using the actual filename.
+                        Useful for temp filenames when supporting web services.
             error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
 
         Returns:
             list: A list of all warnings and errors found in the file. Each issue is a dictionary.
-
-        Notes:
-            - Useful for temp filenames when supporting web services.
-
         """
         issues_list = []
         for schema in self._schemas.values():
             issues_list += schema.check_compliance(check_for_warnings, name, error_handler)
         return issues_list
 
-    def get_tags_with_attribute(self, key):
-        """ Return the tags with this attribute.
+    def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags):
+        """ Return tag entries with the given attribute.
 
         Parameters:
-            key (str): The attributes.
+            attribute (str): A tag attribute.  Eg HedKey.ExtensionAllowed
+            key_class (HedSectionKey): The HedSectionKey for the section to retrieve from.
 
+        Returns:
+            list: A list of all tags with this attribute.
+
+        Notes:
+            - The result is cached so will be fast after first call.
         """
-        all_tags = set()
+        tags = set()
         for schema in self._schemas.values():
-            all_tags.update(schema.get_tags_with_attribute(key))
-        return all_tags
+            tags.update(schema.get_tags_with_attribute(attribute, key_class))
+        return list(tags)
 
-    # todo: maybe tweak this API so you don't have to pass in library namespace?
-    def get_tag_entry(self, name, key_class=HedSectionKey.AllTags, schema_namespace=""):
+    def get_tag_entry(self, name, key_class=HedSectionKey.Tags, schema_namespace=""):
         """ Return the schema entry for this tag, if one exists.
 
         Parameters:
             name (str): Any form of basic tag(or other section entry) to look up.
-            key_class (HedSectionKey): The tag section to search.
-            schema_namespace (str or None): An optional namespace associated with this tag.
+                This will not handle extensions or similar.
+                If this is a tag, it can have a schema namespace, but it's not required
+            key_class (HedSectionKey or str):  The type of entry to return.
+            schema_namespace (str): Only used on Tags.  If incorrect, will return None.
 
         Returns:
-            HedSchemaEntry:  The schema entry for the given tag.
-
-        Notes:
-            - This will not handle extensions or similar.
-
+            HedSchemaEntry: The schema entry for the given tag.
         """
         specific_schema = self.schema_for_namespace(schema_namespace)
         if not specific_schema:
@@ -165,21 +139,19 @@ class HedSchemaGroup:
         return specific_schema.get_tag_entry(name, key_class, schema_namespace)
 
     def find_tag_entry(self, tag, schema_namespace=""):
-        """ Find a schema entry for a source tag.
+        """ Find the schema entry for a given source tag.
 
         Parameters:
-            tag (str or HedTag): Any form of tag to look up.  Can have an extension, value, etc.
-            schema_namespace (str): The namespace the library, if any.
+            tag (str, HedTag): Any form of tag to look up.  Can have an extension, value, etc.
+            schema_namespace (str): The schema namespace of the tag, if any.
 
         Returns:
-            tuple:
-                - HedTagEntry: The located tag entry for this tag.
-                - str: The remainder of the tag that isn't part of the base tag.
-                - list: A list of errors while converting.
+            HedTagEntry: The located tag entry for this tag.
+            str: The remainder of the tag that isn't part of the base tag.
+            list: A list of errors while converting.
 
         Notes:
-            - Works right to left.(mostly relevant for errors).
-
+            Works left to right (which is mostly relevant for errors).
         """
         specific_schema = self.schema_for_namespace(schema_namespace)
         if not specific_schema:

@@ -117,7 +117,7 @@ class BaseSummary(ABC):
 
         return summary
 
-    def save(self, save_dir, file_formats=['.txt'], individual_summaries="separate"):
+    def save(self, save_dir, file_formats=['.txt'], individual_summaries="separate", task_name=""):
 
         for file_format in file_formats:
             if file_format == '.txt':
@@ -126,24 +126,29 @@ class BaseSummary(ABC):
                 summary = self.get_summary(individual_summaries=individual_summaries)
             else:
                 continue
-            self._save_summary_files(save_dir, file_format, summary, individual_summaries)
+            self._save_summary_files(save_dir, file_format, summary, individual_summaries, task_name=task_name)
 
-    def _save_summary_files(self, save_dir, file_format, summary, individual_summaries):
+    def _save_summary_files(self, save_dir, file_format, summary, individual_summaries, task_name=''):
         """ Save the files in the appropriate format.
 
         Parameters:
             save_dir (str): Path to the directory in which the summaries will be saved.
             file_format (str): string representing the extension (including .), '.txt' or '.json'.
-            summary (dictionary): Dictionary of summaries (has "Dataset" and "Individual files" keys.
+            summary (dictionary): Dictionary of summaries (has "Dataset" and "Individual files" keys).
+            individual_summaries (str): "consolidated", "individual", or "none".
+            task_name (str): Name of task to be included in file name if multiple tasks.
 
         """
         if self.op.append_timecode:
             time_stamp = '_' + get_timestamp()
         else:
             time_stamp = ''
+        if task_name:
+            task_name = "_" + task_name
         this_save = os.path.join(save_dir, self.op.summary_name + '/')
         os.makedirs(os.path.realpath(this_save), exist_ok=True)
-        filename = os.path.realpath(os.path.join(this_save, self.op.summary_filename + time_stamp + file_format))
+        filename = os.path.realpath(os.path.join(this_save,
+                                                 self.op.summary_filename + task_name + time_stamp + file_format))
         individual = summary.get("Individual files", {})
         if individual_summaries == "none" or not individual:
             self.dump_summary(filename, summary["Dataset"])
@@ -155,15 +160,16 @@ class BaseSummary(ABC):
         individual_dir = os.path.join(this_save, self.INDIVIDUAL_SUMMARIES_PATH + '/')
         os.makedirs(os.path.realpath(individual_dir), exist_ok=True)
         for name, sum_str in individual.items():
-            filename = self._get_summary_filepath(individual_dir, name, time_stamp, file_format)
+            filename = self._get_summary_filepath(individual_dir, name, task_name, time_stamp, file_format)
             self.dump_summary(filename, sum_str)
 
-    def _get_summary_filepath(self, individual_dir, name, time_stamp, file_format):
+    def _get_summary_filepath(self, individual_dir, name, task_name, time_stamp, file_format):
         """ Return the filepath for the summary including the timestamp
 
         Parameters:
             individual_dir (str):  path of the directory in which the summary should be stored.
             name (str): Path of the original file from which the summary was extracted.
+            task_name (str): Task name if separate summaries for different tasks or the empty string if not separated.
             time_stamp (str):  Formatted date-time string to be included in the filename of the summary.
 
         Returns:
@@ -176,7 +182,7 @@ class BaseSummary(ABC):
         match = True
         filename = None
         while match:
-            filename = f"{self.op.summary_filename}_{this_name}_{count}{time_stamp}{file_format}"
+            filename = f"{self.op.summary_filename}_{this_name}{task_name}_{count}{time_stamp}{file_format}"
             filename = os.path.realpath(os.path.join(individual_dir, filename))
             if not os.path.isfile(filename):
                 break

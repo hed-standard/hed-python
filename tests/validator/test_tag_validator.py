@@ -388,11 +388,11 @@ class TestTagLevels(TestHed):
             'legalDuplicate': [],
             'noDuplicate': [],
             'duplicateGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                group=HedString("(Sensory-event, Man-made-object/VehicleTrain)")),
+                                                group=HedString("(Sensory-event, Man-made-object/VehicleTrain)", self.hed_schema)),
             'duplicateSubGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))")),
+                                                group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))", self.hed_schema)),
             'duplicateSubGroupF': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                   group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)")),
+                                                   group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)", self.hed_schema)),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -882,6 +882,28 @@ class RequiredTags(TestHed):
                                                       tag_namespace='Property/Organizational-property/Event-context'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
+
+class RequiredTagInDefinition(TestHed):
+    schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
+
+    @staticmethod
+    def string_obj_func(validator):
+        from hed.validator import DefValidator
+        def_dict = DefValidator()
+        return partial(def_dict.check_for_definitions)
+
+    def test_includes_all_required_tags(self):
+        test_strings = {
+            'complete': 'Animal-agent, Action, (Definition/labelWithRequired, (Action))',
+        }
+        expected_results = {
+            'complete': False,
+        }
+        expected_issues = {
+            'complete': self.format_error(DefinitionErrors.BAD_PROP_IN_DEFINITION, tag=3, def_name='labelWithRequired'),
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
 
 class TestHedSpecialUnits(TestHed):

@@ -11,7 +11,7 @@ def flatten_schema(hed_schema, skip_non_tag=False):
     """
     children, parents, descriptions = [], [], []
     for section in hed_schema._sections.values():
-        if skip_non_tag and section.section_key != HedSectionKey.AllTags:
+        if skip_non_tag and section.section_key != HedSectionKey.Tags:
             continue
         for entry in section.all_entries:
             if entry.has_attribute(HedKey.TakesValue):

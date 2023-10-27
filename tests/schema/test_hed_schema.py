@@ -88,10 +88,6 @@ class TestHedSchema(unittest.TestCase):
         self.assertTrue(isinstance(terms, list))
         self.assertTrue(len(terms) > 0)
 
-    def test_find_duplicate_tags(self):
-        dupe_tags = self.hed_schema_3g.find_duplicate_tags()
-        self.assertEqual(len(dupe_tags), 0)
-
     def test_get_desc_dict(self):
         desc_dict = self.hed_schema_3g.get_desc_iter()
         self.assertEqual(len(list(desc_dict)), 1117)
@@ -110,8 +106,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(desc, None)
 
     def test_get_all_tag_attributes(self):
-        test_string = HedString("Jerk-rate/#")
-        test_string.convert_to_canonical_forms(self.hed_schema_3g)
+        test_string = HedString("Jerk-rate/#", self.hed_schema_3g)
         tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
             "takesValue": "true",
@@ -125,8 +120,7 @@ class TestHedSchema(unittest.TestCase):
         }
         self.assertCountEqual(tag_props, expected_props)
 
-        test_string = HedString("Statistical-value")
-        test_string.convert_to_canonical_forms(self.hed_schema_3g)
+        test_string = HedString("Statistical-value", self.hed_schema_3g)
         tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
         expected_props = {
             HedKey.ExtensionAllowed: "true",
@@ -140,14 +134,14 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(get_hed_xml_version(self.hed_xml_3g), "8.0.0")
 
     def test_has_duplicate_tags(self):
-        self.assertFalse(self.hed_schema_3g.has_duplicate_tags)
+        self.assertFalse(self.hed_schema_3g._has_duplicate_tags)
 
     def test_short_tag_mapping(self):
-        self.assertEqual(len(self.hed_schema_3g.all_tags.keys()), 1110)
+        self.assertEqual(len(self.hed_schema_3g.tags.keys()), 1110)
 
     def test_schema_compliance(self):
         warnings = self.hed_schema_group.check_compliance(True)
-        self.assertEqual(len(warnings), 10)
+        self.assertEqual(len(warnings), 14)
 
     def test_bad_prefixes(self):
         schema = load_schema_version(xml_version="8.0.0")

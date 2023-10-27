@@ -23,7 +23,7 @@ class TestDefBase(TestHedBase):
             # print(test_key)
             # print(test_issues)
             # print(expected_issue)
-            self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key]))
+            self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key], self.hed_schema))
 
 
 class TestDefinitionDict(TestDefBase):
@@ -100,10 +100,10 @@ class TestDefinitionDict(TestDefBase):
             'invalidPlaceholder': self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
                                                             tag=0, def_name="InvalidDef1/InvalidPlaceholder"),
             'defInGroup': self.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
-                                                    tag=HedTag("Def/ImproperlyPlacedDef"), def_name="ValidDefName"),
+                                            tag=HedTag("Def/ImproperlyPlacedDef", self.hed_schema), def_name="ValidDefName"),
             'defExpandInGroup': self.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
-                                                          tag=HedTag("Def-expand/ImproperlyPlacedDef"),
-                                                          def_name="ValidDefName"),
+                                                  tag=HedTag("Def-expand/ImproperlyPlacedDef", self.hed_schema),
+                                                  def_name="ValidDefName"),
             'doublePoundSignPlaceholder': self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
                                                                      tag=0, def_name="InvalidDef/##"),
             'doublePoundSignDiffPlaceholder': self.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
@@ -133,6 +133,16 @@ class TestDefinitionDict(TestDefBase):
             hed_string = HedString(test_string, hed_schema=self.hed_schema, def_dict=def_dict)
             hed_string.expand_defs()
             self.assertEqual(str(hed_string), expected_results[key])
+
+    def test_altering_definition_contents(self):
+        def_dict = DefinitionDict("(Definition/DefName, (Event, Action))", self.hed_schema)
+        hed_string1 = HedString("Def/DefName", self.hed_schema, def_dict)
+        hed_string2 = HedString("Def/DefName", self.hed_schema, def_dict)
+        hed_string1.expand_defs()
+        hed_string2.expand_defs()
+        hed_string1.remove([hed_string1.get_all_tags()[2]])
+
+        self.assertNotEqual(hed_string1, hed_string2)
 
 if __name__ == '__main__':
     unittest.main()

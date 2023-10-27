@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 import zipfile
 from hed.errors import HedFileError
-from hed.tools.remodeling.cli.run_remodel import parse_arguments, main
+from hed.tools.remodeling.cli.run_remodel import parse_arguments, parse_tasks, main
 
 
 class Test(unittest.TestCase):
@@ -27,8 +27,13 @@ class Test(unittest.TestCase):
                                                                '../../../data/remodel_tests/eeg_ds003645s_hed_remodel',
                                                                'derivatives/remodel/remodeling_files',
                                                                'summarize_hed_types_rmdl.json'))
-        cls.bad_remodel_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
+        cls.bad_model_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                              '../../../data/remodel_tests/bad_rename_rmdl.json'))
+        cls.files = ['/datasets/fmri_ds002790s_hed_aomic/sub-0001/func/sub-0001_task-stopsignal_acq-seq_events.tsv',
+                     '/datasets/fmri_ds002790s_hed_aomic/sub-0001/func/sub-0001_task-workingmemory_acq-seq_events.tsv',
+                     '/datasets/fmri_ds002790s_hed_aomic/sub-0002/func/sub-0002_task-emomatching_acq-seq_events.tsv',
+                     '/datasets/fmri_ds002790s_hed_aomic/sub-0002/func/sub-0002_task-stopsignal_acq-seq_events.tsv',
+                     '/datasets/fmri_ds002790s_hed_aomic/sub-0002/func/sub-0002_task-workingmemory_acq-seq_events.tsv']
 
     def setUp(self):
         with zipfile.ZipFile(self.data_zip, 'r') as zip_ref:
@@ -46,7 +51,7 @@ class Test(unittest.TestCase):
 
     def test_parse_arguments(self):
         # Test no verbose
-        arg_list1 = [self.data_root, self.model_path, '-x', 'derivatives', '-n', 'back1']
+        arg_list1 = [self.data_root, self.model_path, '-x', 'derivatives', '-bn', 'back1']
         with patch('sys.stdout', new=io.StringIO()) as fp1:
             args1, operations1 = parse_arguments(arg_list1)
             self.assertFalse(fp1.getvalue())
@@ -55,7 +60,7 @@ class Test(unittest.TestCase):
         self.assertEqual(args1.file_suffix, 'events')
 
         # Test * for extensions and suffix as well as verbose
-        arg_list2 = [self.data_root, self.model_path, '-x', 'derivatives', '-n', 'back1', '-f', '*', '-e', '*', '-v']
+        arg_list2 = [self.data_root, self.model_path, '-x', 'derivatives', '-bn', 'back1', '-f', '*', '-e', '*', '-v']
         with patch('sys.stdout', new=io.StringIO()) as fp2:
             args2, operations2 = parse_arguments(arg_list2)
             self.assertTrue(fp2.getvalue())
@@ -65,10 +70,20 @@ class Test(unittest.TestCase):
         self.assertIsNone(args2.extensions)
 
         # Test not able to parse
-        arg_list3 = [self.data_root, self.bad_remodel_path, '-x', 'derivatives']
+        arg_list3 = [self.data_root, self.bad_model_path, '-x', 'derivatives']
         with self.assertRaises(ValueError) as context3:
             parse_arguments(arg_list3)
         self.assertEqual(context3.exception.args[0], "UnableToFullyParseOperations")
+ 
+    def test_parse_tasks(self):
+        tasks1 = parse_tasks(self.files, "*")
+        self.assertIn('stopsignal', tasks1)
+        self.assertEqual(3, len(tasks1))
+        self.assertEqual(2, len(tasks1["workingmemory"]))
+        tasks2 = parse_tasks(self.files, ["workingmemory"])
+        self.assertEqual(1, len(tasks2))
+        files2 = ['task-.tsv', '/base/']
+        tasks3 = parse_tasks(files2, "*")
 
     def test_main_bids(self):
         arg_list = [self.data_root, self.model_path, '-x', 'derivatives', 'stimuli', '-b']
@@ -79,12 +94,12 @@ class Test(unittest.TestCase):
     def test_main_bids_alt_path(self):
         work_path = os.path.realpath(os.path.join(self.extract_path, 'temp'))
         arg_list = [self.data_root, self.summary_model_path, '-x', 'derivatives', 'stimuli', '-r', '8.1.0',
-                   '-j', self.sidecar_path, '-w', work_path]
-       
+                    '-j', self.sidecar_path, '-w', work_path]
+
         with patch('sys.stdout', new=io.StringIO()) as fp:
             main(arg_list)
             self.assertFalse(fp.getvalue())
-            
+
     def test_main_bids_verbose_bad_task(self):
         arg_list = [self.data_root, self.model_path, '-x', 'derivatives', 'stimuli', '-b', '-t', 'junk', '-v']
         with patch('sys.stdout', new=io.StringIO()) as fp:
@@ -149,13 +164,13 @@ class Test(unittest.TestCase):
 
     def test_main_errors(self):
         # Test bad data directory
-        arg_list = ['junk/junk', self.model_path, '-x', 'derivatives', '-n', 'back1']
+        arg_list = ['junk/junk', self.model_path, '-x', 'derivatives', '-bn', 'back1']
         with self.assertRaises(HedFileError) as context:
             main(arg_list=arg_list)
         self.assertEqual(context.exception.args[0], "DataDirectoryDoesNotExist")
 
         # Test no backup
-        arg_list = [self.data_root, self.model_path, '-x', 'derivatives', '-n', 'back1']
+        arg_list = [self.data_root, self.model_path, '-x', 'derivatives', '-bn', 'back1']
         with self.assertRaises(HedFileError) as context:
             main(arg_list=arg_list)
         self.assertEqual(context.exception.args[0], "BackupDoesNotExist")
@@ -177,12 +192,6 @@ class Test(unittest.TestCase):
         with patch('sys.stdout', new=io.StringIO()) as fp:
             main(arg_list)
             self.assertFalse(fp.getvalue())
-
-    # def test_temp(self):
-    #     data_root = "g:/ds002718OpenNeuro"
-    #     model_path = 'G:/wh_excerpt_rmdl.json'
-    #     arg_list = [data_root, model_path, '-x', 'derivatives', 'code', 'stimuli', '-b', '-n', '']
-    #     main(arg_list)
 
 
 if __name__ == '__main__':

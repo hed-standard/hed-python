@@ -6,8 +6,8 @@ class RemoveColumnsOp(BaseOp):
     """ Remove columns from a tabular file.
 
     Required remodeling parameters:
-        - **remove_names** (*list*): The names of the columns to be removed.  
-        - **ignore_missing** (*boolean*): If true, names in remove_names that are not columns in df should be ignored.  
+        - **column_names** (*list*): The names of the columns to be removed.
+        - **ignore_missing** (*boolean*): If true, names in column_names that are not columns in df should be ignored.
 
     """
 
@@ -65,4 +65,3 @@ class RemoveColumnsOp(BaseOp):
             raise KeyError("MissingColumnCannotBeRemoved",
                            f"{name}: Ignore missing is False but a column in {str(self.column_names)} is "
                            f"not in the data columns [{str(df_new.columns)}]")
-        return df_new

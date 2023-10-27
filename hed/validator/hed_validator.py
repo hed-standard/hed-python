@@ -12,19 +12,17 @@ from hed.models.hed_string import HedString
 from hed.models import HedTag
 from hed.validator.tag_validator import TagValidator
 from hed.validator.def_validator import DefValidator
-from hed.validator.onset_validator import OnsetValidator
 
 
 class HedValidator:
     """ Top level validation of HED strings. """
 
-    def __init__(self, hed_schema=None, def_dicts=None, run_full_onset_checks=True, definitions_allowed=False):
+    def __init__(self, hed_schema, def_dicts=None, definitions_allowed=False):
         """ Constructor for the HedValidator class.
 
         Parameters:
             hed_schema (HedSchema or HedSchemaGroup): HedSchema object to use for validation.
             def_dicts(DefinitionDict or list or dict): the def dicts to use for validation
-            run_full_onset_checks(bool): If True, check for matching onset/offset tags
             definitions_allowed(bool): If False, flag definitions found as errors
         """
         super().__init__()
@@ -33,8 +31,6 @@ class HedValidator:
 
         self._tag_validator = TagValidator(hed_schema=self._hed_schema)
         self._def_validator = DefValidator(def_dicts, hed_schema)
-        self._onset_validator = OnsetValidator(def_dict=self._def_validator,
-                                               run_full_onset_checks=run_full_onset_checks)
         self._definitions_allowed = definitions_allowed
 
     def validate(self, hed_string, allow_placeholders, error_handler=None):
@@ -66,7 +62,9 @@ class HedValidator:
             return issues
         if hed_string == "n/a" or not self._hed_schema:
             return issues
-        issues += hed_string.convert_to_canonical_forms(self._hed_schema)
+        for tag in hed_string.get_all_tags():
+            self._tag_validator.run_validate_tag_characters(tag, allow_placeholders=allow_placeholders)
+        issues += hed_string._calculate_to_canonical_forms(self._hed_schema)
         if check_for_any_errors(issues):
             return issues
         # This is required so it can validate the tag a tag expands into
@@ -80,7 +78,7 @@ class HedValidator:
         issues = []
         issues += self._validate_tags_in_hed_string(hed_string)
         issues += self._validate_groups_in_hed_string(hed_string)
-        issues += self._onset_validator.validate_onset_offset(hed_string)
+        issues += self._def_validator.validate_onset_offset(hed_string)
         return issues
 
     def _validate_groups_in_hed_string(self, hed_string_obj):
@@ -130,7 +128,7 @@ class HedValidator:
             prev_child = child
 
     def _check_for_duplicate_groups(self, original_group):
-        sorted_group = original_group.sorted()
+        sorted_group = original_group._sorted()
         validation_issues = []
         self._check_for_duplicate_groups_recursive(sorted_group, validation_issues)
         return validation_issues

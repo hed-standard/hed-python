@@ -29,11 +29,18 @@ you can install directly from the
 `GitHub repository <https://github.com/hed-standard/hed-python>`_
 using the following command:
 
+```code
 >>> pip install git+https://github.com/hed-standard/hed-python.git
-
+```
 
 Finding help
 ============
+
+:Documentation:
+
+    See `HED resources <https://www.hed-resources.org>`_ for user documentation and tutorials.
+
+    The `HED online tools <https://hedtools.org>`_ provide an easy-to-use interface that requires no programming. 
 
 :Mailing lists and forums:
 

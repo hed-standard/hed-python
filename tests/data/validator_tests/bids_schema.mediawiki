@@ -1,5 +1,7 @@
 HED version: 8.0.0-alpha.2
 
+'''Prologue'''
+
 !# start schema 
 
 '''Event''' 
@@ -1163,6 +1165,7 @@ HED version: 8.0.0-alpha.2
 * yocto <nowiki>{SIUnitModifier} [SI unit submultiple representing 10^-24]</nowiki>
 * y <nowiki>{SIUnitSymbolModifier} [SI unit submultiple representing 10^-24]</nowiki>
 
+'''Value classes'''
 
 '''Schema attributes'''
 * allowedCharacter <nowiki>{unitClassProperty}[An attribute of unit classes schema value placeholders indicating a special character that is allowed in expressing the value of that placeholder.]</nowiki>
@@ -1183,6 +1186,8 @@ HED version: 8.0.0-alpha.2
 * unique <nowiki>{boolProperty}[Only one of this tag or its descendants can be used within a single tag group or event.]</nowiki> 
 * unitSymbol <nowiki>{boolProperty, unitProperty}[Abbreviation or symbol representing a type of unit. Unit symbols  represent both the singular and the plural and thus cannot be pluralized.]</nowiki>
 * unitClass <nowiki>[Specifies the type of a unit for a tag.]</nowiki>
+
+'''Properties'''
 
 '''Epilogue'''
 This is the new format for the mediawiki schema

@@ -76,11 +76,11 @@ class SummarizeColumnValuesOp(BaseOp):
         Returns:
             DataFrame: A copy of df.
 
-        Side-effect:
+        Side effect:
             Updates the relevant summary.
 
         """
-       
+
         df_new = df.copy()
         summary = dispatcher.summary_dicts.get(self.summary_name, None)
         if not summary:
@@ -130,11 +130,11 @@ class ColumnValueSummary(BaseSummary):
             this_summary['Categorical columns'][key] = dict(sorted_tuples[:min(num_disp, self.op.max_categorical)])
         return {"Name": this_summary['Name'], "Total events": this_summary["Total events"],
                 "Total files": this_summary['Total files'],
-                "Files": [name for name in this_summary['Files'].keys()],
-                "Specifics": {"Value columns": this_summary['Value columns'].keys(),
+                "Files": list(this_summary['Files'].keys()),
+                "Specifics": {"Value columns": list(this_summary['Value columns']),
                               "Skip columns": this_summary['Skip columns'],
-                              "Value columns": this_summary['Value columns'],
-                              "Categorical columns": this_summary['Categorical columns'],
+                              "Value column summaries": this_summary['Value columns'],
+                              "Categorical column summaries": this_summary['Categorical columns'],
                               "Categorical counts": this_summary['Categorical counts']}}
 
     def merge_all_info(self):
@@ -167,8 +167,12 @@ class ColumnValueSummary(BaseSummary):
         """
 
         if name == "Dataset":
-            return self._get_dataset_string(result, indent=indent)
-        return self._get_individual_string(result, indent=indent)
+            sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
+                        f"Total files={result.get('Total files', 0)}"]
+        else:
+            sum_list = [f"Total events={result.get('Total events', 0)}"]
+        sum_list = sum_list + self._get_detail_list(result, indent=indent)
+        return ("\n").join(sum_list)
 
     def _get_categorical_string(self, result, offset="", indent="   "):
         """ Return  a string with the summary for a particular categorical dictionary.
@@ -182,7 +186,7 @@ class ColumnValueSummary(BaseSummary):
              str: Formatted string suitable for saving in a file or printing.
 
          """
-        cat_dict = result.get('Categorical columns', {})
+        cat_dict = result.get('Categorical column summaries', {})
         if not cat_dict:
             return ""
         count_dict = result['Categorical counts']
@@ -192,49 +196,26 @@ class ColumnValueSummary(BaseSummary):
             sum_list = sum_list + self._get_categorical_col(entry, count_dict, offset="", indent="   ")
         return "\n".join(sum_list)
 
-    def _get_dataset_string(self, result, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return  a string with the overall summary for all of the tabular files.
+    def _get_detail_list(self, result, indent=BaseSummary.DISPLAY_INDENT):
+        """ Return  a list of strings with the details
 
         Parameters:
             result (dict): Dictionary of merged summary information.
             indent (str):  String of blanks used as the amount to indent for readability.
 
         Returns:
-            str: Formatted string suitable for saving in a file or printing.
+            list: list of formatted strings suitable for saving in a file or printing.
 
         """
-        sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
-                    f"Total files={result.get('Total files', 0)}"]
+        sum_list = []
         specifics = result["Specifics"]
         cat_string = self._get_categorical_string(specifics, offset="", indent=indent)
         if cat_string:
             sum_list.append(cat_string)
-        val_cols = specifics.get("Value columns", {})
-        if val_cols:
-            sum_list.append(ColumnValueSummary._get_value_string(val_cols, offset="", indent=indent))
-        return "\n".join(sum_list)
-
-    def _get_individual_string(self, result, indent=BaseSummary.DISPLAY_INDENT):
-
-        """ Return  a string with the summary for an individual tabular file.
-
-        Parameters:
-            result (dict): Dictionary of summary information for a particular tabular file.
-            indent (str):  String of blanks used as the amount to indent for readability.
-
-        Returns:
-            str: Formatted string suitable for saving in a file or printing.
-
-        """
-        sum_list = [f"Total events={result.get('Total events', 0)}"]
-        specifics = result.get("Specifics", {})
-        cat_cols = result.get("Categorical columns", {})
-        if cat_cols:
-            sum_list.append(self._get_categorical_string(cat_cols, offset=indent, indent=indent))
-        val_cols = result.get("Value columns", {})
-        if val_cols:
-            sum_list.append(ColumnValueSummary._get_value_string(val_cols, offset=indent, indent=indent))
-        return "\n".join(sum_list)
+        val_dict = specifics.get("Value column summaries", {})
+        if val_dict:
+            sum_list.append(ColumnValueSummary._get_value_string(val_dict, offset="", indent=indent))
+        return sum_list
 
     def _get_categorical_col(self, entry, count_dict, offset="", indent="   "):
         """ Return  a string with the summary for a particular categorical column.

@@ -2,10 +2,9 @@
 
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
-from hed.models.df_util import get_assembled
-from hed.tools.analysis.hed_type_values import HedTypeValues
+from hed.tools.analysis.hed_type import HedType
 from hed.tools.analysis.hed_type_counts import HedTypeCounts
-from hed.tools.analysis.hed_context_manager import HedContextManager
+from hed.tools.analysis.event_manager import EventManager
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
 
@@ -69,7 +68,7 @@ class SummarizeHedTypeOp(BaseOp):
         Returns:
             DataFrame: A copy of df
 
-        Side-effect:
+        Side effect:
             Updates the relevant summary.
 
         """
@@ -104,14 +103,10 @@ class HedTypeSummary(BaseSummary):
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
         input_data = TabularInput(new_info['df'], sidecar=sidecar, name=new_info['name'])
-        hed_strings, definitions = get_assembled(input_data, sidecar, new_info['schema'],
-                                                 extra_def_dicts=None, join_columns=True, expand_defs=False)
-        context_manager = HedContextManager(hed_strings, new_info['schema'])
-        type_values = HedTypeValues(context_manager, definitions, new_info['name'], type_tag=self.type_tag)
-
+        type_values = HedType(EventManager(input_data, new_info['schema']), new_info['name'], type_tag=self.type_tag)
         counts = HedTypeCounts(new_info['name'], self.type_tag)
         counts.update_summary(type_values.get_summary(), type_values.total_events, new_info['name'])
-        counts.add_descriptions(type_values.definitions)
+        counts.add_descriptions(type_values.type_defs)
         self.summary_dict[new_info["name"]] = counts
 
     def get_details_dict(self, counts):
@@ -165,7 +160,7 @@ class HedTypeSummary(BaseSummary):
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return  a string with the overall summary for all of the tabular files.
+        """ Return  a string with the overall summary for all the tabular files.
 
         Parameters:
             result (dict): Dictionary of merged summary information.

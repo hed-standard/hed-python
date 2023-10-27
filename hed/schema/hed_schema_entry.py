@@ -2,6 +2,8 @@ from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.hed_schema_constants import HedKey
 
 import inflect
+import copy
+
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -48,11 +50,46 @@ class HedSchemaEntry:
             for item in to_remove:
                 self._unknown_attributes.pop(item)
 
-    def set_attribute_value(self, attribute_name, attribute_value):
+    def has_attribute(self, attribute, return_value=False):
+        """ Checks for the existence of an attribute in this entry.
+
+        Parameters:
+            attribute (str): The attribute to check for.
+            return_value (bool): If True, returns the actual value of the attribute.
+                                 If False, returns a boolean indicating the presence of the attribute.
+
+        Returns:
+            bool or any: If return_value is False, returns True if the attribute exists and False otherwise.
+            If return_value is True, returns the value of the attribute if it exists, else returns None.
+
+        Notes:
+            - The existence of an attribute does not guarantee its validity.
+        """
+        if return_value:
+            return self.attributes.get(attribute, None)
+        else:
+            return attribute in self.attributes
+
+    def attribute_has_property(self, attribute, property_name):
+        """ Return True if attribute has property.
+
+        Parameters:
+            attribute (str): Attribute name to check for property_name.
+            property_name (str): The property value to return.
+
+        Returns:
+            bool: Returns True if this entry has the property.
+
+        """
+        attr_entry = self._section.valid_attributes.get(attribute)
+        if attr_entry and attr_entry.has_attribute(property_name):
+            return True
+
+    def _set_attribute_value(self, attribute, attribute_value):
         """ Add attribute and set its value.
 
         Parameters:
-            attribute_name (str): The name of the schema entry attribute.
+            attribute (str): The name of the schema entry attribute.
             attribute_value (bool or str):  The value of the attribute.
 
         Notes:
@@ -64,46 +101,12 @@ class HedSchemaEntry:
 
         # todo: remove this patch and redo the code
         # This check doesn't need to be done if the schema is valid.
-        if attribute_name not in self._section.valid_attributes:
-            # print(f"Unknown attribute {attribute_name}")
+        if attribute not in self._section.valid_attributes:
+            # print(f"Unknown attribute {attribute}")
             if self._unknown_attributes is None:
                 self._unknown_attributes = {}
-            self._unknown_attributes[attribute_name] = attribute_value
-        self.attributes[attribute_name] = attribute_value
-
-    def has_attribute(self, attribute_name, return_value=False):
-        """ Return True if this entry has the attribute.
-
-        Parameters:
-            attribute_name (str): The attribute to check for.
-            return_value (bool):  If True return the actual attribute value rather than just indicate presence.
-
-        Returns:
-            bool or str:  If return_value is false, a boolean is returned rather than the actual value.
-
-        Notes:
-            - A return value of True does not indicate whether or not this attribute is valid
-
-        """
-        if return_value:
-            return self.attributes.get(attribute_name, None)
-        else:
-            return attribute_name in self.attributes
-
-    def attribute_has_property(self, attribute_name, property_name):
-        """ Return True if attribute has property.
-
-        Parameters:
-            attribute_name (str): Attribute name to check for property_name.
-            property_name (str): The property value to return.
-
-        Returns:
-            bool: Returns True if this entry has the property.
-
-        """
-        attr_entry = self._section.valid_attributes.get(attribute_name)
-        if attr_entry and attr_entry.has_attribute(property_name):
-            return True
+            self._unknown_attributes[attribute] = attribute_value
+        self.attributes[attribute] = attribute_value
 
     @property
     def section_key(self):
@@ -114,10 +117,8 @@ class HedSchemaEntry:
             return False
         if self.attributes != other.attributes:
             # We only want to compare known attributes
-            self_attr = {key: value for key, value in self.attributes.items()
-                         if not self._unknown_attributes or key not in self._unknown_attributes}
-            other_attr = {key: value for key, value in other.attributes.items()
-                          if not other._unknown_attributes or key not in other._unknown_attributes}
+            self_attr = self.get_known_attributes()
+            other_attr = other.get_known_attributes()
             if self_attr != other_attr:
                 return False
         if self.description != other.description:
@@ -130,6 +131,10 @@ class HedSchemaEntry:
     def __str__(self):
         return self.name
 
+    def get_known_attributes(self):
+        return {key: value for key, value in self.attributes.items()
+                if not self._unknown_attributes or key not in self._unknown_attributes}
+
 
 class UnitClassEntry(HedSchemaEntry):
     """ A single unit class entry in the HedSchema. """
@@ -138,7 +143,7 @@ class UnitClassEntry(HedSchemaEntry):
         super().__init__(*args, **kwargs)
         self._units = []
         self.units = []
-        self.derivative_units = []
+        self.derivative_units = {}
 
     def add_unit(self, unit_entry):
         """ Add the given unit entry to this unit class.
@@ -156,17 +161,12 @@ class UnitClassEntry(HedSchemaEntry):
             schema (HedSchema): The object with the schema rules.
 
         """
-        derivative_units = {}
-        self.units = {unit_entry.name: unit_entry for unit_entry in self._units}
-        for unit_name, unit_entry in self.units.items():
-            new_derivative_units = [unit_name]
-            if not unit_entry.has_attribute(HedKey.UnitSymbol):
-                new_derivative_units.append(pluralize.plural(unit_name))
 
-            for derived_unit in new_derivative_units:
-                derivative_units[derived_unit] = unit_entry
-                for modifier in unit_entry.unit_modifiers:
-                    derivative_units[modifier.name + derived_unit] = unit_entry
+        self.units = {unit_entry.name: unit_entry for unit_entry in self._units}
+        derivative_units = {}
+        for unit_entry in self.units.values():
+            derivative_units.update({key:unit_entry for key in unit_entry.derivative_units.keys()})
+
         self.derivative_units = derivative_units
 
     def __eq__(self, other):
@@ -178,11 +178,11 @@ class UnitClassEntry(HedSchemaEntry):
 
 class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.unit_class_name = None
         self.unit_modifiers = []
+        self.derivative_units = {}
 
     def finalize_entry(self, schema):
         """ Called once after loading to set internal state.
@@ -191,7 +191,41 @@ class UnitEntry(HedSchemaEntry):
             schema (HedSchema): The schema rules come from.
 
         """
-        self.unit_modifiers = schema.get_modifiers_for_unit(self.name)
+        self.unit_modifiers = schema._get_modifiers_for_unit(self.name)
+
+        derivative_units = {}
+        base_plural_units = {self.name}
+        if not self.has_attribute(HedKey.UnitSymbol):
+            base_plural_units.add(pluralize.plural(self.name))
+
+        for derived_unit in base_plural_units:
+            derivative_units[derived_unit] = self._get_conversion_factor(None)
+            for modifier in self.unit_modifiers:
+                derivative_units[modifier.name + derived_unit] = self._get_conversion_factor(modifier_entry=modifier)
+
+        self.derivative_units = derivative_units
+
+    def _get_conversion_factor(self, modifier_entry):
+        base_factor = modifier_factor = 1.0
+        try:
+            base_factor = float(self.attributes.get(HedKey.ConversionFactor, "1.0").replace("^", "e"))
+            if modifier_entry:
+                modifier_factor = float(modifier_entry.attributes.get(HedKey.ConversionFactor, "1.0").replace("^", "e"))
+        except (ValueError, AttributeError) as e:
+            pass  # Just default to 1.0
+        return base_factor * modifier_factor
+
+    def get_conversion_factor(self, unit_name):
+        """Returns the conversion factor from combining this unit with the specified modifier
+
+        Parameters:
+            unit_name (str or None): the full name of the unit with modifier
+
+        Returns:
+            conversion_factor(float or None): Returns the conversion factor or None
+        """
+        if HedKey.ConversionFactor in self.attributes:
+            return float(self.derivative_units.get(unit_name))
 
 class HedTagEntry(HedSchemaEntry):
     """ A single tag entry in the HedSchema. """
@@ -205,26 +239,74 @@ class HedTagEntry(HedSchemaEntry):
         self.takes_value_child_entry = None  # this is a child takes value tag, if one exists
         self._parent_tag = None
         self.tag_terms = tuple()
+        # During setup, it's better to have attributes shadow inherited before getting its own copy later.
+        self.inherited_attributes = self.attributes
+        # Descendent tags below this one
+        self.children = {}
 
-    def any_parent_has_attribute(self, attribute):
-        """ Check if tag (or parents) has the attribute.
+    def has_attribute(self, attribute, return_value=False):
+        """ Returns th existence or value of an attribute in this entry.
+
+            This also checks parent tags for inheritable attributes like ExtensionAllowed.
 
         Parameters:
-            attribute (str): The name of the attribute to check for.
+            attribute (str): The attribute to check for.
+            return_value (bool): If True, returns the actual value of the attribute.
+                                 If False, returns a boolean indicating the presence of the attribute.
 
         Returns:
-            bool: True if the tag has the given attribute. False, if otherwise.
+            bool or any: If return_value is False, returns True if the attribute exists and False otherwise.
+            If return_value is True, returns the value of the attribute if it exists, else returns None.
 
         Notes:
-            - This is mostly used to check extension allowed.  Could be cached.
-
+            - The existence of an attribute does not guarantee its validity.
         """
+        val = self.inherited_attributes.get(attribute)
+        if not return_value:
+            val = val is not None
+        return val
+
+    def _check_inherited_attribute_internal(self, attribute):
+        """Gather up all instances of an attribute from this entry and any parent entries"""
+        attribute_values = []
+
         iter_entry = self
         while iter_entry is not None:
-            if iter_entry.has_attribute(attribute):
-                return True
+            if iter_entry.takes_value_child_entry:
+                break
+            if attribute in iter_entry.attributes:
+                attribute_values.append(iter_entry.attributes[attribute])
             iter_entry = iter_entry._parent_tag
-        return False
+
+        return attribute_values
+
+    def _check_inherited_attribute(self, attribute, return_value=False, return_union=False):
+        """
+        Checks for the existence of an attribute in this entry and its parents.
+
+        Parameters:
+            attribute (str): The attribute to check for.
+            return_value (bool): If True, returns the actual value of the attribute.
+                                 If False, returns a boolean indicating the presence of the attribute.
+            return_union(bool): If true, return a union of all parent values
+
+        Returns:
+            bool or any: Depending on the flag return_value,
+            returns either the presence of the attribute, or its value.
+
+        Notes:
+            - The existence of an attribute does not guarantee its validity.
+            - For string attributes, the values are joined with a comma as a delimiter from all ancestors.
+        """
+        attribute_values = self._check_inherited_attribute_internal(attribute)
+
+        if return_value:
+            if not attribute_values:
+                return None
+            if return_union:
+                return ",".join(attribute_values)
+            return attribute_values[0]
+        return bool(attribute_values)
 
     def base_tag_has_attribute(self, tag_attribute):
         """ Check if the base tag has a specific attribute.
@@ -258,6 +340,28 @@ class HedTagEntry(HedSchemaEntry):
         parent_name, _, child_name = self.name.rpartition("/")
         return parent_name
 
+    def _finalize_classes(self, schema, attribute_key, section_key):
+        result = {}
+        if attribute_key in self.attributes:
+            for attribute_name in self.attributes[attribute_key].split(","):
+                entry = schema._get_tag_entry(attribute_name, section_key)
+                if entry:
+                    result[attribute_name] = entry
+        return result
+
+    def _finalize_takes_value_tag(self, schema):
+        if self.name.endswith("/#"):
+            self.unit_classes = self._finalize_classes(schema, HedKey.UnitClass, HedSectionKey.UnitClasses)
+            self.value_classes = self._finalize_classes(schema, HedKey.ValueClass, HedSectionKey.ValueClasses)
+
+    def _finalize_inherited_attributes(self):
+        # Replace the list with a copy we can modify.
+        self.inherited_attributes = self.attributes.copy()
+        for attribute in self._section.inheritable_attributes:
+            if self._check_inherited_attribute(attribute):
+                treat_as_string = not self.attribute_has_property(attribute, HedKey.BoolProperty)
+                self.inherited_attributes[attribute] = self._check_inherited_attribute(attribute, True, treat_as_string)
+
     def finalize_entry(self, schema):
         """ Called once after schema loading to set state.
 
@@ -271,20 +375,10 @@ class HedTagEntry(HedSchemaEntry):
         if parent_name:
             parent_tag = schema._get_tag_entry(parent_name)
         self._parent_tag = parent_tag
+        if self._parent_tag:
+            self._parent_tag.children[self.short_tag_name] = self
         self.takes_value_child_entry = schema._get_tag_entry(self.name + "/#")
         self.tag_terms = tuple(self.long_tag_name.lower().split("/"))
 
-        if self.name.endswith("/#"):
-            if HedKey.UnitClass in self.attributes:
-                self.unit_classes = {}
-                for unit_class_name in self.attributes[HedKey.UnitClass].split(","):
-                    entry = schema._get_tag_entry(unit_class_name, HedSectionKey.UnitClasses)
-                    if entry:
-                        self.unit_classes[unit_class_name] = entry
-
-            if HedKey.ValueClass in self.attributes:
-                self.value_classes = {}
-                for value_class_name in self.attributes[HedKey.ValueClass].split(","):
-                    entry = schema._get_tag_entry(value_class_name, HedSectionKey.ValueClasses)
-                    if entry:
-                        self.value_classes[value_class_name] = entry
+        self._finalize_inherited_attributes()
+        self._finalize_takes_value_tag(schema)

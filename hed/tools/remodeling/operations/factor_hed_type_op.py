@@ -4,8 +4,7 @@ import pandas as pd
 import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
-from hed.models.sidecar import Sidecar
-from hed.models.df_util import get_assembled
+from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_type_manager import HedTypeManager
 
 # TODO: restricted factor values are not implemented yet.
@@ -67,16 +66,10 @@ class FactorHedTypeOp(BaseOp):
 
         """
 
-        if sidecar and not isinstance(sidecar, Sidecar):
-            sidecar = Sidecar(sidecar)
         input_data = TabularInput(df, sidecar=sidecar, name=name)
         df_list = [input_data.dataframe.copy()]
-        hed_strings, definitions = get_assembled(input_data, sidecar, dispatcher.hed_schema, 
-                                                 extra_def_dicts=None, join_columns=True,
-                                                 shrink_defs=True, expand_defs=False)
-
-        var_manager = HedTypeManager(hed_strings, dispatcher.hed_schema, definitions)
-        var_manager.add_type_variable(self.type_tag.lower())
+        var_manager = HedTypeManager(EventManager(input_data, dispatcher.hed_schema))
+        var_manager.add_type(self.type_tag.lower())
 
         df_factors = var_manager.get_factor_vectors(self.type_tag, self.type_values, factor_encoding="one-hot")
         if len(df_factors.columns) > 0:

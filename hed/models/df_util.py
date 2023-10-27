@@ -21,7 +21,7 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
         extra_def_dicts: list of DefinitionDict, optional
             Any extra DefinitionDict objects to use when parsing the HED tags.
         join_columns: bool
-            If true, join all hed columns into one.
+            If true, join all HED columns into one.
         shrink_defs: bool
             Shrink any def-expand tags found
         expand_defs: bool
@@ -133,18 +133,20 @@ def _expand_defs(hed_string, hed_schema, def_dict):
 
 
 def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None):
-    """ Processes a list of HED strings according to a given HED schema,
-            using known definitions and ambiguous definitions.
+    """ Gather def-expand tags in the strings/compare with known definitions to find any differences
 
     Parameters:
         hed_strings (list or pd.Series): A list of HED strings to process.
         hed_schema (HedSchema): The schema to use
-        known_defs (DefinitionDict or list or str), optional):
+        known_defs (DefinitionDict or list or str or None):
             A DefinitionDict or anything its constructor takes.  These are the known definitions going in, that must
             match perfectly.
         ambiguous_defs (dict): A dictionary containing ambiguous definitions
-            format TBD.  Currently def name key: list of lists of hed tags values
+            format TBD.  Currently def name key: list of lists of HED tags values
+    Returns:
+        tuple: A tuple containing the DefinitionDict, ambiguous definitions, and errors.
     """
+    
     from hed.models.def_expand_gather import DefExpandGatherer
     def_gatherer = DefExpandGatherer(hed_schema, known_defs, ambiguous_defs)
     return def_gatherer.process_def_expands(hed_strings)

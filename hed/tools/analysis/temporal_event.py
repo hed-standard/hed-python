@@ -1,30 +1,45 @@
-from hed.models import HedTag, HedGroup, HedString
+from hed.models import HedGroup
 
 
 class TemporalEvent:
-    def __init__(self, event_group, start_index, start_time):
-        self.event_group = event_group
+    """ Represents an event process with starting and ending.
+
+    Note:  the contents have the Onset and duration removed.
+    """
+    def __init__(self, contents, start_index, start_time):
+        if not contents:
+            raise(ValueError, "A temporal event must have contents")
+        self.contents = None    # Must not have definition expanded if there is a definition.
         self.start_index = start_index
-        self.start_time = start_time
-        self.duration = None
+        self.start_time = float(start_time)
         self.end_index = None
         self.end_time = None
-        self.anchor = None
+        self.anchor = None    # Lowercase def name with value
         self.internal_group = None
-        self._split_group()
-        
+        self.insets = []
+        self._split_group(contents)
+
     def set_end(self, end_index, end_time):
         self.end_index = end_index
         self.end_time = end_time
 
-    def _split_group(self):
-        for item in self.event_group.children:
-            if isinstance(item, HedTag) and (item.short_tag.lower() != "onset"):
-                self.anchor = item.extension.lower()
-            elif isinstance(item, HedTag):
-                continue
-            elif isinstance(item, HedGroup):
+    def _split_group(self, contents):
+        to_remove = []
+        for item in contents.children:
+            if isinstance(item, HedGroup):
                 self.internal_group = item
+            elif item.short_base_tag.lower() == "onset":
+                to_remove.append(item)
+            elif item.short_base_tag.lower() == "duration":
+                to_remove.append(item)
+                self.end_time = self.short_time + float(item.extension.lower())  # Will need to be fixed for units
+            elif item.short_base_tag.lower() == "def":
+                self.anchor = item.short_tag
+        contents.remove(to_remove)
+        if self.internal_group:
+            self.contents = contents
+        else:
+            self.contents = self.anchor
 
     def __str__(self):
-        return f"{self.name}:[event markers {self.start_index}:{self.end_index} contents:{self.contents}]"
+        return f"[{self.start_index}:{self.end_index}] anchor:{self.anchor} contents:{self.contents}"

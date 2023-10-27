@@ -54,7 +54,7 @@ class TabularInput(BaseInput):
 
         self.reset_mapper(new_mapper)
 
-    def get_def_dict(self, hed_schema=None, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None):
         """ Returns the definition dict for this sidecar.
 
         Parameters:
@@ -67,7 +67,7 @@ class TabularInput(BaseInput):
         if self._sidecar:
             return self._sidecar.get_def_dict(hed_schema, extra_def_dicts)
         else:
-            super().get_def_dict(hed_schema, extra_def_dicts)
+            return super().get_def_dict(hed_schema, extra_def_dicts)
 
     def get_column_refs(self):
         """ Returns a list of column refs for this file.

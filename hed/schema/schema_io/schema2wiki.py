@@ -1,11 +1,11 @@
 """Allows output of HedSchema objects as .mediawiki format"""
 
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
+from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.schema_io import wiki_constants
-from hed.schema.schema_io.schema2base import HedSchema2Base
+from hed.schema.schema_io.schema2base import Schema2Base
 
 
-class HedSchema2Wiki(HedSchema2Base):
+class Schema2Wiki(Schema2Base):
     def __init__(self):
         super().__init__()
         self.current_tag_string = ""
@@ -95,7 +95,7 @@ class HedSchema2Wiki(HedSchema2Base):
         prop_string = ""
         tag_props = schema_entry.attributes
         if tag_props:
-            prop_string += self._format_tag_props(tag_props)
+            prop_string += self._format_tag_attributes(tag_props)
         desc = schema_entry.description
         if desc:
             if tag_props:
@@ -123,13 +123,13 @@ class HedSchema2Wiki(HedSchema2Base):
         final_attrib_string = " ".join(attrib_values)
         return final_attrib_string
 
-    def _format_tag_props(self, tag_props):
+    def _format_tag_attributes(self, attributes):
         """
             Takes a dictionary of tag attributes and returns a string with the .mediawiki representation
 
         Parameters
         ----------
-        tag_props : {str:str}
+        attributes : {str:str}
             {attribute_name : attribute_value}
         Returns
         -------
@@ -138,11 +138,9 @@ class HedSchema2Wiki(HedSchema2Base):
         """
         prop_string = ""
         final_props = []
-        for prop, value in tag_props.items():
+        for prop, value in attributes.items():
             # Never save InLibrary if saving merged.
-            if not self._save_merged and prop == HedKey.InLibrary:
-                continue
-            if value is None or value is False:
+            if self._attribute_disallowed(prop):
                 continue
             if value is True:
                 final_props.append(prop)

@@ -7,16 +7,37 @@ on:
     branches: ["*"]
 
 jobs:
+  determine_version:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [[ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/master' ]]; then
+            # Push to master branch
+            echo 'matrix=["3.7", "3.9", "3.10", "3.11"]' >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == 'pull_request' && "${{ github.event.pull_request.base.ref }}" == 'master' ]]; then
+            # PR to master branch
+            echo 'matrix=["3.7", "3.9", "3.10", "3.11"]' >> $GITHUB_OUTPUT
+          else
+            echo 'matrix=["3.9"]' >> $GITHUB_OUTPUT
+          fi
+
   build:
+    needs: determine_version
     strategy:
       matrix:
         platform: [ubuntu-latest]
-        python-version: [3.7, 3.9]
+        python-version: ${{fromJson(needs.determine_version.outputs.matrix)}}
 
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -45,6 +66,9 @@ jobs:
       - name: Test with unittest
         run: |
           HED_GITHUB_TOKEN=${{ secrets.HED_GITHUB_TOKEN }} coverage run -m unittest
+
+      - name: Run spec_test coverage
+        run: HED_GITHUB_TOKEN=${{ secrets.HED_GITHUB_TOKEN }} coverage run --append -m unittest spec_tests/test_errors.py
 
       - name: Archive code coverage results
         if: ${{matrix.python-version == '3.9'}}
@@ -76,7 +100,7 @@ jobs:
     if: needs.check-secret.outputs.secrets-exist == 'true'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
@@ -104,7 +128,7 @@ jobs:
         with:
           coverageCommand: coverage xml
           debug: true
-        uses: paambaati/codeclimate-action@v4.0.0
+        uses: paambaati/codeclimate-action@v5.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 

@@ -1,10 +1,8 @@
 <?xml version="1.0" ?>
-<HED xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="8.2.0" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd">
-   <prologue>The HED standard schema is a hierarchically-organized vocabulary for annotating events and experimental structure. HED annotations consist of comma-separated tags drawn from this vocabulary. This vocabulary can be augmented by terms drawn from specialized library schema.
+<HED unmerged="True" version="8.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd">
+   <prologue>The HED standard schema is a hierarchically-organized vocabulary for annotating events and experimental structure. HED annotations consist of comma-separated tags drawn from this vocabulary. This vocabulary can be augmented by terms drawn from specialized library schema. 
 
 Each term in this vocabulary has a human-readable description and may include additional attributes that give additional properties or that specify how tools should treat the tag during analysis. The meaning of these attributes is described in the Additional schema properties section.
-
-For additional information and tutorials see https://www.hed-resources.org.
 
 </prologue>
    <schema>
@@ -7077,7 +7075,7 @@ For additional information and tutorials see https://www.hed-resources.org.
             <name>nodeProperty</name>
          </property>
          <property>
-            <name>isInherited</name>
+            <name>isInheritedProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -7104,7 +7102,7 @@ For additional information and tutorials see https://www.hed-resources.org.
             <name>nodeProperty</name>
          </property>
          <property>
-            <name>isInherited</name>
+            <name>isInheritedProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -7181,7 +7179,7 @@ For additional information and tutorials see https://www.hed-resources.org.
             <name>nodeProperty</name>
          </property>
          <property>
-            <name>isInherited</name>
+            <name>isInheritedProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -7269,7 +7267,7 @@ For additional information and tutorials see https://www.hed-resources.org.
          <description>Indicates this schema attribute can apply to any type of element(tag term, unit class, etc).</description>
       </propertyDefinition>
       <propertyDefinition>
-         <name>isInherited</name>
+         <name>isInheritedProperty</name>
          <description>Indicates that this attribute is inherited by child nodes. This property only applies to schema attributes for nodes.</description>
       </propertyDefinition>
       <propertyDefinition>
@@ -7293,7 +7291,6 @@ For additional information and tutorials see https://www.hed-resources.org.
          <description>Indicates that the schema attribute is meant to be applied to value classes.</description>
       </propertyDefinition>
    </propertyDefinitions>
-   <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
-
+   <epilogue>This schema is released under the Creative Commons Attribution 4.0 International and is a product of the HED Working Group. The DOI for the latest version of the HED standard schema is 10.5281/zenodo.7876037.
 </epilogue>
 </HED>
