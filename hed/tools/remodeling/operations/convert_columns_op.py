@@ -13,7 +13,8 @@ class ConvertColumnsOp(BaseOp):
 
 
     """
-
+    NAME = "convert_columns"
+    
     PARAMS = {
         "type": "object",
         "properties": {

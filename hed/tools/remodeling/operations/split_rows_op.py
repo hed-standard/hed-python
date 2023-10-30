@@ -14,7 +14,8 @@ class SplitRowsOp(BaseOp):
         - **remove_parent_row** (*bool*):  If true, the original row that was split is removed.   
 
     """
-
+    NAME = "split_rows"
+    
     PARAMS = {
         "type": "object",
         "properties": {

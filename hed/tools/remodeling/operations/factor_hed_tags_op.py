@@ -25,7 +25,8 @@ class FactorHedTagsOp(BaseOp):
         - When the context is expanded, the effect of events for temporal extent is accounted for.  
         - Context expansion is not implemented in the current version.  
     """
-
+    NAME = "factor_hed_tags"
+    
     PARAMS = {
         "type": "object",
         "properties": {

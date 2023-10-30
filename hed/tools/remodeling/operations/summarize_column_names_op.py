@@ -15,7 +15,8 @@ class SummarizeColumnNamesOp(BaseOp):
     The purpose is to check that all the tabular files have the same columns in same order.
 
     """
-
+    NAME = "summarize_column_names"
+    
     PARAMS = {
         "type": "object",
         "properties": {

@@ -16,7 +16,8 @@ class SummarizeDefinitionsOp(BaseOp):
     The purpose is to produce a summary of the values in a tabular file.
 
     """
-
+    NAME = "summarize_definitions"
+    
     PARAMS = {
         "type": "object",
         "properties": {

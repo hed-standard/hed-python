@@ -19,7 +19,8 @@ class SummarizeHedValidationOp(BaseOp):
     The purpose of this op is to produce a summary of the HED validation errors in a file.
 
     """
-
+    NAME = "summarize_hed_validation"
+    
     PARAMS = {
         "type": "object",
         "properties": {

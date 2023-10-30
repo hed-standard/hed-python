@@ -8,7 +8,8 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 class NumberGroupsOp(BaseOp):
     """ Implementation in progress. """
-
+    NAME = "number_groups"
+    
     PARAMS = {
         "type": "object",
         "properties": {

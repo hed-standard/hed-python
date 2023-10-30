@@ -15,6 +15,8 @@ class MergeConsecutiveOp(BaseOp):
         - **ignore_missing** (*bool*):  If true, missing match_columns are ignored.  
 
     """
+    NAME = "merge_consecutive"
+    
     PARAMS = {
         "type": "object",
         "properties": {

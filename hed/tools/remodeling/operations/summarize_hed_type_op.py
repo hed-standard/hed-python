@@ -22,6 +22,8 @@ class SummarizeHedTypeOp(BaseOp):
 
     """
 
+    NAME = "summarize_hed_type"
+    
     PARAMS = {
         "type": "object",
         "properties": {

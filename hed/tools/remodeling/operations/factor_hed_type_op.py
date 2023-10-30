@@ -18,7 +18,8 @@ class FactorHedTypeOp(BaseOp):
         - **type_values** (*list*): Factor values to include. If empty all values of that type_tag are used.   
 
     """
-
+    NAME = "factor_hed_type"
+    
     PARAMS = {
         "type": "object",
         "properties": {

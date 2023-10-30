@@ -11,7 +11,8 @@ class RemoveRowsOp(BaseOp):
         - **remove_values** (*list*): The values to test for row removal.   
 
     """
-
+    NAME = "remove_rows"
+    
     PARAMS = {
         "type": "object",
         "properties": {

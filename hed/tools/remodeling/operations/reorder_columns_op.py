@@ -11,7 +11,8 @@ class ReorderColumnsOp(BaseOp):
         - keep_others (*bool*): If true, columns not in column_order are placed at end.
 
     """
-
+    NAME = "reorder_columns"
+    
     PARAMS = {
         "type": "object",
         "properties": {

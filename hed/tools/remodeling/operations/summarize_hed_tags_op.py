@@ -25,7 +25,8 @@ class SummarizeHedTagsOp(BaseOp):
 
 
     """
-
+    NAME = "summarize_hed_tags"
+    
     PARAMS = {
         "type": "object",
         "properties": {

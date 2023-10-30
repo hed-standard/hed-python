@@ -20,7 +20,8 @@ class SummarizeColumnValuesOp(BaseOp):
     The purpose is to produce a summary of the values in a tabular file.
 
     """
-
+    NAME = "summarize_column_values"
+    
     PARAMS = {
         "type": "object",
         "properties": {

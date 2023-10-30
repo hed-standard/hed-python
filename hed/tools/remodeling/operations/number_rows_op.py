@@ -7,6 +7,8 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 class NumberRowsOp(BaseOp):
     """ Implementation in progress. """
+    NAME = "number_rows"
+    
     PARAMS = {
         "type": "object",
         "properties": {

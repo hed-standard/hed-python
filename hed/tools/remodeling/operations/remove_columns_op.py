@@ -10,7 +10,8 @@ class RemoveColumnsOp(BaseOp):
         - **ignore_missing** (*boolean*): If true, names in remove_names that are not columns in df should be ignored.  
 
     """
-
+    NAME = "remove_columns"
+    
     PARAMS = {
         "type": "object",
         "properties": {

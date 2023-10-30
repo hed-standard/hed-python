@@ -24,6 +24,7 @@ class RemapColumnsOp(BaseOp):
     TODO: Allow wildcards
 
     """
+    NAME = "remap_columns"
 
     PARAMS = {
         "type": "object",

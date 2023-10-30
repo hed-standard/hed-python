@@ -16,7 +16,8 @@ class FactorColumnOp(BaseOp):
 
 
     """
-
+    NAME = "factor_column"
+    
     PARAMS = {
         "type": "object",
         "properties": {

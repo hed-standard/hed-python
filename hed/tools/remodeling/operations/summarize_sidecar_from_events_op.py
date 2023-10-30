@@ -18,7 +18,8 @@ class SummarizeSidecarFromEventsOp(BaseOp):
     The purpose is to produce a JSON sidecar template for annotating a dataset with HED tags.
 
     """
-
+    NAME = "summarize_sidecar_from_events"
+    
     PARAMS = {
         "type": "object",
         "properties": {
