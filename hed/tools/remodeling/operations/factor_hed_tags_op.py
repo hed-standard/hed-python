@@ -27,15 +27,39 @@ class FactorHedTagsOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "factor_hed_tags",
-        "required_parameters": {
-            "queries": list,
-            "query_names": list,
-            "remove_types": list
+        "type": "object",
+        "properties": {
+            "queries": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1
+            },
+            "query_names": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1
+            },
+            "remove_types": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 0
+            },
+            "expand_context": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {
-            "expand_context": bool
-        }
+        "required": [
+            "queries",
+            "query_names",
+            "remove_types"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -93,7 +117,8 @@ class FactorHedTagsOp(BaseOp):
         event_man = EventManager(input_data, dispatcher.hed_schema)
         hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None,
                                        join_columns=True, shrink_defs=False, expand_defs=True)
-        df_factors = search_strings(hed_strings, self.expression_parsers, query_names=self.query_names)
+        df_factors = search_strings(
+            hed_strings, self.expression_parsers, query_names=self.query_names)
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)

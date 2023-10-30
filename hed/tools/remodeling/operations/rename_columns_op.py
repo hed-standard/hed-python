@@ -13,12 +13,26 @@ class RenameColumnsOp (BaseOp):
     """
 
     PARAMS = {
-        "operation": "rename_columns",
-        "required_parameters": {
-            "column_mapping": dict,
-            "ignore_missing": bool
+        "type": "object",
+        "properties": {
+            "column_mapping": {
+                "type": "object",
+                "patternProperties": {
+                    "(.*?)": {
+                        "type": "string"
+                    }
+                },
+                "minProperties": 1
+            },
+            "ignore_missing": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "column_mapping",
+            "ignore_missing"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):

@@ -18,13 +18,30 @@ class FactorColumnOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "factor_column",
-        "required_parameters": {
-            "column_name": str,
-            "factor_values": list,
-            "factor_names": list
+        "type": "object",
+        "properties": {
+            "column_name": {
+                "type": "string"
+            },
+            "factor_values": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "factor_names": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "column_name",
+            "factor_values",
+            "factor_names"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -71,11 +88,13 @@ class FactorColumnOp(BaseOp):
         factor_names = self.factor_names
         if len(factor_values) == 0:
             factor_values = df[self.column_name].unique()
-            factor_names = [self.column_name + '.' + str(column_value) for column_value in factor_values]
+            factor_names = [self.column_name + '.' +
+                            str(column_value) for column_value in factor_values]
 
         df_new = df.copy()
         for index, factor_value in enumerate(factor_values):
-            factor_index = df_new[self.column_name].map(str).isin([str(factor_value)])
+            factor_index = df_new[self.column_name].map(
+                str).isin([str(factor_value)])
             column = factor_names[index]
             df_new[column] = factor_index.astype(int)
         return df_new

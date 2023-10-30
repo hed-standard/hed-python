@@ -20,12 +20,20 @@ class FactorHedTypeOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "factor_hed_type",
-        "required_parameters": {
-            "type_tag": str,
-            "type_values": list
+        "type": "object",
+        "properties": {
+            "type_tag": {
+                "type": "string"
+            },
+            "type_values": {
+                "type": "array"
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "type_tag",
+            "type_values"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -68,10 +76,12 @@ class FactorHedTypeOp(BaseOp):
 
         input_data = TabularInput(df, sidecar=sidecar, name=name)
         df_list = [input_data.dataframe.copy()]
-        var_manager = HedTypeManager(EventManager(input_data, dispatcher.hed_schema))
+        var_manager = HedTypeManager(
+            EventManager(input_data, dispatcher.hed_schema))
         var_manager.add_type(self.type_tag.lower())
 
-        df_factors = var_manager.get_factor_vectors(self.type_tag, self.type_values, factor_encoding="one-hot")
+        df_factors = var_manager.get_factor_vectors(
+            self.type_tag, self.type_values, factor_encoding="one-hot")
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)

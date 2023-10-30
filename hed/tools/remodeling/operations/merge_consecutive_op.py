@@ -16,15 +16,38 @@ class MergeConsecutiveOp(BaseOp):
 
     """
     PARAMS = {
-        "operation": "merge_consecutive",
-        "required_parameters": {
-            "column_name": str,
-            "event_code": [str, int, float],
-            "match_columns": list,
-            "set_durations": bool,
-            "ignore_missing": bool
+        "type": "object",
+        "properties": {
+            "column_name": {
+                "type": "string"
+            },
+            "event_code": {
+                "type": [
+                    "string",
+                    "number"
+                ]
+            },
+            "match_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "set_durations": {
+                "type": "boolean"
+            },
+            "ignore_missing": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "column_name",
+            "event_code",
+            "match_columns",
+            "set_durations",
+            "ignore_missing"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -90,7 +113,8 @@ class MergeConsecutiveOp(BaseOp):
             raise ValueError("MissingMatchColumns",
                              f"{name}: {str(missing)} columns are unmatched by data columns"
                              f"[{str(df.columns)}] and not ignored")
-        match_columns = list(set(self.match_columns).intersection(set(df.columns)))
+        match_columns = list(
+            set(self.match_columns).intersection(set(df.columns)))
 
         df_new = df.copy()
         code_mask = df_new[self.column_name] == self.event_code
@@ -140,8 +164,11 @@ class MergeConsecutiveOp(BaseOp):
         remove_df = pd.DataFrame(remove_groups, columns=["remove"])
         max_groups = max(remove_groups)
         for index in range(max_groups):
-            df_group = df_new.loc[remove_df["remove"] == index + 1, ["onset", "duration"]]
+            df_group = df_new.loc[remove_df["remove"]
+                                  == index + 1, ["onset", "duration"]]
             max_group = df_group.sum(axis=1, skipna=True).max()
             anchor = df_group.index[0] - 1
-            max_anchor = df_new.loc[anchor, ["onset", "duration"]].sum(skipna=True).max()
-            df_new.loc[anchor, "duration"] = max(max_group, max_anchor) - df_new.loc[anchor, "onset"]
+            max_anchor = df_new.loc[anchor, [
+                "onset", "duration"]].sum(skipna=True).max()
+            df_new.loc[anchor, "duration"] = max(
+                max_group, max_anchor) - df_new.loc[anchor, "onset"]

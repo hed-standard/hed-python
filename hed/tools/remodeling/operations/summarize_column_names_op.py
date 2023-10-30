@@ -17,14 +17,23 @@ class SummarizeColumnNamesOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "summarize_column_names",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string"
+            },
+            "summary_filename": {
+                "type": "string"
+            },
+            "append_timecode": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool
-        }
+        "required": [
+            "summary_name",
+            "summary_filename"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = "column_names"
@@ -69,7 +78,8 @@ class SummarizeColumnNamesOp(BaseOp):
         if not summary:
             summary = ColumnNamesSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({"name": name, "column_names": list(df_new.columns)})
+        summary.update_summary(
+            {"name": name, "column_names": list(df_new.columns)})
         return df_new
 
 

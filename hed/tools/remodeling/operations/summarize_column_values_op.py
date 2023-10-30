@@ -22,18 +22,43 @@ class SummarizeColumnValuesOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "summarize_column_values",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str,
-            "skip_columns": list,
-            "value_columns": list
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string"
+            },
+            "summary_filename": {
+                "type": "string"
+            },
+            "skip_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "value_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "append_timecode": {
+                "type": "boolean"
+            },
+            "max_categorical": {
+                "type": "integer"
+            },
+            "values_per_line": {
+                "type": "integer"
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool,
-            "max_categorical": int,
-            "values_per_line": int
-        }
+        "required": [
+            "summary_name",
+            "summary_filename",
+            "skip_columns",
+            "value_columns"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = 'column_values'
@@ -62,7 +87,8 @@ class SummarizeColumnValuesOp(BaseOp):
         self.value_columns = parameters['value_columns']
         self.append_timecode = parameters.get('append_timecode', False)
         self.max_categorical = parameters.get('max_categorical', float('inf'))
-        self.values_per_line = parameters.get('values_per_line', self.VALUES_PER_LINE)
+        self.values_per_line = parameters.get(
+            'values_per_line', self.VALUES_PER_LINE)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create a summary of the column values in df.
@@ -86,7 +112,8 @@ class SummarizeColumnValuesOp(BaseOp):
         if not summary:
             summary = ColumnValueSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name})
+        summary.update_summary(
+            {'df': dispatcher.post_proc_data(df_new), 'name': name})
         return df_new
 
 
@@ -109,7 +136,8 @@ class ColumnValueSummary(BaseSummary):
         name = new_info['name']
         if name not in self.summary_dict:
             self.summary_dict[name] = \
-                TabularSummary(value_cols=self.op.value_columns, skip_cols=self.op.skip_columns, name=name)
+                TabularSummary(value_cols=self.op.value_columns,
+                               skip_cols=self.op.skip_columns, name=name)
         self.summary_dict[name].update(new_info['df'])
 
     def get_details_dict(self, summary):
@@ -123,11 +151,14 @@ class ColumnValueSummary(BaseSummary):
 
         """
         this_summary = summary.get_summary(as_json=False)
-        unique_counts = [(key, len(count_dict)) for key, count_dict in this_summary['Categorical columns'].items()]
+        unique_counts = [(key, len(count_dict)) for key,
+                         count_dict in this_summary['Categorical columns'].items()]
         this_summary['Categorical counts'] = dict(unique_counts)
         for key, dict_entry in this_summary['Categorical columns'].items():
-            num_disp, sorted_tuples = ColumnValueSummary.sort_dict(dict_entry, reverse=True)
-            this_summary['Categorical columns'][key] = dict(sorted_tuples[:min(num_disp, self.op.max_categorical)])
+            num_disp, sorted_tuples = ColumnValueSummary.sort_dict(
+                dict_entry, reverse=True)
+            this_summary['Categorical columns'][key] = dict(
+                sorted_tuples[:min(num_disp, self.op.max_categorical)])
         return {"Name": this_summary['Name'], "Total events": this_summary["Total events"],
                 "Total files": this_summary['Total files'],
                 "Files": list(this_summary['Files'].keys()),
@@ -144,7 +175,8 @@ class ColumnValueSummary(BaseSummary):
             TabularSummary - the summary object for column values.
 
         """
-        all_sum = TabularSummary(value_cols=self.op.value_columns, skip_cols=self.op.skip_columns, name='Dataset')
+        all_sum = TabularSummary(
+            value_cols=self.op.value_columns, skip_cols=self.op.skip_columns, name='Dataset')
         for counts in self.summary_dict.values():
             all_sum.update_summary(counts)
         return all_sum
@@ -190,10 +222,13 @@ class ColumnValueSummary(BaseSummary):
         if not cat_dict:
             return ""
         count_dict = result['Categorical counts']
-        sum_list = [f"{offset}{indent}Categorical column values[Events, Files]:"]
+        sum_list = [
+            f"{offset}{indent}Categorical column values[Events, Files]:"]
         sorted_tuples = sorted(cat_dict.items(), key=lambda x: x[0])
         for entry in sorted_tuples:
-            sum_list = sum_list + self._get_categorical_col(entry, count_dict, offset="", indent="   ")
+            sum_list = sum_list + \
+                self._get_categorical_col(
+                    entry, count_dict, offset="", indent="   ")
         return "\n".join(sum_list)
 
     def _get_detail_list(self, result, indent=BaseSummary.DISPLAY_INDENT):
@@ -209,12 +244,14 @@ class ColumnValueSummary(BaseSummary):
         """
         sum_list = []
         specifics = result["Specifics"]
-        cat_string = self._get_categorical_string(specifics, offset="", indent=indent)
+        cat_string = self._get_categorical_string(
+            specifics, offset="", indent=indent)
         if cat_string:
             sum_list.append(cat_string)
         val_dict = specifics.get("Value column summaries", {})
         if val_dict:
-            sum_list.append(ColumnValueSummary._get_value_string(val_dict, offset="", indent=indent))
+            sum_list.append(ColumnValueSummary._get_value_string(
+                val_dict, offset="", indent=indent))
         return sum_list
 
     def _get_categorical_col(self, entry, count_dict, offset="", indent="   "):
@@ -236,7 +273,8 @@ class ColumnValueSummary(BaseSummary):
         # Create and partition the list of individual entries
         value_list = [f"{item[0]}{str(item[1])}" for item in entry[1].items()]
         value_list = value_list[:num_disp]
-        part_list = ColumnValueSummary.partition_list(value_list, self.op.values_per_line)
+        part_list = ColumnValueSummary.partition_list(
+            value_list, self.op.values_per_line)
         return col_list + [f"{offset}{indent * 3}{ColumnValueSummary.get_list_str(item)}" for item in part_list]
 
     @staticmethod
@@ -266,5 +304,6 @@ class ColumnValueSummary(BaseSummary):
 
     @staticmethod
     def sort_dict(count_dict, reverse=False):
-        sorted_tuples = sorted(count_dict.items(), key=lambda x: x[1][0], reverse=reverse)
+        sorted_tuples = sorted(
+            count_dict.items(), key=lambda x: x[1][0], reverse=reverse)
         return len(sorted_tuples), sorted_tuples

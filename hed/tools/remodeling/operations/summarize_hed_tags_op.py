@@ -27,18 +27,65 @@ class SummarizeHedTagsOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "summarize_hed_tags",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str,
-            "tags": dict
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string"
+            },
+            "summary_filename": {
+                "type": "string"
+            },
+            "tags": {
+                "type": "object",
+                "properties": {
+                    "Sensory events": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "Agent actions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "Objects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "Sensory events",
+                    "Agent actions",
+                    "Objects"
+                ],
+                "additionalProperties": False
+            },
+            "append_timecode": {
+                "type": "boolean"
+            },
+            "include_context": {
+                "type": "boolean"
+            },
+            "replace_defs": {
+                "type": "boolean"
+            },
+            "remove_types": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool,
-            "include_context": bool,
-            "replace_defs": bool,
-            "remove_types": list
-        }
+        "required": [
+            "summary_name",
+            "summary_filename",
+            "tags"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = "hed_tag_summary"
@@ -64,7 +111,8 @@ class SummarizeHedTagsOp(BaseOp):
         self.append_timecode = parameters.get('append_timecode', False)
         self.include_context = parameters.get('include_context', True)
         self.replace_defs = parameters.get("replace_defs", True)
-        self.remove_types = parameters.get("remove_types", ["Condition-variable", "Task"])
+        self.remove_types = parameters.get(
+            "remove_types", ["Condition-variable", "Task"])
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Summarize the HED tags present in the dataset.
@@ -108,11 +156,13 @@ class HedTagSummary(BaseSummary):
             - The summary needs a "name" str, a "schema", a "df, and a "Sidecar".
 
         """
-        counts = HedTagCounts(new_info['name'], total_events=len(new_info['df']))
-        input_data = TabularInput(new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
-        tag_man = HedTagManager(EventManager(input_data, new_info['schema']), 
+        counts = HedTagCounts(
+            new_info['name'], total_events=len(new_info['df']))
+        input_data = TabularInput(
+            new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
+        tag_man = HedTagManager(EventManager(input_data, new_info['schema']),
                                 remove_types=self.sum_op.remove_types)
-        hed_objs = tag_man.get_hed_objs(include_context=self.sum_op.include_context, 
+        hed_objs = tag_man.get_hed_objs(include_context=self.sum_op.include_context,
                                         replace_defs=self.sum_op.replace_defs)
         for hed in hed_objs:
             counts.update_event_counts(hed, new_info['name'])
@@ -188,7 +238,8 @@ class HedTagSummary(BaseSummary):
         """
         sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
                     f"Total files={len(result.get('Files', 0))}"]
-        sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
+        sum_list = sum_list + \
+            HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
@@ -204,14 +255,16 @@ class HedTagSummary(BaseSummary):
 
         """
         sum_list = [f"Total events={result.get('Total events', 0)}"]
-        sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
+        sum_list = sum_list + \
+            HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
     def _tag_details(tags):
         tag_list = []
         for tag in tags:
-            tag_list.append(f"{tag['tag']}[{tag['events']},{len(tag['files'])}]")
+            tag_list.append(
+                f"{tag['tag']}[{tag['events']},{len(tag['files'])}]")
         return tag_list
 
     @staticmethod
@@ -221,10 +274,12 @@ class HedTagSummary(BaseSummary):
         for category, tags in tag_info['Main tags'].items():
             sum_list.append(f"{indent}{indent}{category}:")
             if tags:
-                sum_list.append(f"{indent}{indent}{indent}{' '.join(HedTagSummary._tag_details(tags))}")
+                sum_list.append(
+                    f"{indent}{indent}{indent}{' '.join(HedTagSummary._tag_details(tags))}")
         if tag_info['Other tags']:
             sum_list.append(f"{indent}Other tags[events,files]:")
-            sum_list.append(f"{indent}{indent}{' '.join(HedTagSummary._tag_details(tag_info['Other tags']))}")
+            sum_list.append(
+                f"{indent}{indent}{' '.join(HedTagSummary._tag_details(tag_info['Other tags']))}")
         return sum_list
 
     @staticmethod

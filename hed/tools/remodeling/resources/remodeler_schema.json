@@ -48,7 +48,7 @@
                 "if": {
                     "properties": {
                         "operation": {
-                            "const": "convert_column"
+                            "const": "convert_columns"
                         }
                     },
                     "required": [
@@ -538,7 +538,7 @@
                                             "type": "string"
                                         }
                                     },
-                                    "minProperties":1
+                                    "minProperties": 1
                                 },
                                 "ignore_missing": {
                                     "type": "boolean"
@@ -730,6 +730,15 @@
                                     "items": {
                                         "type": "string"
                                     }
+                                },
+                                "append_timecode": {
+                                    "type": "boolean"
+                                },
+                                "max_categorical": {
+                                    "type": "integer"
+                                },
+                                "values_per_line": {
+                                    "type": "integer"
                                 }
                             },
                             "required": [
@@ -825,84 +834,27 @@
                                         "Objects"
                                     ],
                                     "additionalProperties": false
+                                },
+                                "append_timecode": {
+                                    "type": "boolean"
+                                },
+                                "include_context": {
+                                    "type": "boolean"
+                                },
+                                "replace_defs": {
+                                    "type": "boolean"
+                                },
+                                "remove_types": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
                                 }
                             },
                             "required": [
                                 "summary_name",
                                 "summary_filename",
                                 "tags"
-                            ],
-                            "additionalProperties": false
-                        }
-                    }
-                }
-            },
-            {
-                "if": {
-                    "properties": {
-                        "operation": {
-                            "const": "summarize_hed_type"
-                        }
-                    },
-                    "required": [
-                        "operation"
-                    ]
-                },
-                "then": {
-                    "properties": {
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "summary_name": {
-                                    "type": "string"
-                                },
-                                "summary_filename": {
-                                    "type": "string"
-                                },
-                                "type_tag": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "summary_name",
-                                "summary_filename",
-                                "type_tag"
-                            ],
-                            "additionalProperties": false
-                        }
-                    }
-                }
-            },
-            {
-                "if": {
-                    "properties": {
-                        "operation": {
-                            "const": "summarize_hed_validation"
-                        }
-                    },
-                    "required": [
-                        "operation"
-                    ]
-                },
-                "then": {
-                    "properties": {
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "summary_name": {
-                                    "type": "string"
-                                },
-                                "summary_filename": {
-                                    "type": "string"
-                                },
-                                "check_for_warnings": {
-                                    "type": "boolean"
-                                }
-                            },
-                            "required": [
-                                "summary_name",
-                                "summary_filename",
-                                "check_for_warnings"
                             ],
                             "additionalProperties": false
                         }
@@ -942,6 +894,84 @@
                                 "summary_name",
                                 "summary_filename",
                                 "type_tag"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "summarize_hed_validation"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "summary_name": {
+                                    "type": "string"
+                                },
+                                "summary_filename": {
+                                    "type": "string"
+                                },
+                                "append_timecode": {
+                                    "type": "boolean"
+                                },
+                                "check_for_warnings": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "summary_name",
+                                "summary_filename",
+                                "check_for_warnings"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            },
+            {
+                "if": {
+                    "properties": {
+                        "operation": {
+                            "const": "summarize_sidecar_from_events"
+                        }
+                    },
+                    "required": [
+                        "operation"
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "summary_name": {
+                                    "type": "string"
+                                },
+                                "summary_filename": {
+                                    "type": "string"
+                                },
+                                "append_timecode": {
+                                    "type": "boolean"
+                                },
+                                "check_for_warnings": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "summary_name",
+                                "summary_filename",
+                                "check_for_warnings"
                             ],
                             "additionalProperties": false
                         }

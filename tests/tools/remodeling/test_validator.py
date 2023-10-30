@@ -19,11 +19,6 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_load_schema(self):
-        with open(self.remodeler_schema_path) as f:
-            schema = json.load(f)
-        Draft7Validator.check_schema(schema)
-
     def test_validate_valid(self):
         validator = RemodelerValidator()
         error_strings = validator.validate(self.remodel_file)

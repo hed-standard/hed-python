@@ -15,14 +15,23 @@ class ConvertColumnsOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "convert_columns",
-        "required_parameters": {
-            "column_names": list,
-            "convert_to": str
+        "type": "object",
+        "properties": {
+            "column_names": {
+                "type": "array"
+            },
+            "convert_to": {
+                "type": "string"
+            },
+            "decimal_places": {
+                "type": "integer"
+            }
         },
-        "optional_parameters": {
-            "decimal_places": int
-        }
+        "required": [
+            "column_names",
+            "convert_to"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):

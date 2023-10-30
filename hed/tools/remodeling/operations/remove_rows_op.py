@@ -13,12 +13,26 @@ class RemoveRowsOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "remove_rows",
-        "required_parameters": {
-            "column_name": str,
-            "remove_values": list
+        "type": "object",
+        "properties": {
+            "column_name": {
+                "type": "string"
+            },
+            "remove_values": {
+                "type": "array",
+                "items": {
+                    "type": [
+                        "string",
+                        "number"
+                    ]
+                }
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "column_name",
+            "remove_values"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):

@@ -12,12 +12,23 @@ class RemoveColumnsOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "remove_columns",
-        "required_parameters": {
-            "column_names": list,
-            "ignore_missing": bool
+        "type": "object",
+        "properties": {
+            "column_names": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "ignore_missing": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "column_names",
+            "ignore_missing"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):

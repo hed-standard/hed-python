@@ -26,16 +26,49 @@ class RemapColumnsOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "remap_columns",
-        "required_parameters": {
-            "source_columns": list,
-            "destination_columns": list,
-            "map_list": list,
-            "ignore_missing": bool
+        "type": "object",
+        "properties": {
+            "source_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "destination_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "map_list": {
+                "type": "array",
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": [
+                            "string",
+                            "number"
+                        ]
+                    }
+                }
+            },
+            "ignore_missing": {
+                "type": "boolean"
+            },
+            "integer_sources": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
         },
-        "optional_parameters": {
-            "integer_sources": list
-        }
+        "required": [
+            "source_columns",
+            "destination_columns",
+            "map_list",
+            "ignore_missing"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -68,7 +101,8 @@ class RemapColumnsOp(BaseOp):
             if not set(self.integer_sources).issubset(set(self.source_columns)):
                 raise ValueError("IntegerSourceColumnsInvalid",
                                  f"Integer courses {str(self.integer_sources)} must be in {str(self.source_columns)}")
-            self.string_sources = list(set(self.source_columns).difference(set(self.integer_sources)))
+            self.string_sources = list(
+                set(self.source_columns).difference(set(self.integer_sources)))
         self.destination_columns = parameters['destination_columns']
         self.map_list = parameters['map_list']
         self.ignore_missing = parameters['ignore_missing']
@@ -88,8 +122,10 @@ class RemapColumnsOp(BaseOp):
         self.key_map = self._make_key_map()
 
     def _make_key_map(self):
-        key_df = pd.DataFrame(self.map_list, columns=self.source_columns+self.destination_columns)
-        key_map = KeyMap(self.source_columns, target_cols=self.destination_columns, name="remap")
+        key_df = pd.DataFrame(
+            self.map_list, columns=self.source_columns+self.destination_columns)
+        key_map = KeyMap(self.source_columns,
+                         target_cols=self.destination_columns, name="remap")
         key_map.update(key_df)
         return key_map
 
@@ -110,7 +146,8 @@ class RemapColumnsOp(BaseOp):
 
         """
         df1 = df.copy()
-        df1[self.source_columns] = df1[self.source_columns].replace(np.NaN, 'n/a')
+        df1[self.source_columns] = df1[self.source_columns].replace(
+            np.NaN, 'n/a')
         for column in self.integer_sources:
             int_mask = df1[column] != 'n/a'
             df1.loc[int_mask, column] = df1.loc[int_mask, column].astype(int)

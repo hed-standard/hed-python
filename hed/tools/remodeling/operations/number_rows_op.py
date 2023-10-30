@@ -8,11 +8,38 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class NumberRowsOp(BaseOp):
     """ Implementation in progress. """
     PARAMS = {
-        "operation": "number_rows",
-        "required_parameters": {
-            "number_column_name": str
+        "type": "object",
+        "properties": {
+            "number_column_name": {
+                "type": "string"
+            },
+            "overwrite": {
+                "type": "boolean"
+            },
+            "match_value": {
+                "type": "object",
+                "properties": {
+                    "column": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": [
+                            "string",
+                            "number"
+                        ]
+                    }
+                },
+                "required": [
+                    "column",
+                    "value"
+                ],
+                "additionalProperties": False
+            }
         },
-        "optional_parameters": {"overwrite": bool, "match_value": dict}
+        "required": [
+            "number_column_name"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -20,23 +47,7 @@ class NumberRowsOp(BaseOp):
         self.number_column_name = parameters['number_column_name']
         self.overwrite = parameters.get('overwrite', False)
         self.match_value = parameters.get('match_value', False)
-        if self.match_value:
-            self.match_value_params = {"column": str, "value": str}
-            required = set(self.match_value_params.keys())
-            required_missing = required.difference(set(self.match_value.keys()))
-            if required_missing:
-                raise KeyError("MissingRequiredParameters",
-                               f"Specified match_value for number_rows requires parameters {list(required_missing)}")
-            for param_name, param_value in self.match_value.items():
-                if param_name in required:
-                    param_type = self.match_value_params[param_name]
-                else:
-                    raise KeyError("BadParameter",
-                                   f"{param_name} not a required or optional parameter for {self.operation}")
-                # TODO: this has a syntax error
-                # if not isinstance(param_value, param_type):
-                #     raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
-
+        
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Add numbers events dataframe.
 

@@ -20,16 +20,37 @@ class SummarizeSidecarFromEventsOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "summarize_sidecar_from_events",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str,
-            "skip_columns": list,
-            "value_columns": list,
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string"
+            },
+            "summary_filename": {
+                "type": "string"
+            },
+            "skip_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "value_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+            "append_timecode": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool
-        }
+        "required": [
+            "summary_name",
+            "summary_filename",
+            "skip_columns",
+            "value_columns"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = "events_to_sidecar"
@@ -78,7 +99,8 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         if not summary:
             summary = EventsToSidecarSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name})
+        summary.update_summary(
+            {'df': dispatcher.post_proc_data(df_new), 'name': name})
         return df_new
 
 
@@ -100,7 +122,8 @@ class EventsToSidecarSummary(BaseSummary):
 
         """
 
-        tab_sum = TabularSummary(value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_info["name"])
+        tab_sum = TabularSummary(
+            value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_info["name"])
         tab_sum.update(new_info['df'], new_info['name'])
         self.summary_dict[new_info["name"]] = tab_sum
 

@@ -16,13 +16,61 @@ class SplitRowsOp(BaseOp):
     """
 
     PARAMS = {
-        "operation": "split_rows",
-        "required_parameters": {
-            "anchor_column": str,
-            "new_events": dict,
-            "remove_parent_row": bool
+        "type": "object",
+        "properties": {
+            "anchor_column": {
+                "type": "string"
+            },
+            "new_events": {
+                "type": "object",
+                "patternProperties": {
+                    "^[a-zA-Z0-9_]*$": {
+                        "type": "object",
+                        "properties": {
+                            "onset_source": {
+                                "type": "array",
+                                "items": {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                }
+                            },
+                            "duration": {
+                                "type": "array",
+                                "items": {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                }
+                            },
+                            "copy_columns": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "required": [
+                            "onset_source",
+                            "duration",
+                            "copy_columns"
+                        ],
+                        "additionalProperties": False
+                    }
+                },
+                "minProperties": 1
+            },
+            "remove_parent_event": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "remove_parent_event"
+        ],
+        "minProperties": 2,
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -85,7 +133,8 @@ class SplitRowsOp(BaseOp):
         """
         for event, event_parms in self.new_events.items():
             add_events = pd.DataFrame([], columns=df.columns)
-            add_events['onset'] = self._create_onsets(df, event_parms['onset_source'])
+            add_events['onset'] = self._create_onsets(
+                df, event_parms['onset_source'])
             add_events[self.anchor_column] = event
             self._add_durations(df, add_events, event_parms['duration'])
             if len(event_parms['copy_columns']) > 0:
@@ -103,7 +152,8 @@ class SplitRowsOp(BaseOp):
             if isinstance(duration, float) or isinstance(duration, int):
                 add_events['duration'] = add_events['duration'].add(duration)
             elif isinstance(duration, str) and duration in list(df.columns):
-                add_events['duration'] = add_events['duration'].add(pd.to_numeric(df[duration], errors='coerce'))
+                add_events['duration'] = add_events['duration'].add(
+                    pd.to_numeric(df[duration], errors='coerce'))
             else:
                 raise TypeError("BadDurationInModel",
                                 f"Remodeling duration {str(duration)} must either be numeric or a column name", "")

@@ -10,14 +10,65 @@ class NumberGroupsOp(BaseOp):
     """ Implementation in progress. """
 
     PARAMS = {
-        "operation": "number_groups",
-        "required_parameters": {
-            "number_column_name": str,
-            "source_column": str,
-            "start": dict,
-            "stop": dict
+        "type": "object",
+        "properties": {
+            "number_column_name": {
+                "type": "string"
+            },
+            "source_column": {
+                "type": "string"
+            },
+            "start": {
+                "type": "object",
+                "properties": {
+                    "values": {
+                        "type": "array"
+                    },
+                    "inclusion": {
+                        "type": "string",
+                        "enum": [
+                            "include",
+                            "exclude"
+                        ]
+                    }
+                },
+                "required": [
+                    "values",
+                    "inclusion"
+                ],
+                "additionalProperties": False
+            },
+            "stop": {
+                "type": "object",
+                "properties": {
+                    "values": {
+                        "type": "array"
+                    },
+                    "inclusion": {
+                        "type": "string",
+                        "enum": [
+                            "include",
+                            "exclude"
+                        ]
+                    }
+                },
+                "required": [
+                    "values",
+                    "inclusion"
+                ],
+                "additionalProperties": False
+            },
+            "overwrite": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {"overwrite": bool}
+        "required": [
+            "number_column_name",
+            "source_column",
+            "start",
+            "stop"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -28,27 +79,6 @@ class NumberGroupsOp(BaseOp):
         self.stop = parameters['stop']
         self.start_stop_test = {"values": list, "inclusion": str}
         self.inclusion_test = ["include", "exclude"]
-
-        required = set(self.start_stop_test.keys())
-        for param_to_test in [self.start, self.stop]:
-            required_missing = required.difference(set(param_to_test.keys()))
-            if required_missing:
-                raise KeyError("MissingRequiredParameters",
-                               f"Specified {param_to_test} for number_rows requires parameters"
-                               f"{list(required_missing)}")
-            for param_name, param_value in param_to_test.items():
-                param_type = str
-                if param_name in required:
-                    param_type = self.start_stop_test[param_name]
-                else:
-                    raise KeyError("BadParameter",
-                                   f"{param_name} not a required or optional parameter for {self.operation}")
-                # TODO: This has a syntax error
-                # if not isinstance(param_value, param_type):
-                #     raise TypeError("BadType" f"{param_value} has type {type(param_value)} not {param_type}")
-                if (param_name == 'inclusion') & (param_value not in self.inclusion_test):
-                    raise ValueError("BadValue" f" {param_name} must be one of {self.inclusion_test} not {param_value}")
-
         self.overwrite = parameters.get('overwrite', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
