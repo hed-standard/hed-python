@@ -5,6 +5,7 @@ from tests.validator.test_tag_validator_base import TestValidatorBase
 from functools import partial
 
 
+#todo: update these tests(TagValidator no longer exists)
 class TestHed(TestValidatorBase):
     schema_file = "../data/schema_tests/HED8.0.0.mediawiki"
 
@@ -353,7 +354,7 @@ class IndividualHedTagsShort(TestHed):
 class TestTagLevels(TestHed):
     @staticmethod
     def string_obj_func(validator):
-        return validator._validate_groups_in_hed_string
+        return validator._group_validator.run_tag_level_validators
 
     def test_no_duplicates(self):
         test_strings = {
@@ -499,7 +500,7 @@ class FullHedString(TestHed):
 
     @staticmethod
     def string_obj_func(validator):
-        return validator._tag_validator.run_hed_string_validators
+        return validator._run_hed_string_validators
 
     def test_invalid_placeholders(self):
         # We might want these to be banned later as invalid characters.
@@ -829,7 +830,7 @@ class RequiredTags(TestHed):
 
     @staticmethod
     def string_obj_func(validator):
-        return partial(validator._validate_tags_in_hed_string)
+        return partial(validator._group_validator.run_all_tags_validators)
 
     def test_includes_all_required_tags(self):
         test_strings = {
