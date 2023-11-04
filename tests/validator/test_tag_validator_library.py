@@ -303,7 +303,7 @@ class IndividualHedTagsShort(TestHed3):
 class TestTagLevels3(TestHed3):
     @staticmethod
     def string_obj_func(validator):
-        return validator._validate_groups_in_hed_string
+        return validator._group_validator.run_tag_level_validators
 
     def test_no_duplicates(self):
         test_strings = {
@@ -420,7 +420,7 @@ class TestTagLevels3(TestHed3):
 class RequiredTags(TestHed3):
     @staticmethod
     def string_obj_func(validator):
-        return partial(validator._validate_tags_in_hed_string)
+        return partial(validator._group_validator.run_all_tags_validators)
 
     def test_includes_all_required_tags(self):
         test_strings = {
