@@ -189,7 +189,7 @@ class TestHedSchema(unittest.TestCase):
 
 
 class TestHedSchemaUnmerged(unittest.TestCase):
-    # Verify the hed cache can handle loading unmerged with_standard schemas incase they are ever used
+    # Verify the hed cache can handle loading unmerged with_standard schemas in case they are ever used
     @classmethod
     def setUpClass(cls):
         hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../schema_cache_test_local_unmerged/')
