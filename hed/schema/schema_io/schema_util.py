@@ -8,7 +8,7 @@ from xml.dom import minidom
 from xml.etree import ElementTree
 
 # you can fill this in locally if you don't want to add it to environ.
-github_api_access_token = "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"
+github_api_access_token = ""
 
 
 def get_api_key():
