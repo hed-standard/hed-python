@@ -50,7 +50,7 @@ class RenameColumnsOp (BaseOp):
             - If a parameter has the wrong type.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__("rename_columns", parameters)
         self.column_mapping = parameters['column_mapping']
         if parameters['ignore_missing']:
             self.error_handling = 'ignore'

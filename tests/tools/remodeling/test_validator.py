@@ -19,6 +19,9 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
+    def test_validator_build(self):
+        validator = RemodelerValidator()
+
     def test_validate_valid(self):
         validator = RemodelerValidator()
         error_strings = validator.validate(self.remodel_file)
