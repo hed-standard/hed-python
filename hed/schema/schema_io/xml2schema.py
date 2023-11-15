@@ -21,8 +21,8 @@ class SchemaLoaderXML(SchemaLoader):
 
         SchemaLoaderXML(filename) will load just the header_attributes
     """
-    def __init__(self, filename, schema_as_string=None):
-        super().__init__(filename, schema_as_string)
+    def __init__(self, filename, schema_as_string=None, schema=None):
+        super().__init__(filename, schema_as_string, schema)
         self._root_element = None
         self._parent_map = {}
 
@@ -166,6 +166,8 @@ class SchemaLoaderXML(SchemaLoader):
         for unit_class_element in unit_class_elements:
             unit_class_entry = self._parse_node(unit_class_element, HedSectionKey.UnitClasses)
             unit_class_entry = self._add_to_dict(unit_class_entry, HedSectionKey.UnitClasses)
+            if unit_class_entry is None:
+                continue
             element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
             element_unit_names = [self._get_element_tag_value(element) for element in element_units]
 
@@ -256,8 +258,9 @@ class SchemaLoaderXML(SchemaLoader):
         return elements
 
     def _add_to_dict(self, entry, key_class):
-        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged:
+        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             raise HedFileError(HedExceptions.IN_LIBRARY_IN_UNMERGED,
                                f"Library tag in unmerged schema has InLibrary attribute",
                                self._schema.filename)
-        return self._schema._add_tag_to_dict(entry.name, entry, key_class)
+
+        return self._add_to_dict_base(entry, key_class)
