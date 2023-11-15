@@ -21,8 +21,8 @@ class BidsDataset:
 
     """
 
-    def __init__(self, root_path, schema=None, tabular_types=None,
-                 exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli']):
+    def __init__(self, root_path, schema=None, tabular_types=['events'],
+                 exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli', 'phenotype']):
         """ Constructor for a BIDS dataset.
 
         Parameters:
@@ -30,7 +30,7 @@ class BidsDataset:
             schema (HedSchema or HedSchemaGroup):  A schema that overrides the one specified in dataset.
             tabular_types (list or None):  List of strings specifying types of tabular types to include.
                 If None or empty, then ['events'] is assumed.
-            exclude_dirs=['sourcedata', 'derivatives', 'code']:
+            exclude_dirs=['sourcedata', 'derivatives', 'code', 'phenotype']:
 
         """
         self.root_path = os.path.realpath(root_path)
@@ -42,7 +42,7 @@ class BidsDataset:
             self.schema = load_schema_version(self.dataset_description.get("HEDVersion", None))
 
         self.exclude_dirs = exclude_dirs
-        self.tabular_files = {"participants": BidsFileGroup(root_path, suffix="participants", obj_type="tabular")}
+        self.tabular_files = {}
         if not tabular_types:
             self.tabular_files["events"] = BidsFileGroup(root_path, suffix="events", obj_type="tabular",
                                                          exclude_dirs=exclude_dirs)
