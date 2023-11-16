@@ -2,3 +2,8 @@
 	path = spec_tests/hed-specification
 	url = https://github.com/hed-standard/hed-specification/
 	branch = develop
+
+[submodule "spec_tests/hed-examples"]
+	path = spec_tests/hed-examples
+	url = https://github.com/hed-standard/hed-examples/
+	branch = develop
