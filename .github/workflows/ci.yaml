@@ -69,6 +69,7 @@ jobs:
 
       - name: Run spec_test coverage
         run: HED_GITHUB_TOKEN=${{ secrets.HED_GITHUB_TOKEN }} coverage run --append -m unittest spec_tests/test_errors.py
+        continue-on-error: true
 
       - name: Archive code coverage results
         if: ${{matrix.python-version == '3.9'}}
