@@ -1,35 +1,25 @@
 """ Base class for remodeling operations. """
 
+from abc import ABC, abstractmethod
 
-class BaseOp:
+class BaseOp(ABC):
     """ Base class for operations. All remodeling operations should extend this class.
 
-    The base class holds the parameters and does basic parameter checking against the operation's specification.
-
     """
+    @property
+    @abstractmethod
+    def NAME(self):
+        pass
 
-    def __init__(self, name, parameters):
-        """ Base class constructor for operations.
+    @property
+    @abstractmethod
+    def PARAMS(self):
+        pass
 
-        Parameters:
-            op_spec (dict): Specification for required and optional parameters.
-            parameters (dict):  Actual values of the parameters for the operation.
-
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
-        :raises ValueError:
-            - If the specification is missing a valid operation.
-
-        """
-        self.name = name
+    def __init__(self, parameters):
         self.parameters = parameters
 
-    
+    @abstractmethod
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Base class method to be overridden by each operation.
 
