@@ -3,9 +3,12 @@
 from abc import ABC, abstractmethod
 
 class BaseOp(ABC):
-    """ Base class for operations. All remodeling operations should extend this class.
+    """ Base class for operations. All remodeling operations should extend this class."""
 
-    """
+    def __init__(self, parameters):
+        """"""
+        self.parameters = parameters
+
     @property
     @abstractmethod
     def NAME(self):
@@ -15,9 +18,6 @@ class BaseOp(ABC):
     @abstractmethod
     def PARAMS(self):
         pass
-
-    def __init__(self, parameters):
-        self.parameters = parameters
 
     @abstractmethod
     def do_op(self, dispatcher, df, name, sidecar=None):
