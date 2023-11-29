@@ -5,6 +5,8 @@ import re
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
+from hed.schema.hed_schema_constants import HedKey
+import functools
 
 
 class UnitValueValidator:
@@ -15,6 +17,7 @@ class UnitValueValidator:
 
     DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
 
+    VALUE_CLASS_ALLOWED_CACHE=20
     def __init__(self, value_validators=None):
         """ Validates the unit and value classes on a given tag.
 
@@ -80,16 +83,59 @@ class UnitValueValidator:
         """
         return self._check_value_class(original_tag, original_tag.extension, report_as, error_code)
 
+    # char_sets = {
+    #     "letters": set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+    #     "blank": set(" "),
+    #     "digits": set("0123456789"),
+    #     "alphanumeric": set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+    # }
+    #
+    # @functools.lru_cache(maxsize=VALUE_CLASS_ALLOWED_CACHE)
+    # def _get_allowed_characters(self, value_classes):
+    #     # This could be pre-computed
+    #     character_set = set()
+    #     for value_class in value_classes:
+    #         allowed_types = value_class.attributes.get(HedKey.AllowedCharacter, "")
+    #         for single_type in allowed_types.split(","):
+    #             if single_type in self.char_sets:
+    #                 character_set.update(self.char_sets[single_type])
+    #             else:
+    #                 character_set.add(single_type)
+    #     return character_set
+
+    def _get_problem_indexes(self, original_tag, stripped_value):
+        # Extra +1 for the slash
+        start_index = original_tag.extension.find(stripped_value) + len(original_tag.org_base_tag) + 1
+        if start_index == -1:
+            return []
+
+        problem_indexes = [(char, index + start_index) for index, char in enumerate(stripped_value) if char in "{}"]
+        return problem_indexes
+        # Partial implementation of allowedCharacter
+        # allowed_characters = self._get_allowed_characters(original_tag.value_classes.values())
+        # if allowed_characters:
+        #     # Only test the strippedvalue - otherwise numericClass + unitClass won't validate reasonably.
+        #     indexes = [index for index, char in enumerate(stripped_value) if char not in allowed_characters]
+        #     pass
+
     def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None):
         """Returns any issues found if this is a value tag"""
+        # todo: This function needs to check for allowed characters, not just {}
         validation_issues = []
-        if original_tag.is_takes_value_tag() and \
-                not self._validate_value_class_portion(original_tag, stripped_value):
+        if original_tag.is_takes_value_tag():
             report_as = report_as if report_as else original_tag
-            validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID, report_as)
-            if error_code:
-                validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
-                                                               report_as, actual_error=error_code)
+            problem_indexes = self._get_problem_indexes(original_tag, stripped_value)
+            for char, index in problem_indexes:
+                error_code = ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE \
+                    if char in "{}" else ValidationErrors.INVALID_TAG_CHARACTER
+                validation_issues += ErrorHandler.format_error(error_code,
+                                                               tag=report_as, index_in_tag=index,
+                                                               index_in_tag_end=index + 1)
+            if not self._validate_value_class_portion(original_tag, stripped_value):
+                validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID, report_as)
+                if error_code:
+                    validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
+                                                                   report_as, actual_error=error_code)
         return validation_issues
 
     @staticmethod

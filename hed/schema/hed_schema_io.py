@@ -129,6 +129,7 @@ def _load_schema_version(xml_version=None, xml_folder=None):
     :raises HedFileError:
         - The xml_version is not valid.
         - The specified version cannot be found or loaded
+        - Multiple schemas are being loaded with the same prefix, and they have duplicate tags
         - Other fatal errors loading the schema (These are unlikely if you are not editing them locally)
         - The prefix is invalid
     """
@@ -144,8 +145,22 @@ def _load_schema_version(xml_version=None, xml_folder=None):
         xml_versions = [""]
 
     first_schema = _load_schema_version_sub(schema_namespace, xml_versions[0], xml_folder=xml_folder)
+    filenames = [os.path.basename(first_schema.filename)]
     for version in xml_versions[1:]:
         _load_schema_version_sub(schema_namespace, version, xml_folder=xml_folder, schema=first_schema)
+
+        # Detect duplicate errors when merging schemas in the same namespace
+        current_filename = os.path.basename(first_schema.filename)
+        duplicate_name = first_schema.has_duplicates()
+        if duplicate_name:
+            issues = first_schema.check_compliance(check_for_warnings=False)
+            filename_string = ",".join(filenames)
+            msg = (f"A duplicate tag, '{duplicate_name}', was detected in the schema file '{current_filename}'. "
+                   f"Previously loaded schemas include: {filename_string}. "
+                   f"To resolve this, consider prefixing the final schema during load: "
+                   f"custom_prefix:schema_version.")
+            raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_NAMES, msg, first_schema.filename, issues)
+        filenames.append(current_filename)
     return first_schema
 
 

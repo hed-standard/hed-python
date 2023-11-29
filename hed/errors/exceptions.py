@@ -43,6 +43,8 @@ class HedExceptions:
     SCHEMA_DUPLICATE_LIBRARY = "SCHEMA_LIBRARY_INVALID"
     BAD_COLUMN_NAMES = 'BAD_COLUMN_NAMES'
 
+    SCHEMA_DUPLICATE_NAMES = "SCHEMA_DUPLICATE_NAMES"
+
 
 class HedFileError(Exception):
     """Exception raised when a file cannot be parsed due to being malformed, file IO, etc."""

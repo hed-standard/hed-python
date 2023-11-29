@@ -21,7 +21,6 @@ class HedSchema(HedSchemaBase):
             A HedSchema can be used for validation, checking tag attributes, parsing tags, etc.
         """
         super().__init__()
-        self._has_duplicate_tags = False
         self.header_attributes = {}
         self.filename = None
         self.prologue = ""
@@ -305,7 +304,7 @@ class HedSchema(HedSchemaBase):
             return False
         if self.get_save_header_attributes() != other.get_save_header_attributes():
             return False
-        if self._has_duplicate_tags != other._has_duplicate_tags:
+        if self.has_duplicates() != other.has_duplicates():
             return False
         if self.prologue != other.prologue:
             return False
@@ -527,12 +526,21 @@ class HedSchema(HedSchemaBase):
                 raise self._TagIdentifyError(error)
             word_start_index += len(name) + 1
 
+    def has_duplicates(self):
+        """Returns the first duplicate tag/unit/etc if any section has a duplicate name"""
+        for section in self._sections.values():
+            has_duplicates = bool(section.duplicate_names)
+            if has_duplicates:
+                # Return first entry of dict
+                return next(iter(section.duplicate_names))
+
+        return False
+
     # ===============================================
     # Semi-private creation finalizing functions
     # ===============================================
     def finalize_dictionaries(self):
         """ Call to finish loading. """
-        self._has_duplicate_tags = bool(self.tags.duplicate_names)
         self._update_all_entries()
 
     def _update_all_entries(self):
