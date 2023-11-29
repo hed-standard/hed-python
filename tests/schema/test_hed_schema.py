@@ -134,7 +134,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(get_hed_xml_version(self.hed_xml_3g), "8.0.0")
 
     def test_has_duplicate_tags(self):
-        self.assertFalse(self.hed_schema_3g._has_duplicate_tags)
+        self.assertFalse(self.hed_schema_3g.has_duplicates())
 
     def test_short_tag_mapping(self):
         self.assertEqual(len(self.hed_schema_3g.tags.keys()), 1110)

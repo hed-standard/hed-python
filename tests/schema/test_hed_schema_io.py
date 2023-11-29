@@ -200,9 +200,18 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
         schema.set_cache_directory(cls.hed_cache_dir)
 
+        # Copy source as dupe into cache for easily testing dupe detection
+        cls.dupe_library_name = "testscoredupe_1.1.0"
+        cls.source_library_name = "score_1.1.0"
+
         for filename in os.listdir(hed_cache.INSTALLED_CACHE_LOCATION):
             loaded_schema = schema.load_schema(os.path.join(hed_cache.INSTALLED_CACHE_LOCATION, filename))
             loaded_schema.save_as_xml(os.path.join(cls.hed_cache_dir, filename), save_merged=False)
+            if filename == f"HED_{cls.source_library_name}.xml":
+                new_filename = f"HED_{cls.dupe_library_name}.xml"
+                loaded_schema.save_as_xml(os.path.join(cls.hed_cache_dir, new_filename), save_merged=False)
+
+
 
     @classmethod
     def tearDownClass(cls):
@@ -240,6 +249,12 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3._namespace, "", "load_schema_version has the right version with namespace")
         self.assertEqual(len(issues), 11)
+
+    def test_load_schema_version_merged_duplicates(self):
+        ver4 = ["score_1.1.0", "testscoredupe_1.1.0"]
+        with self.assertRaises(HedFileError) as context:
+            load_schema_version(ver4)
+        self.assertEqual(len(context.exception.issues), 597)
 
     def test_load_and_verify_tags(self):
         # Load 'testlib' by itself
