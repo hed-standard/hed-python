@@ -140,30 +140,40 @@ class HedValidator:
 
         return validation_issues
 
-    def validate_units(self, original_tag, report_as=None, error_code=None):
+    def validate_units(self, original_tag, validate_text=None, report_as=None, error_code=None,
+                       index_offset=0):
         """Validate units and value classes
 
         Parameters:
             original_tag(HedTag): The source tag
+            validate_text (str): the text we want to validate, if not the full extension.
             report_as(HedTag): Report the error tag as coming from a different one.
                                Mostly for definitions that expand.
             error_code(str): The code to override the error as.  Again mostly for def/def-expand tags.
+            index_offset(int): Offset into the extension validate_text starts at
 
         Returns:
             issues(list): Issues found from units
         """
+        if validate_text is None:
+            validate_text = original_tag.extension
         issues = []
         if original_tag.is_unit_class_tag():
             issues += self._unit_validator.check_tag_unit_class_units_are_valid(original_tag,
+                                                                                validate_text,
                                                                                 report_as=report_as,
-                                                                                error_code=error_code)
+                                                                                error_code=error_code,
+                                                                                index_offset=index_offset)
         elif original_tag.is_value_class_tag():
             issues += self._unit_validator.check_tag_value_class_valid(original_tag,
+                                                                       validate_text,
                                                                        report_as=report_as,
-                                                                       error_code=error_code)
-        # todo: potentially make this one have a report_as
+                                                                       error_code=error_code,
+                                                                       index_offset=index_offset)
         elif original_tag.extension:
-            issues += self._char_validator.check_for_invalid_extension_chars(original_tag)
+            issues += self._char_validator.check_for_invalid_extension_chars(original_tag,
+                                                                             validate_text,
+                                                                             index_offset=index_offset)
 
         return issues
 
@@ -198,6 +208,9 @@ class HedValidator:
                     run_individual_tag_validators(hed_tag,
                                                   allow_placeholders=allow_placeholders,
                                                   is_definition=is_definition)
-                validation_issues += self.validate_units(hed_tag)
+                if hed_tag.short_base_tag == DefTagNames.DEF_ORG_KEY or hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY:
+                    validation_issues += self._def_validator.validate_def_value_units(hed_tag, self)
+                else:
+                    validation_issues += self.validate_units(hed_tag)
 
         return validation_issues

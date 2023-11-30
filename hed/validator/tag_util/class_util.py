@@ -5,8 +5,6 @@ import re
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
-from hed.schema.hed_schema_constants import HedKey
-import functools
 
 
 class UnitValueValidator:
@@ -18,6 +16,7 @@ class UnitValueValidator:
     DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
 
     VALUE_CLASS_ALLOWED_CACHE=20
+
     def __init__(self, value_validators=None):
         """ Validates the unit and value classes on a given tag.
 
@@ -39,11 +38,13 @@ class UnitValueValidator:
 
         return validator_dict
 
-    def check_tag_unit_class_units_are_valid(self, original_tag, report_as=None, error_code=None):
+    def check_tag_unit_class_units_are_valid(self, original_tag, validate_text, report_as=None, error_code=None,
+                                             index_offset=0):
         """ Report incorrect unit class or units.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
+            validate_text (str): The text to validate
             report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
             error_code (str): Override error codes
         Returns:
@@ -51,16 +52,17 @@ class UnitValueValidator:
         """
         validation_issues = []
         if original_tag.is_unit_class_tag():
-            stripped_value, unit = original_tag.get_stripped_unit_value()
+            stripped_value, unit = original_tag.get_stripped_unit_value(validate_text)
             if not unit:
                 # Todo: in theory this should separately validate the number and the units, for units
                 # that are prefixes like $.  Right now those are marked as unit invalid AND value_invalid.
-                bad_units = " " in original_tag.extension
+                bad_units = " " in validate_text
 
                 if bad_units:
                     stripped_value = stripped_value.split(" ")[0]
 
-                validation_issues += self._check_value_class(original_tag, stripped_value, report_as, error_code)
+                validation_issues += self._check_value_class(original_tag, stripped_value, report_as, error_code,
+                                                             index_offset)
                 validation_issues += self._check_units(original_tag, bad_units, report_as)
 
                 # We don't want to give this overall error twice
@@ -71,17 +73,21 @@ class UnitValueValidator:
 
         return validation_issues
 
-    def check_tag_value_class_valid(self, original_tag, report_as=None, error_code=None):
+    def check_tag_value_class_valid(self, original_tag, validate_text, report_as=None, error_code=None,
+                                    index_offset=0):
         """ Report an invalid value portion.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
+            validate_text (str): The text to validate
             report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
             error_code (str): Override error codes
+            index_offset(int): Offset into the extension validate_text starts at
+
         Returns:
             list: Validation issues.
         """
-        return self._check_value_class(original_tag, original_tag.extension, report_as, error_code)
+        return self._check_value_class(original_tag, validate_text, report_as, error_code, index_offset)
 
     # char_sets = {
     #     "letters": set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
@@ -118,7 +124,7 @@ class UnitValueValidator:
         #     indexes = [index for index, char in enumerate(stripped_value) if char not in allowed_characters]
         #     pass
 
-    def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None):
+    def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None, index_offset=0):
         """Returns any issues found if this is a value tag"""
         # todo: This function needs to check for allowed characters, not just {}
         validation_issues = []
@@ -126,9 +132,12 @@ class UnitValueValidator:
             report_as = report_as if report_as else original_tag
             problem_indexes = self._get_problem_indexes(original_tag, stripped_value)
             for char, index in problem_indexes:
-                error_code = ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE \
-                    if char in "{}" else ValidationErrors.INVALID_TAG_CHARACTER
-                validation_issues += ErrorHandler.format_error(error_code,
+                tag_code = ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE if (
+                        char in "{}") else ValidationErrors.INVALID_TAG_CHARACTER
+
+                index_adj = len(report_as.org_base_tag) - len(original_tag.org_base_tag)
+                index += index_adj + index_offset
+                validation_issues += ErrorHandler.format_error(tag_code,
                                                                tag=report_as, index_in_tag=index,
                                                                index_in_tag_end=index + 1)
             if not self._validate_value_class_portion(original_tag, stripped_value):
