@@ -320,7 +320,7 @@ class HedTag:
         """ Return the extension divided into value and units, if the units are valid.
 
         Parameters:
-            extension_text (str): The text to split, incase it's a portion of a tag.
+            extension_text (str): The text to split, in case it's a portion of a tag.
 
         Returns:
             stripped_unit_value (str): The extension portion with the units removed.

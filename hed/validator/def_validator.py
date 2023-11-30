@@ -127,6 +127,9 @@ class DefValidator(DefinitionDict):
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
         if def_contents and def_entry.takes_value and hed_validator:
             placeholder_tag = def_contents.get_first_group().find_placeholder_tag()
+            # Handle the case where they're adding a unit as part of a placeholder.  eg Speed/# mph
+            if placeholder_tag:
+                placeholder = placeholder_tag.extension
             def_issues += hed_validator.validate_units(placeholder_tag,
                                                        placeholder,
                                                        report_as=def_tag,
