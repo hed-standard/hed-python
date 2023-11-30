@@ -753,17 +753,6 @@ class HedSchema(HedSchemaBase):
     # Semi private function used to create a schema in memory(usually from a source file)
     # ===============================================
     def _add_tag_to_dict(self, long_tag_name, new_entry, key_class):
-        # Add the InLibrary attribute to any library schemas as they are loaded
-        # These are later removed when they are saved out, if saving unmerged
-        # if self.library and (not self.with_standard or (not self.merged and self.with_standard)):
-        #     # only add it if not already present - This is a rare case
-        #     Todo ian: I think this should be moved up one level for parity with the other loading changes
-        #         .library will be updated to potentially be a list
-        #         Cannot save schema if .library is a list
-        #
-        #     if not new_entry.has_attribute(HedKey.InLibrary):
-        #         new_entry._set_attribute_value(HedKey.InLibrary, self.library)
-
         section = self._sections[key_class]
         return section._add_to_dict(long_tag_name, new_entry)
 

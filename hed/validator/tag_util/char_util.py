@@ -54,11 +54,15 @@ class CharValidator:
         validation_issues += self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
         return validation_issues
 
-    def check_for_invalid_extension_chars(self, original_tag):
+    def check_for_invalid_extension_chars(self, original_tag, validate_text, error_code=None,
+                                          index_offset=0):
         """Report invalid characters in extension/value.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
+            validate_text (str): the text we want to validate, if not the full extension.
+            error_code(str): The code to override the error as.  Again mostly for def/def-expand tags.
+            index_offset(int): Offset into the extension validate_text starts at
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
@@ -66,11 +70,12 @@ class CharValidator:
         allowed_chars = self.TAG_ALLOWED_CHARS
         allowed_chars += self.DEFAULT_ALLOWED_PLACEHOLDER_CHARS
         allowed_chars += " "
-        return self._check_invalid_chars(original_tag.extension, allowed_chars, original_tag,
-                                         starting_index=len(original_tag.org_base_tag) + 1)
+        return self._check_invalid_chars(validate_text, allowed_chars, original_tag,
+                                         starting_index=len(original_tag.org_base_tag) + 1 + index_offset,
+                                         error_code=error_code)
     
     @staticmethod
-    def _check_invalid_chars(check_string, allowed_chars, source_tag, starting_index=0):
+    def _check_invalid_chars(check_string, allowed_chars, source_tag, starting_index=0, error_code=None):
         validation_issues = []
         for i, character in enumerate(check_string):
             if character.isalnum():
@@ -82,7 +87,8 @@ class CharValidator:
                 continue
             validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
                                                            tag=source_tag, index_in_tag=starting_index + i,
-                                                           index_in_tag_end=starting_index + i + 1)
+                                                           index_in_tag_end=starting_index + i + 1,
+                                                           actual_error=error_code)
         return validation_issues
 
     @staticmethod
