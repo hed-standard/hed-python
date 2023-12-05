@@ -14,7 +14,6 @@ class FactorColumnOp(BaseOp):
         - **factor_values** (*list*):  Values in the column column_name to create factors for.   
         - **factor_names** (*list*):   Names to use as the factor columns.   
 
-
     """
     NAME = "factor_column"
     
@@ -34,7 +33,8 @@ class FactorColumnOp(BaseOp):
                 "type": "array",
                 "items": {
                     "type": "string"
-                }
+                },
+                "minItems": 1
             }
         },
         "required": [

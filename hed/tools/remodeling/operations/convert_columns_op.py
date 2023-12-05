@@ -4,13 +4,12 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class ConvertColumnsOp(BaseOp):
-    """ Convert.
+    """ Convert data type in column
 
     Required remodeling parameters:   
         - **column_names** (*list*):   The list of columns to convert.   
         - **convert_to_** (*str*):  Name of type to convert to. (One of 'str', 'int', 'float', 'fixed'.)   
         - **decimal_places** (*int*):   Number decimal places to keep (for fixed only).   
-
 
     """
     NAME = "convert_columns"
@@ -44,16 +43,6 @@ class ConvertColumnsOp(BaseOp):
 
         Parameters:
             parameters (dict): Parameter values for required and optional parameters.
-
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
-        :raises ValueError:
-            - If convert_to is not one of the allowed values.
 
         """
         super().__init__(self.PARAMS, parameters)

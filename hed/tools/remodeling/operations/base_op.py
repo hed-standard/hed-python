@@ -6,7 +6,11 @@ class BaseOp(ABC):
     """ Base class for operations. All remodeling operations should extend this class."""
 
     def __init__(self, parameters):
-        """"""
+        """ Constructor for the BaseOp class. Should be extended by operations.
+        
+        Parameters:
+            parameters (dict): A dictionary specifying the appropriate parameters for the operation.
+        """
         self.parameters = parameters
 
     @property
