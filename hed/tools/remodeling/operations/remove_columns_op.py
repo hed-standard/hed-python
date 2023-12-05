@@ -19,7 +19,8 @@ class RemoveColumnsOp(BaseOp):
                 "type": "array",
                 "items": {
                     "type": "string"
-                }
+                },
+                "minItems": 1
             },
             "ignore_missing": {
                 "type": "boolean"

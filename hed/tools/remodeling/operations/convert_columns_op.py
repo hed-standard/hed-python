@@ -19,10 +19,14 @@ class ConvertColumnsOp(BaseOp):
         "type": "object",
         "properties": {
             "column_names": {
-                "type": "array"
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
             },
             "convert_to": {
-                "type": "string"
+                "type": "string",
+                "enum": ['str', 'int', 'float', 'fixed'],
             },
             "decimal_places": {
                 "type": "integer"
@@ -56,10 +60,6 @@ class ConvertColumnsOp(BaseOp):
         self.column_names = parameters['column_names']
         self.convert_to = parameters['convert_to']
         self.decimal_places = parameters.get('decimal_places', None)
-        self.allowed_types = ['str', 'int', 'float', 'fixed']
-        if self.convert_to not in self.allowed_types:
-            raise ValueError("CannotConvertToSpecifiedType",
-                             f"The convert_to value {self.convert_to} must be one of {str(self.allowed_types)}")
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Convert the specified column to a specified type.

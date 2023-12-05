@@ -50,8 +50,10 @@ class RemapColumnsOp(BaseOp):
                             "string",
                             "number"
                         ]
-                    }
-                }
+                    },
+                    "minItems" : 1
+                },
+                "minItems": 1
             },
             "ignore_missing": {
                 "type": "boolean"
