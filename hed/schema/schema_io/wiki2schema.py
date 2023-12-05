@@ -21,8 +21,6 @@ no_wiki_tag = '</?nowiki>'
 no_wiki_start_tag = '<nowiki>'
 no_wiki_end_tag = '</nowiki>'
 
-
-
 required_sections = [
     HedWikiSection.Prologue,
     HedWikiSection.Schema,
@@ -44,8 +42,9 @@ class SchemaLoaderWiki(SchemaLoader):
 
         SchemaLoaderWiki(filename) will load just the header_attributes
     """
-    def __init__(self, filename, schema_as_string=None):
-        super().__init__(filename, schema_as_string)
+
+    def __init__(self, filename, schema_as_string=None, schema=None):
+        super().__init__(filename, schema_as_string, schema)
         self.fatal_errors = []
 
     def _open_file(self):
@@ -114,7 +113,7 @@ class SchemaLoaderWiki(SchemaLoader):
         for line_number, line in lines:
             if line.strip():
                 msg = f"Extra content [{line}] between HED line and other sections"
-                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg,  filename=self.filename)
+                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.filename)
 
     def _read_text_block(self, lines):
         text = ""
@@ -324,13 +323,6 @@ class SchemaLoaderWiki(SchemaLoader):
             final_attributes[key] = value
 
         return final_attributes
-
-    def _add_to_dict(self, line_number, line, entry, key_class):
-        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged:
-            self._add_fatal_error(line_number, line,
-                                  f"Library tag in unmerged schema has InLibrary attribute",
-                                  HedExceptions.IN_LIBRARY_IN_UNMERGED)
-        return self._schema._add_tag_to_dict(entry.name, entry, key_class)
 
     @staticmethod
     def _get_tag_level(tag_line):
@@ -598,3 +590,11 @@ class SchemaLoaderWiki(SchemaLoader):
                     strings_for_section[current_section].append((line_number + 1, line))
 
         return strings_for_section
+
+    def _add_to_dict(self, line_number, line, entry, key_class):
+        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
+            self._add_fatal_error(line_number, line,
+                                  f"Library tag in unmerged schema has InLibrary attribute",
+                                  HedExceptions.IN_LIBRARY_IN_UNMERGED)
+
+        return self._add_to_dict_base(entry, key_class)

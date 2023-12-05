@@ -31,13 +31,30 @@ jobs:
           python -m pip install --upgrade --upgrade-strategy eager pip
           pip install -r requirements.txt
 
-      - name: Test with unittest
+      - name: Spec Error Tests
+        id: spec_error_tests
+        continue-on-error: true
         run: |
-           python -m unittest spec_tests/test_errors.py > test_results.txt
+           python -m unittest spec_tests/test_errors.py > error_results.txt
 
-      - name: Upload spec test results
+      - name: Bids Validation Test
+        id: bids_validation_test
+        continue-on-error: true
+        run: |
+           python -m unittest spec_tests/validate_bids.py > validate_bids_results.txt
+
+      - name: Upload error test results
         uses: actions/upload-artifact@v3
         with:
-          name: spec-test-results
-          path: test_results.txt
+          name: error-test-results
+          path: error_results.txt
 
+      - name: Upload bids test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: bids-test-results
+          path: validate_bids_results.txt
+
+      - name: Fail if Tests Failed
+        if: steps.spec_error_tests.outcome == 'failure' || steps.bids_validation_test.outcome == 'failure'
+        run: exit 1

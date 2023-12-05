@@ -5,6 +5,7 @@ from tests.validator.test_tag_validator_base import TestValidatorBase
 from functools import partial
 
 
+#todo: update these tests(TagValidator no longer exists)
 class TestHed(TestValidatorBase):
     schema_file = "../data/schema_tests/HED8.0.0.mediawiki"
 
@@ -353,7 +354,7 @@ class IndividualHedTagsShort(TestHed):
 class TestTagLevels(TestHed):
     @staticmethod
     def string_obj_func(validator):
-        return validator._validate_groups_in_hed_string
+        return validator._group_validator.run_tag_level_validators
 
     def test_no_duplicates(self):
         test_strings = {
@@ -499,7 +500,7 @@ class FullHedString(TestHed):
 
     @staticmethod
     def string_obj_func(validator):
-        return validator._tag_validator.run_hed_string_validators
+        return validator._run_hed_string_validators
 
     def test_invalid_placeholders(self):
         # We might want these to be banned later as invalid characters.
@@ -829,7 +830,7 @@ class RequiredTags(TestHed):
 
     @staticmethod
     def string_obj_func(validator):
-        return partial(validator._validate_tags_in_hed_string)
+        return partial(validator._group_validator.run_all_tags_validators)
 
     def test_includes_all_required_tags(self):
         test_strings = {
@@ -882,6 +883,28 @@ class RequiredTags(TestHed):
                                                       tag_namespace='Property/Organizational-property/Event-context'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
+
+class RequiredTagInDefinition(TestHed):
+    schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
+
+    @staticmethod
+    def string_obj_func(validator):
+        from hed.validator import DefValidator
+        def_dict = DefValidator()
+        return partial(def_dict.check_for_definitions)
+
+    def test_includes_all_required_tags(self):
+        test_strings = {
+            'complete': 'Animal-agent, Action, (Definition/labelWithRequired, (Action))',
+        }
+        expected_results = {
+            'complete': False,
+        }
+        expected_issues = {
+            'complete': self.format_error(DefinitionErrors.BAD_PROP_IN_DEFINITION, tag=3, def_name='labelWithRequired'),
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
 
 class TestHedSpecialUnits(TestHed):

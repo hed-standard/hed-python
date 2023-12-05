@@ -316,8 +316,11 @@ class HedTag:
 
         return tag_issues
 
-    def get_stripped_unit_value(self):
+    def get_stripped_unit_value(self, extension_text):
         """ Return the extension divided into value and units, if the units are valid.
+
+        Parameters:
+            extension_text (str): The text to split, in case it's a portion of a tag.
 
         Returns:
             stripped_unit_value (str): The extension portion with the units removed.
@@ -328,7 +331,7 @@ class HedTag:
 
         """
         tag_unit_classes = self.unit_classes
-        stripped_value, unit, _ = self._get_tag_units_portion(tag_unit_classes)
+        stripped_value, unit, _ = HedTag._get_tag_units_portion(extension_text, tag_unit_classes)
         if stripped_value:
             return stripped_value, unit
 
@@ -354,7 +357,7 @@ class HedTag:
             unit_entry = self.default_unit
             unit = unit_entry.name
         else:
-            stripped_value, unit, unit_entry = self._get_tag_units_portion(tag_unit_classes)
+            stripped_value, unit, unit_entry = HedTag._get_tag_units_portion(self.extension, tag_unit_classes)
 
         if stripped_value:
             if unit_entry.get_conversion_factor(unit) is not None:
@@ -499,6 +502,7 @@ class HedTag:
         Returns:
             unit(UnitEntry or None): the default unit entry for this tag, or None
         """
+        # todo: Make this cached
         unit_classes = self.unit_classes.values()
         if len(unit_classes) == 1:
             first_unit_class_entry = list(unit_classes)[0]
@@ -543,7 +547,8 @@ class HedTag:
             return org_tag[:first_colon + 1]
         return ""
 
-    def _get_tag_units_portion(self, tag_unit_classes):
+    @staticmethod
+    def _get_tag_units_portion(extension_text, tag_unit_classes):
         """ Check that this string has valid units and remove them.
 
         Parameters:
@@ -554,19 +559,19 @@ class HedTag:
                                           This is filled in if there are no units as well.
             unit (UnitEntry or None): The matching unit entry if one is found
         """
-        value, _, units = self.extension.rpartition(" ")
+        value, _, units = extension_text.rpartition(" ")
         if not units:
             return None, None, None
 
         for unit_class_entry in tag_unit_classes.values():
             all_valid_unit_permutations = unit_class_entry.derivative_units
 
-            possible_match = self._find_modifier_unit_entry(units, all_valid_unit_permutations)
+            possible_match = HedTag._find_modifier_unit_entry(units, all_valid_unit_permutations)
             if possible_match and not possible_match.has_attribute(HedKey.UnitPrefix):
                 return value, units, possible_match
 
             # Repeat the above, but as a prefix
-            possible_match = self._find_modifier_unit_entry(value, all_valid_unit_permutations)
+            possible_match = HedTag._find_modifier_unit_entry(value, all_valid_unit_permutations)
             if possible_match and possible_match.has_attribute(HedKey.UnitPrefix):
                 return units, value, possible_match
 

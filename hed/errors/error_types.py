@@ -90,6 +90,8 @@ class ValidationErrors:
 
     INVALID_TAG_CHARACTER = 'invalidTagCharacter'
 
+    CURLY_BRACE_UNSUPPORTED_HERE = "CURLY_BRACE_UNSUPPORTED_HERE"
+
 
 
 class SidecarErrors:

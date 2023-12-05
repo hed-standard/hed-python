@@ -9,6 +9,7 @@ from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection,
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.schema.hed_schema_base import HedSchemaBase
+from hed.errors.exceptions import HedFileError, HedExceptions
 
 
 class HedSchema(HedSchemaBase):
@@ -20,7 +21,6 @@ class HedSchema(HedSchemaBase):
             A HedSchema can be used for validation, checking tag attributes, parsing tags, etc.
         """
         super().__init__()
-        self._has_duplicate_tags = False
         self.header_attributes = {}
         self.filename = None
         self.prologue = ""
@@ -58,9 +58,18 @@ class HedSchema(HedSchemaBase):
 
         Returns:
             str: Library name if any.
-
         """
         return self.header_attributes.get(constants.LIBRARY_ATTRIBUTE, "")
+
+    def can_save(self):
+        """ Returns if it's legal to save this schema.
+
+            You cannot save schemas loaded as merged from multiple library schemas.
+
+        Returns:
+            bool: True if this can be saved
+        """
+        return not self.library or "," not in self.library
 
     @property
     def with_standard(self):
@@ -265,9 +274,16 @@ class HedSchema(HedSchemaBase):
         Parameters:
             schema_namespace (str): Should be empty, or end with a colon.(Colon will be automated added if missing).
 
+        :raises HedFileError:
+            - The prefix is invalid
         """
         if schema_namespace and schema_namespace[-1] != ":":
             schema_namespace += ":"
+
+        if schema_namespace and not schema_namespace[:-1].isalpha():
+            raise HedFileError(HedExceptions.INVALID_LIBRARY_PREFIX,
+                               "Schema namespace must contain only alpha characters",
+                               self.filename)
 
         self._namespace = schema_namespace
 
@@ -288,7 +304,7 @@ class HedSchema(HedSchemaBase):
             return False
         if self.get_save_header_attributes() != other.get_save_header_attributes():
             return False
-        if self._has_duplicate_tags != other._has_duplicate_tags:
+        if self.has_duplicates() != other.has_duplicates():
             return False
         if self.prologue != other.prologue:
             return False
@@ -510,12 +526,21 @@ class HedSchema(HedSchemaBase):
                 raise self._TagIdentifyError(error)
             word_start_index += len(name) + 1
 
+    def has_duplicates(self):
+        """Returns the first duplicate tag/unit/etc if any section has a duplicate name"""
+        for section in self._sections.values():
+            has_duplicates = bool(section.duplicate_names)
+            if has_duplicates:
+                # Return first entry of dict
+                return next(iter(section.duplicate_names))
+
+        return False
+
     # ===============================================
     # Semi-private creation finalizing functions
     # ===============================================
     def finalize_dictionaries(self):
         """ Call to finish loading. """
-        self._has_duplicate_tags = bool(self.tags.duplicate_names)
         self._update_all_entries()
 
     def _update_all_entries(self):
@@ -728,13 +753,6 @@ class HedSchema(HedSchemaBase):
     # Semi private function used to create a schema in memory(usually from a source file)
     # ===============================================
     def _add_tag_to_dict(self, long_tag_name, new_entry, key_class):
-        # Add the InLibrary attribute to any library schemas as they are loaded
-        # These are later removed when they are saved out, if saving unmerged
-        if self.library and (not self.with_standard or (not self.merged and self.with_standard)):
-            # only add it if not already present - This is a rare case
-            if not new_entry.has_attribute(HedKey.InLibrary):
-                new_entry._set_attribute_value(HedKey.InLibrary, self.library)
-
         section = self._sections[key_class]
         return section._add_to_dict(long_tag_name, new_entry)
 

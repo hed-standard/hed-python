@@ -39,7 +39,7 @@ def val_error_invalid_char(source_string, char_index):
 @hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True,
                actual_code=ValidationErrors.CHARACTER_INVALID)
 def val_error_invalid_tag_character(tag, problem_tag):
-    return f"Invalid character '{problem_tag}' in {tag}"
+    return f"Invalid character '{problem_tag}' in tag '{tag}'"
 
 
 @hed_error(ValidationErrors.TILDES_UNSUPPORTED)
@@ -47,6 +47,12 @@ def val_error_tildes_not_supported(source_string, char_index):
     character = source_string[char_index]
     return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'"
 
+
+@hed_tag_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, has_sub_tag=True,
+               actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
+def val_error_CURLY_BRACE_UNSUPPORTED_HERE(tag, problem_tag):
+    return (f"Curly braces are only permitted in sidecars, fully wrapping text in place of a tag.  "
+            f"Invalid character '{problem_tag}' in tag '{tag}'")
 
 @hed_error(ValidationErrors.COMMA_MISSING)
 def val_error_comma_missing(tag):
@@ -228,7 +234,7 @@ def val_warning_capitalization(tag):
 @hed_tag_error(ValidationErrors.UNITS_MISSING, default_severity=ErrorSeverity.WARNING)
 def val_warning_default_units_used(tag, default_unit):
     if default_unit is None:
-        return f"No unit specified on - '{tag}'.  Multiple default values exist and cannot be inferred"
+        return f"No unit specified on - '{tag}'.  No default unit is specified for type."
     return f"No unit specified. Using '{default_unit}' as the default - '{tag}'"
 
 
@@ -321,7 +327,7 @@ def def_error_no_takes_value(def_name, placeholder_tag):
 
 @hed_tag_error(DefinitionErrors.BAD_PROP_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_no_takes_value(tag, def_name):
-    return f"Tag '{str(tag)}' in Definition '{def_name}' has has a tag with the unique or required attribute."
+    return f"Tag '{str(tag)}' in Definition '{def_name}' has has a the unique or required attribute."
 
 
 @hed_tag_error(DefinitionErrors.BAD_DEFINITION_LOCATION, actual_code=ValidationErrors.DEFINITION_INVALID)
@@ -382,7 +388,7 @@ def onset_wrong_placeholder(tag, has_placeholder):
 
 @hed_error(ColumnErrors.INVALID_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def invalid_column_ref(bad_ref):
-    return f"The column '{bad_ref}' is unknown.'"
+    return f"The column '{bad_ref}' is unknown or does not have HED annotations.'"
 
 
 @hed_error(ColumnErrors.SELF_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)

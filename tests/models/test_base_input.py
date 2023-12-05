@@ -304,7 +304,7 @@ class TestOnsetDict(unittest.TestCase):
                          {3.5: [0, 1], 4.0: [2], 4.4: [3, 4], -1.0: [5]})
 
     def test_empty_and_single_item_series(self):
-        self.assertTrue(BaseInput._filter_by_index_list(pd.Series([]), {}).equals(pd.Series([])))
+        self.assertTrue(BaseInput._filter_by_index_list(pd.Series([], dtype=str), {}).equals(pd.Series([], dtype=str)))
         self.assertTrue(BaseInput._filter_by_index_list(pd.Series(["apple"]), {0: [0]}).equals(pd.Series(["apple"])))
 
     def test_two_item_series_with_same_onset(self):

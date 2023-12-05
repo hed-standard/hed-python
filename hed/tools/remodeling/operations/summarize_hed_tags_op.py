@@ -136,6 +136,8 @@ class SummarizeHedTagsOp(BaseOp):
         if not summary:
             summary = HedTagSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
+        x = {'df': dispatcher.post_proc_data(df_new), 'name': name,
+                                'schema': dispatcher.hed_schema, 'sidecar': sidecar}
         summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df_new

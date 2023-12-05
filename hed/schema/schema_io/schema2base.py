@@ -1,5 +1,6 @@
 """Baseclass for mediawiki/xml writers"""
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
+from hed.errors.exceptions import HedFileError, HedExceptions
 
 
 class Schema2Base:
@@ -29,6 +30,10 @@ class Schema2Base:
             Varies based on inherited class
 
         """
+        if not hed_schema.can_save():
+            raise HedFileError(HedExceptions.SCHEMA_LIBRARY_INVALID,
+                               "Cannot save a schema merged from multiple library schemas",
+                               hed_schema.filename)
         saver = cls()
         saver._save_lib = False
         saver._save_base = False

@@ -146,7 +146,7 @@ class TestLocal(unittest.TestCase):
 
         with self.assertRaises(HedFileError) as context3:
             load_schema_version(["", None])
-        self.assertEqual(context3.exception.args[0], 'schemaDuplicatePrefix')
+        self.assertEqual(context3.exception.args[0], 'SCHEMA_LIBRARY_INVALID')
 
         with self.assertRaises(HedFileError) as context4:
             load_schema_version(["8.0.0", "score_1.0.0"])

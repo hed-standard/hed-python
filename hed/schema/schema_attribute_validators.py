@@ -208,8 +208,8 @@ def in_library_check(hed_schema, tag_entry, attribute_name):
     issues = []
 
     library = tag_entry.attributes.get(attribute_name, "")
-    if hed_schema.library != library:
-        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ALLOWED_CHARACTERS_INVALID,
+    if library not in hed_schema.library.split(","):
+        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_IN_LIBRARY_INVALID,
                                             tag_entry.name,
                                             library)
     return issues

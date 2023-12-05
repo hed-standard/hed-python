@@ -5,7 +5,7 @@ import shutil
 from hed.models import DefinitionEntry, Sidecar, TabularInput
 from hed import schema
 from hed.errors import HedFileError
-from hed.errors import ErrorHandler
+from hed.errors import ErrorHandler, ErrorContext
 
 
 class Test(unittest.TestCase):
@@ -58,6 +58,7 @@ class Test(unittest.TestCase):
         input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate(hed_schema=self.hed_schema)
+        self.assertEqual(validation_issues[0][ErrorContext.ROW], 2)
         self.assertEqual(len(validation_issues), 1)
 
     def test_blank_and_duplicate_columns(self):

@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
 
     def test_parse_arguments(self):
         # Test no verbose
-        arg_list1 = [self.data_root, self.model_path, '-x', 'derivatives', '-n', 'back1']
+        arg_list1 = [self.data_root, self.model_path, '-x', 'derivatives', '-bn', 'back1']
         with patch('sys.stdout', new=io.StringIO()) as fp1:
             args1, operations1 = parse_arguments(arg_list1)
             self.assertFalse(fp1.getvalue())
@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
         self.assertEqual(args1.file_suffix, 'events')
 
         # Test * for extensions and suffix as well as verbose
-        arg_list2 = [self.data_root, self.model_path, '-x', 'derivatives', '-n', 'back1', '-f', '*', '-e', '*', '-v']
+        arg_list2 = [self.data_root, self.model_path, '-x', 'derivatives', '-bn', 'back1', '-f', '*', '-e', '*', '-v']
         with patch('sys.stdout', new=io.StringIO()) as fp2:
             args2, operations2 = parse_arguments(arg_list2)
             self.assertTrue(fp2.getvalue())
@@ -164,13 +164,13 @@ class Test(unittest.TestCase):
 
     def test_main_errors(self):
         # Test bad data directory
-        arg_list = ['junk/junk', self.model_path, '-x', 'derivatives', '-n', 'back1']
+        arg_list = ['junk/junk', self.model_path, '-x', 'derivatives', '-bn', 'back1']
         with self.assertRaises(HedFileError) as context:
             main(arg_list=arg_list)
         self.assertEqual(context.exception.args[0], "DataDirectoryDoesNotExist")
 
         # Test no backup
-        arg_list = [self.data_root, self.model_path, '-x', 'derivatives', '-n', 'back1']
+        arg_list = [self.data_root, self.model_path, '-x', 'derivatives', '-bn', 'back1']
         with self.assertRaises(HedFileError) as context:
             main(arg_list=arg_list)
         self.assertEqual(context.exception.args[0], "BackupDoesNotExist")
@@ -192,12 +192,6 @@ class Test(unittest.TestCase):
         with patch('sys.stdout', new=io.StringIO()) as fp:
             main(arg_list)
             self.assertFalse(fp.getvalue())
-
-    # def test_temp(self):
-    #     data_root = "g:/ds002718OpenNeuro"
-    #     model_path = 'G:/wh_excerpt_rmdl.json'
-    #     arg_list = [data_root, model_path, '-x', 'derivatives', 'code', 'stimuli', '-b', '-n', '']
-    #     main(arg_list)
 
 
 if __name__ == '__main__':

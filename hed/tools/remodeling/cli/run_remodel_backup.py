@@ -1,5 +1,6 @@
 """ Command-line program for creating a backup. """
 
+import os
 import argparse
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import get_file_list, get_filtered_by_element
@@ -15,21 +16,18 @@ def get_parser():
     """
     parser = argparse.ArgumentParser(description="Creates a backup for the remodeling process.")
     parser.add_argument("data_dir", help="Full path of dataset root directory.")
+    parser.add_argument("-bd", "--backup_dir", default="", dest="backup_dir",
+                        help="Directory for the backup that is being created")
+    parser.add_argument("-bn", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
+                        help="Name of the default backup for remodeling")
     parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
                         help="File extensions to allow in locating files. A * indicates all files allowed.")
     parser.add_argument("-f", "--file-suffix", dest="file_suffix", nargs="*", default=['events'],
                         help="Filename suffix of files to be backed up. A * indicates all files allowed.")
-    parser.add_argument("-n", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
-                        help="Name of the default backup for remodeling")
-    parser.add_argument("-p", "--path-work", default="", dest="path_work",
-                        help="The root path for remodeling work if given, " +
-                             "otherwise [data_root]/derivatives/remodel is used.")
+
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
     parser.add_argument("-v", "--verbose", action='store_true',
                         help="If present, output informative messages as computation progresses.")
-    parser.add_argument("-w", "--work-dir", default="", dest="work_dir",
-                        help="If given, is the path to directory for saving, " +
-                             "otherwise [data_root]derivatives/remodel is used.")
     parser.add_argument("-x", "--exclude-dirs", nargs="*", default=['derivatives'], dest="exclude_dirs",
                         help="Directories names to exclude from search for files. " +
                              "If omitted, no directories except the backup directory will be excluded." +
@@ -60,8 +58,8 @@ def main(arg_list=None):
                               exclude_dirs=exclude_dirs)
     if args.task_names:
         file_list = get_filtered_by_element(file_list, args.task_names)
-    if args.work_dir:
-        backups_root = args.work_dir
+    if args.backup_dir:
+        backups_root = args.backup_dir
     else:
         backups_root = None
     backup_man = BackupManager(args.data_dir, backups_root=backups_root)

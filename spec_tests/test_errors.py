@@ -36,9 +36,6 @@ class MyTestCase(unittest.TestCase):
             test_info = json.load(fp)
         for info in test_info:
             error_code = info['error_code']
-            verify_code = True
-            # To be deprecated once we add this to all tests
-            self._verify_code = verify_code
             if error_code in skip_tests:
                 print(f"Skipping {error_code} test because: {skip_tests[error_code]}")
                 continue
@@ -47,7 +44,7 @@ class MyTestCase(unittest.TestCase):
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
 
-            # if name != "attribute-invalid-in-library":
+            # if name != "sidecar-braces-invalid-spot":
             #     continue
             description = info['description']
             schema = info['schema']
@@ -79,7 +76,7 @@ class MyTestCase(unittest.TestCase):
                 print(f"Passed '{test_type}' (which should fail) '{name}': {test}")
                 print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
-            elif self._verify_code:
+            else:
                 if any(issue['code'] == error_code for issue in issues):
                     return
                 print(f"{error_code}: {description}")

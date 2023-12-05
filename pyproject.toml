@@ -1,3 +1,7 @@
 [build-system]
 requires = ["setuptools>=42", "versioneer-518"]
 build-backend = "setuptools.build_meta"
+
+[tool.codespell]
+skip = '*.git,*.pdf,*.xml,*.mediawiki,*.svg,versioneer.py,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests'
+ignore-words-list = 'te,parms'

@@ -1,32 +1,42 @@
-{{ fullname | escape | underline}}
+{{ fullname.split('.')[-1] | escape | underline }}
 
 .. currentmodule:: {{ module }}
 
-.. autoclass:: {{ objname }}
-   :members:
-   :show-inheritance:
-   :inherited-members:
+.. autoclass:: {{ module }}.{{ objname }}
+   :noindex:
 
-   {% block methods %}
-   .. automethod:: __init__
+.. rubric:: {{ _('Methods') }}
 
-   {% if methods %}
-   .. rubric:: {{ _('Methods') }}
+.. autosummary::
+{% for item in methods %}
+   {{ module }}.{{ objname }}.{{ item }}
+{%- endfor %}
 
-   .. autosummary::
-   {% for item in methods %}
-      ~{{ name }}.{{ item }}
-   {%- endfor %}
-   {% endif %}
-   {% endblock %}
+.. rubric:: {{ _('Attributes') }}
 
-   {% block attributes %}
-   {% if attributes %}
-   .. rubric:: {{ _('Attributes') }}
+.. autosummary::
+{% for item in attributes %}
+   {{ module }}.{{ objname }}.{{ item }}
+{%- endfor %}
 
-   .. autosummary::
-   {% for item in attributes %}
-      ~{{ name }}.{{ item }}
-   {%- endfor %}
-   {% endif %}
-   {% endblock %}
+.. toctree::
+   :hidden:
+
+{% for item in methods %}
+   {{ fullname }}#method-{{ item }}
+{%- endfor %}
+{% for item in attributes %}
+   {{ fullname }}#attribute-{{ item }}
+{%- endfor %}
+
+{% for item in methods %}
+.. _method-{{ item }}:
+
+.. automethod:: {{ module }}.{{ objname }}.{{ item }}
+{%- endfor %}
+
+{% for item in attributes %}
+.. _attribute-{{ item }}:
+
+.. autoattribute:: {{ module }}.{{ objname }}.{{ item }}
+{%- endfor %}
