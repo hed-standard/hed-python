@@ -28,7 +28,8 @@ class RemodelerValidator():
             "type": "Operation {operation_index}: The value of {parameter_path}, in the {operation_name} operation, should be a {validator_value}. {instance} is not a {validator_value}.",
             "minItems": "Operation {operation_index}: The list in {parameter_path}, in the {operation_name} operation, should have at least {validator_value} item(s).",
             "required": "Operation {operation_index}: The field {missing_value} is missing in {parameter_path}. {missing_value} is a required parameter of {parameter_path}.",
-            "additionalProperties": "Operation {operation_index}: Operation parameters for {parameter_path} contain an unexpected field '{added_property}'."
+            "additionalProperties": "Operation {operation_index}: Operation parameters for {parameter_path} contain an unexpected field '{added_property}'.",
+            "enum": "Operation {operation_index}: Operation parameter {parameter_path}, in the {operation_name} operation, contains and unexpected value. Value should be one of {validator_value}."
 
         }
     }
@@ -105,7 +106,6 @@ class RemodelerValidator():
         that led to the error
         '''
         error_dict = vars(error)
-        print(error_dict)
 
         level = len(error_dict["path"])
         if level > 2:

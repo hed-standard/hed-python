@@ -10,8 +10,6 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.remodeler_schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__.replace('tests', 'hed'))), '../remodeling/resources/remodeler_schema.json'))
-
         with open(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '../data/remodel_tests/all_remodel_operations.json'))) as f:
             cls.remodel_file = json.load(f)
 
@@ -88,9 +86,16 @@ class Test(unittest.TestCase):
         self.assertEqual(error_strings[0], "Operation 1: The value of onset_source, response, new_events, in the split_rows operation, should be a array. {'key': 'value'} is not a array.")
 
         empty_array = [deepcopy(self.remodel_file[0])]
-        
-        empty_array_nested = [deepcopy(self.remodel_file[0])]
+        empty_array[0]["parameters"]["column_names"] = []
+        error_strings = validator.validate(empty_array)
+        self.assertEqual(error_strings[0], "Operation 1: The list in column_names, in the remove_columns operation, should have at least 1 item(s).")
+       
+        empty_array_nested = [deepcopy(self.remodel_file[5])]
+        empty_array_nested[0]["parameters"]["map_list"][0] = []
+        error_strings = validator.validate(empty_array_nested)
+        self.assertEqual(error_strings[0], "Operation 1: The list in item 1, map_list, in the remap_columns operation, should have at least 1 item(s).")        
 
-
-
-
+        # invalid_value = [deepcopy(self.remodel_file[18])]
+        # invalid_value[0]["parameters"]["convert_to"] = "invalid_value"
+        # error_strings = validator.validate(invalid_value)
+        # self.assertEqual(error_strings[0], "Operation 1: Operation parameter convert_to, in the convert_columns operation, contains and unexpected value. Value should be one of ['str', 'int', 'float', 'fixed'].")
