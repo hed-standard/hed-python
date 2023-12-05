@@ -17,8 +17,10 @@ class FactorHedTagsOp(BaseOp):
     Required remodeling parameters:   
         - **queries** (*list*): Queries to be applied successively as filters.    
         - **query_names** (*list*):  Column names for the query factors.    
-        - **remove_types** (*list*):  Structural HED tags to be removed.    
-        - **expand_context** (*bool*): Expand the context if True.    
+        - **remove_types** (*list*):  Structural HED tags to be removed.        
+
+    Optional remodeling parameters:   
+        - **expand_context** (*bool*): Expand the context if True.
 
     Notes:  
         - If factor column names are not provided, *query1*, *query2*, ... are used.   
@@ -35,7 +37,8 @@ class FactorHedTagsOp(BaseOp):
                 "items": {
                     "type": "string"
                 },
-                "minItems": 1
+                "minItems": 1,
+                "uniqueItems": True
             },
             "query_names": {
                 "type": "array",
@@ -69,17 +72,8 @@ class FactorHedTagsOp(BaseOp):
         Parameters:
             parameters (dict):  Actual values of the parameters for the operation.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         :raises ValueError:
-            - If the specification is missing a valid operation.
             - If the length of query names is not empty and not same length as queries.
-            - If there are duplicate query names.
 
         """
         super().__init__(self.PARAMS, parameters)

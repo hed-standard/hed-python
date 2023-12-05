@@ -16,6 +16,9 @@ class SummarizeHedValidationOp(BaseOp):
         - **summary_filename** (*str*): Base filename of the summary.
         - **check_for_warnings** (*bool*): If true include warnings as well as errors.
 
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*): If true, 
+
     The purpose of this op is to produce a summary of the HED validation errors in a file.
 
     """
@@ -51,13 +54,6 @@ class SummarizeHedValidationOp(BaseOp):
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
-
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)

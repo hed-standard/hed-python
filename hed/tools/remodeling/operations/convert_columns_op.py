@@ -9,6 +9,8 @@ class ConvertColumnsOp(BaseOp):
     Required remodeling parameters:   
         - **column_names** (*list*):   The list of columns to convert.   
         - **convert_to_** (*str*):  Name of type to convert to. (One of 'str', 'int', 'float', 'fixed'.)   
+    
+    Optional remodeling parameters:
         - **decimal_places** (*int*):   Number decimal places to keep (for fixed only).   
 
     """

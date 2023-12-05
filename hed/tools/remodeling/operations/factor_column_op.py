@@ -51,13 +51,6 @@ class FactorColumnOp(BaseOp):
         Parameters:
             parameters (dict): Parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         :raises ValueError:
             - If factor_names is not empty and is not the same length as factor_values.
 

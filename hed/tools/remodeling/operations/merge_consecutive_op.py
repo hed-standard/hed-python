@@ -58,15 +58,7 @@ class MergeConsecutiveOp(BaseOp):
         Parameters:
             parameters (dict): Actual values of the parameters for the operation.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         :raises ValueError:
-            - If the specification is missing a valid operation.
             - If one of the match column is the merge column.
 
         """

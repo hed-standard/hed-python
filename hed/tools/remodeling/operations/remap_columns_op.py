@@ -33,13 +33,15 @@ class RemapColumnsOp(BaseOp):
                 "type": "array",
                 "items": {
                     "type": "string"
-                }
+                },
+                "minItems": 1
             },
             "destination_columns": {
                 "type": "array",
                 "items": {
                     "type": "string"
-                }
+                },
+                "minItems": 1
             },
             "map_list": {
                 "type": "array",
@@ -80,18 +82,9 @@ class RemapColumnsOp(BaseOp):
             Parameters:
                 parameters (dict): Parameter values for required and optional parameters.
 
-            :raises KeyError:
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
-
-            :raises TypeError:
-                - If a parameter has the wrong type.
-
             :raises ValueError:
                 - If an integer column is not a key column.
                 - If a column designated as an integer source does not have valid integers.
-                - If no source columns are specified.
-                - If no destination columns are specified.
                 - If a map_list entry has the wrong number of items (source columns + destination columns).
 
           """
@@ -109,13 +102,6 @@ class RemapColumnsOp(BaseOp):
         self.destination_columns = parameters['destination_columns']
         self.map_list = parameters['map_list']
         self.ignore_missing = parameters['ignore_missing']
-        if len(self.source_columns) < 1:
-            raise ValueError("EmptySourceColumns",
-                             f"The source column list {str(self.source_columns)} must be non-empty")
-
-        if len(self.destination_columns) < 1:
-            raise ValueError("EmptyDestinationColumns",
-                             f"The destination column list {str(self.destination_columns)} must be non-empty")
         entry_len = len(self.source_columns) + len(self.destination_columns)
         for index, item in enumerate(self.map_list):
             if len(item) != entry_len:

@@ -43,16 +43,6 @@ class FactorHedTypeOp(BaseOp):
         Parameters:
             parameters (dict):  Actual values of the parameters for the operation.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
-        :raises ValueError:
-            - If the specification is missing a valid operation.
-
         """
         super().__init__(self.PARAMS, parameters)
         self.type_tag = parameters["type_tag"]

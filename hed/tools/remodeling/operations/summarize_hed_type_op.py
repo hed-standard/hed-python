@@ -15,7 +15,10 @@ class SummarizeHedTypeOp(BaseOp):
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
         - **summary_filename** (*str*): Base filename of the summary.   
-        - **type_tag** (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags).   
+        - **type_tag** (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags).
+
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*): If true,    
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
     is often used with `condition-variable` to produce a summary of the experimental design.
@@ -55,13 +58,6 @@ class SummarizeHedTypeOp(BaseOp):
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
-
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
 
         """
         super().__init__(self.PARAMS, parameters)

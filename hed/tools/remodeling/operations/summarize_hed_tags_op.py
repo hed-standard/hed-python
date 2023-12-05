@@ -18,7 +18,10 @@ class SummarizeHedTagsOp(BaseOp):
         - **tags** (*dict*): Specifies how to organize the tag output. 
 
     Optional remodeling parameters:    
-       - **expand_context** (*bool*): If True, include counts from expanded context (not supported).   
+       - **append_timecode** (*bool*): If True, .
+       - **include_context** (*bool*): If True, . 
+       - **replace_defs** (*bool*): If True, .  
+       - **remove_types** (*bool*): If True, . 
 
     The purpose of this op is to produce a summary of the occurrences of hed tags organized in a specified manner.
     The
@@ -96,14 +99,7 @@ class SummarizeHedTagsOp(BaseOp):
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
-
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
+            
         """
         super().__init__(self.PARAMS, parameters)
         self.summary_name = parameters['summary_name']
