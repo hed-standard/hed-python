@@ -84,7 +84,8 @@ class RemodelerValidator():
     }
 
     def __init__(self):
-        self.validator = Draft7Validator(self._construct_schema())
+        self.schema = self._construct_schema()
+        self.validator = Draft7Validator(self.schema)
 
     def validate(self, operations):
         list_of_error_strings = []
