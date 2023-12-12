@@ -10,12 +10,14 @@ class SummarizeColumnValuesOp(BaseOp):
 
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary.   
-        - **skip_columns** (*list*):  Names of columns to skip in the summary.   
-        - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns.   
+        - **summary_filename** (*str*): Base filename of the summary.     
 
-    Optional remodeling parameters:   
-         - **max_categorical** (*int*): Maximum number of unique values to include in summary for a categorical column.   
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*): If false (default), the timecode is not appended to the base filename when summary is saved, otherwise it is. 
+        - **max_categorical** (*int*): Maximum number of unique values to include in summary for a categorical column.  
+        - **skip_columns** (*list*):  Names of columns to skip in the summary.   
+        - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns. 
+        - **values_per_line** (*int*): The number of values output per line in the summary.    
 
     The purpose is to produce a summary of the values in a tabular file.
 
@@ -31,23 +33,27 @@ class SummarizeColumnValuesOp(BaseOp):
             "summary_filename": {
                 "type": "string"
             },
-            "skip_columns": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            },
-            "value_columns": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            },
             "append_timecode": {
                 "type": "boolean"
             },
             "max_categorical": {
                 "type": "integer"
+            },
+            "skip_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "value_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
             },
             "values_per_line": {
                 "type": "integer"
@@ -55,9 +61,7 @@ class SummarizeColumnValuesOp(BaseOp):
         },
         "required": [
             "summary_name",
-            "summary_filename",
-            "skip_columns",
-            "value_columns"
+            "summary_filename"
         ],
         "additionalProperties": False
     }

@@ -11,7 +11,10 @@ class SummarizeSidecarFromEventsOp(BaseOp):
 
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary.   
+        - **summary_filename** (*str*): Base filename of the summary. 
+
+    Optional remodeling parameters: 
+        - **append_timecode** (*bool*):  
         - **skip_columns** (*list*): Names of columns to skip in the summary.   
         - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns.   
 
@@ -33,13 +36,17 @@ class SummarizeSidecarFromEventsOp(BaseOp):
                 "type": "array",
                 "items": {
                     "type": "string"
-                }
+                },
+                "minItems": 1,
+                "uniqueItems": True
             },
             "value_columns": {
                 "type": "array",
                 "items": {
                     "type": "string"
-                }
+                },
+                "minItems": 1,
+                "uniqueItems": True
             },
             "append_timecode": {
                 "type": "boolean"
@@ -47,9 +54,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         },
         "required": [
             "summary_name",
-            "summary_filename",
-            "skip_columns",
-            "value_columns"
+            "summary_filename"
         ],
         "additionalProperties": False
     }

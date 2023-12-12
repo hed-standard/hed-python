@@ -15,17 +15,16 @@ class FactorHedTagsOp(BaseOp):
     """ Create tabular file factors from tag queries.
 
     Required remodeling parameters:   
-        - **queries** (*list*): Queries to be applied successively as filters.    
-        - **query_names** (*list*):  Column names for the query factors.    
-        - **remove_types** (*list*):  Structural HED tags to be removed.        
+        - **queries** (*list*): Queries to be applied successively as filters.       
 
     Optional remodeling parameters:   
         - **expand_context** (*bool*): Expand the context if True.
+        - **query_names** (*list*):  Column names for the query factors. 
+        - **remove_types** (*list*):  Structural HED tags to be removed. 
 
     Notes:  
-        - If factor column names are not provided, *query1*, *query2*, ... are used.   
+        - If query names are not provided, *query1*, *query2*, ... are used.   
         - When the context is expanded, the effect of events for temporal extent is accounted for.  
-        - Context expansion is not implemented in the current version.  
     """
     NAME = "factor_hed_tags"
     
@@ -40,28 +39,28 @@ class FactorHedTagsOp(BaseOp):
                 "minItems": 1,
                 "uniqueItems": True
             },
+            "expand_context": {
+                "type": "boolean"
+            },
             "query_names": {
                 "type": "array",
                 "items": {
                     "type": "string"
                 },
-                "minItems": 1
+                "minItems": 1,
+                "uniqueItems": True
             },
             "remove_types": {
                 "type": "array",
                 "items": {
                     "type": "string"
                 },
-                "minItems": 0
-            },
-            "expand_context": {
-                "type": "boolean"
+                "minItems": 1,
+                "uniqueItems": True
             }
         },
         "required": [
-            "queries",
-            "query_names",
-            "remove_types"
+            "queries"
         ],
         "additionalProperties": False
     }

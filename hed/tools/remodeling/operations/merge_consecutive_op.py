@@ -10,9 +10,11 @@ class MergeConsecutiveOp(BaseOp):
     Required remodeling parameters:
         - **column_name** (*str*): name of column whose consecutive values are to be compared (the merge column).  
         - **event_code** (*str* or *int* or *float*): the particular value in the match column to be merged.  
-        - **match_columns** (*list*):  A list of columns whose values have to be matched for two events to be the same.  
         - **set_durations** (*bool*): If true, set the duration of the merged event to the extent of the merged events.  
-        - **ignore_missing** (*bool*):  If true, missing match_columns are ignored.  
+        - **ignore_missing** (*bool*):  If true, missing match_columns are ignored.
+
+    Optional remodeling parameters:
+        - **match_columns** (*list*):  A list of columns whose values have to be matched for two events to be the same.   
 
     """
     NAME = "merge_consecutive"
@@ -45,7 +47,6 @@ class MergeConsecutiveOp(BaseOp):
         "required": [
             "column_name",
             "event_code",
-            "match_columns",
             "set_durations",
             "ignore_missing"
         ],

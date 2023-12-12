@@ -19,7 +19,7 @@ class RenameColumnsOp (BaseOp):
             "column_mapping": {
                 "type": "object",
                 "patternProperties": {
-                    "(.*?)": {
+                    ".*": {
                         "type": "string"
                     }
                 },

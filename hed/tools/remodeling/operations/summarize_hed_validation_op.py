@@ -17,7 +17,7 @@ class SummarizeHedValidationOp(BaseOp):
         - **check_for_warnings** (*bool*): If true include warnings as well as errors.
 
     Optional remodeling parameters:
-        - **append_timecode** (*bool*): If true, 
+        - **append_timecode** (*bool*): If true, the timecode is appended to the base filename when summary is saved. 
 
     The purpose of this op is to produce a summary of the HED validation errors in a file.
 
@@ -38,11 +38,15 @@ class SummarizeHedValidationOp(BaseOp):
             },
             "check_for_warnings": {
                 "type": "boolean"
+            },
+            "append_timecode": {
+                "type": "boolean"
             }
         },
         "required": [
             "summary_name",
-            "summary_filename"
+            "summary_filename",
+            "check_for_warnings"
         ],
         "additionalProperties": False
     }

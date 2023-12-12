@@ -14,8 +14,10 @@ class FactorHedTypeOp(BaseOp):
     """ Create tabular file factors from type variables and append to tabular data.
 
     Required remodeling parameters:   
-        - **type_tag** (*str*): HED tag used to find the factors (most commonly `condition-variable`).   
-        - **type_values** (*list*): Factor values to include. If empty all values of that type_tag are used.   
+        - **type_tag** (*str*): HED tag used to find the factors (most commonly `condition-variable`).
+
+    Optional remodeling parameters:   
+        - **type_values** (*list*): If provided, specifies which factor values to include.
 
     """
     NAME = "factor_hed_type"
@@ -27,12 +29,16 @@ class FactorHedTypeOp(BaseOp):
                 "type": "string"
             },
             "type_values": {
-                "type": "array"
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
             }
         },
         "required": [
-            "type_tag",
-            "type_values"
+            "type_tag"
         ],
         "additionalProperties": False
     }

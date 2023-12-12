@@ -83,8 +83,7 @@ class RemapColumnsOp(BaseOp):
                 parameters (dict): Parameter values for required and optional parameters.
 
             :raises ValueError:
-                - If an integer column is not a key column.
-                - If a column designated as an integer source does not have valid integers.
+                - If an integer column is not a source column.
                 - If a map_list entry has the wrong number of items (source columns + destination columns).
 
           """
@@ -111,6 +110,13 @@ class RemapColumnsOp(BaseOp):
         self.key_map = self._make_key_map()
 
     def _make_key_map(self):
+        """
+
+        :raises ValueError:
+        - If a column designated as an integer source does not have valid integers.
+
+        """
+                            
         key_df = pd.DataFrame(
             self.map_list, columns=self.source_columns+self.destination_columns)
         key_map = KeyMap(self.source_columns,

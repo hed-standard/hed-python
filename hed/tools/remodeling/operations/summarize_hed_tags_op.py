@@ -18,10 +18,10 @@ class SummarizeHedTagsOp(BaseOp):
         - **tags** (*dict*): Specifies how to organize the tag output. 
 
     Optional remodeling parameters:    
-       - **append_timecode** (*bool*): If True, .
-       - **include_context** (*bool*): If True, . 
-       - **replace_defs** (*bool*): If True, .  
-       - **remove_types** (*bool*): If True, . 
+       - **append_timecode** (*bool*): If True, the timecode is appended to the base filename when summary is saved.
+       - **include_context** (*bool*): If True, context of events is included in summary. 
+       - **remove_types** (*list*): A list of type tags, such as Condition-variable or Task, to be excluded from the summary. 
+       - **replace_defs** (*bool*): If True, the def tag is replaced by the contents of the definitions.  
 
     The purpose of this op is to produce a summary of the occurrences of hed tags organized in a specified manner.
     The
@@ -41,32 +41,18 @@ class SummarizeHedTagsOp(BaseOp):
             },
             "tags": {
                 "type": "object",
-                "properties": {
-                    "Sensory events": {
+                "patternProperties": {
+                    ".*": {
                         "type": "array",
                         "items": {
                             "type": "string"
-                        }
-                    },
-                    "Agent actions": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "Objects": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
+                        },
+                        "minItems": 1,
+                        "uniqueItems": True
                 },
-                "required": [
-                    "Sensory events",
-                    "Agent actions",
-                    "Objects"
-                ],
+                "minProperties": 1,
                 "additionalProperties": False
+            }
             },
             "append_timecode": {
                 "type": "boolean"
@@ -74,14 +60,16 @@ class SummarizeHedTagsOp(BaseOp):
             "include_context": {
                 "type": "boolean"
             },
-            "replace_defs": {
-                "type": "boolean"
-            },
             "remove_types": {
                 "type": "array",
                 "items": {
                     "type": "string"
-                }
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "replace_defs": {
+                "type": "boolean"
             }
         },
         "required": [

@@ -4,43 +4,50 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 # TODO: Does not handle empty factor names.
 # TODO: Does not handle optional return columns.
+# TODO: Put dependency factornames requires factorvalues in
+# TODO: Same length factornames and factorvalues
 
 
 class FactorColumnOp(BaseOp):
     """ Create tabular file factor columns from column values.
 
     Required remodeling parameters:   
-        - **column_name** (*str*):  The name of a column in the DataFrame.   
-        - **factor_values** (*list*):  Values in the column column_name to create factors for.   
-        - **factor_names** (*list*):   Names to use as the factor columns.   
+        - **column_name** (*str*):  The name of a column in the DataFrame. 
+
+    Optional remodeling parameters
+        - **factor_names** (*list*):   Names to use as the factor columns.  
+        - **factor_values** (*list*):  Values in the column column_name to create factors for.    
 
     """
     NAME = "factor_column"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
             "column_name": {
                 "type": "string"
             },
-            "factor_values": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            },
             "factor_names": {
                 "type": "array",
                 "items": {
                     "type": "string"
                 },
-                "minItems": 1
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "factor_values": {
+                "type": "array",
+                "items": {
+                        "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
             }
         },
         "required": [
             "column_name",
-            "factor_values",
-            "factor_names"
+            "factor_names",
+            "factor_values"
         ],
         "additionalProperties": False
     }

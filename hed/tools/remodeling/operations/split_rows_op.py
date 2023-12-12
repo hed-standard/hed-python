@@ -25,7 +25,7 @@ class SplitRowsOp(BaseOp):
             "new_events": {
                 "type": "object",
                 "patternProperties": {
-                    "^[a-zA-Z0-9_]*$": {
+                    ".*": {
                         "type": "object",
                         "properties": {
                             "onset_source": {
@@ -35,7 +35,8 @@ class SplitRowsOp(BaseOp):
                                         "string",
                                         "number"
                                     ]
-                                }
+                                },
+                                "minItems": 1
                             },
                             "duration": {
                                 "type": "array",
@@ -44,33 +45,35 @@ class SplitRowsOp(BaseOp):
                                         "string",
                                         "number"
                                     ]
-                                }
+                                },
+                                "minItems": 1
                             },
                             "copy_columns": {
                                 "type": "array",
                                 "items": {
                                     "type": "string"
                                 }
-                            }
+                            },
+                            "minItems": 1,
+                            "uniqueItems": True
                         },
                         "required": [
                             "onset_source",
-                            "duration",
-                            "copy_columns"
+                            "duration"
                         ],
                         "additionalProperties": False
                     }
                 },
                 "minProperties": 1
             },
-            "remove_parent_event": {
+            "remove_parent_row": {
                 "type": "boolean"
             }
         },
         "required": [
-            "remove_parent_event",
             "new_events",
-            "anchor_columns"
+            "anchor_columns",
+            "remove_parent_row"
         ],
         "additionalProperties": False
     }

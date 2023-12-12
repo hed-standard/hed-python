@@ -1,4 +1,6 @@
 """ Convert the type of the specified columns of a tabular file. """
+#TODO finish implementation
+#TODO Specify when requirements for decimal_places parameter
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
@@ -8,11 +10,13 @@ class ConvertColumnsOp(BaseOp):
 
     Required remodeling parameters:   
         - **column_names** (*list*):   The list of columns to convert.   
-        - **convert_to_** (*str*):  Name of type to convert to. (One of 'str', 'int', 'float', 'fixed'.)   
+        - **convert_to** (*str*):  Name of type to convert to. (One of 'str', 'int', 'float', 'fixed'.)   
     
     Optional remodeling parameters:
         - **decimal_places** (*int*):   Number decimal places to keep (for fixed only).   
 
+    Notes:
+        - Decimal places requirements not implemented    
     """
     NAME = "convert_columns"
     
@@ -23,7 +27,9 @@ class ConvertColumnsOp(BaseOp):
                 "type": "array",
                 "items": {
                     "type": "string"
-                }
+                },
+                "minItems": 1,
+                "uniqueItems": True
             },
             "convert_to": {
                 "type": "string",

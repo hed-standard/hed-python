@@ -18,7 +18,7 @@ class SummarizeHedTypeOp(BaseOp):
         - **type_tag** (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags).
 
     Optional remodeling parameters:
-        - **append_timecode** (*bool*): If true,    
+        - **append_timecode** (*bool*): If true, the timecode is appended to the base filename when summary is saved   
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
     is often used with `condition-variable` to produce a summary of the experimental design.

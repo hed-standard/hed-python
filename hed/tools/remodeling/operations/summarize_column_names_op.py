@@ -9,8 +9,11 @@ class SummarizeColumnNamesOp(BaseOp):
     """  Summarize the column names in a collection of tabular files.
 
     Required remodeling parameters:   
-        - **summary_name** (*str*)       The name of the summary.   
-        - **summary_filename** (*str*)   Base filename of the summary.   
+        - **summary_name** (*str*): The name of the summary.   
+        - **summary_filename** (*str*): Base filename of the summary.
+
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*): If false (default), the timecode is not appended to the base filename when summary is saved, otherwise it is.
 
     The purpose is to check that all the tabular files have the same columns in same order.
 
