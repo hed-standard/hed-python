@@ -8,4 +8,4 @@ semantic_version>=2.10.0
 myst-parser>=1.0.0
 Sphinx>=5.2.2
 sphinx_rtd_theme>=1.0.0
-wordcloud==1.9.2
+wordcloud==1.9.3
