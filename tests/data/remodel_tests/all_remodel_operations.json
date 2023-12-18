@@ -37,7 +37,6 @@
                 "correct",
                 "incorrect"
             ],
-            "remove_types": [],
             "expand_context": false
         }
     },
@@ -45,8 +44,7 @@
         "operation": "factor_hed_type",
         "description": "Factor based on the sex of the images being presented.",
         "parameters": {
-            "type_tag": "Condition-variable",
-            "type_values": []
+            "type_tag": "Condition-variable"
         }
     },
     {
@@ -185,7 +183,7 @@
                     ]
                 }
             },
-            "remove_parent_event": false
+            "remove_parent_row": false
         }
     },
     {
@@ -271,10 +269,6 @@
         "parameters": {
             "summary_name": "AOMIC_generate_sidecar",
             "summary_filename": "AOMIC_generate_sidecar",
-            "skip_columns": [
-                "onset",
-                "duration"
-            ],
             "value_columns": [
                 "response_time",
                 "stop_signal_delay"

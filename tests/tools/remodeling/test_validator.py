@@ -3,8 +3,6 @@ import json
 import unittest
 from copy import deepcopy
 from hed.tools.remodeling.validator import RemodelerValidator
-from jsonschema import Draft7Validator
-from jsonschema.exceptions import SchemaError
 
 class Test(unittest.TestCase):
 
@@ -99,3 +97,23 @@ class Test(unittest.TestCase):
         # invalid_value[0]["parameters"]["convert_to"] = "invalid_value"
         # error_strings = validator.validate(invalid_value)
         # self.assertEqual(error_strings[0], "Operation 1: Operation parameter convert_to, in the convert_columns operation, contains and unexpected value. Value should be one of ['str', 'int', 'float', 'fixed'].")
+
+        # value_dependency = [deepcopy(self.remodel_file[18])] 
+        # value_dependency[0]["parameters"]["convert_to"] = "fixed"
+        # error_strings = validator.validate(value_dependency)
+        # self.assertEqual(error_strings[0], "Operation 1: The parameter decimal_places is missing. decimal_places is a required parameter of convert_columns.")
+
+        property_dependency = [deepcopy(self.remodel_file[1])]
+        del property_dependency[0]["parameters"]["factor_values"]
+        error_strings = validator.validate(property_dependency)
+        self.assertEqual(error_strings[0], "Operation 1: The parameter factor_names is missing. factor_names is a required parameter of factor_column when ['factor_values'] is specified.")
+
+        double_item_in_array = [deepcopy(self.remodel_file[0])]
+        double_item_in_array[0]["parameters"]["column_names"] = ['response', 'response']
+        error_strings = validator.validate(double_item_in_array)
+        self.assertEqual(error_strings[0], "Operation 1: The list in column_names, in the remove_columns operation, should only contain unique items.")
+
+        double_item_in_array_nested = [deepcopy(self.remodel_file[10])]
+        double_item_in_array_nested[0]["parameters"]["new_events"]["response"]["copy_columns"] = ['response', 'response']
+        error_strings = validator.validate(double_item_in_array_nested)
+        self.assertEqual(error_strings[0], "Operation 1: The list in copy_columns, response, new_events, in the split_rows operation, should only contain unique items.")

@@ -43,7 +43,15 @@ class ConvertColumnsOp(BaseOp):
             "column_names",
             "convert_to"
         ],
-        "additionalProperties": False
+        "additionalProperties": False,
+        "if": {
+            "properties": {
+                "convert_to": {"const": "fixed"}
+            }
+        },
+        "then": {
+            "required": ["decimal_places"]
+        }
     }
 
     def __init__(self, parameters):

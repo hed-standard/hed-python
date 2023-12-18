@@ -4,7 +4,6 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 # TODO: Does not handle empty factor names.
 # TODO: Does not handle optional return columns.
-# TODO: Put dependency factornames requires factorvalues in
 # TODO: Same length factornames and factorvalues
 
 
@@ -45,10 +44,11 @@ class FactorColumnOp(BaseOp):
             }
         },
         "required": [
-            "column_name",
-            "factor_names",
-            "factor_values"
+            "column_name"
         ],
+        "dependentRequired": {
+            "factor_names": ["factor_values"]
+        },
         "additionalProperties": False
     }
 
