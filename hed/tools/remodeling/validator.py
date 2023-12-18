@@ -1,12 +1,13 @@
 import os
 import json
 from copy import deepcopy
-from jsonschema import Draft7Validator
+from jsonschema import Draft202012Validator
 from jsonschema.exceptions import ErrorTree
 from hed.tools.remodeling.operations.valid_operations import valid_operations
 
 
 class RemodelerValidator():
+    """Validator for remodeler input files."""
 
     MESSAGE_STRINGS = {
         "0": {
@@ -22,15 +23,17 @@ class RemodelerValidator():
             "type": "Operation {operation_index}: {instance} is not a {validator_value}. {operation_field} should be of type {validator_value}.",
             "enum": "{instance} is not a known remodeler operation. Accepted remodeler operations can be found in the documentation.",
             "required": "Operation {operation_index}: The parameter {missing_value} is missing. {missing_value} is a required parameter of {operation_name}.",
-            "additionalProperties": "Operation {operation_index}: Operation parameters for {operation_name} contain an unexpected field '{added_property}'."
+            "additionalProperties": "Operation {operation_index}: Operation parameters for {operation_name} contain an unexpected field '{added_property}'.",
+            "dependentRequired": "Operation {operation_index}: The parameter {missing_value} is missing. {missing_value} is a required parameter of {operation_name} when {dependent_on} is specified."
         },
         "more": {
             "type": "Operation {operation_index}: The value of {parameter_path}, in the {operation_name} operation, should be a {validator_value}. {instance} is not a {validator_value}.",
             "minItems": "Operation {operation_index}: The list in {parameter_path}, in the {operation_name} operation, should have at least {validator_value} item(s).",
             "required": "Operation {operation_index}: The field {missing_value} is missing in {parameter_path}. {missing_value} is a required parameter of {parameter_path}.",
             "additionalProperties": "Operation {operation_index}: Operation parameters for {parameter_path} contain an unexpected field '{added_property}'.",
-            "enum": "Operation {operation_index}: Operation parameter {parameter_path}, in the {operation_name} operation, contains and unexpected value. Value should be one of {validator_value}."
-
+            "enum": "Operation {operation_index}: Operation parameter {parameter_path}, in the {operation_name} operation, contains and unexpected value. Value should be one of {validator_value}.",
+            "uniqueItems": "Operation {operation_index}: The list in {parameter_path}, in the {operation_name} operation, should only contain unique items.",
+            "minProperties": "Operation {operation_index}: The dictionary in {parameter_path}, in the {operation_name} operation, should have at least {validator_value} key(s)."
         }
     }
 
@@ -84,10 +87,25 @@ class RemodelerValidator():
     }
 
     def __init__(self):
+        """ Constructor for remodeler Validator
+
+        Parameters:
+            - **schema** (*dict*): The compiled json schema against which remodeler files should be validated
+            - **validator** (*Draft202012Validator*): The instantiated json schema validator
+        """
         self.schema = self._construct_schema()
-        self.validator = Draft7Validator(self.schema)
+        self.validator = Draft202012Validator(self.schema)
 
     def validate(self, operations):
+        """ Validates a dictionary against the json schema specification for the remodeler file and returns the a list of user friendly error messages
+
+        Parameters:
+            **operations**  (*dict*): Dictionary with input operations to run through the remodeler
+
+        Returns:
+            **list_of_error_strings** (*list*): List with all error messages for every error identified by the validator
+        """
+
         list_of_error_strings = []
         for error in sorted(self.validator.iter_errors(operations), key=lambda e: e.path):
             list_of_error_strings.append(
@@ -97,14 +115,15 @@ class RemodelerValidator():
     def _parse_message(self, error, operations):
         ''' Return a user friendly error message based on the jsonschema validation error
 
-        args: 
-        - errors: a list of errors returned from the validator
-        - operations: the operations that were put in
+        Parameters: 
+        - **error** (*ValidationError*): A validation error from jsonschema validator
+        - **operations**  (*dict*): The operations that were validated
 
         Note:
         - json schema error does not contain all necessary information to return a 
         proper error message so we also take some information directly from the operations 
         that led to the error
+        - all necessary information is gathered into an error dict, message strings are predefined in a dictionary which are formatted with additional information
         '''
         error_dict = vars(error)
 
@@ -140,6 +159,12 @@ class RemodelerValidator():
         if type == 'additionalProperties':
             error_dict["added_property"] = error_dict["message"].split("'")[
                 1::2][0]
+            
+        # dependent required provided both the missing value and the reason it is required in one dictionary
+        # it is split over two for the error message
+        if type == 'dependentRequired':
+            error_dict["missing_value"] = list(error_dict["validator_value"].keys())[0]
+            error_dict["dependent_on"] = list(error_dict["validator_value"].values())[0]
 
         return self.MESSAGE_STRINGS[str(level)][type].format(**error_dict)
 
@@ -154,9 +179,7 @@ class RemodelerValidator():
             parameter_specification = deepcopy(self.PARAMETER_SPECIFICATION_TEMPLATE)
             parameter_specification["if"]["properties"]["operation"]["const"] = operation[0]
             parameter_specification["then"]["properties"]["parameters"] = operation[1].PARAMS
-            #print(parameter_specification)
 
             schema["items"]["allOf"].append(deepcopy(parameter_specification))
-            #print(schema)
 
         return schema
