@@ -15,7 +15,7 @@ class SplitRowsOp(BaseOp):
 
     """
     NAME = "split_rows"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
@@ -52,10 +52,10 @@ class SplitRowsOp(BaseOp):
                                 "type": "array",
                                 "items": {
                                     "type": "string"
-                                }
-                            },
-                            "minItems": 1,
-                            "uniqueItems": True
+                                },
+                                "minItems": 1,
+                                "uniqueItems": True
+                            }
                         },
                         "required": [
                             "onset_source",
@@ -71,8 +71,8 @@ class SplitRowsOp(BaseOp):
             }
         },
         "required": [
+            "anchor_column",
             "new_events",
-            "anchor_columns",
             "remove_parent_row"
         ],
         "additionalProperties": False

@@ -20,7 +20,8 @@ class RemoveColumnsOp(BaseOp):
                 "items": {
                     "type": "string"
                 },
-                "minItems": 1
+                "minItems": 1,
+                "uniqueItems": True
             },
             "ignore_missing": {
                 "type": "boolean"

@@ -55,7 +55,8 @@ class RemapColumnsOp(BaseOp):
                     },
                     "minItems" : 1
                 },
-                "minItems": 1
+                "minItems": 1,
+                "uniqueItems": True
             },
             "ignore_missing": {
                 "type": "boolean"
@@ -64,7 +65,9 @@ class RemapColumnsOp(BaseOp):
                 "type": "array",
                 "items": {
                     "type": "string"
-                }
+                },
+                "minItems": 1,
+                "uniqueItems": True
             }
         },
         "required": [

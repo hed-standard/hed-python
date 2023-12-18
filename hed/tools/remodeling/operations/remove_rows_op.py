@@ -27,7 +27,8 @@ class RemoveRowsOp(BaseOp):
                         "number"
                     ]
                 },
-                "minItems": 1
+                "minItems": 1,
+                "uniqueItems": True
             }
         },
         "required": [
