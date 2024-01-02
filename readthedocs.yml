@@ -12,6 +12,7 @@ build:
     pre_build:
       - sphinx-build -W --keep-going -q -b linkcheck -d docs/_build/doctrees docs/ docs/_build/linkcheck
 
+
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   builder: html
