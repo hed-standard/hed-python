@@ -8,6 +8,9 @@ build:
   os: "ubuntu-22.04"
   tools:
     python: "3.7"
+  jobs:
+    pre_build:
+      - sphinx-build -W --keep-going -q -b linkcheck -d docs/_build/doctrees docs/ docs/_build/linkcheck
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
