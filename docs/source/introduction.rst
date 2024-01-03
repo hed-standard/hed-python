@@ -42,10 +42,6 @@ Finding help
 
     The `HED online tools <https://hedtools.org>`_ provide an easy-to-use interface that requires no programming. 
 
-:Mailing lists and forums:
-
-    * Don't hesitate to ask questions about the python hedtools on `NeuroStars
-      <https://neurostars.org/tags/hedtools>`_.
 
 :Issues and problems:
     * If you notice a bug in the python hedtools code or encounter other problems using the tools, please `open an issue`_ in the
