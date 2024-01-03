@@ -11,7 +11,7 @@ class HedTypeDefs:
         def_map (dict):  keys are definition names, values are dict {type_values, description, tags}
                          Example: A definition 'famous-face-cond' with contents
                          `(Condition-variable/Face-type,Description/A face that should be recognized by the
-                                                   participants,(Image,(Face,Famous)))`
+                         participants,(Image,(Face,Famous)))`
                          would have type_values ['face_type'].  All items are strings not objects.
 
 

@@ -223,7 +223,7 @@ def load_schema_version(xml_version=None, xml_folder=None):
                                            An empty string returns the latest version
                                            A json str format is also supported,
                                            based on the output of HedSchema.get_formatted_version
-                                           Basic format: '[schema_namespace:][library_name_][X.Y.Z]'.
+                                           Basic format: `[schema_namespace:][library_name_][X.Y.Z]`.
         xml_folder (str): Path to a folder containing schema.
 
     Returns:

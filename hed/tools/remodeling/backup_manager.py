@@ -224,7 +224,7 @@ class BackupManager:
         """ Return the task if the file name contains a task_xxx where xxx is in task_names.
 
         Parameters:
-            task_names (list):  List of task names (without the task_ prefix).
+            task_names (list):  List of task names (without the `task_` prefix).
             file_path (str):    Path of the filename to be tested.
 
         Returns:

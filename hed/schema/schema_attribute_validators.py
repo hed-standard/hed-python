@@ -1,13 +1,15 @@
 """The built-in functions to validate known attributes.
 
 Template for the functions:
-attribute_checker_template(hed_schema, tag_entry, attribute_name, possible_values):
-    hed_schema (HedSchema): The schema to use for validation
-    tag_entry (HedSchemaEntry): The schema entry for this tag.
-    attribute_name (str): The name of this attribute
+
+- ``attribute_checker_template(hed_schema, tag_entry, attribute_name)``:
+  - ``hed_schema (HedSchema)``: The schema to use for validation.
+  - ``tag_entry (HedSchemaEntry)``: The schema entry for this tag.
+  - ``attribute_name (str)``: The name of this attribute.
+
 Returns:
-    bool
-"""
+    - ``bool``: Description of the return value.
+    """
 
 from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors
 from hed.errors.error_reporter import ErrorHandler
