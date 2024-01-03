@@ -71,6 +71,7 @@ class GroupValidator:
         """ Report tags incorrectly positioned in hierarchy.
 
             Top-level groups can contain definitions, Onset, etc. tags.
+
         Parameters:
             original_tag_list (list): HedTags containing the original tags.
             is_top_level (bool): If True, this group is a "top level tag group"

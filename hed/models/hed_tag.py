@@ -499,6 +499,7 @@ class HedTag:
         """ Get the default unit class unit for this tag.
 
             Only a tag with a single unit class can have default units.
+
         Returns:
             unit(UnitEntry or None): the default unit entry for this tag, or None
         """
