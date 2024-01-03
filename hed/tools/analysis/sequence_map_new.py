@@ -1,11 +1,10 @@
 """ A map of containing the number of times a particular sequence of values in a column of an event file. """
 
-
 import pandas as pd
 from hed.tools.util.data_util import get_key_hash
 
 
-class SequenceMap:
+class SequenceMapNew:
     """ A map of unique sequences of column values of a particular length appear in an event file.
 
     Attributes:
@@ -16,7 +15,8 @@ class SequenceMap:
     The remapping does not support other types of columns.
 
     """
-    def __init__(self, codes=None, name=''):
+
+    def __init__(self, codes=None, name='', seq=[0, -1]):
         """ Information for setting up the maps.
 
         Parameters:
@@ -27,12 +27,15 @@ class SequenceMap:
 
         self.codes = codes
         self.name = name
-        self.node_counts = {}
-        self.edges = {}     # map of keys to n-element sequences
-        self.edge_counts = {}  # Keeps a running count of the number of times a key appears in the data
+        self.seq = seq
+        self.nodes = {}  # Node keys to node names
+        self.node_counts = {}  # Node values to count  
+        self.sequences = {}  # Sequence keys to sequence
+        self.seq_counts = {}  # Sequence keys to counts
+        self.edges = {}  # map of edge keys to 2-element sequence keys
+        self.edge_counts = {}  # edge keys to edge counts
 
     @property
-
     def __str__(self):
         node_counts = [f"{value}({str(count)})" for value, count in self.node_counts.items()]
         node_str = (" ").join(node_counts)
@@ -52,7 +55,7 @@ class SequenceMap:
         if self.codes:
             node_list = [f"{node};" for node in self.codes if node not in self.node_counts]
             if node_list:
-                base = base + 'subgraph cluster_unused {\n bgcolor="#cAcAcA";\n' + ("\n").join(node_list) +"\n}\n"
+                base = base + 'subgraph cluster_unused {\n bgcolor="#cAcAcA";\n' + ("\n").join(node_list) + "\n}\n"
         if group_spec:
             for group, spec in group_spec.items():
                 group_list = [f"{node};" for node in self.node_counts if node in spec["nodes"]]
@@ -63,16 +66,19 @@ class SequenceMap:
                     base = base + 'subgraph cluster_' + group + '{\n' + f'bgcolor={spec_color};\n' + \
                            '\n'.join(group_list) + '\n}\n'
         edge_list = self.get_edge_list(sort=True)
-        
-        dot_str = base +  ("\n").join(edge_list) + "}\n"
+
+        dot_str = base + ("\n").join(edge_list) + "}\n"
         return dot_str
 
     def edge_to_str(self, key):
         value = self.edges.get(key, [])
         if value:
-            return f"{value[0]} -> {value[1]} "
+            x = ("+").join(value[0])
+            y = ("+").join(value[1])
+            return f"{str(self.sequences[value[0]])} -> {str(self.sequences[value[1]])} "
         else:
             return ""
+
     def get_edge_list(self, sort=True):
         """Produces a DOT format edge list with the option of sorting by edge counts.
         
@@ -83,76 +89,57 @@ class SequenceMap:
             list:  list of DOT strings representing the edges labeled by counts.
         
         """
-        
+
         df = pd.DataFrame(list(self.edge_counts.items()), columns=['Key', 'Counts'])
         if sort:
             df = df.sort_values(by='Counts', ascending=False)
-        edge_list = [f"{self.edge_to_str(row['Key'])} [label={str(self.edge_counts[row['Key']])}];" 
-                     for index, row in df.iterrows()]
+        edge_list = []
+        for index, row in df.iterrows():
+             edge_list.append(f"{self.edge_to_str(row['Key'])} [label={str(self.edge_counts[row['Key']])}];")
         return edge_list
-    
+
     def filter_edges(self):
         print("to here")
 
     def update(self, data):
-        """ Update the existing map with information from data.
+        filtered = self.get_sequence_data(data)
+        last_seq_key = None
+        for index, row in filtered.iterrows():
+            # Update node counts
+            this_node = row['value']
+            self.node_counts[this_node] = self.node_counts.get(this_node, 0) + 1
+            this_seq = row['seq']
+            if not this_seq:
+                last_seq_key = None
+                continue;
+            this_seq_key = get_key_hash(this_seq)
+            self.sequences[this_seq_key] = this_seq
+            self.seq_counts[this_seq_key] = self.seq_counts.get(this_seq_key, 0) + 1
+            if last_seq_key:
+                this_edge_key = get_key_hash([last_seq_key, this_seq_key])
+                self.edges[this_edge_key] = [last_seq_key, this_seq_key]
+                self.edge_counts[this_edge_key] = self.edge_counts.get(this_edge_key, 0) + 1
+            last_seq_key = this_seq_key
 
-        Parameters:
-            data (Series):     DataFrame or filename of an events file or event map.
-            allow_missing (bool):        If true allow missing keys and add as n/a columns.
-
-        :raises HedFileError:
-            - If there are missing keys and allow_missing is False.
-
-        """
+    def get_sequence_data(self, data):
         filtered = self.prep(data)
-        if self.codes:
-            mask = filtered.isin(self.codes)
-            filtered = filtered[mask]
-        for index, value in filtered.items():
-            if value not in self.node_counts:
-                self.node_counts[value] = 1
-            else:
-                self.node_counts[value] = self.node_counts[value] + 1
-            if index + 1 >= len(filtered):
-                break
-            key_list = filtered[index:index+2].tolist()
-            key = get_key_hash(key_list)
-            if key in self.edges:
-                self.edge_counts[key] = self.edge_counts[key] + 1
-            else:
-                self.edges[key] = key_list
-                self.edge_counts[key] = 1
+        empty_lists = [[] for _ in range(len(filtered))]
 
-    def update(self, data):
-        """ Update the existing map with information from data.
+        # Create a DataFrame
+        df = pd.DataFrame({'value': filtered.values, 'seq': empty_lists})
 
-        Parameters:
-            data (Series):     DataFrame or filename of an events file or event map.
-            allow_missing (bool):        If true allow missing keys and add as n/a columns.
+        for index, row in df.iterrows():
+            df.at[index, 'seq'] = self.get_sequence(df, index)
+        return df
 
-        :raises HedFileError:
-            - If there are missing keys and allow_missing is False.
-
-        """
-        filtered = self.prep(data)
-        if self.codes:
-            mask = filtered.isin(self.codes)
-            filtered = filtered[mask]
-        for index, value in filtered.items():
-            if value not in self.node_counts:
-                self.node_counts[value] = 1
-            else:
-                self.node_counts[value] = self.node_counts[value] + 1
-            if index + 1 >= len(filtered):
-                break
-            key_list = filtered[index:index + 2].tolist()
-            key = get_key_hash(key_list)
-            if key in self.edges:
-                self.edge_counts[key] = self.edge_counts[key] + 1
-            else:
-                self.edges[key] = key_list
-                self.edge_counts[key] = 1
+    def get_sequence(self, df, index):
+        seq_list = []
+        for i, val in enumerate(self.seq):
+            df_ind = val + index
+            if df_ind < 0 or df_ind >= len(df):
+                return []
+            seq_list.append(df.iloc[df_ind, 0])
+        return seq_list
 
     @staticmethod
     def prep(data):

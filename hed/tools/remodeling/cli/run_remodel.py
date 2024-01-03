@@ -4,7 +4,7 @@ import os
 import json
 import argparse
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.io_util import get_file_list, get_task_from_file
+from hed.tools.util.io_util import get_file_list, get_task_from_file, get_task_dict
 from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.backup_manager import BackupManager
@@ -119,14 +119,7 @@ def parse_arguments(arg_list=None):
 def parse_tasks(files, task_args):
     if not task_args:
         return {"": files}
-    task_dict = {}
-    for my_file in files:
-        task = get_task_from_file(my_file)
-        if not task:
-            continue
-        task_entry = task_dict.get(task, [])
-        task_entry.append(my_file)
-        task_dict[task] = task_entry
+    task_dict = get_task_dict(files)
     if task_args == "*" or isinstance(task_args, list) and task_args[0] == "*":
         return task_dict
     task_dict = {key: task_dict[key] for key in task_args if key in task_dict}
