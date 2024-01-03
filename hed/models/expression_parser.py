@@ -332,7 +332,7 @@ class QueryParser:
 
         '"Event"' - Finds the Event tag, but not any descendent tags
 
-        'Def/DefName/*' - Find Def/DefName instances with placeholders, regardless of the value of the placeholder
+        `Def/DefName/*` - Find Def/DefName instances with placeholders, regardless of the value of the placeholder
 
         'Eve*' - Find any short tags that begin with Eve*, such as Event, but not Sensory-event
 

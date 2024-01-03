@@ -8,7 +8,6 @@ Hierarchical Event Descriptor (HED) Python Tools
 .. sidebar:: **Links**
 
    * `PDF docs <https://hed-python.readthedocs.io/_/downloads/en/latest/pdf/>`_
-   * `Bad URL <https://hed-python.readthedocsasdf.io/_/downloads/en/latest/pdf/>`_
 
    * `Source code <https://github.com/hed-standard/hed-python/>`_
 
