@@ -135,3 +135,7 @@ class NumberGroupsOp(BaseOp):
         #     df_new.loc[group, self.number_column_name] = i + 1
 
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

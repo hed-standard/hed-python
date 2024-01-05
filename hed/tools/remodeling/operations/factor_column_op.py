@@ -58,9 +58,6 @@ class FactorColumnOp(BaseOp):
         Parameters:
             parameters (dict): Parameter values for required and optional parameters.
 
-        :raises ValueError:
-            - If factor_names is not empty and is not the same length as factor_values.
-
         """
         super().__init__(self.PARAMS, parameters)
         self.column_name = parameters['column_name']
@@ -99,3 +96,13 @@ class FactorColumnOp(BaseOp):
             column = factor_names[index]
             df_new[column] = factor_index.astype(int)
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        if parameters.get("factor_names", False):
+            if len(parameters.get("factor_names")) != len(parameters.get("factor_values")):
+                return ["The list in factor_names, in the factor_column operation, should have the same number of items as factor_values."]
+            else: 
+                return []
+        else:
+            return []

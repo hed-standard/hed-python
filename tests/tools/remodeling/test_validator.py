@@ -117,3 +117,36 @@ class Test(unittest.TestCase):
         double_item_in_array_nested[0]["parameters"]["new_events"]["response"]["copy_columns"] = ['response', 'response']
         error_strings = validator.validate(double_item_in_array_nested)
         self.assertEqual(error_strings[0], "Operation 1: The list in copy_columns, response, new_events, in the split_rows operation, should only contain unique items.")
+
+    def test_validate_parameter_data(self):
+        validator = RemodelerValidator()
+
+        factor_column_validate = [deepcopy(self.remodel_file)[1]]
+        factor_column_validate[0]["parameters"]["factor_names"] = ["stopped"]
+        error_strings = validator.validate(factor_column_validate)
+        self.assertEqual(error_strings[0], "Operation 1: The list in factor_names, in the factor_column operation, should have the same number of items as factor_values.")
+
+        factor_hed_tags_validate = [deepcopy(self.remodel_file)[2]]  
+        factor_hed_tags_validate[0]["parameters"]["query_names"] = ["correct"]
+        error_strings = validator.validate(factor_hed_tags_validate)
+        self.assertEqual(error_strings[0], "Operation 1: The list in query_names, in the factor_hed_tags operation, should have the same number of items as queries.") 
+
+        merge_consecutive_validate = [deepcopy(self.remodel_file)[4]]
+        merge_consecutive_validate[0]["parameters"]["match_columns"].append("trial_type")  
+        error_strings = validator.validate(merge_consecutive_validate)
+        self.assertEqual(error_strings[0], "Operation 1: The column_name in the merge_consecutive operation cannot be specified as a match_column.") 
+
+        remap_columns_validate_same_length = [deepcopy(self.remodel_file)[5]]
+        remap_columns_validate_same_length[0]["parameters"]["map_list"][0] = [""]
+        error_strings = validator.validate(remap_columns_validate_same_length)
+        self.assertEqual(error_strings[0], "Operation 1: The lists specified in the map_list parameter in the remap_columns operation should all have the same length.")
+
+        remap_columns_validate_right_length = [deepcopy(self.remodel_file[5])]
+        remap_columns_validate_right_length[0]["parameters"]["map_list"] = [["string1", "string2"], ["string3", "string4"]]
+        error_strings = validator.validate(remap_columns_validate_right_length)
+        self.assertEqual(error_strings[0], "Operation 1: The lists specified in the map_list parameter in the remap_columns operation should have a length equal to the number of source columns + the number of destination columns.")
+
+        remap_columns_integer_sources = [deepcopy(self.remodel_file[5])]
+        remap_columns_integer_sources[0]["parameters"]["integer_sources"] = ["unknown_column"]
+        error_strings = validator.validate(remap_columns_integer_sources)
+        self.assertEqual(error_strings[0], "Operation 1: All integer_sources in the remap_columns operation should be source_columns.")

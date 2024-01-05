@@ -84,3 +84,7 @@ class FactorHedTypeOp(BaseOp):
         df_new = pd.concat(df_list, axis=1)
         df_new.replace('n/a', np.NaN, inplace=True)
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

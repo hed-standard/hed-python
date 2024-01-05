@@ -173,3 +173,7 @@ class ColumnNamesSummary(BaseSummary):
             for file in element.get("Files", []):
                 sum_list.append(f"{indent}{indent}{file}")
         return "\n".join(sum_list)
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

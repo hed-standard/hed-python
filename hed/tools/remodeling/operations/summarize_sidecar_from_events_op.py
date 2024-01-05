@@ -217,3 +217,7 @@ class EventsToSidecarSummary(BaseSummary):
                     f"Value columns: {str(specifics.get('Value info', {}).keys())}",
                     f"Sidecar:\n{json.dumps(specifics['Sidecar'], indent=indent)}"]
         return "\n".join(sum_list)
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

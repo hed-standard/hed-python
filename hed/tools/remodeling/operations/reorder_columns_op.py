@@ -83,3 +83,7 @@ class ReorderColumnsOp(BaseOp):
             ordered += [elem for elem in current_columns if elem not in ordered]
         df_new = df_new.loc[:, ordered]
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

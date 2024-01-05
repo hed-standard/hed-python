@@ -218,3 +218,7 @@ class DefinitionSummary(BaseSummary):
 
         """
         return ""
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

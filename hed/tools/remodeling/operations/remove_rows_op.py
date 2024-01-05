@@ -68,3 +68,7 @@ class RemoveRowsOp(BaseOp):
         for value in self.remove_values:
             df_new = df_new.loc[df_new[self.column_name] != value, :]
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

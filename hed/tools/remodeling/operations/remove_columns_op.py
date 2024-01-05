@@ -72,3 +72,7 @@ class RemoveColumnsOp(BaseOp):
             raise KeyError("MissingColumnCannotBeRemoved",
                            f"{name}: Ignore missing is False but a column in {str(self.column_names)} is "
                            f"not in the data columns [{str(df_new.columns)}]")
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

@@ -85,30 +85,17 @@ class RemapColumnsOp(BaseOp):
             Parameters:
                 parameters (dict): Parameter values for required and optional parameters.
 
-            :raises ValueError:
-                - If an integer column is not a source column.
-                - If a map_list entry has the wrong number of items (source columns + destination columns).
-
           """
         super().__init__(self.PARAMS, parameters)
         self.source_columns = parameters['source_columns']
         self.integer_sources = []
         self.string_sources = self.source_columns
         if "integer_sources" in parameters:
-            self.integer_sources = parameters['integer_sources']
-            if not set(self.integer_sources).issubset(set(self.source_columns)):
-                raise ValueError("IntegerSourceColumnsInvalid",
-                                 f"Integer courses {str(self.integer_sources)} must be in {str(self.source_columns)}")
             self.string_sources = list(
                 set(self.source_columns).difference(set(self.integer_sources)))
         self.destination_columns = parameters['destination_columns']
         self.map_list = parameters['map_list']
         self.ignore_missing = parameters['ignore_missing']
-        entry_len = len(self.source_columns) + len(self.destination_columns)
-        for index, item in enumerate(self.map_list):
-            if len(item) != entry_len:
-                raise ValueError("BadColumnMapEntry",
-                                 f"Map list entry {index} has {len(item)} elements, but must have {entry_len} elements")
 
         self.key_map = self._make_key_map()
 
@@ -155,3 +142,16 @@ class RemapColumnsOp(BaseOp):
             raise ValueError("MapSourceValueMissing",
                              f"{name}: Ignore missing is false, but source values [{missing}] are in data but not map")
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        errors = []
+        if len(set([len(x) for x in parameters.get("map_list")])) != 1:
+            errors.append("The lists specified in the map_list parameter in the remap_columns operation should all have the same length.")
+        else:
+            if (len(parameters.get('source_columns')) + len(parameters.get("destination_columns"))) != len(parameters.get("map_list")[0]):
+                errors.append("The lists specified in the map_list parameter in the remap_columns operation should have a length equal to the number of source columns + the number of destination columns.")
+        if parameters.get("integer_sources", False):
+            if not all([(x in parameters.get("source_columns")) for x in parameters.get("integer_sources")]):
+                errors.append("All integer_sources in the remap_columns operation should be source_columns.")       
+        return errors

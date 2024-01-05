@@ -59,17 +59,11 @@ class MergeConsecutiveOp(BaseOp):
         Parameters:
             parameters (dict): Actual values of the parameters for the operation.
 
-        :raises ValueError:
-            - If one of the match column is the merge column.
-
         """
         super().__init__(self.PARAMS, parameters)
         self.column_name = parameters["column_name"]
         self.event_code = parameters["event_code"]
         self.match_columns = parameters["match_columns"]
-        if self.column_name in self.match_columns:
-            raise ValueError("MergeColumnCannotBeMatchColumn",
-                             f"Column {self.column_name} cannot be one of the match columns: {str(self.match_columns)}")
         self.set_durations = parameters["set_durations"]
         self.ignore_missing = parameters["ignore_missing"]
 
@@ -167,3 +161,11 @@ class MergeConsecutiveOp(BaseOp):
                 "onset", "duration"]].sum(skipna=True).max()
             df_new.loc[anchor, "duration"] = max(
                 max_group, max_anchor) - df_new.loc[anchor, "onset"]
+
+    @staticmethod
+    def validate_input_data(parameters):
+        errors = []
+        if parameters.get("match_columns", False):
+            if parameters.get("column_name") in parameters.get("match_columns"):
+                errors.append("The column_name in the merge_consecutive operation cannot be specified as a match_column.")
+        return errors

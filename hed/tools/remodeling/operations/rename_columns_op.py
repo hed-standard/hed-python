@@ -7,7 +7,7 @@ class RenameColumnsOp (BaseOp):
     """ Rename columns in a tabular file.
 
     Required remodeling parameters:   
-        - **column_mapping** (*dict*): The names of the columns to be removed.   
+        - **column_mapping** (*dict*): The names of the columns to be renamed.   
         - **ignore_missing** (*bool*): If true, the names in column_mapping that are not columns and should be ignored.
 
     """
@@ -73,3 +73,7 @@ class RenameColumnsOp (BaseOp):
             raise KeyError("MappedColumnsMissingFromData",
                            f"{name}: ignore_missing is False, mapping columns [{self.column_mapping}]"
                            f" but df columns are [{str(df.columns)}")
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

@@ -305,3 +305,7 @@ class ColumnValueSummary(BaseSummary):
         sorted_tuples = sorted(
             count_dict.items(), key=lambda x: x[1][0], reverse=reverse)
         return len(sorted_tuples), sorted_tuples
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

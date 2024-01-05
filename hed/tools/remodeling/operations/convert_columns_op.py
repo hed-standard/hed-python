@@ -1,6 +1,5 @@
 """ Convert the type of the specified columns of a tabular file. """
 #TODO finish implementation
-#TODO Specify when requirements for decimal_places parameter
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
@@ -14,9 +13,7 @@ class ConvertColumnsOp(BaseOp):
     
     Optional remodeling parameters:
         - **decimal_places** (*int*):   Number decimal places to keep (for fixed only).   
-
-    Notes:
-        - Decimal places requirements not implemented    
+ 
     """
     NAME = "convert_columns"
     
@@ -82,3 +79,7 @@ class ConvertColumnsOp(BaseOp):
 
         df_new = df.copy()
         return df_new
+
+    @staticmethod
+    def validate_input_data(operations):
+        return []

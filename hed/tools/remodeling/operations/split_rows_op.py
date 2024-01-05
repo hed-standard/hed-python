@@ -182,3 +182,7 @@ class SplitRowsOp(BaseOp):
                 raise TypeError("BadOnsetInModel",
                                 f"Remodeling onset {str(onset)} must either be numeric or a column name.", "")
         return onsets
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

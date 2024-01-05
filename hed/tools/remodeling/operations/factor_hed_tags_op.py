@@ -71,9 +71,6 @@ class FactorHedTagsOp(BaseOp):
         Parameters:
             parameters (dict):  Actual values of the parameters for the operation.
 
-        :raises ValueError:
-            - If the length of query names is not empty and not same length as queries.
-
         """
         super().__init__(self.PARAMS, parameters)
         self.queries = parameters['queries']
@@ -118,3 +115,11 @@ class FactorHedTagsOp(BaseOp):
         df_new = pd.concat(df_list, axis=1)
         df_new.replace('n/a', np.NaN, inplace=True)
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        errors = []
+        if parameters.get("query_names", False):
+            if len(parameters.get("query_names")) != len(parameters.get("queries")):
+                errors.append("The list in query_names, in the factor_hed_tags operation, should have the same number of items as queries.")
+        return errors

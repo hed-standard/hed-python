@@ -87,3 +87,7 @@ class NumberRowsOp(BaseOp):
         #     df_new[self.number_column_name] = df_new.index + 1
 
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

@@ -97,7 +97,8 @@ class RemodelerValidator():
         self.validator = Draft202012Validator(self.schema)
 
     def validate(self, operations):
-        """ Validates a dictionary against the json schema specification for the remodeler file and returns the a list of user friendly error messages
+        """ Validates a dictionary against the json schema specification for the remodeler file, plus any additional data validation that is 
+        necessary and returns a list of user friendly error messages.
 
         Parameters:
             **operations**  (*dict*): Dictionary with input operations to run through the remodeler
@@ -110,6 +111,16 @@ class RemodelerValidator():
         for error in sorted(self.validator.iter_errors(operations), key=lambda e: e.path):
             list_of_error_strings.append(
                 self._parse_message(error, operations))
+        if list_of_error_strings:
+            return list_of_error_strings
+
+        operation_by_parameters = [(operation["operation"], operation["parameters"]) for operation in operations]
+        
+        for index, operation in enumerate(operation_by_parameters):
+            error_strings = valid_operations[operation[0]].validate_input_data(operation[1])
+            for error_string in error_strings:
+                list_of_error_strings.append("Operation %s: %s" %(index+1, error_string))
+        
         return list_of_error_strings
 
     def _parse_message(self, error, operations):

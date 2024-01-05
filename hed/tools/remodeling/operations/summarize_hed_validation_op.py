@@ -279,3 +279,7 @@ class HedValidationSummary(BaseSummary):
             results['sidecar_issues'][sidecar.name] = str_issues
             results['total_sidecar_issues'] = len(sidecar_issues)
         return results
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

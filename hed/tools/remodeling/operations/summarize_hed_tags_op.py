@@ -276,3 +276,7 @@ class HedTagSummary(BaseSummary):
             for tag_cnt in template[item.lower()]:
                 key_details.append(tag_cnt.get_info(verbose=verbose))
         return key_details
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

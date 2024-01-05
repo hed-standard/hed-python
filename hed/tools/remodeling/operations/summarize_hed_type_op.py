@@ -251,3 +251,7 @@ class HedTypeSummary(BaseSummary):
                 level_list.append(
                     f"{offset}{indent*3}Description: {details['description']}")
         return level_list
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []
