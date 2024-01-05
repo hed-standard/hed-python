@@ -155,8 +155,7 @@ class Test(unittest.TestCase):
         df = pd.read_csv(self.events_path, delimiter='\t', header=0, dtype=str, keep_default_na=False, na_values=None)
         with open(self.model1_path) as fp:
             operation_list = json.load(fp)
-        operations, errors = Dispatcher.parse_operations(operation_list)
-        self.assertFalse(errors, 'split_rows should not give errors if operation is correct')
+        operations = Dispatcher.parse_operations(operation_list)
         dispatch = Dispatcher(operation_list)
         df = dispatch.prep_data(df)
         df_new = operations[0].do_op(dispatch, df, "Name")

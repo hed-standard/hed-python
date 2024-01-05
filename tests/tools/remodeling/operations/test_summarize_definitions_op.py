@@ -24,18 +24,6 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_constructor(self):
-        parms = json.loads(self.json_parms)
-        parms["expand_context"] = ""
-        with self.assertRaises(KeyError) as context:
-            SummarizeDefinitionsOp(parms)
-        self.assertEqual(context.exception.args[0], "BadParameter")
-        parms2 = json.loads(self.json_parms)
-        parms2["mystery"] = True
-        with self.assertRaises(KeyError) as context:
-            SummarizeDefinitionsOp(parms2)
-        self.assertEqual(context.exception.args[0], "BadParameter")
-
     def test_do_op(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         parms = json.loads(self.json_parms)

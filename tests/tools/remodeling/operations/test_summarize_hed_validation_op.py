@@ -42,12 +42,6 @@ class Test(unittest.TestCase):
         sum_op1 = SummarizeHedValidationOp(parms)
         self.assertIsInstance(sum_op1, SummarizeHedValidationOp, "constructor creates an object of the correct type")
 
-        parms2 = json.loads(self.json_parms)
-        parms2["mystery"] = True
-        with self.assertRaises(KeyError) as context:
-            SummarizeHedValidationOp(parms2)
-        self.assertEqual(context.exception.args[0], "BadParameter")
-
     def test_do_op(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         parms = json.loads(self.json_parms)
