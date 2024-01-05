@@ -86,7 +86,7 @@ class RemapColumnsOp(BaseOp):
                 parameters (dict): Parameter values for required and optional parameters.
 
           """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.source_columns = parameters['source_columns']
         self.integer_sources = []
         self.string_sources = self.source_columns

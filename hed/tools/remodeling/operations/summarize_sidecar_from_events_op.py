@@ -69,7 +69,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
 
         """
 
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.skip_columns = parameters['skip_columns']
@@ -102,6 +102,10 @@ class SummarizeSidecarFromEventsOp(BaseOp):
             {'df': dispatcher.post_proc_data(df_new), 'name': name})
         return df_new
 
+    @staticmethod
+    def validate_input_data(parameters):
+        return []
+    
 
 class EventsToSidecarSummary(BaseSummary):
 

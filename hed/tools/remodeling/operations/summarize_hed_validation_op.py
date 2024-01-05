@@ -60,7 +60,7 @@ class SummarizeHedValidationOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
@@ -90,6 +90,10 @@ class SummarizeHedValidationOp(BaseOp):
         summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []
 
 
 class HedValidationSummary(BaseSummary):

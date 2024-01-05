@@ -59,14 +59,10 @@ class FactorColumnOp(BaseOp):
             parameters (dict): Parameter values for required and optional parameters.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.column_name = parameters['column_name']
         self.factor_values = parameters['factor_values']
         self.factor_names = parameters['factor_names']
-        if self.factor_names and len(self.factor_values) != len(self.factor_names):
-            raise ValueError("FactorNamesLenBad",
-                             f"The factor_names length {len(self.factor_names)} must be empty or equal" +
-                             f"to the factor_values length {len(self.factor_values)} .")
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns based on values in a specified column.

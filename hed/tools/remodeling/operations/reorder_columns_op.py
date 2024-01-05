@@ -46,7 +46,7 @@ class ReorderColumnsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.column_order = parameters['column_order']
         self.ignore_missing = parameters['ignore_missing']
         self.keep_others = parameters['keep_others']

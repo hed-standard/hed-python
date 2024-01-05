@@ -58,7 +58,7 @@ class ConvertColumnsOp(BaseOp):
             parameters (dict): Parameter values for required and optional parameters.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.column_names = parameters['column_names']
         self.convert_to = parameters['convert_to']
         self.decimal_places = parameters.get('decimal_places', None)

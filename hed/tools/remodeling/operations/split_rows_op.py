@@ -85,7 +85,7 @@ class SplitRowsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.anchor_column = parameters['anchor_column']
         self.new_events = parameters['new_events']
         self.remove_parent_row = parameters['remove_parent_row']

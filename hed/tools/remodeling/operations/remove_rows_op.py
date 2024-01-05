@@ -45,7 +45,7 @@ class RemoveRowsOp(BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.column_name = parameters["column_name"]
         self.remove_values = parameters["remove_values"]
 

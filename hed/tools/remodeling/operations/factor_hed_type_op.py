@@ -50,7 +50,7 @@ class FactorHedTypeOp(BaseOp):
             parameters (dict):  Actual values of the parameters for the operation.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.type_tag = parameters["type_tag"]
         self.type_values = parameters["type_values"]
 

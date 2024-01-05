@@ -60,7 +60,7 @@ class MergeConsecutiveOp(BaseOp):
             parameters (dict): Actual values of the parameters for the operation.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.column_name = parameters["column_name"]
         self.event_code = parameters["event_code"]
         self.match_columns = parameters["match_columns"]

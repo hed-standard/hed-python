@@ -43,7 +43,7 @@ class RenameColumnsOp (BaseOp):
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
         """
-        super().__init__("rename_columns", parameters)
+        super().__init__(parameters)
         self.column_mapping = parameters['column_mapping']
         if parameters['ignore_missing']:
             self.error_handling = 'ignore'

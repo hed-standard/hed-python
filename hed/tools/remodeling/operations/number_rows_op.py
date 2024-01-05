@@ -45,7 +45,7 @@ class NumberRowsOp(BaseOp):
     }
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.number_column_name = parameters['number_column_name']
         self.overwrite = parameters.get('overwrite', False)
         self.match_value = parameters.get('match_value', False)

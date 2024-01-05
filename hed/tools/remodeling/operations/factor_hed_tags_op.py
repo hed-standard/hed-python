@@ -72,7 +72,7 @@ class FactorHedTagsOp(BaseOp):
             parameters (dict):  Actual values of the parameters for the operation.
 
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.queries = parameters['queries']
         self.query_names = parameters['query_names']
         self.remove_types = parameters['remove_types']
