@@ -176,14 +176,14 @@ def compare_schemas(schema1, schema2, attribute_filter=HedKey.InLibrary, section
         schema1 (HedSchema): The first schema to be compared.
         schema2 (HedSchema): The second schema to be compared.
         attribute_filter (str, optional): The attribute to filter entries by.
-                                        Entries without this attribute are skipped.
-                                        The most common use would be HedKey.InLibrary
-                                        If it evaluates to False, no filtering is performed.
+            Entries without this attribute are skipped.
+            The most common use would be HedKey.InLibrary
+            If it evaluates to False, no filtering is performed.
         sections(list): the list of sections to compare.  By default, just the tags section.
-                        If None, checks all sections including header, prologue, and epilogue.
+            If None, checks all sections including header, prologue, and epilogue.
 
     Returns:
-    tuple: A tuple containing four dictionaries:
+        tuple: A tuple containing four dictionaries:
         - matches(dict): Entries present in both schemas and are equal.
         - not_in_schema1(dict): Entries present in schema2 but not in schema1.
         - not_in_schema2(dict): Entries present in schema1 but not in schema2.

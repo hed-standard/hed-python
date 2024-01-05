@@ -328,3 +328,20 @@ def get_task_from_file(file_path):
         return ""
     splits = re.split(r'[_.]', basename[position+5:])
     return splits[0]
+
+def get_task_dict(files):
+    """ Return a dictionary of the tasks that appear in the file names of a list of files.
+    
+    Parameters:
+        files = 
+    
+    """
+    task_dict = {}
+    for my_file in files:
+        task = get_task_from_file(my_file)
+        if not task:
+            continue
+        task_entry = task_dict.get(task, [])
+        task_entry.append(my_file)
+        task_dict[task] = task_entry
+    return task_dict

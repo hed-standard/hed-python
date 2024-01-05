@@ -30,12 +30,14 @@ class DefinitionDict:
             self.add_definitions(def_dicts, hed_schema)
 
     def add_definitions(self, def_dicts, hed_schema=None):
-        """ Add definitions from dict(s) to this dict.
+        """ Add definitions from dict(s) or strings(s) to this dict.
 
         Parameters:
-            def_dicts (list, DefinitionDict, or dict): DefinitionDict or list of DefinitionDicts/strings/dicts whose
-                                                definitions should be added.
-                                        Note dict form expects DefinitionEntries in the same form as a DefinitionDict
+            def_dicts (list, DefinitionDict, dict, or str): DefinitionDict or list of DefinitionDicts/strings/dicts whose
+                definitions should be added.
+                Note - dict form expects DefinitionEntries in the same form as a DefinitionDict
+                Note - str or list of strings will parse the strings using the hed_schema.
+                Note - You can mix and match types, eg [DefinitionDict, str, list of str] would be valid input.
             hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
         :raises TypeError:

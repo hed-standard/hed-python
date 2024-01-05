@@ -22,7 +22,7 @@ jobs:
           submodules: true
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -44,13 +44,13 @@ jobs:
            python -m unittest spec_tests/validate_bids.py > validate_bids_results.txt
 
       - name: Upload error test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: error-test-results
           path: error_results.txt
 
       - name: Upload bids test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bids-test-results
           path: validate_bids_results.txt
