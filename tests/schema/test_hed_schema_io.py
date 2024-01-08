@@ -624,7 +624,7 @@ class TestOwlBase(unittest.TestCase):
         with self.assertRaises(rdflib.plugin.PluginException):
             self.base_schema.save_as_owl("")
         with self.assertRaises(rdflib.plugin.PluginException):
-            self.base_schema.save_as_owl("", file_format="unkonwn")
+            self.base_schema.save_as_owl("", file_format="unknown")
 
 
 class TestOwlLibRooted(TestOwlBase):
