@@ -43,8 +43,8 @@ class SchemaLoaderWiki(SchemaLoader):
         SchemaLoaderWiki(filename) will load just the header_attributes
     """
 
-    def __init__(self, filename, schema_as_string=None, schema=None):
-        super().__init__(filename, schema_as_string, schema)
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None):
+        super().__init__(filename, schema_as_string, schema, file_format)
         self.fatal_errors = []
 
     def _open_file(self):

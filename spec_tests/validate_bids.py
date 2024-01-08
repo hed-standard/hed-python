@@ -26,9 +26,9 @@ class MyTestCase(unittest.TestCase):
             bids_data = BidsDataset(dataset_path)
             issues = bids_data.validate(check_for_warnings=False)
             if issues:
-                self.fail_count.append(issues)
+                self.fail_count.append((directory, issues))
         print(f"{len(self.fail_count)} tests got an unexpected result")
-        print("\n".join(get_printable_issue_string(issue, skip_filename=False) for issue in self.fail_count))
+        print("\n".join(get_printable_issue_string(issue, f"Errors in directory: {title}", skip_filename=False) for title, issue in self.fail_count))
         self.assertEqual(0, len(self.fail_count))
 
 if __name__ == '__main__':

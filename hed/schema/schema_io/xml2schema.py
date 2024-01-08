@@ -21,22 +21,13 @@ class SchemaLoaderXML(SchemaLoader):
 
         SchemaLoaderXML(filename) will load just the header_attributes
     """
-    def __init__(self, filename, schema_as_string=None, schema=None):
-        super().__init__(filename, schema_as_string, schema)
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None):
+        super().__init__(filename, schema_as_string, schema, file_format)
         self._root_element = None
         self._parent_map = {}
 
     def _open_file(self):
-        """Parses an XML file and returns the root element.
-
-        Parameters
-        ----------
-        Returns
-        -------
-        RestrictedElement
-            The root element of the HED XML file.
-
-        """
+        """Parses an XML file and returns the root element."""
         try:
             if self.filename:
                 hed_xml_tree = ElementTree.parse(self.filename)
@@ -49,13 +40,7 @@ class SchemaLoaderXML(SchemaLoader):
         return root
 
     def _get_header_attributes(self, root_element):
-        """
-            Gets the schema attributes form the XML root node
-
-        Returns
-        -------
-        attribute_dict: {str: str}
-        """
+        """Gets the schema attributes from the XML root node"""
         return self._reformat_xsd_attrib(root_element.attrib)
 
     def _parse_data(self):
@@ -128,17 +113,7 @@ class SchemaLoaderXML(SchemaLoader):
             self._add_tags_recursive(child_tags, parents_and_child)
 
     def _populate_tag_dictionaries(self, tag_section):
-        """Populates a dictionary of dictionaries associated with tags and their attributes.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        {}
-            A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
-
-        """
+        """Populates a dictionary of dictionaries associated with tags and their attributes."""
         self._schema._initialize_attributes(HedSectionKey.Tags)
         root_tags = tag_section.findall("node")
 
@@ -146,18 +121,7 @@ class SchemaLoaderXML(SchemaLoader):
 
     def _populate_unit_class_dictionaries(self, unit_section):
         """Populates a dictionary of dictionaries associated with all the unit classes, unit class units, and unit
-           class default units.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        {}
-            A dictionary of dictionaries associated with all the unit classes, unit class units, and unit class
-            default units.
-
-        """
+           class default units."""
         self._schema._initialize_attributes(HedSectionKey.UnitClasses)
         self._schema._initialize_attributes(HedSectionKey.Units)
         def_element_name = xml_constants.ELEMENT_NAMES[HedSectionKey.UnitClasses]
@@ -169,9 +133,8 @@ class SchemaLoaderXML(SchemaLoader):
             if unit_class_entry is None:
                 continue
             element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
-            element_unit_names = [self._get_element_tag_value(element) for element in element_units]
 
-            for unit, element in zip(element_unit_names, element_units):
+            for element in element_units:
                 unit_class_unit_entry = self._parse_node(element, HedSectionKey.Units)
                 self._add_to_dict(unit_class_unit_entry, HedSectionKey.Units)
                 unit_class_entry.add_unit(unit_class_unit_entry)

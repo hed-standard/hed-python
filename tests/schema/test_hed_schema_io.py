@@ -1,10 +1,12 @@
 import unittest
 
+import rdflib
+
 from hed.errors import HedFileError
 from hed.errors.error_types import SchemaErrors
 from hed.schema import load_schema, HedSchemaGroup, load_schema_version, HedSchema
 from hed.schema.hed_schema_io import parse_version_list, _load_schema_version
-
+from tests.schema.test_schema_converters import with_temp_file, get_temp_filename
 
 import os
 from hed.errors import HedExceptions
@@ -91,7 +93,7 @@ class TestHedSchema(unittest.TestCase):
 
         # Verify this cannot be saved
         with self.assertRaises(HedFileError):
-            schemas3.save_as_mediawiki()
+            schemas3.save_as_mediawiki("filename")
 
     def test_load_and_verify_tags(self):
         # Load 'testlib' by itself
@@ -310,36 +312,40 @@ class TestHedSchemaMerging(unittest.TestCase):
                 s1 = files[i]
                 s2 = files[i + 1]
                 self.assertEqual(s1, s2)
+                filename1 = get_temp_filename(".xml")
+                filename2 = get_temp_filename(".xml")
                 try:
-                    path1 = s1.save_as_xml(save_merged=save_merged)
-                    path2 = s2.save_as_xml(save_merged=save_merged)
-                    result = filecmp.cmp(path1, path2)
+                    s1.save_as_xml(filename1, save_merged=save_merged)
+                    s2.save_as_xml(filename2, save_merged=save_merged)
+                    result = filecmp.cmp(filename1, filename2)
                     # print(s1.filename)
                     # print(s2.filename)
                     self.assertTrue(result)
-                    reload1 = load_schema(path1)
-                    reload2 = load_schema(path2)
+                    reload1 = load_schema(filename1)
+                    reload2 = load_schema(filename2)
                     self.assertEqual(reload1, reload2)
                 except Exception:
                     self.assertTrue(False)
                 finally:
-                    os.remove(path1)
-                    os.remove(path2)
+                    os.remove(filename1)
+                    os.remove(filename2)
 
                 try:
-                    path1 = s1.save_as_mediawiki(save_merged=save_merged)
-                    path2 = s2.save_as_mediawiki(save_merged=save_merged)
-                    result = filecmp.cmp(path1, path2)
+                    filename1 = get_temp_filename(".mediawiki")
+                    filename2 = get_temp_filename(".mediawiki")
+                    s1.save_as_mediawiki(filename1, save_merged=save_merged)
+                    s2.save_as_mediawiki(filename2, save_merged=save_merged)
+                    result = filecmp.cmp(filename1, filename2)
                     self.assertTrue(result)
 
-                    reload1 = load_schema(path1)
-                    reload2 = load_schema(path2)
+                    reload1 = load_schema(filename1)
+                    reload2 = load_schema(filename2)
                     self.assertEqual(reload1, reload2)
                 except Exception:
                     self.assertTrue(False)
                 finally:
-                    os.remove(path1)
-                    os.remove(path2)
+                    os.remove(filename1)
+                    os.remove(filename2)
 
                 lines1 = s1.get_as_mediawiki_string(save_merged=save_merged)
                 lines2 = s2.get_as_mediawiki_string(save_merged=save_merged)
@@ -376,13 +382,11 @@ class TestHedSchemaMerging(unittest.TestCase):
 
         self._base_merging_test(files)
 
-    def test_saving_bad_sort(self):
+    @with_temp_file(".mediawiki")
+    def test_saving_bad_sort(self, filename):
         loaded_schema = load_schema(os.path.join(self.full_base_folder, "bad_sort_test.mediawiki"))
-        filename = loaded_schema.save_as_mediawiki()
-        try:
-            reloaded_schema = load_schema(filename)
-        finally:
-            os.remove(filename)
+        loaded_schema.save_as_mediawiki(filename)
+        reloaded_schema = load_schema(filename)
 
         self.assertEqual(loaded_schema, reloaded_schema)
 
@@ -423,17 +427,17 @@ class TestHedSchemaMerging(unittest.TestCase):
     def test_saving_merged2(self):
         s1 = load_schema(os.path.join(self.full_base_folder, "add_all_types.mediawiki"))
         self._base_added_class_tests(s1)
-        path1 = ""
-        path2 = ""
         for save_merged in [True, False]:
+            path1 = get_temp_filename(".xml")
+            path2 = get_temp_filename(".mediawiki")
             try:
-                path1 = s1.save_as_xml(save_merged=save_merged)
+                s1.save_as_xml(path1, save_merged=save_merged)
                 s2 = load_schema(path1)
                 self.assertEqual(s1, s2)
                 self._base_added_class_tests(s2)
 
-                path2 = s1.save_as_mediawiki(save_merged=save_merged)
-                s2 = load_schema(path1)
+                s1.save_as_mediawiki(path2, save_merged=save_merged)
+                s2 = load_schema(path2)
                 self.assertEqual(s1, s2)
                 self._base_added_class_tests(s2)
             finally:
@@ -565,3 +569,82 @@ class TestParseVersionList(unittest.TestCase):
         """Test that libraries with triple prefixes are handled correctly."""
         self.assertEqual(parse_version_list(["test:score", "ol:otherlib", "test:testlib", "abc:anotherlib"]),
                          {"test": "test:score,testlib", "ol": "ol:otherlib", "abc": "abc:anotherlib"})
+
+
+class TestOwlBase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.base_schema = schema.load_schema_version("8.2.0")
+
+    @with_temp_file(".owl")
+    def test_schema2xml(self, filename):
+        self.base_schema.save_as_owl(filename)
+        loaded_schema = schema.load_schema(filename)
+
+        self.assertEqual(loaded_schema, self.base_schema)
+
+        self.base_schema.save_as_owl(filename, save_merged=True)
+        loaded_schema = schema.load_schema(filename)
+
+        self.assertEqual(loaded_schema, self.base_schema)
+
+    @with_temp_file(".ttl")
+    def test_schema2turtle(self, filename):
+        self.base_schema.save_as_owl(filename)
+        loaded_schema = schema.load_schema(filename)
+
+        self.assertEqual(loaded_schema, self.base_schema)
+
+        self.base_schema.save_as_owl(filename, save_merged=True)
+        loaded_schema = schema.load_schema(filename)
+
+        self.assertEqual(loaded_schema, self.base_schema)
+
+    @with_temp_file(".json-ld")
+    def test_schema2jsonld(self, filename):
+        self.base_schema.save_as_owl(filename)
+        loaded_schema = schema.load_schema(filename)
+
+        self.assertEqual(loaded_schema, self.base_schema)
+
+        self.base_schema.save_as_owl(filename, save_merged=True)
+        loaded_schema = schema.load_schema(filename)
+
+        self.assertEqual(loaded_schema, self.base_schema)
+
+    def test_schema2owlstring(self):
+        owl_string = self.base_schema.get_as_owl_string(file_format="turtle")
+        loaded_schema = schema.from_string(owl_string, schema_format="turtle")
+
+        self.assertEqual(loaded_schema, self.base_schema)
+
+        owl_string = self.base_schema.get_as_owl_string(save_merged=True, file_format="turtle")
+        loaded_schema = schema.from_string(owl_string, schema_format="turtle")
+
+        self.assertEqual(loaded_schema, self.base_schema)
+
+    def test_schema2bad_filename(self):
+        with self.assertRaises(OSError):
+            self.base_schema.save_as_owl("", file_format="xml")
+        with self.assertRaises(OSError):
+            self.base_schema.save_as_owl("/////////", file_format="xml")
+
+    def test_schema2bad_filename_rdf_format(self):
+        with self.assertRaises(rdflib.plugin.PluginException):
+            self.base_schema.save_as_owl("valid_filename.invalid_extension")
+        with self.assertRaises(rdflib.plugin.PluginException):
+            self.base_schema.save_as_owl("")
+        with self.assertRaises(rdflib.plugin.PluginException):
+            self.base_schema.save_as_owl("", file_format="unknown")
+
+
+class TestOwlLibRooted(TestOwlBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.base_schema = schema.load_schema_version("testlib_2.0.0")
+
+
+class TestOwlLib(TestOwlBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.base_schema = schema.load_schema_version("score_1.1.0")

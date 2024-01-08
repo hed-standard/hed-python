@@ -45,6 +45,8 @@ class HedExceptions:
 
     SCHEMA_DUPLICATE_NAMES = "SCHEMA_DUPLICATE_NAMES"
 
+    CANNOT_PARSE_RDF = "CANNOT_PARSE_RDF"
+
 
 class HedFileError(Exception):
     """Exception raised when a file cannot be parsed due to being malformed, file IO, etc."""
