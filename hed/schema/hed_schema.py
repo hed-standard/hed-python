@@ -1,10 +1,13 @@
 import json
+import os
 
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.schema import hed_schema_constants as constants
 from hed.schema.schema_io import schema_util
 from hed.schema.schema_io.schema2xml import Schema2XML
 from hed.schema.schema_io.schema2wiki import Schema2Wiki
+from hed.schema.schema_io.schema2owl import Schema2Owl
+from hed.schema.schema_io.owl_constants import ext_to_format
 from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ValidationErrors
@@ -208,6 +211,11 @@ class HedSchema(HedSchemaBase):
     # ===============================================
     # Creation and saving functions
     # ===============================================
+
+    # todo: we may want to collapse these 6 functions into one like this
+    # def serialize(self, filename=None, save_merged=False, file_format=whatever is default):
+    #     pass
+
     def get_as_mediawiki_string(self, save_merged=False):
         """ Return the schema to a mediawiki string.
 
@@ -222,6 +230,26 @@ class HedSchema(HedSchemaBase):
         output_strings = Schema2Wiki.process_schema(self, save_merged)
         return '\n'.join(output_strings)
 
+    def get_as_owl_string(self, save_merged=False, file_format="owl"):
+        """ Return the schema to a mediawiki string.
+
+        Parameters:
+            save_merged (bool): If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+                                If it is not a "withStandard" schema, this setting has no effect.
+            file_format(str or None): Override format from filename extension.
+                Accepts any value rdflib accepts(We fully support "turtle", "xml"("owl" also accepted) and "json-ld")
+                Other values should work, but aren't as fully supported.
+        Returns:
+            str:  The schema as a string in mediawiki format.
+
+        :raises rdflib.plugin.PluginException:
+            - Invalid format of file_format.  Make sure you use a supported RDF format.
+        """
+        if file_format == "owl":
+            file_format = "xml"
+        rdf_data = Schema2Owl.process_schema(self, save_merged)
+        return rdf_data.serialize(format=file_format)
+
     def get_as_xml_string(self, save_merged=True):
         """ Return the schema to an XML string.
 
@@ -234,39 +262,69 @@ class HedSchema(HedSchemaBase):
 
         """
         xml_tree = Schema2XML.process_schema(self, save_merged)
-        return schema_util._xml_element_2_str(xml_tree)
+        return schema_util.xml_element_2_str(xml_tree)
 
-    def save_as_mediawiki(self, filename=None, save_merged=False):
+    def save_as_mediawiki(self, filename, save_merged=False):
         """ Save as mediawiki to a file.
 
         filename: str
-            If present, move the resulting file to this location.
+            save location
         save_merged: bool
             If true, this will save the schema as a merged schema if it is a "withStandard" schema.
             If it is not a "withStandard" schema, this setting has no effect.
 
-        Returns:
-            str:    The newly created schema filename.
+        :raises OSError:
+            - File cannot be saved for some reason
         """
         output_strings = Schema2Wiki.process_schema(self, save_merged)
-        local_wiki_file = schema_util.write_strings_to_file(output_strings, ".mediawiki")
-        return schema_util.move_file(local_wiki_file, filename)
+        with open(filename, mode='w', encoding='utf-8') as opened_file:
+            for string in output_strings:
+                opened_file.write(string)
+                opened_file.write('\n')
 
-    def save_as_xml(self, filename=None, save_merged=True):
+    def save_as_owl(self, filename, save_merged=False, file_format=None):
+        """ Save as json to a file.
+
+        filename: str
+            Save the file here
+        save_merged: bool
+            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
+        file_format(str or None): Required for owl formatted files other than the following:
+            .ttl: turtle
+            .owl: xml
+            .json-ld: json-ld
+
+        :raises OSError:
+            - File cannot be saved for some reason
+
+        :raises rdflib.plugin.PluginException:
+            - Invalid format of file_format.  Make sure you use a supported RDF format.
+        """
+        ext = os.path.splitext(filename.lower())[1]
+        if ext in ext_to_format and file_format is None:
+            file_format = ext_to_format[ext]
+        if file_format == "owl":
+            file_format = "xml"
+        rdf_data = Schema2Owl.process_schema(self, save_merged)
+        rdf_data.serialize(filename, format=file_format)
+
+    def save_as_xml(self, filename, save_merged=True):
         """ Save as XML to a file.
 
         filename: str
-            If present, move the resulting file to this location.
+            save location
         save_merged: bool
             If true, this will save the schema as a merged schema if it is a "withStandard" schema.
             If it is not a "withStandard" schema, this setting has no effect.
 
-        Returns:
-            str: The name of the newly created schema file.
+        :raises OSError:
+            - File cannot be saved for some reason
         """
         xml_tree = Schema2XML.process_schema(self, save_merged)
-        local_xml_file = schema_util.write_xml_tree_2_xml_file(xml_tree, ".xml")
-        return schema_util.move_file(local_xml_file, filename)
+        with open(filename, mode='w', encoding='utf-8') as opened_file:
+            xml_string = schema_util.xml_element_2_str(xml_tree)
+            opened_file.write(xml_string)
 
     def set_schema_prefix(self, schema_namespace):
         """ Set library namespace associated for this schema.

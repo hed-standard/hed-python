@@ -14,7 +14,7 @@ class SchemaLoader(ABC):
 
         SchemaLoaderXML(filename) will load just the header_attributes
     """
-    def __init__(self, filename, schema_as_string=None, schema=None):
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None):
         """Loads the given schema from one of the two parameters.
 
         Parameters:
@@ -22,10 +22,12 @@ class SchemaLoader(ABC):
             schema_as_string(str or None): A full schema as text or None
             schema(HedSchema or None): A hed schema to merge this new file into
                                        It must be a with-standard schema with the same value.
+            file_format(str or None): The format of this file if needed(only for owl currently)
         """
         if schema_as_string and filename:
             raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.",
                                filename)
+        self.file_format = file_format
         self.filename = filename
         self.schema_as_string = schema_as_string
         self.appending_to_schema = False
@@ -68,7 +70,7 @@ class SchemaLoader(ABC):
         return self._schema
 
     @classmethod
-    def load(cls, filename=None, schema_as_string=None, schema=None):
+    def load(cls, filename=None, schema_as_string=None, schema=None, file_format=None):
         """ Loads and returns the schema, including partnered schema if applicable.
 
         Parameters:
@@ -76,11 +78,13 @@ class SchemaLoader(ABC):
             schema_as_string(str or None): A full schema as text or None
             schema(HedSchema or None): A hed schema to merge this new file into
                            It must be a with-standard schema with the same value.
+            file_format(str or None): If this is an owl file being loaded, this is the format.
+                Allowed values include: turtle, json-ld, and owl(xml)
 
         Returns:
             schema(HedSchema): The new schema
         """
-        loader = cls(filename, schema_as_string, schema)
+        loader = cls(filename, schema_as_string, schema, file_format)
         return loader._load()
 
     def _load(self):

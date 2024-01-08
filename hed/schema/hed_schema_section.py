@@ -151,6 +151,7 @@ class HedSchemaSection:
 
 class HedSchemaUnitClassSection(HedSchemaSection):
     def _check_if_duplicate(self, name_key, new_entry):
+        """Allow adding units to existing unit classes, using a placeholder one with no attributes."""
         if name_key in self and len(new_entry.attributes) == 1\
                     and HedKey.InLibrary in new_entry.attributes:
             return self.all_names[name_key]

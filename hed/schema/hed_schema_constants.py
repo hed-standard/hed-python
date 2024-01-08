@@ -43,15 +43,7 @@ class HedKey:
     Rooted = "rooted"
     DeprecatedFrom = "deprecatedFrom"
     ConversionFactor = "conversionFactor"
-
-    # All known properties
-    BoolProperty = 'boolProperty'
-    UnitClassProperty = 'unitClassProperty'
-    UnitProperty = 'unitProperty'
-    UnitModifierProperty = 'unitModifierProperty'
-    ValueClassProperty = 'valueClassProperty'
-    ElementProperty = 'elementProperty'
-    IsInheritedProperty = 'isInheritedProperty'
+    Reserved = "reserved"
 
     SIUnit = 'SIUnit'
     UnitSymbol = 'unitSymbol'
@@ -67,6 +59,17 @@ class HedKey:
 
     # Node attributes
     InLibrary = "inLibrary"
+
+    # All known properties
+    BoolProperty = 'boolProperty'
+    UnitClassProperty = 'unitClassProperty'
+    UnitProperty = 'unitProperty'
+    UnitModifierProperty = 'unitModifierProperty'
+    ValueClassProperty = 'valueClassProperty'
+    ElementProperty = 'elementProperty'
+    NodeProperty = 'nodeProperty'
+    IsInheritedProperty = 'isInheritedProperty'
+
 
 
 VERSION_ATTRIBUTE = 'version'

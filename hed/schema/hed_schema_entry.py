@@ -119,7 +119,8 @@ class HedSchemaEntry:
             # We only want to compare known attributes
             self_attr = self.get_known_attributes()
             other_attr = other.get_known_attributes()
-            if self_attr != other_attr:
+            # We can no longer be sure on the order of attribute values, since owl formatting has no order
+            if self_attr != other_attr and not self._compare_attributes_no_order(self_attr, other_attr):
                 return False
         if self.description != other.description:
             return False
@@ -134,6 +135,13 @@ class HedSchemaEntry:
     def get_known_attributes(self):
         return {key: value for key, value in self.attributes.items()
                 if not self._unknown_attributes or key not in self._unknown_attributes}
+
+    @staticmethod
+    def _compare_attributes_no_order(left, right):
+        left = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in left.items()}
+        right = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in right.items()}
+
+        return left == right
 
 
 class UnitClassEntry(HedSchemaEntry):
