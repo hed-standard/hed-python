@@ -7,3 +7,4 @@ portalocker>=2.7.0
 semantic_version>=2.10.0
 wordcloud==1.9.3
 jsonschema==4.18.4
+rdflib>=6

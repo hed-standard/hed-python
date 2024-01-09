@@ -9,3 +9,4 @@ myst-parser>=1.0.0
 Sphinx>=5.2.2
 sphinx_rtd_theme>=1.0.0
 wordcloud==1.9.3
+rdflib>=6

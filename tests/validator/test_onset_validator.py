@@ -312,6 +312,18 @@ class Test(TestHedBase):
 
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=False)
 
+    def test_check_for_banned_tags(self):
+        hed_string = HedString("Event, (Duration/Short, Label/Example)", self.hed_schema)
+        issues = OnsetValidator.check_for_banned_tags(hed_string)
+        self.assertEqual(len(issues), 0)
+
+        hed_string = HedString("Onset, (Offset, Event)", self.hed_schema)
+        issues = OnsetValidator.check_for_banned_tags(hed_string)
+        self.assertEqual(len(issues), 2)
+
+        hed_string = HedString("(Onset, Duration/Long), Label/Example", self.hed_schema)
+        issues = OnsetValidator.check_for_banned_tags(hed_string)
+        self.assertEqual(len(issues), 1)
 
 if __name__ == '__main__':
     unittest.main()
