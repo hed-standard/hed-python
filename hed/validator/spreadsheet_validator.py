@@ -28,8 +28,7 @@ class SpreadsheetValidator:
         Validate the input data using the schema
 
         Parameters:
-            data (BaseInput or pd.DataFrame): Input data to be validated.
-                If a dataframe, it is assumed to be assembled already.
+            data (BaseInput): Input data to be validated.
             def_dicts(list of DefDict or DefDict): all definitions to use for validation
             name(str): The name to report errors from this file as
             error_handler (ErrorHandler): Error context to use.  Creates a new one if None
@@ -41,22 +40,27 @@ class SpreadsheetValidator:
         if error_handler is None:
             error_handler = ErrorHandler()
 
+        if not isinstance(data, BaseInput):
+            raise TypeError("Invalid type passed to spreadsheet validator.  Can only validate BaseInput objects.")
+
         error_handler.push_error_context(ErrorContext.FILE_NAME, name)
-        self._hed_validator = HedValidator(self._schema, def_dicts=def_dicts)
-        self._onset_validator = OnsetValidator()
-        onset_filtered = None
         # Adjust to account for 1 based
         row_adj = 1
-        if isinstance(data, BaseInput):
-            # Adjust to account for column names
-            if data.has_column_names:
-                row_adj += 1
-            issues += self._validate_column_structure(data, error_handler, row_adj)
-            onset_filtered = data.series_filtered
-            data = data.dataframe_a
+        # Adjust to account for column names
+        if data.has_column_names:
+            row_adj += 1
+        issues += self._validate_column_structure(data, error_handler, row_adj)
+        onset_filtered = data.series_filtered
+        df = data.dataframe_a
+
+        self._hed_validator = HedValidator(self._schema, def_dicts=def_dicts)
+        if data.onsets is not None:
+            self._onset_validator = OnsetValidator()
+        else:
+            self._onset_validator = None
 
         # Check the rows of the input data
-        issues += self._run_checks(data, onset_filtered, error_handler=error_handler, row_adj=row_adj)
+        issues += self._run_checks(df, onset_filtered, error_handler=error_handler, row_adj=row_adj)
         error_handler.pop_error_context()
 
         issues = sort_issues(issues)
@@ -98,7 +102,10 @@ class SpreadsheetValidator:
             if row_string:
                 error_handler.push_error_context(ErrorContext.HED_STRING, row_string)
                 new_column_issues = self._hed_validator.run_full_string_checks(row_string)
-                new_column_issues += self._onset_validator.validate_temporal_relations(row_string)
+                if self._onset_validator is not None:
+                    new_column_issues += self._onset_validator.validate_temporal_relations(row_string)
+                else:
+                    new_column_issues += OnsetValidator.check_for_banned_tags(row_string)
                 error_handler.add_context_and_filter(new_column_issues)
                 error_handler.pop_error_context()
                 issues += new_column_issues

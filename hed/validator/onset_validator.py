@@ -63,3 +63,20 @@ class OnsetValidator:
                 del self._onsets[full_def_name.lower()]
 
         return []
+
+    @staticmethod
+    def check_for_banned_tags(hed_string):
+        """ Returns an issue for every tag found from the banned list
+
+        Parameters:
+            hed_string(HedString): the string to check
+
+        Returns:
+            list: The validation issues associated with the characters. Each issue is dictionary.
+        """
+        banned_tag_list = DefTagNames.TEMPORAL_KEYS
+        issues = []
+        for tag in hed_string.get_all_tags():
+            if tag in banned_tag_list:
+                issues += ErrorHandler.format_error(OnsetErrors.HED_ONSET_WITH_NO_COLUMN, tag)
+        return issues

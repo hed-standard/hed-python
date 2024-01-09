@@ -25,6 +25,12 @@ def val_error_empty_group(tag):
     return f"HED tags cannot be empty.  Extra delimiters found: '{tag}'"
 
 
+@hed_tag_error(OnsetErrors.HED_ONSET_WITH_NO_COLUMN, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+def val_error_hed_onset_with_no_column(tag):
+    return f"Cannot have Temporal tags without an 'Onset' column.  Found tag: '{tag}'"
+
+
+
 @hed_tag_error(ValidationErrors.TAG_EXTENDED, has_sub_tag=True, default_severity=ErrorSeverity.WARNING)
 def val_error_tag_extended(tag, problem_tag):
     return f"Hed tag is extended. '{problem_tag}' in {tag}"
