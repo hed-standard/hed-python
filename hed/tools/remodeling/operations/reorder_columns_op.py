@@ -11,15 +11,32 @@ class ReorderColumnsOp(BaseOp):
         - keep_others (*bool*): If true, columns not in column_order are placed at end.
 
     """
-
+    NAME = "reorder_columns"
+    
     PARAMS = {
-        "operation": "reorder_columns",
-        "required_parameters": {
-            "column_order": list,
-            "ignore_missing": bool,
-            "keep_others": bool
+        "type": "object",
+        "properties": {
+            "column_order": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "ignore_missing": {
+                "type": "boolean"
+            },
+            "keep_others": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "column_order",
+            "ignore_missing",
+            "keep_others"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -28,15 +45,8 @@ class ReorderColumnsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.column_order = parameters['column_order']
         self.ignore_missing = parameters['ignore_missing']
         self.keep_others = parameters['keep_others']
@@ -59,15 +69,21 @@ class ReorderColumnsOp(BaseOp):
         """
         df_new = df.copy()
         current_columns = list(df_new.columns)
-        missing_columns = set(self.column_order).difference(set(df_new.columns))
+        missing_columns = set(self.column_order).difference(
+            set(df_new.columns))
         ordered = self.column_order
         if missing_columns and not self.ignore_missing:
             raise ValueError("MissingReorderedColumns",
                              f"{str(missing_columns)} are not in dataframe columns "
                              f" [{str(df_new.columns)}] and not ignored.")
         elif missing_columns:
-            ordered = [elem for elem in self.column_order if elem not in list(missing_columns)]
+            ordered = [
+                elem for elem in self.column_order if elem not in list(missing_columns)]
         if self.keep_others:
             ordered += [elem for elem in current_columns if elem not in ordered]
         df_new = df_new.loc[:, ordered]
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

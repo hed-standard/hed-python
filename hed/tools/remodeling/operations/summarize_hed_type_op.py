@@ -15,23 +15,40 @@ class SummarizeHedTypeOp(BaseOp):
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
         - **summary_filename** (*str*): Base filename of the summary.   
-        - **type_tag** (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags).   
+        - **type_tag** (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags).
+
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*): If true, the timecode is appended to the base filename when summary is saved   
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
     is often used with `condition-variable` to produce a summary of the experimental design.
 
     """
 
+    NAME = "summarize_hed_type"
+    
     PARAMS = {
-        "operation": "summarize_hed_type",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str,
-            "type_tag": str
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string"
+            },
+            "summary_filename": {
+                "type": "string"
+            },
+            "type_tag": {
+                "type": "string"
+            },
+            "append_timecode": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool
-        }
+        "required": [
+            "summary_name",
+            "summary_filename",
+            "type_tag"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = 'hed_type_summary'
@@ -42,15 +59,8 @@ class SummarizeHedTypeOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.type_tag = parameters['type_tag'].lower()
@@ -81,6 +91,10 @@ class SummarizeHedTypeOp(BaseOp):
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df_new
 
+    @staticmethod
+    def validate_input_data(parameters):
+        return []
+
 
 class HedTypeSummary(BaseSummary):
 
@@ -102,10 +116,13 @@ class HedTypeSummary(BaseSummary):
         sidecar = new_info['sidecar']
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
-        input_data = TabularInput(new_info['df'], sidecar=sidecar, name=new_info['name'])
-        type_values = HedType(EventManager(input_data, new_info['schema']), new_info['name'], type_tag=self.type_tag)
+        input_data = TabularInput(
+            new_info['df'], sidecar=sidecar, name=new_info['name'])
+        type_values = HedType(EventManager(
+            input_data, new_info['schema']), new_info['name'], type_tag=self.type_tag)
         counts = HedTypeCounts(new_info['name'], self.type_tag)
-        counts.update_summary(type_values.get_summary(), type_values.total_events, new_info['name'])
+        counts.update_summary(type_values.get_summary(),
+                              type_values.total_events, new_info['name'])
         counts.add_descriptions(type_values.type_defs)
         self.summary_dict[new_info["name"]] = counts
 
@@ -183,10 +200,13 @@ class HedTypeSummary(BaseSummary):
             if item['direct_references']:
                 str1 = str1 + f" Direct references:{item['direct_references']}"
             if item['events_with_multiple_refs']:
-                str1 = str1 + f" Multiple references:{item['events_with_multiple_refs']})"
+                str1 = str1 + \
+                    f" Multiple references:{item['events_with_multiple_refs']})"
             sum_list.append(f"{indent}{key}: {str1}")
             if item['level_counts']:
-                sum_list = sum_list + HedTypeSummary._level_details(item['level_counts'], indent=indent)
+                sum_list = sum_list + \
+                    HedTypeSummary._level_details(
+                        item['level_counts'], indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
@@ -207,12 +227,14 @@ class HedTypeSummary(BaseSummary):
                     f"Total events={result.get('Total events', 0)}"]
 
         for key, item in type_info.items():
-            sum_list.append(f"{indent*2}{key}: {item['levels']} levels in {item['events']} events")
+            sum_list.append(
+                f"{indent*2}{key}: {item['levels']} levels in {item['events']} events")
             str1 = ""
             if item['direct_references']:
                 str1 = str1 + f" Direct references:{item['direct_references']}"
             if item['events_with_multiple_refs']:
-                str1 = str1 + f" (Multiple references:{item['events_with_multiple_refs']})"
+                str1 = str1 + \
+                    f" (Multiple references:{item['events_with_multiple_refs']})"
             if str1:
                 sum_list.append(f"{indent*3}{str1}")
             if item['level_counts']:
@@ -227,7 +249,13 @@ class HedTypeSummary(BaseSummary):
             str1 = f"[{details['events']} events, {details['files']} files]:"
             level_list.append(f"{offset}{indent*2}{key} {str1}")
             if details['tags']:
-                level_list.append(f"{offset}{indent*3}Tags: {str(details['tags'])}")
+                level_list.append(
+                    f"{offset}{indent*3}Tags: {str(details['tags'])}")
             if details['description']:
-                level_list.append(f"{offset}{indent*3}Description: {details['description']}")
+                level_list.append(
+                    f"{offset}{indent*3}Description: {details['description']}")
         return level_list
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

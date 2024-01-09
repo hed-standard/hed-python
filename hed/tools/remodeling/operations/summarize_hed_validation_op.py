@@ -16,20 +16,39 @@ class SummarizeHedValidationOp(BaseOp):
         - **summary_filename** (*str*): Base filename of the summary.
         - **check_for_warnings** (*bool*): If true include warnings as well as errors.
 
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*): If true, the timecode is appended to the base filename when summary is saved. 
+
     The purpose of this op is to produce a summary of the HED validation errors in a file.
 
     """
-
+    NAME = "summarize_hed_validation"
+    
     PARAMS = {
-        "operation": "summarize_hed_validation",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string"
+            },
+            "summary_filename": {
+                "type": "string"
+            },
+            "append_timecode": {
+                "type": "boolean"
+            },
+            "check_for_warnings": {
+                "type": "boolean"
+            },
+            "append_timecode": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool,
-            "check_for_warnings": bool
-        }
+        "required": [
+            "summary_name",
+            "summary_filename",
+            "check_for_warnings"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = 'hed_validation'
@@ -40,15 +59,8 @@ class SummarizeHedValidationOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
@@ -79,6 +91,10 @@ class SummarizeHedValidationOp(BaseOp):
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df_new
 
+    @staticmethod
+    def validate_input_data(parameters):
+        return []
+
 
 class HedValidationSummary(BaseSummary):
 
@@ -105,10 +121,16 @@ class HedValidationSummary(BaseSummary):
         sum_list = [f"{name}: [{len(specifics['sidecar_files'])} sidecar files, "
                     f"{len(specifics['event_files'])} event files]"]
         if specifics.get('is_merged'):
-            sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], count_only=True, indent=indent)
-            sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=True, indent=indent)
+            sum_list = sum_list + \
+                self.get_error_list(
+                    specifics['sidecar_issues'], count_only=True, indent=indent)
+            sum_list = sum_list + \
+                self.get_error_list(
+                    specifics['event_issues'], count_only=True, indent=indent)
         else:
-            sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], indent=indent*2)
+            sum_list = sum_list + \
+                self.get_error_list(
+                    specifics['sidecar_issues'], indent=indent*2)
             if specifics['sidecar_had_issues']:
                 sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], count_only=False, indent=indent*2)
             else:
@@ -127,8 +149,10 @@ class HedValidationSummary(BaseSummary):
 
         sidecar = new_info.get('sidecar', None)
         if sidecar and not isinstance(sidecar, Sidecar):
-            sidecar = Sidecar(files=new_info['sidecar'], name=os.path.basename(sidecar))
-        results = self._get_sidecar_results(sidecar, new_info, self.check_for_warnings)
+            sidecar = Sidecar(
+                files=new_info['sidecar'], name=os.path.basename(sidecar))
+        results = self._get_sidecar_results(
+            sidecar, new_info, self.check_for_warnings)
         if not results['sidecar_had_issues']:
             input_data = TabularInput(new_info['df'], sidecar=sidecar)
             issues = input_data.validate(new_info['schema'])
@@ -183,7 +207,8 @@ class HedValidationSummary(BaseSummary):
     @staticmethod
     def _update_sidecar_results(results, ind_results):
         results["total_sidecar_issues"] += ind_results["total_sidecar_issues"]
-        results["sidecar_files"] = results["sidecar_files"] + ind_results["sidecar_files"]
+        results["sidecar_files"] = results["sidecar_files"] + \
+            ind_results["sidecar_files"]
         for ikey, errors in ind_results["sidecar_issues"].items():
             results["sidecar_issues"][ikey] = errors
 
@@ -213,17 +238,21 @@ class HedValidationSummary(BaseSummary):
     def _format_errors(error_list, name, errors, indent):
         error_list.append(f"{indent}{name} issues:")
         for this_item in errors:
-            error_list.append(f"{indent * 2}{HedValidationSummary._format_error(this_item)}")
+            error_list.append(
+                f"{indent * 2}{HedValidationSummary._format_error(this_item)}")
 
     @staticmethod
     def _format_error(error):
         error_str = error['code']
         error_locations = []
-        HedValidationSummary.update_error_location(error_locations, "row", "ec_row", error)
-        HedValidationSummary.update_error_location(error_locations, "column", "ec_column", error)
+        HedValidationSummary.update_error_location(
+            error_locations, "row", "ec_row", error)
+        HedValidationSummary.update_error_location(
+            error_locations, "column", "ec_column", error)
         HedValidationSummary.update_error_location(error_locations, "sidecar column",
                                                    "ec_sidecarColumnName", error)
-        HedValidationSummary.update_error_location(error_locations, "sidecar key", "ec_sidecarKeyName", error)
+        HedValidationSummary.update_error_location(
+            error_locations, "sidecar key", "ec_sidecarKeyName", error)
         location_str = ",".join(error_locations)
         if location_str:
             error_str = error_str + f"[{location_str}]"
@@ -244,7 +273,8 @@ class HedValidationSummary(BaseSummary):
             results["sidecar_files"].append(sidecar.name)
             results["sidecar_issues"][sidecar.name] = []
             sidecar_issues = sidecar.validate(new_info['schema'])
-            filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
+            filtered_issues = ErrorHandler.filter_issues_by_severity(
+                sidecar_issues, ErrorSeverity.ERROR)
             if filtered_issues:
                 results["sidecar_had_issues"] = True
             if not check_for_warnings:
@@ -253,3 +283,7 @@ class HedValidationSummary(BaseSummary):
             results['sidecar_issues'][sidecar.name] = str_issues
             results['total_sidecar_issues'] = len(sidecar_issues)
         return results
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

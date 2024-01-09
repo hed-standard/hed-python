@@ -14,15 +14,68 @@ class SplitRowsOp(BaseOp):
         - **remove_parent_row** (*bool*):  If true, the original row that was split is removed.   
 
     """
+    NAME = "split_rows"
 
     PARAMS = {
-        "operation": "split_rows",
-        "required_parameters": {
-            "anchor_column": str,
-            "new_events": dict,
-            "remove_parent_row": bool
+        "type": "object",
+        "properties": {
+            "anchor_column": {
+                "type": "string"
+            },
+            "new_events": {
+                "type": "object",
+                "patternProperties": {
+                    ".*": {
+                        "type": "object",
+                        "properties": {
+                            "onset_source": {
+                                "type": "array",
+                                "items": {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                },
+                                "minItems": 1
+                            },
+                            "duration": {
+                                "type": "array",
+                                "items": {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                },
+                                "minItems": 1
+                            },
+                            "copy_columns": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "minItems": 1,
+                                "uniqueItems": True
+                            }
+                        },
+                        "required": [
+                            "onset_source",
+                            "duration"
+                        ],
+                        "additionalProperties": False
+                    }
+                },
+                "minProperties": 1
+            },
+            "remove_parent_row": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "anchor_column",
+            "new_events",
+            "remove_parent_row"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -31,15 +84,8 @@ class SplitRowsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.anchor_column = parameters['anchor_column']
         self.new_events = parameters['new_events']
         self.remove_parent_row = parameters['remove_parent_row']
@@ -85,7 +131,8 @@ class SplitRowsOp(BaseOp):
         """
         for event, event_parms in self.new_events.items():
             add_events = pd.DataFrame([], columns=df.columns)
-            add_events['onset'] = self._create_onsets(df, event_parms['onset_source'])
+            add_events['onset'] = self._create_onsets(
+                df, event_parms['onset_source'])
             add_events[self.anchor_column] = event
             self._add_durations(df, add_events, event_parms['duration'])
             if len(event_parms['copy_columns']) > 0:
@@ -103,7 +150,8 @@ class SplitRowsOp(BaseOp):
             if isinstance(duration, float) or isinstance(duration, int):
                 add_events['duration'] = add_events['duration'].add(duration)
             elif isinstance(duration, str) and duration in list(df.columns):
-                add_events['duration'] = add_events['duration'].add(pd.to_numeric(df[duration], errors='coerce'))
+                add_events['duration'] = add_events['duration'].add(
+                    pd.to_numeric(df[duration], errors='coerce'))
             else:
                 raise TypeError("BadDurationInModel",
                                 f"Remodeling duration {str(duration)} must either be numeric or a column name", "")
@@ -134,3 +182,7 @@ class SplitRowsOp(BaseOp):
                 raise TypeError("BadOnsetInModel",
                                 f"Remodeling onset {str(onset)} must either be numeric or a column name.", "")
         return onsets
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

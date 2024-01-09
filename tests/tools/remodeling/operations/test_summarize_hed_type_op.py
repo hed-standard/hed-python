@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
             parms = json.load(fp)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(self.events)
-        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        parsed_commands = Dispatcher.parse_operations(parms)
         sum_op = parsed_commands[2]
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-01', sidecar=self.sidecar_path)
         context1 = dispatch.summary_dicts['AOMIC_condition_variables']
@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
             parms = json.load(fp)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(self.events_wh)
-        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        parsed_commands = Dispatcher.parse_operations(parms)
         sum_op = parsed_commands[2]
         sum_op.do_op(dispatch, dispatch.prep_data(df), 'run-01', sidecar=self.sidecar_path_wh)
         context1 = dispatch.summary_dicts['AOMIC_condition_variables']
@@ -97,8 +97,7 @@ class Test(unittest.TestCase):
 
         with open(self.summary_path, 'r') as fp:
             parms = json.load(fp)
-        parsed_commands, errors = Dispatcher.parse_operations(parms)
-        self.assertFalse(errors)
+        parsed_commands = Dispatcher.parse_operations(parms)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(self.events)
         old_len = len(df)

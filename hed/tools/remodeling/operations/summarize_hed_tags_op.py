@@ -18,27 +18,66 @@ class SummarizeHedTagsOp(BaseOp):
         - **tags** (*dict*): Specifies how to organize the tag output. 
 
     Optional remodeling parameters:    
-       - **expand_context** (*bool*): If True, include counts from expanded context (not supported).   
+       - **append_timecode** (*bool*): If True, the timecode is appended to the base filename when summary is saved.
+       - **include_context** (*bool*): If True, context of events is included in summary. 
+       - **remove_types** (*list*): A list of type tags, such as Condition-variable or Task, to be excluded from the summary. 
+       - **replace_defs** (*bool*): If True, the def tag is replaced by the contents of the definitions.  
 
     The purpose of this op is to produce a summary of the occurrences of hed tags organized in a specified manner.
     The
 
 
     """
-
+    NAME = "summarize_hed_tags"
+    
     PARAMS = {
-        "operation": "summarize_hed_tags",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str,
-            "tags": dict
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string"
+            },
+            "summary_filename": {
+                "type": "string"
+            },
+            "tags": {
+                "type": "object",
+                "patternProperties": {
+                    ".*": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "uniqueItems": True
+                },
+                "minProperties": 1,
+                "additionalProperties": False
+            }
+            },
+            "append_timecode": {
+                "type": "boolean"
+            },
+            "include_context": {
+                "type": "boolean"
+            },
+            "remove_types": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "replace_defs": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool,
-            "include_context": bool,
-            "replace_defs": bool,
-            "remove_types": list
-        }
+        "required": [
+            "summary_name",
+            "summary_filename",
+            "tags"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = "hed_tag_summary"
@@ -48,23 +87,17 @@ class SummarizeHedTagsOp(BaseOp):
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
-
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
+            
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.tags = parameters['tags']
         self.append_timecode = parameters.get('append_timecode', False)
         self.include_context = parameters.get('include_context', True)
         self.replace_defs = parameters.get("replace_defs", True)
-        self.remove_types = parameters.get("remove_types", ["Condition-variable", "Task"])
+        self.remove_types = parameters.get(
+            "remove_types", ["Condition-variable", "Task"])
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Summarize the HED tags present in the dataset.
@@ -93,6 +126,10 @@ class SummarizeHedTagsOp(BaseOp):
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df_new
 
+    @staticmethod
+    def validate_input_data(parameters):
+        return []
+
 
 class HedTagSummary(BaseSummary):
 
@@ -110,11 +147,13 @@ class HedTagSummary(BaseSummary):
             - The summary needs a "name" str, a "schema", a "df, and a "Sidecar".
 
         """
-        counts = HedTagCounts(new_info['name'], total_events=len(new_info['df']))
-        input_data = TabularInput(new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
-        tag_man = HedTagManager(EventManager(input_data, new_info['schema']), 
+        counts = HedTagCounts(
+            new_info['name'], total_events=len(new_info['df']))
+        input_data = TabularInput(
+            new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
+        tag_man = HedTagManager(EventManager(input_data, new_info['schema']),
                                 remove_types=self.sum_op.remove_types)
-        hed_objs = tag_man.get_hed_objs(include_context=self.sum_op.include_context, 
+        hed_objs = tag_man.get_hed_objs(include_context=self.sum_op.include_context,
                                         replace_defs=self.sum_op.replace_defs)
         for hed in hed_objs:
             counts.update_event_counts(hed, new_info['name'])
@@ -190,7 +229,8 @@ class HedTagSummary(BaseSummary):
         """
         sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
                     f"Total files={len(result.get('Files', 0))}"]
-        sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
+        sum_list = sum_list + \
+            HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
@@ -206,14 +246,16 @@ class HedTagSummary(BaseSummary):
 
         """
         sum_list = [f"Total events={result.get('Total events', 0)}"]
-        sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
+        sum_list = sum_list + \
+            HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
     def _tag_details(tags):
         tag_list = []
         for tag in tags:
-            tag_list.append(f"{tag['tag']}[{tag['events']},{len(tag['files'])}]")
+            tag_list.append(
+                f"{tag['tag']}[{tag['events']},{len(tag['files'])}]")
         return tag_list
 
     @staticmethod
@@ -223,10 +265,12 @@ class HedTagSummary(BaseSummary):
         for category, tags in tag_info['Main tags'].items():
             sum_list.append(f"{indent}{indent}{category}:")
             if tags:
-                sum_list.append(f"{indent}{indent}{indent}{' '.join(HedTagSummary._tag_details(tags))}")
+                sum_list.append(
+                    f"{indent}{indent}{indent}{' '.join(HedTagSummary._tag_details(tags))}")
         if tag_info['Other tags']:
             sum_list.append(f"{indent}Other tags[events,files]:")
-            sum_list.append(f"{indent}{indent}{' '.join(HedTagSummary._tag_details(tag_info['Other tags']))}")
+            sum_list.append(
+                f"{indent}{indent}{' '.join(HedTagSummary._tag_details(tag_info['Other tags']))}")
         return sum_list
 
     @staticmethod
@@ -236,3 +280,7 @@ class HedTagSummary(BaseSummary):
             for tag_cnt in template[item.lower()]:
                 key_details.append(tag_cnt.get_info(verbose=verbose))
         return key_details
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

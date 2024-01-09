@@ -11,25 +11,52 @@ class SummarizeSidecarFromEventsOp(BaseOp):
 
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary.   
+        - **summary_filename** (*str*): Base filename of the summary. 
+
+    Optional remodeling parameters: 
+        - **append_timecode** (*bool*):  
         - **skip_columns** (*list*): Names of columns to skip in the summary.   
         - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns.   
 
     The purpose is to produce a JSON sidecar template for annotating a dataset with HED tags.
 
     """
-
+    NAME = "summarize_sidecar_from_events"
+    
     PARAMS = {
-        "operation": "summarize_sidecar_from_events",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str,
-            "skip_columns": list,
-            "value_columns": list,
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string"
+            },
+            "summary_filename": {
+                "type": "string"
+            },
+            "skip_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "value_columns": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "append_timecode": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool
-        }
+        "required": [
+            "summary_name",
+            "summary_filename"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = "events_to_sidecar"
@@ -40,16 +67,9 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
 
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.skip_columns = parameters['skip_columns']
@@ -78,9 +98,14 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         if not summary:
             summary = EventsToSidecarSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name})
+        summary.update_summary(
+            {'df': dispatcher.post_proc_data(df_new), 'name': name})
         return df_new
 
+    @staticmethod
+    def validate_input_data(parameters):
+        return []
+    
 
 class EventsToSidecarSummary(BaseSummary):
 
@@ -100,7 +125,8 @@ class EventsToSidecarSummary(BaseSummary):
 
         """
 
-        tab_sum = TabularSummary(value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_info["name"])
+        tab_sum = TabularSummary(
+            value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_info["name"])
         tab_sum.update(new_info['df'], new_info['name'])
         self.summary_dict[new_info["name"]] = tab_sum
 
@@ -195,3 +221,7 @@ class EventsToSidecarSummary(BaseSummary):
                     f"Value columns: {str(specifics.get('Value info', {}).keys())}",
                     f"Sidecar:\n{json.dumps(specifics['Sidecar'], indent=indent)}"]
         return "\n".join(sum_list)
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

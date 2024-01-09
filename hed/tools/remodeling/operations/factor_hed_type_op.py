@@ -14,18 +14,33 @@ class FactorHedTypeOp(BaseOp):
     """ Create tabular file factors from type variables and append to tabular data.
 
     Required remodeling parameters:   
-        - **type_tag** (*str*): HED tag used to find the factors (most commonly `condition-variable`).   
-        - **type_values** (*list*): Factor values to include. If empty all values of that type_tag are used.   
+        - **type_tag** (*str*): HED tag used to find the factors (most commonly `condition-variable`).
+
+    Optional remodeling parameters:   
+        - **type_values** (*list*): If provided, specifies which factor values to include.
 
     """
-
+    NAME = "factor_hed_type"
+    
     PARAMS = {
-        "operation": "factor_hed_type",
-        "required_parameters": {
-            "type_tag": str,
-            "type_values": list
+        "type": "object",
+        "properties": {
+            "type_tag": {
+                "type": "string"
+            },
+            "type_values": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "type_tag"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -34,18 +49,8 @@ class FactorHedTypeOp(BaseOp):
         Parameters:
             parameters (dict):  Actual values of the parameters for the operation.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
-        :raises ValueError:
-            - If the specification is missing a valid operation.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.type_tag = parameters["type_tag"]
         self.type_values = parameters["type_values"]
 
@@ -68,12 +73,18 @@ class FactorHedTypeOp(BaseOp):
 
         input_data = TabularInput(df, sidecar=sidecar, name=name)
         df_list = [input_data.dataframe.copy()]
-        var_manager = HedTypeManager(EventManager(input_data, dispatcher.hed_schema))
+        var_manager = HedTypeManager(
+            EventManager(input_data, dispatcher.hed_schema))
         var_manager.add_type(self.type_tag.lower())
 
-        df_factors = var_manager.get_factor_vectors(self.type_tag, self.type_values, factor_encoding="one-hot")
+        df_factors = var_manager.get_factor_vectors(
+            self.type_tag, self.type_values, factor_encoding="one-hot")
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
         df_new.replace('n/a', np.NaN, inplace=True)
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

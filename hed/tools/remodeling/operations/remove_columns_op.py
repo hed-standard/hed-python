@@ -10,14 +10,28 @@ class RemoveColumnsOp(BaseOp):
         - **ignore_missing** (*boolean*): If true, names in column_names that are not columns in df should be ignored.
 
     """
-
+    NAME = "remove_columns"
+    
     PARAMS = {
-        "operation": "remove_columns",
-        "required_parameters": {
-            "column_names": list,
-            "ignore_missing": bool
+        "type": "object",
+        "properties": {
+            "column_names": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "ignore_missing": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "column_names",
+            "ignore_missing"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -26,15 +40,8 @@ class RemoveColumnsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.column_names = parameters['column_names']
         ignore_missing = parameters['ignore_missing']
         if ignore_missing:
@@ -65,3 +72,7 @@ class RemoveColumnsOp(BaseOp):
             raise KeyError("MissingColumnCannotBeRemoved",
                            f"{name}: Ignore missing is False but a column in {str(self.column_names)} is "
                            f"not in the data columns [{str(df_new.columns)}]")
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

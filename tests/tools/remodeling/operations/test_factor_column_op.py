@@ -40,13 +40,6 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_bad_constructor(self):
-        self.base_parameters["factor_names"] = ["stopped"]
-        with self.assertRaises(ValueError) as context:
-            FactorColumnOp(self.base_parameters)
-        self.assertEqual(context.exception.args[0], "FactorNamesLenBad",
-                         "factor_names and factor_values must be same length")
-
     def test_no_names(self):
         self.base_parameters["factor_names"] = []
         self.base_parameters["factor_values"] = []

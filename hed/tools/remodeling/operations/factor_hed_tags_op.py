@@ -15,27 +15,54 @@ class FactorHedTagsOp(BaseOp):
     """ Create tabular file factors from tag queries.
 
     Required remodeling parameters:   
-        - **queries** (*list*): Queries to be applied successively as filters.    
-        - **query_names** (*list*):  Column names for the query factors.    
-        - **remove_types** (*list*):  Structural HED tags to be removed.    
-        - **expand_context** (*bool*): Expand the context if True.    
+        - **queries** (*list*): Queries to be applied successively as filters.       
+
+    Optional remodeling parameters:   
+        - **expand_context** (*bool*): Expand the context if True.
+        - **query_names** (*list*):  Column names for the query factors. 
+        - **remove_types** (*list*):  Structural HED tags to be removed. 
 
     Notes:  
-        - If factor column names are not provided, *query1*, *query2*, ... are used.   
+        - If query names are not provided, *query1*, *query2*, ... are used.   
         - When the context is expanded, the effect of events for temporal extent is accounted for.  
-        - Context expansion is not implemented in the current version.  
     """
-
+    NAME = "factor_hed_tags"
+    
     PARAMS = {
-        "operation": "factor_hed_tags",
-        "required_parameters": {
-            "queries": list,
-            "query_names": list,
-            "remove_types": list
+        "type": "object",
+        "properties": {
+            "queries": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "expand_context": {
+                "type": "boolean"
+            },
+            "query_names": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "remove_types": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            }
         },
-        "optional_parameters": {
-            "expand_context": bool
-        }
+        "required": [
+            "queries"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -44,20 +71,8 @@ class FactorHedTagsOp(BaseOp):
         Parameters:
             parameters (dict):  Actual values of the parameters for the operation.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
-        :raises ValueError:
-            - If the specification is missing a valid operation.
-            - If the length of query names is not empty and not same length as queries.
-            - If there are duplicate query names.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.queries = parameters['queries']
         self.query_names = parameters['query_names']
         self.remove_types = parameters['remove_types']
@@ -93,9 +108,18 @@ class FactorHedTagsOp(BaseOp):
         event_man = EventManager(input_data, dispatcher.hed_schema)
         hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None,
                                        join_columns=True, shrink_defs=False, expand_defs=True)
-        df_factors = search_strings(hed_strings, self.expression_parsers, query_names=self.query_names)
+        df_factors = search_strings(
+            hed_strings, self.expression_parsers, query_names=self.query_names)
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
         df_new.replace('n/a', np.NaN, inplace=True)
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        errors = []
+        if parameters.get("query_names", False):
+            if len(parameters.get("query_names")) != len(parameters.get("queries")):
+                errors.append("The list in query_names, in the factor_hed_tags operation, should have the same number of items as queries.")
+        return errors

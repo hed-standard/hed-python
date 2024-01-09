@@ -11,21 +11,34 @@ class SummarizeDefinitionsOp(BaseOp):
 
     Required remodeling parameters:
         - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary.   
+        - **summary_filename** (*str*): Base filename of the summary. 
+
+    Optional remodeling parameters:
+         - **append_timecode** (*bool*): If false (default), the timecode is not appended to the base filename when summary is saved, otherwise it is. 
 
     The purpose is to produce a summary of the values in a tabular file.
 
     """
-
+    NAME = "summarize_definitions"
+    
     PARAMS = {
-        "operation": "summarize_definitions",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string"
+            },
+            "summary_filename": {
+                "type": "string"
+            },
+            "append_timecode": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool
-        }
+        "required": [
+            "summary_name",
+            "summary_filename"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = 'type_defs'
@@ -36,14 +49,8 @@ class SummarizeDefinitionsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
@@ -71,11 +78,16 @@ class SummarizeDefinitionsOp(BaseOp):
                                 'schema': dispatcher.hed_schema})
         return df_new
 
+    @staticmethod
+    def validate_input_data(parameters):
+        return []
+
 
 class DefinitionSummary(BaseSummary):
     def __init__(self, sum_op, hed_schema, known_defs=None):
         super().__init__(sum_op)
-        self.def_gatherer = DefExpandGatherer(hed_schema, known_defs=known_defs)
+        self.def_gatherer = DefExpandGatherer(
+            hed_schema, known_defs=known_defs)
 
     def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.
@@ -87,8 +99,10 @@ class DefinitionSummary(BaseSummary):
             - The summary needs a "name" str, a "schema" and a "Sidecar".
 
         """
-        data_input = TabularInput(new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
-        series, def_dict = data_input.series_a, data_input.get_def_dict(new_info['schema'])
+        data_input = TabularInput(
+            new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
+        series, def_dict = data_input.series_a, data_input.get_def_dict(
+            new_info['schema'])
         self.def_gatherer.process_def_expands(series, def_dict)
 
     @staticmethod
@@ -101,8 +115,10 @@ class DefinitionSummary(BaseSummary):
             if "#" in str(value):
                 key = key + "/#"
             if display_description:
-                description, value = DefinitionSummary._remove_description(value)
-                items[key] = {"description": description, "contents": str(value)}
+                description, value = DefinitionSummary._remove_description(
+                    value)
+                items[key] = {"description": description,
+                              "contents": str(value)}
             elif isinstance(value, list):
                 items[key] = [str(x) for x in value]
             else:
@@ -124,7 +140,8 @@ class DefinitionSummary(BaseSummary):
                                                       display_description=True)
         ambiguous_defs_summary = self._build_summary_dict(def_gatherer.ambiguous_defs, "Ambiguous Definitions",
                                                           def_gatherer.get_ambiguous_group)
-        errors_summary = self._build_summary_dict(def_gatherer.errors, "Errors", None)
+        errors_summary = self._build_summary_dict(
+            def_gatherer.errors, "Errors", None)
 
         known_defs_summary.update(ambiguous_defs_summary)
         known_defs_summary.update(errors_summary)
@@ -166,7 +183,8 @@ class DefinitionSummary(BaseSummary):
         for key, value in data.items():
             if isinstance(value, dict):
                 result.append(f"{indent * level}{key}: {len(value)} items")
-                result.append(DefinitionSummary._nested_dict_to_string(value, indent, level + 1))
+                result.append(DefinitionSummary._nested_dict_to_string(
+                    value, indent, level + 1))
             elif isinstance(value, list):
                 result.append(f"{indent * level}{key}:")
                 for item in value:

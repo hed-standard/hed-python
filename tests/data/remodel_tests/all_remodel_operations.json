@@ -1,0 +1,278 @@
+[
+    {
+        "operation": "remove_columns",
+        "description": "Remove unwanted columns prior to analysis",
+        "parameters": {
+            "column_names": [
+                "value",
+                "sample"
+            ],
+            "ignore_missing": true
+        }
+    },
+    {
+        "operation": "factor_column",
+        "description": "Create factors for the succesful_stop and unsuccesful_stop values.",
+        "parameters": {
+            "column_name": "trial_type",
+            "factor_values": [
+                "succesful_stop",
+                "unsuccesful_stop"
+            ],
+            "factor_names": [
+                "stopped",
+                "stop_failed"
+            ]
+        }
+    },
+    {
+        "operation": "factor_hed_tags",
+        "description": "Create factors based on whether the event represented a correct or incorrect action.",
+        "parameters": {
+            "queries": [
+                "correct-action",
+                "incorrect-action"
+            ],
+            "query_names": [
+                "correct",
+                "incorrect"
+            ],
+            "expand_context": false
+        }
+    },
+    {
+        "operation": "factor_hed_type",
+        "description": "Factor based on the sex of the images being presented.",
+        "parameters": {
+            "type_tag": "Condition-variable"
+        }
+    },
+    {
+        "operation": "merge_consecutive",
+        "description": "Merge consecutive *succesful_stop* events that match the *match_columns.",
+        "parameters": {
+            "column_name": "trial_type",
+            "event_code": "succesful_stop",
+            "match_columns": [
+                "stop_signal_delay",
+                "response_hand",
+                "sex"
+            ],
+            "set_durations": true,
+            "ignore_missing": true
+        }
+    },
+    {
+        "operation": "remap_columns",
+        "description": "Map response_accuracy and response hand into a single column.",
+        "parameters": {
+            "source_columns": [
+                "response_accuracy",
+                "response_hand"
+            ],
+            "destination_columns": [
+                "response_type"
+            ],
+            "map_list": [
+                [
+                    "correct",
+                    "left",
+                    "correct_left"
+                ],
+                [
+                    "correct",
+                    "right",
+                    "correct_right"
+                ],
+                [
+                    "incorrect",
+                    "left",
+                    "incorrect_left"
+                ],
+                [
+                    "incorrect",
+                    "right",
+                    "incorrect_left"
+                ],
+                [
+                    "n/a",
+                    "n/a",
+                    "n/a"
+                ]
+            ],
+            "ignore_missing": true
+        }
+    },
+    {
+        "operation": "remove_columns",
+        "description": "Remove extra columns before the next step.",
+        "parameters": {
+            "column_names": [
+                "stop_signal_delay",
+                "response_accuracy",
+                "face"
+            ],
+            "ignore_missing": true
+        }
+    },
+    {
+        "operation": "remove_rows",
+        "description": "Remove rows where trial_type is either succesful_stop or unsuccesful_stop.",
+        "parameters": {
+            "column_name": "trial_type",
+            "remove_values": [
+                "succesful_stop",
+                "unsuccesful_stop"
+            ]
+        }
+    },
+    {
+        "operation": "rename_columns",
+        "description": "Rename columns to be more descriptive.",
+        "parameters": {
+            "column_mapping": {
+                "stop_signal_delay": "stop_delay",
+                "response_hand": "hand_used"
+            },
+            "ignore_missing": true
+        }
+    },
+    {
+        "operation": "reorder_columns",
+        "description": "Reorder columns.",
+        "parameters": {
+            "column_order": [
+                "onset",
+                "duration",
+                "response_time",
+                "trial_type"
+            ],
+            "ignore_missing": true,
+            "keep_others": false
+        }
+    },
+    {
+        "operation": "split_rows",
+        "description": "add response events to the trials.",
+        "parameters": {
+            "anchor_column": "trial_type",
+            "new_events": {
+                "response": {
+                    "onset_source": [
+                        "response_time"
+                    ],
+                    "duration": [
+                        0
+                    ],
+                    "copy_columns": [
+                        "response_accuracy",
+                        "response_hand",
+                        "sex",
+                        "trial_number"
+                    ]
+                },
+                "stop_signal": {
+                    "onset_source": [
+                        "stop_signal_delay"
+                    ],
+                    "duration": [
+                        0.5
+                    ],
+                    "copy_columns": [
+                        "trial_number"
+                    ]
+                }
+            },
+            "remove_parent_row": false
+        }
+    },
+    {
+        "operation": "summarize_column_names",
+        "description": "Summarize column names.",
+        "parameters": {
+            "summary_name": "AOMIC_column_names",
+            "summary_filename": "AOMIC_column_names"
+        }
+    },
+    {
+        "operation": "summarize_column_values",
+        "description": "Summarize the column values in an excerpt.",
+        "parameters": {
+            "summary_name": "AOMIC_column_values",
+            "summary_filename": "AOMIC_column_values",
+            "skip_columns": [
+                "onset",
+                "duration"
+            ],
+            "value_columns": [
+                "response_time",
+                "stop_signal_delay"
+            ]
+        }
+    },
+    {
+        "operation": "summarize_definitions",
+        "description": "Summarize the definitions used in this dataset.",
+        "parameters": {
+            "summary_name": "HED_column_definition_summary",
+            "summary_filename": "HED_column_definition_summary"
+        }
+    },
+    {
+        "operation": "summarize_hed_tags",
+        "description": "Summarize the HED tags in the dataset.",
+        "parameters": {
+            "summary_name": "summarize_hed_tags",
+            "summary_filename": "summarize_hed_tags",
+            "tags": {
+                "Sensory events": [
+                    "Sensory-event",
+                    "Sensory-presentation",
+                    "Task-stimulus-role",
+                    "Experimental-stimulus"
+                ],
+                "Agent actions": [
+                    "Agent-action",
+                    "Agent",
+                    "Action",
+                    "Agent-task-role",
+                    "Task-action-type",
+                    "Participant-response"
+                ],
+                "Objects": [
+                    "Item"
+                ]
+            }
+        }
+    },
+    {
+        "operation": "summarize_hed_type",
+        "description": "Summarize column names.",
+        "parameters": {
+            "summary_name": "AOMIC_condition_variables",
+            "summary_filename": "AOMIC_condition_variables",
+            "type_tag": "condition-variable"
+        }
+    },
+    {
+        "operation": "summarize_hed_validation",
+        "description": "Summarize validation errors in the sample dataset.",
+        "parameters": {
+            "summary_name": "AOMIC_sample_validation",
+            "summary_filename": "AOMIC_sample_validation",
+            "check_for_warnings": true
+        }
+    },
+    {
+        "operation": "summarize_sidecar_from_events",
+        "description": "Generate a sidecar from the excerpted events file.",
+        "parameters": {
+            "summary_name": "AOMIC_generate_sidecar",
+            "summary_filename": "AOMIC_generate_sidecar",
+            "value_columns": [
+                "response_time",
+                "stop_signal_delay"
+            ]
+        }
+    }
+]

@@ -50,18 +50,6 @@ class Test(unittest.TestCase):
         df_new = op.do_op(self.dispatch, self.dispatch.prep_data(df), 'run-01')
         return df, self.dispatch.post_proc_data(df_new)
 
-    def test_valid(self):
-        parms = json.loads(self.json_parms)
-        op = MergeConsecutiveOp(parms)
-        self.assertIsInstance(op, MergeConsecutiveOp)
-
-    def test_invalid(self):
-        parms = json.loads(self.json_parms)
-        parms["column_name"] = "sex"
-        with self.assertRaises(ValueError) as context:
-            MergeConsecutiveOp(parms)
-        self.assertEqual(context.exception.args[0], "MergeColumnCannotBeMatchColumn")
-
     def test_do_op_valid(self):
         # Test when no extras but ignored.
         parms = json.loads(self.json_parms)

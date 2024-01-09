@@ -44,23 +44,6 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_constructor(self):
-        parms = json.loads(self.json_parms)
-        sum_op1 = SummarizeHedTagsOp(parms)
-        self.assertIsInstance(sum_op1, SummarizeHedTagsOp, "constructor creates an object of the correct type")
-
-    def test_constructor_bad_params(self):
-        parms = json.loads(self.json_parms)
-        parms["include_context"] = ""
-        with self.assertRaises(TypeError) as context:
-            SummarizeHedTagsOp(parms)
-        self.assertEqual(context.exception.args[0], "BadType")
-        parms2 = json.loads(self.json_parms)
-        parms2["mystery"] = True
-        with self.assertRaises(KeyError) as context:
-            SummarizeHedTagsOp(parms2)
-        self.assertEqual(context.exception.args[0], "BadParameter")
-
     def test_do_op_no_replace_no_context_remove_on(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         parms = json.loads(self.json_parms)

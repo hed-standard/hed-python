@@ -22,7 +22,7 @@ class Dispatcher:
         """ Constructor for the dispatcher.
 
         Parameters:
-            operation_list (list): List of unparsed operations.
+            operation_list (list): List of valid unparsed operations.
             data_root (str or None):  Root directory for the dataset. If none, then backups are not made.
             hed_versions (str, list, HedSchema, or HedSchemaGroup): The HED schema.
 
@@ -42,11 +42,7 @@ class Dispatcher:
                 raise HedFileError("BackupDoesNotExist",
                                    f"Remodeler cannot be run with a dataset without first creating the "
                                    f"{self.backup_name} backup for {self.data_root}", "")
-        op_list, errors = self.parse_operations(operation_list)
-        if errors:
-            these_errors = self.errors_to_str(errors, 'Dispatcher failed due to invalid operations')
-            raise ValueError("InvalidOperationList", f"{these_errors}")
-        self.parsed_ops = op_list
+        self.parsed_ops = self.parse_operations(operation_list)
         self.hed_schema = self.get_schema(hed_versions)
         self.summary_dicts = {}
 
@@ -183,31 +179,11 @@ class Dispatcher:
 
     @staticmethod
     def parse_operations(operation_list):
-        errors = []
         operations = []
         for index, item in enumerate(operation_list):
-            try:
-                if not isinstance(item, dict):
-                    raise TypeError("InvalidOperationFormat",
-                                    f"Each operations must be a dictionary but operation {str(item)} is {type(item)}")
-                if "operation" not in item:
-                    raise KeyError("MissingOperation",
-                                   f"operation {str(item)} does not have a operation key")
-                if "parameters" not in item:
-                    raise KeyError("MissingParameters",
-                                   f"Operation {str(item)} does not have a parameters key")
-                if item["operation"] not in valid_operations:
-                    raise KeyError("OperationNotListedAsValid",
-                                   f"Operation {item['operation']} must be added to operations_list "
-                                   f"before it can be executed.")
-                new_operation = valid_operations[item["operation"]](item["parameters"])
-                operations.append(new_operation)
-            except Exception as ex:
-                errors.append({"index": index, "item": f"{item}", "error_type": type(ex),
-                               "error_code": ex.args[0], "error_msg": ex.args[1]})
-        if errors:
-            return [], errors
-        return operations, []
+            new_operation = valid_operations[item["operation"]](item["parameters"])
+            operations.append(new_operation)
+        return operations
 
     @staticmethod
     def prep_data(df):

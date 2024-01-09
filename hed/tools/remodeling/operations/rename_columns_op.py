@@ -7,18 +7,33 @@ class RenameColumnsOp (BaseOp):
     """ Rename columns in a tabular file.
 
     Required remodeling parameters:   
-        - **column_mapping** (*dict*): The names of the columns to be removed.   
+        - **column_mapping** (*dict*): The names of the columns to be renamed.   
         - **ignore_missing** (*bool*): If true, the names in column_mapping that are not columns and should be ignored.
 
     """
-
+    NAME = "rename_columns"
+    
     PARAMS = {
-        "operation": "rename_columns",
-        "required_parameters": {
-            "column_mapping": dict,
-            "ignore_missing": bool
+        "type": "object",
+        "properties": {
+            "column_mapping": {
+                "type": "object",
+                "patternProperties": {
+                    ".*": {
+                        "type": "string"
+                    }
+                },
+                "minProperties": 1
+            },
+            "ignore_missing": {
+                "type": "boolean"
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "column_mapping",
+            "ignore_missing"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -27,15 +42,8 @@ class RenameColumnsOp (BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.column_mapping = parameters['column_mapping']
         if parameters['ignore_missing']:
             self.error_handling = 'ignore'
@@ -65,3 +73,7 @@ class RenameColumnsOp (BaseOp):
             raise KeyError("MappedColumnsMissingFromData",
                            f"{name}: ignore_missing is False, mapping columns [{self.column_mapping}]"
                            f" but df columns are [{str(df.columns)}")
+
+    @staticmethod
+    def validate_input_data(parameters):
+        return []

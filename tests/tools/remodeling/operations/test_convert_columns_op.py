@@ -36,12 +36,5 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_constructor_bad_convert_to(self):
-        self.base_parameters["convert_to"] = "blech"
-        with self.assertRaises(ValueError) as context:
-            ConvertColumnsOp(self.base_parameters)
-        self.assertEqual(context.exception.args[0], "CannotConvertToSpecifiedType")
-
-
 if __name__ == '__main__':
     unittest.main()
