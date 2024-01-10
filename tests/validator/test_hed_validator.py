@@ -183,7 +183,7 @@ class Test(unittest.TestCase):
 
     def test_duplicate_group_in_definition(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/schema_tests/HED8.0.0.mediawiki')
+                                   '../data/schema_tests/HED8.2.0.mediawiki')
         hed_schema = schema.load_schema(schema_path)
         string_with_def = \
             '(Definition/TestDef,(Item,Item))'

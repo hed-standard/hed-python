@@ -8,7 +8,7 @@ from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, 
 
 class TestHedSchema(unittest.TestCase):
     schema_file_3g_xml = '../data/schema_tests/HED8.0.0t.xml'
-    schema_file_3g = '../data/schema_tests/HED8.0.0.mediawiki'
+    schema_file_3g = '../data/schema_tests/HED8.2.0.mediawiki'
 
     @classmethod
     def setUpClass(cls):
@@ -144,7 +144,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(len(warnings), 14)
 
     def test_bad_prefixes(self):
-        schema = load_schema_version(xml_version="8.0.0")
+        schema = load_schema_version(xml_version="8.2.0")
 
         self.assertTrue(schema.get_tag_entry("Event"))
         self.assertFalse(schema.get_tag_entry("sc:Event"))
@@ -155,7 +155,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertFalse(schema.get_tag_entry("Event", schema_namespace='unknown'))
 
     def test_bad_prefixes_library(self):
-        schema = load_schema_version(xml_version="tl:8.0.0")
+        schema = load_schema_version(xml_version="tl:8.2.0")
 
         self.assertTrue(schema.get_tag_entry("tl:Event", schema_namespace="tl:"))
         self.assertFalse(schema.get_tag_entry("sc:Event", schema_namespace="tl:"))

@@ -7,7 +7,7 @@ from functools import partial
 
 #todo: update these tests(TagValidator no longer exists)
 class TestHed(TestValidatorBase):
-    schema_file = "../data/schema_tests/HED8.0.0.mediawiki"
+    schema_file = "../data/schema_tests/HED8.2.0.mediawiki"
 
 
 class IndividualHedTagsShort(TestHed):
