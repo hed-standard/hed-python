@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
         self.assertFalse(issues, "BidsDataset with participants and events validates")
 
     def test_with_schema_group(self):
-        base_version = '8.0.0'
+        base_version = '8.2.0'
         library1_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/" + \
                        "library_schemas/score/hedxml/HED_score_1.0.0.xml"
         library2_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/" + \

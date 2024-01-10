@@ -10,7 +10,7 @@ from tests.validator.test_tag_validator_base import TestHedBase
 class TestDefBase(TestHedBase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_schema = load_schema_version("8.0.0")
+        cls.hed_schema = load_schema_version("8.2.0")
 
     def check_def_base(self, test_strings, expected_issues):
         for test_key in test_strings:
