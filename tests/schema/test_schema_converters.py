@@ -44,7 +44,6 @@ class TestConverterBase(unittest.TestCase):
         # !BFK! - Delete default units as they aren't in the XML file.
         if "HED8.2.0" in cls.wiki_file:
             del cls.hed_schema_wiki.unit_classes["temperatureUnits"].attributes["defaultUnits"]
-        breakHEre = 3
 
     @with_temp_file(".xml")
     def test_schema2xml(self, filename):
@@ -96,8 +95,6 @@ class TestConverterBase(unittest.TestCase):
         self.assertEqual(loaded_schema, self.hed_schema_wiki)
 
     def test_compare_readers(self):
-        self.hed_schema_wiki.check_compliance()
-        self.hed_schema_wiki.save_as_xml("test_resave.xml")
         if self.can_compare:
             self.assertEqual(self.hed_schema_wiki, self.hed_schema_xml)
 
