@@ -45,6 +45,9 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string",
                            filename=schema_string)
 
+    # Replace carriage returns with new lines since this might not be done by the caller
+    schema_string = schema_string.replace("\r\n", "\n")
+
     if schema_format.endswith(".xml"):
         hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string, schema=schema)
     elif schema_format.endswith(".mediawiki"):

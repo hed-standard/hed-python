@@ -114,6 +114,15 @@ class HedSchema(HedSchemaBase):
         return self._sections[HedSectionKey.UnitClasses]
 
     @property
+    def units(self):
+        """ Return the unit schema section.
+
+        Returns:
+            HedSchemaSection: The unit section.
+        """
+        return self._sections[HedSectionKey.Units]
+
+    @property
     def unit_modifiers(self):
         """ Return the modifiers classes schema section
 
@@ -364,9 +373,9 @@ class HedSchema(HedSchemaBase):
             return False
         if self.has_duplicates() != other.has_duplicates():
             return False
-        if self.prologue != other.prologue:
+        if self.prologue.strip() != other.prologue.strip():
             return False
-        if self.epilogue != other.epilogue:
+        if self.epilogue.strip() != other.epilogue.strip():
             return False
         if self._sections != other._sections:
             # This block is useful for debugging when modifying the schema class itself.
