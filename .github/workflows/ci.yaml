@@ -65,10 +65,10 @@ jobs:
 
       - name: Test with unittest
         run: |
-          HED_GITHUB_TOKEN=${{ secrets.HED_GITHUB_TOKEN }} coverage run -m unittest
+          HED_GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} coverage run -m unittest
 
       - name: Run spec_test coverage
-        run: HED_GITHUB_TOKEN=${{ secrets.HED_GITHUB_TOKEN }} coverage run --append -m unittest spec_tests/test_errors.py
+        run: HED_GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} coverage run --append -m unittest spec_tests/test_errors.py
         continue-on-error: true
 
       - name: Archive code coverage results
