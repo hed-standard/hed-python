@@ -171,6 +171,9 @@ class MyTestCase(unittest.TestCase):
                     issues = loaded_schema.check_compliance()
                 except HedFileError as e:
                     issues = e.issues
+                    if not issues:
+                        issues += [{"code": e.code,
+                                   "message": e.message}]
                 self.report_result(result, issues, error_code, description, name, test, "schema_tests")
 
     def test_errors(self):
