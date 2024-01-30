@@ -19,7 +19,7 @@ class TestNewSearch(unittest.TestCase):
         cls.events_path = os.path.realpath(
             os.path.join(bids_root_path, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         cls.base_input = TabularInput(cls.events_path, sidecar1_path)
-        cls.schema = load_schema_version()
+        cls.schema = load_schema_version("8.2.0")
         cls.df = cls.base_input.series_filtered
 
     def test_find_matching_results(self):

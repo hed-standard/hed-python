@@ -9,7 +9,7 @@ from hed import DefinitionDict
 
 class TestShrinkDefs(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version()
+        self.schema = load_schema_version("8.2.0")
 
     def test_shrink_defs_normal(self):
         df = pd.DataFrame({"column1": ["(Def-expand/TestDefNormal,(Acceleration/2471,Action/TestDef2)),Event/SomeEvent"]})
@@ -66,7 +66,7 @@ class TestShrinkDefs(unittest.TestCase):
 
 class TestExpandDefs(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version()
+        self.schema = load_schema_version("8.2.0")
         self.def_dict = DefinitionDict(["(Definition/TestDefNormal,(Acceleration/2471,Action/TestDef2))",
                                        "(Definition/TestDefPlaceholder/#,(Acceleration/#,Action/TestDef2))"],
                                        hed_schema=self.schema)
@@ -116,7 +116,7 @@ class TestExpandDefs(unittest.TestCase):
 
 class TestConvertToForm(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version()
+        self.schema = load_schema_version("8.2.0")
 
     def test_convert_to_form_short_tags(self):
         df = pd.DataFrame({"column1": ["Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See"]})

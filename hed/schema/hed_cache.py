@@ -6,13 +6,14 @@ import os
 import json
 from hashlib import sha1
 from shutil import copyfile
-import urllib
+from hed.errors.exceptions import HedFileError, HedExceptions
 import re
 from semantic_version import Version
 import portalocker
 import time
 from hed.schema.schema_io.schema_util import url_to_file, make_url_request
 from pathlib import Path
+import urllib
 
 # From https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 HED_VERSION_P1 = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"
@@ -29,9 +30,9 @@ hedxml_suffix = "/hedxml"  # The suffix for schema and library schema at the giv
 
 DEFAULT_HED_LIST_VERSIONS_URL = "https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml"
 LIBRARY_HED_URL = "https://api.github.com/repos/hed-standard/hed-schemas/contents/library_schemas"
-DEFAULT_URL_LIST = (DEFAULT_HED_LIST_VERSIONS_URL, LIBRARY_HED_URL, )
+DEFAULT_URL_LIST = (DEFAULT_HED_LIST_VERSIONS_URL, LIBRARY_HED_URL,)
 
-DEFAULT_SKIP_FOLDERS = ('deprecated', )
+DEFAULT_SKIP_FOLDERS = ('deprecated',)
 
 HED_CACHE_DIRECTORY = os.path.join(Path.home(), '.hedtools/hed_cache/')
 TIMESTAMP_FILENAME = "last_update.txt"
@@ -121,38 +122,29 @@ def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_f
     if not _check_if_url(hed_xml_url):
         return None
 
-    if _check_if_api_url(hed_xml_url):
-        return _download_latest_hed_xml_version_from_url(hed_xml_url,
-                                                         xml_version=xml_version,
-                                                         library_name=library_name,
-                                                         cache_folder=cache_folder)
+    try:
+        if _check_if_api_url(hed_xml_url):
+            return _download_latest_hed_xml_version_from_url(hed_xml_url,
+                                                             xml_version=xml_version,
+                                                             library_name=library_name,
+                                                             cache_folder=cache_folder)
+    
+        if not _check_if_specific_xml(hed_xml_url):
+            return None
+    
+        filename = hed_xml_url.split('/')[-1]
+        cache_filename = os.path.join(cache_folder, filename)
+    
+        return _cache_specific_url(hed_xml_url, cache_filename)
+    except urllib.error.URLError as e:
+        raise HedFileError(HedExceptions.URL_ERROR, str(e), hed_xml_url) from e
 
-    if not _check_if_specific_xml(hed_xml_url):
-        return None
-
-    filename = hed_xml_url.split('/')[-1]
-    cache_filename = os.path.join(cache_folder, filename)
-
-    return _cache_specific_url(hed_xml_url, cache_filename)
-
-
-def _cache_specific_url(hed_xml_url, cache_filename):
-    cache_folder = cache_filename.rpartition("/")[0]
-    os.makedirs(cache_folder, exist_ok=True)
-    temp_hed_xml_file = url_to_file(hed_xml_url)
-    if temp_hed_xml_file:
-        cache_filename = _safe_move_tmp_to_folder(temp_hed_xml_file, cache_filename)
-        os.remove(temp_hed_xml_file)
-        return cache_filename
-    return None
-
-
-def get_hed_version_path(xml_version=None, library_name=None, local_hed_directory=None):
-    """ Get latest HED XML file path in a directory.  Only returns filenames that exist.
+def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None):
+    """ Get HED XML file path in a directory.  Only returns filenames that exist.
 
     Parameters:
         library_name (str or None): Optional the schema library name.
-        xml_version (str or None): If not None, return this version or None.
+        xml_version (str): Returns this version if it exists
         local_hed_directory (str): Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
 
     Returns:
@@ -163,46 +155,10 @@ def get_hed_version_path(xml_version=None, library_name=None, local_hed_director
         local_hed_directory = HED_CACHE_DIRECTORY
 
     hed_versions = get_hed_versions(local_hed_directory, library_name)
-    if not hed_versions:
+    if not hed_versions or not xml_version:
         return None
-    if xml_version:
-        if xml_version in hed_versions:
-            latest_hed_version = xml_version
-        else:
-            return None
-    else:
-        latest_hed_version = _get_latest_semantic_version_in_list(hed_versions)
-    return _create_xml_filename(latest_hed_version, library_name, local_hed_directory)
-
-
-def get_path_from_hed_version(hed_version, library_name=None, local_hed_directory=None):
-    """ Return the HED XML file path for a version.
-
-    Parameters:
-        hed_version (str): The HED version that is in the hed directory.
-        library_name (str or None): An optional schema library name.
-        local_hed_directory (str): The local hed path to use.
-
-    Returns:
-        str: The HED XML file path in the hed directory that corresponds to the hed version specified.
-
-    Notes:
-        - Note if no local directory is given, it defaults to HED_CACHE_DIRECTORY.
-
-    """
-    if not local_hed_directory:
-        local_hed_directory = HED_CACHE_DIRECTORY
-    return _create_xml_filename(hed_version, library_name, local_hed_directory)
-
-
-def _copy_installed_schemas_to_cache(cache_folder):
-    installed_files = os.listdir(INSTALLED_CACHE_LOCATION)
-    for install_name in installed_files:
-        _, basename = os.path.split(install_name)
-        cache_name = os.path.join(cache_folder, basename)
-        install_name = os.path.join(INSTALLED_CACHE_LOCATION, basename)
-        if not os.path.exists(cache_name):
-            shutil.copy(install_name, cache_name)
+    if xml_version in hed_versions:
+        return _create_xml_filename(xml_version, library_name, local_hed_directory)
 
 
 def cache_local_versions(cache_folder):
@@ -269,10 +225,31 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
                         _cache_hed_version(version, library_name, version_info, cache_folder=cache_folder)
 
             _write_last_cached_time(current_timestamp, cache_folder)
-    except portalocker.exceptions.LockException or ValueError:
+    except portalocker.exceptions.LockException or ValueError or urllib.errors.URLError:
         return -1
 
     return 0
+
+
+def _cache_specific_url(hed_xml_url, cache_filename):
+    cache_folder = cache_filename.rpartition("/")[0]
+    os.makedirs(cache_folder, exist_ok=True)
+    temp_hed_xml_file = url_to_file(hed_xml_url)
+    if temp_hed_xml_file:
+        cache_filename = _safe_move_tmp_to_folder(temp_hed_xml_file, cache_filename)
+        os.remove(temp_hed_xml_file)
+        return cache_filename
+    return None
+
+
+def _copy_installed_schemas_to_cache(cache_folder):
+    installed_files = os.listdir(INSTALLED_CACHE_LOCATION)
+    for install_name in installed_files:
+        _, basename = os.path.split(install_name)
+        cache_name = os.path.join(cache_folder, basename)
+        install_name = os.path.join(INSTALLED_CACHE_LOCATION, basename)
+        if not os.path.exists(cache_name):
+            shutil.copy(install_name, cache_name)
 
 
 def _read_last_cached_time(cache_folder):
@@ -377,7 +354,7 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
                 sub_folder_versions = \
                     _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
                                                    skip_folders=skip_folders, get_libraries=True)
-            except urllib.error.HTTPError as e:
+            except urllib.error.URLError as e:
                 # Silently ignore ones without a hedxml section for now.
                 continue
             _merge_in_versions(all_hed_versions, sub_folder_versions)
@@ -478,39 +455,3 @@ def _cache_hed_version(version, library_name, version_info, cache_folder):
         return possible_cache_filename
 
     return _cache_specific_url(download_url, possible_cache_filename)
-
-
-def _get_latest_semantic_version_in_list(semantic_version_list):
-    """ Get the latest semantic version in a list.
-
-    Parameters:
-        semantic_version_list (list): A list containing semantic versions.
-
-    Returns:
-        str: The latest semantic version in the list.
-
-    """
-    if not semantic_version_list:
-        return ''
-    latest_semantic_version = semantic_version_list[0]
-    if len(semantic_version_list) > 1:
-        for semantic_version in semantic_version_list[1:]:
-            latest_semantic_version = _compare_semantic_versions(latest_semantic_version,
-                                                                 semantic_version)
-    return latest_semantic_version
-
-
-def _compare_semantic_versions(first_semantic_version, second_semantic_version):
-    """ Compare two semantic versions.
-
-    Parameters:
-        first_semantic_version (str): The first semantic version.
-        second_semantic_version (str): The second semantic version.
-
-    Returns:
-        str: The later semantic version.
-
-    """
-    if Version(first_semantic_version) > Version(second_semantic_version):
-        return first_semantic_version
-    return second_semantic_version

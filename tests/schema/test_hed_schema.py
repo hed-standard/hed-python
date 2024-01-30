@@ -30,7 +30,7 @@ class TestHedSchema(unittest.TestCase):
             # We should have an error before we reach here.
             self.assertTrue(False)
         except HedFileError as e:
-            self.assertTrue(invalid_xml_file in get_printable_issue_string(e.issues, skip_filename=False))
+            self.assertTrue(invalid_xml_file in e.filename)
 
     def test_tag_attribute(self):
         test_strings = {

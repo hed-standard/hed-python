@@ -9,10 +9,23 @@ from abc import ABC, abstractmethod
 
 class HedSchemaBase(ABC):
     """ Baseclass for schema and schema group.
-        Overriding the following functions will allow you to use the schema for validation etc.
+
+        Implementing the abstract functions will allow you to use the schema for validation
     """
     def __init__(self):
+        self._name = ""  # User provided identifier for this schema(not used for equality comparison or saved)
         pass
+
+    @property
+    def name(self):
+        """User provided name for this schema, defaults to filename or version if no name provided."""
+        if not self._name and hasattr(self, "filename"):
+            return self.filename
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name
 
     @abstractmethod
     def get_schema_versions(self):

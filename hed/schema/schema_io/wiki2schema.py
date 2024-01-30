@@ -43,8 +43,9 @@ class SchemaLoaderWiki(SchemaLoader):
         SchemaLoaderWiki(filename) will load just the header_attributes
     """
 
-    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None):
-        super().__init__(filename, schema_as_string, schema, file_format)
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
+        super().__init__(filename, schema_as_string, schema, file_format, name)
+        self._schema.source_format = ".mediawiki"
         self.fatal_errors = []
 
     def _open_file(self):
@@ -65,7 +66,7 @@ class SchemaLoaderWiki(SchemaLoader):
                 hed_attributes = self._get_header_attributes_internal(line[len(wiki_constants.HEADER_LINE_STRING):])
                 return hed_attributes
         msg = f"First line of file should be HED, instead found: {line}"
-        raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING, msg, filename=self.filename)
+        raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING, msg, filename=self.name)
 
     def _parse_data(self):
         wiki_lines_by_section = self._split_lines_into_sections(self.input_data)
@@ -87,13 +88,13 @@ class SchemaLoaderWiki(SchemaLoader):
             if section not in wiki_lines_by_section:
                 error_code = HedExceptions.SCHEMA_SECTION_MISSING
                 msg = f"Required section separator '{SectionNames[section]}' not found in file"
-                raise HedFileError(error_code, msg, filename=self.filename)
+                raise HedFileError(error_code, msg, filename=self.name)
 
         if self.fatal_errors:
             self.fatal_errors = error_reporter.sort_issues(self.fatal_errors)
             raise HedFileError(self.fatal_errors[0]['code'],
                                f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
-                               f"parameter on this exception for more details.", self.filename,
+                               f"parameter on this exception for more details.", self.name,
                                issues=self.fatal_errors)
 
     def _parse_sections(self, wiki_lines_by_section, parse_order):
@@ -113,7 +114,7 @@ class SchemaLoaderWiki(SchemaLoader):
         for line_number, line in lines:
             if line.strip():
                 msg = f"Extra content [{line}] between HED line and other sections"
-                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.filename)
+                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.name)
 
     def _read_text_block(self, lines):
         text = ""
@@ -272,7 +273,7 @@ class SchemaLoaderWiki(SchemaLoader):
             # todo: May shift this at some point to report all errors
             raise HedFileError(code=HedExceptions.SCHEMA_HEADER_INVALID,
                                message=f"Header line has a malformed attribute {m}",
-                               filename=self.filename)
+                               filename=self.name)
         return attributes
 
     @staticmethod
@@ -316,7 +317,7 @@ class SchemaLoaderWiki(SchemaLoader):
             divider_index = pair.find(':')
             if divider_index == -1:
                 msg = f"Found poorly matched key:value pair in header: {pair}"
-                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.filename)
+                raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.name)
             key, value = pair[:divider_index], pair[divider_index + 1:]
             key = key.strip()
             value = value.strip()
@@ -536,24 +537,24 @@ class SchemaLoaderWiki(SchemaLoader):
                 if key in strings_for_section:
                     msg = f"Found section {SectionNames[key]} twice"
                     raise HedFileError(HedExceptions.WIKI_SEPARATOR_INVALID,
-                                       msg, filename=self.filename)
+                                       msg, filename=self.name)
                 if current_section < key:
                     new_section = key
                 else:
                     error_code = HedExceptions.SCHEMA_SECTION_MISSING
                     msg = f"Found section {SectionNames[key]} out of order in file"
-                    raise HedFileError(error_code, msg, filename=self.filename)
+                    raise HedFileError(error_code, msg, filename=self.name)
                 break
         return new_section
 
     def _handle_bad_section_sep(self, line, current_section):
         if current_section != HedWikiSection.Schema and line.startswith(wiki_constants.ROOT_TAG):
             msg = f"Invalid section separator '{line.strip()}'"
-            raise HedFileError(HedExceptions.SCHEMA_SECTION_MISSING, msg, filename=self.filename)
+            raise HedFileError(HedExceptions.SCHEMA_SECTION_MISSING, msg, filename=self.name)
 
         if line.startswith("!#"):
             msg = f"Invalid section separator '{line.strip()}'"
-            raise HedFileError(HedExceptions.WIKI_SEPARATOR_INVALID, msg, filename=self.filename)
+            raise HedFileError(HedExceptions.WIKI_SEPARATOR_INVALID, msg, filename=self.name)
 
     def _split_lines_into_sections(self, wiki_lines):
         """ Takes a list of lines, and splits it into valid wiki sections.
