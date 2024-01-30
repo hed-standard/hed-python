@@ -33,6 +33,7 @@ class HedSchema(HedSchemaBase):
         self._namespace = ""
 
         self._sections = self._create_empty_sections()
+        self.source_format = None  # The type of file this was loaded from(mediawiki, xml, or owl - None if mixed)
 
     # ===============================================
     # Basic schema properties
@@ -64,6 +65,11 @@ class HedSchema(HedSchemaBase):
         """
         return self.header_attributes.get(constants.LIBRARY_ATTRIBUTE, "")
 
+    @property
+    def schema_namespace(self):
+        """Returns the schema namespace prefix"""
+        return self._namespace
+
     def can_save(self):
         """ Returns if it's legal to save this schema.
 
@@ -76,7 +82,7 @@ class HedSchema(HedSchemaBase):
 
     @property
     def with_standard(self):
-        """ The version of the base schema this is extended from, if it exists..
+        """ The version of the base schema this is extended from, if it exists.
 
         Returns:
             str: HED version or ""

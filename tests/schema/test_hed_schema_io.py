@@ -59,27 +59,46 @@ class TestHedSchema(unittest.TestCase):
     #     self.assertEqual(score_lib._namespace, "sc:")
     #     self.assertTrue(score_lib.get_tag_entry("Modulator", schema_namespace="sc:"))
 
+    def test_load_schema_invalid_parameters(self):
+        bad_filename = "this_is_not_a_real_file.xml"
+        with self.assertRaises(HedFileError):
+            load_schema(bad_filename)
+
+        bad_filename = "https://github.com/hed-standard/hed-python/bad_url.xml"
+        with self.assertRaises(HedFileError):
+            load_schema(bad_filename)
+
+    def test_load_schema_name(self):
+        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/schema_tests/HED8.2.0.mediawiki')
+
+        schema = load_schema(schema_path, schema_namespace="testspace", name="Test Name")
+        self.assertEqual(schema.schema_namespace, "testspace:")
+        self.assertEqual(schema.name, "Test Name")
+
+        schema = load_schema(schema_path, schema_namespace="testspace")
+        self.assertEqual(schema.schema_namespace, "testspace:")
+        self.assertEqual(schema.name, schema_path)
+
     def test_load_schema_version(self):
         ver1 = "8.0.0"
         schemas1 = load_schema_version(ver1)
         self.assertIsInstance(schemas1, HedSchema, "load_schema_version returns a HedSchema if a string version")
         self.assertEqual(schemas1.version_number, "8.0.0", "load_schema_version has the right version")
         self.assertEqual(schemas1.library, "", "load_schema_version standard schema has no library")
+        self.assertEqual(schemas1.name, "8.0.0")
         ver2 = "base:8.0.0"
         schemas2 = load_schema_version(ver2)
         self.assertIsInstance(schemas2, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertEqual(schemas2.version_number, "8.0.0", "load_schema_version has the right version with namespace")
         self.assertEqual(schemas2._namespace, "base:", "load_schema_version has the right version with namespace")
+        self.assertEqual(schemas2.name, "base:8.0.0")
         ver3 = ["base:8.0.0"]
         schemas3 = load_schema_version(ver3)
         self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertEqual(schemas3.version_number, "8.0.0", "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3._namespace, "base:", "load_schema_version has the right version with namespace")
-        ver3 = ["base:"]
-        schemas3 = load_schema_version(ver3)
-        self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
-        self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
-        self.assertEqual(schemas3._namespace, "base:", "load_schema_version has the right version with namespace")
+        self.assertEqual(schemas3.name, "base:8.0.0")
 
     def test_load_schema_version_merged(self):
         ver4 = ["testlib_2.0.0", "score_1.1.0"]
@@ -87,7 +106,8 @@ class TestHedSchema(unittest.TestCase):
         issues = schemas3.check_compliance()
         self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
-        self.assertEqual(schemas3._namespace, "", "load_schema_version has the right version with namespace")
+        self.assertEqual(schemas3.schema_namespace, "", "load_schema_version has the right version with namespace")
+        self.assertEqual(schemas3.name, "testlib_2.0.0,score_1.1.0")
         # Deprecated tag warnings
         self.assertEqual(len(issues), 11)
 
@@ -139,16 +159,6 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(schemas1.library, "score", "load_schema_version works with single library no namespace")
         self.assertEqual(schemas1.get_formatted_version(), '"score_1.0.0"',
                          "load_schema_version gives correct version_string with single library no namespace")
-        ver1 = "score_"
-        schemas1 = load_schema_version(ver1)
-        self.assertIsInstance(schemas1, HedSchema, "load_schema_version returns a HedSchema if a string version")
-        self.assertTrue(schemas1.version_number, "load_schema_version has the right version")
-        self.assertEqual(schemas1.library, "score", "load_schema_version works with single library no namespace")
-        ver1 = "score"
-        schemas1 = load_schema_version(ver1)
-        self.assertIsInstance(schemas1, HedSchema, "load_schema_version returns a HedSchema if a string version")
-        self.assertTrue(schemas1.version_number, "load_schema_version has the right version")
-        self.assertEqual(schemas1.library, "score", "load_schema_version works with single library no namespace")
 
         ver2 = "base:score_1.0.0"
         schemas2 = load_schema_version(ver2)
@@ -157,11 +167,13 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(schemas2._namespace, "base:", "load_schema_version has the right version with namespace")
         self.assertEqual(schemas2.get_formatted_version(), '"base:score_1.0.0"',
                          "load_schema_version gives correct version_string with single library with namespace")
+        self.assertEqual(schemas2.name, "base:score_1.0.0")
         ver3 = ["8.0.0", "sc:score_1.0.0"]
         schemas3 = load_schema_version(ver3)
         self.assertIsInstance(schemas3, HedSchemaGroup, "load_schema_version returns HedSchema version+namespace")
         self.assertIsInstance(schemas3._schemas, dict, "load_schema_version group keeps dictionary of hed versions")
         self.assertEqual(len(schemas3._schemas), 2, "load_schema_version group dictionary is right length")
+        self.assertEqual(schemas3.name, "8.0.0,sc:score_1.0.0")
         s = schemas3._schemas[""]
         self.assertEqual(s.version_number, "8.0.0", "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3.get_formatted_version(), '["8.0.0", "sc:score_1.0.0"]',
@@ -173,6 +185,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(len(schemas4._schemas), 2, "load_schema_version group dictionary is right length")
         self.assertEqual(schemas4.get_formatted_version(), '["8.0.0", "sc:score_1.0.0"]',
                          "load_schema_version gives correct version_string with multiple prefixes")
+        self.assertEqual(schemas4.name, "8.0.0,sc:score_1.0.0")
         s = schemas4._schemas["sc:"]
         self.assertEqual(s.version_number, "1.0.0", "load_schema_version has the right version with namespace")
         with self.assertRaises(KeyError) as context:
@@ -214,7 +227,6 @@ class TestHedSchemaUnmerged(unittest.TestCase):
                 loaded_schema.save_as_xml(os.path.join(cls.hed_cache_dir, new_filename), save_merged=False)
 
 
-
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.hed_cache_dir)
@@ -236,11 +248,6 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         schemas3 = load_schema_version(ver3)
         self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertEqual(schemas3.version_number, "8.0.0", "load_schema_version has the right version with namespace")
-        self.assertEqual(schemas3._namespace, "base:", "load_schema_version has the right version with namespace")
-        ver3 = ["base:"]
-        schemas3 = load_schema_version(ver3)
-        self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
-        self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3._namespace, "base:", "load_schema_version has the right version with namespace")
 
     def test_load_schema_version_merged(self):

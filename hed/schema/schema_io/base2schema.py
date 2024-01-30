@@ -14,7 +14,7 @@ class SchemaLoader(ABC):
 
         SchemaLoaderXML(filename) will load just the header_attributes
     """
-    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None):
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
         """Loads the given schema from one of the two parameters.
 
         Parameters:
@@ -23,29 +23,32 @@ class SchemaLoader(ABC):
             schema(HedSchema or None): A hed schema to merge this new file into
                                        It must be a with-standard schema with the same value.
             file_format(str or None): The format of this file if needed(only for owl currently)
+            name(str or None): Optional user supplied identifier, by default uses filename
         """
         if schema_as_string and filename:
             raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.",
                                filename)
         self.file_format = file_format
         self.filename = filename
+        self.name = name if name else filename
         self.schema_as_string = schema_as_string
         self.appending_to_schema = False
         try:
             self.input_data = self._open_file()
         except OSError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, filename)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, self.name)
         except TypeError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), filename)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), self.name)
         except ValueError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), filename)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), self.name)
 
         # self._schema.filename = filename
         hed_attributes = self._get_header_attributes(self.input_data)
-        schema_validation_util.validate_attributes(hed_attributes, filename=self.filename)
+        schema_validation_util.validate_attributes(hed_attributes, name=self.name)
 
         withStandard = hed_attributes.get(hed_schema_constants.WITH_STANDARD_ATTRIBUTE, "")
         self.library = hed_attributes.get(hed_schema_constants.LIBRARY_ATTRIBUTE, "")
+        version_number = hed_attributes.get(hed_schema_constants.VERSION_ATTRIBUTE, "")
         if not schema:
             self._schema = HedSchema()
         else:
@@ -55,14 +58,18 @@ class SchemaLoader(ABC):
                 raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
                                    "Trying to load multiple normal schemas as a merged one with the same namespace.  "
                                    "Ensure schemas have the withStandard header attribute set",
-                                   self.filename)
+                                   self.name)
             elif withStandard != self._schema.with_standard:
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
-                                   "When merging two schemas without a schema namespace, you they must have the same withStandard value.", self.filename)
+                                   "When merging two schemas without a schema namespace, you they must have the same withStandard value.", self.name)
+            hed_attributes[hed_schema_constants.VERSION_ATTRIBUTE] = self._schema.version_number + f",{version_number}"
             hed_attributes[hed_schema_constants.LIBRARY_ATTRIBUTE] = self._schema.library + f",{self.library}"
+        if name:
+            self._schema.name = name
         self._schema.filename = filename
         self._schema.header_attributes = hed_attributes
         self._loading_merged = False
+
 
     @property
     def schema(self):
@@ -70,7 +77,7 @@ class SchemaLoader(ABC):
         return self._schema
 
     @classmethod
-    def load(cls, filename=None, schema_as_string=None, schema=None, file_format=None):
+    def load(cls, filename=None, schema_as_string=None, schema=None, file_format=None, name=""):
         """ Loads and returns the schema, including partnered schema if applicable.
 
         Parameters:
@@ -80,11 +87,11 @@ class SchemaLoader(ABC):
                            It must be a with-standard schema with the same value.
             file_format(str or None): If this is an owl file being loaded, this is the format.
                 Allowed values include: turtle, json-ld, and owl(xml)
-
+            name(str or None): Optional user supplied identifier, by default uses filename
         Returns:
             schema(HedSchema): The new schema
         """
-        loader = cls(filename, schema_as_string, schema, file_format)
+        loader = cls(filename, schema_as_string, schema, file_format, name)
         return loader._load()
 
     def _load(self):

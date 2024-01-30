@@ -133,7 +133,7 @@ class Test(unittest.TestCase):
             self.assertTrue(schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name))
 
     def test_in_library_check(self):
-        score = load_schema_version("score_")
+        score = load_schema_version("score_1.1.0")
         tag_entry = score.tags["Modulator"]
         attribute_name = "inLibrary"
         self.assertFalse(schema_attribute_validators.in_library_check(score, tag_entry, attribute_name))

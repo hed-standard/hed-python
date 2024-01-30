@@ -21,10 +21,11 @@ class SchemaLoaderXML(SchemaLoader):
 
         SchemaLoaderXML(filename) will load just the header_attributes
     """
-    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None):
-        super().__init__(filename, schema_as_string, schema, file_format)
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
+        super().__init__(filename, schema_as_string, schema, file_format, name)
         self._root_element = None
         self._parent_map = {}
+        self._schema.source_format = ".xml"
 
     def _open_file(self):
         """Parses an XML file and returns the root element."""
@@ -35,7 +36,7 @@ class SchemaLoaderXML(SchemaLoader):
             else:
                 root = ElementTree.fromstring(self.schema_as_string)
         except xml.etree.ElementTree.ParseError as e:
-            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, self.schema_as_string)
+            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, self.name)
 
         return root
 
@@ -67,7 +68,7 @@ class SchemaLoaderXML(SchemaLoader):
                 section_element = section_element[0]
             if isinstance(section_element, list):
                 raise HedFileError(HedExceptions.INVALID_HED_FORMAT,
-                                   "Attempting to load an outdated or invalid XML schema", self.filename)
+                                   "Attempting to load an outdated or invalid XML schema", self.name)
             parse_func = parse_order[section_key]
             parse_func(section_element)
 
@@ -195,7 +196,7 @@ class SchemaLoaderXML(SchemaLoader):
             if element.text is None and tag_name != "units":
                 raise HedFileError(HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
                                    f"A Schema node is empty for tag of element name: '{tag_name}'.",
-                                   self._schema.filename)
+                                   self.name)
             return element.text
         return ""
 
@@ -224,6 +225,6 @@ class SchemaLoaderXML(SchemaLoader):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             raise HedFileError(HedExceptions.IN_LIBRARY_IN_UNMERGED,
                                f"Library tag in unmerged schema has InLibrary attribute",
-                               self._schema.filename)
+                               self.name)
 
         return self._add_to_dict_base(entry, key_class)

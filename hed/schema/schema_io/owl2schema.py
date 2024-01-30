@@ -22,13 +22,14 @@ class SchemaLoaderOWL(SchemaLoader):
 
         SchemaLoaderXML(filename) will load just the header_attributes
     """
-    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None):
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
         if schema_as_string and not file_format:
             raise HedFileError(HedExceptions.BAD_PARAMETERS,
                                "Must pass a file_format if loading owl schema as a string.",
-                               filename)
-        super().__init__(filename, schema_as_string, schema, file_format)
+                               name)
+        super().__init__(filename, schema_as_string, schema, file_format, name)
 
+        self._schema.source_format = ".owl"
         self.graph = None
         # When loading, this stores rooted tag name -> full root path pairs
         self._rooted_cache = {}
@@ -43,9 +44,9 @@ class SchemaLoaderOWL(SchemaLoader):
             else:
                 graph.parse(data=self.schema_as_string, format=self.file_format)
         except FileNotFoundError as fnf_error:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(fnf_error), self.filename)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(fnf_error), self.name)
         except ParserError as parse_error:
-            raise HedFileError(HedExceptions.CANNOT_PARSE_RDF, str(parse_error), self.filename)
+            raise HedFileError(HedExceptions.CANNOT_PARSE_RDF, str(parse_error), self.name)
 
         return graph
 
@@ -285,6 +286,6 @@ class SchemaLoaderOWL(SchemaLoader):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             raise HedFileError(HedExceptions.IN_LIBRARY_IN_UNMERGED,
                                f"Library tag in unmerged schema has InLibrary attribute",
-                               self._schema.filename)
+                               self.name)
 
         return self._add_to_dict_base(entry, key_class)

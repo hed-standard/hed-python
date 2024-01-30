@@ -51,12 +51,12 @@ header_attribute_validators = {
 }
 
 
-def validate_present_attributes(attrib_dict, filename):
+def validate_present_attributes(attrib_dict, name):
     """ Validate combinations of attributes
 
         Parameters:
             attrib_dict (dict): Dictionary of attributes to be evaluated.
-            filename (str):  File name to use in reporting errors.
+            name (str):  File name to use in reporting errors.
 
         Returns:
             list: List of issues. Each issue is a dictionary.
@@ -67,15 +67,15 @@ def validate_present_attributes(attrib_dict, filename):
     if constants.WITH_STANDARD_ATTRIBUTE in attrib_dict and constants.LIBRARY_ATTRIBUTE not in attrib_dict:
         raise HedFileError(HedExceptions.BAD_WITH_STANDARD,
                            "withStandard header attribute found, but no library attribute is present",
-                           filename)
+                           name)
 
 
-def validate_attributes(attrib_dict, filename):
+def validate_attributes(attrib_dict, name):
     """ Validate attributes in the dictionary.
 
     Parameters:
         attrib_dict (dict): Dictionary of attributes to be evaluated.
-        filename (str):  File name to use in reporting errors.
+        name (str):  name to use in reporting errors.
 
     Returns:
         list: List of issues. Each issue is a dictionary.
@@ -85,21 +85,21 @@ def validate_attributes(attrib_dict, filename):
         - Version not present
         - Invalid combinations of attributes in header
     """
-    validate_present_attributes(attrib_dict, filename)
+    validate_present_attributes(attrib_dict, name)
 
     for attribute_name, attribute_value in attrib_dict.items():
         if attribute_name in header_attribute_validators:
             validator, error_code = header_attribute_validators[attribute_name]
             had_error = validator(attribute_value)
             if had_error:
-                raise HedFileError(error_code, had_error, filename)
+                raise HedFileError(error_code, had_error, name)
         if attribute_name not in valid_header_attributes:
             raise HedFileError(HedExceptions.SCHEMA_UNKNOWN_HEADER_ATTRIBUTE,
-                               f"Unknown attribute {attribute_name} found in header line", filename=filename)
+                               f"Unknown attribute {attribute_name} found in header line", filename=name)
 
     if constants.VERSION_ATTRIBUTE not in attrib_dict:
         raise HedFileError(HedExceptions.SCHEMA_VERSION_INVALID,
-                           "No version attribute found in header", filename=filename)
+                           "No version attribute found in header", filename=name)
 
 
 # Might move this to a baseclass version if one is ever made for wiki2schema/xml2schema
@@ -127,28 +127,28 @@ def find_rooted_entry(tag_entry, schema, loading_merged):
         if not schema.with_standard:
             raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
                                f"Rooted tag attribute found on '{tag_entry.short_tag_name}' in a standard schema.",
-                               schema.filename)
+                               schema.name)
 
         if not isinstance(rooted_tag, str):
             raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
                                f'Rooted tag \'{tag_entry.short_tag_name}\' is not a string."',
-                               schema.filename)
+                               schema.name)
 
         if tag_entry.parent_name and not loading_merged:
             raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
                                f'Found rooted tag \'{tag_entry.short_tag_name}\' as a non root node.',
-                               schema.filename)
+                               schema.name)
 
         if not tag_entry.parent_name and loading_merged:
             raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
                                f'Found rooted tag \'{tag_entry.short_tag_name}\' as a root node in a merged schema.',
-                               schema.filename)
+                               schema.name)
 
         rooted_entry = schema.tags.get(rooted_tag)
         if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):
             raise HedFileError(HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
                                f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",
-                               schema.filename)
+                               schema.name)
 
         if loading_merged:
             return None
