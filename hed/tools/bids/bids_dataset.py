@@ -8,9 +8,6 @@ from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_file_group import BidsFileGroup
 
 
-LIBRARY_URL_BASE = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/library_schemas/"
-
-
 class BidsDataset:
     """ A BIDS dataset representation primarily focused on HED evaluation.
 

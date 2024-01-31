@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed.schema.hed_schema_io import load_schema
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_file_group import BidsFileGroup
 
@@ -31,8 +31,7 @@ class Test(unittest.TestCase):
 
     def test_validator(self):
         events = BidsFileGroup(self.root_path)
-        hed = 'https://raw.githubusercontent.com/hed-standard/hed-schemas/main/standard_schema/hedxml/HED8.0.0.xml'
-        hed_schema = load_schema(hed)
+        hed_schema = load_schema_version("8.0.0")
         validation_issues = events.validate_datafiles(hed_schema, check_for_warnings=False)
         self.assertFalse(validation_issues, "BidsFileGroup should have no validation errors")
         validation_issues = events.validate_datafiles(hed_schema, check_for_warnings=True)
