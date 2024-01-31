@@ -2,6 +2,7 @@ from hed.models.column_metadata import ColumnMetadata, ColumnType
 from hed.models.sidecar import Sidecar
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
+from hed.models.definition_dict import DefinitionDict
 
 import copy
 from collections import Counter
@@ -32,16 +33,16 @@ class ColumnMapper:
                                             the sidecar.
 
         Notes:
-            - All column numbers are 0 based.  
+            - All column numbers are 0 based.
             - The column_prefix_dictionary may be deprecated/renamed in the future.
-                - These are no longer prefixes, but rather converted to value columns:  
+                - These are no longer prefixes, but rather converted to value columns:
                   {"key": "Description", 1: "Label/"} will turn into value columns as
                   {"key": "Description/#", 1: "Label/#"}
                   It will be a validation issue if column 1 is called "key" in the above example.
                   This means it no longer accepts anything but the value portion only in the columns.
 
         """
-        
+
         # Maps column number to column_entry.  This is what's actually used by most code.
         self._final_column_map = {}
         self._no_mapping_info = True
@@ -392,7 +393,7 @@ class ColumnMapper:
         if self._sidecar:
             return self._sidecar.get_def_dict(hed_schema=hed_schema, extra_def_dicts=extra_def_dicts)
 
-        return []
+        return DefinitionDict(extra_def_dicts, hed_schema=hed_schema)
 
     def get_column_mapping_issues(self):
         """ Get all the issues with finalizing column mapping(duplicate columns, missing required, etc)
