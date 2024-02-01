@@ -135,6 +135,7 @@ class BaseInput:
 
         return indexed_dict
 
+    # This would need to store the index list -> So it can optionally apply to other columns on request
     @staticmethod
     def _filter_by_index_list(original_series, indexed_dict):
         new_series = pd.Series(["n/a"] * len(original_series), dtype=str)
@@ -264,7 +265,7 @@ class BaseInput:
             - Cannot open the indicated file
         """
         dataframe = self._dataframe
-        csv_string_if_filename_none = dataframe.to_csv(file, '\t', index=False, header=self._has_column_names)
+        csv_string_if_filename_none = dataframe.to_csv(file, sep='\t', index=False, header=self._has_column_names)
         return csv_string_if_filename_none
 
     @property
