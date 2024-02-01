@@ -190,7 +190,7 @@ class KeyMap:
             next_pos += pos_update
         if row_list:
             df = pd.DataFrame(row_list)
-            # Ignore empty col_map to supress warning
+            # Ignore empty col_map to suppress warning
             col_map = self.col_map if not self.col_map.empty else None
             self.col_map = pd.concat([col_map, df], axis=0, ignore_index=True)
 
