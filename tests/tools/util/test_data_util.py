@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(df_new1, DataFrame)
         self.assertEqual(len(df_new1), 87, "get_new_dataframe should return correct number of rows")
         self.assertEqual(len(df_new1.columns), 4, "get_new_dataframe should return correct number of rows")
-        df_new.iloc[0]['type'] = 'Pear'
+        df_new.loc[0, 'type'] = 'Pear'
         self.assertNotEqual(df_new.iloc[0]['type'], df_new1.iloc[0]['type'],
                             "get_new_dataframe returns a new dataframe")
 

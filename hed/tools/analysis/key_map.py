@@ -190,7 +190,9 @@ class KeyMap:
             next_pos += pos_update
         if row_list:
             df = pd.DataFrame(row_list)
-            self.col_map = pd.concat([self.col_map, df], axis=0, ignore_index=True)
+            # Ignore empty col_map to suppress warning
+            col_map = self.col_map if not self.col_map.empty else None
+            self.col_map = pd.concat([col_map, df], axis=0, ignore_index=True)
 
     def _handle_update(self, row, row_list, next_pos):
         """ Update the dictionary and counts of the number of times this combination of key columns appears.

@@ -11,6 +11,12 @@ from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
 from hed.tools.util.io_util import clean_filename, extract_suffix_path, get_timestamp
 
+# This isn't supported in all versions of pandas
+try:
+    pd.set_option('future.no_silent_downcasting', True)
+except pd.errors.OptionError:
+    pass
+
 
 class Dispatcher:
     """ Controller for applying operations to tabular files and saving the results. """
@@ -193,7 +199,10 @@ class Dispatcher:
             df (DataFrame) - The DataFrame to be processed.
 
         """
-        return df.replace('n/a', np.NaN)
+        result = df.replace('n/a', np.NaN)
+        # Comment in the next line if this behavior was actually needed, but I don't think it is.
+        # result = result.infer_objects(copy=False)
+        return result
 
     @staticmethod
     def post_proc_data(df):

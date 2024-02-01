@@ -87,15 +87,7 @@ class Test(unittest.TestCase):
         self.assertFalse(issues, "BidsDataset with participants and events validates")
 
     def test_with_schema_group(self):
-        base_version = '8.2.0'
-        library1_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/" + \
-                       "library_schemas/score/hedxml/HED_score_1.0.0.xml"
-        library2_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/" + \
-                       "library_schemas/testlib/hedxml/HED_testlib_1.0.2.xml"
-        schema_list = [load_schema_version(xml_version=base_version),
-                       load_schema(library1_url, schema_namespace="sc"),
-                       load_schema(library2_url, schema_namespace="test")]
-        x = HedSchemaGroup(schema_list)
+        x = load_schema_version(["8.2.0", "sc:score_1.0.0", "test:testlib_1.0.2"])
         bids = BidsDataset(self.library_path, schema=x, tabular_types=["participants"] )
         self.assertIsInstance(bids, BidsDataset, 
                               "BidsDataset with libraries should create a valid object from valid dataset")
