@@ -187,6 +187,9 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
 
     Returns:
         list:   The full paths.
+
+    Notes: Exclude directories are paths relative to the root path.
+
     """
     file_list = []
     if not exclude_dirs:

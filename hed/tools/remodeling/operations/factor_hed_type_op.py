@@ -52,7 +52,7 @@ class FactorHedTypeOp(BaseOp):
         """
         super().__init__(parameters)
         self.type_tag = parameters["type_tag"]
-        self.type_values = parameters["type_values"]
+        self.type_values = parameters.get("type_values", None)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Factor columns based on HED type and append to tabular data.
