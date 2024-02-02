@@ -38,9 +38,6 @@ class SummarizeHedValidationOp(BaseOp):
             },
             "check_for_warnings": {
                 "type": "boolean"
-            },
-            "append_timecode": {
-                "type": "boolean"
             }
         },
         "required": [
@@ -54,7 +51,7 @@ class SummarizeHedValidationOp(BaseOp):
     SUMMARY_TYPE = 'hed_validation'
 
     def __init__(self, parameters):
-        """ Constructor for the summarize hed validation operation.
+        """ Constructor for the summarize HED validation operation.
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
@@ -121,20 +118,14 @@ class HedValidationSummary(BaseSummary):
         sum_list = [f"{name}: [{len(specifics['sidecar_files'])} sidecar files, "
                     f"{len(specifics['event_files'])} event files]"]
         if specifics.get('is_merged'):
-            sum_list = sum_list + \
-                self.get_error_list(
-                    specifics['sidecar_issues'], count_only=True, indent=indent)
-            sum_list = sum_list + \
-                self.get_error_list(
-                    specifics['event_issues'], count_only=True, indent=indent)
+            sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], count_only=True)
+            sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=True)
         else:
-            sum_list = sum_list + \
-                self.get_error_list(
-                    specifics['sidecar_issues'], indent=indent*2)
+            sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'])
             if specifics['sidecar_had_issues']:
-                sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], count_only=False, indent=indent*2)
+                sum_list = sum_list + self.get_error_list(specifics['sidecar_issues'], count_only=False)
             else:
-                sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=False, indent=indent*2)
+                sum_list = sum_list + self.get_error_list(specifics['event_issues'], count_only=False)
         return "\n".join(sum_list)
 
     def update_summary(self, new_info):
@@ -219,7 +210,7 @@ class HedValidationSummary(BaseSummary):
                 "sidecar_had_issues": False}
 
     @staticmethod
-    def get_error_list(error_dict, count_only=False, indent=BaseSummary.DISPLAY_INDENT):
+    def get_error_list(error_dict, count_only=False):
         error_list = []
         for key, item in error_dict.items():
             if count_only and isinstance(item, list):
@@ -231,7 +222,6 @@ class HedValidationSummary(BaseSummary):
             else:
                 error_list.append(f"{key}:")
                 error_list = error_list + item
-                #HedValidationSummary._format_errors(error_list, key, item, indent)
         return error_list
 
     @staticmethod

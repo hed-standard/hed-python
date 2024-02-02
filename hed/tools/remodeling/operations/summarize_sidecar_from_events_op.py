@@ -72,8 +72,8 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
-        self.skip_columns = parameters['skip_columns']
-        self.value_columns = parameters['value_columns']
+        self.skip_columns = parameters.get('skip_columns', None)
+        self.value_columns = parameters.get('value_columns', None)
         self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
@@ -125,8 +125,7 @@ class EventsToSidecarSummary(BaseSummary):
 
         """
 
-        tab_sum = TabularSummary(
-            value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_info["name"])
+        tab_sum = TabularSummary(value_cols=self.value_cols, skip_cols=self.skip_cols, name=new_info["name"])
         tab_sum.update(new_info['df'], new_info['name'])
         self.summary_dict[new_info["name"]] = tab_sum
 

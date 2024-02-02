@@ -1,4 +1,4 @@
-""" Map values in m columns into a new combinations in n columns. """
+""" Map values in m columns in a tabular file into a new combinations in n columns. """
 
 import pandas as pd
 import numpy as np
@@ -7,7 +7,7 @@ from hed.tools.analysis.key_map import KeyMap
 
 
 class RemapColumnsOp(BaseOp):
-    """ Map values in m columns into a new combinations in n columns.
+    """ Map values in m columns in a tabular file into a new combinations in n columns.
 
     Required remodeling parameters:   
         - **source_columns** (*list*): The key columns to map (m key columns).   
@@ -53,7 +53,7 @@ class RemapColumnsOp(BaseOp):
                             "number"
                         ]
                     },
-                    "minItems" : 1
+                    "minItems": 1
                 },
                 "minItems": 1,
                 "uniqueItems": True
@@ -88,15 +88,12 @@ class RemapColumnsOp(BaseOp):
           """
         super().__init__(parameters)
         self.source_columns = parameters['source_columns']
-        self.integer_sources = []
-        self.string_sources = self.source_columns
-        if "integer_sources" in parameters:
-            self.string_sources = list(
-                set(self.source_columns).difference(set(self.integer_sources)))
         self.destination_columns = parameters['destination_columns']
         self.map_list = parameters['map_list']
         self.ignore_missing = parameters['ignore_missing']
-
+        self.string_sources = self.source_columns
+        self.integer_sources = parameters.get('integer_sources', [])
+        self.string_sources = list(set(self.source_columns).difference(set(self.integer_sources)))
         self.key_map = self._make_key_map()
 
     def _make_key_map(self):
@@ -145,13 +142,12 @@ class RemapColumnsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
-        errors = []
-        if len(set([len(x) for x in parameters.get("map_list")])) != 1:
-            errors.append("The lists specified in the map_list parameter in the remap_columns operation should all have the same length.")
-        else:
-            if (len(parameters.get('source_columns')) + len(parameters.get("destination_columns"))) != len(parameters.get("map_list")[0]):
-                errors.append("The lists specified in the map_list parameter in the remap_columns operation should have a length equal to the number of source columns + the number of destination columns.")
-        if parameters.get("integer_sources", False):
-            if not all([(x in parameters.get("source_columns")) for x in parameters.get("integer_sources")]):
-                errors.append("All integer_sources in the remap_columns operation should be source_columns.")       
-        return errors
+        map_list = parameters["map_list"]
+        required_len = len(parameters['source_columns']) + len(parameters['destination_columns'])
+        for x in map_list:
+            if len(x) != required_len:
+                return [f"remap_columns_op: all map_list arrays must be of length {str(required_len)}."]
+        missing = set(parameters.get('integer_sources', [])) - set(parameters['source_columns'])
+        if missing:
+            return [f"remap_columns_op: the integer_sources {str(missing)} are missing from source_columns."]
+        return []

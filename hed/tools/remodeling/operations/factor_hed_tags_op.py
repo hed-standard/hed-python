@@ -1,4 +1,4 @@
-""" Create tabular file factors from tag queries. """
+""" Append to tabular file columns of factors based on column values. """
 
 
 import pandas as pd
@@ -12,7 +12,7 @@ from hed.tools.analysis.event_manager import EventManager
 
 
 class FactorHedTagsOp(BaseOp):
-    """ Create tabular file factors from tag queries.
+    """ Append to tabular file columns of factors based on column values.
 
     Required remodeling parameters:   
         - **queries** (*list*): Queries to be applied successively as filters.       
@@ -20,11 +20,13 @@ class FactorHedTagsOp(BaseOp):
     Optional remodeling parameters:   
         - **expand_context** (*bool*): Expand the context if True.
         - **query_names** (*list*):  Column names for the query factors. 
-        - **remove_types** (*list*):  Structural HED tags to be removed. 
+        - **remove_types** (*list*):  Structural HED tags to be removed (such as Condition-variable or Task).
+        - **expand_context** (*bool*): If true, expand the context based on Onset, Offset, and Duration.
 
     Notes:  
         - If query names are not provided, *query1*, *query2*, ... are used.   
-        - When the context is expanded, the effect of events for temporal extent is accounted for.  
+        - When the context is expanded, the effect of events for temporal extent is accounted for.
+
     """
     NAME = "factor_hed_tags"
     
@@ -38,9 +40,6 @@ class FactorHedTagsOp(BaseOp):
                 },
                 "minItems": 1,
                 "uniqueItems": True
-            },
-            "expand_context": {
-                "type": "boolean"
             },
             "query_names": {
                 "type": "array",
@@ -57,6 +56,9 @@ class FactorHedTagsOp(BaseOp):
                 },
                 "minItems": 1,
                 "uniqueItems": True
+            },
+            "expand_context": {
+                "type": "boolean"
             }
         },
         "required": [
@@ -74,10 +76,10 @@ class FactorHedTagsOp(BaseOp):
         """
         super().__init__(parameters)
         self.queries = parameters['queries']
-        self.query_names = parameters['query_names']
-        self.remove_types = parameters['remove_types']
+        self.remove_types = parameters.get('remove_types', [])
+        self.expand_context = parameters.get('expand_context', True)
         self.expression_parsers, self.query_names = get_expression_parsers(self.queries,
-                                                                           query_names=parameters['query_names'])
+                                                                           parameters.get('query_names', None))
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Factor the column using HED tag queries.
@@ -118,8 +120,8 @@ class FactorHedTagsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
-        errors = []
-        if parameters.get("query_names", False):
-            if len(parameters.get("query_names")) != len(parameters.get("queries")):
-                errors.append("The list in query_names, in the factor_hed_tags operation, should have the same number of items as queries.")
-        return errors
+        queries = parameters.get("queries", None)
+        names = parameters.get("query_names", None)
+        if names and queries and (len(names) != len(parameters["queries"])):
+            return ["factor_hed_tags_op: query_names must be same length as queries."]
+        return []
