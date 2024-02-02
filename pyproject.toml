@@ -1,6 +1,72 @@
 [build-system]
-requires = ["setuptools>=42", "versioneer-518"]
+requires = ["setuptools>=42", "versioneer[toml]"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "hedtools"
+dynamic = ["version"]
+description = "HED validation, summary, and analysis tools."
+readme = "README.md"
+authors = [
+    { name = "VisLab" },
+    { name = "Ian Callanan" },
+    { name = "Jeremy Cockfield" },
+    { name = "Alexander Jones" },
+    { name = "Owen Winterberg" },
+    { name = "Kay Robbins", email = "Kay.Robbins@utsa.edu" },
+]
+license = { text = "MIT License" }
+keywords = [] # Add keywords here if any
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+requires-python = ">=3.7"
+
+dependencies = [
+    "defusedxml",
+    "et-xmlfile",
+    "inflect",
+    "jdcal",
+    "jsonschema",
+    "numpy",
+    "openpyxl",
+    "pandas",
+    "portalocker",
+    "python-dateutil",
+    "pytz",
+    "rdflib",
+    "semantic-version",
+    "six"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/hed-standard/hed-python/"
+"Bug Tracker" = "https://github.com/hed-standard/hed-python/issues"
+
+[project.optional-dependencies]
+# Define any optional dependencies here
+
+[project.scripts]
+run_remodel = "hed.tools.remodeling.cli.run_remodel:main"
+run_remodel_backup = "hed.tools.remodeling.cli.run_remodel_backup:main"
+run_remodel_restore = "hed.tools.remodeling.cli.run_remodel_restore:main"
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "hed/_version.py"
+versionfile_build = "hed/_version.py"
+tag_prefix = ""
+parentdir_prefix = "hedtools-"
+
+[tool.setuptools]
+packages = ["hed"]
+
+[tool.setuptools.package-data]
+hed = ["schema/schema_data/*.xml"]
 
 [tool.codespell]
 skip = '*.git,*.pdf,*.xml,*.mediawiki,*.svg,versioneer.py,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests'
