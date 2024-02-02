@@ -167,13 +167,15 @@ class EventManager:
         """ Return a list of definition names (lower case) that correspond to one of the specified types.
 
         Parameters:
-            types (list):  List of tags that are treated as types such as 'Condition-variable'
+            types (list or None):  List of tags that are treated as types such as 'Condition-variable'
 
         Returns:
             list:  List of definition names (lower-case) that correspond to the specified types
 
         """
         def_list = []
+        if not types:
+            return def_list
         for this_type in types:
             type_defs = HedTypeDefs(self.def_dict, type_tag=this_type)
             def_list = def_list + list(type_defs.def_map.keys())

@@ -96,8 +96,7 @@ class SummarizeHedTagsOp(BaseOp):
         self.append_timecode = parameters.get('append_timecode', False)
         self.include_context = parameters.get('include_context', True)
         self.replace_defs = parameters.get("replace_defs", True)
-        self.remove_types = parameters.get(
-            "remove_types", ["Condition-variable", "Task"])
+        self.remove_types = parameters.get("remove_types", [])
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Summarize the HED tags present in the dataset.

@@ -13,7 +13,7 @@ class SummarizeColumnValuesOp(BaseOp):
         - **summary_filename** (*str*): Base filename of the summary.     
 
     Optional remodeling parameters:
-        - **append_timecode** (*bool*): If false (default), the timecode is not appended to the base filename when summary is saved, otherwise it is. 
+        - **append_timecode** (*bool*): (**Optional**: Default false) If true append timecodes to the base filename when summary is saved.
         - **max_categorical** (*int*): Maximum number of unique values to include in summary for a categorical column.  
         - **skip_columns** (*list*):  Names of columns to skip in the summary.   
         - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns. 
@@ -81,12 +81,11 @@ class SummarizeColumnValuesOp(BaseOp):
         super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
-        self.skip_columns = parameters['skip_columns']
-        self.value_columns = parameters['value_columns']
         self.append_timecode = parameters.get('append_timecode', False)
         self.max_categorical = parameters.get('max_categorical', float('inf'))
-        self.values_per_line = parameters.get(
-            'values_per_line', self.VALUES_PER_LINE)
+        self.skip_columns = parameters['skip_columns']
+        self.value_columns = parameters['value_columns']
+        self.values_per_line = parameters.get('values_per_line', self.VALUES_PER_LINE)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create a summary of the column values in df.

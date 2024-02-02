@@ -1,17 +1,13 @@
-""" Create tabular file factor columns from column values. """
+""" Append to tabular file columns of factors based on column values. """
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-# TODO: Does not handle empty factor names.
-# TODO: Does not handle optional return columns.
-# TODO: Same length factornames and factorvalues
-
 
 class FactorColumnOp(BaseOp):
-    """ Create tabular file factor columns from column values.
+    """ Append to tabular file columns of factors based on column values.
 
     Required remodeling parameters:   
-        - **column_name** (*str*):  The name of a column in the DataFrame. 
+        - **column_name** (*str*):  The name of a column in the DataFrame to compute factors from.
 
     Optional remodeling parameters
         - **factor_names** (*list*):   Names to use as the factor columns.  
@@ -61,8 +57,8 @@ class FactorColumnOp(BaseOp):
         """
         super().__init__(parameters)
         self.column_name = parameters['column_name']
-        self.factor_values = parameters['factor_values']
-        self.factor_names = parameters['factor_names']
+        self.factor_values = parameters.get('factor_values', None)
+        self.factor_names = parameters.get('factor_names', None)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create factor columns based on values in a specified column.
@@ -95,10 +91,12 @@ class FactorColumnOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
-        if parameters.get("factor_names", False):
-            if len(parameters.get("factor_names")) != len(parameters.get("factor_values")):
-                return ["The list in factor_names, in the factor_column operation, should have the same number of items as factor_values."]
-            else: 
-                return []
+        """ Check that factor_names and factor_values have same length if given. """
+        names = parameters.get("factor_names", None)
+        values = parameters.get("factor_values", None)
+        if names and not values:
+            return ["factor_names_op: factor_names cannot be given without factor_values"]
+        elif names and values and len(names) != len(values):
+            return ["factor_names_op: factor_names must be same length as factor_values"]
         else:
             return []

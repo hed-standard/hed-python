@@ -1,10 +1,10 @@
-""" Remove rows from a tabular file. """
+""" Remove rows from a tabular file based on the values in a specified row. """
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class RemoveRowsOp(BaseOp):
-    """ Remove rows from a tabular file.
+    """ Remove rows from a tabular file based on the values in a specified row.
 
     Required remodeling parameters:   
         - **column_name** (*str*): The name of column to be tested.   

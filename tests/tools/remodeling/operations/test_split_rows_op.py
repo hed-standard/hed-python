@@ -97,6 +97,21 @@ class Test(unittest.TestCase):
         self.assertTrue(np.array_equal(df.to_numpy(), df1.to_numpy()),
                         "split_rows should not change the input df values when existing column anchor")
 
+    def test_invalid_onset_duration(self):
+        # Test when existing column is used as anchor event
+        parms = json.loads(self.json_parms)
+        op = SplitRowsOp(parms)
+        df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
+        df1 = df.drop(columns=['onset'])
+        with self.assertRaises(ValueError) as ex:
+            op.do_op(self.dispatch, self.dispatch.prep_data(df1), 'run-01')
+        self.assertEqual('MissingOnsetColumn', ex.exception.args[0])
+        df2 = df.drop(columns=['duration'])
+        with self.assertRaises(ValueError) as ex:
+            op.do_op(self.dispatch, self.dispatch.prep_data(df2), 'run-01')
+        self.assertEqual('MissingDurationColumn', ex.exception.args[0])
+
+
     def test_valid_new_anchor_column(self):
         # Test when new column is used as anchor event
         parms = json.loads(self.json_parms)

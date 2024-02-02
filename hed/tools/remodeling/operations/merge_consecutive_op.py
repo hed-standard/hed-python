@@ -1,11 +1,11 @@
-""" Merge consecutive rows with same column value. """
+""" Merge consecutive rows of a tabular file with same column value. """
 
 import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class MergeConsecutiveOp(BaseOp):
-    """ Merge consecutive rows with same column value.
+    """ Merge consecutive rows of a tabular file with same column value.
 
     Required remodeling parameters:
         - **column_name** (*str*): name of column whose consecutive values are to be compared (the merge column).  
@@ -14,7 +14,10 @@ class MergeConsecutiveOp(BaseOp):
         - **ignore_missing** (*bool*):  If true, missing match_columns are ignored.
 
     Optional remodeling parameters:
-        - **match_columns** (*list*):  A list of columns whose values have to be matched for two events to be the same.   
+        - **match_columns** (*list*):  A list of columns whose values have to be matched for two events to be the same.
+
+    Notes:
+          This operation is meant for time-based tabular files that have an onset column.
 
     """
     NAME = "merge_consecutive"
@@ -63,9 +66,9 @@ class MergeConsecutiveOp(BaseOp):
         super().__init__(parameters)
         self.column_name = parameters["column_name"]
         self.event_code = parameters["event_code"]
-        self.match_columns = parameters["match_columns"]
         self.set_durations = parameters["set_durations"]
         self.ignore_missing = parameters["ignore_missing"]
+        self.match_columns = parameters.get("match_columns", None)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Merge consecutive rows with the same column value.
@@ -164,8 +167,8 @@ class MergeConsecutiveOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
-        errors = []
-        if parameters.get("match_columns", False):
-            if parameters.get("column_name") in parameters.get("match_columns"):
-                errors.append("The column_name in the merge_consecutive operation cannot be specified as a match_column.")
-        return errors
+        match_columns = parameters.get("match_columns", None)
+        name = parameters.get("column_name", None)
+        if match_columns and name in match_columns:
+            return [f"merge_consecutive_op: column_name `{name}` cannot not be a match_column."]
+        return []

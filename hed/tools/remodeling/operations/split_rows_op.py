@@ -1,4 +1,4 @@
-""" Split rows in a tabular file into multiple rows based on a column. """
+""" Split rows in a tabular file with  onset and duration columns into multiple rows based on a specified column. """
 
 import numpy as np
 import pandas as pd
@@ -6,7 +6,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class SplitRowsOp(BaseOp):
-    """ Split rows in a tabular file into multiple rows based on parameters.
+    """ Split rows in a tabular file with  onset and duration columns into multiple rows based on a specified column.
 
     Required remodeling parameters:   
         - **anchor_column** (*str*): The column in which the names of new items are stored.   
@@ -106,7 +106,12 @@ class SplitRowsOp(BaseOp):
             -If bad onset or duration.
 
         """
-
+        if 'onset' not in df.columns:
+            raise ValueError("MissingOnsetColumn",
+                             f"{name}: Data must have an onset column for split_rows_op")
+        elif 'duration' not in df.columns:
+            raise ValueError("MissingDurationColumn",
+                             f"{name}: Data must have an duration column for split_rows_op")
         df_new = df.copy()
 
         if self.anchor_column not in df_new.columns:
@@ -129,14 +134,14 @@ class SplitRowsOp(BaseOp):
             df_list (list):  The list of split events and possibly the
 
         """
-        for event, event_parms in self.new_events.items():
+        for event, event_params in self.new_events.items():
             add_events = pd.DataFrame([], columns=df.columns)
             add_events['onset'] = self._create_onsets(
-                df, event_parms['onset_source'])
+                df, event_params['onset_source'])
             add_events[self.anchor_column] = event
-            self._add_durations(df, add_events, event_parms['duration'])
-            if len(event_parms['copy_columns']) > 0:
-                for column in event_parms['copy_columns']:
+            self._add_durations(df, add_events, event_params['duration'])
+            if len(event_params['copy_columns']) > 0:
+                for column in event_params['copy_columns']:
                     add_events[column] = df[column]
 
             # add_events['event_type'] = event

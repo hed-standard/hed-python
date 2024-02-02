@@ -7,7 +7,7 @@ class RenameColumnsOp (BaseOp):
     """ Rename columns in a tabular file.
 
     Required remodeling parameters:   
-        - **column_mapping** (*dict*): The names of the columns to be renamed.   
+        - **column_mapping** (*dict*): The names of the columns to be renamed with values to be remapped to.
         - **ignore_missing** (*bool*): If true, the names in column_mapping that are not columns and should be ignored.
 
     """
