@@ -15,8 +15,5 @@ from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.hed_schema_io import load_schema, load_schema_version
 
 
-# from hed import errors, models, schema, tools, validator
-
-
 from . import _version
 __version__ = _version.get_versions()['version']
