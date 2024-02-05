@@ -1,8 +1,8 @@
 on:
   push:
-    branches: [develop]
+    branches: ["develop"]
   pull_request:
-    branches: [develop]
+    branches: ["develop"]
 
 jobs:
   build:
@@ -19,19 +19,26 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: Create work directory
+      run: |
+        mkdir workdir
+        echo "WORKDIR=$(pwd)/workdir" >> $GITHUB_OUTPUT
+
     - name: Create and activate virtual environment
       run: |
+        cd $WORKDIR
         python -m venv .venv
         source .venv/bin/activate
 
     - name: Install package
       run: |
+        cd $WORKDIR
         source .venv/bin/activate
         python -m pip install --upgrade pip
-        pip install .
+        pip install $GITHUB_WORKSPACE
 
     - name: Run post-installation test
       run: |
+        cd $WORKDIR
         source .venv/bin/activate
         python -c "from hed.models.hed_string import HedString; print('Import test passed.')"
-
