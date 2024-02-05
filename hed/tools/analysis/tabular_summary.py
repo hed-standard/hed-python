@@ -1,4 +1,4 @@
-""" Summarize the contents of tabular files. """
+""" Summarize the contents of columnar files. """
 
 
 import json
@@ -8,7 +8,7 @@ from hed.tools.analysis.annotation_util import generate_sidecar_entry
 
 
 class TabularSummary:
-    """ Summarize the contents of tabular files. """
+    """ Summarize the contents of columnar files. """
 
     def __init__(self, value_cols=None, skip_cols=None, name=''):
         """ Constructor for a BIDS tabular file summary.

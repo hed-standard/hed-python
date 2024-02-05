@@ -1,10 +1,11 @@
+""" A BIDS tabular file with sidecar. """
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
 from hed.models.sidecar import Sidecar
 
 
 class TabularInput(BaseInput):
-    """ A BIDS tabular tsv file with sidecar. """
+    """ A BIDS tabular file with sidecar. """
 
     HED_COLUMN_NAME = "HED"
 

@@ -6,7 +6,7 @@ import argparse
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import get_file_list, get_task_from_file, get_task_dict
 from hed.tools.bids.bids_dataset import BidsDataset
-from hed.tools.remodeling.validator import RemodelerValidator
+from hed.tools.remodeling.remodeler_validator import RemodelerValidator
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.backup_manager import BackupManager
 

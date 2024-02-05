@@ -1,3 +1,4 @@
+""" A single parenthesized hed string. """
 from hed.models.hed_tag import HedTag
 import copy
 from typing import Iterable, Union
@@ -237,7 +238,7 @@ class HedGroup:
 
     @staticmethod
     def _check_in_group(group, group_list):
-        """ Return true if the group is list.
+        """ Return True if the group is list.
 
         Parameters:
             group (HedGroup): The group to check for.
@@ -458,7 +459,7 @@ class HedGroup:
 
         Parameters:
             search_tags (container):    A container of the starts of short tags to search.
-            recursive (bool):           If true, also check subgroups.
+            recursive (bool):           If True, also check subgroups.
             include_groups (0, 1 or 2): Specify return values.
                 If 0: return a list of the HedTags.
                 If 1: return a list of the HedGroups containing the HedTags.

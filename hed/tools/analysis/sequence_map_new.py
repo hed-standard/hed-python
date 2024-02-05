@@ -38,7 +38,7 @@ class SequenceMapNew:
     @property
     def __str__(self):
         node_counts = [f"{value}({str(count)})" for value, count in self.node_counts.items()]
-        node_str = (" ").join(node_counts)
+        node_str = " ".join(node_counts)
         return node_str
         # temp_list = [f"{self.name} counts for key [{str(self.key_cols)}]:"]
         # for index, row in self.col_map.iterrows():
@@ -55,7 +55,7 @@ class SequenceMapNew:
         if self.codes:
             node_list = [f"{node};" for node in self.codes if node not in self.node_counts]
             if node_list:
-                base = base + 'subgraph cluster_unused {\n bgcolor="#cAcAcA";\n' + ("\n").join(node_list) + "\n}\n"
+                base = base + 'subgraph cluster_unused {\n bgcolor="#cAcAcA";\n' + "\n".join(node_list) + "\n}\n"
         if group_spec:
             for group, spec in group_spec.items():
                 group_list = [f"{node};" for node in self.node_counts if node in spec["nodes"]]
@@ -64,7 +64,7 @@ class SequenceMapNew:
                     if spec_color[0] == '#':
                         spec_color = f'"{spec_color}"'
                     base = base + 'subgraph cluster_' + group + '{\n' + f'bgcolor={spec_color};\n' + \
-                           '\n'.join(group_list) + '\n}\n'
+                        '\n'.join(group_list) + '\n}\n'
         edge_list = self.get_edge_list(sort=True)
 
         dot_str = base + ("\n").join(edge_list) + "}\n"
@@ -73,8 +73,6 @@ class SequenceMapNew:
     def edge_to_str(self, key):
         value = self.edges.get(key, [])
         if value:
-            x = ("+").join(value[0])
-            y = ("+").join(value[1])
             return f"{str(self.sequences[value[0]])} -> {str(self.sequences[value[1]])} "
         else:
             return ""
@@ -83,7 +81,7 @@ class SequenceMapNew:
         """Produces a DOT format edge list with the option of sorting by edge counts.
         
         Parameters:
-            sort (bool): if true the edge list is sorted by edge counts
+            sort (bool): if True the edge list is sorted by edge counts.
             
         Returns:
             list:  list of DOT strings representing the edges labeled by counts.
@@ -95,7 +93,7 @@ class SequenceMapNew:
             df = df.sort_values(by='Counts', ascending=False)
         edge_list = []
         for index, row in df.iterrows():
-             edge_list.append(f"{self.edge_to_str(row['Key'])} [label={str(self.edge_counts[row['Key']])}];")
+            edge_list.append(f"{self.edge_to_str(row['Key'])} [label={str(self.edge_counts[row['Key']])}];")
         return edge_list
 
     def filter_edges(self):
@@ -111,7 +109,7 @@ class SequenceMapNew:
             this_seq = row['seq']
             if not this_seq:
                 last_seq_key = None
-                continue;
+                continue
             this_seq_key = get_key_hash(this_seq)
             self.sequences[this_seq_key] = this_seq
             self.seq_counts[this_seq_key] = self.seq_counts.get(this_seq_key, 0) + 1

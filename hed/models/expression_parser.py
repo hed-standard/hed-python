@@ -1,7 +1,9 @@
+""" Holder for and manipulation of search results. """
 import re
 
 
 class SearchResult:
+    """ Holder for and manipulation of search results. """
     def __init__(self, group, tag):
         self.group = group
         # todo: rename tag: children

@@ -83,7 +83,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
     Parameters:
         error_type (str): A value from error_types or optionally another value.
         default_severity (ErrorSeverity): The default severity for the decorated error.
-        has_sub_tag (bool): If true, this error message also wants a sub_tag passed down.  eg "This" in "This/Is/A/Tag"
+        has_sub_tag (bool): If True, this error message also wants a sub_tag passed down.  eg "This" in "This/Is/A/Tag"
         actual_code (str): The actual error to report to the outside world.
 
     """
@@ -442,7 +442,7 @@ def get_printable_issue_string(issues, title=None, severity=None, skip_filename=
         issues (list):  Issues to print.
         title (str):  Optional title that will always show up first if present(even if there are no validation issues).
         severity (int):        Return only warnings >= severity.
-        skip_filename (bool):  If true, don't add the filename context to the printable string.
+        skip_filename (bool):  If True, don't add the filename context to the printable string.
         add_link (bool): Add a link at the end of message to the appropriate error if True
     Returns:
         str:   A string containing printable version of the issues or ''.
@@ -466,7 +466,7 @@ def get_printable_issue_string_html(issues, title=None, severity=None, skip_file
         issues (list):  Issues to print.
         title (str):  Optional title that will always show up first if present.
         severity (int): Return only warnings >= severity.
-        skip_filename (bool): If true, don't add the filename context to the printable string.
+        skip_filename (bool): If True, don't add the filename context to the printable string.
 
     Returns:
         str: An HTML string containing the issues or ''.
@@ -568,7 +568,7 @@ def _get_context_from_issue(val_issue, skip_filename=True):
 
     Parameters:
         val_issue (dict): A dictionary a representing a single error.
-        skip_filename (bool): If true, don't gather the filename context.
+        skip_filename (bool): If True, don't gather the filename context.
 
     Returns:
         list: A list of tuples containing the context_type and context for the given issue.

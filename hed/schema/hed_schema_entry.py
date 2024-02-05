@@ -296,7 +296,7 @@ class HedTagEntry(HedSchemaEntry):
             attribute (str): The attribute to check for.
             return_value (bool): If True, returns the actual value of the attribute.
                                  If False, returns a boolean indicating the presence of the attribute.
-            return_union(bool): If true, return a union of all parent values
+            return_union(bool): If True, return a union of all parent values.
 
         Returns:
             bool or any: Depending on the flag return_value,

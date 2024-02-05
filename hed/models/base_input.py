@@ -1,3 +1,6 @@
+"""
+Superclass representing a basic columnar file.
+"""
 import re
 import os
 

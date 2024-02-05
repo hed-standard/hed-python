@@ -137,9 +137,9 @@ class Dispatcher:
         """ Run the dispatcher operations on a file.
 
         Parameters:
-            file_path (str or DataFrame):    Full path of the file to be remodeled or a DataFrame
+            file_path (str or DataFrame):    Full path of the file to be remodeled or a DataFrame.
             sidecar (Sidecar or file-like):   Only needed for HED operations.
-            verbose (bool):  If true, print out progress reports
+            verbose (bool):  If True, print out progress reports.
 
         Returns:
             DataFrame:  The processed dataframe.
@@ -193,13 +193,13 @@ class Dispatcher:
 
     @staticmethod
     def prep_data(df):
-        """ Make a copy and replace all n/a entries in the data frame by np.NaN for processing.
+        """ Make a copy and replace all n/a entries in the data frame by np.nan for processing.
 
         Parameters:
             df (DataFrame) - The DataFrame to be processed.
 
         """
-        result = df.replace('n/a', np.NaN)
+        result = df.replace('n/a', np.nan)
         # Comment in the next line if this behavior was actually needed, but I don't think it is.
         # result = result.infer_objects(copy=False)
         return result

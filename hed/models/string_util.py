@@ -1,3 +1,4 @@
+""" Utilities for manipulating HedString objects. """
 from hed.models.hed_string import HedString
 
 

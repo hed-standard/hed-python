@@ -1,3 +1,6 @@
+"""
+Utilities to support HED searches based on strings.
+"""
 import re
 from itertools import combinations, product
 from collections import defaultdict

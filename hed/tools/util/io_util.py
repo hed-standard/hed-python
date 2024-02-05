@@ -48,7 +48,7 @@ def get_allowed(value, allowed_values=None, starts_with=True):
     Parameters:
         value (str): value to be matched.
         allowed_values (list, str, or None):  Values to match.
-        starts_with (bool):  If true match is done at beginning of string, otherwise the end.
+        starts_with (bool):  If True match is done at beginning of string, otherwise the end.
 
     Notes:
         - match is done in lower case.
@@ -80,7 +80,7 @@ def extract_suffix_path(path, prefix_path):
         str:   Suffix path.
 
     Notes:
-        - This function is useful for creating files within BIDS datasets
+        - This function is useful for creating files within BIDS datasets.
 
     """
 
@@ -93,10 +93,10 @@ def extract_suffix_path(path, prefix_path):
 
 
 def clean_filename(filename):
-    """ Replaces invalid characters with under-bars
+    """ Replaces invalid characters with under-bars.
 
     Parameters:
-        filename (str):   source filename
+        filename (str):   source filename.
 
     Returns:
         str:  The filename with anything but alphanumeric, period, hyphens, and under-bars removed.
@@ -164,7 +164,7 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
         file_list (list):      List of files to test.
         name_prefix (str):     Optional name_prefix for the base filename.
         name_suffix (str):     Optional name_suffix for the base filename.
-        extensions (list):     Optional list of file extensions (allows two periods (.tsv.gz))
+        extensions (list):     Optional list of file extensions (allows two periods (.tsv.gz)).
 
      Returns:
          list:  The filtered file names.
@@ -206,8 +206,8 @@ def get_path_components(root_path, this_path):
     """ Get a list of the remaining components after root path.
 
     Parameters:
-        root_path (str):      A path (no trailing separator)
-        this_path (str):      The path of a file or directory descendant of root_path
+        root_path (str):      A path (no trailing separator).
+        this_path (str):      The path of a file or directory descendant of root_path.
 
     Returns:
         list or None:   A list with the remaining elements directory components to the file.
@@ -248,7 +248,7 @@ def make_path(root_path, sub_path, filename):
     Returns:
         str: A valid realpath for the specified file.
 
-    Notes: This function is useful for creating files within BIDS datasets
+    Notes: This function is useful for creating files within BIDS datasets.
 
     """
 
@@ -332,11 +332,15 @@ def get_task_from_file(file_path):
     splits = re.split(r'[_.]', basename[position+5:])
     return splits[0]
 
+
 def get_task_dict(files):
     """ Return a dictionary of the tasks that appear in the file names of a list of files.
     
     Parameters:
-        files = 
+        files (list): List of filenames to be separated by task.
+
+    Returns:
+        dict:  dictionary of filenames keyed by task name.
     
     """
     task_dict = {}

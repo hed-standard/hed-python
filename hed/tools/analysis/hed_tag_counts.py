@@ -62,11 +62,11 @@ class HedTagCount:
 
 
 class HedTagCounts:
-    """ Counts of HED tags for a tabular file.
+    """ Counts of HED tags for a columnar file.
 
     Parameters:
-        name (str):  An identifier for these counts (usually the filename of the tabular file)
-        total_events (int):  The total number of events in the tabular file.
+        name (str):  An identifier for these counts (usually the filename of the tabular file).
+        total_events (int):  The total number of events in the columnar file.
 
     """
 

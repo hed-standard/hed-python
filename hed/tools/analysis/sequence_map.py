@@ -1,4 +1,4 @@
-""" A map of containing the number of times a particular sequence of values in a column of an event file. """
+""" A map of containing the number of times a particular sequence of values in a column of a columnar file. """
 
 
 import pandas as pd
@@ -6,7 +6,7 @@ from hed.tools.util.data_util import get_key_hash
 
 
 class SequenceMap:
-    """ A map of unique sequences of column values of a particular length appear in an event file.
+    """ A map of unique sequences of column values of a particular length appear in an columnar file.
 
     Attributes:
         
@@ -32,10 +32,9 @@ class SequenceMap:
         self.edge_counts = {}  # Keeps a running count of the number of times a key appears in the data
 
     @property
-
     def __str__(self):
         node_counts = [f"{value}({str(count)})" for value, count in self.node_counts.items()]
-        node_str = (" ").join(node_counts)
+        node_str = " ".join(node_counts)
         return node_str
         # temp_list = [f"{self.name} counts for key [{str(self.key_cols)}]:"]
         # for index, row in self.col_map.iterrows():
@@ -52,7 +51,7 @@ class SequenceMap:
         if self.codes:
             node_list = [f"{node};" for node in self.codes if node not in self.node_counts]
             if node_list:
-                base = base + 'subgraph cluster_unused {\n bgcolor="#cAcAcA";\n' + ("\n").join(node_list) +"\n}\n"
+                base = base + 'subgraph cluster_unused {\n bgcolor="#cAcAcA";\n' + "\n".join(node_list) + "\n}\n"
         if group_spec:
             for group, spec in group_spec.items():
                 group_list = [f"{node};" for node in self.node_counts if node in spec["nodes"]]
@@ -61,10 +60,10 @@ class SequenceMap:
                     if spec_color[0] == '#':
                         spec_color = f'"{spec_color}"'
                     base = base + 'subgraph cluster_' + group + '{\n' + f'bgcolor={spec_color};\n' + \
-                           '\n'.join(group_list) + '\n}\n'
+                        '\n'.join(group_list) + '\n}\n'
         edge_list = self.get_edge_list(sort=True)
         
-        dot_str = base +  ("\n").join(edge_list) + "}\n"
+        dot_str = base + "\n".join(edge_list) + "}\n"
         return dot_str
 
     def edge_to_str(self, key):
@@ -73,11 +72,12 @@ class SequenceMap:
             return f"{value[0]} -> {value[1]} "
         else:
             return ""
+        
     def get_edge_list(self, sort=True):
         """Produces a DOT format edge list with the option of sorting by edge counts.
         
         Parameters:
-            sort (bool): if true the edge list is sorted by edge counts
+            sort (bool): if True the edge list is sorted by edge counts.
             
         Returns:
             list:  list of DOT strings representing the edges labeled by counts.
@@ -98,8 +98,8 @@ class SequenceMap:
         """ Update the existing map with information from data.
 
         Parameters:
-            data (Series):     DataFrame or filename of an events file or event map.
-            allow_missing (bool):        If true allow missing keys and add as n/a columns.
+            data (Series): DataFrame or filename of an events file or event map.
+            allow_missing (bool):  If True allow missing keys and add as n/a columns.
 
         :raises HedFileError:
             - If there are missing keys and allow_missing is False.
@@ -124,35 +124,35 @@ class SequenceMap:
                 self.edges[key] = key_list
                 self.edge_counts[key] = 1
 
-    def update(self, data):
-        """ Update the existing map with information from data.
-
-        Parameters:
-            data (Series):     DataFrame or filename of an events file or event map.
-            allow_missing (bool):        If true allow missing keys and add as n/a columns.
-
-        :raises HedFileError:
-            - If there are missing keys and allow_missing is False.
-
-        """
-        filtered = self.prep(data)
-        if self.codes:
-            mask = filtered.isin(self.codes)
-            filtered = filtered[mask]
-        for index, value in filtered.items():
-            if value not in self.node_counts:
-                self.node_counts[value] = 1
-            else:
-                self.node_counts[value] = self.node_counts[value] + 1
-            if index + 1 >= len(filtered):
-                break
-            key_list = filtered[index:index + 2].tolist()
-            key = get_key_hash(key_list)
-            if key in self.edges:
-                self.edge_counts[key] = self.edge_counts[key] + 1
-            else:
-                self.edges[key] = key_list
-                self.edge_counts[key] = 1
+    # def update(self, data):
+    #     """ Update the existing map with information from data.
+    # 
+    #     Parameters:
+    #         data (Series):     DataFrame or filename of an events file or event map.
+    #         allow_missing (bool):        If true allow missing keys and add as n/a columns.
+    # 
+    #     :raises HedFileError:
+    #         - If there are missing keys and allow_missing is False.
+    # 
+    #     """
+    #     filtered = self.prep(data)
+    #     if self.codes:
+    #         mask = filtered.isin(self.codes)
+    #         filtered = filtered[mask]
+    #     for index, value in filtered.items():
+    #         if value not in self.node_counts:
+    #             self.node_counts[value] = 1
+    #         else:
+    #             self.node_counts[value] = self.node_counts[value] + 1
+    #         if index + 1 >= len(filtered):
+    #             break
+    #         key_list = filtered[index:index + 2].tolist()
+    #         key = get_key_hash(key_list)
+    #         if key in self.edges:
+    #             self.edge_counts[key] = self.edge_counts[key] + 1
+    #         else:
+    #             self.edges[key] = key_list
+    #             self.edge_counts[key] = 1
 
     @staticmethod
     def prep(data):

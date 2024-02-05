@@ -13,7 +13,7 @@ class SummarizeColumnNamesOp(BaseOp):
         - **summary_filename** (*str*): Base filename of the summary.
 
     Optional remodeling parameters:
-        - **append_timecode** (*bool*): If false (default), the timecode is not appended to the base filename when summary is saved, otherwise it is.
+        - **append_timecode** (*bool*): If False (default), the timecode is not appended to the summary filename.
 
     The purpose is to check that all the tabular files have the same columns in same order.
 

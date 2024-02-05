@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
         the_path = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.nfti'
         bids = BidsFile(the_path)
         other = BidsSidecarFile('/d/base/task-overt_run-2_bold.json')
-        self.assertTrue(other.is_sidecar_for(bids), "is_a_parent returns true if parent at top level")
+        self.assertTrue(other.is_sidecar_for(bids), "is_a_parent returns True if parent at top level")
         other1 = BidsSidecarFile('/d/base1/task-overt_run-2_bold.json')
         self.assertFalse(other1.is_sidecar_for(bids), "is_a_parent returns false if directories don't match")
         other2 = BidsSidecarFile('/d/base/task-overt_run-3_bold.json')

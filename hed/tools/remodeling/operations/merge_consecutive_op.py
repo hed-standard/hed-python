@@ -1,11 +1,11 @@
-""" Merge consecutive rows of a tabular file with same column value. """
+""" Merge consecutive rows of a columnar file with same column value. """
 
 import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class MergeConsecutiveOp(BaseOp):
-    """ Merge consecutive rows of a tabular file with same column value.
+    """ Merge consecutive rows of a columnar file with same column value.
 
     Required remodeling parameters:
         - **column_name** (*str*): name of column whose consecutive values are to be compared (the merge column).  
@@ -84,7 +84,7 @@ class MergeConsecutiveOp(BaseOp):
 
         :raises ValueError:
             - If dataframe does not have the anchor column and ignore_missing is False.
-            - If a match column is missing and ignore_missing is false.
+            - If a match column is missing and ignore_missing is False.
             - If the durations were to be set and the dataframe did not have an onset column.
             - If the durations were to be set and the dataframe did not have a duration column.
 

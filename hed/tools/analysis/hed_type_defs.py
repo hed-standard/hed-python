@@ -1,11 +1,11 @@
-""" Manages definitions associated with a type such as condition-variable. """
+""" Manager for definitions associated with a type such as condition-variable. """
 
 from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
 
 
 class HedTypeDefs:
-    """
+    """Manager for definitions associated with a type such as condition-variable. 
 
     Properties:
         def_map (dict):  keys are definition names, values are dict {type_values, description, tags}

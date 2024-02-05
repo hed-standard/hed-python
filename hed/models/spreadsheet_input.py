@@ -1,3 +1,4 @@
+""" A spreadsheet of HED tags. """
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
 
@@ -19,7 +20,8 @@ class SpreadsheetInput(BaseInput):
                 The default value is [1] indicating only the second column has tags.
             has_column_names (bool): True if file has column names. Validation will skip over the first row.
                 first line of the file if the spreadsheet as column names.
-            column_prefix_dictionary (dict or None): Dictionary with keys that are column numbers/names and values are HED tag
+            column_prefix_dictionary (dict or None): Dictionary with keys that are column numbers/names and
+                                                     values are HED tag
                 prefixes to prepend to the tags in that column before processing.
 
         Notes:

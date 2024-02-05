@@ -1,4 +1,4 @@
-""" Map values in m columns in a tabular file into a new combinations in n columns. """
+""" Map values in m columns in a columnar file into a new combinations in n columns. """
 
 import pandas as pd
 import numpy as np
@@ -7,7 +7,7 @@ from hed.tools.analysis.key_map import KeyMap
 
 
 class RemapColumnsOp(BaseOp):
-    """ Map values in m columns in a tabular file into a new combinations in n columns.
+    """ Map values in m columns in a columnar file into a new combinations in n columns.
 
     Required remodeling parameters:   
         - **source_columns** (*list*): The key columns to map (m key columns).   
@@ -124,7 +124,7 @@ class RemapColumnsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         :raises ValueError:
-            - If ignore_missing is false and source values from the data are not in the map.
+            - If ignore_missing is False and source values from the data are not in the map.
 
         """
         df1 = df.copy()
@@ -137,7 +137,7 @@ class RemapColumnsOp(BaseOp):
         df_new, missing = self.key_map.remap(df1)
         if missing and not self.ignore_missing:
             raise ValueError("MapSourceValueMissing",
-                             f"{name}: Ignore missing is false, but source values [{missing}] are in data but not map")
+                             f"{name}: Ignore missing is False, but source values [{missing}] are in data but not map")
         return df_new
 
     @staticmethod

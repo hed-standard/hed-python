@@ -6,6 +6,7 @@ from hed.tools.analysis.hed_type import HedType
 
 
 class HedTypeManager:
+    """ Manager for type factors and type definitions. """
 
     def __init__(self, event_manager):
         """ Create a variable manager for one tabular file for all type variables.
@@ -32,7 +33,7 @@ class HedTypeManager:
             HedType(self.event_manager, 'run-01', type_tag=type_name)
 
     def get_factor_vectors(self, type_tag, type_values=None, factor_encoding="one-hot"):
-        """ Return a DataFrame of factor vectors for the indicated HED tag and values
+        """ Return a DataFrame of factor vectors for the indicated HED tag and values.
 
         Parameters:
             type_tag (str):    HED tag to retrieve factors for.
@@ -58,13 +59,13 @@ class HedTypeManager:
         return pd.concat(df_list, axis=1)
 
     def get_type(self, type_tag):
-        """
+        """ Returns the HedType variable associated with the type tag.
 
         Parameters:
-            type_tag (str): HED tag to retrieve the type for
+            type_tag (str): HED tag to retrieve the type for.
 
         Returns:
-            HedType or None: the values associated with this type tag
+            HedType or None: the values associated with this type tag.
 
         """
         return self._type_map.get(type_tag.lower(), None)
@@ -73,7 +74,7 @@ class HedTypeManager:
         """ Return the HedTypeFactors a specified value and extension.
 
         Parameters:
-            type_tag (str or None):    HED tag for the type
+            type_tag (str or None):    HED tag for the type.
             type_value (str or None):  Value of this tag to return the factors for.
 
         """

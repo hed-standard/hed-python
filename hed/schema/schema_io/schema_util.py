@@ -28,7 +28,7 @@ def make_url_request(resource_url, try_authenticate=True):
 
     Parameters:
         resource_url (str): The url to retrieve.
-        try_authenticate (bool): If true add the above credentials.
+        try_authenticate (bool): If True add the above credentials.
 
     Returns:
         url_request

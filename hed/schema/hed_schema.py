@@ -235,7 +235,7 @@ class HedSchema(HedSchemaBase):
         """ Return the schema to a mediawiki string.
 
         Parameters:
-            save_merged (bool): If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
                                 If it is not a "withStandard" schema, this setting has no effect.
 
         Returns:
@@ -249,10 +249,10 @@ class HedSchema(HedSchemaBase):
         """ Return the schema to a mediawiki string.
 
         Parameters:
-            save_merged (bool): If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
                                 If it is not a "withStandard" schema, this setting has no effect.
             file_format(str or None): Override format from filename extension.
-                Accepts any value rdflib accepts(We fully support "turtle", "xml"("owl" also accepted) and "json-ld")
+                Accepts any value rdflib accepts(We fully support "turtle", "xml"("owl" also accepted) and "json-ld").
                 Other values should work, but aren't as fully supported.
         Returns:
             str:  The schema as a string in mediawiki format.
@@ -270,7 +270,7 @@ class HedSchema(HedSchemaBase):
 
         Parameters:
             save_merged (bool):
-            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
             If it is not a "withStandard" schema, this setting has no effect.
         Returns:
             str: Return the schema as an XML string.
@@ -285,11 +285,11 @@ class HedSchema(HedSchemaBase):
         filename: str
             save location
         save_merged: bool
-            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
             If it is not a "withStandard" schema, this setting has no effect.
 
         :raises OSError:
-            - File cannot be saved for some reason
+            - File cannot be saved for some reason.
         """
         output_strings = Schema2Wiki.process_schema(self, save_merged)
         with open(filename, mode='w', encoding='utf-8') as opened_file:
@@ -303,7 +303,7 @@ class HedSchema(HedSchemaBase):
         filename: str
             Save the file here
         save_merged: bool
-            If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
             If it is not a "withStandard" schema, this setting has no effect.
         file_format(str or None): Required for owl formatted files other than the following:
             .ttl: turtle

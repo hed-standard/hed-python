@@ -1,11 +1,11 @@
-""" Manages factor information for a tabular file. """
+""" Manager for factor information for a columnar file. """
 
 import pandas as pd
 from hed.errors.exceptions import HedFileError
 
 
 class HedTypeFactors:
-    """ Holds index of positions for a variable type for one tabular file. """
+    """ Holds index of positions for a variable type for A columnar file. """
 
     ALLOWED_ENCODINGS = ("categorical", "one-hot")
 

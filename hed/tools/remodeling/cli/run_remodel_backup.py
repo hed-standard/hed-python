@@ -1,4 +1,4 @@
-""" Command-line program for creating a backup. """
+""" Command-line program for creating a remodeler backup. """
 
 import os
 import argparse
