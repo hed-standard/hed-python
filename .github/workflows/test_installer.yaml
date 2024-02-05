@@ -13,13 +13,24 @@ jobs:
         python-version: ["3.7", "3.10"]
 
     steps:
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install package directly from the current repository
+
+    - name: Create and activate virtual environment
       run: |
-        pip install git+https://github.com/${{ github.repository }}@develop
+        python -m venv .venv
+        source .venv/bin/activate
+
+    - name: Install package
+      run: |
+        python -m pip install --upgrade pip
+        pip install .
+
     - name: Run post-installation test
       run: |
+        source .venv/bin/activate
         python -c "from hed.models.hed_string import HedString; print('Import test passed.')"
+
