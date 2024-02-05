@@ -21,8 +21,7 @@ class SpreadsheetInput(BaseInput):
             has_column_names (bool): True if file has column names. Validation will skip over the first row.
                 first line of the file if the spreadsheet as column names.
             column_prefix_dictionary (dict or None): Dictionary with keys that are column numbers/names and
-                                                     values are HED tag
-                prefixes to prepend to the tags in that column before processing.
+                values are HED tag prefixes to prepend to the tags in that column before processing.
 
         Notes:
             - If file is a string, file_type is derived from file and this parameter is ignored.  
