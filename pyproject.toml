@@ -62,8 +62,11 @@ versionfile_build = "hed/_version.py"
 tag_prefix = ""
 parentdir_prefix = "hedtools-"
 
-[tool.setuptools]
-packages = ["hed"]
+
+[tool.setuptools.packages.find]
+where = [""]
+include = ["hed*"]
+namespaces = false
 
 [tool.setuptools.package-data]
 hed = ["schema/schema_data/*.xml"]
