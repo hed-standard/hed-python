@@ -1,3 +1,4 @@
+""" Contents of a JSON file or merged file. """
 import json
 import re
 

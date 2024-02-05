@@ -1,4 +1,4 @@
-""" Rename columns in a tabular file. """
+""" Rename columns in a columnar file. """
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
@@ -63,7 +63,7 @@ class RenameColumnsOp (BaseOp):
             Dataframe: A new dataframe after processing.
 
         :raises KeyError:
-            - When ignore_missing is false and column_mapping has columns not in the data.
+            - When ignore_missing is False and column_mapping has columns not in the data.
 
         """
         df_new = df.copy()

@@ -77,7 +77,7 @@ class HedSchemaSection:
 
         Parameters:
             attribute_name (str): The name of the attribute(generally a HedKey entry).
-            return_name_only (bool): If true, return the name as a string rather than the tag entry.
+            return_name_only (bool): If True, return the name as a string rather than the tag entry.
             schema_namespace (str): Prepends given namespace to each name if returning names.
 
         Returns:

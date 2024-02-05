@@ -327,8 +327,8 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
     Parameters:
         hed_base_url (str): A single GitHub API url to cache
         library_name(str or None): If str, cache only the named library schemas
-        skip_folders (list): A list of subfolders to skip over when downloading.
-        get_libraries (bool): If true, return a dictionary of version numbers, with an entry for each library name.
+        skip_folders (list): A list of sub folders to skip over when downloading.
+        get_libraries (bool): If True, return a dictionary of version numbers, with an entry for each library name.
 
     Returns:
         list or dict: List of version numbers or dictionary {library_name: [versions]}.

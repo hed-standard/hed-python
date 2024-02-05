@@ -15,7 +15,7 @@ def assemble_hed(data_input, sidecar, schema, columns_included=None, expand_defs
     Parameters:
         data_input (TabularInput): The tabular input file whose HED annotations are to be assembled.
         sidecar (Sidecar):  Sidecar with definitions.
-        schema (HedSchema):  Hed schema
+        schema (HedSchema):  Hed schema.
         columns_included (list or None):  A list of additional column names to include.
             If None, only the list of assembled tags is included.
         expand_defs (bool): If True, definitions are expanded when the events are assembled.
@@ -138,7 +138,8 @@ def search_strings(hed_strings, queries, query_names=None):
 #     """
 # 
 #     eligible_columns, missing_columns = separate_values(list(data_input.dataframe.columns), columns_included)
-#     hed_list, definitions = df_util.get_assembled(data_input, sidecar, hed_schema, extra_def_dicts=None, join_columns=True,
+#     hed_list, definitions = df_util.get_assembled(data_input, sidecar, hed_schema, extra_def_dicts=None,
+#                                                   join_columns=True,
 #                                                   shrink_defs=False, expand_defs=True)
 #     expression = QueryParser(query)
 #     hed_tags = []

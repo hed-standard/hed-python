@@ -26,7 +26,7 @@ def check_match(ds1, ds2, numeric=False):
     Parameters:
         ds1 (DataSeries):      Pandas data series to check.
         ds2 (DataSeries):      Pandas data series to check.
-        numeric (bool):        If true, treat as numeric and do close-to comparison.
+        numeric (bool):        If True, treat as numeric and do close-to comparison.
 
     Returns:
         list: Error messages indicating the mismatch or empty if the series match.
@@ -88,7 +88,7 @@ def delete_rows_by_column(df, value, column_list=None):
 
 
 def get_eligible_values(values, values_included):
-    """ Return a list of the items from values that are in values_included or None if no values_included
+    """ Return a list of the items from values that are in values_included or None if no values_included.
 
     Parameters:
         values (list): List of strings against which to test.

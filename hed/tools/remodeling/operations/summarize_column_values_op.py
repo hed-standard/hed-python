@@ -1,4 +1,4 @@
-""" Summarize the values in the columns of a tabular file. """
+""" Summarize the values in the columns of a columnar file. """
 
 from hed.tools import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -6,14 +6,14 @@ from hed.tools.remodeling.operations.base_summary import BaseSummary
 
 
 class SummarizeColumnValuesOp(BaseOp):
-    """ Summarize the values in the columns of a tabular file.
+    """ Summarize the values in the columns of a columnar file.
 
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
         - **summary_filename** (*str*): Base filename of the summary.     
 
     Optional remodeling parameters:
-        - **append_timecode** (*bool*): (**Optional**: Default false) If true append timecodes to the base filename when summary is saved.
+        - **append_timecode** (*bool*): (**Optional**: Default False) If True append timecodes to the summary filename.
         - **max_categorical** (*int*): Maximum number of unique values to include in summary for a categorical column.  
         - **skip_columns** (*list*):  Names of columns to skip in the summary.   
         - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns. 

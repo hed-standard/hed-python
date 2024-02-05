@@ -1,5 +1,5 @@
 import unittest
-from wordcloud import WordCloud
+import wordcloud
 from hed.tools.visualization import tag_word_cloud
 from hed.tools.visualization.tag_word_cloud import load_and_resize_mask
 from hed.tools.visualization.word_cloud_util import generate_contour_svg
@@ -43,7 +43,7 @@ class TestWordCloudFunctions(unittest.TestCase):
         height = 200
         wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height)
 
-        self.assertIsInstance(wc, WordCloud)
+        self.assertIsInstance(wc, wordcloud.WordCloud)
         self.assertEqual(wc.width, width)
         self.assertEqual(wc.height, height)
 
@@ -51,7 +51,7 @@ class TestWordCloudFunctions(unittest.TestCase):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
         wc = tag_word_cloud.create_wordcloud(word_dict)
 
-        self.assertIsInstance(wc, WordCloud)
+        self.assertIsInstance(wc, wordcloud.WordCloud)
         self.assertEqual(wc.width, 400)
         self.assertEqual(wc.height, 200)
 
@@ -59,7 +59,7 @@ class TestWordCloudFunctions(unittest.TestCase):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
         wc = tag_word_cloud.create_wordcloud(word_dict, self.mask_path, width=300, height=300)
 
-        self.assertIsInstance(wc, WordCloud)
+        self.assertIsInstance(wc, wordcloud.WordCloud)
         self.assertEqual(wc.width, 300)
         self.assertEqual(wc.height, 300)
 
@@ -67,7 +67,7 @@ class TestWordCloudFunctions(unittest.TestCase):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
         wc = tag_word_cloud.create_wordcloud(word_dict, self.mask_path, width=300, height=None)
 
-        self.assertIsInstance(wc, WordCloud)
+        self.assertIsInstance(wc, wordcloud.WordCloud)
         self.assertEqual(wc.width, 300)
         self.assertLess(wc.height, 300)
 
@@ -81,7 +81,7 @@ class TestWordCloudFunctions(unittest.TestCase):
         # Test creation of word cloud with a single word
         word_dict = {'single_word': 1}
         wc = tag_word_cloud.create_wordcloud(word_dict)
-        self.assertIsInstance(wc, WordCloud)
+        self.assertIsInstance(wc, wordcloud.WordCloud)
         # Check that the single word is in the word cloud
         self.assertIn('single_word', wc.words_)
 
@@ -100,17 +100,17 @@ class TestLoadAndResizeMask(unittest.TestCase):
     def setUpClass(cls):
         # Create a simple black and white image
         cls.original_size = (300, 200)
-        cls.img = Image.new('L', cls.original_size, 0) # Start with a black image
+        cls.img = Image.new('L', cls.original_size, 0)  # Start with a black image
 
         # Draw a white circle in the middle of the image
         d = ImageDraw.Draw(cls.img)
-        circle_radius = min(cls.original_size) // 4 # Radius of the circle is a quarter of the smaller dimension of the image
-        circle_center = (cls.original_size[0] // 2, cls.original_size[1] // 2) # Center of the circle is the center of the image
+        circle_radius = min(cls.original_size) // 4  # Radius of the circle is a quarter of the smaller dimension of the image
+        circle_center = (cls.original_size[0] // 2, cls.original_size[1] // 2)  # Center of the circle is the center of the image
         d.ellipse((circle_center[0] - circle_radius,
                    circle_center[1] - circle_radius,
                    circle_center[0] + circle_radius,
                    circle_center[1] + circle_radius),
-                  fill=255) # Fill the ellipse with white
+                  fill=255)  # Fill the ellipse with white
         cls.img_path = 'temp_img.bmp'
         cls.img.save(cls.img_path)
 

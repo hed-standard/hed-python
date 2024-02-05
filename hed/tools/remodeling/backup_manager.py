@@ -1,4 +1,4 @@
-""" Class to manage backups for remodeling tools. """
+""" Manager for file backups for remodeling tools. """
 
 import os
 import json
@@ -9,6 +9,7 @@ from hed.tools.util.io_util import get_file_list, get_path_components
 
 
 class BackupManager:
+    """ Manager for file backups for remodeling tools. """
     DEFAULT_BACKUP_NAME = 'default_back'
     RELATIVE_BACKUP_LOCATION = './derivatives/remodel/backups'
     BACKUP_DICTIONARY = 'backup_lock.json'
@@ -102,8 +103,8 @@ class BackupManager:
         """ Returns a list of full paths of files contained in the backup.
 
         Parameters:
-            backup_name (str):       Name of the backup.
-            original_paths (bool):   If true return the original paths.
+            backup_name (str):  Name of the backup.
+            original_paths (bool):   If True return the original paths.
 
         Returns:
             list:  Full paths of the original files backed (original_paths=True) or the paths in the backup.
@@ -145,7 +146,7 @@ class BackupManager:
         Parameters:
             backup_name (str):  Name of the backup to restore.
             task_names (list):  A list of task names to restore.
-            verbose (bool):  If true, print out the file names being restored.
+            verbose (bool):  If True, print out the file names being restored.
 
         """
         if verbose:

@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
         entity_dict = {'sub': '01', 'task': 'tempTask', 'run': '2'}
         query_dict1 = {'sub': ['01', '03']}
         result1 = BidsFileDictionary.match_query(query_dict1, entity_dict)
-        self.assertTrue(result1, "match_query should return true when entity in the dictionary")
+        self.assertTrue(result1, "match_query should return True when entity in the dictionary")
         query_dict2 = {'sub': ['02', '03']}
         result2 = BidsFileDictionary.match_query(query_dict2, entity_dict)
         self.assertFalse(result2, "match_query should return False when entity not in the dictionary")

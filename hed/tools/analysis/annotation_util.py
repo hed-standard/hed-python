@@ -224,7 +224,7 @@ def _find_first_pos(tag_string):
     """ Return the position of the first comma or closing parenthesis in tag_string.
 
     Parameters:
-        tag_string (str):   String to be analyzed
+        tag_string (str):   String to be analyzed.
 
     Returns:
         int:  Position of first comma or closing parenthesis or length of tag_string if none.
@@ -240,7 +240,7 @@ def _find_last_pos(tag_string):
     """ Find the position of the last comma, blank, or opening parenthesis in tag_string.
 
     Parameters:
-        tag_string (str):   String to be analyzed
+        tag_string (str):   String to be analyzed.
 
     Returns:
         int:   Position of last comma or opening parenthesis or 0 if none.

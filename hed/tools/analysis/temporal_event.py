@@ -1,8 +1,9 @@
+""" A single event process with starting and ending times. """
 from hed.models import HedGroup
 
 
 class TemporalEvent:
-    """ Represents an event process with starting and ending.
+    """ A single event process with starting and ending times.
 
     Note:  the contents have the Onset and duration removed.
     """

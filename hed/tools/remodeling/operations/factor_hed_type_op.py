@@ -1,4 +1,4 @@
-""" Append to tabular file the factors computed from type variables. """
+""" Append to columnar file the factors computed from type variables. """
 
 import pandas as pd
 import numpy as np
@@ -7,8 +7,9 @@ from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_type_manager import HedTypeManager
 
+
 class FactorHedTypeOp(BaseOp):
-    """ Append to tabular file the factors computed from type variables.
+    """ Append to columnar file the factors computed from type variables.
 
     Required remodeling parameters:   
         - **type_tag** (*str*): HED tag used to find the factors (most commonly `condition-variable`).
@@ -68,8 +69,8 @@ class FactorHedTypeOp(BaseOp):
 
         """
 
-        input_data = TabularInput(df, sidecar=sidecar, name=name)
-        df_list = [input_data.dataframe.copy()]
+        input_data = TabularInput(df.copy().fillna('n/a'), sidecar=sidecar, name=name)
+        df_list = [input_data.dataframe]
         var_manager = HedTypeManager(
             EventManager(input_data, dispatcher.hed_schema))
         var_manager.add_type(self.type_tag.lower())
@@ -79,7 +80,7 @@ class FactorHedTypeOp(BaseOp):
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
-        df_new.replace('n/a', np.NaN, inplace=True)
+        df_new.replace('n/a', np.nan, inplace=True)
         return df_new
 
     @staticmethod

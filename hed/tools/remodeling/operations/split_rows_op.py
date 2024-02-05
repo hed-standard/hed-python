@@ -1,4 +1,4 @@
-""" Split rows in a tabular file with  onset and duration columns into multiple rows based on a specified column. """
+""" Split rows in a columnar file with  onset and duration columns into multiple rows based on a specified column. """
 
 import numpy as np
 import pandas as pd
@@ -6,7 +6,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class SplitRowsOp(BaseOp):
-    """ Split rows in a tabular file with  onset and duration columns into multiple rows based on a specified column.
+    """ Split rows in a columnar file with  onset and duration columns into multiple rows based on a specified column.
 
     Required remodeling parameters:   
         - **anchor_column** (*str*): The column in which the names of new items are stored.   

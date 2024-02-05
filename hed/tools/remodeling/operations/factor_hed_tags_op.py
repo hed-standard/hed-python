@@ -1,4 +1,4 @@
-""" Append to tabular file columns of factors based on column values. """
+""" Append columns of factors based on column values to a columnar file. """
 
 
 import pandas as pd
@@ -9,10 +9,11 @@ from hed.models.sidecar import Sidecar
 from hed.models.df_util import get_assembled
 from hed.tools.analysis.analysis_util import get_expression_parsers, search_strings
 from hed.tools.analysis.event_manager import EventManager
+from hed.tools.analysis.hed_tag_manager import HedTagManager
 
 
 class FactorHedTagsOp(BaseOp):
-    """ Append to tabular file columns of factors based on column values.
+    """ Append columns of factors based on column values to a columnar file.
 
     Required remodeling parameters:   
         - **queries** (*list*): Queries to be applied successively as filters.       
@@ -59,6 +60,9 @@ class FactorHedTagsOp(BaseOp):
             },
             "expand_context": {
                 "type": "boolean"
+            },
+            "replace_defs": {
+                "type": "boolean"
             }
         },
         "required": [
@@ -78,6 +82,7 @@ class FactorHedTagsOp(BaseOp):
         self.queries = parameters['queries']
         self.remove_types = parameters.get('remove_types', [])
         self.expand_context = parameters.get('expand_context', True)
+        self.replace_defs = parameters.get('replace_defs', True)
         self.expression_parsers, self.query_names = get_expression_parsers(self.queries,
                                                                            parameters.get('query_names', None))
 
@@ -100,22 +105,21 @@ class FactorHedTagsOp(BaseOp):
 
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
-        input_data = TabularInput(df.copy(), sidecar=sidecar, name=name)
+        input_data = TabularInput(df.copy().fillna('n/a'), sidecar=sidecar, name=name)
         column_names = list(df.columns)
         for query_name in self.query_names:
             if query_name in column_names:
                 raise ValueError("QueryNameAlreadyColumn",
                                  f"Query [{query_name}]: is already a column name of the data frame")
         df_list = [input_data.dataframe]
-        event_man = EventManager(input_data, dispatcher.hed_schema)
-        hed_strings, _ = get_assembled(input_data, sidecar, dispatcher.hed_schema, extra_def_dicts=None,
-                                       join_columns=True, shrink_defs=False, expand_defs=True)
-        df_factors = search_strings(
-            hed_strings, self.expression_parsers, query_names=self.query_names)
+        tag_man = HedTagManager(EventManager(input_data, dispatcher.hed_schema),
+                                remove_types=self.remove_types)
+        hed_objs = tag_man.get_hed_objs(include_context=self.expand_context, replace_defs=self.replace_defs)
+        df_factors = search_strings(hed_objs, self.expression_parsers, query_names=self.query_names)
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
-        df_new.replace('n/a', np.NaN, inplace=True)
+        df_new.replace('n/a', np.nan, inplace=True)
         return df_new
 
     @staticmethod

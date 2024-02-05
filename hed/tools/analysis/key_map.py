@@ -22,8 +22,8 @@ class KeyMap:
         """ Information for remapping columns of tabular files.
 
         Parameters:
-            key_cols (list):       List of columns to be replaced (assumed in the DataFrame)
-            target_cols(list):     List of replacement columns (assumed to not be in the DataFrame)
+            key_cols (list):       List of columns to be replaced (assumed in the DataFrame).
+            target_cols(list):     List of replacement columns (assumed to not be in the DataFrame).
             name (str):            Name associated with this remap (usually a pathname of the events file).
 
         """
@@ -60,7 +60,7 @@ class KeyMap:
         Parameters:
             additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
             show_counts (bool): If True, number of times each key combination appears is in first column and 
-                                values are sorted in descending order by 
+                                values are sorted in descending order by.
             
         Returns:
             DataFrame:  A dataframe containing the template.
@@ -151,7 +151,7 @@ class KeyMap:
 
         Parameters:
             data (DataFrame or str):     DataFrame or filename of an events file or event map.
-            allow_missing (bool):        If true allow missing keys and add as n/a columns.
+            allow_missing (bool):        If True allow missing keys and add as n/a columns.
 
         :raises HedFileError:
             - If there are missing keys and allow_missing is False.

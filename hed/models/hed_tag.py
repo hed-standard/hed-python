@@ -1,3 +1,4 @@
+""" A single HED tag. """
 from hed.schema.hed_schema_constants import HedKey
 import copy
 
@@ -158,7 +159,7 @@ class HedTag:
         return str(self)
 
     def tag_modified(self):
-        """ Return true if tag has been modified from original.
+        """ Return True if tag has been modified from original.
 
         Returns:
             bool: Return True if the tag is modified.
@@ -247,10 +248,10 @@ class HedTag:
     def expanded(self):
         """Returns if this is currently expanded or not.
 
-           Will always be false unless expandable is set.  This is primarily used for Def/Def-expand tags at present.
+           Will always be False unless expandable is set.  This is primarily used for Def/Def-expand tags at present.
 
         Returns:
-            bool: Returns true if this is currently expanded
+            bool: Returns True if this is currently expanded
         """
         return self._expanded
 

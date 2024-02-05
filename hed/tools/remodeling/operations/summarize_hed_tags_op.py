@@ -20,7 +20,7 @@ class SummarizeHedTagsOp(BaseOp):
     Optional remodeling parameters:    
        - **append_timecode** (*bool*): If True, the timecode is appended to the base filename when summary is saved.
        - **include_context** (*bool*): If True, context of events is included in summary. 
-       - **remove_types** (*list*): A list of type tags, such as Condition-variable or Task, to be excluded from the summary. 
+       - **remove_types** (*list*): A list of type tags such as Condition-variable or Task to exclude from summary.
        - **replace_defs** (*bool*): If True, the def tag is replaced by the contents of the definitions.  
 
     The purpose of this op is to produce a summary of the occurrences of hed tags organized in a specified manner.
@@ -29,7 +29,7 @@ class SummarizeHedTagsOp(BaseOp):
 
     """
     NAME = "summarize_hed_tags"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
@@ -49,10 +49,10 @@ class SummarizeHedTagsOp(BaseOp):
                         },
                         "minItems": 1,
                         "uniqueItems": True
-                },
-                "minProperties": 1,
-                "additionalProperties": False
-            }
+                    },
+                    "minProperties": 1,
+                    "additionalProperties": False
+                }
             },
             "append_timecode": {
                 "type": "boolean"
@@ -119,8 +119,6 @@ class SummarizeHedTagsOp(BaseOp):
         if not summary:
             summary = HedTagSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        x = {'df': dispatcher.post_proc_data(df_new), 'name': name,
-                                'schema': dispatcher.hed_schema, 'sidecar': sidecar}
         summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name,
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df_new

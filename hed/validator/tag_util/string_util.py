@@ -106,7 +106,7 @@ class StringValidator:
             character (str): A string character.
 
         Returns:
-            bool: Returns true if the character is a delimiter. False, if otherwise.
+            bool: Returns True if the character is a delimiter. False, if otherwise.
 
         Notes:
             -  A delimiter is a comma.

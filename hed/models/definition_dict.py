@@ -1,3 +1,4 @@
+""" Definition handler class. """
 from hed.models.definition_entry import DefinitionEntry
 from hed.models.hed_string import HedString
 from hed.errors.error_types import DefinitionErrors
@@ -7,9 +8,7 @@ from hed.schema.hed_schema_constants import HedKey
 
 
 class DefinitionDict:
-    """ Gathers definitions from a single source.
-
-    """
+    """ Gathers definitions from a single source. """
 
     def __init__(self, def_dicts=None, hed_schema=None):
         """ Definitions to be considered a single source.
@@ -33,12 +32,13 @@ class DefinitionDict:
         """ Add definitions from dict(s) or strings(s) to this dict.
 
         Parameters:
-            def_dicts (list, DefinitionDict, dict, or str): DefinitionDict or list of DefinitionDicts/strings/dicts whose
-                definitions should be added.
-                Note - dict form expects DefinitionEntries in the same form as a DefinitionDict
+            def_dicts (list, DefinitionDict, dict, or str): DefinitionDict or list of DefinitionDicts/strings/dicts
+                                                            whose definitions should be added.
+            hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
+
+        Note - dict form expects DefinitionEntries in the same form as a DefinitionDict
                 Note - str or list of strings will parse the strings using the hed_schema.
                 Note - You can mix and match types, eg [DefinitionDict, str, list of str] would be valid input.
-            hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
         :raises TypeError:
             - Bad type passed as def_dicts

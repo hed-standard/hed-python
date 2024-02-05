@@ -74,8 +74,8 @@ class GroupValidator:
 
         Parameters:
             original_tag_list (list): HedTags containing the original tags.
-            is_top_level (bool): If True, this group is a "top level tag group"
-            is_group (bool): If true group should be contained by parenthesis
+            is_top_level (bool): If True, this group is a "top level tag group".
+            is_group (bool): If True group should be contained by parenthesis.
 
         Returns:
             list: Validation issues. Each issue is a dictionary.

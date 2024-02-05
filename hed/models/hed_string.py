@@ -1,6 +1,4 @@
-"""
-This module is used to split tags in a HED string.
-"""
+""" A HED string with its schema and definitions. """
 import copy
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
@@ -8,7 +6,7 @@ from hed.models.model_constants import DefTagNames
 
 
 class HedString(HedGroup):
-    """ A HED string. """
+    """ A HED string with its schema and definitions. """
 
     OPENING_GROUP_CHARACTER = '('
     CLOSING_GROUP_CHARACTER = ')'
@@ -278,7 +276,7 @@ class HedString(HedGroup):
 
         Notes:
             - The tuple format is as follows
-                - is_hed_tag (bool): A (possible) hed tag if true, delimiter if not.
+                - is_hed_tag (bool): A (possible) hed tag if True, delimiter if not.
                 - start_pos (int):   Index of start of string in hed_string.
                 - end_pos (int):     Index of end of string in hed_string
 

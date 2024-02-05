@@ -14,7 +14,7 @@ class SummarizeDefinitionsOp(BaseOp):
         - **summary_filename** (*str*): Base filename of the summary. 
 
     Optional remodeling parameters:
-         - **append_timecode** (*bool*): If false (default), the timecode is not appended to the base filename when summary is saved, otherwise it is. 
+         - **append_timecode** (*bool*): If False (default), the timecode is not appended to the summary filename.
 
     The purpose is to produce a summary of the values in a tabular file.
 

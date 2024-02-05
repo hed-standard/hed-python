@@ -117,7 +117,7 @@ class BidsFileGroup:
 
         Parameters:
             hed_schema (HedSchema):  HED schema for validation.
-            extra_def_dicts (DefinitionDict): Extra definitions
+            extra_def_dicts (DefinitionDict): Extra definitions.
             check_for_warnings (bool):  If True, include warnings in the check.
 
         Returns:

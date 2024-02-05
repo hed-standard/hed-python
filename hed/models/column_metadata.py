@@ -1,3 +1,6 @@
+"""
+Column type of a column in a ColumnMapper.
+"""
 from enum import Enum
 from hed.errors.error_types import SidecarErrors
 import pandas as pd

@@ -4,6 +4,8 @@ import json
 
 
 class ColumnNameSummary:
+    """ Summarizes the unique column names in a dataset. """
+    
     def __init__(self, name=''):
         self.name = name
         self.file_dict = {}

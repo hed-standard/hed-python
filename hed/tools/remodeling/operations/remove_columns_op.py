@@ -1,13 +1,13 @@
-""" Remove columns from a tabular file. """
+""" Remove columns from a columnar file. """
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class RemoveColumnsOp(BaseOp):
-    """ Remove columns from a tabular file.
+    """ Remove columns from a columnar file.
 
     Required remodeling parameters:
         - **column_names** (*list*): The names of the columns to be removed.
-        - **ignore_missing** (*boolean*): If true, names in column_names that are not columns in df should be ignored.
+        - **ignore_missing** (*boolean*): If True, names in column_names that are not columns in df should be ignored.
 
     """
     NAME = "remove_columns"

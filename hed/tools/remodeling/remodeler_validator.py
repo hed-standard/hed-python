@@ -1,13 +1,11 @@
-import os
-import json
+""" Validator for remodeler input files. """
 from copy import deepcopy
 from jsonschema import Draft202012Validator
-from jsonschema.exceptions import ErrorTree
 from hed.tools.remodeling.operations.valid_operations import valid_operations
 
 
 class RemodelerValidator():
-    """Validator for remodeler input files."""
+    """ Validator for remodeler input files. """
 
     MESSAGE_STRINGS = {
         "0": {
@@ -87,11 +85,11 @@ class RemodelerValidator():
     }
 
     def __init__(self):
-        """ Constructor for remodeler Validator
+        """ Constructor for remodeler Validator.
 
         Parameters:
-            - **schema** (*dict*): The compiled json schema against which remodeler files should be validated
-            - **validator** (*Draft202012Validator*): The instantiated json schema validator
+            - **schema** (*dict*): The compiled json schema against which remodeler files should be validated.
+            - **validator** (*Draft202012Validator*): The instantiated json schema validator.
         """
         self.schema = self._construct_schema()
         self.validator = Draft202012Validator(self.schema)
@@ -101,10 +99,10 @@ class RemodelerValidator():
         necessary and returns a list of user friendly error messages.
 
         Parameters:
-            **operations**  (*dict*): Dictionary with input operations to run through the remodeler
+            **operations**  (*dict*): Dictionary with input operations to run through the remodeler.
 
         Returns:
-            **list_of_error_strings** (*list*): List with all error messages for every error identified by the validator
+            **list_of_error_strings** (*list*): List with the error messages for errors identified by the validator.
         """
 
         list_of_error_strings = []

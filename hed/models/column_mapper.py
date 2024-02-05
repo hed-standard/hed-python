@@ -1,3 +1,6 @@
+"""
+Mapping of a base input file columns into HED tags.
+"""
 from hed.models.column_metadata import ColumnMetadata, ColumnType
 from hed.models.sidecar import Sidecar
 from hed.errors.error_reporter import ErrorHandler
@@ -124,8 +127,8 @@ class ColumnMapper:
         """ Validate there are no blank column names
 
         Parameters:
-            column_map(iterable): A list of column names
-            allow_blank_names(bool): Only find issues if this is true
+            column_map(iterable): A list of column names.
+            allow_blank_names(bool): Only find issues if True.
 
         Returns:
             issues(list): A list of dicts, one per issue.

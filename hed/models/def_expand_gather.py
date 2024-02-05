@@ -1,3 +1,6 @@
+"""
+Classes to resolve ambiguities, gather, expand definitions.
+"""
 import pandas as pd
 from hed.models.definition_dict import DefinitionDict
 from hed.models.definition_entry import DefinitionEntry
