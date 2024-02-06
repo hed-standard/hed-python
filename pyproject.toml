@@ -39,7 +39,8 @@ dependencies = [
     "pytz",
     "rdflib",
     "semantic-version",
-    "six"
+    "six",
+    "wordcloud"
 ]
 
 [project.urls]
