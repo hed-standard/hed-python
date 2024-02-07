@@ -1,4 +1,4 @@
-""" Defined constants for definitions, def labels, and expanded labels"""
+""" Defined constants for definitions, def labels, and expanded labels. """
 COLUMN_TO_HED_TAGS = "column_to_hed_tags"
 ROW_HED_STRING = "HED"
 COLUMN_ISSUES = "column_issues"
@@ -6,7 +6,7 @@ ROW_ISSUES = "row_issues"
 
 
 class DefTagNames:
-    """ Source names for definitions, def labels, and expanded labels"""
+    """ Source names for definitions, def labels, and expanded labels. """
 
     DEF_ORG_KEY = 'Def'
     DEF_EXPAND_ORG_KEY = 'Def-expand'

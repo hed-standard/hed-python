@@ -1,4 +1,4 @@
-""" Utilities for handling the assembly and conversion of HED strings to different forms. """
+""" Utilities for assembly and conversion of HED strings to different forms. """
 from functools import partial
 import pandas as pd
 from hed.models.sidecar import Sidecar

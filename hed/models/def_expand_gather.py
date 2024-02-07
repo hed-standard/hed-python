@@ -8,6 +8,7 @@ from hed.models.hed_string import HedString
 
 
 class AmbiguousDef:
+    """ Determine whether expanded definitions are consistent. """
     def __init__(self):
         self.actual_defs = []
         self.placeholder_defs = []
@@ -84,7 +85,7 @@ class AmbiguousDef:
 
 
 class DefExpandGatherer:
-    """Class for gathering definitions from a series of def-expands, including possibly ambiguous ones"""
+    """ Gather definitions from a series of def-expands, including possibly ambiguous ones. """
     def __init__(self, hed_schema, known_defs=None, ambiguous_defs=None, errors=None):
         """Initialize the DefExpandGatherer class.
 
