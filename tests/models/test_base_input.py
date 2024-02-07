@@ -2,15 +2,18 @@ import io
 import unittest
 import os
 import shutil
-from hed import Sidecar
+from hed import Sidecar, load_schema_version
 from hed import BaseInput, TabularInput
 from hed.models.column_mapper import ColumnMapper
 from hed.models import DefinitionDict
 from hed import schema
 from hed import HedFileError
+from hed.errors import ErrorContext, ValidationErrors
+
 
 import pandas as pd
 import numpy as np
+
 
 
 class Test(unittest.TestCase):
@@ -73,6 +76,58 @@ class Test(unittest.TestCase):
     def test_invalid_input_type_dict(self):
         with self.assertRaises(HedFileError):
             BaseInput({'key': 'value'})
+
+class TestSortingByOnset(unittest.TestCase):
+    @staticmethod
+    def generate_test_dataframe():
+        data = {
+            'onset': [0.5, 1.0, 1.5, 2.0, 2.5],
+            'HED': [
+                'Age/1',
+                'Age/2',
+                'Age/3',
+                'NotATag',
+                'Age/5'
+            ]
+        }
+
+        df = pd.DataFrame(data)
+
+        return df
+
+    def test_needs_sort(self):
+        df = self.generate_test_dataframe()
+        opened_file = TabularInput(df)
+        self.assertFalse(opened_file.needs_sorting)
+
+        issues = opened_file.validate(load_schema_version("8.2.0"))
+        self.assertEqual(issues[1][ErrorContext.ROW], 5)
+        df.at[3, "onset"] = 1.5
+        opened_file = TabularInput(df)
+        self.assertFalse(opened_file.needs_sorting)
+
+        df.at[3, "onset"] = 1.0
+        opened_file = TabularInput(df)
+        self.assertTrue(opened_file.needs_sorting)
+        issues = opened_file.validate(load_schema_version("8.2.0"))
+        # Should still report the same issue row despite needing sorting for validation
+        self.assertEqual(issues[1]['code'], ValidationErrors.ONSETS_OUT_OF_ORDER)
+        self.assertEqual(issues[2][ErrorContext.ROW], 5)
+
+    def test_sort(self):
+        from hed.models.df_util import sort_dataframe_by_onsets
+        df = self.generate_test_dataframe()
+        df2 = sort_dataframe_by_onsets(df)
+        self.assertTrue(df.equals(df2))
+
+        df.at[3, "onset"] = 1.5
+        df2 = sort_dataframe_by_onsets(df)
+        self.assertTrue(df.equals(df2))
+
+        df.at[3, "onset"] = 1.0
+        df2 = sort_dataframe_by_onsets(df)
+        self.assertFalse(df.equals(df2))
+
 
 
 class TestInsertColumns(unittest.TestCase):

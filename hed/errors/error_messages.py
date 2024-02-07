@@ -60,6 +60,12 @@ def val_error_CURLY_BRACE_UNSUPPORTED_HERE(tag, problem_tag):
     return (f"Curly braces are only permitted in sidecars, fully wrapping text in place of a tag.  "
             f"Invalid character '{problem_tag}' in tag '{tag}'")
 
+
+@hed_error(ValidationErrors.ONSETS_OUT_OF_ORDER, default_severity=ErrorSeverity.WARNING)
+def val_error_ONSETS_OUT_OF_ORDER():
+    return "Onsets need to be temporally increasing for most downstream tools to work."
+
+
 @hed_error(ValidationErrors.COMMA_MISSING)
 def val_error_comma_missing(tag):
     return f"Comma missing after - '{tag}'"

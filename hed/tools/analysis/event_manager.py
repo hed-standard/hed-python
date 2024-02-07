@@ -48,7 +48,7 @@ class EventManager:
 
         """
         hed_strings, def_dict = get_assembled(input_data, input_data._sidecar, self.hed_schema,
-                                              extra_def_dicts=None, join_columns=True,
+                                              extra_def_dicts=None,
                                               shrink_defs=True, expand_defs=False)
         onset_dict = {}  # Temporary dictionary keeping track of temporal events that haven't ended yet.
         for event_index, hed in enumerate(hed_strings):
