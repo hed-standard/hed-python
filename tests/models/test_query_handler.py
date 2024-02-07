@@ -1,6 +1,6 @@
 import unittest
 from hed.models.hed_string import HedString
-from hed.models.expression_parser import QueryParser
+from hed.models.query_handler import QueryHandler
 import os
 from hed import schema
 from hed import HedTag
@@ -25,7 +25,7 @@ class TestParser(unittest.TestCase):
         cls.hed_schema = schema.load_schema(hed_xml_file)
 
     def base_test(self, parse_expr, search_strings):
-        expression = QueryParser(parse_expr)
+        expression = QueryHandler(parse_expr)
 
         # print(f"Search Pattern: {expression._org_string} - {str(expression.tree)}")
         for string, expected_result in search_strings.items():
@@ -47,7 +47,7 @@ class TestParser(unittest.TestCase):
         ]
         for string in test_search_strings:
             with self.assertRaises(ValueError) as context:
-                QueryParser(string)
+                QueryHandler(string)
             self.assertTrue(context.exception.args[0])
 
     def test_finding_tags(self):
@@ -317,7 +317,7 @@ class TestParser(unittest.TestCase):
     def test_exact_group_negation5(self):
         test_string = "{ ~a and b:}"
         with self.assertRaises(ValueError) as context:
-            QueryParser(test_string)
+            QueryHandler(test_string)
         self.assertTrue(context.exception.args[0])
 
     def test_mixed_group_complex_split(self):
@@ -653,13 +653,13 @@ class TestParser(unittest.TestCase):
         self.base_test("(a or b) and c", test_strings)
 
     def test_logical_negation(self):
-        expression = QueryParser("~a")
+        expression = QueryHandler("~a")
         hed_string = HedString("A", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
         hed_string = HedString("B", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
 
-        expression = QueryParser("~a and b")
+        expression = QueryHandler("~a and b")
         hed_string = HedString("A", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
         hed_string = HedString("B", self.hed_schema)
@@ -667,7 +667,7 @@ class TestParser(unittest.TestCase):
         hed_string = HedString("A, B", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
 
-        expression = QueryParser("~( (a or b) and c)")
+        expression = QueryHandler("~( (a or b) and c)")
         hed_string = HedString("A", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
         hed_string = HedString("B", self.hed_schema)

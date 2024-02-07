@@ -168,7 +168,7 @@ class Test(unittest.TestCase):
         counts = HedTagCounts('myName', 2)
         summary_dict = {}
         hed_strings, definitions = get_assembled(input_data, sidecar, my_schema, 
-                                                 extra_def_dicts=None, join_columns=True,
+                                                 extra_def_dicts=None,
                                                  shrink_defs=False, expand_defs=True)
         for hed in hed_strings:
             counts.update_event_counts(hed, 'myName')

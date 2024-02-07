@@ -3,8 +3,8 @@ import unittest
 from hed import schema as hedschema
 from hed.models import Sidecar, TabularInput, HedString
 from hed.models.df_util import get_assembled
-from hed.tools import assemble_hed
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
+import pandas as pd
 
 
 # noinspection PyBroadException
@@ -27,9 +27,8 @@ class Test(unittest.TestCase):
         input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         cls.input_data = input_data
         cls.sidecar1 = sidecar1
-        input_df, def_dict = assemble_hed(input_data, sidecar1, schema, expand_defs=False)
-        cls.input_df = input_df
-        cls.def_dict = def_dict
+        cls.input_df = pd.DataFrame(input_data.series_a, columns=["HED_assembled"])
+        cls.def_dict = input_data.get_def_dict(schema)
         cls.tag_template = {
             "Sensory events": ["Sensory-event", "Sensory-presentation", "Sensory-attribute",
                                "Experimental-stimulus", "Task-stimulus-role",
@@ -76,7 +75,7 @@ class Test(unittest.TestCase):
     def test_organize_tags(self):
         counts = HedTagCounts('Base_name')
         hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.hed_schema,
-                                                 extra_def_dicts=None, join_columns=True,
+                                                 extra_def_dicts=None,
                                                  shrink_defs=False, expand_defs=True)
         # type_defs = input_data.get_definitions().gathered_defs
         for hed in hed_strings:

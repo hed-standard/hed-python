@@ -158,6 +158,14 @@ class BaseInput:
             return self._dataframe["onset"]
 
     @property
+    def needs_sorting(self):
+        """Returns True if this both has an onset column, and it needs sorting."""
+        onsets = self.onsets
+        if onsets is not None:
+            onsets = onsets.astype(float)
+            return not onsets.is_monotonic_increasing
+
+    @property
     def name(self):
         """ Name of the data. """
         return self._name

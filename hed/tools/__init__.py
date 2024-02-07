@@ -46,9 +46,6 @@ from .util.io_util import get_dir_dictionary, get_file_list, get_path_components
 from .analysis import annotation_util
 from .analysis.annotation_util import \
     check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict
-from .analysis import analysis_util
-from .analysis.analysis_util import assemble_hed
-# from .analysis.analysis_util import search_tabular, get_assembled_strings
 
 from .remodeling.cli import run_remodel
 from .remodeling.cli import run_remodel_backup
