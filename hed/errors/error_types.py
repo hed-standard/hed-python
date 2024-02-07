@@ -91,7 +91,7 @@ class ValidationErrors:
     INVALID_TAG_CHARACTER = 'invalidTagCharacter'
 
     CURLY_BRACE_UNSUPPORTED_HERE = "CURLY_BRACE_UNSUPPORTED_HERE"
-
+    ONSETS_OUT_OF_ORDER = "ONSETS_OUT_OF_ORDER"
 
 
 class SidecarErrors:

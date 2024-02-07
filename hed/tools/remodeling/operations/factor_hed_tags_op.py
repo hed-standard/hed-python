@@ -6,8 +6,8 @@ import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
-from hed.models.df_util import get_assembled
-from hed.tools.analysis.analysis_util import get_expression_parsers, search_strings
+from hed.models.query_handler import QueryHandler
+from hed.models.query_service import search_strings, get_query_handlers
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_tag_manager import HedTagManager
 
@@ -83,8 +83,8 @@ class FactorHedTagsOp(BaseOp):
         self.remove_types = parameters.get('remove_types', [])
         self.expand_context = parameters.get('expand_context', True)
         self.replace_defs = parameters.get('replace_defs', True)
-        self.expression_parsers, self.query_names = get_expression_parsers(self.queries,
-                                                                           parameters.get('query_names', None))
+        self.query_handlers, self.query_names = get_query_handlers(self.queries,
+                                                                   parameters.get('query_names', None))
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Factor the column using HED tag queries.
@@ -115,7 +115,7 @@ class FactorHedTagsOp(BaseOp):
         tag_man = HedTagManager(EventManager(input_data, dispatcher.hed_schema),
                                 remove_types=self.remove_types)
         hed_objs = tag_man.get_hed_objs(include_context=self.expand_context, replace_defs=self.replace_defs)
-        df_factors = search_strings(hed_objs, self.expression_parsers, query_names=self.query_names)
+        df_factors = search_strings(hed_objs, self.query_handlers, query_names=self.query_names)
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
@@ -124,8 +124,15 @@ class FactorHedTagsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
-        queries = parameters.get("queries", None)
-        names = parameters.get("query_names", None)
+        queries = parameters.get("queries", [])
+        names = parameters.get("query_names", [])
         if names and queries and (len(names) != len(parameters["queries"])):
             return ["factor_hed_tags_op: query_names must be same length as queries."]
-        return []
+
+        issues = []
+        for query in queries:
+            try:
+                QueryHandler(query)
+            except ValueError as ex:
+                issues.append(f"factor_hed_tags_op: Invalid query '{query}")
+        return issues

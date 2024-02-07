@@ -7,8 +7,7 @@ from hed.models.hed_string import HedString
 from hed.models.definition_dict import DefinitionDict
 
 
-def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_columns=True,
-                  shrink_defs=False, expand_defs=True):
+def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, shrink_defs=False, expand_defs=True):
     """ Create an array of assembled HedString objects (or list of these) of the same length as tabular file with.
 
     Args:
@@ -20,8 +19,6 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
             If str, will attempt to load as a version if it doesn't have a valid extension.
         extra_def_dicts: list of DefinitionDict, optional
             Any extra DefinitionDict objects to use when parsing the HED tags.
-        join_columns: bool
-            If True, join all HED columns into one.
         shrink_defs: bool
             Shrink any def-expand tags found
         expand_defs: bool
@@ -41,19 +38,12 @@ def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, join_
     if sidecar:
         def_dict = sidecar.get_def_dict(hed_schema=hed_schema, extra_def_dicts=extra_def_dicts)
 
-    if join_columns:
-        if expand_defs:
-            return [HedString(x, hed_schema, def_dict).expand_defs() for x in tabular_file.series_a], def_dict
-        elif shrink_defs:
-            return [HedString(x, hed_schema, def_dict).shrink_defs() for x in tabular_file.series_a], def_dict
-        else:
-            return [HedString(x, hed_schema, def_dict) for x in tabular_file.series_a], def_dict
+    if expand_defs:
+        return [HedString(x, hed_schema, def_dict).expand_defs() for x in tabular_file.series_a], def_dict
+    elif shrink_defs:
+        return [HedString(x, hed_schema, def_dict).shrink_defs() for x in tabular_file.series_a], def_dict
     else:
-        return [[HedString(x, hed_schema, def_dict).expand_defs() if expand_defs
-                 else HedString(x, hed_schema, def_dict).shrink_defs() if shrink_defs
-                 else HedString(x, hed_schema, def_dict)
-                 for x in text_file_row] for text_file_row in tabular_file.dataframe_a.itertuples(index=False)], \
-               def_dict
+        return [HedString(x, hed_schema, def_dict) for x in tabular_file.series_a], def_dict
 
 
 def convert_to_form(df, hed_schema, tag_form, columns=None):
@@ -151,3 +141,22 @@ def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs
     from hed.models.def_expand_gather import DefExpandGatherer
     def_gatherer = DefExpandGatherer(hed_schema, known_defs, ambiguous_defs)
     return def_gatherer.process_def_expands(hed_strings)
+
+
+def sort_dataframe_by_onsets(df):
+    """ Gather def-expand tags in the strings/compare with known definitions to find any differences
+
+    Parameters:
+        df(pd.Dataframe): Dataframe to sort
+    Returns:
+        The sorted dataframe, or the original dataframe if it didn't have an onset column.
+    """
+    if "onset" in df.columns:
+        # Create a copy and sort by onsets as floats(if needed), but continue to keep the string version.
+        df_copy = df.copy()
+        df_copy['_temp_onset_sort'] = df_copy['onset'].astype(float)
+        df_copy.sort_values(by='_temp_onset_sort', inplace=True)
+        df_copy.drop(columns=['_temp_onset_sort'], inplace=True)
+
+        return df_copy
+    return df

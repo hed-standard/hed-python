@@ -1,3 +1,5 @@
+import copy
+
 import pandas as pd
 from hed import BaseInput
 from hed.errors import ErrorHandler, ValidationErrors, ErrorContext
@@ -7,6 +9,8 @@ from hed import HedString
 from hed.errors.error_reporter import sort_issues, check_for_any_errors
 from hed.validator.onset_validator import OnsetValidator
 from hed.validator.hed_validator import HedValidator
+from hed.models.df_util import sort_dataframe_by_onsets
+
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
@@ -50,6 +54,12 @@ class SpreadsheetValidator:
         if data.has_column_names:
             row_adj += 1
         issues += self._validate_column_structure(data, error_handler, row_adj)
+
+        if data.needs_sorting:
+            data_new = copy.deepcopy(data)
+            data_new._dataframe = sort_dataframe_by_onsets(data.dataframe)
+            issues += error_handler.format_error_with_context(ValidationErrors.ONSETS_OUT_OF_ORDER)
+            data = data_new
         onset_filtered = data.series_filtered
         df = data.dataframe_a
 
@@ -69,7 +79,7 @@ class SpreadsheetValidator:
     def _run_checks(self, hed_df, onset_filtered, error_handler, row_adj):
         issues = []
         columns = list(hed_df.columns)
-        for row_number, text_file_row in enumerate(hed_df.itertuples(index=False)):
+        for row_number, text_file_row in hed_df.iterrows():
             error_handler.push_error_context(ErrorContext.ROW, row_number + row_adj)
             row_strings = []
             new_column_issues = []
