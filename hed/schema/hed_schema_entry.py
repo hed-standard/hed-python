@@ -115,13 +115,8 @@ class HedSchemaEntry:
     def __eq__(self, other):
         if self.name != other.name:
             return False
-        if self.attributes != other.attributes:
-            # We only want to compare known attributes
-            self_attr = self.get_known_attributes()
-            other_attr = other.get_known_attributes()
-            # We can no longer be sure on the order of attribute values, since owl formatting has no order
-            if self_attr != other_attr and not self._compare_attributes_no_order(self_attr, other_attr):
-                return False
+        if not self._compare_attributes_no_order(self.attributes, other.attributes):
+            return False
         if self.description != other.description:
             return False
         return True
@@ -138,8 +133,9 @@ class HedSchemaEntry:
 
     @staticmethod
     def _compare_attributes_no_order(left, right):
-        left = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in left.items()}
-        right = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in right.items()}
+        if left != right:
+            left = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in left.items()}
+            right = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in right.items()}
 
         return left == right
 
@@ -235,6 +231,7 @@ class UnitEntry(HedSchemaEntry):
         if HedKey.ConversionFactor in self.attributes:
             return float(self.derivative_units.get(unit_name))
 
+
 class HedTagEntry(HedSchemaEntry):
     """ A single tag entry in the HedSchema. """
     def __init__(self, *args, **kwargs):
@@ -251,6 +248,13 @@ class HedTagEntry(HedSchemaEntry):
         self.inherited_attributes = self.attributes
         # Descendent tags below this one
         self.children = {}
+
+    def __eq__(self, other):
+        if not super().__eq__(other):
+            return False
+        if not self._compare_attributes_no_order(self.inherited_attributes, other.inherited_attributes):
+            return False
+        return True
 
     def has_attribute(self, attribute, return_value=False):
         """ Returns th existence or value of an attribute in this entry.

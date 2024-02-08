@@ -114,6 +114,7 @@ class SchemaLoader(ABC):
             # Copy the non-alterable cached schema
             self._schema = copy.deepcopy(base_version)
             self._schema.filename = self.filename
+            self._schema.name = self.name  # Manually set name here as we don't want to pass it to load_schema_version
             self._schema.header_attributes = saved_attr
             self._loading_merged = False
 

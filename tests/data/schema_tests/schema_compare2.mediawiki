@@ -1,0 +1,62 @@
+HED version="1.2.0" library="compare" withStandard="8.2.0" unmerged="True"
+
+'''Prologue'''
+Prologue Added
+
+!# start schema
+
+'''Tag1'''
+* RemovingUnitClass {takesValue}
+** # {unitClass=accelerationUnits}
+* AddingUnitClass {takesValue}
+** # {unitClass=accelerationUnits, unitClass=physicalLengthUnits}
+
+'''Tag2'''
+* Moving-tag
+* Moving-tag-changed {requireChild}
+** AddedTag
+
+* RemovingValueClass {takesValue}
+** # {valueClass=numericClass}
+* AddingValueClass {takesValue}
+** # {valueClass=numericClass, valueClass=nameClass}
+
+* RelatedTagChanging {relatedTag=Tag1}
+** InheritedRelatedTagChanging
+* SuggestedTagChanging {suggestedTag=Tag2}
+
+'''Tag3'''
+* DescriptionChanging [TagDescriptionNew]
+
+'''Tag4'''
+* ExtensionAllowedRemoval1
+
+'''Tag5'''
+* ExtensionAllowedRemoval2
+
+!# end schema
+
+'''Unit classes'''
+* addingUnit
+** unit1
+** unit2
+* removingUnit
+** unit4
+* NewUnitClass
+
+'''Unit modifiers'''
+* NewUnitModifier
+
+'''Value classes'''
+* NewValueClass
+
+'''Schema attributes'''
+* NewAttribute
+
+'''Properties'''
+* NewProperty
+
+'''Epilogue'''
+
+
+!# end hed
