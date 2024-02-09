@@ -8,7 +8,7 @@ from hed.models import df_util, basic_search
 from hed.models.basic_search import find_words, check_parentheses, reverse_and_flip_parentheses, \
     construct_delimiter_map, verify_search_delimiters, find_matching
 import numpy as np
-
+from hed.models.df_util import convert_to_form
 
 class TestNewSearch(unittest.TestCase):
     @classmethod
@@ -26,10 +26,33 @@ class TestNewSearch(unittest.TestCase):
         result1 = basic_search.find_matching(self.df, "(Face, Item-interval/1)")
         result2 = basic_search.find_matching(self.df, "(Face, Item-interval/1*)")
 
-        # Add assertions
         self.assertTrue(np.sum(result1) > 0, "result1 should have some true values")
         self.assertTrue(np.sum(result2) > 0, "result2 should have some true values")
         self.assertTrue(np.sum(result1) < np.sum(result2), "result1 should have fewer true values than result2")
+
+        # Verify we get the same results in both tag forms
+        df_copy = self.df.copy()
+        convert_to_form(df_copy, self.schema, "long_tag")
+
+        result1b = basic_search.find_matching(self.df, "(Face, Item-interval/1)")
+        result2b = basic_search.find_matching(self.df, "(Face, Item-interval/1*)")
+
+        self.assertTrue(np.sum(result1b) > 0, "result1 should have some true values")
+        self.assertTrue(np.sum(result2b) > 0, "result2 should have some true values")
+        self.assertTrue(np.sum(result1b) < np.sum(result2b), "result1 should have fewer true values than result2")
+        self.assertTrue(result1.equals(result1b))
+        self.assertTrue(result2.equals(result2b))
+
+        convert_to_form(df_copy, self.schema, "short_tag")
+
+        result1b = basic_search.find_matching(self.df, "(Face, Item-interval/1)")
+        result2b = basic_search.find_matching(self.df, "(Face, Item-interval/1*)")
+
+        self.assertTrue(np.sum(result1b) > 0, "result1 should have some true values")
+        self.assertTrue(np.sum(result2b) > 0, "result2 should have some true values")
+        self.assertTrue(np.sum(result1b) < np.sum(result2b), "result1 should have fewer true values than result2")
+        self.assertTrue(result1.equals(result1b))
+        self.assertTrue(result2.equals(result2b))
 
 
 class TestFindWords(unittest.TestCase):
