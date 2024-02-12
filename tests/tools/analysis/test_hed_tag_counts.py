@@ -74,9 +74,8 @@ class Test(unittest.TestCase):
 
     def test_organize_tags(self):
         counts = HedTagCounts('Base_name')
-        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.hed_schema,
-                                                 extra_def_dicts=None,
-                                                 shrink_defs=False, expand_defs=True)
+        hed_strings, definitions = get_assembled(self.input_data, self.hed_schema, extra_def_dicts=None,
+                                                 defs_expanded=True)
         # type_defs = input_data.get_definitions().gathered_defs
         for hed in hed_strings:
             counts.update_event_counts(hed, 'run-1')

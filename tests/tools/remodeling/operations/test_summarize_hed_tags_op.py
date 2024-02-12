@@ -162,14 +162,12 @@ class Test(unittest.TestCase):
                                              '../../../data/remodel_tests/'))
         data_path = os.path.realpath(os.path.join(path, 'sub-002_task-FacePerception_run-1_events.tsv'))
         json_path = os.path.realpath(os.path.join(path, 'task-FacePerception_events.json'))
-        my_schema = load_schema_version('8.1.0')
+        schema = load_schema_version('8.1.0')
         sidecar = Sidecar(json_path,)
         input_data = TabularInput(data_path, sidecar=sidecar)
         counts = HedTagCounts('myName', 2)
         summary_dict = {}
-        hed_strings, definitions = get_assembled(input_data, sidecar, my_schema, 
-                                                 extra_def_dicts=None,
-                                                 shrink_defs=False, expand_defs=True)
+        hed_strings, definitions = get_assembled(input_data, schema, extra_def_dicts=None, defs_expanded=True)
         for hed in hed_strings:
             counts.update_event_counts(hed, 'myName')
         summary_dict['myName'] = counts

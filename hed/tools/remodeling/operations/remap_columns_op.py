@@ -146,8 +146,8 @@ class RemapColumnsOp(BaseOp):
         required_len = len(parameters['source_columns']) + len(parameters['destination_columns'])
         for x in map_list:
             if len(x) != required_len:
-                return [f"remap_columns_op: all map_list arrays must be of length {str(required_len)}."]
+                return [f"all map_list arrays must be of length {str(required_len)}."]
         missing = set(parameters.get('integer_sources', [])) - set(parameters['source_columns'])
         if missing:
-            return [f"remap_columns_op: the integer_sources {str(missing)} are missing from source_columns."]
+            return [f"the integer_sources {str(missing)} are missing from source_columns."]
         return []

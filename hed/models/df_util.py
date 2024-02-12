@@ -1,49 +1,32 @@
-""" Utilities for handling the assembly and conversion of HED strings to different forms. """
+""" Utilities for assembly and conversion of HED strings to different forms. """
 from functools import partial
 import pandas as pd
-from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.models.hed_string import HedString
 from hed.models.definition_dict import DefinitionDict
 
 
-def get_assembled(tabular_file, sidecar, hed_schema, extra_def_dicts=None, shrink_defs=False, expand_defs=True):
-    """ Create an array of assembled HedString objects (or list of these) of the same length as tabular file with.
+def get_assembled(tabular_file, hed_schema, extra_def_dicts=None, defs_expanded=True):
+    """ Create an array of assembled HedString objects (or list of these) of the same length as tabular file input.
 
-    Args:
-        tabular_file: str or TabularInput
-            The path to the tabular file, or a TabularInput object representing it.
-        sidecar: str or Sidecar
-            The path to the sidecar file, or a Sidecar object representing it.
+    Parameters:
+        tabular_file (TabularInput): Represents the tabular input file.
         hed_schema: HedSchema
             If str, will attempt to load as a version if it doesn't have a valid extension.
         extra_def_dicts: list of DefinitionDict, optional
             Any extra DefinitionDict objects to use when parsing the HED tags.
-        shrink_defs: bool
-            Shrink any def-expand tags found
-        expand_defs: bool
-            Expand any def tags found
+        defs_expanded (bool): (Default True) Expands definitions if True, otherwise shrinks them.
     Returns:
         tuple:
             hed_strings(list of HedStrings):A list of HedStrings or a list of lists of HedStrings
             def_dict(DefinitionDict): The definitions from this Sidecar
     """
-    if isinstance(sidecar, str):
-        sidecar = Sidecar(sidecar)
 
-    if isinstance(tabular_file, str):
-        tabular_file = TabularInput(tabular_file, sidecar)
-
-    def_dict = None
-    if sidecar:
-        def_dict = sidecar.get_def_dict(hed_schema=hed_schema, extra_def_dicts=extra_def_dicts)
-
-    if expand_defs:
+    def_dict = tabular_file.get_def_dict(hed_schema, extra_def_dicts=extra_def_dicts)
+    if defs_expanded:
         return [HedString(x, hed_schema, def_dict).expand_defs() for x in tabular_file.series_a], def_dict
-    elif shrink_defs:
-        return [HedString(x, hed_schema, def_dict).shrink_defs() for x in tabular_file.series_a], def_dict
     else:
-        return [HedString(x, hed_schema, def_dict) for x in tabular_file.series_a], def_dict
+        return [HedString(x, hed_schema, def_dict).shrink_defs() for x in tabular_file.series_a], def_dict
 
 
 def convert_to_form(df, hed_schema, tag_form, columns=None):

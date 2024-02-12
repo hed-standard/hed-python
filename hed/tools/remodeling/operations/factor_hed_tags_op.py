@@ -83,8 +83,10 @@ class FactorHedTagsOp(BaseOp):
         self.remove_types = parameters.get('remove_types', [])
         self.expand_context = parameters.get('expand_context', True)
         self.replace_defs = parameters.get('replace_defs', True)
-        self.query_handlers, self.query_names = get_query_handlers(self.queries,
-                                                                   parameters.get('query_names', None))
+        self.query_handlers, self.query_names, issues = \
+            get_query_handlers(self.queries, parameters.get('query_names', None))
+        if issues:
+            raise ValueError("FactorHedTagInvalidQueries", "\n".join(issues))
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Factor the column using HED tag queries.
@@ -124,15 +126,5 @@ class FactorHedTagsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
-        queries = parameters.get("queries", [])
-        names = parameters.get("query_names", [])
-        if names and queries and (len(names) != len(parameters["queries"])):
-            return ["factor_hed_tags_op: query_names must be same length as queries."]
-
-        issues = []
-        for query in queries:
-            try:
-                QueryHandler(query)
-            except ValueError as ex:
-                issues.append(f"factor_hed_tags_op: Invalid query '{query}")
+        queries, names, issues = get_query_handlers(parameters.get("queries", []), parameters.get("query_names", None))
         return issues
