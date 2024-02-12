@@ -95,8 +95,8 @@ class FactorColumnOp(BaseOp):
         names = parameters.get("factor_names", None)
         values = parameters.get("factor_values", None)
         if names and not values:
-            return ["factor_names_op: factor_names cannot be given without factor_values"]
+            return ["factor_names cannot be given without factor_values"]
         elif names and values and len(names) != len(values):
-            return ["factor_names_op: factor_names must be same length as factor_values"]
+            return ["factor_names must be same length as factor_values"]
         else:
             return []

@@ -4,38 +4,39 @@ from hed.models import QueryHandler
 
 
 def get_query_handlers(queries, query_names=None):
-    """ Returns a list of query handlers and names
+    """ Returns a list of query handlers, query names, and issues if any.
 
     Parameters:
-        queries (list):  A list of query strings or QueryHandler objects
+        queries (list):  A list of query strings.
         query_names (list): A list of column names for results of queries. If missing --- query_1, query_2, etc.
 
     Returns:
-        DataFrame - containing the search strings
-
-    :raises ValueError:
-        - If query names are invalid or duplicated.
+        list - QueryHandlers for successfully parsed queries.
+        list - str names to assign to results of the queries.
+        list - issues if any of the queries could not be parsed or other errors occurred.
 
     """
-    expression_parsers = []
+    if not queries:
+        return None, None, [f"EmptyQueries: The queries list must not be empty"]
+    elif isinstance(queries, str):
+        queries = [queries]
+    expression_parsers = [None for i in range(len(queries))]
+    issues = []
     if not query_names:
         query_names = [f"query_{index}" for index in range(len(queries))]
-    elif len(queries) != len(query_names):
-        raise ValueError("QueryNamesLengthBad",
-                         f"The query_names length {len(query_names)} must be empty or equal" +
-                         f"to the queries length {len(queries)}.")
+
+    if len(queries) != len(query_names):
+        issues.append(f"QueryNamesLengthBad: The query_names length {len(query_names)} must be empty or equal" +
+                      f"to the queries length {len(queries)}.")
     elif len(set(query_names)) != len(query_names):
-        raise ValueError("DuplicateQueryNames", f"The query names {str(query_names)} list has duplicates")
+        issues.append(f"DuplicateQueryNames: The query names {str(query_names)} list has duplicates")
+
     for index, query in enumerate(queries):
-        if isinstance(query, str):
-            try:
-                next_query = QueryHandler(query)
-            except Exception:
-                raise ValueError("BadQuery", f"Query [{index}]: {query} cannot be parsed")
-        else:
-            raise ValueError("BadQuery", f"Query [{index}]: {query} has a bad type")
-        expression_parsers.append(next_query)
-    return expression_parsers, query_names
+        try:
+            expression_parsers[index] = QueryHandler(query)
+        except Exception as ex:
+            issues.append(f"[BadQuery {index}]: {query} cannot be parsed")
+    return expression_parsers, query_names, issues
 
 
 def search_strings(hed_strings, queries, query_names):

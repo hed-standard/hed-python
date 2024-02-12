@@ -117,7 +117,7 @@ class RemodelerValidator():
         for index, operation in enumerate(operation_by_parameters):
             error_strings = valid_operations[operation[0]].validate_input_data(operation[1])
             for error_string in error_strings:
-                list_of_error_strings.append("Operation %s: %s" %(index+1, error_string))
+                list_of_error_strings.append("Operation %s (%s): %s" %(index+1, operation[0], error_string))
         
         return list_of_error_strings
 

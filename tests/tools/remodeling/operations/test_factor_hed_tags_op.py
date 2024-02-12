@@ -62,14 +62,14 @@ class Test(unittest.TestCase):
         params["query_names"] = ["apple", "apple"]
         with self.assertRaises(ValueError) as context:
             FactorHedTagsOp(params)
-        self.assertEqual(context.exception.args[0], 'DuplicateQueryNames')
+        self.assertEqual(context.exception.args[0], 'FactorHedTagInvalidQueries')
 
         # Query names have wrong length
         params = json.loads(self.json_params)
         params["query_names"] = ["apple", "banana", "pear"]
         with self.assertRaises(ValueError) as context:
             FactorHedTagsOp(params)
-        self.assertEqual(context.exception.args[0], 'QueryNamesLengthBad')
+        self.assertEqual(context.exception.args[0], 'FactorHedTagInvalidQueries')
 
         # Query name already a column name
         params = json.loads(self.json_params)

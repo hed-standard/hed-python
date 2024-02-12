@@ -16,8 +16,8 @@ class SpreadsheetInput(BaseInput):
             file_type (str or None): ".xlsx" for Excel, ".tsv" or ".txt" for tsv. data. 
             worksheet_name (str or None): The name of the Excel workbook worksheet that contains the HED tags.
                 Not applicable to tsv files. If omitted for Excel, the first worksheet is assumed.
-            tag_columns (list): A list of ints containing the columns that contain the HED tags.
-                The default value is [1] indicating only the second column has tags.
+            tag_columns (list): A list of ints or strs containing the columns that contain the HED tags.
+                If ints then column numbers with [1] indicating only the second column has tags.
             has_column_names (bool): True if file has column names. Validation will skip over the first row.
                 first line of the file if the spreadsheet as column names.
             column_prefix_dictionary (dict or None): Dictionary with keys that are column numbers/names and

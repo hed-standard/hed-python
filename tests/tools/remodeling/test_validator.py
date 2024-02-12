@@ -124,29 +124,30 @@ class Test(unittest.TestCase):
         factor_column_validate = [deepcopy(self.remodel_file)[1]]
         factor_column_validate[0]["parameters"]["factor_names"] = ["stopped"]
         error_strings = self.validator.validate(factor_column_validate)
-        self.assertEqual(error_strings[0], "Operation 1: factor_names_op: factor_names must be same length as factor_values")
+        self.assertEqual(error_strings[0], "Operation 1 (factor_column): factor_names must be same length as factor_values")
 
         factor_hed_tags_validate = [deepcopy(self.remodel_file)[2]]
         factor_hed_tags_validate[0]["parameters"]["query_names"] = ["correct"]
         error_strings = self.validator.validate(factor_hed_tags_validate)
-        self.assertEqual(error_strings[0], "Operation 1: factor_hed_tags_op: query_names must be same length as queries.")
+        self.assertEqual(error_strings[0], "Operation 1 (factor_hed_tags): QueryNamesLengthBad: The query_names length 1 must be empty or equalto the queries length 2.")
 
         merge_consecutive_validate = [deepcopy(self.remodel_file)[4]]
         merge_consecutive_validate[0]["parameters"]["match_columns"].append("trial_type")
         error_strings = self.validator.validate(merge_consecutive_validate)
-        self.assertEqual(error_strings[0], "Operation 1: merge_consecutive_op: column_name `trial_type` cannot not be a match_column.")
+        self.assertEqual(error_strings[0], "Operation 1 (merge_consecutive): column_name `trial_type` cannot not be a match_column.")
 
         remap_columns_validate_same_length = [deepcopy(self.remodel_file)[5]]
         remap_columns_validate_same_length[0]["parameters"]["map_list"][0] = [""]
         error_strings = self.validator.validate(remap_columns_validate_same_length)
-        self.assertEqual(error_strings[0], "Operation 1: remap_columns_op: all map_list arrays must be of length 3.")
+        self.assertEqual(error_strings[0], "Operation 1 (remap_columns): all map_list arrays must be of length 3.")
 
         remap_columns_validate_right_length = [deepcopy(self.remodel_file[5])]
-        remap_columns_validate_right_length[0]["parameters"]["map_list"] = [["string1", "string2"], ["string3", "string4"]]
+        remap_columns_validate_right_length[0]["parameters"]["map_list"] = \
+            [["string1", "string2"], ["string3", "string4"]]
         error_strings = self.validator.validate(remap_columns_validate_right_length)
-        self.assertEqual(error_strings[0], "Operation 1: remap_columns_op: all map_list arrays must be of length 3.")
+        self.assertEqual(error_strings[0], "Operation 1 (remap_columns): all map_list arrays must be of length 3.")
 
         remap_columns_integer_sources = [deepcopy(self.remodel_file[5])]
         remap_columns_integer_sources[0]["parameters"]["integer_sources"] = ["unknown_column"]
         error_strings = self.validator.validate(remap_columns_integer_sources)
-        self.assertEqual(error_strings[0], "Operation 1: remap_columns_op: the integer_sources {'unknown_column'} are missing from source_columns.")
+        self.assertEqual(error_strings[0], "Operation 1 (remap_columns): the integer_sources {'unknown_column'} are missing from source_columns.")
