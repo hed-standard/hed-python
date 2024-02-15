@@ -1,7 +1,9 @@
+""" Classes representing parsed query expressions. """
 from hed.models.query_util import SearchResult
 
 
 class Expression:
+    """ Base class for parsed query expressions. """
     def __init__(self, token, left=None, right=None):
         self.left = left
         self.right = right

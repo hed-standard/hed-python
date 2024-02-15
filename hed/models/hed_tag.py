@@ -16,7 +16,7 @@ class HedTag:
         """ Creates a HedTag.
 
         Parameters:
-            hed_string (str): Source hed string for this tag.
+            hed_string (str): Source HED string for this tag.
             hed_schema (HedSchema): A parameter for calculating canonical forms on creation.
             span  (int, int): The start and end indexes of the tag in the hed_string.
             def_dict(DefinitionDict or None): The def dict to use to identify def/def expand tags.
@@ -24,7 +24,7 @@ class HedTag:
         self._hed_string = hed_string
         if span is None:
             span = (0, len(hed_string))
-        # This is the span into the original hed string for this tag
+        # This is the span into the original HED string for this tag
         self.span = span
 
         # If this is present, use this as the org tag for most purposes.
@@ -98,7 +98,7 @@ class HedTag:
 
     @property
     def short_base_tag(self):
-        """ Short form without value or extension
+        """ Short form without value or extension.
 
         Returns:
             base_tag (str): The short non-extension port of a tag.
@@ -119,7 +119,7 @@ class HedTag:
             new_tag_val (str): The new short_base_tag for this tag.
 
         :raises ValueError:
-            - If the tag wasn't already identified
+            - If the tag wasn't already identified.
 
         Note:
             - Generally this is used to swap def to def-expand.
@@ -201,7 +201,7 @@ class HedTag:
 
     @property
     def extension(self):
-        """ Get the extension or value of tag
+        """ Get the extension or value of tag.
 
             Generally this is just the portion after the last slash.
             Returns an empty string if no extension or value.
@@ -246,33 +246,33 @@ class HedTag:
 
     @property
     def expanded(self):
-        """Returns if this is currently expanded or not.
+        """Return if this is currently expanded or not.
 
            Will always be False unless expandable is set.  This is primarily used for Def/Def-expand tags at present.
 
         Returns:
-            bool: Returns True if this is currently expanded
+            bool: Returns True if this is currently expanded.
         """
         return self._expanded
 
     @property
     def expandable(self):
-        """Returns what this expands to
+        """Return what this expands to.
 
            This is primarily used for Def/Def-expand tags at present.
 
         Returns:
-            HedGroup or HedTag or None: Returns the expanded form of this tag
+            HedGroup or HedTag or None: Returns the expanded form of this tag.
         """
         return self._expandable
 
     def is_column_ref(self):
-        """ Returns if this tag is a column reference from a sidecar.
+        """ Return if this tag is a column reference from a sidecar.
 
             You should only see these if you are directly accessing sidecar strings, tools should remove them otherwise.
 
         Returns:
-            bool: Returns True if this is a column ref
+            bool: Returns True if this is a column ref.
         """
         return self.org_tag.startswith('{') and self.org_tag.endswith('}')
 
@@ -299,7 +299,7 @@ class HedTag:
         """ Update internal state based on schema.
 
         Parameters:
-            hed_schema (HedSchema or HedSchemaGroup): The schema to use to validate this tag
+            hed_schema (HedSchema or HedSchemaGroup): The schema to use to validate this tag.
 
         Returns:
             list:  A list of issues found during conversion. Each element is a dictionary.
@@ -339,13 +339,13 @@ class HedTag:
         return self.extension, None
 
     def value_as_default_unit(self):
-        """ Returns the value converted to default units if possible.
+        """ Return the value converted to default units if possible.
 
-            Returns None if the units are invalid.(No default unit or invalid)
+            Returns None if the units are invalid.(No default unit or invalid).
 
         Returns:
             value (float or None): The extension value as default units.
-                                   If there are not default units, returns None.
+                                   If there are no default units, returns None.
 
         Examples:
             'Duration/300 ms' will return .3
@@ -415,7 +415,7 @@ class HedTag:
         return {}
 
     def tag_exists_in_schema(self):
-        """ Get the schema entry for this tag.
+        """ Return whether the schema entry for this tag exists.
 
         Returns:
             bool: True if this tag exists.
@@ -426,7 +426,7 @@ class HedTag:
         return bool(self._schema_entry)
 
     def is_takes_value_tag(self):
-        """ Return true if this is a takes value tag.
+        """ Return True if this is a takes value tag.
 
         Returns:
             bool: True if this is a takes value tag.
@@ -437,7 +437,7 @@ class HedTag:
         return False
 
     def is_unit_class_tag(self):
-        """ Return true if this is a unit class tag.
+        """ Return True if this is a unit class tag.
 
         Returns:
             bool: True if this is a unit class tag.
@@ -448,7 +448,7 @@ class HedTag:
         return False
 
     def is_value_class_tag(self):
-        """ Return true if this is a value class tag.
+        """ Return True if this is a value class tag.
 
         Returns:
             bool:  True if this is a tag with a value class.
@@ -468,7 +468,7 @@ class HedTag:
         return bool(self._schema_entry and not self.extension)
 
     def has_attribute(self, attribute):
-        """ Return true if this is an attribute this tag has.
+        """ Return True if this is an attribute this tag has.
 
         Parameters:
             attribute (str): Name of the attribute.
@@ -636,7 +636,7 @@ class HedTag:
         return False
 
     def __deepcopy__(self, memo):
-        # check if the object has already been copied
+        # Check if the object has already been copied.
         if id(self) in memo:
             return memo[id(self)]
 

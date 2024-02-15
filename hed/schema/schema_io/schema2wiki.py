@@ -1,4 +1,4 @@
-"""Allows output of HedSchema objects as .mediawiki format"""
+""" Output of HedSchema objects as .mediawiki format. """
 
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.schema_io import wiki_constants
@@ -6,6 +6,7 @@ from hed.schema.schema_io.schema2base import Schema2Base
 
 
 class Schema2Wiki(Schema2Base):
+    """ Output of HedSchema objects as .mediawiki format. """
     def __init__(self):
         super().__init__()
         self.current_tag_string = ""
@@ -106,35 +107,26 @@ class Schema2Wiki(Schema2Base):
 
     @staticmethod
     def _get_attribs_string_from_schema(header_attributes):
-        """
-        Gets the schema attributes and converts it to a string.
+        """ Get the schema attributes and converts it to a string.
 
-        Parameters
-        ----------
-        header_attributes : dict
-            Attributes to format attributes from
+        Parameters:
+            header_attributes (dict): Attributes to format attributes from.
 
-        Returns
-        -------
-        str:
-            A string of the attributes that can be written to a .mediawiki formatted file
+        Returns:
+            str: A string of the attributes that can be written to a .mediawiki formatted file.
         """
         attrib_values = [f"{attr}=\"{value}\"" for attr, value in header_attributes.items()]
         final_attrib_string = " ".join(attrib_values)
         return final_attrib_string
 
     def _format_tag_attributes(self, attributes):
-        """
-            Takes a dictionary of tag attributes and returns a string with the .mediawiki representation
+        """ Take a dictionary of tag attributes and return a string with the .mediawiki representation.
 
-        Parameters
-        ----------
-        attributes : {str:str}
-            {attribute_name : attribute_value}
-        Returns
-        -------
-        str:
-            The formatted string that should be output to the file.
+        Parameters:
+         attributes (dict): Dictionary of form {attribute_name : attribute_value}.
+
+        Returns:
+            str: The formatted string that should be output to the file.
         """
         prop_string = ""
         final_props = []

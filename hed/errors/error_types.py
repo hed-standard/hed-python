@@ -1,3 +1,5 @@
+""" Error codes used in different error messages. """
+
 
 class ErrorSeverity:
     ERROR = 1
@@ -5,7 +7,7 @@ class ErrorSeverity:
 
 
 class ErrorContext:
-    """Indicates the context this error took place in, each error potentially having multiple contexts"""
+    """Context this error took place in, each error potentially having multiple contexts. """
     # Use this one to display any passed in message without modification
     CUSTOM_TITLE = 'ec_title'
     FILE_NAME = 'ec_filename'
@@ -21,7 +23,7 @@ class ErrorContext:
 
 
 class ValidationErrors:
-    # General validation errors
+    # General validation errors.
     CHARACTER_INVALID = 'CHARACTER_INVALID'
     COMMA_MISSING = 'COMMA_MISSING'
     DEF_EXPAND_INVALID = "DEF_EXPAND_INVALID"
@@ -75,9 +77,7 @@ class ValidationErrors:
     HED_GROUP_EMPTY = 'HED_GROUP_EMPTY'
     # end internal codes
 
-
     # Still being worked on below this line
-
     HED_MISSING_REQUIRED_COLUMN = "HED_MISSING_REQUIRED_COLUMN"
     HED_UNKNOWN_COLUMN = "HED_UNKNOWN_COLUMN"
     SIDECAR_AND_OTHER_COLUMNS = "SIDECAR_AND_OTHER_COLUMNS"
@@ -167,6 +167,7 @@ class OnsetErrors:
     INSET_BEFORE_ONSET = "INSET_BEFORE_ONSET"
     ONSET_SAME_DEFS_ONE_ROW = "ONSET_SAME_DEFS_ONE_ROW"
     HED_ONSET_WITH_NO_COLUMN = 'HED_ONSET_WITH_NO_COLUMN'
+
 
 class ColumnErrors:
     INVALID_COLUMN_REF = "INVALID_COLUMN_REF"

@@ -128,6 +128,12 @@ class BaseSummary(ABC):
                 continue
             self._save_summary_files(save_dir, file_format, summary, individual_summaries, task_name=task_name)
 
+            self.save_visualizations(save_dir, file_formats=file_formats, individual_summaries=individual_summaries,
+                                     task_name = task_name)
+
+    def save_visualizations(self, save_dir, file_formats=['.svg'], individual_summaries="separate", task_name=""):
+        pass
+
     def _save_summary_files(self, save_dir, file_format, summary, individual_summaries, task_name=''):
         """ Save the files in the appropriate format.
 

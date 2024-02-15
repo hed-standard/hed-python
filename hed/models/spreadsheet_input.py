@@ -33,21 +33,17 @@ class SpreadsheetInput(BaseInput):
               This means it no longer accepts anything but the value portion only in the columns.
 
         :raises HedFileError:
-            - file is blank
-            - An invalid dataframe was passed with size 0
-            - An invalid extension was provided
-            - A duplicate or empty column name appears
+            - The file is blank.
+            - An invalid dataframe was passed with size 0.
+            - An invalid extension was provided.
+            - A duplicate or empty column name appears.
 
         :raises OSError:
-            - Cannot open the indicated file
+            - Cannot open the indicated file.
 
         :raises KeyError:
-            - The specified worksheet name does not exist
+            - The specified worksheet name does not exist.
         """
-        if tag_columns is None:
-            tag_columns = [1]
-        if column_prefix_dictionary is None:
-            column_prefix_dictionary = {}
 
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   warn_on_missing_column=False)

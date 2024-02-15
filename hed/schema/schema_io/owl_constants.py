@@ -1,5 +1,5 @@
+""" OWL constants used to define namespaces. """
 from rdflib import Namespace
-
 from hed.schema.hed_schema_constants import HedSectionKey
 
 
@@ -48,4 +48,3 @@ ELEMENT_NAMES = {
     HedSectionKey.UnitModifiers: "HedUnitModifier",
     HedSectionKey.ValueClasses: "HedValueClass",
 }
-

@@ -1,5 +1,5 @@
 """
-This module is used to create a HedSchema object from an OWL file or graph.
+Create a HedSchema object from an OWL file or graph.
 """
 
 
@@ -9,18 +9,18 @@ from hed.schema import schema_validation_util
 from .base2schema import SchemaLoader
 import rdflib
 from rdflib.exceptions import ParserError
-from rdflib import Graph, RDF, RDFS, Literal, URIRef, OWL, XSD
+from rdflib import RDF, RDFS, URIRef, OWL
 from collections import defaultdict
 
 from hed.schema.schema_io.owl_constants import HED, HEDT, HEDU, HEDUM
 
 
 class SchemaLoaderOWL(SchemaLoader):
-    """ Loads XML schemas from filenames or strings.
+    """ Load XML schemas from filenames or strings.
 
-        Expected usage is SchemaLoaderXML.load(filename)
+        Expected usage is SchemaLoaderXML.load(filename).
 
-        SchemaLoaderXML(filename) will load just the header_attributes
+        SchemaLoaderXML(filename) will load just the header_attributes.
     """
     def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
         if schema_as_string and not file_format:
@@ -35,7 +35,7 @@ class SchemaLoaderOWL(SchemaLoader):
         self._rooted_cache = {}
 
     def _open_file(self):
-        """Parses a Turtle/owl/etc file and returns the RDF graph."""
+        """ Parse a Turtle/owl/etc. file and returns the RDF graph. """
 
         graph = rdflib.Graph()
         try:
@@ -51,17 +51,17 @@ class SchemaLoaderOWL(SchemaLoader):
         return graph
 
     def _read_prologue(self):
-        """Reads the Prologue section from the ontology."""
+        """ Read the Prologue section from the ontology. """
         prologue = self.graph.value(subject=HED.Prologue, predicate=HED.elementValue, any=False)
         return str(prologue) if prologue else ""
 
     def _read_epilogue(self):
-        """Reads the Epilogue section from the ontology."""
+        """ Read the Epilogue section from the ontology. """
         epilogue = self.graph.value(subject=HED.Epilogue, predicate=HED.elementValue, any=False)
         return str(epilogue) if epilogue else ""
 
     def _get_header_attributes(self, graph):
-        """Parses header attributes from an RDF graph into a dictionary."""
+        """  Parse header attributes from an RDF graph into a dictionary. """
         header_attributes = {}
         for s, _, _ in graph.triples((None, RDF.type, HED.HeaderMember)):
             label = graph.value(s, RDFS.label)
@@ -77,7 +77,6 @@ class SchemaLoaderOWL(SchemaLoader):
         self.graph.bind("hedu", HEDU)
         self.graph.bind("hedum", HEDUM)
 
-
         self._schema.epilogue = self._read_epilogue()
         self._schema.prologue = self._read_prologue()
         self._get_header_attributes(self.graph)
@@ -91,9 +90,7 @@ class SchemaLoaderOWL(SchemaLoader):
         breakHere = 3
 
     def get_local_names_from_uris(parent_chain, tag_uri):
-        """
-        Extracts local names from URIs using RDFlib's n3() method.
-        """
+        """ Extract local names from URIs using RDFlib's n3() method. """
         full_names = []
         for uri in parent_chain + [tag_uri]:
             # Serialize the URI into N3 format and extract the local name
@@ -103,18 +100,18 @@ class SchemaLoaderOWL(SchemaLoader):
         return full_names
 
     def sort_classes_by_hierarchy(self, classes):
-        """
-            Sorts all tags based on assembled full name
+        """ Sort all tags based on assembled full name.
 
         Returns:
             list of tuples.
-            Left Tag URI, right side is parent labels(not including self)
+            Left Tag URI, right side is parent labels(not including self).
         """
         parent_chains = []
         full_tag_names = []
         for tag_uri in classes:
             parent_chain = self._get_parent_chain(tag_uri)
-            parent_chain = [uri.n3(namespace_manager=self.graph.namespace_manager).split(':')[-1] for uri in parent_chain + [tag_uri]]
+            parent_chain = [uri.n3(namespace_manager=self.graph.namespace_manager).split(':')[-1]
+                            for uri in parent_chain + [tag_uri]]
             # parent_chain = [self.graph.value(p, RDFS.label) or p for p in parent_chain + [tag_uri]]
             full_tag_names.append("/".join(parent_chain))
             parent_chains.append((tag_uri, parent_chain[:-1]))
@@ -125,7 +122,7 @@ class SchemaLoaderOWL(SchemaLoader):
         return parent_chains
 
     def _get_parent_chain(self, cls):
-        """ Recursively builds the parent chain for a given class. """
+        """ Recursively build the parent chain for a given class. """
         parent = self.graph.value(subject=cls, predicate=HED.hasHedParent)
         if parent is None:
             return []
@@ -171,7 +168,7 @@ class SchemaLoaderOWL(SchemaLoader):
         return tag_entry
 
     def _get_classes_with_subproperty(self, subproperty_uri, base_type):
-        """Iterates over all classes that have a specified rdfs:subPropertyOf."""
+        """ Iterate over all classes that have a specified rdfs:subPropertyOf. """
         classes = set()
         for s in self.graph.subjects(RDF.type, base_type):
             if (s, RDFS.subPropertyOf, subproperty_uri) in self.graph:
@@ -179,9 +176,7 @@ class SchemaLoaderOWL(SchemaLoader):
         return classes
 
     def _get_all_subclasses(self, base_type):
-        """
-        Recursively finds all subclasses of the given base_type.
-        """
+        """ Recursively find all subclasses of the given base_type. """
         subclasses = set()
         for subclass in self.graph.subjects(RDFS.subClassOf, base_type):
             subclasses.add(subclass)
@@ -189,9 +184,7 @@ class SchemaLoaderOWL(SchemaLoader):
         return subclasses
 
     def _get_classes(self, base_type):
-        """
-        Retrieves all instances of the given base_type, including instances of its subclasses.
-        """
+        """ Retrieve all instances of the given base_type, including instances of its subclasses. """
         classes = set()
         # Add instances of the base type
         for s in self.graph.subjects(RDF.type, base_type):
@@ -238,8 +231,6 @@ class SchemaLoaderOWL(SchemaLoader):
             self._add_to_dict(new_entry, key_class)
             unit_classes[uri] = new_entry
 
-
-
         key_class = HedSectionKey.Units
         units = self._get_classes(HED.HedUnit)
         for uri in units:
@@ -274,7 +265,7 @@ class SchemaLoaderOWL(SchemaLoader):
         self._add_to_dict(tag_entry, HedSectionKey.Tags)
 
     def _read_tags(self):
-        """Populates a dictionary of dictionaries associated with tags and their attributes."""
+        """ Populate a dictionary of dictionaries associated with tags and their attributes. """
         classes = self._get_classes(HED.HedTag)
         classes.update(self._get_classes(HED.HedPlaceholder))
         sorted_classes = self.sort_classes_by_hierarchy(classes)

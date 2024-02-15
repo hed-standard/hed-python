@@ -1,4 +1,4 @@
-"""Allows output of HedSchema objects as .xml format"""
+""" Output of HedSchema objects as .xml format. """
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io import owl_constants
@@ -62,6 +62,7 @@ object_properties = {key for key, value in hed_keys_with_types.items() if value.
 
 
 class Schema2Owl(Schema2Base):
+    """ Output of HedSchema objects as .xml format. """
     def __init__(self):
         super().__init__()
         self.owl_graph = Graph()
@@ -75,7 +76,7 @@ class Schema2Owl(Schema2Base):
     # Required baseclass function
     # =========================================
     def _output_header(self, attributes, prologue):
-        # Create a dictionary mapping label names to property URIs
+        # Create a dictionary mapping label names to property URIs.
         property_uris = {
             "library": HED.Library,
             "unmerged": HED.Unmerged,
@@ -215,22 +216,15 @@ class Schema2Owl(Schema2Base):
         return hed_tag_uri
 
     def _write_tag_entry(self, tag_entry, parent_node=None, level=0):
-        """
-            Creates a tag node and adds it to the parent.
+        """ Create a tag node and adds it to the parent.
 
-        Parameters
-        ----------
-        tag_entry: HedTagEntry
-            The entry for that tag we want to write out
-        parent_node: Any
-            Unused
-        level: Any
-            Unused
+        Parameters:
+            tag_entry (HedTagEntry): The entry for that tag we want to write out.
+            parent_node (Any): Unused.
+            level (Any): Unused:
 
-        Returns
-        -------
-        SubElement
-            The added node
+        Returns:
+             ?
         """
         tag_name = tag_entry.short_tag_name
         parent = tag_entry.parent
@@ -247,15 +241,14 @@ class Schema2Owl(Schema2Base):
         )
 
     def _write_entry(self, entry, parent_node=None, include_props=True):
-        """
-            Creates an entry node and adds it to the parent.
+        """ Create an entry node and adds it to the parent.
 
         Parameters:
-            entry(HedSchemaEntry): The entry for that tag we want to write out
-            parent_node(str): URI for unit class owner, if this is a unit
+            entry(HedSchemaEntry): The entry for that tag we want to write out.
+            parent_node(str): URI for unit class owner, if this is a unit.
             include_props(bool): Add the description and attributes to new node.
         Returns:
-            str: The added URI
+            str: The added URI.
         """
         key_class = entry.section_key
         prefix = HED_URIS[key_class]
@@ -299,10 +292,10 @@ import re
 
 
 def sanitize_for_turtle(name):
-    """ Sanitizes a string to be a valid IRIREF in Turtle, based on the SPARQL grammar.
+    """ Sanitize a string to be a valid IRIREF in Turtle, based on the SPARQL grammar.
 
     Excludes: `control characters, space, <, >, double quote, {, }, |, ^, backtick, and backslash.`
-        Replacing them with underscores
+        Replacing them with underscores.
 
     Parameters:
         name (str): The string to sanitize.

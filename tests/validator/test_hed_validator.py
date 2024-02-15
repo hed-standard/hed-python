@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
         cls.validation_issues = []
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/validator_tests/')
         cls.hed_filepath_with_errors = os.path.join(cls.hed_base_dir, "ExcelMultipleSheets.xlsx")
-        cls.hed_file_with_errors = SpreadsheetInput(cls.hed_filepath_with_errors)
+        cls.hed_file_with_errors = SpreadsheetInput(cls.hed_filepath_with_errors, tag_columns=[1])
 
         cls.hed_filepath_major_errors = os.path.join(cls.hed_base_dir, "bids_events_invalid.tsv")
         cls.hed_file_with_major_errors = SpreadsheetInput(cls.hed_filepath_major_errors, tag_columns=[1])

@@ -11,15 +11,14 @@ def get_assembled(tabular_file, hed_schema, extra_def_dicts=None, defs_expanded=
 
     Parameters:
         tabular_file (TabularInput): Represents the tabular input file.
-        hed_schema: HedSchema
-            If str, will attempt to load as a version if it doesn't have a valid extension.
+        hed_schema (HedSchema): If str, will attempt to load as a version if it doesn't have a valid extension.
         extra_def_dicts: list of DefinitionDict, optional
             Any extra DefinitionDict objects to use when parsing the HED tags.
         defs_expanded (bool): (Default True) Expands definitions if True, otherwise shrinks them.
     Returns:
         tuple:
-            hed_strings(list of HedStrings):A list of HedStrings or a list of lists of HedStrings
-            def_dict(DefinitionDict): The definitions from this Sidecar
+            hed_strings(list of HedStrings): A list of HedStrings or a list of lists of HedStrings
+            def_dict(DefinitionDict): The definitions from this Sidecar.
     """
 
     def_dict = tabular_file.get_def_dict(hed_schema, extra_def_dicts=extra_def_dicts)
@@ -33,7 +32,7 @@ def convert_to_form(df, hed_schema, tag_form, columns=None):
     """ Convert all tags in underlying dataframe to the specified form (in place).
 
     Parameters:
-        df (pd.Dataframe or pd.Series): The dataframe or series to modify
+        df (pd.Dataframe or pd.Series): The dataframe or series to modify.
         hed_schema (HedSchema): The schema to use to convert tags.
         tag_form(str): HedTag property to convert tags to.
         columns (list): The columns to modify on the dataframe.
@@ -53,7 +52,7 @@ def shrink_defs(df, hed_schema, columns=None):
     """ Shrink (in place) any def-expand tags found in the specified columns in the dataframe.
 
     Parameters:
-        df (pd.Dataframe or pd.Series): The dataframe or series to modify
+        df (pd.Dataframe or pd.Series): The dataframe or series to modify.
         hed_schema (HedSchema or None): The schema to use to identify defs.
         columns (list or None): The columns to modify on the dataframe.
 
@@ -76,10 +75,10 @@ def expand_defs(df, hed_schema, def_dict, columns=None):
         Converts in place
 
     Parameters:
-        df (pd.Dataframe or pd.Series): The dataframe or series to modify
-        hed_schema (HedSchema or None): The schema to use to identify defs
-        def_dict (DefinitionDict): The definitions to expand
-        columns (list or None): The columns to modify on the dataframe
+        df (pd.Dataframe or pd.Series): The dataframe or series to modify.
+        hed_schema (HedSchema or None): The schema to use to identify defs.
+        def_dict (DefinitionDict): The definitions to expand.
+        columns (list or None): The columns to modify on the dataframe.
     """
     if isinstance(df, pd.Series):
         mask = df.str.contains('Def/', case=False)
@@ -107,16 +106,17 @@ def _expand_defs(hed_string, hed_schema, def_dict):
 
 
 def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None):
-    """ Gather def-expand tags in the strings/compare with known definitions to find any differences
+    """ Gather def-expand tags in the strings/compare with known definitions to find any differences.
 
     Parameters:
         hed_strings (list or pd.Series): A list of HED strings to process.
-        hed_schema (HedSchema): The schema to use
+        hed_schema (HedSchema): The schema to use.
         known_defs (DefinitionDict or list or str or None):
             A DefinitionDict or anything its constructor takes.  These are the known definitions going in, that must
             match perfectly.
-        ambiguous_defs (dict): A dictionary containing ambiguous definitions
+        ambiguous_defs (dict): A dictionary containing ambiguous definitions.
             format TBD.  Currently def name key: list of lists of HED tags values
+
     Returns:
         tuple: A tuple containing the DefinitionDict, ambiguous definitions, and errors.
     """
@@ -127,10 +127,11 @@ def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs
 
 
 def sort_dataframe_by_onsets(df):
-    """ Gather def-expand tags in the strings/compare with known definitions to find any differences
+    """ Gather def-expand tags in the strings/compare with known definitions to find any differences.
 
     Parameters:
-        df(pd.Dataframe): Dataframe to sort
+        df(pd.Dataframe): Dataframe to sort.
+
     Returns:
         The sorted dataframe, or the original dataframe if it didn't have an onset column.
     """

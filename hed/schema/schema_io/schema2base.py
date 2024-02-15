@@ -1,11 +1,12 @@
-"""Baseclass for mediawiki/xml writers"""
+""" Baseclass for mediawiki/xml writers. """
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 
 
 class Schema2Base:
+    """ Baseclass for mediawiki/xml writers. """
     def __init__(self):
-        # Placeholder output variable
+        # Placeholder output variable.
         self.output = None
         self._save_lib = False
         self._save_base = False
@@ -14,20 +15,15 @@ class Schema2Base:
 
     @classmethod
     def process_schema(cls, hed_schema, save_merged=False):
-        """
-        Takes a HedSchema object and returns a list of strings representing its .mediawiki version.
+        """ Take a HedSchema object and return a list of strings representing its .mediawiki version.
 
-        Parameters
-        ----------
-        hed_schema : HedSchema
-        save_merged: bool
-            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
-            If it is not a "withStandard" schema, this setting has no effect.
+        Parameters:
+            hed_schema (HedSchema): The schema to be processed.
+            save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
+                                If it is not a "withStandard" schema, this setting has no effect.
 
-        Returns
-        -------
-        converted_output: Any
-            Varies based on inherited class
+        Returns:
+            (Any): Varies based on inherited class.
 
         """
         if not hed_schema.can_save():

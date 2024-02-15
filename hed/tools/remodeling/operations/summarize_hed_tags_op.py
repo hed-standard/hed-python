@@ -1,11 +1,13 @@
 """ Summarize the HED tags in collection of tabular files.  """
-
+import os
+import numpy as np
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_tag_manager import HedTagManager
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
+from hed.tools.visualization.tag_word_cloud import create_wordcloud, word_cloud_to_svg
 
 
 class SummarizeHedTagsOp(BaseOp):
@@ -23,7 +25,7 @@ class SummarizeHedTagsOp(BaseOp):
        - **remove_types** (*list*): A list of type tags such as Condition-variable or Task to exclude from summary.
        - **replace_defs** (*bool*): If True, the def tag is replaced by the contents of the definitions.  
 
-    The purpose of this op is to produce a summary of the occurrences of hed tags organized in a specified manner.
+    The purpose of this op is to produce a summary of the occurrences of HED tags organized in a specified manner.
     The
 
 
@@ -70,7 +72,10 @@ class SummarizeHedTagsOp(BaseOp):
             },
             "replace_defs": {
                 "type": "boolean"
-            }
+            },
+            "word_cloud": {
+                "type": "boolean"
+            },
         },
         "required": [
             "summary_name",
@@ -97,6 +102,7 @@ class SummarizeHedTagsOp(BaseOp):
         self.include_context = parameters.get('include_context', True)
         self.replace_defs = parameters.get("replace_defs", True)
         self.remove_types = parameters.get("remove_types", [])
+        self.word_cloud = parameters.get("word_cloud", False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Summarize the HED tags present in the dataset.
@@ -211,6 +217,56 @@ class HedTagSummary(BaseSummary):
                 all_counts.files[file_name] = ""
             all_counts.total_events = all_counts.total_events + counts.total_events
         return all_counts
+
+    def save_visualizations(self, save_dir, file_formats=['.svg'], individual_summaries="separate", task_name=""):
+        if not self.sum_op.word_cloud:
+            return
+        # summary = self.get_summary(individual_summaries='none')
+        summary = self.get_summary(individual_summaries='none')
+        overall_summary = summary.get("Dataset", {})
+        overall_summary = overall_summary.get("Overall summary", {})
+        specifics = overall_summary.get("Specifics", {})
+        word_dict = self.summary_to_dict(specifics)
+        width = 400
+        height = 300
+        mask_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                  '../../../resources/word_cloud_brain_mask.png'))
+        tag_wc = create_wordcloud(word_dict, mask_path=mask_path, width=width, height=height)
+        svg_data = word_cloud_to_svg(tag_wc)
+        cloud_filename = os.path.realpath(os.path.join(save_dir, self.op.summary_name, '_word_cloud.svg'))
+        with open(cloud_filename, "w") as outfile:
+            outfile.writelines(svg_data)
+
+    @staticmethod
+    def summary_to_dict(specifics, transform=np.log10, adjustment=7):
+        """Converts a HedTagSummary json specifics dict into the word cloud input format
+
+        Parameters:
+            specifics(dict): Dictionary with keys "Main tags" and "Other tags"
+            transform(func): The function to transform the number of found tags
+                             Default log10
+            adjustment(int): Value added after transform.
+        Returns:
+            word_dict(dict): a dict of the words and their occurrence count
+
+        :raises KeyError:
+            A malformed dictionary was passed
+
+        """
+        if transform is None:
+            def transform(x):
+                return x
+        word_dict = {}
+        tag_dict = specifics.get("Main tags", {})
+        for tag, tag_sub_list in tag_dict.items():
+            if tag=="Exclude tags":
+                continue
+            for tag_sub_dict in tag_sub_list:
+                word_dict[tag_sub_dict['tag']] = transform(tag_sub_dict['events']) + adjustment
+        other_dict = specifics.get("Other tags", [])
+        for tag_sub_list in other_dict:
+            word_dict[tag_sub_list['tag']] = transform(tag_sub_dict['events']) + adjustment
+        return word_dict
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):

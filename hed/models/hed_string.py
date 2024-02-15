@@ -46,7 +46,7 @@ class HedString(HedGroup):
                                         This takes ownership of their children.
 
         Returns:
-            new_string(HedString): The newly combined HedString
+            new_string(HedString): The newly combined HedString.
         """
         if not hed_strings:
             raise TypeError("Passed an empty list to from_hed_strings")
@@ -119,7 +119,7 @@ class HedString(HedGroup):
             self.remove(definition_groups)
 
     def shrink_defs(self):
-        """ Replace def-expand tags with def tags
+        """ Replace def-expand tags with def tags.
 
             This does not validate them and will blindly shrink invalid ones as well.
 
@@ -136,9 +136,9 @@ class HedString(HedGroup):
         return self
 
     def expand_defs(self):
-        """ Replace def tags with def-expand tags
+        """ Replace def tags with def-expand tags.
 
-            This does very minimal validation
+            This does very minimal validation.
 
         Returns:
             self
@@ -174,9 +174,9 @@ class HedString(HedGroup):
         """ Split the HED string into a parse tree.
 
         Parameters:
-            hed_string (str): A hed string consisting of tags and tag groups to be processed.
+            hed_string (str): A HED string consisting of tags and tag groups to be processed.
             hed_schema (HedSchema): HED schema to use to identify tags.
-            def_dict(DefinitionDict): The definitions to identify
+            def_dict(DefinitionDict): The definitions to identify.
         Returns:
             list:  A list of HedTag and/or HedGroup.
 
@@ -208,7 +208,7 @@ class HedString(HedGroup):
 
                 if delimiter_char is HedString.CLOSING_GROUP_CHARACTER:
                     # if prev_delimiter == ",":
-                    #     raise ValueError(f"Closing parentheses in hed string {hed_string}")
+                    #     raise ValueError(f"Closing parentheses in HED string {hed_string}")
                     # Terminate existing group, and save it off.
                     paren_end = startpos + delimiter_index + 1
 
@@ -227,17 +227,17 @@ class HedString(HedGroup):
         return current_tag_group[0]
 
     def _get_org_span(self, tag_or_group):
-        """ If this tag or group was in the original hed string, find its original span.
+        """ If this tag or group was in the original HED string, find its original span.
 
         Parameters:
-            tag_or_group (HedTag or HedGroup): The hed tag to locate in this string.
+            tag_or_group (HedTag or HedGroup): The HED tag to locate in this string.
 
         Returns:
             int or None:   Starting position of the given item in the original string.
             int or None:   Ending position of the given item in the original string.
 
         Notes:
-            - If the hed tag or group was not in the original string, returns (None, None).
+            - If the HED tag or group was not in the original string, returns (None, None).
 
         """
         if self._from_strings:
@@ -249,7 +249,7 @@ class HedString(HedGroup):
         return None, None
 
     def _get_org_span_from_strings(self, tag_or_group):
-        """A different case of the above, to handle if this was created from hed string objects."""
+        """ A different case of the above, to handle if this was created from HED string objects."""
         found_string = None
         string_start_index = 0
         for string in self._from_strings:
@@ -276,9 +276,9 @@ class HedString(HedGroup):
 
         Notes:
             - The tuple format is as follows
-                - is_hed_tag (bool): A (possible) hed tag if True, delimiter if not.
+                - is_hed_tag (bool): A (possible) HED tag if True, delimiter if not.
                 - start_pos (int):   Index of start of string in hed_string.
-                - end_pos (int):     Index of end of string in hed_string
+                - end_pos (int):     Index of end of string in hed_string.
 
             - This function does not validate tags or delimiters in any form.
 
@@ -333,14 +333,13 @@ class HedString(HedGroup):
         return result_positions
 
     def validate(self, allow_placeholders=True, error_handler=None):
-        """
-        Validate the string using the schema
+        """ Validate the string using the schema.
 
         Parameters:
-            allow_placeholders(bool): allow placeholders in the string
-            error_handler(ErrorHandler or None): the error handler to use, creates a default one if none passed
+            allow_placeholders(bool): Allow placeholders in the string.
+            error_handler(ErrorHandler or None): The error handler to use, creates a default one if none passed.
         Returns:
-            issues (list of dict): A list of issues for hed string
+            issues (list of dict): A list of issues for HED string.
         """
         from hed.validator import HedValidator
 
@@ -353,13 +352,13 @@ class HedString(HedGroup):
             A max of 1 tag located per top level group.
 
         Parameters:
-            anchor_tags (container):     A list/set/etc of short_base_tags to find groups by.
+            anchor_tags (container):  A list/set/etc. of short_base_tags to find groups by.
             include_groups (0, 1 or 2):  Parameter indicating what return values to include.
                 If 0: return only tags.
                 If 1: return only groups.
                 If 2 or any other value: return both.
         Returns:
-            list or tuple: The returned result depends on include_groups:
+            list or tuple: The returned result depends on include_groups.
         """
         top_level_tags = []
         for group in self.groups():
@@ -374,7 +373,7 @@ class HedString(HedGroup):
         return top_level_tags
 
     def remove_refs(self):
-        """ This removes any refs(tags contained entirely inside curly braces) from the string.
+        """ Remove any refs(tags contained entirely inside curly braces) from the string.
 
             This does NOT validate the contents of the curly braces.  This is only relevant when directly
             editing sidecar strings.  Tools will naturally ignore these.

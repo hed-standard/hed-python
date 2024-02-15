@@ -1,5 +1,5 @@
 """
-This module is used to report errors found in the validation.
+Support functions for reporting validation errors.
 
 You can scope the formatted errors with calls to push_error_context and pop_error_context.
 """
@@ -12,10 +12,10 @@ from hed.errors.known_error_codes import known_error_codes
 
 error_functions = {}
 
-# Controls if the default issue printing skips adding indentation for this context
+# Controls if the default issue printing skips adding indentation for this context.
 no_tab_context = {ErrorContext.HED_STRING, ErrorContext.SCHEMA_ATTRIBUTE}
 
-# Default sort ordering for issues list
+# Default sort ordering for issues list.
 default_sort_list = [
     ErrorContext.CUSTOM_TITLE,
     ErrorContext.FILE_NAME,
@@ -65,7 +65,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
                 kwargs (**kwargs): Any keyword args to be passed down to error message function.
 
             Returns:
-                list: A list of dict with the errors.=
+                list: A list of dict with the errors.
             """
             base_message = func(*args, **kwargs)
             error_object = ErrorHandler._create_error_object(actual_code, base_message, severity)
@@ -97,9 +97,9 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 """ Wrapper function for error handling tag errors with sub tags.
 
                 Parameters:
-                    tag (HedTag): The hed tag object with the problem,
-                    index_in_tag (int): The index into the tag with a problem(usually 0),
-                    index_in_tag_end (int): The last index into the tag with a problem - usually len(tag),
+                    tag (HedTag): The HED tag object with the problem.
+                    index_in_tag (int): The index into the tag with a problem(usually 0).
+                    index_in_tag_end (int): The last index into the tag with a problem - usually len(tag).
                     args (args): Any other non keyword args.
                     severity (ErrorSeverity): Used to include warnings as well as errors.
                     kwargs (**kwargs): Any keyword args to be passed down to error message function.
@@ -136,7 +136,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 """ Wrapper function for error handling tag errors.
 
                 Parameters:
-                    tag (HedTag or HedGroup): The hed tag object with the problem.
+                    tag (HedTag or HedGroup): The HED tag object with the problem.
                     args (non keyword args): Any other non keyword args.
                     severity (ErrorSeverity): For including warnings.
                     kwargs (keyword args): Any keyword args to be passed down to error message function.
@@ -286,7 +286,7 @@ class ErrorHandler:
             kwargs (kwargs): Keyword parameters to pass down to the error handling func.
 
         Returns:
-            list:  A list containing a single dictionary
+            list:  A list containing a single dictionary.
 
         Notes:
             - Generally the error_context is returned from _add_context_to_errors.
@@ -379,7 +379,7 @@ class ErrorHandler:
         """ Default error handler if no error of this type was registered.
 
         Parameters:
-            args (args):     List of non-keyword parameters (varies).
+            args (args):  List of non-keyword parameters (varies).
             kwargs (kwargs): Keyword parameters (varies)
 
         Returns:
@@ -404,7 +404,7 @@ class ErrorHandler:
 
 
 def sort_issues(issues, reverse=False):
-    """Sorts a list of issues by the error context values.
+    """Sort a list of issues by the error context values.
 
     Parameters:
         issues (list): A list of dictionaries representing the issues to be sorted.
@@ -427,7 +427,7 @@ def sort_issues(issues, reverse=False):
 
 
 def check_for_any_errors(issues_list):
-    """Returns True if there are any errors with a severity of warning"""
+    """ Return True if there are any errors with a severity of warning. """
     for issue in issues_list:
         if issue['severity'] < ErrorSeverity.WARNING:
             return True
@@ -485,13 +485,13 @@ def get_printable_issue_string_html(issues, title=None, severity=None, skip_file
 
 
 def create_doc_link(error_code):
-    """If error code is a known code, return a documentation url for it
+    """If error code is a known code, return a documentation url for it.
 
     Parameters:
-        error_code(str): A HED error code
+        error_code(str): A HED error code.
 
     Returns:
-        url(str or None): The URL if it's a valid code
+        url(str or None): The URL if it's a valid code.
     """
     if error_code in known_error_codes["hed_validation_errors"] \
             or error_code in known_error_codes["schema_validation_errors"]:
@@ -501,7 +501,7 @@ def create_doc_link(error_code):
 
 
 def _build_error_context_dict(issues, skip_filename):
-    """Builds the context -> error dictionary for an entire list of issues
+    """Build the context -> error dictionary for an entire list of issues.
 
     Returns:
         dict: A nested dictionary structure with a "children" key at each level for unrelated children.
@@ -515,12 +515,12 @@ def _build_error_context_dict(issues, skip_filename):
 
 
 def _add_single_error_to_dict(items, root=None, issue_to_add=None):
-    """ Build a nested dictionary out of the context lists
+    """ Build a nested dictionary out of the context lists.
 
     Parameters:
         items (list): A list of error contexts
         root (dict, optional): An existing nested dictionary structure to update.
-        issue_to_add (dict, optional): The issue to add at this level of context
+        issue_to_add (dict, optional): The issue to add at this level of context.
 
     Returns:
         dict: A nested dictionary structure with a "children" key at each level for unrelated children.
@@ -587,13 +587,13 @@ def _get_context_from_issue(val_issue, skip_filename=True):
 
 
 def _get_error_prefix(single_issue):
-    """Returns the prefix for the error message based on severity and error code.
+    """Return the prefix for the error message based on severity and error code.
 
     Parameters:
-        single_issue(dict): A single issue object
+        single_issue(dict): A single issue object.
 
     Returns:
-        error_prefix(str):  the prefix to use
+        error_prefix(str):  the prefix to use.
     """
     severity = single_issue.get('severity', ErrorSeverity.ERROR)
     error_code = single_issue['code']
@@ -610,7 +610,7 @@ def _format_single_context_string(context_type, context, tab_count=0):
 
     Parameters:
         context_type (str): The context type of this entry.
-        context (str or HedString): The value of this context
+        context (str or HedString): The value of this context.
         tab_count (int): Number of tabs to name_prefix each line with.
 
     Returns:
@@ -647,7 +647,7 @@ def _create_error_tree(error_dict, parent_element=None, add_link=True):
                 error_prefix = _get_error_prefix(child)
                 single_issue_message = child["message"]
 
-                # Create a link for the error prefix if add_link is True
+                # Create a link for the error prefix if add_link is True.
                 if add_link:
                     link_url = create_doc_link(child['code'])
                     if link_url:
@@ -669,11 +669,11 @@ def _create_error_tree(error_dict, parent_element=None, add_link=True):
 
 
 def replace_tag_references(list_or_dict):
-    """Utility function to remove any references to tags, strings, etc from any type of nested list or dict
+    """ Utility function to remove any references to tags, strings, etc. from any type of nested list or dict.
 
        Use this if you want to save out issues to a file.
 
-       If you'd prefer a copy returned, use replace_tag_references(list_or_dict.copy())
+       If you'd prefer a copy returned, use replace_tag_references(list_or_dict.copy()).
 
     Parameters:
        list_or_dict(list or dict): An arbitrarily nested list/dict structure

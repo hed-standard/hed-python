@@ -1,11 +1,12 @@
 """
-This module contains the actual formatted error messages for each type.
+The actual formatted error messages for each type.
 
 Add new errors here, or any other file imported after error_reporter.py.
 """
 
 from hed.errors.error_reporter import hed_error, hed_tag_error
-from hed.errors.error_types import ValidationErrors, SidecarErrors, ErrorSeverity, DefinitionErrors, OnsetErrors, ColumnErrors
+from hed.errors.error_types import (ValidationErrors, SidecarErrors, ErrorSeverity, DefinitionErrors,
+                                    OnsetErrors, ColumnErrors)
 
 
 @hed_tag_error(ValidationErrors.UNITS_INVALID)
@@ -28,7 +29,6 @@ def val_error_empty_group(tag):
 @hed_tag_error(OnsetErrors.HED_ONSET_WITH_NO_COLUMN, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def val_error_hed_onset_with_no_column(tag):
     return f"Cannot have Temporal tags without an 'Onset' column.  Found tag: '{tag}'"
-
 
 
 @hed_tag_error(ValidationErrors.TAG_EXTENDED, has_sub_tag=True, default_severity=ErrorSeverity.WARNING)
@@ -108,7 +108,8 @@ def val_error_invalid_extension(tag):
     return f'Invalid extension on tag - "{tag}"'
 
 
-@hed_tag_error(ValidationErrors.INVALID_PARENT_NODE, has_sub_tag=True, actual_code=ValidationErrors.TAG_EXTENSION_INVALID)
+@hed_tag_error(ValidationErrors.INVALID_PARENT_NODE, has_sub_tag=True,
+               actual_code=ValidationErrors.TAG_EXTENSION_INVALID)
 def val_error_invalid_parent(tag, problem_tag, expected_parent_tag):
     return f"In '{tag}', '{problem_tag}' appears as '{str(expected_parent_tag)}' and cannot be used as an extension."
 
@@ -141,15 +142,15 @@ def val_error_sidecar_with_column(column_names):
 
 
 @hed_error(ValidationErrors.DUPLICATE_COLUMN_IN_LIST)
-def val_error_duplicate_clumn(column_number, column_name, list_name):
+def val_error_duplicate_column(column_number, column_name, list_name):
     if column_name:
         return f"Found column '{column_name}' at index {column_number} twice in {list_name}."
     else:
-        return f"Found column number {column_number} twice in {list_name}.  This isn't a major concern, but does indicate a mistake."
+        return f"Found column number {column_number} twice in {list_name}.  This may indicate a mistake."
 
 
 @hed_error(ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
-def val_error_duplicate_clumn(column_number, column_name, list_names):
+def val_error_duplicate_column(column_number, column_name, list_names):
     if column_name:
         return f"Found column '{column_name}' at index {column_number} in the following inputs: {list_names}. " \
                f"Each entry must be unique."
@@ -176,8 +177,6 @@ def val_error_extra_slashes_spaces(tag, problem_tag):
 @hed_error(ValidationErrors.SIDECAR_KEY_MISSING, default_severity=ErrorSeverity.WARNING)
 def val_error_sidecar_key_missing(invalid_key, category_keys):
     return f"Category key '{invalid_key}' does not exist in column.  Valid keys are: {category_keys}"
-
-
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
@@ -314,7 +313,6 @@ def def_error_wrong_group_tags(def_name, tag_list):
     return f"Too many tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}"
 
 
-
 @hed_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_wrong_placeholder_count(def_name, expected_count, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
@@ -417,5 +415,3 @@ def nested_column_ref(column_name, ref_column):
 @hed_error(ColumnErrors.MALFORMED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def nested_column_ref(column_name, index, symbol):
     return f"Column {column_name} has a malformed column reference.  Improper symbol {symbol} found at index {index}."
-
-

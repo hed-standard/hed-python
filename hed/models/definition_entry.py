@@ -29,13 +29,13 @@ class DefinitionEntry:
             Returns None if placeholder_value passed when it doesn't take value, or vice versa.
 
         Parameters:
-            replace_tag (HedTag): The def hed tag to replace with an expanded version
+            replace_tag (HedTag): The def HED tag to replace with an expanded version.
             placeholder_value (str or None):    If present and required, will replace any pound signs
                                                 in the definition contents.
-            return_copy_of_tag(bool): Set to True for validation
+            return_copy_of_tag(bool): Set to True for validation.
 
         Returns:
-            HedGroup:     The contents of this definition(including the def tag itself)
+            HedGroup:     The contents of this definition(including the def tag itself).
 
         :raises ValueError:
             - Something internally went wrong with finding the placeholder tag.  This should not be possible.

@@ -8,22 +8,22 @@ from hed.schema import hed_schema_constants
 
 
 class SchemaLoader(ABC):
-    """ Baseclass for schema loading, to handle basic errors and partnered schemas
+    """ Baseclass for schema loading, to handle basic errors and partnered schemas.
 
-        Expected usage is SchemaLoaderXML.load(filename)
+        Expected usage is SchemaLoaderXML.load(filename).
 
-        SchemaLoaderXML(filename) will load just the header_attributes
+        SchemaLoaderXML(filename) will load just the header_attributes.
     """
     def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
-        """Loads the given schema from one of the two parameters.
+        """ Load the given schema from one of the two parameters.
 
         Parameters:
-            filename(str or None): A valid filepath or None
-            schema_as_string(str or None): A full schema as text or None
-            schema(HedSchema or None): A hed schema to merge this new file into
+            filename(str or None): A valid filepath or None.
+            schema_as_string(str or None): A full schema as text or None.
+            schema(HedSchema or None): A HED schema to merge this new file into.
                                        It must be a with-standard schema with the same value.
             file_format(str or None): The format of this file if needed(only for owl currently)
-            name(str or None): Optional user supplied identifier, by default uses filename
+            name(str or None): Optional user supplied identifier, by default uses filename.
         """
         if schema_as_string and filename:
             raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.",
@@ -61,7 +61,8 @@ class SchemaLoader(ABC):
                                    self.name)
             elif withStandard != self._schema.with_standard:
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD_VERSION,
-                                   "When merging two schemas without a schema namespace, you they must have the same withStandard value.", self.name)
+                                   "When merging two schemas without a schema namespace, " +
+                                   "you they must have the same withStandard value.", self.name)
             hed_attributes[hed_schema_constants.VERSION_ATTRIBUTE] = self._schema.version_number + f",{version_number}"
             hed_attributes[hed_schema_constants.LIBRARY_ATTRIBUTE] = self._schema.library + f",{self.library}"
         if name:
@@ -70,35 +71,35 @@ class SchemaLoader(ABC):
         self._schema.header_attributes = hed_attributes
         self._loading_merged = False
 
-
     @property
     def schema(self):
-        """ The partially loaded schema if you are after just header attributes."""
+        """ The partially loaded schema if you are after just header attributes.."""
         return self._schema
 
     @classmethod
     def load(cls, filename=None, schema_as_string=None, schema=None, file_format=None, name=""):
-        """ Loads and returns the schema, including partnered schema if applicable.
+        """ Load and return the schema, including partnered schema if applicable.
 
         Parameters:
-            filename(str or None): A valid filepath or None
-            schema_as_string(str or None): A full schema as text or None
-            schema(HedSchema or None): A hed schema to merge this new file into
+            filename(str or None): A valid filepath or None.
+            schema_as_string(str or None): A full schema as text or None.
+            schema(HedSchema or None): A HED schema to merge this new file into.
                            It must be a with-standard schema with the same value.
             file_format(str or None): If this is an owl file being loaded, this is the format.
-                Allowed values include: turtle, json-ld, and owl(xml)
-            name(str or None): Optional user supplied identifier, by default uses filename
+                Allowed values include: turtle, json-ld, and owl(xml).
+            name(str or None): Optional user supplied identifier, by default uses filename.
+
         Returns:
-            schema(HedSchema): The new schema
+            schema(HedSchema): The new schema.
         """
         loader = cls(filename, schema_as_string, schema, file_format, name)
         return loader._load()
 
     def _load(self):
-        """ Parses the previously loaded data, including loading a partnered schema if needed.
+        """ Parse the previously loaded data, including loading a partnered schema if needed.
 
         Returns:
-            schema(HedSchema): The new schema
+            schema(HedSchema): The new schema.
         """
         self._loading_merged = True
         # Do a full load of the standard schema if this is a partnered schema
@@ -125,24 +126,25 @@ class SchemaLoader(ABC):
 
     @abstractmethod
     def _open_file(self):
-        """Overloaded versions should retrieve the input from filename/schema_as_string"""
+        """ Overloaded versions should retrieve the input from filename/schema_as_string. """
         pass
 
     @abstractmethod
     def _get_header_attributes(self, input_data):
-        """Overloaded versions should return the header attributes from the input data."""
+        """ Overloaded versions should return the header attributes from the input data.."""
         pass
 
     @abstractmethod
     def _parse_data(self):
-        """Puts the input data into the new schema"""
+        """ Put the input data into the new schema. """
         pass
 
     def _add_to_dict_base(self, entry, key_class):
         if not entry.has_attribute(HedKey.InLibrary) and self.appending_to_schema and self._schema.merged:
             return None
 
-        if self.library and (not self._schema.with_standard or (not self._schema.merged and self._schema.with_standard)):
+        if self.library and (not self._schema.with_standard or
+                             (not self._schema.merged and self._schema.with_standard)):
             # only add it if not already present - This is a rare case
             if not entry.has_attribute(HedKey.InLibrary):
                 entry._set_attribute_value(HedKey.InLibrary, self.library)

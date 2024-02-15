@@ -1,3 +1,5 @@
+""" Known error codes as reported in the HED specification. """
+
 known_error_codes = {
     "hed_validation_errors": [
         "CHARACTER_INVALID",
