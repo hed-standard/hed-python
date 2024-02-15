@@ -64,6 +64,16 @@ class HedTypeFactors:
                              f"{factor_encoding} is not in the allowed encodings: {str(self.ALLOWED_ENCODINGS)}")
 
     def _one_hot_to_categorical(self, factors, levels):
+        """ Convert factors to one-hot representation.
+
+        Parameters:
+            factors (DataFrame):  Dataframe containing categorical values.
+            levels (list):  List of categorical columns to convert.
+
+        Return:
+            DataFrame:  Contains one-hot representation of requested levels.
+
+        """
         df = pd.DataFrame('n/a', index=range(len(factors.index)), columns=[self.type_value])
         for index, row in factors.iterrows():
             if self.type_value in row.index and row[self.type_value]:
@@ -77,6 +87,12 @@ class HedTypeFactors:
         return df
 
     def get_summary(self):
+        """ Return the summary of the type tag value as a dictionary.
+
+        Returns:
+            dict:  Contains the summary.
+
+        """
         count_list = [0] * self.number_elements
         for index in list(self.direct_indices.keys()):
             count_list[index] = count_list[index] + 1
@@ -92,6 +108,12 @@ class HedTypeFactors:
         return summary
 
     def _get_level_counts(self):
+        """ Return the level counts as a dictionary.
+
+        Returns:
+            dict:  Dictionary with counts of level values.
+
+        """
         count_dict = {}
         for level, cond in self.levels.items():
             count_dict[level] = len(cond.values())

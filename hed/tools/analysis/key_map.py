@@ -22,9 +22,9 @@ class KeyMap:
         """ Information for remapping columns of tabular files.
 
         Parameters:
-            key_cols (list):       List of columns to be replaced (assumed in the DataFrame).
-            target_cols(list):     List of replacement columns (assumed to not be in the DataFrame).
-            name (str):            Name associated with this remap (usually a pathname of the events file).
+            key_cols (list): List of columns to be replaced (assumed in the DataFrame).
+            target_cols(list): List of replacement columns (assumed to not be in the DataFrame).
+            name (str): Name associated with this remap (usually a pathname of the events file).
 
         """
 
@@ -45,6 +45,11 @@ class KeyMap:
 
     @property
     def columns(self):
+        """ Return the column names of the columns managed by this map.
+
+        Returns:
+            list:  Column names of the columns managed by this map.
+        """
         return self.key_cols + self.target_cols
 
     def __str__(self):
@@ -85,6 +90,12 @@ class KeyMap:
         return df
 
     def _get_counts(self):
+        """ Return counts for the key column combinations.
+
+        Returns:
+            list:  List which is the same length as the col_map containing the counts of the combinations.
+
+        """
         counts = [0 for _ in range(len(self.col_map))]
         for index, row in self.col_map.iterrows():
             key_hash = get_row_hash(row, self.key_cols)
@@ -199,8 +210,8 @@ class KeyMap:
 
         Parameters:
             row (DataSeries):  Data the values in a row.
-            row_list (list):   A list of rows to be appended to hold the unique rows
-            next_pos (int):    Index into the
+            row_list (list):   A list of rows to be appended to hold the unique rows.
+            next_pos (int):    Index into the row_list of this row
 
         Returns:
             tuple: (key, pos_update)  key is the row hash and pos_update is 1 if new row or 0 otherwise.

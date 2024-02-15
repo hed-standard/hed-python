@@ -8,11 +8,13 @@ class HedTypeDefs:
     """Manager for definitions associated with a type such as condition-variable. 
 
     Properties:
-        def_map (dict):  keys are definition names, values are dict {type_values, description, tags}
-                         Example: A definition 'famous-face-cond' with contents
-                         `(Condition-variable/Face-type,Description/A face that should be recognized by the
-                         participants,(Image,(Face,Famous)))`
-                         would have type_values ['face_type'].  All items are strings not objects.
+        def_map (dict):  keys are definition names, values are dict {type_values, description, tags}.
+
+    Example: A definition 'famous-face-cond' with contents:
+
+        '(Condition-variable/Face-type,Description/A face that should be recognized.,(Image,(Face,Famous)))'
+
+    would have type_values ['face_type'].  All items are strings not objects.
 
 
     """
@@ -55,7 +57,7 @@ class HedTypeDefs:
 
     @property
     def type_def_names(self):
-        """ List of names of definition that have this type-variable.
+        """ Return list of names of definition that have this type-variable.
 
         Returns:
             list:  definition names that have this type.
@@ -65,7 +67,7 @@ class HedTypeDefs:
 
     @property
     def type_names(self):
-        """ List of names of the type-variables associated with type definitions.
+        """ Return list of names of the type-variables associated with type definitions.
 
         Returns:
             list:  type names associated with the type definitions
@@ -149,12 +151,12 @@ class HedTypeDefs:
         """ Split a name/# or name/x into name, x.
 
         Parameters:
-            name (str):  The extension or value portion of a tag
-            lowercase (bool): If True
+            name (str):  The extension or value portion of a tag.
+            lowercase (bool): If True (default), return values are converted to lowercase.
 
         Returns:
-            str:   name of the definition
-            str:   value of the definition if it has one
+            str:   name of the definition.
+            str:   value of the definition if it has one.
 
         """
         if not name:
