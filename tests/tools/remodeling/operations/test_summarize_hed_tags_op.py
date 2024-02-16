@@ -126,8 +126,6 @@ class Test(unittest.TestCase):
         self.assertNotIn('condition-variable', counts3.tag_dict)
 
     def test_quick3(self):
-        include_context = True
-        replace_defs = True
         remove_types = []
         my_schema = load_schema_version('8.2.0')
         my_json = {
@@ -260,6 +258,24 @@ class Test(unittest.TestCase):
         context_dict = dispatch.summary_dicts.get("summarize_hed_tags")
         text_summary = context_dict.get_text_summary()
         self.assertIsInstance(text_summary["Dataset"], str)
+
+    def test_convert_summary_to_word_dict(self):
+        # Assume we have a valid summary_json
+        summary_json = {
+            'Main tags': {
+                'tag_category_1': [
+                    {'tag': 'tag1', 'events': 5},
+                    {'tag': 'tag2', 'events': 3}
+                ],
+                'tag_category_2': [
+                    {'tag': 'tag3', 'events': 7}
+                ]
+            }
+        }
+        expected_output = {'tag1': 5, 'tag2': 3, 'tag3': 7}
+
+        word_dict = HedTagSummary.summary_to_dict(summary_json, transform=None, adjustment=0)
+        self.assertEqual(word_dict, expected_output)
 
 
 if __name__ == '__main__':

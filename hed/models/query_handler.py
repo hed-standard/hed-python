@@ -7,30 +7,30 @@ from hed.models.query_util import Token
 
 
 class QueryHandler:
-    """Parse a search expression into a form than can be used to search a hed string."""
+    """Parse a search expression into a form than can be used to search a HED string."""
 
     def __init__(self, expression_string):
         """Compiles a QueryHandler for a particular expression, so it can be used to search hed strings.
 
         Basic Input Examples:
 
-        'Event' - Finds any strings with Event, or a descendent tag of Event such as Sensory-event
+        'Event' - Finds any strings with Event, or a descendent tag of Event such as Sensory-event.
 
-        'Event and Action' - Find any strings with Event and Action, including descendant tags
+        'Event and Action' - Find any strings with Event and Action, including descendant tags.
 
-        'Event or Action' - Same as above, but it has either
+        'Event or Action' - Same as above, but it has either.
 
-        '"Event"' - Finds the Event tag, but not any descendent tags
+        '"Event"' - Finds the Event tag, but not any descendent tags.
 
-        `Def/DefName/*` - Find Def/DefName instances with placeholders, regardless of the value of the placeholder
+        `Def/DefName/*` - Find Def/DefName instances with placeholders, regardless of the value of the placeholder.
 
-        'Eve*' - Find any short tags that begin with Eve*, such as Event, but not Sensory-event
+        'Eve*' - Find any short tags that begin with Eve*, such as Event, but not Sensory-event.
 
-        '[Event and Action]' - Find a group that contains both Event and Action(at any level)
+        '[Event and Action]' - Find a group that contains both Event and Action(at any level).
 
         '{Event and Action}' - Find a group with Event And Action at the same level.
 
-        '{Event and Action:}' - Find a group with Event And Action at the same level, and nothing else
+        '{Event and Action:}' - Find a group with Event And Action at the same level, and nothing else.
 
         '{Event and Action:Agent}' - Find a group with Event And Action at the same level, and optionally an Agent tag.
 
@@ -40,7 +40,7 @@ class QueryHandler:
                                     a def tag or def-expand group, and an optional wildcard group
 
         Parameters:
-            expression_string(str): The query string
+            expression_string(str): The query string.
         """
         self.tokens = []
         self.at_token = -1
@@ -171,5 +171,3 @@ class QueryHandler:
 
         result = current_node.handle_expr(hed_string_obj)
         return result
-
-

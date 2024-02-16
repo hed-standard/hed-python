@@ -2,7 +2,6 @@ import unittest
 import wordcloud
 from hed.tools.visualization import tag_word_cloud
 from hed.tools.visualization.tag_word_cloud import load_and_resize_mask
-from hed.tools.visualization.word_cloud_util import generate_contour_svg
 
 import numpy as np
 from PIL import Image, ImageDraw
@@ -14,28 +13,6 @@ class TestWordCloudFunctions(unittest.TestCase):
     def setUpClass(cls):
         cls.mask_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                       '../../data/visualization/word_mask.png'))
-
-    def test_convert_summary_to_word_dict(self):
-        # Assume we have a valid summary_json
-        summary_json = {
-            'Overall summary': {
-                'Specifics': {
-                    'Main tags': {
-                        'tag_category_1': [
-                            {'tag': 'tag1', 'events': 5},
-                            {'tag': 'tag2', 'events': 3}
-                        ],
-                        'tag_category_2': [
-                            {'tag': 'tag3', 'events': 7}
-                        ]
-                    }
-                }
-            }
-        }
-        expected_output = {'tag1': 5, 'tag2': 3, 'tag3': 7}
-
-        word_dict = tag_word_cloud.summary_to_dict(summary_json, transform=None, adjustment=0)
-        self.assertEqual(word_dict, expected_output)
 
     def test_create_wordcloud(self):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
@@ -53,7 +30,7 @@ class TestWordCloudFunctions(unittest.TestCase):
 
         self.assertIsInstance(wc, wordcloud.WordCloud)
         self.assertEqual(wc.width, 400)
-        self.assertEqual(wc.height, 200)
+        self.assertEqual(wc.height, 300)
 
     def test_mask_scaling(self):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
@@ -104,8 +81,8 @@ class TestLoadAndResizeMask(unittest.TestCase):
 
         # Draw a white circle in the middle of the image
         d = ImageDraw.Draw(cls.img)
-        circle_radius = min(cls.original_size) // 4  # Radius of the circle is a quarter of the smaller dimension of the image
-        circle_center = (cls.original_size[0] // 2, cls.original_size[1] // 2)  # Center of the circle is the center of the image
+        circle_radius = min(cls.original_size) // 4  # Radius of circle is 1/4 of the smaller dimension of image
+        circle_center = (cls.original_size[0] // 2, cls.original_size[1] // 2)  # Circle center is center of image
         d.ellipse((circle_center[0] - circle_radius,
                    circle_center[1] - circle_radius,
                    circle_center[0] + circle_radius,

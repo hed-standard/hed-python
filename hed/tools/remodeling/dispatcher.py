@@ -223,6 +223,18 @@ class Dispatcher:
 
     @staticmethod
     def errors_to_str(messages, title="", sep='\n'):
+        """ Return an error string representing error messages in a list.
+
+        Parameters:
+            messages (list):  List of error dictionaries each representing a single error.
+            title (str):  If provided the title is concatenated at the top.
+            sep (str): Character used between lines in concatenation (default '\n').
+
+        Returns:
+            str:  Single string representing the messages.
+
+
+        """
         error_list = [0]*len(messages)
         for index, message in enumerate(messages):
             error_list[index] = f"Operation[{message.get('index', None)}] " + \
@@ -236,6 +248,15 @@ class Dispatcher:
 
     @staticmethod
     def get_schema(hed_versions):
+        """ Return the schema objects represented by the hed_versions.
+
+        Parameters:
+            hed_versions (str, list, HedSchema, HedSchemaGroup): If str, interpreted as a version number.
+
+        Returns:
+             HedSchema or HedSchemaGroup: Objects loaded from the hed_versions specification.
+
+        """
         if not hed_versions:
             return None
         elif isinstance(hed_versions, str) or isinstance(hed_versions, list):

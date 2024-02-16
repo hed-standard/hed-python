@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed.schema.hed_schema_io import load_schema, load_schema_version
+from hed.schema.hed_schema_io import load_schema_version
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_dataset import BidsDataset
@@ -88,7 +88,7 @@ class Test(unittest.TestCase):
 
     def test_with_schema_group(self):
         x = load_schema_version(["8.2.0", "sc:score_1.0.0", "test:testlib_1.0.2"])
-        bids = BidsDataset(self.library_path, schema=x, tabular_types=["participants"] )
+        bids = BidsDataset(self.library_path, schema=x, tabular_types=["participants"])
         self.assertIsInstance(bids, BidsDataset, 
                               "BidsDataset with libraries should create a valid object from valid dataset")
         parts = bids.get_tabular_group("participants")

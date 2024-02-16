@@ -1,4 +1,4 @@
-""" Manager of a type variable and its associated context. """
+""" Manager a type variable and its associated context. """
 import pandas as pd
 from hed.models import HedGroup, HedTag
 from hed.tools.analysis.hed_type_defs import HedTypeDefs

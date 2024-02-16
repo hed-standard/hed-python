@@ -45,6 +45,14 @@ class BidsFile:
         self._contents = None
 
     def get_entity(self, entity_name):
+        """ Return the entity value for the specified entity.
+
+        Parameters:
+            entity_name (str): Name of the BIDS entity, for example task, run, or sub.
+
+        Returns:
+            str or None: Entity value if any, otherwise None.
+        """
         return self.entity_dict.get(entity_name, None)
 
     def get_key(self, entities=None):
@@ -57,7 +65,7 @@ class BidsFile:
             str:  A key based on this object.
 
         Notes:
-            If entities is None, then the file path is used as the key
+            If entities is None, then the file path is used as the key.
 
         """
 
@@ -74,7 +82,7 @@ class BidsFile:
         """ Set the contents of this object.
 
         Parameters:
-            content_info:      The contents appropriate for this object.
+            content_info (Any):      The contents appropriate for this object.
             overwrite (bool):  If False and the contents are not empty, do nothing.
 
         Notes:

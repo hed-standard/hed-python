@@ -1,11 +1,13 @@
 """ Summarize the HED tags in collection of tabular files.  """
-
+import os
+import numpy as np
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_tag_manager import HedTagManager
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
+from hed.tools.visualization.tag_word_cloud import create_wordcloud, word_cloud_to_svg
 
 
 class SummarizeHedTagsOp(BaseOp):
@@ -21,10 +23,10 @@ class SummarizeHedTagsOp(BaseOp):
        - **append_timecode** (*bool*): If True, the timecode is appended to the base filename when summary is saved.
        - **include_context** (*bool*): If True, context of events is included in summary. 
        - **remove_types** (*list*): A list of type tags such as Condition-variable or Task to exclude from summary.
-       - **replace_defs** (*bool*): If True, the def tag is replaced by the contents of the definitions.  
+       - **replace_defs** (*bool*): If True, the def tag is replaced by the contents of the definitions.
+       - **word_cloud** (*bool*): If True, output a word cloud visualization.
 
-    The purpose of this op is to produce a summary of the occurrences of hed tags organized in a specified manner.
-    The
+    The purpose of this op is to produce a summary of the occurrences of HED tags organized in a specified manner.
 
 
     """
@@ -70,7 +72,10 @@ class SummarizeHedTagsOp(BaseOp):
             },
             "replace_defs": {
                 "type": "boolean"
-            }
+            },
+            "word_cloud": {
+                "type": "boolean"
+            },
         },
         "required": [
             "summary_name",
@@ -97,6 +102,7 @@ class SummarizeHedTagsOp(BaseOp):
         self.include_context = parameters.get('include_context', True)
         self.replace_defs = parameters.get("replace_defs", True)
         self.remove_types = parameters.get("remove_types", [])
+        self.word_cloud = parameters.get("word_cloud", False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Summarize the HED tags present in the dataset.
@@ -125,12 +131,19 @@ class SummarizeHedTagsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []
 
 
 class HedTagSummary(BaseSummary):
-
+    """ Manager of the HED tag summaries. """
     def __init__(self, sum_op):
+        """ Constructor for HED tag summary manager.
+
+        Parameters:
+            sum_op (BaseOp): Operation associated with this summary.
+
+        """
         super().__init__(sum_op)
         self.sum_op = sum_op
 
@@ -185,7 +198,7 @@ class HedTagSummary(BaseSummary):
             indent (str): A string containing spaces used for indentation (usually 3 spaces).
 
         Returns:
-            str - The results in a printable format ready to be saved to a text file.
+            str: The results in a printable format ready to be saved to a text file.
 
         Notes:
             This calls _get_dataset_string to get the overall summary string and
@@ -200,7 +213,7 @@ class HedTagSummary(BaseSummary):
         """ Create a HedTagCounts containing the overall dataset HED tag  summary.
 
         Returns:
-            HedTagCounts - the overall dataset summary object for HED tag counts.
+            HedTagCounts: The overall dataset summary object for HED tag counts.
 
         """
 
@@ -211,6 +224,65 @@ class HedTagSummary(BaseSummary):
                 all_counts.files[file_name] = ""
             all_counts.total_events = all_counts.total_events + counts.total_events
         return all_counts
+
+    def save_visualizations(self, save_dir, file_formats=['.svg'], individual_summaries="separate", task_name=""):
+        """ Save the summary visualizations if any.
+
+        Parameters:
+            save_dir (str):  Path to directory in which visualizations should be saved.
+            file_formats (list):  List of file formats to use in saving.
+            individual_summaries (str): One of "consolidated", "separate", or "none" indicating what to save.
+            task_name (str): Name of task if segregated by task.
+
+        """
+        if not self.sum_op.word_cloud:
+            return
+        # summary = self.get_summary(individual_summaries='none')
+        summary = self.get_summary(individual_summaries='none')
+        overall_summary = summary.get("Dataset", {})
+        overall_summary = overall_summary.get("Overall summary", {})
+        specifics = overall_summary.get("Specifics", {})
+        word_dict = self.summary_to_dict(specifics)
+        width = 400
+        height = 300
+        mask_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                  '../../../resources/word_cloud_brain_mask.png'))
+        tag_wc = create_wordcloud(word_dict, mask_path=mask_path, width=width, height=height)
+        svg_data = word_cloud_to_svg(tag_wc)
+        cloud_filename = os.path.realpath(os.path.join(save_dir, self.op.summary_name, '_word_cloud.svg'))
+        with open(cloud_filename, "w") as outfile:
+            outfile.writelines(svg_data)
+
+    @staticmethod
+    def summary_to_dict(specifics, transform=np.log10, adjustment=7):
+        """Convert a HedTagSummary json specifics dict into the word cloud input format.
+
+        Parameters:
+            specifics(dict): Dictionary with keys "Main tags" and "Other tags".
+            transform(func): The function to transform the number of found tags.
+                             Default log10
+            adjustment(int): Value added after transform.
+        Returns:
+            word_dict(dict): a dict of the words and their occurrence count.
+
+        :raises KeyError:
+            A malformed dictionary was passed.
+
+        """
+        if transform is None:
+            def transform(x):
+                return x
+        word_dict = {}
+        tag_dict = specifics.get("Main tags", {})
+        for tag, tag_sub_list in tag_dict.items():
+            if tag == "Exclude tags":
+                continue
+            for tag_sub_dict in tag_sub_list:
+                word_dict[tag_sub_dict['tag']] = transform(tag_sub_dict['events']) + adjustment
+        other_dict = specifics.get("Other tags", [])
+        for tag_sub_list in other_dict:
+            word_dict[tag_sub_list['tag']] = transform(tag_sub_list['events']) + adjustment
+        return word_dict
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):
@@ -225,7 +297,7 @@ class HedTagSummary(BaseSummary):
 
         """
         sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
-                    f"Total files={len(result.get('Files', 0))}"]
+                    f"Total files={len(result.get('Files', []))}"]
         sum_list = sum_list + \
             HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
@@ -249,6 +321,15 @@ class HedTagSummary(BaseSummary):
 
     @staticmethod
     def _tag_details(tags):
+        """ Return a list of strings with the tag details.
+
+        Parameters:
+            tags (list): List of tags to summarize.
+
+        Returns:
+            list: Each entry has the summary details for a tag.
+
+        """
         tag_list = []
         for tag in tags:
             tag_list.append(
@@ -257,6 +338,16 @@ class HedTagSummary(BaseSummary):
 
     @staticmethod
     def _get_tag_list(result, indent=BaseSummary.DISPLAY_INDENT):
+        """ Return a list lines to be output to summarize the tags as organized in the result.
+
+        Parameters:
+            result (dict):  Dictionary with the results organized under key "Specifics".
+            indent (str):  Spaces to indent each line.
+
+        Returns:
+            list:  Each entry is a string representing a line to be printed.
+
+        """
         tag_info = result["Specifics"]
         sum_list = [f"\n{indent}Main tags[events,files]:"]
         for category, tags in tag_info['Main tags'].items():
@@ -272,12 +363,16 @@ class HedTagSummary(BaseSummary):
 
     @staticmethod
     def _get_details(key_list, template, verbose=False):
+        """ Organized a tag information from a list based on the template.
+
+        Parameters:
+            key_list (list): List of information to be organized based on the template.
+            template (dict): An input template derived from the input parameters.
+            verbose (bool): If False (the default) output minimal information about the summary.
+
+        """
         key_details = []
         for item in key_list:
             for tag_cnt in template[item.lower()]:
                 key_details.append(tag_cnt.get_info(verbose=verbose))
         return key_details
-
-    @staticmethod
-    def validate_input_data(parameters):
-        return []

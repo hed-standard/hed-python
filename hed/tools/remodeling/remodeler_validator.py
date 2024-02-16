@@ -4,7 +4,7 @@ from jsonschema import Draft202012Validator
 from hed.tools.remodeling.operations.valid_operations import valid_operations
 
 
-class RemodelerValidator():
+class RemodelerValidator:
     """ Validator for remodeler input files. """
 
     MESSAGE_STRINGS = {
@@ -85,24 +85,18 @@ class RemodelerValidator():
     }
 
     def __init__(self):
-        """ Constructor for remodeler Validator.
-
-        Parameters:
-            - **schema** (*dict*): The compiled json schema against which remodeler files should be validated.
-            - **validator** (*Draft202012Validator*): The instantiated json schema validator.
-        """
-        self.schema = self._construct_schema()
-        self.validator = Draft202012Validator(self.schema)
+        """ Constructor for remodeler Validator. """
+        self.schema = self._construct_schema()  # The compiled json schema against which remodeler files are validated.
+        self.validator = Draft202012Validator(self.schema)  # The instantiated json schema validator.
 
     def validate(self, operations):
-        """ Validates a dictionary against the json schema specification for the remodeler file, plus any additional data validation that is 
-        necessary and returns a list of user friendly error messages.
+        """ Validate remodeler operations against the json schema specification and specific op requirements.
 
         Parameters:
-            **operations**  (*dict*): Dictionary with input operations to run through the remodeler.
+            operations (dict): Dictionary with input operations to run through the remodeler.
 
         Returns:
-            **list_of_error_strings** (*list*): List with the error messages for errors identified by the validator.
+            list: List with the error messages for errors identified by the validator.
         """
 
         list_of_error_strings = []
@@ -117,30 +111,32 @@ class RemodelerValidator():
         for index, operation in enumerate(operation_by_parameters):
             error_strings = valid_operations[operation[0]].validate_input_data(operation[1])
             for error_string in error_strings:
-                list_of_error_strings.append("Operation %s (%s): %s" %(index+1, operation[0], error_string))
+                list_of_error_strings.append(f"Operation {index + 1} ({operation[0]}): {error_string}")
         
         return list_of_error_strings
 
     def _parse_message(self, error, operations):
-        ''' Return a user friendly error message based on the jsonschema validation error
+        """ Return a user-friendly error message based on the jsonschema validation error.
 
         Parameters: 
-        - **error** (*ValidationError*): A validation error from jsonschema validator
-        - **operations**  (*dict*): The operations that were validated
+            error (ValidationError): A validation error from jsonschema validator.
+            operations (dict): The operations that were validated.
 
         Note:
         - json schema error does not contain all necessary information to return a 
-        proper error message so we also take some information directly from the operations 
-        that led to the error
-        - all necessary information is gathered into an error dict, message strings are predefined in a dictionary which are formatted with additional information
-        '''
+          proper error message so, we also take some information directly from the operations
+          that led to the error.
+
+        - all necessary information is gathered into an error dict, message strings are predefined
+          in a dictionary which are formatted with additional information.
+        """
         error_dict = vars(error)
 
         level = len(error_dict["path"])
         if level > 2:
             level = "more"
-        # some information is in the validation error but not directly in a field so I need to
-        # modify before they can parsed in
+        # some information is in the validation error but not directly in a field, so I need to
+        # modify before they can be parsed in
         # if they are necessary, they are there, if they are not there, they are not necessary
         try:
             error_dict["operation_index"] = error_dict["path"][0] + 1
@@ -156,29 +152,34 @@ class RemodelerValidator():
         except (IndexError, TypeError, KeyError):
             pass
 
-        type = str(error_dict["validator"])
+        attr_type = str(error_dict["validator"])
 
         # the missing value with required elements, or the wrong additional value is not known to the
         # validation error object
         # this is a known issue of jsonschema: https://github.com/python-jsonschema/jsonschema/issues/119
         # for now the simplest thing seems to be to extract it from the error message
-        if type == 'required':
+        if attr_type == 'required':
             error_dict["missing_value"] = error_dict["message"].split("'")[
                 1::2][0]
-        if type == 'additionalProperties':
+        if attr_type == 'additionalProperties':
             error_dict["added_property"] = error_dict["message"].split("'")[
                 1::2][0]
             
-        # dependent required provided both the missing value and the reason it is required in one dictionary
+        # dependent is required, provided both the missing value and the reason it is required in one dictionary
         # it is split over two for the error message
-        if type == 'dependentRequired':
+        if attr_type == 'dependentRequired':
             error_dict["missing_value"] = list(error_dict["validator_value"].keys())[0]
             error_dict["dependent_on"] = list(error_dict["validator_value"].values())[0]
 
-        return self.MESSAGE_STRINGS[str(level)][type].format(**error_dict)
+        return self.MESSAGE_STRINGS[str(level)][attr_type].format(**error_dict)
 
     def _construct_schema(self):
+        """ Return a schema specialized to the operations.
 
+        Returns:
+            dict: Array of schema operations.
+
+        """
         schema = deepcopy(self.BASE_ARRAY)
         schema["items"] = deepcopy(self.OPERATION_DICT)
 

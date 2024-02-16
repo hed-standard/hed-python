@@ -4,7 +4,7 @@ import pandas as pd
 import unittest
 # from hed.tools.analysis.column_name_summary import ColumnNameSummary
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNamesSummary, SummarizeColumnNamesOp
+from hed.tools.remodeling.operations.summarize_column_names_op import SummarizeColumnNamesOp
 
 
 class Test(unittest.TestCase):

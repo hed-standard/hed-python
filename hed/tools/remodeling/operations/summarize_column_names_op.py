@@ -66,7 +66,7 @@ class SummarizeColumnNamesOp(BaseOp):
         Returns:
             DataFrame: A copy of df.
 
-        Side-effect:
+        Side effect:
             Updates the relevant summary.
 
         """
@@ -81,12 +81,19 @@ class SummarizeColumnNamesOp(BaseOp):
     
     @staticmethod
     def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []
 
 
 class ColumnNamesSummary(BaseSummary):
-
+    """ Manager for summaries of column names for a dataset. """
     def __init__(self, sum_op):
+        """ Constructor for column name summary manager.
+
+        Parameters:
+            sum_op (BaseOp): Operation associated with this summary.
+
+        """
         super().__init__(sum_op)
 
     def update_summary(self, new_info):

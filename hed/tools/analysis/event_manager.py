@@ -65,7 +65,7 @@ class EventManager:
             onset_dict (dict):  Running dict that keeps track of temporal events that haven't yet ended.
 
         Note:
-            This removes the events of temporal extent from hed.
+            This removes the events of temporal extent from HED.
 
          """
         if not hed:
@@ -87,14 +87,14 @@ class EventManager:
         hed.remove(to_remove)
 
     def unfold_context(self, remove_types=[]):
-        """ Unfold the event information into hed, base, and contexts input either as arrays of str or of HedString.
+        """ Unfold the event information into a tuple based on context.
 
         Parameters:
             remove_types (list):  List of types to remove.
 
         Returns:
-            list of str or HedString representing the information without the events of temporal extent
-            list of str or HedString representing the onsets of the events of temporal extent
+            list of str or HedString representing the information without the events of temporal extent.
+            list of str or HedString representing the onsets of the events of temporal extent.
             list of str or HedString representing the ongoing context information.
 
         """
@@ -117,7 +117,7 @@ class EventManager:
         """ Expand the onset and the ongoing context for additional processing.
 
         Returns:
-            tuple of lists: (base list of str, context list of str)
+            tuple of lists: (base list of str, context list of str).
 
         Notes: For each event, the Onset goes in the base list and the remainder of the times go in the contexts list.
 

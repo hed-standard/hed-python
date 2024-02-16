@@ -1,14 +1,15 @@
+""" Functions to get and use HED queries. """
 import pandas as pd
 
 from hed.models import QueryHandler
 
 
 def get_query_handlers(queries, query_names=None):
-    """ Returns a list of query handlers, query names, and issues if any.
+    """ Return a list of query handlers, query names, and issues if any.
 
     Parameters:
         queries (list):  A list of query strings.
-        query_names (list): A list of column names for results of queries. If missing --- query_1, query_2, etc.
+        query_names (list or None): A list of column names for results of queries. If missing --- query_1, query_2, etc.
 
     Returns:
         list - QueryHandlers for successfully parsed queries.
@@ -40,15 +41,15 @@ def get_query_handlers(queries, query_names=None):
 
 
 def search_strings(hed_strings, queries, query_names):
-    """ Returns a DataFrame of factors based on results of queries.
+    """ Return a DataFrame of factors based on results of queries.
 
     Parameters:
-        hed_strings (list):  A list of HedString objects (empty entries or None entries are 0's)
-        queries (list):  A list of query strings or QueryHandler objects
+        hed_strings (list):  A list of HedString objects (empty entries or None entries are 0's
+        queries (list):  A list of query strings or QueryHandler objects.
         query_names (list): A list of column names for results of queries.
 
     Returns:
-        DataFrame - containing the factor vectors with results of the queries
+        DataFrame: Contains the factor vectors with results of the queries.
 
     :raises ValueError:
         - If query names are invalid or duplicated.

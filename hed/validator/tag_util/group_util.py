@@ -1,7 +1,4 @@
-"""
-This module is used to validate the HED tags as strings.
-
-"""
+""" Validation o the HED tags as strings. """
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.model_constants import DefTagNames
@@ -16,7 +13,7 @@ class GroupValidator:
         This is things like Required, Unique, top level tags, etc.
      """
     def __init__(self, hed_schema):
-        """
+        """ Constructor for GroupValidator
 
         Parameters:
             hed_schema (HedSchema): A HedSchema object.
@@ -49,7 +46,7 @@ class GroupValidator:
         return validation_issues
 
     def run_all_tags_validators(self, hed_string_obj):
-        """ Report invalid the multi-tag properties in a hed string, e.g. required tags.
+        """ Report invalid the multi-tag properties in a HED string, e.g. required tags.
 
          Parameters:
             hed_string_obj (HedString): A HedString object.
@@ -151,7 +148,7 @@ class GroupValidator:
         return validation_issues
 
     def _validate_tags_in_hed_string(self, tags):
-        """ Validate the multi-tag properties in a hed string.
+        """ Validate the multi-tag properties in a HED string.
 
             Multi-tag properties include required tag, unique tag, etc.
 

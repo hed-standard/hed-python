@@ -8,7 +8,7 @@ import pandas as pd
 
 
 def find_matching(series, search_string, regex=False):
-    """ Finds lines in the series that match the search string and returns a mask.
+    """ Find lines in the series that match the search string and returns a mask.
 
     Syntax Rules:
         - '@': Prefixing a term in the search string means the term must appear anywhere within a line.
@@ -26,10 +26,10 @@ def find_matching(series, search_string, regex=False):
         - The format of the series should match the format of the search string, whether it's in short or long form.
         - To enable support for matching parent tags, ensure that both the series and search string are in long form.
 
-    Args:
+    Parameters:
         series (pd.Series): A Pandas Series object containing the lines to be searched.
         search_string (str): The string to search for in each line of the series.
-        regex (bool): By default, translate any * wildcard characters to .*? regex
+        regex (bool): By default, translate any * wildcard characters to .*? regex.
                       If True, do no translation and pass the words as is. Due to how it's setup, you must not include
                       the following characters: (),
 
@@ -92,10 +92,9 @@ def _verify_basic_words(series, anywhere_words, negative_words):
 
 
 def find_words(search_string):
-    """
-    Extract words in the search string based on their prefixes.
+    """ Extract words in the search string based on their prefixes.
 
-    Args:
+    Parameters:
         search_string (str): The search query string to parse.
                              Words can be prefixed with '@' or '~'.
 
@@ -120,9 +119,9 @@ def find_words(search_string):
 
 
 def check_parentheses(text):
-    """ Checks for balanced parentheses in the given text and returns the unbalanced ones.
+    """ Check for balanced parentheses in the given text and returns the unbalanced ones.
 
-    Args:
+    Parameters:
         text (str): The text to be checked for balanced parentheses.
 
     Returns:
@@ -155,9 +154,9 @@ def check_parentheses(text):
 
 
 def reverse_and_flip_parentheses(s):
-    """ Reverses a string and flips the parentheses.
+    """ Reverse a string and flips the parentheses.
 
-        Args:
+        Parameters:
             s (str): The string to be reversed and have its parentheses flipped.
 
         Returns:
@@ -175,14 +174,14 @@ def reverse_and_flip_parentheses(s):
 
 
 def construct_delimiter_map(text, words):
-    """ Takes an input search query and list of words, returning the parenthetical delimiters between them.
+    """ Based on an input search query and list of words, return the parenthetical delimiters between them.
 
-    Args: delimiter
-        text (str): The search query
-        words(list): A list of words we want to map between from the query
+    Parameters:
+        text (str): The search query.
+        words(list): A list of words we want to map between from the query.
 
     Returns:
-        dict: The two-way delimiter map
+        dict: The two-way delimiter map.
     """
     locations = {}
     # Find the locations of each word in the text
@@ -211,11 +210,11 @@ def construct_delimiter_map(text, words):
 
 
 def verify_search_delimiters(text, specific_words, delimiter_map):
-    """ Verifies if the text contains specific words with expected delimiters between them.
+    """ Verify that the text contains specific words with expected delimiters between them.
 
-    Args:
+    Parameters:
         text (str): The text to search in.
-        specific_words (list of str): Words that must appear relative to other words in the text
+        specific_words (list of str): Words that must appear relative to other words in the text.
         delimiter_map (dict): A dictionary specifying expected delimiters between pairs of specific words.
 
     Returns:

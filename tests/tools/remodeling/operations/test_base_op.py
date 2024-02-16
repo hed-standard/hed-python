@@ -44,7 +44,6 @@ class Test(unittest.TestCase):
         test_instantiate = TestOp(parameters)
         self.assertDictEqual(test_instantiate.parameters, parameters)
 
-
     def test_constructor_no_name(self):
         class TestOpNoName(BaseOp):
             PARAMS = {
@@ -64,7 +63,8 @@ class Test(unittest.TestCase):
                 return df
             
         with self.assertRaises(TypeError):
-            instantiate = TestOpNoName({})
+            TestOpNoName({})
+
 
 if __name__ == '__main__':
     unittest.main()

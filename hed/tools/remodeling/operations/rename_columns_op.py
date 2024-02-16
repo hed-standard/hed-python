@@ -76,4 +76,5 @@ class RenameColumnsOp (BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []

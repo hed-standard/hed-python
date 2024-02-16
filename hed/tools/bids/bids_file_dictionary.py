@@ -79,10 +79,10 @@ class BidsFileDictionary(FileDictionary):
             yield key, file
 
     def key_diffs(self, other_dict):
-        """ Return the symmetric key difference with other.
+        """ Return the symmetric key difference with another file dictionary.
 
         Parameters:
-            other_dict (FileDictionary)  A file dictionary object
+            other_dict (FileDictionary)  A file dictionary object.
 
         Returns:
             list: The symmetric difference of the keys in this dictionary and the other one.
@@ -95,7 +95,7 @@ class BidsFileDictionary(FileDictionary):
         """ Create a dictionary with these files.
 
         Parameters:
-            name (str):  Name of this dictionary
+            name (str):  Name of this dictionary.
             files (list or dict):  List or dictionary of files. These could be paths or objects.
 
         Returns:

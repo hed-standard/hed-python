@@ -1,17 +1,17 @@
-""" A single parenthesized hed string. """
+""" A single parenthesized HED string. """
 from hed.models.hed_tag import HedTag
 import copy
 from typing import Iterable, Union
 
 
 class HedGroup:
-    """ A single parenthesized hed string. """
+    """ A single parenthesized HED string. """
 
     def __init__(self, hed_string="", startpos=None, endpos=None, contents=None):
         """ Return an empty HedGroup object.
 
         Parameters:
-            hed_string (str or None): Source hed string for this group.
+            hed_string (str or None): Source HED string for this group.
             startpos (int or None):   Starting index of group(including parentheses) in hed_string.
             endpos (int or None):     Position after the end (including parentheses) in hed_string.
             contents (list or None):  A list of HedTags and/or HedGroups that will be set as the contents of this group.
@@ -71,10 +71,10 @@ class HedGroup:
             new_contents (HedTag or HedGroup): Replacement contents.
 
         :raises KeyError:
-            - item_to_replace does not exist
+            - item_to_replace does not exist.
 
         :raises AttributeError:
-            - item_to_replace has no parent set
+            - item_to_replace has no parent set.
         """
         parent = item_to_replace._parent
         parent._replace(item_to_replace=item_to_replace, new_contents=new_contents)
@@ -88,7 +88,7 @@ class HedGroup:
             new_contents (HedTag or HedGroup): Replacement contents.
 
         :raises KeyError:
-            - item_to_replace does not exist
+            - item_to_replace does not exist.
         """
         if self._original_children is self.children:
             self._original_children = self.children.copy()
@@ -152,23 +152,23 @@ class HedGroup:
         self._sorted(update_self=True)
 
     def sorted(self):
-        """ Returns a sorted copy of this hed group
+        """ Return a sorted copy of this HED group
 
         Returns:
-            sorted_copy (HedGroup): The sorted copy
+            sorted_copy (HedGroup): The sorted copy.
         """
         string_copy = self.copy()
         string_copy._sorted(update_self=True)
         return string_copy
 
     def _sorted(self, update_self=False):
-        """ Returns a sorted copy of this hed group as a list of it's children
+        """ Return a sorted copy of this HED group as a list of it's children.
 
         Parameters:
             update_self (bool): If True, update the contents of this group to be sorted as well.
 
         Returns:
-            list: The list of all tags in this group, with subgroups being returned as further nested lists
+            list: The list of all tags in this group, with subgroups being returned as further nested lists.
         """
         tag_list = []
         group_list = []
@@ -272,20 +272,20 @@ class HedGroup:
         return [group for group in self.children if isinstance(group, HedGroup)]
 
     def get_first_group(self):
-        """ Returns the first group in this hed string or group.
+        """ Return the first group in this HED string or group.
 
             Useful for things like Def-expand where they only have a single group.
 
             Raises a ValueError if there are no groups.
 
         Returns:
-            HedGroup: The first group
+            HedGroup: The first group.
 
         """
         return self.groups()[0]
 
     def get_original_hed_string(self):
-        """ Get the original hed string.
+        """ Get the original HED string.
 
         Returns:
             str: The original string with no modification.
@@ -340,7 +340,7 @@ class HedGroup:
             tag_attribute (str): The hed_tag property to use to construct the string (usually short_tag or long_tag).
 
         Returns:
-            str: The constructed string after transformation
+            str: The constructed string after transformation.
         """
         result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
                            child.get_as_form(tag_attribute) for child in self.children])
@@ -349,17 +349,17 @@ class HedGroup:
         return result
 
     def lower(self):
-        """ Convenience function, equivalent to str(self).lower() """
+        """ Convenience function, equivalent to str(self).lower(). """
         return str(self).lower()
 
     def get_as_indented(self, tag_attribute="short_tag"):
-        """Returns the string as a multiline indented format
+        """Return the string as a multiline indented format.
 
         Parameters:
             tag_attribute (str): The hed_tag property to use to construct the string (usually short_tag or long_tag).
 
         Returns:
-            formatted_hed (str): the indented string
+            formatted_hed (str): The indented string.
         """
         hed_string = self.sorted().get_as_form(tag_attribute)
 
@@ -426,8 +426,8 @@ class HedGroup:
         This searches by short_base_tag, ignoring any ancestors or extensions/values.
 
         Parameters:
-            search_tags (container):    A container of short_base_tags to locate
-            recursive (bool):           If true, also check subgroups.
+            search_tags (container):  A container of short_base_tags to locate.
+            recursive (bool): If true, also check subgroups.
             include_groups (0, 1 or 2): Specify return values.
                 If 0: return a list of the HedTags.
                 If 1: return a list of the HedGroups containing the HedTags.
@@ -455,11 +455,11 @@ class HedGroup:
 
             This searches tag.short_tag, with an implicit wildcard on the end.
 
-            e.g. "Eve" will find Event, but not Sensory-event
+            e.g. "Eve" will find Event, but not Sensory-event.
 
         Parameters:
-            search_tags (container):    A container of the starts of short tags to search.
-            recursive (bool):           If True, also check subgroups.
+            search_tags (container): A container of the starts of short tags to search.
+            recursive (bool): If True, also check subgroups.
             include_groups (0, 1 or 2): Specify return values.
                 If 0: return a list of the HedTags.
                 If 1: return a list of the HedGroups containing the HedTags.
@@ -491,7 +491,7 @@ class HedGroup:
         Parameters:
             exact_tags (list of HedTag): A container of tags to locate.
             recursive (bool): If true, also check subgroups.
-            include_groups(bool): 0, 1 or 2
+            include_groups(bool): 0, 1 or 2.
                 If 0: Return only tags
                 If 1: Return only groups
                 If 2 or any other value: Return both
@@ -513,11 +513,11 @@ class HedGroup:
         return found_tags
 
     def find_def_tags(self, recursive=False, include_groups=3):
-        """ Find def and def-expand tags
+        """ Find def and def-expand tags.
 
         Parameters:
             recursive (bool): If true, also check subgroups.
-            include_groups (int, 0, 1, 2, 3): options for return values
+            include_groups (int, 0, 1, 2, 3): Options for return values.
                 If 0: Return only def and def expand tags/.
                 If 1: Return only def tags and def-expand groups.
                 If 2: Return only groups containing defs, or def-expand groups.
@@ -560,9 +560,9 @@ class HedGroup:
             term (str): A single term to search for.
             recursive (bool): If true, recursively check subgroups.
             include_groups(0, 1 or 2): Controls return values
-                If 0: Return only tags
-                If 1: Return only groups
-                If 2 or any other value: Return both
+                If 0: Return only tags.
+                If 1: Return only groups.
+                If 2 or any other value: Return both.
 
         Returns:
             list:

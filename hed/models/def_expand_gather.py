@@ -26,7 +26,7 @@ class AmbiguousDef:
         self.placeholder_defs.append(group_tag)
 
     def validate(self):
-        """Validate the given ambiguous definition
+        """ Validate the given ambiguous definition.
 
         Returns:
             bool: True if this is a valid definition with exactly 1 placeholder.
@@ -52,7 +52,7 @@ class AmbiguousDef:
 
     @staticmethod
     def _get_matching_value(tags):
-        """Get the matching value for a set of HedTag extensions.
+        """ Get the matching value for a set of HedTag extensions.
 
         Parameters:
             tags (iterator): The list of HedTags to find a matching value for.
@@ -91,7 +91,7 @@ class DefExpandGatherer:
 
         Parameters:
             hed_schema (HedSchema): The HED schema to be used for processing.
-            known_defs (dict, optional): A dictionary of known definitions.
+            known_defs (str or list or DefinitionDict): A dictionary of known definitions.
             ambiguous_defs (dict, optional): A dictionary of ambiguous def-expand definitions.
 
         """
@@ -174,7 +174,7 @@ class DefExpandGatherer:
         return False
 
     def _handle_ambiguous_definition(self, def_tag, def_expand_group):
-        """Handle ambiguous def-expand tag in a HED string.
+        """ Handle ambiguous def-expand tag in a HED string.
 
         Parameters:
             def_tag (HedTag): The def-expand tag.
@@ -200,9 +200,9 @@ class DefExpandGatherer:
 
     @staticmethod
     def get_ambiguous_group(ambiguous_def):
-        """Turns an entry in the ambiguous_defs dict into a single HedGroup
+        """Turn an entry in the ambiguous_defs dict into a single HedGroup.
 
         Returns:
-            HedGroup: the ambiguous definition with known placeholders filled in
+            HedGroup: The ambiguous definition with known placeholders filled in.
         """
         return ambiguous_def.get_group()

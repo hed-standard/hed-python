@@ -38,7 +38,7 @@ class RemoveColumnsOp(BaseOp):
         """ Constructor for remove columns operation.
 
         Parameters:
-            parameters (dict): Dictionary with the parameter values for required and optional parameters
+            parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         """
         super().__init__(parameters)
@@ -75,4 +75,5 @@ class RemoveColumnsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []

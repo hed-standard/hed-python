@@ -5,7 +5,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class ConvertColumnsOp(BaseOp):
-    """ Convert data type in column
+    """ Convert specified columns to have specified data type.
 
     Required remodeling parameters:   
         - **column_names** (*list*):   The list of columns to convert.   
@@ -82,4 +82,5 @@ class ConvertColumnsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(operations):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []

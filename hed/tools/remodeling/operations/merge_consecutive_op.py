@@ -153,6 +153,13 @@ class MergeConsecutiveOp(BaseOp):
 
     @staticmethod
     def _update_durations(df_new, remove_groups):
+        """ Update the durations for the columns based on merged columns.
+
+        Parameters:
+            df_new (DataFrame): Tabular data to merge.
+            remove_groups (list): List of names of columns to remove.
+
+        """
         remove_df = pd.DataFrame(remove_groups, columns=["remove"])
         max_groups = max(remove_groups)
         for index in range(max_groups):
@@ -167,6 +174,12 @@ class MergeConsecutiveOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Verify that the column name is not in match columns.
+
+        Parameters:
+            parameters (dict): Dictionary of parameters of actual implementation.
+
+        """
         match_columns = parameters.get("match_columns", None)
         name = parameters.get("column_name", None)
         if match_columns and name in match_columns:

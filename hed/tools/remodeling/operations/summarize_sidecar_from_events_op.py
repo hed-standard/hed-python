@@ -104,12 +104,20 @@ class SummarizeSidecarFromEventsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []
     
 
 class EventsToSidecarSummary(BaseSummary):
+    """ Manager for events to sidecar generation. """
 
     def __init__(self, sum_op):
+        """ Constructor for events to sidecar manager.
+
+        Parameters:
+            sum_op (BaseOp): Operation associated with this summary.
+
+        """
         super().__init__(sum_op)
         self.value_cols = sum_op.value_columns
         self.skip_cols = sum_op.skip_columns
@@ -133,7 +141,10 @@ class EventsToSidecarSummary(BaseSummary):
         """ Return the summary-specific information.
 
         Parameters:
-            summary_info (TabularSummary):  Summary to return info from
+            summary_info (TabularSummary):  Summary to return info from.
+
+        Returns:
+            dict: Standardized details dictionary extracted from the summary information.
 
         Notes:
             Abstract method be implemented by each individual context summary.
@@ -170,7 +181,7 @@ class EventsToSidecarSummary(BaseSummary):
             indent (str): A string containing spaces used for indentation (usually 3 spaces).
 
         Returns:
-            str - The results in a printable format ready to be saved to a text file.
+            str: The results in a printable format ready to be saved to a text file.
 
         Notes:
             This calls _get_dataset_string to get the overall summary string and

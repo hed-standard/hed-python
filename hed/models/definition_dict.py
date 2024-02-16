@@ -19,7 +19,7 @@ class DefinitionDict:
             hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
         :raises TypeError:
-            - Bad type passed as def_dicts
+            - Bad type passed as def_dicts.
         """
 
         self.defs = {}
@@ -41,7 +41,7 @@ class DefinitionDict:
                 Note - You can mix and match types, eg [DefinitionDict, str, list of str] would be valid input.
 
         :raises TypeError:
-            - Bad type passed as def_dicts
+            - Bad type passed as def_dicts.
         """
         if not isinstance(def_dicts, list):
             def_dicts = [def_dicts]
@@ -94,25 +94,25 @@ class DefinitionDict:
         return len(self.defs)
 
     def items(self):
-        """ Returns the dictionary of definitions
+        """ Return the dictionary of definitions.
 
             Alias for .defs.items()
 
         Returns:
-            def_entries({str: DefinitionEntry}): A list of definitions
+            def_entries({str: DefinitionEntry}): A list of definitions.
         """
         return self.defs.items()
 
     @property
     def issues(self):
-        """Returns issues about duplicate definitions."""
+        """Return issues about duplicate definitions."""
         return self._issues
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
         """ Check string for definition tags, adding them to self.
 
         Parameters:
-            hed_string_obj (HedString): A single hed string to gather definitions from.
+            hed_string_obj (HedString): A single HED string to gather definitions from.
             error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
 
         Returns:

@@ -6,7 +6,6 @@ import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
-from hed.models.query_handler import QueryHandler
 from hed.models.query_service import search_strings, get_query_handlers
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_tag_manager import HedTagManager
@@ -126,5 +125,14 @@ class FactorHedTagsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Parse and valid the queries and return issues in parsing queries, if any.
+
+        Parameters:
+            parameters (dict):  Dictionary representing the actual operation values.
+
+        Returns:
+            list:  List of issues in parsing queries.
+
+        """
         queries, names, issues = get_query_handlers(parameters.get("queries", []), parameters.get("query_names", None))
         return issues

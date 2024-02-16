@@ -12,7 +12,7 @@ class HedTypeManager:
         """ Create a variable manager for one tabular file for all type variables.
 
         Parameters:
-            event_manager (EventManager): an event manager for the tabular file.
+            event_manager (EventManager): An event manager for the tabular file.
 
         :raises HedFileError:
             - On errors such as unmatched onsets or missing definitions.
@@ -24,9 +24,21 @@ class HedTypeManager:
 
     @property
     def types(self):
+        """ Return a list of types managed by this manager.
+
+        Returns:
+            list:  Type tags names.
+        """
+
         return list(self._type_map.keys())
 
     def add_type(self, type_name):
+        """ Add a type variable to be managed by this manager.
+
+        Parameters:
+            type_name (str):  Type tag name of the type to be added.
+
+        """
         if type_name.lower() in self._type_map:
             return
         self._type_map[type_name.lower()] = \
@@ -84,12 +96,30 @@ class HedTypeManager:
         return None
 
     def get_type_def_names(self, type_var):
+        """ Return the definitions associated with a particular type tag.
+
+        Parameters:
+            type_var (str): The name of a type tag such as Condition-variable.
+
+        Returns:
+            list: Names of definitions that use this type.
+
+        """
         this_map = self._type_map.get(type_var, None)
         if not this_map:
             return []
         return this_map.get_type_def_names()
 
     def summarize_all(self, as_json=False):
+        """ Return a dictionary containing the summaries for the types managed by this manager.
+
+        Parameters:
+             as_json (bool): If False (the default), return as an object otherwise return as a JSON string.
+
+        Returns:
+            dict or str:  Dictionary with the summary.
+
+        """
         summary = {}
         for type_tag, type_tag_var in self._type_map.items():
             summary[type_tag] = type_tag_var.get_summary()

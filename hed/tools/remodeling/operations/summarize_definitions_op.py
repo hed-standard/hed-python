@@ -7,7 +7,7 @@ from hed.models.def_expand_gather import DefExpandGatherer
 
 
 class SummarizeDefinitionsOp(BaseOp):
-    """ Summarize the type_defs in the dataset.
+    """ Summarize the definitions used in the dataset based on Def and Def-expand.
 
     Required remodeling parameters:
         - **summary_name** (*str*): The name of the summary.   
@@ -16,7 +16,7 @@ class SummarizeDefinitionsOp(BaseOp):
     Optional remodeling parameters:
          - **append_timecode** (*bool*): If False (default), the timecode is not appended to the summary filename.
 
-    The purpose is to produce a summary of the values in a tabular file.
+    The purpose is to produce a summary of the definitions used in a dataset.
 
     """
     NAME = "summarize_definitions"
@@ -44,7 +44,7 @@ class SummarizeDefinitionsOp(BaseOp):
     SUMMARY_TYPE = 'type_defs'
 
     def __init__(self, parameters):
-        """ Constructor for the summarize column values operation.
+        """ Constructor for the summary of definitions used in the dataset.
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
@@ -56,7 +56,7 @@ class SummarizeDefinitionsOp(BaseOp):
         self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Create summaries of type_defs
+        """ Create summaries of definitions.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -67,7 +67,7 @@ class SummarizeDefinitionsOp(BaseOp):
         Returns:
             DataFrame: a copy of df
 
-        Side-effect:
+        Side effect:
             Updates the relevant summary.
 
         """
@@ -80,14 +80,25 @@ class SummarizeDefinitionsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []
 
 
 class DefinitionSummary(BaseSummary):
+    """ Manager for summaries of the definitions used in a dataset."""
+
     def __init__(self, sum_op, hed_schema, known_defs=None):
+        """ Constructor for the summary of definitions.
+
+        Parameters:
+            sum_op (BaseOp): Summary operation class for gathering definitions.
+            hed_schema (HedSchema or HedSchemaGroup):  Schema used for the dataset.
+            known_defs (str or list or DefinitionDict): Definitions already known to be used.
+
+
+        """
         super().__init__(sum_op)
-        self.def_gatherer = DefExpandGatherer(
-            hed_schema, known_defs=known_defs)
+        self.def_gatherer = DefExpandGatherer(hed_schema, known_defs=known_defs)
 
     def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.
@@ -179,6 +190,14 @@ class DefinitionSummary(BaseSummary):
 
     @staticmethod
     def _nested_dict_to_string(data, indent, level=1):
+        """ Return string summary of definitions used by recursively traversing the summary info.
+
+        Parameters:
+            data (dict):  Dictionary containing information.
+            indent (str):  Spaces to indent the nested results.
+            level (int):  (Default 1): Level indicator for recursive calls.
+
+        """
         result = []
         for key, value in data.items():
             if isinstance(value, dict):
@@ -195,10 +214,32 @@ class DefinitionSummary(BaseSummary):
 
     @staticmethod
     def _get_dataset_string(summary_dict, indent=BaseSummary.DISPLAY_INDENT):
+        """ Return the string representing the summary of the definitions across the dataset.
+
+        Parameters:
+            summary_dict (dict): Contains the merged summary information.
+            indent (str): Spaces to indent successively levels.
+
+        Returns:
+            str:  String summary of the definitions used in the dataset.
+
+        """
         return DefinitionSummary._nested_dict_to_string(summary_dict, indent)
 
     @staticmethod
     def _remove_description(def_entry):
+        """ Remove description from a definition entry.
+
+        Parameters:
+            def_entry (DefinitionEntry): Definition entry from which to remove its definition.
+
+        Returns:
+            tuple:
+                str:  Description string.
+                DefinitionEntry: DefinitionEntry after description has been removed.
+
+
+        """
         def_group = def_entry.contents.copy()
         description = ""
         desc_tag = def_group.find_tags({"description"}, include_groups=False)

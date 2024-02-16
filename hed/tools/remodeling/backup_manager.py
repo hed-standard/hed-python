@@ -164,6 +164,9 @@ class BackupManager:
     def _get_backups(self):
         """ Set the manager's backup-dictionary based on backup directory contents.
 
+        Returns:
+            dict: dictionary of dictionaries of the valid backups in the backups_path directory.
+
         :raises HedFileError:
             - If a backup is inconsistent for any reason.
 

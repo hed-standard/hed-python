@@ -9,7 +9,7 @@ def check_df_columns(df, required_cols=('column_name', 'column_value', 'descript
     """ Return a list of the specified columns that are missing from a dataframe.
 
     Parameters:
-        df (DataFrame):         Spreadsheet to check the columns of.
+        df (DataFrame):  Spreadsheet to check the columns of.
         required_cols (tuple):  List of column names that must be present.
 
     Returns:
@@ -122,7 +122,7 @@ def hed_to_df(sidecar_dict, col_names=None):
 
     Parameters:
         sidecar_dict (dict):      A dictionary conforming to BIDS JSON events sidecar format.
-        col_names (list, None):   A list of the cols to include in the flattened side car.
+        col_names (list, None):   A list of the cols to include in the flattened sidecar.
 
     Returns:
         DataFrame:  Four-column spreadsheet representing HED portion of sidecar.

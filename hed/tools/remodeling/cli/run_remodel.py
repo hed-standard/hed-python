@@ -4,7 +4,7 @@ import os
 import json
 import argparse
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.io_util import get_file_list, get_task_from_file, get_task_dict
+from hed.tools.util.io_util import get_file_list, get_task_dict
 from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.remodeling.remodeler_validator import RemodelerValidator
 from hed.tools.remodeling.dispatcher import Dispatcher
@@ -62,13 +62,13 @@ def get_parser():
 
 
 def handle_backup(args):
-    """ Restores the backup if applicable.
+    """ Restore the backup if applicable.
 
     Parameters:
-        args (obj): parsed arguments as an object.
+        args (obj): Parsed arguments as an object.
 
     Returns:
-        str or None:  backup name if there was a backup done.
+        str or None:  Backup name if there was a backup done.
 
     """
     if args.no_backup:
@@ -90,7 +90,7 @@ def parse_arguments(arg_list=None):
         arg_list (list):  List of command line arguments as a list.
 
     Returns:
-        Object:  Argument object
+        Object:  Argument object.
         List: A list of parsed operations (each operation is a dictionary).
 
     :raises ValueError:
@@ -119,6 +119,13 @@ def parse_arguments(arg_list=None):
 
 
 def parse_tasks(files, task_args):
+    """ Parse the tasks argument to get a task list.
+
+    Parameters:
+        files (list):  List of full paths of files.
+        task_args (str or list):  The argument values for the task parameter.
+
+    """
     if not task_args:
         return {"": files}
     task_dict = get_task_dict(files)

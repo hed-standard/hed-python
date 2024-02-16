@@ -1,6 +1,4 @@
-"""
-Column type of a column in a ColumnMapper.
-"""
+""" Column type for a column in a ColumnMapper. """
 from enum import Enum
 from hed.errors.error_types import SidecarErrors
 import pandas as pd
@@ -15,9 +13,9 @@ class ColumnType(Enum):
     Unknown = None
     # Do not return this column at all
     Ignore = "ignore"
-    # This column is a category with a list of possible values to replace with hed strings.
+    # This column is a category with a list of possible values to replace with HED strings.
     Categorical = "categorical"
-    # This column has a value(e.g. filename) that is added to a hed tag in place of a # sign.
+    # This column has a value(e.g. filename) that is added to a HED tag in place of a # sign.
     Value = "value"
     # Return this column exactly as given, it is HED tags.
     HEDTags = "hed_tags"
@@ -33,7 +31,7 @@ class ColumnMetadata:
             column_type (ColumnType or None): How to treat this column when reading data.
             name (str, int, or None): The column_name or column number identifying this column.
                 If name is a string, you'll need to use a column map to set the number later.
-            source (dict or str or None): Either the entire loaded json sidecar or a single HED string
+            source (dict or str or None): Either the entire loaded json sidecar or a single HED string.
         """
         self.column_name = name
         self._source = source
@@ -43,10 +41,10 @@ class ColumnMetadata:
 
     @property
     def hed_dict(self):
-        """ The hed strings for any given entry.
+        """ The HED strings for any given entry.
 
         Returns:
-            dict or str: A string or dict of strings for this column
+            dict or str: A string or dict of strings for this column.
 
         """
         if self._source is None or isinstance(self._source, str):
@@ -55,20 +53,20 @@ class ColumnMetadata:
 
     @property
     def source_dict(self):
-        """ The raw dict for this entry(if it exists)
+        """ The raw dict for this entry(if it exists).
 
         Returns:
-            dict or str: A string or dict of strings for this column
+            dict or str: A string or dict of strings for this column.
         """
         if self._source is None or isinstance(self._source, str):
             return {"HED": self._source}
         return self._source[self.column_name]
 
     def get_hed_strings(self):
-        """ Returns the hed strings for this entry as a series.
+        """ Return the HED strings for this entry as a series.
 
         Returns:
-            hed_strings(pd.Series): the hed strings for this series.(potentially empty)
+            hed_strings(pd.Series): The HED strings for this series.(potentially empty).
         """
         if not self.column_type:
             return pd.Series(dtype=str)
@@ -78,14 +76,14 @@ class ColumnMetadata:
         return series
 
     def set_hed_strings(self, new_strings):
-        """ Sets the hed strings for this entry.
+        """ Set the HED strings for this entry.
 
         Parameters:
-            new_strings(pd.Series, dict, or str): The hed strings to set.
-                This should generally be the return value from get_hed_strings
+            new_strings(pd.Series, dict, or str): The HED strings to set.
+                This should generally be the return value from get_hed_strings.
 
         Returns:
-            hed_strings(pd.Series): the hed strings for this series.(potentially empty)
+            hed_strings(pd.Series): The HED strings for this series.(potentially empty).
         """
         if new_strings is None:
             return False
@@ -145,12 +143,12 @@ class ColumnMetadata:
         """ Return how many pound signs a column string should have.
 
         Parameters:
-            column_type(ColumnType): The type of the column
+            column_type(ColumnType): The type of the column.
 
         Returns:
             tuple:
-                expected_count(int): The expected count.  0 or 1
-                error_type(str): The type of the error we should issue
+                expected_count(int): The expected count.  0 or 1.
+                error_type(str): The type of the error we should issue.
         """
         if column_type == ColumnType.Value:
             expected_count = 1
