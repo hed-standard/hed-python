@@ -29,7 +29,7 @@ class BaseInput:
         """ Constructor for the BaseInput class.
 
         Parameters:
-            file (str or file-like or pandas dataframe): An xlsx/tsv file to open.
+            file (str or file-like or pd.Dataframe): An xlsx/tsv file to open.
             file_type (str or None): ".xlsx" (Excel), ".tsv" or ".txt" (tab-separated text).
                 Derived from file if file is a filename.  Ignored if pandas dataframe.
             worksheet_name (str or None): Name of Excel workbook worksheet name to use.
@@ -554,7 +554,7 @@ class BaseInput:
         elif input_type in self.TEXT_EXTENSION:
             try:
                 self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
-                                                  dtype=str, keep_default_na=True, na_values=["", "null"])
+                                                  dtype=str, keep_default_na=True, na_values=("", "null"))
             except Exception as e:
                 raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
             # Convert nan values to a known value
