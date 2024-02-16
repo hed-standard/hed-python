@@ -6,7 +6,8 @@ from hed.tools.util.data_util import get_key_hash
 
 
 class SequenceMap:
-    """ A map of unique sequences of column values of a particular length appear in an columnar file.
+    # TODO: This class is partially implemented.
+    """ A map of unique sequences of column values of a particular length appear in a columnar file.
 
     Attributes:
         
@@ -21,7 +22,7 @@ class SequenceMap:
 
         Parameters:
             codes (list or None): If None use all codes, otherwise only include listed codes in the map.
-            name (str):          Name associated with this remap (usually a pathname of the events file).
+            name (str):   Name associated with this remap (usually a pathname of the events file).
 
         """
 
@@ -33,6 +34,7 @@ class SequenceMap:
 
     @property
     def __str__(self):
+        """ Return a version of this sequence map serialized to a string. """
         node_counts = [f"{value}({str(count)})" for value, count in self.node_counts.items()]
         node_str = " ".join(node_counts)
         return node_str
@@ -43,10 +45,7 @@ class SequenceMap:
         # return "\n".join(temp_list)
 
     def dot_str(self, group_spec={}):
-        """ Produce a DOT string representing this sequence map.
-        
-        
-        """
+        """ Produce a DOT string representing this sequence map. """
         base = 'digraph g { \n'
         if self.codes:
             node_list = [f"{node};" for node in self.codes if node not in self.node_counts]
@@ -67,6 +66,12 @@ class SequenceMap:
         return dot_str
 
     def edge_to_str(self, key):
+        """ Convert a graph edge to a DOT string.
+
+        Parameters:
+            key(str):  Hashcode string representing a graph edge.
+
+        """
         value = self.edges.get(key, [])
         if value:
             return f"{value[0]} -> {value[1]} "
@@ -74,10 +79,10 @@ class SequenceMap:
             return ""
         
     def get_edge_list(self, sort=True):
-        """Produces a DOT format edge list with the option of sorting by edge counts.
+        """ Return a DOT format edge list with the option of sorting by edge counts.
         
         Parameters:
-            sort (bool): if True the edge list is sorted by edge counts.
+            sort (bool): If True (the default), the edge list is sorted by edge counts.
             
         Returns:
             list:  list of DOT strings representing the edges labeled by counts.
@@ -92,7 +97,7 @@ class SequenceMap:
         return edge_list
     
     def filter_edges(self):
-        print("to here")
+        pass
 
     def update(self, data):
         """ Update the existing map with information from data.

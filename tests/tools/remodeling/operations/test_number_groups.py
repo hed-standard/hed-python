@@ -1,7 +1,5 @@
 from copy import deepcopy
 import json
-import pandas as pd
-import numpy as np
 import unittest
 from hed.tools.remodeling.operations.number_groups_op import NumberGroupsOp
 

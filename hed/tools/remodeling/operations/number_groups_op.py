@@ -124,18 +124,9 @@ class NumberGroupsOp(BaseOp):
                              f"Start value(s) {missing} does not exist in {self.source_column} of event file {name}")
 
         df_new = df.copy()
-        # # create number column
-        # df_new[self.number_column_name] = np.nan
-        #
-        # # find group indices
-        # indices = tuple_to_range(
-        #     get_indices(df, self.source_column, self.start['values'], self.stop['values']),
-        #     [self.start['inclusion'], self.stop['inclusion']])
-        # for i, group in enumerate(indices):
-        #     df_new.loc[group, self.number_column_name] = i + 1
-
         return df_new
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []

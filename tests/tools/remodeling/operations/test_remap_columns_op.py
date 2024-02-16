@@ -136,10 +136,11 @@ class Test(unittest.TestCase):
         self.assertIn("new_value", df_test.columns.values)
 
     def test_scratch(self):
-        import os
-        from hed.tools.util.io_util import get_file_list
-        from hed.tools.util.data_util import get_new_dataframe
-        event_path = os.path.realpath('D:/monique/test_events.tsv')
+        pass
+        # import os
+        # from hed.tools.util.io_util import get_file_list
+        # from hed.tools.util.data_util import get_new_dataframe
+        # event_path = os.path.realpath('D:/monique/test_events.tsv')
         # save_path = os.path.realpath('D:/monique/output')
         # json_dir = os.path.realpath('D:/monique/json')
         # json_list = get_file_list(json_dir, extensions=['.json'])

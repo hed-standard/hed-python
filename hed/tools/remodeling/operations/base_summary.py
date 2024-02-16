@@ -35,7 +35,7 @@ class BaseSummary(ABC):
             - The 'Individual files' value is dictionary whose keys are file names and values are
                    their corresponding summaries.
 
-        Users are expected to provide merge_all_info and get_details_dict to support this.
+        Users are expected to provide merge_all_info and get_details_dict functions to support this.
 
         """
         merged_counts = self.merge_all_info()
@@ -59,9 +59,9 @@ class BaseSummary(ABC):
         Returns:
             dict - dictionary with "Dataset" and "Individual files" keys.
 
-        Notes: The individual_summaries value is processed as follows
-           -  "separate" individual summaries are to be in separate files
-           -  "consolidated" means that the individual summaries are in same file as overall summary
+        Notes: The individual_summaries value is processed as follows:
+           -  "separate" individual summaries are to be in separate files.
+           -  "consolidated" means that the individual summaries are in same file as overall summary.
            -  "none" means that only the overall summary is produced.
 
         """
@@ -76,6 +76,12 @@ class BaseSummary(ABC):
         return summary
 
     def get_individual(self, summary_details, separately=True):
+        """ Return a dictionary of the individual file summaries.
+
+        Parameters:
+            summary_details (dict): Dictionary of the individual file summaries.
+            separately (bool): If True (the default), each individual summary has a header for separate output.
+        """
         individual_dict = {}
         for name, name_summary in summary_details.items():
             if separately:
@@ -86,6 +92,12 @@ class BaseSummary(ABC):
         return individual_dict
 
     def get_text_summary_details(self, include_individual=True):
+        """ Return a text summary of the information represented by this summary.
+
+        Parameters:
+            include_individual (bool): If True (the default), individual summaries are in "Individual files".
+
+        """
         result = self.get_summary_details(include_individual=include_individual)
         summary_details = {"Dataset": self._get_result_string("Dataset", result.get("Dataset", "")),
                            "Individual files": {}}
@@ -95,6 +107,20 @@ class BaseSummary(ABC):
         return summary_details
 
     def get_text_summary(self, individual_summaries="separate"):
+        """ Return a complete text summary by assembling the individual pieces.
+
+        Parameters:
+            individual_summaries(str):  One of the values "separate", "consolidated", or "none".
+
+        Returns:
+            str: Complete text summary.
+
+        Notes: The options are:
+            - "none":  Just has "Dataset" key.
+            - "consolidated"  Has "Dataset" and "Individual files" keys with the values of each is a string.
+            - "separate" Has "Dataset" and "Individual files" keys. The values of "Individual files" is a dict.
+
+        """
         include_individual = individual_summaries == "separate" or individual_summaries == "consolidated"
         summary_details = self.get_text_summary_details(include_individual=include_individual)
         summary = {"Dataset": f"Summary name: {self.op.summary_name}\n" +
@@ -118,7 +144,15 @@ class BaseSummary(ABC):
         return summary
 
     def save(self, save_dir, file_formats=['.txt'], individual_summaries="separate", task_name=""):
+        """ Save the summaries using the format indicated.
 
+        Parameters:
+            save_dir (str):  Name of the directory to save the summaries in.
+            file_formats (list):  List of file formats to use for saving.
+            individual_summaries (str):  Save one file or multiple files based on setting.
+            task_name (str): If this summary corresponds to files from a task, the task_name is used in filename.
+
+        """
         for file_format in file_formats:
             if file_format == '.txt':
                 summary = self.get_text_summary(individual_summaries=individual_summaries)
@@ -129,9 +163,18 @@ class BaseSummary(ABC):
             self._save_summary_files(save_dir, file_format, summary, individual_summaries, task_name=task_name)
 
             self.save_visualizations(save_dir, file_formats=file_formats, individual_summaries=individual_summaries,
-                                     task_name = task_name)
+                                     task_name=task_name)
 
     def save_visualizations(self, save_dir, file_formats=['.svg'], individual_summaries="separate", task_name=""):
+        """ Save summary visualizations, if any, using the format indicated.
+
+        Parameters:
+            save_dir (str):  Name of the directory to save the summaries in.
+            file_formats (list):  List of file formats to use for saving.
+            individual_summaries (str):  Save one file or multiple files based on setting.
+            task_name (str): If this summary corresponds to files from a task, the task_name is used in filename.
+
+        """
         pass
 
     def _save_summary_files(self, save_dir, file_format, summary, individual_summaries, task_name=''):
@@ -204,7 +247,7 @@ class BaseSummary(ABC):
             indent (str): A string containing spaces used for indentation (usually 3 spaces).
 
         Returns:
-            str - The results in a printable format ready to be saved to a text file.
+            str: The results in a printable format ready to be saved to a text file.
 
         Notes:
             This file should be overridden by each summary.
@@ -224,7 +267,7 @@ class BaseSummary(ABC):
         """ Return the summary-specific information.
 
         Parameters:
-            summary_info (object):  Summary to return info from
+            summary_info (object):  Summary to return info from.
 
         Returns:
             dict: dictionary with the results.

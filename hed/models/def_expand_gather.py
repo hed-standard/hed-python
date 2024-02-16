@@ -91,7 +91,7 @@ class DefExpandGatherer:
 
         Parameters:
             hed_schema (HedSchema): The HED schema to be used for processing.
-            known_defs (dict, optional): A dictionary of known definitions.
+            known_defs (str or list or DefinitionDict): A dictionary of known definitions.
             ambiguous_defs (dict, optional): A dictionary of ambiguous def-expand definitions.
 
         """

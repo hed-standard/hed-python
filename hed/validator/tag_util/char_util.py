@@ -1,3 +1,4 @@
+""" Classes responsible for basic character validation of a string or tag."""
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 
@@ -17,8 +18,8 @@ class CharValidator:
         """ Report invalid characters.
 
         Parameters:
-            hed_string (str): A hed string.
-            allow_placeholders: Allow placeholder and curly brace characters
+            hed_string (str): A HED string.
+            allow_placeholders (bool): Allow placeholder and curly brace characters.
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
@@ -54,15 +55,14 @@ class CharValidator:
         validation_issues += self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
         return validation_issues
 
-    def check_for_invalid_extension_chars(self, original_tag, validate_text, error_code=None,
-                                          index_offset=0):
+    def check_for_invalid_extension_chars(self, original_tag, validate_text, error_code=None, index_offset=0):
         """Report invalid characters in extension/value.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             validate_text (str): the text we want to validate, if not the full extension.
             error_code(str): The code to override the error as.  Again mostly for def/def-expand tags.
-            index_offset(int): Offset into the extension validate_text starts at
+            index_offset(int): Offset into the extension validate_text starts at.
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
@@ -76,6 +76,18 @@ class CharValidator:
     
     @staticmethod
     def _check_invalid_chars(check_string, allowed_chars, source_tag, starting_index=0, error_code=None):
+        """ Helper for checking for invalid characters.
+
+        Parameters:
+            check_string (str): String to be checked for invalid characters.
+            allowed_chars (str): Characters allowed in string.
+            source_tag (HedTag): Tag from which the string came from.
+            starting_index (int): Starting index of check_string within the tag.
+            error_code (str): The code to override the error as.  Again mostly for def/def-expand tags.
+
+        Returns:
+            list:  List of dictionaries with validation issues.
+        """
         validation_issues = []
         for i, character in enumerate(check_string):
             if character.isalnum():
@@ -93,7 +105,16 @@ class CharValidator:
 
     @staticmethod
     def _check_invalid_prefix_issues(original_tag):
-        """Check for invalid schema namespace."""
+        """Check for invalid schema namespace.
+
+        Parameters:
+            original_tag (HedTag): Tag to look
+
+
+        Returns:
+            list:  List of dictionaries with validation issues.
+
+        """
         issues = []
         schema_namespace = original_tag.schema_namespace
         if schema_namespace and not schema_namespace[:-1].isalpha():

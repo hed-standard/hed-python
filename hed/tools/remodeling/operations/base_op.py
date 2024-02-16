@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 
+
 class BaseOp(ABC):
     """ Base class for operations. All remodeling operations should extend this class."""
 
@@ -40,9 +41,12 @@ class BaseOp(ABC):
     @staticmethod
     @abstractmethod
     def validate_input_data(parameters):
-        '''Validates whether operation parameter input data meets specific criteria beyond what can be captured in json schema. 
-           For example, whether two input arrays are the same length. Minimum implementation should return an empty list
-           to indicate no errors were found. If additional validation is necessary, method should perform the validation and 
-           return a list with user friendly error strings. 
-        '''
+        """ Validates whether operation parameters meet op-specific criteria beyond that captured in json schema.
+
+        Example: A check to see whether two input arrays are the same length.
+
+        Notes: The minimum implementation should return an empty list to indicate no errors were found.
+               If additional validation is necessary, method should perform the validation and
+               return a list with user-friendly error strings.
+        """
         return []

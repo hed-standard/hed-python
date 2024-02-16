@@ -181,7 +181,7 @@ class BidsFileGroup:
         """ Create a dictionary of BidsSidecarFile objects for the specified entity type.
 
         Returns:
-            dict:   a dictionary of BidsSidecarFile objects keyed by real path for the specified suffix type
+            dict:   a dictionary of BidsSidecarFile objects keyed by real path for the specified suffix type.
 
         Notes:
             - This function creates the sidecars, but does not set their contents.
@@ -195,7 +195,7 @@ class BidsFileGroup:
         return file_dict
 
     def _make_sidecar_dir_dict(self):
-        """ Create a the dictionary with real paths of directories as keys and a list of sidecar file paths as values.
+        """ Create a dictionary with real paths of directories as keys and a list of sidecar file paths as values.
 
         Returns:
             dict: A dictionary of lists of sidecar BidsSidecarFiles

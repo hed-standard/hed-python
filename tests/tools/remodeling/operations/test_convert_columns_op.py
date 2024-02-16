@@ -1,5 +1,4 @@
 import unittest
-from hed.tools.remodeling.operations.convert_columns_op import ConvertColumnsOp
 
 
 class Test(unittest.TestCase):
@@ -35,6 +34,7 @@ class Test(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         pass
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -9,7 +9,7 @@ def get_query_handlers(queries, query_names=None):
 
     Parameters:
         queries (list):  A list of query strings.
-        query_names (list): A list of column names for results of queries. If missing --- query_1, query_2, etc.
+        query_names (list or None): A list of column names for results of queries. If missing --- query_1, query_2, etc.
 
     Returns:
         list - QueryHandlers for successfully parsed queries.

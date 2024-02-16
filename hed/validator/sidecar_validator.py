@@ -49,9 +49,7 @@ class SidecarValidator:
             error_handler.pop_error_context()
             return issues
         sidecar_def_dict = sidecar.get_def_dict(hed_schema=self._schema, extra_def_dicts=extra_def_dicts)
-        hed_validator = HedValidator(self._schema,
-                                     def_dicts=sidecar_def_dict,
-                                     definitions_allowed=True)
+        hed_validator = HedValidator(self._schema, def_dicts=sidecar_def_dict,  definitions_allowed=True)
 
         issues += sidecar._extract_definition_issues
         issues += sidecar_def_dict.issues

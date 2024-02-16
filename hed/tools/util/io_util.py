@@ -1,4 +1,4 @@
-"""Utilities for generating and handling file names."""
+"""Utilities for generating and handling file names. """
 
 import os
 import re
@@ -12,7 +12,7 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
     """ Return True if correct extension, suffix, and prefix.
 
     Parameters:
-        test_file (str) :           Path of filename to test.
+        test_file (str):  Path of filename to test.
         name_prefix (list, str, None):  An optional name_prefix or list of prefixes to accept for the base filename.
         name_suffix (list, str, None):  An optional name_suffix or list of suffixes to accept for the base file name.
         extensions (list, str, None):   An optional extension or list of extensions to accept for the extensions.
@@ -26,7 +26,6 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
 
 
     """
-
     basename = os.path.basename(test_file.lower())
     if name_prefix and not get_allowed(basename, allowed_values=name_prefix, starts_with=True):
         return False
@@ -49,6 +48,9 @@ def get_allowed(value, allowed_values=None, starts_with=True):
         value (str): value to be matched.
         allowed_values (list, str, or None):  Values to match.
         starts_with (bool):  If True match is done at beginning of string, otherwise the end.
+
+    Returns:
+        str or list:  portion of value that matches the various allowed_values.
 
     Notes:
         - match is done in lower case.
@@ -93,7 +95,7 @@ def extract_suffix_path(path, prefix_path):
 
 
 def clean_filename(filename):
-    """ Replaces invalid characters with under-bars.
+    """ Replace invalid characters with under-bars.
 
     Parameters:
         filename (str):   source filename.
@@ -118,7 +120,7 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
         name_suffix (str, None):      An optional name_suffix for the base file name.
         extensions (list, None):      An optional list of file extensions.
         skip_empty (bool):            Do not put entry for directories that have no files.
-        exclude_dirs (list):          List of directories to skip
+        exclude_dirs (list):          List of directories to skip.
 
     Returns:
         dict:  Dictionary with directories as keys and file lists values.
@@ -233,6 +235,12 @@ def get_path_components(root_path, this_path):
 
 
 def get_timestamp():
+    """ Return a timestamp string suitable for using in filenames.
+
+    Returns:
+        str:  Represents the current time.
+
+    """
     now = datetime.now()
     return now.strftime(TIME_FORMAT)[:-3]
 
@@ -302,13 +310,13 @@ def parse_bids_filename(file_path):
 
 
 def _split_entity(piece):
-    """Splits a piece into an entity or suffix.
+    """ Split a piece into an entity or suffix.
 
     Parameters:
         piece (str):   A string to be parsed.
 
     Returns:
-        dict:  with entities as keys as well as the key "bad" and the key "suffix".
+        dict:  Entities as keys as well as the key "bad" and the key "suffix".
 
     """
     piece = piece.strip()
@@ -324,6 +332,15 @@ def _split_entity(piece):
 
 
 def get_task_from_file(file_path):
+    """ Returns the task name entity from a BIDS-type file path.
+
+    Parameters:
+        file_path (str):  File path.
+
+    Returns:
+        str:  The task name or an empty string.
+
+    """
     filename = os.path.splitext(os.path.basename(file_path))
     basename = filename[0].strip()
     position = basename.lower().find("task-")

@@ -1,6 +1,4 @@
 import json
-import pandas as pd
-import numpy as np
 import unittest
 from hed.tools.remodeling.operations.number_rows_op import NumberRowsOp
 
@@ -199,6 +197,7 @@ class Test(unittest.TestCase):
         #                 "number_rows should not change the input df columns")
         # self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
         #                 "number_rows should not change the input df values")
+
 
 if __name__ == '__main__':
     unittest.main()

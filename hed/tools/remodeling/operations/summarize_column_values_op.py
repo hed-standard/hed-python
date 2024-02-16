@@ -115,12 +115,20 @@ class SummarizeColumnValuesOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []
 
 
 class ColumnValueSummary(BaseSummary):
+    """ Manager for summaries of column contents for columnar files. """
 
     def __init__(self, sum_op):
+        """ Constructor for column value summary manager.
+
+        Parameters:
+            sum_op (BaseOp): Operation associated with this summary.
+
+        """
         super().__init__(sum_op)
 
     def update_summary(self, new_info):
@@ -142,7 +150,7 @@ class ColumnValueSummary(BaseSummary):
         self.summary_dict[name].update(new_info['df'])
 
     def get_details_dict(self, summary):
-        """ Return a dictionary with the summary contained in a TabularSummary
+        """ Return a dictionary with the summary contained in a TabularSummary.
 
         Parameters:
             summary (TabularSummary): Dictionary of merged summary information.
@@ -205,7 +213,7 @@ class ColumnValueSummary(BaseSummary):
         else:
             sum_list = [f"Total events={result.get('Total events', 0)}"]
         sum_list = sum_list + self._get_detail_list(result, indent=indent)
-        return ("\n").join(sum_list)
+        return "\n".join(sum_list)
 
     def _get_categorical_string(self, result, offset="", indent="   "):
         """ Return  a string with the summary for a particular categorical dictionary.
@@ -280,6 +288,12 @@ class ColumnValueSummary(BaseSummary):
 
     @staticmethod
     def get_list_str(lst):
+        """ Return a str version of a list with items separated by a blank.
+
+        Returns:
+            str:  String version of list.
+
+        """
         return f"{' '.join(str(item) for item in lst)}"
 
     @staticmethod
@@ -287,8 +301,8 @@ class ColumnValueSummary(BaseSummary):
         """ Partition a list into lists of n items.
 
         Parameters:
-            lst (list): List to be partitioned
-            n (int):  Number of items in each sublist
+            lst (list): List to be partitioned.
+            n (int):  Number of items in each sublist.
 
         Returns:
             list:  list of lists of n elements, the last might have fewer.

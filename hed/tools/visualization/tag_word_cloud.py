@@ -1,3 +1,5 @@
+""" Utilities for creating a word cloud. """
+
 import numpy as np
 from PIL import Image
 from hed.tools.visualization.word_cloud_util import default_color_func, WordCloud, generate_contour_svg
@@ -7,15 +9,15 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     """ Takes a word dict and returns a generated word cloud object.
 
     Parameters:
-        word_dict(dict): words and their frequencies
-        mask_path(str or None): The path of the mask file
-        background_color(str or None): If None, transparent background.
-        width(int): width in pixels
-        height(int): height in pixels
-        kwargs(kwargs): Any other parameters WordCloud accepts, overrides default values where relevant.
+        word_dict (dict): words and their frequencies
+        mask_path (str or None): The path of the mask file
+        background_color (str or None): If None, transparent background.
+        width (int): width in pixels.
+        height (int): height in pixels.
+        kwargs (kwargs): Any other parameters WordCloud accepts, overrides default values where relevant.
+
     Returns:
-        word_cloud(WordCloud): The generated cloud.
-                               Use .to_file to save it out as an image.
+        WordCloud: The generated cloud. (Use .to_file to save it out as an image.)
 
     :raises ValueError:
         An empty dictionary was passed
@@ -50,12 +52,13 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
 
 
 def word_cloud_to_svg(wc):
-    """Takes word cloud and returns it as an SVG string.
+    """ Return a WordCould as an SVG string.
 
     Parameters:
-        wc(WordCloud): the word cloud object
+        wc (WordCloud): the word cloud object.
+
     Returns:
-        svg_string(str): The svg for the word cloud
+        svg_string (str): The svg for the word cloud.
     """
     svg_string = wc.to_svg()
     svg_string = svg_string.replace("fill:", "fill:rgb")
@@ -64,18 +67,18 @@ def word_cloud_to_svg(wc):
 
 
 def summary_to_dict(summary, transform=np.log10, adjustment=5):
-    """Converts a HedTagSummary json dict into the word cloud input format
+    """Convert a HedTagSummary JSON dict into the word cloud input format.
 
     Parameters:
-        summary(dict): The summary from a SummarizeHedTagsOp
-        transform(func): The function to transform the number of found tags
-                         Default log10
+        summary(dict): The summary from a SummarizeHedTagsOp.
+        transform(func): The function to transform the number of found tags (Default log10).
         adjustment(int): Value added after transform.
+
     Returns:
-        word_dict(dict): a dict of the words and their occurrence count
+        word_dict(dict): A dict of the words and their occurrence count.
 
     :raises KeyError:
-        A malformed dictionary was passed
+        A malformed dictionary was passed.
 
     """
     if transform is None:

@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
                                           '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
         rel_path = '../../../data/remodel_tests/sub-002_task-FacePerception_run-1_events.tsv'
         cls.events_wh = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_path))
-        rel_side =  '../../../data/remodel_tests/task-FacePerception_events.json'
+        rel_side = '../../../data/remodel_tests/task-FacePerception_events.json'
         cls.sidecar_path_wh = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), rel_side))
 
     @classmethod

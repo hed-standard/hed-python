@@ -8,6 +8,7 @@ from hed.errors.error_types import ValidationErrors
 
 
 class UnitValueValidator:
+    """ Validates units. """
     DATE_TIME_VALUE_CLASS = 'dateTimeClass'
     NUMERIC_VALUE_CLASS = "numericClass"
     TEXT_VALUE_CLASS = "textClass"
@@ -29,6 +30,11 @@ class UnitValueValidator:
             self._value_validators.update(value_validators)
 
     def _get_default_value_class_validators(self):
+        """ Return a dictionary of value class validator functions.
+
+        Returns:
+            dict:  Dictionary of value class validator functions.
+        """
         validator_dict = {
             self.DATE_TIME_VALUE_CLASS: is_date_time,
             self.NUMERIC_VALUE_CLASS: validate_numeric_value_class,
@@ -44,9 +50,11 @@ class UnitValueValidator:
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
-            validate_text (str): The text to validate
+            validate_text (str): The text to validate.
             report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
-            error_code (str): Override error codes
+            error_code (str): Override error codes.
+            index_offset (int):  Offset into the extension validate_text starts at.
+
         Returns:
             list: Validation issues. Each issue is a dictionary.
         """
@@ -79,10 +87,10 @@ class UnitValueValidator:
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
-            validate_text (str): The text to validate
+            validate_text (str): The text to validate.
             report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
-            error_code (str): Override error codes
-            index_offset(int): Offset into the extension validate_text starts at
+            error_code (str): Override error codes.
+            index_offset(int): Offset into the extension validate_text starts at.
 
         Returns:
             list: Validation issues.
@@ -110,6 +118,15 @@ class UnitValueValidator:
     #     return character_set
 
     def _get_problem_indexes(self, original_tag, stripped_value):
+        """ Return list of problem indices for error messages.
+
+        Parameters:
+            original_tag (HedTag): The original tag that is used to report the error.
+            stripped_value (str): Value stripped of white space?
+
+        Returns:
+            list: List of int locations in which error occurred.
+        """
         # Extra +1 for the slash
         start_index = original_tag.extension.find(stripped_value) + len(original_tag.org_base_tag) + 1
         if start_index == -1:
@@ -125,7 +142,20 @@ class UnitValueValidator:
         #     pass
 
     def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None, index_offset=0):
-        """Returns any issues found if this is a value tag"""
+        """ Return any issues found if this is a value tag,
+
+        Parameters:
+            original_tag (HedTag): The original tag that is used to report the error.
+            stripped_value (str): Value stripped of white space?
+            report_as (HedTag): Report as this tag.
+            error_code(str): The code to override the error as.  Again mostly for def/def-expand tags.
+            index_offset(int): Offset into the extension validate_text starts at.
+
+        Returns:
+            list:  List of dictionaries of validation issues.
+
+        """
+
         # todo: This function needs to check for allowed characters, not just {}
         validation_issues = []
         if original_tag.is_takes_value_tag():
@@ -149,7 +179,17 @@ class UnitValueValidator:
 
     @staticmethod
     def _check_units(original_tag, bad_units, report_as):
-        """Returns an issue noting this is either bad units, or missing units"""
+        """Returns an issue noting this is either bad units, or missing units
+
+        Parameters:
+            original_tag (HedTag): The original tag that is used to report the error.
+            bad_units (bool): Tag has units so check --- otherwise validate with default units.
+            report_as (HedTag): Report as this tag.
+
+        Returns:
+            list:  List of dictionaries of validation issues.
+
+        """
         report_as = report_as if report_as else original_tag
         if bad_units:
             tag_unit_class_units = original_tag.get_tag_unit_class_units()
@@ -208,7 +248,7 @@ def is_date_time(date_time_string):
 
 
 def validate_numeric_value_class(numeric_string):
-    """ Checks to see if valid numeric value.
+    """ Check to see if valid numeric value.
 
     Parameters:
         numeric_string (str): A string that should be only a number with no units.
@@ -224,7 +264,7 @@ def validate_numeric_value_class(numeric_string):
 
 
 def validate_text_value_class(text_string):
-    """ Placeholder for eventual text value class validation
+    """ Placeholder for eventual text value class validation.
 
     Parameters:
         text_string (str): Text class.

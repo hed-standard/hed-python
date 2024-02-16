@@ -54,7 +54,7 @@ class SummarizeHedTypeOp(BaseOp):
     SUMMARY_TYPE = 'hed_type_summary'
 
     def __init__(self, parameters):
-        """ Constructor for the summarize hed type operation.
+        """ Constructor for the summarize HED type operation.
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
@@ -67,7 +67,7 @@ class SummarizeHedTypeOp(BaseOp):
         self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Summarize a specified HED type variable such as Condition-variable .
+        """ Summarize a specified HED type variable such as Condition-variable.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -93,12 +93,20 @@ class SummarizeHedTypeOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []
 
 
 class HedTypeSummary(BaseSummary):
+    """ Manager of the HED type summaries. """
 
     def __init__(self, sum_op):
+        """ Constructor for HED type summary manager.
+
+        Parameters:
+            sum_op (BaseOp): Operation associated with this summary.
+
+        """
         super().__init__(sum_op)
         self.type_tag = sum_op.type_tag
 
@@ -244,6 +252,14 @@ class HedTypeSummary(BaseSummary):
 
     @staticmethod
     def _level_details(level_counts, offset="", indent=""):
+        """ Return a list of tag type summary counts at different levels.
+
+        Parameters:
+            level_counts (dict): Dictionary of tags with counts.
+            offset (str): Spaces to offset the entire entry.
+            indent (str): Additional spaces to indent each level.
+
+        """
         level_list = []
         for key, details in level_counts.items():
             str1 = f"[{details['events']} events, {details['files']} files]:"
@@ -255,7 +271,3 @@ class HedTypeSummary(BaseSummary):
                 level_list.append(
                     f"{offset}{indent*3}Description: {details['description']}")
         return level_list
-
-    @staticmethod
-    def validate_input_data(parameters):
-        return []

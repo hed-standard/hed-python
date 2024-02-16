@@ -10,6 +10,7 @@ readme = "README.md"
 authors = [
     { name = "VisLab" },
     { name = "Ian Callanan" },
+    { name = "Monique Dennisen"},
     { name = "Jeremy Cockfield" },
     { name = "Alexander Jones" },
     { name = "Owen Winterberg" },
@@ -31,6 +32,7 @@ dependencies = [
     "inflect",
     "jdcal",
     "jsonschema",
+    "matplotlib",
     "numpy",
     "openpyxl",
     "pandas",
