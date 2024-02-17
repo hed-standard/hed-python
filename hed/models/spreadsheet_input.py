@@ -37,11 +37,7 @@ class SpreadsheetInput(BaseInput):
             - An invalid dataframe was passed with size 0.
             - An invalid extension was provided.
             - A duplicate or empty column name appears.
-
-        :raises OSError:
             - Cannot open the indicated file.
-
-        :raises KeyError:
             - The specified worksheet name does not exist.
         """
 

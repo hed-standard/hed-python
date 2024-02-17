@@ -72,7 +72,7 @@ include = ["hed*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-hed = ["schema/schema_data/*.xml"]
+hed = ["schema/schema_data/*.xml", "resources/*.png"]
 
 [tool.codespell]
 skip = '*.git,*.pdf,*.xml,*.mediawiki,*.svg,versioneer.py,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests'
