@@ -6,7 +6,7 @@ import os
 import json
 from hashlib import sha1
 from shutil import copyfile
-from hed.errors.exceptions import HedFileError, HedExceptions
+
 import re
 from semantic_version import Version
 import portalocker
@@ -14,6 +14,7 @@ import time
 from hed.schema.schema_io.schema_util import url_to_file, make_url_request
 from pathlib import Path
 import urllib
+from urllib.error import URLError
 
 # From https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 HED_VERSION_P1 = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"
@@ -103,43 +104,6 @@ def get_hed_versions(local_hed_directory=None, library_name=None):
     return all_hed_versions
 
 
-def cache_specific_url(hed_xml_url, xml_version=None, library_name=None, cache_folder=None):
-    """ Cache a file from a URL.
-
-    Parameters:
-        hed_xml_url (str): Path to an exact file at a URL, or a GitHub API url to a directory.
-        xml_version (str): If not None and hed_xml_url is a directory, return this version or None.
-        library_name (str or None): Optional schema library name.
-        cache_folder (str): The path of the hed cache. Defaults to HED_CACHE_DIRECTORY.
-
-    Returns:
-        str: Path to local hed XML file to use.
-
-    """
-    if not cache_folder:
-        cache_folder = HED_CACHE_DIRECTORY
-
-    if not _check_if_url(hed_xml_url):
-        return None
-
-    try:
-        if _check_if_api_url(hed_xml_url):
-            return _download_latest_hed_xml_version_from_url(hed_xml_url,
-                                                             xml_version=xml_version,
-                                                             library_name=library_name,
-                                                             cache_folder=cache_folder)
-    
-        if not _check_if_specific_xml(hed_xml_url):
-            return None
-    
-        filename = hed_xml_url.split('/')[-1]
-        cache_filename = os.path.join(cache_folder, filename)
-    
-        return _cache_specific_url(hed_xml_url, cache_filename)
-    except urllib.error.URLError as e:
-        raise HedFileError(HedExceptions.URL_ERROR, str(e), hed_xml_url) from e
-
-
 def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None):
     """ Get HED XML file path in a directory.  Only returns filenames that exist.
 
@@ -199,7 +163,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
     Notes:
         - The Default skip_folders is 'deprecated'.
         - The HED cache folder defaults to HED_CACHE_DIRECTORY.
-        - The directories on Github are of the form:
+        - The directories on GitHub are of the form:
             https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml
 
     """
@@ -226,13 +190,14 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, skip_folders=DEFAULT_SKIP
                         _cache_hed_version(version, library_name, version_info, cache_folder=cache_folder)
 
             _write_last_cached_time(current_timestamp, cache_folder)
-    except portalocker.exceptions.LockException or ValueError or urllib.errors.URLError:
+    except portalocker.exceptions.LockException or ValueError or URLError:
         return -1
 
     return 0
 
 
 def _cache_specific_url(hed_xml_url, cache_filename):
+    """Copies a specific url to the cache at the given filename"""
     cache_folder = cache_filename.rpartition("/")[0]
     os.makedirs(cache_folder, exist_ok=True)
     temp_hed_xml_file = url_to_file(hed_xml_url)
@@ -244,6 +209,7 @@ def _cache_specific_url(hed_xml_url, cache_filename):
 
 
 def _copy_installed_schemas_to_cache(cache_folder):
+    """Copies the schemas from the install folder to the cache"""
     installed_files = os.listdir(INSTALLED_CACHE_LOCATION)
     for install_name in installed_files:
         _, basename = os.path.split(install_name)
@@ -291,21 +257,15 @@ def _write_last_cached_time(new_time, cache_folder):
         raise ValueError("Error writing timestamp to hed cache")
 
 
-def _check_if_specific_xml(hed_xml_or_url):
-    return hed_xml_or_url.endswith(HED_XML_EXTENSION)
-
-
-def _check_if_api_url(api_url):
-    return api_url.startswith("http://api.github.com") or api_url.startswith("https://api.github.com")
-
-
 def _check_if_url(hed_xml_or_url):
+    """Returns true if this is a url"""
     if hed_xml_or_url.startswith("http://") or hed_xml_or_url.startswith("https://"):
         return True
     return False
 
 
 def _create_xml_filename(hed_xml_version, library_name=None, hed_directory=None):
+    """Returns the default file name format for the given version"""
     if library_name:
         hed_xml_basename = f"{HED_XML_PREFIX}_{library_name}_{hed_xml_version}{HED_XML_EXTENSION}"
     else:
@@ -337,7 +297,7 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
     Notes:
         - The Default skip_folders is 'deprecated'.
         - The HED cache folder defaults to HED_CACHE_DIRECTORY.
-        - The directories on Github are of the form:
+        - The directories on GitHub are of the form:
             https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml
     """
     url_request = make_url_request(hed_base_url)
@@ -355,7 +315,7 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
                 sub_folder_versions = \
                     _get_hed_xml_versions_from_url(hed_base_url + "/" + file_entry['name'] + hedxml_suffix,
                                                    skip_folders=skip_folders, get_libraries=True)
-            except urllib.error.URLError as e:
+            except urllib.error.URLError:
                 # Silently ignore ones without a hedxml section for now.
                 continue
             _merge_in_versions(all_hed_versions, sub_folder_versions)
@@ -383,33 +343,18 @@ def _get_hed_xml_versions_from_url(hed_base_url, library_name=None,
 
 
 def _merge_in_versions(all_hed_versions, sub_folder_versions):
+    """Build up the version dictionary, divided by library"""
     for lib_name, hed_versions in sub_folder_versions.items():
         if lib_name not in all_hed_versions:
             all_hed_versions[lib_name] = {}
         all_hed_versions[lib_name].update(sub_folder_versions[lib_name])
 
 
-def _download_latest_hed_xml_version_from_url(hed_base_url, xml_version, library_name, cache_folder):
-    latest_version, version_info = _get_latest_hed_xml_version_from_url(hed_base_url, xml_version, library_name)
-    if latest_version:
-        cached_xml_file = _cache_hed_version(latest_version, library_name, version_info, cache_folder=cache_folder)
-        return cached_xml_file
-
-
-def _get_latest_hed_xml_version_from_url(hed_base_url, library_name=None, xml_version=None):
-    hed_versions = _get_hed_xml_versions_from_url(hed_base_url, library_name=library_name)
-
-    if not hed_versions:
-        return None
-
-    if xml_version and xml_version in hed_versions:
-        return xml_version, hed_versions[xml_version]
-
-    for version in hed_versions:
-        return version, hed_versions[version]
-
-
 def _calculate_sha1(filename):
+    """ Calculate sha1 hash for filename
+
+        Can be compared to GitHub hash values
+    """
     try:
         with open(filename, 'rb') as f:
             data = f.read()
@@ -447,6 +392,7 @@ def _safe_move_tmp_to_folder(temp_hed_xml_file, dest_filename):
 
 
 def _cache_hed_version(version, library_name, version_info, cache_folder):
+    """Cache the given hed version"""
     sha_hash, download_url = version_info
 
     possible_cache_filename = _create_xml_filename(version, library_name, cache_folder)

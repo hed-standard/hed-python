@@ -2,7 +2,6 @@
 import os
 import json
 import functools
-import urllib.error
 
 from hed.schema.schema_io.xml2schema import SchemaLoaderXML
 from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
@@ -15,6 +14,7 @@ from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.schema_validation_util import validate_version_string
 from collections import defaultdict
 from hed.schema.schema_io.owl_constants import ext_to_format
+from urllib.error import URLError
 
 
 MAX_MEMORY_CACHE = 40
@@ -97,7 +97,7 @@ def load_schema(hed_path, schema_namespace=None, schema=None, file_format=None, 
     if is_url:
         try:
             file_as_string = schema_util.url_to_string(hed_path)
-        except urllib.error.URLError as e:
+        except URLError as e:
             raise HedFileError(HedExceptions.URL_ERROR, str(e), hed_path) from e
         hed_schema = from_string(file_as_string, schema_format=os.path.splitext(hed_path.lower())[1], name=name)
     elif ext in ext_to_format:
@@ -309,7 +309,8 @@ def parse_version_list(xml_version_list):
                                f"Must specify a schema version by number, found no version on {xml_version_list} schema.",
                                filename=None)
         if version in out_versions[schema_namespace]:
-            raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_LIBRARY, f"Attempting to load the same library '{version}' twice: {out_versions[schema_namespace]}",
+            raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_LIBRARY,
+                               f"Attempting to load the same library '{version}' twice: {out_versions[schema_namespace]}",
                                filename=None)
         out_versions[schema_namespace].append(version)
 

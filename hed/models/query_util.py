@@ -12,12 +12,8 @@ class SearchResult:
             new_tags = tag.copy()
         self.tags = new_tags
 
-    def __eq__(self, other):
-        if isinstance(other, SearchResult):
-            return self.group == other.group
-        return other == self.group
-
-    def merge_result(self, other):
+    def merge_and_result(self, other):
+        """Returns a new result, with the combined tags/groups from this and other."""
         # Returns a new
         new_tags = self.tags.copy()
         for tag in other.tags:
@@ -31,6 +27,7 @@ class SearchResult:
         return SearchResult(self.group, new_tags)
 
     def has_same_tags(self, other):
+        """Checks if these two results have the same tags/groups by identity(not equality)"""
         if self.group != other.group:
             return False
 
@@ -42,16 +39,9 @@ class SearchResult:
     def __str__(self):
         return str(self.group) + " Tags: " + "---".join([str(tag) for tag in self.tags])
 
-    def get_tags_only(self):
-        from hed import HedTag
-        return [tag for tag in self.tags if isinstance(tag, HedTag)]
-
-    def get_groups_only(self):
-        from hed import HedTag
-        return [tag for tag in self.tags if not isinstance(tag, HedTag)]
-
 
 class Token:
+    """Represents a single term/character"""
     And = 0
     Tag = 1
     DescendantGroup = 4

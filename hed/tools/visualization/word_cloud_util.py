@@ -54,7 +54,7 @@ def _get_contour_mask(wc, width, height):
     return contour
 
 
-def _draw_contour(wc, img):
+def _draw_contour(wc, img: Image):
     """Slightly tweaked copy of internal WorldCloud function to allow transparency.
 
     Parameters:
@@ -92,10 +92,10 @@ WordCloud._draw_contour = _draw_contour
 
 
 def _numpy_to_svg(contour):
-    """ Convert an image array to SVG.
+    """ Convert a numpy array to SVG.
 
     Parameters:
-        contour (Image): Image to be converted.
+        contour (np.Array): Image to be converted.
 
     Returns:
         str: The SVG representation.
