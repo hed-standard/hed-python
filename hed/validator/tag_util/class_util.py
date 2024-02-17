@@ -122,7 +122,7 @@ class UnitValueValidator:
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
-            stripped_value (str): Value stripped of white space?
+            stripped_value (str): value without units
 
         Returns:
             list: List of int locations in which error occurred.
@@ -146,7 +146,7 @@ class UnitValueValidator:
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
-            stripped_value (str): Value stripped of white space?
+            stripped_value (str): value without units
             report_as (HedTag): Report as this tag.
             error_code(str): The code to override the error as.  Again mostly for def/def-expand tags.
             index_offset(int): Offset into the extension validate_text starts at.

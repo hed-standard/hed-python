@@ -207,8 +207,6 @@ class HedString(HedGroup):
                     current_tag_group.append(HedGroup(hed_string, startpos + delimiter_index))
 
                 if delimiter_char is HedString.CLOSING_GROUP_CHARACTER:
-                    # if prev_delimiter == ",":
-                    #     raise ValueError(f"Closing parentheses in HED string {hed_string}")
                     # Terminate existing group, and save it off.
                     paren_end = startpos + delimiter_index + 1
 
@@ -296,14 +294,12 @@ class HedString(HedGroup):
 
             if char in tag_delimiters:
                 if found_symbol:
-                    # view_string = hed_string[last_end_pos: i]
                     if last_end_pos != i:
                         result_positions.append((False, (last_end_pos, i)))
                     last_end_pos = i
                 elif not found_symbol:
                     found_symbol = True
                     last_end_pos = i - current_spacing
-                    # view_string = hed_string[tag_start_pos: last_end_pos]
                     result_positions.append((True, (tag_start_pos, last_end_pos)))
                     current_spacing = 0
                     tag_start_pos = None
@@ -311,7 +307,6 @@ class HedString(HedGroup):
 
             # If we have a current delimiter, end it here.
             if found_symbol and last_end_pos is not None:
-                # view_string = hed_string[last_end_pos: i]
                 if last_end_pos != i:
                     result_positions.append((False, (last_end_pos, i)))
                 last_end_pos = None
@@ -322,10 +317,8 @@ class HedString(HedGroup):
                 tag_start_pos = i
 
         if last_end_pos is not None and len(hed_string) != last_end_pos:
-            # view_string = hed_string[last_end_pos: len(hed_string)]
             result_positions.append((False, (last_end_pos, len(hed_string))))
         if tag_start_pos is not None:
-            # view_string = hed_string[tag_start_pos: len(hed_string)]
             result_positions.append((True, (tag_start_pos, len(hed_string) - current_spacing)))
             if current_spacing:
                 result_positions.append((False, (len(hed_string) - current_spacing, len(hed_string))))

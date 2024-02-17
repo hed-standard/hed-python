@@ -47,26 +47,63 @@ class QueryHandler:
         self.tree = self._parse(expression_string.lower())
         self._org_string = expression_string
 
+    def search(self, hed_string_obj):
+        """Returns if a match is found in the given string
+
+        Parameters:
+            hed_string_obj (HedString): String to search
+
+        Returns:
+            list(SearchResult): Generally you should just treat this as a bool
+                                True if a match was found.
+        """
+        current_node = self.tree
+
+        result = current_node.handle_expr(hed_string_obj)
+        return result
+
     def __str__(self):
         return str(self.tree)
 
     def _get_next_token(self):
+        """Returns the current token and advances the counter"""
         self.at_token += 1
         if self.at_token >= len(self.tokens):
             raise ValueError("Parse error in get next token")
         return self.tokens[self.at_token]
 
     def _next_token_is(self, kinds):
+        """Returns the current token if it matches kinds, and advances the counter"""
         if self.at_token + 1 >= len(self.tokens):
             return None
         if self.tokens[self.at_token + 1].kind in kinds:
             return self._get_next_token()
         return None
 
-    def current_token(self):
-        if self.at_token + 1 >= len(self.tokens):
-            return None
-        return self.tokens[self.at_token].text
+    def _parse(self, expression_string):
+        """Parse the string and build an expression tree"""
+        self.tokens = self._tokenize(expression_string)
+
+        expr = self._handle_or_op()
+
+        if self.at_token + 1 != len(self.tokens):
+            raise ValueError("Parse error in search string")
+
+        return expr
+
+    @staticmethod
+    def _tokenize(expression_string):
+        """Tokenize the expression string into a list"""
+        grouping_re = r"\[\[|\[|\]\]|\]|}|{|:"
+        paren_re = r"\)|\(|~"
+        word_re = r"\?+|\band\b|\bor\b|,|[\"_\-a-zA-Z0-9/.^#\*@]+"
+        re_string = fr"({grouping_re}|{paren_re}|{word_re})"
+        token_re = re.compile(re_string)
+
+        tokens = token_re.findall(expression_string)
+        tokens = [Token(token) for token in tokens]
+
+        return tokens
 
     def _handle_and_op(self):
         expr = self._handle_negation()
@@ -79,10 +116,10 @@ class QueryHandler:
         return expr
 
     def _handle_or_op(self):
-        expr = self._handle_and_op()  # Note: calling _handle_and_op here
+        expr = self._handle_and_op()
         next_token = self._next_token_is([Token.Or])
         while next_token:
-            right = self._handle_and_op()  # Note: calling _handle_and_op here
+            right = self._handle_and_op()
             if next_token.kind == Token.Or:
                 expr = ExpressionOr(next_token, expr, right)
             next_token = self._next_token_is([Token.Or])
@@ -143,31 +180,3 @@ class QueryHandler:
                 expr = None
 
         return expr
-
-    def _parse(self, expression_string):
-        self.tokens = self._tokenize(expression_string)
-
-        expr = self._handle_or_op()
-
-        if self.at_token + 1 != len(self.tokens):
-            raise ValueError("Parse error in search string")
-
-        return expr
-
-    def _tokenize(self, expression_string):
-        grouping_re = r"\[\[|\[|\]\]|\]|}|{|:"
-        paren_re = r"\)|\(|~"
-        word_re = r"\?+|\band\b|\bor\b|,|[\"_\-a-zA-Z0-9/.^#\*@]+"
-        re_string = fr"({grouping_re}|{paren_re}|{word_re})"
-        token_re = re.compile(re_string)
-
-        tokens = token_re.findall(expression_string)
-        tokens = [Token(token) for token in tokens]
-
-        return tokens
-
-    def search(self, hed_string_obj):
-        current_node = self.tree
-
-        result = current_node.handle_expr(hed_string_obj)
-        return result

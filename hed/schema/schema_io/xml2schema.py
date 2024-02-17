@@ -4,6 +4,7 @@ This module is used to create a HedSchema object from an XML file or tree.
 
 from defusedxml import ElementTree
 import xml
+from xml.etree import ElementTree
 
 import hed.schema.hed_schema_constants
 from hed.errors.exceptions import HedFileError, HedExceptions

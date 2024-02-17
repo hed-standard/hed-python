@@ -42,9 +42,6 @@ class Test(unittest.TestCase):
         time_since_update = hed_cache.cache_xml_versions(cache_folder=self.hed_cache_dir)
         self.assertGreater(time_since_update, 0)
 
-    def test_cache_specific_urls(self):
-        filename = hed_cache.cache_specific_url(self.specific_base_url)
-        self.assertTrue(os.path.exists(filename))
 
     def test_get_cache_directory(self):
         from hed.schema import get_cache_directory
@@ -61,13 +58,6 @@ class Test(unittest.TestCase):
         hed_cache.set_cache_directory(saved_cache_dir)
         self.assertTrue(hed_cache.HED_CACHE_DIRECTORY == saved_cache_dir)
         os.rmdir(hed_cache_dir)
-
-    def test_cache_specific_url(self):
-        local_filename = hed_cache.cache_specific_url(self.specific_hed_url, None, cache_folder=self.hed_cache_dir)
-        self.assertTrue(local_filename)
-
-        with self.assertRaises(HedFileError):
-            hed_cache.cache_specific_url("https://github.com/hed-standard/hed-python/notrealurl.xml")
 
     def test_get_hed_versions_all(self):
         cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="all")

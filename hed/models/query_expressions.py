@@ -20,7 +20,8 @@ class Expression:
             self._match_mode = 2
             token.text = token.text.replace("*", "")
 
-    def _get_parent_groups(self, search_results):
+    @staticmethod
+    def _get_parent_groups(search_results):
         found_parent_groups = []
         if search_results:
             for group in search_results:
@@ -41,6 +42,14 @@ class Expression:
         return output_str
 
     def handle_expr(self, hed_group, exact=False):
+        """Handles parsing the given expression, recursively down the list as needed.
+
+           BaseClass implementation is search terms.
+
+           Parameters:
+               hed_group(HedGroup): The object to search
+               exact(bool): If True, we are only looking for groups containing this term directly, not descendants.
+           """
         if self._match_mode == 2:
             groups_found = hed_group.find_wildcard_tags([self.token.text], recursive=True, include_groups=2)
         elif self._match_mode:
@@ -76,10 +85,19 @@ class ExpressionAnd(Expression):
             return groups1
         groups2 = self.right.handle_expr(hed_group, exact=exact)
 
-        return self.merge_groups(groups1, groups2)
+        return self.merge_and_groups(groups1, groups2)
 
     @staticmethod
-    def merge_groups(groups1, groups2):
+    def merge_and_groups(groups1, groups2):
+        """Finds any shared results
+
+        Parameters:
+            groups1(list): a list of search results
+            groups2(list): a list of search results
+
+        Returns:
+            combined_groups(list): groups in both lists narrowed down results to where none of the tags overlap
+        """
         return_list = []
         for group in groups1:
             for other_group in groups2:
@@ -87,7 +105,8 @@ class ExpressionAnd(Expression):
                     # At this point any shared tags between the two groups invalidates it.
                     if any(tag is tag2 and tag is not None for tag in group.tags for tag2 in other_group.tags):
                         continue
-                    merged_result = group.merge_result(other_group)
+                    # Merge the two groups tags into one new result, now that we've verified they're unique
+                    merged_result = group.merge_and_result(other_group)
 
                     dont_add = False
                     # This is trash and slow
@@ -195,7 +214,8 @@ class ExpressionExactMatch(Expression):
         super().__init__(token, left, right)
         self.optional = "any"
 
-    def _filter_exact_matches(self, search_results):
+    @staticmethod
+    def _filter_exact_matches(search_results):
         filtered_list = []
         for group in search_results:
             if len(group.group.children) == len(group.tags):
@@ -215,7 +235,7 @@ class ExpressionExactMatch(Expression):
         # Basically if we don't have an exact match above, do the more complex matching including optional
         if self.left:
             optional_groups = self.left.handle_expr(hed_group, exact=True)
-            found_groups = ExpressionAnd.merge_groups(found_groups, optional_groups)
+            found_groups = ExpressionAnd.merge_and_groups(found_groups, optional_groups)
 
         filtered_list = self._filter_exact_matches(found_groups)
         if filtered_list:

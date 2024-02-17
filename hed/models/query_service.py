@@ -21,7 +21,7 @@ def get_query_handlers(queries, query_names=None):
         return None, None, [f"EmptyQueries: The queries list must not be empty"]
     elif isinstance(queries, str):
         queries = [queries]
-    expression_parsers = [None for i in range(len(queries))]
+    expression_parsers = [None] * len(queries)
     issues = []
     if not query_names:
         query_names = [f"query_{index}" for index in range(len(queries))]
