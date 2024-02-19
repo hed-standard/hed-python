@@ -22,7 +22,7 @@ def generate_contour_svg(wc, width, height):
     contour = _get_contour_mask(wc, width, height)
     if contour is None:
         return ""
-    return _numpy_to_svg(contour)
+    return _numpy_to_svg(contour, radius=wc.contour_width, color=wc.contour_color)
 
 
 def _get_contour_mask(wc, width, height):
@@ -91,19 +91,20 @@ def _draw_contour(wc, img: Image):
 WordCloud._draw_contour = _draw_contour
 
 
-def _numpy_to_svg(contour):
+def _numpy_to_svg(contour, radius=1, color="black"):
     """ Convert a numpy array to SVG.
 
     Parameters:
         contour (np.Array): Image to be converted.
-
+        radius (float): The radius of the contour to draw.
+        color(string): the color to draw it as, e.g. "red"
     Returns:
         str: The SVG representation.
     """
     svg_elements = []
     points = np.array(contour.nonzero()).T
     for y, x in points:
-        svg_elements.append(f'<circle cx="{x}" cy="{y}" r="1" stroke="black" fill="black" />')
+        svg_elements.append(f'<circle cx="{x}" cy="{y}" r="{radius}" stroke="{color}" fill="{color}" />')
 
     return '\n'.join(svg_elements)
 
