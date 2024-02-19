@@ -12,7 +12,7 @@ def gather_descriptions(hed_string):
         description(str): The concatenated values of all description tags.
  
     Side effect:
-         The input HedString has its Definition tags removed.
+         The input HedString has its description tags removed.
 
     """
     desc_tags = hed_string.find_tags("description", recursive=True, include_groups=0)
