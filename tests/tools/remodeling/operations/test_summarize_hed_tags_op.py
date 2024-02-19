@@ -274,7 +274,7 @@ class Test(unittest.TestCase):
         }
         expected_output = {'tag1': 5, 'tag2': 3, 'tag3': 7}
 
-        word_dict = HedTagSummary.summary_to_dict(summary_json, transform=None, adjustment=0)
+        word_dict = HedTagSummary.summary_to_dict(summary_json, transform=None, scale_adjustment=0)
         self.assertEqual(word_dict, expected_output)
 
 

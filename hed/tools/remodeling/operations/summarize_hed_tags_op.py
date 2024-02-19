@@ -74,7 +74,43 @@ class SummarizeHedTagsOp(BaseOp):
                 "type": "boolean"
             },
             "word_cloud": {
-                "type": "boolean"
+                "type": "object",
+                "properties": {
+                    "height": {
+                        "type": "integer"
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "prefer_horizontal": {
+                        "type": "number"
+                    },
+                    "min_font_size": {
+                        "type": "number"
+                    },
+                    "max_font_size": {
+                        "type": "number"
+                    },
+                    "scale_adjustment": {
+                        "type": "number"
+                    },
+                    "contour_width": {
+                        "type": "number"
+                    },
+                    "contour_color": {
+                        "type": "string"
+                    },
+                    "background_color": {
+                        "type": "string"
+                    },
+                    "use_mask": {
+                        "type": "boolean"
+                    },
+                    "mask_path": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": False
             },
         },
         "required": [
@@ -102,7 +138,26 @@ class SummarizeHedTagsOp(BaseOp):
         self.include_context = parameters.get('include_context', True)
         self.replace_defs = parameters.get("replace_defs", True)
         self.remove_types = parameters.get("remove_types", [])
-        self.word_cloud = parameters.get("word_cloud", False)
+        if "word_cloud" not in parameters:
+            self.word_cloud = None
+        else:
+            wc_params = parameters["word_cloud"]
+            self.word_cloud = {
+                "height": wc_params.get("height", 300),
+                "width": wc_params.get("width", 400),
+                "prefer_horizontal": wc_params.get("prefer_horizontal", 0.75),
+                "min_font_size": wc_params.get("min_font_size", 8),
+                "max_font_size": wc_params.get("max_font_size", 15),
+                "scale_adjustment": wc_params.get("scale_adjustment", 7),
+                "contour_width": wc_params.get("contour_width", 3),
+                "contour_color": wc_params.get("contour_color", 'black'),
+                "background_color": wc_params.get("background_color", None),
+                "use_mask": wc_params.get("use_mask", False),
+                "mask_path": wc_params.get("mask_path", None)
+            }
+            if self.word_cloud["use_mask"] and not self.word_cloud["mask_path"]:
+                self.word_cloud["mask_path"] = os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                                                '../../../resources/word_cloud_brain_mask.png'))
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Summarize the HED tags present in the dataset.
@@ -144,6 +199,7 @@ class HedTagSummary(BaseSummary):
             sum_op (BaseOp): Operation associated with this summary.
 
         """
+
         super().__init__(sum_op)
         self.sum_op = sum_op
 
@@ -237,31 +293,35 @@ class HedTagSummary(BaseSummary):
         """
         if not self.sum_op.word_cloud:
             return
+        else:
+            wc = self.sum_op.word_cloud
         # summary = self.get_summary(individual_summaries='none')
         summary = self.get_summary(individual_summaries='none')
         overall_summary = summary.get("Dataset", {})
         overall_summary = overall_summary.get("Overall summary", {})
         specifics = overall_summary.get("Specifics", {})
-        word_dict = self.summary_to_dict(specifics)
-        width = 400
-        height = 300
-        mask_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                  '../../../resources/word_cloud_brain_mask.png'))
-        tag_wc = create_wordcloud(word_dict, mask_path=mask_path, width=width, height=height)
+        word_dict = self.summary_to_dict(specifics, scale_adjustment=wc["scale_adjustment"])
+
+        tag_wc = create_wordcloud(word_dict, mask_path=wc["mask_path"], width=wc["width"], height=wc["height"],
+                                  prefer_horizontal=wc["prefer_horizontal"], background_color=wc["background_color"],
+                                  min_font_size=wc["min_font_size"], max_font_size=wc["max_font_size"],
+                                  contour_width=wc["contour_width"], contour_color=wc["contour_color"])
         svg_data = word_cloud_to_svg(tag_wc)
-        cloud_filename = os.path.realpath(os.path.join(save_dir, self.op.summary_name, '_word_cloud.svg'))
+        cloud_filename = os.path.realpath(os.path.join(save_dir, self.sum_op.summary_name,
+                                                       self.sum_op.summary_name + '_word_cloud.svg'))
         with open(cloud_filename, "w") as outfile:
             outfile.writelines(svg_data)
 
     @staticmethod
-    def summary_to_dict(specifics, transform=np.log10, adjustment=7):
+    def summary_to_dict(specifics, transform=np.log10, scale_adjustment=7):
         """Convert a HedTagSummary json specifics dict into the word cloud input format.
 
         Parameters:
             specifics(dict): Dictionary with keys "Main tags" and "Other tags".
             transform(func): The function to transform the number of found tags.
                              Default log10
-            adjustment(int): Value added after transform.
+            scale_adjustment(int): Value added after transform.
+
         Returns:
             word_dict(dict): a dict of the words and their occurrence count.
 
@@ -278,10 +338,10 @@ class HedTagSummary(BaseSummary):
             if tag == "Exclude tags":
                 continue
             for tag_sub_dict in tag_sub_list:
-                word_dict[tag_sub_dict['tag']] = transform(tag_sub_dict['events']) + adjustment
+                word_dict[tag_sub_dict['tag']] = transform(tag_sub_dict['events']) + scale_adjustment
         other_dict = specifics.get("Other tags", [])
         for tag_sub_list in other_dict:
-            word_dict[tag_sub_list['tag']] = transform(tag_sub_list['events']) + adjustment
+            word_dict[tag_sub_list['tag']] = transform(tag_sub_list['events']) + scale_adjustment
         return word_dict
 
     @staticmethod

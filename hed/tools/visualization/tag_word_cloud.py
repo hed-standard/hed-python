@@ -41,7 +41,8 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     kwargs.setdefault('color_func', default_color_func)
     kwargs.setdefault('relative_scaling', 1)
     kwargs.setdefault('max_font_size', height / 20)
-    kwargs.setdefault('min_font_size', 8)
+    kwargs.setdefault('min_font_size', 8),
+
 
     wc = WordCloud(background_color=background_color, mask=mask_image,
                    width=width, height=height, mode="RGBA", **kwargs)
@@ -64,35 +65,6 @@ def word_cloud_to_svg(wc):
     svg_string = svg_string.replace("fill:", "fill:rgb")
     svg_string = svg_string.replace("</svg>", generate_contour_svg(wc, wc.width, wc.height) + "</svg>")
     return svg_string
-
-
-def summary_to_dict(summary, transform=np.log10, adjustment=5):
-    """Convert a HedTagSummary JSON dict into the word cloud input format.
-
-    Parameters:
-        summary(dict): The summary from a SummarizeHedTagsOp.
-        transform(func): The function to transform the number of found tags (Default log10).
-        adjustment(int): Value added after transform.
-
-    Returns:
-        word_dict(dict): A dict of the words and their occurrence count.
-
-    :raises KeyError:
-        A malformed dictionary was passed.
-
-    """
-    if transform is None:
-        def transform(x):
-            return x
-    overall_summary = summary.get("Overall summary", {})
-    specifics = overall_summary.get("Specifics", {})
-    tag_dict = specifics.get("Main tags", {})
-    word_dict = {}
-    for tag_sub_list in tag_dict.values():
-        for tag_sub_dict in tag_sub_list:
-            word_dict[tag_sub_dict['tag']] = transform(tag_sub_dict['events']) + adjustment
-
-    return word_dict
 
 
 def load_and_resize_mask(mask_path, width=None, height=None):

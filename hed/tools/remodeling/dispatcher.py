@@ -37,8 +37,8 @@ class Dispatcher:
 
         :raises ValueError:
             - If any of the operations cannot be parsed correctly.
-
         """
+
         self.data_root = data_root
         self.backup_name = backup_name
         self.backup_man = None
@@ -60,7 +60,6 @@ class Dispatcher:
 
         Returns:
             list: A list of dictionaries of summaries keyed to filenames.
-
         """
 
         summary_list = []
@@ -101,9 +100,9 @@ class Dispatcher:
               In this case, the corresponding backup file is read and returned.    
             - If a string is passed and there is no backup manager,
               the data file corresponding to the file_designator is read and returned.    
-            - If a Pandas DataFrame, return a copy.   
-
+            - If a Pandas DataFrame, return a copy.
         """
+
         if isinstance(file_designator, pd.DataFrame):
             return file_designator.copy()
         if self.backup_man:
@@ -126,7 +125,6 @@ class Dispatcher:
 
         :raises HedFileError:
             - If this dispatcher does not have a data_root.
-
         """
 
         if self.data_root:
@@ -143,7 +141,6 @@ class Dispatcher:
 
         Returns:
             DataFrame:  The processed dataframe.
-
         """
 
         # string to functions
@@ -173,8 +170,8 @@ class Dispatcher:
             - "consolidated" means that the overall summary and summaries of individual files are in one summary file.  
             - "individual" means that the summaries of individual files are in separate files.
             - "none" means that only the overall summary is produced.
-
         """
+
         if not save_formats:
             return
         if not summary_dir:
@@ -185,6 +182,15 @@ class Dispatcher:
 
     @staticmethod
     def parse_operations(operation_list):
+        """ Return a parsed a list of remodeler operations.
+
+        Parameters:
+            operation_list (list): List of JSON remodeler operations.
+
+        Returns:
+            list: List of Python objects containing parsed remodeler operations.
+        """
+
         operations = []
         for index, item in enumerate(operation_list):
             new_operation = valid_operations[item["operation"]](item["parameters"])
@@ -197,8 +203,8 @@ class Dispatcher:
 
         Parameters:
             df (DataFrame) - The DataFrame to be processed.
-
         """
+
         result = df.replace('n/a', np.nan)
         # Comment in the next line if this behavior was actually needed, but I don't think it is.
         # result = result.infer_objects(copy=False)
@@ -206,15 +212,15 @@ class Dispatcher:
 
     @staticmethod
     def post_proc_data(df):
-        """ Replace all nan entries with 'n/a' for BIDS compliance
+        """ Replace all nan entries with 'n/a' for BIDS compliance.
 
         Parameters:
             df (DataFrame): The DataFrame to be processed.
 
         Returns:
-            DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'
-
+            DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'.
         """
+
         dtypes = df.dtypes.to_dict()
         for col_name, typ in dtypes.items():
             if typ == 'category':
@@ -232,10 +238,9 @@ class Dispatcher:
 
         Returns:
             str:  Single string representing the messages.
-
-
         """
-        error_list = [0]*len(messages)
+
+        error_list = [0] * len(messages)
         for index, message in enumerate(messages):
             error_list[index] = f"Operation[{message.get('index', None)}] " + \
                                 f"has error:{message.get('error_type', None)}" + \
@@ -255,8 +260,8 @@ class Dispatcher:
 
         Returns:
              HedSchema or HedSchemaGroup: Objects loaded from the hed_versions specification.
-
         """
+
         if not hed_versions:
             return None
         elif isinstance(hed_versions, str) or isinstance(hed_versions, list):
