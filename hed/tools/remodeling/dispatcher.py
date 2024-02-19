@@ -234,7 +234,7 @@ class Dispatcher:
         Parameters:
             messages (list):  List of error dictionaries each representing a single error.
             title (str):  If provided the title is concatenated at the top.
-            sep (str): Character used between lines in concatenation (default '\n').
+            sep (str): Character used between lines in concatenation.
 
         Returns:
             str:  Single string representing the messages.
