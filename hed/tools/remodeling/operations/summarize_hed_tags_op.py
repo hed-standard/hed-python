@@ -307,7 +307,8 @@ class HedTagSummary(BaseSummary):
                                   min_font_size=wc["min_font_size"], max_font_size=wc["max_font_size"],
                                   contour_width=wc["contour_width"], contour_color=wc["contour_color"])
         svg_data = word_cloud_to_svg(tag_wc)
-        cloud_filename = os.path.realpath(os.path.join(save_dir, self.op.summary_name, '_word_cloud.svg'))
+        cloud_filename = os.path.realpath(os.path.join(save_dir, self.sum_op.summary_name,
+                                                       self.sum_op.summary_name + '_word_cloud.svg'))
         with open(cloud_filename, "w") as outfile:
             outfile.writelines(svg_data)
 
