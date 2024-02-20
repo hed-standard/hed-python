@@ -2,8 +2,9 @@ import os
 import unittest
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import check_filename, extract_suffix_path, clean_filename, \
-    get_dir_dictionary, get_file_list, get_path_components, get_task_from_file, parse_bids_filename, \
-    _split_entity, get_allowed, get_filtered_by_element
+    get_alphanumeric_path, get_dir_dictionary, get_file_list, get_path_components, get_task_from_file, \
+    parse_bids_filename, _split_entity, get_allowed, get_filtered_by_element
+
 
 
 class Test(unittest.TestCase):
@@ -92,7 +93,14 @@ class Test(unittest.TestCase):
         self.assertEqual(value1, "events", "get_allowed is case insensitive")
         value2 = get_allowed(test_value1, [])
         self.assertEqual(value2, test_value1)
-        
+
+    def test_get_alphanumeric_path(self):
+        mypath1 = 'g:\\String1%_-sTring2\n//string3\\\\\string4.pnG'
+        repath1 = get_alphanumeric_path(mypath1)
+        self.assertEqual('g_String1_sTring2_string3_string4_pnG', repath1)
+        repath2 = get_alphanumeric_path(mypath1, '$')
+        self.assertEqual('g$String1$sTring2$string3$string4$pnG', repath2)
+
     def test_get_dir_dictionary(self):
         dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
         self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")
