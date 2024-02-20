@@ -71,6 +71,20 @@ def get_allowed(value, allowed_values=None, starts_with=True):
     return result
 
 
+def get_alphanumeric_path(pathname, replace_char='_'):
+    """ Replace sequences of non-alphanumeric characters in string (usually a path) with specified character.
+
+        Parameters:
+            pathname (str): A string usually representing a pathname, but could be any string.
+            replace_char (str): Replacement character(s).
+
+        Returns:
+            str: New string with characters replaced.
+
+    """
+    return re.sub(r'[^a-zA-Z0-9]+', replace_char, pathname)
+
+
 def extract_suffix_path(path, prefix_path):
     """ Return the suffix of path after prefix path has been removed.
 
