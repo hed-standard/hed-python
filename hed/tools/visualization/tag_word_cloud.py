@@ -43,7 +43,6 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     kwargs.setdefault('max_font_size', height / 20)
     kwargs.setdefault('min_font_size', 8),
 
-
     wc = WordCloud(background_color=background_color, mask=mask_image,
                    width=width, height=height, mode="RGBA", **kwargs)
 
@@ -85,7 +84,7 @@ def load_and_resize_mask(mask_path, width=None, height=None):
         numpy.ndarray: The loaded and processed mask image as a numpy array with binary values (0 or 255).
     """
     if mask_path:
-        mask_image = Image.open(mask_path)
+        mask_image = Image.open(mask_path).convert("RGBA")
 
         if width or height:
             original_size = np.array((mask_image.width, mask_image.height))
@@ -100,11 +99,11 @@ def load_and_resize_mask(mask_path, width=None, height=None):
 
             mask_image = mask_image.resize(output_size.astype(int), Image.LANCZOS)
 
-            # Convert to greyscale then to binary black and white (0 or 255)
-            mask_image = mask_image.convert('L')
-            mask_image_array = np.array(mask_image)
-            mask_image_array = np.where(mask_image_array > 127, 255, 0)
-        else:
-            mask_image_array = np.array(mask_image)
+        mask_image_array = np.array(mask_image)
+        # Treat transparency (alpha < 128) or white (R>127, G>127, B>127) as white, else black
+        mask_image_array = np.where((mask_image_array[:, :, 3] < 128) |
+                                    ((mask_image_array[:, :, 0] > 127) &
+                                     (mask_image_array[:, :, 1] > 127) &
+                                     (mask_image_array[:, :, 2] > 127)), 255, 0)
 
         return mask_image_array.astype(np.uint8)

@@ -9,7 +9,7 @@ from hed.schema import schema_validation_util
 from .base2schema import SchemaLoader
 import rdflib
 from rdflib.exceptions import ParserError
-from rdflib import Graph, RDF, RDFS, Literal, URIRef, OWL, XSD
+from rdflib import RDF, RDFS, URIRef, OWL
 from collections import defaultdict
 
 from hed.schema.schema_io.owl_constants import HED, HEDT, HEDU, HEDUM
@@ -77,7 +77,6 @@ class SchemaLoaderOWL(SchemaLoader):
         self.graph.bind("hedu", HEDU)
         self.graph.bind("hedum", HEDUM)
 
-
         self._schema.epilogue = self._read_epilogue()
         self._schema.prologue = self._read_prologue()
         self._get_header_attributes(self.graph)
@@ -87,8 +86,6 @@ class SchemaLoaderOWL(SchemaLoader):
         self._read_section(HedSectionKey.ValueClasses, HED.HedValueClass)
         self._read_section(HedSectionKey.UnitModifiers, HED.HedUnitModifier)
         self._read_tags()
-
-        breakHere = 3
 
     def get_local_names_from_uris(parent_chain, tag_uri):
         """
@@ -238,8 +235,6 @@ class SchemaLoaderOWL(SchemaLoader):
             self._add_to_dict(new_entry, key_class)
             unit_classes[uri] = new_entry
 
-
-
         key_class = HedSectionKey.Units
         units = self._get_classes(HED.HedUnit)
         for uri in units:
@@ -248,7 +243,6 @@ class SchemaLoaderOWL(SchemaLoader):
             unit_class_uri = self.graph.value(subject=uri, predicate=HED.unitClass)
             class_entry = unit_classes.get(unit_class_uri)
             class_entry.add_unit(new_entry)
-            breakHere = 3
 
     def _add_tag_internal(self, uri, parent_tags):
         tag_name = self.graph.value(uri, RDFS.label)
@@ -285,7 +279,7 @@ class SchemaLoaderOWL(SchemaLoader):
     def _add_to_dict(self, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             raise HedFileError(HedExceptions.IN_LIBRARY_IN_UNMERGED,
-                               f"Library tag in unmerged schema has InLibrary attribute",
+                               "Library tag in unmerged schema has InLibrary attribute",
                                self.name)
 
         return self._add_to_dict_base(entry, key_class)

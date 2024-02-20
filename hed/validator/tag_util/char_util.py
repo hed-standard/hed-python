@@ -73,7 +73,7 @@ class CharValidator:
         return self._check_invalid_chars(validate_text, allowed_chars, original_tag,
                                          starting_index=len(original_tag.org_base_tag) + 1 + index_offset,
                                          error_code=error_code)
-    
+
     @staticmethod
     def _check_invalid_chars(check_string, allowed_chars, source_tag, starting_index=0, error_code=None):
         """ Helper for checking for invalid characters.

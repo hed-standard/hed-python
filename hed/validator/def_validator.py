@@ -1,5 +1,3 @@
-from hed.models.hed_string import HedString
-from hed.models.hed_tag import HedTag
 from hed.models.hed_group import HedGroup
 from hed.models.definition_dict import DefinitionDict
 from hed.errors.error_types import ValidationErrors

@@ -1,4 +1,4 @@
-from hed.schema.hed_schema import HedSchema, HedKey
+from hed.schema.hed_schema import HedKey
 from hed.schema.hed_schema_constants import HedSectionKey
 from collections import defaultdict
 
@@ -300,7 +300,7 @@ def pretty_print_change_dict(change_dict, title="Schema changes"):
     """Formats the change_dict into a string.
 
     Parameters:
-        change_dict(dict): The result from calling gather_schema_changes 
+        change_dict(dict): The result from calling gather_schema_changes
         title(str): Optional header to add, a default on will be added otherwise.
 
     Returns:

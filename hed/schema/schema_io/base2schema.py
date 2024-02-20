@@ -70,7 +70,6 @@ class SchemaLoader(ABC):
         self._schema.header_attributes = hed_attributes
         self._loading_merged = False
 
-
     @property
     def schema(self):
         """ The partially loaded schema if you are after just header attributes."""

@@ -191,7 +191,7 @@ class DefExpandGatherer:
                                                                            takes_value=True,
                                                                            source_context=[])
                 del self.ambiguous_defs[def_tag_name.lower()]
-        except ValueError as e:
+        except ValueError:
             for ambiguous_def in these_defs.placeholder_defs:
                 self.errors.setdefault(def_tag_name.lower(), []).append(ambiguous_def)
             del self.ambiguous_defs[def_tag_name.lower()]

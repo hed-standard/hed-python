@@ -1,7 +1,6 @@
 from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 
-
 entries_by_section = {
     HedSectionKey.Properties: HedSchemaEntry,
     HedSectionKey.Attributes: HedSchemaEntry,
@@ -152,8 +151,8 @@ class HedSchemaSection:
 class HedSchemaUnitClassSection(HedSchemaSection):
     def _check_if_duplicate(self, name_key, new_entry):
         """Allow adding units to existing unit classes, using a placeholder one with no attributes."""
-        if name_key in self and len(new_entry.attributes) == 1\
-                    and HedKey.InLibrary in new_entry.attributes:
+        if name_key in self and len(new_entry.attributes) == 1 \
+                and HedKey.InLibrary in new_entry.attributes:
             return self.all_names[name_key]
         return super()._check_if_duplicate(name_key, new_entry)
 
@@ -267,8 +266,9 @@ class HedSchemaTagSection(HedSchemaSection):
 
         # sort the extension allowed top level nodes
         if extension_allowed_node:
-            split_list[extension_allowed_node:] = sorted(split_list[extension_allowed_node:], key=lambda x: x[0].long_tag_name)
+            split_list[extension_allowed_node:] = sorted(split_list[extension_allowed_node:],
+                                                         key=lambda x: x[0].long_tag_name)
         self.all_entries = [subitem for tag_list in split_list for subitem in tag_list]
 
         super()._finalize_section(hed_schema)
-        self.root_tags = {tag.short_tag_name:tag for tag in self.all_entries if not tag._parent_tag}
+        self.root_tags = {tag.short_tag_name: tag for tag in self.all_entries if not tag._parent_tag}

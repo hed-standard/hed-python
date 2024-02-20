@@ -16,7 +16,7 @@ class UnitValueValidator:
 
     DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
 
-    VALUE_CLASS_ALLOWED_CACHE=20
+    VALUE_CLASS_ALLOWED_CACHE = 20
 
     def __init__(self, value_validators=None):
         """ Validates the unit and value classes on a given tag.

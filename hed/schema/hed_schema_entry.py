@@ -2,8 +2,6 @@ from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.hed_schema_constants import HedKey
 
 import inflect
-import copy
-
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -169,7 +167,7 @@ class UnitClassEntry(HedSchemaEntry):
         self.units = {unit_entry.name: unit_entry for unit_entry in self._units}
         derivative_units = {}
         for unit_entry in self.units.values():
-            derivative_units.update({key:unit_entry for key in unit_entry.derivative_units.keys()})
+            derivative_units.update({key: unit_entry for key in unit_entry.derivative_units.keys()})
 
         self.derivative_units = derivative_units
 
@@ -179,6 +177,7 @@ class UnitClassEntry(HedSchemaEntry):
         if self.units != other.units:
             return False
         return True
+
 
 class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
@@ -215,7 +214,7 @@ class UnitEntry(HedSchemaEntry):
             base_factor = float(self.attributes.get(HedKey.ConversionFactor, "1.0").replace("^", "e"))
             if modifier_entry:
                 modifier_factor = float(modifier_entry.attributes.get(HedKey.ConversionFactor, "1.0").replace("^", "e"))
-        except (ValueError, AttributeError) as e:
+        except (ValueError, AttributeError):
             pass  # Just default to 1.0
         return base_factor * modifier_factor
 

@@ -48,4 +48,3 @@ ELEMENT_NAMES = {
     HedSectionKey.UnitModifiers: "HedUnitModifier",
     HedSectionKey.ValueClasses: "HedValueClass",
 }
-

@@ -1,9 +1,7 @@
 """ Utilities for assembly and conversion of HED strings to different forms. """
 from functools import partial
 import pandas as pd
-from hed.models.tabular_input import TabularInput
 from hed.models.hed_string import HedString
-from hed.models.definition_dict import DefinitionDict
 
 
 def get_assembled(tabular_file, hed_schema, extra_def_dicts=None, defs_expanded=True):
@@ -120,7 +118,6 @@ def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs
     Returns:
         tuple: A tuple containing the DefinitionDict, ambiguous definitions, and errors.
     """
-    
     from hed.models.def_expand_gather import DefExpandGatherer
     def_gatherer = DefExpandGatherer(hed_schema, known_defs, ambiguous_defs)
     return def_gatherer.process_def_expands(hed_strings)

@@ -44,7 +44,6 @@ def validate_version_string(version_string):
     return False
 
 
-
 header_attribute_validators = {
     constants.VERSION_ATTRIBUTE: (validate_version_string, HedExceptions.SCHEMA_VERSION_INVALID),
     constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)

@@ -2,7 +2,6 @@
 Mapping of a base input file columns into HED tags.
 """
 from hed.models.column_metadata import ColumnMetadata, ColumnType
-from hed.models.sidecar import Sidecar
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.models.definition_dict import DefinitionDict
