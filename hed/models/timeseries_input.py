@@ -1,6 +1,5 @@
 """ A BIDS time series tabular file. """
 from hed.models.base_input import BaseInput
-from hed.models.sidecar import Sidecar
 
 
 class TimeseriesInput(BaseInput):

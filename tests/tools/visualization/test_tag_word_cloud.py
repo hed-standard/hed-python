@@ -77,24 +77,41 @@ class TestLoadAndResizeMask(unittest.TestCase):
     def setUpClass(cls):
         # Create a simple black and white image
         cls.original_size = (300, 200)
-        cls.img = Image.new('L', cls.original_size, 0)  # Start with a black image
+        cls.img = Image.new('L', cls.original_size, 255)  # Start with a white image
 
-        # Draw a white circle in the middle of the image
+        # Draw a black circle in the middle of the image
         d = ImageDraw.Draw(cls.img)
-        circle_radius = min(cls.original_size) // 4  # Radius of circle is 1/4 of the smaller dimension of image
-        circle_center = (cls.original_size[0] // 2, cls.original_size[1] // 2)  # Circle center is center of image
+        circle_radius = min(cls.original_size) // 4
+        circle_center = (cls.original_size[0] // 2, cls.original_size[1] // 2)
         d.ellipse((circle_center[0] - circle_radius,
                    circle_center[1] - circle_radius,
                    circle_center[0] + circle_radius,
                    circle_center[1] + circle_radius),
-                  fill=255)  # Fill the ellipse with white
-        cls.img_path = 'temp_img.bmp'
+                  fill=0)
+        cls.img_path = 'temp_img.png'
         cls.img.save(cls.img_path)
+
+        # Start with a black fully transparent image
+        cls.img_trans = Image.new('RGBA', cls.original_size, (0, 0, 0, 0))
+
+        # Draw a black opaque circle in the middle
+        d = ImageDraw.Draw(cls.img_trans)
+        circle_radius = min(cls.original_size) // 4
+        circle_center = (cls.original_size[0] // 2, cls.original_size[1] // 2)
+        d.ellipse((circle_center[0] - circle_radius,
+                   circle_center[1] - circle_radius,
+                   circle_center[0] + circle_radius,
+                   circle_center[1] + circle_radius),
+                  fill=(0, 0, 0, 255))
+        cls.img_path_trans = 'temp_img_trans.png'
+        cls.img_trans.save(cls.img_path_trans)
+
 
     @classmethod
     def tearDownClass(cls):
         # Clean up the temp image
         os.remove(cls.img_path)
+        os.remove(cls.img_path_trans)
 
     def test_no_resizing(self):
         mask = load_and_resize_mask(self.img_path)
@@ -122,6 +139,23 @@ class TestLoadAndResizeMask(unittest.TestCase):
 
     def test_mask_color(self):
         mask = load_and_resize_mask(self.img_path)
-        # Since we created an image with '1' mode, all values should be either 0 or 255
+        # The mask should have 0 and 1, and no other values
         unique_values = np.unique(mask)
         self.assertCountEqual(unique_values, [0, 255])
+
+    def test_transparent_mask(self):
+        mask = load_and_resize_mask(self.img_path_trans)
+        # The mask should have 0 and 1, and no other values
+        unique_values = np.unique(mask)
+        self.assertCountEqual(unique_values, [0, 255])
+
+        mask = load_and_resize_mask(self.img_path_trans, width=500)
+        # The mask should have 0 and 1, and no other values
+        unique_values = np.unique(mask)
+        self.assertCountEqual(unique_values, [0, 255])
+        # Verify sizes
+        self.assertEqual(mask.shape, (333, 500))
+
+        mask_img = Image.fromarray(mask)
+        expected_width, expected_height = 500, int(self.original_size[1] * 500 / self.original_size[0])
+        self.assertEqual((mask_img.width, mask_img.height), (expected_width, expected_height))

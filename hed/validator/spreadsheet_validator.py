@@ -1,6 +1,5 @@
 import copy
 
-import pandas as pd
 from hed import BaseInput
 from hed.errors import ErrorHandler, ValidationErrors, ErrorContext
 from hed.errors.error_types import ColumnErrors

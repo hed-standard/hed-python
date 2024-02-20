@@ -16,7 +16,6 @@ from collections import defaultdict
 from hed.schema.schema_io.owl_constants import ext_to_format
 from urllib.error import URLError
 
-
 MAX_MEMORY_CACHE = 40
 
 
@@ -56,7 +55,8 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
     elif schema_format.endswith(".mediawiki"):
         hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string, schema=schema, name=name)
     elif schema_format:
-        hed_schema = SchemaLoaderOWL.load(schema_as_string=schema_string, schema=schema, file_format=schema_format, name=name)
+        hed_schema = SchemaLoaderOWL.load(schema_as_string=schema_string, schema=schema, file_format=schema_format,
+                                          name=name)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, f"Unknown schema extension {schema_format}", filename=name)
 
@@ -269,14 +269,15 @@ def load_schema_version(xml_version=None, xml_folder=None):
     """
     # Check if we start and end with a square bracket, or double quote.  This might be valid json
     if xml_version and isinstance(xml_version, str) and \
-        ((xml_version[0], xml_version[-1]) in [('[', ']'), ('"', '"')]):
+            ((xml_version[0], xml_version[-1]) in [('[', ']'), ('"', '"')]):
         try:
             xml_version = json.loads(xml_version)
         except json.decoder.JSONDecodeError as e:
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), xml_version) from e
     if xml_version and isinstance(xml_version, list):
         xml_versions = parse_version_list(xml_version)
-        schemas = [_load_schema_version(xml_version=version, xml_folder=xml_folder) for version in xml_versions.values()]
+        schemas = [_load_schema_version(xml_version=version, xml_folder=xml_folder) for version in
+                   xml_versions.values()]
         if len(schemas) == 1:
             return schemas[0]
 
@@ -314,6 +315,7 @@ def parse_version_list(xml_version_list):
                                filename=None)
         out_versions[schema_namespace].append(version)
 
-    out_versions = {key: ",".join(value) if not key else f"{key}:" + ",".join(value) for key, value in out_versions.items()}
+    out_versions = {key: ",".join(value) if not key else f"{key}:" + ",".join(value) for key, value in
+                    out_versions.items()}
 
     return out_versions

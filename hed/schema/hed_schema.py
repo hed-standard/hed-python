@@ -583,7 +583,7 @@ class HedSchema(HedSchemaBase):
 
     def _validate_remaining_terms(self, tag, working_tag, prefix_tag_adj, current_slash_index):
         """ Validates the terms past current_slash_index.
-        
+
         :raises _TagIdentifyError:
             - One of the extension terms already exists as a schema term.
         """

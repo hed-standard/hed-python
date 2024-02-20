@@ -595,7 +595,7 @@ class SchemaLoaderWiki(SchemaLoader):
     def _add_to_dict(self, line_number, line, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             self._add_fatal_error(line_number, line,
-                                  f"Library tag in unmerged schema has InLibrary attribute",
+                                  "Library tag in unmerged schema has InLibrary attribute",
                                   HedExceptions.IN_LIBRARY_IN_UNMERGED)
 
         return self._add_to_dict_base(entry, key_class)

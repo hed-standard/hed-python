@@ -166,8 +166,8 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
 
 # Import after hed_error decorators are defined.
-from hed.errors import error_messages
-from hed.errors import schema_error_messages
+from hed.errors import error_messages  # noqa:E402
+from hed.errors import schema_error_messages  # noqa:E402
 
 # Intentional to make sure tools don't think the import is unused
 error_messages.mark_as_used = True

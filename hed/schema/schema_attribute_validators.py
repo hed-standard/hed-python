@@ -13,7 +13,6 @@ Returns:
 
 from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors
 from hed.errors.error_reporter import ErrorHandler
-from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_cache import get_hed_versions
 from hed.schema.hed_schema_constants import HedKey
 
@@ -160,7 +159,7 @@ def conversion_factor(hed_schema, tag_entry, attribute_name):
     conversion_factor = tag_entry.attributes.get(attribute_name, "1.0")
     try:
         conversion_factor = float(conversion_factor.replace("^", "e"))
-    except (ValueError, AttributeError) as e:
+    except (ValueError, AttributeError):
         pass
     if not isinstance(conversion_factor, float) or conversion_factor <= 0.0:
         issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE,

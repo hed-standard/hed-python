@@ -6,6 +6,8 @@ from hed.schema.schema_io.schema2base import Schema2Base
 from rdflib import Graph, RDF, RDFS, Literal, URIRef, OWL, XSD
 
 from hed.schema.schema_io.owl_constants import HED, HEDT, HEDU, HEDUM
+import re
+
 
 HED_URIS = {
     None: HED,
@@ -293,9 +295,6 @@ class Schema2Owl(Schema2Base):
                 unit_class_uri=unit_class_uri
             )
         return uri
-
-
-import re
 
 
 def sanitize_for_turtle(name):

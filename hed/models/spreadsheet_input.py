@@ -13,7 +13,7 @@ class SpreadsheetInput(BaseInput):
 
         Parameters:
             file (str or file like): An xlsx/tsv file to open or a File object.
-            file_type (str or None): ".xlsx" for Excel, ".tsv" or ".txt" for tsv. data. 
+            file_type (str or None): ".xlsx" for Excel, ".tsv" or ".txt" for tsv. data.
             worksheet_name (str or None): The name of the Excel workbook worksheet that contains the HED tags.
                 Not applicable to tsv files. If omitted for Excel, the first worksheet is assumed.
             tag_columns (list): A list of ints or strs containing the columns that contain the HED tags.
@@ -24,7 +24,7 @@ class SpreadsheetInput(BaseInput):
                 values are HED tag prefixes to prepend to the tags in that column before processing.
 
         Notes:
-            - If file is a string, file_type is derived from file and this parameter is ignored.  
+            - If file is a string, file_type is derived from file and this parameter is ignored.
             - column_prefix_dictionary may be deprecated/renamed.  These are no longer prefixes,
               but rather converted to value columns.
               e.g. {"key": "Description", 1: "Label/"} will turn into value columns as

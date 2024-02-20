@@ -9,7 +9,6 @@ import pandas
 
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.errors.error_reporter import ErrorHandler
 import pandas as pd
 
 

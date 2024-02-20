@@ -18,7 +18,7 @@ def get_query_handlers(queries, query_names=None):
 
     """
     if not queries:
-        return None, None, [f"EmptyQueries: The queries list must not be empty"]
+        return None, None, ["EmptyQueries: The queries list must not be empty"]
     elif isinstance(queries, str):
         queries = [queries]
     expression_parsers = [None] * len(queries)
@@ -35,7 +35,7 @@ def get_query_handlers(queries, query_names=None):
     for index, query in enumerate(queries):
         try:
             expression_parsers[index] = QueryHandler(query)
-        except Exception as ex:
+        except Exception:
             issues.append(f"[BadQuery {index}]: {query} cannot be parsed")
     return expression_parsers, query_names, issues
 

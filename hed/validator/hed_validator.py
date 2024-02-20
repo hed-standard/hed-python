@@ -8,7 +8,6 @@ import re
 from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 
-from hed.models.hed_string import HedString
 from hed.validator.def_validator import DefValidator
 from hed.validator.tag_util import UnitValueValidator, CharValidator, StringValidator, TagValidator, GroupValidator
 
@@ -208,7 +207,8 @@ class HedValidator:
                     run_individual_tag_validators(hed_tag,
                                                   allow_placeholders=allow_placeholders,
                                                   is_definition=is_definition)
-                if hed_tag.short_base_tag == DefTagNames.DEF_ORG_KEY or hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY:
+                if (hed_tag.short_base_tag == DefTagNames.DEF_ORG_KEY or
+                        hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY):
                     validation_issues += self._def_validator.validate_def_value_units(hed_tag, self)
                 else:
                     validation_issues += self.validate_units(hed_tag)

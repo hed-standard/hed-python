@@ -71,7 +71,6 @@ class HedKey:
     IsInheritedProperty = 'isInheritedProperty'
 
 
-
 VERSION_ATTRIBUTE = 'version'
 LIBRARY_ATTRIBUTE = 'library'
 WITH_STANDARD_ATTRIBUTE = "withStandard"

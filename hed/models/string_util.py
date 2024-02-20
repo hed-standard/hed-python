@@ -10,7 +10,7 @@ def gather_descriptions(hed_string):
 
     Returns: tuple
         description(str): The concatenated values of all description tags.
- 
+
     Side effect:
          The input HedString has its description tags removed.
 

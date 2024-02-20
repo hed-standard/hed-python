@@ -150,7 +150,7 @@ def val_error_duplicate_column(column_number, column_name, list_name):
 
 
 @hed_error(ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
-def val_error_duplicate_column(column_number, column_name, list_names):
+def val_error_duplicate_column_between_sources(column_number, column_name, list_names):
     if column_name:
         return f"Found column '{column_name}' at index {column_number} in the following inputs: {list_names}. " \
                f"Each entry must be unique."
@@ -181,7 +181,7 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
-    return f"A data-recording's Def-expand tag does not match the given definition." + \
+    return f"A data-recording's Def-expand tag does not match the given definition." \
            f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}"
 
 
@@ -292,7 +292,7 @@ def sidecar_na_used(column_name):
 
 @hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_def_tag_in_definition(tag, def_name):
-    return f"Invalid tag {tag} found in definition for {def_name}. " +\
+    return f"Invalid tag {tag} found in definition for {def_name}. " \
            f"Def, Def-expand, and Definition tags cannot be in definitions."
 
 
@@ -302,13 +302,13 @@ def def_error_no_group_tags(def_name):
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.DEFINITION_INVALID)
-def def_error_wrong_group_tags(def_name, tag_list):
+def def_error_wrong_number_groups(def_name, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
     return f"Too many group tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}"
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
-def def_error_wrong_group_tags(def_name, tag_list):
+def def_error_wrong_number_tags(def_name, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
     return f"Too many tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}"
 
@@ -336,7 +336,7 @@ def def_error_no_takes_value(def_name, placeholder_tag):
 
 
 @hed_tag_error(DefinitionErrors.BAD_PROP_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
-def def_error_no_takes_value(tag, def_name):
+def def_error_bad_prop_in_definition(tag, def_name):
     return f"Tag '{str(tag)}' in Definition '{def_name}' has has a the unique or required attribute."
 
 
@@ -379,13 +379,13 @@ def onset_too_many_defs(tag, tag_list):
 @hed_tag_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_too_many_groups(tag, tag_list):
     tag_list_strings = [str(a_tag) for a_tag in tag_list]
-    return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1. " +\
+    return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1. " \
            f"Found {len(tag_list_strings)}: {tag_list_strings}"
 
 
 @hed_tag_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_wrong_type_tag(tag, def_tag):
-    return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be " + \
+    return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be " \
            f"in a single group together."
 
 
@@ -413,5 +413,5 @@ def nested_column_ref(column_name, ref_column):
 
 
 @hed_error(ColumnErrors.MALFORMED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
-def nested_column_ref(column_name, index, symbol):
+def malformed_column_ref(column_name, index, symbol):
     return f"Column {column_name} has a malformed column reference.  Improper symbol {symbol} found at index {index}."

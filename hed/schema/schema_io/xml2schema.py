@@ -4,7 +4,7 @@ This module is used to create a HedSchema object from an XML file or tree.
 
 from defusedxml import ElementTree
 import xml
-from xml.etree import ElementTree
+
 
 import hed.schema.hed_schema_constants
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -225,7 +225,7 @@ class SchemaLoaderXML(SchemaLoader):
     def _add_to_dict(self, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             raise HedFileError(HedExceptions.IN_LIBRARY_IN_UNMERGED,
-                               f"Library tag in unmerged schema has InLibrary attribute",
+                               "Library tag in unmerged schema has InLibrary attribute",
                                self.name)
 
         return self._add_to_dict_base(entry, key_class)
