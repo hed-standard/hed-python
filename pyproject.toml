@@ -24,7 +24,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 
 dependencies = [
     "defusedxml",
@@ -42,7 +42,7 @@ dependencies = [
     "rdflib",
     "semantic-version",
     "six",
-    "wordcloud"
+    "wordcloud==1.9.3"
 ]
 
 [project.urls]

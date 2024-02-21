@@ -1,5 +1,7 @@
 import os
 import unittest
+import urllib.error
+
 from hed.models import DefinitionDict
 
 from hed import load_schema_version, HedString
@@ -166,6 +168,7 @@ class MyTestCase(unittest.TestCase):
         for result, tests in info.items():
             for test in tests:
                 schema_string = "\n".join(test)
+                issues = []
                 try:
                     loaded_schema = from_string(schema_string, schema_format=".mediawiki")
                     issues = loaded_schema.check_compliance()
@@ -174,6 +177,9 @@ class MyTestCase(unittest.TestCase):
                     if not issues:
                         issues += [{"code": e.code,
                                    "message": e.message}]
+                except urllib.error.HTTPError:
+                    issues += [{"code": "Http_error",
+                                "message": "HTTP error in testing, probably due to rate limiting for local testing."}]
                 self.report_result(result, issues, error_code, description, name, test, "schema_tests")
 
     def test_errors(self):
