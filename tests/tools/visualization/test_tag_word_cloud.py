@@ -29,12 +29,12 @@ class TestWordCloudFunctions(unittest.TestCase):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
         width = 400
         height = 200
-        wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path="Sarai")
+        wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path="Serif")
 
         self.assertIsInstance(wc, wordcloud.WordCloud)
         self.assertEqual(wc.width, width)
         self.assertEqual(wc.height, height)
-        self.assertIn("Sarai", wc.font_path)
+        self.assertIn("Serif", wc.font_path)
 
     def test_create_wordcloud_font_direct(self):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
