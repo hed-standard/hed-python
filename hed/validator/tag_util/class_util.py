@@ -2,13 +2,12 @@
 import datetime
 import re
 import functools
-from semantic_version import Version
 
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.schema.hed_schema_constants import HedKey, character_types
-from hed.schema import HedSchema
+
 
 class UnitValueValidator:
     """ Validates units. """
@@ -21,20 +20,14 @@ class UnitValueValidator:
 
     VALUE_CLASS_ALLOWED_CACHE = 20
 
-    def __init__(self, hed_schema, value_validators=None):
+    def __init__(self, modern_allowed_char_rules=False, value_validators=None):
         """ Validates the unit and value classes on a given tag.
 
         Parameters:
             value_validators(dict or None): Override or add value class validators
 
         """
-        self._validate_characters = False
-        # todo: Extend character validation for schema groups eventually
-        if isinstance(hed_schema, HedSchema):
-            validation_version = hed_schema.with_standard
-            if not validation_version:
-                validation_version = hed_schema.version_number
-            self._validate_characters = Version(validation_version) >= Version("8.3.0")
+        self._validate_characters = modern_allowed_char_rules
         self._value_validators = self._get_default_value_class_validators()
         if value_validators and isinstance(value_validators, dict):
             self._value_validators.update(value_validators)
