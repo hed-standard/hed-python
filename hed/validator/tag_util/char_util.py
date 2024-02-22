@@ -33,7 +33,7 @@ class CharValidator:
         if allow_placeholders:
             invalid_dict = self.INVALID_STRING_CHARS_PLACEHOLDERS
         for index, character in enumerate(hed_string):
-            if character in invalid_dict or ord(character) > 127:
+            if character in invalid_dict or not character.isprintable():
                 validation_issues += self._report_invalid_character_error(hed_string, index)
 
         return validation_issues

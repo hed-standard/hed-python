@@ -87,3 +87,11 @@ valid_header_attributes = {
     NO_LOC_ATTRIB,
     UNMERGED_ATTRIBUTE
 }
+
+character_types = {
+    "letters": set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+    "blank": set(" "),
+    "digits": set("0123456789"),
+    "alphanumeric": set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
+    "nonascii": "nonascii"  # Special case for all other printable unicode characters
+}

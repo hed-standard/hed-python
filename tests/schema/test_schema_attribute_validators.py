@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
         self.assertFalse(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
         
     def test_conversionFactor(self):
-        tag_entry = self.hed_schema.unit_classes["accelerationUnits"].units['m-per-s^2']
+        tag_entry = self.hed_schema.unit_classes["accelerationUnits"].units["m-per-s^2"]
         attribute_name = "conversionFactor"
         self.assertFalse(schema_attribute_validators.conversion_factor(self.hed_schema, tag_entry, attribute_name))
 
@@ -102,7 +102,7 @@ class Test(unittest.TestCase):
         self.assertTrue(schema_attribute_validators.conversion_factor(self.hed_schema, tag_entry, attribute_name))
 
     def test_conversionFactor_modifier(self):
-        tag_entry = self.hed_schema.unit_classes["magneticFieldUnits"].units['tesla']
+        tag_entry = self.hed_schema.unit_classes["magneticFieldUnits"].units["tesla"]
         attribute_name = "conversionFactor"
         self.assertFalse(schema_attribute_validators.conversion_factor(self.hed_schema, tag_entry, attribute_name))
 
@@ -119,7 +119,7 @@ class Test(unittest.TestCase):
     def test_allowed_characters_check(self):
         tag_entry = self.hed_schema.value_classes["dateTimeClass"]
         attribute_name = "allowedCharacter"
-        valid_attributes = {'letters', 'blank', 'digits', 'alphanumeric', ":", "$", "a"}
+        valid_attributes = {"letters", "blank", "digits", "alphanumeric", ":", "$", "a"}
         self.assertFalse(schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name))
 
         tag_entry = copy.deepcopy(tag_entry)
@@ -127,7 +127,7 @@ class Test(unittest.TestCase):
             tag_entry.attributes[attribute_name] = attribute
             self.assertFalse(schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name))
 
-        invalid_attributes = {'lettersdd', 'notaword', ":a"}
+        invalid_attributes = {"lettersdd", "notaword", ":a"}
         for attribute in invalid_attributes:
             tag_entry.attributes[attribute_name] = attribute
             self.assertTrue(schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name))

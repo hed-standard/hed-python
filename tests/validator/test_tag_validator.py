@@ -949,5 +949,33 @@ class TestHedSpecialUnits(TestHed):
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
 
+class TestHedAllowedCharacters(TestHed):
+    compute_forms = True
+    schema_file = '../data/schema_tests/schema_utf8.mediawiki'
+
+    @staticmethod
+    def string_obj_func(validator):
+        return partial(validator._validate_individual_tags_in_hed_string)
+
+    def test_special_units(self):
+        test_strings = {
+            'ascii': 'Ascii/bad-date',
+            'badascii': 'Ascii/bad-daté',
+            'nonascii': 'Nonascii/Café',
+        }
+        expected_results = {
+            'ascii': True,
+            'badascii': False,
+            'nonascii': True
+        }
+
+        expected_issues = {
+            'ascii': [],
+            'badascii': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER, tag=0,
+                                          index_in_tag=13, index_in_tag_end=14),
+            'nonascii': []
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
+
 if __name__ == '__main__':
     unittest.main()

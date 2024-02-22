@@ -94,9 +94,10 @@ def schema_error_SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE(tag, conversion_factor):
 @hed_error(SchemaAttributeErrors.SCHEMA_ALLOWED_CHARACTERS_INVALID,
            actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
 def schema_error_SCHEMA_ALLOWED_CHARACTERS_INVALID(tag, invalid_character):
+    from hed.schema.hed_schema_constants import character_types
     return (f"Tag '{tag}' has an invalid allowedCharacter: '{invalid_character}'.  "
             f"Allowed characters are: a single character, "
-            f"or one of the following - letters, blank, digits, alphanumeric.")
+            f"or one of the following - {', '.join(character_types.keys())}.")
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_IN_LIBRARY_INVALID,

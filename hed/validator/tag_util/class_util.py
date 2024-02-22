@@ -1,11 +1,14 @@
 """ Utilities to support HED validation. """
 import datetime
 import re
+import functools
+from semantic_version import Version
 
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
-
+from hed.schema.hed_schema_constants import HedKey, character_types
+from hed.schema import HedSchema
 
 class UnitValueValidator:
     """ Validates units. """
@@ -18,13 +21,20 @@ class UnitValueValidator:
 
     VALUE_CLASS_ALLOWED_CACHE = 20
 
-    def __init__(self, value_validators=None):
+    def __init__(self, hed_schema, value_validators=None):
         """ Validates the unit and value classes on a given tag.
 
         Parameters:
             value_validators(dict or None): Override or add value class validators
 
         """
+        self._validate_characters = False
+        # todo: Extend character validation for schema groups eventually
+        if isinstance(hed_schema, HedSchema):
+            validation_version = hed_schema.with_standard
+            if not validation_version:
+                validation_version = hed_schema.version_number
+            self._validate_characters = Version(validation_version) >= Version("8.3.0")
         self._value_validators = self._get_default_value_class_validators()
         if value_validators and isinstance(value_validators, dict):
             self._value_validators.update(value_validators)
@@ -97,25 +107,20 @@ class UnitValueValidator:
         """
         return self._check_value_class(original_tag, validate_text, report_as, error_code, index_offset)
 
-    # char_sets = {
-    #     "letters": set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-    #     "blank": set(" "),
-    #     "digits": set("0123456789"),
-    #     "alphanumeric": set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-    # }
-    #
-    # @functools.lru_cache(maxsize=VALUE_CLASS_ALLOWED_CACHE)
-    # def _get_allowed_characters(self, value_classes):
-    #     # This could be pre-computed
-    #     character_set = set()
-    #     for value_class in value_classes:
-    #         allowed_types = value_class.attributes.get(HedKey.AllowedCharacter, "")
-    #         for single_type in allowed_types.split(","):
-    #             if single_type in self.char_sets:
-    #                 character_set.update(self.char_sets[single_type])
-    #             else:
-    #                 character_set.add(single_type)
-    #     return character_set
+    @functools.lru_cache(maxsize=VALUE_CLASS_ALLOWED_CACHE)
+    def _get_allowed_characters(self, value_classes):
+        # This could be pre-computed
+        character_set = set()
+        for value_class in value_classes:
+            allowed_types = value_class.attributes.get(HedKey.AllowedCharacter, "")
+            for single_type in allowed_types.split(","):
+                if single_type in character_types and single_type != "nonascii":
+                    character_set.update(character_types[single_type])
+                else:
+                    character_set.add(single_type)
+        # for now, just always allow these special cases(it's validated extensively elsewhere)
+        character_set.update("#/")
+        return character_set
 
     def _get_problem_indexes(self, original_tag, stripped_value):
         """ Return list of problem indices for error messages.
@@ -127,19 +132,24 @@ class UnitValueValidator:
         Returns:
             list: List of int locations in which error occurred.
         """
+        indexes = []
         # Extra +1 for the slash
         start_index = original_tag.extension.find(stripped_value) + len(original_tag.org_base_tag) + 1
         if start_index == -1:
-            return []
+            return indexes
 
-        problem_indexes = [(char, index + start_index) for index, char in enumerate(stripped_value) if char in "{}"]
-        return problem_indexes
-        # Partial implementation of allowedCharacter
-        # allowed_characters = self._get_allowed_characters(original_tag.value_classes.values())
-        # if allowed_characters:
-        #     # Only test the strippedvalue - otherwise numericClass + unitClass won't validate reasonably.
-        #     indexes = [index for index, char in enumerate(stripped_value) if char not in allowed_characters]
-        #     pass
+        if self._validate_characters:
+            allowed_characters = self._get_allowed_characters(original_tag.value_classes.values())
+
+            if allowed_characters:
+                # Only test the strippedvalue - otherwise numericClass + unitClass won't validate reasonably.
+                indexes = [(char, index + start_index) for index, char in enumerate(stripped_value) if char not in allowed_characters]
+                if "nonascii" in allowed_characters:
+                    # Filter out ascii characters
+                    indexes = [(char, index) for char, index in indexes if not (ord(char) > 127 and char.isprintable())]
+        else:
+            indexes = [(char, index + start_index) for index, char in enumerate(stripped_value) if char in "{}"]
+        return indexes
 
     def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None, index_offset=0):
         """ Return any issues found if this is a value tag,
@@ -219,12 +229,14 @@ class UnitValueValidator:
             type_valid (bool): True if this is one of the valid_types validators.
 
         """
+        has_valid_func = False
         for unit_class_type in valid_types:
             valid_func = self._value_validators.get(unit_class_type)
             if valid_func:
+                has_valid_func = True
                 if valid_func(unit_or_value_portion):
                     return True
-        return False
+        return not has_valid_func
 
 
 def is_date_time(date_time_string):

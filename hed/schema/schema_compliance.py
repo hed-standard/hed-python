@@ -125,6 +125,7 @@ class SchemaValidator:
             for tag_name, desc in self.hed_schema.get_desc_iter():
                 issues_list += validate_schema_description(tag_name, desc)
 
+        # todo: Do we want to add this?
         # todo Activate this session once we have clearer rules on spaces in unit names
         # for unit in self.hed_schema.units:
         #     for i, char in enumerate(unit):
