@@ -14,7 +14,7 @@ Returns:
 from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors
 from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_cache import get_hed_versions
-from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_constants import HedKey, character_types
 
 
 def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name):
@@ -141,6 +141,10 @@ def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name):
     deprecated_version = tag_entry.attributes.get(attribute_name, "")
     library_name = tag_entry.has_attribute(HedKey.InLibrary, return_value=True)
     all_versions = get_hed_versions(library_name=library_name)
+    if not library_name:
+        library_name = ""
+    if library_name == hed_schema.library and hed_schema.version_number not in all_versions:
+        all_versions.append(hed_schema.version_number)
     if deprecated_version and deprecated_version not in all_versions:
         issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_DEPRECATED_INVALID,
                                             tag_entry.name,
@@ -182,7 +186,7 @@ def allowed_characters_check(hed_schema, tag_entry, attribute_name):
 
     """
     issues = []
-    allowed_strings = {'letters', 'blank', 'digits', 'alphanumeric'}
+    allowed_strings = character_types
 
     char_string = tag_entry.attributes.get(attribute_name, "")
     characters = char_string.split(",")

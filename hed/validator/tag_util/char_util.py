@@ -14,6 +14,14 @@ class CharValidator:
     INVALID_STRING_CHARS = '[]{}~'
     INVALID_STRING_CHARS_PLACEHOLDERS = '[]~'
 
+    def __init__(self, modern_allowed_char_rules=False):
+        """Does basic character validation for hed strings/tags
+
+        Parameters:
+            modern_allowed_char_rules(bool): If True, use 8.3 style rules for unicode characters.
+        """
+        self._validate_characters = modern_allowed_char_rules
+
     def check_invalid_character_issues(self, hed_string, allow_placeholders):
         """ Report invalid characters.
 
@@ -33,8 +41,12 @@ class CharValidator:
         if allow_placeholders:
             invalid_dict = self.INVALID_STRING_CHARS_PLACEHOLDERS
         for index, character in enumerate(hed_string):
-            if character in invalid_dict or ord(character) > 127:
-                validation_issues += self._report_invalid_character_error(hed_string, index)
+            if self._validate_characters:
+                if character in invalid_dict or not character.isprintable():
+                    validation_issues += self._report_invalid_character_error(hed_string, index)
+            else:
+                if character in invalid_dict or ord(character) > 127:
+                    validation_issues += self._report_invalid_character_error(hed_string, index)
 
         return validation_issues
 
