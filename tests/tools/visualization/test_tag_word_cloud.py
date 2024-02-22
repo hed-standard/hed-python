@@ -2,6 +2,7 @@ import unittest
 import wordcloud
 from hed.tools.visualization import tag_word_cloud
 from hed.tools.visualization.tag_word_cloud import load_and_resize_mask
+import matplotlib.font_manager as fm
 
 import numpy as np
 from PIL import Image, ImageDraw
@@ -23,6 +24,32 @@ class TestWordCloudFunctions(unittest.TestCase):
         self.assertIsInstance(wc, wordcloud.WordCloud)
         self.assertEqual(wc.width, width)
         self.assertEqual(wc.height, height)
+
+    def test_create_wordcloud_font(self):
+        word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
+        width = 400
+        height = 200
+        wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path="Sarai")
+
+        self.assertIsInstance(wc, wordcloud.WordCloud)
+        self.assertEqual(wc.width, width)
+        self.assertEqual(wc.height, height)
+        self.assertIn("Sarai", wc.font_path)
+
+    def test_create_wordcloud_font_direct(self):
+        word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
+        width = 400
+        height = 200
+
+        fonts = fm.findSystemFonts()
+        first_font = fonts[0]
+
+        wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path=first_font)
+
+        self.assertIsInstance(wc, wordcloud.WordCloud)
+        self.assertEqual(wc.width, width)
+        self.assertEqual(wc.height, height)
+        self.assertIn(first_font, wc.font_path)
 
     def test_create_wordcloud_default_params(self):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}

@@ -3,9 +3,10 @@
 import numpy as np
 from PIL import Image
 from hed.tools.visualization.word_cloud_util import default_color_func, WordCloud, generate_contour_svg
+import matplotlib.font_manager as fm
 
 
-def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400, height=300, **kwargs):
+def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400, height=300, font_path=None, **kwargs):
     """ Takes a word dict and returns a generated word cloud object.
 
     Parameters:
@@ -14,6 +15,8 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
         background_color (str or None): If None, transparent background.
         width (int): width in pixels.
         height (int): height in pixels.
+        font_path (str): a filename or font name to use.  Assumed to be a full file path if it ends with .ttf or .otf.
+                         Font names will use a default if a close enough match isn't found.
         kwargs (kwargs): Any other parameters WordCloud accepts, overrides default values where relevant.
 
     Returns:
@@ -41,9 +44,11 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     kwargs.setdefault('color_func', default_color_func)
     kwargs.setdefault('relative_scaling', 1)
     kwargs.setdefault('max_font_size', height / 20)
-    kwargs.setdefault('min_font_size', 8),
+    kwargs.setdefault('min_font_size', 8)
+    if font_path and not font_path.endswith(".ttf") and not font_path.endswith(".otf"):
+        font_path = fm.findfont(font_path)
 
-    wc = WordCloud(background_color=background_color, mask=mask_image,
+    wc = WordCloud(font_path=font_path, background_color=background_color, mask=mask_image,
                    width=width, height=height, mode="RGBA", **kwargs)
 
     wc.generate_from_frequencies(word_dict)
