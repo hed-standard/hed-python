@@ -85,7 +85,26 @@ class Test(unittest.TestCase):
 
         tag_entry.attributes["deprecatedFrom"] = "8.0.0"
         self.assertFalse(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
-        
+
+        tag_entry.attributes["deprecatedFrom"] = "8.2.0"
+        self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
+        del tag_entry.attributes["deprecatedFrom"]
+
+        unit_class_entry = self.hed_schema.unit_classes["temperatureUnits"]
+        # This should raise an issue because it assumes the attribute is set
+        self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name))
+        unit_class_entry.attributes["deprecatedFrom"] = "8.1.0"
+        unit_class_entry.units['degree Celsius'].attributes["deprecatedFrom"] = "8.1.0"
+        # Still a warning for oC
+        self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name))
+        unit_class_entry.units['oC'].attributes["deprecatedFrom"] = "8.1.0"
+        self.assertFalse(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name))
+        # this is still fine, as we are validating the child has deprecated from, not it's value
+        unit_class_entry.units['oC'].attributes["deprecatedFrom"] = "8.2.0"
+        self.assertFalse(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name))
+
+        self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry.units['oC'], attribute_name))
+
     def test_conversionFactor(self):
         tag_entry = self.hed_schema.unit_classes["accelerationUnits"].units["m-per-s^2"]
         attribute_name = "conversionFactor"

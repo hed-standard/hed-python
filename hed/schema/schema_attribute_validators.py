@@ -15,6 +15,8 @@ from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttri
 from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_cache import get_hed_versions
 from hed.schema.hed_schema_constants import HedKey, character_types
+from hed.schema.schema_validation_util import schema_version_for_library
+from semantic_version import Version
 
 
 def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name):
@@ -127,11 +129,11 @@ def tag_exists_base_schema_check(hed_schema, tag_entry, attribute_name):
 
 
 def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name):
-    """ Check if the tag has a valid deprecatedFrom attribute, and that any children have it
+    """ Check if the element has a valid deprecatedFrom attribute, and that any children have it
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
-        tag_entry (HedSchemaEntry): The schema entry for this tag.
+        tag_entry (HedSchemaEntry): The schema entry for this element.
         attribute_name (str): The name of this attribute
 
     Returns:
@@ -140,21 +142,25 @@ def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name):
     issues = []
     deprecated_version = tag_entry.attributes.get(attribute_name, "")
     library_name = tag_entry.has_attribute(HedKey.InLibrary, return_value=True)
+    if not library_name and not hed_schema.with_standard:
+        library_name = hed_schema.library
     all_versions = get_hed_versions(library_name=library_name)
-    if not library_name:
-        library_name = ""
-    if library_name == hed_schema.library and hed_schema.version_number not in all_versions:
-        all_versions.append(hed_schema.version_number)
-    if deprecated_version and deprecated_version not in all_versions:
-        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_DEPRECATED_INVALID,
-                                            tag_entry.name,
-                                            deprecated_version)
-
-    for child in tag_entry.children.values():
-        if not child.has_attribute(attribute_name):
-            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_CHILD_OF_DEPRECATED,
+    if deprecated_version:
+        library_version = schema_version_for_library(hed_schema, library_name)
+        # The version must exist, and be lower or equal to our current version
+        if (deprecated_version not in all_versions or
+                (library_version and Version(library_version) <= Version(deprecated_version))):
+            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_DEPRECATED_INVALID,
                                                 tag_entry.name,
-                                                child.name)
+                                                deprecated_version)
+
+    if hasattr(tag_entry, "children"):
+        # Fix up this error message if we ever actually issue it for units
+        for child in tag_entry.children.values():
+            if not child.has_attribute(attribute_name):
+                issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_CHILD_OF_DEPRECATED,
+                                                    tag_entry.name,
+                                                    child.name)
     return issues
 
 

@@ -4,7 +4,7 @@ from hed.errors.error_types import ErrorContext, SchemaErrors, ErrorSeverity, Sc
 from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_schema import HedSchema, HedKey
 from hed.schema import schema_attribute_validators
-from hed.schema.schema_validation_util import validate_schema_term, validate_schema_description
+from hed.schema.schema_validation_util import validate_schema_term, validate_schema_description, schema_version_greater_equal
 
 
 def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handler=None):
@@ -125,12 +125,11 @@ class SchemaValidator:
             for tag_name, desc in self.hed_schema.get_desc_iter():
                 issues_list += validate_schema_description(tag_name, desc)
 
-        # todo: Do we want to add this?
-        # todo Activate this session once we have clearer rules on spaces in unit names
-        # for unit in self.hed_schema.units:
-        #     for i, char in enumerate(unit):
-        #         if char == " ":
-        #             issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
-        #                                                      unit, char_index=i, problem_char=char)
+        if schema_version_greater_equal(self.hed_schema, "8.3.0"):
+            for unit in self.hed_schema.units:
+                for i, char in enumerate(unit):
+                    if char == " ":
+                        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
+                                                                 unit, char_index=i, problem_char=char)
 
         return issues_list

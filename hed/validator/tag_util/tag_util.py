@@ -33,6 +33,7 @@ class TagValidator:
         if not allow_placeholders:
             validation_issues += self.check_for_placeholder(original_tag, is_definition)
         validation_issues += self.check_tag_requires_child(original_tag)
+        validation_issues += self.check_tag_is_deprecated(original_tag)
         validation_issues += self.check_capitalization(original_tag)
         return validation_issues
 
@@ -99,6 +100,14 @@ class TagValidator:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.STYLE_WARNING,
                                                                tag=original_tag)
                 break
+        return validation_issues
+
+    def check_tag_is_deprecated(self, original_tag):
+        validation_issues = []
+        if original_tag.has_attribute(HedKey.DeprecatedFrom):
+            validation_issues += ErrorHandler.format_error(ValidationErrors.ELEMENT_DEPRECATED,
+                                                           tag=original_tag)
+
         return validation_issues
 
     # ==========================================================================

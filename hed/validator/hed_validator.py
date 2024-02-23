@@ -5,12 +5,12 @@ the get_validation_issues() function.
 
 """
 import re
-from semantic_version import Version
 from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 
 from hed.validator.def_validator import DefValidator
 from hed.validator.tag_util import UnitValueValidator, CharValidator, StringValidator, TagValidator, GroupValidator
+from hed.schema.schema_validation_util import schema_version_greater_equal
 from hed.schema import HedSchema
 
 
@@ -33,13 +33,7 @@ class HedValidator:
         self._def_validator = DefValidator(def_dicts, hed_schema)
         self._definitions_allowed = definitions_allowed
 
-        self._validate_characters = False
-        # todo: This could still do validation on schema groups.
-        if isinstance(hed_schema, HedSchema):
-            validation_version = hed_schema.with_standard
-            if not validation_version:
-                validation_version = hed_schema.version_number
-            self._validate_characters = Version(validation_version) >= Version("8.3.0")
+        self._validate_characters = schema_version_greater_equal(hed_schema, "8.3.0")
 
         self._unit_validator = UnitValueValidator(modern_allowed_char_rules=self._validate_characters)
         self._char_validator = CharValidator(modern_allowed_char_rules=self._validate_characters)

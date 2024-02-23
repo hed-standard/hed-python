@@ -5,6 +5,8 @@ from hed.errors import ErrorHandler, SchemaWarnings
 from hed.schema import hed_schema_constants as constants
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.schema.hed_schema_constants import valid_header_attributes
+from hed.schema import HedSchema, HedSchemaGroup
+
 
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
@@ -205,3 +207,54 @@ def validate_schema_description(tag_name, hed_description):
         issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
                                                  hed_description, tag_name, char_index=i, problem_char=char)
     return issues_list
+
+
+def schema_version_greater_equal(hed_schema, target_version):
+    """ Check if the given schema standard version is above target version
+
+    Parameters:
+        hed_schema (HedSchema or HedSchemaGroup): If a schema group, checks if any version is above.
+        target_version (str): The semantic version to check against
+
+    Returns:
+        bool: True if the version is above target_version
+              False if it is not, or it is ambiguous.
+    """
+    # Do exhaustive checks for now, assuming nothing
+    schemas = [hed_schema.schema_for_namespace(schema_namespace) for schema_namespace in hed_schema.valid_prefixes]
+    candidate_versions = [schema.with_standard for schema in schemas if schema.with_standard]
+    if not candidate_versions:
+        # Check for a standard schema(potentially, but unlikely, more than one)
+        for schema in schemas:
+            if schema.library == "":
+                candidate_versions.append(schema.version_number)
+    target_version = Version(target_version)
+    for version in candidate_versions:
+        if Version(version) >= target_version:
+            return True
+
+    return False
+
+
+def schema_version_for_library(hed_schema, library_name):
+    """ Given the library name and hed schema object, return the version
+
+    Parameters:
+        hed_schema (HedSchema): the schema object
+        library_name (str or None): The library name you're interested in.  "" for the standard schema.
+
+    Returns:
+        version_number (str): The version number of the given library name.  Returns None if unknown library_name.
+    """
+    if library_name is None:
+        library_name = ""
+    names = hed_schema.library.split(",")
+    versions = hed_schema.version_number.split(",")
+    for name, version in zip(names, versions):
+        if name == library_name:
+            return version
+
+    # Return the partnered schema version
+    if library_name == "" and hed_schema.with_standard:
+        return hed_schema.with_standard
+    return None
