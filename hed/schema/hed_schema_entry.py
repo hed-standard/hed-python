@@ -147,6 +147,15 @@ class UnitClassEntry(HedSchemaEntry):
         self.units = []
         self.derivative_units = {}
 
+    @property
+    def children(self):
+        """ Alias to get the units for this class
+
+        Returns:
+            unit_list(list): The unit list for this class
+        """
+        return self.units
+
     def add_unit(self, unit_entry):
         """ Add the given unit entry to this unit class.
 
