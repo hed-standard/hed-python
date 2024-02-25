@@ -43,7 +43,8 @@ class TestWordCloudFunctions(unittest.TestCase):
 
         fonts = fm.findSystemFonts()
         first_font = fonts[0]
-
+        x = '/C/Windows/Fonts/timesi.ttf'
+        #y = 'C:\\Windows\\Fonts\\arialbd.ttf'
         wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path=first_font)
 
         self.assertIsInstance(wc, wordcloud.WordCloud)

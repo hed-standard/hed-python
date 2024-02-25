@@ -45,7 +45,8 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     kwargs.setdefault('relative_scaling', 1)
     kwargs.setdefault('max_font_size', height / 20)
     kwargs.setdefault('min_font_size', 8)
-    if font_path and not font_path.endswith(".ttf") and not font_path.endswith(".otf"):
+    if font_path and not font_path.endswith(".ttf") and not font_path.endswith(".otf")\
+            and not font_path.endswith(".TTF") and not font_path.endswith(".OTF"):
         font_path = fm.findfont(font_path)
 
     wc = WordCloud(font_path=font_path, background_color=background_color, mask=mask_image,

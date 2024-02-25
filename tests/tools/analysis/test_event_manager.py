@@ -1,6 +1,9 @@
 import os
 import unittest
+import numpy as np
+import pandas as pd
 
+from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar, HedString
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
@@ -76,6 +79,41 @@ class Test(unittest.TestCase):
         def_names = manager1.get_type_defs(["Condition-variable", "task"])
         self.assertIsInstance(def_names, list)
         self.assertEqual(11, len(def_names))
+
+    def test_onset_ordering_mixed(self):
+        df = pd.DataFrame({'onset': [1, 2, '3', 3.24, 5],
+                           'HED': ['(Duration/4.0 s, Black)', '(Duration/2 s, Red)', 'Blue', 'Green', 'Label/1']})
+        manager = EventManager(TabularInput(df), self.schema)
+        self.assertIsInstance(manager, EventManager)
+        hed, base, context = manager.unfold_context()
+        print("to here")
+        # df = pd.DataFrame(
+        #     {'onset': [1, 2, '3', np.nan, 5], 'HED': ['Sensory-event', 'Red', 'Blue', 'Green', 'Label/1']})
+        # pass
+
+    def test_onset_ordering_bad(self):
+        df = pd.DataFrame({'onset': [1, 2, '3', 'n/a', 5],
+                           'HED': ['(Duration/4.0 s, Black)', '(Duration/2 s, Red)', 'Blue', 'n/a', 'Label/1']})
+        with self.assertRaises(HedFileError) as ex:
+            EventManager(TabularInput(df), self.schema)
+            self.assertEqual(ex.args(0), "OnsetsNotOrdered")
+        df1 = pd.DataFrame({'onset': [1, 2, 1.4, 6, 5],
+                           'HED': ['(Duration/4.0 s, Black)', '(Duration/2 s, Red)', 'Blue', 'n/a', 'Label/1']})
+        with self.assertRaises(HedFileError) as ex1:
+            EventManager(TabularInput(df1), self.schema)
+            self.assertEqual(ex1.args(0), "OnsetsNotOrdered")
+
+    def test_duration_context(self):
+        df = pd.DataFrame({'onset': [1, 2, 3, 4, 5],
+                           'HED': ['(Duration/4.0 s, Black)', '(Duration/2 s, Red)', 'Blue', 'n/a', 'Label/1']})
+        manager = EventManager(TabularInput(df), self.schema)
+        hed, base, context = manager.unfold_context()
+        pass
+
+
+        # df = pd.DataFrame(
+        #     {'onset': [1, 2, '3', np.nan, 5], 'HED': ['Sensory-event', 'Red', 'Blue', 'Green', 'Label/1']})
+        # pass
 
 
 if __name__ == '__main__':
