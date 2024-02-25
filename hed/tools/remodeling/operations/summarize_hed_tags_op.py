@@ -91,6 +91,12 @@ class SummarizeHedTagsOp(BaseOp):
                     "max_font_size": {
                         "type": "number"
                     },
+                    "set_font": {
+                        "type": "boolean"
+                    },
+                    "font_path": {
+                        "type": "string"
+                    },
                     "scale_adjustment": {
                         "type": "number"
                     },
@@ -148,6 +154,8 @@ class SummarizeHedTagsOp(BaseOp):
                 "prefer_horizontal": wc_params.get("prefer_horizontal", 0.75),
                 "min_font_size": wc_params.get("min_font_size", 8),
                 "max_font_size": wc_params.get("max_font_size", 15),
+                "set_font": wc_params.get("set_font", False),
+                "font_path": wc_params.get("font_path", ""),
                 "scale_adjustment": wc_params.get("scale_adjustment", 7),
                 "contour_width": wc_params.get("contour_width", 3),
                 "contour_color": wc_params.get("contour_color", 'black'),
@@ -305,7 +313,8 @@ class HedTagSummary(BaseSummary):
         tag_wc = create_wordcloud(word_dict, mask_path=wc["mask_path"], width=wc["width"], height=wc["height"],
                                   prefer_horizontal=wc["prefer_horizontal"], background_color=wc["background_color"],
                                   min_font_size=wc["min_font_size"], max_font_size=wc["max_font_size"],
-                                  contour_width=wc["contour_width"], contour_color=wc["contour_color"])
+                                  contour_width=wc["contour_width"], contour_color=wc["contour_color"],
+                                  set_font=wc["set_font"], font_path=wc["font_path"])
         svg_data = word_cloud_to_svg(tag_wc)
         cloud_filename = os.path.realpath(os.path.join(save_dir, self.sum_op.summary_name,
                                                        self.sum_op.summary_name + '_word_cloud.svg'))

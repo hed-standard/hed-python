@@ -1,5 +1,7 @@
 """ Manager of events of temporal extent. """
+import pandas as pd
 
+from hed.errors import HedFileError
 from hed.models import HedString
 from hed.models.model_constants import DefTagNames
 from hed.models.df_util import get_assembled
@@ -31,7 +33,10 @@ class EventManager:
         self.hed_schema = hed_schema
         self.input_data = input_data
         self.def_dict = input_data.get_def_dict(hed_schema, extra_def_dicts=extra_defs)
-        self.onsets = input_data.dataframe['onset'].tolist()
+        onsets = pd.to_numeric(input_data.dataframe['onset'], errors='coerce')
+        if not onsets.is_monotonic_increasing:
+            raise HedFileError("OnsetsNotOrdered", "The onset values must be non-decreasing", "")
+        self.onsets = onsets.tolist()
         self.hed_strings = None  # Remaining HED strings copy.deepcopy(hed_strings)
         self._create_event_list(input_data)
 
