@@ -154,8 +154,7 @@ class SummarizeHedTagsOp(BaseOp):
                 "prefer_horizontal": wc_params.get("prefer_horizontal", 0.75),
                 "min_font_size": wc_params.get("min_font_size", 8),
                 "max_font_size": wc_params.get("max_font_size", 15),
-                "set_font": wc_params.get("set_font", False),
-                "font_path": wc_params.get("font_path", ""),
+                "font_path": wc_params.get("font_path", None),
                 "scale_adjustment": wc_params.get("scale_adjustment", 7),
                 "contour_width": wc_params.get("contour_width", 3),
                 "contour_color": wc_params.get("contour_color", 'black'),
@@ -164,8 +163,10 @@ class SummarizeHedTagsOp(BaseOp):
                 "mask_path": wc_params.get("mask_path", None)
             }
             if self.word_cloud["use_mask"] and not self.word_cloud["mask_path"]:
-                self.word_cloud["mask_path"] = os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                                '../../../resources/word_cloud_brain_mask.png'))
+                self.word_cloud["mask_path"] = os.path.realpath(
+                    os.path.join(os.path.dirname(__file__),  '../../../resources/word_cloud_brain_mask.png'))
+            if self.word_cloud["font_path"]:
+                self.word_cloud["font_path"] = os.path.realpath(self.word_cloud["font_path"])
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Summarize the HED tags present in the dataset.
@@ -314,7 +315,7 @@ class HedTagSummary(BaseSummary):
                                   prefer_horizontal=wc["prefer_horizontal"], background_color=wc["background_color"],
                                   min_font_size=wc["min_font_size"], max_font_size=wc["max_font_size"],
                                   contour_width=wc["contour_width"], contour_color=wc["contour_color"],
-                                  set_font=wc["set_font"], font_path=wc["font_path"])
+                                  font_path=wc["font_path"])
         svg_data = word_cloud_to_svg(tag_wc)
         cloud_filename = os.path.realpath(os.path.join(save_dir, self.sum_op.summary_name,
                                                        self.sum_op.summary_name + '_word_cloud.svg'))
