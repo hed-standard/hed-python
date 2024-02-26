@@ -126,10 +126,13 @@ class SchemaValidator:
                 issues_list += validate_schema_description(tag_name, desc)
 
         if schema_version_greater_equal(self.hed_schema, "8.3.0"):
-            for unit in self.hed_schema.units:
-                for i, char in enumerate(unit):
+            for unit_name, unit in self.hed_schema.units.items():
+                # Don't check for spaces on deprecated units, to avoid degree Celsius issue
+                if unit.has_attribute(HedKey.DeprecatedFrom):
+                    continue
+                for i, char in enumerate(unit_name):
                     if char == " ":
                         issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
-                                                                 unit, char_index=i, problem_char=char)
+                                                                 unit_name, char_index=i, problem_char=char)
 
         return issues_list
