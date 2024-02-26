@@ -7,7 +7,7 @@ from hed.tools.visualization.word_cloud_util import default_color_func, WordClou
 import matplotlib.font_manager as fm
 
 
-def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400, height=300, set_font=False, **kwargs):
+def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400, height=300, **kwargs):
     """ Takes a word dict and returns a generated word cloud object.
 
     Parameters:
@@ -16,8 +16,6 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
         background_color (str or None): If None, transparent background.
         width (int): width in pixels.
         height (int): height in pixels.
-        font_path (str): a filename or font name to use.  Assumed to be a full file path if it ends with .ttf or .otf.
-                         Font names will use a default if a close enough match isn't found.
         kwargs (kwargs): Any other parameters WordCloud accepts, overrides default values where relevant.
 
     Returns:
@@ -46,7 +44,7 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     kwargs.setdefault('relative_scaling', 1)
     kwargs.setdefault('max_font_size', height / 20)
     kwargs.setdefault('min_font_size', 8)
-    if not set_font or 'font_path' not in kwargs:
+    if 'font_path' not in kwargs:
         kwargs['font_path'] = None
     elif kwargs['font_path'] and not kwargs['font_path'].endswith((".ttf", ".otf", ".TTF", ".OTF")):
         raise HedFileError("InvalidFontPath", f"Font {kwargs['font_path']} not valid on this system", "")

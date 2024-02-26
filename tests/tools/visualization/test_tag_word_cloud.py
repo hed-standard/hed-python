@@ -25,32 +25,21 @@ class TestWordCloudFunctions(unittest.TestCase):
         self.assertEqual(wc.width, width)
         self.assertEqual(wc.height, height)
 
-    def test_create_wordcloud_font(self):
-        word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
-        width = 400
-        height = 200
-        wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path="Serif")
-
-        self.assertIsInstance(wc, wordcloud.WordCloud)
-        self.assertEqual(wc.width, width)
-        self.assertEqual(wc.height, height)
-        self.assertIn("Serif", wc.font_path)
-
     def test_create_wordcloud_font_direct(self):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
         width = 400
         height = 200
 
         fonts = fm.findSystemFonts()
-        first_font = fonts[0]
-        x = '/C/Windows/Fonts/timesi.ttf'
-        #y = 'C:\\Windows\\Fonts\\arialbd.ttf'
-        wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path=first_font)
+        if not fonts:
+            return
+        font_path = os.path.realpath(fonts[0])
+        wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path=font_path)
 
         self.assertIsInstance(wc, wordcloud.WordCloud)
         self.assertEqual(wc.width, width)
         self.assertEqual(wc.height, height)
-        self.assertIn(first_font, wc.font_path)
+        self.assertIn(font_path, wc.font_path)
 
     def test_create_wordcloud_default_params(self):
         word_dict = {'tag1': 5, 'tag2': 3, 'tag3': 7}
