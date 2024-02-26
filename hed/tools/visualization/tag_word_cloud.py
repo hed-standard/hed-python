@@ -46,7 +46,7 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     kwargs.setdefault('min_font_size', 8)
     if 'font_path' not in kwargs:
         kwargs['font_path'] = None
-    elif kwargs['font_path'] and not kwargs['font_path'].endswith((".ttf", ".otf", ".TTF", ".OTF")):
+    elif kwargs['font_path'] and not kwargs['font_path'].lower().endswith((".ttf", ".otf")):
         raise HedFileError("InvalidFontPath", f"Font {kwargs['font_path']} not valid on this system", "")
 
     wc = WordCloud(background_color=background_color, mask=mask_image,
