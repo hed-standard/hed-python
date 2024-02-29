@@ -86,7 +86,9 @@ class SchemaValidator:
             for tag_entry in self.hed_schema[section_key].values():
                 self.error_handler.push_error_context(ErrorContext.SCHEMA_TAG, tag_entry.name)
                 for attribute_name in tag_entry.attributes:
-                    validators = self.attribute_validators.get(attribute_name, [])
+                    # Always check deprecated
+                    validators = self.attribute_validators.get(attribute_name, []) \
+                                  + [schema_attribute_validators.attribute_is_deprecated]
                     for validator in validators:
                         self.error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name)
                         new_issues = validator(self.hed_schema, tag_entry, attribute_name)

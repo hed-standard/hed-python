@@ -49,15 +49,22 @@ def schema_warning_non_placeholder_class(tag_name, invalid_attribute_name):
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_DEPRECATED_INVALID,
-           actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
+           actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR)
 def schema_error_SCHEMA_DEPRECATED_INVALID(tag_name, invalid_deprecated_version):
     return f"'{tag_name}' has invalid or unknown value in attribute deprecatedFrom: '{invalid_deprecated_version}'."
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_CHILD_OF_DEPRECATED,
-           actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
+           actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR)
 def schema_error_SCHEMA_CHILD_OF_DEPRECATED(deprecated_tag, non_deprecated_child):
     return f"Deprecated tag '{deprecated_tag}' has a child that is not deprecated: '{non_deprecated_child}'."
+
+
+@hed_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
+           actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR)
+def schema_error_SCHEMA_ATTRIBUTE_VALUE_DEPRECATED(tag, deprecated_suggestion, attribute_name):
+    return (f"Tag '{tag}' {attribute_name} uses '{deprecated_suggestion}' which has been deprecated "
+            f"and an alternative method of tagging should be used.")
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_SUGGESTED_TAG_INVALID,
@@ -83,6 +90,12 @@ def schema_error_SCHEMA_VALUE_CLASS_INVALID(tag, unit_class, attribute_name):
 def schema_error_SCHEMA_DEFAULT_UNITS_INVALID(tag, bad_unit, valid_units):
     valid_units = ",".join(valid_units)
     return f"Tag '{tag}' has an invalid defaultUnit '{bad_unit}'.  Valid units are: '{valid_units}'."
+
+
+@hed_error(SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_DEPRECATED,
+           actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR)
+def schema_error_SCHEMA_DEFAULT_UNITS_DEPRECATED(unit_class, bad_unit):
+    return f"Unit class '{unit_class}' defaultUnit '{bad_unit}' is deprecated.  Please find an alternative default."
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE,
