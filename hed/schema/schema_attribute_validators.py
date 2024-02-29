@@ -14,7 +14,7 @@ Returns:
 from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors
 from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_cache import get_hed_versions
-from hed.schema.hed_schema_constants import HedKey, character_types
+from hed.schema.hed_schema_constants import HedKey, character_types, HedSectionKey
 from hed.schema.schema_validation_util import schema_version_for_library
 from semantic_version import Version
 
@@ -39,6 +39,36 @@ def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
+def attribute_is_deprecated(hed_schema, tag_entry, attribute_name):
+    """ Check if the attribute is deprecated.
+
+        does not check value.
+
+    Parameters:
+        hed_schema (HedSchema): The schema to use for validation
+        tag_entry (HedSchemaEntry): The schema entry for this tag.
+        attribute_name (str): The name of this attribute
+
+    Returns:
+        list: A list of issues. Each issue is a dictionary.
+    """
+    issues = []
+    # Attributes has to check properties
+    section_key = HedSectionKey.Attributes
+    if tag_entry.section_key == HedSectionKey.Attributes:
+        section_key = HedSectionKey.Properties
+
+    attribute_entry = hed_schema.get_tag_entry(attribute_name, section_key)
+    if (attribute_entry and attribute_entry.has_attribute(HedKey.DeprecatedFrom)
+            and not tag_entry.has_attribute(HedKey.DeprecatedFrom)):
+        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
+                                            tag_entry.name,
+                                            attribute_entry.name,
+                                            attribute_name)
+
+    return issues
+
+
 # todo: This needs to be refactored, these next several functions are near identical
 def tag_exists_check(hed_schema, tag_entry, attribute_name):
     """ Check if the list of possible tags exists in the schema.
@@ -56,8 +86,15 @@ def tag_exists_check(hed_schema, tag_entry, attribute_name):
     possible_tags = tag_entry.attributes.get(attribute_name, "")
     split_tags = possible_tags.split(",")
     for org_tag in split_tags:
-        if org_tag and org_tag not in hed_schema.tags:
+        org_entry = hed_schema.tags.get(org_tag)
+        if org_tag and not org_entry:
             issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_SUGGESTED_TAG_INVALID,
+                                                tag_entry.name,
+                                                org_tag,
+                                                attribute_name)
+        elif (org_entry and org_entry.has_attribute(HedKey.DeprecatedFrom)
+              and not tag_entry.has_attribute(HedKey.DeprecatedFrom)):
+            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
                                                 tag_entry.name,
                                                 org_tag,
                                                 attribute_name)
@@ -70,8 +107,15 @@ def unit_class_exists(hed_schema, tag_entry, attribute_name):
     possible_unit_classes = tag_entry.attributes.get(attribute_name, "")
     split_tags = possible_unit_classes.split(",")
     for org_tag in split_tags:
-        if org_tag and org_tag not in hed_schema.unit_classes:
+        unit_class_entry = hed_schema.unit_classes.get(org_tag)
+        if org_tag and not unit_class_entry:
             issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_UNIT_CLASS_INVALID,
+                                                tag_entry.name,
+                                                org_tag,
+                                                attribute_name)
+        elif (unit_class_entry and unit_class_entry.has_attribute(HedKey.DeprecatedFrom)
+              and not tag_entry.has_attribute(HedKey.DeprecatedFrom)):
+            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
                                                 tag_entry.name,
                                                 org_tag,
                                                 attribute_name)
@@ -83,9 +127,17 @@ def value_class_exists(hed_schema, tag_entry, attribute_name):
     issues = []
     possible_value_classes = tag_entry.attributes.get(attribute_name, "")
     split_tags = possible_value_classes.split(",")
+
     for org_tag in split_tags:
-        if org_tag and org_tag not in hed_schema.value_classes:
+        value_class_entry = hed_schema.value_classes.get(org_tag)
+        if org_tag and not value_class_entry:
             issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_VALUE_CLASS_INVALID,
+                                                tag_entry.name,
+                                                org_tag,
+                                                attribute_name)
+        elif (value_class_entry and value_class_entry.has_attribute(HedKey.DeprecatedFrom)
+              and not tag_entry.has_attribute(HedKey.DeprecatedFrom)):
+            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
                                                 tag_entry.name,
                                                 org_tag,
                                                 attribute_name)
@@ -95,12 +147,18 @@ def value_class_exists(hed_schema, tag_entry, attribute_name):
 
 def unit_exists(hed_schema, tag_entry, attribute_name):
     issues = []
-    default_unit = tag_entry.attributes.get(attribute_name, "")
-    if default_unit and default_unit not in tag_entry.derivative_units:
+    unit = tag_entry.attributes.get(attribute_name, "")
+    unit_entry = tag_entry.derivative_units.get(unit)
+    if unit and not unit_entry:
         issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_INVALID,
                                             tag_entry.name,
-                                            default_unit,
+                                            unit,
                                             tag_entry.units)
+    elif (unit_entry and unit_entry.has_attribute(HedKey.DeprecatedFrom)
+          and not tag_entry.has_attribute(HedKey.DeprecatedFrom)):
+        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_DEPRECATED,
+                                            tag_entry.name,
+                                            unit_entry.name)
 
     return issues
 
