@@ -16,11 +16,11 @@ class OnsetValidator:
             hed_string_obj (HedString): The hed string to check.
 
         Returns:
-            list: A list of issues found in validating onsets (i.e., out of order onsets, unknown def names).
+            list: A list of issues found in validating onsets (i.e., out of order onsets, repeated def names).
         """
         onset_issues = []
         used_def_names = set()
-        for temporal_tag, temporal_group in self._find_temporal_tags(hed_string_obj):
+        for temporal_tag, temporal_group in hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.TEMPORAL_KEYS):
             if not temporal_tag:
                 return []
 
@@ -42,8 +42,33 @@ class OnsetValidator:
 
         return onset_issues
 
-    def _find_temporal_tags(self, hed_string_obj):
-        return hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.TEMPORAL_KEYS)
+    def validate_duration_tags(self, hed_string_obj):
+        """ Validate Duration/Delay tag groups
+
+        Parameters:
+            hed_string_obj (HedString): The hed string to check.
+
+        Returns:
+            list: A list of issues found in validating durations (i.e., extra tags or groups present, or a group missing)
+        """
+        duration_issues = []
+        for tags, group in hed_string_obj.find_top_level_tags_grouped(anchor_tags=DefTagNames.DURATION_KEYS):
+            # This implicitly validates the duration/delay tag, as they're the only two allowed in the same group
+            # It should be impossible to have > 2 tags, but it's a good stopgap.
+            if len(tags) != len(group.tags()) or len(group.tags()) > 2:
+                for tag in group.tags():
+                    if tag not in tags:
+                        duration_issues += ErrorHandler.format_error(OnsetErrors.DURATION_HAS_OTHER_TAGS, tag=tag)
+                continue
+            if len(group.groups()) != 1:
+                duration_issues += ErrorHandler.format_error(OnsetErrors.DURATION_WRONG_NUMBER_GROUPS,
+                                                             tags[0],
+                                                             hed_string_obj.groups())
+                continue
+
+        # Does anything else need verification here?
+        #     That duration is positive?
+        return duration_issues
 
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
         is_onset = onset_offset_tag.short_base_tag == DefTagNames.ONSET_ORG_KEY
@@ -73,9 +98,9 @@ class OnsetValidator:
         Returns:
             list: The validation issues associated with the characters. Each issue is dictionary.
         """
-        banned_tag_list = DefTagNames.TEMPORAL_KEYS
+        banned_tag_list = DefTagNames.ALL_TIME_KEYS
         issues = []
         for tag in hed_string.get_all_tags():
-            if tag in banned_tag_list:
+            if tag.short_base_tag.lower() in banned_tag_list:
                 issues += ErrorHandler.format_error(OnsetErrors.HED_ONSET_WITH_NO_COLUMN, tag)
         return issues

@@ -113,6 +113,7 @@ class SpreadsheetValidator:
                 new_column_issues = self._hed_validator.run_full_string_checks(row_string)
                 if self._onset_validator is not None:
                     new_column_issues += self._onset_validator.validate_temporal_relations(row_string)
+                    new_column_issues += self._onset_validator.validate_duration_tags(row_string)
                 else:
                     new_column_issues += OnsetValidator.check_for_banned_tags(row_string)
                 error_handler.add_context_and_filter(new_column_issues)

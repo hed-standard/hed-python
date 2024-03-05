@@ -56,6 +56,7 @@ class Test(TestHedBase):
             onset_issues += def_validator.validate_onset_offset(test_string)
             if not onset_issues:
                 onset_issues += onset_validator.validate_temporal_relations(test_string)
+                onset_issues += onset_validator.validate_duration_tags(test_string)
 
             error_handler.add_context_and_filter(onset_issues)
             test_string.shrink_defs()
@@ -315,7 +316,7 @@ class Test(TestHedBase):
     def test_check_for_banned_tags(self):
         hed_string = HedString("Event, (Duration/Short, Label/Example)", self.hed_schema)
         issues = OnsetValidator.check_for_banned_tags(hed_string)
-        self.assertEqual(len(issues), 0)
+        self.assertEqual(len(issues), 1)
 
         hed_string = HedString("Onset, (Offset, Event)", self.hed_schema)
         issues = OnsetValidator.check_for_banned_tags(hed_string)
@@ -323,7 +324,7 @@ class Test(TestHedBase):
 
         hed_string = HedString("(Onset, Duration/Long), Label/Example", self.hed_schema)
         issues = OnsetValidator.check_for_banned_tags(hed_string)
-        self.assertEqual(len(issues), 1)
+        self.assertEqual(len(issues), 2)
 
 if __name__ == '__main__':
     unittest.main()

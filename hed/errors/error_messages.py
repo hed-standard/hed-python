@@ -388,6 +388,13 @@ def onset_too_many_groups(tag, tag_list):
            f"Found {len(tag_list_strings)}: {tag_list_strings}"
 
 
+@hed_tag_error(OnsetErrors.DURATION_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+def onset_DURATION_WRONG_NUMBER_GROUPS(tag, tag_list):
+    tag_list_strings = [str(a_tag) for a_tag in tag_list]
+    return f"A duration and/or delay tag '{tag}'should have exactly one child group." \
+           f"Found {len(tag_list_strings)}: {tag_list_strings}"
+
+
 @hed_tag_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
 def onset_wrong_type_tag(tag, def_tag):
     return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be " \
@@ -399,6 +406,11 @@ def onset_wrong_placeholder(tag, has_placeholder):
     if has_placeholder:
         return f"Onset/offset def tag {tag} expects a placeholder value, but does not have one."
     return f"Onset/offset def tag {tag} should not have a placeholder, but has one."
+
+
+@hed_tag_error(OnsetErrors.DURATION_HAS_OTHER_TAGS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+def onset_DURATION_HAS_OTHER_TAGS(tag):
+    return f"Tag '{tag}' should not be grouped with Duration or Delay.  Context tags should be in a sub-group."
 
 
 @hed_error(ColumnErrors.INVALID_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)

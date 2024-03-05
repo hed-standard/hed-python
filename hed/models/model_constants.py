@@ -1,10 +1,4 @@
 """ Defined constants for definitions, def labels, and expanded labels. """
-COLUMN_TO_HED_TAGS = "column_to_hed_tags"
-ROW_HED_STRING = "HED"
-COLUMN_ISSUES = "column_issues"
-ROW_ISSUES = "row_issues"
-
-
 class DefTagNames:
     """ Source names for definitions, def labels, and expanded labels. """
 
@@ -19,9 +13,16 @@ class DefTagNames:
     ONSET_ORG_KEY = "Onset"
     OFFSET_ORG_KEY = "Offset"
     INSET_ORG_KEY = "Inset"
+    DURATION_ORG_KEY = "Duration"
+    DELAY_ORG_KEY = "Delay"
 
     ONSET_KEY = ONSET_ORG_KEY.lower()
     OFFSET_KEY = OFFSET_ORG_KEY.lower()
     INSET_KEY = INSET_ORG_KEY.lower()
+    DURATION_KEY = DURATION_ORG_KEY.lower()
+    DELAY_KEY = DELAY_ORG_KEY.lower()
 
     TEMPORAL_KEYS = {ONSET_KEY, OFFSET_KEY, INSET_KEY}
+    DURATION_KEYS = {DURATION_KEY, DELAY_KEY}
+
+    ALL_TIME_KEYS = TEMPORAL_KEYS.union(DURATION_KEYS)

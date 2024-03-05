@@ -364,13 +364,13 @@ class TestOnsetDict(unittest.TestCase):
 
     def test_two_item_series_with_same_onset(self):
         input_series = pd.Series(["apple", "orange"])
-        expected_series = pd.Series(["apple,orange", "n/a"])
+        expected_series = pd.Series(["apple,orange", ""])
         self.assertTrue(BaseInput._filter_by_index_list(input_series, {0: [0, 1]}).equals(expected_series))
 
     def test_multiple_item_series(self):
         input_series = pd.Series(["apple", "orange", "banana", "mango"])
         indexed_dict = {0: [0, 1], 1: [2], 2: [3]}
-        expected_series = pd.Series(["apple,orange", "n/a", "banana", "mango"])
+        expected_series = pd.Series(["apple,orange", "", "banana", "mango"])
         self.assertTrue(BaseInput._filter_by_index_list(input_series, indexed_dict).equals(expected_series))
 
     def test_complex_scenarios(self):
@@ -383,6 +383,6 @@ class TestOnsetDict(unittest.TestCase):
         # Test with more complex indexed_dict
         original2 = ["apple", "orange", "banana", "mango", "grape"]
         indexed_dict2= {0: [0, 1], 1: [2], 2: [3, 4]}
-        expected_series2 = pd.Series(["apple,orange", "n/a", "banana", "mango,grape", "n/a"])
+        expected_series2 = pd.Series(["apple,orange", "", "banana", "mango,grape", ""])
         self.assertTrue(BaseInput._filter_by_index_list(original2, indexed_dict2).equals(expected_series2))
 

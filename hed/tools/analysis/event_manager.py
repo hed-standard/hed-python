@@ -1,5 +1,6 @@
 """ Manager of events of temporal extent. """
 import pandas as pd
+import bisect
 
 from hed.errors import HedFileError
 from hed.models import HedString
@@ -52,14 +53,30 @@ class EventManager:
         Notes:
 
         """
-        hed_strings, def_dict = get_assembled(input_data, self.hed_schema, extra_def_dicts=None, defs_expanded=False)
+        hed_strings, def_dict = get_assembled(input_data, self.hed_schema, extra_def_dicts=None, defs_expanded=False,
+                                              return_filtered=True)
         onset_dict = {}  # Temporary dictionary keeping track of temporal events that haven't ended yet.
         for event_index, hed in enumerate(hed_strings):
             self._extract_temporal_events(hed, event_index, onset_dict)
+            self._extract_duration_events(hed, event_index)
         # Now handle the events that extend to end of list
         for item in onset_dict.values():
             item.set_end(len(self.onsets), None)
         self.hed_strings = hed_strings
+
+    def _extract_duration_events(self, hed, event_index):
+        groups = hed.find_top_level_tags(anchor_tags={DefTagNames.DURATION_KEY})
+        to_remove = []
+        for duration_tag, group in groups:
+            start_time = self.onsets[event_index]
+            new_event = TemporalEvent(group, event_index, start_time)
+            end_time = new_event.end_time
+            # Todo: This may need updating.  end_index==len(self.onsets) in the edge
+            end_index = bisect.bisect_left(self.onsets, end_time)
+            new_event.set_end(end_index, end_time)
+            self.event_list[event_index].append(new_event)
+            to_remove.append(group)
+        hed.remove(to_remove)
 
     def _extract_temporal_events(self, hed, event_index, onset_dict):
         """ Extract the temporal events and remove them from the other HED strings.
@@ -77,18 +94,19 @@ class EventManager:
             return
         group_tuples = hed.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY},
                                                include_groups=2)
+
         to_remove = []
-        for tup in group_tuples:
-            anchor_tag = tup[1].find_def_tags(recursive=False, include_groups=0)[0]
+        for def_tag, group in group_tuples:
+            anchor_tag = group.find_def_tags(recursive=False, include_groups=0)[0]
             anchor = anchor_tag.extension.lower()
-            if anchor in onset_dict or tup[0].short_base_tag.lower() == DefTagNames.OFFSET_KEY:
+            if anchor in onset_dict or def_tag.short_base_tag.lower() == DefTagNames.OFFSET_KEY:
                 temporal_event = onset_dict.pop(anchor)
                 temporal_event.set_end(event_index, self.onsets[event_index])
-            if tup[0] == DefTagNames.ONSET_KEY:
-                new_event = TemporalEvent(tup[1], event_index, self.onsets[event_index])
+            if def_tag == DefTagNames.ONSET_KEY:
+                new_event = TemporalEvent(group, event_index, self.onsets[event_index])
                 self.event_list[event_index].append(new_event)
                 onset_dict[anchor] = new_event
-            to_remove.append(tup[1])
+            to_remove.append(group)
         hed.remove(to_remove)
 
     def unfold_context(self, remove_types=[]):

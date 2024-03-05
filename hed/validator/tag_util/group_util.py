@@ -91,8 +91,8 @@ class GroupValidator:
                 actual_code = None
                 if top_level_tag.short_base_tag == DefTagNames.DEFINITION_ORG_KEY:
                     actual_code = ValidationErrors.DEFINITION_INVALID
-                elif top_level_tag.short_base_tag in {DefTagNames.ONSET_ORG_KEY, DefTagNames.OFFSET_ORG_KEY}:
-                    actual_code = ValidationErrors.ONSET_OFFSET_INSET_ERROR
+                elif top_level_tag.short_base_tag.lower() in DefTagNames.ALL_TIME_KEYS:
+                    actual_code = ValidationErrors.ONSET_OFFSET_INSET_ERROR  # May split this out if we switch error
 
                 if actual_code:
                     validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TOP_LEVEL_TAG,
@@ -102,9 +102,12 @@ class GroupValidator:
                                                                tag=top_level_tag)
 
         if is_top_level and len(top_level_tags) > 1:
-            validation_issues += ErrorHandler.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS,
-                                                           tag=top_level_tags[0],
-                                                           multiple_tags=top_level_tags[1:])
+            short_tags = [tag.short_base_tag for tag in top_level_tags]
+            # Special exception for Duration/Delay pairing
+            if len(top_level_tags) != 2 or DefTagNames.DURATION_ORG_KEY not in short_tags or DefTagNames.DELAY_ORG_KEY not in short_tags:
+                validation_issues += ErrorHandler.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS,
+                                                               tag=top_level_tags[0],
+                                                               multiple_tags=top_level_tags[1:])
 
         return validation_issues
 

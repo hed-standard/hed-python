@@ -57,7 +57,8 @@ def search_strings(hed_strings, queries, query_names):
     df_factors = pd.DataFrame(0, index=range(len(hed_strings)), columns=query_names)
     for parse_ind, parser in enumerate(queries):
         for index, next_item in enumerate(hed_strings):
-            match = parser.search(next_item)
-            if match:
-                df_factors.at[index, query_names[parse_ind]] = 1
+            if next_item:
+                match = parser.search(next_item)
+                if match:
+                    df_factors.at[index, query_names[parse_ind]] = 1
     return df_factors
