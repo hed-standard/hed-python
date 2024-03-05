@@ -82,36 +82,56 @@ class Test(unittest.TestCase):
 
     def test_onset_ordering_mixed(self):
         df = pd.DataFrame({'onset': [1, 2, '3', 3.24, 5],
-                           'HED': ['(Duration/4.0 s, Black)', '(Duration/2 s, Red)', 'Blue', 'Green', 'Label/1']})
+                           'HED': ['(Duration/4.0 s, (Black))', '(Duration/2 s, (Red))', 'Blue', 'Green', 'Label/1']})
         manager = EventManager(TabularInput(df), self.schema)
         self.assertIsInstance(manager, EventManager)
         hed, base, context = manager.unfold_context()
 
     def test_onset_ordering_bad(self):
         df = pd.DataFrame({'onset': [1, 2, '3', 'n/a', 5],
-                           'HED': ['(Duration/4.0 s, Black)', '(Duration/2 s, Red)', 'Blue', 'n/a', 'Label/1']})
+                           'HED': ['(Duration/4.0 s, (Black))', '(Duration/2 s, (Red))', 'Blue', 'n/a', 'Label/1']})
         with self.assertRaises(HedFileError) as ex:
             EventManager(TabularInput(df), self.schema)
             self.assertEqual(ex.args(0), "OnsetsNotOrdered")
         df1 = pd.DataFrame({'onset': [1, 2, 1.4, 6, 5],
-                           'HED': ['(Duration/4.0 s, Black)', '(Duration/2 s, Red)', 'Blue', 'n/a', 'Label/1']})
+                           'HED': ['(Duration/4.0 s, (Black))', '(Duration/2 s, (Red))', 'Blue', 'n/a', 'Label/1']})
         with self.assertRaises(HedFileError) as ex1:
             EventManager(TabularInput(df1), self.schema)
             self.assertEqual(ex1.args(0), "OnsetsNotOrdered")
 
         df2 = pd.DataFrame({'onset': [1, np.nan, 1.4, 6, 5],
-                           'HED': ['(Duration/4.0 s, Black)', '(Duration/2 s, Red)', 'Blue', 'n/a', 'Label/1']})
+                           'HED': ['(Duration/4.0 s, (Black))', '(Duration/2 s, (Red))', 'Blue', 'n/a', 'Label/1']})
         with self.assertRaises(HedFileError) as ex2:
             EventManager(TabularInput(df2), self.schema)
             self.assertEqual(ex2.args(0), "OnsetsNotOrdered")
 
     def test_duration_context(self):
         df = pd.DataFrame({'onset': [1, 2, 3, 4, 5],
-                           'HED': ['(Duration/4.0 s, Black)', '(Duration/2 s, Red)', 'Blue', 'n/a', 'Label/1']})
+                           'HED': ['(Duration/5.0 s, (Black))', '(Duration/2 s, (Red))', 'Blue', 'n/a', 'Label/1']})
         manager = EventManager(TabularInput(df), self.schema)
         hed, base, context = manager.unfold_context()
-        pass
+        self.assertTrue(all("Black" in item for item in context[1:]))
+        self.assertTrue(all("Red" in item for item in context[2:3]))
+        self.assertTrue(all("Black" in item for item in base[0:1]))
 
+    def test_duration_context2(self):
+        df = pd.DataFrame({'onset': [1, 2, 3, 4, 5],
+                           'HED': ['(Duration/1.0 s, (Black))', '(Duration/2 s, (Red))', 'Blue', 'n/a', 'Label/1']})
+        manager = EventManager(TabularInput(df), self.schema)
+        hed, base, context = manager.unfold_context()
+        self.assertTrue(not any("Black" in item for item in context))
+        self.assertTrue(all("Red" in item for item in context[2:3]))
+        self.assertTrue(all("Black" in item for item in base[0:1]))
+
+    def test_duration_context_same_onset(self):
+        df = pd.DataFrame({'onset': [1, 1, 3, 4, 5],
+                           'HED': ['(Duration/3.0 s, (Black))', '(Duration/2 s, (Red))', 'Blue', 'n/a', 'Label/1']})
+        manager = EventManager(TabularInput(df), self.schema)
+        hed, base, context = manager.unfold_context()
+        self.assertTrue(all("Black" in item for item in context[1:3]))
+        self.assertTrue(all("Red" in item for item in context[1:2]))
+        self.assertTrue(all("Black" in item for item in base[0:1]))
+        self.assertTrue(all("Red" in item for item in base[0:1]))
 
 if __name__ == '__main__':
     unittest.main()

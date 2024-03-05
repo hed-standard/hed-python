@@ -351,7 +351,7 @@ class HedString(HedGroup):
                 If 1: return only groups.
                 If 2 or any other value: return both.
         Returns:
-            list or tuple: The returned result depends on include_groups.
+            list: The returned result depends on include_groups.
         """
         top_level_tags = []
         for group in self.groups():
@@ -363,6 +363,29 @@ class HedString(HedGroup):
 
         if include_groups == 0 or include_groups == 1:
             return [tag[include_groups] for tag in top_level_tags]
+        return top_level_tags
+
+    def find_top_level_tags_grouped(self, anchor_tags):
+        """ Find top level groups with an anchor tag.
+
+            This is an alternate one designed to be easy to use with Delay/Duration tag.
+
+        Parameters:
+            anchor_tags (container):  A list/set/etc. of short_base_tags to find groups by.
+        Returns:
+            list of tuples:
+                list of tags: the tags in the same subgroup
+                group: the subgroup containing the tags
+        """
+        top_level_tags = []
+        for group in self.groups():
+            tags = []
+            for tag in group.tags():
+                if tag.short_base_tag.lower() in anchor_tags:
+                    tags.append(tag)
+            if tags:
+                top_level_tags.append((tags, group))
+
         return top_level_tags
 
     def remove_refs(self):

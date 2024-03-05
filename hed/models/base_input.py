@@ -139,7 +139,7 @@ class BaseInput:
     # This would need to store the index list -> So it can optionally apply to other columns on request.
     @staticmethod
     def _filter_by_index_list(original_series, indexed_dict):
-        new_series = pd.Series(["n/a"] * len(original_series), dtype=str)
+        new_series = pd.Series([""] * len(original_series), dtype=str)
 
         for onset, indices in indexed_dict.items():
             if indices:

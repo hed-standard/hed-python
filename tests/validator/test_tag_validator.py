@@ -420,6 +420,12 @@ class TestTagLevels(TestHed):
             'invalid2': '(Event, (Definition/InvalidDef2))',
             'invalidTwoInOne': '(Definition/InvalidDef2, Definition/InvalidDef3)',
             'invalid2TwoInOne': '(Definition/InvalidDef2, Onset)',
+            'valid2TwoInOne': '(Duration/5.0 s, Delay, (Event))',
+            'invalid3InOne': '(Duration/5.0 s, Delay, Onset, (Event))',
+            'invalidDuration': '(Duration/5.0 s, Onset, (Event))',
+            'invalidDelay': '(Delay, Onset, (Event))',
+            'invalidDurationPair': '(Duration/5.0 s, Duration/3.0 s, (Event))',
+            'invalidDelayPair': '(Delay/3.0 s, Delay, (Event))',
         }
         expected_results = {
             'invalid1': False,
@@ -428,6 +434,12 @@ class TestTagLevels(TestHed):
             'invalid2': False,
             'invalidTwoInOne': False,
             'invalid2TwoInOne': False,
+            'valid2TwoInOne': True,
+            'invalid3InOne': False,
+            'invalidDuration': False,
+            'invalidDelay': False,
+            'invalidDurationPair': False,
+            'invalidDelayPair': False,
         }
         expected_issues = {
             'invalid1': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0, actual_error=ValidationErrors.DEFINITION_INVALID)
@@ -436,12 +448,14 @@ class TestTagLevels(TestHed):
             'valid2': [],
             'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.DEFINITION_INVALID)
             + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
-            'invalidTwoInOne': self.format_error(
-                ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="Definition/InvalidDef3".split(", ")),
-            'invalid2TwoInOne': self.format_error(
-                ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="Onset".split(", ")),
+            'invalidTwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Definition/InvalidDef3".split(", ")),
+            'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Onset".split(", ")),
+            'valid2TwoInOne': [],
+            'invalid3InOne':  self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Delay, Onset".split(", ")),
+            'invalidDuration': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Onset".split(", ")),
+            'invalidDelay': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Onset".split(", ")),
+            'invalidDurationPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Duration/3.0 s".split(", ")),
+            'invalidDelayPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Delay".split(", ")),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 

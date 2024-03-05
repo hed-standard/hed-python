@@ -75,7 +75,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
 
         issues = self.validator.validate(TabularInput(self.df_without_onset_has_tags), def_dicts=def_dict)
         self.assertEqual(len(issues), 3)
-        self.assertEqual(issues[0]['code'], ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+        self.assertEqual(issues[0]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)
         issues = self.validator.validate(TabularInput(self.df_with_onset_has_tags), def_dicts=def_dict)
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues[0]['code'], ValidationErrors.HED_UNKNOWN_COLUMN)
@@ -89,8 +89,8 @@ class TestSpreadsheetValidation(unittest.TestCase):
 
         issues = self.validator.validate(TabularInput(self.df_without_onset_has_tags_unordered), def_dicts=def_dict)
         self.assertEqual(len(issues), 3)
-        self.assertEqual(issues[0]['code'], ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+        self.assertEqual(issues[0]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)
         issues = self.validator.validate(TabularInput(self.df_with_onset_has_tags_unordered), def_dicts=def_dict)
         self.assertEqual(len(issues), 2)
         self.assertEqual(issues[0]['code'], ValidationErrors.HED_UNKNOWN_COLUMN)
-        self.assertEqual(issues[1]['code'], ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+        self.assertEqual(issues[1]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)

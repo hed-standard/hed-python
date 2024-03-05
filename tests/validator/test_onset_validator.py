@@ -2,7 +2,7 @@ import copy
 import unittest
 import os
 
-from hed.errors import ErrorHandler, OnsetErrors, ErrorContext, ValidationErrors
+from hed.errors import ErrorHandler, TemporalErrors, ErrorContext, ValidationErrors
 from hed.models import HedString, DefinitionDict
 from hed import schema
 from hed.validator import HedValidator, OnsetValidator, DefValidator
@@ -56,6 +56,7 @@ class Test(TestHedBase):
             onset_issues += def_validator.validate_onset_offset(test_string)
             if not onset_issues:
                 onset_issues += onset_validator.validate_temporal_relations(test_string)
+                onset_issues += onset_validator.validate_duration_tags(test_string)
 
             error_handler.add_context_and_filter(onset_issues)
             test_string.shrink_defs()
@@ -113,16 +114,16 @@ class Test(TestHedBase):
         test_issues = [
             [],
             [],
-            self.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=0),
-            self.format_error(OnsetErrors.INSET_BEFORE_ONSET, tag=0),
-            self.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+            self.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=0),
+            self.format_error(TemporalErrors.INSET_BEFORE_ONSET, tag=0),
+            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
                               tag_list=['Def/TestDefPlaceholder/2471', 'Onset', '(Event)', '(Event)']),
             [],
-            self.format_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
-            self.format_error(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=['Def/InvalidDef']),
-            self.format_error(OnsetErrors.ONSET_DEF_UNMATCHED, tag=0),
-            self.format_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
-            self.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+            self.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
+            self.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=['Def/InvalidDef']),
+            self.format_error(TemporalErrors.ONSET_DEF_UNMATCHED, tag=0),
+            self.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
+            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
                               tag_list=[self.placeholder_label_def_string, 'Offset', '(Event)']),
         ]
 
@@ -158,16 +159,16 @@ class Test(TestHedBase):
         test_issues = [
             [],
             [],
-            self.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=0),
-            self.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+            self.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=0),
+            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
                               tag_list=[self.placeholder_label_def_string, 'Onset', '(Event)', '(Event)']),
             [],
-            self.format_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
-            self.format_error(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0,
+            self.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
+            self.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS, tag=0,
                               tag_list=['Def/TestDefPlaceholder/2']),
-            self.format_error(OnsetErrors.ONSET_DEF_UNMATCHED, tag=0),
-            self.format_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
-            self.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+            self.format_error(TemporalErrors.ONSET_DEF_UNMATCHED, tag=0),
+            self.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
+            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
                               tag_list=[self.placeholder_label_def_string, 'Offset', '(Event)']),
         ]
 
@@ -203,15 +204,15 @@ class Test(TestHedBase):
         test_issues = [
             [],
             [],
-            self.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=0),
-            self.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
+            self.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=0),
+            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
                               tag_list=[self.placeholder_expanded_def_string, 'Onset', '(Event)', '(Event)']),
             [],
-            self.format_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
-            self.format_error(OnsetErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=['Def/InvalidDef']),
-            self.format_error(OnsetErrors.ONSET_DEF_UNMATCHED, tag=0),
-            self.format_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
-            self.format_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=False)
+            self.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
+            self.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=['Def/InvalidDef']),
+            self.format_error(TemporalErrors.ONSET_DEF_UNMATCHED, tag=0),
+            self.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
+            self.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=False)
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=False)
@@ -242,7 +243,7 @@ class Test(TestHedBase):
             [],
             [],
             [],
-            self.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=0),
+            self.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=0),
             [],
             [],
         ]
@@ -271,13 +272,13 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset, Offset)",
         ]
         test_issues = [
-            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.TEMPORAL_TAG_ERROR)
             + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1, multiple_tags=["Onset"])
             + self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=2)
-            + self.format_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
+            + self.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
             self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1, multiple_tags=["Offset"])
-            + self.format_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
+            + self.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
         ]
 
         self._test_issues_no_context(test_strings, test_issues)
@@ -307,7 +308,7 @@ class Test(TestHedBase):
             [],
             [],
             [],
-            self.format_error(OnsetErrors.ONSET_SAME_DEFS_ONE_ROW, tag=3, def_name="TestDefPlaceholder/2471")
+            self.format_error(TemporalErrors.ONSET_SAME_DEFS_ONE_ROW, tag=3, def_name="TestDefPlaceholder/2471")
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=False)
@@ -315,7 +316,7 @@ class Test(TestHedBase):
     def test_check_for_banned_tags(self):
         hed_string = HedString("Event, (Duration/Short, Label/Example)", self.hed_schema)
         issues = OnsetValidator.check_for_banned_tags(hed_string)
-        self.assertEqual(len(issues), 0)
+        self.assertEqual(len(issues), 1)
 
         hed_string = HedString("Onset, (Offset, Event)", self.hed_schema)
         issues = OnsetValidator.check_for_banned_tags(hed_string)
@@ -323,7 +324,7 @@ class Test(TestHedBase):
 
         hed_string = HedString("(Onset, Duration/Long), Label/Example", self.hed_schema)
         issues = OnsetValidator.check_for_banned_tags(hed_string)
-        self.assertEqual(len(issues), 1)
+        self.assertEqual(len(issues), 2)
 
 if __name__ == '__main__':
     unittest.main()
