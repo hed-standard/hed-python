@@ -6,7 +6,7 @@ Add new errors here, or any other file imported after error_reporter.py.
 
 from hed.errors.error_reporter import hed_error, hed_tag_error
 from hed.errors.error_types import (ValidationErrors, SidecarErrors, ErrorSeverity, DefinitionErrors,
-                                    OnsetErrors, ColumnErrors)
+                                    TemporalErrors, ColumnErrors)
 
 
 @hed_tag_error(ValidationErrors.UNITS_INVALID)
@@ -26,7 +26,7 @@ def val_error_empty_group(tag):
     return f"HED tags cannot be empty.  Extra delimiters found: '{tag}'"
 
 
-@hed_tag_error(OnsetErrors.HED_ONSET_WITH_NO_COLUMN, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.HED_ONSET_WITH_NO_COLUMN, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def val_error_hed_onset_with_no_column(tag):
     return f"Cannot have Temporal tags without an 'Onset' column.  Found tag: '{tag}'"
 
@@ -350,65 +350,65 @@ def def_error_bad_location(tag):
     return f"Tag '{str(tag)}' is found in a location it is not allowed to be."
 
 
-@hed_tag_error(OnsetErrors.ONSET_DEF_UNMATCHED, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_DEF_UNMATCHED, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_error_def_unmatched(tag):
     return f"The def tag in an onset/offset tag is unmatched.  Def tag: '{tag}'"
 
 
-@hed_tag_error(OnsetErrors.OFFSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.OFFSET_BEFORE_ONSET, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_error_offset_before_onset(tag):
     return f"Offset tag '{tag}' does not have a matching onset."
 
 
-@hed_tag_error(OnsetErrors.ONSET_SAME_DEFS_ONE_ROW, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_SAME_DEFS_ONE_ROW, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_error_same_defs_one_row(tag, def_name):
     return f"'{tag}' uses name '{def_name}', which was already used at this onset time."
 
 
-@hed_tag_error(OnsetErrors.INSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.INSET_BEFORE_ONSET, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_error_inset_before_onset(tag):
     return f"Inset tag '{tag}' does not have a matching onset."
 
 
-@hed_tag_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_no_def_found(tag):
     return f"'{tag}' tag has no def or def-expand tag in string."
 
 
-@hed_tag_error(OnsetErrors.ONSET_TOO_MANY_DEFS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_TOO_MANY_DEFS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_too_many_defs(tag, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
     return f"Too many def tags found in onset for {tag}.  Expected 1, also found: {tag_list_strings}"
 
 
-@hed_tag_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_too_many_groups(tag, tag_list):
     tag_list_strings = [str(a_tag) for a_tag in tag_list]
     return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1. " \
            f"Found {len(tag_list_strings)}: {tag_list_strings}"
 
 
-@hed_tag_error(OnsetErrors.DURATION_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.DURATION_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_DURATION_WRONG_NUMBER_GROUPS(tag, tag_list):
     tag_list_strings = [str(a_tag) for a_tag in tag_list]
     return f"A duration and/or delay tag '{tag}'should have exactly one child group." \
            f"Found {len(tag_list_strings)}: {tag_list_strings}"
 
 
-@hed_tag_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_wrong_type_tag(tag, def_tag):
     return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be " \
            f"in a single group together."
 
 
-@hed_tag_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_wrong_placeholder(tag, has_placeholder):
     if has_placeholder:
         return f"Onset/offset def tag {tag} expects a placeholder value, but does not have one."
     return f"Onset/offset def tag {tag} should not have a placeholder, but has one."
 
 
-@hed_tag_error(OnsetErrors.DURATION_HAS_OTHER_TAGS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.DURATION_HAS_OTHER_TAGS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_DURATION_HAS_OTHER_TAGS(tag):
     return f"Tag '{tag}' should not be grouped with Duration or Delay.  Context tags should be in a sub-group."
 

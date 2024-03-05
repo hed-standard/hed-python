@@ -92,7 +92,7 @@ class GroupValidator:
                 if top_level_tag.short_base_tag == DefTagNames.DEFINITION_ORG_KEY:
                     actual_code = ValidationErrors.DEFINITION_INVALID
                 elif top_level_tag.short_base_tag.lower() in DefTagNames.ALL_TIME_KEYS:
-                    actual_code = ValidationErrors.ONSET_OFFSET_INSET_ERROR  # May split this out if we switch error
+                    actual_code = ValidationErrors.TEMPORAL_TAG_ERROR  # May split this out if we switch error
 
                 if actual_code:
                     validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TOP_LEVEL_TAG,

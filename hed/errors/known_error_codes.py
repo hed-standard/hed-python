@@ -8,7 +8,7 @@ known_error_codes = {
         "DEF_INVALID",
         "DEFINITION_INVALID",
         "NODE_NAME_EMPTY",
-        "ONSET_OFFSET_INSET_ERROR",
+        "TEMPORAL_TAG_ERROR",
         "PARENTHESES_MISMATCH",
         "PLACEHOLDER_INVALID",
         "REQUIRED_TAG_MISSING",

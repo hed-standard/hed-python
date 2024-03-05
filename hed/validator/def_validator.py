@@ -3,7 +3,7 @@ from hed.models.definition_dict import DefinitionDict
 from hed.errors.error_types import ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.model_constants import DefTagNames
-from hed.errors.error_types import OnsetErrors
+from hed.errors.error_types import TemporalErrors
 
 
 class DefValidator(DefinitionDict):
@@ -152,11 +152,11 @@ class DefValidator(DefinitionDict):
 
             def_tags = found_group.find_def_tags()
             if not def_tags:
-                onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, found_onset)
+                onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, found_onset)
                 continue
 
             if len(def_tags) > 1:
-                onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_TOO_MANY_DEFS,
+                onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS,
                                                           tag=def_tags[0][0],
                                                           tag_list=[tag[0] for tag in def_tags[1:]])
                 continue
@@ -171,7 +171,7 @@ class DefValidator(DefinitionDict):
             if found_onset.short_base_tag == DefTagNames.OFFSET_ORG_KEY:
                 max_children = 0
             if len(children) > max_children:
-                onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS,
+                onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS,
                                                           def_tag,
                                                           found_group.children)
                 continue
@@ -180,7 +180,7 @@ class DefValidator(DefinitionDict):
                 # Make this a loop if max_children can be > 1
                 child = children[0]
                 if not isinstance(child, HedGroup):
-                    onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP,
+                    onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP,
                                                               child,
                                                               def_tag)
 
@@ -197,9 +197,9 @@ class DefValidator(DefinitionDict):
 
         def_entry = self.defs.get(def_name.lower())
         if def_entry is None:
-            return ErrorHandler.format_error(OnsetErrors.ONSET_DEF_UNMATCHED, tag=def_tag)
+            return ErrorHandler.format_error(TemporalErrors.ONSET_DEF_UNMATCHED, tag=def_tag)
         if bool(def_entry.takes_value) != bool(placeholder):
-            return ErrorHandler.format_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, tag=def_tag,
+            return ErrorHandler.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=def_tag,
                                              has_placeholder=bool(def_entry.takes_value))
 
         return []

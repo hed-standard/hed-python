@@ -1,6 +1,6 @@
 from hed.models.model_constants import DefTagNames
 from hed.errors.error_reporter import ErrorHandler
-from hed.errors.error_types import OnsetErrors
+from hed.errors.error_types import TemporalErrors
 
 
 class OnsetValidator:
@@ -31,7 +31,7 @@ class OnsetValidator:
             def_tag = def_tags[0]
             def_name = def_tag.extension
             if def_name.lower() in used_def_names:
-                onset_issues += ErrorHandler.format_error(OnsetErrors.ONSET_SAME_DEFS_ONE_ROW, tag=temporal_tag,
+                onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_SAME_DEFS_ONE_ROW, tag=temporal_tag,
                                                           def_name=def_name)
                 continue
 
@@ -58,10 +58,10 @@ class OnsetValidator:
             if len(tags) != len(group.tags()) or len(group.tags()) > 2:
                 for tag in group.tags():
                     if tag not in tags:
-                        duration_issues += ErrorHandler.format_error(OnsetErrors.DURATION_HAS_OTHER_TAGS, tag=tag)
+                        duration_issues += ErrorHandler.format_error(TemporalErrors.DURATION_HAS_OTHER_TAGS, tag=tag)
                 continue
             if len(group.groups()) != 1:
-                duration_issues += ErrorHandler.format_error(OnsetErrors.DURATION_WRONG_NUMBER_GROUPS,
+                duration_issues += ErrorHandler.format_error(TemporalErrors.DURATION_WRONG_NUMBER_GROUPS,
                                                              tags[0],
                                                              hed_string_obj.groups())
                 continue
@@ -80,9 +80,9 @@ class OnsetValidator:
             is_offset = onset_offset_tag.short_base_tag == DefTagNames.OFFSET_ORG_KEY
             if full_def_name.lower() not in self._onsets:
                 if is_offset:
-                    return ErrorHandler.format_error(OnsetErrors.OFFSET_BEFORE_ONSET, tag=def_tag)
+                    return ErrorHandler.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=def_tag)
                 else:
-                    return ErrorHandler.format_error(OnsetErrors.INSET_BEFORE_ONSET, tag=def_tag)
+                    return ErrorHandler.format_error(TemporalErrors.INSET_BEFORE_ONSET, tag=def_tag)
             elif is_offset:
                 del self._onsets[full_def_name.lower()]
 
@@ -102,5 +102,5 @@ class OnsetValidator:
         issues = []
         for tag in hed_string.get_all_tags():
             if tag.short_base_tag.lower() in banned_tag_list:
-                issues += ErrorHandler.format_error(OnsetErrors.HED_ONSET_WITH_NO_COLUMN, tag)
+                issues += ErrorHandler.format_error(TemporalErrors.HED_ONSET_WITH_NO_COLUMN, tag)
         return issues
