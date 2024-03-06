@@ -1,7 +1,6 @@
 """
 Superclass representing a basic columnar file.
 """
-import re
 import os
 
 import openpyxl
@@ -10,6 +9,8 @@ import pandas
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
 import pandas as pd
+
+from hed.models.df_util import _handle_curly_braces_refs
 
 
 class BaseInput:
@@ -417,7 +418,7 @@ class BaseInput:
         transformers, _ = mapper.get_transformers()
         refs = self.get_column_refs()
         column_names = list(transformers)
-        return self._handle_curly_braces_refs(all_columns, refs, column_names)
+        return _handle_curly_braces_refs(all_columns, refs, column_names)
 
     def _handle_transforms(self, mapper):
         transformers, need_categorical = mapper.get_transformers()
@@ -434,69 +435,6 @@ class BaseInput:
             all_columns = self._dataframe
 
         return all_columns
-
-    @staticmethod
-    def _replace_ref(text, newvalue, column_ref):
-        """ Replace column ref in x with y.  If it's n/a, delete extra commas/parentheses.
-
-        Note: This function could easily be updated to handle non-curly brace values, but it's faster this way.
-        Parameters:
-            text (str): The input string containing the ref enclosed in curly braces.
-            newvalue (str): The replacement value for the ref.
-            column_ref (str): The ref to be replaced, without curly braces.
-
-        Returns:
-            str: The modified string with the ref replaced or removed.
-        """
-        # If it's not n/a, we can just replace directly.
-        if newvalue != "n/a":
-            return text.replace(f"{{{column_ref}}}", newvalue)
-
-        def _remover(match):
-            p1 = match.group("p1").count("(")
-            p2 = match.group("p2").count(")")
-            if p1 > p2:  # We have more starting parens than ending.  Make sure we don't remove comma before
-                output = match.group("c1") + "(" * (p1 - p2)
-            elif p2 > p1:  # We have more ending parens.  Make sure we don't remove comma after
-                output = ")" * (p2 - p1) + match.group("c2")
-            else:
-                c1 = match.group("c1")
-                c2 = match.group("c2")
-                if c1:
-                    c1 = ""
-                elif c2:
-                    c2 = ""
-                output = c1 + c2
-
-            return output
-
-        # this finds all surrounding commas and parentheses to a reference.
-        # c1/c2 contain the comma(and possibly spaces) separating this ref from other tags
-        # p1/p2 contain the parentheses directly surrounding the tag
-        # All four groups can have spaces.
-        pattern = r'(?P<c1>[\s,]*)(?P<p1>[(\s]*)\{' + column_ref + r'\}(?P<p2>[\s)]*)(?P<c2>[\s,]*)'
-        return re.sub(pattern, _remover, text)
-
-    @staticmethod
-    def _handle_curly_braces_refs(df, refs, column_names):
-        """ Plug in curly braces with other columns. """
-        # Filter out columns and refs that don't exist.
-        refs = [ref for ref in refs if ref in column_names]
-        remaining_columns = [column for column in column_names if column not in refs]
-
-        # Replace references in the columns we are saving out.
-        saved_columns = df[refs]
-        for column_name in remaining_columns:
-            for replacing_name in refs:
-                # If the data has no n/a values, this version is MUCH faster.
-                # column_name_brackets = f"{{{replacing_name}}}"
-                # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
-                #                             in zip(df[column_name], saved_columns[replacing_name]))
-                df[column_name] = pd.Series(BaseInput._replace_ref(x, y, replacing_name) for x, y
-                                            in zip(df[column_name], saved_columns[replacing_name]))
-        df = df[remaining_columns]
-
-        return df
 
     @staticmethod
     def combine_dataframe(dataframe):
