@@ -1,5 +1,7 @@
 import copy
 import re
+import itertools
+
 from hed.errors import ErrorHandler, ErrorContext, SidecarErrors, DefinitionErrors, ColumnErrors
 from hed.models import ColumnType
 from hed import HedString
@@ -7,6 +9,7 @@ from hed.models.column_metadata import ColumnMetadata
 from hed.errors.error_reporter import sort_issues
 from hed.models.model_constants import DefTagNames
 from hed.errors.error_reporter import check_for_any_errors
+from hed.models.df_util import replace_ref
 
 
 # todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
@@ -53,11 +56,14 @@ class SidecarValidator:
         issues += sidecar._extract_definition_issues
         issues += sidecar_def_dict.issues
 
+        # todo: Break this function up
+        all_ref_columns = sidecar.get_column_refs()
         definition_checks = {}
         for column_data in sidecar:
             column_name = column_data.column_name
             column_data = column_data._get_unvalidated_data()
             hed_strings = column_data.get_hed_strings()
+            is_ref_column = column_name in all_ref_columns
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
             for key_name, hed_string in hed_strings.items():
                 new_issues = []
@@ -68,23 +74,45 @@ class SidecarValidator:
 
                 error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
                 new_issues += hed_validator.run_basic_checks(hed_string_obj, allow_placeholders=True)
-                new_issues += hed_validator.run_full_string_checks(hed_string_obj)
-
                 def_check_list = definition_checks.setdefault(column_name, [])
                 def_check_list.append(hed_string_obj.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True,
                                                                include_groups=0))
+
                 # Might refine this later - for now just skip checking placeholder counts in definition columns.
                 if not def_check_list[-1]:
                     new_issues += self._validate_pound_sign_count(hed_string_obj, column_type=column_data.column_type)
 
-                if len(hed_strings) > 1:
-                    error_handler.pop_error_context()
                 error_handler.add_context_and_filter(new_issues)
                 issues += new_issues
-            error_handler.pop_error_context()
-        error_handler.pop_error_context()
+                error_handler.pop_error_context()  # Hed String
+
+                # Only do full string checks on full columns, not partial ref columns.
+                if not is_ref_column:
+                    refs = re.findall("\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
+                    refs_strings = {data.column_name: data.get_hed_strings() for data in sidecar}
+                    if "HED" not in refs_strings:
+                        refs_strings["HED"] = ["n/a"]
+                    for combination in itertools.product(*[refs_strings[key] for key in refs]):
+                        new_issues = []
+                        ref_dict = dict(zip(refs, combination))
+                        modified_string = hed_string
+                        for ref in refs:
+                            modified_string = replace_ref(modified_string, ref_dict[ref], ref)
+                        hed_string_obj = HedString(modified_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
+
+                        error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
+                        new_issues += hed_validator.run_full_string_checks(hed_string_obj)
+                        error_handler.add_context_and_filter(new_issues)
+                        issues += new_issues
+                        error_handler.pop_error_context()  # Hed string
+                if len(hed_strings) > 1:
+                    error_handler.pop_error_context()  # Category key
+
+            error_handler.pop_error_context()  # Column Name
         issues += self._check_definitions_bad_spot(definition_checks, error_handler)
         issues = sort_issues(issues)
+
+        error_handler.pop_error_context()  # Filename
 
         return issues
 

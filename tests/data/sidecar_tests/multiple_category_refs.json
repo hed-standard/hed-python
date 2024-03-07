@@ -1,0 +1,17 @@
+{
+   "cat1": {
+       "HED": {
+          "go": "Azure,Action/Perceive/Hear",
+          "stop": "Azure"
+       }
+   },
+  "cat2": {
+       "HED": {
+          "go2": "White-color/Azure,Action/Perceive/Hear",
+          "stop2": "n/a"
+       }
+   },
+  "combo": {
+    "HED": "{cat1},{cat2}, Event, Time-interval/# s"
+  }
+}

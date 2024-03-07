@@ -5,6 +5,7 @@ import pandas as pd
 from hed import load_schema_version
 from hed.models.df_util import shrink_defs, expand_defs, convert_to_form, process_def_expands
 from hed import DefinitionDict
+from hed.models.df_util import _handle_curly_braces_refs
 
 
 class TestShrinkDefs(unittest.TestCase):
@@ -286,3 +287,141 @@ class TestConvertToForm(unittest.TestCase):
         self.assertEqual(len(ambiguous), 0)
         self.assertEqual(len(errors), 0)
 
+class TestInsertColumns(unittest.TestCase):
+
+    def test_insert_columns_simple(self):
+        df = pd.DataFrame({
+            "column1": ["{column2}, Event, Action"],
+            "column2": ["Item"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Item, Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_multiple_rows(self):
+        df = pd.DataFrame({
+            "column1": ["{column2}, Event, Action", "Event, Action"],
+            "column2": ["Item", "Subject"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Item, Event, Action", "Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_multiple_columns(self):
+        df = pd.DataFrame({
+            "column1": ["{column2}, Event, {column3}, Action"],
+            "column2": ["Item"],
+            "column3": ["Subject"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Item, Event, Subject, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_four_columns(self):
+        df = pd.DataFrame({
+            "column1": ["{column2}, Event, {column3}, Action"],
+            "column2": ["Item"],
+            "column3": ["Subject"],
+            "column4": ["Data"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Item, Event, Subject, Action"],
+            "column4": ["Data"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["Item"],
+            "column3": ["Subject"],
+            "column4": ["Data"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["(Item, (Subject, Data)), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["Data"],
+            "column3": ["n/a"],
+            "column4": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["(Data), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_na_values2(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["n/a"],
+            "column4": ["Data"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["((Data)), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_mixed_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["Subject"],
+            "column4": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["((Subject)), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_all_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["n/a"],
+            "column4": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_parentheses(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}), Event, Action"],
+            "column2": ["Item"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["(Item), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_parentheses_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Event, Action"],
+            "column3": ["n/a"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)

@@ -1,4 +1,5 @@
 """ Utilities for assembly and conversion of HED strings to different forms. """
+import re
 from functools import partial
 import pandas as pd
 from hed.models.hed_string import HedString
@@ -144,3 +145,79 @@ def sort_dataframe_by_onsets(df):
 
         return df_copy
     return df
+
+
+def replace_ref(text, newvalue, column_ref):
+    """ Replace column ref in x with y.  If it's n/a, delete extra commas/parentheses.
+
+    Parameters:
+        text (str): The input string containing the ref enclosed in curly braces.
+        newvalue (str): The replacement value for the ref.
+        column_ref (str): The ref to be replaced, without curly braces.
+
+    Returns:
+        str: The modified string with the ref replaced or removed.
+    """
+    # Note: This function could easily be updated to handle non-curly brace values, but it seemed faster this way
+
+    # If it's not n/a, we can just replace directly.
+    if newvalue != "n/a":
+        return text.replace(f"{{{column_ref}}}", newvalue)
+
+    def _remover(match):
+        p1 = match.group("p1").count("(")
+        p2 = match.group("p2").count(")")
+        if p1 > p2:  # We have more starting parens than ending.  Make sure we don't remove comma before
+            output = match.group("c1") + "(" * (p1 - p2)
+        elif p2 > p1:  # We have more ending parens.  Make sure we don't remove comma after
+            output = ")" * (p2 - p1) + match.group("c2")
+        else:
+            c1 = match.group("c1")
+            c2 = match.group("c2")
+            if c1:
+                c1 = ""
+            elif c2:
+                c2 = ""
+            output = c1 + c2
+
+        return output
+
+    # this finds all surrounding commas and parentheses to a reference.
+    # c1/c2 contain the comma(and possibly spaces) separating this ref from other tags
+    # p1/p2 contain the parentheses directly surrounding the tag
+    # All four groups can have spaces.
+    pattern = r'(?P<c1>[\s,]*)(?P<p1>[(\s]*)\{' + column_ref + r'\}(?P<p2>[\s)]*)(?P<c2>[\s,]*)'
+    return re.sub(pattern, _remover, text)
+
+
+def _handle_curly_braces_refs(df, refs, column_names):
+    """ Fills in the refs in the dataframe
+
+        You probably shouldn't call this function directly, but rather use base input.
+
+    Parameters:
+        df(pd.DataFrame): The dataframe to modify
+        refs(list or pd.Series): a list of column refs to replace(without {})
+        column_names(list): the columns we are interested in(should include all ref columns)
+
+    Returns:
+        modified_df(pd.DataFrame): The modified dataframe with refs replaced
+    """
+    # Filter out columns and refs that don't exist.
+    refs = [ref for ref in refs if ref in column_names]
+    remaining_columns = [column for column in column_names if column not in refs]
+
+    new_df = df.copy()
+    # Replace references in the columns we are saving out.
+    saved_columns = new_df[refs]
+    for column_name in remaining_columns:
+        for replacing_name in refs:
+            # If the data has no n/a values, this version is MUCH faster.
+            # column_name_brackets = f"{{{replacing_name}}}"
+            # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
+            #                             in zip(df[column_name], saved_columns[replacing_name]))
+            new_df[column_name] = pd.Series(replace_ref(x, y, replacing_name) for x, y
+                                        in zip(new_df[column_name], saved_columns[replacing_name]))
+    new_df = new_df[remaining_columns]
+
+    return new_df
