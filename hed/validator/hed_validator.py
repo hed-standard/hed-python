@@ -75,9 +75,6 @@ class HedValidator:
         issues += hed_string._calculate_to_canonical_forms(self._hed_schema)
         if check_for_any_errors(issues):
             return issues
-        # This is required so it can validate the tag a tag expands into
-        # e.g. checking units when a definition placeholder has units
-        self._def_validator.construct_def_tags(hed_string)
         issues += self._validate_individual_tags_in_hed_string(hed_string, allow_placeholders=allow_placeholders)
         issues += self._def_validator.validate_def_tags(hed_string, self)
         return issues

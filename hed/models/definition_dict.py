@@ -251,30 +251,22 @@ class DefinitionDict:
 
         return issues
 
-    def construct_def_tags(self, hed_string_obj):
-        """ Identify def/def-expand tag contents in the given string.
+    def get_definition_entry(self, def_tag):
+        """ Get the entry for a given def tag.
+
+            Does not validate at all.
 
         Parameters:
-            hed_string_obj(HedString): The hed string to identify definition contents in
-        """
-        for tag in hed_string_obj.get_all_tags():
-            self.construct_def_tag(tag)
+            def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
 
-    def construct_def_tag(self, hed_tag):
-        """ Identify def/def-expand tag contents in the given HedTag.
-
-        Parameters:
-            hed_tag(HedTag): The hed tag to identify definition contents in
+        Returns:
+            def_entry(DefinitionEntry or None): The definition entry if it exists
         """
-        # Finish tracking down why parent is set incorrectly on def tags sometimes
-        # It should be ALWAYS set
-        if hed_tag.short_base_tag in {DefTagNames.DEF_ORG_KEY, DefTagNames.DEF_EXPAND_ORG_KEY}:
-            save_parent = hed_tag._parent
-            def_contents = self._get_definition_contents(hed_tag)
-            hed_tag._parent = save_parent
-            if def_contents is not None:
-                hed_tag._expandable = def_contents
-                hed_tag._expanded = hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY
+        tag_label, _, placeholder = def_tag.extension.partition('/')
+
+        label_tag_lower = tag_label.lower()
+        def_entry = self.defs.get(label_tag_lower)
+        return def_entry
 
     def _get_definition_contents(self, def_tag):
         """ Get the contents for a given def tag.

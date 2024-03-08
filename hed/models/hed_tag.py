@@ -1,6 +1,7 @@
 """ A single HED tag. """
 from hed.schema.hed_schema_constants import HedKey
 import copy
+from hed.models.model_constants import DefTagNames
 
 
 class HedTag:
@@ -46,8 +47,10 @@ class HedTag:
         self.tag_terms = None  # tuple of all the terms in this tag Lowercase.
         self._calculate_to_canonical_forms(hed_schema)
 
+        self._def_entry = None
         if def_dict:
-            def_dict.construct_def_tag(self)
+            if self.short_base_tag in {DefTagNames.DEF_ORG_KEY, DefTagNames.DEF_EXPAND_ORG_KEY}:
+                self._def_entry = def_dict.get_definition_entry(self)
 
     def copy(self):
         """ Return a deep copy of this tag.
@@ -261,9 +264,20 @@ class HedTag:
 
            This is primarily used for Def/Def-expand tags at present.
 
+           Lazily set the first time it's called.
+
         Returns:
             HedGroup or HedTag or None: Returns the expanded form of this tag.
         """
+        if self._expandable is None and self._def_entry:
+            save_parent = self._parent
+            tag_label, _, placeholder = self.extension.partition('/')
+
+            def_contents = self._def_entry.get_definition(self, placeholder_value=placeholder)
+            self._parent = save_parent
+            if def_contents is not None:
+                self._expandable = def_contents
+                self._expanded = self.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY
         return self._expandable
 
     def is_column_ref(self):
