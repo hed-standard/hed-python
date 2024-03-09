@@ -8,7 +8,8 @@ from hed.schema.schema_io.schema2xml import Schema2XML
 from hed.schema.schema_io.schema2wiki import Schema2Wiki
 from hed.schema.schema_io.schema2owl import Schema2Owl
 from hed.schema.schema_io.owl_constants import ext_to_format
-from hed.schema.hed_schema_section import HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection
+from hed.schema.hed_schema_section import (HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection,
+                                           HedSchemaUnitSection)
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.schema.hed_schema_base import HedSchemaBase
@@ -747,7 +748,7 @@ class HedSchema(HedSchemaBase):
         dictionaries[HedSectionKey.Properties] = HedSchemaSection(HedSectionKey.Properties)
         dictionaries[HedSectionKey.Attributes] = HedSchemaSection(HedSectionKey.Attributes)
         dictionaries[HedSectionKey.UnitModifiers] = HedSchemaSection(HedSectionKey.UnitModifiers)
-        dictionaries[HedSectionKey.Units] = HedSchemaSection(HedSectionKey.Units)
+        dictionaries[HedSectionKey.Units] = HedSchemaUnitSection(HedSectionKey.Units)
         dictionaries[HedSectionKey.UnitClasses] = HedSchemaUnitClassSection(HedSectionKey.UnitClasses)
         dictionaries[HedSectionKey.ValueClasses] = HedSchemaSection(HedSectionKey.ValueClasses)
         dictionaries[HedSectionKey.Tags] = HedSchemaTagSection(HedSectionKey.Tags, case_sensitive=False)
@@ -767,9 +768,13 @@ class HedSchema(HedSchemaBase):
             This is a lower level one that doesn't rely on the Unit entries being fully setup.
 
         """
+        # todo: could refactor this so this unit.lower() part is in HedSchemaUnitSection.get
         unit_entry = self.get_tag_entry(unit, HedSectionKey.Units)
         if unit_entry is None:
-            return []
+            unit_entry = self.get_tag_entry(unit.lower(), HedSectionKey.Units)
+            # Unit symbols must match exactly
+            if unit_entry is None or unit_entry.has_attribute(HedKey.UnitSymbol):
+                return []
         is_si_unit = unit_entry.has_attribute(HedKey.SIUnit)
         is_unit_symbol = unit_entry.has_attribute(HedKey.UnitSymbol)
         if not is_si_unit:
