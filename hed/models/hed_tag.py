@@ -580,32 +580,16 @@ class HedTag:
             return None, None, None
 
         for unit_class_entry in tag_unit_classes.values():
-            all_valid_unit_permutations = unit_class_entry.derivative_units
-
-            possible_match = HedTag._find_modifier_unit_entry(units, all_valid_unit_permutations)
+            possible_match = unit_class_entry.get_derivative_unit_entry(units)
             if possible_match and not possible_match.has_attribute(HedKey.UnitPrefix):
                 return value, units, possible_match
 
             # Repeat the above, but as a prefix
-            possible_match = HedTag._find_modifier_unit_entry(value, all_valid_unit_permutations)
+            possible_match = unit_class_entry.get_derivative_unit_entry(value)
             if possible_match and possible_match.has_attribute(HedKey.UnitPrefix):
                 return units, value, possible_match
 
         return None, None, None
-
-    @staticmethod
-    def _find_modifier_unit_entry(units, all_valid_unit_permutations):
-        possible_match = all_valid_unit_permutations.get(units)
-        # If we have a match that's a unit symbol, we're done, return it.
-        if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
-            return possible_match
-
-        possible_match = all_valid_unit_permutations.get(units.lower())
-        # Unit symbols must match including case, a match of a unit symbol now is something like M becoming m.
-        if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
-            possible_match = None
-
-        return possible_match
 
     def is_placeholder(self):
         if "#" in self.org_tag or "#" in self._extension_value:

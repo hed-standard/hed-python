@@ -187,6 +187,27 @@ class UnitClassEntry(HedSchemaEntry):
             return False
         return True
 
+    def get_derivative_unit_entry(self, units):
+        """ Gets the (derivative) unit entry if it exists
+
+        Parameters:
+            units (str): The unit name to check, can be plural or include a modifier.
+
+        Returns:
+            unit_entry(UnitEntry or None): The unit entry if it exists
+        """
+        possible_match = self.derivative_units.get(units)
+        # If we have a match that's a unit symbol, we're done, return it.
+        if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
+            return possible_match
+
+        possible_match = self.derivative_units.get(units.lower())
+        # Unit symbols must match including case, a match of a unit symbol now is something like M becoming m.
+        if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
+            possible_match = None
+
+        return possible_match
+
 
 class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
@@ -206,15 +227,16 @@ class UnitEntry(HedSchemaEntry):
         self.unit_modifiers = schema._get_modifiers_for_unit(self.name)
 
         derivative_units = {}
-        base_plural_units = {self.name}
-        if not self.has_attribute(HedKey.UnitSymbol):
-            base_plural_units.add(pluralize.plural(self.name))
+        if self.has_attribute(HedKey.UnitSymbol):
+            base_plural_units = {self.name}
+        else:
+            base_plural_units = {self.name.lower()}
+            base_plural_units.add(pluralize.plural(self.name.lower()))
 
         for derived_unit in base_plural_units:
             derivative_units[derived_unit] = self._get_conversion_factor(None)
             for modifier in self.unit_modifiers:
                 derivative_units[modifier.name + derived_unit] = self._get_conversion_factor(modifier_entry=modifier)
-
         self.derivative_units = derivative_units
 
     def _get_conversion_factor(self, modifier_entry):

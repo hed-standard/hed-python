@@ -10,10 +10,11 @@ from hed import schema
 #todo: update these tests(TagValidator no longer exists)
 class TestHedBase(unittest.TestCase):
     schema_file = None
+    hed_schema = None
 
     @classmethod
     def setUpClass(cls):
-        if cls.schema_file:
+        if cls.schema_file and not cls.hed_schema:
             hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file)
             cls.hed_schema = schema.load_schema(hed_xml)
         elif not cls.hed_schema:
@@ -87,9 +88,9 @@ class TestValidatorBase(TestHedBase):
             error_handler.add_context_and_filter(test_issues)
             test_result = not test_issues
 
-            # print(test_key)
-            # print(str(expected_issue))
-            # print(str(test_issues))
+            print(test_key)
+            print(str(expected_issue))
+            print(str(test_issues))
             error_handler.pop_error_context()
             self.assertEqual(test_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])

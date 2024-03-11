@@ -148,6 +148,14 @@ class HedSchemaSection:
             entry.finalize_entry(hed_schema)
 
 
+class HedSchemaUnitSection(HedSchemaSection):
+    def _check_if_duplicate(self, name_key, new_entry):
+        """We need to mark duplicate units(units with unitSymbol are case sensitive, while others are not."""
+        if not new_entry.has_attribute(HedKey.UnitSymbol):
+            name_key = name_key.lower()
+        return super()._check_if_duplicate(name_key, new_entry)
+
+
 class HedSchemaUnitClassSection(HedSchemaSection):
     def _check_if_duplicate(self, name_key, new_entry):
         """Allow adding units to existing unit classes, using a placeholder one with no attributes."""

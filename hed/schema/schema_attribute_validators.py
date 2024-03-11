@@ -148,7 +148,7 @@ def value_class_exists(hed_schema, tag_entry, attribute_name):
 def unit_exists(hed_schema, tag_entry, attribute_name):
     issues = []
     unit = tag_entry.attributes.get(attribute_name, "")
-    unit_entry = tag_entry.derivative_units.get(unit)
+    unit_entry = tag_entry.get_derivative_unit_entry(unit)
     if unit and not unit_entry:
         issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_INVALID,
                                             tag_entry.name,

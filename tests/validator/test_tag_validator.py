@@ -2,6 +2,7 @@ import unittest
 
 from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from tests.validator.test_tag_validator_base import TestValidatorBase
+from hed import load_schema_version
 from functools import partial
 
 
@@ -11,6 +12,7 @@ class TestHed(TestValidatorBase):
 
 
 class IndividualHedTagsShort(TestHed):
+    hed_schema = load_schema_version("score_1.1.0")
     @staticmethod
     def string_obj_func(validator):
         return partial(validator._validate_individual_tags_in_hed_string)
@@ -215,6 +217,20 @@ class IndividualHedTagsShort(TestHed):
             # Update tests - 8.0 currently has no clockTime nodes.
             # 'properTime': 'Item/2D shape/Clock face/08:30',
             # 'invalidTime': 'Item/2D shape/Clock face/54:54'
+            'voltsTest1': 'Finding-amplitude/30 v',
+            'voltsTest2': 'Finding-amplitude/30 Volt',
+            'voltsTest3': 'Finding-amplitude/30 volts',
+            'voltsTest4': 'Finding-amplitude/30 VOLTS',
+            'voltsTest5': 'Finding-amplitude/30 kv',
+            'voltsTest6': 'Finding-amplitude/30 kiloVolt',
+            'voltsTest7': 'Finding-amplitude/30 KiloVolt',
+            'volumeTest1': "Sound-volume/5 dB",
+            'volumeTest2': "Sound-volume/5 kdB",  # Invalid, not SI unit
+            'volumeTest3': "Sound-volume/5 candela",
+            'volumeTest4': "Sound-volume/5 kilocandela",
+            'volumeTest5': "Sound-volume/5 cd",
+            'volumeTest6': "Sound-volume/5 kcd",
+            'volumeTest7': "Sound-volume/5 DB",  # Invalid, case doesn't match
         }
         expected_results = {
             'correctUnit': True,
@@ -236,12 +252,27 @@ class IndividualHedTagsShort(TestHed):
             # 'invalidTime': True,
             # 'specialAllowedCharCurrency': True,
             # 'specialNotAllowedCharCurrency': False,
+            'voltsTest1': True,
+            'voltsTest2': True,
+            'voltsTest3': True,
+            'voltsTest4': True,
+            'voltsTest5': True,
+            'voltsTest6': True,
+            'voltsTest7': True,
+            'volumeTest1': True,
+            'volumeTest2': False,
+            'volumeTest3': True,
+            'volumeTest4': True,
+            'volumeTest5': True,
+            'volumeTest6': True,
+            'volumeTest7': False,
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         # legal_clock_time_units = ['hour:min', 'hour:min:sec']
         # legal_datetime_units = ['YYYY-MM-DDThh:mm:ss']
         legal_freq_units = ['Hz', 'hertz']
         # legal_currency_units = ['dollar', "$", "point"]
+        legal_intensity_units = ["candela", "cd", "dB"]
 
         expected_issues = {
             'correctUnit': [],
@@ -273,6 +304,20 @@ class IndividualHedTagsShort(TestHed):
             # 'specialNotAllowedCharCurrency': self.format_error(ValidationErrors.UNITS_INVALID,
             #                                                                    tag=0,
             #                                                                    units=legal_currency_units),
+            'voltsTest1': [],
+            'voltsTest2': [],
+            'voltsTest3': [],
+            'voltsTest4': [],
+            'voltsTest5': [],
+            'voltsTest6': [],
+            'voltsTest7': [],
+            'volumeTest1': [],
+            'volumeTest2': self.format_error(ValidationErrors.UNITS_INVALID,tag=0, units=legal_intensity_units),
+            'volumeTest3': [],
+            'volumeTest4': [],
+            'volumeTest5': [],
+            'volumeTest6': [],
+            'volumeTest7': self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_intensity_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
