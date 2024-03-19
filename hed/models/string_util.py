@@ -15,7 +15,7 @@ def gather_descriptions(hed_string):
          The input HedString has its description tags removed.
 
     """
-    desc_tags = hed_string.find_tags("description", recursive=True, include_groups=0)
+    desc_tags = hed_string.find_tags({"description"}, recursive=True, include_groups=0)
     desc_string = " ".join([tag.extension if tag.extension.endswith(".") else tag.extension + "." for tag in desc_tags])
 
     hed_string.remove(desc_tags)

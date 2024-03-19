@@ -49,7 +49,7 @@ class HedTag:
 
         self._def_entry = None
         if def_dict:
-            if self.short_base_tag in {DefTagNames.DEF_ORG_KEY, DefTagNames.DEF_EXPAND_ORG_KEY}:
+            if self.short_base_tag in {DefTagNames.DEF_KEY, DefTagNames.DEF_EXPAND_KEY}:
                 self._def_entry = def_dict.get_definition_entry(self)
 
     def copy(self):
@@ -277,7 +277,7 @@ class HedTag:
             self._parent = save_parent
             if def_contents is not None:
                 self._expandable = def_contents
-                self._expanded = self.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY
+                self._expanded = self.short_base_tag == DefTagNames.DEF_EXPAND_KEY
         return self._expandable
 
     def is_column_ref(self):
@@ -621,12 +621,12 @@ class HedTag:
             return True
 
         if isinstance(other, str):
-            return self.lower() == other
+            return self.lower() == other.lower()
 
         if not isinstance(other, HedTag):
             return False
 
-        if self.short_tag.lower() == other.short_tag.lower():
+        if self.short_tag == other.short_tag:
             return True
 
         if self.org_tag.lower() == other.org_tag.lower():

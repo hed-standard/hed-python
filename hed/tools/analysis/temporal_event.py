@@ -1,5 +1,6 @@
 """ A single event process with starting and ending times. """
 from hed.models import HedGroup
+from hed.models.model_constants import DefTagNames
 
 
 class TemporalEvent:
@@ -36,12 +37,12 @@ class TemporalEvent:
         for item in contents.children:
             if isinstance(item, HedGroup):
                 self.internal_group = item
-            elif item.short_base_tag.lower() == "onset":
+            elif item.short_base_tag == DefTagNames.ONSET_KEY:
                 to_remove.append(item)
-            elif item.short_base_tag.lower() == "duration":
+            elif item.short_base_tag == DefTagNames.DURATION_KEY:
                 to_remove.append(item)
                 self.end_time = self.start_time + item.value_as_default_unit()
-            elif item.short_base_tag.lower() == "def":
+            elif item.short_base_tag == DefTagNames.DEF_KEY:
                 self.anchor = item.short_tag
         contents.remove(to_remove)
         if self.internal_group:

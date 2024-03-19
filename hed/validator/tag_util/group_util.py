@@ -4,7 +4,7 @@ from hed.errors.error_reporter import ErrorHandler
 from hed.models.model_constants import DefTagNames
 from hed.schema import HedKey
 from hed.models import HedTag
-from hed.errors.error_types import ValidationErrors
+from hed.errors.error_types import ValidationErrors, TemporalErrors
 
 
 class GroupValidator:
@@ -43,6 +43,7 @@ class GroupValidator:
             validation_issues += self.check_tag_level_issue(original_tag_group.tags(), is_top_level, is_group)
 
         validation_issues += self._check_for_duplicate_groups(hed_string_obj)
+        validation_issues += self.validate_duration_tags(hed_string_obj)
         return validation_issues
 
     def run_all_tags_validators(self, hed_string_obj):
@@ -89,9 +90,9 @@ class GroupValidator:
         for top_level_tag in top_level_tags:
             if not is_top_level:
                 actual_code = None
-                if top_level_tag.short_base_tag == DefTagNames.DEFINITION_ORG_KEY:
+                if top_level_tag.short_base_tag == DefTagNames.DEFINITION_KEY:
                     actual_code = ValidationErrors.DEFINITION_INVALID
-                elif top_level_tag.short_base_tag.lower() in DefTagNames.ALL_TIME_KEYS:
+                elif top_level_tag.short_base_tag in DefTagNames.ALL_TIME_KEYS:
                     actual_code = ValidationErrors.TEMPORAL_TAG_ERROR  # May split this out if we switch error
 
                 if actual_code:
@@ -102,9 +103,20 @@ class GroupValidator:
                                                                tag=top_level_tag)
 
         if is_top_level and len(top_level_tags) > 1:
-            short_tags = [tag.short_base_tag for tag in top_level_tags]
-            # Special exception for Duration/Delay pairing
-            if len(top_level_tags) != 2 or DefTagNames.DURATION_ORG_KEY not in short_tags or DefTagNames.DELAY_ORG_KEY not in short_tags:
+            validation_issue = False
+            short_tags = {tag.short_base_tag for tag in top_level_tags}
+            # Verify there's no duplicates, and that if there's two tags they are a delay and temporal tag.
+            if len(short_tags) != len(top_level_tags):
+                validation_issue = True
+            elif DefTagNames.DELAY_KEY not in short_tags or len(short_tags) != 2:
+                validation_issue = True
+            else:
+                short_tags.remove(DefTagNames.DELAY_KEY)
+                other_tag = next(iter(short_tags))
+                if other_tag not in DefTagNames.ALL_TIME_KEYS:
+                    validation_issue = True
+
+            if validation_issue:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS,
                                                                tag=top_level_tags[0],
                                                                multiple_tags=top_level_tags[1:])
@@ -149,6 +161,38 @@ class GroupValidator:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_NOT_UNIQUE,
                                                                tag_namespace=unique_prefix)
         return validation_issues
+
+    @staticmethod
+    def validate_duration_tags(hed_string_obj):
+        """ Validate Duration/Delay tag groups
+
+        Parameters:
+            hed_string_obj (HedString): The hed string to check.
+
+        Returns:
+            list: A list of issues found in validating durations (i.e., extra tags or groups present, or a group missing)
+        """
+        duration_issues = []
+        for top_tag, group in hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.DURATION_KEYS):
+            top_level_tags = [tag.short_base_tag for tag in group.get_all_tags() if tag.base_tag_has_attribute(HedKey.TopLevelTagGroup)]
+            # Skip onset/inset/offset
+            if any(tag in DefTagNames.TEMPORAL_KEYS for tag in top_level_tags):
+                continue
+            # This implicitly validates the duration/delay tag, as they're the only two allowed in the same group
+            # It should be impossible to have > 2 tags, but it's a good stopgap.
+            if len(top_level_tags) != len(group.tags()):
+                for tag in group.tags():
+                    if tag.short_base_tag not in top_level_tags:
+                        duration_issues += ErrorHandler.format_error(TemporalErrors.DURATION_HAS_OTHER_TAGS,
+                                                                     tag=tag)
+                continue
+            if len(group.groups()) != 1:
+                duration_issues += ErrorHandler.format_error(TemporalErrors.DURATION_WRONG_NUMBER_GROUPS,
+                                                             top_tag,
+                                                             hed_string_obj.groups())
+                continue
+
+        return duration_issues
 
     def _validate_tags_in_hed_string(self, tags):
         """ Validate the multi-tag properties in a HED string.

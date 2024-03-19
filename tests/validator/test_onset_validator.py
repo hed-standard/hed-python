@@ -6,6 +6,8 @@ from hed.errors import ErrorHandler, TemporalErrors, ErrorContext, ValidationErr
 from hed.models import HedString, DefinitionDict
 from hed import schema
 from hed.validator import HedValidator, OnsetValidator, DefValidator
+from hed.validator.tag_util.group_util import GroupValidator
+
 
 from tests.validator.test_tag_validator_base import TestHedBase
 
@@ -56,11 +58,12 @@ class Test(TestHedBase):
             onset_issues += def_validator.validate_onset_offset(test_string)
             if not onset_issues:
                 onset_issues += onset_validator.validate_temporal_relations(test_string)
-                onset_issues += onset_validator.validate_duration_tags(test_string)
+                onset_issues += GroupValidator.validate_duration_tags(test_string)
 
             error_handler.add_context_and_filter(onset_issues)
             test_string.shrink_defs()
             issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)
+            # print(str(test_string))
             # print(str(onset_issues))
             # print(str(issues))
             # print(onset_validator._onsets)

@@ -4,13 +4,12 @@ Superclass representing a basic columnar file.
 import os
 
 import openpyxl
-import pandas
+import pandas as pd
 
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
-import pandas as pd
 
-from hed.models.df_util import _handle_curly_braces_refs
+from hed.models.df_util import _handle_curly_braces_refs, filter_series_by_onset
 
 
 class BaseInput:
@@ -118,37 +117,10 @@ class BaseInput:
         """Return the assembled dataframe as a series, with rows that have the same onset combined.
 
         Returns:
-            Series: the assembled dataframe with columns merged, and the rows filtered together.
+            Series or None: the assembled dataframe with columns merged, and the rows filtered together.
         """
         if self.onsets is not None:
-            indexed_dict = self._indexed_dict_from_onsets(self.onsets.astype(float))
-            return self._filter_by_index_list(self.series_a, indexed_dict=indexed_dict)
-
-    @staticmethod
-    def _indexed_dict_from_onsets(onsets):
-        current_onset = -1000000.0
-        tol = 1e-9
-        from collections import defaultdict
-        indexed_dict = defaultdict(list)
-        for i, onset in enumerate(onsets):
-            if abs(onset - current_onset) > tol:
-                current_onset = onset
-            indexed_dict[current_onset].append(i)
-
-        return indexed_dict
-
-    # This would need to store the index list -> So it can optionally apply to other columns on request.
-    @staticmethod
-    def _filter_by_index_list(original_series, indexed_dict):
-        new_series = pd.Series([""] * len(original_series), dtype=str)
-
-        for onset, indices in indexed_dict.items():
-            if indices:
-                first_index = indices[0]  # Take the first index of each onset group
-                # Join the corresponding original series entries and place them at the first index
-                new_series[first_index] = ",".join([str(original_series[i]) for i in indices])
-
-        return new_series
+            return filter_series_by_onset(self.series_a, self.onsets)
 
     @property
     def onsets(self):
@@ -161,7 +133,7 @@ class BaseInput:
         """Return True if this both has an onset column, and it needs sorting."""
         onsets = self.onsets
         if onsets is not None:
-            onsets = onsets.astype(float)
+            onsets = pd.to_numeric(self.dataframe['onset'], errors='coerce')
             return not onsets.is_monotonic_increasing
 
     @property
@@ -369,9 +341,9 @@ class BaseInput:
             # first row is columns
             cols = next(data)
             data = list(data)
-            return pandas.DataFrame(data, columns=cols, dtype=str)
+            return pd.DataFrame(data, columns=cols, dtype=str)
         else:
-            return pandas.DataFrame(worksheet.values, dtype=str)
+            return pd.DataFrame(worksheet.values, dtype=str)
 
     def validate(self, hed_schema, extra_def_dicts=None, name=None, error_handler=None):
         """Creates a SpreadsheetValidator and returns all issues with this file.
@@ -483,14 +455,14 @@ class BaseInput:
         if not has_column_names:
             pandas_header = None
 
-        if isinstance(file, pandas.DataFrame):
+        if isinstance(file, pd.DataFrame):
             self._dataframe = file.astype(str)
             self._has_column_names = self._dataframe_has_names(self._dataframe)
         elif not file:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
         elif input_type in self.TEXT_EXTENSION:
             try:
-                self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
+                self._dataframe = pd.read_csv(file, delimiter='\t', header=pandas_header,
                                                   dtype=str, keep_default_na=True, na_values=("", "null"))
             except Exception as e:
                 raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e

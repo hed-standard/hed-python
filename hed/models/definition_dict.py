@@ -23,7 +23,6 @@ class DefinitionDict:
         """
 
         self.defs = {}
-        self._label_tag_name = DefTagNames.DEF_KEY
         self._issues = []
         if def_dicts:
             self.add_definitions(def_dicts, hed_schema)

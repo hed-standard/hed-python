@@ -7,6 +7,7 @@ from hed import load_schema_version, load_schema
 from hed.validator import SpreadsheetValidator
 from hed import TabularInput, SpreadsheetInput
 from hed.errors.error_types import ValidationErrors
+from hed import DefinitionDict
 
 
 class TestSpreadsheetValidation(unittest.TestCase):

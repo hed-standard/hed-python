@@ -5,7 +5,7 @@ import bisect
 from hed.errors import HedFileError
 from hed.models import HedString
 from hed.models.model_constants import DefTagNames
-from hed.models.df_util import get_assembled
+from hed.models import df_util
 from hed.models.string_util import split_base_tags, split_def_tags
 from hed.tools.analysis.temporal_event import TemporalEvent
 from hed.tools.analysis.hed_type_defs import HedTypeDefs
@@ -29,16 +29,14 @@ class EventManager:
         are separated from the rest of the annotations, which are contained in self.hed_strings.
 
         """
-
-        self.event_list = [[] for _ in range(len(input_data.dataframe))]
         self.hed_schema = hed_schema
         self.input_data = input_data
         self.def_dict = input_data.get_def_dict(hed_schema, extra_def_dicts=extra_defs)
-        onsets = pd.to_numeric(input_data.dataframe['onset'], errors='coerce')
-        if not onsets.is_monotonic_increasing:
+        if self.input_data.needs_sorting:
             raise HedFileError("OnsetsNotOrdered", "The onset values must be non-decreasing", "")
-        self.onsets = onsets.tolist()
-        self.hed_strings = None  # Remaining HED strings copy.deepcopy(hed_strings)
+        self.onsets = None
+        self.hed_strings = None
+        self.event_list = None
         self._create_event_list(input_data)
 
     def _create_event_list(self, input_data):
@@ -53,8 +51,13 @@ class EventManager:
         Notes:
 
         """
-        hed_strings, def_dict = get_assembled(input_data, self.hed_schema, extra_def_dicts=None, defs_expanded=False,
-                                              return_filtered=True)
+        hed_strings = input_data.series_a
+        df_util.shrink_defs(hed_strings, self.hed_schema)
+        delay_df = df_util.split_delay_tags(hed_strings, self.hed_schema, input_data.onsets)
+
+        hed_strings = [HedString(hed_string, self.hed_schema) for hed_string in delay_df.HED]
+        self.onsets = pd.to_numeric(delay_df.onset, errors='coerce')
+        self.event_list = [[] for _ in range(len(hed_strings))]
         onset_dict = {}  # Temporary dictionary keeping track of temporal events that haven't ended yet.
         for event_index, hed in enumerate(hed_strings):
             self._extract_temporal_events(hed, event_index, onset_dict)
@@ -99,7 +102,7 @@ class EventManager:
         for def_tag, group in group_tuples:
             anchor_tag = group.find_def_tags(recursive=False, include_groups=0)[0]
             anchor = anchor_tag.extension.lower()
-            if anchor in onset_dict or def_tag.short_base_tag.lower() == DefTagNames.OFFSET_KEY:
+            if anchor in onset_dict or def_tag.short_base_tag == DefTagNames.OFFSET_KEY:
                 temporal_event = onset_dict.pop(anchor)
                 temporal_event.set_end(event_index, self.onsets[event_index])
             if def_tag == DefTagNames.ONSET_KEY:
