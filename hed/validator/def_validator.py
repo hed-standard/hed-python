@@ -1,4 +1,5 @@
 from hed.models.hed_group import HedGroup
+from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
 from hed.errors.error_types import ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
@@ -29,10 +30,6 @@ class DefValidator(DefinitionDict):
         Returns:
             list: Issues found related to validating defs. Each issue is a dictionary.
         """
-        hed_string_lower = hed_string_obj.lower()
-        if self._label_tag_name not in hed_string_lower:
-            return []
-
         # This is needed primarily to validate the contents of a def-expand matches the default.
         def_issues = []
         # We need to check for labels to expand in ALL groups
@@ -104,7 +101,7 @@ class DefValidator(DefinitionDict):
     def validate_def_value_units(self, def_tag, hed_validator):
         """Equivalent to HedValidator.validate_units for the special case of a Def or Def-expand tag"""
         tag_label, _, placeholder = def_tag.extension.partition('/')
-        is_def_expand_tag = def_tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY
+        is_def_expand_tag = def_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY
 
         def_entry = self.defs.get(tag_label.lower())
         # These errors will be caught as can't match definition
@@ -167,8 +164,12 @@ class DefValidator(DefinitionDict):
                 def_group = def_tag
             children = [child for child in found_group.children if
                         def_group is not child and found_onset is not child]
+
+            # Delay tag is checked for uniqueness elsewhere, so we can safely remove all of them
+            children = [child for child in children
+                        if not isinstance(child, HedTag) or child.short_base_tag != DefTagNames.DELAY_KEY]
             max_children = 1
-            if found_onset.short_base_tag == DefTagNames.OFFSET_ORG_KEY:
+            if found_onset.short_base_tag == DefTagNames.OFFSET_KEY:
                 max_children = 0
             if len(children) > max_children:
                 onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS,

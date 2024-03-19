@@ -1,5 +1,6 @@
 """ A single parenthesized HED string. """
 from hed.models.hed_tag import HedTag
+from hed.models.model_constants import DefTagNames
 import copy
 from typing import Iterable, Union
 
@@ -441,7 +442,7 @@ class HedGroup:
             tags = self.get_all_tags()
         else:
             tags = self.tags()
-
+        search_tags = {tag.lower() for tag in search_tags}
         for tag in tags:
             if tag.short_base_tag.lower() in search_tags:
                 found_tags.append((tag, tag._parent))
@@ -453,7 +454,7 @@ class HedGroup:
     def find_wildcard_tags(self, search_tags, recursive=False, include_groups=2):
         """ Find the tags and their containing groups.
 
-            This searches tag.short_tag, with an implicit wildcard on the end.
+            This searches tag.short_tag.lower(), with an implicit wildcard on the end.
 
             e.g. "Eve" will find Event, but not Sensory-event.
 
@@ -473,6 +474,8 @@ class HedGroup:
             tags = self.get_all_tags()
         else:
             tags = self.tags()
+
+        search_tags = {search_tag.lower() for search_tag in search_tags}
 
         for tag in tags:
             for search_tag in search_tags:
@@ -539,15 +542,14 @@ class HedGroup:
 
     @staticmethod
     def _get_def_tags_from_group(group):
-        from hed.models.definition_dict import DefTagNames
         def_tags = []
         for child in group.children:
             if isinstance(child, HedTag):
-                if child.short_base_tag == DefTagNames.DEF_ORG_KEY:
+                if child.short_base_tag == DefTagNames.DEF_KEY:
                     def_tags.append((child, child, group))
             else:
                 for tag in child.tags():
-                    if tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY:
+                    if tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY:
                         def_tags.append((tag, child, group))
         return def_tags
 

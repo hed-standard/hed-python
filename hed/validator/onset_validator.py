@@ -42,42 +42,14 @@ class OnsetValidator:
 
         return onset_issues
 
-    def validate_duration_tags(self, hed_string_obj):
-        """ Validate Duration/Delay tag groups
-
-        Parameters:
-            hed_string_obj (HedString): The hed string to check.
-
-        Returns:
-            list: A list of issues found in validating durations (i.e., extra tags or groups present, or a group missing)
-        """
-        duration_issues = []
-        for tags, group in hed_string_obj.find_top_level_tags_grouped(anchor_tags=DefTagNames.DURATION_KEYS):
-            # This implicitly validates the duration/delay tag, as they're the only two allowed in the same group
-            # It should be impossible to have > 2 tags, but it's a good stopgap.
-            if len(tags) != len(group.tags()) or len(group.tags()) > 2:
-                for tag in group.tags():
-                    if tag not in tags:
-                        duration_issues += ErrorHandler.format_error(TemporalErrors.DURATION_HAS_OTHER_TAGS, tag=tag)
-                continue
-            if len(group.groups()) != 1:
-                duration_issues += ErrorHandler.format_error(TemporalErrors.DURATION_WRONG_NUMBER_GROUPS,
-                                                             tags[0],
-                                                             hed_string_obj.groups())
-                continue
-
-        # Does anything else need verification here?
-        #     That duration is positive?
-        return duration_issues
-
     def _handle_onset_or_offset(self, def_tag, onset_offset_tag):
-        is_onset = onset_offset_tag.short_base_tag == DefTagNames.ONSET_ORG_KEY
+        is_onset = onset_offset_tag.short_base_tag == DefTagNames.ONSET_KEY
         full_def_name = def_tag.extension
         if is_onset:
             # onset can never fail as it implies an offset
             self._onsets[full_def_name.lower()] = full_def_name
         else:
-            is_offset = onset_offset_tag.short_base_tag == DefTagNames.OFFSET_ORG_KEY
+            is_offset = onset_offset_tag.short_base_tag == DefTagNames.OFFSET_KEY
             if full_def_name.lower() not in self._onsets:
                 if is_offset:
                     return ErrorHandler.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=def_tag)
@@ -101,6 +73,6 @@ class OnsetValidator:
         banned_tag_list = DefTagNames.ALL_TIME_KEYS
         issues = []
         for tag in hed_string.get_all_tags():
-            if tag.short_base_tag.lower() in banned_tag_list:
+            if tag.short_base_tag in banned_tag_list:
                 issues += ErrorHandler.format_error(TemporalErrors.HED_ONSET_WITH_NO_COLUMN, tag)
         return issues

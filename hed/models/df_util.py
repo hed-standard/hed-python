@@ -3,9 +3,10 @@ import re
 from functools import partial
 import pandas as pd
 from hed.models.hed_string import HedString
+from hed.models.model_constants import DefTagNames
 
 
-def get_assembled(tabular_file, hed_schema, extra_def_dicts=None, defs_expanded=True, return_filtered=False):
+def get_assembled(tabular_file, hed_schema, extra_def_dicts=None, defs_expanded=True):
     """ Create an array of assembled HedString objects (or list of these) of the same length as tabular file input.
 
     Parameters:
@@ -14,8 +15,6 @@ def get_assembled(tabular_file, hed_schema, extra_def_dicts=None, defs_expanded=
         extra_def_dicts: list of DefinitionDict, optional
             Any extra DefinitionDict objects to use when parsing the HED tags.
         defs_expanded (bool): (Default True) Expands definitions if True, otherwise shrinks them.
-        return_filtered (bool): If true, combines lines with the same onset.
-            Further lines with that onset are marked n/a
     Returns:
         tuple:
             hed_strings(list of HedStrings): A list of HedStrings
@@ -23,7 +22,7 @@ def get_assembled(tabular_file, hed_schema, extra_def_dicts=None, defs_expanded=
     """
 
     def_dict = tabular_file.get_def_dict(hed_schema, extra_def_dicts=extra_def_dicts)
-    series_a = tabular_file.series_a if not return_filtered else tabular_file.series_filtered
+    series_a = tabular_file.series_a
     if defs_expanded:
         return [HedString(x, hed_schema, def_dict).expand_defs() for x in series_a], def_dict
     else:
@@ -217,7 +216,102 @@ def _handle_curly_braces_refs(df, refs, column_names):
             # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
             #                             in zip(df[column_name], saved_columns[replacing_name]))
             new_df[column_name] = pd.Series(replace_ref(x, y, replacing_name) for x, y
-                                        in zip(new_df[column_name], saved_columns[replacing_name]))
+                                            in zip(new_df[column_name], saved_columns[replacing_name]))
     new_df = new_df[remaining_columns]
 
     return new_df
+
+
+# todo: Consider updating this to be a pure string function(or at least, only instantiating the Duration tags)
+def split_delay_tags(series, hed_schema, onsets):
+    """Sorts the series based on Delay tags, so that the onsets are in order after delay is applied.
+
+    Parameters:
+        series(pd.Series or None): the series of tags to split/sort
+        hed_schema(HedSchema): The schema to use to identify tags
+        onsets(pd.Series or None)
+
+    Returns:
+        sorted_df(pd.Dataframe or None): If we had onsets, a dataframe with 3 columns
+            "HED": The hed strings(still str)
+            "onset": the updated onsets
+            "original_index": the original source line.  Multiple lines can have the same original source line.
+
+    Note: This dataframe may be longer than the original series, but it will never be shorter.
+    """
+    if series is None or onsets is None:
+        return
+    split_df = pd.DataFrame({"onset": onsets, "HED": series, "original_index": series.index})
+    delay_strings = [(i, HedString(hed_string, hed_schema)) for (i, hed_string) in series.items() if
+                     "delay/" in hed_string.lower()]
+    delay_groups = []
+    for i, delay_string in delay_strings:
+        duration_tags = delay_string.find_top_level_tags({DefTagNames.DELAY_KEY})
+        to_remove = []
+        for tag, group in duration_tags:
+            onset_mod = tag.value_as_default_unit() + float(onsets[i])
+            to_remove.append(group)
+            insert_index = split_df['original_index'].index.max() + 1
+            split_df.loc[insert_index] = {'HED': str(group), 'onset': onset_mod, 'original_index': i}
+        delay_string.remove(to_remove)
+        # update the old string with the removals done
+        split_df.at[i, "HED"] = str(delay_string)
+
+    for i, onset_mod, group in delay_groups:
+        insert_index = split_df['original_index'].index.max() + 1
+        split_df.loc[insert_index] = {'HED': str(group), 'onset': onset_mod, 'original_index': i}
+    split_df = sort_dataframe_by_onsets(split_df)
+    split_df.reset_index(drop=True, inplace=True)
+
+    split_df = filter_series_by_onset(split_df, split_df.onset)
+    return split_df
+
+
+def filter_series_by_onset(series, onsets):
+    """Return the series, with rows that have the same onset combined.
+
+    Parameters:
+        series(pd.Series or pd.Dataframe): the series to filter.  If dataframe, it filters the "HED" column
+        onsets(pd.Series): the onset column to filter by
+    Returns:
+        Series or Dataframe: the series with rows filtered together.
+    """
+    indexed_dict = _indexed_dict_from_onsets(onsets.astype(float))
+    return _filter_by_index_list(series, indexed_dict=indexed_dict)
+
+
+def _indexed_dict_from_onsets(onsets):
+    """Finds series of consecutive lines with the same(or close enough) onset"""
+    current_onset = -1000000.0
+    tol = 1e-9
+    from collections import defaultdict
+    indexed_dict = defaultdict(list)
+    for i, onset in enumerate(onsets):
+        if abs(onset - current_onset) > tol:
+            current_onset = onset
+        indexed_dict[current_onset].append(i)
+
+    return indexed_dict
+
+
+def _filter_by_index_list(original_data, indexed_dict):
+    """Filters a series or dataframe by the indexed_dict, joining lines as indicated"""
+    if isinstance(original_data, pd.Series):
+        data_series = original_data
+    elif isinstance(original_data, pd.DataFrame):
+        data_series = original_data["HED"]
+    else:
+        raise TypeError("Input must be a pandas Series or DataFrame")
+
+    new_series = pd.Series([""] * len(data_series), dtype=str)
+    for onset, indices in indexed_dict.items():
+        if indices:
+            first_index = indices[0]
+            new_series[first_index] = ",".join([str(data_series[i]) for i in indices])
+
+    if isinstance(original_data, pd.Series):
+        return new_series
+    else:
+        result_df = original_data.copy()
+        result_df["HED"] = new_series
+        return result_df

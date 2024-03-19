@@ -8,7 +8,7 @@ from hed import HedString
 from hed.errors.error_reporter import sort_issues, check_for_any_errors
 from hed.validator.onset_validator import OnsetValidator
 from hed.validator.hed_validator import HedValidator
-from hed.models.df_util import sort_dataframe_by_onsets
+from hed.models.df_util import sort_dataframe_by_onsets, split_delay_tags
 
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
@@ -25,6 +25,7 @@ class SpreadsheetValidator:
         self._schema = hed_schema
         self._hed_validator = None
         self._onset_validator = None
+        self.invalid_original_rows = set()
 
     def validate(self, data, def_dicts=None, name=None, error_handler=None):
         """
@@ -46,6 +47,8 @@ class SpreadsheetValidator:
         if not isinstance(data, BaseInput):
             raise TypeError("Invalid type passed to spreadsheet validator.  Can only validate BaseInput objects.")
 
+        self.invalid_original_rows = set()
+
         error_handler.push_error_context(ErrorContext.FILE_NAME, name)
         # Adjust to account for 1 based
         row_adj = 1
@@ -59,7 +62,8 @@ class SpreadsheetValidator:
             data_new._dataframe = sort_dataframe_by_onsets(data.dataframe)
             issues += error_handler.format_error_with_context(ValidationErrors.ONSETS_OUT_OF_ORDER)
             data = data_new
-        onset_filtered = data.series_filtered
+
+        onsets = split_delay_tags(data.series_a, self._schema, data.onsets)
         df = data.dataframe_a
 
         self._hed_validator = HedValidator(self._schema, def_dicts=def_dicts)
@@ -69,15 +73,18 @@ class SpreadsheetValidator:
             self._onset_validator = None
 
         # Check the rows of the input data
-        issues += self._run_checks(df, onset_filtered, error_handler=error_handler, row_adj=row_adj)
+        issues += self._run_checks(df, error_handler=error_handler, row_adj=row_adj, has_onsets=bool(self._onset_validator))
+        if self._onset_validator:
+            issues += self._run_onset_checks(onsets, error_handler=error_handler, row_adj=row_adj)
         error_handler.pop_error_context()
 
         issues = sort_issues(issues)
         return issues
 
-    def _run_checks(self, hed_df, onset_filtered, error_handler, row_adj):
+    def _run_checks(self, hed_df, error_handler, row_adj, has_onsets):
         issues = []
         columns = list(hed_df.columns)
+        self.invalid_original_rows = set()
         for row_number, text_file_row in hed_df.iterrows():
             error_handler.push_error_context(ErrorContext.ROW, row_number + row_adj)
             row_strings = []
@@ -94,32 +101,49 @@ class SpreadsheetValidator:
                 new_column_issues = self._hed_validator.run_basic_checks(column_hed_string, allow_placeholders=False)
 
                 error_handler.add_context_and_filter(new_column_issues)
-                error_handler.pop_error_context()
-                error_handler.pop_error_context()
+                error_handler.pop_error_context()  # HedString
+                error_handler.pop_error_context()  # column
 
                 issues += new_column_issues
+            # We want to do full onset checks on the combined and filtered rows
             if check_for_any_errors(new_column_issues):
-                error_handler.pop_error_context()
+                self.invalid_original_rows.add(row_number)
+                error_handler.pop_error_context()  # Row
                 continue
 
-            row_string = None
-            if onset_filtered is not None:
-                row_string = HedString(onset_filtered[row_number], self._schema, self._hed_validator._def_validator)
-            elif row_strings:
-                row_string = HedString.from_hed_strings(row_strings)
+            if has_onsets or not row_strings:
+                error_handler.pop_error_context()  # Row
+                continue
+
+            row_string = HedString.from_hed_strings(row_strings)
 
             if row_string:
                 error_handler.push_error_context(ErrorContext.HED_STRING, row_string)
                 new_column_issues = self._hed_validator.run_full_string_checks(row_string)
-                if self._onset_validator is not None:
-                    new_column_issues += self._onset_validator.validate_temporal_relations(row_string)
-                    new_column_issues += self._onset_validator.validate_duration_tags(row_string)
-                else:
-                    new_column_issues += OnsetValidator.check_for_banned_tags(row_string)
+                new_column_issues += OnsetValidator.check_for_banned_tags(row_string)
                 error_handler.add_context_and_filter(new_column_issues)
-                error_handler.pop_error_context()
+                error_handler.pop_error_context()  # HedString
                 issues += new_column_issues
-            error_handler.pop_error_context()
+            error_handler.pop_error_context()  # Row
+        return issues
+
+    def _run_onset_checks(self, onset_filtered, error_handler, row_adj):
+        issues = []
+        for row in onset_filtered[["HED", "original_index"]].itertuples(index=True):
+            # Skip rows that had issues.
+            if row.original_index in self.invalid_original_rows:
+                continue
+            error_handler.push_error_context(ErrorContext.ROW, row.original_index + row_adj)
+            row_string = HedString(row.HED, self._schema, self._hed_validator._def_validator)
+
+            if row_string:
+                error_handler.push_error_context(ErrorContext.HED_STRING, row_string)
+                new_column_issues = self._hed_validator.run_full_string_checks(row_string)
+                new_column_issues += self._onset_validator.validate_temporal_relations(row_string)
+                error_handler.add_context_and_filter(new_column_issues)
+                error_handler.pop_error_context()  # HedString
+                issues += new_column_issues
+            error_handler.pop_error_context()  # Row
         return issues
 
     def _validate_column_structure(self, base_input, error_handler, row_adj):
