@@ -8,7 +8,7 @@ Template for the functions:
   - ``attribute_name (str)``: The name of this attribute.
 
 Returns:
-    - ``bool``: Description of the return value.
+    - ``issues (list)``: A list of issues found validating this attribute
     """
 
 from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors
