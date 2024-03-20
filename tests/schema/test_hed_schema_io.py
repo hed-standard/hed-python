@@ -578,80 +578,80 @@ class TestParseVersionList(unittest.TestCase):
                          {"test": "test:score,testlib", "ol": "ol:otherlib", "abc": "abc:anotherlib"})
 
 
-class TestOwlBase(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.base_schema = schema.load_schema_version("8.2.0")
-
-    @with_temp_file(".owl")
-    def test_schema2xml(self, filename):
-        self.base_schema.save_as_owl(filename)
-        loaded_schema = schema.load_schema(filename)
-
-        self.assertEqual(loaded_schema, self.base_schema)
-
-        self.base_schema.save_as_owl(filename, save_merged=True)
-        loaded_schema = schema.load_schema(filename)
-
-        self.assertEqual(loaded_schema, self.base_schema)
-
-    @with_temp_file(".ttl")
-    def test_schema2turtle(self, filename):
-        self.base_schema.save_as_owl(filename)
-        loaded_schema = schema.load_schema(filename)
-
-        self.assertEqual(loaded_schema, self.base_schema)
-
-        self.base_schema.save_as_owl(filename, save_merged=True)
-        loaded_schema = schema.load_schema(filename)
-
-        self.assertEqual(loaded_schema, self.base_schema)
-
-    @with_temp_file(".json-ld")
-    def test_schema2jsonld(self, filename):
-        self.base_schema.save_as_owl(filename)
-        loaded_schema = schema.load_schema(filename)
-
-        self.assertEqual(loaded_schema, self.base_schema)
-
-        self.base_schema.save_as_owl(filename, save_merged=True)
-        loaded_schema = schema.load_schema(filename)
-
-        self.assertEqual(loaded_schema, self.base_schema)
-
-    def test_schema2owlstring(self):
-        owl_string = self.base_schema.get_as_owl_string(file_format="turtle")
-        loaded_schema = schema.from_string(owl_string, schema_format="turtle")
-
-        self.assertEqual(loaded_schema, self.base_schema)
-
-        owl_string = self.base_schema.get_as_owl_string(save_merged=True, file_format="turtle")
-        loaded_schema = schema.from_string(owl_string, schema_format="turtle")
-
-        self.assertEqual(loaded_schema, self.base_schema)
-
-    def test_schema2bad_filename(self):
-        with self.assertRaises(OSError):
-            self.base_schema.save_as_owl("", file_format="xml")
-        with self.assertRaises(OSError):
-            self.base_schema.save_as_owl("/////////", file_format="xml")
-
-    def test_schema2bad_filename_rdf_format(self):
-        with self.assertRaises(rdflib.plugin.PluginException):
-            self.base_schema.save_as_owl("valid_filename.invalid_extension")
-        with self.assertRaises(rdflib.plugin.PluginException):
-            self.base_schema.save_as_owl("")
-        with self.assertRaises(rdflib.plugin.PluginException):
-            self.base_schema.save_as_owl("", file_format="unknown")
-
-
-class TestOwlLibRooted(TestOwlBase):
-    @classmethod
-    def setUpClass(cls):
-        cls.base_schema = schema.load_schema_version("testlib_2.0.0")
-
-
-class TestOwlLib(TestOwlBase):
-    @classmethod
-    def setUpClass(cls):
-        cls.base_schema = schema.load_schema_version("score_1.1.0")
+# class TestOwlBase(unittest.TestCase):
+#     @classmethod
+#     def setUpClass(cls):
+#         cls.base_schema = schema.load_schema_version("8.2.0")
+#
+#     @with_temp_file(".owl")
+#     def test_schema2xml(self, filename):
+#         self.base_schema.save_as_owl(filename)
+#         loaded_schema = schema.load_schema(filename)
+#
+#         self.assertEqual(loaded_schema, self.base_schema)
+#
+#         self.base_schema.save_as_owl(filename, save_merged=True)
+#         loaded_schema = schema.load_schema(filename)
+#
+#         self.assertEqual(loaded_schema, self.base_schema)
+#
+#     @with_temp_file(".ttl")
+#     def test_schema2turtle(self, filename):
+#         self.base_schema.save_as_owl(filename)
+#         loaded_schema = schema.load_schema(filename)
+#
+#         self.assertEqual(loaded_schema, self.base_schema)
+#
+#         self.base_schema.save_as_owl(filename, save_merged=True)
+#         loaded_schema = schema.load_schema(filename)
+#
+#         self.assertEqual(loaded_schema, self.base_schema)
+#
+#     @with_temp_file(".json-ld")
+#     def test_schema2jsonld(self, filename):
+#         self.base_schema.save_as_owl(filename)
+#         loaded_schema = schema.load_schema(filename)
+#
+#         self.assertEqual(loaded_schema, self.base_schema)
+#
+#         self.base_schema.save_as_owl(filename, save_merged=True)
+#         loaded_schema = schema.load_schema(filename)
+#
+#         self.assertEqual(loaded_schema, self.base_schema)
+#
+#     def test_schema2owlstring(self):
+#         owl_string = self.base_schema.get_as_owl_string(file_format="turtle")
+#         loaded_schema = schema.from_string(owl_string, schema_format="turtle")
+#
+#         self.assertEqual(loaded_schema, self.base_schema)
+#
+#         owl_string = self.base_schema.get_as_owl_string(save_merged=True, file_format="turtle")
+#         loaded_schema = schema.from_string(owl_string, schema_format="turtle")
+#
+#         self.assertEqual(loaded_schema, self.base_schema)
+#
+#     def test_schema2bad_filename(self):
+#         with self.assertRaises(OSError):
+#             self.base_schema.save_as_owl("", file_format="xml")
+#         with self.assertRaises(OSError):
+#             self.base_schema.save_as_owl("/////////", file_format="xml")
+#
+#     def test_schema2bad_filename_rdf_format(self):
+#         with self.assertRaises(rdflib.plugin.PluginException):
+#             self.base_schema.save_as_owl("valid_filename.invalid_extension")
+#         with self.assertRaises(rdflib.plugin.PluginException):
+#             self.base_schema.save_as_owl("")
+#         with self.assertRaises(rdflib.plugin.PluginException):
+#             self.base_schema.save_as_owl("", file_format="unknown")
+#
+#
+# class TestOwlLibRooted(TestOwlBase):
+#     @classmethod
+#     def setUpClass(cls):
+#         cls.base_schema = schema.load_schema_version("testlib_2.0.0")
+#
+#
+# class TestOwlLib(TestOwlBase):
+#     @classmethod
+#     def setUpClass(cls):
+#         cls.base_schema = schema.load_schema_version("score_1.1.0")

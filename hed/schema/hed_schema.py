@@ -6,8 +6,8 @@ from hed.schema import hed_schema_constants as constants
 from hed.schema.schema_io import schema_util
 from hed.schema.schema_io.schema2xml import Schema2XML
 from hed.schema.schema_io.schema2wiki import Schema2Wiki
-from hed.schema.schema_io.schema2owl import Schema2Owl
-from hed.schema.schema_io.owl_constants import ext_to_format
+# from hed.schema.schema_io.schema2owl import Schema2Owl
+# from hed.schema.schema_io.owl_constants import ext_to_format
 from hed.schema.hed_schema_section import (HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection,
                                            HedSchemaUnitSection)
 from hed.errors import ErrorHandler
@@ -246,25 +246,25 @@ class HedSchema(HedSchemaBase):
         output_strings = Schema2Wiki.process_schema(self, save_merged)
         return '\n'.join(output_strings)
 
-    def get_as_owl_string(self, save_merged=False, file_format="owl"):
-        """ Return the schema to a mediawiki string.
-
-        Parameters:
-            save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
-                                If it is not a "withStandard" schema, this setting has no effect.
-            file_format(str or None): Override format from filename extension.
-                Accepts any value rdflib accepts(We fully support "turtle", "xml"("owl" also accepted) and "json-ld").
-                Other values should work, but aren't as fully supported.
-        Returns:
-            str:  The schema as a string in mediawiki format.
-
-        :raises rdflib.plugin.PluginException:
-            - Invalid format of file_format.  Make sure you use a supported RDF format.
-        """
-        if file_format == "owl":
-            file_format = "xml"
-        rdf_data = Schema2Owl.process_schema(self, save_merged)
-        return rdf_data.serialize(format=file_format)
+    # def get_as_owl_string(self, save_merged=False, file_format="owl"):
+    #     """ Return the schema to a mediawiki string.
+    #
+    #     Parameters:
+    #         save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
+    #                             If it is not a "withStandard" schema, this setting has no effect.
+    #         file_format(str or None): Override format from filename extension.
+    #             Accepts any value rdflib accepts(We fully support "turtle", "xml"("owl" also accepted) and "json-ld").
+    #             Other values should work, but aren't as fully supported.
+    #     Returns:
+    #         str:  The schema as a string in mediawiki format.
+    #
+    #     :raises rdflib.plugin.PluginException:
+    #         - Invalid format of file_format.  Make sure you use a supported RDF format.
+    #     """
+    #     if file_format == "owl":
+    #         file_format = "xml"
+    #     rdf_data = Schema2Owl.process_schema(self, save_merged)
+    #     return rdf_data.serialize(format=file_format)
 
     def get_as_xml_string(self, save_merged=True):
         """ Return the schema to an XML string.
@@ -298,32 +298,32 @@ class HedSchema(HedSchemaBase):
                 opened_file.write(string)
                 opened_file.write('\n')
 
-    def save_as_owl(self, filename, save_merged=False, file_format=None):
-        """ Save as json to a file.
-
-        filename: str
-            Save the file here
-        save_merged: bool
-            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
-            If it is not a "withStandard" schema, this setting has no effect.
-        file_format(str or None): Required for owl formatted files other than the following:
-            .ttl: turtle
-            .owl: xml
-            .json-ld: json-ld
-
-        :raises OSError:
-            - File cannot be saved for some reason
-
-        :raises rdflib.plugin.PluginException:
-            - Invalid format of file_format.  Make sure you use a supported RDF format.
-        """
-        ext = os.path.splitext(filename.lower())[1]
-        if ext in ext_to_format and file_format is None:
-            file_format = ext_to_format[ext]
-        if file_format == "owl":
-            file_format = "xml"
-        rdf_data = Schema2Owl.process_schema(self, save_merged)
-        rdf_data.serialize(filename, format=file_format)
+    # def save_as_owl(self, filename, save_merged=False, file_format=None):
+    #     """ Save as json to a file.
+    #
+    #     filename: str
+    #         Save the file here
+    #     save_merged: bool
+    #         If True, this will save the schema as a merged schema if it is a "withStandard" schema.
+    #         If it is not a "withStandard" schema, this setting has no effect.
+    #     file_format(str or None): Required for owl formatted files other than the following:
+    #         .ttl: turtle
+    #         .owl: xml
+    #         .json-ld: json-ld
+    #
+    #     :raises OSError:
+    #         - File cannot be saved for some reason
+    #
+    #     :raises rdflib.plugin.PluginException:
+    #         - Invalid format of file_format.  Make sure you use a supported RDF format.
+    #     """
+    #     ext = os.path.splitext(filename.lower())[1]
+    #     if ext in ext_to_format and file_format is None:
+    #         file_format = ext_to_format[ext]
+    #     if file_format == "owl":
+    #         file_format = "xml"
+    #     rdf_data = Schema2Owl.process_schema(self, save_merged)
+    #     rdf_data.serialize(filename, format=file_format)
 
     def save_as_xml(self, filename, save_merged=True):
         """ Save as XML to a file.
