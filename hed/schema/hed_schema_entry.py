@@ -125,10 +125,6 @@ class HedSchemaEntry:
     def __str__(self):
         return self.name
 
-    def get_known_attributes(self):
-        return {key: value for key, value in self.attributes.items()
-                if not self._unknown_attributes or key not in self._unknown_attributes}
-
     @staticmethod
     def _compare_attributes_no_order(left, right):
         if left != right:

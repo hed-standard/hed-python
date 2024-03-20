@@ -181,8 +181,7 @@ def _sort_changes_by_severity(changes_dict):
 
 
 def gather_schema_changes(schema1, schema2, attribute_filter=None):
-    """
-    Compare two schemas section by section, generated a changelog
+    """ Compare two schemas section by section, generating a changelog
 
     Parameters:
         schema1 (HedSchema): The first schema to be compared.

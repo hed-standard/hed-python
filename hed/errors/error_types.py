@@ -2,6 +2,7 @@
 
 
 class ErrorSeverity:
+    """Severity codes for errors"""
     ERROR = 1
     WARNING = 10
 

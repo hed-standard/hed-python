@@ -149,6 +149,7 @@ class HedSchemaSection:
 
 
 class HedSchemaUnitSection(HedSchemaSection):
+    """The schema section containing units."""
     def _check_if_duplicate(self, name_key, new_entry):
         """We need to mark duplicate units(units with unitSymbol are case sensitive, while others are not."""
         if not new_entry.has_attribute(HedKey.UnitSymbol):
@@ -157,6 +158,7 @@ class HedSchemaUnitSection(HedSchemaSection):
 
 
 class HedSchemaUnitClassSection(HedSchemaSection):
+    """The schema section containing unit classes."""
     def _check_if_duplicate(self, name_key, new_entry):
         """Allow adding units to existing unit classes, using a placeholder one with no attributes."""
         if name_key in self and len(new_entry.attributes) == 1 \
@@ -166,7 +168,7 @@ class HedSchemaUnitClassSection(HedSchemaSection):
 
 
 class HedSchemaTagSection(HedSchemaSection):
-    """ A section of the schema. """
+    """The schema section containing all tags."""
 
     def __init__(self, *args, case_sensitive=False, **kwargs):
         super().__init__(*args, **kwargs, case_sensitive=case_sensitive)

@@ -158,7 +158,7 @@ class DefinitionDict:
 
     def _validate_name_and_context(self, def_tag_name, error_handler):
         if error_handler:
-            context = error_handler.get_error_context_copy()
+            context = error_handler.error_context
         else:
             context = []
         new_def_issues = []
@@ -298,7 +298,7 @@ class DefinitionDict:
             def_dict(DefinitionDict or dict): A dict of definitions
 
         Returns:
-            dict(str: str): definition name and contents
+            dict(str): definition name and contents
         """
         if isinstance(def_dict, DefinitionDict):
             def_dict = def_dict.defs

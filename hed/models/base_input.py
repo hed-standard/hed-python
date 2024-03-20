@@ -17,11 +17,6 @@ class BaseInput:
 
     TEXT_EXTENSION = ['.tsv', '.txt']
     EXCEL_EXTENSION = ['.xlsx']
-    FILE_EXTENSION = [*TEXT_EXTENSION, *EXCEL_EXTENSION]
-    STRING_INPUT = 'string'
-    FILE_INPUT = 'file'
-    TAB_DELIMITER = '\t'
-    COMMA_DELIMITER = ','
 
     def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, name=None,
                  allow_blank_names=True):

@@ -53,7 +53,7 @@ def split_base_tags(hed_string, base_tags, remove_group=False):
 
 
 def split_def_tags(hed_string, def_names, remove_group=False):
-    """ Split a HedString object into two separate HedString objects based on the presence of wildcard tags.
+    """ Split a HedString object into two separate HedString objects based on the presence of def tags
 
         This does NOT handle def-expand tags currently.
 

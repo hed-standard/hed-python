@@ -1,4 +1,4 @@
-""" Classes representing HED search results. """
+""" Classes representing HED search results and tokens. """
 
 
 class SearchResult:
