@@ -6,7 +6,7 @@ You can scope the formatted errors with calls to push_error_context and pop_erro
 
 from functools import wraps
 import xml.etree.ElementTree as ET
-import copy
+
 from hed.errors.error_types import ErrorContext, ErrorSeverity
 from hed.errors.known_error_codes import known_error_codes
 
@@ -175,6 +175,7 @@ schema_error_messages.mark_as_used = True
 
 
 class ErrorHandler:
+    """Class to hold error context and having general error functions."""
     def __init__(self, check_for_warnings=True):
         # The current (ordered) dictionary of contexts.
         self.error_context = []
@@ -217,9 +218,6 @@ class ErrorHandler:
         """
         self.error_context = []
 
-    def get_error_context_copy(self):
-        return copy.copy(self.error_context)
-
     def format_error_with_context(self, *args, **kwargs):
         error_object = ErrorHandler.format_error(*args, **kwargs)
         if self is not None:
@@ -253,9 +251,9 @@ class ErrorHandler:
         if not error_func:
             error_object = ErrorHandler.val_error_unknown(*args, **kwargs)
             error_object['code'] = error_type
-            return [error_object]
+        else:
+            error_object = error_func(*args, **kwargs)
 
-        error_object = error_func(*args, **kwargs)
         if actual_error:
             error_object['code'] = actual_error
 
@@ -294,19 +292,11 @@ class ErrorHandler:
             - This can't filter out warnings like the other ones.
 
         """
-        error_func = error_functions.get(error_type)
-        if not error_func:
-            error_object = ErrorHandler.val_error_unknown(*args, **kwargs)
-            error_object['code'] = error_type
-        else:
-            error_object = error_func(*args, **kwargs)
+        error_list = ErrorHandler.format_error(error_type, *args, actual_error=actual_error, **kwargs)
 
-        if actual_error:
-            error_object['code'] = actual_error
-
-        ErrorHandler._add_context_to_errors(error_object, error_context)
-        ErrorHandler._update_error_with_char_pos(error_object)
-        return [error_object]
+        ErrorHandler._add_context_to_errors(error_list[0], error_context)
+        ErrorHandler._update_error_with_char_pos(error_list[0])
+        return error_list
 
     @staticmethod
     def _add_context_to_errors(error_object, error_context_to_add):

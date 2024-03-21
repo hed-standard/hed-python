@@ -1,4 +1,4 @@
-""" Format templates for HED error messages. """
+""" Format templates for HED schema error messages. """
 from hed.errors.error_types import SchemaErrors, SchemaWarnings, ErrorSeverity, SchemaAttributeErrors
 from hed.errors.error_reporter import hed_error
 

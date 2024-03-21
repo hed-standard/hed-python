@@ -1,5 +1,4 @@
-"""
-The actual formatted error messages for each type.
+"""Format templates for HED schema error messages.
 
 Add new errors here, or any other file imported after error_reporter.py.
 """

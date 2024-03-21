@@ -59,7 +59,7 @@ class SchemaValidator:
         HedKey.ConversionFactor: [schema_attribute_validators.conversion_factor],
         HedKey.AllowedCharacter: [schema_attribute_validators.allowed_characters_check],
         HedKey.InLibrary: [schema_attribute_validators.in_library_check]
-    }
+    }  # Known attribute validators
 
     def __init__(self, hed_schema, check_for_warnings=True, error_handler=None):
         self.hed_schema = hed_schema

@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class HedSectionKey(Enum):
-    """ Kegs designating specific sections in a HedSchema object.
+    """ Keys designating specific sections in a HedSchema object.
     """
     # overarching category listing all tags
     Tags = 'tags'

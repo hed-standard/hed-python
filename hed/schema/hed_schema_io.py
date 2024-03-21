@@ -5,7 +5,7 @@ import functools
 
 from hed.schema.schema_io.xml2schema import SchemaLoaderXML
 from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
-from hed.schema.schema_io.owl2schema import SchemaLoaderOWL
+# from hed.schema.schema_io.owl2schema import SchemaLoaderOWL
 from hed.schema import hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -13,7 +13,7 @@ from hed.schema.schema_io import schema_util
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.schema_validation_util import validate_version_string
 from collections import defaultdict
-from hed.schema.schema_io.owl_constants import ext_to_format
+# from hed.schema.schema_io.owl_constants import ext_to_format
 from urllib.error import URLError
 
 MAX_MEMORY_CACHE = 40
@@ -26,7 +26,6 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         schema_string (str):         An XML, mediawiki or OWL, file as a single long string
         schema_format (str):         The schema format of the source schema string.
             Allowed normal values: .mediawiki, .xml
-            Allowed owl values: xml, owl, pretty-xml, turtle (or any other value rdflib supports)
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
         schema(HedSchema or None): A hed schema to merge this new file into
                                    It must be a with-standard schema with the same value.
@@ -54,9 +53,9 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string, schema=schema, name=name)
     elif schema_format.endswith(".mediawiki"):
         hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string, schema=schema, name=name)
-    elif schema_format:
-        hed_schema = SchemaLoaderOWL.load(schema_as_string=schema_string, schema=schema, file_format=schema_format,
-                                          name=name)
+    # elif schema_format:
+    #     hed_schema = SchemaLoaderOWL.load(schema_as_string=schema_string, schema=schema, file_format=schema_format,
+    #                                       name=name)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, f"Unknown schema extension {schema_format}", filename=name)
 
@@ -65,7 +64,7 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
     return hed_schema
 
 
-def load_schema(hed_path, schema_namespace=None, schema=None, file_format=None, name=None):
+def load_schema(hed_path, schema_namespace=None, schema=None, name=None):
     """ Load a schema from the given file or URL path.
 
     Parameters:
@@ -73,10 +72,6 @@ def load_schema(hed_path, schema_namespace=None, schema=None, file_format=None, 
         schema_namespace (str or None): The name_prefix all tags in this schema will accept.
         schema(HedSchema or None): A hed schema to merge this new file into
                                    It must be a with-standard schema with the same value.
-        file_format(str or None): Required for owl formatted files other than the following:
-            .ttl: turtle
-            .owl: xml
-            .json-ld: json-ld
         name(str or None): User supplied identifier for this schema
 
     Returns:
@@ -100,10 +95,10 @@ def load_schema(hed_path, schema_namespace=None, schema=None, file_format=None, 
         except URLError as e:
             raise HedFileError(HedExceptions.URL_ERROR, str(e), hed_path) from e
         hed_schema = from_string(file_as_string, schema_format=os.path.splitext(hed_path.lower())[1], name=name)
-    elif ext in ext_to_format:
-        hed_schema = SchemaLoaderOWL.load(hed_path, schema=schema, file_format=ext_to_format[ext], name=name)
-    elif file_format:
-        hed_schema = SchemaLoaderOWL.load(hed_path, schema=schema, file_format=file_format, name=name)
+    # elif ext in ext_to_format:
+    #     hed_schema = SchemaLoaderOWL.load(hed_path, schema=schema, file_format=ext_to_format[ext], name=name)
+    # elif file_format:
+    #     hed_schema = SchemaLoaderOWL.load(hed_path, schema=schema, file_format=file_format, name=name)
     elif hed_path.lower().endswith(".xml"):
         hed_schema = SchemaLoaderXML.load(hed_path, schema=schema, name=name)
     elif hed_path.lower().endswith(".mediawiki"):

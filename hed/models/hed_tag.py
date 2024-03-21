@@ -592,6 +592,11 @@ class HedTag:
         return None, None, None
 
     def is_placeholder(self):
+        """Returns if this tag has a placeholder in it.
+
+        Returns:
+            has_placeholder(bool): True if it has a placeholder
+        """
         if "#" in self.org_tag or "#" in self._extension_value:
             return True
         return False
