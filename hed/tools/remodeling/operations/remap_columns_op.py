@@ -31,6 +31,7 @@ class RemapColumnsOp(BaseOp):
         "properties": {
             "source_columns": {
                 "type": "array",
+                "description": "The columns whose values are combined to provide the remap keys.",
                 "items": {
                     "type": "string"
                 },
@@ -38,6 +39,7 @@ class RemapColumnsOp(BaseOp):
             },
             "destination_columns": {
                 "type": "array",
+                "description": "The columns to insert new values based on a key lookup of the source columns.",
                 "items": {
                     "type": "string"
                 },
@@ -45,6 +47,7 @@ class RemapColumnsOp(BaseOp):
             },
             "map_list": {
                 "type": "array",
+                "description": "An array of k lists each with m+n entries corresponding to the k unique keys.",
                 "items": {
                     "type": "array",
                     "items": {
@@ -59,10 +62,12 @@ class RemapColumnsOp(BaseOp):
                 "uniqueItems": True
             },
             "ignore_missing": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, insert missing source columns in the result, filled with n/a, else error."
             },
             "integer_sources": {
                 "type": "array",
+                "description": "A list of source column names whose values are to be treated as integers.",
                 "items": {
                     "type": "string"
                 },

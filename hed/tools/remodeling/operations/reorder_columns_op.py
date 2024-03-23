@@ -18,6 +18,7 @@ class ReorderColumnsOp(BaseOp):
         "properties": {
             "column_order": {
                 "type": "array",
+                "description": "A list of column names in the order you wish them to be.",
                 "items": {
                     "type": "string"
                 },
@@ -25,10 +26,12 @@ class ReorderColumnsOp(BaseOp):
                 "uniqueItems": True
             },
             "ignore_missing": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, ignore column_order columns that aren't in file, otherwise error."
             },
             "keep_others": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true columns not in column_order are placed at end, otherwise ignored."
             }
         },
         "required": [

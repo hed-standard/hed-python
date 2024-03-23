@@ -13,6 +13,9 @@ class SplitRowsOp(BaseOp):
         - **new_events** (*dict*):  Mapping of new values based on values in the original row.    
         - **remove_parent_row** (*bool*):  If true, the original row that was split is removed.   
 
+    Notes:
+        - In specifying onset and duration for the new row, you can give values or the names of columns as strings.
+
     """
     NAME = "split_rows"
 
@@ -20,16 +23,19 @@ class SplitRowsOp(BaseOp):
         "type": "object",
         "properties": {
             "anchor_column": {
-                "type": "string"
+                "type": "string",
+                "description": "The column containing the keys for the new rows. (Original rows will have own keys.)"
             },
             "new_events": {
                 "type": "object",
+                "description": "A map describing how the rows for the new codes will be created.",
                 "patternProperties": {
                     ".*": {
                         "type": "object",
                         "properties": {
                             "onset_source": {
                                 "type": "array",
+                                "description": "List of items to add to compute the onset time of the new row.",
                                 "items": {
                                     "type": [
                                         "string",
@@ -40,6 +46,7 @@ class SplitRowsOp(BaseOp):
                             },
                             "duration": {
                                 "type": "array",
+                                "description": "List of items to add to compute the duration of the new row.",
                                 "items": {
                                     "type": [
                                         "string",
@@ -50,6 +57,7 @@ class SplitRowsOp(BaseOp):
                             },
                             "copy_columns": {
                                 "type": "array",
+                                "description": "List of columns whose values to copy for the new row.",
                                 "items": {
                                     "type": "string"
                                 },
@@ -67,7 +75,8 @@ class SplitRowsOp(BaseOp):
                 "minProperties": 1
             },
             "remove_parent_row": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, the row from which these rows were split is removed, otherwise it stays."
             }
         },
         "required": [

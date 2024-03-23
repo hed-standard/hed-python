@@ -27,13 +27,16 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         "type": "object",
         "properties": {
             "summary_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary in titles."
             },
             "summary_filename": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary file name base."
             },
             "skip_columns": {
                 "type": "array",
+                "description": "List of columns to skip in generating the sidecar.",
                 "items": {
                     "type": "string"
                 },
@@ -42,6 +45,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
             },
             "value_columns": {
                 "type": "array",
+                "description": "List of columns to provide a single annotation with placeholder for the values.",
                 "items": {
                     "type": "string"
                 },
@@ -55,6 +59,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
         "required": [
             "summary_name",
             "summary_filename"
+
         ],
         "additionalProperties": False
     }

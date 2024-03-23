@@ -24,10 +24,12 @@ class FactorHedTypeOp(BaseOp):
         "type": "object",
         "properties": {
             "type_tag": {
-                "type": "string"
+                "type": "string",
+                "description": "Type tag to use for computing factor vectors (e.g., Condition-variable or Task)."
             },
             "type_values": {
                 "type": "array",
+                "description": "If provided, only compute one-hot factors for these values of the type tag.",
                 "items": {
                     "type": "string"
                 },

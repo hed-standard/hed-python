@@ -36,7 +36,7 @@ required_sections = [
 
 
 class SchemaLoaderWiki(SchemaLoader):
-    """ Loads MediaWiki schemas from filenames or strings.
+    """ Load MediaWiki schemas from filenames or strings.
 
         Expected usage is SchemaLoaderWiki.load(filename)
 
@@ -104,12 +104,11 @@ class SchemaLoaderWiki(SchemaLoader):
             parse_func(lines_for_section)
 
     def _read_header_section(self, lines):
-        """Ensures the header has no content other than the initial line.
+        """Ensure the header has no content other than the initial line.
 
-        Parameters
-        ----------
-        lines: [(int, str)]
-            Lines for this section
+        Parameters:
+            lines (int, str): Lines for the header section.
+
         """
         for line_number, line in lines:
             if line.strip():
@@ -120,7 +119,7 @@ class SchemaLoaderWiki(SchemaLoader):
         text = ""
         for line_number, line in lines:
             text += line
-        # We expect one blank line(plus the normal line break).  Any more should be preserved
+        # We expect one blank line(plus the normal line break).  Any additional lines should be preserved.
         if text.endswith("\n\n"):
             text = text[:-2]
         elif text.endswith("\n"):
@@ -128,32 +127,26 @@ class SchemaLoaderWiki(SchemaLoader):
         return text
 
     def _read_prologue(self, lines):
-        """Adds the prologue
+        """Add the prologue.
 
-        Parameters
-        ----------
-        lines: [(int, str)]
-            Lines for this section
+        Parameters:
+            lines: (int, str): Lines for prologue section.
         """
         self._schema.prologue = self._read_text_block(lines)
 
     def _read_epilogue(self, lines):
-        """Adds the epilogue
+        """Adds the epilogue.
 
-        Parameters
-        ----------
-        lines: [(int, str)]
-            Lines for this section
+        Parameters:
+            lines: (int, str): Lines for the epilogue section.
         """
         self._schema.epilogue = self._read_text_block(lines)
 
     def _read_schema(self, lines):
-        """Adds the main schema section
+        """Add the main schema section
 
-        Parameters
-        ----------
-        lines: [(int, str)]
-            Lines for this section
+        Parameters:
+            lines (int, str): Lines for main schema section.
         """
         self._schema._initialize_attributes(HedSectionKey.Tags)
         parent_tags = []
@@ -168,8 +161,8 @@ class SchemaLoaderWiki(SchemaLoader):
                     parent_tags = parent_tags[:level]
                 elif level > len(parent_tags):
                     self._add_fatal_error(line_number, line,
-                                          "Line has too many *'s at the front.  You cannot skip a level."
-                                          , HedExceptions.WIKI_LINE_START_INVALID)
+                                          "Line has too many *'s at front.  You cannot skip a level.",
+                                          HedExceptions.WIKI_LINE_START_INVALID)
                     continue
             # Create the entry
             tag_entry = self._add_tag_line(parent_tags, line_number, line)
@@ -194,12 +187,10 @@ class SchemaLoaderWiki(SchemaLoader):
             parent_tags.append(tag_entry.short_tag_name)
 
     def _read_unit_classes(self, lines):
-        """Adds the unit classes section
+        """Add the unit classes section.
 
-        Parameters
-        ----------
-        lines: [(int, str)]
-            Lines for this section
+        Parameters:
+            lines (int, str): Lines for the unit class section.
         """
         self._schema._initialize_attributes(HedSectionKey.UnitClasses)
         self._schema._initialize_attributes(HedSectionKey.Units)
@@ -227,22 +218,18 @@ class SchemaLoaderWiki(SchemaLoader):
             self._add_to_dict(line_number, line, new_entry, section_key)
 
     def _read_unit_modifiers(self, lines):
-        """Adds the unit modifiers section
+        """Add the unit modifiers section.
 
-        Parameters
-        ----------
-        lines: [(int, str)]
-            Lines for this section
+        Parameters:
+            lines (int, str): Lines for the unit modifiers section.
         """
         self._read_section(lines, HedSectionKey.UnitModifiers)
 
     def _read_value_classes(self, lines):
-        """Adds the unit modifiers section
+        """Add the value classes section.
 
-        Parameters
-        ----------
-        lines: [(int, str)]
-            Lines for this section
+        Parameters:
+            lines (int, str): Lines for the value class section.
         """
         self._read_section(lines, HedSectionKey.ValueClasses)
 
@@ -255,14 +242,11 @@ class SchemaLoaderWiki(SchemaLoader):
     def _get_header_attributes_internal(self, version_line):
         """Extracts all valid attributes like version from the HED line in .mediawiki format.
 
-        Parameters
-        ----------
-        version_line: string
-            The line in the wiki file that contains the version or other attributes.
+        Parameters:
+            version_line (str): The line in the wiki file that contains the version or other attributes.
 
-        Returns
-        -------
-        {}: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}
+        Returns:
+            dict: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}
         """
         if "=" not in version_line:
             return self._get_header_attributes_internal_old(version_line)
@@ -285,7 +269,7 @@ class SchemaLoaderWiki(SchemaLoader):
         for match in attr_re.finditer(version_line):
             start, end = match.span()
 
-            # If there's unmatched content between the last match and the current one
+            # If there's unmatched content between the last match and the current one.
             if start > last_end:
                 unmatched.append(version_line[last_end:start])
 
@@ -300,16 +284,13 @@ class SchemaLoaderWiki(SchemaLoader):
         return matches, unmatched
 
     def _get_header_attributes_internal_old(self, version_line):
-        """ Extracts all valid attributes like version from the HED line in .mediawiki format.
+        """ Extract all valid attributes like version from the HED line in .mediawiki format.
 
-        Parameters
-        ----------
-        version_line: string
-            The line in the wiki file that contains the version or other attributes.
+        Parameters:
+            version_line (str): The line in the wiki file that contains the version or other attributes.
 
-        Returns
-        -------
-        {}: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}
+        Returns:
+            dict: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}.
         """
         final_attributes = {}
         attribute_pairs = version_line.split(',')
@@ -347,17 +328,14 @@ class SchemaLoaderWiki(SchemaLoader):
         return count
 
     def _remove_nowiki_tag_from_line(self, line_number, tag_line):
-        """Removes the nowiki tag from the  line.
+        """Remove the nowiki tag from the  line.
 
-        Parameters
-        ----------
-        line_number (int): The line number to report errors as
-        tag_line (string): A tag line.
+        Parameters:
+            line_number (int): The line number to report errors as
+            tag_line (str): A tag line.
 
-        Returns
-        -------
-        string
-            The line with the nowiki tag removed.
+        Returns:
+            str: The line with the nowiki tag removed.
         """
         index1 = tag_line.find(no_wiki_start_tag)
         index2 = tag_line.find(no_wiki_end_tag)
@@ -401,7 +379,7 @@ class SchemaLoaderWiki(SchemaLoader):
         """ Get the tag attributes from a line.
 
         Parameters:
-            line_number (int): The line number to report errors as
+            line_number (int): The line number to report errors as.
             tag_line (str): A tag line.
             starting_index (int): The first index we can check for the brackets.
 

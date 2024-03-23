@@ -31,16 +31,20 @@ class SummarizeHedTypeOp(BaseOp):
         "type": "object",
         "properties": {
             "summary_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary in titles."
             },
             "summary_filename": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary file name base."
             },
             "type_tag": {
-                "type": "string"
+                "type": "string",
+                "description": "Type tag (such as Condition-variable or Task to design summaries for.."
             },
             "append_timecode": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, the timecode is appended to the base filename so each run has a unique name."
             }
         },
         "required": [

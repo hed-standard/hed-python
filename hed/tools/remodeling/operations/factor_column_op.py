@@ -11,7 +11,11 @@ class FactorColumnOp(BaseOp):
 
     Optional remodeling parameters
         - **factor_names** (*list*):   Names to use as the factor columns.  
-        - **factor_values** (*list*):  Values in the column column_name to create factors for.    
+        - **factor_values** (*list*):  Values in the column column_name to create factors for.
+
+    Notes:
+        - If no factor_values are provided, factors are computed for each of the unique values in column_name column.
+        - If factor_names are provided, then factor_values must also be provided and the two lists be the same size.
 
     """
     NAME = "factor_column"
@@ -20,10 +24,12 @@ class FactorColumnOp(BaseOp):
         "type": "object",
         "properties": {
             "column_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name of the column for which to create one-hot factors for unique values."
             },
             "factor_names": {
                 "type": "array",
+                "description": "Names of the resulting factor columns. If given must be same length as factor_values",
                 "items": {
                     "type": "string"
                 },
@@ -32,8 +38,9 @@ class FactorColumnOp(BaseOp):
             },
             "factor_values": {
                 "type": "array",
+                "description": "Specific unique column values to compute factors for (otherwise all unique values).",
                 "items": {
-                        "type": "string"
+                    "type": "string"
                 },
                 "minItems": 1,
                 "uniqueItems": True

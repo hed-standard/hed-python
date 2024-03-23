@@ -1,5 +1,5 @@
 """ Convert the type of the specified columns of a tabular file. """
-#TODO finish implementation
+# TODO finish implementation
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
@@ -12,7 +12,9 @@ class ConvertColumnsOp(BaseOp):
         - **convert_to** (*str*):  Name of type to convert to. (One of 'str', 'int', 'float', 'fixed'.)   
     
     Optional remodeling parameters:
-        - **decimal_places** (*int*):   Number decimal places to keep (for fixed only).   
+        - **decimal_places** (*int*):   Number decimal places to keep (for fixed only).
+
+    Notes:
  
     """
     NAME = "convert_columns"
@@ -22,6 +24,7 @@ class ConvertColumnsOp(BaseOp):
         "properties": {
             "column_names": {
                 "type": "array",
+                "description": "List of names of the columns whose types are to be converted to the specified type.",
                 "items": {
                     "type": "string"
                 },
@@ -30,10 +33,12 @@ class ConvertColumnsOp(BaseOp):
             },
             "convert_to": {
                 "type": "string",
+                "description": "Data type to convert the columns to.",
                 "enum": ['str', 'int', 'float', 'fixed'],
             },
             "decimal_places": {
-                "type": "integer"
+                "type": "integer",
+                "description": "The number of decimal points if converted to fixed."
             }
         },
         "required": [
