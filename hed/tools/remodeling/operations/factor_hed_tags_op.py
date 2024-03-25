@@ -24,7 +24,8 @@ class FactorHedTagsOp(BaseOp):
         - **expand_context** (*bool*): If true, expand the context based on Onset, Offset, and Duration.
 
     Notes:  
-        - If query names are not provided, *query1*, *query2*, ... are used.   
+        - If query names are not provided, *query1*, *query2*, ... are used.
+        - If query names are provided, the list must have same list as the number of queries.
         - When the context is expanded, the effect of events for temporal extent is accounted for.
 
     """
@@ -35,6 +36,7 @@ class FactorHedTagsOp(BaseOp):
         "properties": {
             "queries": {
                 "type": "array",
+                "description": "List of HED tag queries to compute one-hot factors for.",
                 "items": {
                     "type": "string"
                 },
@@ -43,6 +45,7 @@ class FactorHedTagsOp(BaseOp):
             },
             "query_names": {
                 "type": "array",
+                "description": "Optional column names for the queries.",
                 "items": {
                     "type": "string"
                 },
@@ -51,6 +54,7 @@ class FactorHedTagsOp(BaseOp):
             },
             "remove_types": {
                 "type": "array",
+                "descriptions": "List of type tags to remove from before querying (e.g., Condition-variable, Task).",
                 "items": {
                     "type": "string"
                 },
@@ -58,10 +62,12 @@ class FactorHedTagsOp(BaseOp):
                 "uniqueItems": True
             },
             "expand_context": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, the assembled HED tags include the effects of temporal extent (e.g., Onset)."
             },
             "replace_defs": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, Def tags are replaced with definition contents."
             }
         },
         "required": [

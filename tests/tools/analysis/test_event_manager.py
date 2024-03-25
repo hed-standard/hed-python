@@ -86,6 +86,10 @@ class Test(unittest.TestCase):
         manager = EventManager(TabularInput(df), self.schema)
         self.assertIsInstance(manager, EventManager)
         hed, base, context = manager.unfold_context()
+        self.assertEqual(hed[2], 'Blue')
+        self.assertFalse(hed[0])
+        self.assertFalse(base[2])
+        self.assertFalse(context[0])
 
     def test_onset_ordering_bad(self):
         df = pd.DataFrame({'onset': [1, 2, '3', 'n/a', 5],
@@ -132,6 +136,7 @@ class Test(unittest.TestCase):
         self.assertTrue(all("Red" in item for item in context[1:2]))
         self.assertTrue(all("Black" in item for item in base[0:1]))
         self.assertTrue(all("Red" in item for item in base[0:1]))
+
 
 if __name__ == '__main__':
     unittest.main()

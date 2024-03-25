@@ -26,25 +26,30 @@ class MergeConsecutiveOp(BaseOp):
         "type": "object",
         "properties": {
             "column_name": {
-                "type": "string"
+                "type": "string",
+                "description": "The name of the column to check for repeated consecutive codes."
             },
             "event_code": {
                 "type": [
                     "string",
                     "number"
-                ]
+                ],
+                "description": "The event code to match for duplicates."
             },
             "match_columns": {
                 "type": "array",
+                "description": "List of columns whose values must also match to be considered a repeat.",
                 "items": {
                     "type": "string"
                 }
             },
             "set_durations": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, then the duration should be computed based on start of first to end of last."
             },
             "ignore_missing": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, missing match columns are ignored."
             }
         },
         "required": [

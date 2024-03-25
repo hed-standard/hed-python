@@ -17,11 +17,11 @@ class Test(unittest.TestCase):
                                             '../../data/bids_tests/eeg_ds003645s_hed_library'))
 
     def test_constructor(self):
-        bids = BidsDataset(Test.root_path)
+        bids = BidsDataset(self.root_path)
         self.assertIsInstance(bids, BidsDataset, "BidsDataset should create a valid object from valid dataset")
         parts = bids.get_tabular_group("participants")
         self.assertFalse(parts)
-        bids = BidsDataset(Test.root_path, tabular_types=['participants', 'events'])
+        bids = BidsDataset(self.root_path, tabular_types=['participants', 'events'])
         parts = bids.get_tabular_group("participants")
         self.assertIsInstance(parts, BidsFileGroup, "BidsDataset participants should be a BidsFileGroup")
         self.assertEqual(len(parts.sidecar_dict), 1, "BidsDataset should have one participants.json file")

@@ -15,7 +15,7 @@ class CharValidator:
     INVALID_STRING_CHARS_PLACEHOLDERS = '[]~'
 
     def __init__(self, modern_allowed_char_rules=False):
-        """Does basic character validation for hed strings/tags
+        """Does basic character validation for HED strings/tags
 
         Parameters:
             modern_allowed_char_rules(bool): If True, use 8.3 style rules for unicode characters.

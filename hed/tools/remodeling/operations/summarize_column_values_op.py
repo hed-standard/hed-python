@@ -28,19 +28,24 @@ class SummarizeColumnValuesOp(BaseOp):
         "type": "object",
         "properties": {
             "summary_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary in titles."
             },
             "summary_filename": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary file name base."
             },
             "append_timecode": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, the timecode is appended to the base filename so each run has a unique name."
             },
             "max_categorical": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Maximum number of unique column values to show in text description."
             },
             "skip_columns": {
                 "type": "array",
+                "description": "List of columns to skip when creating the summary.",
                 "items": {
                     "type": "string"
                 },
@@ -49,6 +54,7 @@ class SummarizeColumnValuesOp(BaseOp):
             },
             "value_columns": {
                 "type": "array",
+                "description": "Columns to be annotated with a single HED annotation and placeholder.",
                 "items": {
                     "type": "string"
                 },
@@ -56,7 +62,8 @@ class SummarizeColumnValuesOp(BaseOp):
                 "uniqueItems": True
             },
             "values_per_line": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Number of items per line to display in the text file."
             }
         },
         "required": [

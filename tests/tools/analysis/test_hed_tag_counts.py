@@ -2,7 +2,7 @@ import os
 import unittest
 from hed import schema as hedschema
 from hed.models import Sidecar, TabularInput, HedString
-from hed.models.df_util import get_assembled
+from hed.models.df_util import expand_defs
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 import pandas as pd
 
@@ -74,11 +74,13 @@ class Test(unittest.TestCase):
 
     def test_organize_tags(self):
         counts = HedTagCounts('Base_name')
-        hed_strings, definitions = get_assembled(self.input_data, self.hed_schema, extra_def_dicts=None,
-                                                 defs_expanded=True)
+        definitions = self.input_data.get_def_dict(self.hed_schema)
+        df = pd.DataFrame({"HED_assembled": self.input_data.series_a})
+        expand_defs(df, self.hed_schema, definitions)
+
         # type_defs = input_data.get_definitions().gathered_defs
-        for hed in hed_strings:
-            counts.update_event_counts(hed, 'run-1')
+        for hed in df["HED_assembled"]:
+            counts.update_event_counts(HedString(hed, self.hed_schema), 'run-1')
         self.assertIsInstance(counts.tag_dict, dict)
         self.assertEqual(46, len(counts.tag_dict))
         org_tags, leftovers = counts.organize_tags(self.tag_template)

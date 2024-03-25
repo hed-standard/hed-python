@@ -28,16 +28,20 @@ class SummarizeHedValidationOp(BaseOp):
         "type": "object",
         "properties": {
             "summary_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary in titles."
             },
             "summary_filename": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary file name base."
             },
             "append_timecode": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, the timecode is appended to the base filename so each run has a unique name."
             },
             "check_for_warnings": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true warnings as well as errors are reported."
             }
         },
         "required": [

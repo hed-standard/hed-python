@@ -27,7 +27,7 @@ def get_query_handlers(queries, query_names=None):
         query_names = [f"query_{index}" for index in range(len(queries))]
 
     if len(queries) != len(query_names):
-        issues.append(f"QueryNamesLengthBad: The query_names length {len(query_names)} must be empty or equal" +
+        issues.append(f"QueryNamesLengthBad: The query_names length {len(query_names)} must be empty or equal " +
                       f"to the queries length {len(queries)}.")
     elif len(set(query_names)) != len(query_names):
         issues.append(f"DuplicateQueryNames: The query names {str(query_names)} list has duplicates")

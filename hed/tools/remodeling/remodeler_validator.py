@@ -10,28 +10,44 @@ class RemodelerValidator:
     MESSAGE_STRINGS = {
         "0": {
             "minItems": "There are no operations defined. Specify at least 1 operation for the remodeler to execute.",
-            "type": "Operations must be contained in a list or array. This is also true when you run a single operation."
+            "type": "Operations must be contained in a list or array. This is also true for a single operation."
         },
         "1": {
-            "type": "Each operation must be defined in a dictionary. {instance} is not a dictionary object.",
-            "required": "Operation dictionary {operation_index} is missing '{missing_value}'. Every operation dictionary must specify the type of operation, a description, and the operation parameters.",
-            "additionalProperties": "Operation dictionary {operation_index} contains an unexpected field '{added_property}'. Every operation dictionary must specify the type of operation, a description, and the operation parameters."
+            "type": "Each operation must be defined in a dictionary: {instance} is not a dictionary object.",
+            "required": "Operation dictionary {operation_index} is missing '{missing_value}'. " +
+                        "Every operation dictionary must specify the type of operation, " +
+                        "a description, and the operation parameters.",
+            "additionalProperties": "Operation dictionary {operation_index} contains an unexpected field " +
+                                    "'{added_property}'. Every operation dictionary must specify the type " +
+                                    "of operation, a description, and the operation parameters."
         },
         "2": {
-            "type": "Operation {operation_index}: {instance} is not a {validator_value}. {operation_field} should be of type {validator_value}.",
-            "enum": "{instance} is not a known remodeler operation. Accepted remodeler operations can be found in the documentation.",
-            "required": "Operation {operation_index}: The parameter {missing_value} is missing. {missing_value} is a required parameter of {operation_name}.",
-            "additionalProperties": "Operation {operation_index}: Operation parameters for {operation_name} contain an unexpected field '{added_property}'.",
-            "dependentRequired": "Operation {operation_index}: The parameter {missing_value} is missing. {missing_value} is a required parameter of {operation_name} when {dependent_on} is specified."
+            "type": "Operation {operation_index}: {instance} is not a {validator_value}. " +
+                    "{operation_field} should be of type {validator_value}.",
+            "enum": "{instance} is not a known remodeler operation. See the documentation for valid operations.",
+            "required": "Operation {operation_index}: The parameter {missing_value} is missing. {missing_value} " +
+                        "is a required parameter of {operation_name}.",
+            "additionalProperties": "Operation {operation_index}: Operation parameters for {operation_name} " +
+                                    "contain an unexpected field '{added_property}'.",
+            "dependentRequired": "Operation {operation_index}: The parameter {missing_value} is missing: " +
+                                 "{missing_value} is a required parameter of {operation_name} " +
+                                 "when {dependent_on} is specified."
         },
         "more": {
-            "type": "Operation {operation_index}: The value of {parameter_path}, in the {operation_name} operation, should be a {validator_value}. {instance} is not a {validator_value}.",
-            "minItems": "Operation {operation_index}: The list in {parameter_path}, in the {operation_name} operation, should have at least {validator_value} item(s).",
-            "required": "Operation {operation_index}: The field {missing_value} is missing in {parameter_path}. {missing_value} is a required parameter of {parameter_path}.",
-            "additionalProperties": "Operation {operation_index}: Operation parameters for {parameter_path} contain an unexpected field '{added_property}'.",
-            "enum": "Operation {operation_index}: Operation parameter {parameter_path}, in the {operation_name} operation, contains and unexpected value. Value should be one of {validator_value}.",
-            "uniqueItems": "Operation {operation_index}: The list in {parameter_path}, in the {operation_name} operation, should only contain unique items.",
-            "minProperties": "Operation {operation_index}: The dictionary in {parameter_path}, in the {operation_name} operation, should have at least {validator_value} key(s)."
+            "type": "Operation {operation_index}: The value of {parameter_path} in the {operation_name} operation " +
+                    "should be {validator_value}. {instance} is not a {validator_value}.",
+            "minItems": "Operation {operation_index}: The list in {parameter_path} in the {operation_name} " +
+                        "operation should have at least {validator_value} item(s).",
+            "required": "Operation {operation_index}: The field {missing_value} is missing in {parameter_path}. " +
+                        "{missing_value} is a required parameter of {parameter_path}.",
+            "additionalProperties": "Operation {operation_index}: Operation parameters for {parameter_path} " +
+                                    "contain an unexpected field '{added_property}'.",
+            "enum": "Operation {operation_index}: Operation parameter {parameter_path} in the {operation_name} " +
+                    "operation contains and unexpected value. Value should be one of {validator_value}.",
+            "uniqueItems": "Operation {operation_index}: The list in {parameter_path} in the {operation_name} " +
+                           "operation should only contain unique items.",
+            "minProperties": "Operation {operation_index}: The dictionary in {parameter_path} in the " +
+                             "{operation_name} operation should have at least {validator_value} key(s)."
         }
     }
 
@@ -93,7 +109,7 @@ class RemodelerValidator:
         """ Validate remodeler operations against the json schema specification and specific op requirements.
 
         Parameters:
-            operations (dict): Dictionary with input operations to run through the remodeler.
+            operations (list): Dictionary with input operations to run through the remodeler.
 
         Returns:
             list: List with the error messages for errors identified by the validator.
@@ -148,7 +164,7 @@ class RemodelerValidator:
             for ind, value in enumerate(parameter_path):
                 if isinstance(value, int):
                     parameter_path[ind] = f"item {value+1}"
-            error_dict["parameter_path"] = ", ".join(parameter_path)
+            error_dict["parameter_path"] = " ".join(parameter_path)
         except (IndexError, TypeError, KeyError):
             pass
 

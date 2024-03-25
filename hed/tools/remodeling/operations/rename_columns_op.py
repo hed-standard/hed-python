@@ -18,6 +18,7 @@ class RenameColumnsOp (BaseOp):
         "properties": {
             "column_mapping": {
                 "type": "object",
+                "description": "Mapping between original column names and their respective new names.",
                 "patternProperties": {
                     ".*": {
                         "type": "string"
@@ -26,7 +27,8 @@ class RenameColumnsOp (BaseOp):
                 "minProperties": 1
             },
             "ignore_missing": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true ignore column_mapping keys that don't correspond to columns, otherwise error."
             }
         },
         "required": [

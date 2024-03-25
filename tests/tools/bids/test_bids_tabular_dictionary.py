@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
 
     def test_constructor_invalid(self):
         with self.assertRaises(HedFileError) as context:
-            BidsTabularDictionary("Tsv name", self.file_list, entities=('sub'))
+            BidsTabularDictionary("Tsv name", self.file_list, entities=('sub',))
         self.assertEqual(context.exception.args[0], 'NonUniqueFileKeys')
 
     def test_count_diffs_same(self):

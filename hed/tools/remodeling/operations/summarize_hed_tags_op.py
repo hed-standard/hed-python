@@ -28,6 +28,9 @@ class SummarizeHedTagsOp(BaseOp):
 
     The purpose of this op is to produce a summary of the occurrences of HED tags organized in a specified manner.
 
+    Notes: The tags template is a dictionary whose keys are the organization titles (not necessarily tags) for the
+    output and whose values are the tags, which if they or their children appear, they will be listed under that
+    title.
 
     """
     NAME = "summarize_hed_tags"
@@ -36,13 +39,16 @@ class SummarizeHedTagsOp(BaseOp):
         "type": "object",
         "properties": {
             "summary_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary in titles."
             },
             "summary_filename": {
-                "type": "string"
+                "type": "string",
+                "description": "Name to use for the summary file name base."
             },
             "tags": {
                 "type": "object",
+                "description": "A dictionary with the template for how output of tags should be organized.",
                 "patternProperties": {
                     ".*": {
                         "type": "array",
@@ -57,13 +63,16 @@ class SummarizeHedTagsOp(BaseOp):
                 }
             },
             "append_timecode": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, the timecode is appended to the base filename so each run has a unique name."
             },
             "include_context": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, tags for events that unfold over time are counted at each intermediate time."
             },
             "remove_types": {
                 "type": "array",
+                "description": "A list of special tags such as Condition-variable whose influence is to be removed.",
                 "items": {
                     "type": "string"
                 },
@@ -71,53 +80,68 @@ class SummarizeHedTagsOp(BaseOp):
                 "uniqueItems": True
             },
             "replace_defs": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "If true, then the Def tags are replaced with actual definitions for the count."
             },
             "word_cloud": {
                 "type": "object",
                 "properties": {
                     "height": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Height of word cloud image in pixels."
                     },
                     "width": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Width of word cloud image in pixels."
                     },
                     "prefer_horizontal": {
-                        "type": "number"
+                        "type": "number",
+                        "description": "Fraction of the words that are oriented horizontally."
                     },
                     "min_font_size": {
-                        "type": "number"
+                        "type": "number",
+                        "description": "Minimum font size in points for the word cloud words."
                     },
                     "max_font_size": {
-                        "type": "number"
+                        "type": "number",
+                        "description": "Maximum font size in point for the word cloud words."
                     },
                     "set_font": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "If true, set the font to a system font (provided by font_path)."
+
                     },
                     "font_path": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Path to system font to use for word cloud display (system-specific)."
                     },
                     "scale_adjustment": {
-                        "type": "number"
+                        "type": "number",
+                        "description": "Constant to add to log-transformed frequencies of the words to get scale."
                     },
                     "contour_width": {
-                        "type": "number"
+                        "type": "number",
+                        "description": "Width in pixels of contour surrounding the words."
                     },
                     "contour_color": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Name of the contour color (uses MatPlotLib names for colors)."
                     },
                     "background_color": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Name of the background color (uses MatPlotLib names for colors)."
                     },
                     "use_mask": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "If true then confine the word display to region within the provided mask."
                     },
                     "mask_path": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "Path of the mask image used to surround the words."
                     }
                 },
                 "additionalProperties": False
-            },
+            }
         },
         "required": [
             "summary_name",
