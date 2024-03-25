@@ -2,13 +2,13 @@ import json
 import os
 import unittest
 import pandas as pd
-from hed.models import TabularInput, Sidecar
+from hed.models import HedString, TabularInput, Sidecar
 from hed.schema import load_schema_version
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_tag_manager import HedTagManager
 from io import StringIO
-from hed.models.df_util import get_assembled
+from hed.models.df_util import expand_defs
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.operations.summarize_hed_tags_op import SummarizeHedTagsOp, HedTagSummary
 
@@ -68,42 +68,42 @@ class Test(unittest.TestCase):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.2.0'])
         df = pd.read_csv(self.data_path, delimiter='\t', header=0, keep_default_na=False, na_values=",null")
 
-        # # no replace, no context, types removed
-        # parms1 = json.loads(self.json_parms)
-        # parms1["summary_name"] = "tag summary 1"
-        # sum_op1 = SummarizeHedTagsOp(parms1)
-        # df_new1 = sum_op1.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
-        # self.assertIsInstance(sum_op1, SummarizeHedTagsOp, "constructor creates an object of the correct type")
-        # self.assertEqual(200, len(df_new1), "summarize_hed_type_op dataframe length is correct")
-        # self.assertEqual(10, len(df_new1.columns), "summarize_hed_type_op has correct number of columns")
-        # self.assertIn(sum_op1.summary_name, dispatch.summary_dicts)
-        # self.assertIsInstance(dispatch.summary_dicts[sum_op1.summary_name], HedTagSummary)
-        # counts1 = dispatch.summary_dicts[sum_op1.summary_name].summary_dict['subj2_run1']
-        # self.assertIsInstance(counts1, HedTagCounts)
-        # self.assertEqual(len(counts1.tag_dict), 16)
-        # self.assertNotIn('event-context', counts1.tag_dict)
-        # self.assertIn('def', counts1.tag_dict)
-        # self.assertNotIn('task', counts1.tag_dict)
-        # self.assertNotIn('condition-variable', counts1.tag_dict)
-        # 
-        # # no replace, context, types removed
-        # parms2 = json.loads(self.json_parms)
-        # parms2["include_context"] = True
-        # parms2["summary_name"] = "tag summary 2"
-        # sum_op2 = SummarizeHedTagsOp(parms2)
-        # df_new2 = sum_op2.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
-        # self.assertIsInstance(sum_op2, SummarizeHedTagsOp, "constructor creates an object of the correct type")
-        # self.assertEqual(200, len(df_new2), "summarize_hed_type_op dataframe length is correct")
-        # self.assertEqual(10, len(df_new2.columns), "summarize_hed_type_op has correct number of columns")
-        # self.assertIn(sum_op2.summary_name, dispatch.summary_dicts)
-        # self.assertIsInstance(dispatch.summary_dicts[sum_op2.summary_name], HedTagSummary)
-        # counts2 = dispatch.summary_dicts[sum_op2.summary_name].summary_dict['subj2_run1']
-        # self.assertIsInstance(counts2, HedTagCounts)
-        # self.assertEqual(len(counts2.tag_dict), len(counts1.tag_dict) + 1)
-        # self.assertIn('event-context', counts2.tag_dict)
-        # self.assertIn('def', counts2.tag_dict)
-        # self.assertNotIn('task', counts2.tag_dict)
-        # self.assertNotIn('condition-variable', counts2.tag_dict)
+        # no replace, no context, types removed
+        parms1 = json.loads(self.json_parms)
+        parms1["summary_name"] = "tag summary 1"
+        sum_op1 = SummarizeHedTagsOp(parms1)
+        df_new1 = sum_op1.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
+        self.assertIsInstance(sum_op1, SummarizeHedTagsOp, "constructor creates an object of the correct type")
+        self.assertEqual(200, len(df_new1), "summarize_hed_type_op dataframe length is correct")
+        self.assertEqual(10, len(df_new1.columns), "summarize_hed_type_op has correct number of columns")
+        self.assertIn(sum_op1.summary_name, dispatch.summary_dicts)
+        self.assertIsInstance(dispatch.summary_dicts[sum_op1.summary_name], HedTagSummary)
+        counts1 = dispatch.summary_dicts[sum_op1.summary_name].summary_dict['subj2_run1']
+        self.assertIsInstance(counts1, HedTagCounts)
+        self.assertEqual(len(counts1.tag_dict), 16)
+        self.assertNotIn('event-context', counts1.tag_dict)
+        self.assertIn('def', counts1.tag_dict)
+        self.assertNotIn('task', counts1.tag_dict)
+        self.assertNotIn('condition-variable', counts1.tag_dict)
+
+        # no replace, context, types removed
+        parms2 = json.loads(self.json_parms)
+        parms2["include_context"] = True
+        parms2["summary_name"] = "tag summary 2"
+        sum_op2 = SummarizeHedTagsOp(parms2)
+        df_new2 = sum_op2.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
+        self.assertIsInstance(sum_op2, SummarizeHedTagsOp, "constructor creates an object of the correct type")
+        self.assertEqual(200, len(df_new2), "summarize_hed_type_op dataframe length is correct")
+        self.assertEqual(10, len(df_new2.columns), "summarize_hed_type_op has correct number of columns")
+        self.assertIn(sum_op2.summary_name, dispatch.summary_dicts)
+        self.assertIsInstance(dispatch.summary_dicts[sum_op2.summary_name], HedTagSummary)
+        counts2 = dispatch.summary_dicts[sum_op2.summary_name].summary_dict['subj2_run1']
+        self.assertIsInstance(counts2, HedTagCounts)
+        self.assertEqual(len(counts2.tag_dict), len(counts1.tag_dict) + 1)
+        self.assertIn('event-context', counts2.tag_dict)
+        self.assertIn('def', counts2.tag_dict)
+        self.assertNotIn('task', counts2.tag_dict)
+        self.assertNotIn('condition-variable', counts2.tag_dict)
 
         # no replace, context, types removed
         parms3 = json.loads(self.json_parms)
@@ -165,9 +165,13 @@ class Test(unittest.TestCase):
         input_data = TabularInput(data_path, sidecar=sidecar)
         counts = HedTagCounts('myName', 2)
         summary_dict = {}
-        hed_strings, definitions = get_assembled(input_data, schema, extra_def_dicts=None, defs_expanded=True)
-        for hed in hed_strings:
-            counts.update_event_counts(hed, 'myName')
+        definitions = input_data.get_def_dict(schema)
+        df = pd.DataFrame({"HED_assembled": input_data.series_a})
+        expand_defs(df, schema, definitions)
+
+        # type_defs = input_data.get_definitions().gathered_defs
+        for hed in df["HED_assembled"]:
+            counts.update_event_counts(HedString(hed, schema), 'myName')
         summary_dict['myName'] = counts
 
     def test_get_summary_details(self):

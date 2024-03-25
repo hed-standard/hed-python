@@ -13,4 +13,4 @@ from .hed_tag import HedTag
 from .sidecar import Sidecar
 from .tabular_input import TabularInput
 from .timeseries_input import TimeseriesInput
-from .df_util import get_assembled, convert_to_form, shrink_defs, expand_defs, process_def_expands
+from .df_util import convert_to_form, shrink_defs, expand_defs, process_def_expands

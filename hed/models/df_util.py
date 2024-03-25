@@ -6,29 +6,6 @@ from hed.models.hed_string import HedString
 from hed.models.model_constants import DefTagNames
 
 
-def get_assembled(tabular_file, hed_schema, extra_def_dicts=None, defs_expanded=True):
-    """ Create an array of assembled HedString objects (or list of these) of the same length as tabular file input.
-
-    Parameters:
-        tabular_file (TabularInput): Represents the tabular input file.
-        hed_schema (HedSchema): If str, will attempt to load as a version if it doesn't have a valid extension.
-        extra_def_dicts: list of DefinitionDict, optional
-            Any extra DefinitionDict objects to use when parsing the HED tags.
-        defs_expanded (bool): (Default True) Expands definitions if True, otherwise shrinks them.
-    Returns:
-        tuple:
-            hed_strings(list of HedStrings): A list of HedStrings
-            def_dict(DefinitionDict): The definitions from this Sidecar.
-    """
-
-    def_dict = tabular_file.get_def_dict(hed_schema, extra_def_dicts=extra_def_dicts)
-    series_a = tabular_file.series_a
-    if defs_expanded:
-        return [HedString(x, hed_schema, def_dict).expand_defs() for x in series_a], def_dict
-    else:
-        return [HedString(x, hed_schema, def_dict).shrink_defs() for x in series_a], def_dict
-
-
 def convert_to_form(df, hed_schema, tag_form, columns=None):
     """ Convert all tags in underlying dataframe to the specified form (in place).
 
