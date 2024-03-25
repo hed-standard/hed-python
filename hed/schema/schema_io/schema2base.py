@@ -92,7 +92,8 @@ class Schema2Base:
             tag = tag_entry.name
             level = tag.count("/")
 
-            if not tag_entry.has_attribute(HedKey.InLibrary):
+            # Don't adjust if we're a top level tag(if this is a rooted tag, it will be re-adjusted below)
+            if not tag_entry.parent_name:
                 level_adj = 0
             if level == 0:
                 root_tag = self._write_tag_entry(tag_entry, schema_node, level)
