@@ -57,7 +57,9 @@ class TestSchemaComparison(unittest.TestCase):
 
     def test_compare_and_summarize_schemas_test(self):
         schema1 = load_schema(os.path.join(self.base_data, "schema_compare.mediawiki"), name="Schema1")
+        self.assertEqual(schema1.source_format, ".mediawiki")
         schema2 = load_schema(os.path.join(self.base_data, "schema_compare2.mediawiki"), name="Schema2")
+        self.assertEqual(schema2.source_format, ".mediawiki")
 
         result = gather_schema_changes(schema1, schema2)
         self.assertEqual(sum(len(x) for x in result.values()), 30)

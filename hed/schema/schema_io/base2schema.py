@@ -104,6 +104,7 @@ class SchemaLoader(ABC):
         if not self.appending_to_schema and self._schema.with_standard and not self._schema.merged:
             from hed.schema.hed_schema_io import load_schema_version
             saved_attr = self._schema.header_attributes
+            saved_format = self._schema.source_format
             try:
                 base_version = load_schema_version(self._schema.with_standard)
             except HedFileError as e:
@@ -115,6 +116,7 @@ class SchemaLoader(ABC):
             self._schema.filename = self.filename
             self._schema.name = self.name  # Manually set name here as we don't want to pass it to load_schema_version
             self._schema.header_attributes = saved_attr
+            self._schema.source_format = saved_format
             self._loading_merged = False
 
         self._parse_data()
