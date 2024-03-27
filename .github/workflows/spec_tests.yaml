@@ -35,25 +35,17 @@ jobs:
         id: spec_error_tests
         continue-on-error: true
         run: |
-           python -m unittest spec_tests/test_errors.py > error_results.txt
+           echo "::group::Spec Test Results"
+           python -m unittest spec_tests/test_errors.py
+           echo "::endgroup::"
 
       - name: Bids Validation Test
         id: bids_validation_test
         continue-on-error: true
         run: |
-           python -m unittest spec_tests/validate_bids.py > validate_bids_results.txt
-
-      - name: Upload error test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: error-test-results
-          path: error_results.txt
-
-      - name: Upload bids test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: bids-test-results
-          path: validate_bids_results.txt
+           echo "::group::Bids Results"
+           python -m unittest spec_tests/validate_bids.py
+           echo "::endgroup::"
 
       - name: Fail if Tests Failed
         if: steps.spec_error_tests.outcome == 'failure' || steps.bids_validation_test.outcome == 'failure'
