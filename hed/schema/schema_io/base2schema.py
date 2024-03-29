@@ -1,9 +1,10 @@
 import copy
+
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema import HedSchema
+from hed.schema import HedSchema, hed_schema_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from abc import abstractmethod, ABC
-from hed.schema import schema_validation_util
+from hed.schema import schema_header_util
 from hed.schema import hed_schema_constants
 
 
@@ -44,7 +45,7 @@ class SchemaLoader(ABC):
 
         # self._schema.filename = filename
         hed_attributes = self._get_header_attributes(self.input_data)
-        schema_validation_util.validate_attributes(hed_attributes, name=self.name)
+        schema_header_util.validate_attributes(hed_attributes, name=self.name)
 
         withStandard = hed_attributes.get(hed_schema_constants.WITH_STANDARD_ATTRIBUTE, "")
         self.library = hed_attributes.get(hed_schema_constants.LIBRARY_ATTRIBUTE, "")
@@ -149,3 +150,56 @@ class SchemaLoader(ABC):
                 entry._set_attribute_value(HedKey.InLibrary, self.library)
 
         return self._schema._add_tag_to_dict(entry.name, entry, key_class)
+
+    @staticmethod
+    def find_rooted_entry(tag_entry, schema, loading_merged):
+        """ This semi-validates rooted tags, raising an exception on major errors
+
+        Parameters:
+            tag_entry(HedTagEntry): the possibly rooted tag
+            schema(HedSchema): The schema being loaded
+            loading_merged(bool): If this schema was already merged before loading
+
+        Returns:
+            rooted_tag(HedTagEntry or None): The base tag entry from the standard schema
+                Returns None if this tag isn't rooted
+
+        :raises HedFileError:
+            - A rooted attribute is found in a non-paired schema
+            - A rooted attribute is not a string
+            - A rooted attribute was found on a non-root node in an unmerged schema.
+            - A rooted attribute is found on a root node in a merged schema.
+            - A rooted attribute indicates a tag that doesn't exist in the base schema.
+        """
+        rooted_tag = tag_entry.has_attribute(constants.HedKey.Rooted, return_value=True)
+        if rooted_tag is not None:
+            if not schema.with_standard:
+                raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                                   f"Rooted tag attribute found on '{tag_entry.short_tag_name}' in a standard schema.",
+                                   schema.name)
+
+            if not isinstance(rooted_tag, str):
+                raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                                   f'Rooted tag \'{tag_entry.short_tag_name}\' is not a string."',
+                                   schema.name)
+
+            if tag_entry.parent_name and not loading_merged:
+                raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                                   f'Found rooted tag \'{tag_entry.short_tag_name}\' as a non root node.',
+                                   schema.name)
+
+            if not tag_entry.parent_name and loading_merged:
+                raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
+                                   f'Found rooted tag \'{tag_entry.short_tag_name}\' as a root node in a merged schema.',
+                                   schema.name)
+
+            rooted_entry = schema.tags.get(rooted_tag)
+            if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):
+                raise HedFileError(HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
+                                   f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",
+                                   schema.name)
+
+            if loading_merged:
+                return None
+
+            return rooted_entry

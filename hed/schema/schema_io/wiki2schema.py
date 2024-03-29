@@ -6,7 +6,6 @@ import re
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors import ErrorContext, error_reporter
-from hed.schema import schema_validation_util
 from hed.schema.schema_io import wiki_constants
 from .base2schema import SchemaLoader
 from .wiki_constants import HedWikiSection, SectionStarts, SectionNames
@@ -172,7 +171,7 @@ class SchemaLoaderWiki(SchemaLoader):
                 continue
 
             try:
-                rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
+                rooted_entry = self.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
                 if rooted_entry:
                     parent_tags = rooted_entry.long_tag_name.split("/")
                     level_adj = len(parent_tags)

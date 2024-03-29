@@ -89,9 +89,51 @@ valid_header_attributes = {
 }
 
 character_types = {
-    "letters": set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-    "blank": set(" "),
+    "ascii": set([chr(x) for x in range(0, 127)]),
+    "nonascii": "nonascii",  # Special case for all other printable unicode characters
+    "printable": set([chr(x) for x in range(32, 127)]),
+    "lowercase": set("abcdefghijklmnopqrstuvwxyz"),
+    "uppercase": set("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
     "digits": set("0123456789"),
-    "alphanumeric": set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"),
-    "nonascii": "nonascii"  # Special case for all other printable unicode characters
+    "tab": set("\t"),
+    "newline": set("\n"),
+    "blank": set(" "),
+    "exclamation": set("!"),
+    "double-quote": set('"'),
+    "number-sign": set("#"),
+    "dollar": set("$"),
+    "percent-sign": set("%"),
+    "ampersand": set("&"),
+    "single-quote": set("'"),
+    "left-paren": set("("),
+    "right-paren": set(")"),
+    "asterisk": set("*"),
+    "plus": set("+"),
+    "comma": set(","),
+    "hyphen": set("-"),
+    "period": set("."),
+    "slash": set("/"),
+    "colon": set(":"),
+    "semicolon": set(";"),
+    "less-than": set("<"),
+    "equals": set("="),
+    "greater-than": set(">"),
+    "question-mark": set("?"),
+    "at-sign": set("@"),
+    "backslash": set("\\"),
+    "caret": set("^"),
+    "underscore": set("_"),
+    "vertical-bar": set("|"),
+    "tilde": set("~"),
 }
+
+banned_delimiters = set(",[]{}")
+
+# Compound types
+character_types["letters"] = character_types["lowercase"] | character_types["uppercase"]
+character_types["alphanumeric"] = character_types["letters"] | character_types["digits"]
+character_types["text"] = character_types["printable"].copy()
+character_types["text"].add("nonascii")
+character_types["text"] -= banned_delimiters
+character_types["name"] = character_types["alphanumeric"] | character_types["hyphen"] | character_types["period"] | character_types["underscore"]
+character_types["name"].add("nonascii")

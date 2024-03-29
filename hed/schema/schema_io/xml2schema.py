@@ -5,11 +5,8 @@ This module is used to create a HedSchema object from an XML file or tree.
 from defusedxml import ElementTree
 import xml
 
-
-import hed.schema.hed_schema_constants
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.schema import schema_validation_util
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey, NS_ATTRIB, NO_LOC_ATTRIB
 from hed.schema.schema_io import xml_constants
 from .base2schema import SchemaLoader
 from functools import partial
@@ -101,7 +98,7 @@ class SchemaLoaderXML(SchemaLoader):
 
             tag_entry = self._parse_node(tag_element, HedSectionKey.Tags, full_tag)
 
-            rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
+            rooted_entry = self.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
             if rooted_entry:
                 loading_from_chain = rooted_entry.name + "/" + tag_entry.short_tag_name
                 loading_from_chain_short = tag_entry.short_tag_name
@@ -146,8 +143,8 @@ class SchemaLoaderXML(SchemaLoader):
         for attrib_name in attrib_dict:
             if attrib_name == xml_constants.NO_NAMESPACE_XSD_KEY:
                 xsd_value = attrib_dict[attrib_name]
-                final_attrib[hed.schema.hed_schema_constants.NS_ATTRIB] = xml_constants.XSI_SOURCE
-                final_attrib[hed.schema.hed_schema_constants.NO_LOC_ATTRIB] = xsd_value
+                final_attrib[NS_ATTRIB] = xml_constants.XSI_SOURCE
+                final_attrib[NO_LOC_ATTRIB] = xsd_value
             else:
                 final_attrib[attrib_name] = attrib_dict[attrib_name]
 

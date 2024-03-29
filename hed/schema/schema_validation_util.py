@@ -3,209 +3,75 @@ from semantic_version import Version
 
 from hed.errors import ErrorHandler, SchemaWarnings
 from hed.schema import hed_schema_constants as constants
-from hed.errors.exceptions import HedExceptions, HedFileError
-from hed.schema.hed_schema_constants import valid_header_attributes
+from hed.schema.hed_schema_constants import character_types
 from hed.schema import HedSchema, HedSchemaGroup
 
 
-ALLOWED_TAG_CHARS = "-"
-ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
-
-
-def validate_library_name(library_name):
-    """ Check the validity of the library name.
+def validate_schema_tag_new(hed_entry):
+    """ Check tag entry for capitalization and illegal characters.
 
     Parameters:
-        library_name (str): Name of the library.
-
-    Returns:
-        bool or str:  If not False, string indicates the issue.
-
-    """
-    for i, character in enumerate(library_name):
-        if not character.isalpha():
-            return f"Non alpha character '{character}' at position {i} in '{library_name}'"
-        if character.isupper():
-            return f"Non lowercase character '{character}' at position {i} in '{library_name}'"
-
-
-def validate_version_string(version_string):
-    """ Check validity of the version.
-
-    Parameters:
-        version_string (str):  A version string.
-
-    Returns:
-        bool or str:  If not False, string indicates the issue.
-
-    """
-    try:
-        Version(version_string)
-    except ValueError as e:
-        return str(e)
-    return False
-
-
-header_attribute_validators = {
-    constants.VERSION_ATTRIBUTE: (validate_version_string, HedExceptions.SCHEMA_VERSION_INVALID),
-    constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
-}
-
-
-def validate_present_attributes(attrib_dict, name):
-    """ Validate combinations of attributes
-
-        Parameters:
-            attrib_dict (dict): Dictionary of attributes to be evaluated.
-            name (str):  File name to use in reporting errors.
-
-        Returns:
-            list: List of issues. Each issue is a dictionary.
-
-        :raises  HedFileError:
-            - withStandard is found in th header, but a library attribute is not specified
-        """
-    if constants.WITH_STANDARD_ATTRIBUTE in attrib_dict and constants.LIBRARY_ATTRIBUTE not in attrib_dict:
-        raise HedFileError(HedExceptions.BAD_WITH_STANDARD,
-                           "withStandard header attribute found, but no library attribute is present",
-                           name)
-
-
-def validate_attributes(attrib_dict, name):
-    """ Validate attributes in the dictionary.
-
-    Parameters:
-        attrib_dict (dict): Dictionary of attributes to be evaluated.
-        name (str):  name to use in reporting errors.
-
-    Returns:
-        list: List of issues. Each issue is a dictionary.
-
-    :raises  HedFileError:
-        - Invalid library name
-        - Version not present
-        - Invalid combinations of attributes in header
-    """
-    validate_present_attributes(attrib_dict, name)
-
-    for attribute_name, attribute_value in attrib_dict.items():
-        if attribute_name in header_attribute_validators:
-            validator, error_code = header_attribute_validators[attribute_name]
-            had_error = validator(attribute_value)
-            if had_error:
-                raise HedFileError(error_code, had_error, name)
-        if attribute_name not in valid_header_attributes:
-            raise HedFileError(HedExceptions.SCHEMA_UNKNOWN_HEADER_ATTRIBUTE,
-                               f"Unknown attribute {attribute_name} found in header line", filename=name)
-
-    if constants.VERSION_ATTRIBUTE not in attrib_dict:
-        raise HedFileError(HedExceptions.SCHEMA_VERSION_INVALID,
-                           "No version attribute found in header", filename=name)
-
-
-# Might move this to a baseclass version if one is ever made for wiki2schema/xml2schema
-def find_rooted_entry(tag_entry, schema, loading_merged):
-    """ This semi-validates rooted tags, raising an exception on major errors
-
-    Parameters:
-        tag_entry(HedTagEntry): the possibly rooted tag
-        schema(HedSchema): The schema being loaded
-        loading_merged(bool): If this schema was already merged before loading
-
-    Returns:
-        rooted_tag(HedTagEntry or None): The base tag entry from the standard schema
-            Returns None if this tag isn't rooted
-
-    :raises HedFileError:
-        - A rooted attribute is found in a non-paired schema
-        - A rooted attribute is not a string
-        - A rooted attribute was found on a non-root node in an unmerged schema.
-        - A rooted attribute is found on a root node in a merged schema.
-        - A rooted attribute indicates a tag that doesn't exist in the base schema.
-    """
-    rooted_tag = tag_entry.has_attribute(constants.HedKey.Rooted, return_value=True)
-    if rooted_tag is not None:
-        if not schema.with_standard:
-            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                               f"Rooted tag attribute found on '{tag_entry.short_tag_name}' in a standard schema.",
-                               schema.name)
-
-        if not isinstance(rooted_tag, str):
-            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                               f'Rooted tag \'{tag_entry.short_tag_name}\' is not a string."',
-                               schema.name)
-
-        if tag_entry.parent_name and not loading_merged:
-            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                               f'Found rooted tag \'{tag_entry.short_tag_name}\' as a non root node.',
-                               schema.name)
-
-        if not tag_entry.parent_name and loading_merged:
-            raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                               f'Found rooted tag \'{tag_entry.short_tag_name}\' as a root node in a merged schema.',
-                               schema.name)
-
-        rooted_entry = schema.tags.get(rooted_tag)
-        if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):
-            raise HedFileError(HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
-                               f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",
-                               schema.name)
-
-        if loading_merged:
-            return None
-
-        return rooted_entry
-
-
-def validate_schema_term(hed_term):
-    """ Check short tag for capitalization and illegal characters.
-
-    Parameters:
-        hed_term (str): A single hed term.
+        hed_entry (HedTagEntry): A single tag entry
 
     Returns:
         list: A list of all formatting issues found in the term. Each issue is a dictionary.
-
     """
     issues_list = []
+    hed_term = hed_entry.short_tag_name
     # Any # terms will have already been validated as the previous entry.
     if hed_term == "#":
         return issues_list
 
-    for i, char in enumerate(hed_term):
-        if i == 0 and not (char.isdigit() or char.isupper()):
-            issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
-                                                     hed_term, char_index=i, problem_char=char)
-            continue
-        if char in ALLOWED_TAG_CHARS or char.isalnum():
-            continue
-        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
-                                                 hed_term, char_index=i, problem_char=char)
+    if hed_term and hed_term[0] and not (hed_term[0].isdigit() or hed_term[0].isupper()):
+        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
+                                                 hed_term, char_index=0, problem_char=hed_term[0])
+    issues_list += validate_schema_term_new(hed_entry, hed_term)
     return issues_list
 
 
-def validate_schema_description(tag_name, hed_description):
-    """ Check the description of a single schema term.
+def validate_schema_term_new(hed_entry, hed_term=None):
+    """ Check the term for invalid character issues
 
     Parameters:
-        tag_name (str): A single hed tag - not validated here, just used for error messages.
-        hed_description (str): The description string to validate.
+        hed_entry (HedSchemaEntry): A single schema entry
+        hed_term (str or None): Use instead of hed_entry.name if present.
 
     Returns:
-        list: A list of all formatting issues found in the description.
-
+        list: A list of all formatting issues found in the term. Each issue is a dictionary.
     """
+    if not hed_term:
+        hed_term = hed_entry.name
     issues_list = []
-    # Blank description is fine
-    if not hed_description:
-        return issues_list
-    for i, char in enumerate(hed_description):
-        if char.isalnum():
-            continue
-        if char in ALLOWED_DESC_CHARS:
-            continue
+    # todo: potentially optimize this someday, as most values are the same
+    character_set = get_allowed_characters_by_name(["name"] + hed_entry.attributes.get("allowedCharacter", "").split(","))
+    indexes = get_problem_indexes(hed_term, character_set)
+    for char, index in indexes:
+        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, hed_term, char_index=index, problem_char=char)
+    return issues_list
+
+
+def validate_schema_description_new(hed_entry):
+    """ Check the description of the entry for invalid character issues
+
+    Parameters:
+        hed_entry (HedSchemaEntry): A single schema entry
+
+    Returns:
+        list: A list of all invalid characters found in description. Each issue is a dictionary.
+    """
+    if not hed_entry.description:
+        return []
+    issues_list = []
+    character_set = get_allowed_characters_by_name(["text", "comma"])
+    indexes = get_problem_indexes(hed_entry.description, character_set)
+    # Kludge, just get short name here if we have it for error reporting
+    name = hed_entry.name
+    if hasattr(hed_entry, "short_tag_name"):
+        name = hed_entry.short_tag_name
+    for char, index in indexes:
+
         issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
-                                                 hed_description, tag_name, char_index=i, problem_char=char)
+                                                 hed_entry.description, name, problem_char=char, char_index=index)
     return issues_list
 
 
@@ -258,3 +124,67 @@ def schema_version_for_library(hed_schema, library_name):
     if library_name == "" and hed_schema.with_standard:
         return hed_schema.with_standard
     return None
+
+
+def get_allowed_characters(value_classes):
+    """Returns the allowed characters in a given container of value classes
+
+    Parameters:
+        value_classes(list of HedSchemaEntry): A list of schema entries that should have the allowedCharacter attribute
+
+    Returns:
+        character_set(set): The set of all characters from the given classes
+    """
+    # This could be pre-computed
+    character_set_names = []
+
+    for value_class in value_classes:
+        allowed_types = value_class.attributes.get(constants.HedKey.AllowedCharacter, "").split(",")
+        character_set_names.extend(allowed_types)
+
+    character_set = get_allowed_characters_by_name(character_set_names)
+    # for now, just always allow these special cases(it's validated extensively elsewhere)
+    character_set.update("#/")
+    return character_set
+
+
+def get_allowed_characters_by_name(character_set_names):
+    """Returns the allowed characters from a list of character set names
+
+    Note: "nonascii" is a special case "character" that can be included as well
+
+    Parameters:
+        character_set_names(list of str): A list of character sets to allow.  See hed_schema_constants.character_types
+
+    Returns:
+        character_set(set): The set of all characters from the names
+    """
+    character_set = set()
+    for name in character_set_names:
+        if name in character_types and name != "nonascii":
+            character_set.update(character_types[name])
+        else:
+            character_set.add(name)
+    return character_set
+
+
+def get_problem_indexes(validation_string, character_set, index_adj=0):
+    """Finds indexes with values not in character set
+
+    Parameters:
+        validation_string(str): The string to check characters in
+        character_set(set): the list of valid characters(or the value "nonascii" as a set entry)
+        index_adj(int): the value to adjust the reported indices by, if this isn't the start of a string.
+
+    Returns:
+        index_list(tuple of (str, int)): The list of problematic characters and indices
+    """
+    if not character_set:
+        return []
+
+    indexes = [(char, index + index_adj) for index, char in enumerate(validation_string) if char not in character_set]
+    if "nonascii" in character_set:
+        indexes = [(char, index) for char, index in indexes if not ord(char) > 127]
+
+    return indexes
+

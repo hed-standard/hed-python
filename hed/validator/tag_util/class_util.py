@@ -1,12 +1,11 @@
 """ Utilities to support HED validation. """
 import datetime
 import re
-import functools
 
-
+from hed.schema.schema_validation_util import get_allowed_characters, get_problem_indexes
+from hed.schema.schema_validation_util_deprecated import _get_disallowed_character_indexes
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
-from hed.schema.hed_schema_constants import HedKey, character_types
 
 
 class UnitValueValidator:
@@ -17,8 +16,6 @@ class UnitValueValidator:
     NAME_VALUE_CLASS = "nameClass"
 
     DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
-
-    VALUE_CLASS_ALLOWED_CACHE = 20
 
     def __init__(self, modern_allowed_char_rules=False, value_validators=None):
         """ Validates the unit and value classes on a given tag.
@@ -64,23 +61,22 @@ class UnitValueValidator:
         validation_issues = []
         if original_tag.is_unit_class_tag():
             stripped_value, unit = original_tag.get_stripped_unit_value(validate_text)
+            # that are prefixes like $.  Right now those are marked as unit invalid AND value_invalid.
+            bad_units = " " in stripped_value
+
+            if bad_units:
+                stripped_value = stripped_value.split(" ")[0]
+
+            validation_issues += self._check_value_class(original_tag, stripped_value, report_as, error_code,
+                                                         index_offset)
             if not unit:
-                # Todo: in theory this should separately validate the number and the units, for units
-                # that are prefixes like $.  Right now those are marked as unit invalid AND value_invalid.
-                bad_units = " " in validate_text
-
-                if bad_units:
-                    stripped_value = stripped_value.split(" ")[0]
-
-                validation_issues += self._check_value_class(original_tag, stripped_value, report_as, error_code,
-                                                             index_offset)
                 validation_issues += self._check_units(original_tag, bad_units, report_as)
 
-                # We don't want to give this overall error twice
-                if error_code and not any(error_code == issue['code'] for issue in validation_issues):
-                    new_issue = validation_issues[0].copy()
-                    new_issue['code'] = error_code
-                    validation_issues += [new_issue]
+            # We don't want to give this overall error twice
+            if error_code and validation_issues and not any(error_code == issue['code'] for issue in validation_issues):
+                new_issue = validation_issues[0].copy()
+                new_issue['code'] = error_code
+                validation_issues += [new_issue]
 
         return validation_issues
 
@@ -100,22 +96,8 @@ class UnitValueValidator:
         """
         return self._check_value_class(original_tag, validate_text, report_as, error_code, index_offset)
 
-    @functools.lru_cache(maxsize=VALUE_CLASS_ALLOWED_CACHE)
-    def _get_allowed_characters(self, value_classes):
-        # This could be pre-computed
-        character_set = set()
-        for value_class in value_classes:
-            allowed_types = value_class.attributes.get(HedKey.AllowedCharacter, "")
-            for single_type in allowed_types.split(","):
-                if single_type in character_types and single_type != "nonascii":
-                    character_set.update(character_types[single_type])
-                else:
-                    character_set.add(single_type)
-        # for now, just always allow these special cases(it's validated extensively elsewhere)
-        character_set.update("#/")
-        return character_set
-
-    def _get_problem_indexes(self, original_tag, stripped_value):
+    @staticmethod
+    def _get_tag_problem_indexes(original_tag, stripped_value, validate_characters):
         """ Return list of problem indices for error messages.
 
         Parameters:
@@ -131,18 +113,11 @@ class UnitValueValidator:
         if start_index == -1:
             return indexes
 
-        if self._validate_characters:
-            allowed_characters = self._get_allowed_characters(original_tag.value_classes.values())
-
-            if allowed_characters:
-                # Only test the strippedvalue - otherwise numericClass + unitClass won't validate reasonably.
-                indexes = [(char, index + start_index) for index, char in enumerate(stripped_value) if char not in allowed_characters]
-                if "nonascii" in allowed_characters:
-                    # Filter out ascii characters
-                    indexes = [(char, index) for char, index in indexes if not (ord(char) > 127 and char.isprintable())]
+        if validate_characters:
+            allowed_characters = get_allowed_characters(original_tag.value_classes.values())
+            return get_problem_indexes(stripped_value, allowed_characters, index_adj=start_index)
         else:
-            indexes = [(char, index + start_index) for index, char in enumerate(stripped_value) if char in "{}"]
-        return indexes
+            return _get_disallowed_character_indexes(stripped_value, start_index)
 
     def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None, index_offset=0):
         """ Return any issues found if this is a value tag,
@@ -159,11 +134,10 @@ class UnitValueValidator:
 
         """
 
-        # todo: This function needs to check for allowed characters, not just {}
         validation_issues = []
         if original_tag.is_takes_value_tag():
             report_as = report_as if report_as else original_tag
-            problem_indexes = self._get_problem_indexes(original_tag, stripped_value)
+            problem_indexes = self._get_tag_problem_indexes(original_tag, stripped_value, self._validate_characters)
             for char, index in problem_indexes:
                 tag_code = ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE if (
                         char in "{}") else ValidationErrors.INVALID_TAG_CHARACTER
