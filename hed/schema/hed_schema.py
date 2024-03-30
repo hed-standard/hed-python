@@ -520,7 +520,7 @@ class HedSchema(HedSchemaBase):
         clean_tag = str(tag)
         namespace = schema_namespace
         clean_tag = clean_tag[len(namespace):]
-        working_tag = clean_tag.lower()
+        working_tag = clean_tag.casefold()
 
         # Most tags are in the schema directly, so test that first
         found_entry = self._get_tag_entry(working_tag)
@@ -699,10 +699,10 @@ class HedSchema(HedSchemaBase):
             This is a lower level one that doesn't rely on the Unit entries being fully setup.
 
         """
-        # todo: could refactor this so this unit.lower() part is in HedSchemaUnitSection.get
+        # todo: could refactor this so this unit.casefold() part is in HedSchemaUnitSection.get
         unit_entry = self.get_tag_entry(unit, HedSectionKey.Units)
         if unit_entry is None:
-            unit_entry = self.get_tag_entry(unit.lower(), HedSectionKey.Units)
+            unit_entry = self.get_tag_entry(unit.casefold(), HedSectionKey.Units)
             # Unit symbols must match exactly
             if unit_entry is None or unit_entry.has_attribute(HedKey.UnitSymbol):
                 return []

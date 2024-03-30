@@ -64,7 +64,7 @@ class HedSchemaSection:
         """ Add a name to the dictionary for this section. """
         name_key = name
         if not self.case_sensitive:
-            name_key = name.lower()
+            name_key = name.casefold()
 
         return_entry = self._check_if_duplicate(name_key, new_entry)
 
@@ -115,7 +115,7 @@ class HedSchemaSection:
 
     def __getitem__(self, key):
         if not self.case_sensitive:
-            key = key.lower()
+            key = key.casefold()
         return self.all_names[key]
 
     def get(self, key):
@@ -126,7 +126,7 @@ class HedSchemaSection:
 
         """
         if not self.case_sensitive:
-            key = key.lower()
+            key = key.casefold()
         return self.all_names.get(key)
 
     def __eq__(self, other):
@@ -153,7 +153,7 @@ class HedSchemaUnitSection(HedSchemaSection):
     def _check_if_duplicate(self, name_key, new_entry):
         """We need to mark duplicate units(units with unitSymbol are case sensitive, while others are not."""
         if not new_entry.has_attribute(HedKey.UnitSymbol):
-            name_key = name_key.lower()
+            name_key = name_key.casefold()
         return super()._check_if_duplicate(name_key, new_entry)
 
 
@@ -220,24 +220,24 @@ class HedSchemaTagSection(HedSchemaSection):
         else:
             self.all_names[name] = new_entry
             for tag_key in tag_forms:
-                name_key = tag_key.lower()
+                name_key = tag_key.casefold()
                 self.long_form_tags[name_key] = new_entry
 
         return new_entry
 
     def get(self, key):
         if not self.case_sensitive:
-            key = key.lower()
+            key = key.casefold()
         return self.long_form_tags.get(key)
 
     def __getitem__(self, key):
         if not self.case_sensitive:
-            key = key.lower()
+            key = key.casefold()
         return self.long_form_tags[key]
 
     def __contains__(self, key):
         if not self.case_sensitive:
-            key = key.lower()
+            key = key.casefold()
         return key in self.long_form_tags
 
     @staticmethod

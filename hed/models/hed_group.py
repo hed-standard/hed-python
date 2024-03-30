@@ -353,6 +353,10 @@ class HedGroup:
         """ Convenience function, equivalent to str(self).lower(). """
         return str(self).lower()
 
+    def casefold(self):
+        """ Convenience function, equivalent to str(self).casefold(). """
+        return str(self).casefold()
+
     def get_as_indented(self, tag_attribute="short_tag"):
         """Return the string as a multiline indented format.
 
@@ -442,9 +446,9 @@ class HedGroup:
             tags = self.get_all_tags()
         else:
             tags = self.tags()
-        search_tags = {tag.lower() for tag in search_tags}
+        search_tags = {tag.casefold() for tag in search_tags}
         for tag in tags:
-            if tag.short_base_tag.lower() in search_tags:
+            if tag.short_base_tag.casefold() in search_tags:
                 found_tags.append((tag, tag._parent))
 
         if include_groups == 0 or include_groups == 1:
@@ -454,7 +458,7 @@ class HedGroup:
     def find_wildcard_tags(self, search_tags, recursive=False, include_groups=2):
         """ Find the tags and their containing groups.
 
-            This searches tag.short_tag.lower(), with an implicit wildcard on the end.
+            This searches tag.short_tag.casefold(), with an implicit wildcard on the end.
 
             e.g. "Eve" will find Event, but not Sensory-event.
 
@@ -475,11 +479,11 @@ class HedGroup:
         else:
             tags = self.tags()
 
-        search_tags = {search_tag.lower() for search_tag in search_tags}
+        search_tags = {search_tag.casefold() for search_tag in search_tags}
 
         for tag in tags:
             for search_tag in search_tags:
-                if tag.short_tag.lower().startswith(search_tag):
+                if tag.short_tag.casefold().startswith(search_tag):
                     found_tags.append((tag, tag._parent))
                     # We can't find the same tag twice
                     break
@@ -575,7 +579,7 @@ class HedGroup:
         else:
             tags = self.tags()
 
-        search_for = term.lower()
+        search_for = term.casefold()
         for tag in tags:
             if search_for in tag.tag_terms:
                 found_tags.append((tag, tag._parent))

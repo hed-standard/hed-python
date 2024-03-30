@@ -75,7 +75,7 @@ class FactorHedTypeOp(BaseOp):
         df_list = [input_data.dataframe]
         var_manager = HedTypeManager(
             EventManager(input_data, dispatcher.hed_schema))
-        var_manager.add_type(self.type_tag.lower())
+        var_manager.add_type(self.type_tag.casefold())
 
         df_factors = var_manager.get_factor_vectors(
             self.type_tag, self.type_values, factor_encoding="one-hot")

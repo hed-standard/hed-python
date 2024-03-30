@@ -115,6 +115,17 @@ class TestHedSchema(unittest.TestCase):
         with self.assertRaises(HedFileError):
             schemas3.save_as_mediawiki("filename")
 
+    def test_verify_utf8_dupe(self):
+        base_dir = os.path.join(os.path.dirname(__file__), "../data/schema_tests")
+        schema_path = os.path.join(base_dir, "schema_utf8_dupe.mediawiki")
+        schema = load_schema(schema_path)
+        issues = schema.check_compliance()
+        self.assertEqual(len(issues), 1)
+
+        # Note it finds both of these as a duplicate
+        self.assertTrue(schema.get_tag_entry("Wßord"))
+        self.assertTrue(schema.get_tag_entry("Wssord"))
+
     def test_load_and_verify_tags(self):
         # Load 'testlib' by itself
         testlib = load_schema_version('testlib_2.0.0')

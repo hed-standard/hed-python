@@ -67,7 +67,7 @@ class SummarizeHedTypeOp(BaseOp):
         super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
-        self.type_tag = parameters['type_tag'].lower()
+        self.type_tag = parameters['type_tag'].casefold()
         self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):

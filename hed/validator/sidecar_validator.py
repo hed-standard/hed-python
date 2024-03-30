@@ -97,7 +97,7 @@ class SidecarValidator:
                         ref_dict = dict(zip(refs, combination))
                         modified_string = hed_string
                         for ref in refs:
-                            modified_string = replace_ref(modified_string, ref_dict[ref], ref)
+                            modified_string = replace_ref(modified_string, f"{{{ref}}}", ref_dict[ref])
                         hed_string_obj = HedString(modified_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
 
                         error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
@@ -296,7 +296,7 @@ class SidecarValidator:
         hed_string_copy.remove_definitions()
         hed_string_copy.shrink_defs()
 
-        if hed_string_copy.lower().count("#") != expected_count:
+        if str(hed_string_copy).count("#") != expected_count:
             return ErrorHandler.format_error(error_type, pound_sign_count=str(hed_string_copy).count("#"))
 
         return []

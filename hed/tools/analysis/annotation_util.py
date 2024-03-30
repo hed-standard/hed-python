@@ -3,6 +3,7 @@
 import re
 from pandas import DataFrame
 from hed.errors.exceptions import HedFileError
+from hed.models.df_util import replace_ref
 
 
 def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')):
@@ -70,20 +71,12 @@ def extract_tags(hed_string, search_tag):
                 - list:  A list of the tags that were extracted, for example descriptions.
 
     """
-    extracted = []
-    remainder = ""
-    back_piece = hed_string
-    while back_piece:
-        ind = back_piece.find(search_tag)
-        if ind == -1:
-            remainder = _update_remainder(remainder, back_piece)
-            break
-        first_pos = _find_last_pos(back_piece[:ind])
-        remainder = _update_remainder(remainder, trim_back(back_piece[:first_pos]))
-        next_piece = back_piece[first_pos:]
-        last_pos = _find_first_pos(next_piece)
-        extracted.append(trim_back(next_piece[:last_pos]))
-        back_piece = trim_front(next_piece[last_pos:])
+    possible_descriptions = hed_string.replace(")", "").replace("(", "").split(",")
+    extracted = [tag.strip() for tag in possible_descriptions if search_tag in tag]
+    remainder = hed_string
+    for tag in extracted:
+        remainder = replace_ref(remainder, tag)
+
     return remainder, extracted
 
 
@@ -176,80 +169,6 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             continue
         if isinstance(value_dict['HED'], dict) and 'Levels' in value_dict:
             sidecar_dict[key]['Levels'] = value_dict['Levels']
-
-
-def trim_back(tag_string):
-    """ Return a trimmed copy of tag_string.
-
-    Parameters:
-        tag_string (str):  A tag string to be trimmed.
-
-    Returns:
-        str:  A copy of tag_string that has been trimmed.
-
-    Notes:
-        -  The trailing blanks and commas are removed from the copy.
-
-
-    """
-
-    last_pos = 0
-    for ind, char in enumerate(reversed(tag_string)):
-        if char not in [',', ' ']:
-            last_pos = ind
-            break
-    return_str = tag_string[:(len(tag_string)-last_pos)]
-    return return_str
-
-
-def trim_front(tag_string):
-    """ Return a copy of tag_string with leading blanks and commas removed.
-
-    Parameters:
-        tag_string (str):     A tag string to be trimmed.
-
-    Returns:
-        str: A copy of tag_string that has been trimmed.
-    """
-    first_pos = len(tag_string)
-    for ind, char in enumerate(tag_string):
-        if char not in [',', ' ']:
-            first_pos = ind
-            break
-    return_str = tag_string[first_pos:]
-    return return_str
-
-
-def _find_first_pos(tag_string):
-    """ Return the position of the first comma or closing parenthesis in tag_string.
-
-    Parameters:
-        tag_string (str):   String to be analyzed.
-
-    Returns:
-        int:  Position of first comma or closing parenthesis or length of tag_string if none.
-
-    """
-    for ind, char in enumerate(tag_string):
-        if char in [',', ')']:
-            return ind
-    return len(tag_string)
-
-
-def _find_last_pos(tag_string):
-    """ Find the position of the last comma, blank, or opening parenthesis in tag_string.
-
-    Parameters:
-        tag_string (str):   String to be analyzed.
-
-    Returns:
-        int:   Position of last comma or opening parenthesis or 0 if none.
-
-    """
-    for index, char in enumerate(reversed(tag_string)):
-        if char in [',', ' ', '(']:
-            return len(tag_string) - index
-    return 0
 
 
 def _flatten_cat_col(col_key, col_dict):
@@ -386,7 +305,7 @@ def _tag_list_to_str(extracted, removed_tag=None):
         return " ".join(extracted)
     str_list = []
     for ind, item in enumerate(extracted):
-        ind = item.lower().find(removed_tag.lower())
+        ind = item.casefold().find(removed_tag.casefold())
         if ind >= 0:
             str_list.append(item[ind+len(removed_tag):])
         else:
@@ -419,22 +338,22 @@ def _update_cat_dict(cat_dict, value_entry, hed_entry, description_entry, descri
         cat_dict['HED'] = hed_part
 
 
-def _update_remainder(remainder, update_piece):
-    """ Update remainder with update piece.
-
-    Parameters:
-        remainder (str):      A tag string without trailing comma.
-        update_piece (str):   A tag string to be appended.
-
-    Returns:
-        str: A concatenation of remainder and update_piece, paying attention to separating commas.
-
-    """
-    if not update_piece:
-        return remainder
-    elif not remainder:
-        return update_piece
-    elif remainder.endswith('(') or update_piece.startswith(')'):
-        return remainder + update_piece
-    else:
-        return remainder + ", " + update_piece
+# def _update_remainder(remainder, update_piece):
+#     """ Update remainder with update piece.
+#
+#     Parameters:
+#         remainder (str):      A tag string without trailing comma.
+#         update_piece (str):   A tag string to be appended.
+#
+#     Returns:
+#         str: A concatenation of remainder and update_piece, paying attention to separating commas.
+#
+#     """
+#     if not update_piece:
+#         return remainder
+#     elif not remainder:
+#         return update_piece
+#     elif remainder.endswith('(') or update_piece.startswith(')'):
+#         return remainder + update_piece
+#     else:
+#         return remainder + ", " + update_piece

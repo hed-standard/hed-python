@@ -6,6 +6,7 @@ HED version="8.3.0" unmerged="True"
 
 '''Tag1'''
 * Café
+* ßword [ This is a special character that differs with .casefold vs .lower]
 
 '''Ascii'''
  * # {takesValue, valueClass=textClass}

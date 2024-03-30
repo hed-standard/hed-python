@@ -21,7 +21,7 @@ class HedTypeFactors:
 
         self.type_value = type_value
         self.number_elements = number_elements
-        self.type_tag = type_tag.lower()
+        self.type_tag = type_tag.casefold()
         self.levels = {}
         self.direct_indices = {}
 
@@ -80,9 +80,9 @@ class HedTypeFactors:
                 df.at[index, self.type_value] = self.type_value
                 continue
             for level in levels:
-                level_str = f"{self.type_value}.{level.lower()}"
+                level_str = f"{self.type_value}.{level.casefold()}"
                 if level_str in row.index and row[level_str]:
-                    df.at[index, self.type_value] = level.lower()
+                    df.at[index, self.type_value] = level.casefold()
                     break
         return df
 

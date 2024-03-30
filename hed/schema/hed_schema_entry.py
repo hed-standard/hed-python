@@ -197,7 +197,7 @@ class UnitClassEntry(HedSchemaEntry):
         if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
             return possible_match
 
-        possible_match = self.derivative_units.get(units.lower())
+        possible_match = self.derivative_units.get(units.casefold())
         # Unit symbols must match including case, a match of a unit symbol now is something like M becoming m.
         if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
             possible_match = None
@@ -416,7 +416,7 @@ class HedTagEntry(HedSchemaEntry):
         if self._parent_tag:
             self._parent_tag.children[self.short_tag_name] = self
         self.takes_value_child_entry = schema._get_tag_entry(self.name + "/#")
-        self.tag_terms = tuple(self.long_tag_name.lower().split("/"))
+        self.tag_terms = tuple(self.long_tag_name.casefold().split("/"))
 
         self._finalize_inherited_attributes()
         self._finalize_takes_value_tag(schema)

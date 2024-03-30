@@ -7,9 +7,9 @@ from hed import schema as hedschema
 from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
 from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags, hed_to_df, merge_hed_dict
-from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, \
-    _flatten_cat_col, _flatten_val_col, _get_value_entry, trim_back, trim_front, _tag_list_to_str, _update_cat_dict, \
-    generate_sidecar_entry
+from hed.tools.analysis.annotation_util import _flatten_cat_col, _flatten_val_col, _get_value_entry, _tag_list_to_str, \
+                                                _update_cat_dict, generate_sidecar_entry
+# from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, trim_back, trim_front
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.util.io_util import get_file_list
 
@@ -117,7 +117,7 @@ class Test(unittest.TestCase):
         self.assertEqual(extracted6[1], "Description/Another description.",
                          "extract_tags return right item when parens")
 
-    def extract_tag_with_parens(self):
+    def test_extract_tag_with_parens(self):
         str7 = "Bear, ((Informational-property/Description/Pluck this leaf., Junk), Description/Another description.)"
         remainder7, extracted7 = extract_tags(str7, 'Description/')
         self.assertEqual(remainder7, "Bear, ((Junk))", "extract_tags should return the right string when parens")
@@ -290,52 +290,6 @@ class Test(unittest.TestCase):
         self.assertEqual(0, len(example_sidecar), 'merge_hed_dict input is empty for this test')
         merge_hed_dict(example_sidecar, spreadsheet_sidecar)
         self.assertEqual(6, len(example_sidecar), 'merge_hed_dict merges with the correct length')
-
-    def test_trim_back(self):
-        str1 = 'Blech, Cat, ('
-        trim1 = trim_back(str1)
-        self.assertEqual(trim1, str1, 'trim_back should trim the correct amount')
-        str2 = ""
-        trim2 = trim_back(str2)
-        self.assertFalse(trim2, 'trim_back should trim an empty string to empty')
-        str3 = '(Blech, Cat),   '
-        trim3 = trim_back(str3)
-        self.assertEqual('(Blech, Cat)', trim3, 'trim_back should trim extra blanks and comma')
-
-    def test_trim_front(self):
-        str1 = ',   (Blech, Cat)'
-        trim1 = trim_front(str1)
-        self.assertEqual(trim1, "(Blech, Cat)", 'trim_front should trim the correct amount')
-        str2 = ""
-        trim2 = trim_front(str2)
-        self.assertFalse(trim2, 'trim_front should trim an empty string to empty')
-        str3 = '(Blech, Cat)'
-        trim3 = trim_front(str3)
-        self.assertEqual(str3, trim3, 'trim_front should trim not trim if no extras')
-
-    def test_find_last_pos(self):
-        test1 = "Apple/1.0, ("
-        pos1 = _find_last_pos(test1)
-        self.assertEqual(pos1, len(test1))
-        test2 = "Informational-property/"
-        pos2 = _find_last_pos(test2)
-        self.assertEqual(pos2, 0, "_find_last_pos should return the start if at the beginning")
-        test3 = "(Blech), (Property/Informational-property"
-        pos3 = _find_last_pos(test3)
-        self.assertEqual(pos3, 10, "_find_last_pos should return the start if at the beginning")
-
-    def test_find_first_pos(self):
-        test1 = "My blech."
-        pos1 = _find_first_pos(test1)
-        self.assertEqual(pos1, len(test1),
-                         "_find_first_position should return position at character after end of string")
-
-        test2 = "My blech.))"
-        pos2 = _find_first_pos(test2)
-        self.assertEqual(pos2, 9, "_find_first_position should return position at closing parentheses")
-        test3 = "My blech., Description/My apple."
-        pos3 = _find_first_pos(test3)
-        self.assertEqual(pos3, 9, "_find_first_position should return position at closing parentheses")
 
     def test_flatten_cat_col(self):
         col1 = self.sidecar2c["a"]

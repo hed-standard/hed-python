@@ -101,8 +101,8 @@ class EventManager:
         to_remove = []
         for def_tag, group in group_tuples:
             anchor_tag = group.find_def_tags(recursive=False, include_groups=0)[0]
-            anchor = anchor_tag.extension.lower()
-            if anchor in onset_dict or def_tag.short_base_tag == DefTagNames.OFFSET_KEY:
+            anchor = anchor_tag.extension.casefold()
+            if anchor in onset_dict or def_tag == DefTagNames.OFFSET_KEY:
                 temporal_event = onset_dict.pop(anchor)
                 temporal_event.set_end(event_index, self.onsets[event_index])
             if def_tag == DefTagNames.ONSET_KEY:

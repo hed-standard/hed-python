@@ -44,7 +44,7 @@ class QueryHandler:
         """
         self.tokens = []
         self.at_token = -1
-        self.tree = self._parse(expression_string.lower())
+        self.tree = self._parse(expression_string.casefold())
         self._org_string = expression_string
 
     def search(self, hed_string_obj):

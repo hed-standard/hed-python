@@ -99,7 +99,7 @@ class HedTagCounts:
         tag_list = hed_string_obj.get_all_tags()
         tag_dict = {}
         for tag in tag_list:
-            str_tag = tag.short_base_tag.lower()
+            str_tag = tag.short_base_tag.casefold()
             if str_tag not in tag_dict:
                 tag_dict[str_tag] = HedTagCount(tag, file_name)
             else:
@@ -173,7 +173,7 @@ class HedTagCounts:
         template_dict = {}
         for key, key_list in tags.items():
             for element in key_list:
-                template_dict[element.lower()] = []
+                template_dict[element.casefold()] = []
         return template_dict
 
     @staticmethod

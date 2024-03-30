@@ -123,22 +123,20 @@ def sort_dataframe_by_onsets(df):
     return df
 
 
-def replace_ref(text, newvalue, column_ref):
+def replace_ref(text, oldvalue, newvalue="n/a"):
     """ Replace column ref in x with y.  If it's n/a, delete extra commas/parentheses.
 
     Parameters:
         text (str): The input string containing the ref enclosed in curly braces.
+        oldvalue (str): The full tag or ref to replace
         newvalue (str): The replacement value for the ref.
-        column_ref (str): The ref to be replaced, without curly braces.
 
     Returns:
         str: The modified string with the ref replaced or removed.
     """
-    # Note: This function could easily be updated to handle non-curly brace values, but it seemed faster this way
-
     # If it's not n/a, we can just replace directly.
     if newvalue != "n/a":
-        return text.replace(f"{{{column_ref}}}", newvalue)
+        return text.replace(oldvalue, newvalue)
 
     def _remover(match):
         p1 = match.group("p1").count("(")
@@ -162,7 +160,7 @@ def replace_ref(text, newvalue, column_ref):
     # c1/c2 contain the comma(and possibly spaces) separating this ref from other tags
     # p1/p2 contain the parentheses directly surrounding the tag
     # All four groups can have spaces.
-    pattern = r'(?P<c1>[\s,]*)(?P<p1>[(\s]*)\{' + column_ref + r'\}(?P<p2>[\s)]*)(?P<c2>[\s,]*)'
+    pattern = r'(?P<c1>[\s,]*)(?P<p1>[(\s]*)' + oldvalue + r'(?P<p2>[\s)]*)(?P<c2>[\s,]*)'
     return re.sub(pattern, _remover, text)
 
 
@@ -192,7 +190,7 @@ def _handle_curly_braces_refs(df, refs, column_names):
             # column_name_brackets = f"{{{replacing_name}}}"
             # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
             #                             in zip(df[column_name], saved_columns[replacing_name]))
-            new_df[column_name] = pd.Series(replace_ref(x, y, replacing_name) for x, y
+            new_df[column_name] = pd.Series(replace_ref(x, f"{{{replacing_name}}}", y) for x, y
                                             in zip(new_df[column_name], saved_columns[replacing_name]))
     new_df = new_df[remaining_columns]
 
@@ -220,7 +218,7 @@ def split_delay_tags(series, hed_schema, onsets):
         return
     split_df = pd.DataFrame({"onset": onsets, "HED": series, "original_index": series.index})
     delay_strings = [(i, HedString(hed_string, hed_schema)) for (i, hed_string) in series.items() if
-                     "delay/" in hed_string.lower()]
+                     "delay/" in hed_string.casefold()]
     delay_groups = []
     for i, delay_string in delay_strings:
         duration_tags = delay_string.find_top_level_tags({DefTagNames.DELAY_KEY})
