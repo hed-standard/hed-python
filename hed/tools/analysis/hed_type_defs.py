@@ -27,7 +27,7 @@ class HedTypeDefs:
 
         """
 
-        self.type_tag = type_tag.lower()
+        self.type_tag = type_tag.casefold()
         if isinstance(definitions, DefinitionDict):
             self.definitions = definitions.defs
         elif isinstance(definitions, dict):
@@ -50,7 +50,7 @@ class HedTypeDefs:
         def_names = self.extract_def_names(item, no_value=True)
         type_values = []
         for def_name in def_names:
-            values = self.def_map.get(def_name.lower(), {})
+            values = self.def_map.get(def_name.casefold(), {})
             if "type_values" in values:
                 type_values = type_values + values["type_values"]
         return type_values
@@ -81,7 +81,7 @@ class HedTypeDefs:
         for entry in self.definitions.values():
             type_def, type_values, description, other_tags = self._extract_entry_values(entry)
             if type_def:
-                def_map[type_def.lower()] = \
+                def_map[type_def.casefold()] = \
                     {'def_name': type_def, 'type_values': type_values, 'description': description, 'tags': other_tags}
         return def_map
 
@@ -115,12 +115,12 @@ class HedTypeDefs:
         description = ''
         other_tags = []
         for hed_tag in tag_list:
-            if hed_tag.short_base_tag.lower() == 'description':
+            if hed_tag.short_base_tag == 'Description':
                 description = hed_tag.extension
-            elif hed_tag.short_base_tag.lower() != self.type_tag:
+            elif hed_tag.short_base_tag.casefold() != self.type_tag:
                 other_tags.append(hed_tag.short_base_tag)
             else:
-                type_values.append(hed_tag.extension.lower())
+                type_values.append(hed_tag.extension.casefold())
                 type_def = entry.name
         return type_def, type_values, description, other_tags
 
@@ -137,9 +137,9 @@ class HedTypeDefs:
 
            """
         if isinstance(item, HedTag) and 'def' in item.tag_terms:
-            names = [item.extension.lower()]
+            names = [item.extension.casefold()]
         else:
-            names = [tag.extension.lower() for tag in item.get_all_tags() if 'def' in tag.tag_terms]
+            names = [tag.extension.casefold() for tag in item.get_all_tags() if 'def' in tag.tag_terms]
         if no_value:
             for index, name in enumerate(names):
                 name, name_value = HedTypeDefs.split_name(name)
@@ -167,6 +167,6 @@ class HedTypeDefs:
         if len(parts) > 1:
             def_value = parts[1]
         if lowercase:
-            return def_name.lower(), def_value.lower()
+            return def_name.casefold(), def_value.casefold()
         else:
             return def_name, def_value

@@ -78,7 +78,7 @@ class DefValidator(DefinitionDict):
         is_def_expand_tag = def_expand_group != def_tag
         tag_label, _, placeholder = def_tag.extension.partition('/')
 
-        label_tag_lower = tag_label.lower()
+        label_tag_lower = tag_label.casefold()
         def_entry = self.defs.get(label_tag_lower)
         if def_entry is None:
             error_code = ValidationErrors.HED_DEF_UNMATCHED
@@ -103,7 +103,7 @@ class DefValidator(DefinitionDict):
         tag_label, _, placeholder = def_tag.extension.partition('/')
         is_def_expand_tag = def_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY
 
-        def_entry = self.defs.get(tag_label.lower())
+        def_entry = self.defs.get(tag_label.casefold())
         # These errors will be caught as can't match definition
         if def_entry is None:
             return []
@@ -196,7 +196,7 @@ class DefValidator(DefinitionDict):
     def _handle_onset_or_offset(self, def_tag):
         def_name, _, placeholder = def_tag.extension.partition('/')
 
-        def_entry = self.defs.get(def_name.lower())
+        def_entry = self.defs.get(def_name.casefold())
         if def_entry is None:
             return ErrorHandler.format_error(TemporalErrors.ONSET_DEF_UNMATCHED, tag=def_tag)
         if bool(def_entry.takes_value) != bool(placeholder):

@@ -353,11 +353,11 @@ class HedString(HedGroup):
         Returns:
             list: The returned result depends on include_groups.
         """
-        anchor_tags = {tag.lower() for tag in anchor_tags}
+        anchor_tags = {tag.casefold() for tag in anchor_tags}
         top_level_tags = []
         for group in self.groups():
             for tag in group.tags():
-                if tag.short_base_tag.lower() in anchor_tags:
+                if tag.short_base_tag.casefold() in anchor_tags:
                     top_level_tags.append((tag, group))
                     # Only capture a max of 1 per group.  These are implicitly unique.
                     break

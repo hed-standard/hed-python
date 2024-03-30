@@ -23,6 +23,13 @@ def schema_error_unknown_attribute(attribute_name, source_tag):
            f"or was used outside of it's defined class."
 
 
+@hed_error(SchemaWarnings.SCHEMA_PROLOGUE_CHARACTER_INVALID, default_severity=ErrorSeverity.WARNING,
+           actual_code=SchemaWarnings.SCHEMA_CHARACTER_INVALID)
+def schema_error_invalid_character_prologue(char_index, source_string, section_name):
+    invalid_char = source_string[char_index]
+    return f"'{section_name}' has invalid character '{invalid_char}' at position {char_index} of string: {source_string}"
+
+
 @hed_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, default_severity=ErrorSeverity.WARNING,
            actual_code=SchemaWarnings.SCHEMA_CHARACTER_INVALID)
 def schema_warning_invalid_chars_desc(desc_string, tag_name, problem_char, char_index):

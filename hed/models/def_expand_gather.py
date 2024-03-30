@@ -155,20 +155,20 @@ class DefExpandGatherer:
 
         if def_group_contents:
             if def_group_contents != def_expand_group:
-                self.errors.setdefault(def_tag_name.lower(), []).append(def_expand_group.get_first_group())
+                self.errors.setdefault(def_tag_name.casefold(), []).append(def_expand_group.get_first_group())
             return True
 
         has_extension = "/" in def_tag.extension
         if not has_extension:
             group_tag = def_expand_group.get_first_group()
-            self.def_dict.defs[def_tag_name.lower()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
+            self.def_dict.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
                                                                        takes_value=False,
                                                                        source_context=[])
             return True
 
         # this is needed for the cases where we have a definition with errors, but it's not a known definition.
-        if def_tag_name.lower() in self.errors:
-            self.errors.setdefault(f"{def_tag_name.lower()}", []).append(def_expand_group.get_first_group())
+        if def_tag_name.casefold() in self.errors:
+            self.errors.setdefault(f"{def_tag_name.casefold()}", []).append(def_expand_group.get_first_group())
             return True
 
         return False
@@ -181,20 +181,20 @@ class DefExpandGatherer:
             def_expand_group (HedGroup): The group containing the def-expand tag.
         """
         def_tag_name = def_tag.extension.split('/')[0]
-        these_defs = self.ambiguous_defs.setdefault(def_tag_name.lower(), AmbiguousDef())
+        these_defs = self.ambiguous_defs.setdefault(def_tag_name.casefold(), AmbiguousDef())
         these_defs.add_def(def_tag, def_expand_group)
 
         try:
             if these_defs.validate():
                 new_contents = these_defs.get_group()
-                self.def_dict.defs[def_tag_name.lower()] = DefinitionEntry(name=def_tag_name, contents=new_contents,
+                self.def_dict.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=new_contents,
                                                                            takes_value=True,
                                                                            source_context=[])
-                del self.ambiguous_defs[def_tag_name.lower()]
+                del self.ambiguous_defs[def_tag_name.casefold()]
         except ValueError:
             for ambiguous_def in these_defs.placeholder_defs:
-                self.errors.setdefault(def_tag_name.lower(), []).append(ambiguous_def)
-            del self.ambiguous_defs[def_tag_name.lower()]
+                self.errors.setdefault(def_tag_name.casefold(), []).append(ambiguous_def)
+            del self.ambiguous_defs[def_tag_name.casefold()]
 
         return
 

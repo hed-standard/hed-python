@@ -520,7 +520,7 @@ class HedSchema(HedSchemaBase):
         clean_tag = str(tag)
         namespace = schema_namespace
         clean_tag = clean_tag[len(namespace):]
-        working_tag = clean_tag.lower()
+        working_tag = clean_tag.casefold()
 
         # Most tags are in the schema directly, so test that first
         found_entry = self._get_tag_entry(working_tag)
@@ -635,75 +635,6 @@ class HedSchema(HedSchemaBase):
     # ===============================================
     # Getters used to write out schema primarily.
     # ===============================================
-    def get_desc_iter(self):
-        """ Return an iterator over all the descriptions.
-
-        Yields:
-            tuple:
-                - str: The tag node name.
-                - str: The description associated with the node.
-
-        """
-        for section in self._sections.values():
-            for tag_entry in section.values():
-                if tag_entry.description:
-                    yield tag_entry.name, tag_entry.description
-
-    def get_tag_description(self, tag_name, key_class=HedSectionKey.Tags):
-        """ Return the description associated with the tag.
-
-        Parameters:
-            tag_name (str): A hed tag name(or unit/unit modifier etc) with proper capitalization.
-            key_class (str): A string indicating type of description (e.g. All tags, Units, Unit modifier).
-                The default is HedSectionKey.Tags.
-
-        Returns:
-            str:  A description of the specified tag.
-
-        """
-        tag_entry = self._get_tag_entry(tag_name, key_class)
-        if tag_entry:
-            return tag_entry.description
-
-    def get_all_schema_tags(self, return_last_term=False):
-        """ Get a list of all hed terms from the schema.
-
-        Returns:
-            list: A list of all terms(short tags) from the schema.
-
-        Notes:
-            Compatible with Hed2 or Hed3.
-
-        """
-        final_list = []
-        for lower_tag, tag_entry in self.tags.items():
-            if return_last_term:
-                final_list.append(tag_entry.name.split('/')[-1])
-            else:
-                final_list.append(tag_entry.name)
-
-        return final_list
-
-    def get_unknown_attributes(self):
-        """ Retrieve the current list of unknown attributes.
-
-        Returns:
-            dict: The keys are attribute names and the values are lists of tags with this attribute.
-
-        Notes:
-            - This includes attributes found in the wrong section for example unitClass attribute found on a Tag.
-            - The return tag list is in long form.
-
-        """
-        unknown_attributes = {}
-        for section in self._sections.values():
-            for entry in section.values():
-                if entry._unknown_attributes:
-                    for attribute_name in entry._unknown_attributes:
-                        unknown_attributes.setdefault(attribute_name, []).append(entry.name)
-
-        return unknown_attributes
-
     def get_tag_attribute_names(self):
         """ Return a dict of all allowed tag attributes.
 
@@ -768,10 +699,10 @@ class HedSchema(HedSchemaBase):
             This is a lower level one that doesn't rely on the Unit entries being fully setup.
 
         """
-        # todo: could refactor this so this unit.lower() part is in HedSchemaUnitSection.get
+        # todo: could refactor this so this unit.casefold() part is in HedSchemaUnitSection.get
         unit_entry = self.get_tag_entry(unit, HedSectionKey.Units)
         if unit_entry is None:
-            unit_entry = self.get_tag_entry(unit.lower(), HedSectionKey.Units)
+            unit_entry = self.get_tag_entry(unit.casefold(), HedSectionKey.Units)
             # Unit symbols must match exactly
             if unit_entry is None or unit_entry.has_attribute(HedKey.UnitSymbol):
                 return []

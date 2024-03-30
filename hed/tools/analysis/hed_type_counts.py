@@ -16,7 +16,7 @@ class HedTypeCount:
     def __init__(self, type_value, type_tag, file_name=None):
 
         self.type_value = type_value
-        self.type_tag = type_tag.lower()
+        self.type_tag = type_tag.casefold()
         self.direct_references = 0
         self.total_events = 0
         self.events = 0

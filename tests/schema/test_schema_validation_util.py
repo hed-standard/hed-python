@@ -3,6 +3,7 @@ import unittest
 import hed.schema.schema_validation_util as util
 from hed.errors import ErrorHandler, SchemaWarnings
 from hed import load_schema_version, load_schema, HedSchemaGroup
+from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry
 
 
 class Test(unittest.TestCase):
@@ -12,12 +13,16 @@ class Test(unittest.TestCase):
 
     def validate_term_base(self, input_text, expected_issues):
         for text, issues in zip(input_text, expected_issues):
-            test_issues = util.validate_schema_term(text)
+            entry = HedTagEntry(name=text, section=None)
+            entry.short_tag_name = text
+            test_issues = util.validate_schema_tag_new(entry)
             self.assertCountEqual(issues, test_issues)
 
     def validate_desc_base(self, input_descriptions, expected_issues):
         for description, issues in zip(input_descriptions, expected_issues):
-            test_issues = util.validate_schema_description("dummy", description)
+            entry = HedSchemaEntry(name="dummy", section=None)
+            entry.description = description
+            test_issues = util.validate_schema_description_new(entry)
             self.assertCountEqual(issues, test_issues)
 
     def test_validate_schema_term(self):
@@ -36,7 +41,9 @@ class Test(unittest.TestCase):
             ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, test_terms[3], char_index=11,
                                       problem_char="#"),
             ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, test_terms[4], char_index=0,
-                                      problem_char="@"),
+                                      problem_char="@")
+            + ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, test_terms[4], char_index=0,
+                                        problem_char="@"),
         ]
         self.validate_term_base(test_terms, expected_issues)
 
@@ -45,20 +52,20 @@ class Test(unittest.TestCase):
             "This is a tag description with no invalid characters.",
             "This is (also) a tag description with no invalid characters.  -_:;./()+ ^",
             "This description has no invalid characters, as commas are allowed",
-            "This description has multiple invalid characters at the end @$%*"
+            "This description has multiple invalid characters at the end {}[]"
         ]
         expected_issues = [
             [],
             [],
             [],
             ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
-                                      char_index=60, problem_char="@")
+                                      char_index=60, problem_char="{")
             + ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
-                                        char_index=61, problem_char="$")
+                                        char_index=61, problem_char="}")
             + ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
-                                        char_index=62, problem_char="%")
+                                        char_index=62, problem_char="[")
             + ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
-                                        char_index=63, problem_char="*")
+                                        char_index=63, problem_char="]")
 
         ]
         self.validate_desc_base(test_descs, expected_issues)
@@ -70,7 +77,8 @@ class Test(unittest.TestCase):
         schema2 = load_schema_version("v:8.2.0")
         self.assertFalse(util.schema_version_greater_equal(schema2, "8.3.0"))
 
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/schema_tests/schema_utf8.mediawiki')
+        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   '../data/schema_tests/schema_utf8.mediawiki')
         schema3 = load_schema(schema_path, schema_namespace="tl:")
         self.assertTrue(util.schema_version_greater_equal(schema3, "8.3.0"))
 

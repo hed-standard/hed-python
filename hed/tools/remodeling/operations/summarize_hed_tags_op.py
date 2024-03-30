@@ -467,6 +467,6 @@ class HedTagSummary(BaseSummary):
         """
         key_details = []
         for item in key_list:
-            for tag_cnt in template[item.lower()]:
+            for tag_cnt in template[item.casefold()]:
                 key_details.append(tag_cnt.get_info(verbose=verbose))
         return key_details

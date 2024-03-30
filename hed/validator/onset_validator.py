@@ -30,12 +30,12 @@ class OnsetValidator:
 
             def_tag = def_tags[0]
             def_name = def_tag.extension
-            if def_name.lower() in used_def_names:
+            if def_name.casefold() in used_def_names:
                 onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_SAME_DEFS_ONE_ROW, tag=temporal_tag,
                                                           def_name=def_name)
                 continue
 
-            used_def_names.add(def_tag.extension.lower())
+            used_def_names.add(def_tag.extension.casefold())
 
             # At this point we have either an onset or offset tag and it's name
             onset_issues += self._handle_onset_or_offset(def_tag, temporal_tag)
@@ -47,16 +47,16 @@ class OnsetValidator:
         full_def_name = def_tag.extension
         if is_onset:
             # onset can never fail as it implies an offset
-            self._onsets[full_def_name.lower()] = full_def_name
+            self._onsets[full_def_name.casefold()] = full_def_name
         else:
             is_offset = onset_offset_tag.short_base_tag == DefTagNames.OFFSET_KEY
-            if full_def_name.lower() not in self._onsets:
+            if full_def_name.casefold() not in self._onsets:
                 if is_offset:
                     return ErrorHandler.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=def_tag)
                 else:
                     return ErrorHandler.format_error(TemporalErrors.INSET_BEFORE_ONSET, tag=def_tag)
             elif is_offset:
-                del self._onsets[full_def_name.lower()]
+                del self._onsets[full_def_name.casefold()]
 
         return []
 

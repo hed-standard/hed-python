@@ -1,6 +1,7 @@
 """ Manager a type variable and its associated context. """
 import pandas as pd
 from hed.models import HedGroup, HedTag
+from hed.models.model_constants import DefTagNames
 from hed.tools.analysis.hed_type_defs import HedTypeDefs
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
@@ -21,7 +22,7 @@ class HedType:
 
         """
         self.name = name
-        self.type_tag = type_tag.lower()
+        self.type_tag = type_tag.casefold()
         self.event_manager = event_manager
         self.type_defs = HedTypeDefs(event_manager.def_dict, type_tag=type_tag)
         self._type_map = {}  # Dictionary of type tags versus dictionary with keys being definition names.
@@ -41,7 +42,7 @@ class HedType:
             HedTypeFactors or None
 
         """
-        return self._type_map.get(type_value.lower(), None)
+        return self._type_map.get(type_value.casefold(), None)
 
     def get_type_value_level_info(self, type_value):
         """ Return type variable corresponding to type_value.
@@ -121,7 +122,7 @@ class HedType:
         else:
             tags = item.get_all_tags()
         for tag in tags:
-            if tag.short_base_tag.lower() != "def":
+            if tag.short_base_tag != DefTagNames.DEF_KEY:
                 continue
             hed_vars = self.type_defs.get_type_values(tag)
             if not hed_vars:
@@ -140,7 +141,7 @@ class HedType:
             This modifies the HedTypeFactors map.
 
         """
-        level = tag.extension.lower()
+        level = tag.extension.casefold()
         for var_name in hed_vars:
             hed_var = self._type_map.get(var_name, None)
             if hed_var is None:
@@ -173,7 +174,7 @@ class HedType:
             list:  List of the items with this type_tag
 
         """
-        if isinstance(item, HedTag) and item.short_base_tag.lower() == type_tag:
+        if isinstance(item, HedTag) and item.short_base_tag.casefold() == type_tag:
             tag_list = [item]
         elif isinstance(item, HedGroup) and item.children:
             tag_list = item.find_tags_with_term(type_tag, recursive=True, include_groups=0)
@@ -190,7 +191,7 @@ class HedType:
 
         """
         for tag in tag_list:
-            tag_value = tag.extension.lower()
+            tag_value = tag.extension.casefold()
             if not tag_value:
                 tag_value = self.type_tag
             hed_var = self._type_map.get(tag_value, None)

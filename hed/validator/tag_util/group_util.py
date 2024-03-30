@@ -136,7 +136,7 @@ class GroupValidator:
         validation_issues = []
         required_prefixes = self._hed_schema.get_tags_with_attribute(HedKey.Required)
         for required_prefix in required_prefixes:
-            if not any(tag.long_tag.lower().startswith(required_prefix.lower()) for tag in tags):
+            if not any(tag.long_tag.casefold().startswith(required_prefix.casefold()) for tag in tags):
                 validation_issues += ErrorHandler.format_error(ValidationErrors.REQUIRED_TAG_MISSING,
                                                                tag_namespace=required_prefix)
         return validation_issues
@@ -156,7 +156,7 @@ class GroupValidator:
         validation_issues = []
         unique_prefixes = self._hed_schema.get_tags_with_attribute(HedKey.Unique)
         for unique_prefix in unique_prefixes:
-            unique_tag_prefix_bool_mask = [x.long_tag.lower().startswith(unique_prefix.lower()) for x in tags]
+            unique_tag_prefix_bool_mask = [x.long_tag.casefold().startswith(unique_prefix.casefold()) for x in tags]
             if sum(unique_tag_prefix_bool_mask) > 1:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_NOT_UNIQUE,
                                                                tag_namespace=unique_prefix)

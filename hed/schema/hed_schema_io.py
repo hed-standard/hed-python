@@ -11,7 +11,7 @@ from hed.schema import hed_cache
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.schema_io import schema_util
 from hed.schema.hed_schema_group import HedSchemaGroup
-from hed.schema.schema_validation_util import validate_version_string
+from hed.schema.schema_header_util import validate_version_string
 from collections import defaultdict
 # from hed.schema.schema_io.owl_constants import ext_to_format
 from urllib.error import URLError

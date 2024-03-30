@@ -84,7 +84,7 @@ class DefinitionDict:
         Returns:
             DefinitionEntry:  Definition entry for the requested definition.
         """
-        return self.defs.get(def_name.lower())
+        return self.defs.get(def_name.casefold())
 
     def __iter__(self):
         return iter(self.defs)
@@ -144,14 +144,14 @@ class DefinitionDict:
                 def_issues += new_def_issues
                 continue
 
-            self.defs[def_tag_name.lower()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
+            self.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
                                                               takes_value=def_takes_value,
                                                               source_context=context)
 
         return def_issues
 
     def _strip_value_placeholder(self, def_tag_name):
-        def_takes_value = def_tag_name.lower().endswith("/#")
+        def_takes_value = def_tag_name.endswith("/#")
         if def_takes_value:
             def_tag_name = def_tag_name[:-len("/#")]
         return def_tag_name, def_takes_value
@@ -162,7 +162,7 @@ class DefinitionDict:
         else:
             context = []
         new_def_issues = []
-        if def_tag_name.lower() in self.defs:
+        if def_tag_name.casefold() in self.defs:
             new_def_issues += ErrorHandler.format_error_with_context(error_handler,
                                                                      DefinitionErrors.DUPLICATE_DEFINITION,
                                                                      def_name=def_tag_name)
@@ -263,7 +263,7 @@ class DefinitionDict:
         """
         tag_label, _, placeholder = def_tag.extension.partition('/')
 
-        label_tag_lower = tag_label.lower()
+        label_tag_lower = tag_label.casefold()
         def_entry = self.defs.get(label_tag_lower)
         return def_entry
 
@@ -281,7 +281,7 @@ class DefinitionDict:
         """
         tag_label, _, placeholder = def_tag.extension.partition('/')
 
-        label_tag_lower = tag_label.lower()
+        label_tag_lower = tag_label.casefold()
         def_entry = self.defs.get(label_tag_lower)
         if def_entry is None:
             # Could raise an error here?

@@ -83,28 +83,6 @@ class TestHedSchema(unittest.TestCase):
                 self.assertEqual(tag.has_attribute(attribute), expected_value,
                                  'Test string: %s. Attribute: %s.' % (test_string, attribute))
 
-    def test_get_all_tags(self):
-        terms = self.hed_schema_3g.get_all_schema_tags(True)
-        self.assertTrue(isinstance(terms, list))
-        self.assertTrue(len(terms) > 0)
-
-    def test_get_desc_dict(self):
-        desc_dict = self.hed_schema_3g.get_desc_iter()
-        self.assertEqual(len(list(desc_dict)), 1117)
-
-    def test_get_tag_description(self):
-        # Test known tag
-        desc = self.hed_schema_3g.get_tag_description("Event/Sensory-event")
-        self.assertEqual(desc, "Something perceivable by the participant. An event meant to be an experimental"
-                               " stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.")
-        # Test known unit modifier
-        desc = self.hed_schema_3g.get_tag_description("deca", HedSectionKey.UnitModifiers)
-        self.assertEqual(desc, "SI unit multiple representing 10^1")
-
-        # test unknown tag.
-        desc = self.hed_schema_3g.get_tag_description("This/Is/Not/A/Real/Tag")
-        self.assertEqual(desc, None)
-
     def test_get_all_tag_attributes(self):
         test_string = HedString("Jerk-rate/#", self.hed_schema_3g)
         tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)

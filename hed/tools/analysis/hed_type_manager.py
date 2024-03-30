@@ -39,9 +39,9 @@ class HedTypeManager:
             type_name (str):  Type tag name of the type to be added.
 
         """
-        if type_name.lower() in self._type_map:
+        if type_name.casefold() in self._type_map:
             return
-        self._type_map[type_name.lower()] = \
+        self._type_map[type_name.casefold()] = \
             HedType(self.event_manager, 'run-01', type_tag=type_name)
 
     def get_factor_vectors(self, type_tag, type_values=None, factor_encoding="one-hot"):
@@ -56,7 +56,7 @@ class HedTypeManager:
             DataFrame or None:   DataFrame containing the factor vectors as the columns.
 
         """
-        this_var = self.get_type(type_tag.lower())
+        this_var = self.get_type(type_tag.casefold())
         if this_var is None:
             return None
         variables = this_var.get_type_value_names()
@@ -80,7 +80,7 @@ class HedTypeManager:
             HedType or None: the values associated with this type tag.
 
         """
-        return self._type_map.get(type_tag.lower(), None)
+        return self._type_map.get(type_tag.casefold(), None)
 
     def get_type_tag_factor(self, type_tag, type_value):
         """ Return the HedTypeFactors a specified value and extension.
@@ -90,9 +90,9 @@ class HedTypeManager:
             type_value (str or None):  Value of this tag to return the factors for.
 
         """
-        this_map = self._type_map.get(type_tag.lower(), None)
+        this_map = self._type_map.get(type_tag.casefold(), None)
         if this_map:
-            return this_map._type_map.get(type_value.lower(), None)
+            return this_map._type_map.get(type_value.casefold(), None)
         return None
 
     def get_type_def_names(self, type_var):

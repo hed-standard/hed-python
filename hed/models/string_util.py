@@ -38,7 +38,7 @@ def split_base_tags(hed_string, base_tags, remove_group=False):
             - The second HedString object contains the tags from hed_string that match the base_tags.
     """
 
-    base_tags = [tag.lower() for tag in base_tags]
+    base_tags = [tag.casefold() for tag in base_tags]
     include_groups = 0
     if remove_group:
         include_groups = 2
@@ -70,7 +70,7 @@ def split_def_tags(hed_string, def_names, remove_group=False):
     include_groups = 0
     if remove_group:
         include_groups = 2
-    wildcard_tags = [f"def/{def_name}".lower() for def_name in def_names]
+    wildcard_tags = [f"def/{def_name}".casefold() for def_name in def_names]
     found_things = hed_string.find_wildcard_tags(wildcard_tags, recursive=True, include_groups=include_groups)
     if remove_group:
         found_things = [tag if isinstance(group, HedString) else group for tag, group in found_things]

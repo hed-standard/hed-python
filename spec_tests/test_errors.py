@@ -53,8 +53,13 @@ class MyTestCase(unittest.TestCase):
             check_for_warnings = info.get("warning", False)
             error_handler = ErrorHandler(check_for_warnings)
             if schema:
-                schema = load_schema_version(schema)
-                definitions = info['definitions']
+                try:
+                    schema = load_schema_version(schema)
+                except HedFileError as e:
+                    print(f"Failed to load schema version {schema} for test, failing test {name}")
+                    self.fail_count.append(name)
+                    continue
+                definitions = info.get('definitions', None)
                 def_dict = DefinitionDict(definitions, schema)
                 self.assertFalse(def_dict.issues)
             else:

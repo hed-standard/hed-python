@@ -309,6 +309,10 @@ class HedTag:
         """ Convenience function, equivalent to str(self).lower(). """
         return str(self).lower()
 
+    def casefold(self):
+        """ Convenience function, equivalent to str(self).casefold(). """
+        return str(self).casefold()
+
     def _calculate_to_canonical_forms(self, hed_schema):
         """ Update internal state based on schema.
 
@@ -617,16 +621,16 @@ class HedTag:
     def __hash__(self):
         if self._schema_entry:
             return hash(
-                self._namespace + self._schema_entry.short_tag_name.lower() + self._extension_value.lower())
+                self._namespace + self._schema_entry.short_tag_name.casefold() + self._extension_value.casefold())
         else:
-            return hash(self.lower())
+            return hash(self.casefold())
 
     def __eq__(self, other):
         if self is other:
             return True
 
         if isinstance(other, str):
-            return self.lower() == other.lower()
+            return self.casefold() == other.casefold()
 
         if not isinstance(other, HedTag):
             return False
@@ -634,7 +638,7 @@ class HedTag:
         if self.short_tag == other.short_tag:
             return True
 
-        if self.org_tag.lower() == other.org_tag.lower():
+        if self.org_tag.casefold() == other.org_tag.casefold():
             return True
         return False
 
