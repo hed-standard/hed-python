@@ -120,7 +120,8 @@ class TestHedSchema(unittest.TestCase):
         schema_path = os.path.join(base_dir, "schema_utf8_dupe.mediawiki")
         schema = load_schema(schema_path)
         issues = schema.check_compliance()
-        self.assertEqual(len(issues), 1)
+        # This can be 1 or 2, depending on if the "pre-release" warning shows up.
+        self.assertTrue(1 <= len(issues) <= 2)
 
         # Note it finds both of these as a duplicate
         self.assertTrue(schema.get_tag_entry("Wßord"))

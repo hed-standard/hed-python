@@ -23,6 +23,11 @@ def schema_error_unknown_attribute(attribute_name, source_tag):
            f"or was used outside of it's defined class."
 
 
+@hed_error(SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED, default_severity=ErrorSeverity.WARNING)
+def schema_error_SCHEMA_PRERELEASE_VERSION_USED(current_version, known_versions):
+    return f"Schema version {current_version} used, which is prerelease or unofficial.  Known versions are: {', '.join(known_versions)}"
+
+
 @hed_error(SchemaWarnings.SCHEMA_PROLOGUE_CHARACTER_INVALID, default_severity=ErrorSeverity.WARNING,
            actual_code=SchemaWarnings.SCHEMA_CHARACTER_INVALID)
 def schema_error_invalid_character_prologue(char_index, source_string, section_name):
