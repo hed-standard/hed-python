@@ -70,24 +70,6 @@ class Test(unittest.TestCase):
         ]
         self.validate_desc_base(test_descs, expected_issues)
 
-    def test_schema_version_greater_equal(self):
-        schema1 = load_schema_version("8.0.0")
-        self.assertFalse(util.schema_version_greater_equal(schema1, "8.3.0"))
-
-        schema2 = load_schema_version("v:8.2.0")
-        self.assertFalse(util.schema_version_greater_equal(schema2, "8.3.0"))
-
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/schema_tests/schema_utf8.mediawiki')
-        schema3 = load_schema(schema_path, schema_namespace="tl:")
-        self.assertTrue(util.schema_version_greater_equal(schema3, "8.3.0"))
-
-        schema_group = HedSchemaGroup([schema1, schema2])
-        self.assertFalse(util.schema_version_greater_equal(schema_group, "8.3.0"))
-
-        schema_group = HedSchemaGroup([schema2, schema3])
-        self.assertTrue(util.schema_version_greater_equal(schema_group, "8.3.0"))
-
     def test_schema_version_for_library(self):
         schema1 = load_schema_version("8.0.0")
         self.assertEqual(util.schema_version_for_library(schema1, ""), "8.0.0")

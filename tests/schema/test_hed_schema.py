@@ -84,8 +84,7 @@ class TestHedSchema(unittest.TestCase):
                                  'Test string: %s. Attribute: %s.' % (test_string, attribute))
 
     def test_get_all_tag_attributes(self):
-        test_string = HedString("Jerk-rate/#", self.hed_schema_3g)
-        tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
+        tag_props = self.hed_schema_3g._get_tag_entry("Jerk-rate/#").attributes
         expected_props = {
             "takesValue": "true",
             "valueClass": "numericClass",
@@ -93,19 +92,13 @@ class TestHedSchema(unittest.TestCase):
         }
         self.assertCountEqual(tag_props, expected_props)
 
-        tag_props = self.hed_schema_3g.get_all_tag_attributes("This/Is/Not/A/Tag")
-        expected_props = {
-        }
-        self.assertCountEqual(tag_props, expected_props)
-
-        test_string = HedString("Statistical-value", self.hed_schema_3g)
-        tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
+        tag_props = self.hed_schema_3g._get_tag_entry("Statistical-value").attributes
         expected_props = {
             HedKey.ExtensionAllowed: "true",
         }
         self.assertCountEqual(tag_props, expected_props)
         # also test long form.
-        tag_props = self.hed_schema_3g.get_all_tag_attributes("Property/Data-property/Data-value/Statistical-value")
+        tag_props = self.hed_schema_3g._get_tag_entry("Property/Data-property/Data-value/Statistical-value").attributes
         self.assertCountEqual(tag_props, expected_props)
 
     def test_get_hed_xml_version(self):

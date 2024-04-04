@@ -1019,20 +1019,20 @@ class TestHedAllowedCharacters(TestHed):
     def test_special_units(self):
         test_strings = {
             'ascii': 'Ascii/bad-date',
-            'badascii': 'Ascii/bad-daté',
-            'nonascii': 'Nonascii/Café',
+            'illegalTab': 'Ascii/bad-dat\t',
+            'allowTab': 'Nonascii/Cafe\t',
         }
         expected_results = {
             'ascii': True,
-            'badascii': False,
-            'nonascii': True
+            'illegalTab': False,
+            'allowTab': True
         }
 
         expected_issues = {
             'ascii': [],
-            'badascii': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER, tag=0,
+            'illegalTab': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER, tag=0,
                                           index_in_tag=13, index_in_tag_end=14),
-            'nonascii': []
+            'allowTab': []
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 

@@ -1,5 +1,5 @@
 from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey, HedKey83
 
 entries_by_section = {
     HedSectionKey.Properties: HedSchemaEntry,
@@ -254,8 +254,12 @@ class HedSchemaTagSection(HedSchemaSection):
     def _finalize_section(self, hed_schema):
         # Find the attributes with the inherited property
         attribute_section = hed_schema.attributes
-        self.inheritable_attributes = [name for name, value in attribute_section.items()
-                                       if value.has_attribute(HedKey.IsInheritedProperty)]
+        if hed_schema.schema_83_props:
+            self.inheritable_attributes = [name for name, value in attribute_section.items()
+                                           if not value.has_attribute(HedKey83.AnnotationProperty)]
+        else:
+            self.inheritable_attributes = [name for name, value in attribute_section.items()
+                                           if value.has_attribute(HedKey.IsInheritedProperty)]
 
         # Hardcode in extension allowed as it is critical for validation in older schemas
         if not self.inheritable_attributes:

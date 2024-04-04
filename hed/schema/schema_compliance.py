@@ -2,11 +2,12 @@
 
 from hed.errors.error_types import ErrorContext, SchemaErrors, ErrorSeverity, SchemaAttributeErrors, SchemaWarnings
 from hed.errors.error_reporter import ErrorHandler, sort_issues
-from hed.schema.hed_schema import HedSchema, HedKey, HedSectionKey
+from hed.schema.hed_schema import HedSchema, HedKey, HedSectionKey, HedKey83
 from hed.schema import schema_attribute_validators
 from hed.schema.schema_validation_util import validate_schema_tag_new, validate_schema_term_new, \
-    schema_version_greater_equal, get_allowed_characters_by_name, get_problem_indexes, validate_schema_description_new
+    get_allowed_characters_by_name, get_problem_indexes, validate_schema_description_new
 from hed.schema.schema_validation_util_deprecated import validate_schema_tag, validate_schema_description, verify_no_brackets
+from functools import partial
 
 
 def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handler=None):
@@ -47,13 +48,13 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
 
 class SchemaValidator:
     """Validator class to wrap some code.  In general, just call check_compliance."""
-    attribute_validators = {
-        HedKey.SuggestedTag: [schema_attribute_validators.tag_exists_check],
-        HedKey.RelatedTag: [schema_attribute_validators.tag_exists_check],
+    attribute_validators_old = {
+        HedKey.SuggestedTag: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
+        HedKey.RelatedTag: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
         HedKey.UnitClass: [schema_attribute_validators.tag_is_placeholder_check,
-                           schema_attribute_validators.unit_class_exists],
+                           partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses)],
         HedKey.ValueClass: [schema_attribute_validators.tag_is_placeholder_check,
-                            schema_attribute_validators.value_class_exists],
+                            partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses)],
         # Rooted tag is implicitly verified on loading
         # HedKey.Rooted: [schema_attribute_validators.tag_exists_base_schema_check],
         HedKey.DeprecatedFrom: [schema_attribute_validators.tag_is_deprecated_check],
@@ -62,12 +63,27 @@ class SchemaValidator:
         HedKey.ConversionFactor: [schema_attribute_validators.conversion_factor],
         HedKey.AllowedCharacter: [schema_attribute_validators.allowed_characters_check],
         HedKey.InLibrary: [schema_attribute_validators.in_library_check]
-    }  # Known attribute validators
+    }  # Known attribute validators( < 8.3.0)
+
+    attribute_validators = {
+        HedKey.SuggestedTag: [],
+        HedKey.RelatedTag: [],
+        HedKey.UnitClass: [schema_attribute_validators.tag_is_placeholder_check],
+        HedKey.ValueClass: [schema_attribute_validators.tag_is_placeholder_check],
+        # Rooted tag is implicitly verified on loading
+        # HedKey.Rooted: [schema_attribute_validators.tag_exists_base_schema_check],
+        HedKey.DeprecatedFrom: [schema_attribute_validators.tag_is_deprecated_check],
+        HedKey.TakesValue: [schema_attribute_validators.tag_is_placeholder_check],
+        HedKey.DefaultUnits: [],
+        HedKey.ConversionFactor: [schema_attribute_validators.conversion_factor],
+        HedKey.AllowedCharacter: [schema_attribute_validators.allowed_characters_check],
+        HedKey.InLibrary: [schema_attribute_validators.in_library_check]
+    }  # Known attribute validators ( > 8.3.0).  Does not include range or domain validation, that's added later.
 
     def __init__(self, hed_schema, error_handler):
         self.hed_schema = hed_schema
         self.error_handler = error_handler
-        self._new_character_validation = schema_version_greater_equal(self.hed_schema, "8.3.0")
+        self._new_character_validation = hed_schema.schema_83_props
 
     def check_prologue_epilogue(self):
         issues = []
@@ -100,9 +116,25 @@ class SchemaValidator:
                             attribute_name,
                             source_tag=tag_entry.name)
                 for attribute_name in tag_entry.attributes:
-                    # Always check deprecated
-                    validators = self.attribute_validators.get(attribute_name, []) \
-                                 + [schema_attribute_validators.attribute_is_deprecated]
+                    if self._new_character_validation:
+                        validators = self.attribute_validators.get(attribute_name, []) \
+                                     + [schema_attribute_validators.attribute_is_deprecated]
+                        attribute_entry = self.hed_schema.get_tag_entry(attribute_name, HedSectionKey.Attributes)
+                        if attribute_entry:
+                            range_validators = {
+                                HedKey83.TagRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
+                                HedKey83.NumericRange: [schema_attribute_validators.is_numeric_value],
+                                HedKey83.StringRange: [],  # Unclear what validation should be done here.
+                                HedKey83.UnitClassRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses)],
+                                HedKey83.UnitRange: [schema_attribute_validators.unit_exists],
+                                HedKey83.ValueClassRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses)]
+                            }
+                            for range_attribute in attribute_entry.attributes:
+                                validators += range_validators.get(range_attribute, [])
+                    else:
+                        # Always check deprecated
+                        validators = self.attribute_validators_old.get(attribute_name, []) \
+                                     + [schema_attribute_validators.attribute_is_deprecated]
                     for validator in validators:
                         self.error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name)
                         new_issues = validator(self.hed_schema, tag_entry, attribute_name)
