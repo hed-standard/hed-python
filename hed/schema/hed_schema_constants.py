@@ -71,6 +71,26 @@ class HedKey:
     IsInheritedProperty = 'isInheritedProperty'
 
 
+class HedKey83:
+    UnitClassDomain = "unitClassDomain"
+    UnitDomain = "unitDomain"
+    UnitModifierDomain = "unitModifierDomain"
+    ValueClassDomain = "valueClassDomain"
+    ElementDomain = "elementDomain"
+    TagDomain = "tagDomain"
+    AnnotationProperty = "annotationProperty"
+
+    BoolRange = "boolRange"
+
+    # Fully new below this
+    TagRange = "tagRange"
+    NumericRange = "numericRange"
+    StringRange = "stringRange"
+    UnitClassRange = "unitClassRange"
+    UnitRange = "unitRange"
+    ValueClassRange = "valueClassRange"
+
+
 VERSION_ATTRIBUTE = 'version'
 LIBRARY_ATTRIBUTE = 'library'
 WITH_STANDARD_ATTRIBUTE = "withStandard"

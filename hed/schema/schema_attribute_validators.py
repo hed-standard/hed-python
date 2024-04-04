@@ -64,93 +64,44 @@ def attribute_is_deprecated(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-# todo: This needs to be refactored, these next several functions are near identical
-def tag_exists_check(hed_schema, tag_entry, attribute_name):
-    """Check if the list of possible tags exists in the schema.
+def item_exists_check(hed_schema, tag_entry, attribute_name, section_key):
+    """Check if the list of possible items exists in the schema and are not deprecated.
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
         attribute_name (str): The name of this attribute
+        section_key (HedSectionKey): The section this item should be in.
+                                   This is generally passed via functools.partial
     Returns:
         issues(list): A list of issues from validating this attribute.
     """
     issues = []
-    possible_tags = tag_entry.attributes.get(attribute_name, "")
-    split_tags = possible_tags.split(",")
-    for org_tag in split_tags:
-        org_entry = hed_schema.tags.get(org_tag)
-        if org_tag and not org_entry:
-            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_SUGGESTED_TAG_INVALID,
+    item_values = tag_entry.attributes.get(attribute_name, "")
+    split_items = item_values.split(",")
+
+    for item in split_items:
+        if not item:
+            continue
+        # todo: make a dict if any more added
+        if section_key == HedSectionKey.Tags:
+            item_entry = hed_schema.tags.get(item)
+        elif section_key == HedSectionKey.UnitClasses:
+            item_entry = hed_schema.unit_classes.get(item)
+        elif section_key == HedSectionKey.ValueClasses:
+            item_entry = hed_schema.value_classes.get(item)
+        else:
+            raise ValueError(f"Invalid item type: {section_key}")
+
+        if not item_entry:
+            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_GENERIC_ATTRIBUTE_VALUE_INVALID,
                                                 tag_entry.name,
-                                                org_tag,
+                                                item,
                                                 attribute_name)
-        elif (org_entry and org_entry.has_attribute(HedKey.DeprecatedFrom)
-              and not tag_entry.has_attribute(HedKey.DeprecatedFrom)):
+        elif item_entry.has_attribute(HedKey.DeprecatedFrom) and not tag_entry.has_attribute(HedKey.DeprecatedFrom):
             issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
                                                 tag_entry.name,
-                                                org_tag,
-                                                attribute_name)
-
-    return issues
-
-
-def unit_class_exists(hed_schema, tag_entry, attribute_name):
-    """Check if comma separated list is valid unit classes.
-
-    Parameters:
-        hed_schema (HedSchema): The schema to use for validation
-        tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
-    Returns:
-        issues(list): A list of issues from validating this attribute.
-    """
-    issues = []
-    possible_unit_classes = tag_entry.attributes.get(attribute_name, "")
-    split_tags = possible_unit_classes.split(",")
-    for org_tag in split_tags:
-        unit_class_entry = hed_schema.unit_classes.get(org_tag)
-        if org_tag and not unit_class_entry:
-            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_UNIT_CLASS_INVALID,
-                                                tag_entry.name,
-                                                org_tag,
-                                                attribute_name)
-        elif (unit_class_entry and unit_class_entry.has_attribute(HedKey.DeprecatedFrom)
-              and not tag_entry.has_attribute(HedKey.DeprecatedFrom)):
-            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
-                                                tag_entry.name,
-                                                org_tag,
-                                                attribute_name)
-
-    return issues
-
-
-def value_class_exists(hed_schema, tag_entry, attribute_name):
-    """Check if comma separated list is valid value classes.
-
-    Parameters:
-        hed_schema (HedSchema): The schema to use for validation
-        tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
-    Returns:
-        issues(list): A list of issues from validating this attribute.
-    """
-    issues = []
-    possible_value_classes = tag_entry.attributes.get(attribute_name, "")
-    split_tags = possible_value_classes.split(",")
-
-    for org_tag in split_tags:
-        value_class_entry = hed_schema.value_classes.get(org_tag)
-        if org_tag and not value_class_entry:
-            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_VALUE_CLASS_INVALID,
-                                                tag_entry.name,
-                                                org_tag,
-                                                attribute_name)
-        elif (value_class_entry and value_class_entry.has_attribute(HedKey.DeprecatedFrom)
-              and not tag_entry.has_attribute(HedKey.DeprecatedFrom)):
-            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
-                                                tag_entry.name,
-                                                org_tag,
+                                                item,
                                                 attribute_name)
 
     return issues
@@ -304,4 +255,28 @@ def in_library_check(hed_schema, tag_entry, attribute_name):
         issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_IN_LIBRARY_INVALID,
                                             tag_entry.name,
                                             library)
+    return issues
+
+
+def is_numeric_value(hed_schema, tag_entry, attribute_name):
+    """Check if the attribute is a valid numeric(float) value
+
+    Parameters:
+        hed_schema (HedSchema): The schema to use for validation
+        tag_entry (HedSchemaEntry): The schema entry for this tag.
+        attribute_name (str): The name of this attribute
+    Returns:
+        issues(list): A list of issues from validating this attribute.
+    """
+    issues = []
+
+    float_str = tag_entry.attributes.get(attribute_name, "")
+
+    try:
+        float(float_str)
+    except ValueError:
+        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_NUMERIC_INVALID,
+                                            tag_entry.name,
+                                            float_str,
+                                            attribute_name)
     return issues

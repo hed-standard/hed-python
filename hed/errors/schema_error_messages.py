@@ -74,22 +74,16 @@ def schema_error_SCHEMA_ATTRIBUTE_VALUE_DEPRECATED(tag, deprecated_suggestion, a
             f"and an alternative method of tagging should be used.")
 
 
-@hed_error(SchemaAttributeErrors.SCHEMA_SUGGESTED_TAG_INVALID,
+@hed_error(SchemaAttributeErrors.SCHEMA_GENERIC_ATTRIBUTE_VALUE_INVALID,
            actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
-def schema_error_SCHEMA_SUGGESTED_TAG_INVALID(suggestedTag, invalidSuggestedTag, attribute_name):
-    return f"Tag '{suggestedTag}' has an invalid {attribute_name}: '{invalidSuggestedTag}'."
+def schema_error_GENERIC_ATTRIBUTE_VALUE_INVALID(tag, invalid_value, attribute_name):
+    return f"Element '{tag}' has an invalid {attribute_name}: '{invalid_value}'."
 
 
-@hed_error(SchemaAttributeErrors.SCHEMA_UNIT_CLASS_INVALID,
+@hed_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_NUMERIC_INVALID,
            actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
-def schema_error_SCHEMA_UNIT_CLASS_INVALID(tag, unit_class, attribute_name):
-    return f"Tag '{tag}' has an invalid {attribute_name}: '{unit_class}'."
-
-
-@hed_error(SchemaAttributeErrors.SCHEMA_VALUE_CLASS_INVALID,
-           actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
-def schema_error_SCHEMA_VALUE_CLASS_INVALID(tag, unit_class, attribute_name):
-    return f"Tag '{tag}' has an invalid {attribute_name}: '{unit_class}'."
+def schema_error_SCHEMA_ATTRIBUTE_NUMERIC_INVALID(tag, invalid_value, attribute_name):
+    return f"Element '{tag}' has an invalid {attribute_name}: '{invalid_value}'.  Should be numeric."
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_INVALID,

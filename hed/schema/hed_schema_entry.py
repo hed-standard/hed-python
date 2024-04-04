@@ -318,7 +318,7 @@ class HedTagEntry(HedSchemaEntry):
 
         return attribute_values
 
-    def _check_inherited_attribute(self, attribute, return_value=False, return_union=False):
+    def _check_inherited_attribute(self, attribute, return_value=False):
         """
         Checks for the existence of an attribute in this entry and its parents.
 
@@ -326,7 +326,6 @@ class HedTagEntry(HedSchemaEntry):
             attribute (str): The attribute to check for.
             return_value (bool): If True, returns the actual value of the attribute.
                                  If False, returns a boolean indicating the presence of the attribute.
-            return_union(bool): If True, return a union of all parent values.
 
         Returns:
             bool or any: Depending on the flag return_value,
@@ -335,15 +334,17 @@ class HedTagEntry(HedSchemaEntry):
         Notes:
             - The existence of an attribute does not guarantee its validity.
             - For string attributes, the values are joined with a comma as a delimiter from all ancestors.
+            - For other attributes, only the value closest to the leaf is returned
         """
         attribute_values = self._check_inherited_attribute_internal(attribute)
 
         if return_value:
             if not attribute_values:
                 return None
-            if return_union:
+            try:
                 return ",".join(attribute_values)
-            return attribute_values[0]
+            except TypeError:
+                return attribute_values[0]  # Return the lowest level attribute if we don't want the union
         return bool(attribute_values)
 
     def base_tag_has_attribute(self, tag_attribute):
@@ -397,8 +398,7 @@ class HedTagEntry(HedSchemaEntry):
         self.inherited_attributes = self.attributes.copy()
         for attribute in self._section.inheritable_attributes:
             if self._check_inherited_attribute(attribute):
-                treat_as_string = not self.attribute_has_property(attribute, HedKey.BoolProperty)
-                self.inherited_attributes[attribute] = self._check_inherited_attribute(attribute, True, treat_as_string)
+                self.inherited_attributes[attribute] = self._check_inherited_attribute(attribute, True)
 
     def finalize_entry(self, schema):
         """ Called once after schema loading to set state.

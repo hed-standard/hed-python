@@ -75,33 +75,6 @@ def validate_schema_description_new(hed_entry):
     return issues_list
 
 
-def schema_version_greater_equal(hed_schema, target_version):
-    """ Check if the given schema standard version is above target version
-
-    Parameters:
-        hed_schema (HedSchema or HedSchemaGroup): If a schema group, checks if any version is above.
-        target_version (str): The semantic version to check against
-
-    Returns:
-        bool: True if the version is above target_version
-              False if it is not, or it is ambiguous.
-    """
-    # Do exhaustive checks for now, assuming nothing
-    schemas = [hed_schema.schema_for_namespace(schema_namespace) for schema_namespace in hed_schema.valid_prefixes]
-    candidate_versions = [schema.with_standard for schema in schemas if schema.with_standard]
-    if not candidate_versions:
-        # Check for a standard schema(potentially, but unlikely, more than one)
-        for schema in schemas:
-            if schema.library == "":
-                candidate_versions.append(schema.version_number)
-    target_version = Version(target_version)
-    for version in candidate_versions:
-        if Version(version) >= target_version:
-            return True
-
-    return False
-
-
 def schema_version_for_library(hed_schema, library_name):
     """ Given the library name and hed schema object, return the version
 

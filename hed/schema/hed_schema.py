@@ -1,7 +1,7 @@
 import json
 import os
 
-from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey, HedKey83
 from hed.schema import hed_schema_constants as constants
 from hed.schema.schema_io import schema_util
 from hed.schema.schema_io.schema2xml import Schema2XML
@@ -35,6 +35,7 @@ class HedSchema(HedSchemaBase):
 
         self._sections = self._create_empty_sections()
         self.source_format = None  # The type of file this was loaded from(mediawiki, xml, or owl - None if mixed)
+        self._schema83 = False  # If True, this is an 8.3 style schema for validation/attribute purposes
 
     # ===============================================
     # Basic schema properties
@@ -70,6 +71,17 @@ class HedSchema(HedSchemaBase):
     def schema_namespace(self):
         """Returns the schema namespace prefix"""
         return self._namespace
+
+    @property
+    def schema_83_props(self):
+        """Returns if this is an 8.3.0 or greater schema.
+
+        Returns:
+            is_83_schema(bool): True if standard or partnered schema is 8.3.0 or greater."""
+        if self._schema83 is not None:
+            return self._schema83
+
+        self._schema83 = schema_util.schema_version_greater_equal(self, "8.3.0")
 
     def can_save(self):
         """ Returns if it's legal to save this schema.
@@ -635,7 +647,7 @@ class HedSchema(HedSchemaBase):
     # ===============================================
     # Getters used to write out schema primarily.
     # ===============================================
-    def get_tag_attribute_names(self):
+    def get_tag_attribute_names_old(self):
         """ Return a dict of all allowed tag attributes.
 
         Returns:
@@ -647,27 +659,6 @@ class HedSchema(HedSchemaBase):
                 and not tag_entry.has_attribute(HedKey.UnitProperty)
                 and not tag_entry.has_attribute(HedKey.UnitModifierProperty)
                 and not tag_entry.has_attribute(HedKey.ValueClassProperty)}
-
-    def get_all_tag_attributes(self, tag_name, key_class=HedSectionKey.Tags):
-        """ Gather all attributes for a given tag name.
-
-        Parameters:
-            tag_name (str): The name of the tag to check.
-            key_class (str): The type of attributes requested.  e.g. Tag, Units, Unit modifiers, or attributes.
-
-        Returns:
-            dict: A dictionary of attribute name and attribute value.
-
-        Notes:
-            If keys is None, gets all normal hed tag attributes.
-
-        """
-        tag_entry = self._get_tag_entry(tag_name, key_class)
-        attributes = {}
-        if tag_entry:
-            attributes = tag_entry.attributes
-
-        return attributes
 
     # ===============================================
     # Private utility functions
@@ -717,32 +708,39 @@ class HedSchema(HedSchemaBase):
         valid_modifiers = self.unit_modifiers.get_entries_with_attribute(modifier_attribute_name)
         return valid_modifiers
 
-    def _add_element_property_attributes(self, attribute_dict):
+    def _add_element_property_attributes(self, attribute_dict, attribute_name):
         attributes = {attribute: entry for attribute, entry in self._sections[HedSectionKey.Attributes].items()
-                      if entry.has_attribute(HedKey.ElementProperty)}
+                      if entry.has_attribute(attribute_name)}
 
         attribute_dict.update(attributes)
 
     def _get_attributes_for_section(self, key_class):
-        """ Return the valid attributes for this section.
+        """Return the valid attributes for this section.
 
         Parameters:
             key_class (HedSectionKey): The HedKey for this section.
 
         Returns:
-            dict or HedSchemaSection: A dict of all the attributes and this section.
-
+            dict: A dict of all the attributes for this section.
         """
-        if key_class == HedSectionKey.Tags:
-            return self.get_tag_attribute_names()
-        elif key_class == HedSectionKey.Attributes:
-            prop_added_dict = {key: value for key, value in self._sections[HedSectionKey.Properties].items()}
-            self._add_element_property_attributes(prop_added_dict)
-            return prop_added_dict
-        elif key_class == HedSectionKey.Properties:
+        element_prop_key = HedKey83.ElementDomain if self.schema_83_props else HedKey.ElementProperty
+
+        # Common logic for Attributes and Properties
+        if key_class in [HedSectionKey.Attributes, HedSectionKey.Properties]:
             prop_added_dict = {}
-            self._add_element_property_attributes(prop_added_dict)
+            if key_class == HedSectionKey.Attributes:
+                prop_added_dict = {key: value for key, value in self._sections[HedSectionKey.Properties].items()}
+            self._add_element_property_attributes(prop_added_dict, element_prop_key)
             return prop_added_dict
+
+        if self.schema_83_props:
+            attrib_classes = {
+                HedSectionKey.UnitClasses: HedKey83.UnitClassDomain,
+                HedSectionKey.Units: HedKey83.UnitDomain,
+                HedSectionKey.UnitModifiers: HedKey83.UnitModifierDomain,
+                HedSectionKey.ValueClasses: HedKey83.ValueClassDomain,
+                HedSectionKey.Tags: HedKey83.TagDomain
+            }
         else:
             attrib_classes = {
                 HedSectionKey.UnitClasses: HedKey.UnitClassProperty,
@@ -750,14 +748,18 @@ class HedSchema(HedSchemaBase):
                 HedSectionKey.UnitModifiers: HedKey.UnitModifierProperty,
                 HedSectionKey.ValueClasses: HedKey.ValueClassProperty
             }
-            attrib_class = attrib_classes.get(key_class, None)
-            if attrib_class is None:
-                return []
+            if key_class == HedSectionKey.Tags:
+                return self.get_tag_attribute_names_old()
 
-            attributes = {attribute: entry for attribute, entry in self._sections[HedSectionKey.Attributes].items()
-                          if entry.has_attribute(attrib_class) or entry.has_attribute(HedKey.ElementProperty)}
-            return attributes
+        # Retrieve attributes based on the determined class
+        attrib_class = attrib_classes.get(key_class)
+        if not attrib_class:
+            return []
 
+        attributes = {attribute: entry for attribute, entry in self._sections[HedSectionKey.Attributes].items()
+                      if entry.has_attribute(attrib_class) or entry.has_attribute(element_prop_key)}
+        return attributes
+    
     # ===============================================
     # Semi private function used to create a schema in memory(usually from a source file)
     # ===============================================

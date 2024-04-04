@@ -1,7 +1,7 @@
 import unittest
 import copy
 
-from hed.schema import schema_attribute_validators
+from hed.schema import schema_attribute_validators, HedSectionKey
 from hed import load_schema_version
 
 
@@ -21,12 +21,12 @@ class Test(unittest.TestCase):
     def test_util_suggested(self):
         tag_entry = self.hed_schema.tags["Event/Sensory-event"]
         attribute_name = "suggestedTag"
-        self.assertFalse(schema_attribute_validators.tag_exists_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.Tags))
         tag_entry = self.hed_schema.tags["Property"]
-        self.assertFalse(schema_attribute_validators.tag_exists_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.Tags))
         tag_entry = copy.deepcopy(tag_entry)
         tag_entry.attributes["suggestedTag"] = "InvalidSuggestedTag"
-        self.assertTrue(schema_attribute_validators.tag_exists_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertTrue(schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.Tags))
 
     def test_util_rooted(self):
         tag_entry = self.hed_schema.tags["Event"]
@@ -44,20 +44,20 @@ class Test(unittest.TestCase):
     def test_unit_class_exists(self):
         tag_entry = self.hed_schema.tags["Weight/#"]
         attribute_name = "unitClass"
-        self.assertFalse(schema_attribute_validators.unit_class_exists(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.UnitClasses))
 
         tag_entry = copy.deepcopy(tag_entry)
         tag_entry.attributes["unitClass"] = "fakeClass"
-        self.assertTrue(schema_attribute_validators.unit_class_exists(self.hed_schema, tag_entry, attribute_name))
+        self.assertTrue(schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.UnitClasses))
 
     def test_value_class_exists(self):
         tag_entry = self.hed_schema.tags["Weight/#"]
         attribute_name = "valueClass"
-        self.assertFalse(schema_attribute_validators.value_class_exists(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.ValueClasses))
 
         tag_entry = copy.deepcopy(tag_entry)
         tag_entry.attributes["valueClass"] = "fakeClass"
-        self.assertTrue(schema_attribute_validators.value_class_exists(self.hed_schema, tag_entry, attribute_name))
+        self.assertTrue(schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.ValueClasses))
 
     def test_unit_exists(self):
         tag_entry = self.hed_schema.unit_classes["accelerationUnits"]
