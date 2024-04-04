@@ -3,6 +3,7 @@
 """
 from hed.schema.hed_schema_constants import HedSectionKey
 from abc import ABC, abstractmethod
+from hed.schema.schema_io import schema_util
 
 
 class HedSchemaBase(ABC):
@@ -12,6 +13,7 @@ class HedSchemaBase(ABC):
     """
     def __init__(self):
         self._name = ""  # User provided identifier for this schema(not used for equality comparison or saved)
+        self._schema83 = None  # If True, this is an 8.3 style schema for validation/attribute purposes
         pass
 
     @property
@@ -24,6 +26,17 @@ class HedSchemaBase(ABC):
     @name.setter
     def name(self, name):
         self._name = name
+
+    @property
+    def schema_83_props(self):
+        """Returns if this is an 8.3.0 or greater schema.
+
+        Returns:
+            is_83_schema(bool): True if standard or partnered schema is 8.3.0 or greater."""
+        if self._schema83 is not None:
+            return self._schema83
+
+        self._schema83 = schema_util.schema_version_greater_equal(self, "8.3.0")
 
     @abstractmethod
     def get_schema_versions(self):

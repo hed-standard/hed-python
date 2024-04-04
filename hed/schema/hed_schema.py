@@ -35,7 +35,6 @@ class HedSchema(HedSchemaBase):
 
         self._sections = self._create_empty_sections()
         self.source_format = None  # The type of file this was loaded from(mediawiki, xml, or owl - None if mixed)
-        self._schema83 = False  # If True, this is an 8.3 style schema for validation/attribute purposes
 
     # ===============================================
     # Basic schema properties
@@ -71,17 +70,6 @@ class HedSchema(HedSchemaBase):
     def schema_namespace(self):
         """Returns the schema namespace prefix"""
         return self._namespace
-
-    @property
-    def schema_83_props(self):
-        """Returns if this is an 8.3.0 or greater schema.
-
-        Returns:
-            is_83_schema(bool): True if standard or partnered schema is 8.3.0 or greater."""
-        if self._schema83 is not None:
-            return self._schema83
-
-        self._schema83 = schema_util.schema_version_greater_equal(self, "8.3.0")
 
     def can_save(self):
         """ Returns if it's legal to save this schema.
