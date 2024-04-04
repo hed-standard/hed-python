@@ -32,7 +32,7 @@ class HedValidator:
         self._def_validator = DefValidator(def_dicts, hed_schema)
         self._definitions_allowed = definitions_allowed
 
-        self._validate_characters = schema.schema_83_props
+        self._validate_characters = hed_schema.schema_83_props
 
         self._unit_validator = UnitValueValidator(modern_allowed_char_rules=self._validate_characters)
         self._char_validator = CharValidator(modern_allowed_char_rules=self._validate_characters)

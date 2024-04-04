@@ -1020,7 +1020,7 @@ class TestHedAllowedCharacters(TestHed):
         test_strings = {
             'ascii': 'Ascii/bad-date',
             'illegalTab': 'Ascii/bad-dat\t',
-            'allowTab': 'Nonascii/Caf\t',
+            'allowTab': 'Nonascii/Cafe\t',
         }
         expected_results = {
             'ascii': True,
