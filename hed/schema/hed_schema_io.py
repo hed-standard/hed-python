@@ -220,15 +220,22 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
                            f"Must specify a schema version by number, found no version on {xml_version} schema.",
                            filename=name)
     try:
+        # 1. Try fully local copy
         final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
         if not final_hed_xml_file:
             hed_cache.cache_local_versions(xml_folder)
+            # 2. Cache the schemas included in hedtools and try local again
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
         hed_schema = load_schema(final_hed_xml_file, schema=schema, name=name)
     except HedFileError as e:
         if e.code == HedExceptions.FILE_NOT_FOUND:
+            # Cache all schemas if we haven't recently.
             hed_cache.cache_xml_versions(cache_folder=xml_folder)
+            # 3. See if we got a copy from online
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
+            # 4. Finally check for a pre-release one
+            if not final_hed_xml_file:
+                final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder, check_prerelease=True)
             if not final_hed_xml_file:
                 raise HedFileError(HedExceptions.FILE_NOT_FOUND,
                                    f"HED version '{xml_version}' not found in cache: {hed_cache.get_cache_directory()}",

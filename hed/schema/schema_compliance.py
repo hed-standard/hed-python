@@ -8,6 +8,8 @@ from hed.schema.schema_validation_util import validate_schema_tag_new, validate_
     get_allowed_characters_by_name, get_problem_indexes, validate_schema_description_new
 from hed.schema.schema_validation_util_deprecated import validate_schema_tag, validate_schema_description, verify_no_brackets
 from functools import partial
+from hed.schema import hed_cache
+from semantic_version import Version
 
 
 def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handler=None):
@@ -36,6 +38,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
         name = hed_schema.filename
     error_handler.push_error_context(ErrorContext.FILE_NAME, name)
 
+    issues_list += validator.check_if_prerelease_version()
     issues_list += validator.check_prologue_epilogue()
     issues_list += validator.check_invalid_chars()
     issues_list += validator.check_attributes()
@@ -84,6 +87,25 @@ class SchemaValidator:
         self.hed_schema = hed_schema
         self.error_handler = error_handler
         self._new_character_validation = hed_schema.schema_83_props
+
+    def check_if_prerelease_version(self):
+        issues = []
+        libraries = self.hed_schema.library.split(",")
+        versions = self.hed_schema.version_number.split(",")
+        for library, version in zip(libraries, versions):
+            all_known_versions = hed_cache.get_hed_versions(library_name=library)
+            if "," not in library and not all_known_versions or Version(all_known_versions[0]) < Version(version):
+                issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED, version,
+                                                    all_known_versions)
+
+        if self.hed_schema.with_standard:
+            all_known_versions = hed_cache.get_hed_versions()
+            if not all_known_versions or Version(all_known_versions[0]) < Version(self.hed_schema.with_standard):
+                issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED,
+                                                    self.hed_schema.with_standard,
+                                                    all_known_versions)
+        self.error_handler.add_context_and_filter(issues)
+        return issues
 
     def check_prologue_epilogue(self):
         issues = []
