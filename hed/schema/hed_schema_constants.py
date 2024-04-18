@@ -59,6 +59,7 @@ class HedKey:
 
     # Node attributes
     InLibrary = "inLibrary"
+    HedID = 'hedId'
 
     # All known properties
     BoolProperty = 'boolProperty'

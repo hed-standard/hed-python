@@ -147,3 +147,57 @@ class Schema2Base:
 
     def _attribute_disallowed(self, attribute):
         return self._strip_out_in_library and attribute == HedKey.InLibrary
+
+    def _format_tag_attributes(self, attributes):
+        """
+            Takes a dictionary of tag attributes and returns a string with the .mediawiki representation
+
+        Parameters
+        ----------
+        attributes : {str:str}
+            {attribute_name : attribute_value}
+        Returns
+        -------
+        str:
+            The formatted string that should be output to the file.
+        """
+        prop_string = ""
+        final_props = []
+        for prop, value in attributes.items():
+            # Never save InLibrary if saving merged.
+            if self._attribute_disallowed(prop):
+                continue
+            if value is True:
+                final_props.append(prop)
+            else:
+                if "," in value:
+                    split_values = value.split(",")
+                    for split_value in split_values:
+                        final_props.append(f"{prop}={split_value}")
+                else:
+                    final_props.append(f"{prop}={value}")
+
+        if final_props:
+            interior = ", ".join(final_props)
+            prop_string = f"{interior}"
+
+        return prop_string
+
+    @staticmethod
+    def _get_attribs_string_from_schema(header_attributes, sep=" "):
+        """
+        Gets the schema attributes and converts it to a string.
+
+        Parameters
+        ----------
+        header_attributes : dict
+            Attributes to format attributes from
+
+        Returns
+        -------
+        str:
+            A string of the attributes that can be written to a .mediawiki formatted file
+        """
+        attrib_values = [f"{attr}=\"{value}\"" for attr, value in header_attributes.items()]
+        final_attrib_string = sep.join(attrib_values)
+        return final_attrib_string

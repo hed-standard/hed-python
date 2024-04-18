@@ -39,7 +39,6 @@ dependencies = [
     "portalocker",
     "python-dateutil",
     "pytz",
-    "rdflib",
     "semantic-version",
     "six",
     "wordcloud==1.9.3"

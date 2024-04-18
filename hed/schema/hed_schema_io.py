@@ -5,6 +5,7 @@ import functools
 
 from hed.schema.schema_io.xml2schema import SchemaLoaderXML
 from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
+from hed.schema.schema_io.df2schema import SchemaLoaderDF
 # from hed.schema.schema_io.owl2schema import SchemaLoaderOWL
 from hed.schema import hed_cache
 
@@ -23,9 +24,11 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
     """ Create a schema from the given string.
 
     Parameters:
-        schema_string (str):         An XML, mediawiki or OWL, file as a single long string
+        schema_string (str or dict): An XML, mediawiki or OWL, file as a single long string
+            If tsv, Must be a dict of spreadsheets as strings.
         schema_format (str):         The schema format of the source schema string.
-            Allowed normal values: .mediawiki, .xml
+            Allowed normal values: .mediawiki, .xml, .tsv
+            Note: tsv is in progress and has limited features
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
         schema(HedSchema or None): A hed schema to merge this new file into
                                    It must be a with-standard schema with the same value.
@@ -46,13 +49,18 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string",
                            filename=name)
 
-    # Replace carriage returns with new lines since this might not be done by the caller
-    schema_string = schema_string.replace("\r\n", "\n")
+    if isinstance(schema_string, str):
+        # Replace carriage returns with new lines since this might not be done by the caller
+        schema_string = schema_string.replace("\r\n", "\n")
 
     if schema_format.endswith(".xml"):
         hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string, schema=schema, name=name)
     elif schema_format.endswith(".mediawiki"):
         hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string, schema=schema, name=name)
+    elif schema_format.endswith(".tsv"):
+        if schema is not None:
+            raise HedFileError(HedExceptions.INVALID_HED_FORMAT, "Cannot pass a schema to merge into spreadsheet loading currently.", filename=name)
+        hed_schema = SchemaLoaderDF.load_spreadsheet(schema_as_strings=schema_string, name=name)
     # elif schema_format:
     #     hed_schema = SchemaLoaderOWL.load(schema_as_string=schema_string, schema=schema, file_format=schema_format,
     #                                       name=name)
@@ -68,7 +76,9 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None):
     """ Load a schema from the given file or URL path.
 
     Parameters:
-        hed_path (str): A filepath or url to open a schema from.
+        hed_path (str or dict): A filepath or url to open a schema from.
+            If loading a TSV file, this can be a single filename template, or a dict of filenames.
+            Template: basename.tsv, where files are named basename_Struct.tsv and basename_Tag.tsv
         schema_namespace (str or None): The name_prefix all tags in this schema will accept.
         schema(HedSchema or None): A hed schema to merge this new file into
                                    It must be a with-standard schema with the same value.
@@ -87,7 +97,6 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None):
         raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file",
                            filename=hed_path)
 
-    ext = os.path.splitext(hed_path.lower())[1]
     is_url = hed_cache._check_if_url(hed_path)
     if is_url:
         try:
@@ -103,6 +112,11 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None):
         hed_schema = SchemaLoaderXML.load(hed_path, schema=schema, name=name)
     elif hed_path.lower().endswith(".mediawiki"):
         hed_schema = SchemaLoaderWiki.load(hed_path, schema=schema, name=name)
+    elif hed_path.lower().endswith(".tsv"):
+        if schema is not None:
+            raise HedFileError(HedExceptions.INVALID_HED_FORMAT,
+                               "Cannot pass a schema to merge into spreadsheet loading currently.", filename=name)
+        hed_schema = SchemaLoaderDF.load_spreadsheet(filenames=hed_path, name=name)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_path)
 
