@@ -90,8 +90,8 @@ class SummarizeColumnValuesOp(BaseOp):
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
         self.max_categorical = parameters.get('max_categorical', float('inf'))
-        self.skip_columns = parameters['skip_columns']
-        self.value_columns = parameters['value_columns']
+        self.skip_columns = parameters.get('skip_columns', [])
+        self.value_columns = parameters.get('value_columns', [])
         self.values_per_line = parameters.get('values_per_line', self.VALUES_PER_LINE)
 
     def do_op(self, dispatcher, df, name, sidecar=None):

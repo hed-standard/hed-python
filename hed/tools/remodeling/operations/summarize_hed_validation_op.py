@@ -65,7 +65,7 @@ class SummarizeHedValidationOp(BaseOp):
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
-        self.check_for_warnings = parameters.get('check_for_warnings', False)
+        self.check_for_warnings = parameters['check_for_warnings']
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Validate the dataframe with the accompanying sidecar, if any.
