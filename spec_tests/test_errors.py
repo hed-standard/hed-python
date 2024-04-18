@@ -11,7 +11,7 @@ from hed import Sidecar
 import io
 import json
 from hed import HedFileError
-from hed.errors import ErrorHandler, get_printable_issue_string
+from hed.errors import ErrorHandler, get_printable_issue_string, SchemaWarnings
 
 
 skip_tests = {
@@ -46,7 +46,7 @@ class MyTestCase(unittest.TestCase):
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
 
-            # if name != "sidecar-braces-invalid-spot":
+            # if name != "library-invalid-bad_with-standard-version":
             #     continue
             description = info['description']
             schema = info['schema']
@@ -56,8 +56,12 @@ class MyTestCase(unittest.TestCase):
                 try:
                     schema = load_schema_version(schema)
                 except HedFileError as e:
-                    print(f"Failed to load schema version {schema} for test, failing test {name}")
-                    self.fail_count.append(name)
+                    issues = e.issues
+                    if not issues:
+                        issues += [{"code": e.code,
+                                    "message": e.message}]
+                    self.report_result("fails", issues, error_code, description, name, "dummy", "Schema")
+                    # self.fail_count.append(name)
                     continue
                 definitions = info.get('definitions', None)
                 def_dict = DefinitionDict(definitions, schema)
@@ -77,6 +81,8 @@ class MyTestCase(unittest.TestCase):
                     self._run_single_schema_test(section, error_code, description, name, error_handler)
 
     def report_result(self, expected_result, issues, error_code, description, name, test, test_type):
+        # Filter out pre-release warnings, we don't care about them.
+        issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
         if expected_result == "fails":
             if not issues:
                 print(f"{error_code}: {description}")
