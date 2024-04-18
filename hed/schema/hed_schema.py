@@ -6,6 +6,8 @@ from hed.schema import hed_schema_constants as constants
 from hed.schema.schema_io import schema_util
 from hed.schema.schema_io.schema2xml import Schema2XML
 from hed.schema.schema_io.schema2wiki import Schema2Wiki
+from hed.schema.schema_io.schema2df import Schema2DF
+
 # from hed.schema.schema_io.schema2owl import Schema2Owl
 # from hed.schema.schema_io.owl_constants import ext_to_format
 from hed.schema.hed_schema_section import (HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection,
@@ -297,6 +299,25 @@ class HedSchema(HedSchemaBase):
             for string in output_strings:
                 opened_file.write(string)
                 opened_file.write('\n')
+
+    def save_as_dataframes(self, base_filename, save_merged=False):
+        """ Save as mediawiki to a file.
+
+        base_filename: str
+            save filename.  A suffix will be added to most, e.g. _Tag
+        save_merged: bool
+            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
+
+        :raises OSError:
+            - File cannot be saved for some reason.
+        """
+        output_dfs = Schema2DF.process_schema(self, save_merged)
+        base, base_ext = os.path.splitext(base_filename)
+        for suffix, dataframe in output_dfs.items():
+            filename = f"{base}_{suffix}.tsv"
+            with open(filename, mode='w', encoding='utf-8') as opened_file:
+                dataframe.to_csv(opened_file, sep='\t', index=False, header=True)
 
     # def save_as_owl(self, filename, save_merged=False, file_format=None):
     #     """ Save as json to a file.

@@ -1,11 +1,17 @@
 import copy
+import re
 
 from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.errors.error_types import ErrorContext
 from hed.schema import HedSchema, hed_schema_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from abc import abstractmethod, ABC
 from hed.schema import schema_header_util
 from hed.schema import hed_schema_constants
+
+# Might need separate version again for wiki
+header_attr_expression = "([^ ,]+?)=\"(.*?)\""
+attr_re = re.compile(header_attr_expression)
 
 
 class SchemaLoader(ABC):
@@ -70,6 +76,7 @@ class SchemaLoader(ABC):
         self._schema.filename = filename
         self._schema.header_attributes = hed_attributes
         self._loading_merged = False
+        self.fatal_errors = []
 
     @property
     def schema(self):
@@ -203,3 +210,74 @@ class SchemaLoader(ABC):
                 return None
 
             return rooted_entry
+
+    def _add_fatal_error(self, line_number, line, warning_message="Schema term is empty or the line is malformed",
+                         error_code=HedExceptions.WIKI_DELIMITERS_INVALID):
+
+        self.fatal_errors += self._format_error(line_number, line, warning_message, error_code)
+
+
+    @staticmethod
+    def _format_error(row_number, row, warning_message="Schema term is empty or the line is malformed",
+                      error_code=HedExceptions.GENERIC_ERROR):
+        error = {'code': error_code,
+                 ErrorContext.ROW: row_number,
+                 ErrorContext.LINE: str(row),
+                 "message": f"{warning_message}"
+                 }
+
+        return [error]
+
+    # Below here are generic string loading functions, used by wiki and spreadsheet formats.
+    @staticmethod
+    def _validate_attribute_string(attribute_string):
+        pattern = r'^[A-Za-z]+(=.+)?$'
+        match = re.fullmatch(pattern, attribute_string)
+        if match:
+            return match.group()
+
+    def _parse_attribute_string(self, row_number, attr_string):
+        if attr_string:
+            attributes_split = [x.strip() for x in attr_string.split(',')]
+
+            final_attributes = {}
+            for attribute in attributes_split:
+                if self._validate_attribute_string(attribute) is None:
+                    self._add_fatal_error(row_number, attr_string,
+                                          f"Malformed attribute found {attribute}.  "
+                                          f"Valid formatting is: attribute, or attribute=\"value\".")
+                    continue
+                split_attribute = attribute.split("=")
+                if len(split_attribute) == 1:
+                    final_attributes[split_attribute[0]] = True
+                else:
+                    if split_attribute[0] in final_attributes:
+                        final_attributes[split_attribute[0]] += "," + split_attribute[1]
+                    else:
+                        final_attributes[split_attribute[0]] = split_attribute[1]
+            return final_attributes
+        else:
+            return {}
+
+    @staticmethod
+    def _parse_attributes_line(version_line):
+        matches = {}
+        unmatched = []
+        last_end = 0
+
+        for match in attr_re.finditer(version_line):
+            start, end = match.span()
+
+            # If there's unmatched content between the last match and the current one.
+            if start > last_end:
+                unmatched.append(version_line[last_end:start])
+
+            matches[match.group(1)] = match.group(2)
+            last_end = end
+
+        # If there's unmatched content after the last match
+        if last_end < len(version_line):
+            unmatched.append(version_line[last_end:])
+
+        unmatched = [m.strip() for m in unmatched if m.strip()]
+        return matches, unmatched

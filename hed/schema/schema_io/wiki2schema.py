@@ -10,8 +10,7 @@ from hed.schema.schema_io import wiki_constants
 from .base2schema import SchemaLoader
 from .wiki_constants import HedWikiSection, SectionStarts, SectionNames
 
-header_attr_expression = "([^ ]+?)=\"(.*?)\""
-attr_re = re.compile(header_attr_expression)
+
 extend_here_line = 'extend here'
 invalid_characters_to_strip = ["&#8203;"]
 tag_name_expression = r'(\*+|\'{3})(.*?)(\'{3})?\s*([\[\{]|$)+'
@@ -45,7 +44,6 @@ class SchemaLoaderWiki(SchemaLoader):
     def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
         super().__init__(filename, schema_as_string, schema, file_format, name)
         self._schema.source_format = ".mediawiki"
-        self.fatal_errors = []
 
     def _open_file(self):
         if self.filename:
@@ -259,29 +257,6 @@ class SchemaLoaderWiki(SchemaLoader):
                                filename=self.name)
         return attributes
 
-    @staticmethod
-    def _parse_attributes_line(version_line):
-        matches = {}
-        unmatched = []
-        last_end = 0
-
-        for match in attr_re.finditer(version_line):
-            start, end = match.span()
-
-            # If there's unmatched content between the last match and the current one.
-            if start > last_end:
-                unmatched.append(version_line[last_end:start])
-
-            matches[match.group(1)] = match.group(2)
-            last_end = end
-
-        # If there's unmatched content after the last match
-        if last_end < len(version_line):
-            unmatched.append(version_line[last_end:])
-
-        unmatched = [m.strip() for m in unmatched if m.strip()]
-        return matches, unmatched
-
     def _get_header_attributes_internal_old(self, version_line):
         """ Extract all valid attributes like version from the HED line in .mediawiki format.
 
@@ -367,13 +342,6 @@ class SchemaLoaderWiki(SchemaLoader):
 
         return None, 0
 
-    @staticmethod
-    def _validate_attribute_string(attribute_string):
-        pattern = r'^[A-Za-z]+(=.+)?$'
-        match = re.fullmatch(pattern, attribute_string)
-        if match:
-            return match.group()
-
     def _get_tag_attributes(self, line_number, tag_line, starting_index):
         """ Get the tag attributes from a line.
 
@@ -390,27 +358,7 @@ class SchemaLoaderWiki(SchemaLoader):
         attr_string, starting_index = SchemaLoaderWiki._get_line_section(tag_line, starting_index, '{', '}')
         if attr_string is None:
             return None, starting_index
-        if attr_string:
-            attributes_split = [x.strip() for x in attr_string.split(',')]
-
-            final_attributes = {}
-            for attribute in attributes_split:
-                if self._validate_attribute_string(attribute) is None:
-                    self._add_fatal_error(line_number, tag_line,
-                                          f"Malformed attribute found {attribute}.  "
-                                          f"Valid formatting is: attribute, or attribute=\"value\".")
-                    continue
-                split_attribute = attribute.split("=")
-                if len(split_attribute) == 1:
-                    final_attributes[split_attribute[0]] = True
-                else:
-                    if split_attribute[0] in final_attributes:
-                        final_attributes[split_attribute[0]] += "," + split_attribute[1]
-                    else:
-                        final_attributes[split_attribute[0]] = split_attribute[1]
-            return final_attributes, starting_index
-        else:
-            return {}, starting_index
+        return self._parse_attribute_string(line_number, attr_string), starting_index
 
     @staticmethod
     def _get_line_section(tag_line, starting_index, start_delim='[', end_delim=']'):
@@ -496,16 +444,6 @@ class SchemaLoaderWiki(SchemaLoader):
             tag_entry._set_attribute_value(attribute_name, attribute_value)
 
         return tag_entry
-
-    def _add_fatal_error(self, line_number, line, warning_message="Schema term is empty or the line is malformed",
-                         error_code=HedExceptions.WIKI_DELIMITERS_INVALID):
-        self.fatal_errors.append(
-            {'code': error_code,
-             ErrorContext.ROW: line_number,
-             ErrorContext.LINE: line,
-             "message": f"{warning_message}"
-             }
-        )
 
     def _check_for_new_section(self, line, strings_for_section, current_section):
         new_section = None

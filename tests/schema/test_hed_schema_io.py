@@ -1,7 +1,5 @@
 import unittest
 
-import rdflib
-
 from hed.errors import HedFileError
 from hed.errors.error_types import SchemaErrors
 from hed.schema import load_schema, HedSchemaGroup, load_schema_version, HedSchema
