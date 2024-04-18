@@ -8,6 +8,7 @@ import itertools
 from hed.schema import hed_cache
 from hed import schema
 import shutil
+from hed.errors import HedExceptions
 
 
 class Test(unittest.TestCase):
@@ -128,15 +129,15 @@ class TestLocal(unittest.TestCase):
 
         with self.assertRaises(HedFileError) as context4:
             load_schema_version(["8.2.0", "score_1.0.0"])
-        self.assertEqual(context4.exception.args[0], 'schemaDuplicatePrefix')
+        self.assertEqual(context4.exception.args[0], HedExceptions.SCHEMA_DUPLICATE_PREFIX)
 
         with self.assertRaises(HedFileError) as context5:
             load_schema_version(["sc:8.2.0", "sc:score_1.0.0"])
-        self.assertEqual(context5.exception.args[0], 'schemaDuplicatePrefix')
+        self.assertEqual(context5.exception.args[0], HedExceptions.SCHEMA_DUPLICATE_PREFIX)
 
         with self.assertRaises(HedFileError) as context6:
             load_schema_version(["8.1.0", "score_1.0.0"])
-        self.assertEqual(context6.exception.args[0], 'schemaDuplicatePrefix')
+        self.assertEqual(context6.exception.args[0], HedExceptions.SCHEMA_DUPLICATE_PREFIX)
 
         with self.assertRaises(HedFileError) as context8:
             load_schema_version(["8.1.0", "notreallibrary_1.0.0"])
