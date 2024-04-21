@@ -1,7 +1,9 @@
 """ Utilities to facilitate annotation of events in BIDS. """
 
+import io
 import re
 from pandas import DataFrame
+from hed.models.sidecar import Sidecar
 from hed.errors.exceptions import HedFileError
 from hed.models.df_util import replace_ref
 
@@ -169,6 +171,27 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             continue
         if isinstance(value_dict['HED'], dict) and 'Levels' in value_dict:
             sidecar_dict[key]['Levels'] = value_dict['Levels']
+
+
+def strs_to_sidecar(sidecar_strings):
+    """ Return a Sidecar from a sidecar as string or as a list of sidecars as strings.
+
+     Parameters:
+         sidecar_strings (string or list):  String or strings representing sidecars.
+
+     Returns:
+         Sidecar:  the merged sidecar from the list.
+     """
+
+    if not isinstance(sidecar_strings, list):
+        sidecar_strings = [sidecar_strings]
+    if sidecar_strings:
+        file_list = []
+        for s_string in sidecar_strings:
+            file_list.append(io.StringIO(s_string))
+        return Sidecar(files=file_list, name="Merged_Sidecar")
+    else:
+        return None
 
 
 def _flatten_cat_col(col_key, col_dict):
