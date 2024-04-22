@@ -218,7 +218,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(sidecar_str, str)
         sidecar_obj = strs_to_sidecar(sidecar_str)
         self.assertIsInstance(sidecar_obj, Sidecar)
-        print(sidecar_str)
 
     def test_hed_to_df(self):
         df1a = hed_to_df(self.sidecar1a, col_names=None)
