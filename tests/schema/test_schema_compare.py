@@ -1,15 +1,16 @@
 import unittest
-import json
 import copy
 
 
 from hed.schema import HedKey, HedSectionKey
 from hed.schema.schema_compare import compare_schemas
-from hed.schema.schema_compare import gather_schema_changes, find_matching_tags, pretty_print_change_dict, compare_differences
+from hed.schema.schema_compare import (gather_schema_changes, find_matching_tags, pretty_print_change_dict,
+                                       compare_differences)
 from hed import load_schema_version, load_schema
 
-from . import util_create_schemas
+from tests.schema import util_create_schemas
 import os
+
 
 class TestSchemaComparison(unittest.TestCase):
     @classmethod

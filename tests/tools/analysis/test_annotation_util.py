@@ -6,7 +6,8 @@ from pandas import DataFrame
 from hed import schema as hedschema
 from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
-from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags, hed_to_df, merge_hed_dict
+from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags,\
+    hed_to_df, merge_hed_dict, strs_to_sidecar
 from hed.tools.analysis.annotation_util import _flatten_cat_col, _flatten_val_col, _get_value_entry, _tag_list_to_str, \
                                                 _update_cat_dict, generate_sidecar_entry
 # from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, trim_back, trim_front
@@ -208,6 +209,15 @@ class Test(unittest.TestCase):
                               "generate_sidecar_entry is a dictionary when no column values and special chars.")
         self.assertEqual(entry2['HED'], '(Label/my_-123_10, Label/#)',
                          "generate_sidecar_entry HED entry has correct label when no column values and special chars.")
+
+    def test_strs_to_sidecar(self):
+        with open(self.json_path, 'r') as fp:
+            sidecar_dict = json.load(fp)
+        self.assertIsInstance(sidecar_dict, dict)
+        sidecar_str = json.dumps(sidecar_dict)
+        self.assertIsInstance(sidecar_str, str)
+        sidecar_obj = strs_to_sidecar(sidecar_str)
+        self.assertIsInstance(sidecar_obj, Sidecar)
 
     def test_hed_to_df(self):
         df1a = hed_to_df(self.sidecar1a, col_names=None)

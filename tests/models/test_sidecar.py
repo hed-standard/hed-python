@@ -5,7 +5,6 @@ import shutil
 
 from hed.errors import HedFileError, ValidationErrors
 from hed.models import ColumnMetadata, HedString, Sidecar
-from hed.validator import HedValidator
 from hed import schema
 from hed.models import DefinitionDict
 from hed.errors import ErrorHandler
