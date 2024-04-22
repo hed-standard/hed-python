@@ -47,6 +47,14 @@ jobs:
            python -m unittest spec_tests/validate_bids.py
            echo "::endgroup::"
 
+      - name: Hed Cache Test
+        env:
+          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: hed_cache_test
+        continue-on-error: true
+        run: |
+           python -m unittest spec_tests/test_hed_cache.py
+
       - name: Fail if Tests Failed
-        if: steps.spec_error_tests.outcome == 'failure' || steps.bids_validation_test.outcome == 'failure'
+        if: steps.spec_error_tests.outcome == 'failure' || steps.bids_validation_test.outcome == 'failure' || steps.hed_cache_test.outcome == 'failure'
         run: exit 1
