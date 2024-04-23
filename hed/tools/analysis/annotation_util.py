@@ -3,7 +3,7 @@
 import io
 import re
 from pandas import DataFrame
-from hed.models.sidecar import Sidecar
+from hed.models import Sidecar, TabularInput
 from hed.errors.exceptions import HedFileError
 from hed.models.df_util import replace_ref
 
@@ -171,6 +171,20 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             continue
         if isinstance(value_dict['HED'], dict) and 'Levels' in value_dict:
             sidecar_dict[key]['Levels'] = value_dict['Levels']
+
+
+def str_to_tabular(tsv_str, sidecar=None):
+    """ Return a TabularInput a tsv string.
+
+    Parameters:
+        tsv_str (str):  A string representing a tabular input.
+        sidecar (Sidecar): An optional Sidecar object.
+
+     Returns:
+         TabularInput:  Represents a tabular input object.
+     """
+
+    return TabularInput(file=io.StringIO(tsv_str), sidecar=sidecar)
 
 
 def strs_to_sidecar(sidecar_strings):

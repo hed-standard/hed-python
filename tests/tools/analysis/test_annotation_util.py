@@ -7,7 +7,7 @@ from hed import schema as hedschema
 from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
 from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags,\
-    hed_to_df, merge_hed_dict, strs_to_sidecar
+    hed_to_df, merge_hed_dict, strs_to_sidecar, str_to_tabular
 from hed.tools.analysis.annotation_util import _flatten_cat_col, _flatten_val_col, _get_value_entry, _tag_list_to_str, \
                                                 _update_cat_dict, generate_sidecar_entry
 # from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, trim_back, trim_front
@@ -27,6 +27,8 @@ class Test(unittest.TestCase):
                                                     '../../data/schema_tests/HED8.2.0.xml'))
         cls.bids_root_path = bids_root_path
         json_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
+        cls.events_path = os.path.realpath(os.path.join(bids_root_path, 'sub-002', 'eeg',
+                                                        'sub-002_task-FacePerception_run-1_events.tsv'))
         cls.json_path = json_path
         json_sm_path = os.path.realpath(os.path.join(curation_base_dir, 'task-FacePerceptionSmall_events.json'))
         cls.sidecar1a = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
@@ -210,15 +212,6 @@ class Test(unittest.TestCase):
         self.assertEqual(entry2['HED'], '(Label/my_-123_10, Label/#)',
                          "generate_sidecar_entry HED entry has correct label when no column values and special chars.")
 
-    def test_strs_to_sidecar(self):
-        with open(self.json_path, 'r') as fp:
-            sidecar_dict = json.load(fp)
-        self.assertIsInstance(sidecar_dict, dict)
-        sidecar_str = json.dumps(sidecar_dict)
-        self.assertIsInstance(sidecar_str, str)
-        sidecar_obj = strs_to_sidecar(sidecar_str)
-        self.assertIsInstance(sidecar_obj, Sidecar)
-
     def test_hed_to_df(self):
         df1a = hed_to_df(self.sidecar1a, col_names=None)
         self.assertIsInstance(df1a, DataFrame)
@@ -300,6 +293,21 @@ class Test(unittest.TestCase):
         self.assertEqual(0, len(example_sidecar), 'merge_hed_dict input is empty for this test')
         merge_hed_dict(example_sidecar, spreadsheet_sidecar)
         self.assertEqual(6, len(example_sidecar), 'merge_hed_dict merges with the correct length')
+
+    def test_strs_to_sidecar(self):
+        with open(self.json_path, 'r') as fp:
+            sidecar_dict = json.load(fp)
+        self.assertIsInstance(sidecar_dict, dict)
+        sidecar_str = json.dumps(sidecar_dict)
+        self.assertIsInstance(sidecar_str, str)
+        sidecar_obj = strs_to_sidecar(sidecar_str)
+        self.assertIsInstance(sidecar_obj, Sidecar)
+
+    def test_strs_to_tabular(self):
+        with open(self.events_path, 'r') as file:
+            events_contents = file.read()
+        tab_in = str_to_tabular(events_contents, sidecar=self.json_path)
+
 
     def test_flatten_cat_col(self):
         col1 = self.sidecar2c["a"]
