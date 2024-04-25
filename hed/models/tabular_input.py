@@ -81,3 +81,7 @@ class TabularInput(BaseInput):
         if self._sidecar:
             return self._sidecar.get_column_refs()
         return []
+
+    def get_sidecar(self):
+        """Return the sidecar associated with this TabularInput."""
+        return self._sidecar
