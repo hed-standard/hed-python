@@ -310,19 +310,19 @@ class Test(unittest.TestCase):
         tab_in = str_to_tabular(events_contents, sidecar=self.json_path)
         self.assertIsInstance(tab_in, TabularInput)
 
-    def test_convert_to_strlist(self):
+    def test_to_strlist(self):
         # schema
         # list1 = [HedString('Red, Sensory-event', schema)]
         list1 = ['abc', '', None, 3.24]
         str_list1 = to_strlist(list1)
         self.assertEqual(len(str_list1), len(list1))
-        self.assertIsNone(str_list1[2], None)
+        self.assertFalse(str_list1[2])
         self.assertEqual(str_list1[3], '3.24')
         self.assertFalse(str_list1[1])
         list2 = [HedString('Red, Sensory-event', self.hed_schema), None, HedString('', self.hed_schema)]
         str_list2 = to_strlist(list2)
         self.assertEqual(len(str_list2), len(list2))
-        self.assertIsNone(str_list2[1], None)
+        self.assertFalse(str_list2[1])
         self.assertEqual(str_list2[0], 'Red,Sensory-event')
         self.assertEqual(str_list2[2], '')
 
