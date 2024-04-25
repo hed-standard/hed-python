@@ -173,6 +173,20 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             sidecar_dict[key]['Levels'] = value_dict['Levels']
 
 
+def str_list(obj_list):
+    """ Return a list with the objects converted to string except for None elements.
+
+    Parameters:
+        obj_list (list):  A list of objects that are None or have a str method.
+
+    Returns:
+        list:  A list with the objects converted to strings -- except None values are preserved.
+    """
+
+    # Using list comprehension to convert non-None items to strings
+    return [str(item) if item is not None else None for item in obj_list]
+
+
 def str_to_tabular(tsv_str, sidecar=None):
     """ Return a TabularInput a tsv string.
 

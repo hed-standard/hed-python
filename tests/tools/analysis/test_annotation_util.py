@@ -6,11 +6,11 @@ from pandas import DataFrame
 from hed import schema as hedschema
 from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
+from hed.models.hed_string import HedString
 from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags,\
-    hed_to_df, merge_hed_dict, strs_to_sidecar, str_to_tabular
+    hed_to_df, merge_hed_dict, strs_to_sidecar, str_to_tabular, str_list
 from hed.tools.analysis.annotation_util import _flatten_cat_col, _flatten_val_col, _get_value_entry, _tag_list_to_str, \
                                                 _update_cat_dict, generate_sidecar_entry
-# from hed.tools.analysis.annotation_util import _find_last_pos, _find_first_pos, trim_back, trim_front
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.util.io_util import get_file_list
 
@@ -308,6 +308,21 @@ class Test(unittest.TestCase):
             events_contents = file.read()
         tab_in = str_to_tabular(events_contents, sidecar=self.json_path)
 
+    def test_str_list(self):
+        # schema
+        # list1 = [HedString('Red, Sensory-event', schema)]
+        list1 = ['abc', '', None, 3.24]
+        str_list1 = str_list(list1)
+        self.assertEqual(len(str_list1), len(list1))
+        self.assertIsNone(str_list1[2], None)
+        self.assertEqual(str_list1[3], '3.24')
+        self.assertFalse(str_list1[1])
+        list2 = [HedString('Red, Sensory-event', self.hed_schema), None, HedString('', self.hed_schema)]
+        str_list2 = str_list(list2)
+        self.assertEqual(len(str_list2), len(list2))
+        self.assertIsNone(str_list2[1], None)
+        self.assertEqual(str_list2[0], 'Red,Sensory-event')
+        self.assertEqual(str_list2[2], '')
 
     def test_flatten_cat_col(self):
         col1 = self.sidecar2c["a"]
