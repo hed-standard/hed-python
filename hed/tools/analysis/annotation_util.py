@@ -219,7 +219,7 @@ def to_strlist(obj_list):
     """
 
     # Using list comprehension to convert non-None items to strings
-    return [str(item) if item is not None else None for item in obj_list]
+    return [str(item) if item is not None else '' for item in obj_list]
 
 
 def _flatten_cat_col(col_key, col_dict):
