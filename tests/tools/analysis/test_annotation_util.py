@@ -7,8 +7,9 @@ from hed import schema as hedschema
 from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
 from hed.models.hed_string import HedString
-from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags,\
-    hed_to_df, merge_hed_dict, strs_to_sidecar, str_to_tabular, str_list
+from hed.models.tabular_input import TabularInput
+from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags, \
+    hed_to_df, merge_hed_dict, strs_to_sidecar, str_to_tabular, to_strlist
 from hed.tools.analysis.annotation_util import _flatten_cat_col, _flatten_val_col, _get_value_entry, _tag_list_to_str, \
                                                 _update_cat_dict, generate_sidecar_entry
 from hed.tools.analysis.tabular_summary import TabularSummary
@@ -307,18 +308,19 @@ class Test(unittest.TestCase):
         with open(self.events_path, 'r') as file:
             events_contents = file.read()
         tab_in = str_to_tabular(events_contents, sidecar=self.json_path)
+        self.assertIsInstance(tab_in, TabularInput)
 
-    def test_str_list(self):
+    def test_convert_to_strlist(self):
         # schema
         # list1 = [HedString('Red, Sensory-event', schema)]
         list1 = ['abc', '', None, 3.24]
-        str_list1 = str_list(list1)
+        str_list1 = to_strlist(list1)
         self.assertEqual(len(str_list1), len(list1))
         self.assertIsNone(str_list1[2], None)
         self.assertEqual(str_list1[3], '3.24')
         self.assertFalse(str_list1[1])
         list2 = [HedString('Red, Sensory-event', self.hed_schema), None, HedString('', self.hed_schema)]
-        str_list2 = str_list(list2)
+        str_list2 = to_strlist(list2)
         self.assertEqual(len(str_list2), len(list2))
         self.assertIsNone(str_list2[1], None)
         self.assertEqual(str_list2[0], 'Red,Sensory-event')
