@@ -55,7 +55,7 @@ class Schema2Wiki(Schema2Base):
             self.current_tag_string += f"'''{tag}'''"
         else:
             short_tag = tag.split("/")[-1]
-            tab_char = '\t'
+            tab_char = ''  # Github mangles these, so remove spacing for now.
             # takes value tags should appear after the nowiki tag.
             if short_tag.endswith("#"):
                 self.current_tag_string += f"{tab_char * level}{'*' * level} "
