@@ -10,7 +10,7 @@ from hed.models.sidecar import Sidecar
 from hed.models.hed_string import HedString
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags, \
-    hed_to_df, merge_hed_dict, series_to_factor, strs_to_sidecar, str_to_tabular, to_strlist
+    hed_to_df, merge_hed_dict, to_factor, strs_to_sidecar, str_to_tabular, to_strlist
 from hed.tools.analysis.annotation_util import _flatten_cat_col, _flatten_val_col, _get_value_entry, _tag_list_to_str, \
                                                 _update_cat_dict, generate_sidecar_entry
 from hed.tools.analysis.tabular_summary import TabularSummary
@@ -199,17 +199,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(entry2['HED'], str,
                               "generate_sidecar_entry HED entry should be str when no column values")
 
-    def test_series_to_factor(self):
-        series1 = Series([1.0, 2.0, 3.0, 4.0])
-        factor1 = series_to_factor(series1)
-        self.assertEqual(len(series1), len(factor1))
-        self.assertEqual(sum(factor1), len(factor1))
-        series2 = Series(['a', '', None, np.NAN, 'n/a'])
-        factor2 = series_to_factor(series2)
-        self.assertEqual(len(series2), len(factor2))
-        self.assertEqual(sum(factor2), 1)
-
-
     def test_generate_sidecar_entry_non_letters(self):
         entry1 = generate_sidecar_entry('my !#$-123_10', column_values=['apple 1', '@banana', 'grape%cherry&'])
         self.assertIsInstance(entry1, dict,
@@ -307,6 +296,27 @@ class Test(unittest.TestCase):
         merge_hed_dict(example_sidecar, spreadsheet_sidecar)
         self.assertEqual(6, len(example_sidecar), 'merge_hed_dict merges with the correct length')
 
+    def test_to_factor(self):
+        series1 = Series([1.0, 2.0, 3.0, 4.0])
+        factor1 = to_factor(series1)
+        self.assertEqual(len(series1), len(factor1))
+        self.assertEqual(sum(factor1), len(factor1))
+        series2 = Series(['a', '', None, np.NAN, 'n/a'])
+        factor2 = to_factor(series2)
+        self.assertEqual(len(series2), len(factor2))
+        self.assertEqual(sum(factor2), 1)
+        data = {
+            'Name': ['Alice', '', 'n/a', 1.0],  # Contains a space
+            'Age': [25, np.NaN, 35, 0]
+        }
+        df = DataFrame(data)
+        factor3 = to_factor(df, column='Name')
+        self.assertEqual(sum(factor3), 2)
+        factor4 = to_factor(df)
+        self.assertEqual(sum(factor4), 2)
+        with self.assertRaises(HedFileError) as context5:
+            to_factor(data)
+
     def test_strs_to_sidecar(self):
         with open(self.json_path, 'r') as fp:
             sidecar_dict = json.load(fp)
@@ -337,7 +347,6 @@ class Test(unittest.TestCase):
         self.assertFalse(str_list2[1])
         self.assertEqual(str_list2[0], 'Red,Sensory-event')
         self.assertEqual(str_list2[2], '')
-
 
     def test_flatten_cat_col(self):
         col1 = self.sidecar2c["a"]
