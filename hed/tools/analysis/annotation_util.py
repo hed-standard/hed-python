@@ -2,7 +2,7 @@
 
 import io
 import re
-from pandas import DataFrame
+from pandas import DataFrame, to_numeric
 from hed.models import Sidecar, TabularInput
 from hed.errors.exceptions import HedFileError
 from hed.models.df_util import replace_ref
@@ -58,6 +58,21 @@ def df_to_hed(dataframe, description_tag=True):
                          description_tag=description_tag)
         hed_dict[row['column_name']] = cat_dict
     return hed_dict
+
+
+def series_to_factor(series):
+    """Convert a series to an integer factor list.
+
+    Parameters:
+        series (Series) - Series to be converted to a list.
+
+    Returns:
+        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
+    """
+    replaced = series.replace('n/a', False)
+    filled = replaced.fillna(False)
+    bool_list = filled.astype(bool).tolist()
+    return [int(value) for value in bool_list]
 
 
 def extract_tags(hed_string, search_tag):

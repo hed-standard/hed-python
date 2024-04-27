@@ -2,14 +2,15 @@ import os
 import io
 import json
 import unittest
-from pandas import DataFrame
+import numpy as np
+from pandas import DataFrame, Series
 from hed import schema as hedschema
 from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
 from hed.models.hed_string import HedString
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.annotation_util import check_df_columns, df_to_hed, extract_tags, \
-    hed_to_df, merge_hed_dict, strs_to_sidecar, str_to_tabular, to_strlist
+    hed_to_df, merge_hed_dict, series_to_factor, strs_to_sidecar, str_to_tabular, to_strlist
 from hed.tools.analysis.annotation_util import _flatten_cat_col, _flatten_val_col, _get_value_entry, _tag_list_to_str, \
                                                 _update_cat_dict, generate_sidecar_entry
 from hed.tools.analysis.tabular_summary import TabularSummary
@@ -198,6 +199,17 @@ class Test(unittest.TestCase):
         self.assertIsInstance(entry2['HED'], str,
                               "generate_sidecar_entry HED entry should be str when no column values")
 
+    def test_series_to_factor(self):
+        series1 = Series([1.0, 2.0, 3.0, 4.0])
+        factor1 = series_to_factor(series1)
+        self.assertEqual(len(series1), len(factor1))
+        self.assertEqual(sum(factor1), len(factor1))
+        series2 = Series(['a', '', None, np.NAN, 'n/a'])
+        factor2 = series_to_factor(series2)
+        self.assertEqual(len(series2), len(factor2))
+        self.assertEqual(sum(factor2), 1)
+
+
     def test_generate_sidecar_entry_non_letters(self):
         entry1 = generate_sidecar_entry('my !#$-123_10', column_values=['apple 1', '@banana', 'grape%cherry&'])
         self.assertIsInstance(entry1, dict,
@@ -325,6 +337,7 @@ class Test(unittest.TestCase):
         self.assertFalse(str_list2[1])
         self.assertEqual(str_list2[0], 'Red,Sensory-event')
         self.assertEqual(str_list2[2], '')
+
 
     def test_flatten_cat_col(self):
         col1 = self.sidecar2c["a"]

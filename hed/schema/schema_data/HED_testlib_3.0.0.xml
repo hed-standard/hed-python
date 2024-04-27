@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<HED version="2.0.0" library="testlib" withStandard="8.2.0">
-   <prologue>This schema tests the ordering effects of various combinations of rooted and extension allowed for rooted schemas. It is compatible with testlib version 3.0.0 but not testlib 2.0.0.</prologue>
+<HED version="3.0.0" library="testlib" withStandard="8.2.0">
+   <prologue>This schema is designed to be lazy partnered with testlib_2.0.0 but conflicts with testlib_2.1.0.</prologue>
    <schema>
       <node>
          <name>Event</name>
@@ -89,50 +89,27 @@
          </node>
       </node>
       <node>
-         <name>B-nonextension</name>
-         <description>These should not be sorted.  B should be first</description>
+         <name>F-nonextension</name>
          <attribute>
             <name>inLibrary</name>
             <value>testlib</value>
          </attribute>
          <node>
-            <name>SubnodeB1</name>
+            <name>SubnodeF6</name>
             <attribute>
                <name>inLibrary</name>
                <value>testlib</value>
             </attribute>
          </node>
          <node>
-            <name>SubnodeB2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-      </node>
-      <node>
-         <name>A-nonextension</name>
-         <description>These should not be sorted.  A should be second</description>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeA3</name>
+            <name>SubnodeF1</name>
             <attribute>
                <name>inLibrary</name>
                <value>testlib</value>
             </attribute>
          </node>
          <node>
-            <name>SubnodeA1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeA2</name>
+            <name>SubnodeF2</name>
             <attribute>
                <name>inLibrary</name>
                <value>testlib</value>
@@ -842,38 +819,6 @@
                <name>Track</name>
                <description>Follow a person, animal, or object through space or time.</description>
             </node>
-         </node>
-      </node>
-      <node>
-         <name>D-extensionallowed</name>
-         <description>These should be sorted.  This section should be first.</description>
-         <attribute>
-            <name>extensionAllowed</name>
-         </attribute>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeD1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeD2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeD3</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
          </node>
       </node>
       <node>
@@ -1738,8 +1683,7 @@
                   <name>Instrument-sound</name>
                   <description>Sound produced by a musical instrument.</description>
                   <node>
-                     <name>Flute-sound</name>
-                     <description>These should be sorted.  Flute should be first</description>
+                     <name>Base-sound</name>
                      <attribute>
                         <name>rooted</name>
                         <value>Instrument-sound</value>
@@ -1749,14 +1693,14 @@
                         <value>testlib</value>
                      </attribute>
                      <node>
-                        <name>Flute-subsound1</name>
+                        <name>Base-subsound1</name>
                         <attribute>
                            <name>inLibrary</name>
                            <value>testlib</value>
                         </attribute>
                      </node>
                      <node>
-                        <name>Flute-subsound2</name>
+                        <name>Base-subsound2</name>
                         <attribute>
                            <name>inLibrary</name>
                            <value>testlib</value>
@@ -1764,8 +1708,7 @@
                      </node>
                   </node>
                   <node>
-                     <name>Oboe-sound</name>
-                     <description>These should be sorted.  Oboe should be second</description>
+                     <name>Piano-sound</name>
                      <attribute>
                         <name>rooted</name>
                         <value>Instrument-sound</value>
@@ -1775,47 +1718,21 @@
                         <value>testlib</value>
                      </attribute>
                      <node>
-                        <name>Oboe-subsound1</name>
+                        <name>Piano-subsound1</name>
                         <attribute>
                            <name>inLibrary</name>
                            <value>testlib</value>
                         </attribute>
                      </node>
                      <node>
-                        <name>Oboe-subsound2</name>
-                        <attribute>
-                           <name>inLibrary</name>
-                           <value>testlib</value>
-                        </attribute>
-                     </node>
-                  </node>
-                  <node>
-                     <name>Violin-sound</name>
-                     <description>These should be sorted.  Violin should be last</description>
-                     <attribute>
-                        <name>rooted</name>
-                        <value>Instrument-sound</value>
-                     </attribute>
-                     <attribute>
-                        <name>inLibrary</name>
-                        <value>testlib</value>
-                     </attribute>
-                     <node>
-                        <name>Violin-subsound1</name>
+                        <name>Piano-subsound2</name>
                         <attribute>
                            <name>inLibrary</name>
                            <value>testlib</value>
                         </attribute>
                      </node>
                      <node>
-                        <name>Violin-subsound2</name>
-                        <attribute>
-                           <name>inLibrary</name>
-                           <value>testlib</value>
-                        </attribute>
-                     </node>
-                     <node>
-                        <name>Violin-subsound3</name>
+                        <name>Piano-subsound3</name>
                         <attribute>
                            <name>inLibrary</name>
                            <value>testlib</value>
@@ -1912,6 +1829,37 @@
                   <description>A loud, continuous sound often varying in frequency designed to indicate an emergency.</description>
                </node>
             </node>
+         </node>
+      </node>
+      <node>
+         <name>E-extensionallowed</name>
+         <attribute>
+            <name>extensionAllowed</name>
+         </attribute>
+         <attribute>
+            <name>inLibrary</name>
+            <value>testlib</value>
+         </attribute>
+         <node>
+            <name>SubnodeE1</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeE2</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeE3</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
          </node>
       </node>
       <node>
