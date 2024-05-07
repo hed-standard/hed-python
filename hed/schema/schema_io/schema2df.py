@@ -1,7 +1,7 @@
 """Allows output of HedSchema objects as .mediawiki format"""
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.schema.schema_io.ontology_util import get_library_name_and_id
+from hed.schema.schema_io.ontology_util import get_library_name_and_id, remove_prefix
 from hed.schema.schema_io.schema2base import Schema2Base
 import pandas as pd
 import hed.schema.hed_schema_df_constants as constants
@@ -40,7 +40,7 @@ class Schema2DF(Schema2Base):
             hed_id(str): The full formatted hed_id
         """
         prefix, obj_id = get_library_name_and_id(self._schema)
-        name = f"{prefix}{object_name.removeprefix('Hed')}"
+        name = f"{prefix}{remove_prefix(object_name, 'Hed')}"
         full_hed_id = self._get_object_id(object_name, obj_id, include_prefix)
         return name, full_hed_id
 
