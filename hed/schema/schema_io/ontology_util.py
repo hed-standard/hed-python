@@ -99,7 +99,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
 
     Returns:
         dataframes(dict of str:pd.DataFrames): The updated dataframes
-                                               These dataframes acn (potentially including extra columns)
+                                               These dataframes can potentially have extra columns
     """
     # 1. Verify existing hed ids don't conflict between schema/dataframes
     for key, df in dataframes.items():
