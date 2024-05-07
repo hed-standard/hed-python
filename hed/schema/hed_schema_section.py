@@ -1,5 +1,5 @@
 from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey, HedKey83
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey, HedKeyOld
 
 entries_by_section = {
     HedSectionKey.Properties: HedSchemaEntry,
@@ -125,9 +125,10 @@ class HedSchemaSection:
             key (str): The name of the key.
 
         """
-        if not self.case_sensitive:
-            key = key.casefold()
-        return self.all_names.get(key)
+        try:
+            return self.__getitem__(key)
+        except KeyError:
+            return None
 
     def __eq__(self, other):
         if self.all_names != other.all_names:
@@ -155,6 +156,16 @@ class HedSchemaUnitSection(HedSchemaSection):
         if not new_entry.has_attribute(HedKey.UnitSymbol):
             name_key = name_key.casefold()
         return super()._check_if_duplicate(name_key, new_entry)
+
+    def __getitem__(self, key):
+        """Check the case of the key appropriately for symbols/not symbols, and return the matching entry."""
+        unit_entry = self.all_names.get(key)
+        if unit_entry is None:
+            unit_entry = self.all_names.get(key.casefold())
+            # Unit symbols must match exactly
+            if unit_entry is None or unit_entry.has_attribute(HedKey.UnitSymbol):
+                return None
+        return unit_entry
 
 
 class HedSchemaUnitClassSection(HedSchemaSection):
@@ -256,10 +267,10 @@ class HedSchemaTagSection(HedSchemaSection):
         attribute_section = hed_schema.attributes
         if hed_schema.schema_83_props:
             self.inheritable_attributes = [name for name, value in attribute_section.items()
-                                           if not value.has_attribute(HedKey83.AnnotationProperty)]
+                                           if not value.has_attribute(HedKey.AnnotationProperty)]
         else:
             self.inheritable_attributes = [name for name, value in attribute_section.items()
-                                           if value.has_attribute(HedKey.IsInheritedProperty)]
+                                           if value.has_attribute(HedKeyOld.IsInheritedProperty)]
 
         # Hardcode in extension allowed as it is critical for validation in older schemas
         if not self.inheritable_attributes:

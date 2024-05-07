@@ -5,10 +5,11 @@ import re
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.errors import ErrorContext, error_reporter
+from hed.errors import error_reporter
 from hed.schema.schema_io import wiki_constants
 from .base2schema import SchemaLoader
 from .wiki_constants import HedWikiSection, SectionStarts, SectionNames
+from hed.schema.schema_io import text_util
 
 
 extend_here_line = 'extend here'
@@ -248,7 +249,7 @@ class SchemaLoaderWiki(SchemaLoader):
         if "=" not in version_line:
             return self._get_header_attributes_internal_old(version_line)
 
-        attributes, malformed = self._parse_attributes_line(version_line)
+        attributes, malformed = text_util._parse_header_attributes_line(version_line)
 
         for m in malformed:
             # todo: May shift this at some point to report all errors
@@ -356,9 +357,11 @@ class SchemaLoaderWiki(SchemaLoader):
 
         """
         attr_string, starting_index = SchemaLoaderWiki._get_line_section(tag_line, starting_index, '{', '}')
-        if attr_string is None:
-            return None, starting_index
-        return self._parse_attribute_string(line_number, attr_string), starting_index
+        try:
+            return text_util.parse_attribute_string(attr_string), starting_index
+        except ValueError as e:
+            self._add_fatal_error(line_number, attr_string, str(e))
+        return {}, starting_index
 
     @staticmethod
     def _get_line_section(tag_line, starting_index, start_delim='[', end_delim=']'):

@@ -1,10 +1,10 @@
 import unittest
 import shutil
 
-from hed.schema import load_schema, load_schema_version, from_string
-from hed.schema.hed_schema_df_constants import *
+from hed.schema.hed_schema_io import load_schema, load_schema_version, from_dataframes
 
 import os
+from hed.schema.schema_io.df2schema import SchemaLoaderDF
 
 
 class TestHedSchemaDF(unittest.TestCase):
@@ -42,18 +42,23 @@ class TestHedSchemaDF(unittest.TestCase):
         reloaded_schema = load_schema(self.output_folder + "test_testlib2.tsv")
         self.assertEqual(schema, reloaded_schema)
 
-    def test_saving_default(self):
+    def test_from_dataframes(self):
         schema = load_schema_version("8.3.0")
+        filename = self.output_folder + "test_8_string.tsv"
         schema.save_as_dataframes(self.output_folder + "test_8_string.tsv")
 
-        filenames = {STRUCT_KEY: self.output_folder + "test_8_string_Structure.tsv",
-                     TAG_KEY: self.output_folder + "test_8_string_Tag.tsv"}
-
+        filenames = SchemaLoaderDF.convert_filenames_to_dict(filename)
         new_file_strings = {}
         for key, value in filenames.items():
             with open(value, "r") as f:
                 all_lines = f.readlines()
                 new_file_strings[key] = "".join(all_lines)
 
-        reloaded_schema = from_string(new_file_strings, ".tsv")
+        reloaded_schema = from_dataframes(new_file_strings)
         self.assertEqual(schema, reloaded_schema)
+
+        schema = load_schema_version("8.3.0")
+        dfs = schema.get_as_dataframes()
+        reloaded_schema = from_dataframes(dfs)
+        self.assertEqual(schema, reloaded_schema)
+

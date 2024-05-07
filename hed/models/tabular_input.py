@@ -52,6 +52,7 @@ class TabularInput(BaseInput):
 
         """
         new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME])
+        self._sidecar = sidecar
 
         self.reset_mapper(new_mapper)
 
