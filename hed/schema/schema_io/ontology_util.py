@@ -72,6 +72,13 @@ def _get_hedid_range(schema_name, df_key):
     return set(range(final_start, final_end))
 
 
+# todo: Replace this once we no longer support < python 3.9
+def remove_prefix(text, prefix):
+    if text and text.startswith(prefix):
+        return text[len(prefix):]
+    return text
+
+
 def get_all_ids(df):
     """Returns a set of all unique hedIds in the dataframe
 
@@ -82,7 +89,7 @@ def get_all_ids(df):
         numbers(Set or None): None if this has no hed column, otherwise all unique numbers as a set.
     """
     if constants.hed_id in df.columns:
-        modified_df = df[constants.hed_id].str.removeprefix("HED_")
+        modified_df = df[constants.hed_id].apply(lambda x: remove_prefix(x, "HED_"))
         modified_df = pd.to_numeric(modified_df, errors="coerce").dropna().astype(int)
         return set(modified_df.unique())
     return None
