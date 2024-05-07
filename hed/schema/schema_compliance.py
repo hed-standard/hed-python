@@ -2,7 +2,7 @@
 
 from hed.errors.error_types import ErrorContext, SchemaErrors, ErrorSeverity, SchemaAttributeErrors, SchemaWarnings
 from hed.errors.error_reporter import ErrorHandler, sort_issues
-from hed.schema.hed_schema import HedSchema, HedKey, HedSectionKey, HedKey83
+from hed.schema.hed_schema import HedSchema, HedKey, HedSectionKey
 from hed.schema import schema_attribute_validators
 from hed.schema.schema_validation_util import validate_schema_tag_new, validate_schema_term_new, \
     get_allowed_characters_by_name, get_problem_indexes, validate_schema_description_new
@@ -144,12 +144,12 @@ class SchemaValidator:
                         attribute_entry = self.hed_schema.get_tag_entry(attribute_name, HedSectionKey.Attributes)
                         if attribute_entry:
                             range_validators = {
-                                HedKey83.TagRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
-                                HedKey83.NumericRange: [schema_attribute_validators.is_numeric_value],
-                                HedKey83.StringRange: [],  # Unclear what validation should be done here.
-                                HedKey83.UnitClassRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses)],
-                                HedKey83.UnitRange: [schema_attribute_validators.unit_exists],
-                                HedKey83.ValueClassRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses)]
+                                HedKey.TagRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
+                                HedKey.NumericRange: [schema_attribute_validators.is_numeric_value],
+                                HedKey.StringRange: [],  # Unclear what validation should be done here.
+                                HedKey.UnitClassRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses)],
+                                HedKey.UnitRange: [schema_attribute_validators.unit_exists],
+                                HedKey.ValueClassRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses)]
                             }
                             for range_attribute in attribute_entry.attributes:
                                 validators += range_validators.get(range_attribute, [])

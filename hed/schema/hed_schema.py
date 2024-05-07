@@ -1,15 +1,14 @@
 import json
-import os
 
-from hed.schema.hed_schema_constants import HedKey, HedSectionKey, HedKey83
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey, HedKeyOld
 from hed.schema import hed_schema_constants as constants
 from hed.schema.schema_io import schema_util
 from hed.schema.schema_io.schema2xml import Schema2XML
 from hed.schema.schema_io.schema2wiki import Schema2Wiki
 from hed.schema.schema_io.schema2df import Schema2DF
+from hed.schema.schema_io import ontology_util
 
-# from hed.schema.schema_io.schema2owl import Schema2Owl
-# from hed.schema.schema_io.owl_constants import ext_to_format
+
 from hed.schema.hed_schema_section import (HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection,
                                            HedSchemaUnitSection)
 from hed.errors import ErrorHandler
@@ -245,28 +244,8 @@ class HedSchema(HedSchemaBase):
             str:  The schema as a string in mediawiki format.
 
         """
-        output_strings = Schema2Wiki.process_schema(self, save_merged)
+        output_strings = Schema2Wiki().process_schema(self, save_merged)
         return '\n'.join(output_strings)
-
-    # def get_as_owl_string(self, save_merged=False, file_format="owl"):
-    #     """ Return the schema to a mediawiki string.
-    #
-    #     Parameters:
-    #         save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
-    #                             If it is not a "withStandard" schema, this setting has no effect.
-    #         file_format(str or None): Override format from filename extension.
-    #             Accepts any value rdflib accepts(We fully support "turtle", "xml"("owl" also accepted) and "json-ld").
-    #             Other values should work, but aren't as fully supported.
-    #     Returns:
-    #         str:  The schema as a string in mediawiki format.
-    #
-    #     :raises rdflib.plugin.PluginException:
-    #         - Invalid format of file_format.  Make sure you use a supported RDF format.
-    #     """
-    #     if file_format == "owl":
-    #         file_format = "xml"
-    #     rdf_data = Schema2Owl.process_schema(self, save_merged)
-    #     return rdf_data.serialize(format=file_format)
 
     def get_as_xml_string(self, save_merged=True):
         """ Return the schema to an XML string.
@@ -279,8 +258,21 @@ class HedSchema(HedSchemaBase):
             str: Return the schema as an XML string.
 
         """
-        xml_tree = Schema2XML.process_schema(self, save_merged)
+        xml_tree = Schema2XML().process_schema(self, save_merged)
         return schema_util.xml_element_2_str(xml_tree)
+
+    def get_as_dataframes(self, save_merged=False):
+        """ Get a dict of dataframes representing this file
+
+        save_merged: bool
+            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
+
+        Returns:
+            dataframes(dict): a dict of dataframes you can load as a schema
+        """
+        output_dfs = Schema2DF().process_schema(self, save_merged)
+        return output_dfs
 
     def save_as_mediawiki(self, filename, save_merged=False):
         """ Save as mediawiki to a file.
@@ -294,57 +286,11 @@ class HedSchema(HedSchemaBase):
         :raises OSError:
             - File cannot be saved for some reason.
         """
-        output_strings = Schema2Wiki.process_schema(self, save_merged)
+        output_strings = Schema2Wiki().process_schema(self, save_merged)
         with open(filename, mode='w', encoding='utf-8') as opened_file:
             for string in output_strings:
                 opened_file.write(string)
                 opened_file.write('\n')
-
-    def save_as_dataframes(self, base_filename, save_merged=False):
-        """ Save as mediawiki to a file.
-
-        base_filename: str
-            save filename.  A suffix will be added to most, e.g. _Tag
-        save_merged: bool
-            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
-            If it is not a "withStandard" schema, this setting has no effect.
-
-        :raises OSError:
-            - File cannot be saved for some reason.
-        """
-        output_dfs = Schema2DF.process_schema(self, save_merged)
-        base, base_ext = os.path.splitext(base_filename)
-        for suffix, dataframe in output_dfs.items():
-            filename = f"{base}_{suffix}.tsv"
-            with open(filename, mode='w', encoding='utf-8') as opened_file:
-                dataframe.to_csv(opened_file, sep='\t', index=False, header=True)
-
-    # def save_as_owl(self, filename, save_merged=False, file_format=None):
-    #     """ Save as json to a file.
-    #
-    #     filename: str
-    #         Save the file here
-    #     save_merged: bool
-    #         If True, this will save the schema as a merged schema if it is a "withStandard" schema.
-    #         If it is not a "withStandard" schema, this setting has no effect.
-    #     file_format(str or None): Required for owl formatted files other than the following:
-    #         .ttl: turtle
-    #         .owl: xml
-    #         .json-ld: json-ld
-    #
-    #     :raises OSError:
-    #         - File cannot be saved for some reason
-    #
-    #     :raises rdflib.plugin.PluginException:
-    #         - Invalid format of file_format.  Make sure you use a supported RDF format.
-    #     """
-    #     ext = os.path.splitext(filename.lower())[1]
-    #     if ext in ext_to_format and file_format is None:
-    #         file_format = ext_to_format[ext]
-    #     if file_format == "owl":
-    #         file_format = "xml"
-    #     rdf_data = Schema2Owl.process_schema(self, save_merged)
-    #     rdf_data.serialize(filename, format=file_format)
 
     def save_as_xml(self, filename, save_merged=True):
         """ Save as XML to a file.
@@ -358,10 +304,25 @@ class HedSchema(HedSchemaBase):
         :raises OSError:
             - File cannot be saved for some reason
         """
-        xml_tree = Schema2XML.process_schema(self, save_merged)
+        xml_tree = Schema2XML().process_schema(self, save_merged)
         with open(filename, mode='w', encoding='utf-8') as opened_file:
             xml_string = schema_util.xml_element_2_str(xml_tree)
             opened_file.write(xml_string)
+
+    def save_as_dataframes(self, base_filename, save_merged=False):
+        """ Save as mediawiki to a file.
+
+        base_filename: str
+            save filename.  A suffix will be added to most, e.g. _Tag
+        save_merged: bool
+            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
+            If it is not a "withStandard" schema, this setting has no effect.
+
+        :raises OSError:
+            - File cannot be saved for some reason.
+        """
+        output_dfs = Schema2DF().process_schema(self, save_merged)
+        ontology_util.save_dataframes(base_filename, output_dfs)
 
     def set_schema_prefix(self, schema_namespace):
         """ Set library namespace associated for this schema.
@@ -664,10 +625,10 @@ class HedSchema(HedSchemaBase):
 
         """
         return {tag_entry.name: tag_entry for tag_entry in self._sections[HedSectionKey.Attributes].values()
-                if not tag_entry.has_attribute(HedKey.UnitClassProperty)
-                and not tag_entry.has_attribute(HedKey.UnitProperty)
-                and not tag_entry.has_attribute(HedKey.UnitModifierProperty)
-                and not tag_entry.has_attribute(HedKey.ValueClassProperty)}
+                if not tag_entry.has_attribute(HedKeyOld.UnitClassProperty)
+                and not tag_entry.has_attribute(HedKeyOld.UnitProperty)
+                and not tag_entry.has_attribute(HedKeyOld.UnitModifierProperty)
+                and not tag_entry.has_attribute(HedKeyOld.ValueClassProperty)}
 
     # ===============================================
     # Private utility functions
@@ -693,19 +654,14 @@ class HedSchema(HedSchemaBase):
             unit (str): A known unit.
 
         Returns:
-            list: List of HedSchemaEntry.
+            derived_unit_list(list of HedSchemaEntry): The derived units for this unit
 
         Notes:
             This is a lower level one that doesn't rely on the Unit entries being fully setup.
-
         """
-        # todo: could refactor this so this unit.casefold() part is in HedSchemaUnitSection.get
         unit_entry = self.get_tag_entry(unit, HedSectionKey.Units)
         if unit_entry is None:
-            unit_entry = self.get_tag_entry(unit.casefold(), HedSectionKey.Units)
-            # Unit symbols must match exactly
-            if unit_entry is None or unit_entry.has_attribute(HedKey.UnitSymbol):
-                return []
+            return []
         is_si_unit = unit_entry.has_attribute(HedKey.SIUnit)
         is_unit_symbol = unit_entry.has_attribute(HedKey.UnitSymbol)
         if not is_si_unit:
@@ -732,7 +688,7 @@ class HedSchema(HedSchemaBase):
         Returns:
             dict: A dict of all the attributes for this section.
         """
-        element_prop_key = HedKey83.ElementDomain if self.schema_83_props else HedKey.ElementProperty
+        element_prop_key = HedKey.ElementDomain if self.schema_83_props else HedKeyOld.ElementProperty
 
         # Common logic for Attributes and Properties
         if key_class in [HedSectionKey.Attributes, HedSectionKey.Properties]:
@@ -744,18 +700,18 @@ class HedSchema(HedSchemaBase):
 
         if self.schema_83_props:
             attrib_classes = {
-                HedSectionKey.UnitClasses: HedKey83.UnitClassDomain,
-                HedSectionKey.Units: HedKey83.UnitDomain,
-                HedSectionKey.UnitModifiers: HedKey83.UnitModifierDomain,
-                HedSectionKey.ValueClasses: HedKey83.ValueClassDomain,
-                HedSectionKey.Tags: HedKey83.TagDomain
+                HedSectionKey.UnitClasses: HedKey.UnitClassDomain,
+                HedSectionKey.Units: HedKey.UnitDomain,
+                HedSectionKey.UnitModifiers: HedKey.UnitModifierDomain,
+                HedSectionKey.ValueClasses: HedKey.ValueClassDomain,
+                HedSectionKey.Tags: HedKey.TagDomain
             }
         else:
             attrib_classes = {
-                HedSectionKey.UnitClasses: HedKey.UnitClassProperty,
-                HedSectionKey.Units: HedKey.UnitProperty,
-                HedSectionKey.UnitModifiers: HedKey.UnitModifierProperty,
-                HedSectionKey.ValueClasses: HedKey.ValueClassProperty
+                HedSectionKey.UnitClasses: HedKeyOld.UnitClassProperty,
+                HedSectionKey.Units: HedKeyOld.UnitProperty,
+                HedSectionKey.UnitModifiers: HedKeyOld.UnitModifierProperty,
+                HedSectionKey.ValueClasses: HedKeyOld.ValueClassProperty
             }
             if key_class == HedSectionKey.Tags:
                 return self.get_tag_attribute_names_old()

@@ -168,8 +168,9 @@ class UnitClassEntry(HedSchemaEntry):
             schema (HedSchema): The object with the schema rules.
 
         """
-
         self.units = {unit_entry.name: unit_entry for unit_entry in self._units}
+        for unit_entry in self.units.values():
+            unit_entry.unit_class_entry = self
         derivative_units = {}
         for unit_entry in self.units.values():
             derivative_units.update({key: unit_entry for key in unit_entry.derivative_units.keys()})
@@ -209,9 +210,9 @@ class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.unit_class_name = None
         self.unit_modifiers = []
         self.derivative_units = {}
+        self.unit_class_entry = None
 
     def finalize_entry(self, schema):
         """ Called once after loading to set internal state.
@@ -221,7 +222,6 @@ class UnitEntry(HedSchemaEntry):
 
         """
         self.unit_modifiers = schema._get_modifiers_for_unit(self.name)
-
         derivative_units = {}
         if self.has_attribute(HedKey.UnitSymbol):
             base_plural_units = {self.name}

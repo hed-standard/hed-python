@@ -7,6 +7,8 @@ from xml.dom import minidom
 from xml.etree import ElementTree
 from semantic_version import Version
 
+from hed.errors import HedExceptions, ErrorContext
+
 # you can fill this in locally if you don't want to add it to environ.
 github_api_access_token = ""
 
@@ -112,3 +114,14 @@ def schema_version_greater_equal(hed_schema, target_version):
             return True
 
     return False
+
+
+def format_error(row_number, row, warning_message="Schema term is empty or the line is malformed",
+                  error_code=HedExceptions.GENERIC_ERROR):
+    error = {'code': error_code,
+             ErrorContext.ROW: row_number,
+             ErrorContext.LINE: str(row),
+             "message": f"{warning_message}"
+             }
+
+    return [error]

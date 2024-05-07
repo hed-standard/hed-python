@@ -10,11 +10,15 @@ class Schema2Wiki(Schema2Base):
         super().__init__()
         self.current_tag_string = ""
         self.current_tag_extra = ""
-        self.output = []
 
     # =========================================
     # Required baseclass function
     # =========================================
+    def _initialize_output(self):
+        self.current_tag_string = ""
+        self.current_tag_extra = ""
+        self.output = []
+
     def _output_header(self, attributes, prologue):
         hed_attrib_string = self._get_attribs_string_from_schema(attributes)
         self.current_tag_string = f"{wiki_constants.HEADER_LINE_STRING} {hed_attrib_string}"
@@ -55,7 +59,7 @@ class Schema2Wiki(Schema2Base):
             self.current_tag_string += f"'''{tag}'''"
         else:
             short_tag = tag.split("/")[-1]
-            tab_char = ''  # Github mangles these, so remove spacing for now.
+            tab_char = ''  # GitHub mangles these, so remove spacing for now.
             # takes value tags should appear after the nowiki tag.
             if short_tag.endswith("#"):
                 self.current_tag_string += f"{tab_char * level}{'*' * level} "
