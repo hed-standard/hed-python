@@ -145,7 +145,6 @@ class TestConvertOmn(unittest.TestCase):
         dataframes = load_schema_version("8.3.0").get_as_dataframes()
         omn_version = convert_df_to_omn(dataframes)
 
-        # todo ian: add another check here for hed ID's being located(it's okay if it's halffassed)
         # make these more robust, for now just verify it's somewhere in the result
         for df_name, df in dataframes.items():
             if df_name == constants.STRUCT_KEY:
@@ -155,3 +154,10 @@ class TestConvertOmn(unittest.TestCase):
                 error = f"Label '{label}' from dataframe '{df_name}' was not found in the OMN output."
                 label_key = f'rdfs:label "{label}"'
                 self.assertIn(label_key, omn_version, error)
+
+            for hed_id in df[constants.hed_id]:
+                if df_name == constants.STRUCT_KEY:
+                    continue  # Not implemented yet
+                base_id = f": hed:{hed_id}"
+                error = f"HedId '{base_id}' from dataframe '{df_name}' was not found in the OMN output."
+                self.assertIn(base_id, omn_version, error)
