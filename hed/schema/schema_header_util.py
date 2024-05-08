@@ -95,3 +95,5 @@ def validate_attributes(attrib_dict, name):
     if constants.VERSION_ATTRIBUTE not in attrib_dict:
         raise HedFileError(HedExceptions.SCHEMA_VERSION_INVALID,
                            "No version attribute found in header", filename=name)
+
+

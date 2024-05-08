@@ -61,18 +61,6 @@ class HedKey:
     InLibrary = "inLibrary"
     HedID = 'hedId'
 
-    # All known properties
-    BoolProperty = 'boolProperty'
-    UnitClassProperty = 'unitClassProperty'
-    UnitProperty = 'unitProperty'
-    UnitModifierProperty = 'unitModifierProperty'
-    ValueClassProperty = 'valueClassProperty'
-    ElementProperty = 'elementProperty'
-    NodeProperty = 'nodeProperty'
-    IsInheritedProperty = 'isInheritedProperty'
-
-
-class HedKey83:
     UnitClassDomain = "unitClassDomain"
     UnitDomain = "unitDomain"
     UnitModifierDomain = "unitModifierDomain"
@@ -82,14 +70,24 @@ class HedKey83:
     AnnotationProperty = "annotationProperty"
 
     BoolRange = "boolRange"
-
-    # Fully new below this
     TagRange = "tagRange"
     NumericRange = "numericRange"
     StringRange = "stringRange"
     UnitClassRange = "unitClassRange"
     UnitRange = "unitRange"
     ValueClassRange = "valueClassRange"
+
+
+class HedKeyOld:
+    # Fully Deprecated properties
+    BoolProperty = 'boolProperty'
+    UnitClassProperty = 'unitClassProperty'
+    UnitProperty = 'unitProperty'
+    UnitModifierProperty = 'unitModifierProperty'
+    ValueClassProperty = 'valueClassProperty'
+    ElementProperty = 'elementProperty'
+    NodeProperty = 'nodeProperty'
+    IsInheritedProperty = 'isInheritedProperty'
 
 
 VERSION_ATTRIBUTE = 'version'

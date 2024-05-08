@@ -9,13 +9,17 @@ from hed.schema.schema_io.schema2base import Schema2Base
 class Schema2XML(Schema2Base):
     def __init__(self):
         super().__init__()
-        self.hed_node = Element('HED')
-        # alias this to output to match baseclass expectation.
-        self.output = self.hed_node
+        self.hed_node = None
+        self.output = None
 
     # =========================================
     # Required baseclass function
     # =========================================
+    def _initialize_output(self):
+        self.hed_node = Element('HED')
+        # alias this to output to match baseclass expectation.
+        self.output = self.hed_node
+
     def _output_header(self, attributes, prologue):
         for attrib_name, attrib_value in attributes.items():
             self.hed_node.set(attrib_name, attrib_value)
