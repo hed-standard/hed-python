@@ -64,7 +64,10 @@ def _get_hedid_range(schema_name, df_key):
     starting_id, ending_id = library_index_ranges[schema_name]
 
     start_object_range, end_object_range = object_type_id_offset[df_key]
-    initial_tag_adj = 1  # We always skip 1
+    if df_key == constants.TAG_KEY:
+        initial_tag_adj = 1  # We always skip 1 for tags
+    else:
+        initial_tag_adj = 0
     final_start = starting_id + start_object_range + initial_tag_adj
     final_end = starting_id + end_object_range
     if end_object_range == -1:
@@ -108,19 +111,22 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
         dataframes(dict of str:pd.DataFrames): The updated dataframes
                                                These dataframes can potentially have extra columns
     """
+    hedid_errors = []
     # 1. Verify existing hed ids don't conflict between schema/dataframes
-    for key, df in dataframes.items():
-        section_key = constants.section_mapping.get(key)
+    for df_key, df in dataframes.items():
+        section_key = constants.section_mapping.get(df_key)
         if not section_key:
             continue
         section = schema[section_key]
 
-        hedid_errors = _verify_hedid_matches(section, df)
-        if hedid_errors:
-            raise HedFileError(hedid_errors[0]['code'],
-                               f"{len(hedid_errors)} issues found with hedId mismatches.  See the .issues "
-                               f"parameter on this exception for more details.", schema.name,
-                               issues=hedid_errors)
+        unused_tag_ids = _get_hedid_range(schema_name, df_key)
+        hedid_errors += _verify_hedid_matches(section, df, unused_tag_ids)
+
+    if hedid_errors:
+        raise HedFileError(hedid_errors[0]['code'],
+                           f"{len(hedid_errors)} issues found with hedId mismatches.  See the .issues "
+                           f"parameter on this exception for more details.", schema.name,
+                           issues=hedid_errors)
 
     # 2. Get the new schema as DFs
     from hed.schema.schema_io.schema2df import Schema2DF  # Late import as this is recursive
@@ -144,12 +150,13 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     return output_dfs
 
 
-def _verify_hedid_matches(section, df):
+def _verify_hedid_matches(section, df, unused_tag_ids):
     """ Verify ID's in both have the same label, and verify all entries in the dataframe are already in the schema
 
     Parameters:
         section(HedSchemaSection): The loaded schema section to compare ID's with
         df(pd.DataFrame): The loaded spreadsheet dataframe to compare with
+        unused_tag_ids(set): The valid range of ID's for this df
 
     Returns:
         error_list(list of str): A list of errors found matching id's
@@ -168,6 +175,23 @@ def _verify_hedid_matches(section, df):
                                                      f"'{label}' does not exist in the schema file provided, only the spreadsheet.")
             continue
         entry_id = entry.attributes.get(HedKey.HedID)
+        if df_id:
+            if not (df_id.startswith("HED_") and len(df_id) == len("HED_0000000")):
+                hedid_errors += schema_util.format_error(row_number, row,
+                                                         f"'{label}' has an improperly formatted hedID in the dataframe.")
+                continue
+            id_value = remove_prefix(df_id, "HED_")
+            try:
+                id_int = int(id_value)
+                if id_int not in unused_tag_ids:
+                    hedid_errors += schema_util.format_error(row_number, row,
+                                                             f"'{label}' has id {id_int} which is outside of the valid range for this type.  Valid range is: {min(unused_tag_ids)} to {max(unused_tag_ids)}")
+                    continue
+            except ValueError:
+                hedid_errors += schema_util.format_error(row_number, row,
+                                                         f"'{label}' has a non-numeric hedID in the dataframe.")
+                continue
+
         if entry_id and entry_id != df_id:
             hedid_errors += schema_util.format_error(row_number, row,
                                                      f"'{label}' has hedID '{df_id}' in dataframe, but '{entry_id}' in schema.")
@@ -232,7 +256,9 @@ def convert_df_to_omn(dataframes):
         dataframes(dict): A set of dataframes representing a schema, potentially including extra columns
 
     Returns:
-        omn_file(str): A combined string representing (most of) a schema omn file.
+        tuple:
+            omn_file(str): A combined string representing (most of) a schema omn file.
+            omn_data(dict): a dict of DF_SUFFIXES:str, representing each .tsv file in omn format.
     """
     from hed.schema.hed_schema_io import from_dataframes
     # Load the schema, so we can save it out with ID's
@@ -243,13 +269,15 @@ def convert_df_to_omn(dataframes):
     # Write out the new dataframes in omn format
     annotation_props = _get_annotation_prop_ids(dataframes)
     full_text = ""
+    omn_data = {}
     for suffix, dataframe in dataframes.items():
         if suffix == constants.STRUCT_KEY:  # not handled here yet
             continue
         output_text = _convert_df_to_omn(dataframes[suffix], annotation_properties=annotation_props)
+        omn_data[suffix] = output_text
         full_text += output_text + "\n"
 
-    return full_text
+    return full_text, omn_data
 
 
 def _convert_df_to_omn(df, annotation_properties=("",)):
