@@ -28,8 +28,8 @@ from hed.tools.analysis.key_map import KeyMap
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.analysis.temporal_event import TemporalEvent
 from hed.tools.analysis.hed_tag_manager import HedTagManager
-from hed.tools.analysis.annotation_util import check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, \
-    df_to_hed, merge_hed_dict, str_to_tabular, strs_to_sidecar, to_strlist
+from hed.tools.analysis.annotation_util import (check_df_columns, extract_tags, generate_sidecar_entry, 
+    get_bids_dataset, hed_to_df, df_to_hed, merge_hed_dict, str_to_tabular, strs_to_sidecar, to_strlist)
 
 from hed.tools.util.hed_logger import HedLogger
 from hed.tools.util.data_util import get_new_dataframe, get_value_dict, replace_values, reorder_columns
