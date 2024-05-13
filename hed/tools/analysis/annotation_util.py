@@ -6,6 +6,7 @@ from pandas import DataFrame
 from hed.models import Sidecar, TabularInput
 from hed.errors.exceptions import HedFileError
 from hed.models.df_util import replace_ref
+from hed.tools.bids.bids_dataset import BidsDataset
 
 
 def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')):
@@ -111,6 +112,17 @@ def generate_sidecar_entry(column_name, column_values=None):
         sidecar_entry["HED"] = hed
     return sidecar_entry
 
+def get_bids_dataset(data_root):
+    """ Return a BIDS dataset object given a path to a dataset root.
+    
+    Parameters:
+        data_root (str): Path to the BIDS dataset root.
+        
+    Returns:
+        BidsDataset 
+        
+    """
+    return BidsDataset(data_root)
 
 def hed_to_df(sidecar_dict, col_names=None):
     """ Return a 4-column dataframe of HED portions of sidecar.

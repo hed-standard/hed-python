@@ -47,7 +47,7 @@ from .util.io_util import get_dir_dictionary, get_file_list, get_path_components
 
 from .analysis import annotation_util
 from .analysis.annotation_util import \
-    check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict, \
+    check_df_columns, extract_tags, generate_sidecar_entry, get_bids_dataset, hed_to_df, df_to_hed, merge_hed_dict, \
     str_to_tabular, strs_to_sidecar, to_strlist
 
 from .remodeling.cli import run_remodel
