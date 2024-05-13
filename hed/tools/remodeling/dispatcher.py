@@ -6,7 +6,8 @@ import pandas as pd
 import json
 from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_io import load_schema_version
-from hed.schema import HedSchema, HedSchemaGroup
+from hed.schema.hed_schema import HedSchema
+from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
 from hed.tools.util.io_util import clean_filename, extract_suffix_path, get_timestamp

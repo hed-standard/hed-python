@@ -1,6 +1,6 @@
 """ Summarize the type_defs in the dataset. """
 
-from hed import TabularInput
+from hed.models.tabular_input import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
 from hed.models.def_expand_gather import DefExpandGatherer

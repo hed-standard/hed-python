@@ -2,13 +2,15 @@ import io
 import unittest
 import os
 import shutil
-from hed import Sidecar, load_schema_version
-from hed import BaseInput, TabularInput
+from hed.models.sidecar import Sidecar
+from hed.schema.hed_schema_io import load_schema_version
+from hed.models.base_input import BaseInput
+from hed.models.tabular_input import TabularInput
 from hed.models.column_mapper import ColumnMapper
-from hed.models import DefinitionDict
+from hed.models.definition_dict import DefinitionDict
 from hed import schema
-from hed import HedFileError
-from hed.errors import ErrorContext, ValidationErrors
+from hed.errors.exceptions import HedFileError
+from hed.errors.error_types import ErrorContext, ValidationErrors
 
 
 import pandas as pd

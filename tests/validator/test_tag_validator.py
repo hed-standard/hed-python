@@ -2,7 +2,7 @@ import unittest
 
 from hed.errors.error_types import ValidationErrors, DefinitionErrors, TemporalErrors
 from tests.validator.test_tag_validator_base import TestValidatorBase
-from hed import load_schema_version
+from hed.schema.hed_schema_io import load_schema_version
 from functools import partial
 
 

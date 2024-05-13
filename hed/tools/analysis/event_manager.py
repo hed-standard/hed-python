@@ -2,11 +2,11 @@
 import pandas as pd
 import bisect
 
-from hed.errors import HedFileError
-from hed.models import HedString
+from hed.errors.exceptions import HedFileError
+from hed.models.hed_string import HedString
 from hed.models.model_constants import DefTagNames
 from hed.models import df_util
-from hed.models.string_util import split_base_tags, split_def_tags
+from hed.models import string_util as sutil 
 from hed.tools.analysis.temporal_event import TemporalEvent
 from hed.tools.analysis.hed_type_defs import HedTypeDefs
 
@@ -176,9 +176,9 @@ class EventManager:
             return ""
         # Reconvert even if HED is already a HedString to make sure a copy and expandable.
         hed_obj = HedString(str(hed), hed_schema=self.hed_schema, def_dict=self.def_dict)
-        hed_obj, temp1 = split_base_tags(hed_obj, remove_types, remove_group=remove_group)
+        hed_obj, temp1 = sutil.split_base_tags(hed_obj, remove_types, remove_group=remove_group)
         if remove_defs:
-            hed_obj, temp2 = split_def_tags(hed_obj, remove_defs, remove_group=remove_group)
+            hed_obj, temp2 = sutil.split_def_tags(hed_obj, remove_defs, remove_group=remove_group)
         return str(hed_obj)
 
     def str_list_to_hed(self, str_list):

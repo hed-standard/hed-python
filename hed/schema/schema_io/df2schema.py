@@ -7,7 +7,7 @@ import os
 import hed.schema.schema_io.ontology_util
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
-from .base2schema import SchemaLoader
+from hed.schema.schema_io.base2schema import SchemaLoader
 import pandas as pd
 import hed.schema.hed_schema_df_constants as constants
 from hed.errors import error_reporter

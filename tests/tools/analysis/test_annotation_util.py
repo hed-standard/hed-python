@@ -4,7 +4,7 @@ import json
 import unittest
 from pandas import DataFrame
 from hed import schema as hedschema
-from hed.errors import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed.models.sidecar import Sidecar
 from hed.models.hed_string import HedString
 from hed.models.tabular_input import TabularInput

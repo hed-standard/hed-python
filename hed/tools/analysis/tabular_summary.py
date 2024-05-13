@@ -4,7 +4,7 @@
 import json
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import get_new_dataframe
-from hed.tools.analysis.annotation_util import generate_sidecar_entry
+from hed.tools.analysis import annotation_util as autil
 
 
 class TabularSummary:
@@ -68,10 +68,10 @@ class TabularSummary:
         for column_name, columns in self.categorical_info.items():
             column_values = list(columns.keys())
             column_values.sort()
-            side_dict[column_name] = generate_sidecar_entry(column_name, column_values)
+            side_dict[column_name] = autil.generate_sidecar_entry(column_name, column_values)
 
         for column_name in self.value_info.keys():
-            side_dict[column_name] = generate_sidecar_entry(column_name, [])
+            side_dict[column_name] = autil.generate_sidecar_entry(column_name, [])
         return side_dict
 
     def get_summary(self, as_json=False):

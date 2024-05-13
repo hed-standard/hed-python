@@ -2,7 +2,7 @@
 
 import numpy as np
 from PIL import Image
-from hed.errors import HedFileError
+from hed.errors.exceptions import HedFileError
 from hed.tools.visualization.word_cloud_util import default_color_func, WordCloud, generate_contour_svg
 import matplotlib.font_manager as fm
 

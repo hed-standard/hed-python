@@ -1,6 +1,6 @@
 """ Manager for HED tags from a columnar file. """
 
-from hed.models import HedString
+from hed.models.hed_string import HedString
 from hed.models.string_util import split_base_tags
 
 

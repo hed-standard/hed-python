@@ -3,8 +3,8 @@ import re
 import itertools
 
 from hed.errors import ErrorHandler, ErrorContext, SidecarErrors, DefinitionErrors, ColumnErrors
-from hed.models import ColumnType
-from hed import HedString
+from hed.models.column_mapper import ColumnType
+from hed.models.hed_string import HedString
 from hed.models.column_metadata import ColumnMetadata
 from hed.errors.error_reporter import sort_issues
 from hed.models.model_constants import DefTagNames

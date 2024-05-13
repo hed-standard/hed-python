@@ -1,10 +1,10 @@
 import copy
 
-from hed import BaseInput
-from hed.errors import ErrorHandler, ValidationErrors, ErrorContext
-from hed.errors.error_types import ColumnErrors
-from hed.models import ColumnType
-from hed import HedString
+from hed.models.base_input import BaseInput
+from hed.errors.error_types import ColumnErrors, ErrorContext, ValidationErrors
+from hed.errors.error_reporter import ErrorHandler
+from hed.models.column_mapper import ColumnType
+from hed.models.hed_string import HedString
 from hed.errors.error_reporter import sort_issues, check_for_any_errors
 from hed.validator.onset_validator import OnsetValidator
 from hed.validator.hed_validator import HedValidator

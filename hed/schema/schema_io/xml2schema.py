@@ -8,7 +8,7 @@ import xml
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey, NS_ATTRIB, NO_LOC_ATTRIB
 from hed.schema.schema_io import xml_constants
-from .base2schema import SchemaLoader
+from hed.schema.schema_io.base2schema import SchemaLoader
 from functools import partial
 
 

@@ -3,7 +3,8 @@
 import io
 import re
 from pandas import DataFrame
-from hed.models import Sidecar, TabularInput
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
 from hed.errors.exceptions import HedFileError
 from hed.models.df_util import replace_ref
 from hed.tools.bids.bids_dataset import BidsDataset

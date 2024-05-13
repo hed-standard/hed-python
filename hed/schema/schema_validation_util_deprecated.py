@@ -1,5 +1,6 @@
 """Legacy validation for terms and descriptions prior to 8.3.0."""
-from hed.errors import ErrorHandler, SchemaWarnings
+from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import SchemaWarnings
 
 
 ALLOWED_TAG_CHARS = "-"

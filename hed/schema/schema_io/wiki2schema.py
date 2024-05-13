@@ -7,8 +7,8 @@ from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors import error_reporter
 from hed.schema.schema_io import wiki_constants
-from .base2schema import SchemaLoader
-from .wiki_constants import HedWikiSection, SectionStarts, SectionNames
+from hed.schema.schema_io.base2schema import SchemaLoader
+from hed.schema.schema_io.wiki_constants import HedWikiSection, SectionStarts, SectionNames
 from hed.schema.schema_io import text_util
 
 
