@@ -4,6 +4,7 @@ import io
 import re
 
 import pandas as pd
+from pandas import DataFrame, Series
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 
@@ -187,6 +188,21 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             continue
         if isinstance(value_dict['HED'], dict) and 'Levels' in value_dict:
             sidecar_dict[key]['Levels'] = value_dict['Levels']
+
+
+def series_to_factor(series):
+    """Convert a series to an integer factor list.
+
+    Parameters:
+        series (Series) - Series to be converted to a list.
+
+    Returns:
+        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
+    """
+    replaced = series.replace('n/a', False)
+    filled = replaced.fillna(False)
+    bool_list = filled.astype(bool).tolist()
+    return [int(value) for value in bool_list]
 
 
 def str_to_tabular(tsv_str, sidecar=None):
