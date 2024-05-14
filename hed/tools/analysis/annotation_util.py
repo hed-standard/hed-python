@@ -226,9 +226,11 @@ def strs_to_sidecar(sidecar_strings):
          sidecar_strings (string or list):  String or strings representing sidecars.
 
      Returns:
-         Sidecar:  the merged sidecar from the list.
+         Sidecar or None:  the merged sidecar from the list.
      """
 
+    if not sidecar_strings:
+        return None
     if not isinstance(sidecar_strings, list):
         sidecar_strings = [sidecar_strings]
     if sidecar_strings:
