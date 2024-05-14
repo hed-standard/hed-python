@@ -1,5 +1,5 @@
 """ A single event process with starting and ending times. """
-from hed.models import HedGroup
+from hed.models.hed_group import HedGroup
 from hed.models.model_constants import DefTagNames
 
 

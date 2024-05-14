@@ -2,9 +2,9 @@
 
 import numpy as np
 from PIL import Image
-from hed.errors import HedFileError
-from hed.tools.visualization.word_cloud_util import default_color_func, WordCloud, generate_contour_svg
-import matplotlib.font_manager as fm
+from hed.errors.exceptions import HedFileError
+from hed.tools.visualization import word_cloud_util
+from wordcloud import WordCloud
 
 
 def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400, height=300, **kwargs):
@@ -40,7 +40,7 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     kwargs.setdefault('contour_width', 3)
     kwargs.setdefault('contour_color', 'black')
     kwargs.setdefault('prefer_horizontal', 0.75)
-    kwargs.setdefault('color_func', default_color_func)
+    kwargs.setdefault('color_func', word_cloud_util.default_color_func)
     kwargs.setdefault('relative_scaling', 1)
     kwargs.setdefault('max_font_size', height / 20)
     kwargs.setdefault('min_font_size', 8)
@@ -68,7 +68,7 @@ def word_cloud_to_svg(wc):
     """
     svg_string = wc.to_svg()
     svg_string = svg_string.replace("fill:", "fill:rgb")
-    svg_string = svg_string.replace("</svg>", generate_contour_svg(wc, wc.width, wc.height) + "</svg>")
+    svg_string = svg_string.replace("</svg>", word_cloud_util.generate_contour_svg(wc, wc.width, wc.height) + "</svg>")
     return svg_string
 
 

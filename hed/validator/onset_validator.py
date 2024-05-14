@@ -1,3 +1,5 @@
+""" Validates the onset/offset conditions. """
+
 from hed.models.model_constants import DefTagNames
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import TemporalErrors

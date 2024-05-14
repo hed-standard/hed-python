@@ -3,7 +3,7 @@
 import os
 from abc import ABC, abstractmethod
 import json
-from hed.tools.util.io_util import get_timestamp
+from hed.tools.util import io_util
 
 
 class BaseSummary(ABC):
@@ -189,7 +189,7 @@ class BaseSummary(ABC):
 
         """
         if self.op.append_timecode:
-            time_stamp = '_' + get_timestamp()
+            time_stamp = '_' + io_util.get_timestamp()
         else:
             time_stamp = ''
         if task_name:

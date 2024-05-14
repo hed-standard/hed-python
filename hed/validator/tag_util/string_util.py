@@ -1,3 +1,5 @@
+""" Utilities supporting the validation of HED strings. """
+
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 

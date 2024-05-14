@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<HED version="2.0.0" library="testlib" withStandard="8.2.0">
-   <prologue>This schema tests the ordering effects of various combinations of rooted and extension allowed for rooted schemas. It is compatible with testlib version 3.0.0 but not testlib 2.0.0.</prologue>
+<HED version="2.1.0" library="testlib" withStandard="8.2.0">
+   <prologue>This schema is designed to conflict with testlib 2.0.0 and testlib 3.0.0.</prologue>
    <schema>
       <node>
          <name>Event</name>
@@ -89,21 +89,21 @@
          </node>
       </node>
       <node>
-         <name>B-nonextension</name>
-         <description>These should not be sorted.  B should be first</description>
+         <name>BA-nonextension</name>
+         <description>Does not conflict with testlib 2.0.0 or 3.0.0</description>
          <attribute>
             <name>inLibrary</name>
             <value>testlib</value>
          </attribute>
          <node>
-            <name>SubnodeB1</name>
+            <name>SubnodeB1A</name>
             <attribute>
                <name>inLibrary</name>
                <value>testlib</value>
             </attribute>
          </node>
          <node>
-            <name>SubnodeB2</name>
+            <name>SubnodeB2A</name>
             <attribute>
                <name>inLibrary</name>
                <value>testlib</value>
@@ -112,7 +112,7 @@
       </node>
       <node>
          <name>A-nonextension</name>
-         <description>These should not be sorted.  A should be second</description>
+         <description>These should not be sorted.  A should be second. Conflicts with testlib 2.0.0.</description>
          <attribute>
             <name>inLibrary</name>
             <value>testlib</value>
@@ -842,38 +842,6 @@
                <name>Track</name>
                <description>Follow a person, animal, or object through space or time.</description>
             </node>
-         </node>
-      </node>
-      <node>
-         <name>D-extensionallowed</name>
-         <description>These should be sorted.  This section should be first.</description>
-         <attribute>
-            <name>extensionAllowed</name>
-         </attribute>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeD1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeD2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeD3</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
          </node>
       </node>
       <node>
@@ -1738,32 +1706,6 @@
                   <name>Instrument-sound</name>
                   <description>Sound produced by a musical instrument.</description>
                   <node>
-                     <name>Flute-sound</name>
-                     <description>These should be sorted.  Flute should be first</description>
-                     <attribute>
-                        <name>rooted</name>
-                        <value>Instrument-sound</value>
-                     </attribute>
-                     <attribute>
-                        <name>inLibrary</name>
-                        <value>testlib</value>
-                     </attribute>
-                     <node>
-                        <name>Flute-subsound1</name>
-                        <attribute>
-                           <name>inLibrary</name>
-                           <value>testlib</value>
-                        </attribute>
-                     </node>
-                     <node>
-                        <name>Flute-subsound2</name>
-                        <attribute>
-                           <name>inLibrary</name>
-                           <value>testlib</value>
-                        </attribute>
-                     </node>
-                  </node>
-                  <node>
                      <name>Oboe-sound</name>
                      <description>These should be sorted.  Oboe should be second</description>
                      <attribute>
@@ -1790,8 +1732,34 @@
                      </node>
                   </node>
                   <node>
-                     <name>Violin-sound</name>
-                     <description>These should be sorted.  Violin should be last</description>
+                     <name>Piano-sound</name>
+                     <description>Conflicts with testlib 3.0.0.</description>
+                     <attribute>
+                        <name>rooted</name>
+                        <value>Instrument-sound</value>
+                     </attribute>
+                     <attribute>
+                        <name>inLibrary</name>
+                        <value>testlib</value>
+                     </attribute>
+                     <node>
+                        <name>Piano-subsound1</name>
+                        <attribute>
+                           <name>inLibrary</name>
+                           <value>testlib</value>
+                        </attribute>
+                     </node>
+                     <node>
+                        <name>Piano-subsound2A</name>
+                        <attribute>
+                           <name>inLibrary</name>
+                           <value>testlib</value>
+                        </attribute>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Violin1-sound</name>
+                     <description>Conflicts with testlib 2.0.0</description>
                      <attribute>
                         <name>rooted</name>
                         <value>Instrument-sound</value>
@@ -1815,7 +1783,7 @@
                         </attribute>
                      </node>
                      <node>
-                        <name>Violin-subsound3</name>
+                        <name>Violin1-subsound3</name>
                         <attribute>
                            <name>inLibrary</name>
                            <value>testlib</value>
@@ -7455,5 +7423,4 @@
          <description>Indicates that the schema attribute is meant to be applied to value classes.</description>
       </propertyDefinition>
    </propertyDefinitions>
-   <epilogue>A final section.</epilogue>
 </HED>

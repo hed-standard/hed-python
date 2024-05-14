@@ -6,7 +6,7 @@ import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
-from hed.models.query_service import search_strings, get_query_handlers
+from hed.models import query_service
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_tag_manager import HedTagManager
 
@@ -89,7 +89,7 @@ class FactorHedTagsOp(BaseOp):
         self.expand_context = parameters.get('expand_context', True)
         self.replace_defs = parameters.get('replace_defs', True)
         self.query_handlers, self.query_names, issues = \
-            get_query_handlers(self.queries, parameters.get('query_names', None))
+            query_service.get_query_handlers(self.queries, parameters.get('query_names', None))
         if issues:
             raise ValueError("FactorHedTagInvalidQueries", "\n".join(issues))
 
@@ -122,7 +122,7 @@ class FactorHedTagsOp(BaseOp):
         tag_man = HedTagManager(EventManager(input_data, dispatcher.hed_schema),
                                 remove_types=self.remove_types)
         hed_objs = tag_man.get_hed_objs(include_context=self.expand_context, replace_defs=self.replace_defs)
-        df_factors = search_strings(hed_objs, self.query_handlers, query_names=self.query_names)
+        df_factors = query_service.search_strings(hed_objs, self.query_handlers, query_names=self.query_names)
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
@@ -140,5 +140,6 @@ class FactorHedTagsOp(BaseOp):
             list:  List of issues in parsing queries.
 
         """
-        queries, names, issues = get_query_handlers(parameters.get("queries", []), parameters.get("query_names", None))
+        queries, names, issues = query_service.get_query_handlers(parameters.get("queries", []), 
+                                                                  parameters.get("query_names", None))
         return issues

@@ -2,7 +2,7 @@
 
 
 import pandas as pd
-from hed.tools.util.data_util import get_key_hash
+from hed.tools.util import data_util
 
 
 class SequenceMap:
@@ -122,7 +122,7 @@ class SequenceMap:
             if index + 1 >= len(filtered):
                 break
             key_list = filtered[index:index+2].tolist()
-            key = get_key_hash(key_list)
+            key = data_util.get_key_hash(key_list)
             if key in self.edges:
                 self.edge_counts[key] = self.edge_counts[key] + 1
             else:

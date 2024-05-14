@@ -1,7 +1,7 @@
 """ Manager for HED tags from a columnar file. """
 
-from hed.models import HedString
-from hed.models.string_util import split_base_tags
+from hed.models.hed_string import HedString
+from hed.models import string_util
 
 
 class HedTagManager:
@@ -58,5 +58,5 @@ class HedTagManager:
             return None
         hed_obj = HedString(hed_str, self.event_manager.hed_schema, def_dict=self.event_manager.def_dict)
         if remove_types:
-            hed_obj, temp = split_base_tags(hed_obj, self.remove_types, remove_group=remove_group)
+            hed_obj, temp = string_util.split_base_tags(hed_obj, self.remove_types, remove_group=remove_group)
         return hed_obj

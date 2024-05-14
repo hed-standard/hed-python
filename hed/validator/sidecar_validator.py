@@ -3,13 +3,13 @@ import re
 import itertools
 
 from hed.errors import ErrorHandler, ErrorContext, SidecarErrors, DefinitionErrors, ColumnErrors
-from hed.models import ColumnType
-from hed import HedString
+from hed.models.column_mapper import ColumnType
+from hed.models.hed_string import HedString
 from hed.models.column_metadata import ColumnMetadata
 from hed.errors.error_reporter import sort_issues
 from hed.models.model_constants import DefTagNames
 from hed.errors.error_reporter import check_for_any_errors
-from hed.models.df_util import replace_ref
+from hed.models import df_util
 
 
 # todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
@@ -97,7 +97,7 @@ class SidecarValidator:
                         ref_dict = dict(zip(refs, combination))
                         modified_string = hed_string
                         for ref in refs:
-                            modified_string = replace_ref(modified_string, f"{{{ref}}}", ref_dict[ref])
+                            modified_string = df_util.replace_ref(modified_string, f"{{{ref}}}", ref_dict[ref])
                         hed_string_obj = HedString(modified_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
 
                         error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)

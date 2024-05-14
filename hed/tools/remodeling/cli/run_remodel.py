@@ -10,7 +10,7 @@ from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.remodeling.remodeler_validator import RemodelerValidator
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.backup_manager import BackupManager
-from hed.tools.util.io_util import get_alphanumeric_path, get_file_list, get_task_dict, get_timestamp
+from hed.tools.util import io_util
 
 
 def get_parser():
@@ -132,7 +132,7 @@ def parse_tasks(files, task_args):
     """
     if not task_args:
         return {"": files}
-    task_dict = get_task_dict(files)
+    task_dict = io_util.get_task_dict(files)
     if task_args == "*" or isinstance(task_args, list) and task_args[0] == "*":
         return task_dict
     task_dict = {key: task_dict[key] for key in task_args if key in task_dict}
@@ -209,7 +209,7 @@ def main(arg_list=None):
 
     if args.log_dir:
         os.makedirs(args.log_dir, exist_ok=True)
-        timestamp = get_timestamp()
+        timestamp = io_util.get_timestamp()
     try:
         if not os.path.isdir(args.data_dir):
             raise HedFileError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist", "")
@@ -217,7 +217,7 @@ def main(arg_list=None):
         save_dir = None
         if args.work_dir:
             save_dir = os.path.realpath(os.path.join(args.work_dir, Dispatcher.REMODELING_SUMMARY_PATH))
-        files = get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
+        files = io_util.get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
                               exclude_dirs=args.exclude_dirs)
         task_dict = parse_tasks(files, args.task_names)
         for task, files in task_dict.items():
@@ -232,7 +232,7 @@ def main(arg_list=None):
                                         summary_dir=save_dir, task_name=task)
     except Exception as ex:
         if args.log_dir:
-            log_name = get_alphanumeric_path(os.path.realpath(args.data_dir)) + '_' + timestamp + '.txt'
+            log_name = io_util.get_alphanumeric_path(os.path.realpath(args.data_dir)) + '_' + timestamp + '.txt'
             logging.basicConfig(filename=os.path.join(args.log_dir, log_name), level=logging.ERROR)
             logging.exception(f"{args.data_dir}: {args.model_path}")
         raise

@@ -1,6 +1,6 @@
 """ Validator for remodeler input files. """
+import jsonschema
 from copy import deepcopy
-from jsonschema import Draft202012Validator
 from hed.tools.remodeling.operations.valid_operations import valid_operations
 
 
@@ -103,7 +103,7 @@ class RemodelerValidator:
     def __init__(self):
         """ Constructor for remodeler Validator. """
         self.schema = self._construct_schema()  # The compiled json schema against which remodeler files are validated.
-        self.validator = Draft202012Validator(self.schema)  # The instantiated json schema validator.
+        self.validator = jsonschema.Draft202012Validator(self.schema)  # The instantiated json schema validator.
 
     def validate(self, operations):
         """ Validate remodeler operations against the json schema specification and specific op requirements.

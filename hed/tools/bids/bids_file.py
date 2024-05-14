@@ -1,7 +1,7 @@
 """ Models a BIDS file. """
 
 import os
-from hed.tools.util.io_util import parse_bids_filename
+from hed.tools.util import io_util
 
 
 class BidsFile:
@@ -27,7 +27,7 @@ class BidsFile:
 
         """
         self.file_path = os.path.realpath(file_path)
-        suffix, ext, entity_dict = parse_bids_filename(self.file_path)
+        suffix, ext, entity_dict = io_util.parse_bids_filename(self.file_path)
         self.suffix = suffix
         self.ext = ext
         self.entity_dict = entity_dict
