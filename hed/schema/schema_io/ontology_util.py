@@ -98,7 +98,8 @@ def get_all_ids(df):
     return None
 
 
-def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids=False):
+def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids=False,
+                                  assign_missing_ids=False):
     """ Write out schema as a dataframe, then merge in extra columns from dataframes.
 
     Parameters:
@@ -106,6 +107,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
         schema(HedSchema): The schema to write into the dataframes:
         schema_name(str): The name to use to find the schema id range.
         get_as_ids(bool): If True, replace all known references with HedIds
+        assign_missing_ids(bool): If True, replacing any blank(new) HedIds with valid ones
 
     Returns:
         dataframes(dict of str:pd.DataFrames): The updated dataframes
@@ -132,14 +134,15 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     from hed.schema.schema_io.schema2df import Schema2DF  # Late import as this is recursive
     output_dfs = Schema2DF(get_as_ids=get_as_ids).process_schema(schema, save_merged=False)
 
-    # 3: Add any hed ID's as needed to these generated dfs
-    for df_key, df in output_dfs.items():
-        if df_key == constants.STRUCT_KEY:
-            continue
-        unused_tag_ids = _get_hedid_range(schema_name, df_key)
+    if assign_missing_ids:
+        # 3: Add any hed ID's as needed to these generated dfs
+        for df_key, df in output_dfs.items():
+            if df_key == constants.STRUCT_KEY:
+                continue
+            unused_tag_ids = _get_hedid_range(schema_name, df_key)
 
-        # If no errors, assign new hed ID's
-        assign_hed_ids_section(df, unused_tag_ids)
+            # If no errors, assign new hed ID's
+            assign_hed_ids_section(df, unused_tag_ids)
 
     # 4: Merge the dataframes
     for df_key in output_dfs.keys():
