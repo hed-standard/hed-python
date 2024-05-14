@@ -1,7 +1,8 @@
 """ Validate the HED tags in a dataset and report errors. """
 
 import os
-from hed.errors import ErrorSeverity, ErrorHandler, get_printable_issue_string
+from hed.errors import error_reporter
+from hed.errors import error_types
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
@@ -160,8 +161,8 @@ class HedValidationSummary(BaseSummary):
             input_data = TabularInput(new_info['df'], sidecar=sidecar)
             issues = input_data.validate(new_info['schema'])
             if not self.sum_op.check_for_warnings:
-                issues = ErrorHandler.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-            issues = [get_printable_issue_string([issue], skip_filename=True) for issue in issues]
+                issues = error_reporter.ErrorHandler.filter_issues_by_severity(issues, error_types.ErrorSeverity.ERROR)
+            issues = [error_reporter.get_printable_issue_string([issue], skip_filename=True) for issue in issues]
             results['event_issues'][new_info["name"]] = issues
             results['total_event_issues'] = len(issues)
         self.summary_dict[new_info["name"]] = results
@@ -345,12 +346,13 @@ class HedValidationSummary(BaseSummary):
             results["sidecar_files"].append(sidecar.name)
             results["sidecar_issues"][sidecar.name] = []
             sidecar_issues = sidecar.validate(new_info.get('schema', None))
-            filtered_issues = ErrorHandler.filter_issues_by_severity(sidecar_issues, ErrorSeverity.ERROR)
+            filtered_issues = error_reporter.ErrorHandler.filter_issues_by_severity(sidecar_issues, 
+                                                                                    error_types.ErrorSeverity.ERROR)
             if filtered_issues:
                 results["sidecar_had_issues"] = True
             if not check_for_warnings:
                 sidecar_issues = filtered_issues
-            str_issues = [get_printable_issue_string([issue], skip_filename=True) for issue in sidecar_issues]
+            str_issues = [error_reporter.get_printable_issue_string([issue], skip_filename=True) for issue in sidecar_issues]
             results['sidecar_issues'][sidecar.name] = str_issues
             results['total_sidecar_issues'] = len(sidecar_issues)
         return results

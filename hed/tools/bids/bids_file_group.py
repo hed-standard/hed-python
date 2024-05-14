@@ -6,7 +6,7 @@ from hed.validator.sidecar_validator import SidecarValidator
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
-from hed.tools.util.io_util import get_dir_dictionary, get_file_list, get_path_components
+from hed.tools.util import io_util
 
 
 class BidsFileGroup:
@@ -62,7 +62,7 @@ class BidsFileGroup:
             list:  A list of the paths for applicable sidecars for obj starting at the root.
 
         """
-        path_components = [self.root_path] + get_path_components(self.root_path, obj.file_path)
+        path_components = [self.root_path] + io_util.get_path_components(self.root_path, obj.file_path)
         sidecar_list = []
         current_path = ''
         for comp in path_components:
@@ -167,7 +167,7 @@ class BidsFileGroup:
             dict:   A dictionary of BidsTabularFile or BidsTimeseriesFile objects keyed by real path.
 
         """
-        files = get_file_list(self.root_path, name_suffix=self.suffix, extensions=['.tsv'],
+        files = io_util.get_file_list(self.root_path, name_suffix=self.suffix, extensions=['.tsv'],
                               exclude_dirs=self.exclude_dirs)
         file_dict = {}
         if self.obj_type == "tabular":
@@ -187,7 +187,7 @@ class BidsFileGroup:
             - This function creates the sidecars, but does not set their contents.
 
         """
-        files = get_file_list(self.root_path, name_suffix=self.suffix,
+        files = io_util.get_file_list(self.root_path, name_suffix=self.suffix,
                               extensions=['.json'], exclude_dirs=self.exclude_dirs)
         file_dict = {}
         for file in files:
@@ -201,7 +201,7 @@ class BidsFileGroup:
             dict: A dictionary of lists of sidecar BidsSidecarFiles
 
         """
-        dir_dict = get_dir_dictionary(self.root_path, name_suffix=self.suffix, extensions=['.json'],
+        dir_dict = io_util.get_dir_dictionary(self.root_path, name_suffix=self.suffix, extensions=['.json'],
                                       exclude_dirs=self.exclude_dirs)
         sidecar_dir_dict = {}
         for this_dir, dir_list in dir_dict.items():

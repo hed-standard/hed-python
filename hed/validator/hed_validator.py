@@ -6,7 +6,7 @@ the get_validation_issues() function.
 """
 import re
 from hed.errors.error_types import ValidationErrors, DefinitionErrors
-from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
+from hed.errors import error_reporter
 
 from hed.validator.def_validator import DefValidator
 from hed.validator.tag_util import UnitValueValidator, CharValidator, StringValidator, TagValidator, GroupValidator
@@ -52,11 +52,11 @@ class HedValidator:
             issues (list of dict): A list of issues for hed string
         """
         if not error_handler:
-            error_handler = ErrorHandler()
+            error_handler = error_reporter.ErrorHandler()
         issues = []
         issues += self.run_basic_checks(hed_string, allow_placeholders=allow_placeholders)
         error_handler.add_context_and_filter(issues)
-        if check_for_any_errors(issues):
+        if error_reporter.check_for_any_errors(issues):
             return issues
         issues += self.run_full_string_checks(hed_string)
         error_handler.add_context_and_filter(issues)
@@ -65,14 +65,14 @@ class HedValidator:
     def run_basic_checks(self, hed_string, allow_placeholders):
         issues = []
         issues += self._run_hed_string_validators(hed_string, allow_placeholders)
-        if check_for_any_errors(issues):
+        if error_reporter.check_for_any_errors(issues):
             return issues
         if hed_string == "n/a":
             return issues
         for tag in hed_string.get_all_tags():
             issues += self._run_validate_tag_characters(tag, allow_placeholders=allow_placeholders)
         issues += hed_string._calculate_to_canonical_forms(self._hed_schema)
-        if check_for_any_errors(issues):
+        if error_reporter.check_for_any_errors(issues):
             return issues
         issues += self._validate_individual_tags_in_hed_string(hed_string, allow_placeholders=allow_placeholders)
         issues += self._def_validator.validate_def_tags(hed_string, self)
@@ -132,10 +132,10 @@ class HedValidator:
         """
         validation_issues = []
         for match in self.pattern_doubleslash.finditer(original_tag.org_tag):
-            validation_issues += ErrorHandler.format_error(ValidationErrors.NODE_NAME_EMPTY,
-                                                           tag=original_tag,
-                                                           index_in_tag=match.start(),
-                                                           index_in_tag_end=match.end())
+            validation_issues += error_reporter.ErrorHandler.format_error(ValidationErrors.NODE_NAME_EMPTY,
+                                                                          tag=original_tag,
+                                                                          index_in_tag=match.start(),
+                                                                        index_in_tag_end=match.end())
 
         return validation_issues
 
@@ -195,7 +195,8 @@ class HedValidator:
             is_definition = group in all_definition_groups
             for hed_tag in group.tags():
                 if not self._definitions_allowed and hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY:
-                    validation_issues += ErrorHandler.format_error(DefinitionErrors.BAD_DEFINITION_LOCATION, hed_tag)
+                    validation_issues += error_reporter.ErrorHandler.format_error(
+                        DefinitionErrors.BAD_DEFINITION_LOCATION, hed_tag)
                 # todo: unclear if this should be restored at some point
                 # if hed_tag.expandable and not hed_tag.expanded:
                 #     for tag in hed_tag.expandable.get_all_tags():

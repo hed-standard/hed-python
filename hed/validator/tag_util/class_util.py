@@ -2,8 +2,8 @@
 import datetime
 import re
 
-from hed.schema.schema_validation_util import get_allowed_characters, get_problem_indexes
-from hed.schema.schema_validation_util_deprecated import _get_disallowed_character_indexes
+from hed.schema import schema_validation_util
+from hed.schema import schema_validation_util_deprecated
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 
@@ -114,10 +114,10 @@ class UnitValueValidator:
             return indexes
 
         if validate_characters:
-            allowed_characters = get_allowed_characters(original_tag.value_classes.values())
-            return get_problem_indexes(stripped_value, allowed_characters, index_adj=start_index)
+            allowed_characters = schema_validation_util.get_allowed_characters(original_tag.value_classes.values())
+            return schema_validation_util.get_problem_indexes(stripped_value, allowed_characters, index_adj=start_index)
         else:
-            return _get_disallowed_character_indexes(stripped_value, start_index)
+            return schema_validation_util_deprecated._get_disallowed_character_indexes(stripped_value, start_index)
 
     def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None, index_offset=0):
         """ Return any issues found if this is a value tag,

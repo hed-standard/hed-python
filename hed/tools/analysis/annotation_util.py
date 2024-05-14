@@ -6,7 +6,7 @@ from pandas import DataFrame
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.errors.exceptions import HedFileError
-from hed.models.df_util import replace_ref
+from hed.models import df_util
 from hed.tools.bids.bids_dataset import BidsDataset
 
 
@@ -79,7 +79,7 @@ def extract_tags(hed_string, search_tag):
     extracted = [tag.strip() for tag in possible_descriptions if search_tag in tag]
     remainder = hed_string
     for tag in extracted:
-        remainder = replace_ref(remainder, tag)
+        remainder = df_util.replace_ref(remainder, tag)
 
     return remainder, extracted
 

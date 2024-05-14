@@ -10,7 +10,7 @@ from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
-from hed.tools.util.io_util import clean_filename, extract_suffix_path, get_timestamp
+from hed.tools.util import io_util
 
 # This isn't supported in all versions of pandas
 try:
@@ -64,12 +64,12 @@ class Dispatcher:
         """
 
         summary_list = []
-        time_stamp = '_' + get_timestamp()
+        time_stamp = '_' + io_util.get_timestamp()
         for context_name, context_item in self.summary_dicts.items():
             file_base = context_item.op.summary_filename
             if self.data_root:
-                file_base = extract_suffix_path(self.data_root, file_base)
-            file_base = clean_filename(file_base)
+                file_base = io_util.extract_suffix_path(self.data_root, file_base)
+            file_base = io_util.clean_filename(file_base)
             for file_format in file_formats:
                 if file_format == '.txt':
                     summary = context_item.get_text_summary(individual_summaries="consolidated")
