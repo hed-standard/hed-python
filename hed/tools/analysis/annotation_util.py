@@ -3,7 +3,7 @@
 import io
 import re
 
-from pandas import DataFrame
+import pandas as pd
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.errors.exceptions import HedFileError
@@ -177,7 +177,7 @@ def hed_to_df(sidecar_dict, col_names=None):
 
     data = {"column_name": column_name, "column_value": column_value,
             "description": column_description, "HED": hed_tags}
-    dataframe = DataFrame(data).astype(str)
+    dataframe = pd.DataFrame(data).astype(str)
     return dataframe
 
 
@@ -235,6 +235,31 @@ def strs_to_sidecar(sidecar_strings):
         return Sidecar(files=file_list, name="Merged_Sidecar")
     else:
         return None
+
+def to_factor(data, column=None):
+    """Convert data to an integer factor list.
+
+    Parameters:
+        data (Series or DataFrame) - Series to be converted to a list.
+        column (str): Optional column name if DataFrame (otherwise column 0).
+
+    Returns:
+        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
+    """
+    if isinstance(data, pd.Series):
+        series = data
+    elif isinstance(data, pd.DataFrame) and column:
+        series = data[column]
+    elif isinstance(data, pd.DataFrame):
+        series = data.iloc[:, 0]
+    else:
+        raise HedFileError("CannotConvertToFactor",
+                           f"Expecting Series or DataFrame but got {type(data)}", "")
+
+    replaced = series.replace('n/a', False)
+    filled = replaced.fillna(False)
+    bool_list = filled.astype(bool).tolist()
+    return [int(value) for value in bool_list]
 
 
 def to_strlist(obj_list):
