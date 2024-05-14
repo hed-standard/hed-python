@@ -3,7 +3,7 @@
 
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.data_util import get_new_dataframe, get_row_hash, separate_values
+from hed.tools.util import data_util
 
 
 class KeyMap:
@@ -55,7 +55,7 @@ class KeyMap:
     def __str__(self):
         temp_list = [f"{self.name} counts for key [{str(self.key_cols)}]:"]
         for index, row in self.col_map.iterrows():
-            key_hash = get_row_hash(row, self.columns)
+            key_hash = data_util.get_row_hash(row, self.columns)
             temp_list.append(f"{str(list(row.values))}:\t{self.count_dict[key_hash]}")
         return "\n".join(temp_list)
 
@@ -98,7 +98,7 @@ class KeyMap:
         """
         counts = [0 for _ in range(len(self.col_map))]
         for index, row in self.col_map.iterrows():
-            key_hash = get_row_hash(row, self.key_cols)
+            key_hash = data_util.get_row_hash(row, self.key_cols)
             counts[index] = self.count_dict[key_hash]
         return counts
 
@@ -118,8 +118,8 @@ class KeyMap:
 
         """
 
-        df_new = get_new_dataframe(data)
-        present_keys, missing_keys = separate_values(df_new.columns.values.tolist(), self.key_cols)
+        df_new = data_util.get_new_dataframe(data)
+        present_keys, missing_keys = data_util.separate_values(df_new.columns.values.tolist(), self.key_cols)
         if missing_keys:
             raise HedFileError("MissingKeys", f"File must have key columns {str(self.key_cols)}", "")
         self.remove_quotes(df_new, columns=present_keys)
@@ -140,7 +140,7 @@ class KeyMap:
 
         missing_indices = []
         for index, row in df.iterrows():
-            key = get_row_hash(row, self.key_cols)
+            key = data_util.get_row_hash(row, self.key_cols)
             key_value = self.map_dict.get(key, None)
             if key_value is not None:
                 result = self.col_map.iloc[key_value]
@@ -154,7 +154,7 @@ class KeyMap:
         """ Sort the col_map in place by the key columns. """
         self.col_map.sort_values(by=self.key_cols, inplace=True, ignore_index=True)
         for index, row in self.col_map.iterrows():
-            key_hash = get_row_hash(row, self.key_cols)
+            key_hash = data_util.get_row_hash(row, self.key_cols)
             self.map_dict[key_hash] = index
             
     def update(self, data, allow_missing=True):
@@ -168,9 +168,9 @@ class KeyMap:
             - If there are missing keys and allow_missing is False.
 
         """
-        df = get_new_dataframe(data)
+        df = data_util.get_new_dataframe(data)
         col_list = df.columns.values.tolist()
-        keys_present, keys_missing = separate_values(col_list, self.key_cols)
+        keys_present, keys_missing = data_util.separate_values(col_list, self.key_cols)
         if keys_missing and not allow_missing:
             raise HedFileError("MissingKeyColumn",
                                f"make_template data does not have key columns {str(keys_missing)}", "")
@@ -181,7 +181,7 @@ class KeyMap:
             base_df[keys_missing] = 'n/a'
         if self.target_cols:
             base_df[self.target_cols] = 'n/a'
-            targets_present, targets_missing = separate_values(col_list, self.target_cols)
+            targets_present, targets_missing = data_util.separate_values(col_list, self.target_cols)
             if targets_present:
                 base_df[targets_present] = df[targets_present].values
         self._update(base_df)
@@ -217,7 +217,7 @@ class KeyMap:
             tuple: (key, pos_update)  key is the row hash and pos_update is 1 if new row or 0 otherwise.
 
         """
-        key = get_row_hash(row, self.key_cols)
+        key = data_util.get_row_hash(row, self.key_cols)
         pos_update = 0
         if key not in self.map_dict:
             self.map_dict[key] = next_pos

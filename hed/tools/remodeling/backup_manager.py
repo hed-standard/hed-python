@@ -5,7 +5,7 @@ import json
 import shutil
 from datetime import datetime
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.io_util import get_file_list, get_path_components
+from hed.tools.util import io_util
 
 
 class BackupManager:
@@ -137,7 +137,7 @@ class BackupManager:
                                              self.get_file_key(file_name)))
 
     def get_file_key(self, file_name):
-        file_comp = get_path_components(self.data_root, file_name) + [os.path.basename(file_name)]
+        file_comp = io_util.get_path_components(self.data_root, file_name) + [os.path.basename(file_name)]
         return '/'.join(file_comp)
 
     def restore_backup(self, backup_name=DEFAULT_BACKUP_NAME, task_names=[], verbose=True):
@@ -218,7 +218,7 @@ class BackupManager:
             backup_dict = json.load(fp)
         backup_paths = set([os.path.realpath(os.path.join(backup_root_path, backup_key))
                             for backup_key in backup_dict.keys()])
-        file_paths = set(get_file_list(backup_root_path))
+        file_paths = set(io_util.get_file_list(backup_root_path))
         files_not_in_backup = list(file_paths.difference(backup_paths))
         backups_not_in_directory = list(backup_paths.difference(file_paths))
         return backup_dict, files_not_in_backup, backups_not_in_directory

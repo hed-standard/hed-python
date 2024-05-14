@@ -1,14 +1,14 @@
 import copy
 
-from hed import BaseInput
-from hed.errors import ErrorHandler, ValidationErrors, ErrorContext
-from hed.errors.error_types import ColumnErrors
-from hed.models import ColumnType
-from hed import HedString
+from hed.models.base_input import BaseInput
+from hed.errors.error_types import ColumnErrors, ErrorContext, ValidationErrors
+from hed.errors.error_reporter import ErrorHandler
+from hed.models.column_mapper import ColumnType
+from hed.models.hed_string import HedString
 from hed.errors.error_reporter import sort_issues, check_for_any_errors
 from hed.validator.onset_validator import OnsetValidator
 from hed.validator.hed_validator import HedValidator
-from hed.models.df_util import sort_dataframe_by_onsets, split_delay_tags
+from hed.models import df_util
 
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
@@ -59,11 +59,11 @@ class SpreadsheetValidator:
 
         if data.needs_sorting:
             data_new = copy.deepcopy(data)
-            data_new._dataframe = sort_dataframe_by_onsets(data.dataframe)
+            data_new._dataframe = df_util.sort_dataframe_by_onsets(data.dataframe)
             issues += error_handler.format_error_with_context(ValidationErrors.ONSETS_OUT_OF_ORDER)
             data = data_new
 
-        onsets = split_delay_tags(data.series_a, self._schema, data.onsets)
+        onsets = df_util.split_delay_tags(data.series_a, self._schema, data.onsets)
         df = data.dataframe_a
 
         self._hed_validator = HedValidator(self._schema, def_dicts=def_dicts)

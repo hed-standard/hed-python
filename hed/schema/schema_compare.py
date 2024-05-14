@@ -1,3 +1,6 @@
+""" Functions supporting comparison of schemas. """
+
+
 from hed.schema.hed_schema import HedKey
 from hed.schema.hed_schema_constants import HedSectionKey
 from collections import defaultdict

@@ -1,7 +1,7 @@
 """ Create a JSON sidecar from column values in a collection of tabular files. """
 
 import json
-from hed.tools import TabularSummary
+from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
 

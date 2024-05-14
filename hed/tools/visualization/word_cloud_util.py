@@ -5,7 +5,7 @@ from random import Random
 import numpy as np
 from PIL import Image, ImageFilter
 from matplotlib import cm
-from wordcloud import WordCloud
+import wordcloud as wcloud
 
 
 def generate_contour_svg(wc, width, height):
@@ -88,7 +88,7 @@ def _draw_contour(wc, img: Image):
 
 
 # Replace WordCloud function with one that can handle transparency
-WordCloud._draw_contour = _draw_contour
+wcloud.WordCloud._draw_contour = _draw_contour
 
 
 def _numpy_to_svg(contour, radius=1, color="black"):

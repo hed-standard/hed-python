@@ -7,7 +7,7 @@ from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_tag_manager import HedTagManager
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
-from hed.tools.visualization.tag_word_cloud import create_wordcloud, word_cloud_to_svg
+from hed.tools.visualization import tag_word_cloud
 
 
 class SummarizeHedTagsOp(BaseOp):
@@ -335,12 +335,13 @@ class HedTagSummary(BaseSummary):
         specifics = overall_summary.get("Specifics", {})
         word_dict = self.summary_to_dict(specifics, scale_adjustment=wc["scale_adjustment"])
 
-        tag_wc = create_wordcloud(word_dict, mask_path=wc["mask_path"], width=wc["width"], height=wc["height"],
+        tag_wc = tag_word_cloud.tag_word_cloud.create_wordcloud(word_dict, mask_path=wc["mask_path"], 
+                                  width=wc["width"], height=wc["height"],
                                   prefer_horizontal=wc["prefer_horizontal"], background_color=wc["background_color"],
                                   min_font_size=wc["min_font_size"], max_font_size=wc["max_font_size"],
                                   contour_width=wc["contour_width"], contour_color=wc["contour_color"],
                                   font_path=wc["font_path"])
-        svg_data = word_cloud_to_svg(tag_wc)
+        svg_data = tag_word_cloud.word_cloud_to_svg(tag_wc)
         cloud_filename = os.path.realpath(os.path.join(save_dir, self.sum_op.summary_name,
                                                        self.sum_op.summary_name + '_word_cloud.svg'))
         with open(cloud_filename, "w") as outfile:

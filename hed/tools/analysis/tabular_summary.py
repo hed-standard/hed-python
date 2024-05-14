@@ -3,8 +3,8 @@
 
 import json
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.data_util import get_new_dataframe
-from hed.tools.analysis.annotation_util import generate_sidecar_entry
+from hed.tools.util import data_util
+from hed.tools.analysis import annotation_util
 
 
 class TabularSummary:
@@ -68,10 +68,10 @@ class TabularSummary:
         for column_name, columns in self.categorical_info.items():
             column_values = list(columns.keys())
             column_values.sort()
-            side_dict[column_name] = generate_sidecar_entry(column_name, column_values)
+            side_dict[column_name] = annotation_util.generate_sidecar_entry(column_name, column_values)
 
         for column_name in self.value_info.keys():
-            side_dict[column_name] = generate_sidecar_entry(column_name, [])
+            side_dict[column_name] = annotation_util.generate_sidecar_entry(column_name, [])
         return side_dict
 
     def get_summary(self, as_json=False):
@@ -184,7 +184,7 @@ class TabularSummary:
             name (str): Name of the file corresponding to data.
 
         """
-        df = get_new_dataframe(data)
+        df = data_util.get_new_dataframe(data)
         if name:
             self.files[name] = ""
         self.total_files = self.total_files + 1
@@ -326,7 +326,7 @@ class TabularSummary:
         summary_dict = {}
         for key, file_path in file_dictionary.items():
             orig_dict = TabularSummary(skip_cols=skip_cols)
-            df = get_new_dataframe(file_path)
+            df = data_util.get_new_dataframe(file_path)
             orig_dict.update(df)
             summary_dict[key] = orig_dict
             summary_all.update_summary(orig_dict)

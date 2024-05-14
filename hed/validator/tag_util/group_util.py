@@ -1,9 +1,9 @@
-""" Validation o the HED tags as strings. """
+""" Validation of the HED tags as strings. """
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.model_constants import DefTagNames
-from hed.schema import HedKey
-from hed.models import HedTag
+from hed.schema.hed_schema_constants import HedKey
+from hed.models.hed_tag import HedTag
 from hed.errors.error_types import ValidationErrors, TemporalErrors
 
 
