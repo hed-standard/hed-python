@@ -9,6 +9,7 @@ from hed.errors.exceptions import HedFileError
 from hed.models.sidecar import Sidecar
 from hed.models.hed_string import HedString
 from hed.models.tabular_input import TabularInput
+
 from hed.tools.analysis import annotation_util
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.util import io_util
@@ -196,17 +197,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(entry2['HED'], str,
                               "generate_sidecar_entry HED entry should be str when no column values")
 
-    def test_series_to_factor(self):
-        series1 = Series([1.0, 2.0, 3.0, 4.0])
-        factor1 = annotation_util.series_to_factor(series1)
-        self.assertEqual(len(series1), len(factor1))
-        self.assertEqual(sum(factor1), len(factor1))
-        series2 = Series(['a', '', None, np.NAN, 'n/a'])
-        factor2 = annotation_util.series_to_factor(series2)
-        self.assertEqual(len(series2), len(factor2))
-        self.assertEqual(sum(factor2), 1)
-
-
     def test_generate_sidecar_entry_non_letters(self):
         entry1 = annotation_util.generate_sidecar_entry('my !#$-123_10', 
                                                         column_values=['apple 1', '@banana', 'grape%cherry&'])
@@ -294,7 +284,7 @@ class Test(unittest.TestCase):
         skip_columns = ["onset", "duration", "sample", "trial", "response_time"]
         value_columns = ["rep_lag", "stim_file", "value"]
         event_files = io_util.get_file_list(self.bids_root_path, extensions=[".tsv"], name_suffix="_events",
-                                    exclude_dirs=exclude_dirs)
+                                            exclude_dirs=exclude_dirs)
         value_sum = TabularSummary(value_cols=value_columns, skip_cols=skip_columns)
         value_sum.update(event_files)
         sidecar_template = value_sum.extract_sidecar_template()
@@ -304,6 +294,37 @@ class Test(unittest.TestCase):
         self.assertEqual(0, len(example_sidecar), 'merge_hed_dict input is empty for this test')
         annotation_util.merge_hed_dict(example_sidecar, spreadsheet_sidecar)
         self.assertEqual(6, len(example_sidecar), 'merge_hed_dict merges with the correct length')
+
+        def test_to_factor(self):
+            series1 = Series([1.0, 2.0, 3.0, 4.0])
+            factor1 = annotation_util.to_factor(series1)
+            self.assertEqual(len(series1), len(factor1))
+            self.assertEqual(sum(factor1), len(factor1))
+            series2 = Series(['a', '', None, np.NAN, 'n/a'])
+            factor2 = annotation_util.to_factor(series2)
+            self.assertEqual(len(series2), len(factor2))
+            self.assertEqual(sum(factor2), 1)
+            data = {
+                'Name': ['Alice', '', 'n/a', 1.0],  # Contains a space
+                'Age': [25, np.NaN, 35, 0]
+            }
+            df = DataFrame(data)
+            factor3 = annotation_util.to_factor(df, column='Name')
+            self.assertEqual(sum(factor3), 2)
+            factor4 = annotation_util.to_factor(df)
+            self.assertEqual(sum(factor4), 2)
+            with self.assertRaises(HedFileError) as context5:
+                annotation_util.to_factor(data)
+
+    def test_series_to_factor(self):
+        series1 = Series([1.0, 2.0, 3.0, 4.0])
+        factor1 = annotation_util.series_to_factor(series1)
+        self.assertEqual(len(series1), len(factor1))
+        self.assertEqual(sum(factor1), len(factor1))
+        series2 = Series(['a', '', None, np.NAN, 'n/a'])
+        factor2 = annotation_util.series_to_factor(series2)
+        self.assertEqual(len(series2), len(factor2))
+        self.assertEqual(sum(factor2), 1)
 
     def test_strs_to_sidecar(self):
         with open(self.json_path, 'r') as fp:
@@ -336,7 +357,6 @@ class Test(unittest.TestCase):
         self.assertEqual(str_list2[0], 'Red,Sensory-event')
         self.assertEqual(str_list2[2], '')
 
-
     def test_flatten_cat_col(self):
         col1 = self.sidecar2c["a"]
         col2 = self.sidecar2c["b"]
@@ -358,13 +378,14 @@ class Test(unittest.TestCase):
                          "_flatten_cat_col should use the Description tag if available")
 
     def test_flatten_cat_col_only_description(self):
-        keys, values, descriptions, tags = annotation_util._flatten_cat_col("event_type",
-                                                            {"HED": {"code1": "Description/Code 1 here."}})
+        keys, values, descriptions, tags = \
+            annotation_util._flatten_cat_col("event_type", {"HED": {"code1": "Description/Code 1 here."}})
         self.assertIsInstance(tags, list)
         self.assertEqual(tags[0], 'n/a')
 
     def test_flatten_val_col_only_description(self):
-        keys, values, descriptions, tags = annotation_util._flatten_val_col("response", {"HED": "Description/Code 1 here."})
+        keys, values, descriptions, tags = annotation_util._flatten_val_col("response",
+                                                                            {"HED": "Description/Code 1 here."})
         self.assertEqual(descriptions[0], 'Code 1 here.')
         self.assertFalse(tags[0])
 

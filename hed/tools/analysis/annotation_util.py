@@ -4,8 +4,10 @@ import io
 import re
 
 import pandas as pd
+from pandas import DataFrame, Series
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
+
 from hed.errors.exceptions import HedFileError
 from hed.models import df_util
 from hed.tools.bids.bids_dataset import BidsDataset
@@ -63,21 +65,6 @@ def df_to_hed(dataframe, description_tag=True):
     return hed_dict
 
 
-def series_to_factor(series):
-    """Convert a series to an integer factor list.
-
-    Parameters:
-        series (Series) - Series to be converted to a list.
-
-    Returns:
-        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
-    """
-    replaced = series.replace('n/a', False)
-    filled = replaced.fillna(False)
-    bool_list = filled.astype(bool).tolist()
-    return [int(value) for value in bool_list]
-
-
 def extract_tags(hed_string, search_tag):
     """ Extract all instances of specified tag from a tag_string.
 
@@ -129,6 +116,7 @@ def generate_sidecar_entry(column_name, column_values=None):
         sidecar_entry["HED"] = hed
     return sidecar_entry
 
+
 def get_bids_dataset(data_root):
     """ Return a BIDS dataset object given a path to a dataset root.
     
@@ -140,6 +128,7 @@ def get_bids_dataset(data_root):
         
     """
     return BidsDataset(data_root)
+
 
 def hed_to_df(sidecar_dict, col_names=None):
     """ Return a 4-column dataframe of HED portions of sidecar.
@@ -202,6 +191,21 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             sidecar_dict[key]['Levels'] = value_dict['Levels']
 
 
+def series_to_factor(series):
+    """Convert a series to an integer factor list.
+
+    Parameters:
+        series (Series) - Series to be converted to a list.
+
+    Returns:
+        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
+    """
+    replaced = series.replace('n/a', False)
+    filled = replaced.fillna(False)
+    bool_list = filled.astype(bool).tolist()
+    return [int(value) for value in bool_list]
+
+
 def str_to_tabular(tsv_str, sidecar=None):
     """ Return a TabularInput a tsv string.
 
@@ -223,9 +227,11 @@ def strs_to_sidecar(sidecar_strings):
          sidecar_strings (string or list):  String or strings representing sidecars.
 
      Returns:
-         Sidecar:  the merged sidecar from the list.
+         Sidecar or None:  the merged sidecar from the list.
      """
 
+    if not sidecar_strings:
+        return None
     if not isinstance(sidecar_strings, list):
         sidecar_strings = [sidecar_strings]
     if sidecar_strings:
@@ -235,6 +241,7 @@ def strs_to_sidecar(sidecar_strings):
         return Sidecar(files=file_list, name="Merged_Sidecar")
     else:
         return None
+
 
 def to_factor(data, column=None):
     """Convert data to an integer factor list.
@@ -246,11 +253,11 @@ def to_factor(data, column=None):
     Returns:
         list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
     """
-    if isinstance(data, pd.Series):
+    if isinstance(data, Series):
         series = data
-    elif isinstance(data, pd.DataFrame) and column:
+    elif isinstance(data, DataFrame) and column:
         series = data[column]
-    elif isinstance(data, pd.DataFrame):
+    elif isinstance(data, DataFrame):
         series = data.iloc[:, 0]
     else:
         raise HedFileError("CannotConvertToFactor",
