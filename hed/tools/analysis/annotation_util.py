@@ -65,7 +65,6 @@ def df_to_hed(dataframe, description_tag=True):
     return hed_dict
 
 
-
 def extract_tags(hed_string, search_tag):
     """ Extract all instances of specified tag from a tag_string.
 
@@ -117,6 +116,7 @@ def generate_sidecar_entry(column_name, column_values=None):
         sidecar_entry["HED"] = hed
     return sidecar_entry
 
+
 def get_bids_dataset(data_root):
     """ Return a BIDS dataset object given a path to a dataset root.
     
@@ -128,6 +128,7 @@ def get_bids_dataset(data_root):
         
     """
     return BidsDataset(data_root)
+
 
 def hed_to_df(sidecar_dict, col_names=None):
     """ Return a 4-column dataframe of HED portions of sidecar.
@@ -240,31 +241,6 @@ def strs_to_sidecar(sidecar_strings):
         return Sidecar(files=file_list, name="Merged_Sidecar")
     else:
         return None
-
-def to_factor(data, column=None):
-    """Convert data to an integer factor list.
-
-    Parameters:
-        data (Series or DataFrame) - Series to be converted to a list.
-        column (str): Optional column name if DataFrame (otherwise column 0).
-
-    Returns:
-        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
-    """
-    if isinstance(data, pd.Series):
-        series = data
-    elif isinstance(data, pd.DataFrame) and column:
-        series = data[column]
-    elif isinstance(data, pd.DataFrame):
-        series = data.iloc[:, 0]
-    else:
-        raise HedFileError("CannotConvertToFactor",
-                           f"Expecting Series or DataFrame but got {type(data)}", "")
-
-    replaced = series.replace('n/a', False)
-    filled = replaced.fillna(False)
-    bool_list = filled.astype(bool).tolist()
-    return [int(value) for value in bool_list]
 
 
 def to_factor(data, column=None):
