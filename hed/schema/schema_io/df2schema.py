@@ -53,12 +53,19 @@ class SchemaLoaderDF(SchemaLoader):
 
         Parameters:
             filenames(str or None or list or dict): The list to convert to a dict
-
+                If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
+                If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
         Returns:
             filename_dict(str: str): The required suffix to filename mapping"""
         result_filenames = {}
         if isinstance(filenames, str):
-            base, base_ext = os.path.splitext(filenames)
+            if filenames.endswith(".tsv"):
+                base, base_ext = os.path.splitext(filenames)
+            else:
+                # Load as foldername/foldername_suffix.tsv
+                base_dir = filenames
+                base_filename = os.path.split(base_dir)[1]
+                base = os.path.join(base_dir, base_filename)
             for suffix in constants.DF_SUFFIXES:
                 filename = f"{base}_{suffix}.tsv"
                 result_filenames[suffix] = filename

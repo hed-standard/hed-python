@@ -360,12 +360,24 @@ def save_dataframes(base_filename, dataframe_dict):
 
     Does not validate contents or suffixes.
 
+    If base_filename has a .tsv suffix, save directly to the indicated location.
+    If base_filename is a directory(does NOT have a .tsv suffix), save the contents into a directory named that.
+        The subfiles are named the same.  e.g. HED8.3.0/HED8.3.0_Tag.tsv
+
     Parameters:
         base_filename(str): The base filename to use.  Output is {base_filename}_{suffix}.tsv
                             See DF_SUFFIXES for all expected names.
         dataframe_dict(dict of str: df.DataFrame): The list of files to save out.  No validation is done.
     """
-    base, base_ext = os.path.splitext(base_filename)
+    if base_filename.lower().endswith(".tsv"):
+        base, base_ext = os.path.splitext(base_filename)
+        base_dir, base_name = os.path.split(base)
+    else:
+        # Assumed as a directory name
+        base_dir = base_filename
+        base_filename = os.path.split(base_dir)[1]
+        base = os.path.join(base_dir, base_filename)
+    os.makedirs(base_dir, exist_ok=True)
     for suffix, dataframe in dataframe_dict.items():
         filename = f"{base}_{suffix}.tsv"
         with open(filename, mode='w', encoding='utf-8') as opened_file:

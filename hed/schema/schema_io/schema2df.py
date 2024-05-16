@@ -28,6 +28,7 @@ class Schema2DF(Schema2Base):
         """
         super().__init__()
         self._get_as_ids = get_as_ids
+        self._tag_rows = []
 
     def _get_object_name_and_id(self, object_name, include_prefix=False):
         """ Get the adjusted name and ID for the given object type.
@@ -67,6 +68,7 @@ class Schema2DF(Schema2Base):
             constants.OBJECT_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
             constants.ATTRIBUTE_PROPERTY_KEY: pd.DataFrame(columns=constants.property_columns_reduced, dtype=str),
         }
+        self._tag_rows = []
 
     def _create_and_add_object_row(self, base_object, attributes="", description=""):
         name, full_hed_id = self._get_object_name_and_id(base_object)
@@ -95,7 +97,7 @@ class Schema2DF(Schema2Base):
         pass
 
     def _end_tag_section(self):
-        pass
+        self.output[constants.TAG_KEY] = pd.DataFrame(self._tag_rows, columns=constants.tag_columns, dtype=str)
 
     def _write_tag_entry(self, tag_entry, parent_node=None, level=0):
         tag_id = tag_entry.attributes.get(HedKey.HedID, "")
@@ -108,7 +110,8 @@ class Schema2DF(Schema2Base):
             constants.description: tag_entry.description,
             constants.equivalent_to: self._get_tag_equivalent_to(tag_entry),
         }
-        self.output[constants.TAG_KEY].loc[len(self.output[constants.TAG_KEY])] = new_row
+        # Todo: do other sections like this as well for efficiency
+        self._tag_rows.append(new_row)
 
     def _write_entry(self, entry, parent_node, include_props=True):
         df_key = section_key_to_df.get(entry.section_key)
