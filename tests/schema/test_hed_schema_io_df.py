@@ -62,3 +62,26 @@ class TestHedSchemaDF(unittest.TestCase):
         reloaded_schema = from_dataframes(dfs)
         self.assertEqual(schema, reloaded_schema)
 
+    def test_save_load_location(self):
+        schema = load_schema_version("8.3.0")
+        schema_name = "test_output"
+        output_location = self.output_folder + schema_name
+        schema.save_as_dataframes(output_location)
+        expected_location = os.path.join(output_location, f"{schema_name}_Tag.tsv")
+        self.assertTrue(os.path.exists(expected_location))
+
+        reloaded_schema = load_schema(output_location)
+
+        self.assertEqual(schema, reloaded_schema)
+
+    def test_save_load_location2(self):
+        schema = load_schema_version("8.3.0")
+        schema_name = "test_output"
+        output_location = self.output_folder + schema_name + ".tsv"
+        schema.save_as_dataframes(output_location)
+        expected_location = self.output_folder + schema_name + "_Tag.tsv"
+        self.assertTrue(os.path.exists(expected_location))
+
+        reloaded_schema = load_schema(output_location)
+
+        self.assertEqual(schema, reloaded_schema)

@@ -94,7 +94,7 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None):
         hed_schema = SchemaLoaderXML.load(hed_path, schema=schema, name=name)
     elif hed_path.lower().endswith(".mediawiki"):
         hed_schema = SchemaLoaderWiki.load(hed_path, schema=schema, name=name)
-    elif hed_path.lower().endswith(".tsv"):
+    elif hed_path.lower().endswith(".tsv") or os.path.isdir(hed_path):
         if schema is not None:
             raise HedFileError(HedExceptions.INVALID_HED_FORMAT,
                                "Cannot pass a schema to merge into spreadsheet loading currently.", filename=name)

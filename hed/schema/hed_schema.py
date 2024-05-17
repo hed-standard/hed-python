@@ -310,7 +310,11 @@ class HedSchema(HedSchemaBase):
             opened_file.write(xml_string)
 
     def save_as_dataframes(self, base_filename, save_merged=False):
-        """ Save as mediawiki to a file.
+        """ Save as dataframes to a folder of files.
+
+            If base_filename has a .tsv suffix, save directly to the indicated location.
+            If base_filename is a directory(does NOT have a .tsv suffix), save the contents into a directory named that.
+                The subfiles are named the same.  e.g. HED8.3.0/HED8.3.0_Tag.tsv
 
         base_filename: str
             save filename.  A suffix will be added to most, e.g. _Tag

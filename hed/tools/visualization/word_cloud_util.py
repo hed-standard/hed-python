@@ -4,7 +4,7 @@ from random import Random
 
 import numpy as np
 from PIL import Image, ImageFilter
-from matplotlib import cm
+import matplotlib as mp1
 import wordcloud as wcloud
 
 
@@ -139,7 +139,7 @@ class ColormapColorFunc:
                                                          This is the speed at which it goes through the range chosen.
                                                          .25 means it will go through 1/4 of the range each pick.
         """
-        self.colormap = cm.get_cmap(colormap)
+        self.colormap = mp1.colormaps[colormap]
         self.color_range = color_range
         self.color_step_range = color_step_range
         self.current_fraction = random.uniform(0, 1)  # Start at a random point

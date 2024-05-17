@@ -335,7 +335,7 @@ class HedTagSummary(BaseSummary):
         specifics = overall_summary.get("Specifics", {})
         word_dict = self.summary_to_dict(specifics, scale_adjustment=wc["scale_adjustment"])
 
-        tag_wc = tag_word_cloud.tag_word_cloud.create_wordcloud(word_dict, mask_path=wc["mask_path"], 
+        tag_wc = tag_word_cloud.create_wordcloud(word_dict, mask_path=wc["mask_path"],
                                   width=wc["width"], height=wc["height"],
                                   prefer_horizontal=wc["prefer_horizontal"], background_color=wc["background_color"],
                                   min_font_size=wc["min_font_size"], max_font_size=wc["max_font_size"],
