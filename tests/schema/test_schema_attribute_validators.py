@@ -90,7 +90,7 @@ class Test(unittest.TestCase):
         self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
         del tag_entry.attributes["deprecatedFrom"]
 
-        unit_class_entry = self.hed_schema.unit_classes["temperatureUnits"]
+        unit_class_entry = copy.deepcopy(self.hed_schema.unit_classes["temperatureUnits"])
         # This should raise an issue because it assumes the attribute is set
         self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name))
         unit_class_entry.attributes["deprecatedFrom"] = "8.1.0"
