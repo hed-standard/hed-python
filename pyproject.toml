@@ -55,6 +55,8 @@ dependencies = [
 run_remodel = "hed.tools.remodeling.cli.run_remodel:main"
 run_remodel_backup = "hed.tools.remodeling.cli.run_remodel_backup:main"
 run_remodel_restore = "hed.tools.remodeling.cli.run_remodel_restore:main"
+hed_validate_schemas = "hed.scripts.validate_schemas:main"
+hed_update_schemas = "hed.scripts.convert_and_update_schema:main"
 
 [tool.versioneer]
 VCS = "git"
