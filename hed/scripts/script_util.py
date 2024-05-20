@@ -142,7 +142,8 @@ def validate_all_schemas(schema_files):
         if len(extensions) > 1 and not single_schema_issues and "prerelease" in basename:
             single_schema_issues += validate_all_schema_formats(basename)
 
-        print(f"Validating {basename}...")
+        print(f"Validating: {basename}...")
+        print(f"Extensions: {extensions}")
         if single_schema_issues:
             for issue in single_schema_issues:
                 print(issue)
