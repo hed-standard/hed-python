@@ -32,7 +32,14 @@ def convert_and_update(filenames, set_ids):
             continue
         source_filename = add_extension(basename,
                                         list(extensions)[0])  # Load any changed schema version, they're all the same
-        source_df_filename = add_extension(basename, ".tsv")
+
+        # todo: more properly decide how we want to handle non lowercase extensions.
+        tsv_extension = ".tsv"
+        for extension in extensions:
+            if extension.lower() == ".tsv":
+                tsv_extension = extension
+
+        source_df_filename = add_extension(basename, tsv_extension)
         schema = load_schema(source_filename)
         print(f"Trying to convert/update file {source_filename}")
         source_dataframes = load_dataframes(source_df_filename)

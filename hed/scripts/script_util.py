@@ -36,7 +36,7 @@ def validate_schema(file_path):
                          f"There is either a problem with the source file, or the saving/loading code."
             validation_issues.append(error_text)
     except HedFileError as e:
-        print(f"Saving/loading error: {e.message}")
+        print(f"Saving/loading error: {file_path} {e.message}")
         error_text = e.message
         if e.issues:
             error_text = get_printable_issue_string(e.issues, title=file_path)
@@ -47,7 +47,7 @@ def validate_schema(file_path):
 
 def add_extension(basename, extension):
     """Generate the final name for a given extension.  Only .tsv varies notably."""
-    if extension == ".tsv":
+    if extension.lower() == ".tsv":
         parent_path, basename = os.path.split(basename)
         return os.path.join(parent_path, "hedtsv", basename)
     return basename + extension
@@ -73,11 +73,11 @@ def sort_base_schemas(filenames):
     """
     schema_files = defaultdict(set)
     for file_path in filenames:
-        basename, extension = os.path.splitext(file_path.lower())
-        if extension == ".xml" or extension == ".mediawiki":
+        basename, extension = os.path.splitext(file_path)
+        if extension.lower() == ".xml" or extension.lower() == ".mediawiki":
             schema_files[basename].add(extension)
             continue
-        elif extension == ".tsv":
+        elif extension.lower() == ".tsv":
             tsv_basename = basename.rpartition("_")[0]
             full_parent_path, real_basename = os.path.split(tsv_basename)
             full_parent_path, real_basename2 = os.path.split(full_parent_path)
@@ -106,6 +106,7 @@ def validate_all_schema_formats(basename):
         issue_list(list): A non-empty list if there are any issues.
     """
     # Note if more than one is changed, it intentionally checks all 3 even if one wasn't changed.
+    # todo: this needs to be updated to handle capital letters in the extension.
     paths = [add_extension(basename, extension) for extension in all_extensions]
     try:
         schemas = [load_schema(path) for path in paths]
