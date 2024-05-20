@@ -25,7 +25,7 @@ class TestAddExtension(unittest.TestCase):
 
     def test_none_extension(self):
         """Test behavior with None as extension."""
-        with self.assertRaises(TypeError):
+        with self.assertRaises(AttributeError):
             add_extension("filename", None)
 
 class TestSortBaseSchemas(unittest.TestCase):

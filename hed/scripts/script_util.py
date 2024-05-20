@@ -47,7 +47,7 @@ def validate_schema(file_path):
 
 def add_extension(basename, extension):
     """Generate the final name for a given extension.  Only .tsv varies notably."""
-    if extension.lower() == ".tsv":
+    if extension and extension.lower() == ".tsv":
         parent_path, basename = os.path.split(basename)
         return os.path.join(parent_path, "hedtsv", basename)
     return basename + extension
