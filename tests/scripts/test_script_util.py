@@ -2,7 +2,7 @@ import unittest
 import os
 import shutil
 from hed import load_schema_version
-from hed.scripts.script_util import add_extension, sort_base_schemas, validate_all_schema_formats
+from hed.scripts.script_util import add_extension, sort_base_schemas, validate_all_schema_formats, validate_schema
 
 
 class TestAddExtension(unittest.TestCase):
@@ -25,8 +25,9 @@ class TestAddExtension(unittest.TestCase):
 
     def test_none_extension(self):
         """Test behavior with None as extension."""
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             add_extension("filename", None)
+
 
 class TestSortBaseSchemas(unittest.TestCase):
     def test_mixed_file_types(self):
@@ -119,3 +120,16 @@ class TestValidateAllSchemaFormats(unittest.TestCase):
     def tearDownClass(cls):
         """Remove the entire directory created for testing to ensure a clean state."""
         shutil.rmtree(cls.base_path)  # This will delete the directory and all its contents
+
+
+class TestValidateSchema(unittest.TestCase):
+    def test_load_invalid_extension(self):
+        # Verify capital letters fail validation
+        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.MEDIAWIKI")[0])
+        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.Mediawiki")[0])
+        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.XML")[0])
+        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.Xml")[0])
+        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.TSV")[0])
+        self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.tsv")[0])
+        self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.xml")[0])
+        self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.mediawiki")[0])
