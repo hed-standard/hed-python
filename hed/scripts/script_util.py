@@ -13,12 +13,20 @@ def validate_schema(file_path):
     """
     validation_issues = []
     try:
+        _, extension = os.path.splitext(file_path)
+        if extension.lower() != extension:
+            error_message = f"Only fully lowercase extensions are allowed for schema files.  " \
+                             f"Invalid extension on file: {file_path}"
+            validation_issues.append(error_message)
+            return validation_issues
+
         base_schema = load_schema(file_path)
         issues = base_schema.check_compliance()
         issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
         if issues:
             error_message = get_printable_issue_string(issues, title=file_path)
             validation_issues.append(error_message)
+            return validation_issues
 
         mediawiki_string = base_schema.get_as_mediawiki_string()
         reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki")
@@ -47,7 +55,7 @@ def validate_schema(file_path):
 
 def add_extension(basename, extension):
     """Generate the final name for a given extension.  Only .tsv varies notably."""
-    if extension.lower() == ".tsv":
+    if extension == ".tsv":
         parent_path, basename = os.path.split(basename)
         return os.path.join(parent_path, "hedtsv", basename)
     return basename + extension
@@ -74,10 +82,10 @@ def sort_base_schemas(filenames):
     schema_files = defaultdict(set)
     for file_path in filenames:
         basename, extension = os.path.splitext(file_path)
-        if extension.lower() == ".xml" or extension.lower() == ".mediawiki":
+        if extension == ".xml" or extension == ".mediawiki":
             schema_files[basename].add(extension)
             continue
-        elif extension.lower() == ".tsv":
+        elif extension == ".tsv":
             tsv_basename = basename.rpartition("_")[0]
             full_parent_path, real_basename = os.path.split(tsv_basename)
             full_parent_path, real_basename2 = os.path.split(full_parent_path)

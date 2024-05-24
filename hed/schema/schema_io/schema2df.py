@@ -1,7 +1,7 @@
 """Allows output of HedSchema objects as .mediawiki format"""
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.schema.schema_io.ontology_util import get_library_name_and_id, remove_prefix
+from hed.schema.schema_io.ontology_util import get_library_name_and_id, remove_prefix, create_empty_dataframes
 from hed.schema.schema_io.schema2base import Schema2Base
 import pandas as pd
 import hed.schema.hed_schema_df_constants as constants
@@ -56,18 +56,7 @@ class Schema2DF(Schema2Base):
     # Required baseclass function
     # =========================================
     def _initialize_output(self):
-        self.output = {
-            constants.STRUCT_KEY: pd.DataFrame(columns=constants.struct_columns, dtype=str),
-            constants.TAG_KEY: pd.DataFrame(columns=constants.tag_columns, dtype=str),
-            constants.UNIT_KEY: pd.DataFrame(columns=constants.unit_columns, dtype=str),
-            constants.UNIT_CLASS_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
-            constants.UNIT_MODIFIER_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
-            constants.VALUE_CLASS_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
-            constants.ANNOTATION_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
-            constants.DATA_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
-            constants.OBJECT_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
-            constants.ATTRIBUTE_PROPERTY_KEY: pd.DataFrame(columns=constants.property_columns_reduced, dtype=str),
-        }
+        self.output = create_empty_dataframes()
         self._tag_rows = []
 
     def _create_and_add_object_row(self, base_object, attributes="", description=""):
@@ -327,4 +316,3 @@ class Schema2DF(Schema2Base):
         elif any(attribute in object_ranges for attribute in attributes):
             return "object"
         return "data"
-

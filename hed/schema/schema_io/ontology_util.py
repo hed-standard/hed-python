@@ -399,3 +399,19 @@ def get_attributes_from_row(row):
     else:
         attr_string = ""
     return parse_attribute_string(attr_string)
+
+
+def create_empty_dataframes():
+    """Returns the default empty dataframes"""
+    return {
+        constants.STRUCT_KEY: pd.DataFrame(columns=constants.struct_columns, dtype=str),
+        constants.TAG_KEY: pd.DataFrame(columns=constants.tag_columns, dtype=str),
+        constants.UNIT_KEY: pd.DataFrame(columns=constants.unit_columns, dtype=str),
+        constants.UNIT_CLASS_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
+        constants.UNIT_MODIFIER_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
+        constants.VALUE_CLASS_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
+        constants.ANNOTATION_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
+        constants.DATA_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
+        constants.OBJECT_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
+        constants.ATTRIBUTE_PROPERTY_KEY: pd.DataFrame(columns=constants.property_columns_reduced, dtype=str),
+    }

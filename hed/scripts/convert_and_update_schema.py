@@ -19,7 +19,11 @@ def convert_and_update(filenames, set_ids):
     schema_files = sort_base_schemas(filenames)
     all_issues = validate_all_schemas(schema_files)
 
-    if all_issues or not schema_files:
+    if not schema_files:
+        print("No schema file changes found in the file list")
+        return 0
+
+    if all_issues:
         print("Did not attempt to update schemas due to validation failures")
         return 1
 

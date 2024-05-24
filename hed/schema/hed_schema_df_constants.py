@@ -40,11 +40,11 @@ name = "rdfs:label"
 subclass_of = "omn:SubClassOf"
 attributes = "Attributes"
 description = "dc:description"
-equivalent_to = "owm:EquivalentTo"
+equivalent_to = "omn:EquivalentTo"
 has_unit_class = "hasUnitClass"
 
 struct_columns = [hed_id, name, attributes, subclass_of, description]
-tag_columns = [hed_id, level, name, subclass_of, attributes, description, equivalent_to]
+tag_columns = [hed_id, name, level, subclass_of, attributes, description, equivalent_to]
 unit_columns = [hed_id, name, subclass_of, has_unit_class, attributes, description, equivalent_to]
 
 # The columns for unit class, value class, and unit modifier
