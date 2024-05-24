@@ -409,7 +409,7 @@ class BaseInput:
             skipping empty columns and columns with empty strings.
 
         Parameters:
-            dataframe(Dataframe): The dataframe to combin
+            dataframe(Dataframe): The dataframe to combine
 
         Returns:
             Series: The assembled series.
