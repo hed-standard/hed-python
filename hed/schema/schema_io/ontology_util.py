@@ -343,7 +343,7 @@ def _convert_df_to_omn(df, annotation_properties=("",)):
             equivalent_to = row[constants.equivalent_to]
             equivalent_to = equivalent_to.replace(" and ", "\n\t\tand ")
             subclass_of = row[constants.subclass_of]
-            if equivalent_to and equivalent_to != subclass_of:
+            if equivalent_to:
                 output_text += "\tEquivalentTo:\n"
                 output_text += f"\t\t{equivalent_to}"
             else:
