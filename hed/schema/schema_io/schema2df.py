@@ -246,7 +246,7 @@ class Schema2DF(Schema2Base):
                 if self._get_as_ids and found_range and found_range != HedKey.NumericRange:
                     section = self._schema[found_range]
                     if any(section.get(v) is None for v in values):
-                        raise ValueError(f"Cannot find schema entry for {v}")
+                        raise ValueError(f"Cannot find schema entry for {values}")
                     for v in values:
                         test_id = section.get(v).attributes.get(HedKey.HedID)
                         if not test_id:
@@ -278,9 +278,13 @@ class Schema2DF(Schema2Base):
             if self._get_as_ids:
                 attribute_strings.append(f"(hed:HED_0000102 some {schema_id})")
             else:
-                attribute_strings.append(f"(inHedSchema some {schema_name}")
+                attribute_strings.append(f"(inHedSchema some {schema_name})")
 
-        return " and ".join([subclass] + attribute_strings)
+        # If they match, we want to leave equivalent_to blank
+        final_out = " and ".join([subclass] + attribute_strings)
+        if final_out == subclass:
+            return ""
+        return final_out
 
     def _get_subclass_of(self, tag_entry):
         # Special case for HedTag
