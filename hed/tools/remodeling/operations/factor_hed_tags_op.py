@@ -122,7 +122,7 @@ class FactorHedTagsOp(BaseOp):
         tag_man = HedTagManager(EventManager(input_data, dispatcher.hed_schema),
                                 remove_types=self.remove_types)
         hed_objs = tag_man.get_hed_objs(include_context=self.expand_context, replace_defs=self.replace_defs)
-        df_factors = query_service.search_strings(hed_objs, self.query_handlers, query_names=self.query_names)
+        df_factors = query_service.search_hed_objs(hed_objs, self.query_handlers, query_names=self.query_names)
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)

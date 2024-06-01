@@ -6,7 +6,7 @@ from .column_metadata import ColumnMetadata, ColumnType
 from .definition_dict import DefinitionDict
 from .definition_entry import DefinitionEntry
 from .query_handler import QueryHandler
-from .query_service import get_query_handlers, search_strings
+from .query_service import get_query_handlers, search_hed_objs
 from .hed_group import HedGroup
 from .spreadsheet_input import SpreadsheetInput
 from .hed_string import HedString
