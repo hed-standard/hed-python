@@ -6,6 +6,7 @@ import re
 import pandas as pd
 from pandas import DataFrame, Series
 from hed.models.sidecar import Sidecar
+from hed.models.hed_string import HedString
 from hed.models.tabular_input import TabularInput
 
 from hed.errors.exceptions import HedFileError
@@ -220,6 +221,27 @@ def str_to_tabular(tsv_str, sidecar=None):
     return TabularInput(file=io.StringIO(tsv_str), sidecar=sidecar)
 
 
+def strs_to_hed_objs(hed_strings, hed_schema):
+    """ Returns a list of HedString objects from a list of strings.
+
+     Parameters:
+         hed_strings (string or list):  String or strings representing HED annotations.
+         hed_schema (HedSchema or HedSchemaGroup): Schema version for the strings.
+         
+     Returns:
+         list or None:  list of HedString objects or None.
+     """
+
+    if not hed_strings:
+        return None
+    if not isinstance(hed_strings, list):
+        hed_strings = [hed_strings]
+    if hed_strings:
+        return [HedString(hed, hed_schema=hed_schema) for hed in hed_strings]
+    else:
+        return None
+
+
 def strs_to_sidecar(sidecar_strings):
     """ Return a Sidecar from a sidecar as string or as a list of sidecars as strings.
 
@@ -241,7 +263,6 @@ def strs_to_sidecar(sidecar_strings):
         return Sidecar(files=file_list, name="Merged_Sidecar")
     else:
         return None
-
 
 def to_factor(data, column=None):
     """Convert data to an integer factor list.
