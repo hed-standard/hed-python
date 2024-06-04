@@ -159,3 +159,27 @@ def validate_all_schemas(schema_files):
 
         all_issues += single_schema_issues
     return all_issues
+
+
+
+def get_schema_filename(schema_name, schema_version):
+    schema_name = schema_name.lower()
+    if schema_name == "standard" or schema_name == "":
+        return f"HED{schema_version}"
+    else:
+        return f"HED_{schema_name}_{schema_version}"
+
+
+def get_prerelease_path(repo_path, schema_name, schema_version):
+    """Returns the location of the given pre-release schema in the repo"""
+    schema_name = schema_name.lower()
+    if schema_name == "" or schema_name == "standard":
+        base_path = "standard_schema"
+    else:
+        base_path = os.path.join("library_schemas", schema_name)
+
+    base_path = os.path.join(repo_path, base_path, "prerelease")
+
+    schema_filename = get_schema_filename(schema_name, schema_version)
+
+    return os.path.join(base_path, "hedtsv", schema_filename)
