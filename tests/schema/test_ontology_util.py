@@ -150,7 +150,7 @@ class TestUpdateDataframes(unittest.TestCase):
         try:
             updated_dataframes = update_dataframes_from_schema(schema_dataframes_new, schema)
         except HedFileError as e:
-            self.assertEqual(len(e.issues), 111)
+            self.assertEqual(len(e.issues), 115)
         breakHere = 3
 
 

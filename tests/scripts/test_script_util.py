@@ -15,9 +15,9 @@ class TestAddExtension(unittest.TestCase):
     def test_tsv_extension(self):
         """Test that .tsv extensions are handled differently."""
         # Assuming the function correctly handles paths with directories
-        self.assertEqual(add_extension("path/to/filename", ".tsv"), "path/to/hedtsv/filename")
+        self.assertEqual(add_extension(os.path.normpath("path/to/filename"), ".tsv"), os.path.normpath("path/to/hedtsv/filename"))
         # Testing with a basename only
-        self.assertEqual(add_extension("filename", ".tsv"), "hedtsv/filename")
+        self.assertEqual(add_extension("filename", ".tsv"), os.path.normpath("hedtsv/filename"))
 
     def test_empty_extension(self):
         """Test adding an empty extension."""
@@ -33,7 +33,7 @@ class TestSortBaseSchemas(unittest.TestCase):
     def test_mixed_file_types(self):
         filenames = [
             "test_schema.mediawiki",
-            "hedtsv/test_schema/test_schema_Tag.tsv",
+            os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
             "other_schema.xml"
         ]
         expected = {
@@ -45,9 +45,9 @@ class TestSortBaseSchemas(unittest.TestCase):
 
     def test_tsv_in_correct_subfolder(self):
         filenames = [
-            "hedtsv/test_schema/test_schema_Tag.tsv",
-            "hedtsv/test_schema/test_schema_Tag.tsv",
-            "hedtsv/wrong_folder/wrong_name_Tag.tsv"  # Should be ignored
+            os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
+            os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
+            os.path.normpath("hedtsv/wrong_folder/wrong_name_Tag.tsv")  # Should be ignored
         ]
         expected = {
             "test_schema": {".tsv"}
@@ -57,12 +57,12 @@ class TestSortBaseSchemas(unittest.TestCase):
 
     def test_tsv_in_correct_subfolder2(self):
         filenames = [
-            "prerelease/hedtsv/test_schema/test_schema_Tag.tsv",
-            "prerelease/hedtsv/test_schema/test_schema_Tag.tsv",
-            "prerelease/hedtsv/wrong_folder/wrong_name_Tag.tsv"  # Should be ignored
+            os.path.normpath("prerelease/hedtsv/test_schema/test_schema_Tag.tsv"),
+            os.path.normpath("prerelease/hedtsv/test_schema/test_schema_Tag.tsv"),
+            os.path.normpath("prerelease/hedtsv/wrong_folder/wrong_name_Tag.tsv")  # Should be ignored
         ]
         expected = {
-            "prerelease/test_schema": {".tsv"}
+            os.path.normpath("prerelease/test_schema"): {".tsv"}
         }
         result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
@@ -70,7 +70,7 @@ class TestSortBaseSchemas(unittest.TestCase):
     def test_ignored_files(self):
         filenames = [
             "test_schema.mediawiki",
-            "not_hedtsv/test_schema/test_schema_Tag.tsv"  # Should be ignored
+            os.path.normpath("not_hedtsv/test_schema/test_schema_Tag.tsv")  # Should be ignored
         ]
         expected = {
             "test_schema": {".mediawiki"}
