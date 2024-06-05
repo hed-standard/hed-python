@@ -27,21 +27,21 @@ class Test(unittest.TestCase):
     def test_constructor_no_group(self):
         test1 = HedString("(Onset, def/blech)", hed_schema=self.schema)
         groups = test1.find_top_level_tags(["onset"], include_groups=1)
-        te = TemporalEvent(groups[0], 3, 4.5)
-        self.assertEqual(te.start_index, 3)
-        self.assertEqual(te.start_time, 4.5)
-        self.assertEqual(te.anchor, 'Def/blech')
-        self.assertFalse(te.internal_group)
+        temp_event = TemporalEvent(groups[0], 3, 4.5)
+        self.assertEqual(temp_event.start_index, 3)
+        self.assertEqual(temp_event.start_time, 4.5)
+        self.assertEqual(temp_event.anchor, 'Def/blech')
+        self.assertFalse(temp_event.internal_group)
 
     def test_constructor_group(self):
         test1 = HedString("(Onset, (Label/Apple, Blue), Def/Blech/54.3)", hed_schema=self.schema)
         groups = test1.find_top_level_tags(["onset"], include_groups=1)
-        te = TemporalEvent(groups[0], 3, 4.5)
-        self.assertEqual(te.start_index, 3)
-        self.assertEqual(te.start_time, 4.5)
-        self.assertTrue(te.internal_group)
-        self.assertEqual(te.anchor, 'Def/Blech/54.3')
-        self.assertIsInstance(te.internal_group, HedGroup)
+        temp_event = TemporalEvent(groups[0], 3, 4.5)
+        self.assertEqual(temp_event.start_index, 3)
+        self.assertEqual(temp_event.start_time, 4.5)
+        self.assertTrue(temp_event.internal_group)
+        self.assertEqual(temp_event.anchor, 'Def/Blech/54.3')
+        self.assertIsInstance(temp_event.internal_group, HedGroup)
 
     def test_constructor_on_files(self):
         manager1 = EventManager(self.input_data, self.schema)

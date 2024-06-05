@@ -326,6 +326,16 @@ class Test(unittest.TestCase):
         self.assertEqual(len(series2), len(factor2))
         self.assertEqual(sum(factor2), 1)
 
+    def test_strs_to_hed_objs(self):
+        self.assertIsNone(annotation_util.strs_to_hed_objs('', self.hed_schema))
+        self.assertIsNone(annotation_util.strs_to_hed_objs(None, self.hed_schema))
+        self.assertIsNone(annotation_util.strs_to_hed_objs([], self.hed_schema))
+        hed_objs1 = annotation_util.strs_to_hed_objs(['Sensory-event', 'Red'], self.hed_schema)
+        self.assertIsInstance(hed_objs1, list)
+        self.assertEqual(len(hed_objs1), 2)
+        self.assertEqual('Red', str(hed_objs1[1]))
+        hed_objs2 = annotation_util.strs_to_hed_objs(['Sensory-event', 'Blech'], self.hed_schema)
+        
     def test_strs_to_sidecar(self):
         with open(self.json_path, 'r') as fp:
             sidecar_dict = json.load(fp)

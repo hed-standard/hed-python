@@ -1,0 +1,3 @@
+[codespell]
+skip = .git,*.pdf,*.svg,deprecated,*.xml,*.mediawiki,*.omn,*.toml
+ignore-words-list = covert,hed,assertIn,parms

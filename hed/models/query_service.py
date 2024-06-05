@@ -40,11 +40,11 @@ def get_query_handlers(queries, query_names=None):
     return expression_parsers, query_names, issues
 
 
-def search_strings(hed_strings, queries, query_names):
+def search_hed_objs(hed_objs, queries, query_names):
     """ Return a DataFrame of factors based on results of queries.
 
     Parameters:
-        hed_strings (list):  A list of HedString objects (empty entries or None entries are 0's
+        hed_objs (list):  A list of HedString objects (empty entries or None entries are 0's
         queries (list):  A list of query strings or QueryHandler objects.
         query_names (list): A list of column names for results of queries.
 
@@ -54,9 +54,9 @@ def search_strings(hed_strings, queries, query_names):
     :raises ValueError:
         - If query names are invalid or duplicated.
     """
-    df_factors = pd.DataFrame(0, index=range(len(hed_strings)), columns=query_names)
+    df_factors = pd.DataFrame(0, index=range(len(hed_objs)), columns=query_names)
     for parse_ind, parser in enumerate(queries):
-        for index, next_item in enumerate(hed_strings):
+        for index, next_item in enumerate(hed_objs):
             if next_item:
                 match = parser.search(next_item)
                 if match:
