@@ -7,12 +7,14 @@ from hed.errors import ErrorHandler, ErrorContext
 from hed import schema
 
 
+#todo: update these tests(TagValidator no longer exists)
 class TestHedBase(unittest.TestCase):
     schema_file = None
+    hed_schema = None
 
     @classmethod
     def setUpClass(cls):
-        if cls.schema_file:
+        if cls.schema_file and not cls.hed_schema:
             hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file)
             cls.hed_schema = schema.load_schema(hed_xml)
         elif not cls.hed_schema:
@@ -67,7 +69,6 @@ class TestValidatorBase(TestHedBase):
         super().setUpClass()
         cls.error_handler = error_reporter.ErrorHandler()
         cls.semantic_hed_input_reader = HedValidator(hed_schema=cls.hed_schema)
-        cls.semantic_tag_validator = cls.semantic_hed_input_reader._tag_validator
 
     def validator_base(self, test_strings, expected_results, expected_issues, test_function,
                        hed_schema, check_for_warnings=False):

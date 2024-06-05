@@ -1,18 +1,42 @@
 """
     Abstract base class for HedSchema and HedSchemaGroup, showing the common functionality
 """
-
-from hed.errors import ErrorHandler
 from hed.schema.hed_schema_constants import HedSectionKey
 from abc import ABC, abstractmethod
+from hed.schema.schema_io import schema_util
 
 
 class HedSchemaBase(ABC):
     """ Baseclass for schema and schema group.
-        Overriding the following functions will allow you to use the schema for validation etc.
+
+        Implementing the abstract functions will allow you to use the schema for validation
     """
     def __init__(self):
+        self._name = ""  # User provided identifier for this schema(not used for equality comparison or saved)
+        self._schema83 = None  # If True, this is an 8.3 style schema for validation/attribute purposes
         pass
+
+    @property
+    def name(self):
+        """User provided name for this schema, defaults to filename or version if no name provided."""
+        if not self._name and hasattr(self, "filename"):
+            return self.filename
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name
+
+    @property
+    def schema_83_props(self):
+        """Returns if this is an 8.3.0 or greater schema.
+
+        Returns:
+            is_83_schema(bool): True if standard or partnered schema is 8.3.0 or greater."""
+        if self._schema83 is not None:
+            return self._schema83
+
+        self._schema83 = schema_util.schema_version_greater_equal(self, "8.3.0")
 
     @abstractmethod
     def get_schema_versions(self):
@@ -21,7 +45,7 @@ class HedSchemaBase(ABC):
         Returns:
             list: The complete version of this schema including library name and namespace.
         """
-        raise NotImplemented("This function must be implemented in the baseclass")
+        raise NotImplementedError("This function must be implemented in the baseclass")
 
     @abstractmethod
     def get_formatted_version(self):
@@ -30,7 +54,7 @@ class HedSchemaBase(ABC):
         Returns:
             str: The complete version of this schema including library name and namespace.
         """
-        raise NotImplemented("This function must be implemented in the baseclass")
+        raise NotImplementedError("This function must be implemented in the baseclass")
 
     @abstractmethod
     def schema_for_namespace(self, namespace):
@@ -42,7 +66,7 @@ class HedSchemaBase(ABC):
         Returns:
             HedSchema or None: The specific schema for this library name namespace if exists.
         """
-        raise NotImplemented("This function must be implemented in the baseclass")
+        raise NotImplementedError("This function must be implemented in the baseclass")
 
     @property
     @abstractmethod
@@ -52,7 +76,7 @@ class HedSchemaBase(ABC):
         Returns:
             prefixes(list of str):  A list of strings representing valid prefixes for this group.
         """
-        raise NotImplemented("This function must be implemented in the baseclass")
+        raise NotImplementedError("This function must be implemented in the baseclass")
 
     @abstractmethod
     def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags):
@@ -68,7 +92,7 @@ class HedSchemaBase(ABC):
         Notes:
             - The result is cached so will be fast after first call.
         """
-        raise NotImplemented("This function must be implemented in the baseclass")
+        raise NotImplementedError("This function must be implemented in the baseclass")
 
     # todo: maybe tweak this API so you don't have to pass in library namespace?
     @abstractmethod
@@ -85,7 +109,7 @@ class HedSchemaBase(ABC):
         Returns:
             HedSchemaEntry: The schema entry for the given tag.
         """
-        raise NotImplemented("This function must be implemented in the baseclass")
+        raise NotImplementedError("This function must be implemented in the baseclass")
 
     @abstractmethod
     def find_tag_entry(self, tag, schema_namespace=""):
@@ -103,11 +127,11 @@ class HedSchemaBase(ABC):
         Notes:
             Works left to right (which is mostly relevant for errors).
         """
-        raise NotImplemented("This function must be implemented in the baseclass")
+        raise NotImplementedError("This function must be implemented in the baseclass")
 
     @abstractmethod
     def __eq__(self, other):
-        raise NotImplemented("This function must be implemented in the baseclass")
+        raise NotImplementedError("This function must be implemented in the baseclass")
 
     @abstractmethod
     def check_compliance(self, check_for_warnings=True, name=None, error_handler=None):
@@ -122,4 +146,4 @@ class HedSchemaBase(ABC):
         Returns:
             list: A list of all warnings and errors found in the file. Each issue is a dictionary.
         """
-        raise NotImplemented("This function must be implemented in the baseclass")
+        raise NotImplementedError("This function must be implemented in the baseclass")

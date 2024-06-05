@@ -1,9 +1,8 @@
-""" Command-line program for creating a backup. """
+""" Command-line program for creating a remodeler backup. """
 
-import os
 import argparse
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.io_util import get_file_list, get_filtered_by_element
+from hed.tools.util import io_util
 from hed.tools.remodeling.backup_manager import BackupManager
 
 
@@ -54,10 +53,10 @@ def main(arg_list=None):
     if '*' in args.extensions:
         args.extensions = None
     exclude_dirs = args.exclude_dirs + ['remodeling']
-    file_list = get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
+    file_list = io_util.get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
                               exclude_dirs=exclude_dirs)
     if args.task_names:
-        file_list = get_filtered_by_element(file_list, args.task_names)
+        file_list = io_util.get_filtered_by_element(file_list, args.task_names)
     if args.backup_dir:
         backups_root = args.backup_dir
     else:

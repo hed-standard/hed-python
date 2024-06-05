@@ -1,15 +1,18 @@
 import unittest
 
-from hed.errors.error_types import ValidationErrors, DefinitionErrors
+from hed.errors.error_types import ValidationErrors, DefinitionErrors, TemporalErrors
 from tests.validator.test_tag_validator_base import TestValidatorBase
+from hed.schema.hed_schema_io import load_schema_version
 from functools import partial
 
 
+#todo: update these tests(TagValidator no longer exists)
 class TestHed(TestValidatorBase):
-    schema_file = "../data/schema_tests/HED8.0.0.mediawiki"
+    schema_file = "../data/schema_tests/HED8.2.0.mediawiki"
 
 
 class IndividualHedTagsShort(TestHed):
+    hed_schema = load_schema_version("score_1.1.0")
     @staticmethod
     def string_obj_func(validator):
         return partial(validator._validate_individual_tags_in_hed_string)
@@ -214,6 +217,20 @@ class IndividualHedTagsShort(TestHed):
             # Update tests - 8.0 currently has no clockTime nodes.
             # 'properTime': 'Item/2D shape/Clock face/08:30',
             # 'invalidTime': 'Item/2D shape/Clock face/54:54'
+            'voltsTest1': 'Finding-amplitude/30 v',
+            'voltsTest2': 'Finding-amplitude/30 Volt',
+            'voltsTest3': 'Finding-amplitude/30 volts',
+            'voltsTest4': 'Finding-amplitude/30 VOLTS',
+            'voltsTest5': 'Finding-amplitude/30 kv',
+            'voltsTest6': 'Finding-amplitude/30 kiloVolt',
+            'voltsTest7': 'Finding-amplitude/30 KiloVolt',
+            'volumeTest1': "Sound-volume/5 dB",
+            'volumeTest2': "Sound-volume/5 kdB",  # Invalid, not SI unit
+            'volumeTest3': "Sound-volume/5 candela",
+            'volumeTest4': "Sound-volume/5 kilocandela",
+            'volumeTest5': "Sound-volume/5 cd",
+            'volumeTest6': "Sound-volume/5 kcd",
+            'volumeTest7': "Sound-volume/5 DB",  # Invalid, case doesn't match
         }
         expected_results = {
             'correctUnit': True,
@@ -235,12 +252,27 @@ class IndividualHedTagsShort(TestHed):
             # 'invalidTime': True,
             # 'specialAllowedCharCurrency': True,
             # 'specialNotAllowedCharCurrency': False,
+            'voltsTest1': True,
+            'voltsTest2': True,
+            'voltsTest3': True,
+            'voltsTest4': True,
+            'voltsTest5': True,
+            'voltsTest6': True,
+            'voltsTest7': True,
+            'volumeTest1': True,
+            'volumeTest2': False,
+            'volumeTest3': True,
+            'volumeTest4': True,
+            'volumeTest5': True,
+            'volumeTest6': True,
+            'volumeTest7': False,
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
         # legal_clock_time_units = ['hour:min', 'hour:min:sec']
         # legal_datetime_units = ['YYYY-MM-DDThh:mm:ss']
         legal_freq_units = ['Hz', 'hertz']
         # legal_currency_units = ['dollar', "$", "point"]
+        legal_intensity_units = ["candela", "cd", "dB"]
 
         expected_issues = {
             'correctUnit': [],
@@ -272,6 +304,20 @@ class IndividualHedTagsShort(TestHed):
             # 'specialNotAllowedCharCurrency': self.format_error(ValidationErrors.UNITS_INVALID,
             #                                                                    tag=0,
             #                                                                    units=legal_currency_units),
+            'voltsTest1': [],
+            'voltsTest2': [],
+            'voltsTest3': [],
+            'voltsTest4': [],
+            'voltsTest5': [],
+            'voltsTest6': [],
+            'voltsTest7': [],
+            'volumeTest1': [],
+            'volumeTest2': self.format_error(ValidationErrors.UNITS_INVALID,tag=0, units=legal_intensity_units),
+            'volumeTest3': [],
+            'volumeTest4': [],
+            'volumeTest5': [],
+            'volumeTest6': [],
+            'volumeTest7': self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_intensity_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
@@ -353,7 +399,7 @@ class IndividualHedTagsShort(TestHed):
 class TestTagLevels(TestHed):
     @staticmethod
     def string_obj_func(validator):
-        return validator._validate_groups_in_hed_string
+        return validator._group_validator.run_tag_level_validators
 
     def test_no_duplicates(self):
         test_strings = {
@@ -419,6 +465,12 @@ class TestTagLevels(TestHed):
             'invalid2': '(Event, (Definition/InvalidDef2))',
             'invalidTwoInOne': '(Definition/InvalidDef2, Definition/InvalidDef3)',
             'invalid2TwoInOne': '(Definition/InvalidDef2, Onset)',
+            'valid2TwoInOne': '(Duration/5.0 s, Delay, (Event))',
+            'invalid3InOne': '(Duration/5.0 s, Delay, Onset, (Event))',
+            'invalidDuration': '(Duration/5.0 s, Onset, (Event))',
+            'validDelay': '(Delay, Onset, (Event))',
+            'invalidDurationPair': '(Duration/5.0 s, Duration/3.0 s, (Event))',
+            'invalidDelayPair': '(Delay/3.0 s, Delay, (Event))',
         }
         expected_results = {
             'invalid1': False,
@@ -427,6 +479,12 @@ class TestTagLevels(TestHed):
             'invalid2': False,
             'invalidTwoInOne': False,
             'invalid2TwoInOne': False,
+            'valid2TwoInOne': True,
+            'invalid3InOne': False,
+            'invalidDuration': False,
+            'validDelay': True,
+            'invalidDurationPair': False,
+            'invalidDelayPair': False,
         }
         expected_issues = {
             'invalid1': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0, actual_error=ValidationErrors.DEFINITION_INVALID)
@@ -434,13 +492,15 @@ class TestTagLevels(TestHed):
             'valid1': [],
             'valid2': [],
             'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.DEFINITION_INVALID)
-            + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
-            'invalidTwoInOne': self.format_error(
-                ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="Definition/InvalidDef3".split(", ")),
-            'invalid2TwoInOne': self.format_error(
-                ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="Onset".split(", ")),
+                        + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
+            'invalidTwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Definition/InvalidDef3".split(", ")),
+            'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Onset".split(", ")),
+            'valid2TwoInOne': [],
+            'invalid3InOne':  self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Delay, Onset".split(", ")),
+            'invalidDuration': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Onset".split(", ")),
+            'validDelay': [],
+            'invalidDurationPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Duration/3.0 s".split(", ")),
+            'invalidDelayPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Delay".split(", ")),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -499,7 +559,7 @@ class FullHedString(TestHed):
 
     @staticmethod
     def string_obj_func(validator):
-        return validator._tag_validator.run_hed_string_validators
+        return validator._run_hed_string_validators
 
     def test_invalid_placeholders(self):
         # We might want these to be banned later as invalid characters.
@@ -829,7 +889,7 @@ class RequiredTags(TestHed):
 
     @staticmethod
     def string_obj_func(validator):
-        return partial(validator._validate_tags_in_hed_string)
+        return partial(validator._group_validator.run_all_tags_validators)
 
     def test_includes_all_required_tags(self):
         test_strings = {
@@ -947,6 +1007,34 @@ class TestHedSpecialUnits(TestHed):
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
+
+class TestHedAllowedCharacters(TestHed):
+    compute_forms = True
+    schema_file = '../data/schema_tests/schema_utf8.mediawiki'
+
+    @staticmethod
+    def string_obj_func(validator):
+        return partial(validator._validate_individual_tags_in_hed_string)
+
+    def test_special_units(self):
+        test_strings = {
+            'ascii': 'Ascii/bad-date',
+            'illegalTab': 'Ascii/bad-dat\t',
+            'allowTab': 'Nonascii/Cafe\t',
+        }
+        expected_results = {
+            'ascii': True,
+            'illegalTab': False,
+            'allowTab': True
+        }
+
+        expected_issues = {
+            'ascii': [],
+            'illegalTab': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER, tag=0,
+                                          index_in_tag=13, index_in_tag_end=14),
+            'allowTab': []
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
 if __name__ == '__main__':
     unittest.main()

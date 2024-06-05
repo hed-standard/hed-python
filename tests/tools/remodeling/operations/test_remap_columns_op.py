@@ -64,47 +64,6 @@ class Test(unittest.TestCase):
         df_new = op.do_op(self.dispatch, self.dispatch.prep_data(df), 'run-01')
         return df, self.dispatch.post_proc_data(df_new)
 
-    def test_valid(self):
-        # Test when no extras but ignored.
-        parms = json.loads(self.json_parms)
-        op = RemapColumnsOp(parms)
-        df, df_test = self.get_dfs(op)
-        self.assertNotIn("response_type", df.columns, "remap_columns before does not have response_type column")
-        self.assertIn("response_type", df_test.columns, "remap_columns after has response_type column")
-
-    def test_invalid_params(self):
-        parms1 = json.loads(self.json_parms)
-        parms1["source_columns"] = []
-        with self.assertRaises(ValueError) as context1:
-            RemapColumnsOp(parms1)
-        self.assertEqual(context1.exception.args[0], "EmptySourceColumns")
-
-        parms2 = json.loads(self.json_parms)
-        parms2["destination_columns"] = []
-        with self.assertRaises(ValueError) as context2:
-            RemapColumnsOp(parms2)
-        self.assertEqual(context2.exception.args[0], "EmptyDestinationColumns")
-
-        parms3 = json.loads(self.json_parms)
-        parms3["map_list"][1] = ["right", "correct_right"],
-        with self.assertRaises(ValueError) as context3:
-            RemapColumnsOp(parms3)
-        self.assertEqual(context3.exception.args[0], "BadColumnMapEntry")
-
-        parms4 = json.loads(self.json_parms1)
-        parms4["integer_sources"] = ["test", "baloney"]
-        with self.assertRaises(ValueError) as context4:
-            RemapColumnsOp(parms4)
-        self.assertEqual(context4.exception.args[0], "IntegerSourceColumnsInvalid")
-
-    def test_integer_sources(self):
-        parms1 = json.loads(self.json_parms1)
-        op1 = RemapColumnsOp(parms1)
-        self.assertIn('test', op1.integer_sources)
-        parms2 = json.loads(self.json_parms2)
-        op2 = RemapColumnsOp(parms2)
-        self.assertIn('test', op2.integer_sources)
-
     def test_valid_missing(self):
         # Test when no extras but ignored.
         parms = json.loads(self.json_parms)
@@ -177,10 +136,11 @@ class Test(unittest.TestCase):
         self.assertIn("new_value", df_test.columns.values)
 
     def test_scratch(self):
-        import os
-        from hed.tools.util.io_util import get_file_list
-        from hed.tools.util.data_util import get_new_dataframe
-        event_path = os.path.realpath('D:/monique/test_events.tsv')
+        pass
+        # import os
+        # from hed.tools.util.io_util import get_file_list
+        # from hed.tools.util.data_util import get_new_dataframe
+        # event_path = os.path.realpath('D:/monique/test_events.tsv')
         # save_path = os.path.realpath('D:/monique/output')
         # json_dir = os.path.realpath('D:/monique/json')
         # json_list = get_file_list(json_dir, extensions=['.json'])

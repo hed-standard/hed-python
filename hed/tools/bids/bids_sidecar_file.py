@@ -18,7 +18,7 @@ class BidsSidecarFile(BidsFile):
         super().__init__(file_path)
 
     def is_sidecar_for(self, obj):
-        """ Return true if this is a sidecar for obj.
+        """ Return True if this is a sidecar for obj.
 
          Parameters:
              obj (BidsFile):  A BidsFile object to check.

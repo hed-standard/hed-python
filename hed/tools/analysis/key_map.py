@@ -3,7 +3,7 @@
 
 import pandas as pd
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.data_util import get_new_dataframe, get_row_hash, separate_values
+from hed.tools.util import data_util
 
 
 class KeyMap:
@@ -22,9 +22,9 @@ class KeyMap:
         """ Information for remapping columns of tabular files.
 
         Parameters:
-            key_cols (list):       List of columns to be replaced (assumed in the DataFrame)
-            target_cols(list):     List of replacement columns (assumed to not be in the DataFrame)
-            name (str):            Name associated with this remap (usually a pathname of the events file).
+            key_cols (list): List of columns to be replaced (assumed in the DataFrame).
+            target_cols(list): List of replacement columns (assumed to not be in the DataFrame).
+            name (str): Name associated with this remap (usually a pathname of the events file).
 
         """
 
@@ -45,12 +45,17 @@ class KeyMap:
 
     @property
     def columns(self):
+        """ Return the column names of the columns managed by this map.
+
+        Returns:
+            list:  Column names of the columns managed by this map.
+        """
         return self.key_cols + self.target_cols
 
     def __str__(self):
         temp_list = [f"{self.name} counts for key [{str(self.key_cols)}]:"]
         for index, row in self.col_map.iterrows():
-            key_hash = get_row_hash(row, self.columns)
+            key_hash = data_util.get_row_hash(row, self.columns)
             temp_list.append(f"{str(list(row.values))}:\t{self.count_dict[key_hash]}")
         return "\n".join(temp_list)
 
@@ -59,7 +64,9 @@ class KeyMap:
 
         Parameters:
             additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
-            show_counts (bool): If true, number of times each key combination appears is in first column
+            show_counts (bool): If True, number of times each key combination appears is in first column and 
+                                values are sorted in descending order by.
+            
         Returns:
             DataFrame:  A dataframe containing the template.
 
@@ -79,12 +86,19 @@ class KeyMap:
             df[additional_cols] = 'n/a'
         if show_counts:
             df.insert(0, 'key_counts', self._get_counts())
+            df.sort_values(by=['key_counts'], inplace=True, ignore_index=True, ascending=False)
         return df
 
     def _get_counts(self):
+        """ Return counts for the key column combinations.
+
+        Returns:
+            list:  List which is the same length as the col_map containing the counts of the combinations.
+
+        """
         counts = [0 for _ in range(len(self.col_map))]
         for index, row in self.col_map.iterrows():
-            key_hash = get_row_hash(row, self.key_cols)
+            key_hash = data_util.get_row_hash(row, self.key_cols)
             counts[index] = self.count_dict[key_hash]
         return counts
 
@@ -104,8 +118,8 @@ class KeyMap:
 
         """
 
-        df_new = get_new_dataframe(data)
-        present_keys, missing_keys = separate_values(df_new.columns.values.tolist(), self.key_cols)
+        df_new = data_util.get_new_dataframe(data)
+        present_keys, missing_keys = data_util.separate_values(df_new.columns.values.tolist(), self.key_cols)
         if missing_keys:
             raise HedFileError("MissingKeys", f"File must have key columns {str(self.key_cols)}", "")
         self.remove_quotes(df_new, columns=present_keys)
@@ -126,7 +140,7 @@ class KeyMap:
 
         missing_indices = []
         for index, row in df.iterrows():
-            key = get_row_hash(row, self.key_cols)
+            key = data_util.get_row_hash(row, self.key_cols)
             key_value = self.map_dict.get(key, None)
             if key_value is not None:
                 result = self.col_map.iloc[key_value]
@@ -140,23 +154,23 @@ class KeyMap:
         """ Sort the col_map in place by the key columns. """
         self.col_map.sort_values(by=self.key_cols, inplace=True, ignore_index=True)
         for index, row in self.col_map.iterrows():
-            key_hash = get_row_hash(row, self.key_cols)
+            key_hash = data_util.get_row_hash(row, self.key_cols)
             self.map_dict[key_hash] = index
-
+            
     def update(self, data, allow_missing=True):
         """ Update the existing map with information from data.
 
         Parameters:
             data (DataFrame or str):     DataFrame or filename of an events file or event map.
-            allow_missing (bool):        If true allow missing keys and add as n/a columns.
+            allow_missing (bool):        If True allow missing keys and add as n/a columns.
 
         :raises HedFileError:
             - If there are missing keys and allow_missing is False.
 
         """
-        df = get_new_dataframe(data)
+        df = data_util.get_new_dataframe(data)
         col_list = df.columns.values.tolist()
-        keys_present, keys_missing = separate_values(col_list, self.key_cols)
+        keys_present, keys_missing = data_util.separate_values(col_list, self.key_cols)
         if keys_missing and not allow_missing:
             raise HedFileError("MissingKeyColumn",
                                f"make_template data does not have key columns {str(keys_missing)}", "")
@@ -167,7 +181,7 @@ class KeyMap:
             base_df[keys_missing] = 'n/a'
         if self.target_cols:
             base_df[self.target_cols] = 'n/a'
-            targets_present, targets_missing = separate_values(col_list, self.target_cols)
+            targets_present, targets_missing = data_util.separate_values(col_list, self.target_cols)
             if targets_present:
                 base_df[targets_present] = df[targets_present].values
         self._update(base_df)
@@ -187,21 +201,23 @@ class KeyMap:
             next_pos += pos_update
         if row_list:
             df = pd.DataFrame(row_list)
-            self.col_map = pd.concat([self.col_map, df], axis=0, ignore_index=True)
+            # Ignore empty col_map to suppress warning
+            col_map = self.col_map if not self.col_map.empty else None
+            self.col_map = pd.concat([col_map, df], axis=0, ignore_index=True)
 
     def _handle_update(self, row, row_list, next_pos):
         """ Update the dictionary and counts of the number of times this combination of key columns appears.
 
         Parameters:
             row (DataSeries):  Data the values in a row.
-            row_list (list):   A list of rows to be appended to hold the unique rows
-            next_pos (int):    Index into the
+            row_list (list):   A list of rows to be appended to hold the unique rows.
+            next_pos (int):    Index into the row_list of this row
 
         Returns:
             tuple: (key, pos_update)  key is the row hash and pos_update is 1 if new row or 0 otherwise.
 
         """
-        key = get_row_hash(row, self.key_cols)
+        key = data_util.get_row_hash(row, self.key_cols)
         pos_update = 0
         if key not in self.map_dict:
             self.map_dict[key] = next_pos

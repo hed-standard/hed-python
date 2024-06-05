@@ -1,24 +1,43 @@
-""" Remove rows from a tabular file. """
+""" Remove rows from a columnar file based on the values in a specified row. """
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class RemoveRowsOp(BaseOp):
-    """ Remove rows from a tabular file.
+    """ Remove rows from a columnar file based on the values in a specified row.
 
     Required remodeling parameters:   
         - **column_name** (*str*): The name of column to be tested.   
         - **remove_values** (*list*): The values to test for row removal.   
 
     """
-
+    NAME = "remove_rows"
+    
     PARAMS = {
-        "operation": "remove_rows",
-        "required_parameters": {
-            "column_name": str,
-            "remove_values": list
+        "type": "object",
+        "properties": {
+            "column_name": {
+                "type": "string",
+                "description": "Name of the key column to determine which rows to remove."
+            },
+            "remove_values": {
+                "type": "array",
+                "description": "List of key values for rows to remove.",
+                "items": {
+                    "type": [
+                        "string",
+                        "number"
+                    ]
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "column_name",
+            "remove_values"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -27,15 +46,8 @@ class RemoveRowsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.column_name = parameters["column_name"]
         self.remove_values = parameters["remove_values"]
 
@@ -58,3 +70,8 @@ class RemoveRowsOp(BaseOp):
         for value in self.remove_values:
             df_new = df_new.loc[df_new[self.column_name] != value, :]
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        return []

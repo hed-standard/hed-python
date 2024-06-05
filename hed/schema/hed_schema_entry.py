@@ -2,8 +2,6 @@ from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.hed_schema_constants import HedKey
 
 import inflect
-import copy
-
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -115,12 +113,8 @@ class HedSchemaEntry:
     def __eq__(self, other):
         if self.name != other.name:
             return False
-        if self.attributes != other.attributes:
-            # We only want to compare known attributes
-            self_attr = self.get_known_attributes()
-            other_attr = other.get_known_attributes()
-            if self_attr != other_attr:
-                return False
+        if not self._compare_attributes_no_order(self.attributes, other.attributes):
+            return False
         if self.description != other.description:
             return False
         return True
@@ -131,9 +125,13 @@ class HedSchemaEntry:
     def __str__(self):
         return self.name
 
-    def get_known_attributes(self):
-        return {key: value for key, value in self.attributes.items()
-                if not self._unknown_attributes or key not in self._unknown_attributes}
+    @staticmethod
+    def _compare_attributes_no_order(left, right):
+        if left != right:
+            left = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in left.items()}
+            right = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in right.items()}
+
+        return left == right
 
 
 class UnitClassEntry(HedSchemaEntry):
@@ -144,6 +142,15 @@ class UnitClassEntry(HedSchemaEntry):
         self._units = []
         self.units = []
         self.derivative_units = {}
+
+    @property
+    def children(self):
+        """ Alias to get the units for this class
+
+        Returns:
+            unit_list(list): The unit list for this class
+        """
+        return self.units
 
     def add_unit(self, unit_entry):
         """ Add the given unit entry to this unit class.
@@ -161,11 +168,12 @@ class UnitClassEntry(HedSchemaEntry):
             schema (HedSchema): The object with the schema rules.
 
         """
-
         self.units = {unit_entry.name: unit_entry for unit_entry in self._units}
+        for unit_entry in self.units.values():
+            unit_entry.unit_class_entry = self
         derivative_units = {}
         for unit_entry in self.units.values():
-            derivative_units.update({key:unit_entry for key in unit_entry.derivative_units.keys()})
+            derivative_units.update({key: unit_entry for key in unit_entry.derivative_units.keys()})
 
         self.derivative_units = derivative_units
 
@@ -176,13 +184,35 @@ class UnitClassEntry(HedSchemaEntry):
             return False
         return True
 
+    def get_derivative_unit_entry(self, units):
+        """ Gets the (derivative) unit entry if it exists
+
+        Parameters:
+            units (str): The unit name to check, can be plural or include a modifier.
+
+        Returns:
+            unit_entry(UnitEntry or None): The unit entry if it exists
+        """
+        possible_match = self.derivative_units.get(units)
+        # If we have a match that's a unit symbol, we're done, return it.
+        if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
+            return possible_match
+
+        possible_match = self.derivative_units.get(units.casefold())
+        # Unit symbols must match including case, a match of a unit symbol now is something like M becoming m.
+        if possible_match and possible_match.has_attribute(HedKey.UnitSymbol):
+            possible_match = None
+
+        return possible_match
+
+
 class UnitEntry(HedSchemaEntry):
     """ A single unit entry with modifiers in the HedSchema. """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.unit_class_name = None
         self.unit_modifiers = []
         self.derivative_units = {}
+        self.unit_class_entry = None
 
     def finalize_entry(self, schema):
         """ Called once after loading to set internal state.
@@ -192,17 +222,17 @@ class UnitEntry(HedSchemaEntry):
 
         """
         self.unit_modifiers = schema._get_modifiers_for_unit(self.name)
-
         derivative_units = {}
-        base_plural_units = {self.name}
-        if not self.has_attribute(HedKey.UnitSymbol):
-            base_plural_units.add(pluralize.plural(self.name))
+        if self.has_attribute(HedKey.UnitSymbol):
+            base_plural_units = {self.name}
+        else:
+            base_plural_units = {self.name.lower()}
+            base_plural_units.add(pluralize.plural(self.name.lower()))
 
         for derived_unit in base_plural_units:
             derivative_units[derived_unit] = self._get_conversion_factor(None)
             for modifier in self.unit_modifiers:
                 derivative_units[modifier.name + derived_unit] = self._get_conversion_factor(modifier_entry=modifier)
-
         self.derivative_units = derivative_units
 
     def _get_conversion_factor(self, modifier_entry):
@@ -211,7 +241,7 @@ class UnitEntry(HedSchemaEntry):
             base_factor = float(self.attributes.get(HedKey.ConversionFactor, "1.0").replace("^", "e"))
             if modifier_entry:
                 modifier_factor = float(modifier_entry.attributes.get(HedKey.ConversionFactor, "1.0").replace("^", "e"))
-        except (ValueError, AttributeError) as e:
+        except (ValueError, AttributeError):
             pass  # Just default to 1.0
         return base_factor * modifier_factor
 
@@ -226,6 +256,7 @@ class UnitEntry(HedSchemaEntry):
         """
         if HedKey.ConversionFactor in self.attributes:
             return float(self.derivative_units.get(unit_name))
+
 
 class HedTagEntry(HedSchemaEntry):
     """ A single tag entry in the HedSchema. """
@@ -243,6 +274,13 @@ class HedTagEntry(HedSchemaEntry):
         self.inherited_attributes = self.attributes
         # Descendent tags below this one
         self.children = {}
+
+    def __eq__(self, other):
+        if not super().__eq__(other):
+            return False
+        if not self._compare_attributes_no_order(self.inherited_attributes, other.inherited_attributes):
+            return False
+        return True
 
     def has_attribute(self, attribute, return_value=False):
         """ Returns th existence or value of an attribute in this entry.
@@ -280,7 +318,7 @@ class HedTagEntry(HedSchemaEntry):
 
         return attribute_values
 
-    def _check_inherited_attribute(self, attribute, return_value=False, return_union=False):
+    def _check_inherited_attribute(self, attribute, return_value=False):
         """
         Checks for the existence of an attribute in this entry and its parents.
 
@@ -288,7 +326,6 @@ class HedTagEntry(HedSchemaEntry):
             attribute (str): The attribute to check for.
             return_value (bool): If True, returns the actual value of the attribute.
                                  If False, returns a boolean indicating the presence of the attribute.
-            return_union(bool): If true, return a union of all parent values
 
         Returns:
             bool or any: Depending on the flag return_value,
@@ -297,15 +334,17 @@ class HedTagEntry(HedSchemaEntry):
         Notes:
             - The existence of an attribute does not guarantee its validity.
             - For string attributes, the values are joined with a comma as a delimiter from all ancestors.
+            - For other attributes, only the value closest to the leaf is returned
         """
         attribute_values = self._check_inherited_attribute_internal(attribute)
 
         if return_value:
             if not attribute_values:
                 return None
-            if return_union:
+            try:
                 return ",".join(attribute_values)
-            return attribute_values[0]
+            except TypeError:
+                return attribute_values[0]  # Return the lowest level attribute if we don't want the union
         return bool(attribute_values)
 
     def base_tag_has_attribute(self, tag_attribute):
@@ -359,8 +398,7 @@ class HedTagEntry(HedSchemaEntry):
         self.inherited_attributes = self.attributes.copy()
         for attribute in self._section.inheritable_attributes:
             if self._check_inherited_attribute(attribute):
-                treat_as_string = not self.attribute_has_property(attribute, HedKey.BoolProperty)
-                self.inherited_attributes[attribute] = self._check_inherited_attribute(attribute, True, treat_as_string)
+                self.inherited_attributes[attribute] = self._check_inherited_attribute(attribute, True)
 
     def finalize_entry(self, schema):
         """ Called once after schema loading to set state.
@@ -378,7 +416,7 @@ class HedTagEntry(HedSchemaEntry):
         if self._parent_tag:
             self._parent_tag.children[self.short_tag_name] = self
         self.takes_value_child_entry = schema._get_tag_entry(self.name + "/#")
-        self.tag_terms = tuple(self.long_tag_name.lower().split("/"))
+        self.tag_terms = tuple(self.long_tag_name.casefold().split("/"))
 
         self._finalize_inherited_attributes()
         self._finalize_takes_value_tag(schema)

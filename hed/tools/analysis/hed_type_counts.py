@@ -1,22 +1,22 @@
-""" Manages the counts of tags such as Condition-variable and task. """
+""" Classes for managing counts of tags for one type tag such as Condition-variable or Task. """
 
 
 class HedTypeCount:
-    """ Keeps a summary of one value of one type of variable.
+    """  Manager of the counts of tags for one type tag such as Condition-variable or Task.
 
     Parameters:
-        type_value (str):  The value of the variable to be counted
+        type_value (str):  The value of the variable to be counted.
         type_tag (str):   The type of variable.
 
     Examples:
-        HedTypeCounts('SymmetricCond', 'condition-variable') keeps counts of Condition-variable/Symmetric
+        HedTypeCounts('SymmetricCond', 'condition-variable') keeps counts of Condition-variable/Symmetric.
 
     """
 
     def __init__(self, type_value, type_tag, file_name=None):
 
         self.type_value = type_value
-        self.type_tag = type_tag.lower()
+        self.type_tag = type_tag.casefold()
         self.direct_references = 0
         self.total_events = 0
         self.events = 0
@@ -48,12 +48,19 @@ class HedTypeCount:
         self._update_levels(type_sum.get('level_counts', {}))
 
     def to_dict(self):
+        """ Return count information as a dictionary. """
         return {'type_value': self.type_value, 'type_tag': self.type_tag,
                 'direct_references': self.direct_references, 'total_events': self.total_events,
                 'events': self.events, 'files': self.files, 'events_with_multiple_refs': self.events_with_multiple_refs,
                 'max_refs_per_event': self.max_refs_per_event, 'level_counts': self.level_counts}
 
     def _update_levels(self, level_dict):
+        """ Helper for updating counts in a level dictionary.
+
+        Parameters:
+            level_dict (dict): A dictionary of level count information.
+
+        """
         for key, item in level_dict.items():
             if key not in self.level_counts:
                 self.level_counts[key] = {'files': 0, 'events': 0, 'tags': '', 'description': ''}
@@ -70,6 +77,12 @@ class HedTypeCount:
                 level_counts['description'] = item['description']
 
     def get_summary(self):
+        """ Return the summary of one value of one type tag.
+
+        Returns:
+            dict:  Count information for one tag of one type.
+
+        """
         summary = {'type_value': self.type_value,
                    'type_tag': self.type_tag,
                    'levels': len(self.level_counts.keys()),
@@ -85,10 +98,7 @@ class HedTypeCount:
 
 
 class HedTypeCounts:
-    """ Keeps a summary of tag counts for a file.
-
-
-    """
+    """ Manager for summaries of tag counts for columnar files. """
 
     def __init__(self, name, type_tag):
         self.name = name
@@ -133,6 +143,12 @@ class HedTypeCounts:
                 type_count.level_counts[level]['description'] = level_dict['description']
 
     def update(self, counts):
+        """ Update count information based on counts in another HedTypeCounts.
+
+        Parameters:
+            counts (HedTypeCounts):  Information to use in the update.
+
+        """
         self.total_events = self.total_events + counts.total_events
         for key, count in counts.type_dict.items():
             if key not in self.type_dict:
@@ -143,6 +159,12 @@ class HedTypeCounts:
             self.files[file_id] = ''
 
     def get_summary(self):
+        """ Return the information in the manager as a dictionary.
+
+        Returns:
+            dict: Dict with keys 'name', 'type_tag', 'files', 'total_events', and 'details'.
+
+        """
         details = {}
         for type_value, count in self.type_dict.items():
             details[type_value] = count.get_summary()

@@ -60,6 +60,7 @@ exclude_patterns:
 - "**/spec/"
 - "**/test/"
 - "**/tests/"
+- "**/spec_tests/"
 - "**/docs/"
 - "Tests/"
 - "**/vendor/"

@@ -100,8 +100,8 @@ class BidsTabularDictionary(BidsFileDictionary):
              tuple:
                 - str: The next key.
                 - BidsTabularFile:   The next object.
-                - int:  Number of rows
-                - list:  List of column names
+                - int:  Number of rows.
+                - list:  List of column names.
 
         """
         self.set_tsv_info()
@@ -132,7 +132,7 @@ class BidsTabularDictionary(BidsFileDictionary):
         self._info_set = True
 
     def report_diffs(self, tsv_dict, logger=None):
-        """ Reports and logs the contents and differences between this tabular dictionary and another
+        """ Reports and logs the contents and differences between this tabular dictionary and another.
 
         Parameters:
             tsv_dict (BidsTabularDictionary):  A dictionary representing BIDS-keyed tsv files.

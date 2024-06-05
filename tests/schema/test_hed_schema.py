@@ -8,7 +8,7 @@ from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, 
 
 class TestHedSchema(unittest.TestCase):
     schema_file_3g_xml = '../data/schema_tests/HED8.0.0t.xml'
-    schema_file_3g = '../data/schema_tests/HED8.0.0.mediawiki'
+    schema_file_3g = '../data/schema_tests/HED8.2.0.mediawiki'
 
     @classmethod
     def setUpClass(cls):
@@ -30,7 +30,7 @@ class TestHedSchema(unittest.TestCase):
             # We should have an error before we reach here.
             self.assertTrue(False)
         except HedFileError as e:
-            self.assertTrue(invalid_xml_file in get_printable_issue_string(e.issues, skip_filename=False))
+            self.assertTrue(invalid_xml_file in e.filename)
 
     def test_tag_attribute(self):
         test_strings = {
@@ -83,31 +83,8 @@ class TestHedSchema(unittest.TestCase):
                 self.assertEqual(tag.has_attribute(attribute), expected_value,
                                  'Test string: %s. Attribute: %s.' % (test_string, attribute))
 
-    def test_get_all_tags(self):
-        terms = self.hed_schema_3g.get_all_schema_tags(True)
-        self.assertTrue(isinstance(terms, list))
-        self.assertTrue(len(terms) > 0)
-
-    def test_get_desc_dict(self):
-        desc_dict = self.hed_schema_3g.get_desc_iter()
-        self.assertEqual(len(list(desc_dict)), 1117)
-
-    def test_get_tag_description(self):
-        # Test known tag
-        desc = self.hed_schema_3g.get_tag_description("Event/Sensory-event")
-        self.assertEqual(desc, "Something perceivable by the participant. An event meant to be an experimental"
-                               " stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.")
-        # Test known unit modifier
-        desc = self.hed_schema_3g.get_tag_description("deca", HedSectionKey.UnitModifiers)
-        self.assertEqual(desc, "SI unit multiple representing 10^1")
-
-        # test unknown tag.
-        desc = self.hed_schema_3g.get_tag_description("This/Is/Not/A/Real/Tag")
-        self.assertEqual(desc, None)
-
     def test_get_all_tag_attributes(self):
-        test_string = HedString("Jerk-rate/#", self.hed_schema_3g)
-        tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
+        tag_props = self.hed_schema_3g._get_tag_entry("Jerk-rate/#").attributes
         expected_props = {
             "takesValue": "true",
             "valueClass": "numericClass",
@@ -115,26 +92,20 @@ class TestHedSchema(unittest.TestCase):
         }
         self.assertCountEqual(tag_props, expected_props)
 
-        tag_props = self.hed_schema_3g.get_all_tag_attributes("This/Is/Not/A/Tag")
-        expected_props = {
-        }
-        self.assertCountEqual(tag_props, expected_props)
-
-        test_string = HedString("Statistical-value", self.hed_schema_3g)
-        tag_props = self.hed_schema_3g.get_all_tag_attributes(test_string)
+        tag_props = self.hed_schema_3g._get_tag_entry("Statistical-value").attributes
         expected_props = {
             HedKey.ExtensionAllowed: "true",
         }
         self.assertCountEqual(tag_props, expected_props)
         # also test long form.
-        tag_props = self.hed_schema_3g.get_all_tag_attributes("Property/Data-property/Data-value/Statistical-value")
+        tag_props = self.hed_schema_3g._get_tag_entry("Property/Data-property/Data-value/Statistical-value").attributes
         self.assertCountEqual(tag_props, expected_props)
 
     def test_get_hed_xml_version(self):
         self.assertEqual(get_hed_xml_version(self.hed_xml_3g), "8.0.0")
 
     def test_has_duplicate_tags(self):
-        self.assertFalse(self.hed_schema_3g._has_duplicate_tags)
+        self.assertFalse(self.hed_schema_3g.has_duplicates())
 
     def test_short_tag_mapping(self):
         self.assertEqual(len(self.hed_schema_3g.tags.keys()), 1110)
@@ -144,7 +115,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(len(warnings), 14)
 
     def test_bad_prefixes(self):
-        schema = load_schema_version(xml_version="8.0.0")
+        schema = load_schema_version(xml_version="8.2.0")
 
         self.assertTrue(schema.get_tag_entry("Event"))
         self.assertFalse(schema.get_tag_entry("sc:Event"))
@@ -155,7 +126,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertFalse(schema.get_tag_entry("Event", schema_namespace='unknown'))
 
     def test_bad_prefixes_library(self):
-        schema = load_schema_version(xml_version="tl:8.0.0")
+        schema = load_schema_version(xml_version="tl:8.2.0")
 
         self.assertTrue(schema.get_tag_entry("tl:Event", schema_namespace="tl:"))
         self.assertFalse(schema.get_tag_entry("sc:Event", schema_namespace="tl:"))

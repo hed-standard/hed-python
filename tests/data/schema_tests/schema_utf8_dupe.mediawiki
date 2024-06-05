@@ -1,0 +1,29 @@
+HED version="8.3.0" unmerged="True"
+
+'''Prologue'''
+
+!# start schema
+
+'''Tag1'''
+* Wßord [ This is a special character that differs with .casefold vs .lower]
+* Wssord [This is the same word as above]
+
+!# end schema
+
+'''Unit classes''' <nowiki>[Unit classes and the units for the nodes.]</nowiki>
+
+
+
+'''Unit modifiers''' <nowiki>[Unit multiples and submultiples.]</nowiki>
+
+
+
+'''Value classes''' <nowiki>[Specification of the rules for the values provided by users.]</nowiki>
+
+'''Schema attributes''' <nowiki>[Allowed attribute modifiers of other sections of the schema.]</nowiki>
+
+'''Properties''' <nowiki>[Properties of the schema attributes themselves. These are used for schema handling and verification.]</nowiki>
+
+'''Epilogue'''
+
+!# end hed

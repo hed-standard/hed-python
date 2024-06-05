@@ -93,7 +93,7 @@ class Test(unittest.TestCase):
                                                '../../../data/remodel_tests/aomic_sub-0013_summary_all_rmdl.json'))
         with open(column_summary_path, 'r') as fp:
             parms = json.load(fp)
-        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        parsed_commands = Dispatcher.parse_operations(parms)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         df = dispatch.get_data_file(events)
         old_len = len(df)

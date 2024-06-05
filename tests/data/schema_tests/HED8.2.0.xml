@@ -1,6 +1,9 @@
 <?xml version="1.0" ?>
-<HED version="8.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd">
-   <prologue>This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.
+<HED unmerged="True" version="8.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd">
+   <prologue>The HED standard schema is a hierarchically-organized vocabulary for annotating events and experimental structure. HED annotations consist of comma-separated tags drawn from this vocabulary. This vocabulary can be augmented by terms drawn from specialized library schema. 
+
+Each term in this vocabulary has a human-readable description and may include additional attributes that give additional properties or that specify how tools should treat the tag during analysis. The meaning of these attributes is described in the Additional schema properties section.
+
 </prologue>
    <schema>
       <node>
@@ -16,7 +19,7 @@
             <attribute>
                <name>suggestedTag</name>
                <value>Task-event-role</value>
-               <value>Attribute/Sensory</value>
+               <value>Sensory-presentation</value>
             </attribute>
          </node>
          <node>
@@ -807,6 +810,10 @@
                <name>Anatomical-item</name>
                <description>A biological structure, system, fluid or other substance excluding single molecular entities.</description>
                <node>
+                  <name>Body</name>
+                  <description>The biological structure representing an organism.</description>
+               </node>
+               <node>
                   <name>Body-part</name>
                   <description>Any part of an organism.</description>
                   <node>
@@ -927,6 +934,10 @@
                      <node>
                         <name>Gentalia</name>
                         <description>The external organs of reproduction.</description>
+                        <attribute>
+                           <name>deprecatedFrom</name>
+                           <value>8.1.0</value>
+                        </attribute>
                      </node>
                      <node>
                         <name>Hip</name>
@@ -1021,7 +1032,7 @@
             <description>An entity related to a systematic means of communicating by the use of sounds, symbols, or gestures.</description>
             <attribute>
                <name>suggestedTag</name>
-               <value>Attribute/Sensory</value>
+               <value>Sensory-presentation</value>
             </attribute>
             <node>
                <name>Character</name>
@@ -1073,7 +1084,7 @@
             <description>Something perceptible by one or more of the senses, especially by vision or touch. A material thing.</description>
             <attribute>
                <name>suggestedTag</name>
-               <value>Attribute/Sensory</value>
+               <value>Sensory-presentation</value>
             </attribute>
             <node>
                <name>Geometric-object</name>
@@ -1093,6 +1104,10 @@
                <node>
                   <name>2D-shape</name>
                   <description>A planar, two-dimensional shape.</description>
+                  <node>
+                     <name>Arrow</name>
+                     <description>A shape with a pointed end indicating direction.</description>
+                  </node>
                   <node>
                      <name>Clockface</name>
                      <description>The dial face of a clock. A location identifier based on clockface numbering or anatomic subregion.</description>
@@ -1418,6 +1433,10 @@
                   <node>
                      <name>Notebook</name>
                      <description>A book for notes or memoranda.</description>
+                  </node>
+                  <node>
+                     <name>Questionnaire</name>
+                     <description>A document consisting of questions and possibly responses, depending on whether it has been filled out.</description>
                   </node>
                </node>
                <node>
@@ -1766,6 +1785,10 @@
                      <description>Concentrating and focusing mental energy on the task or surroundings.</description>
                   </node>
                   <node>
+                     <name>Distracted</name>
+                     <description>Lacking in concentration because of being preoccupied.</description>
+                  </node>
+                  <node>
                      <name>Awake</name>
                      <description>In a non sleeping state.</description>
                   </node>
@@ -2015,6 +2038,10 @@
                      <attribute>
                         <name>takesValue</name>
                      </attribute>
+                     <attribute>
+                        <name>valueClass</name>
+                        <value>numericClass</value>
+                     </attribute>
                   </node>
                </node>
                <node>
@@ -2069,6 +2096,10 @@
                   </node>
                </node>
                <node>
+                  <name>Ethnicity</name>
+                  <description>Belong to a social group that has a common national or cultural tradition. Use with Label to avoid extension.</description>
+               </node>
+               <node>
                   <name>Handedness</name>
                   <description>Individual preference for use of a hand, known as the dominant hand.</description>
                   <node>
@@ -2084,6 +2115,10 @@
                      <description>Having no overall dominance in the use of right or left hand or foot in the performance of tasks that require one hand or foot.</description>
                   </node>
                </node>
+               <node>
+                  <name>Race</name>
+                  <description>Belonging to a group sharing physical or social qualities as defined within a specified society. Use with Label to avoid extension.</description>
+               </node>
             </node>
          </node>
          <node>
@@ -2096,20 +2131,55 @@
                <name>Data-marker</name>
                <description>An indicator placed to mark something.</description>
                <node>
+                  <name>Data-break-marker</name>
+                  <description>An indicator place to indicate a gap in the data.</description>
+               </node>
+               <node>
                   <name>Temporal-marker</name>
                   <description>An indicator placed at a particular time in the data.</description>
                   <node>
-                     <name>Onset</name>
-                     <description>Labels the start or beginning of something, usually an event.</description>
+                     <name>Inset</name>
+                     <description>Marks an intermediate point in an ongoing event of temporal extent.</description>
                      <attribute>
                         <name>topLevelTagGroup</name>
+                     </attribute>
+                     <attribute>
+                        <name>reserved</name>
+                     </attribute>
+                     <attribute>
+                        <name>relatedTag</name>
+                        <value>Onset</value>
+                        <value>Offset</value>
+                     </attribute>
+                  </node>
+                  <node>
+                     <name>Onset</name>
+                     <description>Marks the start of an ongoing event of temporal extent.</description>
+                     <attribute>
+                        <name>topLevelTagGroup</name>
+                     </attribute>
+                     <attribute>
+                        <name>reserved</name>
+                     </attribute>
+                     <attribute>
+                        <name>relatedTag</name>
+                        <value>Inset</value>
+                        <value>Offset</value>
                      </attribute>
                   </node>
                   <node>
                      <name>Offset</name>
-                     <description>Labels the time at which something stops.</description>
+                     <description>Marks the end of an event of temporal extent.</description>
                      <attribute>
                         <name>topLevelTagGroup</name>
+                     </attribute>
+                     <attribute>
+                        <name>reserved</name>
+                     </attribute>
+                     <attribute>
+                        <name>relatedTag</name>
+                        <value>Onset</value>
+                        <value>Inset</value>
                      </attribute>
                   </node>
                   <node>
@@ -2137,6 +2207,10 @@
                      <attribute>
                         <name>takesValue</name>
                      </attribute>
+                     <attribute>
+                        <name>valueClass</name>
+                        <value>numericClass</value>
+                     </attribute>
                   </node>
                </node>
                <node>
@@ -2146,6 +2220,10 @@
                      <name>#</name>
                      <attribute>
                         <name>takesValue</name>
+                     </attribute>
+                     <attribute>
+                        <name>valueClass</name>
+                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2157,6 +2235,10 @@
                      <attribute>
                         <name>takesValue</name>
                      </attribute>
+                     <attribute>
+                        <name>valueClass</name>
+                        <value>numericClass</value>
+                     </attribute>
                   </node>
                </node>
                <node>
@@ -2166,6 +2248,10 @@
                      <name>#</name>
                      <attribute>
                         <name>takesValue</name>
+                     </attribute>
+                     <attribute>
+                        <name>valueClass</name>
+                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2177,6 +2263,10 @@
                      <attribute>
                         <name>takesValue</name>
                      </attribute>
+                     <attribute>
+                        <name>valueClass</name>
+                        <value>numericClass</value>
+                     </attribute>
                   </node>
                </node>
                <node>
@@ -2186,6 +2276,10 @@
                      <name>#</name>
                      <attribute>
                         <name>takesValue</name>
+                     </attribute>
+                     <attribute>
+                        <name>valueClass</name>
+                        <value>numericClass</value>
                      </attribute>
                   </node>
                </node>
@@ -2237,7 +2331,7 @@
                         <description>Free from error. Especially conforming to fact or truth.</description>
                         <attribute>
                            <name>relatedTag</name>
-                           <value>Incorrect</value>
+                           <value>Wrong</value>
                         </attribute>
                      </node>
                      <node>
@@ -2266,7 +2360,7 @@
                      </node>
                      <node>
                         <name>Invalid</name>
-                        <description>Not true because based on erroneous information or unsound reasoning or not conforming to the correct format or specifications.</description>
+                        <description>Not allowed or not conforming to the correct format or specifications.</description>
                         <attribute>
                            <name>relatedTag</name>
                            <value>Valid</value>
@@ -2308,7 +2402,7 @@
                      </node>
                      <node>
                         <name>Wrong</name>
-                        <description>Not accurate, correct, or appropriate.</description>
+                        <description>Inaccurate or not correct.</description>
                         <attribute>
                            <name>relatedTag</name>
                            <value>Correct</value>
@@ -2495,7 +2589,7 @@
                      <description>Categorical values based on dividing a continuous variable into levels such as high and low.</description>
                      <node>
                         <name>Cold</name>
-                        <description>Characterized by an absence of heat.</description>
+                        <description>Having an absence of heat.</description>
                         <attribute>
                            <name>relatedTag</name>
                            <value>Hot</value>
@@ -2520,10 +2614,18 @@
                      </node>
                      <node>
                         <name>Hot</name>
-                        <description>Characterized by an excess of heat.</description>
+                        <description>Having an excess of heat.</description>
                         <attribute>
                            <name>relatedTag</name>
                            <value>Cold</value>
+                        </attribute>
+                     </node>
+                     <node>
+                        <name>Large</name>
+                        <description>Having a great extent such as in physical dimensions, period of time, amplitude or frequency.</description>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Small</value>
                         </attribute>
                      </node>
                      <node>
@@ -2537,7 +2639,7 @@
                      </node>
                      <node>
                         <name>Loud</name>
-                        <description>Characterizing a perceived high intensity of sound.</description>
+                        <description>Having a perceived high intensity of sound.</description>
                         <attribute>
                            <name>relatedTag</name>
                            <value>Quiet</value>
@@ -2598,6 +2700,14 @@
                         <attribute>
                            <name>relatedTag</name>
                            <value>Deep</value>
+                        </attribute>
+                     </node>
+                     <node>
+                        <name>Small</name>
+                        <description>Having a small extent such as in physical dimensions, period of time, amplitude or frequency.</description>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Large</value>
                         </attribute>
                      </node>
                      <node>
@@ -2675,6 +2785,10 @@
                      <node>
                         <name>Horizontally-oriented</name>
                         <description>Oriented parallel to or in the plane of the horizon.</description>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Vertically-oriented</value>
+                        </attribute>
                      </node>
                      <node>
                         <name>Leftward</name>
@@ -2721,6 +2835,10 @@
                      <node>
                         <name>Vertically-oriented</name>
                         <description>Oriented perpendicular to the plane of the horizon.</description>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Horizontally-oriented</value>
+                        </attribute>
                      </node>
                   </node>
                </node>
@@ -2736,12 +2854,30 @@
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
+                           <name>valueClass</name>
+                           <value>numericClass</value>
+                        </attribute>
+                        <attribute>
                            <name>unitClass</name>
                            <value>weightUnits</value>
+                        </attribute>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Temperature</name>
+                     <description>A measure of hot or cold based on the average kinetic energy of the atoms or molecules in the system.</description>
+                     <node>
+                        <name>#</name>
+                        <attribute>
+                           <name>takesValue</name>
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
                            <value>numericClass</value>
+                        </attribute>
+                        <attribute>
+                           <name>unitClass</name>
+                           <value>temperatureUnits</value>
                         </attribute>
                      </node>
                   </node>
@@ -2751,7 +2887,7 @@
                   <description>Something capable of being estimated or expressed with numeric values.</description>
                   <node>
                      <name>Fraction</name>
-                     <description>A numerical value betwee 0 and 1.</description>
+                     <description>A numerical value between 0 and 1.</description>
                      <node>
                         <name>#</name>
                         <attribute>
@@ -2766,6 +2902,20 @@
                   <node>
                      <name>Item-count</name>
                      <description>The integer count of something which is usually grouped with the entity it is counting. (Item-count/3, A) indicates that 3 of A have occurred up to this point.</description>
+                     <node>
+                        <name>#</name>
+                        <attribute>
+                           <name>takesValue</name>
+                        </attribute>
+                        <attribute>
+                           <name>valueClass</name>
+                           <value>numericClass</value>
+                        </attribute>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Item-index</name>
+                     <description>The index of an item in a collection, sequence or other structure. (A (Item-index/3, B)) means that A is item number 3 in B.</description>
                      <node>
                         <name>#</name>
                         <attribute>
@@ -2982,12 +3132,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>accelerationUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>accelerationUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3000,12 +3150,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>frequencyUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>frequencyUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3018,12 +3168,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>jerkUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>jerkUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3064,12 +3214,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>speedUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>speedUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3082,12 +3232,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>frequencyUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>frequencyUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3098,14 +3248,14 @@
                      <node>
                         <name>Angle</name>
                         <description>The amount of inclination of one line to another or the plane of one object to another.</description>
-                        <attribute>
-                           <name>unitClass</name>
-                           <value>angleUnits</value>
-                        </attribute>
                         <node>
                            <name>#</name>
                            <attribute>
                               <name>takesValue</name>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>angleUnits</value>
                            </attribute>
                            <attribute>
                               <name>valueClass</name>
@@ -3122,12 +3272,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>physicalLengthUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>physicalLengthUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3143,12 +3293,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3161,12 +3311,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3179,12 +3329,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3201,12 +3351,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>areaUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>areaUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3219,12 +3369,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3237,12 +3387,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3255,12 +3405,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3273,12 +3423,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>physicalLengthUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>physicalLengthUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3291,12 +3441,12 @@
                                  <name>takesValue</name>
                               </attribute>
                               <attribute>
-                                 <name>unitClass</name>
-                                 <value>volumeUnits</value>
-                              </attribute>
-                              <attribute>
                                  <name>valueClass</name>
                                  <value>numericClass</value>
+                              </attribute>
+                              <attribute>
+                                 <name>unitClass</name>
+                                 <value>volumeUnits</value>
                               </attribute>
                            </node>
                         </node>
@@ -3307,37 +3457,57 @@
                      <description>A characteristic of or relating to time or limited by time.</description>
                      <node>
                         <name>Delay</name>
-                        <description>Time during which some action is awaited.</description>
+                        <description>The time at which an event start time is delayed from the current onset time. This tag defines the start time of an event of temporal extent and may be used with the Duration tag.</description>
+                        <attribute>
+                           <name>topLevelTagGroup</name>
+                        </attribute>
+                        <attribute>
+                           <name>reserved</name>
+                        </attribute>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Duration</value>
+                        </attribute>
                         <node>
                            <name>#</name>
                            <attribute>
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
                      <node>
                         <name>Duration</name>
-                        <description>The period of time during which something occurs or continues.</description>
+                        <description>The period of time during which an event occurs. This tag defines the end time of an event of temporal extent and may be used with the Delay tag.</description>
+                        <attribute>
+                           <name>topLevelTagGroup</name>
+                        </attribute>
+                        <attribute>
+                           <name>reserved</name>
+                        </attribute>
+                        <attribute>
+                           <name>relatedTag</name>
+                           <value>Delay</value>
+                        </attribute>
                         <node>
                            <name>#</name>
                            <attribute>
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3350,12 +3520,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3368,12 +3538,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -3750,7 +3920,7 @@
                      </attribute>
                      <attribute>
                         <name>valueClass</name>
-                        <value>labelClass</value>
+                        <value>nameClass</value>
                      </attribute>
                   </node>
                </node>
@@ -3790,7 +3960,7 @@
             </node>
             <node>
                <name>Condition-variable</name>
-               <description>An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent type_variables or contrasts.</description>
+               <description>An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.</description>
                <node>
                   <name>#</name>
                   <description>Name of the condition variable.</description>
@@ -3824,6 +3994,9 @@
                <attribute>
                   <name>requireChild</name>
                </attribute>
+               <attribute>
+                  <name>reserved</name>
+               </attribute>
                <node>
                   <name>#</name>
                   <description>Name of the definition.</description>
@@ -3841,6 +4014,9 @@
                <description>A HED specific utility tag that is grouped with an expanded definition. The child value of the Def-expand is the name of the expanded definition.</description>
                <attribute>
                   <name>requireChild</name>
+               </attribute>
+               <attribute>
+                  <name>reserved</name>
                </attribute>
                <attribute>
                   <name>tagGroup</name>
@@ -3863,6 +4039,9 @@
                   <name>requireChild</name>
                </attribute>
                <attribute>
+                  <name>reserved</name>
+               </attribute>
+               <attribute>
                   <name>topLevelTagGroup</name>
                </attribute>
                <node>
@@ -3880,6 +4059,9 @@
             <node>
                <name>Event-context</name>
                <description>A special HED tag inserted as part of a top-level tag group to contain information about the interrelated conditions under which the event occurs. The event context includes information about other events that are ongoing when this event happens.</description>
+               <attribute>
+                  <name>reserved</name>
+               </attribute>
                <attribute>
                   <name>topLevelTagGroup</name>
                </attribute>
@@ -3934,7 +4116,7 @@
             </node>
             <node>
                <name>Indicator-variable</name>
-               <description>An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent type_variables.</description>
+               <description>An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent variables.</description>
                <node>
                   <name>#</name>
                   <description>Name of the indicator variable.</description>
@@ -4013,6 +4195,7 @@
                         <attribute>
                            <name>valueClass</name>
                            <value>numericClass</value>
+                           <value>nameClass</value>
                         </attribute>
                      </node>
                   </node>
@@ -4025,12 +4208,12 @@
                            <name>takesValue</name>
                         </attribute>
                         <attribute>
-                           <name>unitClass</name>
-                           <value>frequencyUnits</value>
-                        </attribute>
-                        <attribute>
                            <name>valueClass</name>
                            <value>numericClass</value>
+                        </attribute>
+                        <attribute>
+                           <name>unitClass</name>
+                           <value>frequencyUnits</value>
                         </attribute>
                      </node>
                   </node>
@@ -4046,12 +4229,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -4064,30 +4247,30 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
                      <node>
                         <name>Sound-envelope-release</name>
-                        <description>The time taken for the level to decay from the sustain level to zero after the key is released</description>
+                        <description>The time taken for the level to decay from the sustain level to zero after the key is released.</description>
                         <node>
                            <name>#</name>
                            <attribute>
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -4100,12 +4283,12 @@
                               <name>takesValue</name>
                            </attribute>
                            <attribute>
-                              <name>unitClass</name>
-                              <value>timeUnits</value>
-                           </attribute>
-                           <attribute>
                               <name>valueClass</name>
                               <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>timeUnits</value>
                            </attribute>
                         </node>
                      </node>
@@ -4120,7 +4303,25 @@
                         </attribute>
                         <attribute>
                            <name>valueClass</name>
-                           <value>labelClass</value>
+                           <value>nameClass</value>
+                        </attribute>
+                     </node>
+                  </node>
+                  <node>
+                     <name>Sound-volume</name>
+                     <description>The sound pressure level (SPL) usually the ratio to a reference signal estimated as the lower bound of hearing.</description>
+                     <node>
+                        <name>#</name>
+                        <attribute>
+                           <name>takesValue</name>
+                        </attribute>
+                        <attribute>
+                           <name>valueClass</name>
+                           <value>numericClass</value>
+                        </attribute>
+                        <attribute>
+                           <name>unitClass</name>
+                           <value>intensityUnits</value>
                         </attribute>
                      </node>
                   </node>
@@ -4197,613 +4398,613 @@
                      <description>The appearance of objects (or light sources) described in terms of perception of their hue and lightness (or brightness) and saturation.</description>
                      <node>
                         <name>CSS-color</name>
-                        <description>One of 140 colors supported by all browsers. For more details such as the color RGB or HEX values,  check:  https://www.w3schools.com/colors/colors_groups.asp</description>
+                        <description>One of 140 colors supported by all browsers. For more details such as the color RGB or HEX values,  check:  https://www.w3schools.com/colors/colors_groups.asp.</description>
                         <node>
                            <name>Blue-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>CadetBlue</name>
-                              <description>CSS-color 0x5F9EA0</description>
+                              <description>CSS-color 0x5F9EA0.</description>
                            </node>
                            <node>
                               <name>SteelBlue</name>
-                              <description>CSS-color 0x4682B4</description>
+                              <description>CSS-color 0x4682B4.</description>
                            </node>
                            <node>
                               <name>LightSteelBlue</name>
-                              <description>CSS-color 0xB0C4DE</description>
+                              <description>CSS-color 0xB0C4DE.</description>
                            </node>
                            <node>
                               <name>LightBlue</name>
-                              <description>CSS-color 0xADD8E6</description>
+                              <description>CSS-color 0xADD8E6.</description>
                            </node>
                            <node>
                               <name>PowderBlue</name>
-                              <description>CSS-color 0xB0E0E6</description>
+                              <description>CSS-color 0xB0E0E6.</description>
                            </node>
                            <node>
                               <name>LightSkyBlue</name>
-                              <description>CSS-color 0x87CEFA</description>
+                              <description>CSS-color 0x87CEFA.</description>
                            </node>
                            <node>
                               <name>SkyBlue</name>
-                              <description>CSS-color 0x87CEEB</description>
+                              <description>CSS-color 0x87CEEB.</description>
                            </node>
                            <node>
                               <name>CornflowerBlue</name>
-                              <description>CSS-color 0x6495ED</description>
+                              <description>CSS-color 0x6495ED.</description>
                            </node>
                            <node>
                               <name>DeepSkyBlue</name>
-                              <description>CSS-color 0x00BFFF</description>
+                              <description>CSS-color 0x00BFFF.</description>
                            </node>
                            <node>
                               <name>DodgerBlue</name>
-                              <description>CSS-color 0x1E90FF</description>
+                              <description>CSS-color 0x1E90FF.</description>
                            </node>
                            <node>
                               <name>RoyalBlue</name>
-                              <description>CSS-color 0x4169E1</description>
+                              <description>CSS-color 0x4169E1.</description>
                            </node>
                            <node>
                               <name>Blue</name>
-                              <description>CSS-color 0x0000FF</description>
+                              <description>CSS-color 0x0000FF.</description>
                            </node>
                            <node>
                               <name>MediumBlue</name>
-                              <description>CSS-color 0x0000CD</description>
+                              <description>CSS-color 0x0000CD.</description>
                            </node>
                            <node>
                               <name>DarkBlue</name>
-                              <description>CSS-color 0x00008B</description>
+                              <description>CSS-color 0x00008B.</description>
                            </node>
                            <node>
                               <name>Navy</name>
-                              <description>CSS-color 0x000080</description>
+                              <description>CSS-color 0x000080.</description>
                            </node>
                            <node>
                               <name>MidnightBlue</name>
-                              <description>CSS-color 0x191970</description>
+                              <description>CSS-color 0x191970.</description>
                            </node>
                         </node>
                         <node>
                            <name>Brown-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>Cornsilk</name>
-                              <description>CSS-color 0xFFF8DC</description>
+                              <description>CSS-color 0xFFF8DC.</description>
                            </node>
                            <node>
                               <name>BlanchedAlmond</name>
-                              <description>CSS-color 0xFFEBCD</description>
+                              <description>CSS-color 0xFFEBCD.</description>
                            </node>
                            <node>
                               <name>Bisque</name>
-                              <description>CSS-color 0xFFE4C4</description>
+                              <description>CSS-color 0xFFE4C4.</description>
                            </node>
                            <node>
                               <name>NavajoWhite</name>
-                              <description>CSS-color 0xFFDEAD</description>
+                              <description>CSS-color 0xFFDEAD.</description>
                            </node>
                            <node>
                               <name>Wheat</name>
-                              <description>CSS-color 0xF5DEB3</description>
+                              <description>CSS-color 0xF5DEB3.</description>
                            </node>
                            <node>
                               <name>BurlyWood</name>
-                              <description>CSS-color 0xDEB887</description>
+                              <description>CSS-color 0xDEB887.</description>
                            </node>
                            <node>
                               <name>Tan</name>
-                              <description>CSS-color 0xD2B48C</description>
+                              <description>CSS-color 0xD2B48C.</description>
                            </node>
                            <node>
                               <name>RosyBrown</name>
-                              <description>CSS-color 0xBC8F8F</description>
+                              <description>CSS-color 0xBC8F8F.</description>
                            </node>
                            <node>
                               <name>SandyBrown</name>
-                              <description>CSS-color 0xF4A460</description>
+                              <description>CSS-color 0xF4A460.</description>
                            </node>
                            <node>
                               <name>GoldenRod</name>
-                              <description>CSS-color 0xDAA520</description>
+                              <description>CSS-color 0xDAA520.</description>
                            </node>
                            <node>
                               <name>DarkGoldenRod</name>
-                              <description>CSS-color 0xB8860B</description>
+                              <description>CSS-color 0xB8860B.</description>
                            </node>
                            <node>
                               <name>Peru</name>
-                              <description>CSS-color 0xCD853F</description>
+                              <description>CSS-color 0xCD853F.</description>
                            </node>
                            <node>
                               <name>Chocolate</name>
-                              <description>CSS-color 0xD2691E</description>
+                              <description>CSS-color 0xD2691E.</description>
                            </node>
                            <node>
                               <name>Olive</name>
-                              <description>CSS-color 0x808000</description>
+                              <description>CSS-color 0x808000.</description>
                            </node>
                            <node>
                               <name>SaddleBrown</name>
-                              <description>CSS-color 0x8B4513</description>
+                              <description>CSS-color 0x8B4513.</description>
                            </node>
                            <node>
                               <name>Sienna</name>
-                              <description>CSS-color 0xA0522D</description>
+                              <description>CSS-color 0xA0522D.</description>
                            </node>
                            <node>
                               <name>Brown</name>
-                              <description>CSS-color 0xA52A2A</description>
+                              <description>CSS-color 0xA52A2A.</description>
                            </node>
                            <node>
                               <name>Maroon</name>
-                              <description>CSS-color 0x800000</description>
+                              <description>CSS-color 0x800000.</description>
                            </node>
                         </node>
                         <node>
                            <name>Cyan-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>Aqua</name>
-                              <description>CSS-color 0x00FFFF</description>
+                              <description>CSS-color 0x00FFFF.</description>
                            </node>
                            <node>
                               <name>Cyan</name>
-                              <description>CSS-color 0x00FFFF</description>
+                              <description>CSS-color 0x00FFFF.</description>
                            </node>
                            <node>
                               <name>LightCyan</name>
-                              <description>CSS-color 0xE0FFFF</description>
+                              <description>CSS-color 0xE0FFFF.</description>
                            </node>
                            <node>
                               <name>PaleTurquoise</name>
-                              <description>CSS-color 0xAFEEEE</description>
+                              <description>CSS-color 0xAFEEEE.</description>
                            </node>
                            <node>
                               <name>Aquamarine</name>
-                              <description>CSS-color 0x7FFFD4</description>
+                              <description>CSS-color 0x7FFFD4.</description>
                            </node>
                            <node>
                               <name>Turquoise</name>
-                              <description>CSS-color 0x40E0D0</description>
+                              <description>CSS-color 0x40E0D0.</description>
                            </node>
                            <node>
                               <name>MediumTurquoise</name>
-                              <description>CSS-color 0x48D1CC</description>
+                              <description>CSS-color 0x48D1CC.</description>
                            </node>
                            <node>
                               <name>DarkTurquoise</name>
-                              <description>CSS-color 0x00CED1</description>
+                              <description>CSS-color 0x00CED1.</description>
                            </node>
                         </node>
                         <node>
                            <name>Green-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>GreenYellow</name>
-                              <description>CSS-color 0xADFF2F</description>
+                              <description>CSS-color 0xADFF2F.</description>
                            </node>
                            <node>
                               <name>Chartreuse</name>
-                              <description>CSS-color 0x7FFF00</description>
+                              <description>CSS-color 0x7FFF00.</description>
                            </node>
                            <node>
                               <name>LawnGreen</name>
-                              <description>CSS-color 0x7CFC00</description>
+                              <description>CSS-color 0x7CFC00.</description>
                            </node>
                            <node>
                               <name>Lime</name>
-                              <description>CSS-color 0x00FF00</description>
+                              <description>CSS-color 0x00FF00.</description>
                            </node>
                            <node>
                               <name>LimeGreen</name>
-                              <description>CSS-color 0x32CD32</description>
+                              <description>CSS-color 0x32CD32.</description>
                            </node>
                            <node>
                               <name>PaleGreen</name>
-                              <description>CSS-color 0x98FB98</description>
+                              <description>CSS-color 0x98FB98.</description>
                            </node>
                            <node>
                               <name>LightGreen</name>
-                              <description>CSS-color 0x90EE90</description>
+                              <description>CSS-color 0x90EE90.</description>
                            </node>
                            <node>
                               <name>MediumSpringGreen</name>
-                              <description>CSS-color 0x00FA9A</description>
+                              <description>CSS-color 0x00FA9A.</description>
                            </node>
                            <node>
                               <name>SpringGreen</name>
-                              <description>CSS-color 0x00FF7F</description>
+                              <description>CSS-color 0x00FF7F.</description>
                            </node>
                            <node>
                               <name>MediumSeaGreen</name>
-                              <description>CSS-color 0x3CB371</description>
+                              <description>CSS-color 0x3CB371.</description>
                            </node>
                            <node>
                               <name>SeaGreen</name>
-                              <description>CSS-color 0x2E8B57</description>
+                              <description>CSS-color 0x2E8B57.</description>
                            </node>
                            <node>
                               <name>ForestGreen</name>
-                              <description>CSS-color 0x228B22</description>
+                              <description>CSS-color 0x228B22.</description>
                            </node>
                            <node>
                               <name>Green</name>
-                              <description>CSS-color 0x008000</description>
+                              <description>CSS-color 0x008000.</description>
                            </node>
                            <node>
                               <name>DarkGreen</name>
-                              <description>CSS-color 0x006400</description>
+                              <description>CSS-color 0x006400.</description>
                            </node>
                            <node>
                               <name>YellowGreen</name>
-                              <description>CSS-color 0x9ACD32</description>
+                              <description>CSS-color 0x9ACD32.</description>
                            </node>
                            <node>
                               <name>OliveDrab</name>
-                              <description>CSS-color 0x6B8E23</description>
+                              <description>CSS-color 0x6B8E23.</description>
                            </node>
                            <node>
                               <name>DarkOliveGreen</name>
-                              <description>CSS-color 0x556B2F</description>
+                              <description>CSS-color 0x556B2F.</description>
                            </node>
                            <node>
                               <name>MediumAquaMarine</name>
-                              <description>CSS-color 0x66CDAA</description>
+                              <description>CSS-color 0x66CDAA.</description>
                            </node>
                            <node>
                               <name>DarkSeaGreen</name>
-                              <description>CSS-color 0x8FBC8F</description>
+                              <description>CSS-color 0x8FBC8F.</description>
                            </node>
                            <node>
                               <name>LightSeaGreen</name>
-                              <description>CSS-color 0x20B2AA</description>
+                              <description>CSS-color 0x20B2AA.</description>
                            </node>
                            <node>
                               <name>DarkCyan</name>
-                              <description>CSS-color 0x008B8B</description>
+                              <description>CSS-color 0x008B8B.</description>
                            </node>
                            <node>
                               <name>Teal</name>
-                              <description>CSS-color 0x008080</description>
+                              <description>CSS-color 0x008080.</description>
                            </node>
                         </node>
                         <node>
                            <name>Gray-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>Gainsboro</name>
-                              <description>CSS-color 0xDCDCDC</description>
+                              <description>CSS-color 0xDCDCDC.</description>
                            </node>
                            <node>
                               <name>LightGray</name>
-                              <description>CSS-color 0xD3D3D3</description>
+                              <description>CSS-color 0xD3D3D3.</description>
                            </node>
                            <node>
                               <name>Silver</name>
-                              <description>CSS-color 0xC0C0C0</description>
+                              <description>CSS-color 0xC0C0C0.</description>
                            </node>
                            <node>
                               <name>DarkGray</name>
-                              <description>CSS-color 0xA9A9A9</description>
+                              <description>CSS-color 0xA9A9A9.</description>
                            </node>
                            <node>
                               <name>DimGray</name>
-                              <description>CSS-color 0x696969</description>
+                              <description>CSS-color 0x696969.</description>
                            </node>
                            <node>
                               <name>Gray</name>
-                              <description>CSS-color 0x808080</description>
+                              <description>CSS-color 0x808080.</description>
                            </node>
                            <node>
                               <name>LightSlateGray</name>
-                              <description>CSS-color 0x778899</description>
+                              <description>CSS-color 0x778899.</description>
                            </node>
                            <node>
                               <name>SlateGray</name>
-                              <description>CSS-color 0x708090</description>
+                              <description>CSS-color 0x708090.</description>
                            </node>
                            <node>
                               <name>DarkSlateGray</name>
-                              <description>CSS-color 0x2F4F4F</description>
+                              <description>CSS-color 0x2F4F4F.</description>
                            </node>
                            <node>
                               <name>Black</name>
-                              <description>CSS-color 0x000000</description>
+                              <description>CSS-color 0x000000.</description>
                            </node>
                         </node>
                         <node>
                            <name>Orange-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>Orange</name>
-                              <description>CSS-color 0xFFA500</description>
+                              <description>CSS-color 0xFFA500.</description>
                            </node>
                            <node>
                               <name>DarkOrange</name>
-                              <description>CSS-color 0xFF8C00</description>
+                              <description>CSS-color 0xFF8C00.</description>
                            </node>
                            <node>
                               <name>Coral</name>
-                              <description>CSS-color 0xFF7F50</description>
+                              <description>CSS-color 0xFF7F50.</description>
                            </node>
                            <node>
                               <name>Tomato</name>
-                              <description>CSS-color 0xFF6347</description>
+                              <description>CSS-color 0xFF6347.</description>
                            </node>
                            <node>
                               <name>OrangeRed</name>
-                              <description>CSS-color 0xFF4500</description>
+                              <description>CSS-color 0xFF4500.</description>
                            </node>
                         </node>
                         <node>
                            <name>Pink-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>Pink</name>
-                              <description>CSS-color 0xFFC0CB</description>
+                              <description>CSS-color 0xFFC0CB.</description>
                            </node>
                            <node>
                               <name>LightPink</name>
-                              <description>CSS-color 0xFFB6C1</description>
+                              <description>CSS-color 0xFFB6C1.</description>
                            </node>
                            <node>
                               <name>HotPink</name>
-                              <description>CSS-color 0xFF69B4</description>
+                              <description>CSS-color 0xFF69B4.</description>
                            </node>
                            <node>
                               <name>DeepPink</name>
-                              <description>CSS-color 0xFF1493</description>
+                              <description>CSS-color 0xFF1493.</description>
                            </node>
                            <node>
                               <name>PaleVioletRed</name>
-                              <description>CSS-color 0xDB7093</description>
+                              <description>CSS-color 0xDB7093.</description>
                            </node>
                            <node>
                               <name>MediumVioletRed</name>
-                              <description>CSS-color 0xC71585</description>
+                              <description>CSS-color 0xC71585.</description>
                            </node>
                         </node>
                         <node>
                            <name>Purple-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>Lavender</name>
-                              <description>CSS-color 0xE6E6FA</description>
+                              <description>CSS-color 0xE6E6FA.</description>
                            </node>
                            <node>
                               <name>Thistle</name>
-                              <description>CSS-color 0xD8BFD8</description>
+                              <description>CSS-color 0xD8BFD8.</description>
                            </node>
                            <node>
                               <name>Plum</name>
-                              <description>CSS-color 0xDDA0DD</description>
+                              <description>CSS-color 0xDDA0DD.</description>
                            </node>
                            <node>
                               <name>Orchid</name>
-                              <description>CSS-color 0xDA70D6</description>
+                              <description>CSS-color 0xDA70D6.</description>
                            </node>
                            <node>
                               <name>Violet</name>
-                              <description>CSS-color 0xEE82EE</description>
+                              <description>CSS-color 0xEE82EE.</description>
                            </node>
                            <node>
                               <name>Fuchsia</name>
-                              <description>CSS-color 0xFF00FF</description>
+                              <description>CSS-color 0xFF00FF.</description>
                            </node>
                            <node>
                               <name>Magenta</name>
-                              <description>CSS-color 0xFF00FF</description>
+                              <description>CSS-color 0xFF00FF.</description>
                            </node>
                            <node>
                               <name>MediumOrchid</name>
-                              <description>CSS-color 0xBA55D3</description>
+                              <description>CSS-color 0xBA55D3.</description>
                            </node>
                            <node>
                               <name>DarkOrchid</name>
-                              <description>CSS-color 0x9932CC</description>
+                              <description>CSS-color 0x9932CC.</description>
                            </node>
                            <node>
                               <name>DarkViolet</name>
-                              <description>CSS-color 0x9400D3</description>
+                              <description>CSS-color 0x9400D3.</description>
                            </node>
                            <node>
                               <name>BlueViolet</name>
-                              <description>CSS-color 0x8A2BE2</description>
+                              <description>CSS-color 0x8A2BE2.</description>
                            </node>
                            <node>
                               <name>DarkMagenta</name>
-                              <description>CSS-color 0x8B008B</description>
+                              <description>CSS-color 0x8B008B.</description>
                            </node>
                            <node>
                               <name>Purple</name>
-                              <description>CSS-color 0x800080</description>
+                              <description>CSS-color 0x800080.</description>
                            </node>
                            <node>
                               <name>MediumPurple</name>
-                              <description>CSS-color 0x9370DB</description>
+                              <description>CSS-color 0x9370DB.</description>
                            </node>
                            <node>
                               <name>MediumSlateBlue</name>
-                              <description>CSS-color 0x7B68EE</description>
+                              <description>CSS-color 0x7B68EE.</description>
                            </node>
                            <node>
                               <name>SlateBlue</name>
-                              <description>CSS-color 0x6A5ACD</description>
+                              <description>CSS-color 0x6A5ACD.</description>
                            </node>
                            <node>
                               <name>DarkSlateBlue</name>
-                              <description>CSS-color 0x483D8B</description>
+                              <description>CSS-color 0x483D8B.</description>
                            </node>
                            <node>
                               <name>RebeccaPurple</name>
-                              <description>CSS-color 0x663399</description>
+                              <description>CSS-color 0x663399.</description>
                            </node>
                            <node>
                               <name>Indigo</name>
-                              <description>CSS-color 0x4B0082</description>
+                              <description>CSS-color 0x4B0082.</description>
                            </node>
                         </node>
                         <node>
                            <name>Red-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>LightSalmon</name>
-                              <description>CSS-color 0xFFA07A</description>
+                              <description>CSS-color 0xFFA07A.</description>
                            </node>
                            <node>
                               <name>Salmon</name>
-                              <description>CSS-color 0xFA8072</description>
+                              <description>CSS-color 0xFA8072.</description>
                            </node>
                            <node>
                               <name>DarkSalmon</name>
-                              <description>CSS-color 0xE9967A</description>
+                              <description>CSS-color 0xE9967A.</description>
                            </node>
                            <node>
                               <name>LightCoral</name>
-                              <description>CSS-color 0xF08080</description>
+                              <description>CSS-color 0xF08080.</description>
                            </node>
                            <node>
                               <name>IndianRed</name>
-                              <description>CSS-color 0xCD5C5C</description>
+                              <description>CSS-color 0xCD5C5C.</description>
                            </node>
                            <node>
                               <name>Crimson</name>
-                              <description>CSS-color 0xDC143C</description>
+                              <description>CSS-color 0xDC143C.</description>
                            </node>
                            <node>
                               <name>Red</name>
-                              <description>CSS-color 0xFF0000</description>
+                              <description>CSS-color 0xFF0000.</description>
                            </node>
                            <node>
                               <name>FireBrick</name>
-                              <description>CSS-color 0xB22222</description>
+                              <description>CSS-color 0xB22222.</description>
                            </node>
                            <node>
                               <name>DarkRed</name>
-                              <description>CSS-color 0x8B0000</description>
+                              <description>CSS-color 0x8B0000.</description>
                            </node>
                         </node>
                         <node>
                            <name>Yellow-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>Gold</name>
-                              <description>CSS-color 0xFFD700</description>
+                              <description>CSS-color 0xFFD700.</description>
                            </node>
                            <node>
                               <name>Yellow</name>
-                              <description>CSS-color 0xFFFF00</description>
+                              <description>CSS-color 0xFFFF00.</description>
                            </node>
                            <node>
                               <name>LightYellow</name>
-                              <description>CSS-color 0xFFFFE0</description>
+                              <description>CSS-color 0xFFFFE0.</description>
                            </node>
                            <node>
                               <name>LemonChiffon</name>
-                              <description>CSS-color 0xFFFACD</description>
+                              <description>CSS-color 0xFFFACD.</description>
                            </node>
                            <node>
                               <name>LightGoldenRodYellow</name>
-                              <description>CSS-color 0xFAFAD2</description>
+                              <description>CSS-color 0xFAFAD2.</description>
                            </node>
                            <node>
                               <name>PapayaWhip</name>
-                              <description>CSS-color 0xFFEFD5</description>
+                              <description>CSS-color 0xFFEFD5.</description>
                            </node>
                            <node>
                               <name>Moccasin</name>
-                              <description>CSS-color 0xFFE4B5</description>
+                              <description>CSS-color 0xFFE4B5.</description>
                            </node>
                            <node>
                               <name>PeachPuff</name>
-                              <description>CSS-color 0xFFDAB9</description>
+                              <description>CSS-color 0xFFDAB9.</description>
                            </node>
                            <node>
                               <name>PaleGoldenRod</name>
-                              <description>CSS-color 0xEEE8AA</description>
+                              <description>CSS-color 0xEEE8AA.</description>
                            </node>
                            <node>
                               <name>Khaki</name>
-                              <description>CSS-color 0xF0E68C</description>
+                              <description>CSS-color 0xF0E68C.</description>
                            </node>
                            <node>
                               <name>DarkKhaki</name>
-                              <description>CSS-color 0xBDB76B</description>
+                              <description>CSS-color 0xBDB76B.</description>
                            </node>
                         </node>
                         <node>
                            <name>White-color</name>
-                           <description>CSS color group</description>
+                           <description>CSS color group.</description>
                            <node>
                               <name>White</name>
-                              <description>CSS-color 0xFFFFFF</description>
+                              <description>CSS-color 0xFFFFFF.</description>
                            </node>
                            <node>
                               <name>Snow</name>
-                              <description>CSS-color 0xFFFAFA</description>
+                              <description>CSS-color 0xFFFAFA.</description>
                            </node>
                            <node>
                               <name>HoneyDew</name>
-                              <description>CSS-color 0xF0FFF0</description>
+                              <description>CSS-color 0xF0FFF0.</description>
                            </node>
                            <node>
                               <name>MintCream</name>
-                              <description>CSS-color 0xF5FFFA</description>
+                              <description>CSS-color 0xF5FFFA.</description>
                            </node>
                            <node>
                               <name>Azure</name>
-                              <description>CSS-color 0xF0FFFF</description>
+                              <description>CSS-color 0xF0FFFF.</description>
                            </node>
                            <node>
                               <name>AliceBlue</name>
-                              <description>CSS-color 0xF0F8FF</description>
+                              <description>CSS-color 0xF0F8FF.</description>
                            </node>
                            <node>
                               <name>GhostWhite</name>
-                              <description>CSS-color 0xF8F8FF</description>
+                              <description>CSS-color 0xF8F8FF.</description>
                            </node>
                            <node>
                               <name>WhiteSmoke</name>
-                              <description>CSS-color 0xF5F5F5</description>
+                              <description>CSS-color 0xF5F5F5.</description>
                            </node>
                            <node>
                               <name>SeaShell</name>
-                              <description>CSS-color 0xFFF5EE</description>
+                              <description>CSS-color 0xFFF5EE.</description>
                            </node>
                            <node>
                               <name>Beige</name>
-                              <description>CSS-color 0xF5F5DC</description>
+                              <description>CSS-color 0xF5F5DC.</description>
                            </node>
                            <node>
                               <name>OldLace</name>
-                              <description>CSS-color 0xFDF5E6</description>
+                              <description>CSS-color 0xFDF5E6.</description>
                            </node>
                            <node>
                               <name>FloralWhite</name>
-                              <description>CSS-color 0xFFFAF0</description>
+                              <description>CSS-color 0xFFFAF0.</description>
                            </node>
                            <node>
                               <name>Ivory</name>
-                              <description>CSS-color 0xFFFFF0</description>
+                              <description>CSS-color 0xFFFFF0.</description>
                            </node>
                            <node>
                               <name>AntiqueWhite</name>
-                              <description>CSS-color 0xFAEBD7</description>
+                              <description>CSS-color 0xFAEBD7.</description>
                            </node>
                            <node>
                               <name>Linen</name>
-                              <description>CSS-color 0xFAF0E6</description>
+                              <description>CSS-color 0xFAF0E6.</description>
                            </node>
                            <node>
                               <name>LavenderBlush</name>
-                              <description>CSS-color 0xFFF0F5</description>
+                              <description>CSS-color 0xFFF0F5.</description>
                            </node>
                            <node>
                               <name>MistyRose</name>
-                              <description>CSS-color 0xFFE4E1</description>
+                              <description>CSS-color 0xFFE4E1.</description>
                            </node>
                         </node>
                      </node>
@@ -4824,7 +5025,7 @@
                         <description>Using a color map composed of shades of gray, varying from black at the weakest intensity to white at the strongest.</description>
                         <node>
                            <name>#</name>
-                           <description>White intensity between 0 and 1</description>
+                           <description>White intensity between 0 and 1.</description>
                            <attribute>
                               <name>takesValue</name>
                            </attribute>
@@ -4842,7 +5043,7 @@
                            <description>Attribute of a visual sensation according to which an area appears to be similar to one of the perceived colors.</description>
                            <node>
                               <name>#</name>
-                              <description>Angular value between 0 and 360</description>
+                              <description>Angular value between 0 and 360.</description>
                               <attribute>
                                  <name>takesValue</name>
                               </attribute>
@@ -4857,7 +5058,7 @@
                            <description>Colorfulness of a stimulus relative to its own brightness.</description>
                            <node>
                               <name>#</name>
-                              <description>B value of RGB between 0 and 1</description>
+                              <description>B value of RGB between 0 and 1.</description>
                               <attribute>
                                  <name>takesValue</name>
                               </attribute>
@@ -4869,7 +5070,7 @@
                         </node>
                         <node>
                            <name>HSV-value</name>
-                           <description>AAttribute of a visual sensation according to which an area appears to emit more or less light.</description>
+                           <description>An attribute of a visual sensation according to which an area appears to emit more or less light.</description>
                            <node>
                               <name>#</name>
                               <attribute>
@@ -4890,7 +5091,7 @@
                            <description>The red component.</description>
                            <node>
                               <name>#</name>
-                              <description>R value of RGB between 0 and 1</description>
+                              <description>R value of RGB between 0 and 1.</description>
                               <attribute>
                                  <name>takesValue</name>
                               </attribute>
@@ -4905,7 +5106,7 @@
                            <description>The blue component.</description>
                            <node>
                               <name>#</name>
-                              <description>B value of RGB between 0 and 1</description>
+                              <description>B value of RGB between 0 and 1.</description>
                               <attribute>
                                  <name>takesValue</name>
                               </attribute>
@@ -4920,7 +5121,7 @@
                            <description>The green component.</description>
                            <node>
                               <name>#</name>
-                              <description>G value of RGB between 0 and 1</description>
+                              <description>G value of RGB between 0 and 1.</description>
                               <attribute>
                                  <name>takesValue</name>
                               </attribute>
@@ -5142,7 +5343,7 @@
                </node>
                <node>
                   <name>Incidental</name>
-                  <description>Usually associated with a sensory event intended to give instructions to the participant about the task or behavior.</description>
+                  <description>A sensory or other type of event that is unrelated to the task or experiment.</description>
                </node>
                <node>
                   <name>Instructional</name>
@@ -5188,6 +5389,14 @@
                <node>
                   <name>Correction</name>
                   <description>An action offering an improvement to replace a mistake or error.</description>
+               </node>
+               <node>
+                  <name>Done-indication</name>
+                  <description>An action that indicates that the participant has completed this step in the task.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Ready-indication</value>
+                  </attribute>
                </node>
                <node>
                   <name>Incorrect-action</name>
@@ -5239,6 +5448,14 @@
                   <attribute>
                      <name>relatedTag</name>
                      <value>Miss</value>
+                  </attribute>
+               </node>
+               <node>
+                  <name>Ready-indication</name>
+                  <description>An action that indicates that the participant is ready to perform the next step in the task.</description>
+                  <attribute>
+                     <name>relatedTag</name>
+                     <value>Done-indication</value>
                   </attribute>
                </node>
             </node>
@@ -5399,144 +5616,171 @@
       <node>
          <name>Relation</name>
          <description>Concerns the way in which two or more people or things are connected.</description>
+         <attribute>
+            <name>extensionAllowed</name>
+         </attribute>
          <node>
             <name>Comparative-relation</name>
-            <description>Something considered in comparison to something else.</description>
+            <description>Something considered in comparison to something else. The first entity is the focus.</description>
             <node>
                <name>Approximately-equal-to</name>
-               <description>(A (Approximately-equal-to B)) indicates that A and B have almost the same value. Here A and B could refer to sizes, orders, positions or other quantities.</description>
+               <description>(A, (Approximately-equal-to, B)) indicates that A and B have almost the same value. Here A and B could refer to sizes, orders, positions or other quantities.</description>
             </node>
             <node>
                <name>Less-than</name>
-               <description>(A (Less-than B)) indicates that A is smaller than B. Here A and B could refer to sizes, orders, positions or other quantities.</description>
+               <description>(A, (Less-than, B)) indicates that A is smaller than B. Here A and B could refer to sizes, orders, positions or other quantities.</description>
             </node>
             <node>
                <name>Less-than-or-equal-to</name>
-               <description>(A (Less-than-or-equal-to B)) indicates that the relative size or order of A is smaller than or equal to B.</description>
+               <description>(A, (Less-than-or-equal-to, B)) indicates that the relative size or order of A is smaller than or equal to B.</description>
             </node>
             <node>
                <name>Greater-than</name>
-               <description>(A (Greater-than B)) indicates that the relative size or order of A is bigger than that of B.</description>
+               <description>(A, (Greater-than, B)) indicates that the relative size or order of A is bigger than that of B.</description>
             </node>
             <node>
                <name>Greater-than-or-equal-to</name>
-               <description>(A (Greater-than-or-equal-to B)) indicates that the relative size or order of A is bigger than or the same as that of B.</description>
+               <description>(A, (Greater-than-or-equal-to, B)) indicates that the relative size or order of A is bigger than or the same as that of B.</description>
             </node>
             <node>
                <name>Equal-to</name>
-               <description>(A (Equal-to B)) indicates that the size or order of A is the same as that of B.</description>
+               <description>(A, (Equal-to, B)) indicates that the size or order of A is the same as that of B.</description>
             </node>
             <node>
                <name>Not-equal-to</name>
-               <description>(A (Not-equal-to B)) indicates that the size or order of A is not the same as that of B.</description>
+               <description>(A, (Not-equal-to, B)) indicates that the size or order of A is not the same as that of B.</description>
             </node>
          </node>
          <node>
             <name>Connective-relation</name>
-            <description>Indicates two items are related in some way.</description>
+            <description>Indicates two entities are related in some way. The first entity is the focus.</description>
             <node>
                <name>Belongs-to</name>
-               <description>(A (Belongs-to B)) indicates that A is a member of B.</description>
+               <description>(A, (Belongs-to, B)) indicates that A is a member of B.</description>
             </node>
             <node>
                <name>Connected-to</name>
-               <description>(A (Connected-to) B) indicates that A is related to B in some respect, usually through a direct link.</description>
+               <description>(A, (Connected-to, B)) indicates that A is related to B in some respect, usually through a direct link.</description>
             </node>
             <node>
                <name>Contained-in</name>
-               <description>(A (Contained-in B)) indicates that A is completely inside of B.</description>
+               <description>(A, (Contained-in, B)) indicates that A is completely inside of B.</description>
             </node>
             <node>
                <name>Described-by</name>
-               <description>(A (Described-by B)) indicates that B provides information about A.</description>
+               <description>(A, (Described-by, B)) indicates that B provides information about A.</description>
             </node>
             <node>
                <name>From-to</name>
-               <description>(A (From-to B)) indicates a directional relation from A to B. A is considered the source.</description>
+               <description>(A, (From-to, B)) indicates a directional relation from A to B. A is considered the source.</description>
             </node>
             <node>
                <name>Group-of</name>
-               <description>(A (Group-of B)) indicates A is a group of items of type B.</description>
+               <description>(A, (Group-of, B)) indicates A is a group of items of type B.</description>
             </node>
             <node>
                <name>Implied-by</name>
-               <description>(A (Implied-by B)) indicates B is suggested by A.</description>
+               <description>(A, (Implied-by, B)) indicates B is suggested by A.</description>
+            </node>
+            <node>
+               <name>Includes</name>
+               <description>(A, (Includes, B)) indicates that A has B as a member or part.</description>
             </node>
             <node>
                <name>Interacts-with</name>
-               <description>(A (Interacts-with B)) indicates A and B interact, possibly reciprocally.</description>
+               <description>(A, (Interacts-with, B)) indicates A and B interact, possibly reciprocally.</description>
             </node>
             <node>
                <name>Member-of</name>
-               <description>(A (Member-of B)) indicates A is a member of group B.</description>
+               <description>(A, (Member-of, B)) indicates A is a member of group B.</description>
             </node>
             <node>
                <name>Part-of</name>
-               <description>(A (Part-of B)) indicates A is a part of the whole B.</description>
+               <description>(A, (Part-of, B)) indicates A is a part of the whole B.</description>
             </node>
             <node>
                <name>Performed-by</name>
-               <description>(A (Performed-by B)) Indicates that ction or procedure A was carried out by agent B.</description>
+               <description>(A, (Performed-by, B)) indicates that the action or procedure A was carried out by agent B.</description>
+            </node>
+            <node>
+               <name>Performed-using</name>
+               <description>(A, (Performed-using, B)) indicates that the action or procedure A was accomplished using B.</description>
             </node>
             <node>
                <name>Related-to</name>
-               <description>(A (Relative-to B)) indicates A is a part of the whole B.</description>
+               <description>(A, (Related-to, B)) indicates A has some relationship to B.</description>
+            </node>
+            <node>
+               <name>Unrelated-to</name>
+               <description>(A, (Unrelated-to, B)) indicates that A is not related to B.  For example, A is not related to Task.</description>
             </node>
          </node>
          <node>
             <name>Directional-relation</name>
-            <description>A relationship indicating direction of change.</description>
+            <description>A relationship indicating direction of change of one entity relative to another. The first entity is the focus.</description>
             <node>
                <name>Away-from</name>
-               <description>Go away from a place or object.</description>
+               <description>(A, (Away-from, B)) indicates that A is going or has moved away from B. The meaning depends on A and B.</description>
             </node>
             <node>
                <name>Towards</name>
-               <description>Moving in the direction of. A relation binding a relational quality or disposition to the relevant type of entity</description>
+               <description>(A, (Towards, B)) indicates that A is going to or has moved to B. The meaning depends on A and B.</description>
+            </node>
+         </node>
+         <node>
+            <name>Logical-relation</name>
+            <description>Indicating a logical relationship between entities. The first entity is usually the focus.</description>
+            <node>
+               <name>And</name>
+               <description>(A, (And, B)) means A and B are both in effect.</description>
+            </node>
+            <node>
+               <name>Or</name>
+               <description>(A, (Or, B)) means at least one of A and B are in effect.</description>
             </node>
          </node>
          <node>
             <name>Spatial-relation</name>
-            <description>Indicating information about position.</description>
+            <description>Indicating a relationship about position between entities.</description>
             <node>
                <name>Above</name>
-               <description>(A (Adjacent-to B)) means A is in a place or position that is higher than B.</description>
+               <description>(A, (Above, B)) means A is in a place or position that is higher than B.</description>
             </node>
             <node>
                <name>Across-from</name>
-               <description>(A (Across-from B)) means A is on the opposite side of something from B.</description>
+               <description>(A, (Across-from, B)) means A is on the opposite side of something from B.</description>
             </node>
             <node>
                <name>Adjacent-to</name>
-               <description>(A (Adjacent-to B)) indicates that A is next to B in time or space.</description>
+               <description>(A, (Adjacent-to, B)) indicates that A is next to B in time or space.</description>
             </node>
             <node>
                <name>Ahead-of</name>
-               <description>(A (Ahead-of B)) indicates that A is further forward in time or space in B.</description>
+               <description>(A, (Ahead-of, B)) indicates that A is further forward in time or space in B.</description>
             </node>
             <node>
                <name>Around</name>
-               <description>(A (Around B)) means A is in or near the present place or situation of B.</description>
+               <description>(A, (Around, B)) means A is in or near the present place or situation of B.</description>
             </node>
             <node>
                <name>Behind</name>
-               <description>(A (Behind B)) means A is at or to the far side of B, typically so as to be hidden by it.</description>
+               <description>(A, (Behind, B)) means A is at or to the far side of B, typically so as to be hidden by it.</description>
             </node>
             <node>
                <name>Below</name>
-               <description>(A (Below B)) means A is in a place or position that is lower than the position of B.</description>
+               <description>(A, (Below, B)) means A is in a place or position that is lower than the position of B.</description>
             </node>
             <node>
                <name>Between</name>
-               <description>(A (Between, (B, C))) means A is in the space or interval separating B and C.</description>
+               <description>(A, (Between, (B, C))) means A is in the space or interval separating B and C.</description>
             </node>
             <node>
                <name>Bilateral-to</name>
-               <description>(A (Bilateral B)) means A is on both sides of B or affects both sides of B.</description>
+               <description>(A, (Bilateral, B)) means A is on both sides of B or affects both sides of B.</description>
             </node>
             <node>
                <name>Bottom-edge-of</name>
-               <description>(A (Bottom-edge-of B)) means A is on the bottom most part or or near the boundary of B.</description>
+               <description>(A, (Bottom-edge-of, B)) means A is on the bottom most part or or near the boundary of B.</description>
                <attribute>
                   <name>relatedTag</name>
                   <value>Left-edge-of</value>
@@ -5546,27 +5790,27 @@
             </node>
             <node>
                <name>Boundary-of</name>
-               <description>(A (Boundary-of B)) means A is on or part of the edge or boundary of B.</description>
+               <description>(A, (Boundary-of, B)) means A is on or part of the edge or boundary of B.</description>
             </node>
             <node>
                <name>Center-of</name>
-               <description>(A (Center-of B)) means A is at a point or or in an area that is approximately central within B.</description>
+               <description>(A, (Center-of, B)) means A is at a point or or in an area that is approximately central within B.</description>
             </node>
             <node>
                <name>Close-to</name>
-               <description>(A (Close-to B)) means A is at a small distance from or is located near in space to B.</description>
+               <description>(A, (Close-to, B)) means A is at a small distance from or is located near in space to B.</description>
             </node>
             <node>
                <name>Far-from</name>
-               <description>(A (Far-from B)) means A is at a large distance from or is not located near in space to B.</description>
+               <description>(A, (Far-from, B)) means A is at a large distance from or is not located near in space to B.</description>
             </node>
             <node>
                <name>In-front-of</name>
-               <description>(A (In-front-of B)) means A is in a position just ahead or at the front part of B, potentially partially blocking B from view.</description>
+               <description>(A, (In-front-of, B)) means A is in a position just ahead or at the front part of B, potentially partially blocking B from view.</description>
             </node>
             <node>
                <name>Left-edge-of</name>
-               <description>(A (Left-edge-of B)) means A is located on the left side of B on or near the boundary of B.</description>
+               <description>(A, (Left-edge-of, B)) means A is located on the left side of B on or near the boundary of B.</description>
                <attribute>
                   <name>relatedTag</name>
                   <value>Bottom-edge-of</value>
@@ -5576,39 +5820,62 @@
             </node>
             <node>
                <name>Left-side-of</name>
-               <description>(A (Left-side-of B)) means A is located on the left side of B usually as part of B.</description>
+               <description>(A, (Left-side-of, B)) means A is located on the left side of B usually as part of B.</description>
                <attribute>
                   <name>relatedTag</name>
                   <value>Right-side-of</value>
                </attribute>
             </node>
             <node>
-               <name>Lower-left-of</name>
-               <description>(A (Lower-left-of B)) means A is situated on the lower left part of B. This relation is often used to specify qualitative information about screen position.</description>
+               <name>Lower-center-of</name>
+               <description>(A, (Lower-center-of, B)) means A is situated on the lower center part of B (due south). This relation is often used to specify qualitative information about screen position.</description>
                <attribute>
                   <name>relatedTag</name>
+                  <value>Center-of</value>
+                  <value>Lower-left-of</value>
                   <value>Lower-right-of</value>
+                  <value>Upper-center-of</value>
+                  <value>Upper-right-of</value>
+               </attribute>
+            </node>
+            <node>
+               <name>Lower-left-of</name>
+               <description>(A, (Lower-left-of, B)) means A is situated on the lower left part of B. This relation is often used to specify qualitative information about screen position.</description>
+               <attribute>
+                  <name>relatedTag</name>
+                  <value>Center-of</value>
+                  <value>Lower-center-of</value>
+                  <value>Lower-right-of</value>
+                  <value>Upper-center-of</value>
+                  <value>Upper-left-of</value>
+                  <value>Upper-right-of</value>
                </attribute>
             </node>
             <node>
                <name>Lower-right-of</name>
-               <description>(A (Lower-right-of B)) means A is situated on the lower right part of B. This relation is often used to specify qualitative information about screen position.</description>
+               <description>(A, (Lower-right-of, B)) means A is situated on the lower right part of B. This relation is often used to specify qualitative information about screen position.</description>
                <attribute>
                   <name>relatedTag</name>
+                  <value>Center-of</value>
+                  <value>Lower-center-of</value>
+                  <value>Lower-left-of</value>
                   <value>Upper-left-of</value>
+                  <value>Upper-center-of</value>
+                  <value>Upper-left-of</value>
+                  <value>Lower-right-of</value>
                </attribute>
             </node>
             <node>
                <name>Outside-of</name>
-               <description>(A (Outside-of B)) means A is located in the space around but not including B.</description>
+               <description>(A, (Outside-of, B)) means A is located in the space around but not including B.</description>
             </node>
             <node>
                <name>Over</name>
-               <description>(A (over B)) means A above is above B so as to cover or protect or A extends over the a general area as from a from a vantage point.</description>
+               <description>(A, (Over, B)) means A above is above B so as to cover or protect or A extends over the a general area as from a from a vantage point.</description>
             </node>
             <node>
                <name>Right-edge-of</name>
-               <description>(A (Right-edge-of B)) means A is located on the right side of B on or near the boundary of B.</description>
+               <description>(A, (Right-edge-of, B)) means A is located on the right side of B on or near the boundary of B.</description>
                <attribute>
                   <name>relatedTag</name>
                   <value>Bottom-edge-of</value>
@@ -5618,7 +5885,7 @@
             </node>
             <node>
                <name>Right-side-of</name>
-               <description>(A (Right-side-of B)) means A is located on the right side of B usually as part of B.</description>
+               <description>(A, (Right-side-of, B)) means A is located on the right side of B usually as part of B.</description>
                <attribute>
                   <name>relatedTag</name>
                   <value>Left-side-of</value>
@@ -5626,15 +5893,15 @@
             </node>
             <node>
                <name>To-left-of</name>
-               <description>(A (To-left-of B)) means A is located on or directed toward the side to the west of B when B is facing north. This term is used when A is not part of B.</description>
+               <description>(A, (To-left-of, B)) means A is located on or directed toward the side to the west of B when B is facing north. This term is used when A is not part of B.</description>
             </node>
             <node>
                <name>To-right-of</name>
-               <description>(A (To-right-of B)) means A is located on or directed toward the side to the east of B when B is facing north. This term is used when A is not part of B.</description>
+               <description>(A, (To-right-of, B)) means A is located on or directed toward the side to the east of B when B is facing north. This term is used when A is not part of B.</description>
             </node>
             <node>
                <name>Top-edge-of</name>
-               <description>(A (Top-edge-of B)) means A is on the uppermost part or or near the boundary of B.</description>
+               <description>(A, (Top-edge-of, B)) means A is on the uppermost part or or near the boundary of B.</description>
                <attribute>
                   <name>relatedTag</name>
                   <value>Left-edge-of</value>
@@ -5644,59 +5911,82 @@
             </node>
             <node>
                <name>Top-of</name>
-               <description>(A (Top-of B)) means A is on the uppermost part, side, or surface of B.</description>
+               <description>(A, (Top-of, B)) means A is on the uppermost part, side, or surface of B.</description>
             </node>
             <node>
-               <name>Underneath</name>
-               <description>(A (Underneath B)) means A is situated directly below and may be concealed by B.</description>
+               <name>Upper-center-of</name>
+               <description>(A, (Upper-center-of, B)) means A is situated on the upper center part of B (due north). This relation is often used to specify qualitative information about screen position.</description>
+               <attribute>
+                  <name>relatedTag</name>
+                  <value>Center-of</value>
+                  <value>Lower-center-of</value>
+                  <value>Lower-left-of</value>
+                  <value>Lower-right-of</value>
+                  <value>Upper-center-of</value>
+                  <value>Upper-right-of</value>
+               </attribute>
             </node>
             <node>
                <name>Upper-left-of</name>
-               <description>(A (Upper-left-of B)) means A is situated on the upper left part of B. This relation is often used to specify qualitative information about screen position.</description>
+               <description>(A, (Upper-left-of, B)) means A is situated on the upper left part of B. This relation is often used to specify qualitative information about screen position.</description>
                <attribute>
                   <name>relatedTag</name>
+                  <value>Center-of</value>
+                  <value>Lower-center-of</value>
                   <value>Lower-left-of</value>
+                  <value>Lower-right-of</value>
+                  <value>Upper-center-of</value>
+                  <value>Upper-right-of</value>
                </attribute>
             </node>
             <node>
                <name>Upper-right-of</name>
-               <description>(A (Upper-right-of B)) means A is situated on the upper right part of B. This relation is often used to specify qualitative information about screen position.</description>
+               <description>(A, (Upper-right-of, B)) means A is situated on the upper right part of B. This relation is often used to specify qualitative information about screen position.</description>
                <attribute>
                   <name>relatedTag</name>
+                  <value>Center-of</value>
+                  <value>Lower-center-of</value>
                   <value>Lower-left-of</value>
+                  <value>Upper-left-of</value>
+                  <value>Upper-center-of</value>
+                  <value>Lower-right-of</value>
                </attribute>
             </node>
             <node>
+               <name>Underneath</name>
+               <description>(A, (Underneath, B)) means A is situated directly below and may be concealed by B.</description>
+            </node>
+            <node>
                <name>Within</name>
-               <description>(A (Within B)) means A is on the inside of or contained in B.</description>
+               <description>(A, (Within, B)) means A is on the inside of or contained in B.</description>
             </node>
          </node>
          <node>
             <name>Temporal-relation</name>
-            <description>Any relationship which includes a temporal or time-based component.</description>
+            <description>A relationship that includes a temporal or time-based component.</description>
             <node>
                <name>After</name>
-               <description>(A After B) means A happens at a time subsequent to a reference time related to B.</description>
+               <description>(A, (After B)) means A happens at a time subsequent to a reference time related to B.</description>
             </node>
             <node>
                <name>Asynchronous-with</name>
-               <description>(A Asynchronous-with B) means A happens at times not occurring at the same time or having the same period or phase as B.</description>
+               <description>(A, (Asynchronous-with, B)) means A happens at times not occurring at the same time or having the same period or phase as B.</description>
             </node>
             <node>
                <name>Before</name>
-               <description>(A Before B) means A happens at a time earlier in time or order than B.</description>
+               <description>(A, (Before B)) means A happens at a time earlier in time or order than B.</description>
             </node>
             <node>
                <name>During</name>
-               <description>(A During B) means A happens at some point in a given period of time in which B is ongoing.</description>
+               <description>(A, (During, B)) means A happens at some point in a given period of time in which B is ongoing.</description>
             </node>
             <node>
                <name>Synchronous-with</name>
-               <description>(A Synchronous-with B) means A happens at occurs at the same time or rate as B.</description>
+               <description>(A, (Synchronous-with, B)) means A happens at occurs at the same time or rate as B.</description>
             </node>
             <node>
                <name>Waiting-for</name>
-               <description>(A Waiting-for B) means A pauses for something to happen in B.</description>
+               <description>(A, (Waiting-for, B)) means A pauses for something to happen in B.</description>
             </node>
          </node>
       </node>
@@ -5716,6 +6006,10 @@
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
@@ -5729,6 +6023,10 @@
             <attribute>
                <name>SIUnit</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>rad</name>
@@ -5738,9 +6036,17 @@
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>degree</name>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>0.0174533</value>
+            </attribute>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
@@ -5757,6 +6063,10 @@
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
@@ -5768,6 +6078,10 @@
          </attribute>
          <unit>
             <name>dollar</name>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>$</name>
@@ -5777,9 +6091,46 @@
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
+         </unit>
+         <unit>
+            <name>euro</name>
          </unit>
          <unit>
             <name>point</name>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>electricPotentialUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>uv</value>
+         </attribute>
+         <unit>
+            <name>v</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>0.000001</value>
+            </attribute>
+         </unit>
+         <unit>
+            <name>Volt</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>0.000001</value>
+            </attribute>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
@@ -5793,6 +6144,10 @@
             <attribute>
                <name>SIUnit</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>Hz</name>
@@ -5801,6 +6156,10 @@
             </attribute>
             <attribute>
                <name>unitSymbol</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
             </attribute>
          </unit>
       </unitClassDefinition>
@@ -5812,9 +6171,13 @@
          </attribute>
          <unit>
             <name>dB</name>
-            <description>Intensity expressed as ratio to a threshold. Often used for sound intensity.</description>
+            <description>Intensity expressed as ratio to a threshold. May be used for sound intensity.</description>
             <attribute>
                <name>unitSymbol</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
             </attribute>
          </unit>
          <unit>
@@ -5846,6 +6209,41 @@
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>magneticFieldUnits</name>
+         <description>Units used to magnetic field intensity.</description>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>fT</value>
+         </attribute>
+         <unit>
+            <name>tesla</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>10^-15</value>
+            </attribute>
+         </unit>
+         <unit>
+            <name>T</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>10^-15</value>
+            </attribute>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
@@ -5859,6 +6257,10 @@
             <attribute>
                <name>SIUnit</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>B</name>
@@ -5867,6 +6269,10 @@
             </attribute>
             <attribute>
                <name>unitSymbol</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
             </attribute>
          </unit>
       </unitClassDefinition>
@@ -5878,14 +6284,36 @@
          </attribute>
          <unit>
             <name>foot</name>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>0.3048</value>
+            </attribute>
          </unit>
          <unit>
             <name>inch</name>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>0.0254</value>
+            </attribute>
+         </unit>
+         <unit>
+            <name>meter</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>metre</name>
             <attribute>
                <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
             </attribute>
          </unit>
          <unit>
@@ -5896,9 +6324,17 @@
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>mile</name>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1609.34</value>
+            </attribute>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
@@ -5915,17 +6351,55 @@
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>mph</name>
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>0.44704</value>
+            </attribute>
          </unit>
          <unit>
             <name>kph</name>
             <attribute>
                <name>unitSymbol</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>0.277778</value>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+      <unitClassDefinition>
+         <name>temperatureUnits</name>
+         <unit>
+            <name>degree Celsius</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
+         </unit>
+         <unit>
+            <name>oC</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>unitSymbol</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
             </attribute>
          </unit>
       </unitClassDefinition>
@@ -5940,6 +6414,10 @@
             <attribute>
                <name>SIUnit</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>s</name>
@@ -5949,16 +6427,32 @@
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>day</name>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>86400</value>
+            </attribute>
          </unit>
          <unit>
             <name>minute</name>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>60</value>
+            </attribute>
          </unit>
          <unit>
             <name>hour</name>
             <description>Should be in 24-hour format.</description>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>3600</value>
+            </attribute>
          </unit>
       </unitClassDefinition>
       <unitClassDefinition>
@@ -5974,6 +6468,10 @@
             </attribute>
             <attribute>
                <name>unitSymbol</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
             </attribute>
          </unit>
       </unitClassDefinition>
@@ -5991,300 +6489,476 @@
             <attribute>
                <name>unitSymbol</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>gram</name>
             <attribute>
                <name>SIUnit</name>
             </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
          </unit>
          <unit>
             <name>pound</name>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>453.592</value>
+            </attribute>
          </unit>
          <unit>
             <name>lb</name>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>453.592</value>
+            </attribute>
          </unit>
       </unitClassDefinition>
    </unitClassDefinitions>
    <unitModifierDefinitions>
       <unitModifierDefinition>
          <name>deca</name>
-         <description>SI unit multiple representing 10^1</description>
+         <description>SI unit multiple representing 10^1.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10.0</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>da</name>
-         <description>SI unit multiple representing 10^1</description>
+         <description>SI unit multiple representing 10^1.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10.0</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>hecto</name>
-         <description>SI unit multiple representing 10^2</description>
+         <description>SI unit multiple representing 10^2.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>100.0</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>h</name>
-         <description>SI unit multiple representing 10^2</description>
+         <description>SI unit multiple representing 10^2.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>100.0</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>kilo</name>
-         <description>SI unit multiple representing 10^3</description>
+         <description>SI unit multiple representing 10^3.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>1000.0</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>k</name>
-         <description>SI unit multiple representing 10^3</description>
+         <description>SI unit multiple representing 10^3.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>1000.0</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>mega</name>
-         <description>SI unit multiple representing 10^6</description>
+         <description>SI unit multiple representing 10^6.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^6</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>M</name>
-         <description>SI unit multiple representing 10^6</description>
+         <description>SI unit multiple representing 10^6.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^6</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>giga</name>
-         <description>SI unit multiple representing 10^9</description>
+         <description>SI unit multiple representing 10^9.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^9</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>G</name>
-         <description>SI unit multiple representing 10^9</description>
+         <description>SI unit multiple representing 10^9.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^9</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>tera</name>
-         <description>SI unit multiple representing 10^12</description>
+         <description>SI unit multiple representing 10^12.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^12</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>T</name>
-         <description>SI unit multiple representing 10^12</description>
+         <description>SI unit multiple representing 10^12.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^12</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>peta</name>
-         <description>SI unit multiple representing 10^15</description>
+         <description>SI unit multiple representing 10^15.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^15</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>P</name>
-         <description>SI unit multiple representing 10^15</description>
+         <description>SI unit multiple representing 10^15.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^15</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>exa</name>
-         <description>SI unit multiple representing 10^18</description>
+         <description>SI unit multiple representing 10^18.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^18</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>E</name>
-         <description>SI unit multiple representing 10^18</description>
+         <description>SI unit multiple representing 10^18.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^18</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>zetta</name>
-         <description>SI unit multiple representing 10^21</description>
+         <description>SI unit multiple representing 10^21.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^21</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>Z</name>
-         <description>SI unit multiple representing 10^21</description>
+         <description>SI unit multiple representing 10^21.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^21</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>yotta</name>
-         <description>SI unit multiple representing 10^24</description>
+         <description>SI unit multiple representing 10^24.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^24</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>Y</name>
-         <description>SI unit multiple representing 10^24</description>
+         <description>SI unit multiple representing 10^24.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^24</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>deci</name>
-         <description>SI unit submultiple representing 10^-1</description>
+         <description>SI unit submultiple representing 10^-1.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>0.1</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>d</name>
-         <description>SI unit submultiple representing 10^-1</description>
+         <description>SI unit submultiple representing 10^-1.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>0.1</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>centi</name>
-         <description>SI unit submultiple representing 10^-2</description>
+         <description>SI unit submultiple representing 10^-2.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>0.01</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>c</name>
-         <description>SI unit submultiple representing 10^-2</description>
+         <description>SI unit submultiple representing 10^-2.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>0.01</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>milli</name>
-         <description>SI unit submultiple representing 10^-3</description>
+         <description>SI unit submultiple representing 10^-3.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>0.001</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>m</name>
-         <description>SI unit submultiple representing 10^-3</description>
+         <description>SI unit submultiple representing 10^-3.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>0.001</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>micro</name>
-         <description>SI unit submultiple representing 10^-6</description>
+         <description>SI unit submultiple representing 10^-6.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-6</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>u</name>
-         <description>SI unit submultiple representing 10^-6</description>
+         <description>SI unit submultiple representing 10^-6.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-6</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>nano</name>
-         <description>SI unit submultiple representing 10^-9</description>
+         <description>SI unit submultiple representing 10^-9.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-9</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>n</name>
-         <description>SI unit submultiple representing 10^-9</description>
+         <description>SI unit submultiple representing 10^-9.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-9</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>pico</name>
-         <description>SI unit submultiple representing 10^-12</description>
+         <description>SI unit submultiple representing 10^-12.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-12</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>p</name>
-         <description>SI unit submultiple representing 10^-12</description>
+         <description>SI unit submultiple representing 10^-12.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-12</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>femto</name>
-         <description>SI unit submultiple representing 10^-15</description>
+         <description>SI unit submultiple representing 10^-15.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-15</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>f</name>
-         <description>SI unit submultiple representing 10^-15</description>
+         <description>SI unit submultiple representing 10^-15.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-15</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>atto</name>
-         <description>SI unit submultiple representing 10^-18</description>
+         <description>SI unit submultiple representing 10^-18.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-18</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>a</name>
-         <description>SI unit submultiple representing 10^-18</description>
+         <description>SI unit submultiple representing 10^-18.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-18</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>zepto</name>
-         <description>SI unit submultiple representing 10^-21</description>
+         <description>SI unit submultiple representing 10^-21.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-21</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>z</name>
-         <description>SI unit submultiple representing 10^-21</description>
+         <description>SI unit submultiple representing 10^-21.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-21</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>yocto</name>
-         <description>SI unit submultiple representing 10^-24</description>
+         <description>SI unit submultiple representing 10^-24.</description>
          <attribute>
             <name>SIUnitModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-24</value>
          </attribute>
       </unitModifierDefinition>
       <unitModifierDefinition>
          <name>y</name>
-         <description>SI unit submultiple representing 10^-24</description>
+         <description>SI unit submultiple representing 10^-24.</description>
          <attribute>
             <name>SIUnitSymbolModifier</name>
+         </attribute>
+         <attribute>
+            <name>conversionFactor</name>
+            <value>10^-24</value>
          </attribute>
       </unitModifierDefinition>
    </unitModifierDefinitions>
@@ -6368,6 +7042,23 @@
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
+         <name>conversionFactor</name>
+         <description>The multiplicative factor to multiply these units to convert to default units.</description>
+         <property>
+            <name>unitProperty</name>
+         </property>
+         <property>
+            <name>unitModifierProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>deprecatedFrom</name>
+         <description>Indicates that this element is deprecated. The value of the attribute is the latest schema version in which the element appeared in undeprecated form.</description>
+         <property>
+            <name>elementProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
          <name>defaultUnits</name>
          <description>A schema attribute of unit classes specifying the default units to use if the placeholder has a unit class but the substituted value has no units.</description>
          <property>
@@ -6380,6 +7071,19 @@
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+         <property>
+            <name>isInheritedProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>inLibrary</name>
+         <description>Indicates this schema element came from the named library schema, not the standard schema. This attribute is added by tools when a library schema is merged into its partnered standard schema.</description>
+         <property>
+            <name>elementProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>recommended</name>
@@ -6387,10 +7091,19 @@
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>relatedTag</name>
          <description>A schema attribute suggesting HED tags that are closely related to this tag. This attribute is used by tagging tools.</description>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+         <property>
+            <name>isInheritedProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>requireChild</name>
@@ -6398,12 +7111,35 @@
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>required</name>
          <description>A schema attribute indicating that every event-level HED string should include this tag.</description>
          <property>
             <name>boolProperty</name>
+         </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>reserved</name>
+         <description>A schema attribute indicating that this tag has special meaning and requires special handling by tools.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>rooted</name>
+         <description>Indicates a top-level library schema node is identical to a node of the same name in the partnered standard schema. This attribute can only appear in nodes that have the inLibrary schema attribute.</description>
+         <property>
+            <name>nodeProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -6439,12 +7175,21 @@
       <schemaAttributeDefinition>
          <name>suggestedTag</name>
          <description>A schema attribute that indicates another tag  that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.</description>
+         <property>
+            <name>nodeProperty</name>
+         </property>
+         <property>
+            <name>isInheritedProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>tagGroup</name>
          <description>A schema attribute indicating the tag can only appear inside a tag group.</description>
          <property>
             <name>boolProperty</name>
+         </property>
+         <property>
+            <name>nodeProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -6453,12 +7198,18 @@
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>topLevelTagGroup</name>
-         <description>A schema attribute indicating that this tag (or its descendants) can only appear in a top-level tag group.</description>
+         <description>A schema attribute indicating that this tag (or its descendants) can only appear in a top-level tag group. A tag group can have at most one tag with this attribute.</description>
          <property>
             <name>boolProperty</name>
+         </property>
+         <property>
+            <name>nodeProperty</name>
          </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
@@ -6467,10 +7218,16 @@
          <property>
             <name>boolProperty</name>
          </property>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>unitClass</name>
          <description>A schema attribute specifying which unit class this value tag belongs to.</description>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
       <schemaAttributeDefinition>
          <name>unitPrefix</name>
@@ -6495,12 +7252,27 @@
       <schemaAttributeDefinition>
          <name>valueClass</name>
          <description>A schema attribute specifying which value class this value tag belongs to.</description>
+         <property>
+            <name>nodeProperty</name>
+         </property>
       </schemaAttributeDefinition>
    </schemaAttributeDefinitions>
    <propertyDefinitions>
       <propertyDefinition>
          <name>boolProperty</name>
          <description>Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.</description>
+      </propertyDefinition>
+      <propertyDefinition>
+         <name>elementProperty</name>
+         <description>Indicates this schema attribute can apply to any type of element(tag term, unit class, etc).</description>
+      </propertyDefinition>
+      <propertyDefinition>
+         <name>isInheritedProperty</name>
+         <description>Indicates that this attribute is inherited by child nodes. This property only applies to schema attributes for nodes.</description>
+      </propertyDefinition>
+      <propertyDefinition>
+         <name>nodeProperty</name>
+         <description>Indicates this schema attribute applies to node (tag-term) elements. This was added to allow for an attribute to apply to multiple elements.</description>
       </propertyDefinition>
       <propertyDefinition>
          <name>unitClassProperty</name>
@@ -6519,6 +7291,6 @@
          <description>Indicates that the schema attribute is meant to be applied to value classes.</description>
       </propertyDefinition>
    </propertyDefinitions>
-   <epilogue>This is an updated version of the schema format. The properties are now part of the schema. The schema attributes are designed to be checked in software rather than hard-coded. The schema attributes, themselves have properties.
+   <epilogue>This schema is released under the Creative Commons Attribution 4.0 International and is a product of the HED Working Group. The DOI for the latest version of the HED standard schema is 10.5281/zenodo.7876037.
 </epilogue>
 </HED>

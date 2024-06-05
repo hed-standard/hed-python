@@ -1,11 +1,11 @@
-""" Manages factor information for a tabular file. """
+""" Manager for factor information for a columnar file. """
 
 import pandas as pd
 from hed.errors.exceptions import HedFileError
 
 
 class HedTypeFactors:
-    """ Holds index of positions for a variable type for one tabular file. """
+    """ Holds index of positions for a variable type for A columnar file. """
 
     ALLOWED_ENCODINGS = ("categorical", "one-hot")
 
@@ -21,7 +21,7 @@ class HedTypeFactors:
 
         self.type_value = type_value
         self.number_elements = number_elements
-        self.type_tag = type_tag.lower()
+        self.type_tag = type_tag.casefold()
         self.levels = {}
         self.direct_indices = {}
 
@@ -64,19 +64,35 @@ class HedTypeFactors:
                              f"{factor_encoding} is not in the allowed encodings: {str(self.ALLOWED_ENCODINGS)}")
 
     def _one_hot_to_categorical(self, factors, levels):
+        """ Convert factors to one-hot representation.
+
+        Parameters:
+            factors (DataFrame):  Dataframe containing categorical values.
+            levels (list):  List of categorical columns to convert.
+
+        Return:
+            DataFrame:  Contains one-hot representation of requested levels.
+
+        """
         df = pd.DataFrame('n/a', index=range(len(factors.index)), columns=[self.type_value])
         for index, row in factors.iterrows():
             if self.type_value in row.index and row[self.type_value]:
                 df.at[index, self.type_value] = self.type_value
                 continue
             for level in levels:
-                level_str = f"{self.type_value}.{level.lower()}"
+                level_str = f"{self.type_value}.{level.casefold()}"
                 if level_str in row.index and row[level_str]:
-                    df.at[index, self.type_value] = level.lower()
+                    df.at[index, self.type_value] = level.casefold()
                     break
         return df
 
     def get_summary(self):
+        """ Return the summary of the type tag value as a dictionary.
+
+        Returns:
+            dict:  Contains the summary.
+
+        """
         count_list = [0] * self.number_elements
         for index in list(self.direct_indices.keys()):
             count_list[index] = count_list[index] + 1
@@ -92,6 +108,12 @@ class HedTypeFactors:
         return summary
 
     def _get_level_counts(self):
+        """ Return the level counts as a dictionary.
+
+        Returns:
+            dict:  Dictionary with counts of level values.
+
+        """
         count_dict = {}
         for level, cond in self.levels.items():
             count_dict[level] = len(cond.values())

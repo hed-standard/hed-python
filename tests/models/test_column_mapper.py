@@ -2,7 +2,7 @@ import unittest
 import os
 
 from hed.models import ColumnMapper, ColumnType, HedString
-from hed.models.sidecar import Sidecar
+from hed.models.sidecar import Sidecar, DefinitionDict
 from hed.errors import ValidationErrors
 from hed import load_schema
 
@@ -24,6 +24,7 @@ class Test(unittest.TestCase):
 
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
         cls.basic_events_json = os.path.join(cls.base_data_dir, "sidecar_tests/both_types_events.json")
+        cls.bids_events_defs = os.path.join(cls.base_data_dir, "validator_tests/bids_events.json")
         cls.basic_event_name = "trial_type"
         cls.basic_event_type = ColumnType.Categorical
         cls.basic_hed_tags_column = "onset"
@@ -31,19 +32,6 @@ class Test(unittest.TestCase):
         cls.basic_event_row = ["1.2", "0.6", "go", "1.435", "images/red_square.jpg"]
         cls.basic_event_row_invalid = ["1.2", "0.6", "invalid_category_key", "1.435", "images/red_square.jpg"]
 
-        cls.add_column_name = "TestColumn"
-        cls.add_column_number = 0
-        cls.hed_string = "Event/Label/#"
-        cls.test_column_map = ["TestColumn"]
-        cls.required_prefix = "TestRequiredPrefix/"
-        cls.complex_hed_tag_required_prefix = \
-            "TestRequiredPrefix/ThisIsAHedTag, (TestRequiredPrefix/NewTag, TestRequiredPrefix/NewTag3)"
-        cls.complex_hed_tag_no_prefix = "ThisIsAHedTag,(NewTag,NewTag3)"
-
-        cls.short_tag_key = 'Item/Language-item/Character/'
-        cls.short_tag_with_missing_prefix = "D"
-        cls.short_tag_partial_prefix = 'Language-item/Character/'
-        cls.short_tag_partial_prefix2 = 'Character/'
 
     def test_set_tag_columns(self):
         mapper = ColumnMapper()
@@ -211,6 +199,21 @@ class Test(unittest.TestCase):
         self.assertEqual(mapper._final_column_map[1].hed_dict, "Label/#")
         self.assertEqual(mapper._final_column_map[2].column_type, ColumnType.HEDTags)
 
+    def test_get_def_dict(self):
+        mapper = ColumnMapper()
+        def_dict_empty = mapper.get_def_dict(self.hed_schema)
+        self.assertIsInstance(def_dict_empty, DefinitionDict)
+        def_dict_base = DefinitionDict("(Definition/TestDef, (Event))", self.hed_schema)
+        self.assertIsInstance(def_dict_base, DefinitionDict)
+        self.assertEqual(len(def_dict_base.defs), 1)
+        def_dict = mapper.get_def_dict(self.hed_schema, extra_def_dicts=def_dict_base)
+        self.assertIsInstance(def_dict, DefinitionDict)
+        self.assertEqual(len(def_dict.defs), 1)
+
+        mapper._set_sidecar(Sidecar(self.bids_events_defs))
+        def_dict_combined = mapper.get_def_dict(self.hed_schema, extra_def_dicts=def_dict_base)
+        self.assertIsInstance(def_dict_combined, DefinitionDict)
+        self.assertEqual(len(def_dict_combined.defs), 4)
 
 
 if __name__ == '__main__':

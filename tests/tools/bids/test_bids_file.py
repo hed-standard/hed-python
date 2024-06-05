@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
 
     def test_get_key(self):
         bids1 = BidsFile(self.event_path)
-        key1 = bids1.get_key('')
+        key1 = bids1.get_key()
         self.assertEqual(key1, bids1.file_path, "get_key should be file path when no entities")
         key2 = bids1.get_key(('sub', 'task'))
         self.assertEqual(key2, 'sub-002_task-FacePerception', 'get_key should give the correct key with two entities')

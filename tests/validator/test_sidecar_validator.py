@@ -22,6 +22,7 @@ class Test(unittest.TestCase):
         cls._refs_json_filename = os.path.join(base_data_dir, "sidecar_tests/basic_refs_test.json")
         cls._bad_refs_json_filename = os.path.join(base_data_dir, "sidecar_tests/bad_refs_test2.json")
         cls._malformed_refs_json_filename = os.path.join(base_data_dir, "sidecar_tests/malformed_refs_test.json")
+        cls._multiple_category_refs = os.path.join(base_data_dir, "sidecar_tests/multiple_category_refs.json")
 
     def test_basic_refs(self):
         sidecar = Sidecar(self._refs_json_filename)
@@ -30,6 +31,16 @@ class Test(unittest.TestCase):
         self.assertEqual(len(issues), 0)
         refs = sidecar.get_column_refs()
         self.assertEqual(len(refs), 2)
+
+    def test_multicategory_refs(self):
+        sidecar = Sidecar(self._multiple_category_refs)
+        issues = sidecar.validate(self.hed_schema)
+
+        # 3 issues are expected for repeated tags from stacking lines
+        self.assertEqual(len(issues), 3)
+        refs = sidecar.get_column_refs()
+        self.assertEqual(len(refs), 2)
+
 
     def test_bad_refs(self):
         sidecar = Sidecar(self._bad_refs_json_filename)

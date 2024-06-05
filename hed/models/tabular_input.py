@@ -1,10 +1,11 @@
+""" A BIDS tabular file with sidecar. """
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
 from hed.models.sidecar import Sidecar
 
 
 class TabularInput(BaseInput):
-    """ A BIDS tabular tsv file with sidecar. """
+    """ A BIDS tabular file with sidecar. """
 
     HED_COLUMN_NAME = "HED"
 
@@ -18,16 +19,16 @@ class TabularInput(BaseInput):
             name (str): The name to display for this file for error purposes.
 
         :raises HedFileError:
-            - file is blank
-            - An invalid dataframe was passed with size 0
-            - An invalid extension was provided
-            - A duplicate or empty column name appears
+            - The file is blank.
+            - An invalid dataframe was passed with size 0.
+            - An invalid extension was provided.
+            - A duplicate or empty column name appears.
 
         :raises OSError:
-            - Cannot open the indicated file
+            - Cannot open the indicated file.
 
         :raises ValueError:
-            - This file has no column names
+            - This file has no column names.
         """
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
@@ -51,18 +52,19 @@ class TabularInput(BaseInput):
 
         """
         new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME])
+        self._sidecar = sidecar
 
         self.reset_mapper(new_mapper)
 
     def get_def_dict(self, hed_schema, extra_def_dicts=None):
-        """ Returns the definition dict for this sidecar.
+        """ Return the definition dict for this sidecar.
 
         Parameters:
-            hed_schema(HedSchema): used to identify tags to find definitions
+            hed_schema(HedSchema): Used to identify tags to find definitions.
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:
-            DefinitionDict:   A single definition dict representing all the data(and extra def dicts)
+            DefinitionDict:   A single definition dict representing all the data(and extra def dicts).
         """
         if self._sidecar:
             return self._sidecar.get_def_dict(hed_schema, extra_def_dicts)
@@ -70,13 +72,17 @@ class TabularInput(BaseInput):
             return super().get_def_dict(hed_schema, extra_def_dicts)
 
     def get_column_refs(self):
-        """ Returns a list of column refs for this file.
+        """ Return a list of column refs for this file.
 
             Default implementation returns none.
 
         Returns:
-            column_refs(list): A list of unique column refs found
+            column_refs(list): A list of unique column refs found.
         """
         if self._sidecar:
             return self._sidecar.get_column_refs()
         return []
+
+    def get_sidecar(self):
+        """Return the sidecar associated with this TabularInput."""
+        return self._sidecar

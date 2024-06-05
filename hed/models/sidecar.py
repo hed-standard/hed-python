@@ -1,3 +1,4 @@
+""" Contents of a JSON file or merged JSON files. """
 import json
 import re
 
@@ -11,7 +12,7 @@ from hed.models.definition_dict import DefinitionDict
 
 
 class Sidecar:
-    """ Contents of a JSON file or merged file.
+    """ Contents of a JSON file or JSON files.
 
     """
 
@@ -43,10 +44,10 @@ class Sidecar:
 
     @property
     def all_hed_columns(self):
-        """ Returns all columns that are HED compatible
+        """ Return all columns that are HED compatible.
 
-            returns:
-                column_refs(list): A list of all valid hed columns by name
+            Returns:
+                column_refs(list): A list of all valid HED columns by name.
         """
         possible_column_references = [column.column_name for column in self if column.column_type != ColumnType.Ignore]
 
@@ -54,33 +55,33 @@ class Sidecar:
 
     @property
     def def_dict(self):
-        """This is the definitions from this sidecar.
+        """ Definitions from this sidecar.
 
-            Generally you should instead call get_def_dict to get the relevant definitions
+            Generally you should instead call get_def_dict to get the relevant definitions.
 
         Returns:
-            DefinitionDict: The definitions for this sidecar
+            DefinitionDict: The definitions for this sidecar.
         """
         return self._def_dict
 
     @property
     def column_data(self):
-        """ Generates the ColumnMetadata for this sidecar
+        """ Generate the ColumnMetadata for this sidecar.
 
         Returns:
-            dict({str:ColumnMetadata}): the column metadata defined by this sidecar
+            dict({str:ColumnMetadata}): The column metadata defined by this sidecar.
         """
         return {col_name: ColumnMetadata(name=col_name, source=self.loaded_dict) for col_name in self.loaded_dict}
 
     def get_def_dict(self, hed_schema, extra_def_dicts=None):
-        """ Returns the definition dict for this sidecar.
+        """ Return the definition dict for this sidecar.
 
         Parameters:
-            hed_schema(HedSchema): used to identify tags to find definitions
+            hed_schema(HedSchema): Identifies tags to find definitions.
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:
-            DefinitionDict:   A single definition dict representing all the data(and extra def dicts)
+            DefinitionDict:  A single definition dict representing all the data(and extra def dicts).
         """
         if self._def_dict is None and hed_schema:
             self._def_dict = self.extract_definitions(hed_schema)
@@ -97,7 +98,7 @@ class Sidecar:
         """ Save column metadata to a JSON file.
 
         Parameters:
-            save_filename (str): Path to save file
+            save_filename (str): Path to save file.
 
         """
         with open(save_filename, "w") as fp:
@@ -120,7 +121,6 @@ class Sidecar:
 
         :raises HedFileError:
             - If the file was not found or could not be parsed into JSON.
-            
         """
         if not file:
             return {}
@@ -136,14 +136,14 @@ class Sidecar:
             return self._load_json_file(file)
 
     def load_sidecar_files(self, files):
-        """ Load json from a given file or list
+        """ Load json from a given file or list.
 
         Parameters:
             files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
 
         :raises HedFileError:
             - If the file was not found or could not be parsed into JSON.
-            
+
         """
         if not files:
             return {}
@@ -164,7 +164,7 @@ class Sidecar:
             extra_def_dicts(list or DefinitionDict): Extra def dicts in addition to sidecar.
             name(str): The name to report this sidecar as.
             error_handler (ErrorHandler): Error context to use.  Creates a new one if None.
-            
+
         Returns:
             issues (list of dict): A list of issues associated with each level in the HED string.
         """
@@ -178,7 +178,7 @@ class Sidecar:
         return issues
 
     def _load_json_file(self, fp):
-        """ Load the raw json of a given file
+        """ Load the raw json of a given file.
 
         Parameters:
             fp (File-like): The JSON source stream.
@@ -231,7 +231,7 @@ class Sidecar:
             This does not validate
 
         Returns:
-            column_refs(list): A list of unique column refs found
+            column_refs(list): A list of unique column refs found.
         """
         found_vals = set()
         for column_data in self:

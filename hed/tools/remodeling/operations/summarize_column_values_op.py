@@ -1,39 +1,76 @@
-""" Summarize the values in the columns of a tabular file. """
+""" Summarize the values in the columns of a columnar file. """
 
-from hed.tools import TabularSummary
+from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
 
 
 class SummarizeColumnValuesOp(BaseOp):
-    """ Summarize the values in the columns of a tabular file.
+    """ Summarize the values in the columns of a columnar file.
 
     Required remodeling parameters:   
         - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary.   
-        - **skip_columns** (*list*):  Names of columns to skip in the summary.   
-        - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns.   
+        - **summary_filename** (*str*): Base filename of the summary.     
 
-    Optional remodeling parameters:   
-         - **max_categorical** (*int*): Maximum number of unique values to include in summary for a categorical column.   
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*): (**Optional**: Default False) If True append timecodes to the summary filename.
+        - **max_categorical** (*int*): Maximum number of unique values to include in summary for a categorical column.  
+        - **skip_columns** (*list*):  Names of columns to skip in the summary.   
+        - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns. 
+        - **values_per_line** (*int*): The number of values output per line in the summary.    
 
     The purpose is to produce a summary of the values in a tabular file.
 
     """
-
+    NAME = "summarize_column_values"
+    
     PARAMS = {
-        "operation": "summarize_column_values",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str,
-            "skip_columns": list,
-            "value_columns": list
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string",
+                "description": "Name to use for the summary in titles."
+            },
+            "summary_filename": {
+                "type": "string",
+                "description": "Name to use for the summary file name base."
+            },
+            "append_timecode": {
+                "type": "boolean",
+                "description": "If true, the timecode is appended to the base filename so each run has a unique name."
+            },
+            "max_categorical": {
+                "type": "integer",
+                "description": "Maximum number of unique column values to show in text description."
+            },
+            "skip_columns": {
+                "type": "array",
+                "description": "List of columns to skip when creating the summary.",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "value_columns": {
+                "type": "array",
+                "description": "Columns to be annotated with a single HED annotation and placeholder.",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "values_per_line": {
+                "type": "integer",
+                "description": "Number of items per line to display in the text file."
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool,
-            "max_categorical": int,
-            "values_per_line": int
-        }
+        "required": [
+            "summary_name",
+            "summary_filename"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = 'column_values'
@@ -46,22 +83,15 @@ class SummarizeColumnValuesOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
 
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
-        self.skip_columns = parameters['skip_columns']
-        self.value_columns = parameters['value_columns']
         self.append_timecode = parameters.get('append_timecode', False)
         self.max_categorical = parameters.get('max_categorical', float('inf'))
+        self.skip_columns = parameters.get('skip_columns', [])
+        self.value_columns = parameters.get('value_columns', [])
         self.values_per_line = parameters.get('values_per_line', self.VALUES_PER_LINE)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
@@ -86,13 +116,26 @@ class SummarizeColumnValuesOp(BaseOp):
         if not summary:
             summary = ColumnValueSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name})
+        summary.update_summary(
+            {'df': dispatcher.post_proc_data(df_new), 'name': name})
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        return []
 
 
 class ColumnValueSummary(BaseSummary):
+    """ Manager for summaries of column contents for columnar files. """
 
     def __init__(self, sum_op):
+        """ Constructor for column value summary manager.
+
+        Parameters:
+            sum_op (BaseOp): Operation associated with this summary.
+
+        """
         super().__init__(sum_op)
 
     def update_summary(self, new_info):
@@ -109,11 +152,12 @@ class ColumnValueSummary(BaseSummary):
         name = new_info['name']
         if name not in self.summary_dict:
             self.summary_dict[name] = \
-                TabularSummary(value_cols=self.op.value_columns, skip_cols=self.op.skip_columns, name=name)
+                TabularSummary(value_cols=self.op.value_columns,
+                               skip_cols=self.op.skip_columns, name=name)
         self.summary_dict[name].update(new_info['df'])
 
     def get_details_dict(self, summary):
-        """ Return a dictionary with the summary contained in a TabularSummary
+        """ Return a dictionary with the summary contained in a TabularSummary.
 
         Parameters:
             summary (TabularSummary): Dictionary of merged summary information.
@@ -123,11 +167,14 @@ class ColumnValueSummary(BaseSummary):
 
         """
         this_summary = summary.get_summary(as_json=False)
-        unique_counts = [(key, len(count_dict)) for key, count_dict in this_summary['Categorical columns'].items()]
+        unique_counts = [(key, len(count_dict)) for key,
+                         count_dict in this_summary['Categorical columns'].items()]
         this_summary['Categorical counts'] = dict(unique_counts)
         for key, dict_entry in this_summary['Categorical columns'].items():
-            num_disp, sorted_tuples = ColumnValueSummary.sort_dict(dict_entry, reverse=True)
-            this_summary['Categorical columns'][key] = dict(sorted_tuples[:min(num_disp, self.op.max_categorical)])
+            num_disp, sorted_tuples = ColumnValueSummary.sort_dict(
+                dict_entry, reverse=True)
+            this_summary['Categorical columns'][key] = dict(
+                sorted_tuples[:min(num_disp, self.op.max_categorical)])
         return {"Name": this_summary['Name'], "Total events": this_summary["Total events"],
                 "Total files": this_summary['Total files'],
                 "Files": list(this_summary['Files'].keys()),
@@ -144,7 +191,8 @@ class ColumnValueSummary(BaseSummary):
             TabularSummary - the summary object for column values.
 
         """
-        all_sum = TabularSummary(value_cols=self.op.value_columns, skip_cols=self.op.skip_columns, name='Dataset')
+        all_sum = TabularSummary(
+            value_cols=self.op.value_columns, skip_cols=self.op.skip_columns, name='Dataset')
         for counts in self.summary_dict.values():
             all_sum.update_summary(counts)
         return all_sum
@@ -172,7 +220,7 @@ class ColumnValueSummary(BaseSummary):
         else:
             sum_list = [f"Total events={result.get('Total events', 0)}"]
         sum_list = sum_list + self._get_detail_list(result, indent=indent)
-        return ("\n").join(sum_list)
+        return "\n".join(sum_list)
 
     def _get_categorical_string(self, result, offset="", indent="   "):
         """ Return  a string with the summary for a particular categorical dictionary.
@@ -190,10 +238,13 @@ class ColumnValueSummary(BaseSummary):
         if not cat_dict:
             return ""
         count_dict = result['Categorical counts']
-        sum_list = [f"{offset}{indent}Categorical column values[Events, Files]:"]
+        sum_list = [
+            f"{offset}{indent}Categorical column values[Events, Files]:"]
         sorted_tuples = sorted(cat_dict.items(), key=lambda x: x[0])
         for entry in sorted_tuples:
-            sum_list = sum_list + self._get_categorical_col(entry, count_dict, offset="", indent="   ")
+            sum_list = sum_list + \
+                self._get_categorical_col(
+                    entry, count_dict, offset="", indent="   ")
         return "\n".join(sum_list)
 
     def _get_detail_list(self, result, indent=BaseSummary.DISPLAY_INDENT):
@@ -209,12 +260,14 @@ class ColumnValueSummary(BaseSummary):
         """
         sum_list = []
         specifics = result["Specifics"]
-        cat_string = self._get_categorical_string(specifics, offset="", indent=indent)
+        cat_string = self._get_categorical_string(
+            specifics, offset="", indent=indent)
         if cat_string:
             sum_list.append(cat_string)
         val_dict = specifics.get("Value column summaries", {})
         if val_dict:
-            sum_list.append(ColumnValueSummary._get_value_string(val_dict, offset="", indent=indent))
+            sum_list.append(ColumnValueSummary._get_value_string(
+                val_dict, offset="", indent=indent))
         return sum_list
 
     def _get_categorical_col(self, entry, count_dict, offset="", indent="   "):
@@ -236,11 +289,18 @@ class ColumnValueSummary(BaseSummary):
         # Create and partition the list of individual entries
         value_list = [f"{item[0]}{str(item[1])}" for item in entry[1].items()]
         value_list = value_list[:num_disp]
-        part_list = ColumnValueSummary.partition_list(value_list, self.op.values_per_line)
+        part_list = ColumnValueSummary.partition_list(
+            value_list, self.op.values_per_line)
         return col_list + [f"{offset}{indent * 3}{ColumnValueSummary.get_list_str(item)}" for item in part_list]
 
     @staticmethod
     def get_list_str(lst):
+        """ Return a str version of a list with items separated by a blank.
+
+        Returns:
+            str:  String version of list.
+
+        """
         return f"{' '.join(str(item) for item in lst)}"
 
     @staticmethod
@@ -248,8 +308,8 @@ class ColumnValueSummary(BaseSummary):
         """ Partition a list into lists of n items.
 
         Parameters:
-            lst (list): List to be partitioned
-            n (int):  Number of items in each sublist
+            lst (list): List to be partitioned.
+            n (int):  Number of items in each sublist.
 
         Returns:
             list:  list of lists of n elements, the last might have fewer.
@@ -266,5 +326,6 @@ class ColumnValueSummary(BaseSummary):
 
     @staticmethod
     def sort_dict(count_dict, reverse=False):
-        sorted_tuples = sorted(count_dict.items(), key=lambda x: x[1][0], reverse=reverse)
+        sorted_tuples = sorted(
+            count_dict.items(), key=lambda x: x[1][0], reverse=reverse)
         return len(sorted_tuples), sorted_tuples

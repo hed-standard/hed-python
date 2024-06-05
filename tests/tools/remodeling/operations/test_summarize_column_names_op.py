@@ -4,7 +4,7 @@ import pandas as pd
 import unittest
 # from hed.tools.analysis.column_name_summary import ColumnNameSummary
 from hed.tools.remodeling.dispatcher import Dispatcher
-from hed.tools.remodeling.operations.summarize_column_names_op import ColumnNamesSummary, SummarizeColumnNamesOp
+from hed.tools.remodeling.operations.summarize_column_names_op import SummarizeColumnNamesOp
 
 
 class Test(unittest.TestCase):
@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
     def test_summary_op(self):
         with open(self.model_path, 'r') as fp:
             parms = json.load(fp)
-        parsed_commands, errors = Dispatcher.parse_operations(parms)
+        parsed_commands = Dispatcher.parse_operations(parms)
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         df = dispatch.get_data_file(self.events_path)
         df = dispatch.prep_data(df)

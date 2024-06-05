@@ -21,6 +21,7 @@ class TestHedSchema(unittest.TestCase):
             "empty_file.mediawiki": HedExceptions.SCHEMA_HEADER_INVALID,
             "HED_header_invalid_version.mediawiki": HedExceptions.SCHEMA_VERSION_INVALID,
             "HED_header_missing_version.mediawiki": HedExceptions.SCHEMA_VERSION_INVALID,
+            "HED_header_unknown_attribute.mediawiki": HedExceptions.SCHEMA_UNKNOWN_HEADER_ATTRIBUTE,
             "HED_header_bad_library.mediawiki": HedExceptions.BAD_HED_LIBRARY_NAME,
             "HED_schema_out_of_order.mediawiki": HedExceptions.SCHEMA_SECTION_MISSING,
             "empty_node.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,

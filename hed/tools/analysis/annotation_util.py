@@ -1,15 +1,23 @@
 """ Utilities to facilitate annotation of events in BIDS. """
 
+import io
 import re
-from pandas import DataFrame
+
+import pandas as pd
+from pandas import DataFrame, Series
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+
 from hed.errors.exceptions import HedFileError
+from hed.models import df_util
+from hed.tools.bids.bids_dataset import BidsDataset
 
 
 def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')):
     """ Return a list of the specified columns that are missing from a dataframe.
 
     Parameters:
-        df (DataFrame):         Spreadsheet to check the columns of.
+        df (DataFrame):  Spreadsheet to check the columns of.
         required_cols (tuple):  List of column names that must be present.
 
     Returns:
@@ -70,20 +78,12 @@ def extract_tags(hed_string, search_tag):
                 - list:  A list of the tags that were extracted, for example descriptions.
 
     """
-    extracted = []
-    remainder = ""
-    back_piece = hed_string
-    while back_piece:
-        ind = back_piece.find(search_tag)
-        if ind == -1:
-            remainder = _update_remainder(remainder, back_piece)
-            break
-        first_pos = _find_last_pos(back_piece[:ind])
-        remainder = _update_remainder(remainder, trim_back(back_piece[:first_pos]))
-        next_piece = back_piece[first_pos:]
-        last_pos = _find_first_pos(next_piece)
-        extracted.append(trim_back(next_piece[:last_pos]))
-        back_piece = trim_front(next_piece[last_pos:])
+    possible_descriptions = hed_string.replace(")", "").replace("(", "").split(",")
+    extracted = [tag.strip() for tag in possible_descriptions if search_tag in tag]
+    remainder = hed_string
+    for tag in extracted:
+        remainder = df_util.replace_ref(remainder, tag)
+
     return remainder, extracted
 
 
@@ -117,12 +117,25 @@ def generate_sidecar_entry(column_name, column_values=None):
     return sidecar_entry
 
 
+def get_bids_dataset(data_root):
+    """ Return a BIDS dataset object given a path to a dataset root.
+    
+    Parameters:
+        data_root (str): Path to the BIDS dataset root.
+        
+    Returns:
+        BidsDataset 
+        
+    """
+    return BidsDataset(data_root)
+
+
 def hed_to_df(sidecar_dict, col_names=None):
     """ Return a 4-column dataframe of HED portions of sidecar.
 
     Parameters:
         sidecar_dict (dict):      A dictionary conforming to BIDS JSON events sidecar format.
-        col_names (list, None):   A list of the cols to include in the flattened side car.
+        col_names (list, None):   A list of the cols to include in the flattened sidecar.
 
     Returns:
         DataFrame:  Four-column spreadsheet representing HED portion of sidecar.
@@ -153,7 +166,7 @@ def hed_to_df(sidecar_dict, col_names=None):
 
     data = {"column_name": column_name, "column_value": column_value,
             "description": column_description, "HED": hed_tags}
-    dataframe = DataFrame(data).astype(str)
+    dataframe = pd.DataFrame(data).astype(str)
     return dataframe
 
 
@@ -178,78 +191,96 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             sidecar_dict[key]['Levels'] = value_dict['Levels']
 
 
-def trim_back(tag_string):
-    """ Return a trimmed copy of tag_string.
+def series_to_factor(series):
+    """Convert a series to an integer factor list.
 
     Parameters:
-        tag_string (str):  A tag string to be trimmed.
+        series (Series) - Series to be converted to a list.
 
     Returns:
-        str:  A copy of tag_string that has been trimmed.
-
-    Notes:
-        -  The trailing blanks and commas are removed from the copy.
-
-
+        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
     """
-
-    last_pos = 0
-    for ind, char in enumerate(reversed(tag_string)):
-        if char not in [',', ' ']:
-            last_pos = ind
-            break
-    return_str = tag_string[:(len(tag_string)-last_pos)]
-    return return_str
+    replaced = series.replace('n/a', False)
+    filled = replaced.fillna(False)
+    bool_list = filled.astype(bool).tolist()
+    return [int(value) for value in bool_list]
 
 
-def trim_front(tag_string):
-    """ Return a copy of tag_string with leading blanks and commas removed.
+def str_to_tabular(tsv_str, sidecar=None):
+    """ Return a TabularInput a tsv string.
 
     Parameters:
-        tag_string (str):     A tag string to be trimmed.
+        tsv_str (str):  A string representing a tabular input.
+        sidecar (Sidecar, str, File or File-like): An optional Sidecar object.
 
-    Returns:
-        str: A copy of tag_string that has been trimmed.
-    """
-    first_pos = len(tag_string)
-    for ind, char in enumerate(tag_string):
-        if char not in [',', ' ']:
-            first_pos = ind
-            break
-    return_str = tag_string[first_pos:]
-    return return_str
+     Returns:
+         TabularInput:  Represents a tabular input object.
+     """
+
+    return TabularInput(file=io.StringIO(tsv_str), sidecar=sidecar)
 
 
-def _find_first_pos(tag_string):
-    """ Return the position of the first comma or closing parenthesis in tag_string.
+def strs_to_sidecar(sidecar_strings):
+    """ Return a Sidecar from a sidecar as string or as a list of sidecars as strings.
+
+     Parameters:
+         sidecar_strings (string or list):  String or strings representing sidecars.
+
+     Returns:
+         Sidecar or None:  the merged sidecar from the list.
+     """
+
+    if not sidecar_strings:
+        return None
+    if not isinstance(sidecar_strings, list):
+        sidecar_strings = [sidecar_strings]
+    if sidecar_strings:
+        file_list = []
+        for s_string in sidecar_strings:
+            file_list.append(io.StringIO(s_string))
+        return Sidecar(files=file_list, name="Merged_Sidecar")
+    else:
+        return None
+
+
+def to_factor(data, column=None):
+    """Convert data to an integer factor list.
 
     Parameters:
-        tag_string (str):   String to be analyzed
+        data (Series or DataFrame) - Series to be converted to a list.
+        column (str): Optional column name if DataFrame (otherwise column 0).
 
     Returns:
-        int:  Position of first comma or closing parenthesis or length of tag_string if none.
-
+        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
     """
-    for ind, char in enumerate(tag_string):
-        if char in [',', ')']:
-            return ind
-    return len(tag_string)
+    if isinstance(data, Series):
+        series = data
+    elif isinstance(data, DataFrame) and column:
+        series = data[column]
+    elif isinstance(data, DataFrame):
+        series = data.iloc[:, 0]
+    else:
+        raise HedFileError("CannotConvertToFactor",
+                           f"Expecting Series or DataFrame but got {type(data)}", "")
+
+    replaced = series.replace('n/a', False)
+    filled = replaced.fillna(False)
+    bool_list = filled.astype(bool).tolist()
+    return [int(value) for value in bool_list]
 
 
-def _find_last_pos(tag_string):
-    """ Find the position of the last comma, blank, or opening parenthesis in tag_string.
+def to_strlist(obj_list):
+    """ Return a list with the objects converted to string except for None elements.
 
     Parameters:
-        tag_string (str):   String to be analyzed
+        obj_list (list):  A list of objects that are None or have a str method.
 
     Returns:
-        int:   Position of last comma or opening parenthesis or 0 if none.
-
+        list:  A list with the objects converted to strings -- except None values are preserved.
     """
-    for index, char in enumerate(reversed(tag_string)):
-        if char in [',', ' ', '(']:
-            return len(tag_string) - index
-    return 0
+
+    # Using list comprehension to convert non-None items to strings
+    return [str(item) if item is not None else '' for item in obj_list]
 
 
 def _flatten_cat_col(col_key, col_dict):
@@ -386,7 +417,7 @@ def _tag_list_to_str(extracted, removed_tag=None):
         return " ".join(extracted)
     str_list = []
     for ind, item in enumerate(extracted):
-        ind = item.lower().find(removed_tag.lower())
+        ind = item.casefold().find(removed_tag.casefold())
         if ind >= 0:
             str_list.append(item[ind+len(removed_tag):])
         else:
@@ -419,22 +450,22 @@ def _update_cat_dict(cat_dict, value_entry, hed_entry, description_entry, descri
         cat_dict['HED'] = hed_part
 
 
-def _update_remainder(remainder, update_piece):
-    """ Update remainder with update piece.
-
-    Parameters:
-        remainder (str):      A tag string without trailing comma.
-        update_piece (str):   A tag string to be appended.
-
-    Returns:
-        str: A concatenation of remainder and update_piece, paying attention to separating commas.
-
-    """
-    if not update_piece:
-        return remainder
-    elif not remainder:
-        return update_piece
-    elif remainder.endswith('(') or update_piece.startswith(')'):
-        return remainder + update_piece
-    else:
-        return remainder + ", " + update_piece
+# def _update_remainder(remainder, update_piece):
+#     """ Update remainder with update piece.
+#
+#     Parameters:
+#         remainder (str):      A tag string without trailing comma.
+#         update_piece (str):   A tag string to be appended.
+#
+#     Returns:
+#         str: A concatenation of remainder and update_piece, paying attention to separating commas.
+#
+#     """
+#     if not update_piece:
+#         return remainder
+#     elif not remainder:
+#         return update_piece
+#     elif remainder.endswith('(') or update_piece.startswith(')'):
+#         return remainder + update_piece
+#     else:
+#         return remainder + ", " + update_piece

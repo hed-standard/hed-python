@@ -1,5 +1,7 @@
 import os
 import unittest
+import urllib.error
+
 from hed.models import DefinitionDict
 
 from hed import load_schema_version, HedString
@@ -9,7 +11,7 @@ from hed import Sidecar
 import io
 import json
 from hed import HedFileError
-from hed.errors import ErrorHandler, get_printable_issue_string
+from hed.errors import ErrorHandler, get_printable_issue_string, SchemaWarnings
 
 
 skip_tests = {
@@ -36,9 +38,6 @@ class MyTestCase(unittest.TestCase):
             test_info = json.load(fp)
         for info in test_info:
             error_code = info['error_code']
-            verify_code = True
-            # To be deprecated once we add this to all tests
-            self._verify_code = verify_code
             if error_code in skip_tests:
                 print(f"Skipping {error_code} test because: {skip_tests[error_code]}")
                 continue
@@ -47,15 +46,24 @@ class MyTestCase(unittest.TestCase):
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
 
-            # if name != "attribute-invalid-in-library":
+            # if name != "library-invalid-bad_with-standard-version":
             #     continue
             description = info['description']
             schema = info['schema']
             check_for_warnings = info.get("warning", False)
             error_handler = ErrorHandler(check_for_warnings)
             if schema:
-                schema = load_schema_version(schema)
-                definitions = info['definitions']
+                try:
+                    schema = load_schema_version(schema)
+                except HedFileError as e:
+                    issues = e.issues
+                    if not issues:
+                        issues += [{"code": e.code,
+                                    "message": e.message}]
+                    self.report_result("fails", issues, error_code, description, name, "dummy", "Schema")
+                    # self.fail_count.append(name)
+                    continue
+                definitions = info.get('definitions', None)
                 def_dict = DefinitionDict(definitions, schema)
                 self.assertFalse(def_dict.issues)
             else:
@@ -73,13 +81,15 @@ class MyTestCase(unittest.TestCase):
                     self._run_single_schema_test(section, error_code, description, name, error_handler)
 
     def report_result(self, expected_result, issues, error_code, description, name, test, test_type):
+        # Filter out pre-release warnings, we don't care about them.
+        issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
         if expected_result == "fails":
             if not issues:
                 print(f"{error_code}: {description}")
                 print(f"Passed '{test_type}' (which should fail) '{name}': {test}")
                 print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
-            elif self._verify_code:
+            else:
                 if any(issue['code'] == error_code for issue in issues):
                     return
                 print(f"{error_code}: {description}")
@@ -169,11 +179,18 @@ class MyTestCase(unittest.TestCase):
         for result, tests in info.items():
             for test in tests:
                 schema_string = "\n".join(test)
+                issues = []
                 try:
                     loaded_schema = from_string(schema_string, schema_format=".mediawiki")
                     issues = loaded_schema.check_compliance()
                 except HedFileError as e:
                     issues = e.issues
+                    if not issues:
+                        issues += [{"code": e.code,
+                                   "message": e.message}]
+                except urllib.error.HTTPError:
+                    issues += [{"code": "Http_error",
+                                "message": "HTTP error in testing, probably due to rate limiting for local testing."}]
                 self.report_result(result, issues, error_code, description, name, test, "schema_tests")
 
     def test_errors(self):

@@ -2,9 +2,9 @@ import os
 import unittest
 from hed import schema as hedschema
 from hed.models import Sidecar, TabularInput, HedString
-from hed.models.df_util import get_assembled
-from hed.tools import assemble_hed
+from hed.models.df_util import expand_defs
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
+import pandas as pd
 
 
 # noinspection PyBroadException
@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                        '../../data/bids_tests/eeg_ds003645s_hed'))
         schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                    '../../data/schema_tests/HED8.0.0.xml'))
+                                                    '../../data/schema_tests/HED8.2.0.xml'))
         cls.bids_root_path = bids_root_path
         json_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         events_path = os.path.realpath(os.path.join(bids_root_path,
@@ -27,9 +27,8 @@ class Test(unittest.TestCase):
         input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
         cls.input_data = input_data
         cls.sidecar1 = sidecar1
-        input_df, def_dict = assemble_hed(input_data, sidecar1, schema, expand_defs=False)
-        cls.input_df = input_df
-        cls.def_dict = def_dict
+        cls.input_df = pd.DataFrame(input_data.series_a, columns=["HED_assembled"])
+        cls.def_dict = input_data.get_def_dict(schema)
         cls.tag_template = {
             "Sensory events": ["Sensory-event", "Sensory-presentation", "Sensory-attribute",
                                "Experimental-stimulus", "Task-stimulus-role",
@@ -75,12 +74,13 @@ class Test(unittest.TestCase):
 
     def test_organize_tags(self):
         counts = HedTagCounts('Base_name')
-        hed_strings, definitions = get_assembled(self.input_data, self.sidecar1, self.hed_schema,
-                                                 extra_def_dicts=None, join_columns=True,
-                                                 shrink_defs=False, expand_defs=True)
+        definitions = self.input_data.get_def_dict(self.hed_schema)
+        df = pd.DataFrame({"HED_assembled": self.input_data.series_a})
+        expand_defs(df, self.hed_schema, definitions)
+
         # type_defs = input_data.get_definitions().gathered_defs
-        for hed in hed_strings:
-            counts.update_event_counts(hed, 'run-1')
+        for hed in df["HED_assembled"]:
+            counts.update_event_counts(HedString(hed, self.hed_schema), 'run-1')
         self.assertIsInstance(counts.tag_dict, dict)
         self.assertEqual(46, len(counts.tag_dict))
         org_tags, leftovers = counts.organize_tags(self.tag_template)

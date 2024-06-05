@@ -1,0 +1,44 @@
+on:
+  push:
+    branches: ["develop"]
+  pull_request:
+    branches: ["develop"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Create work directory
+      run: |
+        mkdir workdir
+        echo "WORKDIR=$(pwd)/workdir" >> $GITHUB_OUTPUT
+
+    - name: Create and activate virtual environment
+      run: |
+        cd $WORKDIR
+        python -m venv .venv
+        source .venv/bin/activate
+
+    - name: Install package
+      run: |
+        cd $WORKDIR
+        source .venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install $GITHUB_WORKSPACE
+
+    - name: Run post-installation test
+      run: |
+        cd $WORKDIR
+        source .venv/bin/activate
+        python -c "from hed.models.hed_string import HedString; print('Import test passed.')"

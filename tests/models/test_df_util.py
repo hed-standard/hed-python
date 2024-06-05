@@ -5,11 +5,12 @@ import pandas as pd
 from hed import load_schema_version
 from hed.models.df_util import shrink_defs, expand_defs, convert_to_form, process_def_expands
 from hed import DefinitionDict
+from hed.models.df_util import _handle_curly_braces_refs, _indexed_dict_from_onsets, _filter_by_index_list, split_delay_tags
 
 
 class TestShrinkDefs(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version()
+        self.schema = load_schema_version("8.2.0")
 
     def test_shrink_defs_normal(self):
         df = pd.DataFrame({"column1": ["(Def-expand/TestDefNormal,(Acceleration/2471,Action/TestDef2)),Event/SomeEvent"]})
@@ -66,7 +67,7 @@ class TestShrinkDefs(unittest.TestCase):
 
 class TestExpandDefs(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version()
+        self.schema = load_schema_version("8.2.0")
         self.def_dict = DefinitionDict(["(Definition/TestDefNormal,(Acceleration/2471,Action/TestDef2))",
                                        "(Definition/TestDefPlaceholder/#,(Acceleration/#,Action/TestDef2))"],
                                        hed_schema=self.schema)
@@ -116,7 +117,7 @@ class TestExpandDefs(unittest.TestCase):
 
 class TestConvertToForm(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version()
+        self.schema = load_schema_version("8.2.0")
 
     def test_convert_to_form_short_tags(self):
         df = pd.DataFrame({"column1": ["Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See"]})
@@ -286,3 +287,298 @@ class TestConvertToForm(unittest.TestCase):
         self.assertEqual(len(ambiguous), 0)
         self.assertEqual(len(errors), 0)
 
+class TestInsertColumns(unittest.TestCase):
+
+    def test_insert_columns_simple(self):
+        df = pd.DataFrame({
+            "column1": ["{column2}, Event, Action"],
+            "column2": ["Item"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Item, Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_multiple_rows(self):
+        df = pd.DataFrame({
+            "column1": ["{column2}, Event, Action", "Event, Action"],
+            "column2": ["Item", "Subject"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Item, Event, Action", "Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_multiple_columns(self):
+        df = pd.DataFrame({
+            "column1": ["{column2}, Event, {column3}, Action"],
+            "column2": ["Item"],
+            "column3": ["Subject"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Item, Event, Subject, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_four_columns(self):
+        df = pd.DataFrame({
+            "column1": ["{column2}, Event, {column3}, Action"],
+            "column2": ["Item"],
+            "column3": ["Subject"],
+            "column4": ["Data"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Item, Event, Subject, Action"],
+            "column4": ["Data"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["Item"],
+            "column3": ["Subject"],
+            "column4": ["Data"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["(Item, (Subject, Data)), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["Data"],
+            "column3": ["n/a"],
+            "column4": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["(Data), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_na_values2(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["n/a"],
+            "column4": ["Data"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["((Data)), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_mixed_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["Subject"],
+            "column4": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["((Subject)), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_nested_parentheses_all_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["n/a"],
+            "column4": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_parentheses(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}), Event, Action"],
+            "column2": ["Item"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["(Item), Event, Action"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+    def test_insert_columns_with_parentheses_na_values(self):
+        df = pd.DataFrame({
+            "column1": ["({column2}), Event, Action"],
+            "column2": ["n/a"],
+            "column3": ["n/a"]
+        })
+        expected_df = pd.DataFrame({
+            "column1": ["Event, Action"],
+            "column3": ["n/a"]
+        })
+        result = _handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
+        pd.testing.assert_frame_equal(result, expected_df)
+
+class TestOnsetDict(unittest.TestCase):
+    def test_empty_and_single_onset(self):
+        self.assertEqual(_indexed_dict_from_onsets([]), {})
+        self.assertEqual(_indexed_dict_from_onsets([3.5]), {3.5: [0]})
+
+    def test_identical_and_approx_equal_onsets(self):
+        self.assertEqual(_indexed_dict_from_onsets([3.5, 3.5]), {3.5: [0, 1]})
+        self.assertEqual(_indexed_dict_from_onsets([3.5, 3.500000001]), {3.5: [0], 3.500000001: [1]})
+        self.assertEqual(_indexed_dict_from_onsets([3.5, 3.5000000000001]), {3.5: [0, 1]})
+
+    def test_distinct_and_mixed_onsets(self):
+        self.assertEqual(_indexed_dict_from_onsets([3.5, 4.0, 4.4]), {3.5: [0], 4.0: [1], 4.4: [2]})
+        self.assertEqual(_indexed_dict_from_onsets([3.5, 3.5, 4.0, 4.4]), {3.5: [0, 1], 4.0: [2], 4.4: [3]})
+        self.assertEqual(_indexed_dict_from_onsets([4.0, 3.5, 4.4, 4.4]), {4.0: [0], 3.5: [1], 4.4: [2, 3]})
+
+    def test_complex_onsets(self):
+        # Negative, zero, and positive onsets
+        self.assertEqual(_indexed_dict_from_onsets([-1.0, 0.0, 1.0]), {-1.0: [0], 0.0: [1], 1.0: [2]})
+
+        # Very close but distinct onsets
+        self.assertEqual(_indexed_dict_from_onsets([1.0, 1.0 + 1e-8, 1.0 + 2e-8]),
+                         {1.0: [0], 1.0 + 1e-8: [1], 1.0 + 2e-8: [2]})
+        # Very close
+        self.assertEqual(_indexed_dict_from_onsets([1.0, 1.0 + 1e-10, 1.0 + 2e-10]),
+                         {1.0: [0, 1, 2]})
+
+        # Mixed scenario
+        self.assertEqual(_indexed_dict_from_onsets([3.5, 3.5, 4.0, 4.4, 4.4, -1.0]),
+                         {3.5: [0, 1], 4.0: [2], 4.4: [3, 4], -1.0: [5]})
+
+    def test_empty_and_single_item_series(self):
+        self.assertTrue(_filter_by_index_list(pd.Series([], dtype=str), {}).equals(pd.Series([], dtype=str)))
+        self.assertTrue(_filter_by_index_list(pd.Series(["apple"]), {0: [0]}).equals(pd.Series(["apple"])))
+
+    def test_two_item_series_with_same_onset(self):
+        input_series = pd.Series(["apple", "orange"])
+        expected_series = pd.Series(["apple,orange", ""])
+        self.assertTrue(_filter_by_index_list(input_series, {0: [0, 1]}).equals(expected_series))
+
+    def test_multiple_item_series(self):
+        input_series = pd.Series(["apple", "orange", "banana", "mango"])
+        indexed_dict = {0: [0, 1], 1: [2], 2: [3]}
+        expected_series = pd.Series(["apple,orange", "", "banana", "mango"])
+        self.assertTrue(_filter_by_index_list(input_series, indexed_dict).equals(expected_series))
+
+    def test_complex_scenarios(self):
+        # Test with negative, zero and positive onsets
+        original = pd.Series(["negative", "zero", "positive"])
+        indexed_dict = {-1: [0], 0: [1], 1: [2]}
+        expected_series1 = pd.Series(["negative", "zero", "positive"])
+        self.assertTrue(_filter_by_index_list(original, indexed_dict).equals(expected_series1))
+
+        # Test with more complex indexed_dict
+        original2 = pd.Series(["apple", "orange", "banana", "mango", "grape"])
+        indexed_dict2= {0: [0, 1], 1: [2], 2: [3, 4]}
+        expected_series2 = pd.Series(["apple,orange", "", "banana", "mango,grape", ""])
+        self.assertTrue(_filter_by_index_list(original2, indexed_dict2).equals(expected_series2))
+
+    def test_empty_and_single_item_series_df(self):
+        self.assertTrue(_filter_by_index_list(pd.DataFrame([], columns=["HED", "Extra"]), {}).equals(
+            pd.DataFrame([], columns=["HED", "Extra"])))
+        self.assertTrue(
+            _filter_by_index_list(pd.DataFrame([["apple", "extra1"]], columns=["HED", "Extra"]), {0: [0]}).equals(
+                pd.DataFrame([["apple", "extra1"]], columns=["HED", "Extra"])))
+
+    def test_two_item_series_with_same_onset_df(self):
+        input_df = pd.DataFrame([["apple", "extra1"], ["orange", "extra2"]], columns=["HED", "Extra"])
+        expected_df = pd.DataFrame([["apple,orange", "extra1"], ["", "extra2"]], columns=["HED", "Extra"])
+        self.assertTrue(_filter_by_index_list(input_df, {0: [0, 1]}).equals(expected_df))
+
+    def test_multiple_item_series_df(self):
+        input_df = pd.DataFrame([["apple", "extra1"], ["orange", "extra2"], ["banana", "extra3"], ["mango", "extra4"]],
+                                columns=["HED", "Extra"])
+        indexed_dict = {0: [0, 1], 1: [2], 2: [3]}
+        expected_df = pd.DataFrame(
+            [["apple,orange", "extra1"], ["", "extra2"], ["banana", "extra3"], ["mango", "extra4"]],
+            columns=["HED", "Extra"])
+        self.assertTrue(_filter_by_index_list(input_df, indexed_dict).equals(expected_df))
+
+    def test_complex_scenarios_df(self):
+        # Test with negative, zero, and positive onsets
+        original = pd.DataFrame([["negative", "extra1"], ["zero", "extra2"], ["positive", "extra3"]],
+                                columns=["HED", "Extra"])
+        indexed_dict = {-1: [0], 0: [1], 1: [2]}
+        expected_df = pd.DataFrame([["negative", "extra1"], ["zero", "extra2"], ["positive", "extra3"]],
+                                   columns=["HED", "Extra"])
+        self.assertTrue(_filter_by_index_list(original, indexed_dict).equals(expected_df))
+
+        # Test with more complex indexed_dict
+        original2 = pd.DataFrame(
+            [["apple", "extra1"], ["orange", "extra2"], ["banana", "extra3"], ["mango", "extra4"], ["grape", "extra5"]],
+            columns=["HED", "Extra"])
+        indexed_dict2 = {0: [0, 1], 1: [2], 2: [3, 4]}
+        expected_df2 = pd.DataFrame(
+            [["apple,orange", "extra1"], ["", "extra2"], ["banana", "extra3"], ["mango,grape", "extra4"],
+             ["", "extra5"]], columns=["HED", "Extra"])
+        self.assertTrue(_filter_by_index_list(original2, indexed_dict2).equals(expected_df2))
+
+
+
+class TestSplitDelayTags(unittest.TestCase):
+    schema = load_schema_version("8.2.0")
+    def test_empty_series_and_onsets(self):
+        empty_series = pd.Series([], dtype="object")
+        empty_onsets = pd.Series([], dtype="float")
+        result = split_delay_tags(empty_series, self.schema, empty_onsets)
+        self.assertIsInstance(result, pd.DataFrame)
+
+    def test_None_series_and_onsets(self):
+        result = split_delay_tags(None, self.schema, None)
+        self.assertIsNone(result)
+
+    def test_normal_ordered_series(self):
+        series = pd.Series([
+            "Tag1,Tag2",
+            "Tag3,Tag4"
+        ])
+        onsets = pd.Series([1.0, 2.0])
+        result = split_delay_tags(series, self.schema, onsets)
+        self.assertTrue(result.onset.equals(pd.Series([1.0, 2.0])))
+        self.assertTrue(result.HED.equals(pd.Series([
+            "Tag1,Tag2",
+            "Tag3,Tag4"
+        ])))
+
+    def test_normal_ordered_series_with_delays(self):
+        series = pd.Series([
+            "Tag1,Tag2,(Delay/3.0 s,(Tag5))",
+            "Tag3,Tag4"
+        ])
+        onsets = pd.Series([1.0, 2.0])
+        result = split_delay_tags(series, self.schema, onsets)
+        self.assertTrue(result.onset.equals(pd.Series([1.0, 2.0, 4.0])))
+        self.assertTrue(result.HED.equals(pd.Series([
+            "Tag1,Tag2",
+            "Tag3,Tag4",
+            "(Delay/3.0 s,(Tag5))"
+        ])))
+
+    def test_normal_ordered_series_with_double_delays(self):
+        series = pd.Series([
+            "Tag1,Tag2,(Delay/3.0 s,(Tag5))",
+            "Tag6,(Delay/2.0 s,(Tag7))",
+            "Tag3,Tag4"
+        ])
+        onsets = pd.Series([1.0, 2.0, 3.0])
+        result = split_delay_tags(series, self.schema, onsets)
+        self.assertTrue(result.onset.equals(pd.Series([1.0, 2.0, 3.0, 4.0, 4.0])))
+        self.assertTrue(result.HED.equals(pd.Series([
+            "Tag1,Tag2",
+            "Tag6",
+            "Tag3,Tag4",
+            "(Delay/3.0 s,(Tag5)),(Delay/2.0 s,(Tag7))",
+            ""
+        ])))
+        self.assertTrue(result.original_index.equals(pd.Series([0, 1, 2, 0, 1])))

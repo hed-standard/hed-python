@@ -9,22 +9,38 @@ class SummarizeColumnNamesOp(BaseOp):
     """  Summarize the column names in a collection of tabular files.
 
     Required remodeling parameters:   
-        - **summary_name** (*str*)       The name of the summary.   
-        - **summary_filename** (*str*)   Base filename of the summary.   
+        - **summary_name** (*str*): The name of the summary.   
+        - **summary_filename** (*str*): Base filename of the summary.
+
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*): If False (default), the timecode is not appended to the summary filename.
 
     The purpose is to check that all the tabular files have the same columns in same order.
 
     """
-
+    NAME = "summarize_column_names"
+    
     PARAMS = {
-        "operation": "summarize_column_names",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string",
+                "description": "Name to use for the summary in titles."
+            },
+            "summary_filename": {
+                "type": "string",
+                "description": "Name to use for the summary file name base."
+            },
+            "append_timecode": {
+                "type": "boolean",
+                "description": "If true, the timecode is appended to the base filename so each run has a unique name."
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool
-        }
+        "required": [
+            "summary_name",
+            "summary_filename"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = "column_names"
@@ -35,15 +51,8 @@ class SummarizeColumnNamesOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
@@ -60,7 +69,7 @@ class SummarizeColumnNamesOp(BaseOp):
         Returns:
             DataFrame: A copy of df.
 
-        Side-effect:
+        Side effect:
             Updates the relevant summary.
 
         """
@@ -69,13 +78,25 @@ class SummarizeColumnNamesOp(BaseOp):
         if not summary:
             summary = ColumnNamesSummary(self)
             dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary({"name": name, "column_names": list(df_new.columns)})
+        summary.update_summary(
+            {"name": name, "column_names": list(df_new.columns)})
         return df_new
+    
+    @staticmethod
+    def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        return []
 
 
 class ColumnNamesSummary(BaseSummary):
-
+    """ Manager for summaries of column names for a dataset. """
     def __init__(self, sum_op):
+        """ Constructor for column name summary manager.
+
+        Parameters:
+            sum_op (BaseOp): Operation associated with this summary.
+
+        """
         super().__init__(sum_op)
 
     def update_summary(self, new_info):
