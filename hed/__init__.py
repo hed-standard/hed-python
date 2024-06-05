@@ -9,7 +9,7 @@ from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
 from hed.models.definition_dict import DefinitionDict
 from hed.models.query_handler import QueryHandler
-from hed.models.query_service import get_query_handlers, search_strings
+from hed.models.query_service import get_query_handlers, search_hed_objs
 
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
