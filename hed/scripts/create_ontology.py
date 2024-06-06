@@ -14,7 +14,7 @@ def create_ontology(repo_path, schema_name, schema_version, dest):
     _, omn_dict = convert_df_to_omn(dataframes)
 
     base = get_schema_filename(schema_name, schema_version)
-    output_dest = os.path.join(dest, base)
+    output_dest = os.path.join(dest, base, "generated_omn")
     os.makedirs(output_dest, exist_ok=True)
     for suffix, omn_text in omn_dict.items():
         filename = os.path.join(output_dest, f"{base}_{suffix}.omn")

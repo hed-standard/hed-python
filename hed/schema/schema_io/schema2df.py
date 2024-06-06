@@ -3,6 +3,7 @@
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io.ontology_util import get_library_name_and_id, remove_prefix, create_empty_dataframes
 from hed.schema.schema_io.schema2base import Schema2Base
+from hed.schema.schema_io import text_util
 import pandas as pd
 import hed.schema.hed_schema_df_constants as constants
 from hed.schema.hed_schema_entry import HedTagEntry
@@ -67,6 +68,7 @@ class Schema2DF(Schema2Base):
             constants.attributes: attributes,
             constants.subclass_of: base_object,
             constants.description: description.replace("\n", "\\n"),
+            constants.equivalent_to: self._get_header_equivalent_to(attributes, base_object)
         }
         self.output[constants.STRUCT_KEY].loc[len(self.output[constants.STRUCT_KEY])] = new_row
 
@@ -214,6 +216,35 @@ class Schema2DF(Schema2Base):
             return True
         # strip out hedID in dataframe format
         return attribute in [HedKey.HedID, HedKey.AnnotationProperty]
+
+    def _get_header_equivalent_to(self, attributes_string, subclass_of):
+        attribute_strings = []
+
+        attributes, _ = text_util._parse_header_attributes_line(attributes_string)
+        schema_name, schema_id = self._get_object_name_and_id("HedSchema", include_prefix=True)
+
+        if self._get_as_ids:
+            attribute_strings.append(f"(hed:HED_0000102 some {schema_id})")
+        else:
+            attribute_strings.append(f"(inHedSchema some {schema_name})")
+
+        for attribute, value in attributes.items():
+            if attribute not in constants.valid_omn_attributes:
+                continue
+
+            if self._get_as_ids:
+                attribute = f"hed:{constants.valid_omn_attributes[attribute]}"
+            attribute_strings.append(f'({attribute} value "{value}")')
+
+        if self._get_as_ids:
+            # we just want the ID for normal hed objects, not schema specific
+            subclass_of = self._get_object_id(subclass_of, base_id=0, include_prefix=True)
+
+        # If they match, we want to leave equivalent_to blank
+        final_out = " and ".join([subclass_of] + attribute_strings)
+        if final_out == subclass_of:
+            return ""
+        return final_out
 
     def _get_tag_equivalent_to(self, tag_entry):
         subclass = self._get_subclass_of(tag_entry)
