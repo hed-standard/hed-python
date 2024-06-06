@@ -185,7 +185,10 @@ class SchemaLoaderDF(SchemaLoader):
 
             tag_entry = self._add_to_dict(row_number, row, tag_entry, HedSectionKey.Tags)
 
-            parent_tags.append(tag_entry.short_tag_name)
+            if tag_entry.name.endswith("/#"):
+                parent_tags.append("#")
+            else:
+                parent_tags.append(tag_entry.short_tag_name)
 
     def _read_section(self, df, section_key):
         self._schema._initialize_attributes(section_key)

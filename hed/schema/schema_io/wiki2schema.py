@@ -182,7 +182,10 @@ class SchemaLoaderWiki(SchemaLoader):
 
             tag_entry = self._add_to_dict(line_number, line, tag_entry, HedSectionKey.Tags)
 
-            parent_tags.append(tag_entry.short_tag_name)
+            if tag_entry.name.endswith("/#"):
+                parent_tags.append("#")
+            else:
+                parent_tags.append(tag_entry.short_tag_name)
 
     def _read_unit_classes(self, lines):
         """Add the unit classes section.

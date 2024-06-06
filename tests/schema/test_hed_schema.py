@@ -112,7 +112,7 @@ class TestHedSchema(unittest.TestCase):
 
     def test_schema_compliance(self):
         warnings = self.hed_schema_group.check_compliance(True)
-        self.assertEqual(len(warnings), 14)
+        self.assertEqual(len(warnings), 18)
 
     def test_bad_prefixes(self):
         schema = load_schema_version(xml_version="8.2.0")
