@@ -11,7 +11,7 @@ Returns:
     - ``issues (list)``: A list of issues found validating this attribute
     """
 
-from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors
+from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors, SchemaErrors
 from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_cache import get_hed_versions
 from hed.schema.hed_schema_constants import HedKey, character_types, HedSectionKey
@@ -33,6 +33,16 @@ def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name):
     if not tag_entry.name.endswith("/#"):
         issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_NON_PLACEHOLDER_HAS_CLASS, tag_entry.name,
                                             attribute_name)
+
+    if tag_entry.parent:
+        other_entries = [child for child in tag_entry.parent.children.values() if child is not tag_entry]
+        if len(other_entries) > 0:
+            issues += ErrorHandler.format_error(SchemaErrors.SCHEMA_INVALID_SIBLING, tag_entry.name,
+                                                other_entries)
+
+    if tag_entry.children:
+        issues += ErrorHandler.format_error(SchemaErrors.SCHEMA_INVALID_CHILD, tag_entry.name,
+                                            tag_entry.children)
 
     return issues
 

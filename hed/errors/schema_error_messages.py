@@ -17,6 +17,20 @@ def schema_error_hed_duplicate_from_library(tag, duplicate_tag_list, section):
            f"{tag_join_delimiter}{tag_join_delimiter.join(duplicate_tag_list)}"
 
 
+@hed_error(SchemaErrors.SCHEMA_INVALID_SIBLING, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID)
+def schema_error_SCHEMA_INVALID_SIBLING(tag, sibling_tag_list):
+    tag_join_delimiter = ", "
+    return f"Placeholder tag '{str(tag)}' has siblings.  Placeholder tags must be an only child.   Extra tags:" + \
+           f"{tag_join_delimiter}{tag_join_delimiter.join(str(n) for n in sibling_tag_list)}"
+
+
+@hed_error(SchemaErrors.SCHEMA_INVALID_CHILD, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID)
+def schema_error_SCHEMA_INVALID_CHILD(tag, child_tag_list):
+    tag_join_delimiter = ", "
+    return f"Placeholder tag '{str(tag)}' has children.  Placeholder tags must have no children.   Extra tags:" + \
+           f"{tag_join_delimiter}{tag_join_delimiter.join(str(n) for n in child_tag_list)}"
+
+
 @hed_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID)
 def schema_error_unknown_attribute(attribute_name, source_tag):
     return f"Attribute '{attribute_name}' used by '{source_tag}' was not defined in the schema, " \
