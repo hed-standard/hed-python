@@ -54,7 +54,7 @@ def convert_and_update(filenames, set_ids):
             source_dataframes = schema.get_as_dataframes()
 
         try:
-            result = update_dataframes_from_schema(source_dataframes, schema, assign_missing_ids=set_ids)
+            result = update_dataframes_from_schema(source_dataframes, schema, schema.library, assign_missing_ids=set_ids)
         except HedFileError as e:
             print(get_printable_issue_string(e.issues, title="Issues updating schema:"))
             raise e
