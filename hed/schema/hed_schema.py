@@ -601,6 +601,8 @@ class HedSchema(HedSchemaBase):
     # ===============================================
     def finalize_dictionaries(self):
         """ Call to finish loading. """
+        # Kludge - Reset this here so it recalculates while having all properties
+        self._schema83 = None
         self._update_all_entries()
 
     def _update_all_entries(self):

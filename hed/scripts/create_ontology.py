@@ -7,6 +7,17 @@ import os
 
 
 def create_ontology(repo_path, schema_name, schema_version, dest):
+    """ Creates an ontology out of the given schema
+
+    Parameters:
+        repo_path(str): the location of the hed-schemas folder relative to this one.  Should point into the folder.
+        schema_name(str): The name of the schema we're interested in.  "standard" for the standard schema
+        schema_version(str): The semantic version number
+        dest(str): Location for output
+
+    Returns:
+        error(int): 0 on success.  Raises an exception otherwise.
+    """
     final_source = get_prerelease_path(repo_path, schema_name, schema_version)
     # print(f"Creating ontology from {final_source}")
 
@@ -14,7 +25,7 @@ def create_ontology(repo_path, schema_name, schema_version, dest):
     _, omn_dict = convert_df_to_omn(dataframes)
 
     base = get_schema_filename(schema_name, schema_version)
-    output_dest = os.path.join(dest, base)
+    output_dest = os.path.join(dest, base, "generated_omn")
     os.makedirs(output_dest, exist_ok=True)
     for suffix, omn_text in omn_dict.items():
         filename = os.path.join(output_dest, f"{base}_{suffix}.omn")

@@ -7,7 +7,7 @@ from hed.schema.schema_io import schema_util
 from hed.errors.exceptions import HedFileError
 from hed.schema import hed_schema_df_constants as constants
 from hed.schema.hed_schema_constants import HedKey
-from hed.schema.schema_io.text_util import parse_attribute_string
+from hed.schema.schema_io.text_util import parse_attribute_string, _parse_header_attributes_line
 
 library_index_ranges = {
     "": (10000, 40000),
@@ -274,8 +274,6 @@ def convert_df_to_omn(dataframes):
     full_text = ""
     omn_data = {}
     for suffix, dataframe in dataframes.items():
-        if suffix == constants.STRUCT_KEY:  # not handled here yet
-            continue
         output_text = _convert_df_to_omn(dataframes[suffix], annotation_properties=annotation_props)
         omn_data[suffix] = output_text
         full_text += output_text + "\n"
@@ -398,6 +396,10 @@ def get_attributes_from_row(row):
         attr_string = row[constants.attributes]
     else:
         attr_string = ""
+
+    if constants.subclass_of in row.index and row[constants.subclass_of] == "HedHeader":
+        header_attributes, _ =  _parse_header_attributes_line(attr_string)
+        return header_attributes
     return parse_attribute_string(attr_string)
 
 
