@@ -591,7 +591,7 @@ class TestParseVersionList(unittest.TestCase):
 # class TestOwlBase(unittest.TestCase):
 #     @classmethod
 #     def setUpClass(cls):
-#         cls.base_schema = schema.load_schema_version("8.2.0")
+#         cls.base_schema = schema.load_schema_version("8.3.0")
 #
 #     @with_temp_file(".owl")
 #     def test_schema2xml(self, filename):

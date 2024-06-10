@@ -312,25 +312,29 @@ def _add_suggested_tag_changes(change_dict, entry1, entry2, attribute, label):
              'tag': entry1.short_tag_name})
 
 
-def pretty_print_change_dict(change_dict, title="Schema changes"):
+def pretty_print_change_dict(change_dict, title="Schema changes", use_markdown=True):
     """Formats the change_dict into a string.
 
     Parameters:
         change_dict(dict): The result from calling gather_schema_changes
         title(str): Optional header to add, a default on will be added otherwise.
-
+        use_markdown(bool): If True, adds Markdown formatting characters to output.
     Returns:
         changelog(str): the changes listed out by section
     """
     final_strings = []
+    line_prefix = " - " if use_markdown else "\t"
     if change_dict:
         final_strings.append(title)
+        final_strings.append("") # add blank line
         for section_key, section_dict in change_dict.items():
             name = SectionEntryNamesPlural.get(section_key, section_key)
-            final_strings.append(f"{name}:")
+            line_endings = "**" if use_markdown else ""
+            final_strings.append(f"{line_endings}{name}:{line_endings}")
             for item in section_dict:
                 change, tag, change_type = item['change'], item['tag'], item['change_type']
-                final_strings.append(f"\t{tag} ({change_type}): {change}")
+                final_strings.append(f"{line_prefix}{tag} ({change_type}): {change}")
+            final_strings.append("")
     return "\n".join(final_strings)
 
 

@@ -14,7 +14,7 @@ class TestLibraryFunctions(unittest.TestCase):
 
     def test_get_library_name_and_id_default(self):
         # Test default case where no library name is provided
-        schema = load_schema_version("8.2.0")
+        schema = load_schema_version("8.3.0")
         name, first_id = get_library_name_and_id(schema)
         self.assertEqual(name, "Standard")
         self.assertEqual(first_id, 10000)
@@ -145,7 +145,7 @@ class TestUpdateDataframes(unittest.TestCase):
         for key, df in updated_dataframes.items():
             self.assertTrue((df['test_column'] == fixed_value).all())
         # this is expected to bomb horribly, since schema lacks many of the spreadsheet entries.
-        schema = load_schema_version("8.2.0")
+        schema = load_schema_version("8.3.0")
         schema_dataframes_new = load_schema_version("8.3.0").get_as_dataframes()
         try:
             updated_dataframes = update_dataframes_from_schema(schema_dataframes_new, schema)

@@ -10,7 +10,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.error_handler = ErrorHandler()
-        cls._schema = load_schema_version("8.2.0")
+        cls._schema = load_schema_version("8.3.0")
         pass
 
     def test_push_error_context(self):
