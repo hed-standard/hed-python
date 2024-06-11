@@ -37,7 +37,7 @@ class TestConvertAndUpdate(unittest.TestCase):
         self.assertEqual(schema, schema_reload2)
 
         # Now verify after doing this again with a new schema, they're still the same.
-        schema = load_schema_version("8.2.0")
+        schema = load_schema_version("8.3.0")
         schema.save_as_dataframes(tsv_filename)
 
         filenames = [os.path.join(tsv_filename, "test_schema_Tag.tsv")]

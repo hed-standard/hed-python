@@ -10,7 +10,7 @@ from hed.models.df_util import _handle_curly_braces_refs, _indexed_dict_from_ons
 
 class TestShrinkDefs(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version("8.2.0")
+        self.schema = load_schema_version("8.3.0")
 
     def test_shrink_defs_normal(self):
         df = pd.DataFrame({"column1": ["(Def-expand/TestDefNormal,(Acceleration/2471,Action/TestDef2)),Event/SomeEvent"]})
@@ -67,7 +67,7 @@ class TestShrinkDefs(unittest.TestCase):
 
 class TestExpandDefs(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version("8.2.0")
+        self.schema = load_schema_version("8.3.0")
         self.def_dict = DefinitionDict(["(Definition/TestDefNormal,(Acceleration/2471,Action/TestDef2))",
                                        "(Definition/TestDefPlaceholder/#,(Acceleration/#,Action/TestDef2))"],
                                        hed_schema=self.schema)
@@ -527,7 +527,7 @@ class TestOnsetDict(unittest.TestCase):
 
 
 class TestSplitDelayTags(unittest.TestCase):
-    schema = load_schema_version("8.2.0")
+    schema = load_schema_version("8.3.0")
     def test_empty_series_and_onsets(self):
         empty_series = pd.Series([], dtype="object")
         empty_onsets = pd.Series([], dtype="float")
