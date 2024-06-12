@@ -69,7 +69,7 @@ class RemoveRowsOp(BaseOp):
             return df_new
         for value in self.remove_values:
             df_new = df_new.loc[df_new[self.column_name] != value, :]
-        df_new = df_new.reset_index()
+        df_new = df_new.reset_index(drop=True)
         return df_new
 
     @staticmethod
