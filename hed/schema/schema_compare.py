@@ -1,6 +1,5 @@
 """ Functions supporting comparison of schemas. """
 
-
 from hed.schema.hed_schema import HedKey
 from hed.schema.hed_schema_constants import HedSectionKey
 from collections import defaultdict
@@ -204,98 +203,103 @@ def gather_schema_changes(schema1, schema2, attribute_filter=None):
                                                              sections=None)
     change_dict = defaultdict(list)
 
-    # Items removed from schema
+    _add_removed_items(change_dict, not_in_2)
+    _add_added_items(change_dict, not_in_1)
+    _add_unequal_entries(change_dict, unequal_entries)
+
+    _sort_changes_by_severity(change_dict)
+    output_dict = {key: change_dict[key] for key in SectionEntryNames if key in change_dict}
+    return output_dict
+
+
+def _add_removed_items(change_dict, not_in_2):
     for section_key, section in not_in_2.items():
         for tag, _ in section.items():
             type_name = SectionEntryNamesPlural[section_key]
-            if section_key == HedSectionKey.Tags:
-                change_dict[section_key].append(
-                    {'change_type': 'Major', 'change': f'Tag {tag} deleted from {type_name}',
-                     'tag': tag})
-            else:
-                # Only here for completeness - these aren't in the list
-                change_dict[section_key].append(
-                    {'change_type': 'Unknown', 'change': f"Item {tag} removed from {type_name}",
-                     'tag': tag})
+            change_type = 'Major' if section_key == HedSectionKey.Tags else 'Unknown'
+            change_dict[section_key].append(
+                {'change_type': change_type, 'change': f'Tag {tag} deleted from {type_name}', 'tag': tag}
+            )
 
-    # Items added to schema
+
+def _add_added_items(change_dict, not_in_1):
     for section_key, section in not_in_1.items():
         for tag, _ in section.items():
-            change_dict[section_key].append({'change_type': 'Minor', 'change': f'Item {tag} added',
-                                             'tag': tag})
+            change_dict[section_key].append(
+                {'change_type': 'Minor', 'change': f'Item {tag} added', 'tag': tag}
+            )
 
-    # Now the much more complex comparing an individual tag changes
+
+def _add_unequal_entries(change_dict, unequal_entries):
     for section_key, changes in unequal_entries.items():
         if section_key == MiscSection:
-            for misc_section, (value1, value2) in changes.items():
-                if "prologue" in misc_section or "epilogue" in misc_section:
+            _add_misc_section_changes(change_dict, section_key, changes)
+        else:
+            for tag, (entry1, entry2) in changes.items():
+                if section_key == HedSectionKey.UnitClasses:
+                    _add_unit_classes_changes(change_dict, section_key, entry1, entry2)
+                elif section_key == HedSectionKey.Tags:
+                    _add_tag_changes(change_dict, section_key, entry1, entry2)
+                _check_other_attributes(change_dict, section_key, entry1, entry2)
+                if entry1.description != entry2.description:
                     change_dict[section_key].append(
-                        {'change_type': 'Patch', 'change': f'{misc_section} changed',
-                         'tag': misc_section})
-                else:
-                    # todo: consider fine grained header changes
-                    change_dict[section_key].append(
-                        {'change_type': 'Patch', 'change': f'{misc_section} changed from {value1} to {value2}',
-                         'tag': misc_section})
-            continue
-        for tag, (entry1, entry2) in changes.items():
-            if section_key == HedSectionKey.UnitClasses:
-                for unit in entry1.units:
-                    if unit not in entry2.units:
-                        change_dict[section_key].append(
-                            {'change_type': 'Major', 'change': f'Unit {unit} removed from {entry1.name}',
-                             'tag': tag})
-                for unit in entry2.units:
-                    if unit not in entry1.units:
-                        change_dict[section_key].append(
-                            {'change_type': 'Patch', 'change': f'Unit {unit} added to {entry2.name}',
-                             'tag': tag})
-            if section_key == HedSectionKey.Tags:
-                for unit_class in entry1.unit_classes:
-                    if unit_class not in entry2.unit_classes:
-                        change_dict[section_key].append(
-                            {'change_type': 'Major',
-                             'change': f'Unit class {unit_class} removed from {entry1.short_tag_name}',
-                             'tag': tag})
-                for unit_class in entry2.unit_classes:
-                    if unit_class not in entry1.unit_classes:
-                        change_dict[section_key].append(
-                            {'change_type': 'Patch',
-                             'change': f'Unit class {unit_class} added to {entry2.short_tag_name}',
-                             'tag': tag})
+                        {'change_type': 'Patch', 'change': f'Description of {tag} modified', 'tag': tag})
 
-                for value_class in entry1.value_classes:
-                    if value_class not in entry2.value_classes:
-                        change_dict[section_key].append(
-                            {'change_type': 'Unknown',
-                             'change': f'Value class {value_class} removed from {entry1.short_tag_name}',
-                             'tag': tag})
-                for value_class in entry2.value_classes:
-                    if value_class not in entry1.value_classes:
-                        change_dict[section_key].append(
-                            {'change_type': 'Minor',
-                             'change': f'Value class {value_class} added to {entry2.short_tag_name}',
-                             'tag': tag})
 
-                if entry1.long_tag_name != entry2.long_tag_name:
-                    change_dict[section_key].append(
-                        {'change_type': 'Minor', 'change': f'Tag {entry1.short_tag_name} moved in schema from {entry1.long_tag_name} to {entry2.long_tag_name}',
-                         'tag': tag})
+def _add_misc_section_changes(change_dict, section_key, changes):
+    for misc_section, (value1, value2) in changes.items():
+        change_type = 'Patch' if "prologue" in misc_section or "epilogue" in misc_section else 'Patch'
+        change_desc = f'{misc_section} changed' if "prologue" in misc_section or "epilogue" in misc_section \
+            else f'{misc_section} changed from {value1} to {value2}'
+        change_dict[section_key].append({'change_type': change_type, 'change': change_desc, 'tag': misc_section})
 
-                _add_suggested_tag_changes(change_dict, entry1, entry2, HedKey.SuggestedTag, "Suggested tag")
-                _add_suggested_tag_changes(change_dict, entry1, entry2, HedKey.RelatedTag, "Related tag")
 
-            _check_other_attributes(entry1, entry2, tag, section_key, change_dict)
-            if entry1.description != entry2.description:
-                change_dict[section_key].append({'change_type': 'Patch', 'change': f'Description of {tag} modified',
-                                                 'tag': tag})
+def _add_unit_classes_changes(change_dict, section_key, entry1, entry2):
+    for unit in entry1.units:
+        if unit not in entry2.units:
+            change_dict[section_key].append(
+                {'change_type': 'Major', 'change': f'Unit {unit} removed from {entry1.name}', 'tag': entry1.name}
+            )
+    for unit in entry2.units:
+        if unit not in entry1.units:
+            change_dict[section_key].append(
+                {'change_type': 'Patch', 'change': f'Unit {unit} added to {entry2.name}', 'tag': entry1.name}
+            )
 
-    _sort_changes_by_severity(change_dict)
-    output_dict = {}
-    for key in SectionEntryNames:
-        if key in change_dict:
-            output_dict[key] = change_dict[key]
-    return output_dict
+
+def _add_tag_changes(change_dict, section_key, entry1, entry2):
+    for unit_class in entry1.unit_classes:
+        if unit_class not in entry2.unit_classes:
+            change_dict[section_key].append(
+                {'change_type': 'Major', 'change': f'Unit class {unit_class} removed from {entry1.short_tag_name}',
+                 'tag': entry1.short_tag_name}
+            )
+    for unit_class in entry2.unit_classes:
+        if unit_class not in entry1.unit_classes:
+            change_dict[section_key].append(
+                {'change_type': 'Patch', 'change': f'Unit class {unit_class} added to {entry2.short_tag_name}',
+                 'tag': entry1.short_tag_name}
+            )
+    for value_class in entry1.value_classes:
+        if value_class not in entry2.value_classes:
+            change_dict[section_key].append(
+                {'change_type': 'Unknown', 'change': f'Value class {value_class} removed from {entry1.short_tag_name}',
+                 'tag': entry1.short_tag_name}
+            )
+    for value_class in entry2.value_classes:
+        if value_class not in entry1.value_classes:
+            change_dict[section_key].append(
+                {'change_type': 'Minor', 'change': f'Value class {value_class} added to {entry2.short_tag_name}',
+                 'tag': entry1.short_tag_name}
+            )
+    if entry1.long_tag_name != entry2.long_tag_name:
+        change_dict[section_key].append(
+            {'change_type': 'Minor',
+             'change': f'Tag {entry1.short_tag_name} moved in schema from {entry1.long_tag_name} to {entry2.long_tag_name}',
+             'tag': entry1.short_tag_name}
+        )
+    _add_suggested_tag_changes(change_dict, entry1, entry2, HedKey.SuggestedTag, "Suggested tag")
+    _add_suggested_tag_changes(change_dict, entry1, entry2, HedKey.RelatedTag, "Related tag")
 
 
 def _add_suggested_tag_changes(change_dict, entry1, entry2, attribute, label):
@@ -326,7 +330,7 @@ def pretty_print_change_dict(change_dict, title="Schema changes", use_markdown=T
     line_prefix = " - " if use_markdown else "\t"
     if change_dict:
         final_strings.append(title)
-        final_strings.append("") # add blank line
+        final_strings.append("")  # add blank line
         for section_key, section_dict in change_dict.items():
             name = SectionEntryNamesPlural.get(section_key, section_key)
             line_endings = "**" if use_markdown else ""
@@ -361,7 +365,7 @@ def compare_differences(schema1, schema2, attribute_filter=None, title=""):
     return changelog_string
 
 
-def _check_other_attributes(entry1, entry2, tag, section_key, change_dict):
+def _check_other_attributes(change_dict, section_key, entry1, entry2):
     """Compare non specialized attributes"""
     already_checked_attributes = [HedKey.RelatedTag, HedKey.SuggestedTag, HedKey.ValueClass, HedKey.UnitClass]
     unique_keys = set(entry1.attributes.keys()).union(entry2.attributes.keys())
@@ -403,6 +407,6 @@ def _check_other_attributes(entry1, entry2, tag, section_key, change_dict):
             change_dict[use_section_key].append({
                 "change_type": change_type,
                 "change": f"{start_text}{end_text}",
-                "tag": tag,
+                "tag": entry1.name if section_key != HedSectionKey.Tags else entry1.short_tag_name,
                 "section": section_key
             })
