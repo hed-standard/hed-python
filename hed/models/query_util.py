@@ -59,8 +59,8 @@ class Token:
     def __init__(self, text):
         tokens = {
             ",": Token.And,
-            "and": Token.And,
-            "or": Token.Or,
+            "&&": Token.And,
+            "||": Token.Or,
             "[": Token.DescendantGroup,
             "]": Token.DescendantGroupEnd,
             "(": Token.LogicalGroup,
