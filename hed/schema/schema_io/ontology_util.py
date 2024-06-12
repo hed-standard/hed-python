@@ -103,7 +103,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     """ Write out schema as a dataframe, then merge in extra columns from dataframes.
 
     Parameters:
-        dataframes(dict of str:pd.DataFrames): A full set of schema spreadsheet formatted dataframes
+        dataframes(dict): A full set of schema spreadsheet formatted dataframes
         schema(HedSchema): The schema to write into the dataframes:
         schema_name(str): The name to use to find the schema id range.
         get_as_ids(bool): If True, replace all known references with HedIds
@@ -290,41 +290,16 @@ def _convert_df_to_omn(df, annotation_properties=("",)):
 
     Parameters:
         df(pd.DataFrame): the dataframe to turn into omn
-        annotation_properties(dict of str:str): Known annotation properties, with the values being their hedId.
+        annotation_properties(dict): Known annotation properties, with the values being their hedId.
     Returns:
         omn_text(str): the omn formatted text for this section
     """
     output_text = ""
     for index, row in df.iterrows():
-        prop_type = "Class"
-        if constants.property_type in row.index:
-            prop_type = row[constants.property_type]
+        prop_type = _get_property_type(row)
         hed_id = row[constants.hed_id]
         output_text += f"{prop_type}: hed:{hed_id}\n"
-        annotation_lines = []
-        description = row[constants.description]
-        if description:
-            annotation_lines.append(f"\t\t{constants.description} \"{description}\"")
-        name = row[constants.name]
-        if name:
-            annotation_lines.append(f"\t\t{constants.name} \"{name}\"")
-
-        # Add annotation properties(other than HedId)
-        attributes = get_attributes_from_row(row)
-        for attribute in attributes:
-            if attribute in annotation_properties and attribute != HedKey.HedID:
-                annotation_id = f"hed:{annotation_properties[attribute]}"
-                value = attributes[attribute]
-                if value is True:
-                    value = "true"
-                else:
-                    value = f'"{value}"'
-                annotation_lines.append(f"\t\t{annotation_id} {value}")
-
-        if annotation_lines:
-            output_text += "\tAnnotations:\n"
-            output_text += ",\n".join(annotation_lines)
-        output_text += "\n"
+        output_text += _add_annotation_lines(row, annotation_properties)
 
         if prop_type != "AnnotationProperty":
             if constants.property_domain in row.index:
@@ -351,6 +326,41 @@ def _convert_df_to_omn(df, annotation_properties=("",)):
 
         output_text += "\n"
     return output_text
+
+
+def _add_annotation_lines(row, annotation_properties):
+    annotation_lines = []
+    description = row[constants.description]
+    if description:
+        annotation_lines.append(f"\t\t{constants.description} \"{description}\"")
+    name = row[constants.name]
+    if name:
+        annotation_lines.append(f"\t\t{constants.name} \"{name}\"")
+
+    # Add annotation properties(other than HedId)
+    attributes = get_attributes_from_row(row)
+    for attribute in attributes:
+        if attribute in annotation_properties and attribute != HedKey.HedID:
+            annotation_id = f"hed:{annotation_properties[attribute]}"
+            value = attributes[attribute]
+            if value is True:
+                value = "true"
+            else:
+                value = f'"{value}"'
+            annotation_lines.append(f"\t\t{annotation_id} {value}")
+
+    output_text = ""
+    if annotation_lines:
+        output_text += "\tAnnotations:\n"
+        output_text += ",\n".join(annotation_lines)
+    output_text += "\n"
+
+    return output_text
+
+
+def _get_property_type(row):
+    """Gets the property type from the row."""
+    return row[constants.property_type] if constants.property_type in row.index else "Class"
 
 
 def save_dataframes(base_filename, dataframe_dict):

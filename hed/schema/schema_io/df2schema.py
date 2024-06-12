@@ -7,14 +7,14 @@ import os
 from hed.schema.schema_io import ontology_util
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.schema_io.base2schema import SchemaLoader
+from hed.schema.schema_io.text2schema import SchemaLoaderText
 import pandas as pd
 import hed.schema.hed_schema_df_constants as constants
 from hed.errors import error_reporter
 from hed.schema.schema_io import text_util
 
 
-class SchemaLoaderDF(SchemaLoader):
+class SchemaLoaderDF(SchemaLoaderText):
     """ Load dataframe schemas from filenames
 
         Expected usage is SchemaLoaderDF.load(filenames)
@@ -137,12 +137,12 @@ class SchemaLoaderDF(SchemaLoader):
         Parameters:
             dataframe (pd.DataFrame): The dataframe for the main tags section
         """
-        # note: this assumes loading is in order line by line.
+        # note: this assumes loading is in order row by row.
         # If tags are NOT sorted this won't work.(same as mediawiki)
+        self._schema._initialize_attributes(HedSectionKey.Tags)
         known_tag_levels = {"HedTag": -1}
         parent_tags = []
         level_adj = 0
-        self._schema._initialize_attributes(HedSectionKey.Tags)
         for row_number, row in dataframe[constants.TAG_KEY].iterrows():
             # skip blank rows, though there shouldn't be any
             if not any(row):
@@ -162,33 +162,10 @@ class SchemaLoaderDF(SchemaLoader):
                                           "Invalid level reported from Level column",
                                           HedExceptions.GENERIC_ERROR)
                     continue
-            # Create the entry
-            tag_entry = self._add_tag_line(parent_tags, row_number, row)
 
-            if not tag_entry:
-                # This will have already raised an error
-                continue
-
-            known_tag_levels[tag_entry.short_tag_name] = raw_level
-
-            # todo: this is part 100% duplicated in wiki2schema
-            try:
-                rooted_entry = self.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
-                if rooted_entry:
-                    parent_tags = rooted_entry.long_tag_name.split("/")
-                    level_adj = len(parent_tags)
-                    # Create the entry again for rooted tags, to get the full name.
-                    tag_entry = self._add_tag_line(parent_tags, row_number, row)
-            except HedFileError as e:
-                self._add_fatal_error(row_number, row, e.message, e.code)
-                continue
-
-            tag_entry = self._add_to_dict(row_number, row, tag_entry, HedSectionKey.Tags)
-
-            if tag_entry.name.endswith("/#"):
-                parent_tags.append("#")
-            else:
-                parent_tags.append(tag_entry.short_tag_name)
+            tag_entry, parent_tags, level_adj = self._add_tag_meta(parent_tags, row_number, row, level_adj)
+            if tag_entry:
+                known_tag_levels[tag_entry.short_tag_name] = raw_level
 
     def _read_section(self, df, section_key):
         self._schema._initialize_attributes(section_key)
@@ -221,44 +198,18 @@ class SchemaLoaderDF(SchemaLoader):
                 new_entry._set_attribute_value(HedKey.AnnotationProperty, True)
             self._add_to_dict(row_number, row, new_entry, section_key)
 
-    def _add_tag_line(self, parent_tags, line_number, row):
-        """ Add a tag to the dictionaries.
-
-        Parameters:
-            parent_tags (list): A list of parent tags in order.
-            line_number (int): The line number to report errors as
-            row (pd.Series): the pandas row
-        Returns:
-            HedSchemaEntry: The entry for the added tag.
-
-        Notes:
-            Includes attributes and description.
-        """
-        tag_name = self._get_name_from_row(row)
-        if tag_name:
-            if parent_tags:
-                long_tag_name = "/".join(parent_tags) + "/" + tag_name
-            else:
-                long_tag_name = tag_name
-            long_tag_name = long_tag_name
-            return self._create_entry(line_number, row, HedSectionKey.Tags, long_tag_name)
-
-        self._add_fatal_error(line_number, row, f"No tag name found in row.",
-                              error_code=HedExceptions.GENERIC_ERROR)
-
-    @staticmethod
-    def _get_name_from_row(row):
+    def _get_tag_name(self, row):
         base_tag_name = row[constants.name]
         if base_tag_name.endswith("-#"):
-            return "#"
-        return base_tag_name
+            return "#", 0
+        return base_tag_name, 0
 
-    def _create_entry(self, line_number, row, key_class, full_tag_name=None):
-        element_name = self._get_name_from_row(row)
+    def _create_entry(self, row_number, row, key_class, full_tag_name=None):
+        element_name, _ = self._get_tag_name(row)
         if full_tag_name:
             element_name = full_tag_name
 
-        node_attributes = self._get_tag_attributes(line_number, row)
+        node_attributes = self._get_tag_attributes(row_number, row)
 
         hed_id = row[constants.hed_id]
         if hed_id:
@@ -276,11 +227,11 @@ class SchemaLoaderDF(SchemaLoader):
         return tag_entry
 
     def _get_tag_attributes(self, row_number, row):
-        """ Get the tag attributes from a line.
+        """ Get the tag attributes from a row.
 
         Parameters:
-            row_number (int): The line number to report errors as.
-            row (pd.Series): A tag line.
+            row_number (int): The row number to report errors as.
+            row (pd.Series): A tag row.
         Returns:
             dict: Dictionary of attributes.
         """
@@ -289,13 +240,6 @@ class SchemaLoaderDF(SchemaLoader):
         except ValueError as e:
             self._add_fatal_error(row_number, str(row), str(e))
 
-    def _add_to_dict(self, line_number, line, entry, key_class):
-        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
-            self._add_fatal_error(line_number, line,
-                                  "Library tag in unmerged schema has InLibrary attribute",
-                                  HedExceptions.IN_LIBRARY_IN_UNMERGED)
-
-        return self._add_to_dict_base(entry, key_class)
 
 
 def load_dataframes(filenames):

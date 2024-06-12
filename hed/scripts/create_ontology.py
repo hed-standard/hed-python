@@ -1,4 +1,5 @@
 from hed.schema import load_schema_version
+from hed.errors import HedFileError, get_printable_issue_string
 from hed.schema.schema_io.df2schema import load_dataframes
 from hed.schema.schema_io.ontology_util import convert_df_to_omn
 from hed.scripts.script_util import get_prerelease_path, get_schema_filename
@@ -22,7 +23,12 @@ def create_ontology(repo_path, schema_name, schema_version, dest):
     # print(f"Creating ontology from {final_source}")
 
     dataframes = load_dataframes(final_source)
-    _, omn_dict = convert_df_to_omn(dataframes)
+    try:
+        _, omn_dict = convert_df_to_omn(dataframes)
+    except HedFileError as e:
+        if e.issues:
+            print(get_printable_issue_string(e.issues, title="Issues converting schema:"))
+        raise e
 
     base = get_schema_filename(schema_name, schema_version)
     output_dest = os.path.join(dest, base, "generated_omn")
