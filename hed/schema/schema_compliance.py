@@ -131,41 +131,65 @@ class SchemaValidator:
             self.error_handler.push_error_context(ErrorContext.SCHEMA_SECTION, str(section_key))
             for tag_entry in self.hed_schema[section_key].values():
                 self.error_handler.push_error_context(ErrorContext.SCHEMA_TAG, tag_entry.name)
-                if tag_entry._unknown_attributes:
-                    for attribute_name in tag_entry._unknown_attributes:
-                        issues_list += self.error_handler.format_error_with_context(
-                            SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID,
-                            attribute_name,
-                            source_tag=tag_entry.name)
-                for attribute_name in tag_entry.attributes:
-                    if self._new_character_validation:
-                        validators = self.attribute_validators.get(attribute_name, []) \
-                                     + [schema_attribute_validators.attribute_is_deprecated]
-                        attribute_entry = self.hed_schema.get_tag_entry(attribute_name, HedSectionKey.Attributes)
-                        if attribute_entry:
-                            range_validators = {
-                                HedKey.TagRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
-                                HedKey.NumericRange: [schema_attribute_validators.is_numeric_value],
-                                HedKey.StringRange: [],  # Unclear what validation should be done here.
-                                HedKey.UnitClassRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses)],
-                                HedKey.UnitRange: [schema_attribute_validators.unit_exists],
-                                HedKey.ValueClassRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses)]
-                            }
-                            for range_attribute in attribute_entry.attributes:
-                                validators += range_validators.get(range_attribute, [])
-                    else:
-                        # Always check deprecated
-                        validators = self.attribute_validators_old.get(attribute_name, []) \
-                                     + [schema_attribute_validators.attribute_is_deprecated]
-                    for validator in validators:
-                        self.error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name)
-                        new_issues = validator(self.hed_schema, tag_entry, attribute_name)
-                        for issue in new_issues:
-                            issue['severity'] = ErrorSeverity.WARNING
-                        self.error_handler.add_context_and_filter(new_issues)
-                        issues_list += new_issues
-                        self.error_handler.pop_error_context()
+                issues_list += self._check_tag_entry_attributes(tag_entry)
                 self.error_handler.pop_error_context()
+            self.error_handler.pop_error_context()
+        return issues_list
+
+    def _check_tag_entry_attributes(self, tag_entry):
+        issues_list = []
+        issues_list += self._check_unknown_attributes(tag_entry)
+        for attribute_name in tag_entry.attributes:
+            validators = self._get_validators(attribute_name)
+            issues_list += self._run_validators(tag_entry, attribute_name, validators)
+        return issues_list
+
+    def _check_unknown_attributes(self, tag_entry):
+        issues_list = []
+        if tag_entry._unknown_attributes:
+            for attribute_name in tag_entry._unknown_attributes:
+                issues_list += self.error_handler.format_error_with_context(
+                    SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID, attribute_name, source_tag=tag_entry.name)
+        return issues_list
+
+    def _get_validators(self, attribute_name):
+        if self._new_character_validation:
+            validators = self.attribute_validators.get(attribute_name, []) + [
+                schema_attribute_validators.attribute_is_deprecated]
+            attribute_entry = self.hed_schema.get_tag_entry(attribute_name, HedSectionKey.Attributes)
+            if attribute_entry:
+                validators += self._get_range_validators(attribute_entry)
+        else:
+            # Always check deprecated
+            validators = self.attribute_validators_old.get(attribute_name, []) + [
+                schema_attribute_validators.attribute_is_deprecated]
+        return validators
+
+    def _get_range_validators(self, attribute_entry):
+        range_validators = {
+            HedKey.TagRange: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
+            HedKey.NumericRange: [schema_attribute_validators.is_numeric_value],
+            HedKey.StringRange: [],  # Unclear what validation should be done here.
+            HedKey.UnitClassRange: [
+                partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses)],
+            HedKey.UnitRange: [schema_attribute_validators.unit_exists],
+            HedKey.ValueClassRange: [
+                partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses)]
+        }
+        validators = []
+        for range_attribute in attribute_entry.attributes:
+            validators += range_validators.get(range_attribute, [])
+        return validators
+
+    def _run_validators(self, tag_entry, attribute_name, validators):
+        issues_list = []
+        for validator in validators:
+            self.error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name)
+            new_issues = validator(self.hed_schema, tag_entry, attribute_name)
+            for issue in new_issues:
+                issue['severity'] = ErrorSeverity.WARNING
+            self.error_handler.add_context_and_filter(new_issues)
+            issues_list += new_issues
             self.error_handler.pop_error_context()
         return issues_list
 

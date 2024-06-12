@@ -7,7 +7,7 @@ from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors import error_reporter
 from hed.schema.schema_io import wiki_constants
-from hed.schema.schema_io.base2schema import SchemaLoader
+from hed.schema.schema_io.text2schema import SchemaLoaderText
 from hed.schema.schema_io.wiki_constants import HedWikiSection, SectionStarts, SectionNames
 from hed.schema.schema_io import text_util
 
@@ -34,7 +34,7 @@ required_sections = [
 ]
 
 
-class SchemaLoaderWiki(SchemaLoader):
+class SchemaLoaderWiki(SchemaLoaderText):
     """ Load MediaWiki schemas from filenames or strings.
 
         Expected usage is SchemaLoaderWiki.load(filename)
@@ -45,6 +45,8 @@ class SchemaLoaderWiki(SchemaLoader):
     def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
         super().__init__(filename, schema_as_string, schema, file_format, name)
         self._schema.source_format = ".mediawiki"
+        self._no_name_msg = "Schema term is empty or the line is malformed",
+        self._no_name_error = HedExceptions.WIKI_DELIMITERS_INVALID
 
     def _open_file(self):
         if self.filename:
@@ -162,30 +164,9 @@ class SchemaLoaderWiki(SchemaLoader):
                                           "Line has too many *'s at front.  You cannot skip a level.",
                                           HedExceptions.WIKI_LINE_START_INVALID)
                     continue
+
             # Create the entry
-            tag_entry = self._add_tag_line(parent_tags, line_number, line)
-
-            if not tag_entry:
-                # This will have already raised an error
-                continue
-
-            try:
-                rooted_entry = self.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
-                if rooted_entry:
-                    parent_tags = rooted_entry.long_tag_name.split("/")
-                    level_adj = len(parent_tags)
-                    # Create the entry again for rooted tags, to get the full name.
-                    tag_entry = self._add_tag_line(parent_tags, line_number, line)
-            except HedFileError as e:
-                self._add_fatal_error(line_number, line, e.message, e.code)
-                continue
-
-            tag_entry = self._add_to_dict(line_number, line, tag_entry, HedSectionKey.Tags)
-
-            if tag_entry.name.endswith("/#"):
-                parent_tags.append("#")
-            else:
-                parent_tags.append(tag_entry.short_tag_name)
+            tag_entry, parent_tags, level_adj = self._add_tag_meta(parent_tags, line_number, line, level_adj)
 
     def _read_unit_classes(self, lines):
         """Add the unit classes section.
@@ -285,11 +266,11 @@ class SchemaLoaderWiki(SchemaLoader):
         return final_attributes
 
     @staticmethod
-    def _get_tag_level(tag_line):
+    def _get_tag_level(row):
         """ Get the tag level from a line in a wiki file.
 
         Parameters:
-            tag_line (str): A tag line.
+            row (str): A tag line.
 
         Returns:
             int: Gets the tag level.
@@ -299,46 +280,46 @@ class SchemaLoaderWiki(SchemaLoader):
 
         """
         count = 0
-        while tag_line[count] == '*':
+        while row[count] == '*':
             count += 1
         if count == 0:
             return 1
         return count
 
-    def _remove_nowiki_tag_from_line(self, line_number, tag_line):
+    def _remove_nowiki_tag_from_line(self, line_number, row):
         """Remove the nowiki tag from the  line.
 
         Parameters:
             line_number (int): The line number to report errors as
-            tag_line (str): A tag line.
+            row (str): A tag line.
 
         Returns:
             str: The line with the nowiki tag removed.
         """
-        index1 = tag_line.find(no_wiki_start_tag)
-        index2 = tag_line.find(no_wiki_end_tag)
+        index1 = row.find(no_wiki_start_tag)
+        index2 = row.find(no_wiki_end_tag)
         if index1 == -1 ^ index2 == -1:  # XOR operation, true if exactly one of the conditions is true
-            self._add_fatal_error(line_number, tag_line, "Invalid or non matching <nowiki> tags found")
+            self._add_fatal_error(line_number, row, "Invalid or non matching <nowiki> tags found")
         elif index1 != -1 and index2 <= index1:
-            self._add_fatal_error(line_number, tag_line, "</nowiki> appears before <nowiki> on a line")
-        tag_line = re.sub(no_wiki_tag, '', tag_line)
-        return tag_line
+            self._add_fatal_error(line_number, row, "</nowiki> appears before <nowiki> on a line")
+        row = re.sub(no_wiki_tag, '', row)
+        return row
 
-    def _get_tag_name(self, tag_line):
+    def _get_tag_name(self, row):
         """ Get the tag name from the tag line.
 
         Parameters:
-            tag_line (str): A tag line.
+            row (str): A tag line.
 
         Returns:
             str: The tag name.
 
         """
-        if tag_line.find(extend_here_line) != -1:
+        if row.find(extend_here_line) != -1:
             return '', 0
         for invalid_chars in invalid_characters_to_strip:
-            tag_line = tag_line.replace(invalid_chars, "")
-        match = tag_name_re.search(tag_line)
+            row = row.replace(invalid_chars, "")
+        match = tag_name_re.search(row)
         if match:
             tag_name = match.group(2).strip()
             if tag_name:
@@ -346,12 +327,12 @@ class SchemaLoaderWiki(SchemaLoader):
 
         return None, 0
 
-    def _get_tag_attributes(self, line_number, tag_line, starting_index):
+    def _get_tag_attributes(self, line_number, row, starting_index):
         """ Get the tag attributes from a line.
 
         Parameters:
             line_number (int): The line number to report errors as.
-            tag_line (str): A tag line.
+            row (str): A tag line.
             starting_index (int): The first index we can check for the brackets.
 
         Returns:
@@ -359,7 +340,7 @@ class SchemaLoaderWiki(SchemaLoader):
             int: The last index we found tag attributes at.
 
         """
-        attr_string, starting_index = SchemaLoaderWiki._get_line_section(tag_line, starting_index, '{', '}')
+        attr_string, starting_index = self._get_line_section(row, starting_index, '{', '}')
         try:
             return text_util.parse_attribute_string(attr_string), starting_index
         except ValueError as e:
@@ -367,11 +348,11 @@ class SchemaLoaderWiki(SchemaLoader):
         return {}, starting_index
 
     @staticmethod
-    def _get_line_section(tag_line, starting_index, start_delim='[', end_delim=']'):
+    def _get_line_section(row, starting_index, start_delim='[', end_delim=']'):
         """ Get the portion enclosed by the given delimiters.
 
         Parameters:
-            tag_line (str): A tag line.
+            row (str): A tag line.
             starting_index (int): The first index we can check for the brackets.
             start_delim (str): The string that starts this block.
             end_delim (str): The string that ends this block.
@@ -381,64 +362,39 @@ class SchemaLoaderWiki(SchemaLoader):
             int: The last index we found tag attributes at.
 
         """
-        count1 = tag_line.count(start_delim)
-        count2 = tag_line.count(end_delim)
+        count1 = row.count(start_delim)
+        count2 = row.count(end_delim)
         if count1 != count2 or count1 > 1 or count2 > 1:
             return None, 0
 
-        tag_line = tag_line[starting_index:]
+        row = row[starting_index:]
 
-        index1 = tag_line.find(start_delim)
-        index2 = tag_line.find(end_delim)
+        index1 = row.find(start_delim)
+        index2 = row.find(end_delim)
         if index2 < index1:
             return None, 0
 
         if count1 == 0:
             return "", starting_index
 
-        return tag_line[index1 + 1: index2], index2 + starting_index
+        return row[index1 + 1: index2], index2 + starting_index
 
-    def _add_tag_line(self, parent_tags, line_number, tag_line):
-        """ Add a tag to the dictionaries.
-
-        Parameters:
-            parent_tags (list): A list of parent tags in order.
-            line_number (int): The line number to report errors as
-            tag_line (str): A tag line.
-
-        Returns:
-            HedSchemaEntry: The entry for the added tag.
-
-        Notes:
-            Includes attributes and description.
-        """
-        tag_name, _ = self._get_tag_name(tag_line)
-        if tag_name:
-            if parent_tags:
-                long_tag_name = "/".join(parent_tags) + "/" + tag_name
-            else:
-                long_tag_name = tag_name
-            return self._create_entry(line_number, tag_line, HedSectionKey.Tags, long_tag_name)
-
-        self._add_fatal_error(line_number, tag_line)
-        return None
-
-    def _create_entry(self, line_number, tag_line, key_class, element_name=None):
-        node_name, index = self._get_tag_name(tag_line)
+    def _create_entry(self, line_number, row, key_class, full_tag_name=None):
+        node_name, index = self._get_tag_name(row)
         if node_name is None:
-            self._add_fatal_error(line_number, tag_line)
+            self._add_fatal_error(line_number, row)
             return
-        if element_name:
-            node_name = element_name
+        if full_tag_name:
+            node_name = full_tag_name
 
-        node_attributes, index = self._get_tag_attributes(line_number, tag_line, index)
+        node_attributes, index = self._get_tag_attributes(line_number, row, index)
         if node_attributes is None:
-            self._add_fatal_error(line_number, tag_line, "Attributes has mismatched delimiters")
+            self._add_fatal_error(line_number, row, "Attributes has mismatched delimiters")
             return
 
-        node_desc, _ = self._get_line_section(tag_line, index)
+        node_desc, _ = self._get_line_section(row, index)
         if node_desc is None:
-            self._add_fatal_error(line_number, tag_line, "Description has mismatched delimiters")
+            self._add_fatal_error(line_number, row, "Description has mismatched delimiters")
             return
 
         tag_entry = self._schema._create_tag_entry(node_name, key_class)
@@ -513,10 +469,3 @@ class SchemaLoaderWiki(SchemaLoader):
 
         return strings_for_section
 
-    def _add_to_dict(self, line_number, line, entry, key_class):
-        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
-            self._add_fatal_error(line_number, line,
-                                  "Library tag in unmerged schema has InLibrary attribute",
-                                  HedExceptions.IN_LIBRARY_IN_UNMERGED)
-
-        return self._add_to_dict_base(entry, key_class)

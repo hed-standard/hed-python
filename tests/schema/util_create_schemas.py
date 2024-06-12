@@ -1,7 +1,7 @@
 from hed.schema import HedKey, HedSectionKey, from_string
 
 
-library_schema_start = """HED library="testcomparison" version="1.1.0" withStandard="8.2.0" unmerged="true"
+library_schema_start = """HED library="testcomparison" version="1.1.0" withStandard="8.3.0" unmerged="true"
 
 '''Prologue'''
 
