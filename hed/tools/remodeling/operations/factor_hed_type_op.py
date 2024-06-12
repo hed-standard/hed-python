@@ -11,15 +11,15 @@ from hed.tools.analysis.hed_type_manager import HedTypeManager
 class FactorHedTypeOp(BaseOp):
     """ Append to columnar file the factors computed from type variables.
 
-    Required remodeling parameters:   
+    Required remodeling parameters:
         - **type_tag** (*str*): HED tag used to find the factors (most commonly `condition-variable`).
 
-    Optional remodeling parameters:   
+    Optional remodeling parameters:
         - **type_values** (*list*): If provided, specifies which factor values to include.
 
     """
     NAME = "factor_hed_type"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {

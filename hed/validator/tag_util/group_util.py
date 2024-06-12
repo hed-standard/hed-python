@@ -170,11 +170,12 @@ class GroupValidator:
             hed_string_obj (HedString): The hed string to check.
 
         Returns:
-            list: A list of issues found in validating durations (i.e., extra tags or groups present, or a group missing)
+            list: Issues found in validating durations (i.e., extra tags or groups present, or a group missing)
         """
         duration_issues = []
         for top_tag, group in hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.DURATION_KEYS):
-            top_level_tags = [tag.short_base_tag for tag in group.get_all_tags() if tag.base_tag_has_attribute(HedKey.TopLevelTagGroup)]
+            top_level_tags = [tag.short_base_tag for tag in group.get_all_tags()
+                              if tag.base_tag_has_attribute(HedKey.TopLevelTagGroup)]
             # Skip onset/inset/offset
             if any(tag in DefTagNames.TEMPORAL_KEYS for tag in top_level_tags):
                 continue

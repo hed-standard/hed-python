@@ -60,12 +60,12 @@ class SchemaLoader(ABC):
             self.appending_to_schema = True
             if not self._schema.with_standard:
                 raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
-                                   "Trying to load multiple normal schemas as a merged one with the same namespace.  "
+                                   "Loading multiple normal schemas as a merged one with the same namespace.  "
                                    "Ensure schemas have the withStandard header attribute set",
                                    self.name)
             elif with_standard != self._schema.with_standard:
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD_MULTIPLE_VALUES,
-                                   "When merging two schemas without a schema namespace, you they must have the same withStandard value.",
+                                   "Merging schemas requires same withStandard value.",
                                    self.name)
             hed_attributes[hed_schema_constants.VERSION_ATTRIBUTE] = self._schema.version_number + f",{version_number}"
             hed_attributes[hed_schema_constants.LIBRARY_ATTRIBUTE] = self._schema.library + f",{self.library}"

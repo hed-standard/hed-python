@@ -6,7 +6,8 @@ from hed.schema.hed_schema import HedSchema, HedKey, HedSectionKey
 from hed.schema import schema_attribute_validators
 from hed.schema.schema_validation_util import validate_schema_tag_new, validate_schema_term_new, \
     get_allowed_characters_by_name, get_problem_indexes, validate_schema_description_new
-from hed.schema.schema_validation_util_deprecated import validate_schema_tag, validate_schema_description, verify_no_brackets
+from hed.schema.schema_validation_util_deprecated import validate_schema_tag, \
+    validate_schema_description, verify_no_brackets
 from functools import partial
 from hed.schema import hed_cache
 from semantic_version import Version
@@ -55,9 +56,11 @@ class SchemaValidator:
         HedKey.SuggestedTag: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
         HedKey.RelatedTag: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
         HedKey.UnitClass: [schema_attribute_validators.tag_is_placeholder_check,
-                           partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses)],
+                           partial(schema_attribute_validators.item_exists_check,
+                                   section_key=HedSectionKey.UnitClasses)],
         HedKey.ValueClass: [schema_attribute_validators.tag_is_placeholder_check,
-                            partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses)],
+                            partial(schema_attribute_validators.item_exists_check,
+                                    section_key=HedSectionKey.ValueClasses)],
         # Rooted tag is implicitly verified on loading
         # HedKey.Rooted: [schema_attribute_validators.tag_exists_base_schema_check],
         HedKey.DeprecatedFrom: [schema_attribute_validators.tag_is_deprecated_check],
@@ -240,6 +243,5 @@ class SchemaValidator:
                 issues_list += new_issues
                 self.error_handler.pop_error_context()  # Term
             self.error_handler.pop_error_context()  # section
-
 
         return issues_list

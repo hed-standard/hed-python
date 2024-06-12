@@ -175,13 +175,13 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
         entry = section.get(label)
         if not entry:
             hedid_errors += schema_util.format_error(row_number, row,
-                                                     f"'{label}' does not exist in the schema file provided, only the spreadsheet.")
+                                                     f"'{label}' does not exist in schema file only the spreadsheet.")
             continue
         entry_id = entry.attributes.get(HedKey.HedID)
         if df_id:
             if not (df_id.startswith("HED_") and len(df_id) == len("HED_0000000")):
                 hedid_errors += schema_util.format_error(row_number, row,
-                                                         f"'{label}' has an improperly formatted hedID in the dataframe.")
+                                                         f"'{label}' has an improperly formatted hedID in dataframe.")
                 continue
             id_value = remove_prefix(df_id, "HED_")
             try:
@@ -408,7 +408,7 @@ def get_attributes_from_row(row):
         attr_string = ""
 
     if constants.subclass_of in row.index and row[constants.subclass_of] == "HedHeader":
-        header_attributes, _ =  _parse_header_attributes_line(attr_string)
+        header_attributes, _ = _parse_header_attributes_line(attr_string)
         return header_attributes
     return parse_attribute_string(attr_string)
 

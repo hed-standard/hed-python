@@ -587,7 +587,7 @@ class HedSchema(HedSchemaBase):
             word_start_index += len(name) + 1
 
     def has_duplicates(self):
-        """Returns the first duplicate tag/unit/etc if any section has a duplicate name"""
+        """Returns the first duplicate tag/unit/etc. if any section has a duplicate name"""
         for section in self._sections.values():
             has_duplicates = bool(section.duplicate_names)
             if has_duplicates:
@@ -730,7 +730,7 @@ class HedSchema(HedSchemaBase):
         attributes = {attribute: entry for attribute, entry in self._sections[HedSectionKey.Attributes].items()
                       if entry.has_attribute(attrib_class) or entry.has_attribute(element_prop_key)}
         return attributes
-    
+
     # ===============================================
     # Semi private function used to create a schema in memory(usually from a source file)
     # ===============================================

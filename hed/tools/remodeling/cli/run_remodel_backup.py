@@ -54,7 +54,7 @@ def main(arg_list=None):
         args.extensions = None
     exclude_dirs = args.exclude_dirs + ['remodeling']
     file_list = io_util.get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
-                              exclude_dirs=exclude_dirs)
+                                      exclude_dirs=exclude_dirs)
     if args.task_names:
         file_list = io_util.get_filtered_by_element(file_list, args.task_names)
     if args.backup_dir:

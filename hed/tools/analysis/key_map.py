@@ -64,9 +64,9 @@ class KeyMap:
 
         Parameters:
             additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
-            show_counts (bool): If True, number of times each key combination appears is in first column and 
+            show_counts (bool): If True, number of times each key combination appears is in first column and
                                 values are sorted in descending order by.
-            
+
         Returns:
             DataFrame:  A dataframe containing the template.
 
@@ -145,7 +145,8 @@ class KeyMap:
             if key_value is not None:
                 result = self.col_map.iloc[key_value]
                 row[self.target_cols] = result[self.target_cols].values
-                df.iloc[index] = row
+                new_index = df.index.get_loc(index)  # In case index and location don't agree.
+                df.iloc[new_index] = row
             else:
                 missing_indices.append(index)
         return missing_indices
@@ -156,7 +157,7 @@ class KeyMap:
         for index, row in self.col_map.iterrows():
             key_hash = data_util.get_row_hash(row, self.key_cols)
             self.map_dict[key_hash] = index
-            
+
     def update(self, data, allow_missing=True):
         """ Update the existing map with information from data.
 

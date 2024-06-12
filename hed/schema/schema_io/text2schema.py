@@ -1,15 +1,11 @@
 """
-This module is used to create a HedSchema object from a .mediawiki file.
+Create a HedSchema object from a .mediawiki file.
 """
-import re
+
 from abc import abstractmethod
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.errors import error_reporter
-from hed.schema.schema_io import wiki_constants
 from hed.schema.schema_io.base2schema import SchemaLoader
-from hed.schema.schema_io.wiki_constants import HedWikiSection, SectionStarts, SectionNames
-from hed.schema.schema_io import text_util
 
 
 class SchemaLoaderText(SchemaLoader):
@@ -71,7 +67,7 @@ class SchemaLoaderText(SchemaLoader):
             return self._create_entry(row_number, row, HedSectionKey.Tags, long_tag_name)
 
         self._add_fatal_error(row_number, row, self._no_name_msg, error_code=self._no_name_error)
-    
+
     def _add_to_dict(self, row_number, row, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             self._add_fatal_error(row_number, row,
@@ -79,7 +75,7 @@ class SchemaLoaderText(SchemaLoader):
                                   HedExceptions.IN_LIBRARY_IN_UNMERGED)
 
         return self._add_to_dict_base(entry, key_class)
-    
+
     @abstractmethod
     def _create_entry(self, row_number, row, key_class, full_tag_name=None):
         """ Create a tag entry from the given row
@@ -109,5 +105,3 @@ class SchemaLoaderText(SchemaLoader):
             Should be set to add a fatal error if no name returned
         """
         raise NotImplementedError("Required in subclass")
-    
-    

@@ -241,7 +241,6 @@ class SchemaLoaderDF(SchemaLoaderText):
             self._add_fatal_error(row_number, str(row), str(e))
 
 
-
 def load_dataframes(filenames):
     dict_filenames = SchemaLoaderDF.convert_filenames_to_dict(filenames)
     dataframes = ontology_util.create_empty_dataframes()
@@ -263,5 +262,6 @@ def load_dataframes_from_strings(schema_data):
     Returns:
         schema_data(dict): A dict with the same keys as schema_data, but values are dataframes if not before
     """
-    return {key: value if isinstance(value, pd.DataFrame) else pd.read_csv(io.StringIO(value), sep="\t", dtype=str, na_filter=False)
+    return {key: value if isinstance(value, pd.DataFrame) else pd.read_csv(io.StringIO(value), sep="\t",
+                                                                           dtype=str, na_filter=False)
             for key, value in schema_data.items()}

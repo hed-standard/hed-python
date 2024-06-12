@@ -12,13 +12,13 @@ from hed.tools.remodeling.operations.base_summary import BaseSummary
 class SummarizeHedTypeOp(BaseOp):
     """ Summarize a HED type tag in a collection of tabular files.
 
-    Required remodeling parameters:   
-        - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary.   
+    Required remodeling parameters:
+        - **summary_name** (*str*): The name of the summary.
+        - **summary_filename** (*str*): Base filename of the summary.
         - **type_tag** (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags).
 
     Optional remodeling parameters:
-        - **append_timecode** (*bool*): If true, the timecode is appended to the base filename when summary is saved   
+        - **append_timecode** (*bool*): If true, the timecode is appended to the base filename when summary is saved.
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
     is often used with `condition-variable` to produce a summary of the experimental design.
@@ -26,7 +26,7 @@ class SummarizeHedTypeOp(BaseOp):
     """
 
     NAME = "summarize_hed_type"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {

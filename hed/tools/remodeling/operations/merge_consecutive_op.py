@@ -8,9 +8,9 @@ class MergeConsecutiveOp(BaseOp):
     """ Merge consecutive rows of a columnar file with same column value.
 
     Required remodeling parameters:
-        - **column_name** (*str*): name of column whose consecutive values are to be compared (the merge column).  
-        - **event_code** (*str* or *int* or *float*): the particular value in the match column to be merged.  
-        - **set_durations** (*bool*): If true, set the duration of the merged event to the extent of the merged events.  
+        - **column_name** (*str*): name of column whose consecutive values are to be compared (the merge column).
+        - **event_code** (*str* or *int* or *float*): the particular value in the match column to be merged.
+        - **set_durations** (*bool*): If true, set the duration of the merged event to the extent of the merged events.
         - **ignore_missing** (*bool*):  If true, missing match_columns are ignored.
 
     Optional remodeling parameters:
@@ -21,7 +21,7 @@ class MergeConsecutiveOp(BaseOp):
 
     """
     NAME = "merge_consecutive"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {

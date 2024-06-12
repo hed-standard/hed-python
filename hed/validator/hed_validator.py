@@ -1,9 +1,5 @@
-"""
-This module contains the HedValidator class which is used to validate the tags in a HED string or a file. The file
-types include .tsv, .txt, and .xlsx. To get the validation issues after creating a HedValidator class call
-the get_validation_issues() function.
+""" Top level validation of HED strings. """
 
-"""
 import re
 from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from hed.errors import error_reporter
@@ -14,7 +10,12 @@ from hed.schema.hed_schema import HedSchema
 
 
 class HedValidator:
-    """ Top level validation of HED strings. """
+    """ Top level validation of HED strings.
+
+    This module contains the HedValidator class which is used to validate the tags in a HED string or a file.
+    The file types include .tsv, .txt, and .xlsx. To get the validation issues after creating a
+    HedValidator class call the get_validation_issues() function.
+    """
 
     def __init__(self, hed_schema, def_dicts=None, definitions_allowed=False):
         """ Constructor for the HedValidator class.
@@ -135,7 +136,7 @@ class HedValidator:
             validation_issues += error_reporter.ErrorHandler.format_error(ValidationErrors.NODE_NAME_EMPTY,
                                                                           tag=original_tag,
                                                                           index_in_tag=match.start(),
-                                                                        index_in_tag_end=match.end())
+                                                                          index_in_tag_end=match.end())
 
         return validation_issues
 

@@ -117,7 +117,7 @@ def schema_version_greater_equal(hed_schema, target_version):
 
 
 def format_error(row_number, row, warning_message="Schema term is empty or the line is malformed",
-                  error_code=HedExceptions.GENERIC_ERROR):
+                 error_code=HedExceptions.GENERIC_ERROR):
     error = {'code': error_code,
              ErrorContext.ROW: row_number,
              ErrorContext.LINE: str(row),

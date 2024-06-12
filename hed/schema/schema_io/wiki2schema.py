@@ -3,7 +3,7 @@ This module is used to create a HedSchema object from a .mediawiki file.
 """
 import re
 
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
+from hed.schema.hed_schema_constants import HedSectionKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors import error_reporter
 from hed.schema.schema_io import wiki_constants
@@ -468,4 +468,3 @@ class SchemaLoaderWiki(SchemaLoaderText):
                     strings_for_section[current_section].append((line_number + 1, line))
 
         return strings_for_section
-

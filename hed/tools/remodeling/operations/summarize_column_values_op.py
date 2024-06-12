@@ -8,22 +8,22 @@ from hed.tools.remodeling.operations.base_summary import BaseSummary
 class SummarizeColumnValuesOp(BaseOp):
     """ Summarize the values in the columns of a columnar file.
 
-    Required remodeling parameters:   
-        - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary.     
+    Required remodeling parameters:
+        - **summary_name** (*str*): The name of the summary.
+        - **summary_filename** (*str*): Base filename of the summary.
 
     Optional remodeling parameters:
         - **append_timecode** (*bool*): (**Optional**: Default False) If True append timecodes to the summary filename.
-        - **max_categorical** (*int*): Maximum number of unique values to include in summary for a categorical column.  
-        - **skip_columns** (*list*):  Names of columns to skip in the summary.   
-        - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns. 
-        - **values_per_line** (*int*): The number of values output per line in the summary.    
+        - **max_categorical** (*int*): Maximum number of unique values to include in summary for a categorical column.
+        - **skip_columns** (*list*):  Names of columns to skip in the summary.
+        - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns.
+        - **values_per_line** (*int*): The number of values output per line in the summary.
 
     The purpose is to produce a summary of the values in a tabular file.
 
     """
     NAME = "summarize_column_values"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
@@ -145,8 +145,8 @@ class ColumnValueSummary(BaseSummary):
             new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:
-            - The summary information is kept in separate TabularSummary objects for each file.  
-            - The summary needs a "name" str and a "df" .  
+            - The summary information is kept in separate TabularSummary objects for each file.
+            - The summary needs a "name" str and a "df" .
 
         """
         name = new_info['name']

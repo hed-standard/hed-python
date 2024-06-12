@@ -8,10 +8,10 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class SplitRowsOp(BaseOp):
     """ Split rows in a columnar file with  onset and duration columns into multiple rows based on a specified column.
 
-    Required remodeling parameters:   
-        - **anchor_column** (*str*): The column in which the names of new items are stored.   
-        - **new_events** (*dict*):  Mapping of new values based on values in the original row.    
-        - **remove_parent_row** (*bool*):  If true, the original row that was split is removed.   
+    Required remodeling parameters:
+        - **anchor_column** (*str*): The column in which the names of new items are stored.
+        - **new_events** (*dict*):  Mapping of new values based on values in the original row.
+        - **remove_parent_row** (*bool*):  If true, the original row that was split is removed.
 
     Notes:
         - In specifying onset and duration for the new row, you can give values or the names of columns as strings.

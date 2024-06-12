@@ -47,7 +47,7 @@ class Schema2DF(Schema2Base):
         return name, full_hed_id
 
     def _get_object_id(self, object_name, base_id=0, include_prefix=False):
-        prefix=""
+        prefix = ""
         if include_prefix:
             prefix = "hed:"
         return f"{prefix}HED_{base_id + constants.struct_base_ids[object_name]:07d}"
@@ -94,7 +94,9 @@ class Schema2DF(Schema2Base):
         new_row = {
             constants.hed_id: f"{tag_id}",
             constants.level: f"{level}",
-            constants.name: tag_entry.short_tag_name if not tag_entry.has_attribute(HedKey.TakesValue) else tag_entry.short_tag_name + "-#",
+            constants.name:
+                tag_entry.short_tag_name if not tag_entry.has_attribute(HedKey.TakesValue)
+                else tag_entry.short_tag_name + "-#",
             constants.subclass_of: self._get_subclass_of(tag_entry),
             constants.attributes: self._format_tag_attributes(tag_entry.attributes),
             constants.description: tag_entry.description,

@@ -162,8 +162,8 @@ class DefExpandGatherer:
         if not has_extension:
             group_tag = def_expand_group.get_first_group()
             self.def_dict.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
-                                                                       takes_value=False,
-                                                                       source_context=[])
+                                                                          takes_value=False,
+                                                                          source_context=[])
             return True
 
         # this is needed for the cases where we have a definition with errors, but it's not a known definition.
@@ -188,8 +188,8 @@ class DefExpandGatherer:
             if these_defs.validate():
                 new_contents = these_defs.get_group()
                 self.def_dict.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=new_contents,
-                                                                           takes_value=True,
-                                                                           source_context=[])
+                                                                              takes_value=True,
+                                                                              source_context=[])
                 del self.ambiguous_defs[def_tag_name.casefold()]
         except ValueError:
             for ambiguous_def in these_defs.placeholder_defs:
