@@ -2,6 +2,7 @@
 
 
 import pandas as pd
+import numpy as np
 from hed.errors.exceptions import HedFileError
 from hed.tools.util import data_util
 
@@ -128,27 +129,32 @@ class KeyMap:
         return df_new, missing_indices
 
     def _remap(self, df):
-        """ Utility method that iterates through dataframes to do the remapping.
+        """ Utility method that does the remapping
 
         Parameters:
             df (DataFrame):    DataFrame in which to perform the mapping.
 
         Returns:
             list:  The row numbers that had no correspondence in the mapping.
-
         """
+        key_series = df.apply(lambda row: data_util.get_row_hash(row, self.key_cols), axis=1)
 
-        missing_indices = []
-        for index, row in df.iterrows():
-            key = data_util.get_row_hash(row, self.key_cols)
-            key_value = self.map_dict.get(key, None)
-            if key_value is not None:
-                result = self.col_map.iloc[key_value]
-                row[self.target_cols] = result[self.target_cols].values
-                new_index = df.index.get_loc(index)  # In case index and location don't agree.
-                df.iloc[new_index] = row
-            else:
-                missing_indices.append(index)
+        # Add a column containing the mapped index for each row
+        map_series = pd.Series(self.map_dict)
+        key_values = key_series.map(map_series)
+        merged_df = df.assign(key_value=key_values.values)
+
+        # Add new columns with the updated values
+        remapped_df = pd.merge(merged_df, self.col_map, left_on='key_value', right_index=True,
+                               suffixes=('', '_new'), how='left').fillna("n/a")
+
+        # Override the original columns with our newly calculated ones
+        for col in self.target_cols:
+            df[col] = remapped_df[col + '_new']
+
+        # Finally calculate missing indices
+        missing_indices = key_series.index[key_values.isna()].tolist()
+
         return missing_indices
 
     def resort(self):
