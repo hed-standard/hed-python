@@ -1,3 +1,4 @@
+""" Validates spreadsheet tabular data. """
 import copy
 
 from hed.models.base_input import BaseInput
@@ -17,7 +18,7 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 class SpreadsheetValidator:
     def __init__(self, hed_schema):
         """
-        Constructor for the HedValidator class.
+        Constructor for the SpreadsheetValidator class.
 
         Parameters:
             hed_schema (HedSchema): HED schema object to use for validation.
@@ -73,7 +74,8 @@ class SpreadsheetValidator:
             self._onset_validator = None
 
         # Check the rows of the input data
-        issues += self._run_checks(df, error_handler=error_handler, row_adj=row_adj, has_onsets=bool(self._onset_validator))
+        issues += self._run_checks(df, error_handler=error_handler, row_adj=row_adj,
+                                   has_onsets=bool(self._onset_validator))
         if self._onset_validator:
             issues += self._run_onset_checks(onsets, error_handler=error_handler, row_adj=row_adj)
         error_handler.pop_error_context()

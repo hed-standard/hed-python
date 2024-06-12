@@ -14,23 +14,23 @@ from hed.tools.analysis.hed_tag_manager import HedTagManager
 class FactorHedTagsOp(BaseOp):
     """ Append columns of factors based on column values to a columnar file.
 
-    Required remodeling parameters:   
-        - **queries** (*list*): Queries to be applied successively as filters.       
+    Required remodeling parameters:
+        - **queries** (*list*): Queries to be applied successively as filters.
 
-    Optional remodeling parameters:   
+    Optional remodeling parameters:
         - **expand_context** (*bool*): Expand the context if True.
-        - **query_names** (*list*):  Column names for the query factors. 
+        - **query_names** (*list*):  Column names for the query factors.
         - **remove_types** (*list*):  Structural HED tags to be removed (such as Condition-variable or Task).
         - **expand_context** (*bool*): If true, expand the context based on Onset, Offset, and Duration.
 
-    Notes:  
+    Notes:
         - If query names are not provided, *query1*, *query2*, ... are used.
         - If query names are provided, the list must have same list as the number of queries.
         - When the context is expanded, the effect of events for temporal extent is accounted for.
 
     """
     NAME = "factor_hed_tags"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
@@ -140,6 +140,6 @@ class FactorHedTagsOp(BaseOp):
             list:  List of issues in parsing queries.
 
         """
-        queries, names, issues = query_service.get_query_handlers(parameters.get("queries", []), 
+        queries, names, issues = query_service.get_query_handlers(parameters.get("queries", []),
                                                                   parameters.get("query_names", None))
         return issues

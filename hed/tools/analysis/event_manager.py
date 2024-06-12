@@ -13,7 +13,7 @@ from hed.tools.analysis.hed_type_defs import HedTypeDefs
 
 class EventManager:
     """ Manager of events of temporal extent. """
-    
+
     def __init__(self, input_data, hed_schema, extra_defs=None):
         """ Create an event manager for an events file. Manages events of temporal extent.
 

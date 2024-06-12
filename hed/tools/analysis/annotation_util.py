@@ -120,13 +120,13 @@ def generate_sidecar_entry(column_name, column_values=None):
 
 def get_bids_dataset(data_root):
     """ Return a BIDS dataset object given a path to a dataset root.
-    
+
     Parameters:
         data_root (str): Path to the BIDS dataset root.
-        
+
     Returns:
-        BidsDataset 
-        
+        BidsDataset
+
     """
     return BidsDataset(data_root)
 
@@ -227,7 +227,7 @@ def strs_to_hed_objs(hed_strings, hed_schema):
      Parameters:
          hed_strings (string or list):  String or strings representing HED annotations.
          hed_schema (HedSchema or HedSchemaGroup): Schema version for the strings.
-         
+
      Returns:
          list or None:  list of HedString objects or None.
      """
@@ -263,6 +263,7 @@ def strs_to_sidecar(sidecar_strings):
         return Sidecar(files=file_list, name="Merged_Sidecar")
     else:
         return None
+
 
 def to_factor(data, column=None):
     """Convert data to an integer factor list.

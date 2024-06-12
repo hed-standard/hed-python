@@ -13,15 +13,14 @@ from hed.tools.visualization import tag_word_cloud
 class SummarizeHedTagsOp(BaseOp):
     """ Summarize the HED tags in collection of tabular files.
 
+    Required remodeling parameters:
+        - **summary_name** (*str*): The name of the summary.
+        - **summary_filename** (*str*): Base filename of the summary.
+        - **tags** (*dict*): Specifies how to organize the tag output.
 
-    Required remodeling parameters:   
-        - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary.   
-        - **tags** (*dict*): Specifies how to organize the tag output. 
-
-    Optional remodeling parameters:    
+    Optional remodeling parameters:
        - **append_timecode** (*bool*): If True, the timecode is appended to the base filename when summary is saved.
-       - **include_context** (*bool*): If True, context of events is included in summary. 
+       - **include_context** (*bool*): If True, context of events is included in summary.
        - **remove_types** (*list*): A list of type tags such as Condition-variable or Task to exclude from summary.
        - **replace_defs** (*bool*): If True, the def tag is replaced by the contents of the definitions.
        - **word_cloud** (*bool*): If True, output a word cloud visualization.
@@ -158,7 +157,7 @@ class SummarizeHedTagsOp(BaseOp):
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
-            
+
         """
         super().__init__(parameters)
         self.summary_name = parameters['summary_name']
@@ -336,11 +335,12 @@ class HedTagSummary(BaseSummary):
         word_dict = self.summary_to_dict(specifics, scale_adjustment=wc["scale_adjustment"])
 
         tag_wc = tag_word_cloud.create_wordcloud(word_dict, mask_path=wc["mask_path"],
-                                  width=wc["width"], height=wc["height"],
-                                  prefer_horizontal=wc["prefer_horizontal"], background_color=wc["background_color"],
-                                  min_font_size=wc["min_font_size"], max_font_size=wc["max_font_size"],
-                                  contour_width=wc["contour_width"], contour_color=wc["contour_color"],
-                                  font_path=wc["font_path"])
+                                                 width=wc["width"], height=wc["height"],
+                                                 prefer_horizontal=wc["prefer_horizontal"],
+                                                 background_color=wc["background_color"],
+                                                 min_font_size=wc["min_font_size"], max_font_size=wc["max_font_size"],
+                                                 contour_width=wc["contour_width"], contour_color=wc["contour_color"],
+                                                 font_path=wc["font_path"])
         svg_data = tag_word_cloud.word_cloud_to_svg(tag_wc)
         cloud_filename = os.path.realpath(os.path.join(save_dir, self.sum_op.summary_name,
                                                        self.sum_op.summary_name + '_word_cloud.svg'))

@@ -219,11 +219,11 @@ def parse_version_list(xml_version_list):
 
         if not isinstance(version, str):
             raise HedFileError(HedExceptions.SCHEMA_VERSION_INVALID,
-                               f"Must specify a schema version by number, found no version on {xml_version_list} schema.",
+                               f"Must specify schema version by number, found no version on {xml_version_list} schema.",
                                filename=None)
         if version in out_versions[schema_namespace]:
             raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_LIBRARY,
-                               f"Attempting to load the same library '{version}' twice: {out_versions[schema_namespace]}",
+                               f"Attempting to load same library '{version}' twice: {out_versions[schema_namespace]}",
                                filename=None)
         out_versions[schema_namespace].append(version)
 
@@ -239,9 +239,9 @@ def _load_schema_version(xml_version=None, xml_folder=None):
 
     Parameters:
         xml_version (str): HED version format string. Expected format: '[schema_namespace:][library_name_]X.Y.Z'
-                                Further versions can be added comma separated after the version number/library name.
-                                e.g. "lib:library_x.y.z,otherlibrary_x.y.z" will load "library" and "otherlibrary" into "lib:"
-                                The schema namespace must be the same and not repeated if loading multiple merged schemas.
+                           Further versions can be added comma separated after the version number/library name.
+                           e.g. "lib:library_x.y.z,otherlibrary_x.y.z" loads "library" and "otherlibrary" into "lib:"
+                           The schema namespace must be the same and not repeated if loading multiple merged schemas.
 
         xml_folder (str): Path to a folder containing schema.
 
@@ -339,10 +339,11 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
             # 4. Finally check for a pre-release one
             if not final_hed_xml_file:
-                final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder, check_prerelease=True)
+                final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder,
+                                                                    check_prerelease=True)
             if not final_hed_xml_file:
                 raise HedFileError(HedExceptions.FILE_NOT_FOUND,
-                                   f"HED version '{save_version}' not found in cache: {hed_cache.get_cache_directory()}",
+                                   f"HED version '{save_version}' not cached in: {hed_cache.get_cache_directory()}",
                                    filename=xml_folder)
             hed_schema = load_schema(final_hed_xml_file, schema=schema, name=name)
         else:
@@ -352,5 +353,3 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
 
     return hed_schema
-
-

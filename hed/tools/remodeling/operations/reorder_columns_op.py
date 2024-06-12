@@ -12,7 +12,7 @@ class ReorderColumnsOp(BaseOp):
 
     """
     NAME = "reorder_columns"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {

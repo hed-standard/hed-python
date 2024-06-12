@@ -1,5 +1,5 @@
 """ Implementation in progress. """
-import numpy as np
+
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 # TODO: This class is under development
@@ -8,7 +8,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class NumberRowsOp(BaseOp):
     """ Implementation in progress. """
     NAME = "number_rows"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
@@ -49,7 +49,7 @@ class NumberRowsOp(BaseOp):
         self.number_column_name = parameters['number_column_name']
         self.overwrite = parameters.get('overwrite', False)
         self.match_value = parameters.get('match_value', False)
-        
+
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Add numbers events dataframe.
 

@@ -107,4 +107,3 @@ class Schema2Wiki(Schema2Base):
             prop_string += f"[{desc}]"
 
         return prop_string
-

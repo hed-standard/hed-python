@@ -72,7 +72,8 @@ def verify_no_brackets(hed_entry):
     issues_list = []
     indexes = _get_disallowed_character_indexes(hed_term)
     for char, index in indexes:
-        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, hed_term, char_index=index, problem_char=char)
+        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
+                                                 hed_term, char_index=index, problem_char=char)
     return issues_list
 
 
