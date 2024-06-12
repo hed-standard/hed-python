@@ -1,6 +1,5 @@
 """ A map of column value keys into new column values. """
 
-
 import pandas as pd
 from hed.errors.exceptions import HedFileError
 from hed.tools.util import data_util
@@ -18,6 +17,7 @@ class KeyMap:
     The remapping does not support other types of columns.
 
     """
+
     def __init__(self, key_cols, target_cols=None, name=''):
         """ Information for remapping columns of tabular files.
 
@@ -137,13 +137,17 @@ class KeyMap:
             list:  The row numbers that had no correspondence in the mapping.
         """
         key_series = df.apply(lambda row: data_util.get_row_hash(row, self.key_cols), axis=1)
+        # Key series now contains row_number: hash for each row in the dataframe
 
         # Add a column containing the mapped index for each row
-        map_series = pd.Series(self.map_dict)
-        key_values = key_series.map(map_series)
+        map_series = pd.Series(self.map_dict)  # map_series is hash:row_index for each entry in the map_dict index
+        key_values = key_series.map(map_series)  # key_values is df_row_number:map_dict_index
+        # e.g. a key_value entry of 0:79 means row 0 maps to row 79 in the map_dict
+
+        # This adds the map_dict_index column, to merged_df as a new column "key_value"
         merged_df = df.assign(key_value=key_values.values)
 
-        # Add new columns with the updated values
+        # Copy all the map_dict data into merged_df as new columns, merging on the map_dict_index number of both
         remapped_df = pd.merge(merged_df, self.col_map, left_on='key_value', right_index=True,
                                suffixes=('', '_new'), how='left').fillna("n/a")
 
