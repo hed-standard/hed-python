@@ -2,7 +2,6 @@
 
 
 import pandas as pd
-import numpy as np
 from hed.errors.exceptions import HedFileError
 from hed.tools.util import data_util
 
