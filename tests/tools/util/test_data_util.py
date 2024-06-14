@@ -1,11 +1,12 @@
 import os
 import unittest
 import numpy as np
-from pandas import DataFrame
+
+from pandas import DataFrame, Categorical
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import add_columns, check_match, delete_columns, delete_rows_by_column, \
     get_key_hash, get_new_dataframe, get_row_hash, get_value_dict, \
-    make_info_dataframe, reorder_columns, replace_values, separate_values
+    make_info_dataframe, reorder_columns, replace_na, replace_values, separate_values
 
 
 class Test(unittest.TestCase):
@@ -106,6 +107,43 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df1), 3, "make_info_dataframe should the right number of rows.")
         df2 = make_info_dataframe(col_dict, "Baloney")
         self.assertFalse(df2, "make_frame should return None if column name invalid")
+
+    def test_replace_na(self):
+        # With categorical column containing n/a's
+        df = DataFrame({
+            'A': Categorical(['apple', 'n/a', 'cherry']),
+            'B': ['n/a', 'pear', 'banana']
+        })
+        replace_na(df)
+        self.assertTrue(df['A'].isnull().any())
+        self.assertTrue(df['B'].isnull().any())
+
+        # With categorical column not containing n/a's
+        df = DataFrame({
+            'A': Categorical(['apple', 'orange', 'cherry']),
+            'B': ['pear', 'melon', 'banana']
+        })
+        replace_na(df)
+        self.assertFalse(df['A'].isnull().any())
+        self.assertFalse(df['B'].isnull().any())
+
+        # preserving other values
+        df = DataFrame({
+            'A': Categorical(['apple', 'n/a', 'cherry']),
+            'B': ['n/a', 'pear', 'banana'],
+            'C': [1, 2, 3]
+        })
+        replace_na(df)
+        self.assertEqual(list(df['C']), [1, 2, 3])
+
+        # Non-categorical n/a replacement
+        df = DataFrame({
+            'A': ['apple', 'n/a', 'cherry'],
+            'B': ['n/a', 'pear', 'banana']
+        })
+        replace_na(df)
+        self.assertTrue(df['A'].isnull().any())
+        self.assertTrue(df['B'].isnull().any())
 
     def test_replace_values(self):
         data = {'Name': ['n/a', '', 'tom', 'alice', 0, 1],
