@@ -85,6 +85,9 @@ def sort_base_schemas(filenames):
     """
     schema_files = defaultdict(set)
     for file_path in filenames:
+        if not os.path.exists(file_path):
+            print(f"Ignoring deleted file {file_path}.")
+            continue
         basename, extension = os.path.splitext(file_path)
         if extension == ".xml" or extension == ".mediawiki":
             schema_files[basename].add(extension)
