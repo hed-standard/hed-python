@@ -2,13 +2,13 @@
 
 
 import pandas as pd
-import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
 from hed.models import query_service
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_tag_manager import HedTagManager
+from hed.tools.util.data_util import replace_na
 
 
 class FactorHedTagsOp(BaseOp):
@@ -126,7 +126,7 @@ class FactorHedTagsOp(BaseOp):
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
-        df_new.replace('n/a', np.nan, inplace=True)
+        replace_na(df_new)
         return df_new
 
     @staticmethod
