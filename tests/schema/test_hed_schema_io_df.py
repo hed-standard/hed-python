@@ -24,7 +24,7 @@ class TestHedSchemaDF(unittest.TestCase):
         reloaded_schema = load_schema(self.output_folder + "test_8.tsv")
         self.assertEqual(schema, reloaded_schema)
 
-        schema = load_schema_version("score_1.1.1")
+        schema = load_schema_version("score_1.1.0")
         schema.save_as_dataframes(self.output_folder + "test_score.tsv", save_merged=True)
 
         reloaded_schema = load_schema(self.output_folder + "test_score.tsv")

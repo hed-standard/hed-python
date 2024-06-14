@@ -31,6 +31,38 @@ class TestAddExtension(unittest.TestCase):
 
 
 class TestSortBaseSchemas(unittest.TestCase):
+    TEST_DIR = 'test_directory'
+
+    @classmethod
+    def setUpClass(cls):
+        if not os.path.exists(cls.TEST_DIR):
+            os.makedirs(cls.TEST_DIR)
+        os.chdir(cls.TEST_DIR)
+        cls.create_stub_files()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir('..')
+        shutil.rmtree(cls.TEST_DIR)
+
+    @classmethod
+    def create_stub_files(cls):
+        filenames = [
+            "test_schema.mediawiki",
+            os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
+            "other_schema.xml",
+            os.path.normpath("hedtsv/wrong_folder/wrong_name_Tag.tsv"),
+            os.path.normpath("prerelease/hedtsv/test_schema/test_schema_Tag.tsv"),
+            os.path.normpath("not_hedtsv/test_schema/test_schema_Tag.tsv")
+        ]
+        for filename in filenames:
+            filepath = os.path.normpath(filename)
+            directory = os.path.dirname(filepath)
+            if directory:
+                os.makedirs(directory, exist_ok=True)
+            with open(filepath, 'w') as f:
+                f.write('')  # Create an empty file
+
     def test_mixed_file_types(self):
         filenames = [
             "test_schema.mediawiki",
