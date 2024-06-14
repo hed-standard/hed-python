@@ -211,6 +211,15 @@ def make_info_dataframe(col_info, selected_col):
     df = pd.DataFrame(sorted(list(col_values)), columns=[selected_col])
     return df
 
+def replace_na(df):
+    """ Replace (in place) the n/a with np.nan taking care of categorical columns.  """
+    for column in df.columns:
+        if df[column].dtype.name != 'category':
+            df[column] = df[column].replace('n/a', np.nan)
+        elif 'n/a' in df[column].cat.categories:
+            df[column] = df[column].astype('object')
+            df[column] = df[column].replace('n/a', np.nan)
+            df[column] = pd.Categorical(df[column])
 
 def replace_values(df, values=None, replace_value='n/a', column_list=None):
     """ Replace string values in specified columns.

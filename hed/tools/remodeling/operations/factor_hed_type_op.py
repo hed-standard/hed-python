@@ -1,11 +1,11 @@
 """ Append to columnar file the factors computed from type variables. """
 
 import pandas as pd
-import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_type_manager import HedTypeManager
+from hed.tools.util.data_util import replace_na
 
 
 class FactorHedTypeOp(BaseOp):
@@ -82,7 +82,7 @@ class FactorHedTypeOp(BaseOp):
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
-        df_new.replace('n/a', np.nan, inplace=True)
+        replace_na(df_new)
         return df_new
 
     @staticmethod
