@@ -37,13 +37,7 @@ To install directly from the
        pip install git+https://github.com/hed-standard/hed-python/@master
    ```
 
-The HEDTools in this repository require Python 3.7 or greater.
-**Note:** HED is continuing to support Python 3.7 until 2023, because
-it is needed for MATLAB versions R2019a through R2020a.
-
-**Note:** The final exported interface for Python tools has not been 
-completely frozen in 0.1.0 and is expected to undergo minor changes
-in interface until the release of version 1.0.0.
+The HEDTools in this repository require Python 3.8 or greater.
 
 ### Relationship to other repositories
 
