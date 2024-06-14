@@ -10,7 +10,7 @@ class SequenceMap:
     """ A map of unique sequences of column values of a particular length appear in a columnar file.
 
     Attributes:
-        
+
         name (str):       An optional name of this remap for identification purposes.
 
     Notes: This mapping converts all columns in the mapping to strings.
@@ -61,7 +61,7 @@ class SequenceMap:
                     base = base + 'subgraph cluster_' + group + '{\n' + f'bgcolor={spec_color};\n' + \
                         '\n'.join(group_list) + '\n}\n'
         edge_list = self.get_edge_list(sort=True)
-        
+
         dot_str = base + "\n".join(edge_list) + "}\n"
         return dot_str
 
@@ -77,25 +77,25 @@ class SequenceMap:
             return f"{value[0]} -> {value[1]} "
         else:
             return ""
-        
+
     def get_edge_list(self, sort=True):
         """ Return a DOT format edge list with the option of sorting by edge counts.
-        
+
         Parameters:
             sort (bool): If True (the default), the edge list is sorted by edge counts.
-            
+
         Returns:
             list:  list of DOT strings representing the edges labeled by counts.
-        
+
         """
-        
+
         df = pd.DataFrame(list(self.edge_counts.items()), columns=['Key', 'Counts'])
         if sort:
             df = df.sort_values(by='Counts', ascending=False)
-        edge_list = [f"{self.edge_to_str(row['Key'])} [label={str(self.edge_counts[row['Key']])}];" 
+        edge_list = [f"{self.edge_to_str(row['Key'])} [label={str(self.edge_counts[row['Key']])}];"
                      for index, row in df.iterrows()]
         return edge_list
-    
+
     def filter_edges(self):
         pass
 
@@ -131,14 +131,14 @@ class SequenceMap:
 
     # def update(self, data):
     #     """ Update the existing map with information from data.
-    # 
+    #
     #     Parameters:
     #         data (Series):     DataFrame or filename of an events file or event map.
     #         allow_missing (bool):        If true allow missing keys and add as n/a columns.
-    # 
+    #
     #     :raises HedFileError:
     #         - If there are missing keys and allow_missing is False.
-    # 
+    #
     #     """
     #     filtered = self.prep(data)
     #     if self.codes:
@@ -165,7 +165,7 @@ class SequenceMap:
 
         Parameters:
             data (Series):   Dataframe to process by removing quotes.
-            
+
         Returns: Series
         Notes:
             - Replacement is done in place.

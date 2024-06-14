@@ -3,6 +3,7 @@ import os
 import shutil
 from hed import load_schema_version
 from hed.scripts.script_util import add_extension, sort_base_schemas, validate_all_schema_formats, validate_schema
+import contextlib
 
 
 class TestAddExtension(unittest.TestCase):
@@ -30,6 +31,38 @@ class TestAddExtension(unittest.TestCase):
 
 
 class TestSortBaseSchemas(unittest.TestCase):
+    TEST_DIR = 'test_directory'
+
+    @classmethod
+    def setUpClass(cls):
+        if not os.path.exists(cls.TEST_DIR):
+            os.makedirs(cls.TEST_DIR)
+        os.chdir(cls.TEST_DIR)
+        cls.create_stub_files()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir('..')
+        shutil.rmtree(cls.TEST_DIR)
+
+    @classmethod
+    def create_stub_files(cls):
+        filenames = [
+            "test_schema.mediawiki",
+            os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
+            "other_schema.xml",
+            os.path.normpath("hedtsv/wrong_folder/wrong_name_Tag.tsv"),
+            os.path.normpath("prerelease/hedtsv/test_schema/test_schema_Tag.tsv"),
+            os.path.normpath("not_hedtsv/test_schema/test_schema_Tag.tsv")
+        ]
+        for filename in filenames:
+            filepath = os.path.normpath(filename)
+            directory = os.path.dirname(filepath)
+            if directory:
+                os.makedirs(directory, exist_ok=True)
+            with open(filepath, 'w') as f:
+                f.write('')  # Create an empty file
+
     def test_mixed_file_types(self):
         filenames = [
             "test_schema.mediawiki",
@@ -40,7 +73,8 @@ class TestSortBaseSchemas(unittest.TestCase):
             "test_schema": {".mediawiki", ".tsv"},
             "other_schema": {".xml"}
         }
-        result = sort_base_schemas(filenames)
+        with contextlib.redirect_stdout(None):
+            result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
     def test_tsv_in_correct_subfolder(self):
@@ -52,7 +86,8 @@ class TestSortBaseSchemas(unittest.TestCase):
         expected = {
             "test_schema": {".tsv"}
         }
-        result = sort_base_schemas(filenames)
+        with contextlib.redirect_stdout(None):
+            result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
     def test_tsv_in_correct_subfolder2(self):
@@ -64,7 +99,8 @@ class TestSortBaseSchemas(unittest.TestCase):
         expected = {
             os.path.normpath("prerelease/test_schema"): {".tsv"}
         }
-        result = sort_base_schemas(filenames)
+        with contextlib.redirect_stdout(None):
+            result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
     def test_ignored_files(self):
@@ -75,13 +111,15 @@ class TestSortBaseSchemas(unittest.TestCase):
         expected = {
             "test_schema": {".mediawiki"}
         }
-        result = sort_base_schemas(filenames)
+        with contextlib.redirect_stdout(None):
+            result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
     def test_empty_input(self):
         filenames = []
         expected = {}
-        result = sort_base_schemas(filenames)
+        with contextlib.redirect_stdout(None):
+            result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
 
@@ -100,19 +138,22 @@ class TestValidateAllSchemaFormats(unittest.TestCase):
         schema = load_schema_version("8.3.0")
         schema.save_as_xml(os.path.join(self.base_path, self.basename + ".xml"))
         schema.save_as_dataframes(os.path.join(self.base_path, "hedtsv", self.basename))
-        issues = validate_all_schema_formats(os.path.join(self.base_path, self.basename))
+        with contextlib.redirect_stdout(None):
+            issues = validate_all_schema_formats(os.path.join(self.base_path, self.basename))
         self.assertTrue(issues)
         self.assertIn("Error loading schema", issues[0])
 
         schema.save_as_mediawiki(os.path.join(self.base_path, self.basename + ".mediawiki"))
 
-        self.assertEqual(validate_all_schema_formats(os.path.join(self.base_path, self.basename)), [])
+        with contextlib.redirect_stdout(None):
+            self.assertEqual(validate_all_schema_formats(os.path.join(self.base_path, self.basename)), [])
 
         schema_incorrect = load_schema_version("8.2.0")
         schema_incorrect.save_as_dataframes(os.path.join(self.base_path, "hedtsv", self.basename))
 
         # Validate and expect errors
-        issues = validate_all_schema_formats(os.path.join(self.base_path, self.basename))
+        with contextlib.redirect_stdout(None):
+            issues = validate_all_schema_formats(os.path.join(self.base_path, self.basename))
         self.assertTrue(issues)
         self.assertIn("Multiple schemas of type", issues[0])
 
@@ -125,11 +166,12 @@ class TestValidateAllSchemaFormats(unittest.TestCase):
 class TestValidateSchema(unittest.TestCase):
     def test_load_invalid_extension(self):
         # Verify capital letters fail validation
-        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.MEDIAWIKI")[0])
-        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.Mediawiki")[0])
-        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.XML")[0])
-        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.Xml")[0])
-        self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.TSV")[0])
-        self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.tsv")[0])
-        self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.xml")[0])
-        self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.mediawiki")[0])
+        with contextlib.redirect_stdout(None):
+            self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.MEDIAWIKI")[0])
+            self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.Mediawiki")[0])
+            self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.XML")[0])
+            self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.Xml")[0])
+            self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.TSV")[0])
+            self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.tsv")[0])
+            self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.xml")[0])
+            self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.mediawiki")[0])

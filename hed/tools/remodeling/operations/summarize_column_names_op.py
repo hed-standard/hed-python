@@ -8,8 +8,8 @@ from hed.tools.remodeling.operations.base_summary import BaseSummary
 class SummarizeColumnNamesOp(BaseOp):
     """  Summarize the column names in a collection of tabular files.
 
-    Required remodeling parameters:   
-        - **summary_name** (*str*): The name of the summary.   
+    Required remodeling parameters:
+        - **summary_name** (*str*): The name of the summary.
         - **summary_filename** (*str*): Base filename of the summary.
 
     Optional remodeling parameters:
@@ -19,7 +19,7 @@ class SummarizeColumnNamesOp(BaseOp):
 
     """
     NAME = "summarize_column_names"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
@@ -81,7 +81,7 @@ class SummarizeColumnNamesOp(BaseOp):
         summary.update_summary(
             {"name": name, "column_names": list(df_new.columns)})
         return df_new
-    
+
     @staticmethod
     def validate_input_data(parameters):
         """ Additional validation required of operation parameters not performed by JSON schema validator. """
@@ -106,8 +106,8 @@ class ColumnNamesSummary(BaseSummary):
             new_info (dict):  A dictionary with the parameters needed to update a summary.
 
         Notes:
-            - The summary information is kept in separate ColumnNameSummary objects for each file.  
-            - The summary needs a "name" str and a "column_names" list.  
+            - The summary information is kept in separate ColumnNameSummary objects for each file.
+            - The summary needs a "name" str and a "column_names" list.
             - The summary uses ColumnNameSummary as the summary object.
         """
         name = new_info['name']

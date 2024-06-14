@@ -1,3 +1,4 @@
+""" Validates sidecars. """
 import copy
 import re
 import itertools
@@ -19,7 +20,7 @@ class SidecarValidator:
 
     def __init__(self, hed_schema):
         """
-        Constructor for the HedValidator class.
+        Constructor for the SidecarValidator class.
 
         Parameters:
             hed_schema (HedSchema): HED schema object to use for validation.
@@ -151,7 +152,8 @@ class SidecarValidator:
                 if len(hed_strings) > 1:
                     error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
 
-                error_handler.push_error_context(ErrorContext.HED_STRING, HedString(hed_string, hed_schema=self._schema))
+                error_handler.push_error_context(ErrorContext.HED_STRING,
+                                                 HedString(hed_string, hed_schema=self._schema))
                 invalid_locations = self._find_non_matching_braces(hed_string)
                 for loc in invalid_locations:
                     bad_symbol = hed_string[loc]

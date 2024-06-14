@@ -43,10 +43,12 @@ def validate_schema_term_new(hed_entry, hed_term=None):
         hed_term = hed_entry.name
     issues_list = []
     # todo: potentially optimize this someday, as most values are the same
-    character_set = get_allowed_characters_by_name(["name"] + hed_entry.attributes.get("allowedCharacter", "").split(","))
+    character_set = get_allowed_characters_by_name(["name"] +
+                                                   hed_entry.attributes.get("allowedCharacter", "").split(","))
     indexes = get_problem_indexes(hed_term, character_set)
     for char, index in indexes:
-        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, hed_term, char_index=index, problem_char=char)
+        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
+                                                 hed_term, char_index=index, problem_char=char)
     return issues_list
 
 
@@ -160,4 +162,3 @@ def get_problem_indexes(validation_string, character_set, index_adj=0):
         indexes = [(char, index) for char, index in indexes if not ord(char) > 127]
 
     return indexes
-

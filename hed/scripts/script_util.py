@@ -9,7 +9,11 @@ all_extensions = [".tsv", ".mediawiki", ".xml"]
 def validate_schema(file_path):
     """ Validates the given schema, ensuring it can save/load as well as validates.
 
-        This is probably overkill...
+    Parameters:
+        file_path(str): the specific schema file to validate
+
+    Returns:
+        validation_issues(list): A list of issues found
     """
     validation_issues = []
     try:
@@ -81,6 +85,9 @@ def sort_base_schemas(filenames):
     """
     schema_files = defaultdict(set)
     for file_path in filenames:
+        if not os.path.exists(file_path):
+            print(f"Ignoring deleted file {file_path}.")
+            continue
         basename, extension = os.path.splitext(file_path)
         if extension == ".xml" or extension == ".mediawiki":
             schema_files[basename].add(extension)
@@ -161,8 +168,18 @@ def validate_all_schemas(schema_files):
     return all_issues
 
 
-
 def get_schema_filename(schema_name, schema_version):
+    """ Returns the assembled name of a schema given the name and version
+
+        e.g. "standard" and "8.3.0" returns "HED8.3.0"
+
+    Parameters:
+        schema_name(str): The name of the schema we're interested in.  "standard" for the standard schema
+        schema_version(str): The semantic version number
+
+    Returns:
+        schema_filename(str): the assembled filename, without extension or folder.
+    """
     schema_name = schema_name.lower()
     if schema_name == "standard" or schema_name == "":
         return f"HED{schema_version}"
@@ -171,7 +188,16 @@ def get_schema_filename(schema_name, schema_version):
 
 
 def get_prerelease_path(repo_path, schema_name, schema_version):
-    """Returns the location of the given pre-release schema in the repo"""
+    """ Returns the location of the given pre-release schema in the repo
+
+    Parameters:
+        repo_path(str): the location of the hed-schemas folder relative to this one.  Should point into the folder.
+        schema_name(str): The name of the schema we're interested in.  "standard" for the standard schema
+        schema_version(str): The semantic version number
+
+    Returns:
+        schema_path(str): The fully assembled location of this schema tsv version.
+    """
     schema_name = schema_name.lower()
     if schema_name == "" or schema_name == "standard":
         base_path = "standard_schema"

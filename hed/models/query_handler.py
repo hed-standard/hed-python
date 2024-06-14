@@ -16,9 +16,9 @@ class QueryHandler:
 
         'Event' - Finds any strings with Event, or a descendent tag of Event such as Sensory-event.
 
-        'Event and Action' - Find any strings with Event and Action, including descendant tags.
+        'Event && Action' - Find any strings with Event and Action, including descendant tags.
 
-        'Event or Action' - Same as above, but it has either.
+        'Event || Action' - Same as above, but it has either.
 
         '"Event"' - Finds the Event tag, but not any descendent tags.
 
@@ -26,17 +26,17 @@ class QueryHandler:
 
         'Eve*' - Find any short tags that begin with Eve*, such as Event, but not Sensory-event.
 
-        '[Event and Action]' - Find a group that contains both Event and Action(at any level).
+        '[Event && Action]' - Find a group that contains both Event and Action(at any level).
 
-        '{Event and Action}' - Find a group with Event And Action at the same level.
+        '{Event && Action}' - Find a group with Event And Action at the same level.
 
-        '{Event and Action:}' - Find a group with Event And Action at the same level, and nothing else.
+        '{Event && Action:}' - Find a group with Event And Action at the same level, and nothing else.
 
-        '{Event and Action:Agent}' - Find a group with Event And Action at the same level, and optionally an Agent tag.
+        '{Event && Action:Agent}' - Find a group with Event And Action at the same level, and optionally an Agent tag.
 
         Practical Complex Example:
 
-        {(Onset or Offset), (Def or {Def-expand}): ???} - A group with an onset tag,
+        {(Onset || Offset), (Def || {Def-expand}): ???} - A group with an onset tag,
                                     a def tag or def-expand group, and an optional wildcard group
 
         Parameters:
@@ -96,7 +96,7 @@ class QueryHandler:
         """Tokenize the expression string into a list"""
         grouping_re = r"\[\[|\[|\]\]|\]|}|{|:"
         paren_re = r"\)|\(|~"
-        word_re = r"\?+|\band\b|\bor\b|,|[\"_\-a-zA-Z0-9/.^#\*@]+"
+        word_re = r"\?+|\&\&|\|\||,|[\"_\-a-zA-Z0-9/.^#\*@]+"
         re_string = fr"({grouping_re}|{paren_re}|{word_re})"
         token_re = re.compile(re_string)
 

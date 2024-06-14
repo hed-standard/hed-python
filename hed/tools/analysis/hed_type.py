@@ -9,7 +9,7 @@ from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 class HedType:
     """ Manager of a type variable and its associated context. """
-    
+
     def __init__(self, event_manager, name, type_tag="condition-variable"):
         """ Create a variable manager for one type-variable for one tabular file.
 

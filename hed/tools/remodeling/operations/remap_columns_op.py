@@ -9,17 +9,17 @@ from hed.tools.analysis.key_map import KeyMap
 class RemapColumnsOp(BaseOp):
     """ Map values in m columns in a columnar file into a new combinations in n columns.
 
-    Required remodeling parameters:   
-        - **source_columns** (*list*): The key columns to map (m key columns).   
-        - **destination_columns** (*list*): The destination columns to have the mapped values (n destination columns).   
-        - **map_list** (*list*): A list of lists with the mapping.    
-        - **ignore_missing** (*bool*): If True, entries whose key column values are not in map_list are ignored.   
+    Required remodeling parameters:
+        - **source_columns** (*list*): The key columns to map (m key columns).
+        - **destination_columns** (*list*): The destination columns to have the mapped values (n destination columns).
+        - **map_list** (*list*): A list of lists with the mapping.
+        - **ignore_missing** (*bool*): If True, entries whose key column values are not in map_list are ignored.
 
-    Optional remodeling parameters:   
-        **integer_sources** (*list*): Source columns that should be treated as integers rather than strings.   
+    Optional remodeling parameters:
+        **integer_sources** (*list*): Source columns that should be treated as integers rather than strings.
 
     Notes:
-        Each list element list is of length m + n with the key columns followed by mapped columns. 
+        Each list element list is of length m + n with the key columns followed by mapped columns.
 
     TODO: Allow wildcards
 
@@ -108,7 +108,7 @@ class RemapColumnsOp(BaseOp):
         - If a column designated as an integer source does not have valid integers.
 
         """
-                            
+
         key_df = pd.DataFrame(
             self.map_list, columns=self.source_columns+self.destination_columns)
         key_map = KeyMap(self.source_columns,

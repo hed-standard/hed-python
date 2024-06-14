@@ -10,7 +10,7 @@ class TestValidatorUtilityFunctions(TestHedBase):
 
     @classmethod
     def setUpClass(cls):
-        cls.hed_schema = load_schema_version("8.2.0")
+        cls.hed_schema = load_schema_version("8.3.0")
 
     def test_if_tag_exists(self):
         valid_tag1 = HedTag('Left-handed', hed_schema=self.hed_schema)
@@ -45,7 +45,7 @@ class TestValidatorUtilityFunctions(TestHedBase):
 class TestSchemaUtilityFunctions(TestHedBase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_schema = load_schema_version("8.2.0")
+        cls.hed_schema = load_schema_version("8.3.0")
 
     def test_correctly_determine_tag_takes_value(self):
         value_tag1 = HedTag('Distance/35 px', hed_schema=self.hed_schema)

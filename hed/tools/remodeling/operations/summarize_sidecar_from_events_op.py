@@ -9,20 +9,20 @@ from hed.tools.remodeling.operations.base_summary import BaseSummary
 class SummarizeSidecarFromEventsOp(BaseOp):
     """ Create a JSON sidecar from column values in a collection of tabular files.
 
-    Required remodeling parameters:   
-        - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary. 
+    Required remodeling parameters:
+        - **summary_name** (*str*): The name of the summary.
+        - **summary_filename** (*str*): Base filename of the summary.
 
-    Optional remodeling parameters: 
-        - **append_timecode** (*bool*):  
-        - **skip_columns** (*list*): Names of columns to skip in the summary.   
-        - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns.   
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*):
+        - **skip_columns** (*list*): Names of columns to skip in the summary.
+        - **value_columns** (*list*): Names of columns to treat as value columns rather than categorical columns.
 
     The purpose is to produce a JSON sidecar template for annotating a dataset with HED tags.
 
     """
     NAME = "summarize_sidecar_from_events"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
@@ -111,7 +111,7 @@ class SummarizeSidecarFromEventsOp(BaseOp):
     def validate_input_data(parameters):
         """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []
-    
+
 
 class EventsToSidecarSummary(BaseSummary):
     """ Manager for events to sidecar generation. """

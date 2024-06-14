@@ -293,7 +293,7 @@ def parse_bids_filename(file_path):
     :raises HedFileError:
         - If filename does not conform to name-value_suffix format.
 
-    Notes:  
+    Notes:
         - splits into BIDS suffix, extension, and a dictionary of entity name-value pairs.
 
     """
@@ -366,13 +366,13 @@ def get_task_from_file(file_path):
 
 def get_task_dict(files):
     """ Return a dictionary of the tasks that appear in the file names of a list of files.
-    
+
     Parameters:
         files (list): List of filenames to be separated by task.
 
     Returns:
         dict:  dictionary of filenames keyed by task name.
-    
+
     """
     task_dict = {}
     for my_file in files:

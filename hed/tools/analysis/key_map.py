@@ -1,6 +1,5 @@
 """ A map of column value keys into new column values. """
 
-
 import pandas as pd
 from hed.errors.exceptions import HedFileError
 from hed.tools.util import data_util
@@ -18,6 +17,7 @@ class KeyMap:
     The remapping does not support other types of columns.
 
     """
+
     def __init__(self, key_cols, target_cols=None, name=''):
         """ Information for remapping columns of tabular files.
 
@@ -64,9 +64,9 @@ class KeyMap:
 
         Parameters:
             additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
-            show_counts (bool): If True, number of times each key combination appears is in first column and 
+            show_counts (bool): If True, number of times each key combination appears is in first column and
                                 values are sorted in descending order by.
-            
+
         Returns:
             DataFrame:  A dataframe containing the template.
 
@@ -128,26 +128,36 @@ class KeyMap:
         return df_new, missing_indices
 
     def _remap(self, df):
-        """ Utility method that iterates through dataframes to do the remapping.
+        """ Utility method that does the remapping
 
         Parameters:
             df (DataFrame):    DataFrame in which to perform the mapping.
 
         Returns:
             list:  The row numbers that had no correspondence in the mapping.
-
         """
+        key_series = df.apply(lambda row: data_util.get_row_hash(row, self.key_cols), axis=1)
+        # Key series now contains row_number: hash for each row in the dataframe
 
-        missing_indices = []
-        for index, row in df.iterrows():
-            key = data_util.get_row_hash(row, self.key_cols)
-            key_value = self.map_dict.get(key, None)
-            if key_value is not None:
-                result = self.col_map.iloc[key_value]
-                row[self.target_cols] = result[self.target_cols].values
-                df.iloc[index] = row
-            else:
-                missing_indices.append(index)
+        # Add a column containing the mapped index for each row
+        map_series = pd.Series(self.map_dict)  # map_series is hash:row_index for each entry in the map_dict index
+        key_values = key_series.map(map_series)  # key_values is df_row_number:map_dict_index
+        # e.g. a key_value entry of 0:79 means row 0 maps to row 79 in the map_dict
+
+        # This adds the map_dict_index column, to merged_df as a new column "key_value"
+        merged_df = df.assign(key_value=key_values.values)
+
+        # Copy all the map_dict data into merged_df as new columns, merging on the map_dict_index number of both
+        remapped_df = pd.merge(merged_df, self.col_map, left_on='key_value', right_index=True,
+                               suffixes=('', '_new'), how='left').fillna("n/a")
+
+        # Override the original columns with our newly calculated ones
+        for col in self.target_cols:
+            df[col] = remapped_df[col + '_new']
+
+        # Finally calculate missing indices
+        missing_indices = key_series.index[key_values.isna()].tolist()
+
         return missing_indices
 
     def resort(self):
@@ -156,7 +166,7 @@ class KeyMap:
         for index, row in self.col_map.iterrows():
             key_hash = data_util.get_row_hash(row, self.key_cols)
             self.map_dict[key_hash] = index
-            
+
     def update(self, data, allow_missing=True):
         """ Update the existing map with information from data.
 

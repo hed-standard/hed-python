@@ -168,7 +168,7 @@ class BidsFileGroup:
 
         """
         files = io_util.get_file_list(self.root_path, name_suffix=self.suffix, extensions=['.tsv'],
-                              exclude_dirs=self.exclude_dirs)
+                                      exclude_dirs=self.exclude_dirs)
         file_dict = {}
         if self.obj_type == "tabular":
             for file in files:
@@ -188,7 +188,7 @@ class BidsFileGroup:
 
         """
         files = io_util.get_file_list(self.root_path, name_suffix=self.suffix,
-                              extensions=['.json'], exclude_dirs=self.exclude_dirs)
+                                      extensions=['.json'], exclude_dirs=self.exclude_dirs)
         file_dict = {}
         for file in files:
             file_dict[os.path.realpath(file)] = BidsSidecarFile(os.path.realpath(file))
@@ -202,7 +202,7 @@ class BidsFileGroup:
 
         """
         dir_dict = io_util.get_dir_dictionary(self.root_path, name_suffix=self.suffix, extensions=['.json'],
-                                      exclude_dirs=self.exclude_dirs)
+                                              exclude_dirs=self.exclude_dirs)
         sidecar_dir_dict = {}
         for this_dir, dir_list in dir_dict.items():
             new_dir_list = []

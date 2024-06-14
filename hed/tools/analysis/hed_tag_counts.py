@@ -4,9 +4,10 @@ import copy
 
 
 class HedTagCount:
-    def __init__(self, hed_tag, file_name):
-        """ Counts for a particular HedTag in particular file.
+    """ Counts for a particular HedTag in particular file."""
 
+    def __init__(self, hed_tag, file_name):
+        """
         Parameters:
             hed_tag (HedTag):  The HedTag to keep track of.
             file_name (str):   Name of the file associated with the tag.

@@ -6,13 +6,13 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class RemoveRowsOp(BaseOp):
     """ Remove rows from a columnar file based on the values in a specified row.
 
-    Required remodeling parameters:   
-        - **column_name** (*str*): The name of column to be tested.   
-        - **remove_values** (*list*): The values to test for row removal.   
+    Required remodeling parameters:
+        - **column_name** (*str*): The name of column to be tested.
+        - **remove_values** (*list*): The values to test for row removal.
 
     """
     NAME = "remove_rows"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
@@ -69,6 +69,7 @@ class RemoveRowsOp(BaseOp):
             return df_new
         for value in self.remove_values:
             df_new = df_new.loc[df_new[self.column_name] != value, :]
+        df_new = df_new.reset_index(drop=True)
         return df_new
 
     @staticmethod

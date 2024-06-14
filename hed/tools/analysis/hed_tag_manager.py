@@ -6,7 +6,7 @@ from hed.models import string_util
 
 class HedTagManager:
     """ Manager for the HED tags from a columnar file. """
-    
+
     def __init__(self, event_manager, remove_types=[]):
         """ Create a tag manager for one tabular file.
 

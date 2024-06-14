@@ -458,7 +458,7 @@ class BaseInput:
         elif input_type in self.TEXT_EXTENSION:
             try:
                 self._dataframe = pd.read_csv(file, delimiter='\t', header=pandas_header,
-                                                  dtype=str, keep_default_na=True, na_values=("", "null"))
+                                              dtype=str, keep_default_na=True, na_values=("", "null"))
             except Exception as e:
                 raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
             # Convert nan values to a known value

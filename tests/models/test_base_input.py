@@ -102,7 +102,7 @@ class TestSortingByOnset(unittest.TestCase):
         opened_file = TabularInput(df)
         self.assertFalse(opened_file.needs_sorting)
 
-        issues = opened_file.validate(load_schema_version("8.2.0"))
+        issues = opened_file.validate(load_schema_version("8.3.0"))
         self.assertEqual(issues[1][ErrorContext.ROW], 5)
         df.at[3, "onset"] = 1.5
         opened_file = TabularInput(df)
@@ -111,7 +111,7 @@ class TestSortingByOnset(unittest.TestCase):
         df.at[3, "onset"] = 1.0
         opened_file = TabularInput(df)
         self.assertTrue(opened_file.needs_sorting)
-        issues = opened_file.validate(load_schema_version("8.2.0"))
+        issues = opened_file.validate(load_schema_version("8.3.0"))
         # Should still report the same issue row despite needing sorting for validation
         self.assertEqual(issues[1]['code'], ValidationErrors.ONSETS_OUT_OF_ORDER)
         self.assertEqual(issues[2][ErrorContext.ROW], 5)

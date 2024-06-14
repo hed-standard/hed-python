@@ -1,11 +1,12 @@
 import unittest
-import os
 import shutil
 import copy
+import os
 from hed import load_schema, load_schema_version
 from hed.schema import HedSectionKey, HedKey
 from hed.scripts.script_util import add_extension
 from hed.scripts.convert_and_update_schema import convert_and_update
+import contextlib
 
 
 class TestConvertAndUpdate(unittest.TestCase):
@@ -24,7 +25,8 @@ class TestConvertAndUpdate(unittest.TestCase):
 
         # Assume filenames updated includes just the original schema file for simplicity
         filenames = [original_name]
-        result = convert_and_update(filenames, set_ids=False)
+        with contextlib.redirect_stdout(None):
+            result = convert_and_update(filenames, set_ids=False)
 
         # Verify no error from convert_and_update and the correct schema version was saved
         self.assertEqual(result, 0)
@@ -37,11 +39,12 @@ class TestConvertAndUpdate(unittest.TestCase):
         self.assertEqual(schema, schema_reload2)
 
         # Now verify after doing this again with a new schema, they're still the same.
-        schema = load_schema_version("8.2.0")
+        schema = load_schema_version("8.3.0")
         schema.save_as_dataframes(tsv_filename)
 
         filenames = [os.path.join(tsv_filename, "test_schema_Tag.tsv")]
-        result = convert_and_update(filenames, set_ids=False)
+        with contextlib.redirect_stdout(None):
+            result = convert_and_update(filenames, set_ids=False)
 
         # Verify no error from convert_and_update and the correct schema version was saved
         self.assertEqual(result, 0)
@@ -68,14 +71,16 @@ class TestConvertAndUpdate(unittest.TestCase):
 
         # Assume filenames updated includes just the original schema file for simplicity
         filenames = [add_extension(basename, ".mediawiki")]
-        result = convert_and_update(filenames, set_ids=False)
+        with contextlib.redirect_stdout(None):
+            result = convert_and_update(filenames, set_ids=False)
         self.assertEqual(result, 0)
 
         schema_reloaded = load_schema(add_extension(basename, ".xml"))
 
         self.assertEqual(schema_reloaded, schema_edited)
 
-        result = convert_and_update(filenames, set_ids=True)
+        with contextlib.redirect_stdout(None):
+            result = convert_and_update(filenames, set_ids=True)
         self.assertEqual(result, 0)
 
         schema_reloaded = load_schema(add_extension(basename, ".xml"))

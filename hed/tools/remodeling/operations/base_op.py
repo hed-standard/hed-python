@@ -8,7 +8,7 @@ class BaseOp(ABC):
 
     def __init__(self, parameters):
         """ Constructor for the BaseOp class. Should be extended by operations.
-        
+
         Parameters:
             parameters (dict): A dictionary specifying the appropriate parameters for the operation.
         """
@@ -37,7 +37,7 @@ class BaseOp(ABC):
         """
 
         return df.copy()
-    
+
     @staticmethod
     @abstractmethod
     def validate_input_data(parameters):

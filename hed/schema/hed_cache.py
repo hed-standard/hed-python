@@ -154,12 +154,13 @@ def cache_local_versions(cache_folder):
         return -1
 
 
-def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_LIBRARY_URL_LIST, skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
+def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_LIBRARY_URL_LIST,
+                       skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
     """ Cache all schemas at the given URLs.
 
     Parameters:
         hed_base_urls (str or list): Path or list of paths.   These should point to a single folder.
-        hed_library_urls (str or list): Path or list of paths.   These should point to a folder containing library folders.
+        hed_library_urls (str or list): Path or list of paths.  These should point to folder containing library folders.
         skip_folders (list): A list of subfolders to skip over when downloading.
         cache_folder (str): The folder holding the cache.
 
@@ -196,7 +197,8 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_
                 new_hed_versions = _get_hed_xml_versions_one_library(hed_base_url)
                 _merge_in_versions(all_hed_versions, new_hed_versions)
             for hed_library_url in hed_library_urls:
-                new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(hed_library_url, skip_folders=skip_folders)
+                new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(hed_library_url,
+                                                                                skip_folders=skip_folders)
                 _merge_in_versions(all_hed_versions, new_hed_versions)
 
             for library_name, hed_versions in all_hed_versions.items():
@@ -299,7 +301,8 @@ def _get_hed_xml_versions_one_folder(hed_folder_url):
             found_library_name = expression_match.group(2)
             if found_library_name not in all_hed_versions:
                 all_hed_versions[found_library_name] = {}
-            all_hed_versions[found_library_name][version] = file_entry["sha"], file_entry["download_url"], hed_folder_url.endswith(prerelease_suffix)
+            all_hed_versions[found_library_name][version] = (
+                file_entry["sha"], file_entry["download_url"], hed_folder_url.endswith(prerelease_suffix))
 
     return all_hed_versions
 
@@ -330,7 +333,8 @@ def _get_hed_xml_versions_one_library(hed_one_library_url):
     return ordered_versions
 
 
-def _get_hed_xml_versions_from_url_all_libraries(hed_base_library_url, library_name=None, skip_folders=DEFAULT_SKIP_FOLDERS):
+def _get_hed_xml_versions_from_url_all_libraries(hed_base_library_url, library_name=None,
+                                                 skip_folders=DEFAULT_SKIP_FOLDERS):
     """ Get all available schemas and their hash values
 
     Parameters:

@@ -11,7 +11,7 @@ class RemoveColumnsOp(BaseOp):
 
     """
     NAME = "remove_columns"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {

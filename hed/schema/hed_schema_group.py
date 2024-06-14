@@ -14,7 +14,7 @@ class HedSchemaGroup(HedSchemaBase):
 
     Notes:
         - The container class is useful when library schema are included.
-        - You cannot save/load/etc the combined schema object directly.
+        - You cannot save/load/etc. the combined schema object directly.
 
     """
     def __init__(self, schema_list, name=""):

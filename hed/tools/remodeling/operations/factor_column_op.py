@@ -6,11 +6,11 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class FactorColumnOp(BaseOp):
     """ Append to tabular file columns of factors based on column values.
 
-    Required remodeling parameters:   
+    Required remodeling parameters:
         - **column_name** (*str*):  The name of a column in the DataFrame to compute factors from.
 
     Optional remodeling parameters
-        - **factor_names** (*list*):   Names to use as the factor columns.  
+        - **factor_names** (*list*):   Names to use as the factor columns.
         - **factor_values** (*list*):  Values in the column column_name to create factors for.
 
     Notes:

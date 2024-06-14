@@ -18,13 +18,13 @@ class SummarizeHedValidationOp(BaseOp):
         - **check_for_warnings** (*bool*): If true include warnings as well as errors.
 
     Optional remodeling parameters:
-        - **append_timecode** (*bool*): If true, the timecode is appended to the base filename when summary is saved. 
+        - **append_timecode** (*bool*): If true, the timecode is appended to the base filename when summary is saved.
 
     The purpose of this op is to produce a summary of the HED validation errors in a file.
 
     """
     NAME = "summarize_hed_validation"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {
@@ -346,13 +346,14 @@ class HedValidationSummary(BaseSummary):
             results["sidecar_files"].append(sidecar.name)
             results["sidecar_issues"][sidecar.name] = []
             sidecar_issues = sidecar.validate(new_info.get('schema', None))
-            filtered_issues = error_reporter.ErrorHandler.filter_issues_by_severity(sidecar_issues, 
+            filtered_issues = error_reporter.ErrorHandler.filter_issues_by_severity(sidecar_issues,
                                                                                     error_types.ErrorSeverity.ERROR)
             if filtered_issues:
                 results["sidecar_had_issues"] = True
             if not check_for_warnings:
                 sidecar_issues = filtered_issues
-            str_issues = [error_reporter.get_printable_issue_string([issue], skip_filename=True) for issue in sidecar_issues]
+            str_issues = [error_reporter.get_printable_issue_string([issue],
+                                                                    skip_filename=True) for issue in sidecar_issues]
             results['sidecar_issues'][sidecar.name] = str_issues
             results['total_sidecar_issues'] = len(sidecar_issues)
         return results

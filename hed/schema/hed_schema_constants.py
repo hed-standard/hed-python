@@ -154,5 +154,6 @@ character_types["alphanumeric"] = character_types["letters"] | character_types["
 character_types["text"] = character_types["printable"].copy()
 character_types["text"].add("nonascii")
 character_types["text"] -= banned_delimiters
-character_types["name"] = character_types["alphanumeric"] | character_types["hyphen"] | character_types["period"] | character_types["underscore"]
+character_types["name"] = (character_types["alphanumeric"] | character_types["hyphen"] |
+                           character_types["period"] | character_types["underscore"])
 character_types["name"].add("nonascii")

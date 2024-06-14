@@ -1,7 +1,7 @@
 """
     Abstract base class for HedSchema and HedSchemaGroup, showing the common functionality
 """
-from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from abc import ABC, abstractmethod
 from hed.schema.schema_io import schema_util
 
@@ -37,6 +37,9 @@ class HedSchemaBase(ABC):
             return self._schema83
 
         self._schema83 = schema_util.schema_version_greater_equal(self, "8.3.0")
+        if self.get_tag_entry(HedKey.ElementDomain, HedSectionKey.Properties):
+            self._schema83 = True
+        return self._schema83
 
     @abstractmethod
     def get_schema_versions(self):

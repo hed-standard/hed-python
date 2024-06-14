@@ -1,4 +1,6 @@
 """ Defined constants for definitions, def labels, and expanded labels. """
+
+
 class DefTagNames:
     """ Source names for definitions, def labels, and expanded labels. """
 

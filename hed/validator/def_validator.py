@@ -1,3 +1,4 @@
+""" Validates of Def, Def-expand and Temporal groups. """
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
@@ -8,7 +9,7 @@ from hed.errors.error_types import TemporalErrors
 
 
 class DefValidator(DefinitionDict):
-    """ Handles validating Def/ and Def-expand/, as well as Temporal groups: Onset, Inset, and Offset
+    """ Validates Def/ and Def-expand/, as well as Temporal groups: Onset, Inset, and Offset
 
     """
 

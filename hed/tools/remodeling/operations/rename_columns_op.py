@@ -6,13 +6,13 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 class RenameColumnsOp (BaseOp):
     """ Rename columns in a tabular file.
 
-    Required remodeling parameters:   
+    Required remodeling parameters:
         - **column_mapping** (*dict*): The names of the columns to be renamed with values to be remapped to.
         - **ignore_missing** (*bool*): If true, the names in column_mapping that are not columns and should be ignored.
 
     """
     NAME = "rename_columns"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {

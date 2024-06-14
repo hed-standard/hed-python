@@ -123,23 +123,23 @@ class RemodelerValidator:
             return list_of_error_strings
 
         operation_by_parameters = [(operation["operation"], operation["parameters"]) for operation in operations]
-        
+
         for index, operation in enumerate(operation_by_parameters):
             error_strings = valid_operations[operation[0]].validate_input_data(operation[1])
             for error_string in error_strings:
                 list_of_error_strings.append(f"Operation {index + 1} ({operation[0]}): {error_string}")
-        
+
         return list_of_error_strings
 
     def _parse_message(self, error, operations):
         """ Return a user-friendly error message based on the jsonschema validation error.
 
-        Parameters: 
+        Parameters:
             error (ValidationError): A validation error from jsonschema validator.
             operations (dict): The operations that were validated.
 
         Note:
-        - json schema error does not contain all necessary information to return a 
+        - json schema error does not contain all necessary information to return a
           proper error message so, we also take some information directly from the operations
           that led to the error.
 
@@ -180,7 +180,7 @@ class RemodelerValidator:
         if attr_type == 'additionalProperties':
             error_dict["added_property"] = error_dict["message"].split("'")[
                 1::2][0]
-            
+
         # dependent is required, provided both the missing value and the reason it is required in one dictionary
         # it is split over two for the error message
         if attr_type == 'dependentRequired':

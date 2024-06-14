@@ -3,6 +3,7 @@ from hed.scripts.script_util import sort_base_schemas, validate_all_schemas, add
 from hed.schema.schema_io.df2schema import load_dataframes
 from hed.schema.schema_io.ontology_util import update_dataframes_from_schema, save_dataframes
 from hed.schema.hed_schema_io import load_schema, from_dataframes
+from hed.errors import get_printable_issue_string, HedFileError
 import argparse
 
 
@@ -52,8 +53,12 @@ def convert_and_update(filenames, set_ids):
         if any(value is None for value in source_dataframes.values()):
             source_dataframes = schema.get_as_dataframes()
 
-        result = update_dataframes_from_schema(source_dataframes, schema, assign_missing_ids=set_ids)
-
+        try:
+            result = update_dataframes_from_schema(source_dataframes, schema, schema.library,
+                                                   assign_missing_ids=set_ids)
+        except HedFileError as e:
+            print(get_printable_issue_string(e.issues, title="Issues updating schema:"))
+            raise e
         schema_reloaded = from_dataframes(result)
         schema_reloaded.save_as_mediawiki(basename + ".mediawiki")
         schema_reloaded.save_as_xml(basename + ".xml")

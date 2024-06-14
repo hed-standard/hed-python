@@ -1,3 +1,10 @@
+Release 0.5.0
+- Added JSON schema specification of remodeling commands.
+- Added support for schema that are specified by .tsv files.
+- Added support for embedding schema in an ontology.
+- Added WordCloud visualizations.
+- Added handling of event context and events of temporal extent.
+
 Release 0.4.0 October 27, 2023
 - Refactored the model classes to be based on DataFrame.
 - Added additional command line options for remodeling tools.
@@ -8,7 +15,7 @@ Release 0.4.0 October 27, 2023
 - Improvements to API-Docs.
 
 Release 0.3.1 July 3, 2023
-- Pinned the version of the pydantic and inflect libraries due to inflict.
+- Pinned the version of the pydantic and inflect libraries due to conflict.
 - Reorganized JSON output of remodeling summaries so that all of consistent form.
 - Fixed summarize_hed_tags_op so that tags were correctly categorized for output.
 - Minor refactoring to reduce code complexity.

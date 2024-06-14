@@ -112,10 +112,10 @@ class TestHedSchema(unittest.TestCase):
 
     def test_schema_compliance(self):
         warnings = self.hed_schema_group.check_compliance(True)
-        self.assertEqual(len(warnings), 14)
+        self.assertEqual(len(warnings), 18)
 
     def test_bad_prefixes(self):
-        schema = load_schema_version(xml_version="8.2.0")
+        schema = load_schema_version(xml_version="8.3.0")
 
         self.assertTrue(schema.get_tag_entry("Event"))
         self.assertFalse(schema.get_tag_entry("sc:Event"))
@@ -126,7 +126,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertFalse(schema.get_tag_entry("Event", schema_namespace='unknown'))
 
     def test_bad_prefixes_library(self):
-        schema = load_schema_version(xml_version="tl:8.2.0")
+        schema = load_schema_version(xml_version="tl:8.3.0")
 
         self.assertTrue(schema.get_tag_entry("tl:Event", schema_namespace="tl:"))
         self.assertFalse(schema.get_tag_entry("sc:Event", schema_namespace="tl:"))

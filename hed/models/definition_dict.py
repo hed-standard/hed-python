@@ -145,8 +145,8 @@ class DefinitionDict:
                 continue
 
             self.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
-                                                              takes_value=def_takes_value,
-                                                              source_context=context)
+                                                                 takes_value=def_takes_value,
+                                                                 source_context=context)
 
         return def_issues
 

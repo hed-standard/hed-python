@@ -1,4 +1,5 @@
 from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema import hed_schema_constants
 
 # Known tsv format suffixes
 
@@ -17,8 +18,8 @@ ATTRIBUTE_PROPERTY_KEY = "AttributeProperty"
 
 PROPERTY_KEYS = [ANNOTATION_KEY, DATA_KEY, OBJECT_KEY]
 DF_SUFFIXES = {TAG_KEY, STRUCT_KEY, VALUE_CLASS_KEY,
-                 UNIT_CLASS_KEY, UNIT_KEY, UNIT_MODIFIER_KEY,
-                 *PROPERTY_KEYS, ATTRIBUTE_PROPERTY_KEY}
+               UNIT_CLASS_KEY, UNIT_KEY, UNIT_MODIFIER_KEY,
+               *PROPERTY_KEYS, ATTRIBUTE_PROPERTY_KEY}
 
 section_mapping = {
     STRUCT_KEY: None,
@@ -43,7 +44,7 @@ description = "dc:description"
 equivalent_to = "omn:EquivalentTo"
 has_unit_class = "hasUnitClass"
 
-struct_columns = [hed_id, name, attributes, subclass_of, description]
+struct_columns = [hed_id, name, attributes, subclass_of, description, equivalent_to]
 tag_columns = [hed_id, name, level, subclass_of, attributes, description, equivalent_to]
 unit_columns = [hed_id, name, subclass_of, has_unit_class, attributes, description, equivalent_to]
 
@@ -76,3 +77,10 @@ struct_base_ids = {
     "HedEpilogue": 12
 }
 
+# todo: this should be retrieved directly from the appropriate spreadsheet
+valid_omn_attributes = {
+    hed_schema_constants.VERSION_ATTRIBUTE: "HED_0000300",
+    hed_schema_constants.LIBRARY_ATTRIBUTE: "HED_0000301",
+    hed_schema_constants.WITH_STANDARD_ATTRIBUTE: "HED_0000302",
+    hed_schema_constants.UNMERGED_ATTRIBUTE: "HED_0000303"
+}
