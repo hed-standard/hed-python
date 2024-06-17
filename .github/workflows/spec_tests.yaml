@@ -22,7 +22,7 @@ jobs:
           submodules: true
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -31,13 +31,30 @@ jobs:
           python -m pip install --upgrade --upgrade-strategy eager pip
           pip install -r requirements.txt
 
-      - name: Test with unittest
+      - name: Spec Error Tests
+        id: spec_error_tests
+        continue-on-error: true
         run: |
-           python -m unittest spec_tests/test_errors.py > test_results.txt
+           echo "::group::Spec Test Results"
+           python -m unittest spec_tests/test_errors.py
+           echo "::endgroup::"
 
-      - name: Upload spec test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: spec-test-results
-          path: test_results.txt
+      - name: Bids Validation Test
+        id: bids_validation_test
+        continue-on-error: true
+        run: |
+           echo "::group::Bids Results"
+           python -m unittest spec_tests/validate_bids.py
+           echo "::endgroup::"
 
+      - name: Hed Cache Test
+        env:
+          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: hed_cache_test
+        continue-on-error: true
+        run: |
+           python -m unittest spec_tests/test_hed_cache.py
+
+      - name: Fail if Tests Failed
+        if: steps.spec_error_tests.outcome == 'failure' || steps.bids_validation_test.outcome == 'failure' || steps.hed_cache_test.outcome == 'failure'
+        run: exit 1

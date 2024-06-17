@@ -57,17 +57,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(disp, Dispatcher, "")
         self.assertFalse(disp.parsed_ops, "constructor empty operations list has empty parsed ops")
 
-    def test_constructor_bad_no_operation(self):
-        test = [{"operation": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},
-                {"parameters": {"column_name": "trial_type", "remove_values": ["succesful_stop", "unsuccesful_stop"]}}]
-        operations, errors = Dispatcher.parse_operations(test)
-        self.assertFalse(operations, "parse_operations returns empty if no operation")
-        self.assertEqual(len(errors), 1,
-                         "parse_operation returns a list of one error if one operation with no operation")
-        self.assertEqual(errors[0]['index'], 1, "parse_operation error has the correct index for missing operation")
-        self.assertEqual(errors[0]['error_type'], KeyError,
-                         "parse_operation error has the correct type for missing operation")
-
     def test_get_data_file(self):
         model_path1 = os.path.join(self.data_path, 'simple_reorder_rmdl.json')
         with open(model_path1) as fp:
@@ -91,46 +80,6 @@ class Test(unittest.TestCase):
         with self.assertRaises(HedFileError) as context:
             dispatch2.get_summary_save_dir()
         self.assertEqual(context.exception.code, 'NoDataRoot')
-
-    def test_parse_operations_errors(self):
-        test = [{"operation": "remove_rows", "parameters": {"column_name": "response_time", "remove_values": ["n/a"]}},
-                {"operation": "remove_rows"}]
-        operations, errors = Dispatcher.parse_operations(test)
-        self.assertFalse(operations, "parse_operations returns empty if no parameters")
-        self.assertEqual(len(errors), 1,
-                         "parse_operation returns a list of one error if one operation with no parameters")
-        self.assertEqual(errors[0]['index'], 1, "parse_operation error has the correct index for missing parameters")
-        self.assertEqual(errors[0]['error_type'], KeyError,
-                         "parse_operation error has the correct type for missing parameters")
-
-        test = [{"operation": "remove_rows",
-                 "parameters": {"column_name": "trial_type", "remove_values": ["succesful_stop", "unsuccesful_stop"]}},
-                {"operation": "remove_rows", "parameters": {"column_name": "response_time"}}]
-        operations, errors = Dispatcher.parse_operations(test)
-        self.assertFalse(operations, "parse_operations returns empty if missing required")
-        self.assertEqual(len(errors), 1,
-                         "parse_operation returns a list of one error if one operation with missing required")
-        self.assertEqual(errors[0]['index'], 1, "parse_operation error has the correct index for missing parameters")
-        self.assertEqual(errors[0]['error_type'], KeyError,
-                         "parse_operation error has the correct type for missing required")
-        with self.assertRaises(ValueError) as context:
-            Dispatcher(test)
-        self.assertEqual(context.exception.args[0], 'InvalidOperationList')
-
-        test2 = [{"operation": "blimey",
-                 "parameters": {"column_name": "trial_type", "remove_values": ["succesful_stop", "unsuccesful_stop"]}}]
-        operations, errors = Dispatcher.parse_operations(test2)
-        self.assertFalse(operations, "parse_operations returns empty if missing required")
-        self.assertEqual(len(errors), 1,
-                         "parse_operation returns a list of one error if bad operation")
-        self.assertEqual(errors[0]['index'], 0, "parse_operation error has the correct index for bad operation")
-        self.assertEqual(errors[0]['error_type'], KeyError,
-                         "parse_operation error has the correct type for bad operation")
-        self.assertEqual(errors[0]['error_code'], 'OperationNotListedAsValid''',
-                         "parse_operation error has has correct code for bad operation")
-        with self.assertRaises(ValueError) as context:
-            Dispatcher(test2)
-        self.assertEqual(context.exception.args[0], 'InvalidOperationList')
 
     def test_parse_operation_list(self):
         test = [{"operation": "remove_rows",
@@ -176,8 +125,6 @@ class Test(unittest.TestCase):
                 }
             }
         ]
-        operations, errors = Dispatcher.parse_operations(op_list)
-        self.assertFalse(errors)
         dispatch = Dispatcher(op_list, hed_versions=['8.1.0'])
         df = dispatch.run_operations(events_path, sidecar=sidecar_path, verbose=False)
         self.assertIsInstance(df, pd.DataFrame)

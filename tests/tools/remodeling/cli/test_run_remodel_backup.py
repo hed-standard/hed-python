@@ -49,8 +49,8 @@ class Test(unittest.TestCase):
 
     def test_main_events(self):
         self.assertFalse(os.path.exists(self.derv_path), 'backup directory does not exist before creation')
-        arg_list = [self.test_root, '-bn', BackupManager.DEFAULT_BACKUP_NAME, '-bd', self.derv_path, '-x', 'derivatives',
-                    '-f', 'events', '-e', '.tsv']
+        arg_list = [self.test_root, '-bn', BackupManager.DEFAULT_BACKUP_NAME, '-bd', self.derv_path,
+                    '-x', 'derivatives', '-f', 'events', '-e', '.tsv']
         main(arg_list)
         self.assertTrue(os.path.exists(self.derv_path), 'backup directory exists before creation')
         json_path = os.path.realpath(os.path.join(self.derv_path, BackupManager.DEFAULT_BACKUP_NAME,

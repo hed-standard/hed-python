@@ -6,6 +6,7 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class TestOp(BaseOp):
+    NAME = "test_op"
     PARAMS = {
         "operation": "test_summary_op",
         "required_parameters": {
@@ -20,10 +21,17 @@ class TestOp(BaseOp):
     SUMMARY_TYPE = "test_sum"
 
     def __init__(self, parameters):
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
+
+    def do_op(self, dispatcher, df, name, sidecar=None):
+        return df.copy()
+    
+    @staticmethod
+    def validate_input_data(parameters):
+        return []
 
 
 class TestSummary(BaseSummary):

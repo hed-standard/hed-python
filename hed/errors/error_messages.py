@@ -1,11 +1,11 @@
-"""
-This module contains the actual formatted error messages for each type.
+"""Format templates for HED schema error messages.
 
 Add new errors here, or any other file imported after error_reporter.py.
 """
 
 from hed.errors.error_reporter import hed_error, hed_tag_error
-from hed.errors.error_types import ValidationErrors, SidecarErrors, ErrorSeverity, DefinitionErrors, OnsetErrors, ColumnErrors
+from hed.errors.error_types import (ValidationErrors, SidecarErrors, ErrorSeverity, DefinitionErrors,
+                                    TemporalErrors, ColumnErrors)
 
 
 @hed_tag_error(ValidationErrors.UNITS_INVALID)
@@ -25,6 +25,11 @@ def val_error_empty_group(tag):
     return f"HED tags cannot be empty.  Extra delimiters found: '{tag}'"
 
 
+@hed_tag_error(TemporalErrors.HED_ONSET_WITH_NO_COLUMN, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
+def val_error_hed_onset_with_no_column(tag):
+    return f"Cannot have Temporal tags without an 'Onset' column.  Found tag: '{tag}'"
+
+
 @hed_tag_error(ValidationErrors.TAG_EXTENDED, has_sub_tag=True, default_severity=ErrorSeverity.WARNING)
 def val_error_tag_extended(tag, problem_tag):
     return f"Hed tag is extended. '{problem_tag}' in {tag}"
@@ -36,16 +41,33 @@ def val_error_invalid_char(source_string, char_index):
     return f'Invalid character "{character}" at index {char_index}"'
 
 
+@hed_tag_error(ValidationErrors.ELEMENT_DEPRECATED, default_severity=ErrorSeverity.WARNING)
+def val_error_element_deprecatedr(tag):
+    return f"Element '{tag}' has been deprecated and an alternative method of tagging should be used"
+
+
 @hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True,
                actual_code=ValidationErrors.CHARACTER_INVALID)
 def val_error_invalid_tag_character(tag, problem_tag):
-    return f"Invalid character '{problem_tag}' in {tag}"
+    return f"Invalid character '{problem_tag}' in tag '{tag}'"
 
 
 @hed_error(ValidationErrors.TILDES_UNSUPPORTED)
 def val_error_tildes_not_supported(source_string, char_index):
     character = source_string[char_index]
     return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'"
+
+
+@hed_tag_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, has_sub_tag=True,
+               actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
+def val_error_CURLY_BRACE_UNSUPPORTED_HERE(tag, problem_tag):
+    return (f"Curly braces are only permitted in sidecars, fully wrapping text in place of a tag.  "
+            f"Invalid character '{problem_tag}' in tag '{tag}'")
+
+
+@hed_error(ValidationErrors.ONSETS_OUT_OF_ORDER, default_severity=ErrorSeverity.WARNING)
+def val_error_ONSETS_OUT_OF_ORDER():
+    return "Onsets need to be temporally increasing for most downstream tools to work."
 
 
 @hed_error(ValidationErrors.COMMA_MISSING)
@@ -90,7 +112,8 @@ def val_error_invalid_extension(tag):
     return f'Invalid extension on tag - "{tag}"'
 
 
-@hed_tag_error(ValidationErrors.INVALID_PARENT_NODE, has_sub_tag=True, actual_code=ValidationErrors.TAG_EXTENSION_INVALID)
+@hed_tag_error(ValidationErrors.INVALID_PARENT_NODE, has_sub_tag=True,
+               actual_code=ValidationErrors.TAG_EXTENSION_INVALID)
 def val_error_invalid_parent(tag, problem_tag, expected_parent_tag):
     return f"In '{tag}', '{problem_tag}' appears as '{str(expected_parent_tag)}' and cannot be used as an extension."
 
@@ -123,15 +146,15 @@ def val_error_sidecar_with_column(column_names):
 
 
 @hed_error(ValidationErrors.DUPLICATE_COLUMN_IN_LIST)
-def val_error_duplicate_clumn(column_number, column_name, list_name):
+def val_error_duplicate_column(column_number, column_name, list_name):
     if column_name:
         return f"Found column '{column_name}' at index {column_number} twice in {list_name}."
     else:
-        return f"Found column number {column_number} twice in {list_name}.  This isn't a major concern, but does indicate a mistake."
+        return f"Found column number {column_number} twice in {list_name}.  This may indicate a mistake."
 
 
 @hed_error(ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
-def val_error_duplicate_clumn(column_number, column_name, list_names):
+def val_error_duplicate_column_between_sources(column_number, column_name, list_names):
     if column_name:
         return f"Found column '{column_name}' at index {column_number} in the following inputs: {list_names}. " \
                f"Each entry must be unique."
@@ -160,11 +183,9 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
     return f"Category key '{invalid_key}' does not exist in column.  Valid keys are: {category_keys}"
 
 
-
-
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
-    return f"A data-recording's Def-expand tag does not match the given definition." + \
+    return f"A data-recording's Def-expand tag does not match the given definition." \
            f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}"
 
 
@@ -227,10 +248,7 @@ def val_warning_capitalization(tag):
 
 @hed_tag_error(ValidationErrors.UNITS_MISSING, default_severity=ErrorSeverity.WARNING)
 def val_warning_default_units_used(tag, default_unit):
-    # todo: add a test case for no default unit.
-    if default_unit is None:
-        return f"No unit specified on - '{tag}'.  No default unit is specified for type."
-    return f"No unit specified. Using '{default_unit}' as the default - '{tag}'"
+    return f"Tag '{tag}' expects units, but no units were given."
 
 
 @hed_error(SidecarErrors.BLANK_HED_STRING)
@@ -276,7 +294,7 @@ def sidecar_na_used(column_name):
 
 @hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_def_tag_in_definition(tag, def_name):
-    return f"Invalid tag {tag} found in definition for {def_name}. " +\
+    return f"Invalid tag {tag} found in definition for {def_name}. " \
            f"Def, Def-expand, and Definition tags cannot be in definitions."
 
 
@@ -286,16 +304,15 @@ def def_error_no_group_tags(def_name):
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.DEFINITION_INVALID)
-def def_error_wrong_group_tags(def_name, tag_list):
+def def_error_wrong_number_groups(def_name, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
     return f"Too many group tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}"
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
-def def_error_wrong_group_tags(def_name, tag_list):
+def def_error_wrong_number_tags(def_name, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
     return f"Too many tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}"
-
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
@@ -321,7 +338,7 @@ def def_error_no_takes_value(def_name, placeholder_tag):
 
 
 @hed_tag_error(DefinitionErrors.BAD_PROP_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
-def def_error_no_takes_value(tag, def_name):
+def def_error_bad_prop_in_definition(tag, def_name):
     return f"Tag '{str(tag)}' in Definition '{def_name}' has has a the unique or required attribute."
 
 
@@ -330,60 +347,72 @@ def def_error_bad_location(tag):
     return f"Tag '{str(tag)}' is found in a location it is not allowed to be."
 
 
-@hed_tag_error(OnsetErrors.ONSET_DEF_UNMATCHED, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_DEF_UNMATCHED, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_error_def_unmatched(tag):
     return f"The def tag in an onset/offset tag is unmatched.  Def tag: '{tag}'"
 
 
-@hed_tag_error(OnsetErrors.OFFSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.OFFSET_BEFORE_ONSET, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_error_offset_before_onset(tag):
     return f"Offset tag '{tag}' does not have a matching onset."
 
 
-@hed_tag_error(OnsetErrors.ONSET_SAME_DEFS_ONE_ROW, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_SAME_DEFS_ONE_ROW, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_error_same_defs_one_row(tag, def_name):
     return f"'{tag}' uses name '{def_name}', which was already used at this onset time."
 
 
-@hed_tag_error(OnsetErrors.INSET_BEFORE_ONSET, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.INSET_BEFORE_ONSET, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_error_inset_before_onset(tag):
     return f"Inset tag '{tag}' does not have a matching onset."
 
 
-@hed_tag_error(OnsetErrors.ONSET_NO_DEF_TAG_FOUND, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_no_def_found(tag):
     return f"'{tag}' tag has no def or def-expand tag in string."
 
 
-@hed_tag_error(OnsetErrors.ONSET_TOO_MANY_DEFS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_TOO_MANY_DEFS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_too_many_defs(tag, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
     return f"Too many def tags found in onset for {tag}.  Expected 1, also found: {tag_list_strings}"
 
 
-@hed_tag_error(OnsetErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_too_many_groups(tag, tag_list):
     tag_list_strings = [str(a_tag) for a_tag in tag_list]
-    return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1. " +\
+    return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1. " \
            f"Found {len(tag_list_strings)}: {tag_list_strings}"
 
 
-@hed_tag_error(OnsetErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.DURATION_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
+def onset_DURATION_WRONG_NUMBER_GROUPS(tag, tag_list):
+    tag_list_strings = [str(a_tag) for a_tag in tag_list]
+    return f"A duration and/or delay tag '{tag}'should have exactly one child group." \
+           f"Found {len(tag_list_strings)}: {tag_list_strings}"
+
+
+@hed_tag_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_wrong_type_tag(tag, def_tag):
-    return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be " + \
+    return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be " \
            f"in a single group together."
 
 
-@hed_tag_error(OnsetErrors.ONSET_PLACEHOLDER_WRONG, actual_code=ValidationErrors.ONSET_OFFSET_INSET_ERROR)
+@hed_tag_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_wrong_placeholder(tag, has_placeholder):
     if has_placeholder:
         return f"Onset/offset def tag {tag} expects a placeholder value, but does not have one."
     return f"Onset/offset def tag {tag} should not have a placeholder, but has one."
 
 
+@hed_tag_error(TemporalErrors.DURATION_HAS_OTHER_TAGS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
+def onset_DURATION_HAS_OTHER_TAGS(tag):
+    return f"Tag '{tag}' should not be grouped with Duration or Delay.  Context tags should be in a sub-group."
+
+
 @hed_error(ColumnErrors.INVALID_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def invalid_column_ref(bad_ref):
-    return f"The column '{bad_ref}' is unknown.'"
+    return f"The column '{bad_ref}' is unknown or does not have HED annotations.'"
 
 
 @hed_error(ColumnErrors.SELF_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
@@ -398,7 +427,5 @@ def nested_column_ref(column_name, ref_column):
 
 
 @hed_error(ColumnErrors.MALFORMED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
-def nested_column_ref(column_name, index, symbol):
+def malformed_column_ref(column_name, index, symbol):
     return f"Column {column_name} has a malformed column reference.  Improper symbol {symbol} found at index {index}."
-
-

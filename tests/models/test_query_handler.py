@@ -1,6 +1,6 @@
 import unittest
 from hed.models.hed_string import HedString
-from hed.models.expression_parser import QueryParser
+from hed.models.query_handler import QueryHandler
 import os
 from hed import schema
 from hed import HedTag
@@ -25,7 +25,7 @@ class TestParser(unittest.TestCase):
         cls.hed_schema = schema.load_schema(hed_xml_file)
 
     def base_test(self, parse_expr, search_strings):
-        expression = QueryParser(parse_expr)
+        expression = QueryHandler(parse_expr)
 
         # print(f"Search Pattern: {expression._org_string} - {str(expression.tree)}")
         for string, expected_result in search_strings.items():
@@ -38,16 +38,16 @@ class TestParser(unittest.TestCase):
 
     def test_broken_search_strings(self):
         test_search_strings = [
-            "A and",
-            "(A and B",
-            "and B",
+            "A &&",
+            "(A && B",
+            "&& B",
             "A, ",
             ", A",
             "A)"
         ]
         for string in test_search_strings:
             with self.assertRaises(ValueError) as context:
-                QueryParser(string)
+                QueryHandler(string)
             self.assertTrue(context.exception.args[0])
 
     def test_finding_tags(self):
@@ -58,7 +58,7 @@ class TestParser(unittest.TestCase):
             "Agent, Clear-throat": True,
             "Agent, Event": False,
         }
-        self.base_test("(Item or Agent) and Action", test_strings)
+        self.base_test("(Item || Agent) && Action", test_strings)
 
     def test_finding_tags_wildcards(self):
         test_strings = {
@@ -118,7 +118,7 @@ class TestParser(unittest.TestCase):
             "Agent, (Event)": True,
             "(Item), (Event)": True
         }
-        self.base_test("(Item or Agent) and {Action or Event}", test_strings)
+        self.base_test("(Item || Agent) && {Action || Event}", test_strings)
 
     def test_exact_group(self):
         test_strings = {
@@ -163,7 +163,7 @@ class TestParser(unittest.TestCase):
             "(Event, Agent-action)": True,
 
         }
-        self.base_test("Event and Event", test_strings)
+        self.base_test("Event && Event", test_strings)
 
     def test_duplicate_search_or(self):
         test_strings = {
@@ -171,7 +171,7 @@ class TestParser(unittest.TestCase):
             "(Event, Agent-action)": True,
 
         }
-        self.base_test("Event or Event", test_strings)
+        self.base_test("Event || Event", test_strings)
 
     def test_exact_group_complex_split(self):
         test_strings = {
@@ -210,7 +210,7 @@ class TestParser(unittest.TestCase):
             "((A), ((D)))": True,
             "((A, D))": True,
         }
-        self.base_test("{ {a} or {d} }", test_strings)
+        self.base_test("{ {a} || {d} }", test_strings)
 
     def test_exact_group_split_or_negation(self):
         test_strings = {
@@ -234,7 +234,7 @@ class TestParser(unittest.TestCase):
             "((A), (B, C))": False,
             "((A), ((B), C))": True,
         }
-        self.base_test("{ {~a and ~b} }", test_strings)
+        self.base_test("{ {~a && ~b} }", test_strings)
 
     def test_exact_group_split_or_negation_dual2(self):
         test_strings = {
@@ -247,7 +247,7 @@ class TestParser(unittest.TestCase):
             "((A), (B, C))": False,
             "((A), ((B), C))": True,
         }
-        self.base_test("{ {~(a or b)} }", test_strings)
+        self.base_test("{ {~(a || b)} }", test_strings)
 
     def test_exact_group_split_or_negation_complex(self):
         test_strings = {
@@ -261,7 +261,7 @@ class TestParser(unittest.TestCase):
             "((A), (B, C)), (D)": False,
             "((A), (B, C)), (H)": False,
         }
-        self.base_test("{ {~(a or b)} } and {D or ~F}", test_strings)
+        self.base_test("{ {~(a || b)} } && {D || ~F}", test_strings)
 
     # TODO: Should this work, and what should it mean?
     # Right now this is always true, since there is at least one group without ", (a)" in every string.
@@ -299,7 +299,7 @@ class TestParser(unittest.TestCase):
             "(B)": True,
             "((A), B)": True
         }
-        self.base_test("{ ~a and b}", test_strings)
+        self.base_test("{ ~a && b}", test_strings)
 
     def test_exact_group_negation4(self):
         test_strings = {
@@ -312,12 +312,12 @@ class TestParser(unittest.TestCase):
             "(B, (D))": True,
             "((A), B)": False
         }
-        self.base_test("{ @c and @a and b: ???}", test_strings)
+        self.base_test("{ @c && @a && b: ???}", test_strings)
 
     def test_exact_group_negation5(self):
-        test_string = "{ ~a and b:}"
+        test_string = "{ ~a && b:}"
         with self.assertRaises(ValueError) as context:
-            QueryParser(test_string)
+            QueryHandler(test_string)
         self.assertTrue(context.exception.args[0])
 
     def test_mixed_group_complex_split(self):
@@ -413,7 +413,7 @@ class TestParser(unittest.TestCase):
             "A, C": False,
             "B, C": False
         }
-        self.base_test("a and b", test_strings)
+        self.base_test("a && b", test_strings)
 
     def test_or(self):
         test_strings = {
@@ -424,7 +424,7 @@ class TestParser(unittest.TestCase):
             "A, C": True,
             "B, C": True
         }
-        self.base_test("a or b", test_strings)
+        self.base_test("a || b", test_strings)
 
     def test_and_wildcard(self):
         test_strings = {
@@ -438,7 +438,7 @@ class TestParser(unittest.TestCase):
             "D, A, B": True,
             "A, B, (C)": True
         }
-        self.base_test("a and b and ?", test_strings)
+        self.base_test("a && b && ?", test_strings)
 
     def test_and_wildcard_nothing_else(self):
         test_strings = {
@@ -454,7 +454,7 @@ class TestParser(unittest.TestCase):
             "(A, B), C": True,
             "(A, B, C)": True,
         }
-        self.base_test("{a and b}", test_strings)
+        self.base_test("{a && b}", test_strings)
 
         test_strings = {
             "A": False,
@@ -469,7 +469,7 @@ class TestParser(unittest.TestCase):
             "(A, B), C": True,
             "(A, B, C)": False,
         }
-        self.base_test("{a and b:}", test_strings)
+        self.base_test("{a && b:}", test_strings)
 
     def test_and_logical_wildcard(self):
         test_strings = {
@@ -478,8 +478,8 @@ class TestParser(unittest.TestCase):
             "A, B, (C)": True,
             "A, B, C": True,
         }
-        self.base_test("(A, B) and ?", test_strings)
-        self.base_test("A, B and ?", test_strings)
+        self.base_test("(A, B) && ?", test_strings)
+        self.base_test("A, B && ?", test_strings)
 
         test_strings = {
             "A": True,
@@ -488,9 +488,9 @@ class TestParser(unittest.TestCase):
             "B, C": False,
             "B, C, D, E": True
         }
-        self.base_test("(a or (b and c) and ?)", test_strings)
+        self.base_test("(a || (b && c) && ?)", test_strings)
 
-        self.base_test("(a or (b and c and ?) and ?)", test_strings)
+        self.base_test("(a || (b && c && ?) && ?)", test_strings)
 
     def test_double_wildcard(self):
         test_strings = {
@@ -499,7 +499,7 @@ class TestParser(unittest.TestCase):
             "A, B, C": True,
             "A, (B), (C)": False,
         }
-        self.base_test("A and ? and ??", test_strings)
+        self.base_test("A && ? && ??", test_strings)
 
     def test_or_wildcard(self):
         test_strings = {
@@ -513,7 +513,7 @@ class TestParser(unittest.TestCase):
             "D, A, B": True,
             "A, B, (C)": True
         }
-        self.base_test("a or b, ?", test_strings)
+        self.base_test("a || b, ?", test_strings)
 
     def test_and_wildcard_tags(self):
         test_strings = {
@@ -527,7 +527,7 @@ class TestParser(unittest.TestCase):
             "D, A, B": True,
             "A, B, (C)": False
         }
-        self.base_test("a and b, ??", test_strings)
+        self.base_test("a && b, ??", test_strings)
 
     def test_and_wildcard_groups(self):
         test_strings = {
@@ -541,7 +541,7 @@ class TestParser(unittest.TestCase):
             "D, A, B": False,
             "A, B, (C)": True
         }
-        self.base_test("a and b, ???", test_strings)
+        self.base_test("a && b, ???", test_strings)
 
     def test_complex_wildcard_groups(self):
         test_strings = {
@@ -560,19 +560,19 @@ class TestParser(unittest.TestCase):
             "((A, B), (C)), E": False, # todo: should discuss this case.  Is this correct to be False?
             "((A, B), C), E": False,
         }
-        self.base_test("[a and b, ???], ?", test_strings)
+        self.base_test("[a && b, ???], ?", test_strings)
 
     def test_wildcard_new(self):
         # todo: does it make sense this behavior varies?  I think so
         test_strings = {
             "((A, B), C)": False,
         }
-        self.base_test("[a and b, ???]", test_strings)
+        self.base_test("[a && b, ???]", test_strings)
 
         test_strings = {
             "((A, B), C)": False,
         }
-        self.base_test("[a and b and c]", test_strings)
+        self.base_test("[a && b && c]", test_strings)
 
     def test_complex_wildcard_groups2(self):
         test_strings = {
@@ -589,7 +589,7 @@ class TestParser(unittest.TestCase):
             "(A, B, (C)), D": False,
             "(A, B, (C)), (D), E": True,
         }
-        self.base_test("[a and b, ???], E, ?", test_strings)
+        self.base_test("[a && b, ???], E, ?", test_strings)
 
     def test_and_or(self):
         test_strings = {
@@ -600,7 +600,7 @@ class TestParser(unittest.TestCase):
             "A, C": True,
             "B, C": True
         }
-        self.base_test("a and b or c", test_strings)
+        self.base_test("a && b || c", test_strings)
 
         test_strings = {
             "A": False,
@@ -610,7 +610,7 @@ class TestParser(unittest.TestCase):
             "A, C": True,
             "B, C": True
         }
-        self.base_test("(a and b) or c", test_strings)
+        self.base_test("(a && b) || c", test_strings)
 
         test_strings = {
             "A": False,
@@ -620,7 +620,7 @@ class TestParser(unittest.TestCase):
             "A, C": True,
             "B, C": False
         }
-        self.base_test("a and (b or c)", test_strings)
+        self.base_test("a && (b || c)", test_strings)
 
         test_strings = {
             "A": True,
@@ -630,7 +630,7 @@ class TestParser(unittest.TestCase):
             "A, C": True,
             "B, C": True
         }
-        self.base_test("a or b and c", test_strings)
+        self.base_test("a || b && c", test_strings)
 
         test_strings = {
             "A": True,
@@ -640,7 +640,7 @@ class TestParser(unittest.TestCase):
             "A, C": True,
             "B, C": True
         }
-        self.base_test("a or (b and c)", test_strings)
+        self.base_test("a || (b && c)", test_strings)
 
         test_strings = {
             "A": False,
@@ -650,16 +650,16 @@ class TestParser(unittest.TestCase):
             "A, C": True,
             "B, C": True
         }
-        self.base_test("(a or b) and c", test_strings)
+        self.base_test("(a || b) && c", test_strings)
 
     def test_logical_negation(self):
-        expression = QueryParser("~a")
+        expression = QueryHandler("~a")
         hed_string = HedString("A", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
         hed_string = HedString("B", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
 
-        expression = QueryParser("~a and b")
+        expression = QueryHandler("~a && b")
         hed_string = HedString("A", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
         hed_string = HedString("B", self.hed_schema)
@@ -667,7 +667,7 @@ class TestParser(unittest.TestCase):
         hed_string = HedString("A, B", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), False)
 
-        expression = QueryParser("~( (a or b) and c)")
+        expression = QueryHandler("~( (a || b) && c)")
         hed_string = HedString("A", self.hed_schema)
         self.assertEqual(bool(expression.search(hed_string)), True)
         hed_string = HedString("B", self.hed_schema)
@@ -711,7 +711,7 @@ class TestParser(unittest.TestCase):
             "(A, B, (C)), D": False,
             "(A, B, (C)), (D), E": False,
         }
-        self.base_test("@B and C", test_strings)
+        self.base_test("@B && C", test_strings)
 
     def test_not_in_line3(self):
         test_strings = {
@@ -728,24 +728,24 @@ class TestParser(unittest.TestCase):
             "(A, B, (C)), D": True,
             "(A, B, (C)), (D), E": True,
         }
-        self.base_test("@C or B", test_strings)
+        self.base_test("@C || B", test_strings)
 
     def test_optional_exact_group(self):
         test_strings = {
             "(A, C)": True,
         }
-        self.base_test("{a and (b or c)}", test_strings)
+        self.base_test("{a && (b || c)}", test_strings)
 
         test_strings = {
             "(A, B, C, D)": True,
         }
-        self.base_test("{a and b: c and d}", test_strings)
+        self.base_test("{a && b: c && d}", test_strings)
 
         test_strings = {
             "(A, B, C)": True,
             "(A, B, C, D)": False,
         }
-        self.base_test("{a and b: c or d}", test_strings)
+        self.base_test("{a && b: c || d}", test_strings)
 
         test_strings = {
             "(A, C)": True,
@@ -753,7 +753,7 @@ class TestParser(unittest.TestCase):
             "(A, B, C)": False,
             "(A, B, C, D)": False,
         }
-        self.base_test("{a or b: c or d}", test_strings)
+        self.base_test("{a || b: c || d}", test_strings)
 
         test_strings = {
             "(Onset, (Def-expand/taco))": True,
@@ -766,9 +766,9 @@ class TestParser(unittest.TestCase):
             "Onset, (Def-expand/taco), (Label/OnsetContents)": False,
             "(Onset, (Def-expand/taco), Label/OnsetContents)": False,
         }
-        self.base_test("{(Onset or Offset), (Def or {Def-expand}): ???}", test_strings)
+        self.base_test("{(Onset || Offset), (Def || {Def-expand}): ???}", test_strings)
         test_strings = {
             "(A, B)": True,
             "(A, B, C)": True
         }
-        self.base_test("{a or b}", test_strings)
+        self.base_test("{a || b}", test_strings)

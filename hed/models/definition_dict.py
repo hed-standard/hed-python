@@ -1,3 +1,4 @@
+""" Definition handler class. """
 from hed.models.definition_entry import DefinitionEntry
 from hed.models.hed_string import HedString
 from hed.errors.error_types import DefinitionErrors
@@ -7,9 +8,7 @@ from hed.schema.hed_schema_constants import HedKey
 
 
 class DefinitionDict:
-    """ Gathers definitions from a single source.
-
-    """
+    """ Gathers definitions from a single source. """
 
     def __init__(self, def_dicts=None, hed_schema=None):
         """ Definitions to be considered a single source.
@@ -20,26 +19,28 @@ class DefinitionDict:
             hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
         :raises TypeError:
-            - Bad type passed as def_dicts
+            - Bad type passed as def_dicts.
         """
 
         self.defs = {}
-        self._label_tag_name = DefTagNames.DEF_KEY
         self._issues = []
         if def_dicts:
             self.add_definitions(def_dicts, hed_schema)
 
     def add_definitions(self, def_dicts, hed_schema=None):
-        """ Add definitions from dict(s) to this dict.
+        """ Add definitions from dict(s) or strings(s) to this dict.
 
         Parameters:
-            def_dicts (list, DefinitionDict, or dict): DefinitionDict or list of DefinitionDicts/strings/dicts whose
-                                                definitions should be added.
-                                        Note dict form expects DefinitionEntries in the same form as a DefinitionDict
+            def_dicts (list, DefinitionDict, dict, or str): DefinitionDict or list of DefinitionDicts/strings/dicts
+                                                            whose definitions should be added.
             hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
+        Note - dict form expects DefinitionEntries in the same form as a DefinitionDict
+                Note - str or list of strings will parse the strings using the hed_schema.
+                Note - You can mix and match types, eg [DefinitionDict, str, list of str] would be valid input.
+
         :raises TypeError:
-            - Bad type passed as def_dicts
+            - Bad type passed as def_dicts.
         """
         if not isinstance(def_dicts, list):
             def_dicts = [def_dicts]
@@ -83,7 +84,7 @@ class DefinitionDict:
         Returns:
             DefinitionEntry:  Definition entry for the requested definition.
         """
-        return self.defs.get(def_name.lower())
+        return self.defs.get(def_name.casefold())
 
     def __iter__(self):
         return iter(self.defs)
@@ -92,25 +93,25 @@ class DefinitionDict:
         return len(self.defs)
 
     def items(self):
-        """ Returns the dictionary of definitions
+        """ Return the dictionary of definitions.
 
             Alias for .defs.items()
 
         Returns:
-            def_entries({str: DefinitionEntry}): A list of definitions
+            def_entries({str: DefinitionEntry}): A list of definitions.
         """
         return self.defs.items()
 
     @property
     def issues(self):
-        """Returns issues about duplicate definitions."""
+        """Return issues about duplicate definitions."""
         return self._issues
 
     def check_for_definitions(self, hed_string_obj, error_handler=None):
         """ Check string for definition tags, adding them to self.
 
         Parameters:
-            hed_string_obj (HedString): A single hed string to gather definitions from.
+            hed_string_obj (HedString): A single HED string to gather definitions from.
             error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
 
         Returns:
@@ -143,25 +144,25 @@ class DefinitionDict:
                 def_issues += new_def_issues
                 continue
 
-            self.defs[def_tag_name.lower()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
-                                                              takes_value=def_takes_value,
-                                                              source_context=context)
+            self.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
+                                                                 takes_value=def_takes_value,
+                                                                 source_context=context)
 
         return def_issues
 
     def _strip_value_placeholder(self, def_tag_name):
-        def_takes_value = def_tag_name.lower().endswith("/#")
+        def_takes_value = def_tag_name.endswith("/#")
         if def_takes_value:
             def_tag_name = def_tag_name[:-len("/#")]
         return def_tag_name, def_takes_value
 
     def _validate_name_and_context(self, def_tag_name, error_handler):
         if error_handler:
-            context = error_handler.get_error_context_copy()
+            context = error_handler.error_context
         else:
             context = []
         new_def_issues = []
-        if def_tag_name.lower() in self.defs:
+        if def_tag_name.casefold() in self.defs:
             new_def_issues += ErrorHandler.format_error_with_context(error_handler,
                                                                      DefinitionErrors.DUPLICATE_DEFINITION,
                                                                      def_name=def_tag_name)
@@ -249,30 +250,22 @@ class DefinitionDict:
 
         return issues
 
-    def construct_def_tags(self, hed_string_obj):
-        """ Identify def/def-expand tag contents in the given string.
+    def get_definition_entry(self, def_tag):
+        """ Get the entry for a given def tag.
+
+            Does not validate at all.
 
         Parameters:
-            hed_string_obj(HedString): The hed string to identify definition contents in
-        """
-        for tag in hed_string_obj.get_all_tags():
-            self.construct_def_tag(tag)
+            def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
 
-    def construct_def_tag(self, hed_tag):
-        """ Identify def/def-expand tag contents in the given HedTag.
-
-        Parameters:
-            hed_tag(HedTag): The hed tag to identify definition contents in
+        Returns:
+            def_entry(DefinitionEntry or None): The definition entry if it exists
         """
-        # Finish tracking down why parent is set incorrectly on def tags sometimes
-        # It should be ALWAYS set
-        if hed_tag.short_base_tag in {DefTagNames.DEF_ORG_KEY, DefTagNames.DEF_EXPAND_ORG_KEY}:
-            save_parent = hed_tag._parent
-            def_contents = self._get_definition_contents(hed_tag)
-            hed_tag._parent = save_parent
-            if def_contents is not None:
-                hed_tag._expandable = def_contents
-                hed_tag._expanded = hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_ORG_KEY
+        tag_label, _, placeholder = def_tag.extension.partition('/')
+
+        label_tag_lower = tag_label.casefold()
+        def_entry = self.defs.get(label_tag_lower)
+        return def_entry
 
     def _get_definition_contents(self, def_tag):
         """ Get the contents for a given def tag.
@@ -288,7 +281,7 @@ class DefinitionDict:
         """
         tag_label, _, placeholder = def_tag.extension.partition('/')
 
-        label_tag_lower = tag_label.lower()
+        label_tag_lower = tag_label.casefold()
         def_entry = self.defs.get(label_tag_lower)
         if def_entry is None:
             # Could raise an error here?
@@ -305,7 +298,7 @@ class DefinitionDict:
             def_dict(DefinitionDict or dict): A dict of definitions
 
         Returns:
-            dict(str: str): definition name and contents
+            dict(str): definition name and contents
         """
         if isinstance(def_dict, DefinitionDict):
             def_dict = def_dict.defs

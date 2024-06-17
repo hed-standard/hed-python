@@ -1,4 +1,4 @@
-""" Representation of a file dictionary keyed by entity indices. """
+""" A file dictionary keyed by entity indices. """
 import os
 from hed.errors.exceptions import HedFileError
 
@@ -38,7 +38,7 @@ class FileDictionary:
 
     @property
     def name(self):
-        """ Name of this dictionary"""
+        """ Name of this dictionary. """
         return self.collection_name
 
     @property
@@ -92,10 +92,10 @@ class FileDictionary:
             yield key, file
 
     def key_diffs(self, other_dict):
-        """ Return symmetric key difference with other.
+        """ Return symmetric key difference with another dict.
 
         Parameters:
-            other_dict (FileDictionary)  A file dictionary object
+            other_dict (FileDictionary)  A file dictionary object.
 
         Returns:
             list: The symmetric difference of the keys in this dictionary and the other one.

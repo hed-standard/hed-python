@@ -1,3 +1,6 @@
+"""
+Classes to resolve ambiguities, gather, expand definitions.
+"""
 import pandas as pd
 from hed.models.definition_dict import DefinitionDict
 from hed.models.definition_entry import DefinitionEntry
@@ -5,6 +8,7 @@ from hed.models.hed_string import HedString
 
 
 class AmbiguousDef:
+    """ Determine whether expanded definitions are consistent. """
     def __init__(self):
         self.actual_defs = []
         self.placeholder_defs = []
@@ -22,7 +26,7 @@ class AmbiguousDef:
         self.placeholder_defs.append(group_tag)
 
     def validate(self):
-        """Validate the given ambiguous definition
+        """ Validate the given ambiguous definition.
 
         Returns:
             bool: True if this is a valid definition with exactly 1 placeholder.
@@ -48,7 +52,7 @@ class AmbiguousDef:
 
     @staticmethod
     def _get_matching_value(tags):
-        """Get the matching value for a set of HedTag extensions.
+        """ Get the matching value for a set of HedTag extensions.
 
         Parameters:
             tags (iterator): The list of HedTags to find a matching value for.
@@ -81,13 +85,13 @@ class AmbiguousDef:
 
 
 class DefExpandGatherer:
-    """Class for gathering definitions from a series of def-expands, including possibly ambiguous ones"""
+    """ Gather definitions from a series of def-expands, including possibly ambiguous ones. """
     def __init__(self, hed_schema, known_defs=None, ambiguous_defs=None, errors=None):
         """Initialize the DefExpandGatherer class.
 
         Parameters:
             hed_schema (HedSchema): The HED schema to be used for processing.
-            known_defs (dict, optional): A dictionary of known definitions.
+            known_defs (str or list or DefinitionDict): A dictionary of known definitions.
             ambiguous_defs (dict, optional): A dictionary of ambiguous def-expand definitions.
 
         """
@@ -151,54 +155,54 @@ class DefExpandGatherer:
 
         if def_group_contents:
             if def_group_contents != def_expand_group:
-                self.errors.setdefault(def_tag_name.lower(), []).append(def_expand_group.get_first_group())
+                self.errors.setdefault(def_tag_name.casefold(), []).append(def_expand_group.get_first_group())
             return True
 
         has_extension = "/" in def_tag.extension
         if not has_extension:
             group_tag = def_expand_group.get_first_group()
-            self.def_dict.defs[def_tag_name.lower()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
-                                                                       takes_value=False,
-                                                                       source_context=[])
+            self.def_dict.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=group_tag,
+                                                                          takes_value=False,
+                                                                          source_context=[])
             return True
 
         # this is needed for the cases where we have a definition with errors, but it's not a known definition.
-        if def_tag_name.lower() in self.errors:
-            self.errors.setdefault(f"{def_tag_name.lower()}", []).append(def_expand_group.get_first_group())
+        if def_tag_name.casefold() in self.errors:
+            self.errors.setdefault(f"{def_tag_name.casefold()}", []).append(def_expand_group.get_first_group())
             return True
 
         return False
 
     def _handle_ambiguous_definition(self, def_tag, def_expand_group):
-        """Handle ambiguous def-expand tag in a HED string.
+        """ Handle ambiguous def-expand tag in a HED string.
 
         Parameters:
             def_tag (HedTag): The def-expand tag.
             def_expand_group (HedGroup): The group containing the def-expand tag.
         """
         def_tag_name = def_tag.extension.split('/')[0]
-        these_defs = self.ambiguous_defs.setdefault(def_tag_name.lower(), AmbiguousDef())
+        these_defs = self.ambiguous_defs.setdefault(def_tag_name.casefold(), AmbiguousDef())
         these_defs.add_def(def_tag, def_expand_group)
 
         try:
             if these_defs.validate():
                 new_contents = these_defs.get_group()
-                self.def_dict.defs[def_tag_name.lower()] = DefinitionEntry(name=def_tag_name, contents=new_contents,
-                                                                           takes_value=True,
-                                                                           source_context=[])
-                del self.ambiguous_defs[def_tag_name.lower()]
-        except ValueError as e:
+                self.def_dict.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=new_contents,
+                                                                              takes_value=True,
+                                                                              source_context=[])
+                del self.ambiguous_defs[def_tag_name.casefold()]
+        except ValueError:
             for ambiguous_def in these_defs.placeholder_defs:
-                self.errors.setdefault(def_tag_name.lower(), []).append(ambiguous_def)
-            del self.ambiguous_defs[def_tag_name.lower()]
+                self.errors.setdefault(def_tag_name.casefold(), []).append(ambiguous_def)
+            del self.ambiguous_defs[def_tag_name.casefold()]
 
         return
 
     @staticmethod
     def get_ambiguous_group(ambiguous_def):
-        """Turns an entry in the ambiguous_defs dict into a single HedGroup
+        """Turn an entry in the ambiguous_defs dict into a single HedGroup.
 
         Returns:
-            HedGroup: the ambiguous definition with known placeholders filled in
+            HedGroup: The ambiguous definition with known placeholders filled in.
         """
         return ambiguous_def.get_group()

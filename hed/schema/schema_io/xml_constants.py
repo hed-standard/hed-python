@@ -1,3 +1,5 @@
+""" Constants used for the """
+
 from hed.schema.hed_schema_constants import HedSectionKey
 
 # These are only currently used by the XML reader/writer, but that may change.

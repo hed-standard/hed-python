@@ -7,7 +7,7 @@
           "stop": "A blue square is displayed to indicate stopping"
        },
        "HED": {
-          "go": "Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See",
+          "go": "Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/Hear",
           "stop": "Property/Sensory-property/Sensory-attribute/Visual-attribute/Color/CSS-color/White-color/Azure"
        }
    },
@@ -15,7 +15,7 @@
        "LongName": "Response time after stimulus",
        "Description": "Time from stimulus presentation until subject presses button",
        "Units": "ms",
-       "HED": "({stim_file}, Event), Visual-attribute/Color/CSS-color/White-color/Azure,Action/Perceive/See, Time-value/# s, {trial_type}"
+       "HED": "({stim_file}, Event), Visual-attribute/Color/CSS-color/Yellow-color/Gold,Action/Perceive/See, Time-value/# s, {trial_type}"
    },
    "stim_file": {
        "LongName": "Stimulus file name",

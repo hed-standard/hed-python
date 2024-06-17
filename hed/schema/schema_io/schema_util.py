@@ -1,11 +1,13 @@
 """ Utilities for writing content to files and for other file manipulation."""
 
-import shutil
 import tempfile
 import os
 import urllib.request
 from xml.dom import minidom
 from xml.etree import ElementTree
+from semantic_version import Version
+
+from hed.errors import HedExceptions, ErrorContext
 
 # you can fill this in locally if you don't want to add it to environ.
 github_api_access_token = ""
@@ -29,7 +31,7 @@ def make_url_request(resource_url, try_authenticate=True):
 
     Parameters:
         resource_url (str): The url to retrieve.
-        try_authenticate (bool): If true add the above credentials.
+        try_authenticate (bool): If True add the above credentials.
 
     Returns:
         url_request
@@ -72,65 +74,7 @@ def url_to_string(resource_url):
     return url_data
 
 
-def write_strings_to_file(output_strings, extension=None):
-    """ Write output strings to a temporary file.
-
-    Parameters:
-        output_strings ([str], str):  Strings to output one per line.
-        extension (str):              File extension of the temporary file.
-
-    Returns:
-        file: Opened temporary file.
-
-    """
-    if isinstance(output_strings, str):
-        output_strings = [output_strings]
-    with tempfile.NamedTemporaryFile(suffix=extension, delete=False, mode='w', encoding='utf-8') as opened_file:
-        for string in output_strings:
-            opened_file.write(string)
-            opened_file.write('\n')
-        return opened_file.name
-
-
-def move_file(input_path, target_path):
-    """
-    If target_path is not empty, move input file to target file
-
-    Parameters:
-        input_path(str): Path to an existing file
-        target_path(str or None): Path to move this file to
-                                  If None, the function does nothing and returns input_path
-
-    Returns:
-        filepath(str): the original or moved filepath
-    """
-    if target_path:
-        directory = os.path.dirname(target_path)
-        if directory and not os.path.exists(directory):
-            os.makedirs(directory)
-        shutil.move(input_path, target_path)
-        return target_path
-    return input_path
-
-
-def write_xml_tree_2_xml_file(xml_tree, extension=".xml"):
-    """ Write an XML element tree object into an XML file.
-
-    Parameters:
-        xml_tree (Element):  An element representing an XML file.
-        extension (string):  The file extension to use for the temporary file.
-
-    Returns:
-        str:  Name of the temporary file.
-
-    """
-    with tempfile.NamedTemporaryFile(suffix=extension, mode='w', delete=False, encoding='utf-8') as hed_xml_file:
-        xml_string = _xml_element_2_str(xml_tree)
-        hed_xml_file.write(xml_string)
-        return hed_xml_file.name
-
-
-def _xml_element_2_str(elem):
+def xml_element_2_str(elem):
     """ Convert an XML element to an XML string.
 
     Parameters:
@@ -143,3 +87,41 @@ def _xml_element_2_str(elem):
     rough_string = ElementTree.tostring(elem, method='xml')
     parsed = minidom.parseString(rough_string)
     return parsed.toprettyxml(indent="   ")
+
+
+def schema_version_greater_equal(hed_schema, target_version):
+    """ Check if the given schema standard version is above target version
+
+    Parameters:
+        hed_schema (HedSchema or HedSchemaGroup): If a schema group, checks if any version is above.
+        target_version (str): The semantic version to check against
+
+    Returns:
+        bool: True if the version is above target_version
+              False if it is not, or it is ambiguous.
+    """
+    # Do exhaustive checks for now, assuming nothing
+    schemas = [hed_schema.schema_for_namespace(schema_namespace) for schema_namespace in hed_schema.valid_prefixes]
+    candidate_versions = [schema.with_standard for schema in schemas if schema.with_standard]
+    if not candidate_versions:
+        # Check for a standard schema(potentially, but unlikely, more than one)
+        for schema in schemas:
+            if schema.library == "":
+                candidate_versions.append(schema.version_number)
+    target_version = Version(target_version)
+    for version in candidate_versions:
+        if Version(version) >= target_version:
+            return True
+
+    return False
+
+
+def format_error(row_number, row, warning_message="Schema term is empty or the line is malformed",
+                 error_code=HedExceptions.GENERIC_ERROR):
+    error = {'code': error_code,
+             ErrorContext.ROW: row_number,
+             ErrorContext.LINE: str(row),
+             "message": f"{warning_message}"
+             }
+
+    return [error]

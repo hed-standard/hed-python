@@ -6,10 +6,17 @@ import pandas as pd
 import json
 from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_io import load_schema_version
-from hed.schema import HedSchema, HedSchemaGroup
+from hed.schema.hed_schema import HedSchema
+from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.remodeling.operations.valid_operations import valid_operations
-from hed.tools.util.io_util import clean_filename, extract_suffix_path, get_timestamp
+from hed.tools.util import io_util
+
+# This isn't supported in all versions of pandas
+try:
+    pd.set_option('future.no_silent_downcasting', True)
+except pd.errors.OptionError:
+    pass
 
 
 class Dispatcher:
@@ -22,7 +29,7 @@ class Dispatcher:
         """ Constructor for the dispatcher.
 
         Parameters:
-            operation_list (list): List of unparsed operations.
+            operation_list (list): List of valid unparsed operations.
             data_root (str or None):  Root directory for the dataset. If none, then backups are not made.
             hed_versions (str, list, HedSchema, or HedSchemaGroup): The HED schema.
 
@@ -31,8 +38,8 @@ class Dispatcher:
 
         :raises ValueError:
             - If any of the operations cannot be parsed correctly.
-
         """
+
         self.data_root = data_root
         self.backup_name = backup_name
         self.backup_man = None
@@ -42,11 +49,7 @@ class Dispatcher:
                 raise HedFileError("BackupDoesNotExist",
                                    f"Remodeler cannot be run with a dataset without first creating the "
                                    f"{self.backup_name} backup for {self.data_root}", "")
-        op_list, errors = self.parse_operations(operation_list)
-        if errors:
-            these_errors = self.errors_to_str(errors, 'Dispatcher failed due to invalid operations')
-            raise ValueError("InvalidOperationList", f"{these_errors}")
-        self.parsed_ops = op_list
+        self.parsed_ops = self.parse_operations(operation_list)
         self.hed_schema = self.get_schema(hed_versions)
         self.summary_dicts = {}
 
@@ -58,16 +61,15 @@ class Dispatcher:
 
         Returns:
             list: A list of dictionaries of summaries keyed to filenames.
-
         """
 
         summary_list = []
-        time_stamp = '_' + get_timestamp()
+        time_stamp = '_' + io_util.get_timestamp()
         for context_name, context_item in self.summary_dicts.items():
             file_base = context_item.op.summary_filename
             if self.data_root:
-                file_base = extract_suffix_path(self.data_root, file_base)
-            file_base = clean_filename(file_base)
+                file_base = io_util.extract_suffix_path(self.data_root, file_base)
+            file_base = io_util.clean_filename(file_base)
             for file_format in file_formats:
                 if file_format == '.txt':
                     summary = context_item.get_text_summary(individual_summaries="consolidated")
@@ -93,15 +95,15 @@ class Dispatcher:
         :raises HedFileError:
             - If a valid file cannot be found.
 
-        Notes:  
+        Notes:
             - If a string is passed and there is a backup manager,
               the string must correspond to the full path of the file in the original dataset.
-              In this case, the corresponding backup file is read and returned.    
+              In this case, the corresponding backup file is read and returned.
             - If a string is passed and there is no backup manager,
-              the data file corresponding to the file_designator is read and returned.    
-            - If a Pandas DataFrame, return a copy.   
-
+              the data file corresponding to the file_designator is read and returned.
+            - If a Pandas DataFrame, return a copy.
         """
+
         if isinstance(file_designator, pd.DataFrame):
             return file_designator.copy()
         if self.backup_man:
@@ -124,7 +126,6 @@ class Dispatcher:
 
         :raises HedFileError:
             - If this dispatcher does not have a data_root.
-
         """
 
         if self.data_root:
@@ -135,13 +136,12 @@ class Dispatcher:
         """ Run the dispatcher operations on a file.
 
         Parameters:
-            file_path (str or DataFrame):    Full path of the file to be remodeled or a DataFrame
+            file_path (str or DataFrame):    Full path of the file to be remodeled or a DataFrame.
             sidecar (Sidecar or file-like):   Only needed for HED operations.
-            verbose (bool):  If true, print out progress reports
+            verbose (bool):  If True, print out progress reports.
 
         Returns:
             DataFrame:  The processed dataframe.
-
         """
 
         # string to functions
@@ -168,11 +168,11 @@ class Dispatcher:
             The summaries are saved in the dataset derivatives/remodeling folder if no save_dir is provided.
 
         Notes:
-            - "consolidated" means that the overall summary and summaries of individual files are in one summary file.  
+            - "consolidated" means that the overall summary and summaries of individual files are in one summary file.
             - "individual" means that the summaries of individual files are in separate files.
             - "none" means that only the overall summary is produced.
-
         """
+
         if not save_formats:
             return
         if not summary_dir:
@@ -183,53 +183,45 @@ class Dispatcher:
 
     @staticmethod
     def parse_operations(operation_list):
-        errors = []
+        """ Return a parsed a list of remodeler operations.
+
+        Parameters:
+            operation_list (list): List of JSON remodeler operations.
+
+        Returns:
+            list: List of Python objects containing parsed remodeler operations.
+        """
+
         operations = []
         for index, item in enumerate(operation_list):
-            try:
-                if not isinstance(item, dict):
-                    raise TypeError("InvalidOperationFormat",
-                                    f"Each operations must be a dictionary but operation {str(item)} is {type(item)}")
-                if "operation" not in item:
-                    raise KeyError("MissingOperation",
-                                   f"operation {str(item)} does not have a operation key")
-                if "parameters" not in item:
-                    raise KeyError("MissingParameters",
-                                   f"Operation {str(item)} does not have a parameters key")
-                if item["operation"] not in valid_operations:
-                    raise KeyError("OperationNotListedAsValid",
-                                   f"Operation {item['operation']} must be added to operations_list "
-                                   f"before it can be executed.")
-                new_operation = valid_operations[item["operation"]](item["parameters"])
-                operations.append(new_operation)
-            except Exception as ex:
-                errors.append({"index": index, "item": f"{item}", "error_type": type(ex),
-                               "error_code": ex.args[0], "error_msg": ex.args[1]})
-        if errors:
-            return [], errors
-        return operations, []
+            new_operation = valid_operations[item["operation"]](item["parameters"])
+            operations.append(new_operation)
+        return operations
 
     @staticmethod
     def prep_data(df):
-        """ Make a copy and replace all n/a entries in the data frame by np.NaN for processing.
+        """ Make a copy and replace all n/a entries in the data frame by np.nan for processing.
 
         Parameters:
             df (DataFrame) - The DataFrame to be processed.
-
         """
-        return df.replace('n/a', np.NaN)
+
+        result = df.replace('n/a', np.nan)
+        # Comment in the next line if this behavior was actually needed, but I don't think it is.
+        # result = result.infer_objects(copy=False)
+        return result
 
     @staticmethod
     def post_proc_data(df):
-        """ Replace all nan entries with 'n/a' for BIDS compliance
+        """ Replace all nan entries with 'n/a' for BIDS compliance.
 
         Parameters:
             df (DataFrame): The DataFrame to be processed.
 
         Returns:
-            DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'
-
+            DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'.
         """
+
         dtypes = df.dtypes.to_dict()
         for col_name, typ in dtypes.items():
             if typ == 'category':
@@ -238,7 +230,18 @@ class Dispatcher:
 
     @staticmethod
     def errors_to_str(messages, title="", sep='\n'):
-        error_list = [0]*len(messages)
+        """ Return an error string representing error messages in a list.
+
+        Parameters:
+            messages (list):  List of error dictionaries each representing a single error.
+            title (str):  If provided the title is concatenated at the top.
+            sep (str): Character used between lines in concatenation.
+
+        Returns:
+            str:  Single string representing the messages.
+        """
+
+        error_list = [0] * len(messages)
         for index, message in enumerate(messages):
             error_list[index] = f"Operation[{message.get('index', None)}] " + \
                                 f"has error:{message.get('error_type', None)}" + \
@@ -251,6 +254,15 @@ class Dispatcher:
 
     @staticmethod
     def get_schema(hed_versions):
+        """ Return the schema objects represented by the hed_versions.
+
+        Parameters:
+            hed_versions (str, list, HedSchema, HedSchemaGroup): If str, interpreted as a version number.
+
+        Returns:
+             HedSchema or HedSchemaGroup: Objects loaded from the hed_versions specification.
+        """
+
         if not hed_versions:
             return None
         elif isinstance(hed_versions, str) or isinstance(hed_versions, list):

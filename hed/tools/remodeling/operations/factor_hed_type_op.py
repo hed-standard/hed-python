@@ -1,31 +1,46 @@
-""" Create tabular file factors from type variables. """
+""" Append to columnar file the factors computed from type variables. """
 
 import pandas as pd
-import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_type_manager import HedTypeManager
-
-# TODO: restricted factor values are not implemented yet.
+from hed.tools.util.data_util import replace_na
 
 
 class FactorHedTypeOp(BaseOp):
-    """ Create tabular file factors from type variables and append to tabular data.
+    """ Append to columnar file the factors computed from type variables.
 
-    Required remodeling parameters:   
-        - **type_tag** (*str*): HED tag used to find the factors (most commonly `condition-variable`).   
-        - **type_values** (*list*): Factor values to include. If empty all values of that type_tag are used.   
+    Required remodeling parameters:
+        - **type_tag** (*str*): HED tag used to find the factors (most commonly `condition-variable`).
+
+    Optional remodeling parameters:
+        - **type_values** (*list*): If provided, specifies which factor values to include.
 
     """
+    NAME = "factor_hed_type"
 
     PARAMS = {
-        "operation": "factor_hed_type",
-        "required_parameters": {
-            "type_tag": str,
-            "type_values": list
+        "type": "object",
+        "properties": {
+            "type_tag": {
+                "type": "string",
+                "description": "Type tag to use for computing factor vectors (e.g., Condition-variable or Task)."
+            },
+            "type_values": {
+                "type": "array",
+                "description": "If provided, only compute one-hot factors for these values of the type tag.",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "type_tag"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -34,20 +49,10 @@ class FactorHedTypeOp(BaseOp):
         Parameters:
             parameters (dict):  Actual values of the parameters for the operation.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
-        :raises ValueError:
-            - If the specification is missing a valid operation.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.type_tag = parameters["type_tag"]
-        self.type_values = parameters["type_values"]
+        self.type_values = parameters.get("type_values", None)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Factor columns based on HED type and append to tabular data.
@@ -66,14 +71,21 @@ class FactorHedTypeOp(BaseOp):
 
         """
 
-        input_data = TabularInput(df, sidecar=sidecar, name=name)
-        df_list = [input_data.dataframe.copy()]
-        var_manager = HedTypeManager(EventManager(input_data, dispatcher.hed_schema))
-        var_manager.add_type(self.type_tag.lower())
+        input_data = TabularInput(df.copy().fillna('n/a'), sidecar=sidecar, name=name)
+        df_list = [input_data.dataframe]
+        var_manager = HedTypeManager(
+            EventManager(input_data, dispatcher.hed_schema))
+        var_manager.add_type(self.type_tag.casefold())
 
-        df_factors = var_manager.get_factor_vectors(self.type_tag, self.type_values, factor_encoding="one-hot")
+        df_factors = var_manager.get_factor_vectors(
+            self.type_tag, self.type_values, factor_encoding="one-hot")
         if len(df_factors.columns) > 0:
             df_list.append(df_factors)
         df_new = pd.concat(df_list, axis=1)
-        df_new.replace('n/a', np.NaN, inplace=True)
+        replace_na(df_new)
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        return []

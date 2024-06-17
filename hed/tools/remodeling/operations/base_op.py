@@ -1,71 +1,30 @@
 """ Base class for remodeling operations. """
 
+from abc import ABC, abstractmethod
 
-class BaseOp:
-    """ Base class for operations. All remodeling operations should extend this class.
 
-    The base class holds the parameters and does basic parameter checking against the operation's specification.
+class BaseOp(ABC):
+    """ Base class for operations. All remodeling operations should extend this class."""
 
-    """
-
-    def __init__(self, op_spec, parameters):
-        """ Base class constructor for operations.
+    def __init__(self, parameters):
+        """ Constructor for the BaseOp class. Should be extended by operations.
 
         Parameters:
-            op_spec (dict): Specification for required and optional parameters.
-            parameters (dict):  Actual values of the parameters for the operation.
-
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
-        :raises ValueError:
-            - If the specification is missing a valid operation.
-
+            parameters (dict): A dictionary specifying the appropriate parameters for the operation.
         """
-        self.operation = op_spec.get("operation", "")
-        if not self.operation:
-            raise ValueError("OpMustHaveOperation", "Op must have operation is empty")
-        self.required_params = op_spec.get("required_parameters", {})
-        self.optional_params = op_spec.get("optional_parameters", {})
-        self.check_parameters(parameters)
+        self.parameters = parameters
 
-    def check_parameters(self, parameters):
-        """ Verify that the parameters meet the operation specification.
+    @property
+    @abstractmethod
+    def NAME(self):
+        pass
 
-        Parameters:
-            parameters (dict): Dictionary of parameters for this operation.
+    @property
+    @abstractmethod
+    def PARAMS(self):
+        pass
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
-        """
-
-        required = set(self.required_params.keys())
-        required_missing = required.difference(set(parameters.keys()))
-        if required_missing:
-            raise KeyError("MissingRequiredParameters",
-                           f"{self.operation} requires parameters {list(required_missing)}")
-        for param_name, param_value in parameters.items():
-            if param_name in self.required_params:
-                param_type = self.required_params[param_name]
-            elif param_name in self.optional_params:
-                param_type = self.optional_params[param_name]
-            else:
-                raise KeyError("BadParameter",
-                               f"{param_name} not a required or optional parameter for {self.operation}")
-            if isinstance(param_type, list):
-                self._check_list_type(param_value, param_type)
-            elif not isinstance(param_value, param_type):
-                raise TypeError("BadType", f"{param_value} has type {type(param_value)} not {param_type}")
-
+    @abstractmethod
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Base class method to be overridden by each operation.
 
@@ -80,19 +39,14 @@ class BaseOp:
         return df.copy()
 
     @staticmethod
-    def _check_list_type(param_value, param_type):
-        """ Check a parameter value against its specified type.
+    @abstractmethod
+    def validate_input_data(parameters):
+        """ Validates whether operation parameters meet op-specific criteria beyond that captured in json schema.
 
-        Parameters:
-            param_value (any):   The value to be checked.
-            param_type (any):    Class to check the param_value against.
+        Example: A check to see whether two input arrays are the same length.
 
-        :raises TypeError:
-            - If param_value is not an instance of param_type.
-
+        Notes: The minimum implementation should return an empty list to indicate no errors were found.
+               If additional validation is necessary, method should perform the validation and
+               return a list with user-friendly error strings.
         """
-
-        for this_type in param_type:
-            if isinstance(param_value, this_type):
-                return
-        raise TypeError("BadType", f"{param_value} has type {type(param_value)} which is not in {str(param_type)}")
+        return []

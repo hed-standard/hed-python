@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class HedSectionKey(Enum):
-    """ Kegs designating specific sections in a HedSchema object.
+    """ Keys designating specific sections in a HedSchema object.
     """
     # overarching category listing all tags
     Tags = 'tags'
@@ -43,15 +43,7 @@ class HedKey:
     Rooted = "rooted"
     DeprecatedFrom = "deprecatedFrom"
     ConversionFactor = "conversionFactor"
-
-    # All known properties
-    BoolProperty = 'boolProperty'
-    UnitClassProperty = 'unitClassProperty'
-    UnitProperty = 'unitProperty'
-    UnitModifierProperty = 'unitModifierProperty'
-    ValueClassProperty = 'valueClassProperty'
-    ElementProperty = 'elementProperty'
-    IsInheritedProperty = 'isInheritedProperty'
+    Reserved = "reserved"
 
     SIUnit = 'SIUnit'
     UnitSymbol = 'unitSymbol'
@@ -67,6 +59,35 @@ class HedKey:
 
     # Node attributes
     InLibrary = "inLibrary"
+    HedID = 'hedId'
+
+    UnitClassDomain = "unitClassDomain"
+    UnitDomain = "unitDomain"
+    UnitModifierDomain = "unitModifierDomain"
+    ValueClassDomain = "valueClassDomain"
+    ElementDomain = "elementDomain"
+    TagDomain = "tagDomain"
+    AnnotationProperty = "annotationProperty"
+
+    BoolRange = "boolRange"
+    TagRange = "tagRange"
+    NumericRange = "numericRange"
+    StringRange = "stringRange"
+    UnitClassRange = "unitClassRange"
+    UnitRange = "unitRange"
+    ValueClassRange = "valueClassRange"
+
+
+class HedKeyOld:
+    # Fully Deprecated properties
+    BoolProperty = 'boolProperty'
+    UnitClassProperty = 'unitClassProperty'
+    UnitProperty = 'unitProperty'
+    UnitModifierProperty = 'unitModifierProperty'
+    ValueClassProperty = 'valueClassProperty'
+    ElementProperty = 'elementProperty'
+    NodeProperty = 'nodeProperty'
+    IsInheritedProperty = 'isInheritedProperty'
 
 
 VERSION_ATTRIBUTE = 'version'
@@ -85,3 +106,54 @@ valid_header_attributes = {
     NO_LOC_ATTRIB,
     UNMERGED_ATTRIBUTE
 }
+
+character_types = {
+    "ascii": set([chr(x) for x in range(0, 127)]),
+    "nonascii": "nonascii",  # Special case for all other printable unicode characters
+    "printable": set([chr(x) for x in range(32, 127)]),
+    "lowercase": set("abcdefghijklmnopqrstuvwxyz"),
+    "uppercase": set("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+    "digits": set("0123456789"),
+    "tab": set("\t"),
+    "newline": set("\n"),
+    "blank": set(" "),
+    "exclamation": set("!"),
+    "double-quote": set('"'),
+    "number-sign": set("#"),
+    "dollar": set("$"),
+    "percent-sign": set("%"),
+    "ampersand": set("&"),
+    "single-quote": set("'"),
+    "left-paren": set("("),
+    "right-paren": set(")"),
+    "asterisk": set("*"),
+    "plus": set("+"),
+    "comma": set(","),
+    "hyphen": set("-"),
+    "period": set("."),
+    "slash": set("/"),
+    "colon": set(":"),
+    "semicolon": set(";"),
+    "less-than": set("<"),
+    "equals": set("="),
+    "greater-than": set(">"),
+    "question-mark": set("?"),
+    "at-sign": set("@"),
+    "backslash": set("\\"),
+    "caret": set("^"),
+    "underscore": set("_"),
+    "vertical-bar": set("|"),
+    "tilde": set("~"),
+}
+
+banned_delimiters = set(",[]{}")
+
+# Compound types
+character_types["letters"] = character_types["lowercase"] | character_types["uppercase"]
+character_types["alphanumeric"] = character_types["letters"] | character_types["digits"]
+character_types["text"] = character_types["printable"].copy()
+character_types["text"].add("nonascii")
+character_types["text"] -= banned_delimiters
+character_types["name"] = (character_types["alphanumeric"] | character_types["hyphen"] |
+                           character_types["period"] | character_types["underscore"])
+character_types["name"].add("nonascii")

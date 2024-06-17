@@ -1,14 +1,14 @@
-""" Summarize the contents of tabular files. """
+""" Summarize the contents of columnar files. """
 
 
 import json
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.data_util import get_new_dataframe
-from hed.tools.analysis.annotation_util import generate_sidecar_entry
+from hed.tools.util import data_util
+from hed.tools.analysis import annotation_util
 
 
 class TabularSummary:
-    """ Summarize the contents of tabular files. """
+    """ Summarize the contents of columnar files. """
 
     def __init__(self, value_cols=None, skip_cols=None, name=''):
         """ Constructor for a BIDS tabular file summary.
@@ -38,6 +38,8 @@ class TabularSummary:
         self.files = {}
 
     def __str__(self):
+        """ Return a str version of this summary.
+        """
         indent = "   "
         summary_list = [f"Summary for column dictionary {self.name}:"]
         sorted_keys = sorted(self.categorical_info.keys())
@@ -56,18 +58,29 @@ class TabularSummary:
         return "\n".join(summary_list)
 
     def extract_sidecar_template(self):
-        """ Extract a BIDS sidecar-compatible dictionary."""
+        """ Extract a BIDS sidecar-compatible dictionary.
+
+        Returns:
+            dict: A sidecar template that can be converted to JSON.
+
+        """
         side_dict = {}
         for column_name, columns in self.categorical_info.items():
             column_values = list(columns.keys())
             column_values.sort()
-            side_dict[column_name] = generate_sidecar_entry(column_name, column_values)
+            side_dict[column_name] = annotation_util.generate_sidecar_entry(column_name, column_values)
 
         for column_name in self.value_info.keys():
-            side_dict[column_name] = generate_sidecar_entry(column_name, [])
+            side_dict[column_name] = annotation_util.generate_sidecar_entry(column_name, [])
         return side_dict
 
     def get_summary(self, as_json=False):
+        """ Return the summary in dictionary format.
+
+        Parameters:
+            as_json (bool): If False, return as a Python dictionary, otherwise convert to a JSON dictionary.
+
+        """
         sorted_keys = sorted(self.categorical_info.keys())
         categorical_cols = {}
         for key in sorted_keys:
@@ -114,7 +127,7 @@ class TabularSummary:
 
         Parameters:
             data (DataFrame, str, or list):    DataFrame containing data to update.
-            name (str): Name of the summary
+            name (str): Name of the summary.
 
         """
 
@@ -146,6 +159,13 @@ class TabularSummary:
         self._update_dict_categorical(tab_sum)
 
     def _update_categorical(self, tab_name, values):
+        """ Update the categorical information for this summary.
+
+        Parameters:
+            tab_name (str): Name of a key indicating a categorical column.
+            values (dict): A dictionary whose keys are unique categorical values.
+
+        """
         if tab_name not in self.categorical_info:
             self.categorical_info[tab_name] = {}
 
@@ -157,7 +177,14 @@ class TabularSummary:
             total_values[name] = [value_list[0] + value[0], value_list[1] + value[1]]
 
     def _update_dataframe(self, data, name):
-        df = get_new_dataframe(data)
+        """ Update the information based on columnar data.
+
+        Parameters:
+            data (DataFrame, str):  Columnar data (either DataFrame or filename) whose columns are to be summarized.
+            name (str): Name of the file corresponding to data.
+
+        """
+        df = data_util.get_new_dataframe(data)
         if name:
             self.files[name] = ""
         self.total_files = self.total_files + 1
@@ -174,6 +201,12 @@ class TabularSummary:
                 self._update_categorical(col_name,  values)
 
     def _update_dict_categorical(self, col_dict):
+        """ Update this summary with the categorical information in the dictionary from another summary.
+
+        Parameters:
+            col_dict (TabularSummary):  Summary information from another tabular summary.
+
+        """
         new_cat_cols = col_dict.categorical_info.keys()
         if not new_cat_cols:
             return
@@ -188,6 +221,13 @@ class TabularSummary:
                 self._update_categorical(col, col_dict.categorical_info[col])
 
     def _update_dict_skip(self, col_dict):
+        """ Update this summary with the skip column information from another summary.
+
+        Parameters:
+            col_dict (TabularSummary):  Summary information from another tabular summary.
+
+        """
+
         if not col_dict.skip_cols:
             return
         cat_cols = self.categorical_info.keys()
@@ -200,6 +240,12 @@ class TabularSummary:
                 self.skip_cols.append(col)
 
     def _update_dict_value(self, col_dict):
+        """ Update this summary with the value column information from another summary.
+
+        Parameters:
+             col_dict (TabularSummary):  Summary information from another tabular summary.
+
+        """
         new_value_cols = col_dict.value_info.keys()
         if not new_value_cols:
             return
@@ -218,7 +264,7 @@ class TabularSummary:
 
     @staticmethod
     def extract_summary(summary_info):
-        """ Create a TabularSummary object from a serialized summary
+        """ Create a TabularSummary object from a serialized summary.
 
         Parameters:
             summary_info (dict or str):  A JSON string or a dictionary containing contents of a TabularSummary.
@@ -245,8 +291,8 @@ class TabularSummary:
         """ Extract unique value counts for columns.
 
         Parameters:
-            dataframe (DataFrame):    The DataFrame to be analyzed.
-            skip_cols(list):          List of names of columns to be skipped in the extraction.
+            dataframe (DataFrame): The DataFrame to be analyzed.
+            skip_cols(list): List of names of columns to be skipped in the extraction.
 
         Returns:
             dict:   A dictionary with keys that are column names and values that
@@ -280,7 +326,7 @@ class TabularSummary:
         summary_dict = {}
         for key, file_path in file_dictionary.items():
             orig_dict = TabularSummary(skip_cols=skip_cols)
-            df = get_new_dataframe(file_path)
+            df = data_util.get_new_dataframe(file_path)
             orig_dict.update(df)
             summary_dict[key] = orig_dict
             summary_all.update_summary(orig_dict)

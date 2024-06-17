@@ -24,18 +24,6 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_constructor(self):
-        parms = json.loads(self.json_parms)
-        parms["expand_context"] = ""
-        with self.assertRaises(KeyError) as context:
-            SummarizeDefinitionsOp(parms)
-        self.assertEqual(context.exception.args[0], "BadParameter")
-        parms2 = json.loads(self.json_parms)
-        parms2["mystery"] = True
-        with self.assertRaises(KeyError) as context:
-            SummarizeDefinitionsOp(parms2)
-        self.assertEqual(context.exception.args[0], "BadParameter")
-
     def test_do_op(self):
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions=['8.1.0'])
         parms = json.loads(self.json_parms)
@@ -86,6 +74,7 @@ class Test(unittest.TestCase):
             "(Def-expand/A1/4, (Action/4, Age/5, Item-count/2))",
         ]})
         df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
+        self.assertIsInstance(df_new, pd.DataFrame)
         self.assertIn(sum_op.summary_name, dispatch.summary_dicts)
         self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], DefinitionSummary)
         # print(str(dispatch.summary_dicts[sum_op.summary_name].get_text_summary()['Dataset']))

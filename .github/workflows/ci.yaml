@@ -16,10 +16,10 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/master' ]]; then
             # Push to master branch
-            echo 'matrix=["3.7", "3.9", "3.10", "3.11"]' >> $GITHUB_OUTPUT
+            echo 'matrix=["3.8", "3.9", "3.10", "3.11"]' >> $GITHUB_OUTPUT
           elif [[ "${{ github.event_name }}" == 'pull_request' && "${{ github.event.pull_request.base.ref }}" == 'master' ]]; then
             # PR to master branch
-            echo 'matrix=["3.7", "3.9", "3.10", "3.11"]' >> $GITHUB_OUTPUT
+            echo 'matrix=["3.8", "3.9", "3.10", "3.11"]' >> $GITHUB_OUTPUT
           else
             echo 'matrix=["3.9"]' >> $GITHUB_OUTPUT
           fi
@@ -39,11 +39,11 @@ jobs:
           submodules: true
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('docs/requirements.txt') }}
@@ -64,15 +64,20 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 
       - name: Test with unittest
+        env:
+          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          HED_GITHUB_TOKEN=${{ secrets.HED_GITHUB_TOKEN }} coverage run -m unittest
+          coverage run -m unittest
 
       - name: Run spec_test coverage
-        run: HED_GITHUB_TOKEN=${{ secrets.HED_GITHUB_TOKEN }} coverage run --append -m unittest spec_tests/test_errors.py
+        env:
+          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: coverage run --append -m unittest spec_tests/test_errors.py
+        continue-on-error: true
 
       - name: Archive code coverage results
         if: ${{matrix.python-version == '3.9'}}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
           path: .coverage
@@ -102,11 +107,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.9
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ${{ env.pythonLocation }}
           key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('docs/requirements.txt') }}
@@ -120,7 +125,7 @@ jobs:
           pip install -r docs/requirements.txt
 
       - name: Download a single artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: code-coverage-report
 
@@ -128,7 +133,7 @@ jobs:
         with:
           coverageCommand: coverage xml
           debug: true
-        uses: paambaati/codeclimate-action@v5.0.0
+        uses: paambaati/codeclimate-action@v6.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 

@@ -2,15 +2,20 @@ import io
 import unittest
 import os
 import shutil
-from hed import Sidecar
-from hed import BaseInput, TabularInput
+from hed.models.sidecar import Sidecar
+from hed.schema.hed_schema_io import load_schema_version
+from hed.models.base_input import BaseInput
+from hed.models.tabular_input import TabularInput
 from hed.models.column_mapper import ColumnMapper
-from hed.models import DefinitionDict
+from hed.models.definition_dict import DefinitionDict
 from hed import schema
-from hed import HedFileError
+from hed.errors.exceptions import HedFileError
+from hed.errors.error_types import ErrorContext, ValidationErrors
+
 
 import pandas as pd
 import numpy as np
+
 
 
 class Test(unittest.TestCase):
@@ -32,7 +37,7 @@ class Test(unittest.TestCase):
         bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                        '../data/bids_tests/eeg_ds003645s_hed'))
         schema_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                    '../data/schema_tests/HED8.0.0.xml'))
+                                                    '../data/schema_tests/HED8.2.0.xml'))
         cls.bids_root_path = bids_root_path
         json_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         events_path = os.path.realpath(os.path.join(bids_root_path,
@@ -74,145 +79,56 @@ class Test(unittest.TestCase):
         with self.assertRaises(HedFileError):
             BaseInput({'key': 'value'})
 
+class TestSortingByOnset(unittest.TestCase):
+    @staticmethod
+    def generate_test_dataframe():
+        data = {
+            'onset': [0.5, 1.0, 1.5, 2.0, 2.5],
+            'HED': [
+                'Age/1',
+                'Age/2',
+                'Age/3',
+                'NotATag',
+                'Age/5'
+            ]
+        }
 
-class TestInsertColumns(unittest.TestCase):
+        df = pd.DataFrame(data)
 
-    def test_insert_columns_simple(self):
-        df = pd.DataFrame({
-            "column1": ["{column2}, Event, Action"],
-            "column2": ["Item"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["Item, Event, Action"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
+        return df
 
-    def test_insert_columns_multiple_rows(self):
-        df = pd.DataFrame({
-            "column1": ["{column2}, Event, Action", "Event, Action"],
-            "column2": ["Item", "Subject"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["Item, Event, Action", "Event, Action"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
+    def test_needs_sort(self):
+        df = self.generate_test_dataframe()
+        opened_file = TabularInput(df)
+        self.assertFalse(opened_file.needs_sorting)
 
-    def test_insert_columns_multiple_columns(self):
-        df = pd.DataFrame({
-            "column1": ["{column2}, Event, {column3}, Action"],
-            "column2": ["Item"],
-            "column3": ["Subject"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["Item, Event, Subject, Action"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
+        issues = opened_file.validate(load_schema_version("8.3.0"))
+        self.assertEqual(issues[1][ErrorContext.ROW], 5)
+        df.at[3, "onset"] = 1.5
+        opened_file = TabularInput(df)
+        self.assertFalse(opened_file.needs_sorting)
 
-    def test_insert_columns_four_columns(self):
-        df = pd.DataFrame({
-            "column1": ["{column2}, Event, {column3}, Action"],
-            "column2": ["Item"],
-            "column3": ["Subject"],
-            "column4": ["Data"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["Item, Event, Subject, Action"],
-            "column4": ["Data"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
+        df.at[3, "onset"] = 1.0
+        opened_file = TabularInput(df)
+        self.assertTrue(opened_file.needs_sorting)
+        issues = opened_file.validate(load_schema_version("8.3.0"))
+        # Should still report the same issue row despite needing sorting for validation
+        self.assertEqual(issues[1]['code'], ValidationErrors.ONSETS_OUT_OF_ORDER)
+        self.assertEqual(issues[2][ErrorContext.ROW], 5)
 
-    def test_insert_columns_with_nested_parentheses(self):
-        df = pd.DataFrame({
-            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
-            "column2": ["Item"],
-            "column3": ["Subject"],
-            "column4": ["Data"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["(Item, (Subject, Data)), Event, Action"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
+    def test_sort(self):
+        from hed.models.df_util import sort_dataframe_by_onsets
+        df = self.generate_test_dataframe()
+        df2 = sort_dataframe_by_onsets(df)
+        self.assertTrue(df.equals(df2))
 
-    def test_insert_columns_with_nested_parentheses_na_values(self):
-        df = pd.DataFrame({
-            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
-            "column2": ["Data"],
-            "column3": ["n/a"],
-            "column4": ["n/a"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["(Data), Event, Action"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
+        df.at[3, "onset"] = 1.5
+        df2 = sort_dataframe_by_onsets(df)
+        self.assertTrue(df.equals(df2))
 
-    def test_insert_columns_with_nested_parentheses_na_values2(self):
-        df = pd.DataFrame({
-            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
-            "column2": ["n/a"],
-            "column3": ["n/a"],
-            "column4": ["Data"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["((Data)), Event, Action"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
-
-    def test_insert_columns_with_nested_parentheses_mixed_na_values(self):
-        df = pd.DataFrame({
-            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
-            "column2": ["n/a"],
-            "column3": ["Subject"],
-            "column4": ["n/a"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["((Subject)), Event, Action"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
-
-    def test_insert_columns_with_nested_parentheses_all_na_values(self):
-        df = pd.DataFrame({
-            "column1": ["({column2}, ({column3}, {column4})), Event, Action"],
-            "column2": ["n/a"],
-            "column3": ["n/a"],
-            "column4": ["n/a"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["Event, Action"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2", "column3", "column4"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
-
-    def test_insert_columns_with_parentheses(self):
-        df = pd.DataFrame({
-            "column1": ["({column2}), Event, Action"],
-            "column2": ["Item"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["(Item), Event, Action"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
-
-    def test_insert_columns_with_parentheses_na_values(self):
-        df = pd.DataFrame({
-            "column1": ["({column2}), Event, Action"],
-            "column2": ["n/a"],
-            "column3": ["n/a"]
-        })
-        expected_df = pd.DataFrame({
-            "column1": ["Event, Action"],
-            "column3": ["n/a"]
-        })
-        result = BaseInput._handle_curly_braces_refs(df, refs=["column2"], column_names=df.columns)
-        pd.testing.assert_frame_equal(result, expected_df)
+        df.at[3, "onset"] = 1.0
+        df2 = sort_dataframe_by_onsets(df)
+        self.assertFalse(df.equals(df2))
 
 
 class TestCombineDataframe(unittest.TestCase):
@@ -271,63 +187,4 @@ class TestCombineDataframe(unittest.TestCase):
         result = BaseInput.combine_dataframe(loaded_df)
         expected = pd.Series(['apple, guitar', 'elephant, harmonica', 'cherry, fox', '', ''])
         self.assertTrue(result.equals(expected))
-
-
-class TestOnsetDict(unittest.TestCase):
-    def test_empty_and_single_onset(self):
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([]), {})
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5]), {3.5: [0]})
-
-    def test_identical_and_approx_equal_onsets(self):
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.5]), {3.5: [0, 1]})
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.500000001]), {3.5: [0], 3.500000001: [1]})
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.5000000000001]), {3.5: [0, 1]})
-
-    def test_distinct_and_mixed_onsets(self):
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 4.0, 4.4]), {3.5: [0], 4.0: [1], 4.4: [2]})
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.5, 4.0, 4.4]), {3.5: [0, 1], 4.0: [2], 4.4: [3]})
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([4.0, 3.5, 4.4, 4.4]), {4.0: [0], 3.5: [1], 4.4: [2, 3]})
-
-    def test_complex_onsets(self):
-        # Negative, zero, and positive onsets
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([-1.0, 0.0, 1.0]), {-1.0: [0], 0.0: [1], 1.0: [2]})
-
-        # Very close but distinct onsets
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([1.0, 1.0 + 1e-8, 1.0 + 2e-8]),
-                         {1.0: [0], 1.0 + 1e-8: [1], 1.0 + 2e-8: [2]})
-        # Very close
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([1.0, 1.0 + 1e-10, 1.0 + 2e-10]),
-                         {1.0: [0, 1, 2]})
-
-        # Mixed scenario
-        self.assertEqual(BaseInput._indexed_dict_from_onsets([3.5, 3.5, 4.0, 4.4, 4.4, -1.0]),
-                         {3.5: [0, 1], 4.0: [2], 4.4: [3, 4], -1.0: [5]})
-
-    def test_empty_and_single_item_series(self):
-        self.assertTrue(BaseInput._filter_by_index_list(pd.Series([], dtype=str), {}).equals(pd.Series([], dtype=str)))
-        self.assertTrue(BaseInput._filter_by_index_list(pd.Series(["apple"]), {0: [0]}).equals(pd.Series(["apple"])))
-
-    def test_two_item_series_with_same_onset(self):
-        input_series = pd.Series(["apple", "orange"])
-        expected_series = pd.Series(["apple,orange", "n/a"])
-        self.assertTrue(BaseInput._filter_by_index_list(input_series, {0: [0, 1]}).equals(expected_series))
-
-    def test_multiple_item_series(self):
-        input_series = pd.Series(["apple", "orange", "banana", "mango"])
-        indexed_dict = {0: [0, 1], 1: [2], 2: [3]}
-        expected_series = pd.Series(["apple,orange", "n/a", "banana", "mango"])
-        self.assertTrue(BaseInput._filter_by_index_list(input_series, indexed_dict).equals(expected_series))
-
-    def test_complex_scenarios(self):
-        # Test with negative, zero and positive onsets
-        original = pd.Series(["negative", "zero", "positive"])
-        indexed_dict = {-1: [0], 0: [1], 1: [2]}
-        expected_series1 = pd.Series(["negative", "zero", "positive"])
-        self.assertTrue(BaseInput._filter_by_index_list(original, indexed_dict).equals(expected_series1))
-
-        # Test with more complex indexed_dict
-        original2 = ["apple", "orange", "banana", "mango", "grape"]
-        indexed_dict2= {0: [0, 1], 1: [2], 2: [3, 4]}
-        expected_series2 = pd.Series(["apple,orange", "n/a", "banana", "mango,grape", "n/a"])
-        self.assertTrue(BaseInput._filter_by_index_list(original2, indexed_dict2).equals(expected_series2))
 

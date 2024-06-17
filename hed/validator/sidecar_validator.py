@@ -1,13 +1,16 @@
+""" Validates sidecars. """
 import copy
 import re
+import itertools
+
 from hed.errors import ErrorHandler, ErrorContext, SidecarErrors, DefinitionErrors, ColumnErrors
-from hed.models import ColumnType
-from hed import HedString
-from hed import Sidecar
+from hed.models.column_mapper import ColumnType
+from hed.models.hed_string import HedString
 from hed.models.column_metadata import ColumnMetadata
 from hed.errors.error_reporter import sort_issues
 from hed.models.model_constants import DefTagNames
 from hed.errors.error_reporter import check_for_any_errors
+from hed.models import df_util
 
 
 # todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
@@ -17,7 +20,7 @@ class SidecarValidator:
 
     def __init__(self, hed_schema):
         """
-        Constructor for the HedValidator class.
+        Constructor for the SidecarValidator class.
 
         Parameters:
             hed_schema (HedSchema): HED schema object to use for validation.
@@ -49,18 +52,19 @@ class SidecarValidator:
             error_handler.pop_error_context()
             return issues
         sidecar_def_dict = sidecar.get_def_dict(hed_schema=self._schema, extra_def_dicts=extra_def_dicts)
-        hed_validator = HedValidator(self._schema,
-                                     def_dicts=sidecar_def_dict,
-                                     definitions_allowed=True)
+        hed_validator = HedValidator(self._schema, def_dicts=sidecar_def_dict,  definitions_allowed=True)
 
         issues += sidecar._extract_definition_issues
         issues += sidecar_def_dict.issues
 
+        # todo: Break this function up
+        all_ref_columns = sidecar.get_column_refs()
         definition_checks = {}
         for column_data in sidecar:
             column_name = column_data.column_name
             column_data = column_data._get_unvalidated_data()
             hed_strings = column_data.get_hed_strings()
+            is_ref_column = column_name in all_ref_columns
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
             for key_name, hed_string in hed_strings.items():
                 new_issues = []
@@ -71,23 +75,45 @@ class SidecarValidator:
 
                 error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
                 new_issues += hed_validator.run_basic_checks(hed_string_obj, allow_placeholders=True)
-                new_issues += hed_validator.run_full_string_checks(hed_string_obj)
-
                 def_check_list = definition_checks.setdefault(column_name, [])
                 def_check_list.append(hed_string_obj.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True,
                                                                include_groups=0))
+
                 # Might refine this later - for now just skip checking placeholder counts in definition columns.
                 if not def_check_list[-1]:
                     new_issues += self._validate_pound_sign_count(hed_string_obj, column_type=column_data.column_type)
 
-                if len(hed_strings) > 1:
-                    error_handler.pop_error_context()
                 error_handler.add_context_and_filter(new_issues)
                 issues += new_issues
-            error_handler.pop_error_context()
-        error_handler.pop_error_context()
+                error_handler.pop_error_context()  # Hed String
+
+                # Only do full string checks on full columns, not partial ref columns.
+                if not is_ref_column:
+                    refs = re.findall("\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
+                    refs_strings = {data.column_name: data.get_hed_strings() for data in sidecar}
+                    if "HED" not in refs_strings:
+                        refs_strings["HED"] = ["n/a"]
+                    for combination in itertools.product(*[refs_strings[key] for key in refs]):
+                        new_issues = []
+                        ref_dict = dict(zip(refs, combination))
+                        modified_string = hed_string
+                        for ref in refs:
+                            modified_string = df_util.replace_ref(modified_string, f"{{{ref}}}", ref_dict[ref])
+                        hed_string_obj = HedString(modified_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
+
+                        error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
+                        new_issues += hed_validator.run_full_string_checks(hed_string_obj)
+                        error_handler.add_context_and_filter(new_issues)
+                        issues += new_issues
+                        error_handler.pop_error_context()  # Hed string
+                if len(hed_strings) > 1:
+                    error_handler.pop_error_context()  # Category key
+
+            error_handler.pop_error_context()  # Column Name
         issues += self._check_definitions_bad_spot(definition_checks, error_handler)
         issues = sort_issues(issues)
+
+        error_handler.pop_error_context()  # Filename
 
         return issues
 
@@ -126,7 +152,8 @@ class SidecarValidator:
                 if len(hed_strings) > 1:
                     error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
 
-                error_handler.push_error_context(ErrorContext.HED_STRING, HedString(hed_string, hed_schema=self._schema))
+                error_handler.push_error_context(ErrorContext.HED_STRING,
+                                                 HedString(hed_string, hed_schema=self._schema))
                 invalid_locations = self._find_non_matching_braces(hed_string)
                 for loc in invalid_locations:
                     bad_symbol = hed_string[loc]
@@ -271,7 +298,7 @@ class SidecarValidator:
         hed_string_copy.remove_definitions()
         hed_string_copy.shrink_defs()
 
-        if hed_string_copy.lower().count("#") != expected_count:
+        if str(hed_string_copy).count("#") != expected_count:
             return ErrorHandler.format_error(error_type, pound_sign_count=str(hed_string_copy).count("#"))
 
         return []

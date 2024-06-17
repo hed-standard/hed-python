@@ -1,14 +1,15 @@
+""" Support utilities for word cloud generation. """
 import random
 from random import Random
 
 import numpy as np
 from PIL import Image, ImageFilter
-from matplotlib import cm
-from wordcloud import WordCloud
+import matplotlib as mp1
+import wordcloud as wcloud
 
 
 def generate_contour_svg(wc, width, height):
-    """Generates an SVG contour mask based on a word cloud object and dimensions.
+    """ Generate an SVG contour mask based on a word cloud object and dimensions.
 
     Parameters:
         wc (WordCloud): The word cloud object.
@@ -21,11 +22,22 @@ def generate_contour_svg(wc, width, height):
     contour = _get_contour_mask(wc, width, height)
     if contour is None:
         return ""
-    return _numpy_to_svg(contour)
+    return _numpy_to_svg(contour, radius=wc.contour_width, color=wc.contour_color)
 
 
 def _get_contour_mask(wc, width, height):
-    """Slightly tweaked copy of internal WorldCloud function to allow transparency"""
+    """ Slightly tweaked copy of internal WorldCloud function to allow transparency for mask.
+
+    Parameters:
+        wc (WordCloud): Representation of the word cloud.
+        width (int): Width of the generated mask.
+        height (int): Height of generated mask.
+
+    Returns:
+        Image:  Image of mask.
+
+
+    """
     if wc.mask is None or wc.contour_width == 0 or wc.contour_color is None:
         return None
 
@@ -42,8 +54,17 @@ def _get_contour_mask(wc, width, height):
     return contour
 
 
-def _draw_contour(wc, img):
-    """Slightly tweaked copy of internal WorldCloud function to allow transparency"""
+def _draw_contour(wc, img: Image):
+    """Slightly tweaked copy of internal WorldCloud function to allow transparency.
+
+    Parameters:
+        wc (WordCloud): Wordcloud object.
+        img (Image):  Image to work with.
+
+    Returns:
+        Image: Modified image.
+
+    """
     contour = _get_contour_mask(wc, img.width, img.height)
     if contour is None:
         return img
@@ -67,26 +88,44 @@ def _draw_contour(wc, img):
 
 
 # Replace WordCloud function with one that can handle transparency
-WordCloud._draw_contour = _draw_contour
+wcloud.WordCloud._draw_contour = _draw_contour
 
 
-def _numpy_to_svg(contour):
+def _numpy_to_svg(contour, radius=1, color="black"):
+    """ Convert a numpy array to SVG.
+
+    Parameters:
+        contour (np.Array): Image to be converted.
+        radius (float): The radius of the contour to draw.
+        color(string): the color to draw it as, e.g. "red"
+    Returns:
+        str: The SVG representation.
+    """
     svg_elements = []
     points = np.array(contour.nonzero()).T
     for y, x in points:
-        svg_elements.append(f'<circle cx="{x}" cy="{y}" r="1" stroke="black" fill="black" />')
+        svg_elements.append(f'<circle cx="{x}" cy="{y}" r="{radius}" stroke="{color}" fill="{color}" />')
 
     return '\n'.join(svg_elements)
 
 
-def random_color_darker(word=None, font_size=None, position=None, orientation=None, font_path=None, random_state=None):
-    """Random color generation func"""
+def random_color_darker(random_state=None):
+    """Random color generation function.
+
+    Parameters:
+        random_state (Random or None): Previous state of random generation for next color generation.
+
+    Returns:
+        str:  Represents a hue, saturation, and lightness.
+
+    """
     if random_state is None:
         random_state = Random()
     return f"hsl({random_state.randint(0, 255)}, {random_state.randint(50, 100)}%, {random_state.randint(0, 50)}%)"
 
 
 class ColormapColorFunc:
+    """ Represents a colormap. """
     def __init__(self, colormap='nipy_spectral', color_range=(0.0, 0.5), color_step_range=(0.15, 0.25)):
         """Initialize a word cloud color generator.
 
@@ -100,13 +139,13 @@ class ColormapColorFunc:
                                                          This is the speed at which it goes through the range chosen.
                                                          .25 means it will go through 1/4 of the range each pick.
         """
-        self.colormap = cm.get_cmap(colormap)
+        self.colormap = mp1.colormaps[colormap]
         self.color_range = color_range
         self.color_step_range = color_step_range
         self.current_fraction = random.uniform(0, 1)  # Start at a random point
 
     def color_func(self, word, font_size, position, orientation, random_state=None, **kwargs):
-        # Update the current color fraction and wrap around if necessary
+        """ Update the current color fraction and wrap around if necessary. """
         color_step = random.uniform(*self.color_step_range)
         self.current_fraction = (self.current_fraction + color_step) % 1.0
 

@@ -1,6 +1,5 @@
 from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey, HedKeyOld
 
 entries_by_section = {
     HedSectionKey.Properties: HedSchemaEntry,
@@ -65,7 +64,7 @@ class HedSchemaSection:
         """ Add a name to the dictionary for this section. """
         name_key = name
         if not self.case_sensitive:
-            name_key = name.lower()
+            name_key = name.casefold()
 
         return_entry = self._check_if_duplicate(name_key, new_entry)
 
@@ -77,7 +76,7 @@ class HedSchemaSection:
 
         Parameters:
             attribute_name (str): The name of the attribute(generally a HedKey entry).
-            return_name_only (bool): If true, return the name as a string rather than the tag entry.
+            return_name_only (bool): If True, return the name as a string rather than the tag entry.
             schema_namespace (str): Prepends given namespace to each name if returning names.
 
         Returns:
@@ -116,7 +115,7 @@ class HedSchemaSection:
 
     def __getitem__(self, key):
         if not self.case_sensitive:
-            key = key.lower()
+            key = key.casefold()
         return self.all_names[key]
 
     def get(self, key):
@@ -126,9 +125,10 @@ class HedSchemaSection:
             key (str): The name of the key.
 
         """
-        if not self.case_sensitive:
-            key = key.lower()
-        return self.all_names.get(key)
+        try:
+            return self.__getitem__(key)
+        except KeyError:
+            return None
 
     def __eq__(self, other):
         if self.all_names != other.all_names:
@@ -149,16 +149,37 @@ class HedSchemaSection:
             entry.finalize_entry(hed_schema)
 
 
-class HedSchemaUnitClassSection(HedSchemaSection):
+class HedSchemaUnitSection(HedSchemaSection):
+    """The schema section containing units."""
     def _check_if_duplicate(self, name_key, new_entry):
-        if name_key in self and len(new_entry.attributes) == 1\
-                    and HedKey.InLibrary in new_entry.attributes:
+        """We need to mark duplicate units(units with unitSymbol are case sensitive, while others are not."""
+        if not new_entry.has_attribute(HedKey.UnitSymbol):
+            name_key = name_key.casefold()
+        return super()._check_if_duplicate(name_key, new_entry)
+
+    def __getitem__(self, key):
+        """Check the case of the key appropriately for symbols/not symbols, and return the matching entry."""
+        unit_entry = self.all_names.get(key)
+        if unit_entry is None:
+            unit_entry = self.all_names.get(key.casefold())
+            # Unit symbols must match exactly
+            if unit_entry is None or unit_entry.has_attribute(HedKey.UnitSymbol):
+                return None
+        return unit_entry
+
+
+class HedSchemaUnitClassSection(HedSchemaSection):
+    """The schema section containing unit classes."""
+    def _check_if_duplicate(self, name_key, new_entry):
+        """Allow adding units to existing unit classes, using a placeholder one with no attributes."""
+        if name_key in self and len(new_entry.attributes) == 1 \
+                and HedKey.InLibrary in new_entry.attributes:
             return self.all_names[name_key]
         return super()._check_if_duplicate(name_key, new_entry)
 
 
 class HedSchemaTagSection(HedSchemaSection):
-    """ A section of the schema. """
+    """The schema section containing all tags."""
 
     def __init__(self, *args, case_sensitive=False, **kwargs):
         super().__init__(*args, **kwargs, case_sensitive=case_sensitive)
@@ -210,24 +231,24 @@ class HedSchemaTagSection(HedSchemaSection):
         else:
             self.all_names[name] = new_entry
             for tag_key in tag_forms:
-                name_key = tag_key.lower()
+                name_key = tag_key.casefold()
                 self.long_form_tags[name_key] = new_entry
 
         return new_entry
 
     def get(self, key):
         if not self.case_sensitive:
-            key = key.lower()
+            key = key.casefold()
         return self.long_form_tags.get(key)
 
     def __getitem__(self, key):
         if not self.case_sensitive:
-            key = key.lower()
+            key = key.casefold()
         return self.long_form_tags[key]
 
     def __contains__(self, key):
         if not self.case_sensitive:
-            key = key.lower()
+            key = key.casefold()
         return key in self.long_form_tags
 
     @staticmethod
@@ -244,8 +265,12 @@ class HedSchemaTagSection(HedSchemaSection):
     def _finalize_section(self, hed_schema):
         # Find the attributes with the inherited property
         attribute_section = hed_schema.attributes
-        self.inheritable_attributes = [name for name, value in attribute_section.items()
-                                       if value.has_attribute(HedKey.IsInheritedProperty)]
+        if hed_schema.schema_83_props:
+            self.inheritable_attributes = [name for name, value in attribute_section.items()
+                                           if not value.has_attribute(HedKey.AnnotationProperty)]
+        else:
+            self.inheritable_attributes = [name for name, value in attribute_section.items()
+                                           if value.has_attribute(HedKeyOld.IsInheritedProperty)]
 
         # Hardcode in extension allowed as it is critical for validation in older schemas
         if not self.inheritable_attributes:
@@ -266,8 +291,9 @@ class HedSchemaTagSection(HedSchemaSection):
 
         # sort the extension allowed top level nodes
         if extension_allowed_node:
-            split_list[extension_allowed_node:] = sorted(split_list[extension_allowed_node:], key=lambda x: x[0].long_tag_name)
+            split_list[extension_allowed_node:] = sorted(split_list[extension_allowed_node:],
+                                                         key=lambda x: x[0].long_tag_name)
         self.all_entries = [subitem for tag_list in split_list for subitem in tag_list]
 
         super()._finalize_section(hed_schema)
-        self.root_tags = {tag.short_tag_name:tag for tag in self.all_entries if not tag._parent_tag}
+        self.root_tags = {tag.short_tag_name: tag for tag in self.all_entries if not tag._parent_tag}

@@ -10,7 +10,7 @@ class TestValidatorUtilityFunctions(TestHedBase):
 
     @classmethod
     def setUpClass(cls):
-        cls.hed_schema = load_schema_version("8.2.0")
+        cls.hed_schema = load_schema_version("8.3.0")
 
     def test_if_tag_exists(self):
         valid_tag1 = HedTag('Left-handed', hed_schema=self.hed_schema)
@@ -45,7 +45,7 @@ class TestValidatorUtilityFunctions(TestHedBase):
 class TestSchemaUtilityFunctions(TestHedBase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_schema = load_schema_version("8.2.0")
+        cls.hed_schema = load_schema_version("8.3.0")
 
     def test_correctly_determine_tag_takes_value(self):
         value_tag1 = HedTag('Distance/35 px', hed_schema=self.hed_schema)
@@ -143,11 +143,11 @@ class TestSchemaUtilityFunctions(TestHedBase):
         # stripped_dollars_string_no_space = dollars_string_no_space._get_tag_units_portion(currency_units)
         # stripped_dollars_string = dollars_string._get_tag_units_portion(currency_units)
         # stripped_dollars_string_invalid = dollars_string_invalid._get_tag_units_portion(currency_units)
-        stripped_volume_string, _, _ = volume_string._get_tag_units_portion(volume_units)
-        stripped_volume_string_no_space, _, _ = volume_string_no_space._get_tag_units_portion(volume_units)
-        stripped_prefixed_volume_string, _, _ = prefixed_volume_string._get_tag_units_portion(volume_units)
-        stripped_invalid_volume_string, _, _ = invalid_volume_string._get_tag_units_portion(volume_units)
-        stripped_invalid_distance_string, _, _ = invalid_distance_string._get_tag_units_portion(distance_units)
+        stripped_volume_string, _, _ = HedTag._get_tag_units_portion(volume_string.extension, volume_units)
+        stripped_volume_string_no_space, _, _ = HedTag._get_tag_units_portion(volume_string_no_space.extension, volume_units)
+        stripped_prefixed_volume_string, _, _ = HedTag._get_tag_units_portion(prefixed_volume_string.extension, volume_units)
+        stripped_invalid_volume_string, _, _ = HedTag._get_tag_units_portion(invalid_volume_string.extension, volume_units)
+        stripped_invalid_distance_string, _, _ = HedTag._get_tag_units_portion(invalid_distance_string.extension, distance_units)
         # self.assertEqual(stripped_dollars_string_no_space, None)
         # self.assertEqual(stripped_dollars_string, '25.99')
         # self.assertEqual(stripped_dollars_string_invalid, None)

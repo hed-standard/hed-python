@@ -8,7 +8,7 @@ from hed.models import df_util, basic_search
 from hed.models.basic_search import find_words, check_parentheses, reverse_and_flip_parentheses, \
     construct_delimiter_map, verify_search_delimiters, find_matching
 import numpy as np
-
+from hed.models.df_util import convert_to_form
 
 class TestNewSearch(unittest.TestCase):
     @classmethod
@@ -19,17 +19,40 @@ class TestNewSearch(unittest.TestCase):
         cls.events_path = os.path.realpath(
             os.path.join(bids_root_path, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
         cls.base_input = TabularInput(cls.events_path, sidecar1_path)
-        cls.schema = load_schema_version()
+        cls.schema = load_schema_version("8.3.0")
         cls.df = cls.base_input.series_filtered
 
     def test_find_matching_results(self):
         result1 = basic_search.find_matching(self.df, "(Face, Item-interval/1)")
         result2 = basic_search.find_matching(self.df, "(Face, Item-interval/1*)")
 
-        # Add assertions
         self.assertTrue(np.sum(result1) > 0, "result1 should have some true values")
         self.assertTrue(np.sum(result2) > 0, "result2 should have some true values")
         self.assertTrue(np.sum(result1) < np.sum(result2), "result1 should have fewer true values than result2")
+
+        # Verify we get the same results in both tag forms
+        df_copy = self.df.copy()
+        convert_to_form(df_copy, self.schema, "long_tag")
+
+        result1b = basic_search.find_matching(self.df, "(Face, Item-interval/1)")
+        result2b = basic_search.find_matching(self.df, "(Face, Item-interval/1*)")
+
+        self.assertTrue(np.sum(result1b) > 0, "result1 should have some true values")
+        self.assertTrue(np.sum(result2b) > 0, "result2 should have some true values")
+        self.assertTrue(np.sum(result1b) < np.sum(result2b), "result1 should have fewer true values than result2")
+        self.assertTrue(result1.equals(result1b))
+        self.assertTrue(result2.equals(result2b))
+
+        convert_to_form(df_copy, self.schema, "short_tag")
+
+        result1b = basic_search.find_matching(self.df, "(Face, Item-interval/1)")
+        result2b = basic_search.find_matching(self.df, "(Face, Item-interval/1*)")
+
+        self.assertTrue(np.sum(result1b) > 0, "result1 should have some true values")
+        self.assertTrue(np.sum(result2b) > 0, "result2 should have some true values")
+        self.assertTrue(np.sum(result1b) < np.sum(result2b), "result1 should have fewer true values than result2")
+        self.assertTrue(result1.equals(result1b))
+        self.assertTrue(result2.equals(result2b))
 
 
 class TestFindWords(unittest.TestCase):

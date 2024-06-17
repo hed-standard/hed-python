@@ -1,12 +1,18 @@
+""" Utilities"""
+
 import pandas as pd
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 
 
 def flatten_schema(hed_schema, skip_non_tag=False):
-    """ turns a schema into a 3 column dataframe.
+    """ Returns a 3-column dataframe representing a schema.
+
     Parameters:
         hed_schema (HedSchema): the schema to flatten
         skip_non_tag (bool): Skips all sections except tag
+
+    Returns:
+        DataFrame:  Represents a HED schema in flattened form.
 
     """
     children, parents, descriptions = [], [], []

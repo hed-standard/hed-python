@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <HED version="2.0.0" library="testlib" withStandard="8.2.0">
-   <prologue>This schema tests the ordering effects of various combinations of rooted and extension allowed for rooted schemas.</prologue>
+   <prologue>This schema tests the ordering effects of various combinations of rooted and extension allowed for rooted schemas. It is compatible with testlib version 3.0.0 but not testlib 2.0.0.</prologue>
    <schema>
       <node>
          <name>Event</name>
@@ -133,35 +133,6 @@
          </node>
          <node>
             <name>SubnodeA2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-      </node>
-      <node>
-         <name>C-nonextension</name>
-         <description>These should not be sorted.  C should be last</description>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeC3</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeC1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeC2</name>
             <attribute>
                <name>inLibrary</name>
                <value>testlib</value>
@@ -874,7 +845,7 @@
          </node>
       </node>
       <node>
-         <name>A-extensionallowed</name>
+         <name>D-extensionallowed</name>
          <description>These should be sorted.  This section should be first.</description>
          <attribute>
             <name>extensionAllowed</name>
@@ -899,38 +870,6 @@
          </node>
          <node>
             <name>SubnodeD3</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-      </node>
-      <node>
-         <name>B-extensionallowed</name>
-         <description>These should be sorted.  This section should be second.</description>
-         <attribute>
-            <name>extensionAllowed</name>
-         </attribute>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeE1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeE2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeE3</name>
             <attribute>
                <name>inLibrary</name>
                <value>testlib</value>
@@ -7516,4 +7455,5 @@
          <description>Indicates that the schema attribute is meant to be applied to value classes.</description>
       </propertyDefinition>
    </propertyDefinitions>
+   <epilogue>A final section.</epilogue>
 </HED>

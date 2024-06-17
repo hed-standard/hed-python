@@ -1,7 +1,6 @@
 """
 """
 
-# todo: Switch various properties to this cached_property once we require python 3.8
 
 import json
 from hed.errors.exceptions import HedExceptions, HedFileError
@@ -15,10 +14,10 @@ class HedSchemaGroup(HedSchemaBase):
 
     Notes:
         - The container class is useful when library schema are included.
-        - You cannot save/load/etc the combined schema object directly.
+        - You cannot save/load/etc. the combined schema object directly.
 
     """
-    def __init__(self, schema_list):
+    def __init__(self, schema_list, name=""):
         """ Combine multiple HedSchema objects from a list.
 
         Parameters:
@@ -34,13 +33,17 @@ class HedSchemaGroup(HedSchemaBase):
         super().__init__()
         if len(schema_list) == 0:
             raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty list passed to HedSchemaGroup constructor.",
-                               filename="Combined Schema")
+                               filename=self.name)
         schema_prefixes = [hed_schema._namespace for hed_schema in schema_list]
         if len(set(schema_prefixes)) != len(schema_prefixes):
             raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
                                "Multiple schema share the same tag name_prefix.  This is not allowed.",
-                               filename="Combined Schema")
+                               filename=self.name)
         self._schemas = {hed_schema._namespace: hed_schema for hed_schema in schema_list}
+        source_formats = [hed_schema.source_format for hed_schema in schema_list]
+        # All must be same source format or return None.
+        self.source_format = source_formats[0] if len(set(source_formats)) == 1 else None
+        self._name = name
 
     def get_schema_versions(self):
         """ A list of HED version strings including namespace and library name if any of this schema.

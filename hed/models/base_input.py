@@ -1,13 +1,15 @@
-import re
+"""
+Superclass representing a basic columnar file.
+"""
 import os
 
 import openpyxl
-import pandas
+import pandas as pd
 
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.errors.error_reporter import ErrorHandler
-import pandas as pd
+
+from hed.models.df_util import _handle_curly_braces_refs, filter_series_by_onset
 
 
 class BaseInput:
@@ -15,18 +17,13 @@ class BaseInput:
 
     TEXT_EXTENSION = ['.tsv', '.txt']
     EXCEL_EXTENSION = ['.xlsx']
-    FILE_EXTENSION = [*TEXT_EXTENSION, *EXCEL_EXTENSION]
-    STRING_INPUT = 'string'
-    FILE_INPUT = 'file'
-    TAB_DELIMITER = '\t'
-    COMMA_DELIMITER = ','
 
     def __init__(self, file, file_type=None, worksheet_name=None, has_column_names=True, mapper=None, name=None,
                  allow_blank_names=True):
         """ Constructor for the BaseInput class.
 
         Parameters:
-            file (str or file-like or pandas dataframe): An xlsx/tsv file to open.
+            file (str or file-like or pd.Dataframe): An xlsx/tsv file to open.
             file_type (str or None): ".xlsx" (Excel), ".tsv" or ".txt" (tab-separated text).
                 Derived from file if file is a filename.  Ignored if pandas dataframe.
             worksheet_name (str or None): Name of Excel workbook worksheet name to use.
@@ -39,12 +36,12 @@ class BaseInput:
             allow_blank_names(bool): If True, column names can be blank
 
         :raises HedFileError:
-            - file is blank
-            - An invalid dataframe was passed with size 0
-            - An invalid extension was provided
-            - A duplicate or empty column name appears
-            - Cannot open the indicated file
-            - The specified worksheet name does not exist
+            - file is blank.
+            - An invalid dataframe was passed with size 0.
+            - An invalid extension was provided.
+            - A duplicate or empty column name appears.
+            - Cannot open the indicated file.
+            - The specified worksheet name does not exist.
             - If the sidecar file or tabular file had invalid format and could not be read.
 
          """
@@ -95,8 +92,7 @@ class BaseInput:
 
     @property
     def dataframe_a(self):
-        """Return the assembled dataframe
-            Probably a placeholder name.
+        """Return the assembled dataframe Probably a placeholder name.
 
         Returns:
             Dataframe: the assembled dataframe"""
@@ -104,54 +100,36 @@ class BaseInput:
 
     @property
     def series_a(self):
-        """Return the assembled dataframe as a series
+        """Return the assembled dataframe as a series.
 
         Returns:
-            Series: the assembled dataframe with columns merged
+            Series: the assembled dataframe with columns merged.
         """
         return self.combine_dataframe(self.assemble())
 
     @property
     def series_filtered(self):
-        """Return the assembled dataframe as a series, with rows that have the same onset combined
+        """Return the assembled dataframe as a series, with rows that have the same onset combined.
 
         Returns:
-            Series: the assembled dataframe with columns merged, and the rows filtered together
+            Series or None: the assembled dataframe with columns merged, and the rows filtered together.
         """
         if self.onsets is not None:
-            indexed_dict = self._indexed_dict_from_onsets(self.onsets.astype(float))
-            return self._filter_by_index_list(self.series_a, indexed_dict=indexed_dict)
-
-    @staticmethod
-    def _indexed_dict_from_onsets(onsets):
-        current_onset = -1000000.0
-        tol = 1e-9
-        from collections import defaultdict
-        indexed_dict = defaultdict(list)
-        for i, onset in enumerate(onsets):
-            if abs(onset - current_onset) > tol:
-                current_onset = onset
-            indexed_dict[current_onset].append(i)
-
-        return indexed_dict
-
-    @staticmethod
-    def _filter_by_index_list(original_series, indexed_dict):
-        new_series = pd.Series(["n/a"] * len(original_series), dtype=str)
-
-        for onset, indices in indexed_dict.items():
-            if indices:
-                first_index = indices[0]  # Take the first index of each onset group
-                # Join the corresponding original series entries and place them at the first index
-                new_series[first_index] = ",".join([str(original_series[i]) for i in indices])
-
-        return new_series
+            return filter_series_by_onset(self.series_a, self.onsets)
 
     @property
     def onsets(self):
-        """Returns the onset column if it exists"""
+        """Return the onset column if it exists. """
         if "onset" in self.columns:
             return self._dataframe["onset"]
+
+    @property
+    def needs_sorting(self):
+        """Return True if this both has an onset column, and it needs sorting."""
+        onsets = self.onsets
+        if onsets is not None:
+            onsets = pd.to_numeric(self.dataframe['onset'], errors='coerce')
+            return not onsets.is_monotonic_increasing
 
     @property
     def name(self):
@@ -204,7 +182,7 @@ class BaseInput:
         """ Shrinks any def-expand found in the underlying dataframe.
 
         Parameters:
-            hed_schema (HedSchema or None): The schema to use to identify defs
+            hed_schema (HedSchema or None): The schema to use to identify defs.
         """
         from df_util import shrink_defs
         shrink_defs(self._dataframe, hed_schema=hed_schema, columns=self._mapper.get_tag_columns())
@@ -213,8 +191,8 @@ class BaseInput:
         """ Shrinks any def-expand found in the underlying dataframe.
 
         Parameters:
-            hed_schema (HedSchema or None): The schema to use to identify defs
-            def_dict (DefinitionDict): The definitions to expand
+            hed_schema (HedSchema or None): The schema to use to identify defs.
+            def_dict (DefinitionDict): The definitions to expand.
         """
         from df_util import expand_defs
         expand_defs(self._dataframe, hed_schema=hed_schema, def_dict=def_dict, columns=self._mapper.get_tag_columns())
@@ -223,13 +201,13 @@ class BaseInput:
         """ Output to an Excel file.
 
         Parameters:
-            file (str or file-like):      Location to save this base input.
+            file (str or file-like): Location to save this base input.
 
         :raises ValueError:
-            - if empty file object was passed
+            - If empty file object was passed.
 
         :raises OSError:
-            - Cannot open the indicated file
+            - Cannot open the indicated file.
         """
         if not file:
             raise ValueError("Empty file name or object passed in to BaseInput.save.")
@@ -261,10 +239,10 @@ class BaseInput:
             None or str:  None if file is given or the contents as a str if file is None.
 
         :raises OSError:
-            - Cannot open the indicated file
+            - Cannot open the indicated file.
         """
         dataframe = self._dataframe
-        csv_string_if_filename_none = dataframe.to_csv(file, '\t', index=False, header=self._has_column_names)
+        csv_string_if_filename_none = dataframe.to_csv(file, sep='\t', index=False, header=self._has_column_names)
         return csv_string_if_filename_none
 
     @property
@@ -274,7 +252,7 @@ class BaseInput:
             Empty if no column names.
 
         Returns:
-            columns(list): the column names
+            columns(list): The column names.
         """
         columns = []
         if self._dataframe is not None and self._has_column_names:
@@ -282,10 +260,10 @@ class BaseInput:
         return columns
 
     def column_metadata(self):
-        """Get the metadata for each column
+        """ Return the metadata for each column.
 
         Returns:
-            dict: number/ColumnMeta pairs
+            dict: Number/ColumnMeta pairs.
         """
         if self._mapper:
             return self._mapper._final_column_map
@@ -304,13 +282,13 @@ class BaseInput:
              Any attribute of a HedTag that returns a string is a valid value of tag_form.
 
         :raises ValueError:
-            - There is not a loaded dataframe
+            - There is not a loaded dataframe.
 
         :raises KeyError:
-            - the indicated row/column does not exist
+            - The indicated row/column does not exist.
 
         :raises AttributeError:
-            - The indicated tag_form is not an attribute of HedTag
+            - The indicated tag_form is not an attribute of HedTag.
         """
         if self._dataframe is None:
             raise ValueError("No data frame loaded")
@@ -331,7 +309,7 @@ class BaseInput:
             If None, returns the first worksheet.
 
         :raises KeyError:
-            - The specified worksheet name does not exist
+            - The specified worksheet name does not exist.
         """
         if worksheet_name and self._loaded_workbook:
             # return self._loaded_workbook.get_sheet_by_name(worksheet_name)
@@ -358,20 +336,21 @@ class BaseInput:
             # first row is columns
             cols = next(data)
             data = list(data)
-            return pandas.DataFrame(data, columns=cols, dtype=str)
+            return pd.DataFrame(data, columns=cols, dtype=str)
         else:
-            return pandas.DataFrame(worksheet.values, dtype=str)
+            return pd.DataFrame(worksheet.values, dtype=str)
 
     def validate(self, hed_schema, extra_def_dicts=None, name=None, error_handler=None):
-        """Creates a SpreadsheetValidator and returns all issues with this fil
+        """Creates a SpreadsheetValidator and returns all issues with this file.
 
         Parameters:
-            hed_schema(HedSchema): The schema to use for validation
-            extra_def_dicts(list of DefDict or DefDict): all definitions to use for validation
-            name(str): The name to report errors from this file as
-            error_handler (ErrorHandler): Error context to use.  Creates a new one if None
+            hed_schema(HedSchema): The schema to use for validation.
+            extra_def_dicts(list of DefDict or DefDict): All definitions to use for validation.
+            name(str): The name to report errors from this file as.
+            error_handler (ErrorHandler): Error context to use.  Creates a new one if None.
+
         Returns:
-            issues (list of dict): A list of issues for hed string
+            issues (list of dict): A list of issues for a HED string.
         """
         from hed.validator.spreadsheet_validator import SpreadsheetValidator
         if not name:
@@ -389,13 +368,13 @@ class BaseInput:
         return False
 
     def assemble(self, mapper=None, skip_curly_braces=False):
-        """ Assembles the hed strings
+        """ Assembles the HED strings.
 
         Parameters:
             mapper(ColumnMapper or None): Generally pass none here unless you want special behavior.
             skip_curly_braces (bool): If True, don't plug in curly brace values into columns.
         Returns:
-            Dataframe: the assembled dataframe
+            Dataframe: The assembled dataframe.
         """
         if mapper is None:
             mapper = self._mapper
@@ -406,7 +385,7 @@ class BaseInput:
         transformers, _ = mapper.get_transformers()
         refs = self.get_column_refs()
         column_names = list(transformers)
-        return self._handle_curly_braces_refs(all_columns, refs, column_names)
+        return _handle_curly_braces_refs(all_columns, refs, column_names)
 
     def _handle_transforms(self, mapper):
         transformers, need_categorical = mapper.get_transformers()
@@ -425,80 +404,15 @@ class BaseInput:
         return all_columns
 
     @staticmethod
-    def _replace_ref(text, newvalue, column_ref):
-        """ Replace column ref in x with y.  If it's n/a, delete extra commas/parentheses.
-
-        Note: This function could easily be updated to handle non-curly brace values, but it's faster this way.
-        Parameters:
-            text (str): The input string containing the ref enclosed in curly braces.
-            newvalue (str): The replacement value for the ref.
-            column_ref (str): The ref to be replaced, without curly braces
-
-        Returns:
-            str: The modified string with the ref replaced or removed.
-        """
-        # If it's not n/a, we can just replace directly.
-        if newvalue != "n/a":
-            return text.replace(f"{{{column_ref}}}", newvalue)
-
-        def _remover(match):
-            p1 = match.group("p1").count("(")
-            p2 = match.group("p2").count(")")
-            if p1 > p2:  # We have more starting parens than ending.  Make sure we don't remove comma before
-                output = match.group("c1") + "(" * (p1 - p2)
-            elif p2 > p1:  # We have more ending parens.  Make sure we don't remove comma after
-                output = ")" * (p2 - p1) + match.group("c2")
-            else:
-                c1 = match.group("c1")
-                c2 = match.group("c2")
-                if c1:
-                    c1 = ""
-                elif c2:
-                    c2 = ""
-                output = c1 + c2
-
-            return output
-
-        # this finds all surrounding commas and parentheses to a reference.
-        # c1/c2 contain the comma(and possibly spaces) separating this ref from other tags
-        # p1/p2 contain the parentheses directly surrounding the tag
-        # All four groups can have spaces.
-        pattern = r'(?P<c1>[\s,]*)(?P<p1>[(\s]*)\{' + column_ref + r'\}(?P<p2>[\s)]*)(?P<c2>[\s,]*)'
-        return re.sub(pattern, _remover, text)
-
-    @staticmethod
-    def _handle_curly_braces_refs(df, refs, column_names):
-        """
-            Plug in curly braces with other columns
-        """
-        # Filter out columns and refs that don't exist.
-        refs = [ref for ref in refs if ref in column_names]
-        remaining_columns = [column for column in column_names if column not in refs]
-
-        # Replace references in the columns we are saving out.
-        saved_columns = df[refs]
-        for column_name in remaining_columns:
-            for replacing_name in refs:
-                # If the data has no n/a values, this version is MUCH faster.
-                # column_name_brackets = f"{{{replacing_name}}}"
-                # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
-                #                             in zip(df[column_name], saved_columns[replacing_name]))
-                df[column_name] = pd.Series(BaseInput._replace_ref(x, y, replacing_name) for x, y
-                                            in zip(df[column_name], saved_columns[replacing_name]))
-        df = df[remaining_columns]
-
-        return df
-
-    @staticmethod
     def combine_dataframe(dataframe):
-        """ Combines all columns in the given dataframe into a single HED string series,
+        """ Combine all columns in the given dataframe into a single HED string series,
             skipping empty columns and columns with empty strings.
 
         Parameters:
             dataframe(Dataframe): The dataframe to combine
 
         Returns:
-            Series: the assembled series
+            Series: The assembled series.
         """
         dataframe = dataframe.apply(
             lambda x: ', '.join(filter(lambda e: bool(e) and e != "n/a", map(str, x))),
@@ -507,27 +421,27 @@ class BaseInput:
         return dataframe
 
     def get_def_dict(self, hed_schema, extra_def_dicts=None):
-        """ Returns the definition dict for this file
+        """ Return the definition dict for this file.
 
         Note: Baseclass implementation returns just extra_def_dicts.
 
         Parameters:
-            hed_schema(HedSchema): used to identify tags to find definitions(if needed)
+            hed_schema(HedSchema): Identifies tags to find definitions(if needed).
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:
-            DefinitionDict:   A single definition dict representing all the data(and extra def dicts)
+            DefinitionDict:   A single definition dict representing all the data(and extra def dicts).
         """
         from hed.models.definition_dict import DefinitionDict
         return DefinitionDict(extra_def_dicts, hed_schema)
 
     def get_column_refs(self):
-        """ Returns a list of column refs for this file.
+        """ Return a list of column refs for this file.
 
             Default implementation returns none.
 
         Returns:
-            column_refs(list): A list of unique column refs found
+            column_refs(list): A list of unique column refs found.
         """
         return []
 
@@ -536,15 +450,15 @@ class BaseInput:
         if not has_column_names:
             pandas_header = None
 
-        if isinstance(file, pandas.DataFrame):
+        if isinstance(file, pd.DataFrame):
             self._dataframe = file.astype(str)
             self._has_column_names = self._dataframe_has_names(self._dataframe)
         elif not file:
             raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
         elif input_type in self.TEXT_EXTENSION:
             try:
-                self._dataframe = pandas.read_csv(file, delimiter='\t', header=pandas_header,
-                                                  dtype=str, keep_default_na=True, na_values=["", "null"])
+                self._dataframe = pd.read_csv(file, delimiter='\t', header=pandas_header,
+                                              dtype=str, keep_default_na=True, na_values=("", "null"))
             except Exception as e:
                 raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
             # Convert nan values to a known value

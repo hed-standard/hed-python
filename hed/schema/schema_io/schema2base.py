@@ -1,5 +1,6 @@
 """Baseclass for mediawiki/xml writers"""
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
+from hed.errors.exceptions import HedFileError, HedExceptions
 
 
 class Schema2Base:
@@ -10,11 +11,11 @@ class Schema2Base:
         self._save_base = False
         self._save_merged = False
         self._strip_out_in_library = False
+        self._schema = None
 
-    @classmethod
-    def process_schema(cls, hed_schema, save_merged=False):
+    def process_schema(self, hed_schema, save_merged=False):
         """
-        Takes a HedSchema object and returns a list of strings representing its .mediawiki version.
+        Takes a HedSchema object and returns it in the inherited form(mediawiki, xml, etc)
 
         Parameters
         ----------
@@ -29,33 +30,42 @@ class Schema2Base:
             Varies based on inherited class
 
         """
-        saver = cls()
-        saver._save_lib = False
-        saver._save_base = False
-        saver._strip_out_in_library = True
+        if not hed_schema.can_save():
+            raise HedFileError(HedExceptions.SCHEMA_LIBRARY_INVALID,
+                               "Cannot save a schema merged from multiple library schemas",
+                               hed_schema.filename)
+
+        self._initialize_output()
+        self._save_lib = False
+        self._save_base = False
+        self._strip_out_in_library = True
+        self._schema = hed_schema  # This is needed to save attributes in dataframes for now
         if hed_schema.with_standard:
-            saver._save_lib = True
+            self._save_lib = True
             if save_merged:
-                saver._save_base = True
-                saver._strip_out_in_library = False
+                self._save_base = True
+                self._strip_out_in_library = False
         else:
             # Saving a standard schema or a library schema without a standard schema
             save_merged = True
-            saver._save_lib = True
-            saver._save_base = True
+            self._save_lib = True
+            self._save_base = True
 
-        saver._save_merged = save_merged
+        self._save_merged = save_merged
 
-        saver._output_header(hed_schema.get_save_header_attributes(saver._save_merged), hed_schema.prologue)
-        saver._output_tags(hed_schema.tags)
-        saver._output_units(hed_schema.unit_classes)
-        saver._output_section(hed_schema, HedSectionKey.UnitModifiers)
-        saver._output_section(hed_schema, HedSectionKey.ValueClasses)
-        saver._output_section(hed_schema, HedSectionKey.Attributes)
-        saver._output_section(hed_schema, HedSectionKey.Properties)
-        saver._output_footer(hed_schema.epilogue)
+        self._output_header(hed_schema.get_save_header_attributes(self._save_merged), hed_schema.prologue)
+        self._output_tags(hed_schema.tags)
+        self._output_units(hed_schema.unit_classes)
+        self._output_section(hed_schema, HedSectionKey.UnitModifiers)
+        self._output_section(hed_schema, HedSectionKey.ValueClasses)
+        self._output_section(hed_schema, HedSectionKey.Attributes)
+        self._output_section(hed_schema, HedSectionKey.Properties)
+        self._output_footer(hed_schema.epilogue)
 
-        return saver.output
+        return self.output
+
+    def _initialize_output(self):
+        raise NotImplementedError("This needs to be defined in the subclass")
 
     def _output_header(self, attributes, prologue):
         raise NotImplementedError("This needs to be defined in the subclass")
@@ -87,7 +97,8 @@ class Schema2Base:
             tag = tag_entry.name
             level = tag.count("/")
 
-            if not tag_entry.has_attribute(HedKey.InLibrary):
+            # Don't adjust if we're a top level tag(if this is a rooted tag, it will be re-adjusted below)
+            if not tag_entry.parent_name:
                 level_adj = 0
             if level == 0:
                 root_tag = self._write_tag_entry(tag_entry, schema_node, level)
@@ -141,3 +152,57 @@ class Schema2Base:
 
     def _attribute_disallowed(self, attribute):
         return self._strip_out_in_library and attribute == HedKey.InLibrary
+
+    def _format_tag_attributes(self, attributes):
+        """
+            Takes a dictionary of tag attributes and returns a string with the .mediawiki representation
+
+        Parameters
+        ----------
+        attributes : {str:str}
+            {attribute_name : attribute_value}
+        Returns
+        -------
+        str:
+            The formatted string that should be output to the file.
+        """
+        prop_string = ""
+        final_props = []
+        for prop, value in attributes.items():
+            # Never save InLibrary if saving merged.
+            if self._attribute_disallowed(prop):
+                continue
+            if value is True:
+                final_props.append(prop)
+            else:
+                if "," in value:
+                    split_values = value.split(",")
+                    for split_value in split_values:
+                        final_props.append(f"{prop}={split_value}")
+                else:
+                    final_props.append(f"{prop}={value}")
+
+        if final_props:
+            interior = ", ".join(final_props)
+            prop_string = f"{interior}"
+
+        return prop_string
+
+    @staticmethod
+    def _get_attribs_string_from_schema(header_attributes, sep=" "):
+        """
+        Gets the schema attributes and converts it to a string.
+
+        Parameters
+        ----------
+        header_attributes : dict
+            Attributes to format attributes from
+
+        Returns
+        -------
+        str:
+            A string of the attributes that can be written to a .mediawiki formatted file
+        """
+        attrib_values = [f"{attr}=\"{value}\"" for attr, value in header_attributes.items()]
+        final_attrib_string = sep.join(attrib_values)
+        return final_attrib_string

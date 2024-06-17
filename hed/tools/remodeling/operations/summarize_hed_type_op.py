@@ -12,52 +12,66 @@ from hed.tools.remodeling.operations.base_summary import BaseSummary
 class SummarizeHedTypeOp(BaseOp):
     """ Summarize a HED type tag in a collection of tabular files.
 
-    Required remodeling parameters:   
-        - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary.   
-        - **type_tag** (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags).   
+    Required remodeling parameters:
+        - **summary_name** (*str*): The name of the summary.
+        - **summary_filename** (*str*): Base filename of the summary.
+        - **type_tag** (*str*):Type tag to get_summary (e.g. `condition-variable` or `task` tags).
+
+    Optional remodeling parameters:
+        - **append_timecode** (*bool*): If true, the timecode is appended to the base filename when summary is saved.
 
     The purpose of this op is to produce a summary of the occurrences of specified tag. This summary
     is often used with `condition-variable` to produce a summary of the experimental design.
 
     """
 
+    NAME = "summarize_hed_type"
+
     PARAMS = {
-        "operation": "summarize_hed_type",
-        "required_parameters": {
-            "summary_name": str,
-            "summary_filename": str,
-            "type_tag": str
+        "type": "object",
+        "properties": {
+            "summary_name": {
+                "type": "string",
+                "description": "Name to use for the summary in titles."
+            },
+            "summary_filename": {
+                "type": "string",
+                "description": "Name to use for the summary file name base."
+            },
+            "type_tag": {
+                "type": "string",
+                "description": "Type tag (such as Condition-variable or Task to design summaries for.."
+            },
+            "append_timecode": {
+                "type": "boolean",
+                "description": "If true, the timecode is appended to the base filename so each run has a unique name."
+            }
         },
-        "optional_parameters": {
-            "append_timecode": bool
-        }
+        "required": [
+            "summary_name",
+            "summary_filename",
+            "type_tag"
+        ],
+        "additionalProperties": False
     }
 
     SUMMARY_TYPE = 'hed_type_summary'
 
     def __init__(self, parameters):
-        """ Constructor for the summarize hed type operation.
+        """ Constructor for the summarize HED type operation.
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.summary_name = parameters['summary_name']
         self.summary_filename = parameters['summary_filename']
-        self.type_tag = parameters['type_tag'].lower()
+        self.type_tag = parameters['type_tag'].casefold()
         self.append_timecode = parameters.get('append_timecode', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Summarize a specified HED type variable such as Condition-variable .
+        """ Summarize a specified HED type variable such as Condition-variable.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -81,10 +95,22 @@ class SummarizeHedTypeOp(BaseOp):
                                 'schema': dispatcher.hed_schema, 'sidecar': sidecar})
         return df_new
 
+    @staticmethod
+    def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        return []
+
 
 class HedTypeSummary(BaseSummary):
+    """ Manager of the HED type summaries. """
 
     def __init__(self, sum_op):
+        """ Constructor for HED type summary manager.
+
+        Parameters:
+            sum_op (BaseOp): Operation associated with this summary.
+
+        """
         super().__init__(sum_op)
         self.type_tag = sum_op.type_tag
 
@@ -102,10 +128,13 @@ class HedTypeSummary(BaseSummary):
         sidecar = new_info['sidecar']
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
-        input_data = TabularInput(new_info['df'], sidecar=sidecar, name=new_info['name'])
-        type_values = HedType(EventManager(input_data, new_info['schema']), new_info['name'], type_tag=self.type_tag)
+        input_data = TabularInput(
+            new_info['df'], sidecar=sidecar, name=new_info['name'])
+        type_values = HedType(EventManager(
+            input_data, new_info['schema']), new_info['name'], type_tag=self.type_tag)
         counts = HedTypeCounts(new_info['name'], self.type_tag)
-        counts.update_summary(type_values.get_summary(), type_values.total_events, new_info['name'])
+        counts.update_summary(type_values.get_summary(),
+                              type_values.total_events, new_info['name'])
         counts.add_descriptions(type_values.type_defs)
         self.summary_dict[new_info["name"]] = counts
 
@@ -183,10 +212,13 @@ class HedTypeSummary(BaseSummary):
             if item['direct_references']:
                 str1 = str1 + f" Direct references:{item['direct_references']}"
             if item['events_with_multiple_refs']:
-                str1 = str1 + f" Multiple references:{item['events_with_multiple_refs']})"
+                str1 = str1 + \
+                    f" Multiple references:{item['events_with_multiple_refs']})"
             sum_list.append(f"{indent}{key}: {str1}")
             if item['level_counts']:
-                sum_list = sum_list + HedTypeSummary._level_details(item['level_counts'], indent=indent)
+                sum_list = sum_list + \
+                    HedTypeSummary._level_details(
+                        item['level_counts'], indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
@@ -207,12 +239,14 @@ class HedTypeSummary(BaseSummary):
                     f"Total events={result.get('Total events', 0)}"]
 
         for key, item in type_info.items():
-            sum_list.append(f"{indent*2}{key}: {item['levels']} levels in {item['events']} events")
+            sum_list.append(
+                f"{indent*2}{key}: {item['levels']} levels in {item['events']} events")
             str1 = ""
             if item['direct_references']:
                 str1 = str1 + f" Direct references:{item['direct_references']}"
             if item['events_with_multiple_refs']:
-                str1 = str1 + f" (Multiple references:{item['events_with_multiple_refs']})"
+                str1 = str1 + \
+                    f" (Multiple references:{item['events_with_multiple_refs']})"
             if str1:
                 sum_list.append(f"{indent*3}{str1}")
             if item['level_counts']:
@@ -222,12 +256,22 @@ class HedTypeSummary(BaseSummary):
 
     @staticmethod
     def _level_details(level_counts, offset="", indent=""):
+        """ Return a list of tag type summary counts at different levels.
+
+        Parameters:
+            level_counts (dict): Dictionary of tags with counts.
+            offset (str): Spaces to offset the entire entry.
+            indent (str): Additional spaces to indent each level.
+
+        """
         level_list = []
         for key, details in level_counts.items():
             str1 = f"[{details['events']} events, {details['files']} files]:"
             level_list.append(f"{offset}{indent*2}{key} {str1}")
             if details['tags']:
-                level_list.append(f"{offset}{indent*3}Tags: {str(details['tags'])}")
+                level_list.append(
+                    f"{offset}{indent*3}Tags: {str(details['tags'])}")
             if details['description']:
-                level_list.append(f"{offset}{indent*3}Description: {details['description']}")
+                level_list.append(
+                    f"{offset}{indent*3}Description: {details['description']}")
         return level_list

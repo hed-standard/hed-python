@@ -2,8 +2,9 @@ import os
 import unittest
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import check_filename, extract_suffix_path, clean_filename, \
-    get_dir_dictionary, get_file_list, get_path_components, get_task_from_file, parse_bids_filename, \
-    _split_entity, get_allowed, get_filtered_by_element
+    get_alphanumeric_path, get_dir_dictionary, get_file_list, get_path_components, get_task_from_file, \
+    parse_bids_filename, _split_entity, get_allowed, get_filtered_by_element
+
 
 
 class Test(unittest.TestCase):
@@ -24,23 +25,23 @@ class Test(unittest.TestCase):
     def test_check_filename(self):
         name1 = "/user/local/task_baloney.gz_events.nii"
         check1a = check_filename(name1, extensions=[".txt", ".nii"])
-        self.assertTrue(check1a, "check_filename should return true if has required extension")
+        self.assertTrue(check1a, "check_filename should return True if has required extension")
         check1b = check_filename(name1, name_prefix="apple", extensions=[".txt", ".nii"])
-        self.assertFalse(check1b, "check_filename should return false if right extension but wrong prefix")
+        self.assertFalse(check1b, "check_filename should return False if right extension but wrong prefix")
         check1c = check_filename(name1, name_suffix='_events')
-        self.assertTrue(check1c, "check_filename should return true if has a default extension and correct suffix")
+        self.assertTrue(check1c, "check_filename should return True if has a default extension and correct suffix")
         name2 = "/user/local/task_baloney.gz_events.nii.gz"
         check2a = check_filename(name2, extensions=[".txt", ".nii"])
-        self.assertFalse(check2a, "check_filename should return false if extension does not match")
+        self.assertFalse(check2a, "check_filename should return False if extension does not match")
         check2b = check_filename(name2, extensions=[".txt", ".nii.gz"])
-        self.assertTrue(check2b, "check_filename should return true if extension with gz matches")
+        self.assertTrue(check2b, "check_filename should return True if extension with gz matches")
         check2c = check_filename(name2, name_suffix="_events", extensions=[".txt", ".nii.gz"])
-        self.assertTrue(check2c, "check_filename should return true if suffix after extension matches")
+        self.assertTrue(check2c, "check_filename should return True if suffix after extension matches")
         name3 = "Changes"
         check3a = check_filename(name3, name_suffix="_events", extensions=None)
-        self.assertFalse(check3a, "check_filename should be false if it doesn't match with no extension")
+        self.assertFalse(check3a, "check_filename should be False if it doesn't match with no extension")
         check3b = check_filename(name3, name_suffix="es", extensions=None)
-        self.assertTrue(check3b, "check_filename should be true if match with no extension.")
+        self.assertTrue(check3b, "check_filename should be True if match with no extension.")
 
     def test_extract_suffix_path(self):
         suffix_path = extract_suffix_path('c:/myroot/temp.tsv', 'c:')
@@ -92,7 +93,14 @@ class Test(unittest.TestCase):
         self.assertEqual(value1, "events", "get_allowed is case insensitive")
         value2 = get_allowed(test_value1, [])
         self.assertEqual(value2, test_value1)
-        
+
+    def test_get_alphanumeric_path(self):
+        mypath1 = 'g:\\String1%_-sTring2\n//string3\\\\\string4.pnG'
+        repath1 = get_alphanumeric_path(mypath1)
+        self.assertEqual('g_String1_sTring2_string3_string4_pnG', repath1)
+        repath2 = get_alphanumeric_path(mypath1, '$')
+        self.assertEqual('g$String1$sTring2$string3$string4$pnG', repath2)
+
     def test_get_dir_dictionary(self):
         dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
         self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")

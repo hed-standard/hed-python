@@ -1,4 +1,4 @@
-""" Split rows in a tabular file into multiple rows based on a column. """
+""" Split rows in a columnar file with  onset and duration columns into multiple rows based on a specified column. """
 
 import numpy as np
 import pandas as pd
@@ -6,23 +6,85 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class SplitRowsOp(BaseOp):
-    """ Split rows in a tabular file into multiple rows based on parameters.
+    """ Split rows in a columnar file with  onset and duration columns into multiple rows based on a specified column.
 
-    Required remodeling parameters:   
-        - **anchor_column** (*str*): The column in which the names of new items are stored.   
-        - **new_events** (*dict*):  Mapping of new values based on values in the original row.    
-        - **remove_parent_row** (*bool*):  If true, the original row that was split is removed.   
+    Required remodeling parameters:
+        - **anchor_column** (*str*): The column in which the names of new items are stored.
+        - **new_events** (*dict*):  Mapping of new values based on values in the original row.
+        - **remove_parent_row** (*bool*):  If true, the original row that was split is removed.
+
+    Notes:
+        - In specifying onset and duration for the new row, you can give values or the names of columns as strings.
 
     """
+    NAME = "split_rows"
 
     PARAMS = {
-        "operation": "split_rows",
-        "required_parameters": {
-            "anchor_column": str,
-            "new_events": dict,
-            "remove_parent_row": bool
+        "type": "object",
+        "properties": {
+            "anchor_column": {
+                "type": "string",
+                "description": "The column containing the keys for the new rows. (Original rows will have own keys.)"
+            },
+            "new_events": {
+                "type": "object",
+                "description": "A map describing how the rows for the new codes will be created.",
+                "patternProperties": {
+                    ".*": {
+                        "type": "object",
+                        "properties": {
+                            "onset_source": {
+                                "type": "array",
+                                "description": "List of items to add to compute the onset time of the new row.",
+                                "items": {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                },
+                                "minItems": 1
+                            },
+                            "duration": {
+                                "type": "array",
+                                "description": "List of items to add to compute the duration of the new row.",
+                                "items": {
+                                    "type": [
+                                        "string",
+                                        "number"
+                                    ]
+                                },
+                                "minItems": 1
+                            },
+                            "copy_columns": {
+                                "type": "array",
+                                "description": "List of columns whose values to copy for the new row.",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "minItems": 1,
+                                "uniqueItems": True
+                            }
+                        },
+                        "required": [
+                            "onset_source",
+                            "duration"
+                        ],
+                        "additionalProperties": False
+                    }
+                },
+                "minProperties": 1
+            },
+            "remove_parent_row": {
+                "type": "boolean",
+                "description": "If true, the row from which these rows were split is removed, otherwise it stays."
+            }
         },
-        "optional_parameters": {}
+        "required": [
+            "anchor_column",
+            "new_events",
+            "remove_parent_row"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -31,15 +93,8 @@ class SplitRowsOp(BaseOp):
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
-        :raises KeyError:
-            - If a required parameter is missing.
-            - If an unexpected parameter is provided.
-
-        :raises TypeError:
-            - If a parameter has the wrong type.
-
         """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.anchor_column = parameters['anchor_column']
         self.new_events = parameters['new_events']
         self.remove_parent_row = parameters['remove_parent_row']
@@ -60,7 +115,12 @@ class SplitRowsOp(BaseOp):
             -If bad onset or duration.
 
         """
-
+        if 'onset' not in df.columns:
+            raise ValueError("MissingOnsetColumn",
+                             f"{name}: Data must have an onset column for split_rows_op")
+        elif 'duration' not in df.columns:
+            raise ValueError("MissingDurationColumn",
+                             f"{name}: Data must have an duration column for split_rows_op")
         df_new = df.copy()
 
         if self.anchor_column not in df_new.columns:
@@ -83,13 +143,14 @@ class SplitRowsOp(BaseOp):
             df_list (list):  The list of split events and possibly the
 
         """
-        for event, event_parms in self.new_events.items():
+        for event, event_params in self.new_events.items():
             add_events = pd.DataFrame([], columns=df.columns)
-            add_events['onset'] = self._create_onsets(df, event_parms['onset_source'])
+            add_events['onset'] = self._create_onsets(
+                df, event_params['onset_source'])
             add_events[self.anchor_column] = event
-            self._add_durations(df, add_events, event_parms['duration'])
-            if len(event_parms['copy_columns']) > 0:
-                for column in event_parms['copy_columns']:
+            self._add_durations(df, add_events, event_params['duration'])
+            if len(event_params['copy_columns']) > 0:
+                for column in event_params['copy_columns']:
                     add_events[column] = df[column]
 
             # add_events['event_type'] = event
@@ -103,7 +164,8 @@ class SplitRowsOp(BaseOp):
             if isinstance(duration, float) or isinstance(duration, int):
                 add_events['duration'] = add_events['duration'].add(duration)
             elif isinstance(duration, str) and duration in list(df.columns):
-                add_events['duration'] = add_events['duration'].add(pd.to_numeric(df[duration], errors='coerce'))
+                add_events['duration'] = add_events['duration'].add(
+                    pd.to_numeric(df[duration], errors='coerce'))
             else:
                 raise TypeError("BadDurationInModel",
                                 f"Remodeling duration {str(duration)} must either be numeric or a column name", "")
@@ -134,3 +196,8 @@ class SplitRowsOp(BaseOp):
                 raise TypeError("BadOnsetInModel",
                                 f"Remodeling onset {str(onset)} must either be numeric or a column name.", "")
         return onsets
+
+    @staticmethod
+    def validate_input_data(parameters):
+        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        return []

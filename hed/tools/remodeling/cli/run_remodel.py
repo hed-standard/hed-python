@@ -3,11 +3,14 @@
 import os
 import json
 import argparse
+import logging
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.io_util import get_file_list, get_task_from_file
+
 from hed.tools.bids.bids_dataset import BidsDataset
+from hed.tools.remodeling.remodeler_validator import RemodelerValidator
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.backup_manager import BackupManager
+from hed.tools.util import io_util
 
 
 def get_parser():
@@ -35,6 +38,8 @@ def get_parser():
                         help="Controls individual file summaries ('none', 'separate', 'consolidated')")
     parser.add_argument("-j", "--json-sidecar", dest="json_sidecar", nargs="?",
                         help="Optional path to JSON sidecar with HED information")
+    parser.add_argument("-ld", "--log_dir", dest="log_dir", default="",
+                        help="Directory for storing log entries for errors.")
 #    parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
 #                        help="Name of the default backup for remodeling")
     parser.add_argument("-nb", "--no-backup", action='store_true', dest="no_backup",
@@ -61,13 +66,13 @@ def get_parser():
 
 
 def handle_backup(args):
-    """ Restores the backup if applicable.
+    """ Restore the backup if applicable.
 
     Parameters:
-        args (obj): parsed arguments as an object.
+        args (obj): Parsed arguments as an object.
 
     Returns:
-        str or None:  backup name if there was a backup done.
+        str or None:  Backup name if there was a backup done.
 
     """
     if args.no_backup:
@@ -89,7 +94,7 @@ def parse_arguments(arg_list=None):
         arg_list (list):  List of command line arguments as a list.
 
     Returns:
-        Object:  Argument object
+        Object:  Argument object.
         List: A list of parsed operations (each operation is a dictionary).
 
     :raises ValueError:
@@ -109,24 +114,25 @@ def parse_arguments(arg_list=None):
         print(f"Data directory: {args.data_dir}\nModel path: {args.model_path}")
     with open(args.model_path, 'r') as fp:
         operations = json.load(fp)
-    parsed_operations, errors = Dispatcher.parse_operations(operations)
+    validator = RemodelerValidator()
+    errors = validator.validate(operations)
     if errors:
         raise ValueError("UnableToFullyParseOperations",
-                         f"Fatal operation error, cannot continue:\n{Dispatcher.errors_to_str(errors)}")
+                         f"Fatal operation error, cannot continue:\n{errors}")
     return args, operations
 
 
 def parse_tasks(files, task_args):
+    """ Parse the tasks argument to get a task list.
+
+    Parameters:
+        files (list):  List of full paths of files.
+        task_args (str or list):  The argument values for the task parameter.
+
+    """
     if not task_args:
         return {"": files}
-    task_dict = {}
-    for my_file in files:
-        task = get_task_from_file(my_file)
-        if not task:
-            continue
-        task_entry = task_dict.get(task, [])
-        task_entry.append(my_file)
-        task_dict[task] = task_entry
+    task_dict = io_util.get_task_dict(files)
     if task_args == "*" or isinstance(task_args, list) and task_args[0] == "*":
         return task_dict
     task_dict = {key: task_dict[key] for key in task_args if key in task_dict}
@@ -200,25 +206,37 @@ def main(arg_list=None):
 
     """
     args, operations = parse_arguments(arg_list)
-    if not os.path.isdir(args.data_dir):
-        raise HedFileError("DataDirectoryDoesNotExist", f"The root data directory {args.data_dir} does not exist", "")
-    backup_name = handle_backup(args)
-    save_dir = None
-    if args.work_dir:
-        save_dir = os.path.realpath(os.path.join(args.work_dir, Dispatcher.REMODELING_SUMMARY_PATH))
-    files = get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
-                          exclude_dirs=args.exclude_dirs)
-    task_dict = parse_tasks(files, args.task_names)
-    for task, files in task_dict.items():
-        dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=backup_name,
-                              hed_versions=args.hed_versions)
-        if args.use_bids:
-            run_bids_ops(dispatch, args, files)
-        else:
-            run_direct_ops(dispatch, args, files)
-        if not args.no_summaries:
-            dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries, 
-                                    summary_dir=save_dir, task_name=task)
+
+    if args.log_dir:
+        os.makedirs(args.log_dir, exist_ok=True)
+        timestamp = io_util.get_timestamp()
+    try:
+        if not os.path.isdir(args.data_dir):
+            raise HedFileError("DataDirectoryDoesNotExist",
+                               f"The root data directory {args.data_dir} does not exist", "")
+        backup_name = handle_backup(args)
+        save_dir = None
+        if args.work_dir:
+            save_dir = os.path.realpath(os.path.join(args.work_dir, Dispatcher.REMODELING_SUMMARY_PATH))
+        files = io_util.get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
+                                      exclude_dirs=args.exclude_dirs)
+        task_dict = parse_tasks(files, args.task_names)
+        for task, files in task_dict.items():
+            dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=backup_name,
+                                  hed_versions=args.hed_versions)
+            if args.use_bids:
+                run_bids_ops(dispatch, args, files)
+            else:
+                run_direct_ops(dispatch, args, files)
+            if not args.no_summaries:
+                dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries,
+                                        summary_dir=save_dir, task_name=task)
+    except Exception as ex:
+        if args.log_dir:
+            log_name = io_util.get_alphanumeric_path(os.path.realpath(args.data_dir)) + '_' + timestamp + '.txt'
+            logging.basicConfig(filename=os.path.join(args.log_dir, log_name), level=logging.ERROR)
+            logging.exception(f"{args.data_dir}: {args.model_path}")
+        raise
 
 
 if __name__ == '__main__':

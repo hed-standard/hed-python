@@ -1,14 +1,15 @@
-""" Class to manage backups for remodeling tools. """
+""" Manager for file backups for remodeling tools. """
 
 import os
 import json
 import shutil
 from datetime import datetime
 from hed.errors.exceptions import HedFileError
-from hed.tools.util.io_util import get_file_list, get_path_components
+from hed.tools.util import io_util
 
 
 class BackupManager:
+    """ Manager for file backups for remodeling tools. """
     DEFAULT_BACKUP_NAME = 'default_back'
     RELATIVE_BACKUP_LOCATION = './derivatives/remodel/backups'
     BACKUP_DICTIONARY = 'backup_lock.json'
@@ -102,8 +103,8 @@ class BackupManager:
         """ Returns a list of full paths of files contained in the backup.
 
         Parameters:
-            backup_name (str):       Name of the backup.
-            original_paths (bool):   If true return the original paths.
+            backup_name (str):  Name of the backup.
+            original_paths (bool):   If True return the original paths.
 
         Returns:
             list:  Full paths of the original files backed (original_paths=True) or the paths in the backup.
@@ -136,7 +137,7 @@ class BackupManager:
                                              self.get_file_key(file_name)))
 
     def get_file_key(self, file_name):
-        file_comp = get_path_components(self.data_root, file_name) + [os.path.basename(file_name)]
+        file_comp = io_util.get_path_components(self.data_root, file_name) + [os.path.basename(file_name)]
         return '/'.join(file_comp)
 
     def restore_backup(self, backup_name=DEFAULT_BACKUP_NAME, task_names=[], verbose=True):
@@ -145,7 +146,7 @@ class BackupManager:
         Parameters:
             backup_name (str):  Name of the backup to restore.
             task_names (list):  A list of task names to restore.
-            verbose (bool):  If true, print out the file names being restored.
+            verbose (bool):  If True, print out the file names being restored.
 
         """
         if verbose:
@@ -162,6 +163,9 @@ class BackupManager:
 
     def _get_backups(self):
         """ Set the manager's backup-dictionary based on backup directory contents.
+
+        Returns:
+            dict: dictionary of dictionaries of the valid backups in the backups_path directory.
 
         :raises HedFileError:
             - If a backup is inconsistent for any reason.
@@ -214,7 +218,7 @@ class BackupManager:
             backup_dict = json.load(fp)
         backup_paths = set([os.path.realpath(os.path.join(backup_root_path, backup_key))
                             for backup_key in backup_dict.keys()])
-        file_paths = set(get_file_list(backup_root_path))
+        file_paths = set(io_util.get_file_list(backup_root_path))
         files_not_in_backup = list(file_paths.difference(backup_paths))
         backups_not_in_directory = list(backup_paths.difference(file_paths))
         return backup_dict, files_not_in_backup, backups_not_in_directory
@@ -224,7 +228,7 @@ class BackupManager:
         """ Return the task if the file name contains a task_xxx where xxx is in task_names.
 
         Parameters:
-            task_names (list):  List of task names (without the task_ prefix).
+            task_names (list):  List of task names (without the `task_` prefix).
             file_path (str):    Path of the filename to be tested.
 
         Returns:

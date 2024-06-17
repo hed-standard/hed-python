@@ -50,18 +50,6 @@ class Test(unittest.TestCase):
         df_new = op.do_op(self.dispatch, self.dispatch.prep_data(df), 'run-01')
         return df, self.dispatch.post_proc_data(df_new)
 
-    def test_valid(self):
-        parms = json.loads(self.json_parms)
-        op = MergeConsecutiveOp(parms)
-        self.assertIsInstance(op, MergeConsecutiveOp)
-
-    def test_invalid(self):
-        parms = json.loads(self.json_parms)
-        parms["column_name"] = "sex"
-        with self.assertRaises(ValueError) as context:
-            MergeConsecutiveOp(parms)
-        self.assertEqual(context.exception.args[0], "MergeColumnCannotBeMatchColumn")
-
     def test_do_op_valid(self):
         # Test when no extras but ignored.
         parms = json.loads(self.json_parms)
@@ -113,7 +101,7 @@ class Test(unittest.TestCase):
 
     def test_get_remove_groups(self):
         match_df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        match_df = match_df.replace('n/a', np.NaN)
+        match_df = match_df.replace('n/a', np.nan)
         match_df1 = match_df.loc[:, ['duration', 'stop_signal_delay',  'response_hand', 'sex']]
         code_mask1 = pd.Series([False, False, False, True, True, True, True, True, False, False])
         remove_groups1 = MergeConsecutiveOp._get_remove_groups(match_df1, code_mask1)
@@ -139,7 +127,7 @@ class Test(unittest.TestCase):
         parms["ignore_missing"] = False
         op = MergeConsecutiveOp(parms)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df = df.replace('n/a', np.NaN)
+        df = df.replace('n/a', np.nan)
         with self.assertRaises(ValueError) as context:
             op.do_op(self.dispatch, df, 'sample_data')
         self.assertEqual(context.exception.args[0], "ColumnMissing")
@@ -149,7 +137,7 @@ class Test(unittest.TestCase):
         parms["ignore_missing"] = False
         op = MergeConsecutiveOp(parms)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df = df.replace('n/a', np.NaN)
+        df = df.replace('n/a', np.nan)
         df_new = df.drop("onset", axis=1)
         self.assertEqual(len(df.columns), len(df_new.columns) + 1)
         with self.assertRaises(ValueError) as context:
@@ -161,7 +149,7 @@ class Test(unittest.TestCase):
         parms["set_durations"] = True
         op = MergeConsecutiveOp(parms)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df = df.replace('n/a', np.NaN)
+        df = df.replace('n/a', np.nan)
         df_new = df.drop("duration", axis=1)
         self.assertEqual(len(df.columns), len(df_new.columns) + 1)
         with self.assertRaises(ValueError) as context:
@@ -174,7 +162,7 @@ class Test(unittest.TestCase):
         parms["ignore_missing"] = False
         op = MergeConsecutiveOp(parms)
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
-        df = df.replace('n/a', np.NaN)
+        df = df.replace('n/a', np.nan)
         with self.assertRaises(ValueError) as context:
             op.do_op(self.dispatch, df, 'sample_data')
         self.assertEqual(context.exception.args[0], "MissingMatchColumns")

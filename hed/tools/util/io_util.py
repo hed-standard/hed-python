@@ -1,4 +1,4 @@
-"""Utilities for generating and handling file names."""
+"""Utilities for generating and handling file names. """
 
 import os
 import re
@@ -12,7 +12,7 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
     """ Return True if correct extension, suffix, and prefix.
 
     Parameters:
-        test_file (str) :           Path of filename to test.
+        test_file (str):  Path of filename to test.
         name_prefix (list, str, None):  An optional name_prefix or list of prefixes to accept for the base filename.
         name_suffix (list, str, None):  An optional name_suffix or list of suffixes to accept for the base file name.
         extensions (list, str, None):   An optional extension or list of extensions to accept for the extensions.
@@ -26,7 +26,6 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
 
 
     """
-
     basename = os.path.basename(test_file.lower())
     if name_prefix and not get_allowed(basename, allowed_values=name_prefix, starts_with=True):
         return False
@@ -48,7 +47,10 @@ def get_allowed(value, allowed_values=None, starts_with=True):
     Parameters:
         value (str): value to be matched.
         allowed_values (list, str, or None):  Values to match.
-        starts_with (bool):  If true match is done at beginning of string, otherwise the end.
+        starts_with (bool):  If True match is done at beginning of string, otherwise the end.
+
+    Returns:
+        str or list:  portion of value that matches the various allowed_values.
 
     Notes:
         - match is done in lower case.
@@ -69,6 +71,20 @@ def get_allowed(value, allowed_values=None, starts_with=True):
     return result
 
 
+def get_alphanumeric_path(pathname, replace_char='_'):
+    """ Replace sequences of non-alphanumeric characters in string (usually a path) with specified character.
+
+        Parameters:
+            pathname (str): A string usually representing a pathname, but could be any string.
+            replace_char (str): Replacement character(s).
+
+        Returns:
+            str: New string with characters replaced.
+
+    """
+    return re.sub(r'[^a-zA-Z0-9]+', replace_char, pathname)
+
+
 def extract_suffix_path(path, prefix_path):
     """ Return the suffix of path after prefix path has been removed.
 
@@ -80,7 +96,7 @@ def extract_suffix_path(path, prefix_path):
         str:   Suffix path.
 
     Notes:
-        - This function is useful for creating files within BIDS datasets
+        - This function is useful for creating files within BIDS datasets.
 
     """
 
@@ -93,10 +109,10 @@ def extract_suffix_path(path, prefix_path):
 
 
 def clean_filename(filename):
-    """ Replaces invalid characters with under-bars
+    """ Replace invalid characters with under-bars.
 
     Parameters:
-        filename (str):   source filename
+        filename (str):   source filename.
 
     Returns:
         str:  The filename with anything but alphanumeric, period, hyphens, and under-bars removed.
@@ -118,7 +134,7 @@ def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=
         name_suffix (str, None):      An optional name_suffix for the base file name.
         extensions (list, None):      An optional list of file extensions.
         skip_empty (bool):            Do not put entry for directories that have no files.
-        exclude_dirs (list):          List of directories to skip
+        exclude_dirs (list):          List of directories to skip.
 
     Returns:
         dict:  Dictionary with directories as keys and file lists values.
@@ -164,7 +180,7 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
         file_list (list):      List of files to test.
         name_prefix (str):     Optional name_prefix for the base filename.
         name_suffix (str):     Optional name_suffix for the base filename.
-        extensions (list):     Optional list of file extensions (allows two periods (.tsv.gz))
+        extensions (list):     Optional list of file extensions (allows two periods (.tsv.gz)).
 
      Returns:
          list:  The filtered file names.
@@ -187,6 +203,9 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
 
     Returns:
         list:   The full paths.
+
+    Notes: Exclude directories are paths relative to the root path.
+
     """
     file_list = []
     if not exclude_dirs:
@@ -203,8 +222,8 @@ def get_path_components(root_path, this_path):
     """ Get a list of the remaining components after root path.
 
     Parameters:
-        root_path (str):      A path (no trailing separator)
-        this_path (str):      The path of a file or directory descendant of root_path
+        root_path (str):      A path (no trailing separator).
+        this_path (str):      The path of a file or directory descendant of root_path.
 
     Returns:
         list or None:   A list with the remaining elements directory components to the file.
@@ -230,6 +249,12 @@ def get_path_components(root_path, this_path):
 
 
 def get_timestamp():
+    """ Return a timestamp string suitable for using in filenames.
+
+    Returns:
+        str:  Represents the current time.
+
+    """
     now = datetime.now()
     return now.strftime(TIME_FORMAT)[:-3]
 
@@ -245,7 +270,7 @@ def make_path(root_path, sub_path, filename):
     Returns:
         str: A valid realpath for the specified file.
 
-    Notes: This function is useful for creating files within BIDS datasets
+    Notes: This function is useful for creating files within BIDS datasets.
 
     """
 
@@ -268,7 +293,7 @@ def parse_bids_filename(file_path):
     :raises HedFileError:
         - If filename does not conform to name-value_suffix format.
 
-    Notes:  
+    Notes:
         - splits into BIDS suffix, extension, and a dictionary of entity name-value pairs.
 
     """
@@ -299,13 +324,13 @@ def parse_bids_filename(file_path):
 
 
 def _split_entity(piece):
-    """Splits a piece into an entity or suffix.
+    """ Split a piece into an entity or suffix.
 
     Parameters:
         piece (str):   A string to be parsed.
 
     Returns:
-        dict:  with entities as keys as well as the key "bad" and the key "suffix".
+        dict:  Entities as keys as well as the key "bad" and the key "suffix".
 
     """
     piece = piece.strip()
@@ -321,6 +346,15 @@ def _split_entity(piece):
 
 
 def get_task_from_file(file_path):
+    """ Returns the task name entity from a BIDS-type file path.
+
+    Parameters:
+        file_path (str):  File path.
+
+    Returns:
+        str:  The task name or an empty string.
+
+    """
     filename = os.path.splitext(os.path.basename(file_path))
     basename = filename[0].strip()
     position = basename.lower().find("task-")
@@ -328,3 +362,24 @@ def get_task_from_file(file_path):
         return ""
     splits = re.split(r'[_.]', basename[position+5:])
     return splits[0]
+
+
+def get_task_dict(files):
+    """ Return a dictionary of the tasks that appear in the file names of a list of files.
+
+    Parameters:
+        files (list): List of filenames to be separated by task.
+
+    Returns:
+        dict:  dictionary of filenames keyed by task name.
+
+    """
+    task_dict = {}
+    for my_file in files:
+        task = get_task_from_file(my_file)
+        if not task:
+            continue
+        task_entry = task_dict.get(task, [])
+        task_entry.append(my_file)
+        task_dict[task] = task_entry
+    return task_dict

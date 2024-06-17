@@ -1,4 +1,4 @@
-""" Map values in m columns into a new combinations in n columns. """
+""" Map values in m columns in a columnar file into a new combinations in n columns. """
 
 import pandas as pd
 import numpy as np
@@ -7,35 +7,81 @@ from hed.tools.analysis.key_map import KeyMap
 
 
 class RemapColumnsOp(BaseOp):
-    """ Map values in m columns into a new combinations in n columns.
+    """ Map values in m columns in a columnar file into a new combinations in n columns.
 
-    Required remodeling parameters:   
-        - **source_columns** (*list*): The key columns to map (m key columns).   
-        - **destination_columns** (*list*): The destination columns to have the mapped values (n destination columns).   
-        - **map_list** (*list*): A list of lists with the mapping.    
-        - **ignore_missing** (*bool*): If True, entries whose key column values are not in map_list are ignored.   
+    Required remodeling parameters:
+        - **source_columns** (*list*): The key columns to map (m key columns).
+        - **destination_columns** (*list*): The destination columns to have the mapped values (n destination columns).
+        - **map_list** (*list*): A list of lists with the mapping.
+        - **ignore_missing** (*bool*): If True, entries whose key column values are not in map_list are ignored.
 
-    Optional remodeling parameters:   
-        **integer_sources** (*list*): Source columns that should be treated as integers rather than strings.   
+    Optional remodeling parameters:
+        **integer_sources** (*list*): Source columns that should be treated as integers rather than strings.
 
     Notes:
-        Each list element list is of length m + n with the key columns followed by mapped columns. 
+        Each list element list is of length m + n with the key columns followed by mapped columns.
 
     TODO: Allow wildcards
 
     """
+    NAME = "remap_columns"
 
     PARAMS = {
-        "operation": "remap_columns",
-        "required_parameters": {
-            "source_columns": list,
-            "destination_columns": list,
-            "map_list": list,
-            "ignore_missing": bool
+        "type": "object",
+        "properties": {
+            "source_columns": {
+                "type": "array",
+                "description": "The columns whose values are combined to provide the remap keys.",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1
+            },
+            "destination_columns": {
+                "type": "array",
+                "description": "The columns to insert new values based on a key lookup of the source columns.",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1
+            },
+            "map_list": {
+                "type": "array",
+                "description": "An array of k lists each with m+n entries corresponding to the k unique keys.",
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": [
+                            "string",
+                            "number"
+                        ]
+                    },
+                    "minItems": 1
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            },
+            "ignore_missing": {
+                "type": "boolean",
+                "description": "If true, insert missing source columns in the result, filled with n/a, else error."
+            },
+            "integer_sources": {
+                "type": "array",
+                "description": "A list of source column names whose values are to be treated as integers.",
+                "items": {
+                    "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": True
+            }
         },
-        "optional_parameters": {
-            "integer_sources": list
-        }
+        "required": [
+            "source_columns",
+            "destination_columns",
+            "map_list",
+            "ignore_missing"
+        ],
+        "additionalProperties": False
     }
 
     def __init__(self, parameters):
@@ -44,52 +90,29 @@ class RemapColumnsOp(BaseOp):
             Parameters:
                 parameters (dict): Parameter values for required and optional parameters.
 
-            :raises KeyError:
-                - If a required parameter is missing.
-                - If an unexpected parameter is provided.
-
-            :raises TypeError:
-                - If a parameter has the wrong type.
-
-            :raises ValueError:
-                - If an integer column is not a key column.
-                - If a column designated as an integer source does not have valid integers.
-                - If no source columns are specified.
-                - If no destination columns are specified.
-                - If a map_list entry has the wrong number of items (source columns + destination columns).
-
           """
-        super().__init__(self.PARAMS, parameters)
+        super().__init__(parameters)
         self.source_columns = parameters['source_columns']
-        self.integer_sources = []
-        self.string_sources = self.source_columns
-        if "integer_sources" in parameters:
-            self.integer_sources = parameters['integer_sources']
-            if not set(self.integer_sources).issubset(set(self.source_columns)):
-                raise ValueError("IntegerSourceColumnsInvalid",
-                                 f"Integer courses {str(self.integer_sources)} must be in {str(self.source_columns)}")
-            self.string_sources = list(set(self.source_columns).difference(set(self.integer_sources)))
         self.destination_columns = parameters['destination_columns']
         self.map_list = parameters['map_list']
         self.ignore_missing = parameters['ignore_missing']
-        if len(self.source_columns) < 1:
-            raise ValueError("EmptySourceColumns",
-                             f"The source column list {str(self.source_columns)} must be non-empty")
-
-        if len(self.destination_columns) < 1:
-            raise ValueError("EmptyDestinationColumns",
-                             f"The destination column list {str(self.destination_columns)} must be non-empty")
-        entry_len = len(self.source_columns) + len(self.destination_columns)
-        for index, item in enumerate(self.map_list):
-            if len(item) != entry_len:
-                raise ValueError("BadColumnMapEntry",
-                                 f"Map list entry {index} has {len(item)} elements, but must have {entry_len} elements")
-
+        self.string_sources = self.source_columns
+        self.integer_sources = parameters.get('integer_sources', [])
+        self.string_sources = list(set(self.source_columns).difference(set(self.integer_sources)))
         self.key_map = self._make_key_map()
 
     def _make_key_map(self):
-        key_df = pd.DataFrame(self.map_list, columns=self.source_columns+self.destination_columns)
-        key_map = KeyMap(self.source_columns, target_cols=self.destination_columns, name="remap")
+        """
+
+        :raises ValueError:
+        - If a column designated as an integer source does not have valid integers.
+
+        """
+
+        key_df = pd.DataFrame(
+            self.map_list, columns=self.source_columns+self.destination_columns)
+        key_map = KeyMap(self.source_columns,
+                         target_cols=self.destination_columns, name="remap")
         key_map.update(key_df)
         return key_map
 
@@ -106,11 +129,12 @@ class RemapColumnsOp(BaseOp):
             Dataframe: A new dataframe after processing.
 
         :raises ValueError:
-            - If ignore_missing is false and source values from the data are not in the map.
+            - If ignore_missing is False and source values from the data are not in the map.
 
         """
         df1 = df.copy()
-        df1[self.source_columns] = df1[self.source_columns].replace(np.NaN, 'n/a')
+        df1[self.source_columns] = df1[self.source_columns].replace(
+            np.NaN, 'n/a')
         for column in self.integer_sources:
             int_mask = df1[column] != 'n/a'
             df1.loc[int_mask, column] = df1.loc[int_mask, column].astype(int)
@@ -118,5 +142,17 @@ class RemapColumnsOp(BaseOp):
         df_new, missing = self.key_map.remap(df1)
         if missing and not self.ignore_missing:
             raise ValueError("MapSourceValueMissing",
-                             f"{name}: Ignore missing is false, but source values [{missing}] are in data but not map")
+                             f"{name}: Ignore missing is False, but source values [{missing}] are in data but not map")
         return df_new
+
+    @staticmethod
+    def validate_input_data(parameters):
+        map_list = parameters["map_list"]
+        required_len = len(parameters['source_columns']) + len(parameters['destination_columns'])
+        for x in map_list:
+            if len(x) != required_len:
+                return [f"all map_list arrays must be of length {str(required_len)}."]
+        missing = set(parameters.get('integer_sources', [])) - set(parameters['source_columns'])
+        if missing:
+            return [f"the integer_sources {str(missing)} are missing from source_columns."]
+        return []

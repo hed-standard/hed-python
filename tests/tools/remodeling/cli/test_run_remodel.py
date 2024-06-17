@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
                                                                'derivatives/remodel/remodeling_files',
                                                                'summarize_hed_types_rmdl.json'))
         cls.bad_model_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                                             '../../../data/remodel_tests/bad_rename_rmdl.json'))
+                                                           '../../../data/remodel_tests/bad_rename_rmdl.json'))
         cls.files = ['/datasets/fmri_ds002790s_hed_aomic/sub-0001/func/sub-0001_task-stopsignal_acq-seq_events.tsv',
                      '/datasets/fmri_ds002790s_hed_aomic/sub-0001/func/sub-0001_task-workingmemory_acq-seq_events.tsv',
                      '/datasets/fmri_ds002790s_hed_aomic/sub-0002/func/sub-0002_task-emomatching_acq-seq_events.tsv',

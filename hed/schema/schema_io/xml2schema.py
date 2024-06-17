@@ -5,12 +5,10 @@ This module is used to create a HedSchema object from an XML file or tree.
 from defusedxml import ElementTree
 import xml
 
-import hed.schema.hed_schema_constants
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.schema import schema_validation_util
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey, NS_ATTRIB, NO_LOC_ATTRIB
 from hed.schema.schema_io import xml_constants
-from .base2schema import SchemaLoader
+from hed.schema.schema_io.base2schema import SchemaLoader
 from functools import partial
 
 
@@ -21,22 +19,14 @@ class SchemaLoaderXML(SchemaLoader):
 
         SchemaLoaderXML(filename) will load just the header_attributes
     """
-    def __init__(self, filename, schema_as_string=None):
-        super().__init__(filename, schema_as_string)
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
+        super().__init__(filename, schema_as_string, schema, file_format, name)
         self._root_element = None
         self._parent_map = {}
+        self._schema.source_format = ".xml"
 
     def _open_file(self):
-        """Parses an XML file and returns the root element.
-
-        Parameters
-        ----------
-        Returns
-        -------
-        RestrictedElement
-            The root element of the HED XML file.
-
-        """
+        """Parses an XML file and returns the root element."""
         try:
             if self.filename:
                 hed_xml_tree = ElementTree.parse(self.filename)
@@ -44,18 +34,12 @@ class SchemaLoaderXML(SchemaLoader):
             else:
                 root = ElementTree.fromstring(self.schema_as_string)
         except xml.etree.ElementTree.ParseError as e:
-            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, self.schema_as_string)
+            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, self.name)
 
         return root
 
     def _get_header_attributes(self, root_element):
-        """
-            Gets the schema attributes form the XML root node
-
-        Returns
-        -------
-        attribute_dict: {str: str}
-        """
+        """Gets the schema attributes from the XML root node"""
         return self._reformat_xsd_attrib(root_element.attrib)
 
     def _parse_data(self):
@@ -82,7 +66,7 @@ class SchemaLoaderXML(SchemaLoader):
                 section_element = section_element[0]
             if isinstance(section_element, list):
                 raise HedFileError(HedExceptions.INVALID_HED_FORMAT,
-                                   "Attempting to load an outdated or invalid XML schema", self.filename)
+                                   "Attempting to load an outdated or invalid XML schema", self.name)
             parse_func = parse_order[section_key]
             parse_func(section_element)
 
@@ -114,7 +98,7 @@ class SchemaLoaderXML(SchemaLoader):
 
             tag_entry = self._parse_node(tag_element, HedSectionKey.Tags, full_tag)
 
-            rooted_entry = schema_validation_util.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
+            rooted_entry = self.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
             if rooted_entry:
                 loading_from_chain = rooted_entry.name + "/" + tag_entry.short_tag_name
                 loading_from_chain_short = tag_entry.short_tag_name
@@ -128,17 +112,7 @@ class SchemaLoaderXML(SchemaLoader):
             self._add_tags_recursive(child_tags, parents_and_child)
 
     def _populate_tag_dictionaries(self, tag_section):
-        """Populates a dictionary of dictionaries associated with tags and their attributes.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        {}
-            A dictionary of dictionaries that has been populated with dictionaries associated with tag attributes.
-
-        """
+        """Populates a dictionary of dictionaries associated with tags and their attributes."""
         self._schema._initialize_attributes(HedSectionKey.Tags)
         root_tags = tag_section.findall("node")
 
@@ -146,18 +120,7 @@ class SchemaLoaderXML(SchemaLoader):
 
     def _populate_unit_class_dictionaries(self, unit_section):
         """Populates a dictionary of dictionaries associated with all the unit classes, unit class units, and unit
-           class default units.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        {}
-            A dictionary of dictionaries associated with all the unit classes, unit class units, and unit class
-            default units.
-
-        """
+           class default units."""
         self._schema._initialize_attributes(HedSectionKey.UnitClasses)
         self._schema._initialize_attributes(HedSectionKey.Units)
         def_element_name = xml_constants.ELEMENT_NAMES[HedSectionKey.UnitClasses]
@@ -166,10 +129,11 @@ class SchemaLoaderXML(SchemaLoader):
         for unit_class_element in unit_class_elements:
             unit_class_entry = self._parse_node(unit_class_element, HedSectionKey.UnitClasses)
             unit_class_entry = self._add_to_dict(unit_class_entry, HedSectionKey.UnitClasses)
+            if unit_class_entry is None:
+                continue
             element_units = self._get_elements_by_name(xml_constants.UNIT_CLASS_UNIT_ELEMENT, unit_class_element)
-            element_unit_names = [self._get_element_tag_value(element) for element in element_units]
 
-            for unit, element in zip(element_unit_names, element_units):
+            for element in element_units:
                 unit_class_unit_entry = self._parse_node(element, HedSectionKey.Units)
                 self._add_to_dict(unit_class_unit_entry, HedSectionKey.Units)
                 unit_class_entry.add_unit(unit_class_unit_entry)
@@ -179,8 +143,8 @@ class SchemaLoaderXML(SchemaLoader):
         for attrib_name in attrib_dict:
             if attrib_name == xml_constants.NO_NAMESPACE_XSD_KEY:
                 xsd_value = attrib_dict[attrib_name]
-                final_attrib[hed.schema.hed_schema_constants.NS_ATTRIB] = xml_constants.XSI_SOURCE
-                final_attrib[hed.schema.hed_schema_constants.NO_LOC_ATTRIB] = xsd_value
+                final_attrib[NS_ATTRIB] = xml_constants.XSI_SOURCE
+                final_attrib[NO_LOC_ATTRIB] = xsd_value
             else:
                 final_attrib[attrib_name] = attrib_dict[attrib_name]
 
@@ -230,7 +194,7 @@ class SchemaLoaderXML(SchemaLoader):
             if element.text is None and tag_name != "units":
                 raise HedFileError(HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
                                    f"A Schema node is empty for tag of element name: '{tag_name}'.",
-                                   self._schema.filename)
+                                   self.name)
             return element.text
         return ""
 
@@ -256,8 +220,9 @@ class SchemaLoaderXML(SchemaLoader):
         return elements
 
     def _add_to_dict(self, entry, key_class):
-        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged:
+        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             raise HedFileError(HedExceptions.IN_LIBRARY_IN_UNMERGED,
-                               f"Library tag in unmerged schema has InLibrary attribute",
-                               self._schema.filename)
-        return self._schema._add_tag_to_dict(entry.name, entry, key_class)
+                               "Library tag in unmerged schema has InLibrary attribute",
+                               self.name)
+
+        return self._add_to_dict_base(entry, key_class)
