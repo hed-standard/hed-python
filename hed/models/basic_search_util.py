@@ -5,7 +5,7 @@ from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 
 
-def convert_query_to_form(search_query, schema):
+def convert_query(search_query, schema):
     """Converts the given basic search query into a hed_string
 
     Parameters:
