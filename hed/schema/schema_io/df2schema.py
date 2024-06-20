@@ -137,35 +137,19 @@ class SchemaLoaderDF(SchemaLoaderText):
         Parameters:
             dataframe (pd.DataFrame): The dataframe for the main tags section
         """
-        # note: this assumes loading is in order row by row.
-        # If tags are NOT sorted this won't work.(same as mediawiki)
         self._schema._initialize_attributes(HedSectionKey.Tags)
-        known_tag_levels = {"HedTag": -1}
-        parent_tags = []
+        known_parent_tags =  {"HedTag": []}
         level_adj = 0
         for row_number, row in dataframe[constants.TAG_KEY].iterrows():
             # skip blank rows, though there shouldn't be any
             if not any(row):
                 continue
             parent_tag = row[constants.subclass_of]
-            # Return -1 by default for top level rooted tag support(they might not be in the dict)
-            raw_level = known_tag_levels.get(parent_tag, -1) + 1
-            if raw_level == 0:
-                parent_tags = []
-                level_adj = 0
-            else:
-                level = raw_level + level_adj
-                if level < len(parent_tags):
-                    parent_tags = parent_tags[:level]
-                elif level > len(parent_tags):
-                    self._add_fatal_error(row_number, row,
-                                          "Invalid level reported from Level column",
-                                          HedExceptions.GENERIC_ERROR)
-                    continue
+            org_parent_tags = known_parent_tags.get(parent_tag, []).copy()
 
-            tag_entry, parent_tags, level_adj = self._add_tag_meta(parent_tags, row_number, row, level_adj)
+            tag_entry, parent_tags, _ = self._add_tag_meta(org_parent_tags, row_number, row, level_adj)
             if tag_entry:
-                known_tag_levels[tag_entry.short_tag_name] = raw_level
+                known_parent_tags[tag_entry.short_tag_name] = parent_tags.copy()
 
     def _read_section(self, df, section_key):
         self._schema._initialize_attributes(section_key)
