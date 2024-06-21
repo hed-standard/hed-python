@@ -77,5 +77,5 @@ namespaces = false
 hed = ["schema/schema_data/*.xml", "resources/*.png"]
 
 [tool.codespell]
-skip = '*.git,*.pdf,*.xml,*.mediawiki,*.svg,versioneer.py,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests'
+skip = '*.git,*.pdf,*.svg,versioneer.py,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests,,*.xml,*.mediawiki,*.omn,*.toml'
 ignore-words-list = 'te,parms,assertIn'
