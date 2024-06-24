@@ -1,6 +1,6 @@
 import os.path
 from collections import defaultdict
-from hed.schema import from_string, load_schema
+from hed.schema import from_string, load_schema, from_dataframes
 from hed.errors import get_printable_issue_string, HedFileError, SchemaWarnings
 
 all_extensions = [".tsv", ".mediawiki", ".xml"]
@@ -45,6 +45,14 @@ def validate_schema(file_path):
 
         if reloaded_schema != base_schema:
             error_text = f"Failed to reload {file_path} as xml.  " \
+                         f"There is either a problem with the source file, or the saving/loading code."
+            validation_issues.append(error_text)
+
+        tsv_dataframes = base_schema.get_as_dataframes()
+        reloaded_schema = from_dataframes(tsv_dataframes)
+
+        if reloaded_schema != base_schema:
+            error_text = f"Failed to reload {file_path} as dataframes.  " \
                          f"There is either a problem with the source file, or the saving/loading code."
             validation_issues.append(error_text)
     except HedFileError as e:
