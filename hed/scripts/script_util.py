@@ -1,7 +1,8 @@
 import os.path
 from collections import defaultdict
-from hed.schema import from_string, load_schema
+from hed.schema import from_string, load_schema, from_dataframes
 from hed.errors import get_printable_issue_string, HedFileError, SchemaWarnings
+from hed.schema.schema_compare import compare_differences
 
 all_extensions = [".tsv", ".mediawiki", ".xml"]
 
@@ -35,18 +36,17 @@ def validate_schema(file_path):
         mediawiki_string = base_schema.get_as_mediawiki_string()
         reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki")
 
-        if reloaded_schema != base_schema:
-            error_text = f"Failed to reload {file_path} as mediawiki.  " \
-                         f"There is either a problem with the source file, or the saving/loading code."
-            validation_issues.append(error_text)
+        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "mediawiki")
 
         xml_string = base_schema.get_as_xml_string()
         reloaded_schema = from_string(xml_string, schema_format=".xml")
 
-        if reloaded_schema != base_schema:
-            error_text = f"Failed to reload {file_path} as xml.  " \
-                         f"There is either a problem with the source file, or the saving/loading code."
-            validation_issues.append(error_text)
+        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "xml")
+
+        tsv_dataframes = base_schema.get_as_dataframes()
+        reloaded_schema = from_dataframes(tsv_dataframes)
+
+        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "tsv")
     except HedFileError as e:
         print(f"Saving/loading error: {file_path} {e.message}")
         error_text = e.message
@@ -209,3 +209,15 @@ def get_prerelease_path(repo_path, schema_name, schema_version):
     schema_filename = get_schema_filename(schema_name, schema_version)
 
     return os.path.join(base_path, "hedtsv", schema_filename)
+
+
+def _get_schema_comparison(schema, schema_reload, file_path, file_format):
+    if schema_reload != schema:
+        error_text = f"Failed to reload {file_path} as {file_format}.  " \
+                     f"There is either a problem with the source file, or the saving/loading code."
+        title_prompt = ("If the problem is in the schema file, "
+                        "the following comparison should indicate the approximate source of the issues:")
+        error_text += "\n" + compare_differences(schema, schema_reload, title=title_prompt)
+        return [error_text]
+
+    return []
