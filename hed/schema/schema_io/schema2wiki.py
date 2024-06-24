@@ -96,14 +96,14 @@ class Schema2Wiki(Schema2Base):
         self.output.append("")
 
     def _format_props_and_desc(self, schema_entry):
-        prop_string = ""
-        tag_props = schema_entry.attributes
-        if tag_props:
-            prop_string += f"{{{self._format_tag_attributes(tag_props)}}}"
+        extras_string = ""
+        attribute_string = self._format_tag_attributes(schema_entry.attributes)
+        if attribute_string:
+            extras_string += f"{{{attribute_string}}}"
         desc = schema_entry.description
         if desc:
-            if tag_props:
-                prop_string += " "
-            prop_string += f"[{desc}]"
+            if attribute_string:
+                extras_string += " "
+            extras_string += f"[{desc}]"
 
-        return prop_string
+        return extras_string
