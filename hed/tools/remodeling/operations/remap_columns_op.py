@@ -134,7 +134,7 @@ class RemapColumnsOp(BaseOp):
         """
         df1 = df.copy()
         df1[self.source_columns] = df1[self.source_columns].replace(
-            np.NaN, 'n/a')
+            np.nan, 'n/a')
         for column in self.integer_sources:
             int_mask = df1[column] != 'n/a'
             df1.loc[int_mask, column] = df1.loc[int_mask, column].astype(int)

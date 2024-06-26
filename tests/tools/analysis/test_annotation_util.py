@@ -300,13 +300,13 @@ class Test(unittest.TestCase):
             factor1 = annotation_util.to_factor(series1)
             self.assertEqual(len(series1), len(factor1))
             self.assertEqual(sum(factor1), len(factor1))
-            series2 = Series(['a', '', None, np.NAN, 'n/a'])
+            series2 = Series(['a', '', None, np.nan, 'n/a'])
             factor2 = annotation_util.to_factor(series2)
             self.assertEqual(len(series2), len(factor2))
             self.assertEqual(sum(factor2), 1)
             data = {
                 'Name': ['Alice', '', 'n/a', 1.0],  # Contains a space
-                'Age': [25, np.NaN, 35, 0]
+                'Age': [25, np.nan, 35, 0]
             }
             df = DataFrame(data)
             factor3 = annotation_util.to_factor(df, column='Name')
@@ -321,7 +321,7 @@ class Test(unittest.TestCase):
         factor1 = annotation_util.series_to_factor(series1)
         self.assertEqual(len(series1), len(factor1))
         self.assertEqual(sum(factor1), len(factor1))
-        series2 = Series(['a', '', None, np.NAN, 'n/a'])
+        series2 = Series(['a', '', None, np.nan, 'n/a'])
         factor2 = annotation_util.series_to_factor(series2)
         self.assertEqual(len(series2), len(factor2))
         self.assertEqual(sum(factor2), 1)
@@ -465,13 +465,13 @@ class Test(unittest.TestCase):
         factor1 = annotation_util.to_factor(series1)
         self.assertEqual(len(series1), len(factor1))
         self.assertEqual(sum(factor1), len(factor1))
-        series2 = Series(['a', '', None, np.NAN, 'n/a'])
+        series2 = Series(['a', '', None, np.nan, 'n/a'])
         factor2 = annotation_util.to_factor(series2)
         self.assertEqual(len(series2), len(factor2))
         self.assertEqual(sum(factor2), 1)
         data = {
             'Name': ['Alice', '', 'n/a', 1.0],  # Contains a space
-            'Age': [25, np.NaN, 35, 0]
+            'Age': [25, np.nan, 35, 0]
         }
         df = DataFrame(data)
         factor3 = annotation_util.to_factor(df, column='Name')
