@@ -95,7 +95,7 @@ class Schema2DF(Schema2Base):
             constants.hed_id: f"{tag_id}",
             constants.level: f"{level}",
             constants.name:
-                tag_entry.short_tag_name if not tag_entry.has_attribute(HedKey.TakesValue)
+                tag_entry.short_tag_name if not tag_entry.name.endswith("#")
                 else tag_entry.short_tag_name + "-#",
             constants.subclass_of: self._get_subclass_of(tag_entry),
             constants.attributes: self._format_tag_attributes(tag_entry.attributes),
