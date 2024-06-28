@@ -199,7 +199,7 @@ def series_to_factor(series):
         series (Series) - Series to be converted to a list.
 
     Returns:
-        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
+        list - contains 0's and 1's, empty, 'n/a' and np.nan are converted to 0.
     """
     replaced = series.replace('n/a', False)
     filled = replaced.fillna(False)
@@ -273,7 +273,7 @@ def to_factor(data, column=None):
         column (str): Optional column name if DataFrame (otherwise column 0).
 
     Returns:
-        list - contains 0's and 1's, empty, 'n/a' and np.NAN are converted to 0.
+        list - contains 0's and 1's, empty, 'n/a' and np.nan are converted to 0.
     """
     if isinstance(data, Series):
         series = data
