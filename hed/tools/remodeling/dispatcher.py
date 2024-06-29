@@ -219,7 +219,7 @@ class Dispatcher:
             df (DataFrame): The DataFrame to be processed.
 
         Returns:
-            DataFrame: DataFrame with the 'np.NAN replaced by 'n/a'.
+            DataFrame: DataFrame with the 'np.nan replaced by 'n/a'.
         """
 
         dtypes = df.dtypes.to_dict()
