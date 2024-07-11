@@ -49,6 +49,8 @@ class HedExceptions:
     CANNOT_PARSE_RDF = "CANNOT_PARSE_RDF"
     SCHEMA_LOAD_FAILED = "SCHEMA_LOAD_FAILED"
 
+    SCHEMA_TAG_TSV_BAD_PARENT = "SCHEMA_TAG_TSV_BAD_PARENT"
+
 
 class HedFileError(Exception):
     """Exception raised when a file cannot be parsed due to being malformed, file IO, etc."""
