@@ -7,14 +7,14 @@ import os
 from hed.schema.schema_io import ontology_util
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.schema_io.text2schema import SchemaLoaderText
+from hed.schema.schema_io.base2schema import SchemaLoader
 import pandas as pd
 import hed.schema.hed_schema_df_constants as constants
 from hed.errors import error_reporter
 from hed.schema.schema_io import text_util
 
 
-class SchemaLoaderDF(SchemaLoaderText):
+class SchemaLoaderDF(SchemaLoader):
     """ Load dataframe schemas from filenames
 
         Expected usage is SchemaLoaderDF.load(filenames)
@@ -139,17 +139,82 @@ class SchemaLoaderDF(SchemaLoaderText):
         """
         self._schema._initialize_attributes(HedSectionKey.Tags)
         known_parent_tags =  {"HedTag": []}
-        level_adj = 0
-        for row_number, row in dataframe[constants.TAG_KEY].iterrows():
-            # skip blank rows, though there shouldn't be any
-            if not any(row):
-                continue
-            parent_tag = row[constants.subclass_of]
-            org_parent_tags = known_parent_tags.get(parent_tag, []).copy()
+        iterations = 0
+        # Handle this over multiple iterations incase tags have parent tags listed later in the file.
+        # A properly formatted .tsv file will never have parents after the child.
+        current_rows = list(dataframe[constants.TAG_KEY].iterrows())
+        while current_rows:
+            iterations += 1
+            next_round_rows = []
+            for row_number, row in current_rows:
+                # skip blank rows, though there shouldn't be any
+                if not any(row):
+                    continue
 
-            tag_entry, parent_tags, _ = self._add_tag_meta(org_parent_tags, row_number, row, level_adj)
-            if tag_entry:
-                known_parent_tags[tag_entry.short_tag_name] = parent_tags.copy()
+                parent_tag = row[constants.subclass_of]
+                org_parent_tags = known_parent_tags.get(parent_tag)
+                tag_entry = self._create_tag_entry(org_parent_tags, row_number, row)
+                if not tag_entry:
+                    # This will have already raised an error
+                    continue
+
+                # If this is NOT a rooted tag and we have no parent, try it in another round.
+                if org_parent_tags is None and not tag_entry.has_attribute(HedKey.Rooted):
+                    next_round_rows.append((row_number, row))
+                    continue
+
+                tag_entry = self._add_tag_entry(tag_entry, row_number, row)
+                if tag_entry:
+                    known_parent_tags[tag_entry.short_tag_name] = tag_entry.name.split("/")
+
+            if len(next_round_rows) == len(current_rows):
+                for row_number, row in current_rows:
+                    tag_name = self._get_tag_name(row)
+                    msg = (f"Cannot resolve parent tag.  "
+                           f"There is probably an issue with circular parent tags of {tag_name} on row {row_number}.")
+                    self._add_fatal_error(row_number, row, msg, HedExceptions.SCHEMA_TAG_TSV_BAD_PARENT)
+                break
+            current_rows = next_round_rows
+
+    def _add_tag_entry(self, tag_entry, row_number, row):
+        try:
+            rooted_entry = self.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
+            if rooted_entry:
+                parent_tags = rooted_entry.long_tag_name.split("/")
+                # Create the entry again for rooted tags, to get the full name.
+                tag_entry = self._create_tag_entry(parent_tags, row_number, row)
+        except HedFileError as e:
+            self._add_fatal_error(row_number, row, e.message, e.code)
+            return None
+
+        tag_entry = self._add_to_dict(row_number, row, tag_entry, HedSectionKey.Tags)
+
+        return tag_entry
+
+    def _create_tag_entry(self, parent_tags, row_number, row):
+        """ Create a tag entry(does not add to dict)
+
+        Parameters:
+            parent_tags (list): A list of parent tags in order.
+            row_number (int): The row number to report errors as
+            row (str or pd.Series): A tag row or pandas series(depends on format)
+
+        Returns:
+            HedSchemaEntry: The entry for the added tag.
+
+        Notes:
+            Includes attributes and description.
+        """
+        tag_name = self._get_tag_name(row)
+        if tag_name:
+            if parent_tags:
+                long_tag_name = "/".join(parent_tags) + "/" + tag_name
+            else:
+                long_tag_name = tag_name
+            return self._create_entry(row_number, row, HedSectionKey.Tags, long_tag_name)
+
+        self._add_fatal_error(row_number, row, f"No tag name found in row.",
+                              error_code=HedExceptions.GENERIC_ERROR)
 
     def _read_section(self, df, section_key):
         self._schema._initialize_attributes(section_key)
@@ -185,11 +250,11 @@ class SchemaLoaderDF(SchemaLoaderText):
     def _get_tag_name(self, row):
         base_tag_name = row[constants.name]
         if base_tag_name.endswith("-#"):
-            return "#", 0
-        return base_tag_name, 0
+            return "#"
+        return base_tag_name
 
     def _create_entry(self, row_number, row, key_class, full_tag_name=None):
-        element_name, _ = self._get_tag_name(row)
+        element_name = self._get_tag_name(row)
         if full_tag_name:
             element_name = full_tag_name
 
@@ -223,6 +288,14 @@ class SchemaLoaderDF(SchemaLoaderText):
             return ontology_util.get_attributes_from_row(row)
         except ValueError as e:
             self._add_fatal_error(row_number, str(row), str(e))
+
+    def _add_to_dict(self, row_number, row, entry, key_class):
+        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
+            self._add_fatal_error(row_number, row,
+                                  "Library tag in unmerged schema has InLibrary attribute",
+                                  HedExceptions.IN_LIBRARY_IN_UNMERGED)
+
+        return self._add_to_dict_base(entry, key_class)
 
 
 def load_dataframes(filenames):
