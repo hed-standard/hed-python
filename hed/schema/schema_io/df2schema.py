@@ -140,7 +140,7 @@ class SchemaLoaderDF(SchemaLoader):
         self._schema._initialize_attributes(HedSectionKey.Tags)
         known_parent_tags =  {"HedTag": []}
         iterations = 0
-        # Handle this over multiple iterations incase tags have parent tags listed later in the file.
+        # Handle this over multiple iterations in case tags have parent tags listed later in the file.
         # A properly formatted .tsv file will never have parents after the child.
         current_rows = list(dataframe[constants.TAG_KEY].iterrows())
         while current_rows:
