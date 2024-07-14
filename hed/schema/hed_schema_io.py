@@ -65,6 +65,7 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None):
         hed_path (str): A filepath or url to open a schema from.
             If loading a TSV file, this should be a single filename where:
             Template: basename.tsv, where files are named basename_Struct.tsv, basename_Tag.tsv, etc.
+            Alternatively, you can point to a directory containing the .tsv files.
         schema_namespace (str or None): The name_prefix all tags in this schema will accept.
         schema(HedSchema or None): A hed schema to merge this new file into
                                    It must be a with-standard schema with the same value.
