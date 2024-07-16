@@ -21,7 +21,7 @@ jobs:
             # PR to master branch
             echo 'matrix=["3.8", "3.9", "3.10", "3.11"]' >> $GITHUB_OUTPUT
           else
-            echo 'matrix=["3.9"]' >> $GITHUB_OUTPUT
+            echo 'matrix=["3.9", "3.11"]' >> $GITHUB_OUTPUT
           fi
 
   build:
