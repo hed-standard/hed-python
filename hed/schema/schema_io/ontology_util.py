@@ -61,6 +61,8 @@ def _get_hedid_range(schema_name, df_key):
     if df_key == constants.STRUCT_KEY:
         raise NotImplementedError("Cannot assign hed_ids struct section")
 
+    if schema_name not in library_index_ranges:
+        return set()
     starting_id, ending_id = library_index_ranges[schema_name]
 
     start_object_range, end_object_range = object_type_id_offset[df_key]
