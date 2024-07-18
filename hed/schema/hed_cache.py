@@ -6,11 +6,12 @@ import os
 import json
 from hashlib import sha1
 from shutil import copyfile
+import functools
+
 
 import re
 from semantic_version import Version
-import portalocker
-import time
+from hed.schema.hed_cache_lock import CacheException, CacheLock
 from hed.schema.schema_io.schema_util import url_to_file, make_url_request
 from pathlib import Path
 import urllib
@@ -32,6 +33,7 @@ prerelease_suffix = "/prerelease"  # The prerelease schemas at the given URLs
 
 DEFAULT_HED_LIST_VERSIONS_URL = "https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema"
 LIBRARY_HED_URL = "https://api.github.com/repos/hed-standard/hed-schemas/contents/library_schemas"
+LIBRARY_DATA_URL = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/library_data.json"
 DEFAULT_URL_LIST = (DEFAULT_HED_LIST_VERSIONS_URL,)
 DEFAULT_LIBRARY_URL_LIST = (LIBRARY_HED_URL,)
 
@@ -39,8 +41,6 @@ DEFAULT_LIBRARY_URL_LIST = (LIBRARY_HED_URL,)
 DEFAULT_SKIP_FOLDERS = ('deprecated',)
 
 HED_CACHE_DIRECTORY = os.path.join(Path.home(), '.hedtools/hed_cache/')
-TIMESTAMP_FILENAME = "last_update.txt"
-CACHE_TIME_THRESHOLD = 300 * 6
 
 # This is the schemas included in the hedtools package.
 INSTALLED_CACHE_LOCATION = os.path.realpath(os.path.join(os.path.dirname(__file__), 'schema_data/'))
@@ -144,13 +144,11 @@ def cache_local_versions(cache_folder):
     """
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
-    os.makedirs(cache_folder, exist_ok=True)
 
     try:
-        cache_lock_filename = os.path.join(cache_folder, "cache_lock.lock")
-        with portalocker.Lock(cache_lock_filename, timeout=1):
-            _copy_installed_schemas_to_cache(cache_folder)
-    except portalocker.exceptions.LockException:
+        with CacheLock(cache_folder, write_time=False):
+            _copy_installed_folder_to_cache(cache_folder)
+    except CacheException:
         return -1
 
 
@@ -165,33 +163,25 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_
         cache_folder (str): The folder holding the cache.
 
     Returns:
-        float: Returns -1 if cache failed, a positive number meaning time in seconds since last update
-            if it didn't cache, 0 if it cached successfully this time.
+        float: Returns -1 if cache failed for any reason, including having been cached too recently.
+               Returns 0 if it successfully cached this time.
 
     Notes:
         - The Default skip_folders is 'deprecated'.
         - The HED cache folder defaults to HED_CACHE_DIRECTORY.
         - The directories on GitHub are of the form:
-            https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml
+            https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema
 
     """
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
 
-    if isinstance(hed_base_urls, str):
-        hed_base_urls = [hed_base_urls]
-    if isinstance(hed_library_urls, str):
-        hed_library_urls = [hed_library_urls]
-    os.makedirs(cache_folder, exist_ok=True)
-    last_timestamp = _read_last_cached_time(cache_folder)
-    current_timestamp = time.time()
-    time_since_update = current_timestamp - last_timestamp
-    if time_since_update < CACHE_TIME_THRESHOLD:
-        return time_since_update
-
     try:
-        cache_lock_filename = os.path.join(cache_folder, "cache_lock.lock")
-        with portalocker.Lock(cache_lock_filename, timeout=1):
+        with CacheLock(cache_folder):
+            if isinstance(hed_base_urls, str):
+                hed_base_urls = [hed_base_urls]
+            if isinstance(hed_library_urls, str):
+                hed_library_urls = [hed_library_urls]
             all_hed_versions = {}
             for hed_base_url in hed_base_urls:
                 new_hed_versions = _get_hed_xml_versions_one_library(hed_base_url)
@@ -205,60 +195,78 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_
                 for version, version_info in hed_versions.items():
                     _cache_hed_version(version, library_name, version_info, cache_folder=cache_folder)
 
-            _write_last_cached_time(current_timestamp, cache_folder)
-    except portalocker.exceptions.LockException or ValueError or URLError:
+    except CacheException or ValueError or URLError:
         return -1
 
     return 0
 
 
-def _copy_installed_schemas_to_cache(cache_folder):
+@functools.lru_cache(maxsize=50)
+def get_library_data(library_name, cache_folder=None):
+    """Retrieve the library data for the given library.
+
+       Currently, this is just the valid ID range.
+
+       Parameters:
+           library_name(str): The schema name.  "" for standard schema.
+           cache_folder(str): The cache folder to use if not using the default.
+
+       Returns:
+           library_data(dict): The data for a specific library.
+    """
+    if cache_folder is None:
+        cache_folder = HED_CACHE_DIRECTORY
+
+    cache_lib_data_folder = os.path.join(cache_folder, "library_data")
+
+    local_library_data_filename = os.path.join(cache_lib_data_folder, "library_data.json")
+    try:
+        with open(local_library_data_filename) as file:
+            library_data = json.load(file)
+        specific_library = library_data[library_name]
+        return specific_library
+    except (OSError, CacheException, ValueError, KeyError):
+        pass
+
+    try:
+        with CacheLock(cache_lib_data_folder, write_time=False):
+            _copy_installed_folder_to_cache(cache_lib_data_folder, "library_data")
+
+        with open(local_library_data_filename) as file:
+            library_data = json.load(file)
+        specific_library = library_data[library_name]
+        return specific_library
+    except (OSError, CacheException, ValueError, KeyError):
+        pass
+
+    try:
+        with CacheLock(cache_lib_data_folder):
+            # if this fails it'll fail to load in the next step
+            _cache_specific_url(LIBRARY_DATA_URL, local_library_data_filename)
+        with open(local_library_data_filename) as file:
+            library_data = json.load(file)
+        specific_library = library_data[library_name]
+        return specific_library
+    except (OSError, CacheException, ValueError, URLError, KeyError) as e:
+        pass
+
+    # This failed to get any data for some reason
+    return {}
+
+
+def _copy_installed_folder_to_cache(cache_folder, sub_folder=""):
     """Copies the schemas from the install folder to the cache"""
-    installed_files = os.listdir(INSTALLED_CACHE_LOCATION)
+    source_folder = INSTALLED_CACHE_LOCATION
+    if sub_folder:
+        source_folder = os.path.join(INSTALLED_CACHE_LOCATION, sub_folder)
+
+    installed_files = os.listdir(source_folder)
     for install_name in installed_files:
         _, basename = os.path.split(install_name)
         cache_name = os.path.join(cache_folder, basename)
-        install_name = os.path.join(INSTALLED_CACHE_LOCATION, basename)
-        if not os.path.exists(cache_name):
+        install_name = os.path.join(source_folder, basename)
+        if not os.path.isdir(install_name) and not os.path.exists(cache_name):
             shutil.copy(install_name, cache_name)
-
-
-def _read_last_cached_time(cache_folder):
-    """ Check the given cache folder to see when it was last updated.
-
-    Parameters:
-        cache_folder (str): The folder we're caching hed schema in.
-
-    Returns:
-        float: The time we last updated the cache.  Zero if no update found.
-
-    """
-    timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
-
-    try:
-        with open(timestamp_filename, "r") as f:
-            timestamp = float(f.readline())
-            return timestamp
-    except FileNotFoundError or ValueError or IOError:
-        return 0
-
-
-def _write_last_cached_time(new_time, cache_folder):
-    """ Set the time of last cache update.
-
-    Parameters:
-        new_time (float): The time this was updated.
-        cache_folder (str): The folder used for caching the hed schema.
-
-    :raises ValueError:
-        - something went wrong writing to the file
-    """
-    timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
-    try:
-        with open(timestamp_filename, "w") as f:
-            f.write(str(new_time))
-    except Exception:
-        raise ValueError("Error writing timestamp to hed cache")
 
 
 def _check_if_url(hed_xml_or_url):
@@ -435,13 +443,13 @@ def _cache_hed_version(version, library_name, version_info, cache_folder):
     return _cache_specific_url(download_url, possible_cache_filename)
 
 
-def _cache_specific_url(hed_xml_url, cache_filename):
+def _cache_specific_url(source_url, cache_filename):
     """Copies a specific url to the cache at the given filename"""
     cache_folder = cache_filename.rpartition("/")[0]
     os.makedirs(cache_folder, exist_ok=True)
-    temp_hed_xml_file = url_to_file(hed_xml_url)
-    if temp_hed_xml_file:
-        cache_filename = _safe_move_tmp_to_folder(temp_hed_xml_file, cache_filename)
-        os.remove(temp_hed_xml_file)
+    temp_filename = url_to_file(source_url)
+    if temp_filename:
+        cache_filename = _safe_move_tmp_to_folder(temp_filename, cache_filename)
+        os.remove(temp_filename)
         return cache_filename
     return None
