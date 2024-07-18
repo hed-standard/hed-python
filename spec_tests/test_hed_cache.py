@@ -41,7 +41,8 @@ class Test(unittest.TestCase):
 
     def test_cache_again(self):
         time_since_update = hed_cache.cache_xml_versions(cache_folder=self.hed_cache_dir)
-        self.assertGreater(time_since_update, 0)
+        # this should fail to cache, since it was cached too recently.
+        self.assertEqual(time_since_update, -1)
 
 
     def test_get_cache_directory(self):
@@ -90,6 +91,7 @@ class Test(unittest.TestCase):
         for version in invalid_versions:
             final_version = f"HED{version}.xml"
             self.assertFalse(hed_cache.version_pattern.match(final_version))
+
 
 class TestLocal(unittest.TestCase):
     @classmethod
@@ -142,6 +144,71 @@ class TestLocal(unittest.TestCase):
         with self.assertRaises(HedFileError) as context8:
             load_schema_version(["8.1.0", "notreallibrary_1.0.0"])
         self.assertEqual(context8.exception.args[0], 'fileNotFound')
+
+
+class TestLibraryDataCache(unittest.TestCase):
+    # Verify get_library_data properly caches from the internet and locally
+    @classmethod
+    def setUpClass(cls):
+        hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../schema_cache_test_get_library_data/')
+        if os.path.exists(hed_cache_dir) and os.path.isdir(hed_cache_dir):
+            shutil.rmtree(hed_cache_dir)
+        hed_cache.get_library_data.cache_clear()
+        cls.hed_cache_dir = hed_cache_dir
+        cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
+        schema.set_cache_directory(cls.hed_cache_dir)
+        cls.saved_install_cache = hed_cache.INSTALLED_CACHE_LOCATION
+        cls.empty_source_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../schema_install_empty_local/")
+        if os.path.exists(cls.empty_source_dir) and os.path.isdir(cls.empty_source_dir):
+            shutil.rmtree(cls.empty_source_dir)
+        os.makedirs(cls.empty_source_dir)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.hed_cache_dir)
+        schema.set_cache_directory(cls.saved_cache_folder)
+        shutil.rmtree(cls.empty_source_dir)
+        hed_cache.INSTALLED_CACHE_LOCATION = cls.saved_install_cache
+        hed_cache.get_library_data.cache_clear()
+
+    def test_local_cache_off(self):
+        hed_cache.get_library_data.cache_clear()
+        shutil.rmtree(self.hed_cache_dir)
+        saved_url = hed_cache.LIBRARY_DATA_URL
+        try:
+            hed_cache.LIBRARY_DATA_URL = ""
+            hed_cache.INSTALLED_CACHE_LOCATION = self.empty_source_dir
+            self.assertEqual(hed_cache.get_library_data(""), {})
+            self.assertEqual(hed_cache.get_library_data("score"), {})
+            self.assertEqual(hed_cache.get_library_data("not_real_library_name"), {})
+        finally:
+            hed_cache.LIBRARY_DATA_URL = saved_url
+            hed_cache.INSTALLED_CACHE_LOCATION = self.saved_install_cache
+
+    def test_local_cache_on(self):
+        hed_cache.get_library_data.cache_clear()
+        shutil.rmtree(self.hed_cache_dir)
+        saved_url = hed_cache.LIBRARY_DATA_URL
+        try:
+            hed_cache.LIBRARY_DATA_URL = ""
+            self.assertTrue(hed_cache.get_library_data(""))
+            self.assertTrue(hed_cache.get_library_data("score"))
+            self.assertEqual(hed_cache.get_library_data("not_real_library_name"), {})
+        finally:
+            hed_cache.LIBRARY_DATA_URL = saved_url
+
+    def test_url_cache(self):
+        hed_cache.get_library_data.cache_clear()
+        shutil.rmtree(self.hed_cache_dir)
+        hed_cache.INSTALLED_CACHE_LOCATION = self.empty_source_dir
+        try:
+            # hed_cache.LIBRARY_DATA_URL = ""
+            self.assertTrue(hed_cache.get_library_data(""))
+            self.assertTrue(hed_cache.get_library_data("score"))
+            self.assertEqual(hed_cache.get_library_data("not_real_library_name"), {})
+        finally:
+            hed_cache.INSTALLED_CACHE_LOCATION = self.saved_install_cache
+
 
 if __name__ == '__main__':
     unittest.main()
