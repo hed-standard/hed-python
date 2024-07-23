@@ -173,7 +173,7 @@ def val_error_unknown_namespace(tag, unknown_prefix, known_prefixes):
     return f"Tag '{tag} has unknown namespace '{unknown_prefix}'.  Valid prefixes: {known_prefixes}"
 
 
-@hed_tag_error(ValidationErrors.NODE_NAME_EMPTY, has_sub_tag=True)
+@hed_tag_error(ValidationErrors.NODE_NAME_EMPTY, has_sub_tag=True, actual_code=ValidationErrors.TAG_INVALID)
 def val_error_extra_slashes_spaces(tag, problem_tag):
     return f"Extra slashes or spaces '{problem_tag}' in tag '{tag}'"
 
