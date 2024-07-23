@@ -57,6 +57,7 @@ run_remodel_backup = "hed.tools.remodeling.cli.run_remodel_backup:main"
 run_remodel_restore = "hed.tools.remodeling.cli.run_remodel_restore:main"
 hed_validate_schemas = "hed.scripts.validate_schemas:main"
 hed_update_schemas = "hed.scripts.convert_and_update_schema:main"
+hed_add_ids = "hed.scripts.add_hed_ids:main"
 hed_create_ontology = "hed.scripts.create_ontology:main"
 
 [tool.versioneer]

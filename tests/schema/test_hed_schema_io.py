@@ -230,7 +230,10 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         cls.source_library_name = "score_1.1.0"
 
         for filename in os.listdir(hed_cache.INSTALLED_CACHE_LOCATION):
-            loaded_schema = schema.load_schema(os.path.join(hed_cache.INSTALLED_CACHE_LOCATION, filename))
+            final_filename = os.path.join(hed_cache.INSTALLED_CACHE_LOCATION, filename)
+            if os.path.isdir(final_filename):
+                continue
+            loaded_schema = schema.load_schema(final_filename)
             loaded_schema.save_as_xml(os.path.join(cls.hed_cache_dir, filename), save_merged=False)
             if filename == f"HED_{cls.source_library_name}.xml":
                 new_filename = f"HED_{cls.dupe_library_name}.xml"

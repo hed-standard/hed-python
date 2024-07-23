@@ -8,13 +8,10 @@ from hed.errors.exceptions import HedFileError
 from hed.schema import hed_schema_df_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema.schema_io.text_util import parse_attribute_string, _parse_header_attributes_line
+from hed.schema.hed_cache import get_library_data
 
-library_index_ranges = {
-    "": (10000, 40000),
-    "score": (40000, 60000),
-    "lang": (60000, 80000)
-}
-UNKNOWN_LIBRARY_VALUE = 9910000
+
+UNKNOWN_LIBRARY_VALUE = 0
 
 object_type_id_offset = {
     constants.OBJECT_KEY: (100, 300),
@@ -39,10 +36,11 @@ def get_library_name_and_id(schema):
         library_name(str): The capitalized library name
         first_id(int): the first id for a given library
     """
+
     name = schema.library
-
-    starting_id, _ = library_index_ranges.get(name, (UNKNOWN_LIBRARY_VALUE, 0))
-
+    
+    library_data = get_library_data(name)
+    starting_id, _ = library_data.get("id_range", (UNKNOWN_LIBRARY_VALUE, UNKNOWN_LIBRARY_VALUE))
     if not name:
         name = "standard"
     return name.capitalize(), starting_id
@@ -61,7 +59,10 @@ def _get_hedid_range(schema_name, df_key):
     if df_key == constants.STRUCT_KEY:
         raise NotImplementedError("Cannot assign hed_ids struct section")
 
-    starting_id, ending_id = library_index_ranges[schema_name]
+    library_data = get_library_data(schema_name)
+    if not library_data:
+        return set()
+    starting_id, ending_id = library_data["id_range"]
 
     start_object_range, end_object_range = object_type_id_offset[df_key]
     if df_key == constants.TAG_KEY:
@@ -71,7 +72,8 @@ def _get_hedid_range(schema_name, df_key):
     final_start = starting_id + start_object_range + initial_tag_adj
     final_end = starting_id + end_object_range
     if end_object_range == -1:
-        final_end = ending_id
+        # Add one since the versions on hed-schemas are set to max_value - 1
+        final_end = ending_id + 1
     return set(range(final_start, final_end))
 
 
