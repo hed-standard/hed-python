@@ -45,7 +45,7 @@ def main():
     parser = argparse.ArgumentParser(description='Convert a specified schema in the prerelease folder to an ontology.')
     parser.add_argument('repo_path', help='The location of the hed-schemas directory')
     parser.add_argument('schema_name', help='The name of the schema to convert("standard" for standard schema)')
-    parser.add_argument('schema_version', help='The location of the hed-schemas directory')
+    parser.add_argument('schema_version', help='The schema version to modify')
     parser.add_argument('--dest', default=os.path.join("src", "ontology"), help='The base location to save to')
 
     args = parser.parse_args()
