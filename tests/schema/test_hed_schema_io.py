@@ -106,6 +106,7 @@ class TestHedSchema(unittest.TestCase):
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3.schema_namespace, "", "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3.name, "testlib_2.0.0,score_1.1.0")
+        self.assertEqual(schemas3.version, "testlib_2.0.0,score_1.1.0")
         # Deprecated tag warnings
         self.assertEqual(len(issues), 11)
 
@@ -271,6 +272,17 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3._namespace, "", "load_schema_version has the right version with namespace")
         self.assertEqual(len(issues), 11)
+
+    # This could be turned on after 2.0.0 and 1.0.0 added to local schema_data(this version will hit the internet)
+    # Also change the 2 below to a 0
+    # def test_load_schema_version_merged2(self):
+    #     ver4 = ["lang_1.0.0", "score_2.0.0"]
+    #     schemas3 = load_schema_version(ver4)
+    #     issues = schemas3.check_compliance()
+    #     self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
+    #     self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
+    #     self.assertEqual(schemas3._namespace, "", "load_schema_version has the right version with namespace")
+    #     self.assertEqual(len(issues), 2)
 
     def test_load_schema_version_merged_duplicates(self):
         ver4 = ["score_1.1.0", "testscoredupe_1.1.0"]

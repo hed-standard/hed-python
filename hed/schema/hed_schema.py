@@ -53,10 +53,13 @@ class HedSchema(HedSchemaBase):
     @property
     def version(self):
         """The complete schema version, including prefix and library name(if applicable)"""
-        library = self.library
-        if library:
-            library = library + '_'
-        return self._namespace + library + self.version_number
+        libraries = self.library.split(",")
+        versions = self.version_number.split(",")
+        namespace = self._namespace
+        combined_versions = [f"{namespace}{version}" if not library else f"{namespace}{library}_{version}"
+                             for library, version in zip(libraries, versions)]
+
+        return ",".join(combined_versions)
 
     @property
     def library(self):

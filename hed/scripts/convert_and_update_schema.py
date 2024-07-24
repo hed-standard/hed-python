@@ -1,4 +1,3 @@
-from hed.schema import load_schema_version
 from hed.scripts.script_util import sort_base_schemas, validate_all_schemas, add_extension
 from hed.schema.schema_io.df2schema import load_dataframes
 from hed.schema.schema_io.ontology_util import update_dataframes_from_schema, save_dataframes
@@ -83,9 +82,6 @@ def main():
 
     filenames = args.filenames
     set_ids = args.set_ids
-
-    # Trigger a local cache hit (this ensures trying to load withStandard schemas will work properly)
-    _ = load_schema_version("8.2.0")
 
     return convert_and_update(filenames, set_ids)
 

@@ -6,7 +6,7 @@ from hed.errors import ErrorHandler, TemporalErrors, ErrorContext, ValidationErr
 from hed.models import HedString, DefinitionDict
 from hed import schema
 from hed.validator import HedValidator, OnsetValidator, DefValidator
-from hed.validator.tag_util.group_util import GroupValidator
+from hed.validator.util.group_util import GroupValidator
 
 
 from tests.validator.test_tag_validator_base import TestHedBase
