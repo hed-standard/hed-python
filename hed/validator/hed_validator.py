@@ -5,7 +5,7 @@ from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from hed.errors import error_reporter
 
 from hed.validator.def_validator import DefValidator
-from hed.validator.tag_util import UnitValueValidator, CharValidator, StringValidator, TagValidator, GroupValidator
+from hed.validator.util import UnitValueValidator, CharValidator, StringValidator, TagValidator, GroupValidator
 from hed.schema.hed_schema import HedSchema
 
 

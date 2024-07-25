@@ -1,4 +1,3 @@
-from hed.schema import load_schema_version
 from hed.errors import HedFileError, get_printable_issue_string
 from hed.schema.schema_io.df2schema import load_dataframes
 from hed.schema.schema_io.ontology_util import convert_df_to_omn
@@ -54,9 +53,6 @@ def main():
     schema_name = args.schema_name
     schema_version = args.schema_version
     dest = args.dest
-
-    # Trigger a local cache hit (this ensures trying to load withStandard schemas will work properly)
-    _ = load_schema_version("8.2.0")
 
     return create_ontology(repo_path, schema_name, schema_version, dest)
 

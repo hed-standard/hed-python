@@ -33,8 +33,7 @@ def schema_error_SCHEMA_INVALID_CHILD(tag, child_tag_list):
 
 @hed_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID)
 def schema_error_unknown_attribute(attribute_name, source_tag):
-    return f"Attribute '{attribute_name}' used by '{source_tag}' was not defined in the schema, " \
-           f"or was used outside of it's defined class."
+    return f"Attribute '{attribute_name}' used by '{source_tag}' was not defined in the schema, or was used outside of it's defined class."
 
 
 @hed_error(SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED, default_severity=ErrorSeverity.WARNING)
@@ -122,6 +121,17 @@ def schema_error_SCHEMA_DEFAULT_UNITS_DEPRECATED(unit_class, bad_unit):
            actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
 def schema_error_SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE(tag, conversion_factor):
     return f"Tag '{tag}' has an invalid conversionFactor '{conversion_factor}'.  Conversion factor must be positive."
+
+
+@hed_error(SchemaAttributeErrors.SCHEMA_HED_ID_INVALID,
+           actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
+def schema_error_SCHEMA_HED_ID_INVALID(tag, new_id, old_id=None, valid_min=None, valid_max=None):
+    if old_id:
+        return f"Tag '{tag}' has an invalid hedId '{new_id}'.  " \
+                f"It has changed from the previous schema version.  Old value: {old_id}."
+    elif valid_min:
+        return f"Tag '{tag}' has an invalid hedId '{new_id}'.  It must be between {valid_min} and {valid_max}."
+    return f"Tag '{tag}' has an invalid hedId '{new_id}'.  It must be an integer in the format of HED_XXXXXXX."
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_ALLOWED_CHARACTERS_INVALID,
