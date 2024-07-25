@@ -35,8 +35,11 @@ class HedIDValidator:
         # Add the standard schema if we have a with_standard
         if "" not in prev_versions and self.hed_schema.with_standard:
             prev_version = self._get_previous_version(self.hed_schema.with_standard, "")
-            prev_versions[""] = prev_version
-            self.library_data[""] = get_library_data("")
+            if prev_version:
+                prev_versions[""] = prev_version
+            library_data = get_library_data("")
+            if library_data:
+                self.library_data[""] = get_library_data("")
 
         if prev_versions:
             self._previous_schemas = {library: load_schema_version(full_version) for library, full_version in
