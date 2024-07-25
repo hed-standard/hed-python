@@ -2,6 +2,7 @@
 import os
 
 import pandas as pd
+import csv
 
 from hed.schema.schema_io import schema_util
 from hed.errors.exceptions import HedFileError
@@ -391,7 +392,40 @@ def save_dataframes(base_filename, dataframe_dict):
     for suffix, dataframe in dataframe_dict.items():
         filename = f"{base}_{suffix}.tsv"
         with open(filename, mode='w', encoding='utf-8') as opened_file:
-            dataframe.to_csv(opened_file, sep='\t', index=False, header=True)
+            dataframe.to_csv(opened_file, sep='\t', index=False, header=True, quoting=csv.QUOTE_NONE)
+
+
+def convert_filenames_to_dict(filenames):
+    """Infers filename meaning based on suffix, e.g. _Tag for the tags sheet
+
+    Parameters:
+        filenames(str or None or list or dict): The list to convert to a dict
+            If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
+            If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
+    Returns:
+        filename_dict(str: str): The required suffix to filename mapping"""
+    result_filenames = {}
+    if isinstance(filenames, str):
+        if filenames.endswith(".tsv"):
+            base, base_ext = os.path.splitext(filenames)
+        else:
+            # Load as foldername/foldername_suffix.tsv
+            base_dir = filenames
+            base_filename = os.path.split(base_dir)[1]
+            base = os.path.join(base_dir, base_filename)
+        for suffix in constants.DF_SUFFIXES:
+            filename = f"{base}_{suffix}.tsv"
+            result_filenames[suffix] = filename
+        filenames = result_filenames
+    elif isinstance(filenames, list):
+        for filename in filenames:
+            remainder, suffix = filename.replace("_", "-").rsplit("-")
+            for needed_suffix in constants.DF_SUFFIXES:
+                if needed_suffix in suffix:
+                    result_filenames[needed_suffix] = filename
+        filenames = result_filenames
+
+    return filenames
 
 
 def get_attributes_from_row(row):
@@ -429,3 +463,15 @@ def create_empty_dataframes():
         constants.OBJECT_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
         constants.ATTRIBUTE_PROPERTY_KEY: pd.DataFrame(columns=constants.property_columns_reduced, dtype=str),
     }
+
+
+def load_dataframes(filenames):
+    dict_filenames = convert_filenames_to_dict(filenames)
+    dataframes = create_empty_dataframes()
+    for key, filename in dict_filenames.items():
+        try:
+            dataframes[key] = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
+        except OSError:
+            # todo: consider if we want to report this error(we probably do)
+            pass  # We will use a blank one for this
+    return dataframes

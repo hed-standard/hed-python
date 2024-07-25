@@ -1,5 +1,5 @@
 from hed.errors import HedFileError, get_printable_issue_string
-from hed.schema.schema_io.df2schema import load_dataframes
+from hed.schema.schema_io import load_dataframes
 from hed.schema.schema_io.ontology_util import convert_df_to_omn
 from hed.scripts.script_util import get_prerelease_path, get_schema_filename
 import argparse
