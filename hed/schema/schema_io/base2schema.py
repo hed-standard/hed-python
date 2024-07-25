@@ -107,7 +107,8 @@ class SchemaLoader(ABC):
         """
         self._loading_merged = True
         # Do a full load of the standard schema if this is a partnered schema
-        if not self.appending_to_schema and self._schema.with_standard and not self._schema.merged:
+        # todo: this could simply cache the schema, rather than a full load, if it's not a merged schema.
+        if not self.appending_to_schema and self._schema.with_standard:
             from hed.schema.hed_schema_io import load_schema_version
             saved_attr = self._schema.header_attributes
             saved_format = self._schema.source_format
@@ -117,13 +118,14 @@ class SchemaLoader(ABC):
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD,
                                    message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
                                    filename=e.filename)
-            # Copy the non-alterable cached schema
-            self._schema = copy.deepcopy(base_version)
-            self._schema.filename = self.filename
-            self._schema.name = self.name  # Manually set name here as we don't want to pass it to load_schema_version
-            self._schema.header_attributes = saved_attr
-            self._schema.source_format = saved_format
-            self._loading_merged = False
+            if not self._schema.merged:
+                # Copy the non-alterable cached schema
+                self._schema = copy.deepcopy(base_version)
+                self._schema.filename = self.filename
+                self._schema.name = self.name  # Manually set name here as we don't want to pass it to load_schema_version
+                self._schema.header_attributes = saved_attr
+                self._schema.source_format = saved_format
+                self._loading_merged = False
 
         self._parse_data()
         self._schema.finalize_dictionaries()
