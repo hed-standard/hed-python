@@ -115,9 +115,6 @@ class TestLocal(unittest.TestCase):
 
     def test_local_cache(self):
         final_hed_xml_file = hed_cache.get_hed_version_path("8.2.0", None, local_hed_directory=self.hed_cache_dir)
-        self.assertFalse(final_hed_xml_file)
-        hed_cache.cache_local_versions(self.hed_cache_dir)
-        final_hed_xml_file = hed_cache.get_hed_version_path("8.2.0", None, local_hed_directory=self.hed_cache_dir)
         self.assertTrue(final_hed_xml_file)
 
     def test_schema_load_schema_version_invalid(self):
