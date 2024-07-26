@@ -44,7 +44,6 @@ class Test(unittest.TestCase):
         # this should fail to cache, since it was cached too recently.
         self.assertEqual(time_since_update, -1)
 
-
     def test_get_cache_directory(self):
         from hed.schema import get_cache_directory
         cache_dir = get_cache_directory()
@@ -73,6 +72,12 @@ class Test(unittest.TestCase):
 
     def test_get_hed_versions_library(self):
         cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score")
+        self.assertIsInstance(cached_versions, list)
+        self.assertTrue(len(cached_versions) > 0)
+
+    def test_get_hed_versions_library_prerelease(self):
+        # Todo: improve this code to actually test it.
+        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score", check_prerelease=True)
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
 
