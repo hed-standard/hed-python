@@ -39,7 +39,7 @@ def get_library_name_and_id(schema):
     """
 
     name = schema.library
-    
+
     library_data = get_library_data(name)
     starting_id, _ = library_data.get("id_range", (UNKNOWN_LIBRARY_VALUE, UNKNOWN_LIBRARY_VALUE))
     if not name:
@@ -117,6 +117,8 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
                                                These dataframes can potentially have extra columns
     """
     hedid_errors = []
+    if not schema_name:
+        schema_name = schema.library
     # 1. Verify existing hed ids don't conflict between schema/dataframes
     for df_key, df in dataframes.items():
         section_key = constants.section_mapping.get(df_key)
@@ -250,7 +252,7 @@ def _get_annotation_prop_ids(dataframes):
     # Also add schema properties
     annotation_props.update(
         {key: value for key, value in zip(dataframes[constants.ATTRIBUTE_PROPERTY_KEY][constants.name],
-                                          dataframes[constants.ATTRIBUTE_PROPERTY_KEY][constants.hed_id])})
+                                 dataframes[constants.ATTRIBUTE_PROPERTY_KEY][constants.hed_id])})
 
     return annotation_props
 
