@@ -33,17 +33,17 @@ def validate_schema(file_path):
             validation_issues.append(error_message)
             return validation_issues
 
-        mediawiki_string = base_schema.get_as_mediawiki_string()
+        mediawiki_string = base_schema.get_as_mediawiki_string(save_merged=True)
         reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki")
 
         validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "mediawiki")
 
-        xml_string = base_schema.get_as_xml_string()
+        xml_string = base_schema.get_as_xml_string(save_merged=True)
         reloaded_schema = from_string(xml_string, schema_format=".xml")
 
         validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "xml")
 
-        tsv_dataframes = base_schema.get_as_dataframes()
+        tsv_dataframes = base_schema.get_as_dataframes(save_merged=True)
         reloaded_schema = from_dataframes(tsv_dataframes)
 
         validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "tsv")
