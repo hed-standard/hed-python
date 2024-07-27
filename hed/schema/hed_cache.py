@@ -86,13 +86,23 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
         library_name = None
 
     all_hed_versions = {}
-    local_directory = local_hed_directory
-    if check_prerelease and not local_directory.endswith(prerelease_suffix):
-        local_directory += prerelease_suffix
-    try:
-        hed_files = os.listdir(local_directory)
-    except FileNotFoundError:
-        hed_files = []
+    local_directories = [local_hed_directory]
+    if check_prerelease and not local_hed_directory.endswith(prerelease_suffix):
+        local_directories.append(os.path.join(local_hed_directory, "prerelease"))
+
+    hed_files = []
+    for hed_dir in local_directories:
+        try:
+            hed_files += os.listdir(hed_dir)
+        except FileNotFoundError:
+            pass
+    if not hed_files:
+        cache_local_versions(local_hed_directory)
+        for hed_dir in local_directories:
+            try:
+                hed_files += os.listdir(hed_dir)
+            except FileNotFoundError:
+                pass
     for hed_file in hed_files:
         expression_match = version_pattern.match(hed_file)
         if expression_match is not None:

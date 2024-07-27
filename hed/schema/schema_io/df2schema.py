@@ -2,9 +2,8 @@
 This module is used to create a HedSchema object from a set of .tsv files.
 """
 import io
-import os
 
-from hed.schema.schema_io import ontology_util
+from hed.schema.schema_io import ontology_util, load_dataframes
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.schema_io.base2schema import SchemaLoader
@@ -23,7 +22,7 @@ class SchemaLoaderDF(SchemaLoader):
     """
 
     def __init__(self, filenames, schema_as_strings_or_df, name=""):
-        self.filenames = self.convert_filenames_to_dict(filenames)
+        self.filenames = ontology_util.convert_filenames_to_dict(filenames)
         self.schema_as_strings_or_df = schema_as_strings_or_df
         if self.filenames:
             reported_filename = self.filenames.get(constants.STRUCT_KEY)
@@ -46,39 +45,6 @@ class SchemaLoaderDF(SchemaLoader):
         """
         loader = cls(filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name)
         return loader._load()
-
-    @staticmethod
-    def convert_filenames_to_dict(filenames):
-        """Infers filename meaning based on suffix, e.g. _Tag for the tags sheet
-
-        Parameters:
-            filenames(str or None or list or dict): The list to convert to a dict
-                If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
-                If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
-        Returns:
-            filename_dict(str: str): The required suffix to filename mapping"""
-        result_filenames = {}
-        if isinstance(filenames, str):
-            if filenames.endswith(".tsv"):
-                base, base_ext = os.path.splitext(filenames)
-            else:
-                # Load as foldername/foldername_suffix.tsv
-                base_dir = filenames
-                base_filename = os.path.split(base_dir)[1]
-                base = os.path.join(base_dir, base_filename)
-            for suffix in constants.DF_SUFFIXES:
-                filename = f"{base}_{suffix}.tsv"
-                result_filenames[suffix] = filename
-            filenames = result_filenames
-        elif isinstance(filenames, list):
-            for filename in filenames:
-                remainder, suffix = filename.replace("_", "-").rsplit("-")
-                for needed_suffix in constants.DF_SUFFIXES:
-                    if needed_suffix in suffix:
-                        result_filenames[needed_suffix] = filename
-            filenames = result_filenames
-
-        return filenames
 
     def _open_file(self):
         if self.filenames:
@@ -298,18 +264,6 @@ class SchemaLoaderDF(SchemaLoader):
         return self._add_to_dict_base(entry, key_class)
 
 
-def load_dataframes(filenames):
-    dict_filenames = SchemaLoaderDF.convert_filenames_to_dict(filenames)
-    dataframes = ontology_util.create_empty_dataframes()
-    for key, filename in dict_filenames.items():
-        try:
-            dataframes[key] = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
-        except OSError:
-            # todo: consider if we want to report this error(we probably do)
-            pass  # We will use a blank one for this
-    return dataframes
-
-
 def load_dataframes_from_strings(schema_data):
     """ Load the given strings/dataframes as dataframes.
 
@@ -322,3 +276,5 @@ def load_dataframes_from_strings(schema_data):
     return {key: value if isinstance(value, pd.DataFrame) else pd.read_csv(io.StringIO(value), sep="\t",
                                                                            dtype=str, na_filter=False)
             for key, value in schema_data.items()}
+
+

@@ -4,9 +4,8 @@ import os
 import pandas as pd
 from hed.errors import HedExceptions, HedFileError
 from hed.schema.hed_schema_io import load_schema, load_schema_version, from_dataframes
-from hed.schema.schema_io.df2schema import SchemaLoaderDF
 from hed.schema import hed_schema_df_constants as df_constants
-from hed.schema.schema_io.ontology_util import create_empty_dataframes
+from hed.schema.schema_io.ontology_util import create_empty_dataframes, convert_filenames_to_dict
 
 
 class TestHedSchemaDF(unittest.TestCase):
@@ -49,7 +48,7 @@ class TestHedSchemaDF(unittest.TestCase):
         filename = self.output_folder + "test_8_string.tsv"
         schema.save_as_dataframes(self.output_folder + "test_8_string.tsv")
 
-        filenames = SchemaLoaderDF.convert_filenames_to_dict(filename)
+        filenames = convert_filenames_to_dict(filename)
         new_file_strings = {}
         for key, value in filenames.items():
             with open(value, "r") as f:
