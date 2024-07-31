@@ -179,6 +179,9 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
         df_id = row[constants.hed_id]
         entry = section.get(label)
         if not entry:
+            # Neither side has a hedID, so nothing to do.
+            if not df_id:
+                continue
             hedid_errors += schema_util.format_error(row_number, row,
                                                      f"'{label}' does not exist in schema file only the spreadsheet.")
             continue
