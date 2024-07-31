@@ -3,7 +3,7 @@ This module is used to create a HedSchema object from a set of .tsv files.
 """
 import io
 
-from hed.schema.schema_io import ontology_util, load_dataframes
+from hed.schema.schema_io import df_util, load_dataframes
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.schema_io.base2schema import SchemaLoader
@@ -22,7 +22,7 @@ class SchemaLoaderDF(SchemaLoader):
     """
 
     def __init__(self, filenames, schema_as_strings_or_df, name=""):
-        self.filenames = ontology_util.convert_filenames_to_dict(filenames)
+        self.filenames = df_util.convert_filenames_to_dict(filenames)
         self.schema_as_strings_or_df = schema_as_strings_or_df
         if self.filenames:
             reported_filename = self.filenames.get(constants.STRUCT_KEY)
@@ -251,7 +251,7 @@ class SchemaLoaderDF(SchemaLoader):
             dict: Dictionary of attributes.
         """
         try:
-            return ontology_util.get_attributes_from_row(row)
+            return df_util.get_attributes_from_row(row)
         except ValueError as e:
             self._add_fatal_error(row_number, str(row), str(e))
 

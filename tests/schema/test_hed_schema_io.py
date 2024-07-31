@@ -390,10 +390,10 @@ class TestHedSchemaMerging(unittest.TestCase):
     def test_saving_merged(self):
         files = [
             load_schema(os.path.join(self.full_base_folder, "HED_score_1.1.0.mediawiki")),
-            load_schema(os.path.join(self.full_base_folder, "HED_score_lib_tags.mediawiki")),
+            load_schema(os.path.join(self.full_base_folder, "HED_score_unmerged.mediawiki")),
             load_schema(os.path.join(self.full_base_folder, "HED_score_merged.mediawiki")),
             load_schema(os.path.join(self.full_base_folder, "HED_score_merged.xml")),
-            load_schema(os.path.join(self.full_base_folder, "HED_score_lib_tags.xml"))
+            load_schema(os.path.join(self.full_base_folder, "HED_score_unmerged.xml"))
         ]
 
         self._base_merging_test(files)
