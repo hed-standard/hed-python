@@ -62,8 +62,8 @@ def get_parser():
                         help="If given, is the path to directory for saving, otherwise derivatives/remodel is used.")
     parser.add_argument("-x", "--exclude-dirs", nargs="*", default=[], dest="exclude_dirs",
                         help="Directories names to exclude from search for files.")
-    parser.add_argument("-a", "--analysis-level", dest="analysis_level", default="none",
-                        choices=["participant", "group", "none"])
+    parser.add_argument("-a", "--analysis-level", dest="analysis_level", default="group",
+                        choices=["group"])
     return parser
 
 
@@ -141,60 +141,6 @@ def parse_tasks(files, task_args):
     return task_dict
 
 
-def run_bids_ops(dispatch, args, tabular_files):
-    """ Run the remodeler on a BIDS dataset.
-
-    Parameters:
-        dispatch (Dispatcher): Manages the execution of the operations.
-        args (Object): The command-line arguments as an object.
-        tabular_files (list): List of tabular files to run the ops on.
-
-    """
-    bids = BidsDataset(dispatch.data_root, tabular_types=['events'], exclude_dirs=args.exclude_dirs)
-    dispatch.hed_schema = bids.schema
-    if args.verbose:
-        print(f"Successfully parsed BIDS dataset with HED schema {str(bids.schema.get_schema_versions())}")
-    data = bids.get_tabular_group(args.file_suffix)
-    if args.verbose:
-        print(f"Processing {dispatch.data_root}")
-    filtered_events = [data.datafile_dict[key] for key in tabular_files]
-    for data_obj in filtered_events:
-        sidecar_list = data.get_sidecars_from_path(data_obj)
-        if sidecar_list:
-            sidecar = data.sidecar_dict[sidecar_list[-1]].contents
-        else:
-            sidecar = None
-        if args.verbose:
-            print(f"Tabular file {data_obj.file_path}  sidecar {sidecar}")
-        df = dispatch.run_operations(data_obj.file_path, sidecar=sidecar, verbose=args.verbose)
-        if not args.no_update:
-            df.to_csv(data_obj.file_path, sep='\t', index=False, header=True)
-
-
-def run_direct_ops(dispatch, args, tabular_files):
-    """ Run the remodeler on files of a specified form in a directory tree.
-
-    Parameters:
-        dispatch (Dispatcher):  Controls the application of the operations and backup.
-        args (argparse.Namespace): Dictionary of arguments and their values.
-        tabular_files (list): List of files to include in this run.
-
-    """
-
-    if args.verbose:
-        print(f"Found {len(tabular_files)} files with suffix {args.file_suffix} and extensions {str(args.extensions)}")
-    if hasattr(args, 'json_sidecar'):
-        sidecar = args.json_sidecar
-    else:
-        sidecar = None
-    for file_path in tabular_files:
-        if args.verbose:
-            print(f"Tabular file {file_path}  sidecar {sidecar}")
-        df = dispatch.run_operations(file_path, verbose=args.verbose, sidecar=sidecar)
-        if not args.no_update:
-            df.to_csv(file_path, sep='\t', index=False, header=True)
-
-
 def main(arg_list=None):
     """ The command-line program.
 
@@ -227,16 +173,14 @@ def main(arg_list=None):
             dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=backup_name,
                                   hed_versions=args.hed_versions)
 
-            if args.use_bids:
-                run_bids_ops(dispatch, args, files)
-            else:
-                run_direct_ops(dispatch, args, files)
+            # next task: add a makeshift "analysis level" parameter.  particpant = generate individual, group = reload indivdual on load
+            # Need a way to determine WHICH run to reload options from
+
+            dispatch.load_existing_summaries(save_dir)
 
             if not args.no_summaries:
-                # Todo ian: replace dataset_summary variable
                 dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries,
-                                        summary_dir=save_dir, task_name=task,
-                                        dataset_summary=args.analysis_level != "participant")
+                                        summary_dir=save_dir, task_name=task)
     except Exception as ex:
         if args.log_dir:
             log_name = io_util.get_alphanumeric_path(os.path.realpath(args.data_dir)) + '_' + timestamp + '.txt'

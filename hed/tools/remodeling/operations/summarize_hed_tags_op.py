@@ -235,6 +235,10 @@ class HedTagSummary(BaseSummary):
         super().__init__(sum_op)
         self.sum_op = sum_op
 
+    # @staticmethod
+    # def get_sub_summary_class():
+    #     return ColumnNameSummary
+
     def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.
 
@@ -247,6 +251,7 @@ class HedTagSummary(BaseSummary):
         """
         counts = HedTagCounts(
             new_info['name'], total_events=len(new_info['df']))
+        # todo ian: This should maybe instead call counts.update or counts.update_Summary
         input_data = TabularInput(
             new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
         tag_man = HedTagManager(EventManager(input_data, new_info['schema']),

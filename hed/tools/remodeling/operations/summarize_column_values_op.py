@@ -77,6 +77,10 @@ class SummarizeColumnValuesOp(BaseOp):
     VALUES_PER_LINE = 5
     MAX_CATEGORICAL = 50
 
+    @staticmethod
+    def get_summary_class():
+        return ColumnValueSummary
+
     def __init__(self, parameters):
         """ Constructor for the summarize column values operation.
 
@@ -110,14 +114,11 @@ class SummarizeColumnValuesOp(BaseOp):
             Updates the relevant summary.
 
         """
-
+        # todo ian: does this actually help us?  Maybe?
+        # I was trying to standardize these do_op functions creating the summary
         df_new = df.copy()
-        summary = dispatcher.summary_dicts.get(self.summary_name, None)
-        if not summary:
-            summary = ColumnValueSummary(self)
-            dispatcher.summary_dicts[self.summary_name] = summary
-        summary.update_summary(
-            {'df': dispatcher.post_proc_data(df_new), 'name': name})
+        summary = dispatcher.summary_dicts.setdefault(self.summary_name, self.get_summary_class()(self))
+        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name})
         return df_new
 
     @staticmethod
@@ -138,6 +139,10 @@ class ColumnValueSummary(BaseSummary):
         """
         super().__init__(sum_op)
 
+    @staticmethod
+    def get_sub_summary_class():
+        return TabularSummary
+
     def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.
 
@@ -151,9 +156,8 @@ class ColumnValueSummary(BaseSummary):
         """
         name = new_info['name']
         if name not in self.summary_dict:
-            self.summary_dict[name] = \
-                TabularSummary(value_cols=self.op.value_columns,
-                               skip_cols=self.op.skip_columns, name=name)
+            self.summary_dict[name] = TabularSummary(value_cols=self.op.value_columns, skip_cols=self.op.skip_columns,
+                                                     name=name)
         self.summary_dict[name].update(new_info['df'])
 
     def get_details_dict(self, summary):
@@ -167,17 +171,13 @@ class ColumnValueSummary(BaseSummary):
 
         """
         this_summary = summary.get_summary(as_json=False)
-        unique_counts = [(key, len(count_dict)) for key,
-                         count_dict in this_summary['Categorical columns'].items()]
+        unique_counts = [(key, len(count_dict)) for key, count_dict in this_summary['Categorical columns'].items()]
         this_summary['Categorical counts'] = dict(unique_counts)
         for key, dict_entry in this_summary['Categorical columns'].items():
-            num_disp, sorted_tuples = ColumnValueSummary.sort_dict(
-                dict_entry, reverse=True)
-            this_summary['Categorical columns'][key] = dict(
-                sorted_tuples[:min(num_disp, self.op.max_categorical)])
+            num_disp, sorted_tuples = ColumnValueSummary.sort_dict(dict_entry, reverse=True)
+            this_summary['Categorical columns'][key] = dict(sorted_tuples[:min(num_disp, self.op.max_categorical)])
         return {"Name": this_summary['Name'], "Total events": this_summary["Total events"],
-                "Total files": this_summary['Total files'],
-                "Files": list(this_summary['Files'].keys()),
+                "Total files": this_summary['Total files'], "Files": list(this_summary['Files'].keys()),
                 "Specifics": {"Value columns": list(this_summary['Value columns']),
                               "Skip columns": this_summary['Skip columns'],
                               "Value column summaries": this_summary['Value columns'],
@@ -191,8 +191,7 @@ class ColumnValueSummary(BaseSummary):
             TabularSummary - the summary object for column values.
 
         """
-        all_sum = TabularSummary(
-            value_cols=self.op.value_columns, skip_cols=self.op.skip_columns, name='Dataset')
+        all_sum = TabularSummary(value_cols=self.op.value_columns, skip_cols=self.op.skip_columns, name='Dataset')
         for counts in self.summary_dict.values():
             all_sum.update_summary(counts)
         return all_sum
@@ -238,13 +237,10 @@ class ColumnValueSummary(BaseSummary):
         if not cat_dict:
             return ""
         count_dict = result['Categorical counts']
-        sum_list = [
-            f"{offset}{indent}Categorical column values[Events, Files]:"]
+        sum_list = [f"{offset}{indent}Categorical column values[Events, Files]:"]
         sorted_tuples = sorted(cat_dict.items(), key=lambda x: x[0])
         for entry in sorted_tuples:
-            sum_list = sum_list + \
-                self._get_categorical_col(
-                    entry, count_dict, offset="", indent="   ")
+            sum_list = sum_list + self._get_categorical_col(entry, count_dict, offset="", indent="   ")
         return "\n".join(sum_list)
 
     def _get_detail_list(self, result, indent=BaseSummary.DISPLAY_INDENT):
@@ -260,14 +256,12 @@ class ColumnValueSummary(BaseSummary):
         """
         sum_list = []
         specifics = result["Specifics"]
-        cat_string = self._get_categorical_string(
-            specifics, offset="", indent=indent)
+        cat_string = self._get_categorical_string(specifics, offset="", indent=indent)
         if cat_string:
             sum_list.append(cat_string)
         val_dict = specifics.get("Value column summaries", {})
         if val_dict:
-            sum_list.append(ColumnValueSummary._get_value_string(
-                val_dict, offset="", indent=indent))
+            sum_list.append(ColumnValueSummary._get_value_string(val_dict, offset="", indent=indent))
         return sum_list
 
     def _get_categorical_col(self, entry, count_dict, offset="", indent="   "):
@@ -289,8 +283,7 @@ class ColumnValueSummary(BaseSummary):
         # Create and partition the list of individual entries
         value_list = [f"{item[0]}{str(item[1])}" for item in entry[1].items()]
         value_list = value_list[:num_disp]
-        part_list = ColumnValueSummary.partition_list(
-            value_list, self.op.values_per_line)
+        part_list = ColumnValueSummary.partition_list(value_list, self.op.values_per_line)
         return col_list + [f"{offset}{indent * 3}{ColumnValueSummary.get_list_str(item)}" for item in part_list]
 
     @staticmethod
@@ -321,11 +314,10 @@ class ColumnValueSummary(BaseSummary):
     def _get_value_string(val_dict, offset="", indent=""):
         sum_list = [f"{offset}{indent}Value columns[Events, Files]:"]
         for col_name, val_counts in val_dict.items():
-            sum_list.append(f"{offset}{indent*2}{col_name}{str(val_counts)}")
+            sum_list.append(f"{offset}{indent * 2}{col_name}{str(val_counts)}")
         return "\n".join(sum_list)
 
     @staticmethod
     def sort_dict(count_dict, reverse=False):
-        sorted_tuples = sorted(
-            count_dict.items(), key=lambda x: x[1][0], reverse=reverse)
+        sorted_tuples = sorted(count_dict.items(), key=lambda x: x[1][0], reverse=reverse)
         return len(sorted_tuples), sorted_tuples
