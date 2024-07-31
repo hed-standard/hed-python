@@ -1,18 +1,13 @@
 """Utility functions for saving as an ontology or dataframe."""
-import os
 
 import pandas as pd
-import csv
 
 from hed.schema.schema_io import schema_util
 from hed.errors.exceptions import HedFileError
 from hed.schema import hed_schema_df_constants as constants
 from hed.schema.hed_schema_constants import HedKey
-from hed.schema.schema_io.text_util import parse_attribute_string, _parse_header_attributes_line
+from hed.schema.schema_io.df_util import remove_prefix, calculate_attribute_type, get_attributes_from_row
 from hed.schema.hed_cache import get_library_data
-
-
-UNKNOWN_LIBRARY_VALUE = 0
 
 object_type_id_offset = {
     constants.OBJECT_KEY: (100, 300),
@@ -25,26 +20,6 @@ object_type_id_offset = {
     constants.UNIT_KEY: (1600, 1700),
     constants.TAG_KEY: (2000, -1),  # -1 = go to end of range
 }
-
-
-def get_library_name_and_id(schema):
-    """ Get the library("Standard" for the standard schema) and first id for a schema range
-
-    Parameters:
-        schema(HedSchema): The schema to check
-
-    Returns:
-        library_name(str): The capitalized library name
-        first_id(int): the first id for a given library
-    """
-
-    name = schema.library
-
-    library_data = get_library_data(name)
-    starting_id, _ = library_data.get("id_range", (UNKNOWN_LIBRARY_VALUE, UNKNOWN_LIBRARY_VALUE))
-    if not name:
-        name = "standard"
-    return name.capitalize(), starting_id
 
 
 def _get_hedid_range(schema_name, df_key):
@@ -78,13 +53,6 @@ def _get_hedid_range(schema_name, df_key):
     return set(range(final_start, final_end))
 
 
-# todo: Replace this once we no longer support < python 3.9
-def remove_prefix(text, prefix):
-    if text and text.startswith(prefix):
-        return text[len(prefix):]
-    return text
-
-
 def get_all_ids(df):
     """Returns a set of all unique hedIds in the dataframe
 
@@ -101,8 +69,7 @@ def get_all_ids(df):
     return None
 
 
-def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids=False,
-                                  assign_missing_ids=False):
+def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids=False, assign_missing_ids=False):
     """ Write out schema as a dataframe, then merge in extra columns from dataframes.
 
     Parameters:
@@ -121,7 +88,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
         schema_name = schema.library
     # 1. Verify existing hed ids don't conflict between schema/dataframes
     for df_key, df in dataframes.items():
-        section_key = constants.section_mapping.get(df_key)
+        section_key = constants.section_mapping_hed_id.get(df_key)
         if not section_key:
             continue
         section = schema[section_key]
@@ -132,8 +99,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     if hedid_errors:
         raise HedFileError(hedid_errors[0]['code'],
                            f"{len(hedid_errors)} issues found with hedId mismatches.  See the .issues "
-                           f"parameter on this exception for more details.", schema.name,
-                           issues=hedid_errors)
+                           f"parameter on this exception for more details.", schema.name, issues=hedid_errors)
 
     # 2. Get the new schema as DFs
     from hed.schema.schema_io.schema2df import Schema2DF  # Late import as this is recursive
@@ -249,15 +215,31 @@ def merge_dfs(dest_df, source_df):
                     dest_df.at[match_index[0], col] = row[col]
 
 
-def _get_annotation_prop_ids(dataframes):
-    annotation_props = {key: value for key, value in zip(dataframes[constants.ANNOTATION_KEY][constants.name],
-                                                         dataframes[constants.ANNOTATION_KEY][constants.hed_id])}
-    # Also add schema properties
-    annotation_props.update(
-        {key: value for key, value in zip(dataframes[constants.ATTRIBUTE_PROPERTY_KEY][constants.name],
-                                 dataframes[constants.ATTRIBUTE_PROPERTY_KEY][constants.hed_id])})
+def _get_annotation_prop_ids(schema):
+    annotation_props = dict()
+    for entry in schema.attributes.values():
+        attribute_type = calculate_attribute_type(entry)
+
+        if attribute_type == "annotation":
+            annotation_props[entry.name] = entry.attributes[HedKey.HedID]
+
+    for entry in schema.properties.values():
+        annotation_props[entry.name] = entry.attributes[HedKey.HedID]
 
     return annotation_props
+
+
+def get_prefixes(dataframes):
+    prefixes = dataframes.get(constants.PREFIXES_KEY)
+    extensions = dataframes.get(constants.EXTERNAL_ANNOTATION_KEY)
+    if prefixes is None or extensions is None:
+        return {}
+    all_prefixes = {prefix.Prefix: prefix[2] for prefix in prefixes.itertuples()}
+    annotation_terms = {}
+    for row in extensions.itertuples():
+        annotation_terms[row.Prefix + row.ID] = all_prefixes[row.Prefix]
+
+    return annotation_terms
 
 
 def convert_df_to_omn(dataframes):
@@ -272,24 +254,36 @@ def convert_df_to_omn(dataframes):
             omn_data(dict): a dict of DF_SUFFIXES:str, representing each .tsv file in omn format.
     """
     from hed.schema.hed_schema_io import from_dataframes
+
+    annotation_terms = get_prefixes(dataframes)
+
     # Load the schema, so we can save it out with ID's
     schema = from_dataframes(dataframes)
     # Convert dataframes to hedId format, and add any missing hedId's(generally, they should be replaced before here)
-    dataframes = update_dataframes_from_schema(dataframes, schema, get_as_ids=True)
+    dataframes_u = update_dataframes_from_schema(dataframes, schema, get_as_ids=True)
+
+    # Copy over remaining non schema dataframes.
+    if constants.PREFIXES_KEY in dataframes:
+        dataframes_u[constants.PREFIXES_KEY] = dataframes[constants.PREFIXES_KEY]
+        dataframes_u[constants.EXTERNAL_ANNOTATION_KEY] = dataframes[constants.EXTERNAL_ANNOTATION_KEY]
 
     # Write out the new dataframes in omn format
-    annotation_props = _get_annotation_prop_ids(dataframes)
+    annotation_props = _get_annotation_prop_ids(schema)
     full_text = ""
     omn_data = {}
-    for suffix, dataframe in dataframes.items():
-        output_text = _convert_df_to_omn(dataframes[suffix], annotation_properties=annotation_props)
+    for suffix, dataframe in dataframes_u.items():
+        if suffix in constants.DF_EXTRA_SUFFIXES:
+            output_text = _convert_extra_df_to_omn(dataframes_u[suffix], suffix)
+        else:
+            output_text = _convert_df_to_omn(dataframes_u[suffix], annotation_properties=annotation_props,
+                                             annotation_terms=annotation_terms)
         omn_data[suffix] = output_text
         full_text += output_text + "\n"
 
     return full_text, omn_data
 
 
-def _convert_df_to_omn(df, annotation_properties=("",)):
+def _convert_df_to_omn(df, annotation_properties=("",), annotation_terms=None):
     """Takes a single df format schema and converts it to omn.
 
         This is one section, e.g. tags, units, etc.
@@ -299,6 +293,7 @@ def _convert_df_to_omn(df, annotation_properties=("",)):
     Parameters:
         df(pd.DataFrame): the dataframe to turn into omn
         annotation_properties(dict): Known annotation properties, with the values being their hedId.
+        annotation_terms(dict): The list of valid external omn tags, such as "dc:source"
     Returns:
         omn_text(str): the omn formatted text for this section
     """
@@ -307,7 +302,7 @@ def _convert_df_to_omn(df, annotation_properties=("",)):
         prop_type = _get_property_type(row)
         hed_id = row[constants.hed_id]
         output_text += f"{prop_type}: hed:{hed_id}\n"
-        output_text += _add_annotation_lines(row, annotation_properties)
+        output_text += _add_annotation_lines(row, annotation_properties, annotation_terms)
 
         if prop_type != "AnnotationProperty":
             if constants.property_domain in row.index:
@@ -336,7 +331,71 @@ def _convert_df_to_omn(df, annotation_properties=("",)):
     return output_text
 
 
-def _add_annotation_lines(row, annotation_properties):
+def _convert_extra_df_to_omn(df, suffix):
+    """Takes a single df format schema and converts it to omn.
+
+        This is one section, e.g. tags, units, etc.
+
+        Note: This mostly assumes a fully valid df.  A df missing a required column will raise an error.
+
+    Parameters:
+        df(pd.DataFrame): the dataframe to turn into omn
+        suffix(dict): Known annotation properties, with the values being their hedId.
+    Returns:
+        omn_text(str): the omn formatted text for this section
+    """
+    output_text = ""
+    for index, row in df.iterrows():
+        if suffix == constants.PREFIXES_KEY:
+            output_text += f"Prefix: {row[constants.Prefix]} <{row[constants.NamespaceIRI]}>"
+        elif suffix == constants.EXTERNAL_ANNOTATION_KEY:
+            output_text += f"AnnotationProperty: {row[constants.Prefix]}{row[constants.ID]}"
+        else:
+            raise ValueError(f"Unknown tsv suffix attempting to be converted {suffix}")
+
+        output_text += "\n"
+    return output_text
+
+
+def _split_on_unquoted_commas(input_string):
+    """ Splits the given string into comma separated portions, ignoring commas inside double quotes.
+
+    Parameters:
+        input_string: The string to split
+
+    Returns:
+        parts(list): The split apart string.
+    """
+    # Note: does not handle escaped double quotes.
+    parts = []
+    current = []
+    in_quotes = False
+
+    for char in input_string:
+        if char == '"':
+            in_quotes = not in_quotes
+        if char == ',' and not in_quotes:
+            parts.append(''.join(current).strip())
+            current = []
+        else:
+            current.append(char)
+
+    if current:  # Add the last part if there is any.
+        parts.append(''.join(current).strip())
+
+    return parts
+
+
+def _split_annotation_values(parts):
+    annotations = dict()
+    for part in parts:
+        key, value = part.split(" ", 1)
+        annotations[key] = value
+
+    return annotations
+
+
+def _add_annotation_lines(row, annotation_properties, annotation_terms):
     annotation_lines = []
     description = row[constants.description]
     if description:
@@ -357,6 +416,15 @@ def _add_annotation_lines(row, annotation_properties):
                 value = f'"{value}"'
             annotation_lines.append(f"\t\t{annotation_id} {value}")
 
+    if constants.annotations in row.index:
+        portions = _split_on_unquoted_commas(row[constants.annotations])
+        annotations = _split_annotation_values(portions)
+
+        for key, value in annotations.items():
+            if key not in annotation_terms:
+                raise ValueError(f"Problem.  Found {key} which is not in the prefix/annotation list.")
+            annotation_lines.append(f"\t\t{key} {value}")
+
     output_text = ""
     if annotation_lines:
         output_text += "\tAnnotations:\n"
@@ -370,114 +438,3 @@ def _get_property_type(row):
     """Gets the property type from the row."""
     return row[constants.property_type] if constants.property_type in row.index else "Class"
 
-
-def save_dataframes(base_filename, dataframe_dict):
-    """ Writes out the dataframes using the provided suffixes.
-
-    Does not validate contents or suffixes.
-
-    If base_filename has a .tsv suffix, save directly to the indicated location.
-    If base_filename is a directory(does NOT have a .tsv suffix), save the contents into a directory named that.
-    The subfiles are named the same.  e.g. HED8.3.0/HED8.3.0_Tag.tsv
-
-    Parameters:
-        base_filename(str): The base filename to use.  Output is {base_filename}_{suffix}.tsv
-                            See DF_SUFFIXES for all expected names.
-        dataframe_dict(dict of str: df.DataFrame): The list of files to save out.  No validation is done.
-    """
-    if base_filename.lower().endswith(".tsv"):
-        base, base_ext = os.path.splitext(base_filename)
-        base_dir, base_name = os.path.split(base)
-    else:
-        # Assumed as a directory name
-        base_dir = base_filename
-        base_filename = os.path.split(base_dir)[1]
-        base = os.path.join(base_dir, base_filename)
-    os.makedirs(base_dir, exist_ok=True)
-    for suffix, dataframe in dataframe_dict.items():
-        filename = f"{base}_{suffix}.tsv"
-        with open(filename, mode='w', encoding='utf-8') as opened_file:
-            dataframe.to_csv(opened_file, sep='\t', index=False, header=True,
-                             quoting=csv.QUOTE_NONE, lineterminator="\n")
-
-
-def convert_filenames_to_dict(filenames):
-    """Infers filename meaning based on suffix, e.g. _Tag for the tags sheet
-
-    Parameters:
-        filenames(str or None or list or dict): The list to convert to a dict
-            If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
-            If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
-    Returns:
-        filename_dict(str: str): The required suffix to filename mapping"""
-    result_filenames = {}
-    if isinstance(filenames, str):
-        if filenames.endswith(".tsv"):
-            base, base_ext = os.path.splitext(filenames)
-        else:
-            # Load as foldername/foldername_suffix.tsv
-            base_dir = filenames
-            base_filename = os.path.split(base_dir)[1]
-            base = os.path.join(base_dir, base_filename)
-        for suffix in constants.DF_SUFFIXES:
-            filename = f"{base}_{suffix}.tsv"
-            result_filenames[suffix] = filename
-        filenames = result_filenames
-    elif isinstance(filenames, list):
-        for filename in filenames:
-            remainder, suffix = filename.replace("_", "-").rsplit("-")
-            for needed_suffix in constants.DF_SUFFIXES:
-                if needed_suffix in suffix:
-                    result_filenames[needed_suffix] = filename
-        filenames = result_filenames
-
-    return filenames
-
-
-def get_attributes_from_row(row):
-    """ Get the tag attributes from a line.
-
-    Parameters:
-        row (pd.Series): A tag line.
-    Returns:
-        dict: Dictionary of attributes.
-    """
-    if constants.properties in row.index:
-        attr_string = row[constants.properties]
-    elif constants.attributes in row.index:
-        attr_string = row[constants.attributes]
-    else:
-        attr_string = ""
-
-    if constants.subclass_of in row.index and row[constants.subclass_of] == "HedHeader":
-        header_attributes, _ = _parse_header_attributes_line(attr_string)
-        return header_attributes
-    return parse_attribute_string(attr_string)
-
-
-def create_empty_dataframes():
-    """Returns the default empty dataframes"""
-    return {
-        constants.STRUCT_KEY: pd.DataFrame(columns=constants.struct_columns, dtype=str),
-        constants.TAG_KEY: pd.DataFrame(columns=constants.tag_columns, dtype=str),
-        constants.UNIT_KEY: pd.DataFrame(columns=constants.unit_columns, dtype=str),
-        constants.UNIT_CLASS_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
-        constants.UNIT_MODIFIER_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
-        constants.VALUE_CLASS_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
-        constants.ANNOTATION_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
-        constants.DATA_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
-        constants.OBJECT_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
-        constants.ATTRIBUTE_PROPERTY_KEY: pd.DataFrame(columns=constants.property_columns_reduced, dtype=str),
-    }
-
-
-def load_dataframes(filenames):
-    dict_filenames = convert_filenames_to_dict(filenames)
-    dataframes = create_empty_dataframes()
-    for key, filename in dict_filenames.items():
-        try:
-            dataframes[key] = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
-        except OSError:
-            # todo: consider if we want to report this error(we probably do)
-            pass  # We will use a blank one for this
-    return dataframes

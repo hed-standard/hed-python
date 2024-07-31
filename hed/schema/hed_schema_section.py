@@ -278,21 +278,17 @@ class HedSchemaTagSection(HedSchemaSection):
 
         split_list = self._group_by_top_level_tag(self.all_entries)
         # Sort the extension allowed lists
-        extension_allowed_node = 0
         for values in split_list:
             node = values[0]
             if node.has_attribute(HedKey.ExtensionAllowed):
                 # Make sure we sort / characters to the front.
                 values.sort(key=lambda x: x.long_tag_name.replace("/", "\0"))
-                extension_allowed_node += 1
 
-        # sort the top level nodes so extension allowed is at the bottom
-        split_list.sort(key=lambda x: x[0].has_attribute(HedKey.ExtensionAllowed))
+        # Sort ones without inLibrary to the end, and then sort library ones at the top.
+        split_list.sort(key=lambda x: (x[0].has_attribute(HedKey.InLibrary, return_value=True) is None,
+                                       x[0].has_attribute(HedKey.InLibrary, return_value=True)))
 
-        # sort the extension allowed top level nodes
-        if extension_allowed_node:
-            split_list[extension_allowed_node:] = sorted(split_list[extension_allowed_node:],
-                                                         key=lambda x: x[0].long_tag_name)
+        # split_list.sort(key=lambda x: x[0].has_attribute(HedKey.ExtensionAllowed))
         self.all_entries = [subitem for tag_list in split_list for subitem in tag_list]
 
         super()._finalize_section(hed_schema)
