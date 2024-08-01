@@ -57,6 +57,10 @@ class SummarizeColumnNamesOp(BaseOp):
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
 
+    @staticmethod
+    def get_summary_class():
+        return ColumnNamesSummary
+
     def do_op(self, dispatcher, df, name, sidecar=None):
         """ Create a column name summary for df.
 
@@ -74,10 +78,7 @@ class SummarizeColumnNamesOp(BaseOp):
 
         """
         df_new = df.copy()
-        summary = dispatcher.summary_dicts.get(self.summary_name, None)
-        if not summary:
-            summary = ColumnNamesSummary(self)
-            dispatcher.summary_dicts[self.summary_name] = summary
+        summary = dispatcher.summary_dicts.setdefault(self.summary_name, self.get_summary_class()(self))
         summary.update_summary(
             {"name": name, "column_names": list(df_new.columns)})
         return df_new
@@ -98,6 +99,10 @@ class ColumnNamesSummary(BaseSummary):
 
         """
         super().__init__(sum_op)
+
+    @staticmethod
+    def get_sub_summary_class():
+        return ColumnNameSummary
 
     def update_summary(self, new_info):
         """ Update the summary for a given tabular input file.

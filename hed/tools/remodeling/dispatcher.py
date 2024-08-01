@@ -4,6 +4,8 @@ import os
 import numpy as np
 import pandas as pd
 import json
+import re
+from collections import defaultdict
 from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_io import load_schema_version
 from hed.schema.hed_schema import HedSchema
@@ -154,8 +156,73 @@ class Dispatcher:
             df = self.post_proc_data(df)
         return df
 
+    def load_existing_summaries(self, summary_dir):
+        if not summary_dir:
+            summary_dir = self.get_summary_save_dir()
+
+        for operation in self.parsed_ops:
+            if hasattr(operation, "get_summary_class"):
+                # todo ian: How do we carefully get the name if the names aren't unique?
+                # Are there names in the files?
+                name = str(operation.summary_name)
+                filename = operation.summary_filename
+
+                final_dir = os.path.join(summary_dir, name, "individual_summaries")
+                if not os.path.exists(final_dir):
+                    continue
+
+                base_files = os.listdir(final_dir)
+                # Need to filter out names here -> break name into parts(is there a function for this?)
+                # possible_files = [os.path.join(final_dir, file) for file in base_files]
+                possible_files = defaultdict(list)
+                # todo ian: not robust.  Also put in a file
+                for file in base_files:
+                    if not file.endswith(".json"):
+                        continue
+
+                    final_filename = os.path.join(final_dir, file)
+                    json_data = json.load(open(final_filename))
+                    loaded_name = json_data["Summary name"]
+                    loaded_filename = json_data["Summary filename"]
+                    if loaded_name != name or loaded_filename != filename:
+                        continue
+
+                    # todo ian:  this is all lazily done so far
+                    trimmed_file = file[len(filename) + 1:]
+                    trimmed_file, _ = os.path.splitext(trimmed_file)
+
+                    # Look for a timestamp ending a file.
+                    timecode_pattern = r'(.*)(\d{4}_\d{2}_\d{2}_T_\d{2}_\d{2}_\d{2}_\d{3})$'
+                    timecode_match = re.match(timecode_pattern, trimmed_file)
+                    suffix = ""
+                    if timecode_match:
+                        trimmed_file = timecode_match.group(1)
+                        suffix = timecode_match.group(2)
+                    trimmed_file, _, run_number = trimmed_file.rpartition("_")
+                    final_suffix = "_".join([run_number, suffix])
+                    possible_files[final_suffix].append(final_filename)
+                    # todo ian: need some way to identify a run here
+                    print(file)
+
+                if not possible_files:
+                    # todo: what error etc is this
+                    continue
+
+                actual_files = possible_files[list(possible_files)[0]]
+
+                # How do we know which one to load here?
+                #     Do we do all of them?
+                summary = operation.get_summary_class()(operation)
+
+                # todo ian: this is probably an issue, don't some of these require other params?
+                sub_summary = summary.get_sub_summary_class()
+                summary.summary_dict = {file:sub_summary.load_as_json2(json.load(open(file))) for file in actual_files}
+                self.summary_dicts[operation.summary_name] = summary
+                breakHere = 3
+
+
     def save_summaries(self, save_formats=['.json', '.txt'], individual_summaries="separate",
-                       summary_dir=None, task_name=""):
+                       summary_dir=None, task_name="", dataset_summary=True):
         """ Save the summary files in the specified formats.
 
         Parameters:
@@ -179,7 +246,8 @@ class Dispatcher:
             summary_dir = self.get_summary_save_dir()
         os.makedirs(summary_dir, exist_ok=True)
         for summary_name, summary_item in self.summary_dicts.items():
-            summary_item.save(summary_dir, save_formats, individual_summaries=individual_summaries, task_name=task_name)
+            summary_item.save(summary_dir, save_formats, individual_summaries=individual_summaries, task_name=task_name,
+                              dataset_summary=dataset_summary)
 
     @staticmethod
     def parse_operations(operation_list):

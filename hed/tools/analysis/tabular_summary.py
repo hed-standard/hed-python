@@ -1,6 +1,5 @@
 """ Summarize the contents of columnar files. """
 
-
 import json
 from hed.errors.exceptions import HedFileError
 from hed.tools.util import data_util
@@ -74,6 +73,32 @@ class TabularSummary:
             side_dict[column_name] = annotation_util.generate_sidecar_entry(column_name, [])
         return side_dict
 
+    @staticmethod
+    def load_as_json2(json_data):
+        summary = TabularSummary()
+        json_data = json_data["File summary"]
+        summary.name = json_data["Name"]
+        summary.total_events = json_data["Total events"]
+        summary.total_files = json_data["Total files"]
+        specifics = json_data["Specifics"]
+        # todo ian: this doesn't use value column summaries or categorical counts?  What
+        summary.categorical_info = specifics["Categorical column summaries"]
+        summary.value_info = specifics["Value column summaries"]
+        summary.skip_cols = specifics["Skip columns"]
+        # summary.files = specifics["Files"]
+
+        return summary
+
+    def _sort_internal(self):
+        categorical_cols = {}
+        for key in sorted(self.categorical_info):
+            cat_dict = self.categorical_info[key]
+            val_dict = {v_key: cat_dict[v_key] for v_key in sorted(cat_dict.keys())}
+            categorical_cols[key] = val_dict
+        value_cols = {key: self.value_info[key] for key in sorted(self.value_info)}
+        self.categorical_info = categorical_cols
+        self.value_info = value_cols
+
     def get_summary(self, as_json=False):
         """ Return the summary in dictionary format.
 
@@ -81,22 +106,17 @@ class TabularSummary:
             as_json (bool): If False, return as a Python dictionary, otherwise convert to a JSON dictionary.
 
         """
-        sorted_keys = sorted(self.categorical_info.keys())
-        categorical_cols = {}
-        for key in sorted_keys:
-            cat_dict = self.categorical_info[key]
-            sorted_v_keys = sorted(list(cat_dict))
-            val_dict = {}
-            for v_key in sorted_v_keys:
-                val_dict[v_key] = cat_dict[v_key]
-            categorical_cols[key] = val_dict
-        sorted_cols = sorted(map(str, list(self.value_info)))
-        value_cols = {}
-        for key in sorted_cols:
-            value_cols[key] = self.value_info[key]
-        summary = {"Name": self.name, "Total events": self.total_events, "Total files": self.total_files,
-                   "Categorical columns": categorical_cols, "Value columns": value_cols,
-                   "Skip columns": self.skip_cols, "Files": self.files}
+        self._sort_internal()
+        summary = {"Name": self.name,
+                   "Total events": self.total_events,
+                   "Total files": self.total_files,
+                   "Categorical columns": self.categorical_info,
+                   "Value columns": self.value_info,
+                   "Skip columns": self.skip_cols,
+                   "Files": self.files}
+
+        # reloaded_summary = self.load_as_json(summary)
+
         if as_json:
             return json.dumps(summary, indent=4)
         else:
@@ -198,7 +218,7 @@ class TabularSummary:
             else:
                 col_values = col_values.astype(str)
                 values = col_values.value_counts(ascending=True)
-                self._update_categorical(col_name,  values)
+                self._update_categorical(col_name, values)
 
     def _update_dict_categorical(self, col_dict):
         """ Update this summary with the categorical information in the dictionary from another summary.

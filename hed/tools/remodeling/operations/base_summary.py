@@ -143,7 +143,8 @@ class BaseSummary(ABC):
 
         return summary
 
-    def save(self, save_dir, file_formats=['.txt'], individual_summaries="separate", task_name=""):
+    def save(self, save_dir, file_formats=('.txt'), individual_summaries="separate", task_name="",
+             dataset_summary=True):
         """ Save the summaries using the format indicated.
 
         Parameters:
@@ -160,12 +161,13 @@ class BaseSummary(ABC):
                 summary = self.get_summary(individual_summaries=individual_summaries)
             else:
                 continue
-            self._save_summary_files(save_dir, file_format, summary, individual_summaries, task_name=task_name)
+            self._save_summary_files(save_dir, file_format, summary, individual_summaries, task_name=task_name,
+                                     dataset_summary=dataset_summary)
 
             self.save_visualizations(save_dir, file_formats=file_formats, individual_summaries=individual_summaries,
                                      task_name=task_name)
 
-    def save_visualizations(self, save_dir, file_formats=['.svg'], individual_summaries="separate", task_name=""):
+    def save_visualizations(self, save_dir, file_formats=('.svg'), individual_summaries="separate", task_name=""):
         """ Save summary visualizations, if any, using the format indicated.
 
         Parameters:
@@ -177,7 +179,8 @@ class BaseSummary(ABC):
         """
         pass
 
-    def _save_summary_files(self, save_dir, file_format, summary, individual_summaries, task_name=''):
+    def _save_summary_files(self, save_dir, file_format, summary, individual_summaries, task_name='',
+                            dataset_summary=True):
         """ Save the files in the appropriate format.
 
         Parameters:
@@ -200,12 +203,15 @@ class BaseSummary(ABC):
                                                  self.op.summary_filename + task_name + time_stamp + file_format))
         individual = summary.get("Individual files", {})
         if individual_summaries == "none" or not individual:
-            self.dump_summary(filename, summary["Dataset"])
+            if dataset_summary:
+                self.dump_summary(filename, summary["Dataset"])
             return
         if individual_summaries == "consolidated":
             self.dump_summary(filename, summary)
             return
-        self.dump_summary(filename, summary["Dataset"])
+        # todo ian: this is very clunky, replace variable dataset_summary
+        if dataset_summary:
+            self.dump_summary(filename, summary["Dataset"])
         individual_dir = os.path.join(this_save, self.INDIVIDUAL_SUMMARIES_PATH + '/')
         os.makedirs(os.path.realpath(individual_dir), exist_ok=True)
         for name, sum_str in individual.items():

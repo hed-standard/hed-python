@@ -1,5 +1,5 @@
 """ Summarize the unique column names in a dataset. """
-
+import copy
 import json
 
 
@@ -10,6 +10,24 @@ class ColumnNameSummary:
         self.name = name
         self.file_dict = {}
         self.unique_headers = []
+
+    @staticmethod
+    def load_as_json2(json_data):
+        summary = ColumnNameSummary()
+        json_data = json_data["File summary"]
+        summary.name = json_data["Name"]
+        # summary.total_events = json_data["Total events"]
+        # summary.total_files = json_data["Total files"]
+        specifics = json_data["Specifics"]
+        all_column_data = specifics["Columns"]
+        for index, column_data in enumerate(all_column_data):
+            file_list = column_data["Files"]
+            unique_header = column_data["Column names"]
+            summary.unique_headers.append(unique_header)
+            for file in file_list:
+                summary.file_dict[file] = index
+
+        return summary
 
     def update(self, name, columns):
         """ Update the summary based on columns associated with a file.

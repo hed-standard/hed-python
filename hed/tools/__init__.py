@@ -52,3 +52,4 @@ from .analysis.annotation_util import \
 from .remodeling.cli import run_remodel
 from .remodeling.cli import run_remodel_backup
 from .remodeling.cli import run_remodel_restore
+from .remodeling.cli import run_summary
