@@ -5,7 +5,7 @@ import pandas as pd
 from hed.errors import HedExceptions, HedFileError
 from hed.schema.hed_schema_io import load_schema, load_schema_version, from_dataframes
 from hed.schema import hed_schema_df_constants as df_constants
-from hed.schema.schema_io.ontology_util import create_empty_dataframes, convert_filenames_to_dict
+from hed.schema.schema_io.df_util import convert_filenames_to_dict, create_empty_dataframes
 
 
 class TestHedSchemaDF(unittest.TestCase):

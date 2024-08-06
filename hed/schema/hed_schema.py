@@ -1,13 +1,12 @@
 import json
 
+
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey, HedKeyOld
 from hed.schema import hed_schema_constants as constants
-from hed.schema.schema_io import schema_util
+from hed.schema.schema_io import schema_util, df_util
 from hed.schema.schema_io.schema2xml import Schema2XML
 from hed.schema.schema_io.schema2wiki import Schema2Wiki
 from hed.schema.schema_io.schema2df import Schema2DF
-from hed.schema.schema_io import ontology_util
-
 
 from hed.schema.hed_schema_section import (HedSchemaSection, HedSchemaTagSection, HedSchemaUnitClassSection,
                                            HedSchemaUnitSection)
@@ -329,7 +328,7 @@ class HedSchema(HedSchemaBase):
             - File cannot be saved for some reason.
         """
         output_dfs = Schema2DF().process_schema(self, save_merged)
-        ontology_util.save_dataframes(base_filename, output_dfs)
+        df_util.save_dataframes(base_filename, output_dfs)
 
     def set_schema_prefix(self, schema_namespace):
         """ Set library namespace associated for this schema.
