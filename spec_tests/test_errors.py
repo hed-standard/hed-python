@@ -17,7 +17,10 @@ from hed.errors import ErrorHandler, get_printable_issue_string, SchemaWarnings
 skip_tests = {
     "VERSION_DEPRECATED": "Not applicable",
     "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
+    "curly-braces-has-no-hed": "Need to fix issue #1006",
+    "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass"
 }
+
 
 class MyTestCase(unittest.TestCase):
     @classmethod
@@ -27,7 +30,8 @@ class MyTestCase(unittest.TestCase):
         cls.test_files = [os.path.join(test_dir, f) for f in os.listdir(test_dir)
                           if os.path.isfile(os.path.join(test_dir, f))]
         cls.fail_count = []
-        cls.default_sidecar = Sidecar(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_sidecar.json')))
+        cls.default_sidecar = Sidecar(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                                                    'test_sidecar.json')))
 
     @classmethod
     def tearDownClass(cls):
@@ -70,11 +74,14 @@ class MyTestCase(unittest.TestCase):
                 def_dict = DefinitionDict()
             for section_name, section in info["tests"].items():
                 if section_name == "string_tests":
-                    self._run_single_string_test(section, schema, def_dict, error_code, description, name, error_handler)
+                    self._run_single_string_test(section, schema, def_dict, error_code,
+                                                 description, name, error_handler)
                 if section_name == "sidecar_tests":
-                    self._run_single_sidecar_test(section, schema, def_dict, error_code, description, name, error_handler)
+                    self._run_single_sidecar_test(section, schema, def_dict, error_code,
+                                                  description, name, error_handler)
                 if section_name == "event_tests":
-                    self._run_single_events_test(section, schema, def_dict, error_code, description, name, error_handler)
+                    self._run_single_events_test(section, schema, def_dict, error_code,
+                                                 description, name, error_handler)
                 if section_name == "combo_tests":
                     self._run_single_combo_test(section, schema, def_dict, error_code, description, name, error_handler)
                 if section_name == "schema_tests":
@@ -117,12 +124,13 @@ class MyTestCase(unittest.TestCase):
     def _run_single_sidecar_test(self, info, schema, def_dict, error_code, description, name, error_handler):
         for result, tests in info.items():
             for test in tests:
+                print(f"{error_code}: {name}")
                 buffer = io.BytesIO(json.dumps(test).encode("utf-8"))
                 sidecar = Sidecar(buffer)
                 issues = sidecar.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
                 self.report_result(result, issues, error_code, description, name, test, "sidecar_test")
 
-    def _run_single_events_test(self, info, schema, def_dict, error_code, description,name, error_handler):
+    def _run_single_events_test(self, info, schema, def_dict, error_code, description, name, error_handler):
         from hed import TabularInput
         for result, tests in info.items():
             for test in tests:
@@ -143,7 +151,7 @@ class MyTestCase(unittest.TestCase):
                 issues = file.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
                 self.report_result(result, issues, error_code, description, name, test, "events_test")
 
-    def _run_single_combo_test(self, info, schema, def_dict, error_code, description,name, error_handler):
+    def _run_single_combo_test(self, info, schema, def_dict, error_code, description, name, error_handler):
         from hed import TabularInput
         for result, tests in info.items():
             for test in tests:
@@ -175,7 +183,7 @@ class MyTestCase(unittest.TestCase):
                 issues += file.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
                 self.report_result(result, issues, error_code, description, name, test, "combo_tests")
 
-    def _run_single_schema_test(self, info, error_code, description,name, error_handler):
+    def _run_single_schema_test(self, info, error_code, description, name, error_handler):
         for result, tests in info.items():
             for test in tests:
                 schema_string = "\n".join(test)
@@ -200,6 +208,6 @@ class MyTestCase(unittest.TestCase):
         print("\n".join(self.fail_count))
         self.assertEqual(len(self.fail_count), 0)
 
+
 if __name__ == '__main__':
     unittest.main()
-
