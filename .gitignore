@@ -122,3 +122,4 @@ Desktop.ini
 # Project specific
 schema_cache_test/
 hed_cache/
+spec_tests/hed-specification/tests
