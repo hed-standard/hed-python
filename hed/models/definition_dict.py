@@ -214,18 +214,18 @@ class DefinitionDict:
                 ErrorHandler.format_error_with_context(error_handler,
                                                        DefinitionErrors.WRONG_NUMBER_GROUPS,
                                                        def_name=definition_tag.extension, tag_list=groups)
-        elif len(groups) == 0:
-            issues += \
-                ErrorHandler.format_error_with_context(error_handler,
-                                                       DefinitionErrors.NO_DEFINITION_CONTENTS,
-                                                       def_name=definition_tag.extension)
-        if len(group.tags()) != 1:
-            issues += \
-                ErrorHandler.format_error_with_context(error_handler,
-                                                       DefinitionErrors.WRONG_NUMBER_TAGS,
-                                                       def_name=definition_tag.extension,
-                                                       tag_list=[tag for tag in group.tags()
-                                                                 if tag is not definition_tag])
+        # elif len(groups) == 0:
+        #     issues += \
+        #         ErrorHandler.format_error_with_context(error_handler,
+        #                                                DefinitionErrors.NO_DEFINITION_CONTENTS,
+        #                                                def_name=definition_tag.extension)
+        # if len(group.tags()) != 1:
+        #     issues += \
+        #         ErrorHandler.format_error_with_context(error_handler,
+        #                                                DefinitionErrors.WRONG_NUMBER_TAGS,
+        #                                                def_name=definition_tag.extension,
+        #                                                tag_list=[tag for tag in group.tags()
+        #                                                          if tag is not definition_tag])
 
         group_tag = groups[0] if groups else None
 

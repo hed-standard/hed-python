@@ -50,10 +50,9 @@ class MyTestCase(unittest.TestCase):
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
 
-            # if name != "library-invalid-bad_with-standard-version":
-            #     continue
             description = info['description']
             schema = info['schema']
+            all_codes = {error_code}.union(set(info.get('alt_codes', [])))
             check_for_warnings = info.get("warning", False)
             error_handler = ErrorHandler(check_for_warnings)
             if schema:
@@ -74,85 +73,87 @@ class MyTestCase(unittest.TestCase):
                 def_dict = DefinitionDict()
             for section_name, section in info["tests"].items():
                 if section_name == "string_tests":
-                    self._run_single_string_test(section, schema, def_dict, error_code,
+                    self._run_single_string_test(section, schema, def_dict, all_codes,
                                                  description, name, error_handler)
                 if section_name == "sidecar_tests":
-                    self._run_single_sidecar_test(section, schema, def_dict, error_code,
+                    self._run_single_sidecar_test(section, schema, def_dict, all_codes,
                                                   description, name, error_handler)
                 if section_name == "event_tests":
-                    self._run_single_events_test(section, schema, def_dict, error_code,
+                    self._run_single_events_test(section, schema, def_dict, all_codes,
                                                  description, name, error_handler)
                 if section_name == "combo_tests":
-                    self._run_single_combo_test(section, schema, def_dict, error_code, description, name, error_handler)
+                    self._run_single_combo_test(section, schema, def_dict, all_codes,
+                                                description, name, error_handler)
                 if section_name == "schema_tests":
                     self._run_single_schema_test(section, error_code, description, name, error_handler)
 
-    def report_result(self, expected_result, issues, error_code, description, name, test, test_type):
+    def report_result(self, expected_result, issues, all_codes, description, name, test, test_type):
         # Filter out pre-release warnings, we don't care about them.
         issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
         if expected_result == "fails":
             if not issues:
-                print(f"{error_code}: {description}")
+                print(f"{str(all_codes)}: {description}")
                 print(f"Passed '{test_type}' (which should fail) '{name}': {test}")
-                print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
             else:
-                if any(issue['code'] == error_code for issue in issues):
+                if any(issue['code'] in all_codes for issue in issues):
                     return
-                print(f"{error_code}: {description}")
+                print(f"{str(all_codes)}: {description}")
                 print(f"Failed '{test_type}' (unexpected errors found) '{name}': {test}")
                 print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
         else:
             if issues:
-                print(f"{error_code}: {description}")
+                print(f"{str(all_codes)}: {description}")
                 print(f"Failed '{test_type}' test '{name}': {test}")
                 print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
 
-    def _run_single_string_test(self, info, schema, def_dict, error_code, description, name, error_handler):
+    def _run_single_string_test(self, info, schema, def_dict, all_codes, description, name, error_handler):
         string_validator = HedValidator(hed_schema=schema, def_dicts=def_dict)
+        print(f"{str(all_codes)}: {name} string tests")
         for result, tests in info.items():
             for test in tests:
                 test_string = HedString(test, schema)
-
                 issues = string_validator.run_basic_checks(test_string, False)
                 issues += string_validator.run_full_string_checks(test_string)
                 error_handler.add_context_and_filter(issues)
-                self.report_result(result, issues, error_code, description, name, test, "string_test")
+                self.report_result(result, issues, all_codes, description, name, test, "string_test")
 
-    def _run_single_sidecar_test(self, info, schema, def_dict, error_code, description, name, error_handler):
+    def _run_single_sidecar_test(self, info, schema, def_dict, all_codes, description, name, error_handler):
+        print(f"{str(all_codes)}: {name} sidecar tests")
         for result, tests in info.items():
             for test in tests:
-                print(f"{error_code}: {name}")
                 buffer = io.BytesIO(json.dumps(test).encode("utf-8"))
                 sidecar = Sidecar(buffer)
                 issues = sidecar.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
-                self.report_result(result, issues, error_code, description, name, test, "sidecar_test")
+                self.report_result(result, issues, all_codes, description, name, test, "sidecar_test")
 
-    def _run_single_events_test(self, info, schema, def_dict, error_code, description, name, error_handler):
+    def _run_single_events_test(self, info, schema, def_dict, all_codes, description, name, error_handler):
         from hed import TabularInput
+        print(f"{all_codes}: {name} event tests")
         for result, tests in info.items():
             for test in tests:
                 string = ""
                 for row in test:
                     if not isinstance(row, list):
-                        print(f"Improper grouping in test: {error_code}:{name}")
+                        print(f"Improper grouping in test: [{str(all_codes)}]:{name}")
                         print(f"This is probably a missing set of square brackets.")
                         break
                     string += "\t".join(str(x) for x in row) + "\n"
 
                 if not string:
-                    print(F"Invalid blank events found in test: {error_code}:{name}")
+                    print(F"Invalid blank events found in test: [{str(all_codes)}]:{name}")
                     continue
                 file_obj = io.BytesIO(string.encode("utf-8"))
 
                 file = TabularInput(file_obj, sidecar=self.default_sidecar)
                 issues = file.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
-                self.report_result(result, issues, error_code, description, name, test, "events_test")
+                self.report_result(result, issues, all_codes, description, name, test, "events_test")
 
-    def _run_single_combo_test(self, info, schema, def_dict, error_code, description, name, error_handler):
+    def _run_single_combo_test(self, info, schema, def_dict, all_codes, description, name, error_handler):
         from hed import TabularInput
+        print(f"{str(all_codes)}: {name} combo tests")
         for result, tests in info.items():
             for test in tests:
                 buffer = io.BytesIO(json.dumps(test['sidecar']).encode("utf-8"))
@@ -163,25 +164,25 @@ class MyTestCase(unittest.TestCase):
                 try:
                     for row in test['events']:
                         if not isinstance(row, list):
-                            print(f"Improper grouping in test: {error_code}:{name}")
+                            print(f"Improper grouping in test: [{str(all_codes)}]:{name}")
                             print(f"Improper data for test {name}: {test}")
                             print(f"This is probably a missing set of square brackets.")
                             break
                         string += "\t".join(str(x) for x in row) + "\n"
 
                     if not string:
-                        print(F"Invalid blank events found in test: {error_code}:{name}")
+                        print(F"Invalid blank events found in test: {str(all_codes)}:{name}")
                         continue
                     file_obj = io.BytesIO(string.encode("utf-8"))
 
                     file = TabularInput(file_obj, sidecar=sidecar)
                 except HedFileError:
-                    print(f"{error_code}: {description}")
+                    print(f"{str(all_codes)}: {description}")
                     print(f"Improper data for test {name}: {test}")
                     print(f"This is probably a missing set of square brackets.")
                     continue
                 issues += file.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
-                self.report_result(result, issues, error_code, description, name, test, "combo_tests")
+                self.report_result(result, issues, all_codes, description, name, test, "combo_tests")
 
     def _run_single_schema_test(self, info, error_code, description, name, error_handler):
         for result, tests in info.items():
