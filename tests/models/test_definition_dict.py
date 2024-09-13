@@ -62,8 +62,9 @@ class TestDefinitionDict(TestDefBase):
             'noGroupTag': "(Definition/InvalidDef0)",
             'placeholderNoGroupTag': "(Definition/InvalidDef1/#)",
             'placeholderWrongSpot': "(Definition/InvalidDef1#)",
-            'twoDefTags': f"(Definition/ValidDef1,Definition/InvalidDef2,{self.def_contents_string})",
+            'twoDefTags': f"(Definition/InvalidDef1,Definition/InvalidDef2,{self.def_contents_string})",
             'twoGroupTags': f"(Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2})",
+            'extraValidTags': "(Definition/InvalidDefA, Red, Blue)",
             'extraOtherTags': "(Definition/InvalidDef1, InvalidContents)",
             'duplicateDef': f"(Definition/Def1, {self.def_contents_string}), (Definition/Def1, {self.def_contents_string})",
             'duplicateDef2': f"(Definition/Def1, {self.def_contents_string}), (Definition/Def1/#, {self.placeholder_def_contents})",
@@ -77,35 +78,37 @@ class TestDefinitionDict(TestDefBase):
             'placeholdersWrongSpot': f"(Definition/InvalidDef/#, (Age/#,Item/TestDef2))",
         }
         expected_results = {
-            'noGroupTag': self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS,
-                                                               "InvalidDef0"),
-            'placeholderNoGroupTag': self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS,"InvalidDef1/#"),
-            'placeholderWrongSpot': self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS,"InvalidDef1#") + self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
-                                                              tag=0, def_name="InvalidDef1#"),
-            'twoDefTags': self.format_error(DefinitionErrors.WRONG_NUMBER_TAGS,
-                                                    "ValidDef1", ["Definition/InvalidDef2"]),
-            'twoGroupTags': self.format_error(DefinitionErrors.WRONG_NUMBER_GROUPS,
-                                                      "InvalidDef1",
-                                                      [self.def_contents_string, self.def_contents_string2]),
-            'extraOtherTags': self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS, "InvalidDef1")
-                              + self.format_error(DefinitionErrors.WRONG_NUMBER_TAGS, "InvalidDef1", ['InvalidContents']),
+            'noGroupTag': [],
+            'placeholderNoGroupTag': self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS, "InvalidDef1/#"),
+            'placeholderWrongSpot': self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS, "InvalidDef1#") +
+            self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
+                              tag=0, def_name="InvalidDef1#"),
+            'twoDefTags': self.format_error(DefinitionErrors.WRONG_NUMBER_TAGS, "InvalidDef1",
+                                            ["Definition/InvalidDef2"]),
+            'twoGroupTags': self.format_error(DefinitionErrors.WRONG_NUMBER_GROUPS, "InvalidDef1",
+                                              [self.def_contents_string, self.def_contents_string2]),
+            'extraValidTags': self.format_error(DefinitionErrors.WRONG_NUMBER_TAGS, "InvalidDefA",
+                                                ["Red", "Blue"]),
+            'extraOtherTags': self.format_error(DefinitionErrors.WRONG_NUMBER_TAGS, "InvalidDef1",
+                                                ["InvalidContents"]),
             'duplicateDef': self.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
             'duplicateDef2': self.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
 
             'defTooManyPlaceholders': self.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
-                                                                "TestDefPlaceholder", expected_count=1,
-                                                                tag_list=["Age/#", "Item/TestDef2/#"]),
+                                                        "TestDefPlaceholder", expected_count=1,
+                                                        tag_list=["Age/#", "Item/TestDef2/#"]),
             'invalidPlaceholderExtension': self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
-                                                                     tag=0, def_name="InvalidDef1/this-part-is-not-allowed"),
+                                                             tag=0, def_name="InvalidDef1/this-part-is-not-allowed"),
             'invalidPlaceholder': self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
-                                                            tag=0, def_name="InvalidDef1/InvalidPlaceholder"),
+                                                    tag=0, def_name="InvalidDef1/InvalidPlaceholder"),
             'defInGroup': self.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
-                                            tag=HedTag("Def/ImproperlyPlacedDef", self.hed_schema), def_name="ValidDefName"),
+                                            tag=HedTag("Def/ImproperlyPlacedDef", self.hed_schema),
+                                            def_name="ValidDefName"),
             'defExpandInGroup': self.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
                                                   tag=HedTag("Def-expand/ImproperlyPlacedDef", self.hed_schema),
                                                   def_name="ValidDefName"),
             'doublePoundSignPlaceholder': self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
-                                                                     tag=0, def_name="InvalidDef/##"),
+                                                            tag=0, def_name="InvalidDef/##"),
             'doublePoundSignDiffPlaceholder': self.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
                                                                 "InvalidDef", expected_count=1, tag_list=['Age/##']),
             'placeholdersWrongSpot': []
@@ -143,6 +146,7 @@ class TestDefinitionDict(TestDefBase):
         hed_string1.remove([hed_string1.get_all_tags()[2]])
 
         self.assertNotEqual(hed_string1, hed_string2)
+
 
 if __name__ == '__main__':
     unittest.main()
