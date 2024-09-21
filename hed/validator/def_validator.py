@@ -99,7 +99,7 @@ class DefValidator(DefinitionDict):
 
         return def_issues
 
-    def validate_def_value_units(self, def_tag, hed_validator):
+    def validate_def_value_units(self, def_tag, hed_validator, allow_placeholders=False):
         """Equivalent to HedValidator.validate_units for the special case of a Def or Def-expand tag"""
         tag_label, _, placeholder = def_tag.extension.partition('/')
         is_def_expand_tag = def_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY
@@ -113,12 +113,11 @@ class DefValidator(DefinitionDict):
         if is_def_expand_tag:
             error_code = ValidationErrors.DEF_EXPAND_INVALID
 
-        def_issues = []
-
         # Validate the def name vs the name class
-        def_issues += hed_validator.validate_units(def_tag,
-                                                   tag_label,
-                                                   error_code=error_code)
+        def_issues = hed_validator._unit_validator._check_value_class(def_tag, tag_label, report_as=None, error_code=error_code, index_offset=0)
+        # def_issues += hed_validator.validate_units(def_tag,
+        #                                            tag_label,
+        #                                            error_code=error_code)
 
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
         if def_contents and def_entry.takes_value and hed_validator:
@@ -126,6 +125,8 @@ class DefValidator(DefinitionDict):
             # Handle the case where they're adding a unit as part of a placeholder.  eg Speed/# mph
             if placeholder_tag:
                 placeholder = placeholder_tag.extension
+                if placeholder.startswith('# '):
+                    placeholder = placeholder[2:]
             def_issues += hed_validator.validate_units(placeholder_tag,
                                                        placeholder,
                                                        report_as=def_tag,

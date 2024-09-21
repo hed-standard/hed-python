@@ -239,7 +239,9 @@ class IndividualHedTagsShort(TestHed3):
                 ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
-            'specialAllowedCharBadUnit':  self.format_error(ValidationErrors.VALUE_INVALID, tag=0),
+            'specialAllowedCharBadUnit':  self.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, tag=0,
+                                                            value_class="dateTimeClass",
+                                                            index_in_tag=0, index_in_tag_end=25),
             'specialAllowedCharUnit': [],
             # 'properTime': [],
             # 'invalidTime': self.format_error(ValidationErrors.UNITS_INVALID,  tag=0,
@@ -275,7 +277,9 @@ class IndividualHedTagsShort(TestHed3):
         expected_issues = {
             'invalidPlaceholder': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
                                                     tag=0, index_in_tag=12, index_in_tag_end=13,
-                                                    actual_error=ValidationErrors.PLACEHOLDER_INVALID),
+                                                    actual_error=ValidationErrors.PLACEHOLDER_INVALID) +
+                self.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, tag=0,
+                                  index_in_tag=0, index_in_tag_end=16, value_class="numericClass")
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 

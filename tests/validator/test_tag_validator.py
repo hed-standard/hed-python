@@ -202,6 +202,7 @@ class IndividualHedTagsShort(TestHed):
             # 'correctNoPluralUnit': 'Frequency/3 hertz',
             # 'correctNonSymbolCapitalizedUnit': 'Duration/3 MilliSeconds',
             # 'correctSymbolCapitalizedUnit': 'Frequency/3 kHz',
+
             'incorrectUnit': 'Duration/3 cm',
             'incorrectSiUsage': 'Duration/3 decaday',
             'incorrectPluralUnit': 'Frequency/3 hertzs',
@@ -209,7 +210,7 @@ class IndividualHedTagsShort(TestHed):
             'incorrectSymbolCapitalizedUnitModifier': 'Frequency/3 KHz',
             'notRequiredNumber': 'Statistical-accuracy/0.5',
             'notRequiredScientific': 'Statistical-accuracy/5e-1',
-            'specialAllowedCharBadUnit': 'Creation-date/bad_date',
+            'specialAllowedCharBadUnit': 'Creation-date/ba',
             'specialAllowedCharUnit': 'Creation-date/1900-01-01T01:01:01',
             # todo: restore these when we have a currency node in the valid beta schema.
             # 'specialAllowedCharCurrency': 'Event/Currency-Test/$100',
@@ -294,8 +295,10 @@ class IndividualHedTagsShort(TestHed):
                 ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units),
             'notRequiredNumber': [],
             'notRequiredScientific': [],
-            'specialAllowedCharBadUnit': self.format_error(ValidationErrors.VALUE_INVALID,
-                                                           tag=0),
+            'specialAllowedCharBadUnit': self.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, tag=0,
+                                                           index_in_tag=0, index_in_tag_end=16,
+                                                           value_class="dateTimeClass",
+                                                           actual_error=ValidationErrors.VALUE_INVALID),
             'specialAllowedCharUnit': [],
             # 'properTime': [],
             # 'invalidTime': self.format_error(ValidationErrors.UNITS_INVALID,  tag=0,
@@ -365,7 +368,11 @@ class IndividualHedTagsShort(TestHed):
         expected_issues = {
             'invalidPlaceholder': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
                                                     tag=0, index_in_tag=9, index_in_tag_end=10,
-                                                    actual_error=ValidationErrors.PLACEHOLDER_INVALID),
+                                                    actual_error=ValidationErrors.PLACEHOLDER_INVALID) +
+            self.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, tag=0, index_in_tag=0,
+                              index_in_tag_end=13, value_class="numericClass",
+                              actual_error=ValidationErrors.VALUE_INVALID)
+            ,
             'invalidMiscPoundSign': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
                                                       tag=0, index_in_tag=0, index_in_tag_end=8),
             'invalidAfterBaseTag': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
@@ -996,13 +1003,11 @@ class TestHedSpecialUnits(TestHed):
             # 'properTime': [],
             # 'invalidTime': [],
             'specialAllowedCharCurrency': [],
-            'specialNotAllowedCharCurrency': self.format_error(ValidationErrors.UNITS_INVALID,
-                                                               tag=0,
-                                                               units=legal_currency_units)
-            + self.format_error(ValidationErrors.VALUE_INVALID,
-                                                               tag=0),
-            'specialAllowedCharCurrencyAsSuffix': self.format_error(ValidationErrors.UNITS_INVALID,
-                                                                    tag=0,
+            'specialNotAllowedCharCurrency': self.format_error("INVALID_VALUE_CLASS_VALUE",
+                                                               value_class="numericClass", tag=0, index_in_tag=0,
+                                                               index_in_tag_end=24)
+            + self.format_error(ValidationErrors.UNITS_INVALID,tag=0, units=legal_currency_units),
+            'specialAllowedCharCurrencyAsSuffix': self.format_error(ValidationErrors.UNITS_INVALID, tag=0,
                                                                     units=legal_currency_units),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
@@ -1030,11 +1035,12 @@ class TestHedAllowedCharacters(TestHed):
 
         expected_issues = {
             'ascii': [],
-            'illegalTab': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER, tag=0,
-                                          index_in_tag=13, index_in_tag_end=14),
+            'illegalTab': self.format_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, tag=0,
+                                          index_in_tag=13, index_in_tag_end=14, value_class="textClass"),
             'allowTab': []
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
+
 
 if __name__ == '__main__':
     unittest.main()

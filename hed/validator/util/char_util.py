@@ -1,6 +1,12 @@
 """ Classes responsible for basic character validation of a string or tag."""
+import json
+import re
+import os
+
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
+
+CLASS_REX_FILENAME = 'class_regex.json'
 
 
 class CharValidator:
@@ -152,3 +158,70 @@ class CharValidator:
             error_type = ValidationErrors.TILDES_UNSUPPORTED
         return ErrorHandler.format_error(error_type, char_index=index,
                                          source_string=hed_string)
+
+
+class CharRexValidator(CharValidator):
+    """Class responsible for basic character level validation of a string or tag."""
+
+    def __init__(self, modern_allowed_char_rules=False):
+        """Does basic character validation for HED strings/tags
+
+        Parameters:
+            modern_allowed_char_rules(bool): If True, use 8.3 style rules for unicode characters.
+        """
+        super().__init__(modern_allowed_char_rules)
+        self._rex_dict = self._get_rex_dict()
+
+    def get_problem_chars(self, input_string, class_name):
+
+        # List to store problem indices and characters
+        bad_indices = []
+
+        # Retrieve the allowed character classes for the given class_name
+        allowed_classes = self._rex_dict["class_chars"].get(class_name, [])
+        if not allowed_classes:
+            return bad_indices
+        # Combine the corresponding regular expressions from the char_regex section
+        allowed_regex_parts = [self._rex_dict["char_regex"][char_class] for char_class in allowed_classes]
+
+        # Create one combined regex that matches any of the allowed character classes
+        combined_regex = "|".join(allowed_regex_parts)
+
+        # Compile the combined regular expression
+        compiled_regex = re.compile(combined_regex)
+
+        # Iterate through the input string, checking each character
+        for index, char in enumerate(input_string):
+            # If the character doesn't match the combined regex, it's a problem
+            if not compiled_regex.match(char):
+                bad_indices.append((index, char))
+
+        return bad_indices
+
+    def is_valid_value(self, input_string, class_name):
+        # Retrieve the allowed character classes for the given class_name
+        class_regex = self._rex_dict["class_words"].get(class_name, [])
+        if not class_regex:
+            return True
+        match = re.match(class_regex, input_string)
+        match = match if match else False
+        return match
+
+    @staticmethod
+    def _get_rex_dict():
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        json_path = os.path.realpath(os.path.join(current_dir, CLASS_REX_FILENAME))
+        with open(json_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+
+
+if __name__ == "__main__":
+    # Example input string
+    input_string = "Hello World123"
+
+    # Class name (e.g., "nameClass" or "testClass")
+    class_name = "nameClass"
+
+    # Call the function and print the result
+    # problem_indices = get_problem_chars(input_string, class_name, json_data)
+    # print(problem_indices)
