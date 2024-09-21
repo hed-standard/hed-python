@@ -16,9 +16,9 @@ from hed.errors import ErrorHandler, get_printable_issue_string, SchemaWarnings
 
 skip_tests = {
     "VERSION_DEPRECATED": "Not applicable",
-    "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
+    # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
     "curly-braces-has-no-hed": "Need to fix issue #1006",
-    "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
+    # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
     "invalid-character-name-value-class-deprecated": "Removing support for 8.2.0 or earlier name classes"
 }
 
@@ -43,6 +43,7 @@ class MyTestCase(unittest.TestCase):
             test_info = json.load(fp)
         for info in test_info:
             error_code = info['error_code']
+            all_codes = [error_code] + info.get('alt_codes', [])
             if error_code in skip_tests:
                 print(f"Skipping {error_code} test because: {skip_tests[error_code]}")
                 continue
@@ -65,30 +66,32 @@ class MyTestCase(unittest.TestCase):
                     if not issues:
                         issues += [{"code": e.code,
                                     "message": e.message}]
-                    self.report_result("fails", issues, error_code, description, name, "dummy", "Schema")
+                    self.report_result("fails", issues, error_code, all_codes, description, name, "dummy", "Schema")
                     # self.fail_count.append(name)
                     continue
                 definitions = info.get('definitions', None)
                 def_dict = DefinitionDict(definitions, schema)
                 self.assertFalse(def_dict.issues)
+
             else:
                 def_dict = DefinitionDict()
             for section_name, section in info["tests"].items():
                 if section_name == "string_tests":
-                    self._run_single_string_test(section, schema, def_dict, error_code,
+                    self._run_single_string_test(section, schema, def_dict, error_code, all_codes,
                                                  description, name, error_handler)
                 if section_name == "sidecar_tests":
-                    self._run_single_sidecar_test(section, schema, def_dict, error_code,
+                    self._run_single_sidecar_test(section, schema, def_dict, error_code, all_codes,
                                                   description, name, error_handler)
                 if section_name == "event_tests":
-                    self._run_single_events_test(section, schema, def_dict, error_code,
+                    self._run_single_events_test(section, schema, def_dict, error_code, all_codes,
                                                  description, name, error_handler)
                 if section_name == "combo_tests":
-                    self._run_single_combo_test(section, schema, def_dict, error_code, description, name, error_handler)
+                    self._run_single_combo_test(section, schema, def_dict, error_code, all_codes,
+                                                description, name, error_handler)
                 if section_name == "schema_tests":
-                    self._run_single_schema_test(section, error_code, description, name, error_handler)
+                    self._run_single_schema_test(section, error_code, all_codes, description, name, error_handler)
 
-    def report_result(self, expected_result, issues, error_code, description, name, test, test_type):
+    def report_result(self, expected_result, issues, error_code, all_codes, description, name, test, test_type):
         # Filter out pre-release warnings, we don't care about them.
         issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
         if expected_result == "fails":
@@ -98,9 +101,9 @@ class MyTestCase(unittest.TestCase):
                 print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
             else:
-                if any(issue['code'] == error_code for issue in issues):
+                if any(issue['code'] in all_codes for issue in issues):
                     return
-                print(f"{error_code}: {description}")
+                print(f"{error_code}: {description} all codes:[{str(all_codes)}]")
                 print(f"Failed '{test_type}' (unexpected errors found) '{name}': {test}")
                 print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
@@ -111,7 +114,7 @@ class MyTestCase(unittest.TestCase):
                 print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
 
-    def _run_single_string_test(self, info, schema, def_dict, error_code, description, name, error_handler):
+    def _run_single_string_test(self, info, schema, def_dict, error_code, all_codes, description, name, error_handler):
         string_validator = HedValidator(hed_schema=schema, def_dicts=def_dict)
         for result, tests in info.items():
             for test in tests:
@@ -120,18 +123,18 @@ class MyTestCase(unittest.TestCase):
                 issues = string_validator.run_basic_checks(test_string, False)
                 issues += string_validator.run_full_string_checks(test_string)
                 error_handler.add_context_and_filter(issues)
-                self.report_result(result, issues, error_code, description, name, test, "string_test")
+                self.report_result(result, issues, error_code, all_codes, description, name, test, "string_test")
 
-    def _run_single_sidecar_test(self, info, schema, def_dict, error_code, description, name, error_handler):
+    def _run_single_sidecar_test(self, info, schema, def_dict, error_code, all_codes, description, name, error_handler):
         for result, tests in info.items():
             for test in tests:
                 # print(f"{error_code}: {name}")
                 buffer = io.BytesIO(json.dumps(test).encode("utf-8"))
                 sidecar = Sidecar(buffer)
                 issues = sidecar.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
-                self.report_result(result, issues, error_code, description, name, test, "sidecar_test")
+                self.report_result(result, issues, error_code, all_codes, description, name, test, "sidecar_test")
 
-    def _run_single_events_test(self, info, schema, def_dict, error_code, description, name, error_handler):
+    def _run_single_events_test(self, info, schema, def_dict, error_code, all_codes, description, name, error_handler):
         from hed import TabularInput
         for result, tests in info.items():
             for test in tests:
@@ -150,9 +153,9 @@ class MyTestCase(unittest.TestCase):
 
                 file = TabularInput(file_obj, sidecar=self.default_sidecar)
                 issues = file.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
-                self.report_result(result, issues, error_code, description, name, test, "events_test")
+                self.report_result(result, issues, error_code, all_codes, description, name, test, "events_test")
 
-    def _run_single_combo_test(self, info, schema, def_dict, error_code, description, name, error_handler):
+    def _run_single_combo_test(self, info, schema, def_dict, error_code, all_codes, description, name, error_handler):
         from hed import TabularInput
         for result, tests in info.items():
             for test in tests:
@@ -182,9 +185,9 @@ class MyTestCase(unittest.TestCase):
                     print(f"This is probably a missing set of square brackets.")
                     continue
                 issues += file.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
-                self.report_result(result, issues, error_code, description, name, test, "combo_tests")
+                self.report_result(result, issues, error_code, all_codes, description, name, test, "combo_tests")
 
-    def _run_single_schema_test(self, info, error_code, description, name, error_handler):
+    def _run_single_schema_test(self, info, error_code, all_codes, description, name, error_handler):
         for result, tests in info.items():
             for test in tests:
                 schema_string = "\n".join(test)
@@ -200,15 +203,18 @@ class MyTestCase(unittest.TestCase):
                 except urllib.error.HTTPError:
                     issues += [{"code": "Http_error",
                                 "message": "HTTP error in testing, probably due to rate limiting for local testing."}]
-                self.report_result(result, issues, error_code, description, name, test, "schema_tests")
+                self.report_result(result, issues, error_code, all_codes, description, name, test, "schema_tests")
 
     def test_errors(self):
         for test_file in self.test_files:
             self.run_single_test(test_file)
+        #test_file = './temp.json'
+        self.run_single_test(test_file)
         print(f"{len(self.fail_count)} tests got an unexpected result")
         print("\n".join(self.fail_count))
         self.assertEqual(len(self.fail_count), 0)
 
 
 if __name__ == '__main__':
+
     unittest.main()
