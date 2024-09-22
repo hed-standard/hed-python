@@ -73,6 +73,7 @@ class TestValidatorBase(TestHedBase):
     def validator_base(self, test_strings, expected_results, expected_issues, test_function,
                        hed_schema, check_for_warnings=False):
         for test_key in test_strings:
+            print(test_key)
             hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
             error_handler = ErrorHandler(check_for_warnings=check_for_warnings)
             error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
@@ -88,10 +89,10 @@ class TestValidatorBase(TestHedBase):
             error_handler.add_context_and_filter(test_issues)
             test_result = not test_issues
 
-            # print(test_key)
+
             # print(str(expected_issue))
             # print(str(test_issues))
-            error_handler.pop_error_context()
+            # error_handler.pop_error_context()
             self.assertEqual(test_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 
