@@ -1,9 +1,9 @@
 import unittest
 import os
 
-from hed.errors import HedFileError, get_printable_issue_string
-from hed.models import HedString, HedTag
-from hed.schema import HedKey, HedSectionKey, get_hed_xml_version, load_schema, HedSchemaGroup, load_schema_version, HedSchema
+from hed.errors import HedFileError
+from hed.models import HedTag
+from hed.schema import HedKey,  get_hed_xml_version, load_schema, HedSchemaGroup, load_schema_version
 
 
 class TestHedSchema(unittest.TestCase):
@@ -136,4 +136,3 @@ class TestHedSchema(unittest.TestCase):
         self.assertFalse(schema.get_tag_entry("Event", schema_namespace=None))
         self.assertFalse(schema.get_tag_entry("Event", schema_namespace=''))
         self.assertFalse(schema.get_tag_entry("Event", schema_namespace='unknown'))
-

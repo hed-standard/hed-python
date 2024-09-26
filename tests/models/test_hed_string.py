@@ -185,6 +185,7 @@ class TestHedStringUtil(unittest.TestCase):
 
         self.compare_split_results(test_strings, expected_results)
 
+
 class TestHedStringShrinkDefs(unittest.TestCase):
     hed_schema = load_schema_version("8.0.0")
 
@@ -224,17 +225,17 @@ class TestFromHedStrings(unittest.TestCase):
     def test_from_hed_strings(self):
         combined_hed_string = HedString.from_hed_strings(self.hed_strings)
 
-        # Test that the combined hed string is as expected
+        # Test that the combined HED string is as expected
         self.assertEqual(combined_hed_string._hed_string, 'Event,Action,Age/20,Item')
 
-        # Test that the schema of the combined hed string is the same as the first hed string
+        # Test that the schema of the combined HED string is the same as the first HED string
         self.assertEqual(combined_hed_string._schema, self.schema)
 
-        # Test that the contents of the combined hed string is the concatenation of the contents of all hed strings
+        # Test that the contents of the combined HED string is the concatenation of the contents of all HED strings
         expected_contents = [child for hed_string in self.hed_strings for child in hed_string.children]
         self.assertEqual(combined_hed_string.children, expected_contents)
 
-        # Test that the _from_strings attribute of the combined hed string is the list of original hed strings
+        # Test that the _from_strings attribute of the combined HED string is the list of original HED strings
         self.assertEqual(combined_hed_string._from_strings, self.hed_strings)
 
     def test_empty_hed_strings_list(self):
@@ -254,17 +255,17 @@ class TestFromHedStrings(unittest.TestCase):
 
         combined_hed_string = HedString.from_hed_strings(complex_hed_strings)
 
-        # Test that the combined hed string is as expected
+        # Test that the combined HED string is as expected
         self.assertEqual(combined_hed_string._hed_string, 'Event,Action,Age/20,Hand,Item,(Leg, Nose)')
 
-        # Test that the schema of the combined hed string is the same as the first hed string
+        # Test that the schema of the combined HED string is the same as the first HED string
         self.assertEqual(combined_hed_string._schema, self.schema)
 
-        # Test that the contents of the combined hed string is the concatenation of the contents of all hed strings
+        # Test that the contents of the combined HED string is the concatenation of the contents of all HED strings
         expected_contents = [child for hed_string in complex_hed_strings for child in hed_string.children]
         self.assertEqual(combined_hed_string.children, expected_contents)
 
-        # Test that the _from_strings attribute of the combined hed string is the list of original hed strings
+        # Test that the _from_strings attribute of the combined HED string is the list of original HED strings
         self.assertEqual(combined_hed_string._from_strings, complex_hed_strings)
 
     def _verify_copied_string(self, original_hed_string):
@@ -287,7 +288,7 @@ class TestFromHedStrings(unittest.TestCase):
         for child in copied_hed_string.children:
             self.assertEqual(child._parent, copied_hed_string)
 
-        # The _original_children and _from_strings attributes should also be deepcopied
+        # The _original_children and _from_strings attributes should also be deep copied
         self.assertNotEqual(id(original_hed_string._original_children), id(copied_hed_string._original_children))
         self.assertEqual(copied_hed_string._original_children, original_hed_string._original_children)
         if original_hed_string._from_strings:

@@ -153,7 +153,7 @@ class TestUpdateDataframes(unittest.TestCase):
             updated_dataframes = update_dataframes_from_schema(schema_dataframes_new, schema)
         except HedFileError as e:
             self.assertEqual(len(e.issues), 115)
-        breakHere = 3
+        break_here = 3
 
 
 class TestConvertOmn(unittest.TestCase):

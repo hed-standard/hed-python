@@ -56,28 +56,34 @@ jobs:
           pip install -r requirements.txt
           pip install -r docs/requirements.txt
 
+      # Run flake8 only for Python 3.9
       - name: Lint with flake8
+        if: matrix.python-version == '3.9'
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-
+          pip install flake8
           flake8 . --count --show-source --statistics --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics 
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 
       - name: Test with unittest
         env:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          coverage run -m unittest
+          if [ "${{ matrix.python-version }}" == "3.9" ]; then
+            pip install coverage
+            coverage run -m unittest discover tests
+          else
+            python -m unittest tests
+          fi
 
       - name: Run spec_test coverage
         env:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: coverage run --append -m unittest spec_tests/test_errors.py
-        continue-on-error: true
+        run: |
+          if ["${{ matrix.python-version }}" == "3.9" ]; then
+            coverage run --append -m unittest discover tests/spec_tests
+            ls -a
+            continue-on-error: true
+          if
 
-      - name: List files in workspace
-        run: ls -a
-        
       - name: Archive code coverage results
         if: ${{matrix.python-version == '3.9'}}
         uses: actions/upload-artifact@v4

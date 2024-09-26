@@ -132,5 +132,6 @@ class Test(unittest.TestCase):
         self.assertEqual(str(original_hed_string), str(hed_string))
         self.assertIsNot(sorted_hed_string, hed_string)
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -6,6 +6,7 @@ from hed.models.sidecar import Sidecar, DefinitionDict
 from hed.errors import ValidationErrors
 from hed import load_schema
 
+
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -31,7 +32,6 @@ class Test(unittest.TestCase):
         cls.basic_column_map = ["onset", "duration", "trial_type", "response_time", " stim_file"]
         cls.basic_event_row = ["1.2", "0.6", "go", "1.435", "images/red_square.jpg"]
         cls.basic_event_row_invalid = ["1.2", "0.6", "invalid_category_key", "1.435", "images/red_square.jpg"]
-
 
     def test_set_tag_columns(self):
         mapper = ColumnMapper()
@@ -82,7 +82,6 @@ class Test(unittest.TestCase):
         self.assertTrue(len(mapper._final_column_map) == 1)
         self.assertTrue(len(mapper.check_for_mapping_issues()) == 0)
 
-
     def test_sidecar_and_columns(self):
         mapper = ColumnMapper(Sidecar(self.basic_events_json))
         mapper.set_tag_columns(["Invalid", "Invalid2"])
@@ -131,7 +130,8 @@ class Test(unittest.TestCase):
         mapper.set_column_map(["Column1"])
         self.assertTrue(len(mapper._final_column_map) == 1)
         self.assertTrue(len(mapper.check_for_mapping_issues()) == 1)
-        self.assertTrue(mapper.check_for_mapping_issues()[-1]['code'] == ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
+        self.assertTrue(mapper.check_for_mapping_issues()[-1]['code'] ==
+                        ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
 
         mapper = ColumnMapper()
         prefix_dict = {
@@ -142,20 +142,23 @@ class Test(unittest.TestCase):
         mapper.set_column_map(["Column1"])
         self.assertTrue(len(mapper._final_column_map) == 1)
         self.assertTrue(len(mapper.check_for_mapping_issues()) == 1)
-        self.assertTrue(mapper.check_for_mapping_issues()[-1]['code'] == ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
-
+        self.assertTrue(mapper.check_for_mapping_issues()[-1]['code'] ==
+                        ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
 
         mapper.set_tag_columns(["Column1"])
         self.assertTrue(len(mapper._final_column_map) == 1)
         self.assertTrue(len(mapper.check_for_mapping_issues()) == 1)
-        self.assertTrue(mapper.check_for_mapping_issues()[-1]['code'] == ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
+        self.assertTrue(mapper.check_for_mapping_issues()[-1]['code'] ==
+                        ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
 
     def test_blank_column(self):
         mapper = ColumnMapper()
         mapper.set_column_map(["", None])
         self.assertTrue(len(mapper.check_for_mapping_issues()) == 2)
-        self.assertTrue(mapper.check_for_mapping_issues(allow_blank_names=False)[1]['code'] == ValidationErrors.HED_BLANK_COLUMN)
-        self.assertTrue(mapper.check_for_mapping_issues(allow_blank_names=False)[1]['code'] == ValidationErrors.HED_BLANK_COLUMN)
+        self.assertTrue(mapper.check_for_mapping_issues(allow_blank_names=False)[1]['code'] ==
+                        ValidationErrors.HED_BLANK_COLUMN)
+        self.assertTrue(mapper.check_for_mapping_issues(allow_blank_names=False)[1]['code'] ==
+                        ValidationErrors.HED_BLANK_COLUMN)
 
     def test_optional_column(self):
         mapper = ColumnMapper()
@@ -192,7 +195,8 @@ class Test(unittest.TestCase):
         tag_columns = [0]
         column_prefix_dictionary = {1: "Label/"}
         optional_tag_columns = [2]
-        mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary, optional_tag_columns=optional_tag_columns)
+        mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
+                              optional_tag_columns=optional_tag_columns)
         self.assertEqual(list(mapper._final_column_map), [0, 1, 2])
         self.assertEqual(mapper._final_column_map[0].column_type, ColumnType.HEDTags)
         self.assertEqual(mapper._final_column_map[1].column_type, ColumnType.Value)

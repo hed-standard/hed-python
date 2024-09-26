@@ -2,7 +2,7 @@ import unittest
 import os
 import shutil
 
-from hed.models import DefinitionEntry, Sidecar, TabularInput
+from hed.models import Sidecar, TabularInput
 from hed import schema
 from hed.errors import HedFileError
 from hed.errors import ErrorHandler, ErrorContext

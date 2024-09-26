@@ -11,11 +11,8 @@ from hed.models.definition_dict import DefinitionDict
 from hed import schema
 from hed.errors.exceptions import HedFileError
 from hed.errors.error_types import ErrorContext, ValidationErrors
-
-
 import pandas as pd
 import numpy as np
-
 
 
 class Test(unittest.TestCase):
@@ -78,6 +75,7 @@ class Test(unittest.TestCase):
     def test_invalid_input_type_dict(self):
         with self.assertRaises(HedFileError):
             BaseInput({'key': 'value'})
+
 
 class TestSortingByOnset(unittest.TestCase):
     @staticmethod
@@ -187,4 +185,3 @@ class TestCombineDataframe(unittest.TestCase):
         result = BaseInput.combine_dataframe(loaded_df)
         expected = pd.Series(['apple, guitar', 'elephant, harmonica', 'cherry, fox', '', ''])
         self.assertTrue(result.equals(expected))
-

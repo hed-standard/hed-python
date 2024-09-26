@@ -105,7 +105,8 @@ class Test(unittest.TestCase):
         extra_def_dict = DefinitionDict()
         extra_def_dict.check_for_definitions(hed_string)
 
-        validation_issues2 = self.json_without_definitions_sidecar.validate(self.hed_schema, extra_def_dicts=extra_def_dict)
+        validation_issues2 = self.json_without_definitions_sidecar.validate(self.hed_schema,
+                                                                            extra_def_dicts=extra_def_dict)
         # this removes one undef matched error
         self.assertEqual(len(validation_issues2), 7)
 

@@ -8,7 +8,7 @@ from hed.schema import HedKey
 
 
 # tests needed:
-# 1. Verify hed id(HARDEST, MAY SKIP)
+# 1. Verify HED id(HARDEST, MAY SKIP)
 # 4. Json tests
 
 class Test(unittest.TestCase):
@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
         issues = id_validator.verify_tag_id(self.hed_schema84, event_entry, HedKey.HedID)
         self.assertTrue("It has changed", issues[0]["message"])
         self.assertTrue("between 10000", issues[0]["message"])
-        breakHere = 3
+        break_here = 3
 
         event_entry = self.hed_schema84.tags["Event"]
         event_entry.attributes[HedKey.HedID] = "HED_XXXXXXX"

@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
         params["replace_defs"] = True
         params["remove_types"] = []
         op = FactorHedTagsOp(params)
-        df_new = op.do_op(dispatch, df,'run-01', sidecar=self.json_path)
+        df_new = op.do_op(dispatch, df, 'run-01', sidecar=self.json_path)
         df_new = dispatch.post_proc_data(df_new)
         self.assertEqual(len(df_new), len(df))
         self.assertEqual(len(df_new.columns), df_columns + 3)
@@ -144,7 +144,7 @@ class Test(unittest.TestCase):
         # Setup for testing remove types
         dispatch = Dispatcher([], data_root=None, backup_name=None, hed_versions='8.1.0')
         params = json.loads(self.json_params)
-        params["expand_context"] =True
+        params["expand_context"] = True
         params["queries"] = ["Def/Famous-face-cond", "Def/Right-sym-cond", "Def/Initialize-recording"]
         df = dispatch.get_data_file(self.data_path)
         df = dispatch.prep_data(df)

@@ -84,6 +84,7 @@ class Test(unittest.TestCase):
         self.assertEqual(1, len(tasks2))
         files2 = ['task-.tsv', '/base/']
         tasks3 = parse_tasks(files2, "*")
+        self.assertFalse(tasks3)
 
     def test_main_bids(self):
         arg_list = [self.data_root, self.model_path, '-x', 'derivatives', 'stimuli', '-b']

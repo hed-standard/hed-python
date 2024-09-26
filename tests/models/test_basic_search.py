@@ -4,11 +4,12 @@ from hed import load_schema_version
 
 import os
 from hed import TabularInput
-from hed.models import df_util, basic_search
+from hed.models import basic_search
 from hed.models.basic_search import find_words, check_parentheses, reverse_and_flip_parentheses, \
     construct_delimiter_map, verify_search_delimiters, find_matching
 import numpy as np
 from hed.models.df_util import convert_to_form
+
 
 class TestNewSearch(unittest.TestCase):
     @classmethod
