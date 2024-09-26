@@ -81,6 +81,7 @@ jobs:
         with:
           name: code-coverage-report
           path: .coverage
+          if-no-files-found: error
 
   check-secret:
     runs-on: ubuntu-latest

@@ -73,7 +73,6 @@ class TestValidatorBase(TestHedBase):
     def validator_base(self, test_strings, expected_results, expected_issues, test_function,
                        hed_schema, check_for_warnings=False):
         for test_key in test_strings:
-            print(test_key)
             hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
             error_handler = ErrorHandler(check_for_warnings=check_for_warnings)
             error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)

@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
         self.assertFalse(issues, "BidsDataset with participants and events validates")
 
     def test_with_schema_group(self):
-        x = load_schema_version(["8.2.0", "sc:score_1.0.0", "test:testlib_1.0.2"])
+        x = load_schema_version(["score_2.0.0", "test:testlib_1.0.2"])
         bids = BidsDataset(self.library_path, schema=x, tabular_types=["participants"])
         self.assertIsInstance(bids, BidsDataset, 
                               "BidsDataset with libraries should create a valid object from valid dataset")
@@ -121,7 +121,7 @@ class Test(unittest.TestCase):
                         "BidsDataset with libraries has a summary with a hed_schema_versions key")
         self.assertIsInstance(summary2["hed_schema_versions"], list,
                               "BidsDataset with libraries hed_schema_versions in summary is a list")
-        self.assertEqual(len(summary2["hed_schema_versions"]), 3,
+        self.assertEqual(len(summary2["hed_schema_versions"]), 2,
                          "BidsDataset with libraries summary hed_schema_versions list has 3 schema")
         self.assertTrue("dataset" in summary2)
 
