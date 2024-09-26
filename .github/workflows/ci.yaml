@@ -75,6 +75,9 @@ jobs:
         run: coverage run --append -m unittest spec_tests/test_errors.py
         continue-on-error: true
 
+      - name: List files in workspace
+        run: ls -a
+        
       - name: Archive code coverage results
         if: ${{matrix.python-version == '3.9'}}
         uses: actions/upload-artifact@v4
