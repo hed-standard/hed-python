@@ -104,7 +104,7 @@ class SchemaLoaderDF(SchemaLoader):
             dataframe (pd.DataFrame): The dataframe for the main tags section
         """
         self._schema._initialize_attributes(HedSectionKey.Tags)
-        known_parent_tags =  {"HedTag": []}
+        known_parent_tags = {"HedTag": []}
         iterations = 0
         # Handle this over multiple iterations in case tags have parent tags listed later in the file.
         # A properly formatted .tsv file will never have parents after the child.
@@ -179,7 +179,7 @@ class SchemaLoaderDF(SchemaLoader):
                 long_tag_name = tag_name
             return self._create_entry(row_number, row, HedSectionKey.Tags, long_tag_name)
 
-        self._add_fatal_error(row_number, row, f"No tag name found in row.",
+        self._add_fatal_error(row_number, row, "No tag name found in row.",
                               error_code=HedExceptions.GENERIC_ERROR)
 
     def _read_section(self, df, section_key):
@@ -276,5 +276,3 @@ def load_dataframes_from_strings(schema_data):
     return {key: value if isinstance(value, pd.DataFrame) else pd.read_csv(io.StringIO(value), sep="\t",
                                                                            dtype=str, na_filter=False)
             for key, value in schema_data.items()}
-
-

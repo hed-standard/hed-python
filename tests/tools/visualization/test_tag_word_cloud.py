@@ -123,7 +123,6 @@ class TestLoadAndResizeMask(unittest.TestCase):
         cls.img_path_trans = 'temp_img_trans.png'
         cls.img_trans.save(cls.img_path_trans)
 
-
     @classmethod
     def tearDownClass(cls):
         # Clean up the temp image

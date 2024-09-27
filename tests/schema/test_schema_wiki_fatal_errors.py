@@ -63,22 +63,19 @@ class TestHedSchema(unittest.TestCase):
             with self.assertRaises(HedFileError) as context:
                 load_schema(full_filename)
                 # all of these should produce exceptions.
-            from hed.errors import ErrorHandler, ErrorContext, get_printable_issue_string
+            from hed.errors import ErrorContext, get_printable_issue_string
 
             # Verify basic properties of exception
             expected_line_numbers = self.expected_line_numbers.get(filename, [])
             if expected_line_numbers:
                 for issue, expected in zip(context.exception.issues, expected_line_numbers):
                     self.assertEqual(issue[ErrorContext.ROW], expected)
-
-
             issues = context.exception.issues
 
             self.assertIsInstance(get_printable_issue_string(issues), str)
 
             self.assertTrue(context.exception.args[0] == error)
             self.assertTrue(context.exception.filename == full_filename)
-
 
     def test_merging_errors_schema(self):
         for filename, error in self.files_and_errors.items():

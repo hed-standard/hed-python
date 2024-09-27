@@ -1,18 +1,19 @@
 import unittest
 
-from hed.errors.error_types import ValidationErrors, DefinitionErrors, TemporalErrors
+from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from tests.validator.test_tag_validator_base import TestValidatorBase
 from hed.schema.hed_schema_io import load_schema_version
 from functools import partial
 
 
-#todo: update these tests(TagValidator no longer exists)
+# todo: update these tests(TagValidator no longer exists)
 class TestHed(TestValidatorBase):
     schema_file = "../data/schema_tests/HED8.2.0.mediawiki"
 
 
 class IndividualHedTagsShort(TestHed):
     hed_schema = load_schema_version("score_1.1.0")
+
     @staticmethod
     def string_obj_func(validator):
         return partial(validator._validate_individual_tags_in_hed_string)
@@ -315,7 +316,7 @@ class IndividualHedTagsShort(TestHed):
             'voltsTest6': [],
             'voltsTest7': [],
             'volumeTest1': [],
-            'volumeTest2': self.format_error(ValidationErrors.UNITS_INVALID,tag=0, units=legal_intensity_units),
+            'volumeTest2': self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_intensity_units),
             'volumeTest3': [],
             'volumeTest4': [],
             'volumeTest5': [],
@@ -371,8 +372,7 @@ class IndividualHedTagsShort(TestHed):
                                                     actual_error=ValidationErrors.PLACEHOLDER_INVALID) +
             self.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, tag=0, index_in_tag=0,
                               index_in_tag_end=13, value_class="numericClass",
-                              actual_error=ValidationErrors.VALUE_INVALID)
-            ,
+                              actual_error=ValidationErrors.VALUE_INVALID),
             'invalidMiscPoundSign': self.format_error(ValidationErrors.NO_VALID_TAG_FOUND,
                                                       tag=0, index_in_tag=0, index_in_tag_end=8),
             'invalidAfterBaseTag': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
@@ -418,7 +418,7 @@ class TestTagLevels(TestHed):
                            'Purple-color/Purple',
             'legalDuplicate': 'Item/Object/Man-made-object/VehicleTrain,(Item/Object/Man-made-object/VehicleTrain,'
                               'Event/Sensory-event)',
-            'duplicateGroup': 'Sensory-event, (Sensory-event, Man-made-object/VehicleTrain),' 
+            'duplicateGroup': 'Sensory-event, (Sensory-event, Man-made-object/VehicleTrain),'
                               '(Man-made-object/VehicleTrain, Sensory-event)',
             'duplicateSubGroup': 'Sensory-event, (Event, (Sensory-event, Man-made-object/VehicleTrain)),'
                               '(Event, (Man-made-object/VehicleTrain, Sensory-event))',
@@ -441,11 +441,14 @@ class TestTagLevels(TestHed):
             'legalDuplicate': [],
             'noDuplicate': [],
             'duplicateGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                group=HedString("(Sensory-event, Man-made-object/VehicleTrain)", self.hed_schema)),
-            'duplicateSubGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))", self.hed_schema)),
-            'duplicateSubGroupF': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                   group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)", self.hed_schema)),
+                                                group=HedString("(Sensory-event, Man-made-object/VehicleTrain)",
+                                                                self.hed_schema)),
+            'duplicateSubGroup': self.format_error(
+                ValidationErrors.HED_TAG_REPEATED_GROUP,
+                group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))", self.hed_schema)),
+            'duplicateSubGroupF': self.format_error(
+                ValidationErrors.HED_TAG_REPEATED_GROUP,
+                group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)", self.hed_schema)),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -494,20 +497,28 @@ class TestTagLevels(TestHed):
             'invalidDelayPair': False,
         }
         expected_issues = {
-            'invalid1': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0, actual_error=ValidationErrors.DEFINITION_INVALID)
+            'invalid1': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0,
+                                          actual_error=ValidationErrors.DEFINITION_INVALID)
             + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0),
             'valid1': [],
             'valid2': [],
-            'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.DEFINITION_INVALID)
-                        + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
-            'invalidTwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Definition/InvalidDef3".split(", ")),
-            'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Onset".split(", ")),
+            'invalid2': self.format_error(
+                ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=
+                ValidationErrors.DEFINITION_INVALID) + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
+            'invalidTwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+                                                 multiple_tags="Definition/InvalidDef3".split(", ")),
+            'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+                                                  multiple_tags="Onset".split(", ")),
             'valid2TwoInOne': [],
-            'invalid3InOne':  self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Delay, Onset".split(", ")),
-            'invalidDuration': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Onset".split(", ")),
+            'invalid3InOne':  self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+                                                multiple_tags="Delay, Onset".split(", ")),
+            'invalidDuration': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+                                                 multiple_tags="Onset".split(", ")),
             'validDelay': [],
-            'invalidDurationPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Duration/3.0 s".split(", ")),
-            'invalidDelayPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0, multiple_tags="Delay".split(", ")),
+            'invalidDurationPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+                                                     multiple_tags="Duration/3.0 s".split(", ")),
+            'invalidDelayPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+                                                  multiple_tags="Delay".split(", ")),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -605,11 +616,9 @@ class FullHedString(TestHed):
             'extraOpening': self.format_error(ValidationErrors.PARENTHESES_MISMATCH,
                                               opening_parentheses_count=2,
                                               closing_parentheses_count=1),
-            'extraClosing': self.format_error(ValidationErrors.PARENTHESES_MISMATCH,
-                                              opening_parentheses_count=1,
-                                              closing_parentheses_count=2)
-            +               self.format_error(ValidationErrors.TAG_EMPTY, source_string=test_strings['extraClosing'],
-                                                   char_index=84),
+            'extraClosing': self.format_error(ValidationErrors.PARENTHESES_MISMATCH, opening_parentheses_count=1,
+                                              closing_parentheses_count=2) +
+            self.format_error(ValidationErrors.TAG_EMPTY, source_string=test_strings['extraClosing'], char_index=84),
             'valid': []
         }
 
@@ -1006,7 +1015,7 @@ class TestHedSpecialUnits(TestHed):
             'specialNotAllowedCharCurrency': self.format_error("INVALID_VALUE_CLASS_VALUE",
                                                                value_class="numericClass", tag=0, index_in_tag=0,
                                                                index_in_tag_end=24)
-            + self.format_error(ValidationErrors.UNITS_INVALID,tag=0, units=legal_currency_units),
+            + self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_currency_units),
             'specialAllowedCharCurrencyAsSuffix': self.format_error(ValidationErrors.UNITS_INVALID, tag=0,
                                                                     units=legal_currency_units),
         }

@@ -51,15 +51,18 @@ def val_error_element_deprecatedr(tag):
 def val_error_invalid_tag_character(tag, problem_tag):
     return f"Invalid character '{problem_tag}' in tag '{tag}'"
 
+
 @hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, has_sub_tag=True,
                actual_code=ValidationErrors.CHARACTER_INVALID)
 def val_error_INVALID_VALUE_CLASS_CHARACTER(tag, problem_tag, value_class):
     return f"Invalid character '{problem_tag}' in tag '{tag}' for value class '{value_class}'"
 
+
 @hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, has_sub_tag=True,
                actual_code=ValidationErrors.VALUE_INVALID)
 def val_error_INVALID_VALUE_CLASS_VALUE(tag, problem_tag, value_class):
     return f"'{tag}' has an invalid value portion for value class '{value_class}'"
+
 
 @hed_error(ValidationErrors.TILDES_UNSUPPORTED)
 def val_error_tildes_not_supported(source_string, char_index):

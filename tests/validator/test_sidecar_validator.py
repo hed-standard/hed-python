@@ -1,14 +1,9 @@
 import unittest
 import os
 import io
-import shutil
 
-from hed.errors import HedFileError, ValidationErrors
-from hed.models import ColumnMetadata, HedString, Sidecar
-from hed.validator import HedValidator
+from hed.models import Sidecar
 from hed import schema
-from hed.models import DefinitionDict
-from hed.errors import ErrorHandler
 from hed.validator.sidecar_validator import SidecarValidator
 
 
@@ -41,7 +36,6 @@ class Test(unittest.TestCase):
         refs = sidecar.get_column_refs()
         self.assertEqual(len(refs), 2)
 
-
     def test_bad_refs(self):
         sidecar = Sidecar(self._bad_refs_json_filename)
         issues = sidecar.validate(self.hed_schema)
@@ -57,10 +51,10 @@ class Test(unittest.TestCase):
     def test_malformed_braces(self):
         hed_strings = [
             "column2}, Event, Action",
-             "{column, Event, Action",
-             "This is a {malformed {input string}} with extra {opening brackets",
-             "{Event{Action}}",
-             "Event, Action}"
+            "{column, Event, Action",
+            "This is a {malformed {input string}} with extra {opening brackets",
+            "{Event{Action}}",
+            "Event, Action}"
         ]
         error_counts = [
             1,
@@ -74,7 +68,6 @@ class Test(unittest.TestCase):
             issues = SidecarValidator._find_non_matching_braces(string)
 
             self.assertEqual(len(issues), error_count)
-
 
     def test_bad_structure_na(self):
         sidecar_with_na_json = '''
@@ -101,7 +94,6 @@ class Test(unittest.TestCase):
            }
        },
        "HED": {
-       
        },
        "OtherBad": {
            "subbad": ["thing1", "HED", "Other"]

@@ -1,4 +1,3 @@
-import os
 import unittest
 import hed.schema.schema_validation_util_deprecated as util
 from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry

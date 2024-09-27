@@ -278,8 +278,8 @@ class IndividualHedTagsShort(TestHed3):
             'invalidPlaceholder': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
                                                     tag=0, index_in_tag=12, index_in_tag_end=13,
                                                     actual_error=ValidationErrors.PLACEHOLDER_INVALID) +
-                self.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, tag=0,
-                                  index_in_tag=0, index_in_tag_end=16, value_class="numericClass")
+            self.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, tag=0,
+                              index_in_tag=0, index_in_tag_end=16, value_class="numericClass")
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -375,7 +375,8 @@ class TestTagLevels3(TestHed3):
             + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0),
             'valid1': [],
             'valid2': [],
-            'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.DEFINITION_INVALID)
+            'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1,
+                                          actual_error=ValidationErrors.DEFINITION_INVALID)
             + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             'invalidTwoInOne': self.format_error(
                 ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
@@ -475,8 +476,9 @@ class RequiredTags(TestHed3):
             'legal': [],
             'multipleDesc': self.format_error(ValidationErrors.TAG_NOT_UNIQUE,
                                               tag_namespace='tl:Property/Organizational-property/Event-context'),
-            'multipleDescIncShort': self.format_error(ValidationErrors.TAG_NOT_UNIQUE,
-                                                      tag_namespace='tl:Property/Organizational-property/Event-context'),
+            'multipleDescIncShort':
+                self.format_error(ValidationErrors.TAG_NOT_UNIQUE,
+                                  tag_namespace='tl:Property/Organizational-property/Event-context'),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 

@@ -114,7 +114,8 @@ class DefValidator(DefinitionDict):
             error_code = ValidationErrors.DEF_EXPAND_INVALID
 
         # Validate the def name vs the name class
-        def_issues = hed_validator._unit_validator._check_value_class(def_tag, tag_label, report_as=None, error_code=error_code, index_offset=0)
+        def_issues = hed_validator._unit_validator._check_value_class(def_tag, tag_label, report_as=None,
+                                                                      error_code=error_code, index_offset=0)
         # def_issues += hed_validator.validate_units(def_tag,
         #                                            tag_label,
         #                                            error_code=error_code)

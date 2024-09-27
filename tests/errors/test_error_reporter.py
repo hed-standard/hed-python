@@ -100,36 +100,38 @@ class Test(unittest.TestCase):
         self.error_handler.reset_error_context()
 
     def test_printable_issue_string_with_filenames(self):
-        myfile = 'my_file.txt'
+        my_file = 'my_file.txt'
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
-        self.error_handler.push_error_context(ErrorContext.FILE_NAME, myfile)
+        self.error_handler.push_error_context(ErrorContext.FILE_NAME, my_file)
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
                                                                    "dummy", problem_char="#", char_index=0)
 
         printable_issues = get_printable_issue_string(error_list, skip_filename=False)
         self.assertTrue(len(printable_issues) > 10)
-        self.assertEqual(printable_issues.count(myfile), 1)
+        self.assertEqual(printable_issues.count(my_file), 1)
 
         printable_issues2 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR, skip_filename=False)
         self.assertTrue(len(printable_issues) > len(printable_issues2))
-        self.assertEqual(printable_issues2.count(myfile), 1)
+        self.assertEqual(printable_issues2.count(my_file), 1)
         printable_issues3 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR, skip_filename=False,
                                                        title="Later added custom title that is longer")
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
-        self.assertEqual(printable_issues3.count(myfile), 1)
+        self.assertEqual(printable_issues3.count(my_file), 1)
 
         printable_issues = get_printable_issue_string_html(error_list, skip_filename=False)
         self.assertTrue(len(printable_issues) > 10)
-        self.assertEqual(printable_issues.count(myfile), 1)
+        self.assertEqual(printable_issues.count(my_file), 1)
 
-        printable_issues2 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR, skip_filename=False)
+        printable_issues2 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR,
+                                                            skip_filename=False)
         self.assertTrue(len(printable_issues) > len(printable_issues2))
-        self.assertEqual(printable_issues2.count(myfile), 1)
-        printable_issues3 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR, skip_filename=False,
-                                                       title="Later added custom title that is longer")
+        self.assertEqual(printable_issues2.count(my_file), 1)
+        printable_issues3 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR,
+                                                            skip_filename=False,
+                                                            title="Later added custom title that is longer")
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
-        self.assertEqual(printable_issues3.count(myfile), 1)
+        self.assertEqual(printable_issues3.count(my_file), 1)
 
         self.error_handler.reset_error_context()
 
@@ -160,26 +162,28 @@ class Test(unittest.TestCase):
         self.assertEqual(reversed_issues[3][ErrorContext.CUSTOM_TITLE], 'issue2')
         self.assertEqual(reversed_issues[4][ErrorContext.CUSTOM_TITLE], 'issue1')
 
-
     def test_replace_tag_references(self):
         # Test with mixed data types and HedString in a nested dict
-        nested_dict = {'a': HedString('Hed1', self._schema), 'b': {'c': 2, 'd': [3, {'e': HedString('Hed2', self._schema)}]}, 'f': [5, 6]}
+        nested_dict = {'a': HedString('Hed1', self._schema), 
+                       'b': {'c': 2, 'd': [3, {'e': HedString('Hed2', self._schema)}]}, 'f': [5, 6]}
         replace_tag_references(nested_dict)
         self.assertEqual(nested_dict, {'a': 'Hed1', 'b': {'c': 2, 'd': [3, {'e': 'Hed2'}]}, 'f': [5, 6]})
 
         # Test with mixed data types and HedString in a nested list
-        nested_list = [HedString('Hed1', self._schema), {'a': 2, 'b': [3, {'c': HedString('Hed2', self._schema)}]}]
+        nested_list = [HedString('Hed1', self._schema),
+                       {'a': 2, 'b': [3, {'c': HedString('Hed2', self._schema)}]}]
         replace_tag_references(nested_list)
         self.assertEqual(nested_list, ['Hed1', {'a': 2, 'b': [3, {'c': 'Hed2'}]}])
 
         # Test with mixed data types and HedString in a list within a dict
-        mixed = {'a': HedString('Hed1', self._schema), 'b': [2, 3, {'c': HedString('Hed2', self._schema)}, 4]}
+        mixed = {'a': HedString('Hed1', self._schema), 
+                 'b': [2, 3, {'c': HedString('Hed2', self._schema)}, 4]}
         replace_tag_references(mixed)
         self.assertEqual(mixed, {'a': 'Hed1', 'b': [2, 3, {'c': 'Hed2'}, 4]})
 
-
     def test_register_error_twice(self):
         test_code = "test_error_code"
+
         @hed_tag_error(test_code)
         def test_error_code(tag):
             pass
@@ -195,6 +199,7 @@ class Test(unittest.TestCase):
         self.assertEqual(error_list[0]['code'], error_code)
 
         actual_code = "Actual unknown error type"
-        error_list = self.error_handler.format_error_from_context(error_code, self.error_handler.error_context, "param1", param2=0,
+        error_list = self.error_handler.format_error_from_context(error_code, self.error_handler.error_context,
+                                                                  "param1", param2=0,
                                                                   actual_error=actual_code)
         self.assertEqual(error_list[0]['code'], actual_code)

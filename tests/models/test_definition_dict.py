@@ -66,16 +66,19 @@ class TestDefinitionDict(TestDefBase):
             'twoGroupTags': f"(Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2})",
             'extraValidTags': "(Definition/InvalidDefA, Red, Blue)",
             'extraOtherTags': "(Definition/InvalidDef1, InvalidContents)",
-            'duplicateDef': f"(Definition/Def1, {self.def_contents_string}), (Definition/Def1, {self.def_contents_string})",
-            'duplicateDef2': f"(Definition/Def1, {self.def_contents_string}), (Definition/Def1/#, {self.placeholder_def_contents})",
+            'duplicateDef': (f"(Definition/Def1, {self.def_contents_string}), "
+                             f"(Definition/Def1, {self.def_contents_string})"),
+            'duplicateDef2': (f"(Definition/Def1, {self.def_contents_string}), "
+                              f"(Definition/Def1/#, {self.placeholder_def_contents})"),
             'defTooManyPlaceholders': self.placeholder_invalid_def_string,
             'invalidPlaceholder': f"(Definition/InvalidDef1/InvalidPlaceholder, {self.def_contents_string})",
-            'invalidPlaceholderExtension': f"(Definition/InvalidDef1/this-part-is-not-allowed/#, {self.def_contents_string})",
+            'invalidPlaceholderExtension':
+                f"(Definition/InvalidDef1/this-part-is-not-allowed/#, {self.def_contents_string})",
             'defInGroup': "(Definition/ValidDefName, (Def/ImproperlyPlacedDef))",
             'defExpandInGroup': "(Definition/ValidDefName, (Def-expand/ImproperlyPlacedDef, (ImproperContents)))",
             'doublePoundSignPlaceholder': f"(Definition/InvalidDef/##, {self.placeholder_def_contents})",
-            'doublePoundSignDiffPlaceholder': f"(Definition/InvalidDef/#, (Age/##,Item/TestDef2))",
-            'placeholdersWrongSpot': f"(Definition/InvalidDef/#, (Age/#,Item/TestDef2))",
+            'doublePoundSignDiffPlaceholder': "(Definition/InvalidDef/#, (Age/##,Item/TestDef2))",
+            'placeholdersWrongSpot': "(Definition/InvalidDef/#, (Age/#,Item/TestDef2))",
         }
         expected_results = {
             'noGroupTag': [],

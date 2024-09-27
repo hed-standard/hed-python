@@ -88,7 +88,6 @@ class TestConvertAndUpdate(unittest.TestCase):
         reloaded_entry = schema_reloaded.tags[test_tag_name]
         self.assertTrue(reloaded_entry.has_attribute(HedKey.HedID))
 
-
     @classmethod
     def tearDownClass(cls):
         # Clean up the directory created for testing

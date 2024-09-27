@@ -38,5 +38,6 @@ class Test(unittest.TestCase):
         schema_group = HedSchemaGroup([schema2, schema3])
         self.assertTrue(schema_util.schema_version_greater_equal(schema_group, "8.3.0"))
 
+
 if __name__ == '__main__':
     unittest.main()

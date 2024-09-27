@@ -512,8 +512,8 @@ class SchemaLoaderWiki(SchemaLoader):
                 long_tag_name = tag_name
             return self._create_entry(row_number, row, HedSectionKey.Tags, long_tag_name)
 
-        self._add_fatal_error(row_number, row, "Schema term is empty or the line is malformed"
-                              , error_code=HedExceptions.WIKI_DELIMITERS_INVALID)
+        self._add_fatal_error(row_number, row, "Schema term is empty or the line is malformed",
+                              error_code=HedExceptions.WIKI_DELIMITERS_INVALID)
 
     def _add_to_dict(self, row_number, row, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:

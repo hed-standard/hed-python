@@ -90,10 +90,12 @@ class TestHedSchemaDF(unittest.TestCase):
     def _create_structure_df(self):
         data = {"hedId": ["HED_0060010"],
                 "rdfs:label": ["LangHeader"],
-            "Attributes": ['version="1.0.0", library="lang", withStandard="8.3.0", unmerged="True"'],
-            "omn:SubClassOf": ["HedHeader"],
+                "Attributes": ['version="1.0.0", library="lang", withStandard="8.3.0", unmerged="True"'],
+                "omn:SubClassOf": ["HedHeader"],
                 "dc:description": [""],
-            "omn:EquivalentTo": ['HedHeader and (inHedSchema some LangSchema) and (version value "1.0.0") and (library value "lang") and (withStandard value "8.3.0") and (unmerged value "True")']}
+                "omn:EquivalentTo": ['HedHeader and (inHedSchema some LangSchema) and (version value "1.0.0")' +
+                                     'and (library value "lang") and (withStandard value "8.3.0")' +
+                                     'and (unmerged value "True")']}
 
         df = pd.DataFrame(data)
         return df
@@ -119,7 +121,6 @@ class TestHedSchemaDF(unittest.TestCase):
         loaded_schema = from_dataframes(dataframes)
         issues = loaded_schema.check_compliance(check_for_warnings=False)
         self.assertEqual(len(issues), 0)
-        breakHere = 3
 
         self.assertEqual(loaded_schema.tags['MadeUpLongTagNameChild'].name,
                          "MadeUpLongTagNameParent/MadeUpLongTagNameChild")

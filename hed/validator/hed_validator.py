@@ -211,8 +211,10 @@ class HedValidator:
                     self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
                                                                       is_definition=is_definition)
                 if (hed_tag.short_base_tag == DefTagNames.DEF_KEY or
-                    hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY):
-                    validation_issues += self._def_validator.validate_def_value_units(hed_tag, self, allow_placeholders=allow_placeholders)
+                        hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY):
+                    validation_issues += (
+                        self._def_validator.validate_def_value_units(hed_tag,
+                                                                     self, allow_placeholders=allow_placeholders))
                 elif (hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY) and hed_tag.extension.endswith("/#"):
                     validation_issues += self.validate_units(hed_tag, hed_tag.extension[:-2])
                 elif not (allow_placeholders and '#' in hed_tag.extension):

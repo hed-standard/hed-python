@@ -16,7 +16,8 @@ class TestAddExtension(unittest.TestCase):
     def test_tsv_extension(self):
         """Test that .tsv extensions are handled differently."""
         # Assuming the function correctly handles paths with directories
-        self.assertEqual(add_extension(os.path.normpath("path/to/filename"), ".tsv"), os.path.normpath("path/to/hedtsv/filename"))
+        self.assertEqual(add_extension(os.path.normpath("path/to/filename"), ".tsv"),
+                         os.path.normpath("path/to/hedtsv/filename"))
         # Testing with a basename only
         self.assertEqual(add_extension("filename", ".tsv"), os.path.normpath("hedtsv/filename"))
 

@@ -27,7 +27,8 @@ class Test(unittest.TestCase):
         cls.semantic_version_three = '1.2.5'
         cls.semantic_version_list = ['1.2.3', '1.2.4', '1.2.5']
         cls.specific_base_url = "https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml"
-        cls.specific_hed_url = "https://raw.githubusercontent.com/hed-standard/hed-schemas/master/standard_schema/hedxml/HED8.0.0.xml"
+        cls.specific_hed_url = \
+            "https://raw.githubusercontent.com/hed-standard/hed-schemas/master/standard_schema/hedxml/HED8.0.0.xml"
         try:
             hed_cache.cache_xml_versions(cache_folder=cls.hed_cache_dir)
         except HedFileError as e:
@@ -152,7 +153,8 @@ class TestLibraryDataCache(unittest.TestCase):
     # Verify get_library_data properly caches from the internet and locally
     @classmethod
     def setUpClass(cls):
-        hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../schema_cache_test_get_library_data/')
+        hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                     '../schema_cache_test_get_library_data/')
         if os.path.exists(hed_cache_dir) and os.path.isdir(hed_cache_dir):
             shutil.rmtree(hed_cache_dir)
         hed_cache.get_library_data.cache_clear()
@@ -160,7 +162,8 @@ class TestLibraryDataCache(unittest.TestCase):
         cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
         schema.set_cache_directory(cls.hed_cache_dir)
         cls.saved_install_cache = hed_cache.INSTALLED_CACHE_LOCATION
-        cls.empty_source_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../schema_install_empty_local/")
+        cls.empty_source_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                            "../schema_install_empty_local/")
         if os.path.exists(cls.empty_source_dir) and os.path.isdir(cls.empty_source_dir):
             shutil.rmtree(cls.empty_source_dir)
         os.makedirs(cls.empty_source_dir)
@@ -214,4 +217,3 @@ class TestLibraryDataCache(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

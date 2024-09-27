@@ -5,7 +5,8 @@ import os
 from hed.errors import ErrorContext
 from hed import schema
 from hed.models import HedString, SpreadsheetInput, TabularInput, Sidecar
-from hed.validator import HedValidator, DefValidator
+from hed.validator import HedValidator
+
 
 # todo: redo all this so we
 class Test(unittest.TestCase):
@@ -179,7 +180,6 @@ class Test(unittest.TestCase):
 
         source_span = test_string_obj._get_org_span(HedTag("Event", self.hed_schema))
         self.assertEqual(source_span, (None, None))
-
 
     def test_duplicate_group_in_definition(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),

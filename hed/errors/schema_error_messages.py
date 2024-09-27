@@ -33,19 +33,22 @@ def schema_error_SCHEMA_INVALID_CHILD(tag, child_tag_list):
 
 @hed_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID)
 def schema_error_unknown_attribute(attribute_name, source_tag):
-    return f"Attribute '{attribute_name}' used by '{source_tag}' was not defined in the schema, or was used outside of it's defined class."
+    return f"Attribute '{attribute_name}' used by '{source_tag}' " + \
+    "was not defined in the schema, or was used outside of it's defined class."
 
 
 @hed_error(SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED, default_severity=ErrorSeverity.WARNING)
 def schema_error_SCHEMA_PRERELEASE_VERSION_USED(current_version, known_versions):
-    return f"Schema version {current_version} used, which is prerelease or unofficial.  Known versions are: {', '.join(known_versions)}"
+    return f"Schema version {current_version} used, which is prerelease or unofficial. " + \
+    f"Known versions are: {', '.join(known_versions)}"
 
 
 @hed_error(SchemaWarnings.SCHEMA_PROLOGUE_CHARACTER_INVALID, default_severity=ErrorSeverity.WARNING,
            actual_code=SchemaWarnings.SCHEMA_CHARACTER_INVALID)
 def schema_error_invalid_character_prologue(char_index, source_string, section_name):
     invalid_char = source_string[char_index]
-    return f"'{section_name}' has invalid character '{invalid_char}' at position {char_index} of string: {source_string}"
+    return f"'{section_name}' has invalid character '{invalid_char}' at " + \
+    f"position {char_index} of string: {source_string}"
 
 
 @hed_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, default_severity=ErrorSeverity.WARNING,
@@ -88,7 +91,7 @@ def schema_error_SCHEMA_CHILD_OF_DEPRECATED(deprecated_tag, non_deprecated_child
 @hed_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
            actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR)
 def schema_error_SCHEMA_ATTRIBUTE_VALUE_DEPRECATED(tag, deprecated_suggestion, attribute_name):
-    return (f"Tag '{tag}' {attribute_name} uses '{deprecated_suggestion}' which has been deprecated "
+    return (f"Tag '{tag}' {attribute_name} uses '{deprecated_suggestion}' which has been deprecated " + \
             f"and an alternative method of tagging should be used.")
 
 

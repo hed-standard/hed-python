@@ -1,10 +1,7 @@
 """ Utilities to support HED validation. """
 import datetime
 import re
-import json
 
-from hed.schema import schema_validation_util
-from hed.schema import schema_validation_util_deprecated
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.validator.util.char_util import CharRexValidator
@@ -181,7 +178,6 @@ class UnitValueValidator:
             list:  List of dictionaries of validation issues.
 
         """
-
 
         if not original_tag.is_takes_value_tag():
             return []
