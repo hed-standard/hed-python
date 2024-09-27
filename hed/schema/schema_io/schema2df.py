@@ -362,14 +362,13 @@ class Schema2DF(Schema2Base):
                 return tag_entry.parent.short_tag_name if tag_entry.parent else "HedTag"
 
         base_objects = {
-            HedSectionKey.Units: f"HedUnit",
-            HedSectionKey.UnitClasses: f"HedUnitClass",
-            HedSectionKey.UnitModifiers: f"HedUnitModifier",
-            HedSectionKey.ValueClasses: f"HedValueClass"
+            HedSectionKey.Units: "HedUnit",
+            HedSectionKey.UnitClasses: "HedUnitClass",
+            HedSectionKey.UnitModifiers: "HedUnitModifier",
+            HedSectionKey.ValueClasses: "HedValueClass"
         }
         name, obj_id = self._get_object_name_and_id(base_objects[tag_entry.section_key], include_prefix=True)
 
         if self._get_as_ids:
             return obj_id
         return name
-

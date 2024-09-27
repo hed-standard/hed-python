@@ -443,10 +443,12 @@ class TestTagLevels(TestHed):
             'duplicateGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
                                                 group=HedString("(Sensory-event, Man-made-object/VehicleTrain)",
                                                                 self.hed_schema)),
-            'duplicateSubGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                 group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))", self.hed_schema)),
-            'duplicateSubGroupF': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                 group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)", self.hed_schema)),
+            'duplicateSubGroup': self.format_error(
+                ValidationErrors.HED_TAG_REPEATED_GROUP,
+                group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))", self.hed_schema)),
+            'duplicateSubGroupF': self.format_error(
+                ValidationErrors.HED_TAG_REPEATED_GROUP,
+                group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)", self.hed_schema)),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -500,9 +502,9 @@ class TestTagLevels(TestHed):
             + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0),
             'valid1': [],
             'valid2': [],
-            'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1,
-                                          actual_error=ValidationErrors.DEFINITION_INVALID) +
-                self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
+            'invalid2': self.format_error(
+                ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=
+                ValidationErrors.DEFINITION_INVALID) + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             'invalidTwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
                                                  multiple_tags="Definition/InvalidDef3".split(", ")),
             'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
@@ -614,11 +616,9 @@ class FullHedString(TestHed):
             'extraOpening': self.format_error(ValidationErrors.PARENTHESES_MISMATCH,
                                               opening_parentheses_count=2,
                                               closing_parentheses_count=1),
-            'extraClosing': self.format_error(ValidationErrors.PARENTHESES_MISMATCH,
-                                              opening_parentheses_count=1,
+            'extraClosing': self.format_error(ValidationErrors.PARENTHESES_MISMATCH, opening_parentheses_count=1,
                                               closing_parentheses_count=2) +
-                            self.format_error(ValidationErrors.TAG_EMPTY, source_string=test_strings['extraClosing'],
-                                              char_index=84),
+            self.format_error(ValidationErrors.TAG_EMPTY, source_string=test_strings['extraClosing'], char_index=84),
             'valid': []
         }
 

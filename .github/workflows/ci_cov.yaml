@@ -1,4 +1,4 @@
-name: CICOV
+name: CI_COV
 
 on:
   push:
@@ -43,24 +43,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v4
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('docs/requirements.txt') }}
-
       # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade --upgrade-strategy eager pip
-          pip install flake8
-          pip install coverage
-          pip install -r requirements.txt
-          pip install -r docs/requirements.txt
+          pip install flake8 coverage -r requirements.txt -r docs/requirements.txt
 
-      # Run flake8 only for Python 3.9
+      # Run flake8
       - name: Lint with flake8
         run: |
-          pip install flake8
           flake8 . --count --show-source --statistics --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics 
 
       # Run unittest with coverage
@@ -77,14 +68,12 @@ jobs:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |  
           coverage run --append -m unittest discover spec_tests
+          coverage xml
           ls -la
-           
-      # Publish the coverages
-      - name: publish-coverages
-        with:
-          coverageCommand: coverage xml
-          debug: false
+
+      # Upload coverage to Code Climate
+      - name: Upload coverage to Code Climate
+        if: needs.check-secret.outputs.secrets-exist == 'true'
         uses: paambaati/codeclimate-action@v9.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-

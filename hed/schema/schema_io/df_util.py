@@ -116,7 +116,7 @@ def load_dataframes(filenames, include_prefix_dfs=False):
                                        f"Required column(s) {list(columns_not_in_loaded)} missing from {filename}.  "
                                        f"The required columns are {list(dataframes[key].columns)}", filename=filename)
             dataframes[key] = loaded_dataframe
-        except OSError as e:
+        except OSError:
             # todo: consider if we want to report this error(we probably do)
             pass  # We will use a blank one for this
     return dataframes

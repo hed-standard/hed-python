@@ -121,7 +121,6 @@ class TestHedSchemaDF(unittest.TestCase):
         loaded_schema = from_dataframes(dataframes)
         issues = loaded_schema.check_compliance(check_for_warnings=False)
         self.assertEqual(len(issues), 0)
-        break_here = 3
 
         self.assertEqual(loaded_schema.tags['MadeUpLongTagNameChild'].name,
                          "MadeUpLongTagNameParent/MadeUpLongTagNameChild")

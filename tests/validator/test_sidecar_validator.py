@@ -2,11 +2,8 @@ import unittest
 import os
 import io
 
-from hed.models import ColumnMetadata, HedString, Sidecar
-from hed.validator import HedValidator
+from hed.models import Sidecar
 from hed import schema
-from hed.models import DefinitionDict
-from hed.errors import ErrorHandler
 from hed.validator.sidecar_validator import SidecarValidator
 
 

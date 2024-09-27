@@ -337,8 +337,7 @@ class TestHedSchemaMerging(unittest.TestCase):
 
     def _base_merging_test(self, files):
         import filecmp
-        path1 = ""
-        path2 = ""
+
         for save_merged in [True, False]:
             for i in range(len(files) - 1):
                 s1 = files[i]
@@ -496,9 +495,9 @@ class TestHedSchemaMerging(unittest.TestCase):
             HedExceptions.SCHEMA_LIBRARY_INVALID,
             SchemaErrors.SCHEMA_DUPLICATE_NODE,
         ]
-        for schema, expected_code in zip(files, expected_code):
+        for schema1, expected_code in zip(files, expected_code):
             # print(schema.filename)
-            issues = schema.check_compliance()
+            issues = schema1.check_compliance()
             # for issue in issues:
             #     print(str(issue))
             self.assertEqual(len(issues), 1)

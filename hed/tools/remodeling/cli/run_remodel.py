@@ -231,7 +231,7 @@ def main(arg_list=None):
             if not args.no_summaries:
                 dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries,
                                         summary_dir=save_dir, task_name=task)
-    except Exception as ex:
+    except Exception:
         if args.log_dir:
             log_name = io_util.get_alphanumeric_path(os.path.realpath(args.data_dir)) + '_' + timestamp + '.txt'
             logging.basicConfig(filename=os.path.join(args.log_dir, log_name), level=logging.ERROR)

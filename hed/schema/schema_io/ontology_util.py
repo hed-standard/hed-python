@@ -161,17 +161,19 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
             try:
                 id_int = int(id_value)
                 if id_int not in unused_tag_ids:
-                    hedid_errors += schema_util.format_error(row_number, row,
-                                                             f"'{label}' has id {id_int} which is outside of the valid range for this type.  Valid range is: {min(unused_tag_ids)} to {max(unused_tag_ids)}")
+                    hedid_errors += schema_util.format_error(
+                        row_number, row, f"'{label}' has id {id_int} which is outside " +
+                        f"of the valid range for this type.  Valid range is: " +
+                        f"{min(unused_tag_ids)} to {max(unused_tag_ids)}")
                     continue
             except ValueError:
-                hedid_errors += schema_util.format_error(row_number, row,
-                                                         f"'{label}' has a non-numeric hedID in the dataframe.")
+                hedid_errors += schema_util.format_error(
+                    row_number, row, f"'{label}' has a non-numeric hedID in the dataframe.")
                 continue
 
         if entry_id and entry_id != df_id:
-            hedid_errors += schema_util.format_error(row_number, row,
-                                                     f"'{label}' has hedID '{df_id}' in dataframe, but '{entry_id}' in schema.")
+            hedid_errors += schema_util.format_error(
+                row_number, row, f"'{label}' has hedID '{df_id}' in dataframe, but '{entry_id}' in schema.")
             continue
 
     return hedid_errors
@@ -437,4 +439,3 @@ def _add_annotation_lines(row, annotation_properties, annotation_terms):
 def _get_property_type(row):
     """Gets the property type from the row."""
     return row[constants.property_type] if constants.property_type in row.index else "Class"
-

@@ -257,7 +257,7 @@ def get_library_data(library_name, cache_folder=None):
             library_data = json.load(file)
         specific_library = library_data[library_name]
         return specific_library
-    except (OSError, CacheException, ValueError, URLError, KeyError) as e:
+    except (OSError, CacheException, ValueError, URLError, KeyError):
         pass
 
     # This failed to get any data for some reason
@@ -288,7 +288,7 @@ def _check_if_url(hed_xml_or_url):
 
 def _create_xml_filename(hed_xml_version, library_name=None, hed_directory=None, prerelease=False):
     """Returns the default file name format for the given version"""
-    prerelease_prefix = f"prerelease/" if prerelease else ""
+    prerelease_prefix = "prerelease/" if prerelease else ""
     if library_name:
         hed_xml_basename = f"{prerelease_prefix}{HED_XML_PREFIX}_{library_name}_{hed_xml_version}{HED_XML_EXTENSION}"
     else:

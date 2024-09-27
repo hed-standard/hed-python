@@ -77,12 +77,16 @@ class Test(unittest.TestCase):
 
     def test_validate_file_warnings(self):
         issues1 = self.sidecar1.validate(hed_schema=self.hed_schema)
+        self.assertFalse(issues1)
         input_file1 = TabularInput(self.events_path, sidecar=self.sidecar1)
         issues1a = input_file1.validate(hed_schema=self.hed_schema)
-
+        self.assertEqual(len(issues1a), 1)
+        self.assertEqual(issues1a[0]['code'], "HED_UNKNOWN_COLUMN")
         issues2 = self.sidecar1.validate(hed_schema=self.hed_schema, error_handler=ErrorHandler(False))
+        self.assertFalse(issues2)
         input_file2 = TabularInput(self.events_path, sidecar=self.sidecar2)
         issues2a = input_file2.validate(hed_schema=self.hed_schema, error_handler=ErrorHandler(False))
+        self.assertEqual(issues2a[0]['code'], "TAG_EXPRESSION_REPEATED")
 
     def test_invalid_file(self):
         for invalid_input in self.invalid_inputs:

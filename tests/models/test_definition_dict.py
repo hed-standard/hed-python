@@ -77,8 +77,8 @@ class TestDefinitionDict(TestDefBase):
             'defInGroup': "(Definition/ValidDefName, (Def/ImproperlyPlacedDef))",
             'defExpandInGroup': "(Definition/ValidDefName, (Def-expand/ImproperlyPlacedDef, (ImproperContents)))",
             'doublePoundSignPlaceholder': f"(Definition/InvalidDef/##, {self.placeholder_def_contents})",
-            'doublePoundSignDiffPlaceholder': f"(Definition/InvalidDef/#, (Age/##,Item/TestDef2))",
-            'placeholdersWrongSpot': f"(Definition/InvalidDef/#, (Age/#,Item/TestDef2))",
+            'doublePoundSignDiffPlaceholder': "(Definition/InvalidDef/#, (Age/##,Item/TestDef2))",
+            'placeholdersWrongSpot': "(Definition/InvalidDef/#, (Age/#,Item/TestDef2))",
         }
         expected_results = {
             'noGroupTag': [],

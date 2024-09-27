@@ -190,7 +190,7 @@ class TestDefErrors(unittest.TestCase):
         self.base_def_validator(expanded_def_strings_with_definition, expanded_def_strings_with_definition,
                                 expand_defs=True, shrink_defs=False,
                                 remove_definitions=False)
-        self.base_def_validator(basic_def_strings, expanded_def_strings, 
+        self.base_def_validator(basic_def_strings, expanded_def_strings,
                                 expand_defs=True, shrink_defs=False, remove_definitions=True)
 
     def test_expand_def_tags_placeholder(self):
@@ -222,11 +222,11 @@ class TestDefErrors(unittest.TestCase):
             'str7': "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")",
         }
 
-        self.base_def_validator(basic_def_strings, expanded_def_strings_with_definition, 
+        self.base_def_validator(basic_def_strings, expanded_def_strings_with_definition,
                                 expand_defs=True, shrink_defs=False,
                                 remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
 
-        self.base_def_validator(basic_def_strings, basic_def_strings, 
+        self.base_def_validator(basic_def_strings, basic_def_strings,
                                 expand_defs=False, shrink_defs=False,
                                 remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
 
@@ -234,11 +234,11 @@ class TestDefErrors(unittest.TestCase):
                                 expand_defs=False, shrink_defs=True,
                                 remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
 
-        self.base_def_validator(expanded_def_strings_with_definition, basic_def_strings, 
+        self.base_def_validator(expanded_def_strings_with_definition, basic_def_strings,
                                 expand_defs=False, shrink_defs=True,
                                 remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
 
-        self.base_def_validator(basic_def_strings, expanded_def_strings, 
+        self.base_def_validator(basic_def_strings, expanded_def_strings,
                                 expand_defs=True, shrink_defs=False,
                                 remove_definitions=True, basic_definition_string=self.placeholder_definition_string)
 

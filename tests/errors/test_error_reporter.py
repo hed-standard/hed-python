@@ -123,11 +123,11 @@ class Test(unittest.TestCase):
         self.assertTrue(len(printable_issues) > 10)
         self.assertEqual(printable_issues.count(my_file), 1)
 
-        printable_issues2 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR, 
+        printable_issues2 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR,
                                                             skip_filename=False)
         self.assertTrue(len(printable_issues) > len(printable_issues2))
         self.assertEqual(printable_issues2.count(my_file), 1)
-        printable_issues3 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR, 
+        printable_issues3 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR,
                                                             skip_filename=False,
                                                             title="Later added custom title that is longer")
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
@@ -170,7 +170,7 @@ class Test(unittest.TestCase):
         self.assertEqual(nested_dict, {'a': 'Hed1', 'b': {'c': 2, 'd': [3, {'e': 'Hed2'}]}, 'f': [5, 6]})
 
         # Test with mixed data types and HedString in a nested list
-        nested_list = [HedString('Hed1', self._schema), 
+        nested_list = [HedString('Hed1', self._schema),
                        {'a': 2, 'b': [3, {'c': HedString('Hed2', self._schema)}]}]
         replace_tag_references(nested_list)
         self.assertEqual(nested_list, ['Hed1', {'a': 2, 'b': [3, {'c': 'Hed2'}]}])
@@ -183,7 +183,7 @@ class Test(unittest.TestCase):
 
     def test_register_error_twice(self):
         test_code = "test_error_code"
-        
+
         @hed_tag_error(test_code)
         def test_error_code(tag):
             pass

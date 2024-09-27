@@ -182,7 +182,7 @@ class MyTestCase(unittest.TestCase):
                 except HedFileError:
                     print(f"{error_code}: {description}")
                     print(f"Improper data for test {name}: {test}")
-                    print(f"This is probably a missing set of square brackets.")
+                    print("This is probably a missing set of square brackets.")
                     continue
                 issues += file.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
                 self.report_result(result, issues, error_code, all_codes, description, name, test, "combo_tests")
@@ -208,7 +208,7 @@ class MyTestCase(unittest.TestCase):
     def test_errors(self):
         for test_file in self.test_files:
             self.run_single_test(test_file)
-        #test_file = './temp.json'
+        # test_file = './temp.json'
         self.run_single_test(test_file)
         print(f"{len(self.fail_count)} tests got an unexpected result")
         print("\n".join(self.fail_count))

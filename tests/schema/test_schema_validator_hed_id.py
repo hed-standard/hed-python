@@ -50,7 +50,6 @@ class Test(unittest.TestCase):
         issues = id_validator.verify_tag_id(self.hed_schema84, event_entry, HedKey.HedID)
         self.assertTrue("It has changed", issues[0]["message"])
         self.assertTrue("between 10000", issues[0]["message"])
-        break_here = 3
 
         event_entry = self.hed_schema84.tags["Event"]
         event_entry.attributes[HedKey.HedID] = "HED_XXXXXXX"

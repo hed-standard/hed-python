@@ -209,9 +209,9 @@ class SchemaValidator:
                 error_code = SchemaErrors.SCHEMA_DUPLICATE_NODE
                 if len(values) == 2:
                     error_code = SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY
-                issues_list += self.error_handler.format_error_with_context(error_code, name,
-                                                                            duplicate_tag_list=[entry.name for entry in duplicate_entries],
-                                                                            section=section_key)
+                issues_list += self.error_handler.format_error_with_context(
+                    error_code, name, duplicate_tag_list=[entry.name for entry in duplicate_entries],
+                    section=section_key)
         return issues_list
 
     def check_invalid_chars(self):

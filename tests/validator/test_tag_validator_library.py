@@ -278,8 +278,8 @@ class IndividualHedTagsShort(TestHed3):
             'invalidPlaceholder': self.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
                                                     tag=0, index_in_tag=12, index_in_tag_end=13,
                                                     actual_error=ValidationErrors.PLACEHOLDER_INVALID) +
-                                  self.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, tag=0,
-                                                    index_in_tag=0, index_in_tag_end=16, value_class="numericClass")
+            self.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, tag=0,
+                              index_in_tag=0, index_in_tag_end=16, value_class="numericClass")
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
