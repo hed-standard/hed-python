@@ -69,21 +69,21 @@ jobs:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
         run: |  
-            coverage run -m unittest discover tests
+          coverage run -m unittest discover tests
 
       # Run spec tests with coverage
       - name: Run spec_test coverage
         env:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
         run: |  
-           coverage run --append -m unittest discover tests/spec_tests
+          coverage run --append -m unittest discover spec_tests
+          ls -la
            
-
+      # Publish the coverages
       - name: publish-coverages
         with:
           coverageCommand: coverage xml
-          debug: true
+          debug: false
         uses: paambaati/codeclimate-action@v9.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
