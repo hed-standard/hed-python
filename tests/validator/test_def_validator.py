@@ -230,7 +230,7 @@ class TestDefErrors(unittest.TestCase):
                                 expand_defs=False, shrink_defs=False,
                                 remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
 
-        self.base_def_validator(basic_def_strings, basic_def_strings, 
+        self.base_def_validator(basic_def_strings, basic_def_strings,
                                 expand_defs=False, shrink_defs=True,
                                 remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
 

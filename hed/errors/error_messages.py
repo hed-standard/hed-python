@@ -42,7 +42,7 @@ def val_error_invalid_char(source_string, char_index):
 
 
 @hed_tag_error(ValidationErrors.ELEMENT_DEPRECATED, default_severity=ErrorSeverity.WARNING)
-def val_error_element_deprecatedr(tag):
+def val_error_element_deprecated(tag):
     return f"Element '{tag}' has been deprecated and an alternative method of tagging should be used"
 
 

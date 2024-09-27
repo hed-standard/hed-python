@@ -195,7 +195,7 @@ class UnitValueValidator:
         char_errors = {}
         for class_name in classes:
             char_errors[class_name] = self._get_problem_indices(stripped_value, class_name, start_index=start_index)
-            if class_valid[class_name] and not char_errors[class_name]: # We have found a valid class
+            if class_valid[class_name] and not char_errors[class_name]:  # We have found a valid class
                 return []
         index_adj = len(report_as.org_base_tag) - len(original_tag.org_base_tag)
         validation_issues = self.report_value_errors(char_errors, class_valid, report_as, index_adj)

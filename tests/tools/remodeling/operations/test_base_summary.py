@@ -28,7 +28,7 @@ class TestOp(BaseOp):
 
     def do_op(self, dispatcher, df, name, sidecar=None):
         return df.copy()
-    
+
     @staticmethod
     def validate_input_data(parameters):
         return []

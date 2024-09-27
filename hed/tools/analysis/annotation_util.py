@@ -103,7 +103,7 @@ def generate_sidecar_entry(column_name, column_values=None):
     name_label = re.sub(r'[^A-Za-z0-9-]+', '_', column_name)
     sidecar_entry = {"Description": f"Description for {column_name}", "HED": ""}
     if not column_values:
-        sidecar_entry["HED"] = f"(Label/{name_label}, Label/#)"
+        sidecar_entry["HED"] = f"(Label/{name_label}, ID/#)"
     else:
         levels = {}
         hed = {}
@@ -112,7 +112,7 @@ def generate_sidecar_entry(column_name, column_values=None):
                 continue
             value_label = re.sub(r'[^A-Za-z0-9-]+', '_', column_value)
             levels[column_value] = f"Here describe column value {column_value} of column {column_name}"
-            hed[column_value] = f"(Label/{name_label}, Label/{value_label})"
+            hed[column_value] = f"(Label/{name_label}, ID/{value_label})"
         sidecar_entry["Levels"] = levels
         sidecar_entry["HED"] = hed
     return sidecar_entry

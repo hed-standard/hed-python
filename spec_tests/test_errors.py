@@ -142,7 +142,7 @@ class MyTestCase(unittest.TestCase):
                 for row in test:
                     if not isinstance(row, list):
                         print(f"Improper grouping in test: {error_code}:{name}")
-                        print(f"This is probably a missing set of square brackets.")
+                        print("This is probably a missing set of square brackets.")
                         break
                     string += "\t".join(str(x) for x in row) + "\n"
 
@@ -169,7 +169,7 @@ class MyTestCase(unittest.TestCase):
                         if not isinstance(row, list):
                             print(f"Improper grouping in test: {error_code}:{name}")
                             print(f"Improper data for test {name}: {test}")
-                            print(f"This is probably a missing set of square brackets.")
+                            print("This is probably a missing set of square brackets.")
                             break
                         string += "\t".join(str(x) for x in row) + "\n"
 
@@ -209,7 +209,7 @@ class MyTestCase(unittest.TestCase):
         for test_file in self.test_files:
             self.run_single_test(test_file)
         # test_file = './temp.json'
-        self.run_single_test(test_file)
+        # self.run_single_test(test_file)
         print(f"{len(self.fail_count)} tests got an unexpected result")
         print("\n".join(self.fail_count))
         self.assertEqual(len(self.fail_count), 0)

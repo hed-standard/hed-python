@@ -176,7 +176,7 @@ class Test(unittest.TestCase):
         self.assertEqual(nested_list, ['Hed1', {'a': 2, 'b': [3, {'c': 'Hed2'}]}])
 
         # Test with mixed data types and HedString in a list within a dict
-        mixed = {'a': HedString('Hed1', self._schema), 
+        mixed = {'a': HedString('Hed1', self._schema),
                  'b': [2, 3, {'c': HedString('Hed2', self._schema)}, 4]}
         replace_tag_references(mixed)
         self.assertEqual(mixed, {'a': 'Hed1', 'b': [2, 3, {'c': 'Hed2'}, 4]})

@@ -205,12 +205,12 @@ class Test(unittest.TestCase):
         self.assertIn('HED', entry1,
                       "generate_sidecar_entry has a HED key when column values and special chars")
         hed_entry1 = entry1['HED']
-        self.assertEqual(hed_entry1['apple 1'], '(Label/my_-123_10, Label/apple_1)',
+        self.assertEqual(hed_entry1['apple 1'], '(Label/my_-123_10, ID/apple_1)',
                          "generate_sidecar_entry HED entry should convert labels correctly when column values")
         entry2 = annotation_util.generate_sidecar_entry('my !#$-123_10')
         self.assertIsInstance(entry2, dict,
                               "generate_sidecar_entry is a dictionary when no column values and special chars.")
-        self.assertEqual(entry2['HED'], '(Label/my_-123_10, Label/#)',
+        self.assertEqual(entry2['HED'], '(Label/my_-123_10, ID/#)',
                          "generate_sidecar_entry HED entry has correct label when no column values and special chars.")
 
     def test_hed_to_df(self):
@@ -294,27 +294,6 @@ class Test(unittest.TestCase):
         self.assertEqual(0, len(example_sidecar), 'merge_hed_dict input is empty for this test')
         annotation_util.merge_hed_dict(example_sidecar, spreadsheet_sidecar)
         self.assertEqual(6, len(example_sidecar), 'merge_hed_dict merges with the correct length')
-
-        def test_to_factor(self):
-            series1 = Series([1.0, 2.0, 3.0, 4.0])
-            factor1 = annotation_util.to_factor(series1)
-            self.assertEqual(len(series1), len(factor1))
-            self.assertEqual(sum(factor1), len(factor1))
-            series2 = Series(['a', '', None, np.nan, 'n/a'])
-            factor2 = annotation_util.to_factor(series2)
-            self.assertEqual(len(series2), len(factor2))
-            self.assertEqual(sum(factor2), 1)
-            data = {
-                'Name': ['Alice', '', 'n/a', 1.0],  # Contains a space
-                'Age': [25, np.nan, 35, 0]
-            }
-            df = DataFrame(data)
-            factor3 = annotation_util.to_factor(df, column='Name')
-            self.assertEqual(sum(factor3), 2)
-            factor4 = annotation_util.to_factor(df)
-            self.assertEqual(sum(factor4), 2)
-            with self.assertRaises(HedFileError):
-                annotation_util.to_factor(data)
 
     def test_series_to_factor(self):
         series1 = Series([1.0, 2.0, 3.0, 4.0])
