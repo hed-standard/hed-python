@@ -163,7 +163,11 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
                 if id_int not in unused_tag_ids:
                     hedid_errors += schema_util.format_error(
                         row_number, row, f"'{label}' has id {id_int} which is outside " +
+<<<<<<< HEAD
                         "of the valid range for this type.  Valid range is: " +
+=======
+                        f"of the valid range for this type.  Valid range is: " +
+>>>>>>> 887f2944e5b295cd98a5ade9e420185756eec536
                         f"{min(unused_tag_ids)} to {max(unused_tag_ids)}")
                     continue
             except ValueError:

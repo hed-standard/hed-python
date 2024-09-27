@@ -209,7 +209,7 @@ class MyTestCase(unittest.TestCase):
         for test_file in self.test_files:
             self.run_single_test(test_file)
         # test_file = './temp.json'
-        self.run_single_test(test_file)
+        # self.run_single_test(test_file)
         print(f"{len(self.fail_count)} tests got an unexpected result")
         print("\n".join(self.fail_count))
         self.assertEqual(len(self.fail_count), 0)

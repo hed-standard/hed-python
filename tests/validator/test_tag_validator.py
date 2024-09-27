@@ -503,8 +503,13 @@ class TestTagLevels(TestHed):
             'valid1': [],
             'valid2': [],
             'invalid2': self.format_error(
+<<<<<<< HEAD
                 ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.DEFINITION_INVALID) + \
             self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
+=======
+                ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=
+                ValidationErrors.DEFINITION_INVALID) + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
+>>>>>>> 887f2944e5b295cd98a5ade9e420185756eec536
             'invalidTwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
                                                  multiple_tags="Definition/InvalidDef3".split(", ")),
             'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
@@ -1045,7 +1050,11 @@ class TestHedAllowedCharacters(TestHed):
         expected_issues = {
             'ascii': [],
             'illegalTab': self.format_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, tag=0,
+<<<<<<< HEAD
                                             index_in_tag=13, index_in_tag_end=14, value_class="textClass"),
+=======
+                                          index_in_tag=13, index_in_tag_end=14, value_class="textClass"),
+>>>>>>> 887f2944e5b295cd98a5ade9e420185756eec536
             'allowTab': []
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)

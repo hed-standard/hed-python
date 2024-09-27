@@ -295,6 +295,30 @@ class Test(unittest.TestCase):
         annotation_util.merge_hed_dict(example_sidecar, spreadsheet_sidecar)
         self.assertEqual(6, len(example_sidecar), 'merge_hed_dict merges with the correct length')
 
+<<<<<<< HEAD
+=======
+        def test_to_factor(self):
+            series1 = Series([1.0, 2.0, 3.0, 4.0])
+            factor1 = annotation_util.to_factor(series1)
+            self.assertEqual(len(series1), len(factor1))
+            self.assertEqual(sum(factor1), len(factor1))
+            series2 = Series(['a', '', None, np.nan, 'n/a'])
+            factor2 = annotation_util.to_factor(series2)
+            self.assertEqual(len(series2), len(factor2))
+            self.assertEqual(sum(factor2), 1)
+            data = {
+                'Name': ['Alice', '', 'n/a', 1.0],  # Contains a space
+                'Age': [25, np.nan, 35, 0]
+            }
+            df = DataFrame(data)
+            factor3 = annotation_util.to_factor(df, column='Name')
+            self.assertEqual(sum(factor3), 2)
+            factor4 = annotation_util.to_factor(df)
+            self.assertEqual(sum(factor4), 2)
+            with self.assertRaises(HedFileError):
+                annotation_util.to_factor(data)
+
+>>>>>>> 887f2944e5b295cd98a5ade9e420185756eec536
     def test_series_to_factor(self):
         series1 = Series([1.0, 2.0, 3.0, 4.0])
         factor1 = annotation_util.series_to_factor(series1)
