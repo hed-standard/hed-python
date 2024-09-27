@@ -8,11 +8,7 @@ class TestHedStrings(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.schema = load_schema_version("8.3.0")
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 887f2944e5b295cd98a5ade9e420185756eec536
     def validator_scalar(self, test_strings, expected_results, test_function):
         for test_key in test_strings:
             test_result = test_function(test_strings[test_key])

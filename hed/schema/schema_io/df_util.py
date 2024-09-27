@@ -182,8 +182,4 @@ def get_attributes_from_row(row):
     if constants.subclass_of in row.index and row[constants.subclass_of] == "HedHeader":
         header_attributes, _ = _parse_header_attributes_line(attr_string)
         return header_attributes
-<<<<<<< HEAD
     return parse_attribute_string(attr_string)
-=======
-    return parse_attribute_string(attr_string)
->>>>>>> 887f2944e5b295cd98a5ade9e420185756eec536
