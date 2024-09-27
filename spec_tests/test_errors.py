@@ -142,7 +142,7 @@ class MyTestCase(unittest.TestCase):
                 for row in test:
                     if not isinstance(row, list):
                         print(f"Improper grouping in test: {error_code}:{name}")
-                        print(f"This is probably a missing set of square brackets.")
+                        print("This is probably a missing set of square brackets.")
                         break
                     string += "\t".join(str(x) for x in row) + "\n"
 
@@ -169,7 +169,7 @@ class MyTestCase(unittest.TestCase):
                         if not isinstance(row, list):
                             print(f"Improper grouping in test: {error_code}:{name}")
                             print(f"Improper data for test {name}: {test}")
-                            print(f"This is probably a missing set of square brackets.")
+                            print("This is probably a missing set of square brackets.")
                             break
                         string += "\t".join(str(x) for x in row) + "\n"
 
