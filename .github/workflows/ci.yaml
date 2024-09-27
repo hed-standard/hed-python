@@ -59,14 +59,14 @@ jobs:
       - name: Test with unittest
         env:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
         run: |
           python -m unittest discover tests
-          continue-on-error: true
 
       # Run spec tests without coverage for non Python 3.9
       - name: Run spec_test
         env:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
         run: |  
            python -m unittest discover tests/spec_tests
-           continue-on-error: true

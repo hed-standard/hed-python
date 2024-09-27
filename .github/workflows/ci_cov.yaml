@@ -67,17 +67,18 @@ jobs:
       - name: Test with unittest and coverage
         env:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
         run: |  
             coverage run -m unittest discover tests
-            continue-on-error: true  
 
       # Run spec tests with coverage
       - name: Run spec_test coverage
         env:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
         run: |  
            coverage run --append -m unittest discover tests/spec_tests
-           continue-on-error: true
+           
 
       - name: publish-coverages
         with:
