@@ -94,6 +94,7 @@ class Test(unittest.TestCase):
         context = cont.get("get_definition_summary", None)
         self.assertIsInstance(context, DefinitionSummary, "get_summary testing DefinitionSummary")
         summary1a = context.get_summary()
+        self.assertIsInstance(summary1a, dict)
 
 
 if __name__ == '__main__':

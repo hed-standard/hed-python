@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
         with self.assertRaises(ValueError) as context3:
             parse_arguments(arg_list3)
         self.assertEqual(context3.exception.args[0], "UnableToFullyParseOperations")
- 
+
     def test_parse_tasks(self):
         tasks1 = parse_tasks(self.files, "*")
         self.assertIn('stopsignal', tasks1)

@@ -59,6 +59,7 @@ class Test(unittest.TestCase):
                          "do_ops updating does not change number of categorical columns.")
         context = dispatch.summary_dicts['test summary']
         text_sum = context.get_text_summary()
+        self.assertIsInstance(text_sum, dict)
         self.assertEqual(len(context.summary_dict), 2)
 
     def test_get_summary(self):

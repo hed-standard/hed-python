@@ -2,7 +2,6 @@ import unittest
 import os
 import io
 
-from hed.errors import HedFileError, ValidationErrors
 from hed.models import ColumnMetadata, HedString, Sidecar
 from hed.validator import HedValidator
 from hed import schema
@@ -98,7 +97,6 @@ class Test(unittest.TestCase):
            }
        },
        "HED": {
-       
        },
        "OtherBad": {
            "subbad": ["thing1", "HED", "Other"]

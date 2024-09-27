@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
     def test_with_schema_group(self):
         x = load_schema_version(["score_2.0.0", "test:testlib_1.0.2"])
         bids = BidsDataset(self.library_path, schema=x, tabular_types=["participants"])
-        self.assertIsInstance(bids, BidsDataset, 
+        self.assertIsInstance(bids, BidsDataset,
                               "BidsDataset with libraries should create a valid object from valid dataset")
         parts = bids.get_tabular_group("participants")
         self.assertIsInstance(parts, BidsFileGroup, "BidsDataset participants should be a BidsFileGroup")

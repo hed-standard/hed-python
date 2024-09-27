@@ -12,10 +12,10 @@ class Test(unittest.TestCase):
                                            '/sub-01/ses-01/eeg/sub-01_ses-01_task-DriveRandomSound_run-1_events.tsv')
 
     def test_constructor(self):
-        codes1 = ['1111', '1112', '1121', '1122', '1131', '1132', '1141', 
+        codes1 = ['1111', '1112', '1121', '1122', '1131', '1132', '1141',
                   '1142', '1311', '1312', '1321', '1322',
                   '4210', '4220', '4230', '4311', '4312']
-        
+
         smap1 = SequenceMap(codes=codes1)
         self.assertIsInstance(smap1, SequenceMap)
         # df = get_new_dataframe(self.events_path)

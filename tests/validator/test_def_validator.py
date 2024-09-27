@@ -180,9 +180,9 @@ class TestDefErrors(unittest.TestCase):
         self.base_def_validator(basic_def_strings, expanded_def_strings_with_definition,
                                 expand_defs=True,
                                 shrink_defs=False, remove_definitions=False)
-        self.base_def_validator(basic_def_strings, basic_def_strings, 
+        self.base_def_validator(basic_def_strings, basic_def_strings,
                                 expand_defs=False, shrink_defs=False, remove_definitions=False)
-        self.base_def_validator(basic_def_strings, basic_def_strings, 
+        self.base_def_validator(basic_def_strings, basic_def_strings,
                                 expand_defs=False, shrink_defs=True, remove_definitions=False)
         self.base_def_validator(expanded_def_strings_with_definition, basic_def_strings,
                                 expand_defs=False, shrink_defs=True,

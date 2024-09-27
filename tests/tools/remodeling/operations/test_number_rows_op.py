@@ -177,6 +177,7 @@ class Test(unittest.TestCase):
         # Test when new column name is given with overwrite unspecified (=False)
         parms = json.loads(self.json_parms)
         op = NumberRowsOp(parms)
+        self.assertIsInstance(op, NumberRowsOp)
         # df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         # df_check = pd.DataFrame(self.numbered_data, columns=self.numbered_columns)
         # df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)

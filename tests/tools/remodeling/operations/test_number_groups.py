@@ -158,25 +158,25 @@ class Test(unittest.TestCase):
     #     df_check = pd.DataFrame(self.numbered_data, columns=self.numbered_columns)
     #     df_test = pd.DataFrame(self.sample_data, columns=self.sample_columns)
     #     df_new = op.do_op(self.dispatcher, df_test, self.file_name)
-    # 
+    #
     #     self.assertTrue(list(df_new.columns) == list(self.numbered_columns),
     #                     "numbered_events should have the expected columns")
     #     self.assertTrue(len(df_new) == len(df_test),
     #                     "numbered_events should have same length as original dataframe")
     #     self.assertTrue(np.nanmax(df_new["number"]) == 5.0,
     #                     "max value in numbered_events should match the number of groups")
-    # 
+    #
     #     # fill na to match postprocessing dispatcher
     #     df_new = df_new.fillna('n/a')
     #     self.assertTrue(np.array_equal(df_new.to_numpy(), df_check.to_numpy()),
     #                     "numbered_events should not differ from check")
-    # 
+    #
     #     # Test that df has not been changed by the op
     #     self.assertTrue(list(df.columns) == list(df_test.columns),
     #                     "number_rows should not change the input df columns")
     #     self.assertTrue(np.array_equal(df.to_numpy(), df_test.to_numpy()),
     #                     "number_rows should not change the input df values")
-    # 
+    #
     # def test_existing_column_overwrite_true(self):
     #     # Test when existing column name is given with overwrite True
     #     parms = json.loads(self.json_overwrite_true_parms)
@@ -185,7 +185,7 @@ class Test(unittest.TestCase):
         # df_test = pd.DataFrame(self.sample_data, columns=self.existing_sample_columns)
         # df_check = pd.DataFrame(self.overwritten_data, columns=self.existing_sample_columns)
         # df_new = op.do_op(self.dispatcher, df_test, self.file_name)
-        # 
+        #
         # self.assertTrue(list(df_new.columns) == list(self.existing_sample_columns),
         #                 "numbered_events should have the same columns as original dataframe in case of overwrite")
         # self.assertTrue(len(df_new) == len(df_test),
@@ -195,7 +195,7 @@ class Test(unittest.TestCase):
         # df_new = df_new.fillna('n/a')
         # self.assertTrue(np.array_equal(df_new.to_numpy(), df_check.to_numpy()),
         #                 "numbered_events should not differ from check")
-        # 
+        #
         # # Test that df has not been changed by the op
         # self.assertTrue(list(df.columns) == list(df_test.columns),
         #                 "split_rows should not change the input df columns")

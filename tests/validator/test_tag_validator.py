@@ -1,6 +1,6 @@
 import unittest
 
-from hed.errors.error_types import ValidationErrors, DefinitionErrors, TemporalErrors
+from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from tests.validator.test_tag_validator_base import TestValidatorBase
 from hed.schema.hed_schema_io import load_schema_version
 from functools import partial
@@ -418,7 +418,7 @@ class TestTagLevels(TestHed):
                            'Purple-color/Purple',
             'legalDuplicate': 'Item/Object/Man-made-object/VehicleTrain,(Item/Object/Man-made-object/VehicleTrain,'
                               'Event/Sensory-event)',
-            'duplicateGroup': 'Sensory-event, (Sensory-event, Man-made-object/VehicleTrain),' 
+            'duplicateGroup': 'Sensory-event, (Sensory-event, Man-made-object/VehicleTrain),'
                               '(Man-made-object/VehicleTrain, Sensory-event)',
             'duplicateSubGroup': 'Sensory-event, (Event, (Sensory-event, Man-made-object/VehicleTrain)),'
                               '(Event, (Man-made-object/VehicleTrain, Sensory-event))',
