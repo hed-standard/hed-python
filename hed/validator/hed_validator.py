@@ -5,7 +5,7 @@ from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from hed.errors import error_reporter
 
 from hed.validator.def_validator import DefValidator
-from hed.validator.tag_util import UnitValueValidator, CharValidator, StringValidator, TagValidator, GroupValidator
+from hed.validator.util import UnitValueValidator, CharRexValidator, StringValidator, TagValidator, GroupValidator
 from hed.schema.hed_schema import HedSchema
 
 
@@ -36,7 +36,7 @@ class HedValidator:
         self._validate_characters = hed_schema.schema_83_props
 
         self._unit_validator = UnitValueValidator(modern_allowed_char_rules=self._validate_characters)
-        self._char_validator = CharValidator(modern_allowed_char_rules=self._validate_characters)
+        self._char_validator = CharRexValidator(modern_allowed_char_rules=self._validate_characters)
         self._string_validator = StringValidator()
         self._tag_validator = TagValidator()
         self._group_validator = GroupValidator(hed_schema)
@@ -158,6 +158,8 @@ class HedValidator:
         if validate_text is None:
             validate_text = original_tag.extension
         issues = []
+        if validate_text == '#':
+            return []
         if original_tag.is_unit_class_tag():
             issues += self._unit_validator.check_tag_unit_class_units_are_valid(original_tag,
                                                                                 validate_text,
@@ -205,14 +207,17 @@ class HedValidator:
                 #             run_individual_tag_validators(tag, allow_placeholders=allow_placeholders,
                 #                                           is_definition=is_definition)
                 # else:
-                validation_issues += self._tag_validator. \
-                    run_individual_tag_validators(hed_tag,
-                                                  allow_placeholders=allow_placeholders,
-                                                  is_definition=is_definition)
+                validation_issues += \
+                    self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
+                                                                      is_definition=is_definition)
                 if (hed_tag.short_base_tag == DefTagNames.DEF_KEY or
                         hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY):
-                    validation_issues += self._def_validator.validate_def_value_units(hed_tag, self)
-                else:
+                    validation_issues += (
+                        self._def_validator.validate_def_value_units(hed_tag,
+                                                                     self, allow_placeholders=allow_placeholders))
+                elif (hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY) and hed_tag.extension.endswith("/#"):
+                    validation_issues += self.validate_units(hed_tag, hed_tag.extension[:-2])
+                elif not (allow_placeholders and '#' in hed_tag.extension):
                     validation_issues += self.validate_units(hed_tag)
 
         return validation_issues

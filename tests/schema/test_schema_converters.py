@@ -12,6 +12,7 @@ def get_temp_filename(extension):
         filename = temp_file.name
     return filename
 
+
 # Function wrapper to create and clean up a single schema for testing
 def with_temp_file(extension):
     def decorator(test_func):
@@ -72,7 +73,7 @@ class TestConverterBase(unittest.TestCase):
             hed_schema_as_string = "".join([line for line in file])
 
         string_schema = schema.from_string(hed_schema_as_string, schema_format=".mediawiki")
-        #!BFK! - Same as before, 8.2.0 has a difference
+        # !BFK! - Same as before, 8.2.0 has a difference
         if "HED8.2.0" in self.wiki_file:
             del string_schema.unit_classes["temperatureUnits"].attributes["defaultUnits"]
 
@@ -189,7 +190,6 @@ class TestDuplicateUnitClass(TestComplianceBase):
     wiki_file = '../data/schema_tests/duplicate_unit_class.mediawiki'
     can_compare = True
     expected_issues = 1
-
 
 
 class TestConverterSavingPrefix(unittest.TestCase):

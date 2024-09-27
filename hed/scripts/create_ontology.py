@@ -1,6 +1,5 @@
-from hed.schema import load_schema_version
 from hed.errors import HedFileError, get_printable_issue_string
-from hed.schema.schema_io.df2schema import load_dataframes
+from hed.schema.schema_io import load_dataframes
 from hed.schema.schema_io.ontology_util import convert_df_to_omn
 from hed.scripts.script_util import get_prerelease_path, get_schema_filename
 import argparse
@@ -22,7 +21,7 @@ def create_ontology(repo_path, schema_name, schema_version, dest):
     final_source = get_prerelease_path(repo_path, schema_name, schema_version)
     # print(f"Creating ontology from {final_source}")
 
-    dataframes = load_dataframes(final_source)
+    dataframes = load_dataframes(final_source, include_prefix_dfs=True)
     try:
         _, omn_dict = convert_df_to_omn(dataframes)
     except HedFileError as e:
@@ -45,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser(description='Convert a specified schema in the prerelease folder to an ontology.')
     parser.add_argument('repo_path', help='The location of the hed-schemas directory')
     parser.add_argument('schema_name', help='The name of the schema to convert("standard" for standard schema)')
-    parser.add_argument('schema_version', help='The location of the hed-schemas directory')
+    parser.add_argument('schema_version', help='The schema version to modify')
     parser.add_argument('--dest', default=os.path.join("src", "ontology"), help='The base location to save to')
 
     args = parser.parse_args()
@@ -54,9 +53,6 @@ def main():
     schema_name = args.schema_name
     schema_version = args.schema_version
     dest = args.dest
-
-    # Trigger a local cache hit (this ensures trying to load withStandard schemas will work properly)
-    _ = load_schema_version("8.2.0")
 
     return create_ontology(repo_path, schema_name, schema_version, dest)
 

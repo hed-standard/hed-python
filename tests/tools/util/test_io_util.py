@@ -6,7 +6,6 @@ from hed.tools.util.io_util import check_filename, extract_suffix_path, clean_fi
     parse_bids_filename, _split_entity, get_allowed, get_filtered_by_element
 
 
-
 class Test(unittest.TestCase):
 
     @classmethod
@@ -95,7 +94,7 @@ class Test(unittest.TestCase):
         self.assertEqual(value2, test_value1)
 
     def test_get_alphanumeric_path(self):
-        mypath1 = 'g:\\String1%_-sTring2\n//string3\\\\\string4.pnG'
+        mypath1 = 'g:\\String1%_-sTring2\n//string3\\\\string4.pnG'
         repath1 = get_alphanumeric_path(mypath1)
         self.assertEqual('g_String1_sTring2_string3_string4_pnG', repath1)
         repath2 = get_alphanumeric_path(mypath1, '$')

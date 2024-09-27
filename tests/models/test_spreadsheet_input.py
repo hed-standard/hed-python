@@ -24,7 +24,6 @@ class Test(unittest.TestCase):
         cls.base_output_folder = base_output
         os.makedirs(base_output, exist_ok=True)
 
-
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.base_output_folder)
@@ -169,15 +168,6 @@ class Test(unittest.TestCase):
                                         '../data/model_tests/no_column_header_definition_long.tsv')
         hed_input_long = SpreadsheetInput(events_path_long, has_column_names=False, tag_columns=[0, 1])
         self.assertTrue(hed_input._dataframe.equals(hed_input_long._dataframe))
-
-    def test_definitions_identified(self):
-        # Todo: this test is no longer relevant
-        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/model_tests/no_column_header_definition.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])
-        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/model_tests/no_column_header_definition.tsv')
-        hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])
 
     def test_loading_dataframe_directly(self):
         ds_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),

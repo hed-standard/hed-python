@@ -7,7 +7,6 @@ from hed import load_schema_version, load_schema
 from hed.validator import SpreadsheetValidator
 from hed import TabularInput, SpreadsheetInput
 from hed.errors.error_types import ValidationErrors
-from hed import DefinitionDict
 
 
 class TestSpreadsheetValidation(unittest.TestCase):
@@ -67,7 +66,8 @@ class TestSpreadsheetValidation(unittest.TestCase):
         self.assertEqual(issues[0]['code'], ValidationErrors.HED_UNKNOWN_COLUMN)
 
         base_has_tags_df = pd.DataFrame({
-            'HED': ["(Onset, Def/DefaultOnset)", "(Inset, Def/DefaultOnset), (Event, Age/2)", "(Offset, Def/DefaultOnset), (Age/4)"]
+            'HED': ["(Onset, Def/DefaultOnset)", "(Inset, Def/DefaultOnset), (Event, Age/2)",
+                    "(Offset, Def/DefaultOnset), (Age/4)"]
         })
 
         self.df_with_onset_has_tags = base_has_tags_df.copy()
@@ -82,7 +82,8 @@ class TestSpreadsheetValidation(unittest.TestCase):
         self.assertEqual(issues[0]['code'], ValidationErrors.HED_UNKNOWN_COLUMN)
 
         base_has_tags_unordered_df = pd.DataFrame({
-            'HED': ["(Onset, Def/DefaultOnset)", "(Offset, Def/DefaultOnset), (Age/4)", "(Inset, Def/DefaultOnset), (Event, Age/2)"]
+            'HED': ["(Onset, Def/DefaultOnset)", "(Offset, Def/DefaultOnset), (Age/4)",
+                    "(Inset, Def/DefaultOnset), (Event, Age/2)"]
         })
         self.df_with_onset_has_tags_unordered = base_has_tags_unordered_df.copy()
         self.df_with_onset_has_tags_unordered['onset'] = [1, 2, 3]

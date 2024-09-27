@@ -1,7 +1,8 @@
 """Allows output of HedSchema objects as .tsv format"""
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.schema.schema_io.ontology_util import get_library_name_and_id, remove_prefix, create_empty_dataframes
+from hed.schema.schema_io.df_util import create_empty_dataframes, get_library_name_and_id, remove_prefix, \
+    calculate_attribute_type
 from hed.schema.schema_io.schema2base import Schema2Base
 from hed.schema.schema_io import text_util
 import pandas as pd
@@ -276,7 +277,7 @@ class Schema2DF(Schema2Base):
 
         for attribute, value in tag_entry.attributes.items():
             attribute_entry = self._schema.attributes.get(attribute)
-            attribute_type = self._calculate_attribute_type(attribute_entry)
+            attribute_type = calculate_attribute_type(attribute_entry)
 
             if self._attribute_disallowed(attribute) or attribute_type == "annotation":
                 continue
@@ -361,23 +362,13 @@ class Schema2DF(Schema2Base):
                 return tag_entry.parent.short_tag_name if tag_entry.parent else "HedTag"
 
         base_objects = {
-            HedSectionKey.Units: f"HedUnit",
-            HedSectionKey.UnitClasses: f"HedUnitClass",
-            HedSectionKey.UnitModifiers: f"HedUnitModifier",
-            HedSectionKey.ValueClasses: f"HedValueClass"
+            HedSectionKey.Units: "HedUnit",
+            HedSectionKey.UnitClasses: "HedUnitClass",
+            HedSectionKey.UnitModifiers: "HedUnitModifier",
+            HedSectionKey.ValueClasses: "HedValueClass"
         }
         name, obj_id = self._get_object_name_and_id(base_objects[tag_entry.section_key], include_prefix=True)
 
         if self._get_as_ids:
             return obj_id
         return name
-
-    @staticmethod
-    def _calculate_attribute_type(attribute_entry):
-        attributes = attribute_entry.attributes
-        object_ranges = {HedKey.TagRange, HedKey.UnitRange, HedKey.UnitClassRange, HedKey.ValueClassRange}
-        if HedKey.AnnotationProperty in attributes:
-            return "annotation"
-        elif any(attribute in object_ranges for attribute in attributes):
-            return "object"
-        return "data"

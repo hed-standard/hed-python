@@ -87,11 +87,11 @@ class Test(unittest.TestCase):
         item1 = HedString("Sensory-event,((Red,Blue)),", self.schema)
         vars1 = def_man.get_type_values(item1)
         self.assertFalse(vars1, "get_type_values should return None if no condition type_variables")
-        item2 = HedString(f"Sensory-event,(Def/Cond1,(Red,Blue,Condition-variable/Trouble))", self.schema)
+        item2 = HedString("Sensory-event,(Def/Cond1,(Red,Blue,Condition-variable/Trouble))", self.schema)
         vars2 = def_man.get_type_values(item2)
         self.assertEqual(1, len(vars2), "get_type_values should return correct number of condition type_variables")
-        item3 = HedString(f"Sensory-event,(Def/Cond1,(Red,Blue,Condition-variable/Trouble)),"
-                          f"(Def/Cond2),Green,Yellow,Def/Cond5, Def/Cond6/4, Description/Tell me", self.schema)
+        item3 = HedString("Sensory-event,(Def/Cond1,(Red,Blue,Condition-variable/Trouble))," +
+                          "(Def/Cond2),Green,Yellow,Def/Cond5, Def/Cond6/4, Description/Tell me", self.schema)
         vars3 = def_man.get_type_values(item3)
         self.assertEqual(len(vars3), 5, "get_type_values should return multiple condition type_variables")
 

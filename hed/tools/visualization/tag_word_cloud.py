@@ -103,7 +103,7 @@ def load_and_resize_mask(mask_path, width=None, height=None):
                 scale = original_size[1] / height
                 output_size = original_size / scale
 
-            mask_image = mask_image.resize(output_size.astype(int), Image.LANCZOS)
+            mask_image = mask_image.resize(tuple(output_size.astype(int)), Image.LANCZOS)
 
         mask_image_array = np.array(mask_image)
         # Treat transparency (alpha < 128) or white (R>127, G>127, B>127) as white, else black

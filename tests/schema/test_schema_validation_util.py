@@ -1,8 +1,7 @@
-import os
 import unittest
 import hed.schema.schema_validation_util as util
 from hed.errors import ErrorHandler, SchemaWarnings
-from hed import load_schema_version, load_schema, HedSchemaGroup
+from hed import load_schema_version
 from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry
 
 

@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df1.columns), 1, "make_template should return 1 column single key, no additional columns")
         df2 = t_map.make_template(show_counts=True)
         self.assertEqual(len(df2.columns), 2, "make_template returns an extra column for counts")
-        
+
         t_map2 = KeyMap(['event_type', 'type'])
         t_map2.update(self.stern_test1_path)
         df3 = t_map2.make_template()

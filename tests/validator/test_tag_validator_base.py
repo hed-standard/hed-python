@@ -7,7 +7,7 @@ from hed.errors import ErrorHandler, ErrorContext
 from hed import schema
 
 
-#todo: update these tests(TagValidator no longer exists)
+# todo: update these tests(TagValidator no longer exists)
 class TestHedBase(unittest.TestCase):
     schema_file = None
     hed_schema = None
@@ -88,10 +88,9 @@ class TestValidatorBase(TestHedBase):
             error_handler.add_context_and_filter(test_issues)
             test_result = not test_issues
 
-            # print(test_key)
             # print(str(expected_issue))
             # print(str(test_issues))
-            error_handler.pop_error_context()
+            # error_handler.pop_error_context()
             self.assertEqual(test_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 

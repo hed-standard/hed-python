@@ -11,6 +11,7 @@ from hed.schema.schema_validation_util_deprecated import validate_schema_tag, \
 from functools import partial
 from hed.schema import hed_cache
 from semantic_version import Version
+from hed.schema.schema_attribute_validator_hed_id import HedIDValidator
 
 
 def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handler=None):
@@ -90,6 +91,7 @@ class SchemaValidator:
         self.hed_schema = hed_schema
         self.error_handler = error_handler
         self._new_character_validation = hed_schema.schema_83_props
+        self._id_validator = HedIDValidator(hed_schema)
 
     def check_if_prerelease_version(self):
         issues = []
@@ -159,6 +161,8 @@ class SchemaValidator:
         if self._new_character_validation:
             validators = self.attribute_validators.get(attribute_name, []) + [
                 schema_attribute_validators.attribute_is_deprecated]
+            if attribute_name == HedKey.HedID:
+                validators += [self._id_validator.verify_tag_id]
             attribute_entry = self.hed_schema.get_tag_entry(attribute_name, HedSectionKey.Attributes)
             if attribute_entry:
                 validators += self._get_range_validators(attribute_entry)
@@ -205,9 +209,9 @@ class SchemaValidator:
                 error_code = SchemaErrors.SCHEMA_DUPLICATE_NODE
                 if len(values) == 2:
                     error_code = SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY
-                issues_list += self.error_handler.format_error_with_context(error_code, name,
-                                                                            duplicate_tag_list=[entry.name for entry in duplicate_entries],
-                                                                            section=section_key)
+                issues_list += self.error_handler.format_error_with_context(
+                    error_code, name, duplicate_tag_list=[entry.name for entry in duplicate_entries],
+                    section=section_key)
         return issues_list
 
     def check_invalid_chars(self):

@@ -12,6 +12,7 @@ def new_init(self, *args, **kwargs):
     if not self.tag_terms:
         self.tag_terms = (str(self).lower(),)
 
+
 old_tag_init = HedTag.__init__
 HedTag.__init__ = new_init
 
@@ -557,7 +558,7 @@ class TestParser(unittest.TestCase):
             "(A, B, (C))": False,
             "(A, B, (C)), D": True,
             "(A, B, (C)), (D)": True,
-            "((A, B), (C)), E": False, # todo: should discuss this case.  Is this correct to be False?
+            "((A, B), (C)), E": False,  # todo: should discuss this case.  Is this correct to be False?
             "((A, B), C), E": False,
         }
         self.base_test("[a && b, ???], ?", test_strings)
@@ -758,7 +759,7 @@ class TestParser(unittest.TestCase):
         test_strings = {
             "(Onset, (Def-expand/taco))": True,
             "(Onset, Def-expand/taco)": False,
-            "(Onset, Def/taco, (Def-expand/taco))": True, # this one validates
+            "(Onset, Def/taco, (Def-expand/taco))": True,  # this one validates
             "(Onset, (Def/taco))": False,
             "(Onset, (Def-expand/taco, (Label/DefContents)))": True,
             "(Onset, (Def-expand/taco), (Label/OnsetContents))": True,

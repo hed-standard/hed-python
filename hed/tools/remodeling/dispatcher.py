@@ -130,7 +130,7 @@ class Dispatcher:
 
         if self.data_root:
             return os.path.realpath(os.path.join(self.data_root, 'derivatives', Dispatcher.REMODELING_SUMMARY_PATH))
-        raise HedFileError("NoDataRoot", f"Dispatcher must have a data root to produce directories", "")
+        raise HedFileError("NoDataRoot", "Dispatcher must have a data root to produce directories", "")
 
     def run_operations(self, file_path, sidecar=None, verbose=False):
         """ Run the dispatcher operations on a file.

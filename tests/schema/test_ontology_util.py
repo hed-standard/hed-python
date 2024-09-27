@@ -1,10 +1,12 @@
 import unittest
 import pandas as pd
+
 from hed import HedFileError
 from hed.schema import hed_schema_df_constants as constants
-from hed.schema.schema_io import ontology_util
-from hed.schema.schema_io.ontology_util import get_library_name_and_id, _verify_hedid_matches, assign_hed_ids_section, \
+from hed.schema.schema_io import ontology_util, df_util
+from hed.schema.schema_io.ontology_util import _verify_hedid_matches, assign_hed_ids_section, \
     get_all_ids, convert_df_to_omn, update_dataframes_from_schema
+from hed.schema.schema_io.df_util import get_library_name_and_id
 from hed import load_schema_version
 
 
@@ -31,7 +33,7 @@ class TestLibraryFunctions(unittest.TestCase):
         schema = load_schema_version("testlib_2.0.0")
         name, first_id = get_library_name_and_id(schema)
         self.assertEqual(name, "Testlib")
-        self.assertEqual(first_id, ontology_util.UNKNOWN_LIBRARY_VALUE)
+        self.assertEqual(first_id, df_util.UNKNOWN_LIBRARY_VALUE)
 
     def test_get_hedid_range_normal_case(self):
         id_set = ontology_util._get_hedid_range("score", constants.DATA_KEY)
@@ -151,7 +153,6 @@ class TestUpdateDataframes(unittest.TestCase):
             updated_dataframes = update_dataframes_from_schema(schema_dataframes_new, schema)
         except HedFileError as e:
             self.assertEqual(len(e.issues), 115)
-        breakHere = 3
 
 
 class TestConvertOmn(unittest.TestCase):

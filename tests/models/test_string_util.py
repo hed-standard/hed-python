@@ -67,6 +67,7 @@ class TestHedStringSplit(unittest.TestCase):
         expected_string2 = '(Memorize,(Action,Handedness),Wink)'
         self.check_split_base_tags(hed_string, base_tags, expected_string, expected_string2)
 
+
 class TestHedStringSplitDef(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -92,7 +93,7 @@ class TestHedStringSplitDef(unittest.TestCase):
         self.assertIsInstance(found_hed2, HedString)
         self.assertEqual(str(remaining_hed2), expected_string2)
 
-        #self.assertTrue(all(tag.short_base_tag == "Def" for tag in found_hed.get_all_tags()))
+        # self.assertTrue(all(tag.short_base_tag == "Def" for tag in found_hed.get_all_tags()))
         self.assertTrue(all(tag.short_base_tag != "Def" for tag in remaining_hed2.get_all_tags()))
 
     def test_case_1(self):
@@ -117,7 +118,8 @@ class TestHedStringSplitDef(unittest.TestCase):
         self.check_split_def_tags(hed_string, def_names, expected_string, expected_string2)
 
     def test_case_4(self):
-        hed_string = HedString('(def/CustomTag1,(LightBlue,def/CustomTag2/123,(Wink,Communicate))),Face,def/CustomTag3/abc', self.schema)
+        hed_string = HedString('(def/CustomTag1,(LightBlue,def/CustomTag2/123,(Wink,Communicate))),' +
+                               'Face,def/CustomTag3/abc', self.schema)
         def_names = ['CustomTag1', 'CustomTag2', 'CustomTag3']
         expected_string = '((LightBlue,(Wink,Communicate))),Face'
         expected_string2 = 'Face'

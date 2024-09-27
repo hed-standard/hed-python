@@ -149,7 +149,8 @@ class Test(unittest.TestCase):
         input_data = TabularInput(df, sidecar=my_sidecar, name="myName")
         tag_man = HedTagManager(EventManager(input_data, my_schema), remove_types=remove_types)
         counts = HedTagCounts('myName', 2)
-        summary_dict = {}
+        self.assertIsInstance(counts, HedTagCounts)
+        self.assertIsInstance(tag_man, HedTagManager)
         # hed_objs = tag_man.get_hed_objs(include_context=include_context, replace_defs=replace_defs)
         # for hed in hed_objs:
         #     counts.update_event_counts(hed, 'myName')
@@ -211,13 +212,13 @@ class Test(unittest.TestCase):
         self.assertIn('Dataset', text_sum_none)
         self.assertIsInstance(text_sum_none['Dataset'], str)
         self.assertFalse(text_sum_none.get("Individual files", {}))
-        
+
         text_sum_consolidated = sum_context1.get_text_summary(individual_summaries="consolidated")
         self.assertIn('Dataset', text_sum_consolidated)
         self.assertIsInstance(text_sum_consolidated['Dataset'], str)
         self.assertFalse(text_sum_consolidated.get("Individual files", {}))
         self.assertGreater(len(text_sum_consolidated['Dataset']), len(text_sum_none['Dataset']))
-        
+
         text_sum_separate = sum_context1.get_text_summary(individual_summaries="separate")
         self.assertIn('Dataset', text_sum_separate)
         self.assertIsInstance(text_sum_separate['Dataset'], str)

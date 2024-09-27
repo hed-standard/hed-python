@@ -6,7 +6,7 @@ from hed.errors import ErrorHandler, TemporalErrors, ErrorContext, ValidationErr
 from hed.models import HedString, DefinitionDict
 from hed import schema
 from hed.validator import HedValidator, OnsetValidator, DefValidator
-from hed.validator.tag_util.group_util import GroupValidator
+from hed.validator.util.group_util import GroupValidator
 
 
 from tests.validator.test_tag_validator_base import TestHedBase
@@ -275,13 +275,16 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset, Offset)",
         ]
         test_issues = [
-            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.TEMPORAL_TAG_ERROR)
+            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1,
+                              actual_error=ValidationErrors.TEMPORAL_TAG_ERROR)
             + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
             self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1, multiple_tags=["Onset"])
             + self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=2)
-            + self.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
+            + self.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2,
+                                def_tag="Def/TestDefPlaceholder/2471"),
             self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1, multiple_tags=["Offset"])
-            + self.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2, def_tag="Def/TestDefPlaceholder/2471"),
+            + self.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2,
+                                def_tag="Def/TestDefPlaceholder/2471"),
         ]
 
         self._test_issues_no_context(test_strings, test_issues)
@@ -328,6 +331,7 @@ class Test(TestHedBase):
         hed_string = HedString("(Onset, Duration/Long), Label/Example", self.hed_schema)
         issues = OnsetValidator.check_for_banned_tags(hed_string)
         self.assertEqual(len(issues), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

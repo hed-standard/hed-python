@@ -33,17 +33,17 @@ def validate_schema(file_path):
             validation_issues.append(error_message)
             return validation_issues
 
-        mediawiki_string = base_schema.get_as_mediawiki_string()
+        mediawiki_string = base_schema.get_as_mediawiki_string(save_merged=True)
         reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki")
 
         validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "mediawiki")
 
-        xml_string = base_schema.get_as_xml_string()
+        xml_string = base_schema.get_as_xml_string(save_merged=True)
         reloaded_schema = from_string(xml_string, schema_format=".xml")
 
         validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "xml")
 
-        tsv_dataframes = base_schema.get_as_dataframes()
+        tsv_dataframes = base_schema.get_as_dataframes(save_merged=True)
         reloaded_schema = from_dataframes(tsv_dataframes)
 
         validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "tsv")
@@ -65,7 +65,7 @@ def add_extension(basename, extension):
     return basename + extension
 
 
-def sort_base_schemas(filenames):
+def sort_base_schemas(filenames, add_all_extensions=False):
     """ Sort and group the changed files based on basename
 
         Example input: ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.xml"]
@@ -78,6 +78,7 @@ def sort_base_schemas(filenames):
 
     Parameters:
         filenames(list or container): The changed filenames
+        add_all_extensions(bool): If True, always return all 3 filenames for any schemas found.
 
     Returns:
         sorted_files(dict): A dictionary where keys are the basename, and the values are a set of extensions modified
@@ -107,6 +108,11 @@ def sort_base_schemas(filenames):
             schema_files[real_name].add(extension)
         else:
             print(f"Ignoring file {file_path}")
+
+    if add_all_extensions:
+        for schema_name in schema_files:
+            for extension in all_extensions:
+                schema_files[schema_name].add(extension)
 
     return schema_files
 

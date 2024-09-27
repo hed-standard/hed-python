@@ -1,0 +1,62 @@
+{
+  "char_regex": {
+    "alphanumeric": "[A-Za-z0-9]",
+    "ampersand": "&",
+    "ascii": "[\\x00-\\x7F]",
+    "asterisk": "\\*",
+    "at-sign": "@",
+    "backslash": "\\",
+    "blank": " ",
+    "caret": "\\^",
+    "colon": ":",
+    "comma": ",",
+    "date-time": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?",
+    "dollar": "\\$",
+    "digits": "[0-9]",
+    "double-quote": "\"",
+    "equals": "=",
+    "exclamation": "!",
+    "greater-than": ">",
+    "hyphen": "-",
+    "left-paren": "(",
+    "less-than": "<",
+    "letters": "[A-Za-z]",
+    "lowercase": "[a-z]",
+    "name": "[\\w\\-\\u0080-\\uFFFF]",
+    "newline": "\\n",
+    "nonascii": "[\\u0080-\\uFFFF]",
+    "number-sign": "#",
+    "numeric": "[0-9.\\-+^Ee]",
+    "percent-sign": "%",
+    "period": "\\.",
+    "plus": "\\+",
+    "printable": "[\\x20-\\x7E]",
+    "question-mark": "\\?",
+    "right-paren": "(",
+    "semicolon": ";",
+    "single-quote": "'",
+    "forward-slash": "/",
+    "tab": "\\t",
+    "text": "[^\\x00-\\x1F\\x7F,{}]",
+    "tilde": "~",
+    "underscore": "_",
+    "uppercase": "[A-Z]",
+    "vertical-bar": "|"
+  },
+  "class_chars": {
+    "dateTimeClass": [],
+    "nameClass": [
+      "alphanumeric",
+      "underscore",
+      "hyphen",
+      "nonascii"
+    ],
+    "numericClass": [],
+    "textClass": ["text"],
+    "testClass": ["newline", "tab", "nonascii"]
+  },
+  "class_words": {
+    "dateTimeClass": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?$",
+    "numericClass": "^[+-]?(\\d+(\\.\\d*)?|\\.\\d+)([eE][+-]?\\d+)?$"
+  }
+}

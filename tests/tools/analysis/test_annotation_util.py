@@ -198,7 +198,7 @@ class Test(unittest.TestCase):
                               "generate_sidecar_entry HED entry should be str when no column values")
 
     def test_generate_sidecar_entry_non_letters(self):
-        entry1 = annotation_util.generate_sidecar_entry('my !#$-123_10', 
+        entry1 = annotation_util.generate_sidecar_entry('my !#$-123_10',
                                                         column_values=['apple 1', '@banana', 'grape%cherry&'])
         self.assertIsInstance(entry1, dict,
                               "generate_sidecar_entry is a dictionary when column values and special chars.")
@@ -313,7 +313,7 @@ class Test(unittest.TestCase):
             self.assertEqual(sum(factor3), 2)
             factor4 = annotation_util.to_factor(df)
             self.assertEqual(sum(factor4), 2)
-            with self.assertRaises(HedFileError) as context5:
+            with self.assertRaises(HedFileError):
                 annotation_util.to_factor(data)
 
     def test_series_to_factor(self):
@@ -335,7 +335,8 @@ class Test(unittest.TestCase):
         self.assertEqual(len(hed_objs1), 2)
         self.assertEqual('Red', str(hed_objs1[1]))
         hed_objs2 = annotation_util.strs_to_hed_objs(['Sensory-event', 'Blech'], self.hed_schema)
-        
+        self.assertEqual(len(hed_objs2), 2)
+
     def test_strs_to_sidecar(self):
         with open(self.json_path, 'r') as fp:
             sidecar_dict = json.load(fp)
@@ -478,9 +479,9 @@ class Test(unittest.TestCase):
         self.assertEqual(sum(factor3), 2)
         factor4 = annotation_util.to_factor(df)
         self.assertEqual(sum(factor4), 2)
-        with self.assertRaises(HedFileError) as context5:
+        with self.assertRaises(HedFileError):
             annotation_util.to_factor(data)
-        
+
     def test_update_cat_dict(self):
         # TODO: Improve tests
         cat_dict = self.sidecar_face['event_type']

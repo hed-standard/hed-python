@@ -16,12 +16,20 @@ OBJECT_KEY = "ObjectProperty"
 
 ATTRIBUTE_PROPERTY_KEY = "AttributeProperty"
 
+PREFIXES_KEY = "Prefixes"
+EXTERNAL_ANNOTATION_KEY = "AnnotationPropertyExternal"
+
 PROPERTY_KEYS = [ANNOTATION_KEY, DATA_KEY, OBJECT_KEY]
 DF_SUFFIXES = {TAG_KEY, STRUCT_KEY, VALUE_CLASS_KEY,
                UNIT_CLASS_KEY, UNIT_KEY, UNIT_MODIFIER_KEY,
                *PROPERTY_KEYS, ATTRIBUTE_PROPERTY_KEY}
 
-section_mapping = {
+
+DF_EXTRA_SUFFIXES = {PREFIXES_KEY, EXTERNAL_ANNOTATION_KEY}
+DF_SUFFIXES_OMN = {*DF_SUFFIXES, *DF_EXTRA_SUFFIXES}
+
+
+section_mapping_hed_id = {
     STRUCT_KEY: None,
     TAG_KEY: HedSectionKey.Tags,
     VALUE_CLASS_KEY: HedSectionKey.ValueClasses,
@@ -43,6 +51,8 @@ attributes = "Attributes"
 description = "dc:description"
 equivalent_to = "omn:EquivalentTo"
 has_unit_class = "hasUnitClass"
+annotations = "Annotations"
+
 
 struct_columns = [hed_id, name, attributes, subclass_of, description, equivalent_to]
 tag_columns = [hed_id, name, level, subclass_of, attributes, description, equivalent_to]
@@ -84,3 +94,8 @@ valid_omn_attributes = {
     hed_schema_constants.WITH_STANDARD_ATTRIBUTE: "HED_0000302",
     hed_schema_constants.UNMERGED_ATTRIBUTE: "HED_0000303"
 }
+
+# Extra spreadsheet column ideas
+Prefix = "Prefix"
+ID = "ID"
+NamespaceIRI = "Namespace IRI"

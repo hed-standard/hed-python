@@ -10,8 +10,8 @@ class SummarizeDefinitionsOp(BaseOp):
     """ Summarize the definitions used in the dataset based on Def and Def-expand.
 
     Required remodeling parameters:
-        - **summary_name** (*str*): The name of the summary.   
-        - **summary_filename** (*str*): Base filename of the summary. 
+        - **summary_name** (*str*): The name of the summary.
+        - **summary_filename** (*str*): Base filename of the summary.
 
     Optional remodeling parameters:
          - **append_timecode** (*bool*): If False (default), the timecode is not appended to the summary filename.
@@ -20,7 +20,7 @@ class SummarizeDefinitionsOp(BaseOp):
 
     """
     NAME = "summarize_definitions"
-    
+
     PARAMS = {
         "type": "object",
         "properties": {

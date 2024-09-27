@@ -57,6 +57,7 @@ run_remodel_backup = "hed.tools.remodeling.cli.run_remodel_backup:main"
 run_remodel_restore = "hed.tools.remodeling.cli.run_remodel_restore:main"
 hed_validate_schemas = "hed.scripts.validate_schemas:main"
 hed_update_schemas = "hed.scripts.convert_and_update_schema:main"
+hed_add_ids = "hed.scripts.add_hed_ids:main"
 hed_create_ontology = "hed.scripts.create_ontology:main"
 
 [tool.versioneer]
@@ -74,7 +75,7 @@ include = ["hed*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-hed = ["schema/schema_data/*.xml", "resources/*.png"]
+hed = ["schema/schema_data/*.xml", "resources/*.png", "validator/util/class_regex.json"]
 
 [tool.codespell]
 skip = '*.git,*.pdf,*.svg,versioneer.py,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests,,*.xml,*.mediawiki,*.omn,*.toml'

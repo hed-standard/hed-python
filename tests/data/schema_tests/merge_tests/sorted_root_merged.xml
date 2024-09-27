@@ -3,6 +3,150 @@
    <prologue>This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.</prologue>
    <schema>
       <node>
+         <name>B-nonextension</name>
+         <description>These should not be sorted.  B should be first</description>
+         <attribute>
+            <name>inLibrary</name>
+            <value>testlib</value>
+         </attribute>
+         <node>
+            <name>SubnodeB1</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeB2</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+      </node>
+      <node>
+         <name>A-nonextension</name>
+         <description>These should not be sorted.  A should be second</description>
+         <attribute>
+            <name>inLibrary</name>
+            <value>testlib</value>
+         </attribute>
+         <node>
+            <name>SubnodeA3</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeA1</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeA2</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+      </node>
+      <node>
+         <name>C-nonextension</name>
+         <description>These should not be sorted.  C should be last</description>
+         <attribute>
+            <name>inLibrary</name>
+            <value>testlib</value>
+         </attribute>
+         <node>
+            <name>SubnodeC3</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeC1</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeC2</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+      </node>
+      <node>
+         <name>B-extensionallowed</name>
+         <description>These should be sorted.  This section should be second.</description>
+         <attribute>
+            <name>extensionAllowed</name>
+         </attribute>
+         <attribute>
+            <name>inLibrary</name>
+            <value>testlib</value>
+         </attribute>
+         <node>
+            <name>SubnodeE1</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeE2</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeE3</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+      </node>
+      <node>
+         <name>A-extensionallowed</name>
+         <description>These should be sorted.  This section should be first.</description>
+         <attribute>
+            <name>extensionAllowed</name>
+         </attribute>
+         <attribute>
+            <name>inLibrary</name>
+            <value>testlib</value>
+         </attribute>
+         <node>
+            <name>SubnodeD1</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeD2</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+         <node>
+            <name>SubnodeD3</name>
+            <attribute>
+               <name>inLibrary</name>
+               <value>testlib</value>
+            </attribute>
+         </node>
+      </node>
+      <node>
          <name>Event</name>
          <description>Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.</description>
          <attribute>
@@ -86,86 +230,6 @@
          <node>
             <name>Software-agent</name>
             <description>An agent computer program.</description>
-         </node>
-      </node>
-      <node>
-         <name>B-nonextension</name>
-         <description>These should not be sorted.  B should be first</description>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeB1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeB2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-      </node>
-      <node>
-         <name>A-nonextension</name>
-         <description>These should not be sorted.  A should be second</description>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeA3</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeA1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeA2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-      </node>
-      <node>
-         <name>C-nonextension</name>
-         <description>These should not be sorted.  C should be last</description>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeC3</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeC1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeC2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
          </node>
       </node>
       <node>
@@ -871,70 +935,6 @@
                <name>Track</name>
                <description>Follow a person, animal, or object through space or time.</description>
             </node>
-         </node>
-      </node>
-      <node>
-         <name>A-extensionallowed</name>
-         <description>These should be sorted.  This section should be first.</description>
-         <attribute>
-            <name>extensionAllowed</name>
-         </attribute>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeD1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeD2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeD3</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-      </node>
-      <node>
-         <name>B-extensionallowed</name>
-         <description>These should be sorted.  This section should be second.</description>
-         <attribute>
-            <name>extensionAllowed</name>
-         </attribute>
-         <attribute>
-            <name>inLibrary</name>
-            <value>testlib</value>
-         </attribute>
-         <node>
-            <name>SubnodeE1</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeE2</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
-         </node>
-         <node>
-            <name>SubnodeE3</name>
-            <attribute>
-               <name>inLibrary</name>
-               <value>testlib</value>
-            </attribute>
          </node>
       </node>
       <node>

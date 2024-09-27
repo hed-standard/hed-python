@@ -21,7 +21,7 @@ jobs:
             # PR to master branch
             echo 'matrix=["3.8", "3.9", "3.10", "3.11"]' >> $GITHUB_OUTPUT
           else
-            echo 'matrix=["3.9"]' >> $GITHUB_OUTPUT
+            echo 'matrix=["3.9", "3.11"]' >> $GITHUB_OUTPUT
           fi
 
   build:
@@ -48,92 +48,24 @@ jobs:
           path: ${{ env.pythonLocation }}
           key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('docs/requirements.txt') }}
 
+      # Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade --upgrade-strategy eager pip
-          pip install flake8
-          pip install coverage
           pip install -r requirements.txt
           pip install -r docs/requirements.txt
 
-      - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
+      # Run spec tests without coverage for non Python 3.9
+      - name: Run spec_test
+        env:
+          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |  
+           python -m unittest discover spec_tests
 
-          flake8 . --count --show-source --statistics --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics 
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-
+      # Run unittest without coverage
       - name: Test with unittest
         env:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          coverage run -m unittest
-
-      - name: Run spec_test coverage
-        env:
-          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: coverage run --append -m unittest spec_tests/test_errors.py
-        continue-on-error: true
-
-      - name: Archive code coverage results
-        if: ${{matrix.python-version == '3.9'}}
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-coverage-report
-          path: .coverage
-
-  check-secret:
-    runs-on: ubuntu-latest
-    outputs:
-      secrets-exist: ${{ steps.check-for-secrets.outputs.defined }}
-    steps:
-      - name: Check for Secret availability
-        id: check-for-secrets
-        # perform secret check & put boolean result as an output
-        shell: bash
-        run: |
-          if [ "${{ secrets.CC_TEST_REPORTER_ID }}" != '' ]; then
-            echo "defined=true" >> $GITHUB_OUTPUT;
-          else
-            echo "defined=false" >> $GITHUB_OUTPUT;
-          fi
-
-  coverage:
-    name: Publish coverage
-    needs: [build, check-secret]
-    runs-on: ubuntu-latest
-    if: needs.check-secret.outputs.secrets-exist == 'true'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
-
-      - uses: actions/cache@v4
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}-${{ hashFiles('docs/requirements.txt') }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade --upgrade-strategy eager pip
-          pip install flake8
-          pip install coverage
-          pip install -r requirements.txt
-          pip install -r docs/requirements.txt
-
-      - name: Download a single artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: code-coverage-report
-
-      - name: publish-coverages
-        with:
-          coverageCommand: coverage xml
-          debug: true
-        uses: paambaati/codeclimate-action@v8.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-
+          python -m unittest discover tests

@@ -44,13 +44,13 @@ class Test(unittest.TestCase):
                          "string is not a dictionary object.")
 
         invalid_operation_missing = [self.remodel_file[0].copy()]
-        del invalid_operation_missing[0]["description"]  
+        del invalid_operation_missing[0]["description"]
         error_strings = self.validator.validate(invalid_operation_missing)
         self.assertEqual(error_strings[0], "Operation dictionary 1 is missing 'description'. " +
                          "Every operation dictionary must specify the type of operation, a description, " +
                          "and the operation parameters.")
 
-        invalid_operation_name = [self.remodel_file[0].copy()]  
+        invalid_operation_name = [self.remodel_file[0].copy()]
         invalid_operation_name[0]["operation"] = "unlisted_operation"
         error_strings = self.validator.validate(invalid_operation_name)
         self.assertEqual(error_strings[0], "unlisted_operation is not a known remodeler operation. " +
@@ -100,7 +100,7 @@ class Test(unittest.TestCase):
         error_strings = self.validator.validate(empty_array)
         self.assertEqual(error_strings[0], "Operation 1: The list in column_names in the remove_columns " +
                          "operation should have at least 1 item(s).")
-       
+
         empty_array_nested = [deepcopy(self.remodel_file[5])]
         empty_array_nested[0]["parameters"]["map_list"][0] = []
         error_strings = self.validator.validate(empty_array_nested)
@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
         #                  "convert_columns operation, contains and unexpected value. " +
         #                  "Value should be one of ['str', 'int', 'float', 'fixed'].")
 
-        # value_dependency = [deepcopy(self.remodel_file[18])] 
+        # value_dependency = [deepcopy(self.remodel_file[18])]
         # value_dependency[0]["parameters"]["convert_to"] = "fixed"
         # error_strings = validator.validate(value_dependency)
         # self.assertEqual(error_strings[0], "Operation 1: The parameter decimal_places is missing. " +

@@ -1,4 +1,4 @@
-from hed.schema import HedKey, HedSectionKey, from_string
+from hed.schema import from_string
 
 
 library_schema_start = """HED library="testcomparison" version="1.1.0" withStandard="8.3.0" unmerged="true"
@@ -20,13 +20,15 @@ default_end_lines = """
 """
 
 required_non_tag = [
-"'''Unit classes'''",
-"'''Unit modifiers'''",
-"'''Value classes'''",
-"'''Schema attributes'''",
-"'''Properties'''",
-"'''Epilogue'''"
+    "'''Unit classes'''",
+    "'''Unit modifiers'''",
+    "'''Value classes'''",
+    "'''Schema attributes'''",
+    "'''Properties'''",
+    "'''Epilogue'''"
 ]
+
+
 def _get_test_schema(node_lines, other_lines=(default_end_lines,)):
     node_section = "\n".join(node_lines)
     non_tag_section = "\n".join(other_lines)

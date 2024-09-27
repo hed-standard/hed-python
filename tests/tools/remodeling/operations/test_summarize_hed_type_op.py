@@ -79,7 +79,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(summary2['Dataset']['Overall summary']['Files']), 2)
         summary2a = context2.get_summary(individual_summaries="separate")
         self.assertIsInstance(summary2a["Individual files"]["run-02"], dict)
-        
+
     def test_text_summary_with_levels(self):
         with open(self.summary_path, 'r') as fp:
             parms = json.load(fp)

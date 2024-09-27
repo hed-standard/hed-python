@@ -209,12 +209,18 @@ class DefinitionDict:
         # initial validation
         groups = group.groups()
         issues = []
+        # tags = group.tags()
+        # if len(tags) != 1:
+        #     issues += \
+        #         ErrorHandler.format_error_with_context(error_handler,
+        #                                                DefinitionErrors.WRONG_NUMBER_TAGS,
+        #                                                def_name=definition_tag.extension, tag_list=tags)
         if len(groups) > 1:
             issues += \
                 ErrorHandler.format_error_with_context(error_handler,
                                                        DefinitionErrors.WRONG_NUMBER_GROUPS,
                                                        def_name=definition_tag.extension, tag_list=groups)
-        elif len(groups) == 0:
+        elif len(groups) == 0 and '#' in definition_tag.extension:
             issues += \
                 ErrorHandler.format_error_with_context(error_handler,
                                                        DefinitionErrors.NO_DEFINITION_CONTENTS,

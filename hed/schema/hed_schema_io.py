@@ -65,6 +65,7 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None):
         hed_path (str): A filepath or url to open a schema from.
             If loading a TSV file, this should be a single filename where:
             Template: basename.tsv, where files are named basename_Struct.tsv, basename_Tag.tsv, etc.
+            Alternatively, you can point to a directory containing the .tsv files.
         schema_namespace (str or None): The name_prefix all tags in this schema will accept.
         schema(HedSchema or None): A hed schema to merge this new file into
                                    It must be a with-standard schema with the same value.
@@ -324,20 +325,16 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
                            f"Must specify a schema version by number, found no version on {xml_version} schema.",
                            filename=name)
     try:
-        # 1. Try fully local copy
+        # 1. Try fully local(or from direct cache)
         final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
-        if not final_hed_xml_file:
-            hed_cache.cache_local_versions(xml_folder)
-            # 2. Cache the schemas included in hedtools and try local again
-            final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
         hed_schema = load_schema(final_hed_xml_file, schema=schema, name=name)
     except HedFileError as e:
         if e.code == HedExceptions.FILE_NOT_FOUND:
             # Cache all schemas if we haven't recently.
             hed_cache.cache_xml_versions(cache_folder=xml_folder)
-            # 3. See if we got a copy from online
+            # 2. See if we got a copy from online
             final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder)
-            # 4. Finally check for a pre-release one
+            # 3. Finally check for a pre-release one
             if not final_hed_xml_file:
                 final_hed_xml_file = hed_cache.get_hed_version_path(xml_version, library_name, xml_folder,
                                                                     check_prerelease=True)

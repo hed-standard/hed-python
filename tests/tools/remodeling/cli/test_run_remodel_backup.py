@@ -102,7 +102,7 @@ class Test(unittest.TestCase):
                     '-f', 'events', '-e', '.tsv', '-t', 'Baloney']
         main(arg_list)
         self.assertTrue(os.path.exists(der_path))
-        back_path = os.path.realpath(os.path.join(self.data_root, BackupManager.RELATIVE_BACKUP_LOCATION, 
+        back_path = os.path.realpath(os.path.join(self.data_root, BackupManager.RELATIVE_BACKUP_LOCATION,
                                                   BackupManager.DEFAULT_BACKUP_NAME, 'backup_root'))
         self.assertTrue(os.path.exists(back_path))
         backed_files = get_file_list(back_path)

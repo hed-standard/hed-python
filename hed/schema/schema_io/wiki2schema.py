@@ -3,11 +3,11 @@ This module is used to create a HedSchema object from a .mediawiki file.
 """
 import re
 
-from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors import error_reporter
 from hed.schema.schema_io import wiki_constants
-from hed.schema.schema_io.text2schema import SchemaLoaderText
+from hed.schema.schema_io.base2schema import SchemaLoader
 from hed.schema.schema_io.wiki_constants import HedWikiSection, SectionStarts, SectionNames
 from hed.schema.schema_io import text_util
 
@@ -34,7 +34,7 @@ required_sections = [
 ]
 
 
-class SchemaLoaderWiki(SchemaLoaderText):
+class SchemaLoaderWiki(SchemaLoader):
     """ Load MediaWiki schemas from filenames or strings.
 
         Expected usage is SchemaLoaderWiki.load(filename)
@@ -45,8 +45,6 @@ class SchemaLoaderWiki(SchemaLoaderText):
     def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
         super().__init__(filename, schema_as_string, schema, file_format, name)
         self._schema.source_format = ".mediawiki"
-        self._no_name_msg = "Schema term is empty or the line is malformed",
-        self._no_name_error = HedExceptions.WIKI_DELIMITERS_INVALID
 
     def _open_file(self):
         if self.filename:
@@ -151,22 +149,29 @@ class SchemaLoaderWiki(SchemaLoaderText):
         self._schema._initialize_attributes(HedSectionKey.Tags)
         parent_tags = []
         level_adj = 0
-        for line_number, line in lines:
-            if line.startswith(wiki_constants.ROOT_TAG):
+        for row_number, row in lines:
+            if row.startswith(wiki_constants.ROOT_TAG):
                 parent_tags = []
                 level_adj = 0
             else:
-                level = self._get_tag_level(line) + level_adj
+                level = self._get_tag_level(row) + level_adj
                 if level < len(parent_tags):
                     parent_tags = parent_tags[:level]
                 elif level > len(parent_tags):
-                    self._add_fatal_error(line_number, line,
+                    self._add_fatal_error(row_number, row,
                                           "Line has too many *'s at front.  You cannot skip a level.",
                                           HedExceptions.WIKI_LINE_START_INVALID)
                     continue
 
             # Create the entry
-            tag_entry, parent_tags, level_adj = self._add_tag_meta(parent_tags, line_number, line, level_adj)
+            tag_entry = self._create_tag_entry(parent_tags, row_number, row)
+            if not tag_entry:
+                # This will have already raised an error
+                continue
+
+            tag_entry, level_adj = self._add_tag_entry(tag_entry, row_number, row, level_adj)
+            if tag_entry:
+                parent_tags = tag_entry.name.split("/")
 
     def _read_unit_classes(self, lines):
         """Add the unit classes section.
@@ -468,3 +473,52 @@ class SchemaLoaderWiki(SchemaLoaderText):
                     strings_for_section[current_section].append((line_number + 1, line))
 
         return strings_for_section
+
+    def _add_tag_entry(self, tag_entry, row_number, row, level_adj):
+        try:
+            rooted_entry = self.find_rooted_entry(tag_entry, self._schema, self._loading_merged)
+            if rooted_entry:
+                parent_tags = rooted_entry.long_tag_name.split("/")
+                level_adj = len(parent_tags)
+                # Create the entry again for rooted tags, to get the full name.
+                tag_entry = self._create_tag_entry(parent_tags, row_number, row)
+        except HedFileError as e:
+            self._add_fatal_error(row_number, row, e.message, e.code)
+            return None, level_adj
+
+        tag_entry = self._add_to_dict(row_number, row, tag_entry, HedSectionKey.Tags)
+
+        return tag_entry, level_adj
+
+    def _create_tag_entry(self, parent_tags, row_number, row):
+        """ Create a tag entry(does not add to schema)
+
+        Parameters:
+            parent_tags (list): A list of parent tags in order.
+            row_number (int): The row number to report errors as
+            row (str or pd.Series): A tag row or pandas series(depends on format)
+
+        Returns:
+            HedSchemaEntry: The entry for the added tag.
+
+        Notes:
+            Includes attributes and description.
+        """
+        tag_name, _ = self._get_tag_name(row)
+        if tag_name:
+            if parent_tags:
+                long_tag_name = "/".join(parent_tags) + "/" + tag_name
+            else:
+                long_tag_name = tag_name
+            return self._create_entry(row_number, row, HedSectionKey.Tags, long_tag_name)
+
+        self._add_fatal_error(row_number, row, "Schema term is empty or the line is malformed",
+                              error_code=HedExceptions.WIKI_DELIMITERS_INVALID)
+
+    def _add_to_dict(self, row_number, row, entry, key_class):
+        if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
+            self._add_fatal_error(row_number, row,
+                                  "Library tag in unmerged schema has InLibrary attribute",
+                                  HedExceptions.IN_LIBRARY_IN_UNMERGED)
+
+        return self._add_to_dict_base(entry, key_class)
