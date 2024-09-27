@@ -209,7 +209,7 @@ class DefinitionDict:
         # initial validation
         groups = group.groups()
         issues = []
-        tags = group.tags()
+        # tags = group.tags()
         # if len(tags) != 1:
         #     issues += \
         #         ErrorHandler.format_error_with_context(error_handler,
