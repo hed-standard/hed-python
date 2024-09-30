@@ -11,7 +11,7 @@ def validate_schema_tag(hed_entry):
     """ Check short tag for capitalization and illegal characters.
 
     Parameters:
-        hed_entry (HedTagEntry): A single hed term.
+        hed_entry (HedTagEntry): A single HED term.
 
     Returns:
         list: A list of all formatting issues found in the term. Each issue is a dictionary.

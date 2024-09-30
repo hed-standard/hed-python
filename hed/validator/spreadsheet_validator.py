@@ -38,7 +38,7 @@ class SpreadsheetValidator:
             name(str): The name to report errors from this file as
             error_handler (ErrorHandler): Error context to use.  Creates a new one if None
         Returns:
-            issues (list of dict): A list of issues for hed string
+            issues (list of dict): A list of issues for HED string
         """
 
         issues = []

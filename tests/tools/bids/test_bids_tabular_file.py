@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
         events.set_contents()
         self.assertIsInstance(events.contents, TabularInput,
                               "BidsTabularFile should have TabularInput contents after setting.")
-        self.assertFalse(events.has_hed, "set_contents indicate hed if no sidecar and no HED columns.")
+        self.assertFalse(events.has_hed, "set_contents indicate HED if no sidecar and no HED columns.")
         events.clear_contents()
         self.assertFalse(events.contents, "BidsTabularFile should have no contents after clearing.")
 

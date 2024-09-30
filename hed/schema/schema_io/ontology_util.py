@@ -60,7 +60,7 @@ def get_all_ids(df):
         df(pd.DataFrame): The dataframe
 
     Returns:
-        numbers(Set or None): None if this has no hed column, otherwise all unique numbers as a set.
+        numbers(Set or None): None if this has no HED column, otherwise all unique numbers as a set.
     """
     if constants.hed_id in df.columns:
         modified_df = df[constants.hed_id].apply(lambda x: remove_prefix(x, "HED_"))
@@ -86,7 +86,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     hedid_errors = []
     if not schema_name:
         schema_name = schema.library
-    # 1. Verify existing hed ids don't conflict between schema/dataframes
+    # 1. Verify existing HED ids don't conflict between schema/dataframes
     for df_key, df in dataframes.items():
         section_key = constants.section_mapping_hed_id.get(df_key)
         if not section_key:
@@ -106,13 +106,13 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     output_dfs = Schema2DF(get_as_ids=get_as_ids).process_schema(schema, save_merged=False)
 
     if assign_missing_ids:
-        # 3: Add any hed ID's as needed to these generated dfs
+        # 3: Add any HED ID's as needed to these generated dfs
         for df_key, df in output_dfs.items():
             if df_key == constants.STRUCT_KEY:
                 continue
             unused_tag_ids = _get_hedid_range(schema_name, df_key)
 
-            # If no errors, assign new hed ID's
+            # If no errors, assign new HED ID's
             assign_hed_ids_section(df, unused_tag_ids)
 
     # 4: Merge the dataframes
@@ -184,7 +184,7 @@ def assign_hed_ids_section(df, unused_tag_ids):
 
     Parameters:
         df(pd.DataFrame): The dataframe to add id's to.
-        unused_tag_ids(set of int): The possible hed id's to assign from
+        unused_tag_ids(set of int): The possible HED id's to assign from
     """
     # Remove already used ids
     unused_tag_ids -= get_all_ids(df)

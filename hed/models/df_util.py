@@ -208,7 +208,7 @@ def split_delay_tags(series, hed_schema, onsets):
 
     Returns:
         sorted_df(pd.Dataframe or None): If we had onsets, a dataframe with 3 columns
-            "HED": The hed strings(still str)
+            "HED": The HED strings(still str)
             "onset": the updated onsets
             "original_index": the original source line.  Multiple lines can have the same original source line.
 

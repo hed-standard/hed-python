@@ -15,7 +15,7 @@ class OnsetValidator:
         """ Validate onset/offset/inset tag relations
 
         Parameters:
-            hed_string_obj (HedString): The hed string to check.
+            hed_string_obj (HedString): The HED string to check.
 
         Returns:
             list: A list of issues found in validating onsets (i.e., out of order onsets, repeated def names).

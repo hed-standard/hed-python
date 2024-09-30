@@ -182,7 +182,7 @@ class TestHedSchema(unittest.TestCase):
         ver3 = ["8.0.0", "sc:score_1.0.0"]
         schemas3 = load_schema_version(ver3)
         self.assertIsInstance(schemas3, HedSchemaGroup, "load_schema_version returns HedSchema version+namespace")
-        self.assertIsInstance(schemas3._schemas, dict, "load_schema_version group keeps dictionary of hed versions")
+        self.assertIsInstance(schemas3._schemas, dict, "load_schema_version group keeps dictionary of HED versions")
         self.assertEqual(len(schemas3._schemas), 2, "load_schema_version group dictionary is right length")
         self.assertEqual(schemas3.name, "8.0.0,sc:score_1.0.0")
         s = schemas3._schemas[""]
@@ -192,7 +192,7 @@ class TestHedSchema(unittest.TestCase):
         formatted_list = schemas3.get_formatted_version()
         schemas4 = load_schema_version(formatted_list)
         self.assertIsInstance(schemas4, HedSchemaGroup, "load_schema_version returns HedSchema version+namespace")
-        self.assertIsInstance(schemas4._schemas, dict, "load_schema_version group keeps dictionary of hed versions")
+        self.assertIsInstance(schemas4._schemas, dict, "load_schema_version group keeps dictionary of HED versions")
         self.assertEqual(len(schemas4._schemas), 2, "load_schema_version group dictionary is right length")
         self.assertEqual(schemas4.get_formatted_version(), '["8.0.0", "sc:score_1.0.0"]',
                          "load_schema_version gives correct version_string with multiple prefixes")
@@ -215,7 +215,7 @@ class TestHedSchema(unittest.TestCase):
 
 
 class TestHedSchemaUnmerged(unittest.TestCase):
-    # Verify the hed cache can handle loading unmerged with_standard schemas in case they are ever used
+    # Verify the HED cache can handle loading unmerged with_standard schemas in case they are ever used
     @classmethod
     def setUpClass(cls):
         hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),

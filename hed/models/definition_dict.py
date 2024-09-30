@@ -262,7 +262,7 @@ class DefinitionDict:
             Does not validate at all.
 
         Parameters:
-            def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
+            def_tag (HedTag): Source HED tag that may be a Def or Def-expand tag.
 
         Returns:
             def_entry(DefinitionEntry or None): The definition entry if it exists
@@ -279,7 +279,7 @@ class DefinitionDict:
             Does not validate at all.
 
         Parameters:
-            def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
+            def_tag (HedTag): Source HED tag that may be a Def or Def-expand tag.
 
         Returns:
             def_contents: HedGroup

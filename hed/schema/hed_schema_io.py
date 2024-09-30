@@ -67,7 +67,7 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None):
             Template: basename.tsv, where files are named basename_Struct.tsv, basename_Tag.tsv, etc.
             Alternatively, you can point to a directory containing the .tsv files.
         schema_namespace (str or None): The name_prefix all tags in this schema will accept.
-        schema(HedSchema or None): A hed schema to merge this new file into
+        schema(HedSchema or None): A HED schema to merge this new file into
                                    It must be a with-standard schema with the same value.
         name(str or None): User supplied identifier for this schema
 
@@ -117,7 +117,7 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         schema_format (str):         The schema format of the source schema string.
             Allowed normal values: .mediawiki, .xml
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
-        schema(HedSchema or None): A hed schema to merge this new file into
+        schema(HedSchema or None): A HED schema to merge this new file into
                                    It must be a with-standard schema with the same value.
         name(str or None): User supplied identifier for this schema
 
@@ -207,7 +207,7 @@ def parse_version_list(xml_version_list):
         e.g. ["score", "testlib", "ol:otherlib"] will return {"": "score, testlib", "ol:": "otherlib"}
 
     Parameters:
-        xml_version_list (list): List of str specifying which hed schemas to use
+        xml_version_list (list): List of str specifying which HED schemas to use
 
     Returns:
         HedSchema or HedSchemaGroup: The schema or schema group extracted.
@@ -297,7 +297,7 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
         xml_version (str): HED version format string. Expected format: '[schema_namespace:][library_name_]X.Y.Z'
         schema_namespace(str): Namespace to add this schema to, default none
         xml_folder (str): Path to a folder containing schema.
-        schema(HedSchema or None): A hed schema to merge this new file into
+        schema(HedSchema or None): A HED schema to merge this new file into
                                    It must be a with-standard schema with the same value.
 
     Returns:

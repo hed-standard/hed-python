@@ -23,7 +23,7 @@ HED_VERSION_P2 = r"(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)" 
                  r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
 HED_VERSION_P3 = r"(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
 HED_VERSION = HED_VERSION_P1 + HED_VERSION_P2 + HED_VERSION_P3
-# Actual local hed filename re.
+# Actual local HED filename re.
 HED_VERSION_FINAL = r'^[hH][eE][dD](_([a-z0-9]+)_)?(' + HED_VERSION + r')\.[xX][mM][lL]$'
 
 HED_XML_PREFIX = 'HED'
@@ -48,7 +48,7 @@ version_pattern = re.compile(HED_VERSION_FINAL)
 
 
 def set_cache_directory(new_cache_dir):
-    """ Set default global hed cache directory.
+    """ Set default global HED cache directory.
 
     Parameters:
         new_cache_dir (str): Directory to check for versions.
@@ -66,7 +66,7 @@ def get_cache_directory():
 
 
 def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=False):
-    """ Get the HED versions in the hed directory.
+    """ Get the HED versions in the HED directory.
 
     Parameters:
         local_hed_directory (str): Directory to check for versions which defaults to hed_cache.
@@ -126,10 +126,10 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
     Parameters:
         library_name (str or None): Optional the schema library name.
         xml_version (str): Returns this version if it exists
-        local_hed_directory (str): Path to local hed directory.  Defaults to HED_CACHE_DIRECTORY
+        local_hed_directory (str): Path to local HED directory.  Defaults to HED_CACHE_DIRECTORY
         check_prerelease(bool): Also check for prerelease schemas
     Returns:
-        str: The path to the latest HED version the hed directory.
+        str: The path to the latest HED version the HED directory.
 
     """
     if not local_hed_directory:
@@ -143,7 +143,7 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
 
 
 def cache_local_versions(cache_folder):
-    """ Cache all schemas included with the hed installation.
+    """ Cache all schemas included with the HED installation.
 
     Parameters:
         cache_folder (str): The folder holding the cache.
@@ -441,7 +441,7 @@ def _safe_move_tmp_to_folder(temp_hed_xml_file, dest_filename):
 
 
 def _cache_hed_version(version, library_name, version_info, cache_folder):
-    """Cache the given hed version"""
+    """Cache the given HED version"""
     sha_hash, download_url, prerelease = version_info
 
     possible_cache_filename = _create_xml_filename(version, library_name, cache_folder, prerelease)

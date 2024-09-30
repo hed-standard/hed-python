@@ -36,7 +36,7 @@ class Schema2DF(Schema2Base):
         """ Get the adjusted name and ID for the given object type.
 
         Parameters:
-            object_name(str): The name of the base hed object, e.g. HedHeader, HedUnit
+            object_name(str): The name of the base HED object, e.g. HedHeader, HedUnit
             include_prefix(bool): If True, include the "hed:"
         Returns:
             object_name(str): The inherited object name, e.g. StandardHeader
@@ -239,7 +239,7 @@ class Schema2DF(Schema2Base):
             attribute_strings.append(f'({attribute} value "{value}")')
 
         if self._get_as_ids:
-            # we just want the ID for normal hed objects, not schema specific
+            # we just want the ID for normal HED objects, not schema specific
             subclass_of = self._get_object_id(subclass_of, base_id=0, include_prefix=True)
 
         # If they match, we want to leave equivalent_to blank

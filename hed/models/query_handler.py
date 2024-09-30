@@ -10,7 +10,7 @@ class QueryHandler:
     """Parse a search expression into a form than can be used to search a HED string."""
 
     def __init__(self, expression_string):
-        """Compiles a QueryHandler for a particular expression, so it can be used to search hed strings.
+        """Compiles a QueryHandler for a particular expression, so it can be used to search HED strings.
 
         Basic Input Examples:
 
