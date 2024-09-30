@@ -24,7 +24,7 @@ class SchemaLoader(ABC):
         Parameters:
             filename(str or None): A valid filepath or None
             schema_as_string(str or None): A full schema as text or None
-            schema(HedSchema or None): A hed schema to merge this new file into
+            schema(HedSchema or None): A HED schema to merge this new file into
                                        It must be a with-standard schema with the same value.
             file_format(str or None): The format of this file if needed(only for owl currently)
             name(str or None): Optional user supplied identifier, by default uses filename
@@ -88,7 +88,7 @@ class SchemaLoader(ABC):
         Parameters:
             filename(str or None): A valid filepath or None
             schema_as_string(str or None): A full schema as text or None
-            schema(HedSchema or None): A hed schema to merge this new file into
+            schema(HedSchema or None): A HED schema to merge this new file into
                            It must be a with-standard schema with the same value.
             file_format(str or None): If this is an owl file being loaded, this is the format.
                 Allowed values include: turtle, json-ld, and owl(xml)

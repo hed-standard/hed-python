@@ -216,11 +216,11 @@ class HedString(HedGroup):
 
                         current_tag_group[-1].append(new_group)
                     else:
-                        raise ValueError(f"Closing parentheses in hed string {hed_string}")
+                        raise ValueError(f"Closing parentheses in HED string {hed_string}")
 
         # Comma delimiter issues are ignored and assumed already validated currently.
         if len(current_tag_group) != 1:
-            raise ValueError(f"Unmatched opening parentheses in hed string {hed_string}")
+            raise ValueError(f"Unmatched opening parentheses in HED string {hed_string}")
 
         return current_tag_group[0]
 

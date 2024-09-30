@@ -78,7 +78,7 @@ def validate_schema_description_new(hed_entry):
 
 
 def schema_version_for_library(hed_schema, library_name):
-    """ Given the library name and hed schema object, return the version
+    """ Given the library name and HED schema object, return the version
 
     Parameters:
         hed_schema (HedSchema): the schema object

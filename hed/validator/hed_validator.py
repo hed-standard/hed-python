@@ -50,7 +50,7 @@ class HedValidator:
             allow_placeholders(bool): allow placeholders in the string
             error_handler(ErrorHandler or None): the error handler to use, creates a default one if none passed
         Returns:
-            issues (list of dict): A list of issues for hed string
+            issues (list of dict): A list of issues for HED string
         """
         if not error_handler:
             error_handler = error_reporter.ErrorHandler()
@@ -101,7 +101,7 @@ class HedValidator:
         return self._char_validator.check_tag_invalid_chars(original_tag, allow_placeholders)
 
     def _run_hed_string_validators(self, hed_string_obj, allow_placeholders=False):
-        """Basic high level checks of the hed string for illegal characters
+        """Basic high level checks of the HED string for illegal characters
 
            Catches fully banned characters, out of order parentheses, commas, repeated slashes, etc.
 

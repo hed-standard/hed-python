@@ -76,7 +76,7 @@ def convert_and_update(filenames, set_ids):
 def main():
     parser = argparse.ArgumentParser(description='Update other schema formats based on the changed one.')
     parser.add_argument('filenames', nargs='*', help='List of files to process')
-    parser.add_argument('--set-ids', action='store_true', help='Add missing hed ids')
+    parser.add_argument('--set-ids', action='store_true', help='Add missing HED ids')
 
     args = parser.parse_args()
 

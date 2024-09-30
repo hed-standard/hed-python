@@ -132,7 +132,7 @@ def val_error_invalid_parent(tag, problem_tag, expected_parent_tag):
 
 @hed_tag_error(ValidationErrors.NO_VALID_TAG_FOUND, has_sub_tag=True, actual_code=ValidationErrors.TAG_INVALID)
 def val_error_no_valid_tag(tag, problem_tag):
-    return f"'{problem_tag}' in {tag} is not a valid base hed tag."
+    return f"'{problem_tag}' in {tag} is not a valid base HED tag."
 
 
 @hed_tag_error(ValidationErrors.VALUE_INVALID)

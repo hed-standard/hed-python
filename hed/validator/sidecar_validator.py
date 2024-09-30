@@ -279,7 +279,7 @@ class SidecarValidator:
         return val_issues
 
     def _validate_pound_sign_count(self, hed_string, column_type):
-        """ Check if a given hed string in the column has the correct number of pound signs.
+        """ Check if a given HED string in the column has the correct number of pound signs.
 
         Parameters:
             hed_string (str or HedString): HED string to be checked.

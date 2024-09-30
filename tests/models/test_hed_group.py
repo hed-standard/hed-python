@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
         # works
         located_tags = basic_hed_string_obj.find_tags_with_term("Object", recursive=True, include_groups=0)
         self.assertEqual(len(located_tags), 5)
-        # located tags now has found all 5 hed tags
+        # located tags now has found all 5 HED tags
 
         # This will find no tags
         located_tags = basic_hed_string_obj.find_tags_with_term("reject", recursive=True, include_groups=0)

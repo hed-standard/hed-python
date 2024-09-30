@@ -14,7 +14,7 @@ class DefValidator(DefinitionDict):
     """
 
     def __init__(self, def_dicts=None, hed_schema=None):
-        """ Initialize for definitions in hed strings.
+        """ Initialize for definitions in HED strings.
 
         Parameters:
             def_dicts (list or DefinitionDict or str): DefinitionDicts containing the definitions to pass to baseclass
@@ -67,7 +67,7 @@ class DefValidator(DefinitionDict):
         """ Check for issues with expanding a tag from Def to a Def-expand tag group
 
         Parameters:
-            def_tag (HedTag): Source hed tag that may be a Def or Def-expand tag.
+            def_tag (HedTag): Source HED tag that may be a Def or Def-expand tag.
             def_expand_group (HedGroup or HedTag): Source group for this def-expand tag.
                                                    Same as def_tag if this is not a def-expand tag.
             hed_validator (HedValidator): Used to validate the placeholder replacement.
@@ -140,7 +140,7 @@ class DefValidator(DefinitionDict):
         """ Validate onset/offset
 
         Parameters:
-            hed_string_obj (HedString): The hed string to check.
+            hed_string_obj (HedString): The HED string to check.
 
         Returns:
             list: A list of issues found in validating onsets (i.e., out of order onsets, unknown def names).

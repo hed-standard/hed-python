@@ -135,7 +135,7 @@ class HedType:
 
         Parameters:
             tag (HedTag): A HedTag that is a Def tag.
-            hed_vars (list): A list of names of the hed type_variables
+            hed_vars (list): A list of names of the HED type_variables
             index (ind):  The event number associated with this.
 
         Notes:
