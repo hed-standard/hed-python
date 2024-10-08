@@ -61,7 +61,7 @@ class SpreadsheetValidator:
         if data.needs_sorting:
             data_new = copy.deepcopy(data)
             data_new._dataframe = df_util.sort_dataframe_by_onsets(data.dataframe)
-            issues += error_handler.format_error_with_context(ValidationErrors.ONSETS_OUT_OF_ORDER)
+            issues += error_handler.format_error_with_context(ValidationErrors.ONSETS_UNORDERED)
             data = data_new
 
         onsets = df_util.split_delay_tags(data.series_a, self._schema, data.onsets)
@@ -160,7 +160,7 @@ class SpreadsheetValidator:
             List of issues associated with each invalid value. Each issue is a dictionary.
         """
         issues = []
-        col_issues = base_input._mapper.check_for_mapping_issues(base_input)
+        col_issues = base_input._mapper.check_for_mapping_issues()
         error_handler.add_context_and_filter(col_issues)
         issues += col_issues
         for column in base_input.column_metadata().values():

@@ -115,7 +115,7 @@ def sort_dataframe_by_onsets(df):
     if "onset" in df.columns:
         # Create a copy and sort by onsets as floats(if needed), but continue to keep the string version.
         df_copy = df.copy()
-        df_copy['_temp_onset_sort'] = df_copy['onset'].astype(float)
+        df_copy['_temp_onset_sort'] = pd.to_numeric(df_copy['onset'], errors='coerce')
         df_copy.sort_values(by='_temp_onset_sort', inplace=True)
         df_copy.drop(columns=['_temp_onset_sort'], inplace=True)
 
@@ -251,7 +251,7 @@ def filter_series_by_onset(series, onsets):
     Returns:
         Series or Dataframe: the series with rows filtered together.
     """
-    indexed_dict = _indexed_dict_from_onsets(onsets.astype(float))
+    indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))
     return _filter_by_index_list(series, indexed_dict=indexed_dict)
 
 

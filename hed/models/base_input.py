@@ -130,6 +130,8 @@ class BaseInput:
         if onsets is not None:
             onsets = pd.to_numeric(self.dataframe['onset'], errors='coerce')
             return not onsets.is_monotonic_increasing
+        else:
+            return False
 
     @property
     def name(self):
@@ -276,7 +278,7 @@ class BaseInput:
             row_number (int):    The row number of the spreadsheet to set.
             column_number (int): The column number of the spreadsheet to set.
             new_string_obj (HedString): Object with text to put in the given cell.
-            tag_form (str): Version of the tags (short_tag, long_tag, base_tag, etc)
+            tag_form (str): Version of the tags (short_tag, long_tag, base_tag, etc.)
 
         Notes:
              Any attribute of a HedTag that returns a string is a valid value of tag_form.

@@ -10,6 +10,7 @@ import copy
 from collections import Counter
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
+NO_WARN_COLUMNS = ['onset', 'duration']
 
 
 class ColumnMapper:
@@ -359,7 +360,7 @@ class ColumnMapper:
 
         # 5. Verify we handled all columns
         if self._warn_on_missing_column:
-            fully_combined_list = list(self.sidecar_column_data) + combined_list
+            fully_combined_list = list(self.sidecar_column_data) + combined_list + NO_WARN_COLUMNS
             for column in self._column_map.values():
                 if column not in fully_combined_list:
                     issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN, column)
