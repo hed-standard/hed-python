@@ -108,7 +108,7 @@ class HedTypeSummary(BaseSummary):
         """ Constructor for HED type summary manager.
 
         Parameters:
-            sum_op (BaseOp): Operation associated with this summary.
+            sum_op (SummarizeHedTypeOp): Operation associated with this summary.
 
         """
         super().__init__(sum_op)

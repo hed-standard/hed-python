@@ -187,7 +187,7 @@ class SummarizeHedTagsOp(BaseOp):
             }
             if self.word_cloud["use_mask"] and not self.word_cloud["mask_path"]:
                 self.word_cloud["mask_path"] = os.path.realpath(
-                    os.path.join(os.path.dirname(__file__),  '../../../resources/word_cloud_brain_mask.png'))
+                    os.path.join(os.path.dirname(__file__), '../../../resources/word_cloud_brain_mask.png'))
             if self.word_cloud["font_path"]:
                 self.word_cloud["font_path"] = os.path.realpath(self.word_cloud["font_path"])
 
@@ -224,11 +224,12 @@ class SummarizeHedTagsOp(BaseOp):
 
 class HedTagSummary(BaseSummary):
     """ Manager of the HED tag summaries. """
+
     def __init__(self, sum_op):
         """ Constructor for HED tag summary manager.
 
         Parameters:
-            sum_op (BaseOp): Operation associated with this summary.
+            sum_op (SummarizeHedTagsOp): Operation associated with this summary.
 
         """
 
@@ -249,7 +250,7 @@ class HedTagSummary(BaseSummary):
             new_info['name'], total_events=len(new_info['df']))
         input_data = TabularInput(
             new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
-        tag_man = HedTagManager(input_data, new_info['schema'], remove_types=self.sum_op.remove_types)
+        tag_man = HedTagManager(EventManager(input_data, new_info['schema']), remove_types=self.sum_op.remove_types)
         hed_objs = tag_man.get_hed_objs(include_context=self.sum_op.include_context,
                                         replace_defs=self.sum_op.replace_defs)
         for hed in hed_objs:
@@ -392,8 +393,7 @@ class HedTagSummary(BaseSummary):
         """
         sum_list = [f"Dataset: Total events={result.get('Total events', 0)} "
                     f"Total files={len(result.get('Files', []))}"]
-        sum_list = sum_list + \
-            HedTagSummary._get_tag_list(result, indent=indent)
+        sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod
@@ -409,8 +409,7 @@ class HedTagSummary(BaseSummary):
 
         """
         sum_list = [f"Total events={result.get('Total events', 0)}"]
-        sum_list = sum_list + \
-            HedTagSummary._get_tag_list(result, indent=indent)
+        sum_list = sum_list + HedTagSummary._get_tag_list(result, indent=indent)
         return "\n".join(sum_list)
 
     @staticmethod

@@ -73,7 +73,7 @@ class FactorHedTypeOp(BaseOp):
 
         input_data = TabularInput(df.copy().fillna('n/a'), sidecar=sidecar, name=name)
         df_list = [input_data.dataframe]
-        var_manager = HedTypeManager(input_data, dispatcher.hed_schema)
+        var_manager = HedTypeManager(EventManager(input_data, dispatcher.hed_schema))
         var_manager.add_type(self.type_tag.casefold())
 
         df_factors = var_manager.get_factor_vectors(
