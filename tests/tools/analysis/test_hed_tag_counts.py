@@ -44,8 +44,8 @@ class Test(unittest.TestCase):
         self.assertIsInstance(counts, HedTagCounts)
         self.assertFalse(counts.tag_dict)
         for k in range(6):
-            counts.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
-                                       file_name='Base_name')
+            counts.update_tag_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
+                                     file_name='Base_name')
         self.assertIsInstance(counts.tag_dict, dict)
         self.assertEqual(14, len(counts.tag_dict))
 
@@ -53,10 +53,10 @@ class Test(unittest.TestCase):
         counts1 = HedTagCounts('Base_name1', 50)
         counts2 = HedTagCounts('Base_name2', 100)
         for k in range(6):
-            counts1.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
-                                        file_name='Base_name1')
-            counts2.update_event_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
-                                        file_name='Base_name2')
+            counts1.update_tag_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
+                                      file_name='Base_name1')
+            counts2.update_tag_counts(HedString(self.input_df.iloc[k]['HED_assembled'], self.hed_schema),
+                                      file_name='Base_name2')
         counts3 = HedTagCounts("All", 0)
         counts3.merge_tag_dicts(counts1.tag_dict)
         counts3.merge_tag_dicts(counts2.tag_dict)
@@ -68,8 +68,8 @@ class Test(unittest.TestCase):
     def test_hed_tag_count(self):
         name = 'Base_name1'
         counts1 = HedTagCounts(name, 0)
-        counts1.update_event_counts(HedString(self.input_df.iloc[0]['HED_assembled'], self.hed_schema),
-                                    file_name=name)
+        counts1.update_tag_counts(HedString(self.input_df.iloc[0]['HED_assembled'], self.hed_schema),
+                                  file_name=name)
         self.assertIsInstance(counts1, HedTagCounts)
 
     def test_organize_tags(self):
@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
 
         # type_defs = input_data.get_definitions().gathered_defs
         for hed in df["HED_assembled"]:
-            counts.update_event_counts(HedString(hed, self.hed_schema), 'run-1')
+            counts.update_tag_counts(HedString(hed, self.hed_schema), 'run-1')
         self.assertIsInstance(counts.tag_dict, dict)
         self.assertEqual(46, len(counts.tag_dict))
         org_tags, leftovers = counts.organize_tags(self.tag_template)

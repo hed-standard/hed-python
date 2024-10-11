@@ -101,7 +101,7 @@ class TestSortingByOnset(unittest.TestCase):
         self.assertFalse(opened_file.needs_sorting)
 
         issues = opened_file.validate(load_schema_version("8.3.0"))
-        self.assertEqual(issues[1][ErrorContext.ROW], 5)
+        self.assertEqual(issues[0][ErrorContext.ROW], 5)
         df.at[3, "onset"] = 1.5
         opened_file = TabularInput(df)
         self.assertFalse(opened_file.needs_sorting)
@@ -111,8 +111,8 @@ class TestSortingByOnset(unittest.TestCase):
         self.assertTrue(opened_file.needs_sorting)
         issues = opened_file.validate(load_schema_version("8.3.0"))
         # Should still report the same issue row despite needing sorting for validation
-        self.assertEqual(issues[1]['code'], ValidationErrors.ONSETS_OUT_OF_ORDER)
-        self.assertEqual(issues[2][ErrorContext.ROW], 5)
+        self.assertEqual(issues[0]['code'], ValidationErrors.ONSETS_UNORDERED)
+        self.assertEqual(issues[1][ErrorContext.ROW], 5)
 
     def test_sort(self):
         from hed.models.df_util import sort_dataframe_by_onsets

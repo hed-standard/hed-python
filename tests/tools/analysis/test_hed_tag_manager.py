@@ -109,7 +109,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(tag_man, HedTagManager)
         hed_objs = tag_man.get_hed_objs()
         self.assertIsInstance(hed_objs, list)
-        self.assertEqual(len(hed_objs), len(event_man.onsets))
+        self.assertEqual(len(hed_objs), len(tag_man.event_manager.onsets))
 
     # def test_constructor_variable_caps(self):
     #     sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')

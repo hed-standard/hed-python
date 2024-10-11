@@ -1,5 +1,7 @@
 import os
 import unittest
+import json
+import io
 import numpy as np
 import pandas as pd
 
@@ -8,6 +10,7 @@ from hed.models.sidecar import Sidecar, HedString
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager
+from hed.validator import SpreadsheetValidator
 
 
 class Test(unittest.TestCase):
@@ -22,9 +25,26 @@ class Test(unittest.TestCase):
         sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
         sidecar1 = Sidecar(sidecar_path, name='face_sub1_json')
         cls.input_data = TabularInput(events_path, sidecar=sidecar1, name="face_sub1_events")
-        cls.events_path = events_path
+        sidecar_dict = {
+            "event_code": {
+                "HED": {
+                    "show": "Sensory-event,Visual-presentation",
+                    "respond": "Press",
+                    "whatever": "Black",
+                    "whatelse": "Purple"
+                }
+            },
+            "defs": {
+                "HED": {
+                    "defs1": "(Definition/Con1, (Condition-variable/Cond-one)), (Definition/Con2, (Condition-variable/Cond-one))"
+                }
+            }
+        }
+
+        cls.sidecar2 = Sidecar(io.StringIO(json.dumps(sidecar_dict)))
         cls.sidecar = sidecar1
         cls.schema = schema
+        cls.def_dict = "(Definition/Def1, (Event))"
 
     def test_constructor(self):
         manager1 = EventManager(self.input_data, self.schema)
@@ -45,12 +65,71 @@ class Test(unittest.TestCase):
                 if not event.end_time:
                     self.assertEqual(event.end_index, len(manager1.input_data.dataframe))
 
+    def test_no_onset_constructor(self):
+        # No onsets --- has an event manager
+        tsv = {
+            "event_code": ["show", "respond", "show", "respond", "whatever", "show", "whatelse", "respond"],
+            "HED": ["Age/100", "n/a", "n/a", "n/a", "Green", "n/a", "Female", "n/a"],
+        }
+
+        tab = TabularInput(pd.DataFrame(tsv), sidecar=self.sidecar2)
+        eman = EventManager(tab, self.schema)
+        self.assertIsNone(eman.onsets)
+        self.assertEqual(str(eman.hed_strings[0]), "Age/100,Sensory-event,Visual-presentation")
+
+        # No onsets and an n/a entry
+        tsv["event_code"][2] = "n/a"
+        tab2 = TabularInput(pd.DataFrame(tsv), sidecar=self.sidecar2)
+        eman2 = EventManager(tab2, self.schema)
+        self.assertIsNone(eman2.onsets)
+        self.assertEqual(str(eman2.hed_strings[0]), "Age/100,Sensory-event,Visual-presentation")
+        self.assertFalse(str(eman2.hed_strings[2]))
+        self.assertIsNone(eman2.base)
+        self.assertIsNone(eman2.context)
+
+    def test_bad_onset_constructor(self):
+        tsv = {
+            "onset": [0.0, 1.2, 1.2, 3.0, 5, 3.5, 4, 6],
+            "duration": [0.5, "n/a", "n/a", "n/a", "n/a", "n/a", "n/a", "n/a"],
+            "event_code": ["show", "respond", "show", "respond", "whatever", "show", "whatelse", "respond"],
+            "HED": ["Age/100", "n/a", "n/a", "n/a", "Green", "n/a", "Female", "n/a"],
+        }
+
+        tab = TabularInput(pd.DataFrame(tsv), sidecar=self.sidecar2)
+        with self.assertRaises(HedFileError):
+            EventManager(tab, self.schema)
+
+        tsv = {
+            "onset": [0.0, 1.2, 1.2, 3.0, "n/a", 3.5, "n/a", 6],
+            "duration": [0.5, "n/a", "n/a", "n/a", "n/a", "n/a", "n/a", "n/a"],
+            "event_code": ["show", "respond", "show", "respond", "whatever", "show", "whatelse", "respond"],
+            "HED": ["Age/100", "n/a", "n/a", "n/a", "Green", "n/a", "Female", "n/a"],
+        }
+        tab = TabularInput(pd.DataFrame(tsv), sidecar=self.sidecar2)
+        with self.assertRaises(HedFileError):
+            EventManager(tab, self.schema)
+
+    def test_unfold_no_onset(self):
+        tsv = {
+            "event_code": ["show", "respond", "show", "respond", "whatever", "show", "whatelse", "respond"],
+            "HED": ["Age/100,Condition-variable/Temp", "Def/Con1", "Def/Con2", "n/a", "Green", "n/a", "Female", "n/a"],
+        }
+        tab = TabularInput(pd.DataFrame(tsv), sidecar=self.sidecar2)
+        defs = self.sidecar2.get_def_dict(self.schema)
+        manager1 = EventManager(tab, self.schema)
+        hed1, base1, context1 = manager1.unfold_context()
+        hed2, base2, context2 = manager1.unfold_context(remove_types=["Condition-variable"])
+        self.assertEqual(hed1[1], "Def/Con1,Press")
+        self.assertEqual(hed2[1], "Press")
+
     def test_unfold_context_no_remove(self):
         manager1 = EventManager(self.input_data, self.schema)
         hed, base, context = manager1.unfold_context()
         for index in range(len(manager1.onsets)):
             self.assertIsInstance(hed[index], str)
             self.assertIsInstance(base[index], str)
+
+
 
     def test_unfold_context_remove(self):
         manager1 = EventManager(self.input_data, self.schema)
