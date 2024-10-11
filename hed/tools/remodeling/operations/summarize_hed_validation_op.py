@@ -106,7 +106,7 @@ class HedValidationSummary(BaseSummary):
         """ Constructor for validation issue manager.
 
         Parameters:
-            sum_op (BaseOp): Operation associated with this summary.
+            sum_op (SummarizeHedValidationOp): Operation associated with this summary.
 
         """
         super().__init__(sum_op)
@@ -153,8 +153,7 @@ class HedValidationSummary(BaseSummary):
 
         sidecar = new_info.get('sidecar', None)
         if sidecar and not isinstance(sidecar, Sidecar):
-            sidecar = Sidecar(
-                files=new_info['sidecar'], name=os.path.basename(sidecar))
+            sidecar = Sidecar(files=new_info['sidecar'], name=os.path.basename(sidecar))
         results = self._get_sidecar_results(
             sidecar, new_info, self.sum_op.check_for_warnings)
         if not results['sidecar_had_issues']:

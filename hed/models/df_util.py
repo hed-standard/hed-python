@@ -1,5 +1,7 @@
 """ Utilities for assembly and conversion of HED strings to different forms. """
 import re
+import math
+from collections import defaultdict
 from functools import partial
 import pandas as pd
 from hed.models.hed_string import HedString
@@ -115,7 +117,7 @@ def sort_dataframe_by_onsets(df):
     if "onset" in df.columns:
         # Create a copy and sort by onsets as floats(if needed), but continue to keep the string version.
         df_copy = df.copy()
-        df_copy['_temp_onset_sort'] = df_copy['onset'].astype(float)
+        df_copy['_temp_onset_sort'] = pd.to_numeric(df_copy['onset'], errors='coerce')
         df_copy.sort_values(by='_temp_onset_sort', inplace=True)
         df_copy.drop(columns=['_temp_onset_sort'], inplace=True)
 
@@ -215,7 +217,7 @@ def split_delay_tags(series, hed_schema, onsets):
     Note: This dataframe may be longer than the original series, but it will never be shorter.
     """
     if series is None or onsets is None:
-        return
+        return None
     split_df = pd.DataFrame({"onset": onsets, "HED": series, "original_index": series.index})
     delay_strings = [(i, HedString(hed_string, hed_schema)) for (i, hed_string) in series.items() if
                      "delay/" in hed_string.casefold()]
@@ -251,22 +253,41 @@ def filter_series_by_onset(series, onsets):
     Returns:
         Series or Dataframe: the series with rows filtered together.
     """
-    indexed_dict = _indexed_dict_from_onsets(onsets.astype(float))
-    return _filter_by_index_list(series, indexed_dict=indexed_dict)
+    #indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))
+    #return _filter_by_index_list(series, indexed_dict=indexed_dict)
+    indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))
+    y =  _filter_by_index_list(series, indexed_dict=indexed_dict)
+    return y
+    # return _filter_by_index_list(series, indexed_dict=indexed_dict)
 
 
 def _indexed_dict_from_onsets(onsets):
-    """Finds series of consecutive lines with the same(or close enough) onset"""
+    """Finds series of consecutive lines with the same (or close enough) onset."""
     current_onset = -1000000.0
     tol = 1e-9
-    from collections import defaultdict
     indexed_dict = defaultdict(list)
+
     for i, onset in enumerate(onsets):
+        if math.isnan(onset): # Ignore NaNs
+            continue
         if abs(onset - current_onset) > tol:
             current_onset = onset
         indexed_dict[current_onset].append(i)
 
     return indexed_dict
+
+# def _indexed_dict_from_onsets(onsets):
+#     """Finds series of consecutive lines with the same(or close enough) onset"""
+#     current_onset = -1000000.0
+#     tol = 1e-9
+#     from collections import defaultdict
+#     indexed_dict = defaultdict(list)
+#     for i, onset in enumerate(onsets):
+#         if abs(onset - current_onset) > tol:
+#             current_onset = onset
+#         indexed_dict[current_onset].append(i)
+#
+#     return indexed_dict
 
 
 def _filter_by_index_list(original_data, indexed_dict):

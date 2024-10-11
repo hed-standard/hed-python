@@ -14,7 +14,7 @@ class TabularInput(BaseInput):
         """ Constructor for the TabularInput class.
 
         Parameters:
-            file (str or FileLike): A tsv file to open.
+            file (str or FileLike or pd.Dataframe): A tsv file to open.
             sidecar (str or Sidecar or FileLike): A Sidecar or source file/filename.
             name (str): The name to display for this file for error purposes.
 

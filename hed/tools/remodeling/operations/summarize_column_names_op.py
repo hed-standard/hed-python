@@ -94,7 +94,7 @@ class ColumnNamesSummary(BaseSummary):
         """ Constructor for column name summary manager.
 
         Parameters:
-            sum_op (BaseOp): Operation associated with this summary.
+            sum_op (SummarizeColumnNamesOp): Operation associated with this summary.
 
         """
         super().__init__(sum_op)

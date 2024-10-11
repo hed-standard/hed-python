@@ -115,7 +115,7 @@ class MergeConsecutiveOp(BaseOp):
 
         df_new = df.copy()
         code_mask = df_new[self.column_name] == self.event_code
-        if sum(code_mask.astype(int)) == 0:
+        if not code_mask.any():
             return df_new
         match_columns.append(self.column_name)
         match_df = df_new.loc[:, match_columns]

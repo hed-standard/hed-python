@@ -108,7 +108,7 @@ class HedTypeSummary(BaseSummary):
         """ Constructor for HED type summary manager.
 
         Parameters:
-            sum_op (BaseOp): Operation associated with this summary.
+            sum_op (SummarizeHedTypeOp): Operation associated with this summary.
 
         """
         super().__init__(sum_op)
@@ -130,8 +130,7 @@ class HedTypeSummary(BaseSummary):
             sidecar = Sidecar(sidecar)
         input_data = TabularInput(
             new_info['df'], sidecar=sidecar, name=new_info['name'])
-        type_values = HedType(EventManager(
-            input_data, new_info['schema']), new_info['name'], type_tag=self.type_tag)
+        type_values = HedType(EventManager(input_data, new_info['schema']), new_info['name'], type_tag=self.type_tag)
         counts = HedTypeCounts(new_info['name'], self.type_tag)
         counts.update_summary(type_values.get_summary(),
                               type_values.total_events, new_info['name'])

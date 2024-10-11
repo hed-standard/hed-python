@@ -76,5 +76,5 @@ class OnsetValidator:
         issues = []
         for tag in hed_string.get_all_tags():
             if tag.short_base_tag in banned_tag_list:
-                issues += ErrorHandler.format_error(TemporalErrors.HED_ONSET_WITH_NO_COLUMN, tag)
+                issues += ErrorHandler.format_error(TemporalErrors.TEMPORAL_TAG_NO_TIME, tag)
         return issues

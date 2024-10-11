@@ -133,7 +133,7 @@ class ColumnValueSummary(BaseSummary):
         """ Constructor for column value summary manager.
 
         Parameters:
-            sum_op (BaseOp): Operation associated with this summary.
+            sum_op (SummarizeColumnValuesOp): Operation associated with this summary.
 
         """
         super().__init__(sum_op)

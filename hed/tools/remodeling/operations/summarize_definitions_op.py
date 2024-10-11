@@ -94,7 +94,7 @@ class DefinitionSummary(BaseSummary):
         """ Constructor for the summary of definitions.
 
         Parameters:
-            sum_op (BaseOp): Summary operation class for gathering definitions.
+            sum_op (SummarizeDefinitionsOp): Summary operation class for gathering definitions.
             hed_schema (HedSchema or HedSchemaGroup):  Schema used for the dataset.
             known_defs (str or list or DefinitionDict): Definitions already known to be used.
 

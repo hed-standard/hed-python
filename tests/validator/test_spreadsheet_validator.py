@@ -1,11 +1,13 @@
 import pandas as pd
 import os
 import shutil
+import json
+import io
 
 import unittest
 from hed import load_schema_version, load_schema
 from hed.validator import SpreadsheetValidator
-from hed import TabularInput, SpreadsheetInput
+from hed import TabularInput, SpreadsheetInput, Sidecar
 from hed.errors.error_types import ValidationErrors
 
 
@@ -62,8 +64,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
         self.assertEqual(len(issues), 0)
 
         issues = self.validator.validate(TabularInput(self.df_with_onset), def_dicts=def_dict)
-        self.assertEqual(len(issues), 1)
-        self.assertEqual(issues[0]['code'], ValidationErrors.HED_UNKNOWN_COLUMN)
+        self.assertEqual(len(issues), 0)
 
         base_has_tags_df = pd.DataFrame({
             'HED': ["(Onset, Def/DefaultOnset)", "(Inset, Def/DefaultOnset), (Event, Age/2)",
@@ -78,8 +79,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
         self.assertEqual(len(issues), 3)
         self.assertEqual(issues[0]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)
         issues = self.validator.validate(TabularInput(self.df_with_onset_has_tags), def_dicts=def_dict)
-        self.assertEqual(len(issues), 1)
-        self.assertEqual(issues[0]['code'], ValidationErrors.HED_UNKNOWN_COLUMN)
+        self.assertEqual(len(issues), 0)
 
         base_has_tags_unordered_df = pd.DataFrame({
             'HED': ["(Onset, Def/DefaultOnset)", "(Offset, Def/DefaultOnset), (Age/4)",
@@ -93,6 +93,44 @@ class TestSpreadsheetValidation(unittest.TestCase):
         self.assertEqual(len(issues), 3)
         self.assertEqual(issues[0]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)
         issues = self.validator.validate(TabularInput(self.df_with_onset_has_tags_unordered), def_dicts=def_dict)
-        self.assertEqual(len(issues), 2)
-        self.assertEqual(issues[0]['code'], ValidationErrors.HED_UNKNOWN_COLUMN)
-        self.assertEqual(issues[1]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues[0]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)
+
+    def test_onset_na(self):
+        # Test with no sidecar
+        def_dict = "(Definition/Def1, (Event))"
+        tsv = {
+            "onset": [0.0, 1.2, 1.2, 3.0, "n/a", 3.5, "n/a", 6],
+            "duration": [0.5, "n/a", "n/a", "n/a", "n/a", "n/a", "n/a", "n/a"],
+            "event_code": ["show", "respond", "show", "respond", "whatever", "show", "whatelse", "respond"],
+            "HED": ["Age/100", "(Def/Def1, Onset)", "Red", "n/a", "Green", "(Def/Def1, Offset)",
+                    "Female,(Def/Def1,Onset)", "n/a"],
+        }
+        df_with_nans = pd.DataFrame(tsv)
+        issues = self.validator.validate(TabularInput(df_with_nans), def_dicts=def_dict)
+        self.assertEqual(len(issues), 3)
+        self.assertEqual(issues[2]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)
+
+        # Test with sidecar
+        sidecar_dict = {
+            "event_code": {
+                "HED": {
+                    "show": "Sensory-event,Visual-presentation",
+                    "respond": "Press",
+                    "whatever": "Black",
+                    "whatelse": "Purple"
+                }
+            }
+        }
+
+        sidecar1 = Sidecar(io.StringIO(json.dumps(sidecar_dict)))
+        issues1 = self.validator.validate(TabularInput(df_with_nans, sidecar=sidecar1), def_dicts=def_dict)
+        self.assertEqual(len(issues1), 2)
+        self.assertEqual(issues1[1]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)
+
+        # The whatelse does not use the bad HED columns and HED column appears in {} so only when assembled is used.
+        sidecar_dict["event_code"]["HED"]["whatever"] = "Black, {HED}"
+        sidecar2 = Sidecar(io.StringIO(json.dumps(sidecar_dict)))
+        issues2 = self.validator.validate(TabularInput(df_with_nans, sidecar=sidecar2), def_dicts=def_dict)
+        self.assertEqual(len(issues2), 1)
+        self.assertEqual(issues1[0]['code'], ValidationErrors.ONSETS_UNORDERED)

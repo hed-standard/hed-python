@@ -14,7 +14,7 @@ class HedType:
         """ Create a variable manager for one type-variable for one tabular file.
 
         Parameters:
-            event_manager (EventManager): An event manager for the tabular file.
+            event_manager (EventManager): Event manager instance
             name (str): Name of the tabular file as a unique identifier.
             type_tag (str): Lowercase short form of the tag to be managed.
 
@@ -25,7 +25,7 @@ class HedType:
         self.name = name
         self.type_tag = type_tag.casefold()
         self.event_manager = event_manager
-        self.type_defs = HedTypeDefs(event_manager.def_dict, type_tag=type_tag)
+        self.type_defs = HedTypeDefs(self.event_manager.def_dict, type_tag=type_tag)
         self._type_map = {}  # Dictionary of type tags versus dictionary with keys being definition names.
         self._extract_variables()
 
