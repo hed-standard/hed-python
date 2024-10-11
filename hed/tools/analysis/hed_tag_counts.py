@@ -85,7 +85,7 @@ class HedTagCounts:
         self.files = {}
         self.total_events = total_events
 
-    def update_event_counts(self, hed_string_obj, file_name):
+    def update_tag_counts(self, hed_string_obj, file_name):
         """ Update the tag counts based on a HedString object.
 
         Parameters:

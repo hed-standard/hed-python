@@ -1,6 +1,6 @@
 """ Validates spreadsheet tabular data. """
 import copy
-
+import pandas as pd
 from hed.models.base_input import BaseInput
 from hed.errors.error_types import ColumnErrors, ErrorContext, ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
@@ -70,12 +70,13 @@ class SpreadsheetValidator:
         self._hed_validator = HedValidator(self._schema, def_dicts=def_dicts)
         if data.onsets is not None:
             self._onset_validator = OnsetValidator()
+            onset_mask = ~pd.isna(pd.to_numeric(onsets['onset'], errors='coerce'))
         else:
             self._onset_validator = None
+            onset_mask = None
 
         # Check the rows of the input data
-        issues += self._run_checks(df, error_handler=error_handler, row_adj=row_adj,
-                                   has_onsets=bool(self._onset_validator))
+        issues += self._run_checks(df, error_handler=error_handler, row_adj=row_adj, onset_mask=onset_mask)
         if self._onset_validator:
             issues += self._run_onset_checks(onsets, error_handler=error_handler, row_adj=row_adj)
         error_handler.pop_error_context()
@@ -83,7 +84,7 @@ class SpreadsheetValidator:
         issues = sort_issues(issues)
         return issues
 
-    def _run_checks(self, hed_df, error_handler, row_adj, has_onsets):
+    def _run_checks(self, hed_df, error_handler, row_adj, onset_mask=None):
         issues = []
         columns = list(hed_df.columns)
         self.invalid_original_rows = set()
@@ -113,7 +114,7 @@ class SpreadsheetValidator:
                 error_handler.pop_error_context()  # Row
                 continue
 
-            if has_onsets or not row_strings:
+            if not row_strings or (onset_mask is not None and onset_mask.iloc[row_number]):
                 error_handler.pop_error_context()  # Row
                 continue
 
@@ -147,6 +148,9 @@ class SpreadsheetValidator:
                 issues += new_column_issues
             error_handler.pop_error_context()  # Row
         return issues
+
+    def _run_onset_nan_checks(self, onsets, error_handler, row_adj):
+        return
 
     def _validate_column_structure(self, base_input, error_handler, row_adj):
         """

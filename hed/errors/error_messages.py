@@ -25,9 +25,9 @@ def val_error_empty_group(tag):
     return f"HED tags cannot be empty.  Extra delimiters found: '{tag}'"
 
 
-@hed_tag_error(TemporalErrors.HED_ONSET_WITH_NO_COLUMN, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
-def val_error_hed_onset_with_no_column(tag):
-    return f"Cannot have Temporal tags without an 'Onset' column.  Found tag: '{tag}'"
+@hed_tag_error(TemporalErrors.TEMPORAL_TAG_NO_TIME, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
+def val_error_temporal_tag_no_time(tag):
+    return f"Cannot have Temporal tags without an 'Onset' column and a time.  Found tag: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.TAG_EXTENDED, has_sub_tag=True, default_severity=ErrorSeverity.WARNING)

@@ -153,7 +153,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(tag_man, HedTagManager)
         # hed_objs = tag_man.get_hed_objs(include_context=include_context, replace_defs=replace_defs)
         # for hed in hed_objs:
-        #     counts.update_event_counts(hed, 'myName')
+        #     counts.update_tag_counts(hed, 'myName')
         # summary_dict['myName'] = counts
 
     def test_quick4(self):
@@ -172,7 +172,7 @@ class Test(unittest.TestCase):
 
         # type_defs = input_data.get_definitions().gathered_defs
         for hed in df["HED_assembled"]:
-            counts.update_event_counts(HedString(hed, schema), 'myName')
+            counts.update_tag_counts(HedString(hed, schema), 'myName')
         summary_dict['myName'] = counts
 
     def test_get_summary_details(self):

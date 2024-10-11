@@ -105,6 +105,7 @@ class BaseInput:
         Returns:
             Series: the assembled dataframe with columns merged.
         """
+
         return self.combine_dataframe(self.assemble())
 
     @property

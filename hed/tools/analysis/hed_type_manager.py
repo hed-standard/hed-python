@@ -3,6 +3,7 @@
 import pandas as pd
 import json
 from hed.tools.analysis.hed_type import HedType
+from hed.tools.analysis.event_manager import EventManager
 
 
 class HedTypeManager:

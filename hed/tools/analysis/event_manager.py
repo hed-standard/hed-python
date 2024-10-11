@@ -29,13 +29,15 @@ class EventManager:
         are separated from the rest of the annotations, which are contained in self.hed_strings.
 
         """
+        if input_data.onsets is not None and input_data.needs_sorting:
+            raise HedFileError("OnsetsNotOrdered", "Events must have numeric non-decreasing onset values", "")
         self.hed_schema = hed_schema
         self.input_data = input_data
         self.def_dict = input_data.get_def_dict(hed_schema, extra_def_dicts=extra_defs)
-        if self.input_data.needs_sorting:
-            raise HedFileError("OnsetsNotOrdered", "The onset values must be non-decreasing", "")
-        self.onsets = None
-        self.hed_strings = None
+        self.onsets = None  # list of onset times or None if not an events file
+        self.base = None  # list of strings containing the starts of event processes
+        self.context = None  # list of strings containing the contexts of event processes
+        self.hed_strings = None  # list of HedString objects without the temporal events
         self.event_list = None
         self._create_event_list(input_data)
 
@@ -53,6 +55,9 @@ class EventManager:
         """
         hed_strings = input_data.series_a
         df_util.shrink_defs(hed_strings, self.hed_schema)
+        if input_data.onsets is None:
+            self.hed_strings = [HedString(hed_string, self.hed_schema) for hed_string in hed_strings]
+            return
         delay_df = df_util.split_delay_tags(hed_strings, self.hed_schema, input_data.onsets)
 
         hed_strings = [HedString(hed_string, self.hed_schema) for hed_string in delay_df.HED]
@@ -66,6 +71,7 @@ class EventManager:
         for item in onset_dict.values():
             item.set_end(len(self.onsets), None)
         self.hed_strings = hed_strings
+        self._extract_context()
 
     def _extract_duration_events(self, hed, event_index):
         groups = hed.find_top_level_tags(anchor_tags={DefTagNames.DURATION_KEY})
@@ -120,30 +126,41 @@ class EventManager:
 
         Returns:
             list of str or HedString representing the information without the events of temporal extent.
-            list of str or HedString representing the onsets of the events of temporal extent.
-            list of str or HedString representing the ongoing context information.
+            list of str or HedString or None representing the onsets of the events of temporal extent.
+            list of str or HedString or None representing the ongoing context information.
 
+        If the
         """
-        placeholder = ""
+
         remove_defs = self.get_type_defs(remove_types)  # definitions corresponding to remove types to be filtered out
-        new_hed = [placeholder for _ in range(len(self.hed_strings))]
-        new_base = [placeholder for _ in range(len(self.hed_strings))]
-        new_contexts = [placeholder for _ in range(len(self.hed_strings))]
-        base, contexts = self._expand_context()
+        new_hed = ["" for _ in range(len(self.hed_strings))]
         for index, item in enumerate(self.hed_strings):
             new_hed[index] = self._filter_hed(item, remove_types=remove_types,
                                               remove_defs=remove_defs, remove_group=False)
-            new_base[index] = self._filter_hed(base[index], remove_types=remove_types,
+        if self.onsets is None:
+            return new_hed, None, None
+        new_base, new_contexts = self._get_base_contexts(remove_types, remove_defs)
+        return new_hed, new_base, new_contexts
+
+    def _get_base_contexts(self, remove_types, remove_defs):
+        """ Expand the context and filter to remove specified types.
+
+        Parameters:
+            remove_types (list):  List of types to remove.
+            remove_defs (list):  List of definitions to remove.
+
+        """
+        new_base = ["" for _ in range(len(self.hed_strings))]
+        new_contexts = ["" for _ in range(len(self.hed_strings))]
+        for index, item in enumerate(self.hed_strings):
+            new_base[index] = self._filter_hed(self.base[index], remove_types=remove_types,
                                                remove_defs=remove_defs, remove_group=True)
-            new_contexts[index] = self._filter_hed(contexts[index], remove_types=remove_types,
+            new_contexts[index] = self._filter_hed(self.contexts[index], remove_types=remove_types,
                                                    remove_defs=remove_defs, remove_group=True)
-        return new_hed, new_base, new_contexts   # these are each a list of strings
+        return new_base, new_contexts   # these are each a list of strings
 
-    def _expand_context(self):
+    def _extract_context(self):
         """ Expand the onset and the ongoing context for additional processing.
-
-        Returns:
-            tuple of lists: (base list of str, context list of str).
 
         Notes: For each event, the Onset goes in the base list and the remainder of the times go in the contexts list.
 
@@ -156,8 +173,8 @@ class EventManager:
                 base[event.start_index].append(this_str)
                 for i in range(event.start_index + 1, event.end_index):
                     contexts[i].append(this_str)
-
-        return self.compress_strings(base), self.compress_strings(contexts)
+        self.base = self.compress_strings(base)
+        self.contexts = self.compress_strings(contexts)
 
     def _filter_hed(self, hed, remove_types=[], remove_defs=[], remove_group=False):
         """ Remove types and definitions from a HED string.
