@@ -475,6 +475,3 @@ class BaseInput:
                 raise HedFileError(HedExceptions.GENERIC_ERROR, str(e), self.name) from e
         else:
             raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
-
-        if self._dataframe.size == 0:
-            raise HedFileError(HedExceptions.INVALID_DATAFRAME, "Invalid dataframe(malformed datafile, etc)", file)

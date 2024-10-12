@@ -15,6 +15,8 @@ class Test(unittest.TestCase):
                                      '../../data/bids_tests/eeg_ds003645s_hed')
         cls.library_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                             '../../data/bids_tests/eeg_ds003645s_hed_library'))
+        cls.empty_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                     '../../data/bids_tests/eeg_ds003645s_empty')
 
     def test_constructor(self):
         bids = BidsDataset(self.root_path)
@@ -80,6 +82,23 @@ class Test(unittest.TestCase):
         bids = BidsDataset(self.library_path)
         issues = bids.validate(check_for_warnings=False)
         self.assertFalse(issues, "BidsDataset with libraries should validate")
+
+    def test_empty(self):
+        bids = BidsDataset(self.empty_path, tabular_types=['participants', 'events'])
+        parts = bids.get_tabular_group("participants")
+        self.assertIsInstance(parts, BidsFileGroup, "BidsDataset participants should be a BidsFileGroup")
+        self.assertEqual(len(parts.sidecar_dict), 1, "BidsDataset should have one participants.json file")
+        self.assertEqual(len(parts.datafile_dict), 1, "BidsDataset should have one participants.tsv file")
+        self.assertIsInstance(bids.dataset_description, dict, "BidsDataset dataset_description should be a dict")
+        for group in bids.tabular_files.values():
+            self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
+        self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
+        self.assertIsInstance(bids.schema, HedSchema, "BidsDataset schema should be HedSchema")
+        issues1 = bids.validate(check_for_warnings=False)
+        self.assertFalse(issues1, "BidsDataset with empty events should validate")
+        issues2 = bids.validate(check_for_warnings=True)
+        self.assertTrue(issues2, "BidsDataset with empty events should validate")
+        self.assertEqual(len(issues2), 1)
 
     def test_validator_types(self):
         bids = BidsDataset(self.root_path, tabular_types=None)
