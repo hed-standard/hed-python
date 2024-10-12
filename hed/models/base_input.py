@@ -449,29 +449,54 @@ class BaseInput:
         return []
 
     def _open_dataframe_file(self, file, has_column_names, input_type):
-        pandas_header = 0
-        if not has_column_names:
-            pandas_header = None
+        """ Set the _dataframe property of BaseInput. """
+        pandas_header = 0 if has_column_names else None
 
+        # If file is already a DataFrame
         if isinstance(file, pd.DataFrame):
             self._dataframe = file.astype(str)
             self._has_column_names = self._dataframe_has_names(self._dataframe)
-        elif not file:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file passed to BaseInput.", file)
-        elif input_type in self.TEXT_EXTENSION:
-            try:
-                self._dataframe = pd.read_csv(file, delimiter='\t', header=pandas_header,
-                                              dtype=str, keep_default_na=True, na_values=("", "null"))
-            except Exception as e:
-                raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, str(e), self.name) from e
-            # Convert nan values to a known value
+            return
+
+        # Check for empty file or None
+        if not file:
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file specification passed to BaseInput.", file)
+
+        # Handle Excel file input
+        if input_type in self.EXCEL_EXTENSION:
+            self._load_excel_file(file, has_column_names)
+            return
+
+        # Handle unsupported file extensions
+        if input_type not in self.TEXT_EXTENSION:
+            raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unsupported file extension for text files.",
+                               self.name)
+
+        # Handle text file input (CSV/TSV)
+        self._load_text_file(file, pandas_header)
+
+    def _load_excel_file(self, file, has_column_names):
+        """ Load an Excel file into a Pandas dataframe"""
+        try:
+            self._loaded_workbook = openpyxl.load_workbook(file)
+            loaded_worksheet = self.get_worksheet(self._worksheet_name)
+            self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
+        except Exception as e:
+            raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, f"Failed to load Excel file: {str(e)}", self.name) from e
+
+    def _load_text_file(self, file, pandas_header):
+        """ Load an text file"""
+        if isinstance(file, str) and os.path.exists(file) and os.path.getsize(file) == 0:
+            self._dataframe = pd.DataFrame()  # Handle empty file
+            return
+
+        try:
+            self._dataframe = pd.read_csv(file, delimiter='\t', header=pandas_header, skip_blank_lines=True,
+                                          dtype=str, keep_default_na=True, na_values=("", "null"))
+            # Replace NaN values with a known value
             self._dataframe = self._dataframe.fillna("n/a")
-        elif input_type in self.EXCEL_EXTENSION:
-            try:
-                self._loaded_workbook = openpyxl.load_workbook(file)
-                loaded_worksheet = self.get_worksheet(self._worksheet_name)
-                self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
-            except Exception as e:
-                raise HedFileError(HedExceptions.GENERIC_ERROR, str(e), self.name) from e
-        else:
-            raise HedFileError(HedExceptions.INVALID_EXTENSION, "", file)
+        except pd.errors.EmptyDataError:
+            self._dataframe = pd.DataFrame()  # Handle case where file has no data
+        except Exception as e:
+            raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, f"Failed to load text file: {str(e)}",
+                               self.name) from e
