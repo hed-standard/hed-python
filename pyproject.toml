@@ -41,7 +41,7 @@ dependencies = [
     "pytz",
     "semantic-version",
     "six",
-    "wordcloud==1.9.3"
+    "wordcloud==1.9.4"
 ]
 
 [project.urls]
