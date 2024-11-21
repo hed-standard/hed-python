@@ -266,9 +266,8 @@ class HedSchema(HedSchemaBase):
     def get_as_dataframes(self, save_merged=False):
         """ Get a dict of dataframes representing this file
 
-        save_merged: bool
-            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
-            If it is not a "withStandard" schema, this setting has no effect.
+        Parameters:
+            save_merged (bool): If True, returns DFs as if merged with standard.
 
         Returns:
             dataframes(dict): a dict of dataframes you can load as a schema

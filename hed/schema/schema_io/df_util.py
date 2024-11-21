@@ -12,6 +12,47 @@ from hed.schema.schema_io.text_util import parse_attribute_string, _parse_header
 UNKNOWN_LIBRARY_VALUE = 0
 
 
+def merge_dataframe_dicts(df_dict1, df_dict2, key_column=constants.KEY_COLUMN_NAME):
+    """ Create a new dictionary of DataFrames where dict2 is merged into dict1.
+
+    Does not validate contents or suffixes.
+
+    Parameters:
+        df_dict1(dict of str: df.DataFrame): dataframes to use as destination merge.
+        df_dict2(dict of str: df.DataFrame): dataframes to use as a merge element.
+        key_column(str): name of the column that is treated as the key when dataframes are merged
+    """
+
+    result_dict = {}
+    all_keys = set(df_dict1.keys()).union(set(df_dict2.keys()))
+
+    for key in all_keys:
+        if key in df_dict1 and key in df_dict2:
+            result_dict[key] = _merge_dataframes(df_dict1[key], df_dict2[key], key_column)
+        elif key in df_dict1:
+            result_dict[key] = df_dict1[key]
+        else:
+            result_dict[key] = df_dict2[key]
+
+    return result_dict
+
+
+def _merge_dataframes(df1, df2, key_column):
+    # Add columns from df2 that are not in df1, only for rows that are in df1
+
+    if df1.empty or df2.empty or key_column not in df1.columns or key_column not in df2.columns:
+        raise HedFileError(HedExceptions.BAD_COLUMN_NAMES,
+                           f"Both dataframes to be merged must be non-empty had nave a '{key_column}' column", "")
+    df1 = df1.copy()
+    for col in df2.columns:
+        if col not in df1.columns and col != key_column:
+            df1 = df1.merge(df2[[key_column, col]], on=key_column, how='left')
+
+    # Fill missing values with ''
+    df1.fillna('', inplace=True)
+
+    return df1
+
 def save_dataframes(base_filename, dataframe_dict):
     """ Writes out the dataframes using the provided suffixes.
 

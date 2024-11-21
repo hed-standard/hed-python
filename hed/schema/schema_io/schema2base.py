@@ -14,20 +14,14 @@ class Schema2Base:
         self._schema = None
 
     def process_schema(self, hed_schema, save_merged=False):
-        """
-        Takes a HedSchema object and returns it in the inherited form(mediawiki, xml, etc)
+        """ Takes a HedSchema object and returns it in the inherited form(mediawiki, xml, etc)
 
-        Parameters
-        ----------
-        hed_schema : HedSchema
-        save_merged: bool
-            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
-            If it is not a "withStandard" schema, this setting has no effect.
+        Parameters:
+            hed_schema (HedSchema): The schema to be processed.
+            save_merged (bool): If True, save as merged schema if has "withStandard".
 
-        Returns
-        -------
-        converted_output: Any
-            Varies based on inherited class
+        Returns:
+            Any: Varies based on inherited class
 
         """
         if not hed_schema.can_save():

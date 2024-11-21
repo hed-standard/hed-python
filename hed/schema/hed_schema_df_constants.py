@@ -1,8 +1,9 @@
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema import hed_schema_constants
 
-# Known tsv format suffixes
+KEY_COLUMN_NAME = 'rdfs.label'
 
+# Known tsv format suffixes
 STRUCT_KEY = "Structure"
 TAG_KEY = "Tag"
 UNIT_KEY = "Unit"
