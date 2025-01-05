@@ -21,7 +21,7 @@ class StringValidator:
         """ Report unmatched parentheses.
 
         Parameters:
-            hed_string (str): A hed string.
+            hed_string (str): A HED string.
 
         Returns:
             list: A list of validation list. Each issue is a dictionary.

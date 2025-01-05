@@ -21,6 +21,8 @@ skip_tests = {
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
     "invalid-character-name-value-class-deprecated": "Removing support for 8.2.0 or earlier name classes"
 }
+runAll = True
+runOnly = {}
 
 
 class MyTestCase(unittest.TestCase):
@@ -28,6 +30,7 @@ class MyTestCase(unittest.TestCase):
     def setUpClass(cls):
         test_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                  'hed-specification/tests/json_tests'))
+        cls.test_dir = test_dir
         cls.test_files = [os.path.join(test_dir, f) for f in os.listdir(test_dir)
                           if os.path.isfile(os.path.join(test_dir, f))]
         cls.fail_count = []
@@ -38,7 +41,7 @@ class MyTestCase(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def run_single_test(self, test_file):
+    def run_single_test(self, test_file, test_name=None, test_type=None):
         with open(test_file, "r") as fp:
             test_info = json.load(fp)
         for info in test_info:
@@ -51,9 +54,9 @@ class MyTestCase(unittest.TestCase):
             if name in skip_tests:
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
-
-            # if name != "library-invalid-bad_with-standard-version":
-            #     continue
+            if test_name is not None and name != test_name:
+                print(f"Skipping {name} test because it is not the one specified")
+                continue
             description = info['description']
             schema = info['schema']
             check_for_warnings = info.get("warning", False)
@@ -76,6 +79,8 @@ class MyTestCase(unittest.TestCase):
             else:
                 def_dict = DefinitionDict()
             for section_name, section in info["tests"].items():
+                if test_type is not None and test_type != section_name:
+                    continue
                 if section_name == "string_tests":
                     self._run_single_string_test(section, schema, def_dict, error_code, all_codes,
                                                  description, name, error_handler)
@@ -128,7 +133,6 @@ class MyTestCase(unittest.TestCase):
     def _run_single_sidecar_test(self, info, schema, def_dict, error_code, all_codes, description, name, error_handler):
         for result, tests in info.items():
             for test in tests:
-                # print(f"{error_code}: {name}")
                 buffer = io.BytesIO(json.dumps(test).encode("utf-8"))
                 sidecar = Sidecar(buffer)
                 issues = sidecar.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
@@ -208,13 +212,17 @@ class MyTestCase(unittest.TestCase):
     def test_errors(self):
         for test_file in self.test_files:
             self.run_single_test(test_file)
-        # test_file = './temp.json'
-        # self.run_single_test(test_file)
+
         print(f"{len(self.fail_count)} tests got an unexpected result")
         print("\n".join(self.fail_count))
         self.assertEqual(len(self.fail_count), 0)
 
+    def test_debug(self):
+        test_file = os.path.realpath('./temp4.json')
+        test_name = None
+        test_type = None
+        self.run_single_test(test_file, test_name, test_type)
+
 
 if __name__ == '__main__':
-
     unittest.main()

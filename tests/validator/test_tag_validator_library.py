@@ -141,7 +141,7 @@ class IndividualHedTagsShort(TestHed3):
     def test_required_units(self):
         test_strings = {
             'hasRequiredUnit': 'Duration/3 ms',
-            'missingRequiredUnit': 'Duration/3',
+            'missingUnit': 'Duration/3',
             'notRequiredNoNumber': 'Age',
             'notRequiredNumber': 'Age/0.5',
             'notRequiredScientific': 'Age/5.2e-1',
@@ -151,7 +151,7 @@ class IndividualHedTagsShort(TestHed3):
         }
         expected_results = {
             'hasRequiredUnit': True,
-            'missingRequiredUnit': False,
+            'missingUnit': True,
             'notRequiredNoNumber': True,
             'notRequiredNumber': True,
             'notRequiredScientific': True,
@@ -161,8 +161,7 @@ class IndividualHedTagsShort(TestHed3):
         # legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'hasRequiredUnit': [],
-            'missingRequiredUnit': self.format_error(
-                ValidationErrors.UNITS_MISSING, tag=0, default_unit='s'),
+            'missingUnit': [],
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
             'notRequiredScientific': [],

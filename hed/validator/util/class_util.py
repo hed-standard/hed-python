@@ -61,17 +61,18 @@ class UnitValueValidator:
         """
         validation_issues = []
         if original_tag.is_unit_class_tag():
-            stripped_value, unit = original_tag.get_stripped_unit_value(validate_text)
-            # that are prefixes like $.  Right now those are marked as unit invalid AND value_invalid.
-            bad_units = " " in stripped_value
 
-            if bad_units:
-                stripped_value = stripped_value.split(" ")[0]
+            # Check the units first
+            stripped_value, units = original_tag.get_stripped_unit_value(validate_text)
+            if not stripped_value:
+                validation_issues += self._report_bad_units(original_tag, report_as)
+                return validation_issues
 
+            # Check the value classes
             validation_issues += self._check_value_class(original_tag, stripped_value, report_as, error_code,
                                                          index_offset)
-            if not unit:
-                validation_issues += self._check_units(original_tag, bad_units, report_as)
+            if validation_issues:
+                return validation_issues
 
             # We don't want to give this overall error twice
             if error_code and validation_issues and not any(error_code == issue['code'] for issue in validation_issues):
@@ -97,41 +98,6 @@ class UnitValueValidator:
         """
         return self._check_value_class(original_tag, validate_text, report_as, error_code, index_offset)
 
-    # def _get_tag_problem_indexes(self, original_tag, stripped_value, validation=True):
-    #     """ Return list of problem indices for error messages.
-    #
-    #     Parameters:
-    #         original_tag (HedTag): The original tag that is used to report the error.
-    #         stripped_value (str): value without units
-    #         validation (bool):
-    #
-    #     Returns:
-    #         list: List of int locations in which error occurred.
-    #     """
-    #     indexes = []
-    #     # Extra +1 for the slash
-    #     start_index = original_tag.extension.find(stripped_value) + len(original_tag.org_base_tag) + 1
-    #     if start_index == -1:
-    #         return indexes
-    #
-    #     if not validation:
-    #         return schema_validation_util_deprecated._get_disallowed_character_indexes(stripped_value, start_index)
-    #
-    #     return self._get_problem_indices(stripped_value, "nameClass", start_index=start_index)
-    # classes = list(original_tag.value_classes.keys())
-    # problems = {}
-    # okay_count = len(classes)
-    # for class_name in classes:
-    #     indices = self._char_validator.get_problem_chars(stripped_value, class_name)
-    #     if indices:
-    #         problems[class_name] = [(char, index + start_index) for index, char in indices]
-    #     else:
-    #        okay_count -= 1
-    # if okay_count:  # At least one value class has an issue
-    #     return problems
-    # else:
-    #     return {}
-
     def _get_problem_indices(self, stripped_value, class_name, start_index=0):
         indices = self._char_validator.get_problem_chars(stripped_value, class_name)
         if indices:
@@ -139,30 +105,6 @@ class UnitValueValidator:
         return indices
         # value_classes = original_tag.value_classes.values()
         # allowed_characters = schema_validation_util.get_allowed_characters(original_tag.value_classes.values())
-
-    #  return schema_validation_util.get_problem_indexes(stripped_value, allowed_characters, index_adj=start_index)
-
-    # @staticmethod
-    # def get_problem_index(validation_string, reg_ex, index_adj=0):
-    #     """Finds indexes with values not in character set
-    #
-    #     Parameters:
-    #         validation_string(str): The string to check characters in
-    #         character_set(set): the list of valid characters(or the value "nonascii" as a set entry)
-    #         index_adj(int): the value to adjust the reported indices by, if this isn't the start of a string.
-    #
-    #     Returns:
-    #         index_list(tuple of (str, int)): The list of problematic characters and indices
-    #     """
-    #     invalid_positions = []
-    #
-    #     # Iterate over the string, check each character
-    #     for i, char in enumerate(validation_string):
-    #         if not re.match(reg_ex, char):
-    #             # If the character does not match, record its position and value
-    #             invalid_positions.append((i, char))
-    #
-    #     return invalid_positions
 
     def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None, index_offset=0):
         """ Return any issues found if this is a value tag,
@@ -223,61 +165,19 @@ class UnitValueValidator:
             index = value[1] + index_adj
             if value[0] in "{}":
                 validation_issues += ErrorHandler.format_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE,
-                                                               tag=report_as, index_in_tag=index,
-                                                               index_in_tag_end=index + 1)
+                                                               tag=report_as,problem_tag=value[0])
             else:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
-                                                               value_class=class_name, tag=report_as,
-                                                               index_in_tag=index, index_in_tag_end=index + 1)
+                                                               tag=report_as, value_class=class_name,
+                                                               problem_tag=value[0])
         return validation_issues
-    # @staticmethod
-    # def report_class_errors(error_dict, report_as):
-    #     validation_issues = []
-    #     for class_name, errors in error_dict.items():
-
-        # def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None, index_offset=0):
-
-    #     """ Return any issues found if this is a value tag,
-    #
-    #     Parameters:
-    #         original_tag (HedTag): The original tag that is used to report the error.
-    #         stripped_value (str): value without units
-    #         report_as (HedTag): Report as this tag.
-    #         error_code(str): The code to override the error as.  Again mostly for def/def-expand tags.
-    #         index_offset(int): Offset into the extension validate_text starts at.
-    #
-    #     Returns:
-    #         list:  List of dictionaries of validation issues.
-    #
-    #     """
-    #
-    #     validation_issues = []
-    #     if original_tag.is_takes_value_tag():
-    #         report_as = report_as if report_as else original_tag
-    #         problem_indexes = self._get_tag_problem_indexes(original_tag, stripped_value, self._validate_characters)
-    #         for char, index in problem_indexes:
-    #             tag_code = ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE if (
-    #                     char in "{}") else ValidationErrors.INVALID_TAG_CHARACTER
-    #
-    #             index_adj = len(report_as.org_base_tag) - len(original_tag.org_base_tag)
-    #             index += index_adj + index_offset
-    #             validation_issues += ErrorHandler.format_error(tag_code,
-    #                                                            tag=report_as, index_in_tag=index,
-    #                                                            index_in_tag_end=index + 1)
-    #         if not self._validate_value_class_portion(original_tag, stripped_value):
-    #             validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID, report_as)
-    #             if error_code:
-    #                 validation_issues += ErrorHandler.format_error(ValidationErrors.VALUE_INVALID,
-    #                                                                report_as, actual_error=error_code)
-    #     return validation_issues
 
     @staticmethod
-    def _check_units(original_tag, bad_units, report_as):
-        """Returns an issue noting this is either bad units, or missing units
+    def _report_bad_units(original_tag, report_as):
+        """Returns an issue noting this is bad units
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
-            bad_units (bool): Tag has units so check --- otherwise validate with default units.
             report_as (HedTag): Report as this tag.
 
         Returns:
@@ -285,15 +185,8 @@ class UnitValueValidator:
 
         """
         report_as = report_as if report_as else original_tag
-        if bad_units:
-            tag_unit_class_units = original_tag.get_tag_unit_class_units()
-            validation_issue = ErrorHandler.format_error(ValidationErrors.UNITS_INVALID,
-                                                         tag=report_as, units=tag_unit_class_units)
-        else:
-            default_unit = original_tag.default_unit
-            validation_issue = ErrorHandler.format_error(ValidationErrors.UNITS_MISSING,
-                                                         tag=report_as, default_unit=default_unit)
-        return validation_issue
+        tag_unit_class_units = original_tag.get_tag_unit_class_units()
+        return ErrorHandler.format_error(ValidationErrors.UNITS_INVALID, tag=report_as, units=tag_unit_class_units)
 
     def _validate_value_class_portion(self, original_tag, portion_to_validate):
         if portion_to_validate is None:

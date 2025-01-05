@@ -122,44 +122,31 @@ class TestSchemaUtilityFunctions(TestHedBase):
         self.assertEqual(no_unit_class_tag_result, [])
 
     def test_strip_off_units_from_value(self):
-        # todo: add this back in when we have a currency unit or make a test for one.
-        # dollars_string_no_space = HedTag('Participant/Effect/Cognitive/Reward/$25.99', schema=self.schema)
-        # dollars_string = HedTag('Participant/Effect/Cognitive/Reward/$ 25.99', schema=self.schema)
-        # dollars_string_invalid = HedTag('Participant/Effect/Cognitive/Reward/25.99$', schema=self.schema)
         volume_string_no_space = HedTag('Volume/100m^3', hed_schema=self.hed_schema)
         volume_string = HedTag('Volume/100 m^3', hed_schema=self.hed_schema)
         prefixed_volume_string = HedTag('Volume/100 cm^3', hed_schema=self.hed_schema)
         invalid_volume_string = HedTag('Volume/200 cm', hed_schema=self.hed_schema)
         invalid_distance_string = HedTag('Distance/200 M', hed_schema=self.hed_schema)
-        # currency_units = {
-        #     'currency':self.schema.unit_classes['currency']
-        # }
-        volume_units = {
-            'volume': self.hed_schema.unit_classes['volumeUnits']
-        }
-        distance_units = {
-            'distance': self.hed_schema.unit_classes['physicalLengthUnits']
-        }
-        # stripped_dollars_string_no_space = dollars_string_no_space._get_tag_units_portion(currency_units)
-        # stripped_dollars_string = dollars_string._get_tag_units_portion(currency_units)
-        # stripped_dollars_string_invalid = dollars_string_invalid._get_tag_units_portion(currency_units)
+        volume_units = {'volume': self.hed_schema.unit_classes['volumeUnits']}
+        distance_units = { 'distance': self.hed_schema.unit_classes['physicalLengthUnits']}
         stripped_volume_string, _, _ = HedTag._get_tag_units_portion(volume_string.extension, volume_units)
         stripped_volume_string_no_space, _, _ = HedTag._get_tag_units_portion(volume_string_no_space.extension,
                                                                               volume_units)
         stripped_prefixed_volume_string, _, _ = HedTag._get_tag_units_portion(prefixed_volume_string.extension,
                                                                               volume_units)
-        stripped_invalid_volume_string, _, _ = HedTag._get_tag_units_portion(invalid_volume_string.extension,
-                                                                             volume_units)
-        stripped_invalid_distance_string, _, _ = HedTag._get_tag_units_portion(invalid_distance_string.extension,
+        stripped_invalid_volume_string, units_invalid, unit_entry_invalid = (
+            HedTag._get_tag_units_portion(invalid_volume_string.extension, volume_units))
+        stripped_invalid_distance_string, dist_invalid_units, dist_invalid_entry = HedTag._get_tag_units_portion(invalid_distance_string.extension,
                                                                                distance_units)
-        # self.assertEqual(stripped_dollars_string_no_space, None)
-        # self.assertEqual(stripped_dollars_string, '25.99')
-        # self.assertEqual(stripped_dollars_string_invalid, None)
         self.assertEqual(stripped_volume_string, '100')
-        self.assertEqual(stripped_volume_string_no_space, None)
+        self.assertEqual(stripped_volume_string_no_space, '100m^3')
         self.assertEqual(stripped_prefixed_volume_string, '100')
-        self.assertEqual(stripped_invalid_volume_string, None)
-        self.assertEqual(stripped_invalid_distance_string, None)
+        self.assertEqual(stripped_invalid_volume_string, '200')
+        self.assertEqual(units_invalid, 'cm')
+        self.assertEqual(unit_entry_invalid, None)
+        self.assertEqual(stripped_invalid_distance_string, '200')
+        self.assertEqual(dist_invalid_units, 'M')
+        self.assertEqual(dist_invalid_entry, None)
 
     def test_determine_allows_extensions(self):
         extension_tag1 = HedTag('boat', hed_schema=self.hed_schema)
@@ -189,4 +176,4 @@ class TestSchemaUtilityFunctions(TestHedBase):
         self.assertEqual(300, tag4.value_as_default_unit())
 
         tag5 = HedTag("IntensityTakesValue/300 cd", hed_schema=util_create_schemas.load_schema_intensity())
-        self.assertEqual(None, tag5.value_as_default_unit())
+        self.assertEqual(300, tag5.value_as_default_unit())

@@ -169,9 +169,22 @@ class DefinitionDict:
         return new_def_issues, context
 
     def _validate_placeholders(self, def_tag_name, group, def_takes_value, error_handler):
+        """ Check the definition for the correct placeholders (exactly 1 placeholder when takes value).
+
+        Parameters:
+            def_tag_name (str): The name of the definition without any Definition tag or value.
+            group (HedGroup): The contents of the definition.
+            def_takes_value (bool): True if the definition takes a value (should have #).
+            error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
+
+            Returns:
+               list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
+        """
         new_issues = []
         placeholder_tags = []
         tags_with_issues = []
+
+        # Find the tags that have # in their strings and return issues of count > 1.
         if group:
             for tag in group.get_all_tags():
                 count = str(tag).count("#")
@@ -186,7 +199,7 @@ class DefinitionDict:
                                                                  def_name=def_tag_name,
                                                                  tag_list=tags_with_issues,
                                                                  expected_count=1 if def_takes_value else 0)
-
+        # Make sure placeholder count is correct.
         if (len(placeholder_tags) == 1) != def_takes_value:
             new_issues += ErrorHandler.format_error_with_context(error_handler,
                                                                  DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
@@ -195,6 +208,7 @@ class DefinitionDict:
                                                                  expected_count=1 if def_takes_value else 0)
             return new_issues
 
+        # Make sure that the tag with the placeholder is allowed to take a value.
         if def_takes_value:
             placeholder_tag = placeholder_tags[0]
             if not placeholder_tag.is_takes_value_tag():
@@ -206,6 +220,16 @@ class DefinitionDict:
         return new_issues
 
     def _find_group(self, definition_tag, group, error_handler):
+        """ Check the definition for the correct placeholders (exactly 1 placeholder when takes value).
+
+        Parameters:
+            definition_tag (HedTag): The Definition tag itself.
+            group (HedGroup): The entire definition group include the Definition tag.
+            error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
+
+            Returns:
+               list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
+        """
         # initial validation
         groups = group.groups()
         issues = []

@@ -52,7 +52,7 @@ def val_error_invalid_tag_character(tag, problem_tag):
     return f"Invalid character '{problem_tag}' in tag '{tag}'"
 
 
-@hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, has_sub_tag=True,
+@hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, has_sub_tag=False,
                actual_code=ValidationErrors.CHARACTER_INVALID)
 def val_error_INVALID_VALUE_CLASS_CHARACTER(tag, problem_tag, value_class):
     return f"Invalid character '{problem_tag}' in tag '{tag}' for value class '{value_class}'"
@@ -70,7 +70,13 @@ def val_error_tildes_not_supported(source_string, char_index):
     return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'"
 
 
-@hed_tag_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, has_sub_tag=True,
+@hed_tag_error(ValidationErrors.HED_PLACEHOLDER_OUT_OF_CONTEXT, has_sub_tag=False,
+               actual_code=ValidationErrors.PLACEHOLDER_INVALID)
+def val_error_HED_PLACEHOLDER_OUT_OF_CONTEXT(tag):
+    return f"'{tag}' has a '#' placeholder where it is not allowed or where it should have been replaced with a value."
+
+
+@hed_tag_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, has_sub_tag=False,
                actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def val_error_CURLY_BRACE_UNSUPPORTED_HERE(tag, problem_tag):
     return (f"Curly braces are only permitted in sidecars, fully wrapping text in place of a tag.  "
@@ -259,11 +265,6 @@ def val_warning_required_prefix_missing(tag_namespace):
 @hed_tag_error(ValidationErrors.STYLE_WARNING, default_severity=ErrorSeverity.WARNING)
 def val_warning_capitalization(tag):
     return f"First word not capitalized or camel case - '{tag}'"
-
-
-@hed_tag_error(ValidationErrors.UNITS_MISSING, default_severity=ErrorSeverity.WARNING)
-def val_warning_default_units_used(tag, default_unit):
-    return f"Tag '{tag}' expects units, but no units were given."
 
 
 @hed_error(SidecarErrors.BLANK_HED_STRING)

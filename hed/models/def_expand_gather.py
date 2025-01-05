@@ -10,20 +10,45 @@ from hed.models.hed_string import HedString
 class AmbiguousDef:
     """ Determine whether expanded definitions are consistent. """
     def __init__(self):
-        self.actual_defs = []
+        self.def_tag_name = None
+        self.actual_contents = {}
         self.placeholder_defs = []
+        self.matching_names = None
+        self.has_errors = False
 
     def add_def(self, def_tag, def_expand_group):
-        group_tag = def_expand_group.get_first_group()
-        def_extension = def_tag.extension.split('/')[-1]
-        self.actual_defs.append(group_tag)
-        group_tag = group_tag.copy()
-        matching_tags = [tag for tag in group_tag.get_all_tags() if
-                         tag.extension == def_extension]
+        """ Adds a definition to this ambiguous definition.
 
+        Parameters:
+            def_tag (HedTag): The Def-expand tag representing this definition.
+            def_expand_group (HedGroup): The Definition group including the tag and contents.
+
+        Raises:
+            ValueError: if this group could not match any of the other possible matches.
+
+        """
+        orig_group = def_expand_group.get_first_group()
+        def_extension = def_tag.extension.split('/')[-1]
+        self.actual_contents.setdefault(def_extension, []).append(orig_group)
+        if self.def_tag_name is None:
+            self.def_tag_name = def_tag.short_tag
+        group = orig_group.copy()
+        matching_tags = [tag for tag in group.get_all_tags() if
+                         tag.extension == def_extension and tag.is_takes_value_tag()]
+        if len(matching_tags) == 0:
+            self.has_errors = True
+            raise ValueError("Invalid Definition")
+        matching_names = set([tag.short_base_tag for tag in matching_tags])
+        if self.matching_names is not None:
+            self.matching_names = self.matching_names & matching_names
+        else:
+            self.matching_names = matching_names
+        if len(self.matching_names) == 0:
+            self.has_errors = True
+            raise ValueError("Invalid Definition")
         for tag in matching_tags:
             tag.extension = "#"
-        self.placeholder_defs.append(group_tag)
+        self.placeholder_defs.append(group)
 
     def validate(self):
         """ Validate the given ambiguous definition.
@@ -35,20 +60,17 @@ class AmbiguousDef:
             ValueError: Raised if this is an invalid(not ambiguous) definition.
         """
         # todo: improve this and get_group
-        placeholder_group = self.get_group()
-        if not placeholder_group:
-            raise ValueError("Invalid Definition")
-        placeholder_mask = [(tag.extension == "#") for tag in placeholder_group.get_all_tags()]
-        all_tags_list = [group.get_all_tags() for group in self.actual_defs]
-        for tags, placeholder in zip(zip(*all_tags_list), placeholder_mask):
-            if placeholder:
-                continue
+        # Check whether all of the actual items with the same key agree:
+        for key, contents in self.actual_contents.items():
+            sorted = contents[0].sort()
+            if any(item.sort() != sorted for item in contents):
+                raise ValueError('Invalid Definition')
+        return True
 
-            tag_set = set(tag.extension for tag in tags)
-            if len(tag_set) > 1:
-                raise ValueError("Invalid Definition")
-
-        return placeholder_mask.count(True) == 1
+    def get_definition_string(self):
+        x = f"(Definition/{self.def_tag_name}, {str(self.placeholder_defs[0])})"
+        print(x)
+        return x
 
     @staticmethod
     def _get_matching_value(tags):
@@ -60,7 +82,7 @@ class AmbiguousDef:
         Returns:
             str or None: The matching value if found, None otherwise.
         """
-        extensions = [tag.extension for tag in tags]
+        extensions = [tag.extension for tag in tags if tag.is_takes_value_tag()]
         unique_extensions = set(extensions)
 
         if len(unique_extensions) == 1:
@@ -71,21 +93,49 @@ class AmbiguousDef:
                 return unique_extensions.pop()
         return None
 
-    def get_group(self):
-        new_group = self.placeholder_defs[0].copy()
 
-        all_tags_list = [group.get_all_tags() for group in self.placeholder_defs]
-        for tags, new_tag in zip(zip(*all_tags_list), new_group.get_all_tags()):
-            matching_val = self._get_matching_value(tags)
-            if matching_val is None:
-                return None
-            new_tag.extension = matching_val
 
-        return new_group
+    # def get_group(self):
+    #     """
+    #        Return the first item if there is a matching tag value in each item or None if no match.
+    #     """
+    #     if len(self.placeholder_defs) == 0:
+    #         return None
+    #     new_group = self.placeholder_defs[0].copy()
+    #     if len(self.placeholder_defs) == 1:
+    #         return new_group
+    #     comparison_tags = new_group.get_all_tags()
+    #     all_tags_list = [group.get_all_tags() for group in self.placeholder_defs]
+    #     for tags in all_tags_list:
+    #         if len(tags) != len(comparison_tags):
+    #             return None
+    #         matching_val = self._get_matching_value(tags)
+    #         if matching_val is None:
+    #             return None
+    #     return new_group
+
+    # placeholder_group = self.get_group()
+    # placeholder_mask = [(tag.extension == "#") for tag in placeholder_group.get_all_tags()]
+    # all_tags_list = [group.get_all_tags() for group in self.actual_defs]
+    # for tags, placeholder in zip(zip(*all_tags_list), placeholder_mask):
+    #     if placeholder:
+    #         continue
+    #
+    #     tag_set = set(tag.extension for tag in tags)
+    #     if len(tag_set) > 1:
+    #         raise ValueError("Invalid Definition")
+    #
+    # return placeholder_mask.count(True) == 1
 
 
 class DefExpandGatherer:
-    """ Gather definitions from a series of def-expands, including possibly ambiguous ones. """
+    """ Gather definitions from a series of def-expands, including possibly ambiguous ones.
+
+    Notes: The def-dict contains the known definitions. After validation, it also contains resolved definitions.
+    The errors contain the definition contents that are known to be in error. The ambiguous_defs contain the defintions
+    that are not able to be resolved based on the data.
+
+    """
     def __init__(self, hed_schema, known_defs=None, ambiguous_defs=None, errors=None):
         """Initialize the DefExpandGatherer class.
 
@@ -120,8 +170,32 @@ class DefExpandGatherer:
         for i in hed_strings[def_expand_mask].index:
             string = hed_strings.loc[i]
             self._process_def_expand(string)
-
+        self._validate_ambiguous()
         return self.def_dict, self.ambiguous_defs, self.errors
+
+    def _validate_ambiguous(self):
+        """ Do a final validation on each ambiguous group.
+
+        Notes:
+            If found to be invalid, the ambiguous definition contents are transferred to the errors.
+
+        """
+        for def_name in list(self.ambiguous_defs.keys()):  # Iterate over a copy of the keys
+            ambiguous_def = self.ambiguous_defs.get(def_name)
+            if ambiguous_def is None:
+                continue
+            try:
+                is_resolved = ambiguous_def.validate()
+                if is_resolved:
+                    def_string = ambiguous_def.get_definition_string()
+                    self.def_dict.add_definitions(def_string, self.hed_schema)
+                    del self.ambiguous_defs[def_name]
+                # if is_resolved:
+                #     self.def_dict.defs[def_name] =
+            except ValueError:
+                contents_list = self.errors.setdefault(def_name, [])
+                contents_list += ambiguous_def.actual_contents
+                del self.ambiguous_defs[def_name]
 
     def _process_def_expand(self, string):
         """Process a single HED string to extract definitions and handle known and ambiguous definitions.
@@ -132,6 +206,7 @@ class DefExpandGatherer:
         hed_str = HedString(string, self.hed_schema)
 
         for def_tag, def_expand_group, def_group in hed_str.find_def_tags(recursive=True):
+            print(f"{str(def_tag)}: {str(def_expand_group)}")
             if def_tag == def_expand_group:
                 continue
 
@@ -143,8 +218,8 @@ class DefExpandGatherer:
 
         Parameters:
             def_tag (HedTag): The def-expand tag.
-            def_expand_group (HedGroup): The group containing the def-expand tag.
-            def_group (HedGroup): The group containing the def-expand group.
+            def_expand_group (HedGroup): The group containing the entire Def-expand tag and its group.
+            def_group (HedGroup): The group containing the Def-expand contents.
 
         Returns:
             bool: True if the def-expand tag is known and handled, False otherwise.
@@ -153,6 +228,7 @@ class DefExpandGatherer:
         def_group_contents = self.def_dict._get_definition_contents(def_tag)
         def_expand_group.sort()
 
+        # If this definition is already known, make sure it agrees.
         if def_group_contents:
             if def_group_contents != def_expand_group:
                 self.errors.setdefault(def_tag_name.casefold(), []).append(def_expand_group.get_first_group())
@@ -181,22 +257,15 @@ class DefExpandGatherer:
             def_expand_group (HedGroup): The group containing the def-expand tag.
         """
         def_tag_name = def_tag.extension.split('/')[0]
-        these_defs = self.ambiguous_defs.setdefault(def_tag_name.casefold(), AmbiguousDef())
-        these_defs.add_def(def_tag, def_expand_group)
 
+        # Return the AmbiguousDefinition object associated with this def_tag name
+        these_defs = self.ambiguous_defs.setdefault(def_tag_name.casefold(), AmbiguousDef())
         try:
-            if these_defs.validate():
-                new_contents = these_defs.get_group()
-                self.def_dict.defs[def_tag_name.casefold()] = DefinitionEntry(name=def_tag_name, contents=new_contents,
-                                                                              takes_value=True,
-                                                                              source_context=[])
-                del self.ambiguous_defs[def_tag_name.casefold()]
+            these_defs.add_def(def_tag, def_expand_group)
         except ValueError:
-            for ambiguous_def in these_defs.placeholder_defs:
-                self.errors.setdefault(def_tag_name.casefold(), []).append(ambiguous_def)
+            self.errors.setdefault(def_tag_name.casefold(), []).append(def_expand_group)
             del self.ambiguous_defs[def_tag_name.casefold()]
 
-        return
 
     @staticmethod
     def get_ambiguous_group(ambiguous_def):

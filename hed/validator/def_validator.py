@@ -109,6 +109,12 @@ class DefValidator(DefinitionDict):
         if def_entry is None:
             return []
 
+        # Make sure that there aren't any errant placeholders.
+        if not allow_placeholders and '#' in placeholder:
+           return ErrorHandler.format_error(ValidationErrors.HED_PLACEHOLDER_OUT_OF_CONTEXT, tag=def_tag.tag)
+
+
+        # Set the appropriate error code
         error_code = ValidationErrors.DEF_INVALID
         if is_def_expand_tag:
             error_code = ValidationErrors.DEF_EXPAND_INVALID
@@ -123,11 +129,11 @@ class DefValidator(DefinitionDict):
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
         if def_contents and def_entry.takes_value and hed_validator:
             placeholder_tag = def_contents.get_first_group().find_placeholder_tag()
-            # Handle the case where they're adding a unit as part of a placeholder.  eg Speed/# mph
-            if placeholder_tag:
-                placeholder = placeholder_tag.extension
-                if placeholder.startswith('# '):
-                    placeholder = placeholder[2:]
+        #     # Handle the case where they're adding a unit as part of a placeholder.  eg Speed/# mph
+        #     if placeholder_tag:
+        #         placeholder = placeholder_tag.extension
+        #         if placeholder.startswith('# '):
+        #             placeholder = placeholder[2:]
             def_issues += hed_validator.validate_units(placeholder_tag,
                                                        placeholder,
                                                        report_as=def_tag,

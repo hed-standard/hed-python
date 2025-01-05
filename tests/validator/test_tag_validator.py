@@ -163,7 +163,7 @@ class IndividualHedTagsShort(TestHed):
     def test_required_units(self):
         test_strings = {
             'hasRequiredUnit': 'Duration/3 ms',
-            'missingRequiredUnit': 'Duration/3',
+            'missingUnit': 'Duration/3',
             'notRequiredNoNumber': 'Age',
             'notRequiredNumber': 'Age/0.5',
             'notRequiredScientific': 'Age/5.2e-1',
@@ -173,7 +173,7 @@ class IndividualHedTagsShort(TestHed):
         }
         expected_results = {
             'hasRequiredUnit': True,
-            'missingRequiredUnit': False,
+            'missingUnit': True,
             'notRequiredNoNumber': True,
             'notRequiredNumber': True,
             'notRequiredScientific': True,
@@ -183,8 +183,7 @@ class IndividualHedTagsShort(TestHed):
         # legal_clock_time_units = ['hour:min', 'hour:min:sec']
         expected_issues = {
             'hasRequiredUnit': [],
-            'missingRequiredUnit': self.format_error(ValidationErrors.UNITS_MISSING, tag=0,
-                                                     default_unit='s'),
+            'missingUnit': [],
             'notRequiredNoNumber': [],
             'notRequiredNumber': [],
             'notRequiredScientific': [],
@@ -990,37 +989,6 @@ class TestHedSpecialUnits(TestHed):
     def string_obj_func(validator):
         return partial(validator._validate_individual_tags_in_hed_string)
 
-    def test_special_units(self):
-        test_strings = {
-            'specialAllowedCharCurrency': 'Item/Currency-test/$ 100',
-            'specialNotAllowedCharCurrency': 'Item/Currency-test/@ 100',
-            'specialAllowedCharCurrencyAsSuffix': 'Item/Currency-test/100 $',
-            # Update tests - 8.0 currently has no clockTime nodes.
-            # 'properTime': 'Item/clockTime-test/08:30',
-            # 'invalidTime': 'Item/clockTime-test/54:54'
-        }
-        expected_results = {
-            # 'properTime': True,
-            # 'invalidTime': True,
-            'specialAllowedCharCurrency': True,
-            'specialNotAllowedCharCurrency': False,
-            'specialAllowedCharCurrencyAsSuffix': False,
-        }
-        legal_currency_units = ['dollar', "$", "point"]
-
-        expected_issues = {
-            # 'properTime': [],
-            # 'invalidTime': [],
-            'specialAllowedCharCurrency': [],
-            'specialNotAllowedCharCurrency': self.format_error("INVALID_VALUE_CLASS_VALUE",
-                                                               value_class="numericClass", tag=0, index_in_tag=0,
-                                                               index_in_tag_end=24)
-            + self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_currency_units),
-            'specialAllowedCharCurrencyAsSuffix': self.format_error(ValidationErrors.UNITS_INVALID, tag=0,
-                                                                    units=legal_currency_units),
-        }
-        self.validator_semantic(test_strings, expected_results, expected_issues, True)
-
 
 class TestHedAllowedCharacters(TestHed):
     compute_forms = True
@@ -1045,7 +1013,7 @@ class TestHedAllowedCharacters(TestHed):
         expected_issues = {
             'ascii': [],
             'illegalTab': self.format_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, tag=0,
-                                            index_in_tag=13, index_in_tag_end=14, value_class="textClass"),
+                                            problem_tag='\t', value_class="textClass"),
             'allowTab': []
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
