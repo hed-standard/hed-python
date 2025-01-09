@@ -79,12 +79,26 @@ class HedValidator:
         issues += self._def_validator.validate_def_tags(hed_string, self)
         return issues
 
-    def run_full_string_checks(self, hed_string):
-        issues = []
-        issues += self._group_validator.run_all_tags_validators(hed_string)
-        issues += self._group_validator.run_tag_level_validators(hed_string)
-        issues += self._def_validator.validate_onset_offset(hed_string)
+    # def run_full_string_checks(self, hed_string):
+    #     issues = []
+    #     issues += self._group_validator.run_all_tags_validators(hed_string)
+    #     issues += self._group_validator.run_tag_level_validators(hed_string)
+    #     issues += self._def_validator.validate_onset_offset(hed_string)
         return issues
+
+    def run_full_string_checks(self, hed_string):
+        checks = [
+            self._group_validator.run_all_tags_validators,
+            self._group_validator.run_tag_level_validators,
+            self._def_validator.validate_onset_offset,
+        ]
+
+        for check in checks:
+            issues = check(hed_string)  # Call each function with `hed_string`
+            if issues:
+                return issues
+
+        return []  # Return an empty list if no issues are found
 
     # Todo: mark semi private/actually private below this
     def _run_validate_tag_characters(self, original_tag, allow_placeholders):

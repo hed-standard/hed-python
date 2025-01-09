@@ -6,7 +6,7 @@ import os
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 
-CLASS_REX_FILENAME = 'class_regex.json'
+CLASS_REX_FILENAME = '../data/class_regex.json'
 
 
 class CharValidator:

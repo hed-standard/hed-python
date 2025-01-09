@@ -87,7 +87,9 @@ class TestValidatorBase(TestHedBase):
                                                       params=expected_params)
             error_handler.add_context_and_filter(test_issues)
             test_result = not test_issues
-
+            print(f"test issues: {str(test_issues)}")
+            print(f"expected_issue: {str(expected_issue)}")
+            print(f"expected_params: {str(expected_params)}")
             self.assertEqual(test_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
 

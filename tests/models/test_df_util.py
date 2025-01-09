@@ -205,11 +205,11 @@ class TestConvertToForm(unittest.TestCase):
             "(Def-expand/D5/7, (Label/7, Acceleration/7, Item-count/8, Event))",
             "(Def-expand/D5/8, (Label/8, Acceleration/7, Item-count/8, Event))"
         ]
-        def_dict, ambiguous_defs, _ = process_def_expands(test_strings, self.schema)
+        def_dict, ambiguous_defs, errors = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(def_dict), 5)
 
     def test_error_double_defs(self):
-        # Cases that can't be identified
+        # One case can't be identified.  Action doesn't count -- it doesn't take value.
         test_strings = [
             "(Def-expand/A1/2, (Action/2, Acceleration/5, Item-count/2))",
             "(Def-expand/B2/3, (Action/3, Collection/animals, Acceleration/3))",
@@ -217,8 +217,10 @@ class TestConvertToForm(unittest.TestCase):
             "(Def-expand/D4/7, (Action/7, Acceleration/7, Item-count/8))",
             "(Def-expand/D5/7, (Action/7, Acceleration/7, Item-count/8, Event))",
         ]
-        _, ambiguous_defs, _ = process_def_expands(test_strings, self.schema)
-        self.assertEqual(len(ambiguous_defs), 5)
+        def_dict, ambiguous_defs, errors = process_def_expands(test_strings, self.schema)
+        self.assertEqual(len(ambiguous_defs), 1)
+        self.assertEqual(len(def_dict), 4)
+        self.assertEqual(len(errors), 0)
 
     def test_ambiguous_defs(self):
         # Cases that can't be identified
@@ -275,10 +277,8 @@ class TestConvertToForm(unittest.TestCase):
             "(Def-expand/A1/3, (Acceleration/3, Age/5, Item-count/3))",
         ]
         known, ambiguous, errors = process_def_expands(test_strings, self.schema)
-        self.assertEqual(len(errors), 0)
-        self.assertEqual(len(ambiguous), 1)
-        self.assertEqual(len(ambiguous["a1"].actual_contents), 3)
-
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(len(ambiguous), 0)
 
     def test_errors_unresolved(self):
         # Verify we recognize errors when we had a def that can't be resolved.
@@ -288,8 +288,6 @@ class TestConvertToForm(unittest.TestCase):
         ]
         known, ambiguous, errors = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(errors), 1)
-        x = errors["a1"]
-        self.assertEqual(len(errors["a1"]), 2)
 
     def test_def_expand_detection(self):
         test_strings = [

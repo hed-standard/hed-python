@@ -3,6 +3,7 @@ import unittest
 from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from tests.validator.test_tag_validator_base import TestValidatorBase
 from hed.schema.hed_schema_io import load_schema_version
+from hed import HedTag, HedString
 from functools import partial
 
 
@@ -466,6 +467,21 @@ class TestTagLevels(TestHed):
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
+    def test_temp_validation(self):
+        test_strings = {
+            'invalid2TwoInOne': '(Definition/InvalidDef2, Onset)',
+        }
+        expected_results = {
+             'invalid2TwoInOne': False,
+        }
+        expected_issues = {
+            'invalid2TwoInOne': self.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED,
+                                                  tag=HedTag("Onset", hed_schema=self.hed_schema),
+                                                  group=HedString("(Definition/InvalidDef2, Onset)",
+                                                                  hed_schema=self.hed_schema)),
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
     def test_topLevelTagGroup_validation(self):
         test_strings = {
             'invalid1': 'Definition/InvalidDef',
@@ -504,8 +520,10 @@ class TestTagLevels(TestHed):
             'invalid2': self.format_error(
                 ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.DEFINITION_INVALID) + \
             self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
-            'invalidTwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                                                 multiple_tags="Definition/InvalidDef3".split(", ")),
+            'invalidTwoInOne': self.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED,
+                 tag=HedTag("Definition/InvalidDef3", hed_schema=self.hed_schema),
+                 group=HedString("(Definition/InvalidDef2, Definition/InvalidDef3)",
+                                 hed_schema=self.hed_schema)),
             'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
                                                   multiple_tags="Onset".split(", ")),
             'valid2TwoInOne': [],
@@ -556,7 +574,7 @@ class TestTagLevels(TestHed):
             'semivalid1': [],
             'semivalid2': []
         }
-        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic_string(test_strings, expected_results, expected_issues, False)
 
     def test_empty_groups(self):
         test_strings = {
