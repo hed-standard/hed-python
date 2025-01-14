@@ -469,22 +469,18 @@ class TestTagLevels(TestHed):
 
     def test_temp_validation(self):
         test_strings = {
-            'invalid2TwoInOne': '(Definition/InvalidDef2, Onset)',
+            'valid1': 'Event, (Event)',
         }
         expected_results = {
-             'invalid2TwoInOne': False,
+             'valid1': True,
         }
         expected_issues = {
-            'invalid2TwoInOne': self.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED,
-                                                  tag=HedTag("Onset", hed_schema=self.hed_schema),
-                                                  group=HedString("(Definition/InvalidDef2, Onset)",
-                                                                  hed_schema=self.hed_schema)),
+            'valid1': []
         }
-        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic_new(test_strings, expected_results, expected_issues, False)
 
-    def test_topLevelTagGroup_validation(self):
+    def test_topLevelTagGroup_validation_new(self):
         test_strings = {
-            'invalid1': 'Definition/InvalidDef',
             'valid1': '(Definition/ValidDef)',
             'valid2': '(Definition/ValidDef), (Definition/ValidDef2)',
             'invalid2': '(Event, (Definition/InvalidDef2))',
@@ -493,12 +489,11 @@ class TestTagLevels(TestHed):
             'valid2TwoInOne': '(Duration/5.0 s, Delay, (Event))',
             'invalid3InOne': '(Duration/5.0 s, Delay, Onset, (Event))',
             'invalidDuration': '(Duration/5.0 s, Onset, (Event))',
-            'validDelay': '(Delay, Onset, (Event))',
+            'invalidDelay': '(Delay, Onset, (Event))',
             'invalidDurationPair': '(Duration/5.0 s, Duration/3.0 s, (Event))',
-            'invalidDelayPair': '(Delay/3.0 s, Delay, (Event))',
+            'invalidDelayPair': '(Delay/3.0 s, Delay/2.0 s, (Event))',
         }
         expected_results = {
-            'invalid1': False,
             'valid1': True,
             'valid2': True,
             'invalid2': False,
@@ -507,37 +502,114 @@ class TestTagLevels(TestHed):
             'valid2TwoInOne': True,
             'invalid3InOne': False,
             'invalidDuration': False,
-            'validDelay': True,
+            'invalidDelay': False,
             'invalidDurationPair': False,
             'invalidDelayPair': False,
         }
         expected_issues = {
-            'invalid1': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0,
-                                          actual_error=ValidationErrors.DEFINITION_INVALID)
-            + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0),
             'valid1': [],
             'valid2': [],
-            'invalid2': self.format_error(
-                ValidationErrors.HED_TOP_LEVEL_TAG, tag=1, actual_error=ValidationErrors.DEFINITION_INVALID) + \
-            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
-            'invalidTwoInOne': self.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED,
-                 tag=HedTag("Definition/InvalidDef3", hed_schema=self.hed_schema),
-                 group=HedString("(Definition/InvalidDef2, Definition/InvalidDef3)",
-                                 hed_schema=self.hed_schema)),
-            'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                                                  multiple_tags="Onset".split(", ")),
+            'invalid2': [
+                {'code': 'DEFINITION_INVALID',
+                 'message': 'Tag "Definition/InvalidDef2" must be in a top level group but was found in another location.',
+                 'severity': 1}
+                ],
+            'invalidTwoInOne': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Repeated reserved tag "Definition/InvalidDef3" or multiple reserved tags in group "(Definition/InvalidDef2,Definition/InvalidDef3)"',
+                 'severity': 1}
+            ],
+            'invalid2TwoInOne': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "Onset" is not allowed with the other tag(s) in group "(Definition/InvalidDef2,Onset)"',
+                 'severity': 1}
+            ],
             'valid2TwoInOne': [],
-            'invalid3InOne':  self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                                                multiple_tags="Delay, Onset".split(", ")),
-            'invalidDuration': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                                                 multiple_tags="Onset".split(", ")),
-            'validDelay': [],
-            'invalidDurationPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                                                     multiple_tags="Duration/3.0 s".split(", ")),
-            'invalidDelayPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                                                  multiple_tags="Delay".split(", ")),
+            'invalid3InOne': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "Onset" is not allowed with the other tag(s) in group "(Duration/5.0 s,Delay,Onset,(Event))"',
+                 'severity': 1}
+             ],
+            'invalidDuration': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "Onset" is not allowed with the other tag(s) in group "(Duration/5.0 s,Onset,(Event))"',
+                 'severity': 1}
+            ],
+            'invalidDelay': [
+                {'code': 'TEMPORAL_TAG_ERROR',
+                 'message': "'Onset' tag has no def tag or def-expand group or too many when 1 is required in string.",
+                 'severity': 1}
+            ],
+            'invalidDurationPair': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Repeated reserved tag "Duration/3.0 s" or multiple reserved tags in group "(Duration/5.0 s,Duration/3.0 s,(Event))"',
+                 'severity': 1}
+            ],
+            'invalidDelayPair':  [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Repeated reserved tag "Delay/2.0 s" or multiple reserved tags in group "(Delay/3.0 s,Delay/2.0 s,(Event))"',
+                 'severity': 1}
+            ],
         }
-        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic_new(test_strings, expected_results, expected_issues, False)
+
+    # def test_topLevelTagGroup_validation(self):
+    #     test_strings = {
+    #         'invalid1': 'Definition/InvalidDef',
+    #         'valid1': '(Definition/ValidDef)',
+    #         'valid2': '(Definition/ValidDef), (Definition/ValidDef2)',
+    #         'invalid2': '(Event, (Definition/InvalidDef2))',
+    #         'invalidTwoInOne': '(Definition/InvalidDef2, Definition/InvalidDef3)',
+    #         'invalid2TwoInOne': '(Definition/InvalidDef2, Onset)',
+    #         'valid2TwoInOne': '(Duration/5.0 s, Delay, (Event))',
+    #         'invalid3InOne': '(Duration/5.0 s, Delay, Onset, (Event))',
+    #         'invalidDuration': '(Duration/5.0 s, Onset, (Event))',
+    #         'validDelay': '(Delay, Onset, (Event))',
+    #         'invalidDurationPair': '(Duration/5.0 s, Duration/3.0 s, (Event))',
+    #         'invalidDelayPair': '(Delay/3.0 s, Delay, (Event))',
+    #     }
+    #     expected_results = {
+    #         'invalid1': False,
+    #         'valid1': True,
+    #         'valid2': True,
+    #         'invalid2': False,
+    #         'invalidTwoInOne': False,
+    #         'invalid2TwoInOne': False,
+    #         'valid2TwoInOne': True,
+    #         'invalid3InOne': False,
+    #         'invalidDuration': False,
+    #         'validDelay': True,
+    #         'invalidDurationPair': False,
+    #         'invalidDelayPair': False,
+    #     }
+    #     expected_issues = {
+    #         'invalid1': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0,
+    #                                       actual_error=ValidationErrors.DEFINITION_INVALID)
+    #                     + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0),
+    #         'valid1': [],
+    #         'valid2': [],
+    #         'invalid2':
+    #             self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1,
+    #                               actual_error=ValidationErrors.DEFINITION_INVALID) +
+    #             self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
+    #         'invalidTwoInOne': self.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED,
+    #                                              tag=HedTag("Definition/InvalidDef3", hed_schema=self.hed_schema),
+    #                                              group=HedString("(Definition/InvalidDef2, Definition/InvalidDef3)",
+    #                                                              hed_schema=self.hed_schema)),
+    #         'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+    #                                               multiple_tags="Onset".split(", ")),
+    #         'valid2TwoInOne': [],
+    #         'invalid3InOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+    #                                            multiple_tags="Delay, Onset".split(", ")),
+    #         'invalidDuration': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+    #                                              multiple_tags="Onset".split(", ")),
+    #         'validDelay': [],
+    #         'invalidDurationPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+    #                                                  multiple_tags="Duration/3.0 s".split(", ")),
+    #         'invalidDelayPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
+    #                                               multiple_tags="Delay".split(", ")),
+    #     }
+    #     self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_taggroup_validation(self):
         test_strings = {
@@ -562,19 +634,32 @@ class TestTagLevels(TestHed):
             'semivalid2': True,
         }
         expected_issues = {
-            'invalid1': self.format_error(ValidationErrors.HED_TAG_GROUP_TAG,
-                                          tag=0),
-            'invalid2': self.format_error(ValidationErrors.HED_TAG_GROUP_TAG,
-                                          tag=0),
-            'invalid3': self.format_error(ValidationErrors.HED_TAG_GROUP_TAG,
-                                          tag=2),
+            'invalid1': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "Def-Expand/InvalidDef" that must be in a group was found in another location.',
+                 'severity': 1}
+            ],
+            'invalid2': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "Def-Expand/InvalidDef" that must be in a group was found in another location.',
+                 'severity': 1}
+            ],
+            'invalid3': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "Def-Expand/InvalidDef" that must be in a group was found in another location.',
+                 'severity': 1}
+            ],
             'valid1': [],
             'valid2': [],
             'valid3': [],
             'semivalid1': [],
-            'semivalid2': []
+            'semivalid2': [
+                {'code': 'TEMPORAL_TAG_ERROR',
+                 'message': "'Onset' tag has no def tag or def-expand group or too many when 1 is required in string.",
+                 'severity': 1}
+            ]
         }
-        self.validator_semantic_string(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic_new(test_strings, expected_results, expected_issues, False)
 
     def test_empty_groups(self):
         test_strings = {

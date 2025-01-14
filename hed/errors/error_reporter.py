@@ -390,7 +390,6 @@ class ErrorHandler:
             list: A list of dictionaries containing the issue list after filtering by severity.
 
         """
-        print(issues_list, severity)
         return [issue for issue in issues_list if issue['severity'] <= severity]
 
 

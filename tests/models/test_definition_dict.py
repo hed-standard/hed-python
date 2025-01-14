@@ -20,9 +20,6 @@ class TestDefBase(TestHedBase):
             expected_params = expected_issues[test_key]
             expected_issue = self.format_errors_fully(ErrorHandler(), hed_string=hed_string_obj,
                                                       params=expected_params)
-            # print(test_key)
-            # print(test_issues)
-            # print(expected_issue)
             self.assertCountEqual(test_issues, expected_issue, HedString(test_strings[test_key], self.hed_schema))
 
 

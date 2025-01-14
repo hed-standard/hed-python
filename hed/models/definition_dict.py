@@ -150,7 +150,8 @@ class DefinitionDict:
 
         return def_issues
 
-    def _strip_value_placeholder(self, def_tag_name):
+    @staticmethod
+    def _strip_value_placeholder(def_tag_name):
         def_takes_value = def_tag_name.endswith("/#")
         if def_takes_value:
             def_tag_name = def_tag_name[:-len("/#")]
@@ -168,7 +169,8 @@ class DefinitionDict:
                                                                      def_name=def_tag_name)
         return new_def_issues, context
 
-    def _validate_placeholders(self, def_tag_name, group, def_takes_value, error_handler):
+    @staticmethod
+    def _validate_placeholders(def_tag_name, group, def_takes_value, error_handler):
         """ Check the definition for the correct placeholders (exactly 1 placeholder when takes value).
 
         Parameters:
@@ -219,7 +221,8 @@ class DefinitionDict:
 
         return new_issues
 
-    def _find_group(self, definition_tag, group, error_handler):
+    @staticmethod
+    def _find_group(definition_tag, group, error_handler):
         """ Check the definition for the correct placeholders (exactly 1 placeholder when takes value).
 
         Parameters:
@@ -233,12 +236,6 @@ class DefinitionDict:
         # initial validation
         groups = group.groups()
         issues = []
-        # tags = group.tags()
-        # if len(tags) != 1:
-        #     issues += \
-        #         ErrorHandler.format_error_with_context(error_handler,
-        #                                                DefinitionErrors.WRONG_NUMBER_TAGS,
-        #                                                def_name=definition_tag.extension, tag_list=tags)
         if len(groups) > 1:
             issues += \
                 ErrorHandler.format_error_with_context(error_handler,
@@ -261,7 +258,8 @@ class DefinitionDict:
 
         return group_tag, issues
 
-    def _validate_contents(self, definition_tag, group, error_handler):
+    @staticmethod
+    def _validate_contents(definition_tag, group, error_handler):
         issues = []
         if group:
             def_keys = {DefTagNames.DEF_KEY, DefTagNames.DEF_EXPAND_KEY, DefTagNames.DEFINITION_KEY}

@@ -369,22 +369,30 @@ class TestTagLevels3(TestHed3):
             'invalid2TwoInOne': False,
         }
         expected_issues = {
-            'invalid1': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG,
-                                          tag=0, actual_error=ValidationErrors.DEFINITION_INVALID)
-            + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0),
+            'invalid1': [
+                {'code': 'DEFINITION_INVALID',
+                 'message': 'Tag "tl:Definition/InvalidDef" must be in a top level group but was found in another location.',
+                 'severity': 1}
+            ],
             'valid1': [],
             'valid2': [],
-            'invalid2': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1,
-                                          actual_error=ValidationErrors.DEFINITION_INVALID)
-            + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
-            'invalidTwoInOne': self.format_error(
-                ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="tl:Definition/InvalidDef3".split(", ")),
-            'invalid2TwoInOne': self.format_error(
-                ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-                multiple_tags="tl:Onset".split(", ")),
+            'invalid2':  [
+                {'code': 'DEFINITION_INVALID',
+                 'message': 'Tag "tl:Definition/InvalidDef2" must be in a top level group but was found in another location.',
+                 'severity': 1}
+            ],
+            'invalidTwoInOne': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Repeated reserved tag "tl:Definition/InvalidDef3" or multiple reserved tags in group "(tl:Definition/InvalidDef2,tl:Definition/InvalidDef3)"',
+                 'severity': 1}
+            ],
+            'invalid2TwoInOne': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "tl:Onset" is not allowed with the other tag(s) in group "(tl:Definition/InvalidDef2,tl:Onset)"',
+                 'severity': 1}
+            ],
         }
-        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic_new(test_strings, expected_results, expected_issues, False)
 
     def test_taggroup_validation(self):
         test_strings = {
@@ -394,7 +402,7 @@ class TestTagLevels3(TestHed3):
             'valid1': '(tl:Def-Expand/ValidDef)',
             'valid2': '(tl:Def-Expand/ValidDef), (tl:Def-Expand/ValidDef2)',
             'valid3': '(tl:Event, (tl:Def-Expand/InvalidDef2))',
-            # This case should possibly be flagged as invalid
+            # This case is flagged later as invalid definition
             'semivalid1': '(tl:Def-Expand/InvalidDef2, tl:Def-Expand/InvalidDef3)',
             'semivalid2': '(tl:Def-Expand/InvalidDef2, tl:Onset)',
         }
@@ -405,20 +413,34 @@ class TestTagLevels3(TestHed3):
             'valid1': True,
             'valid2': True,
             'valid3': True,
-            'semivalid1': True,
+            'semivalid1': False,
             'semivalid2': True,
         }
         expected_issues = {
-            'invalid1': self.format_error(ValidationErrors.HED_TAG_GROUP_TAG, tag=0),
-            'invalid2': self.format_error(ValidationErrors.HED_TAG_GROUP_TAG, tag=0),
-            'invalid3': self.format_error(ValidationErrors.HED_TAG_GROUP_TAG, tag=2),
+            'invalid1': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "tl:Def-Expand/InvalidDef" that must be in a group was found in another location.',
+                 'severity': 1}
+             ],
+            'invalid2': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "tl:Def-Expand/InvalidDef" that must be in a group was found in another location.',
+                 'severity': 1}
+            ],
+            'invalid3': [
+                {'code': 'TAG_GROUP_ERROR',
+                 'message': 'Tag "tl:Def-Expand/InvalidDef" that must be in a group was found in another location.',
+                 'severity': 1}
+            ],
             'valid1': [],
             'valid2': [],
             'valid3': [],
             'semivalid1': [],
-            'semivalid2': []
+            'semivalid2': [
+                {'code': 'TEMPORAL_TAG_ERROR',
+                 'message': "'tl:Onset' tag has no def tag or def-expand group or too many when 1 is required in string.", 'severity': 1}]
         }
-        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic_new(test_strings, expected_results, expected_issues, False)
 
 
 class RequiredTags(TestHed3):

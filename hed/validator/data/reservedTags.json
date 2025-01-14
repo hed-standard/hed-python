@@ -12,7 +12,7 @@
     "minNonDefSubgroups": 0,
     "ERROR_CODE": "DEFINITION_INVALID",
     "noSpliceInGroup": true,
-    "forbiddenSubgroupTags": ["Def", "Def-expand", "Inset", "Outset", "Offset", "Event-context", "Delay", "Duration"],
+    "forbiddenSubgroupTags": ["Def", "Def-expand"],
     "requiresTimeline": false,
     "requiresDef": false,
     "otherAllowedNonDefTags": []

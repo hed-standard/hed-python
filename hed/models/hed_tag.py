@@ -80,7 +80,7 @@ class HedTag:
         """ Short form including value or extension.
 
         Returns:
-            short_tag (str): The short form of the tag, including value or extension.
+            str: The short form of the tag, including value or extension.
 
         """
         if self._schema_entry:
@@ -104,7 +104,7 @@ class HedTag:
         """ Short form without value or extension.
 
         Returns:
-            base_tag (str): The short non-extension port of a tag.
+            str: The short non-extension port of a tag.
 
         Notes:
             - ParentNodes/Def/DefName would return just "Def".
@@ -143,7 +143,7 @@ class HedTag:
         """ Original form without value or extension.
 
         Returns:
-            base_tag (str): The original form of the tag, without value or extension.
+            str: The original form of the tag, without value or extension.
 
         Notes:
             - Warning: This could be empty if the original tag had a name_prefix prepended.
@@ -180,7 +180,7 @@ class HedTag:
             Returns the original tag if no user form set.
 
         Returns:
-            tag (str): The custom set user form of the tag.
+            str: The custom set user form of the tag.
 
         """
         if self._tag:
@@ -254,7 +254,7 @@ class HedTag:
            Will always be False unless expandable is set.  This is primarily used for Def/Def-expand tags at present.
 
         Returns:
-            bool: Returns True if this is currently expanded.
+            bool: True if this is currently expanded.
         """
         return self._expanded
 
@@ -343,7 +343,7 @@ class HedTag:
 
         Returns:
             str or None: The extension portion with the units removed or None if invalid units.
-            str or None: The units or None if no units of the right unit class are found found.
+            str or None: The units or None if no units of the right unit class are found.
 
         Examples:
             'Duration/3 ms' will return ('3', 'ms')
@@ -361,8 +361,8 @@ class HedTag:
         """ Return the value converted to default units if possible or None if invalid.
 
         Returns:
-            value (float or None): The extension value in default units.
-                                   If there are no default units it assumes that the extension value is in default units.
+            float or None: The extension value in default units.
+                                   If no default units it assumes that the extension value is in default units.
 
         Examples:
             'Duration/300 ms' will return .3
@@ -383,7 +383,7 @@ class HedTag:
         """ Return a dict of all the unit classes this tag accepts.
 
         Returns:
-            unit_classes (dict):  A dict of unit classes this tag accepts.
+            dict:  A dict of unit classes this tag accepts.
 
         Notes:
             - Returns empty dict if this is not a unit class tag.

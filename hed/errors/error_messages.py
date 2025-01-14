@@ -108,6 +108,12 @@ def val_error_duplicate_reserved_tag(tag, group):
     return f'Repeated reserved tag "{tag}" or multiple reserved tags in group "{group}"'
 
 
+@hed_error(ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR, actual_code=ValidationErrors.TAG_GROUP_ERROR)
+def val_error_group_for_reserved_tag(group, group_count):
+    return (f'The number of non-def-expand subgroups for group "{group}" is {group_count}, "'
+            f'which does not meet reserved tag requirements."')
+
+
 @hed_error(ValidationErrors.PARENTHESES_MISMATCH)
 def val_error_parentheses(opening_parentheses_count, closing_parentheses_count):
     return f'Number of opening and closing parentheses are unequal. '\
@@ -263,8 +269,8 @@ def val_error_top_level_tags(tag, multiple_tags):
 
 
 @hed_tag_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, actual_code=ValidationErrors.TAG_GROUP_ERROR)
-def val_error_tags_in_group(tag, group):
-    return f'Tag "{tag}" is not allowed with the other tag(s) in group "{group}"'
+def val_error_tags_in_group_with_reserved(tag, group):
+    return f'Tag "{tag}" is not allowed with the other tag(s) or Def-expand sub-group in group "{group}"'
 
 
 @hed_error(ValidationErrors.REQUIRED_TAG_MISSING)

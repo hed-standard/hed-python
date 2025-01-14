@@ -58,32 +58,22 @@ class Test(TestHedBase):
             onset_issues += def_validator.validate_onset_offset(test_string)
             if not onset_issues:
                 onset_issues += onset_validator.validate_temporal_relations(test_string)
-                onset_issues += GroupValidator.validate_duration_tags(test_string)
 
             error_handler.add_context_and_filter(onset_issues)
             test_string.shrink_defs()
             issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)
-            # print(str(test_string))
-            # print(str(onset_issues))
-            # print(str(issues))
-            # print(onset_validator._onsets)
+
             error_handler.pop_error_context()
             self.assertEqual(len(onset_validator._onsets), context)
             self.assertCountEqual(onset_issues, issues)
 
     def _test_issues_no_context(self, test_strings, test_issues):
         hed_validator = HedValidator(self.hed_schema, self.def_dict_both)
-        for string, expected_params in zip(test_strings, test_issues):
-            test_string = HedString(string, self.hed_schema)
-            error_handler = ErrorHandler(check_for_warnings=False)
-            error_handler.push_error_context(ErrorContext.HED_STRING, test_string)
+        for index, this_test in enumerate(test_strings):
+            test_string = HedString(this_test, self.hed_schema)
             onset_issues = hed_validator.validate(test_string, False)
-            error_handler.add_context_and_filter(onset_issues)
-            issues = self.format_errors_fully(error_handler, hed_string=test_string, params=expected_params)
-            # print(str(onset_issues))
-            # print(str(issues))
-            error_handler.pop_error_context()
-            self.assertCountEqual(onset_issues, issues)
+            filtered_issues = self.filter_issues(onset_issues)
+            self.assertCountEqual(filtered_issues, test_issues[index])
 
     def test_basic_onset_errors(self):
         test_strings = [
@@ -275,16 +265,14 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset, Offset)",
         ]
         test_issues = [
-            self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1,
-                              actual_error=ValidationErrors.TEMPORAL_TAG_ERROR)
-            + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
-            self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1, multiple_tags=["Onset"])
-            + self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=2)
-            + self.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2,
-                                def_tag="Def/TestDefPlaceholder/2471"),
-            self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=1, multiple_tags=["Offset"])
-            + self.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, tag=2,
-                                def_tag="Def/TestDefPlaceholder/2471"),
+            [{'code': 'TEMPORAL_TAG_ERROR',
+              'message': 'Tag "Onset" must be in a top level group but was found in another location.', 'severity': 1}],
+            [{'code': 'TAG_GROUP_ERROR',
+              'message': 'Repeated reserved tag "Onset" or multiple reserved tags in group "(Def/TestDefPlaceholder/2471,Onset,Onset)"',
+              'severity': 1}],
+            [{'code': 'TAG_GROUP_ERROR',
+              'message': 'Tag "Offset" is not allowed with the other tag(s) in group "(Def/TestDefPlaceholder/2471,Onset,Offset)"',
+              'severity': 1}]
         ]
 
         self._test_issues_no_context(test_strings, test_issues)
