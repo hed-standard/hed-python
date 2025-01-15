@@ -521,18 +521,18 @@ class TestTagLevels(TestHed):
             ],
             'invalid2TwoInOne': [
                 {'code': 'TAG_GROUP_ERROR',
-                 'message': 'Tag "Onset" is not allowed with the other tag(s) in group "(Definition/InvalidDef2,Onset)"',
+                 'message': 'Tag "Onset" is not allowed with the other tag(s) or Def-expand sub-group in group "(Definition/InvalidDef2,Onset)"',
                  'severity': 1}
             ],
             'valid2TwoInOne': [],
             'invalid3InOne': [
                 {'code': 'TAG_GROUP_ERROR',
-                 'message': 'Tag "Onset" is not allowed with the other tag(s) in group "(Duration/5.0 s,Delay,Onset,(Event))"',
+                 'message': 'Tag "Onset" is not allowed with the other tag(s) or Def-expand sub-group in group "(Duration/5.0 s,Delay,Onset,(Event))"',
                  'severity': 1}
              ],
             'invalidDuration': [
                 {'code': 'TAG_GROUP_ERROR',
-                 'message': 'Tag "Onset" is not allowed with the other tag(s) in group "(Duration/5.0 s,Onset,(Event))"',
+                 'message': 'Tag "Onset" is not allowed with the other tag(s) or Def-expand sub-group in group "(Duration/5.0 s,Onset,(Event))"',
                  'severity': 1}
             ],
             'invalidDelay': [

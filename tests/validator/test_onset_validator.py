@@ -271,7 +271,7 @@ class Test(TestHedBase):
               'message': 'Repeated reserved tag "Onset" or multiple reserved tags in group "(Def/TestDefPlaceholder/2471,Onset,Onset)"',
               'severity': 1}],
             [{'code': 'TAG_GROUP_ERROR',
-              'message': 'Tag "Offset" is not allowed with the other tag(s) in group "(Def/TestDefPlaceholder/2471,Onset,Offset)"',
+              'message': 'Tag "Offset" is not allowed with the other tag(s) or Def-expand sub-group in group "(Def/TestDefPlaceholder/2471,Onset,Offset)"',
               'severity': 1}]
         ]
 

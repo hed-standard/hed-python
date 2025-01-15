@@ -105,7 +105,9 @@ class TestValidatorBase(TestHedBase):
                 test_issues += hed_string_obj._calculate_to_canonical_forms(hed_schema)
             if not test_issues:
                 test_issues += test_function(hed_string_obj)
+            # print(f"result: {str(test_issues)}")
             filtered_issues = self.filter_issues(test_issues)
+            # print(f"filtered: {str(filtered_issues)}")
             these_issues = expected_issues[test_key]
             self.assertEqual(len(filtered_issues), len(these_issues),
                              f"{test_strings[test_key]} should have the same number of issues.")

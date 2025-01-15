@@ -388,7 +388,7 @@ class TestTagLevels3(TestHed3):
             ],
             'invalid2TwoInOne': [
                 {'code': 'TAG_GROUP_ERROR',
-                 'message': 'Tag "tl:Onset" is not allowed with the other tag(s) in group "(tl:Definition/InvalidDef2,tl:Onset)"',
+                 'message': 'Tag "tl:Onset" is not allowed with the other tag(s) or Def-expand sub-group in group "(tl:Definition/InvalidDef2,tl:Onset)"',
                  'severity': 1}
             ],
         }
