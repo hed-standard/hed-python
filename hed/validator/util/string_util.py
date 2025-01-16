@@ -21,7 +21,7 @@ class StringValidator:
         """ Report unmatched parentheses.
 
         Parameters:
-            hed_string (str): A hed string.
+            hed_string (str): A HED string.
 
         Returns:
             list: A list of validation list. Each issue is a dictionary.
@@ -39,7 +39,7 @@ class StringValidator:
         """ Report missing commas or commas in value tags.
 
         Parameters:
-            hed_string (str): A hed string.
+            hed_string (str): A HED string.
 
         Returns:
             list: A validation issues list. Each issue is a dictionary.

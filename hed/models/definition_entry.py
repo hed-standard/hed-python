@@ -11,7 +11,7 @@ class DefinitionEntry:
 
         Parameters:
             name (str):            The label portion of this name (not including Definition/).
-            contents (HedGroup):   The contents of this definition.
+            contents (HedGroup):   The contents of this definition (which could be None).
             takes_value (bool):    If True, expects ONE tag to have a single # sign in it.
             source_context (list, None): List (stack) of dictionaries giving context for reporting errors.
         """

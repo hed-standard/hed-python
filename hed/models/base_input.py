@@ -482,10 +482,11 @@ class BaseInput:
             loaded_worksheet = self.get_worksheet(self._worksheet_name)
             self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
         except Exception as e:
-            raise HedFileError(HedExceptions.INVALID_FILE_FORMAT, f"Failed to load Excel file: {str(e)}", self.name) from e
+            raise HedFileError(HedExceptions.INVALID_FILE_FORMAT,
+                               f"Failed to load Excel file: {str(e)}", self.name) from e
 
     def _load_text_file(self, file, pandas_header):
-        """ Load an text file"""
+        """ Load a text file"""
         if isinstance(file, str) and os.path.exists(file) and os.path.getsize(file) == 0:
             self._dataframe = pd.DataFrame()  # Handle empty file
             return

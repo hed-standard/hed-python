@@ -253,12 +253,10 @@ def filter_series_by_onset(series, onsets):
     Returns:
         Series or Dataframe: the series with rows filtered together.
     """
-    #indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))
-    #return _filter_by_index_list(series, indexed_dict=indexed_dict)
+
     indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))
-    y =  _filter_by_index_list(series, indexed_dict=indexed_dict)
+    y = _filter_by_index_list(series, indexed_dict=indexed_dict)
     return y
-    # return _filter_by_index_list(series, indexed_dict=indexed_dict)
 
 
 def _indexed_dict_from_onsets(onsets):
@@ -268,26 +266,13 @@ def _indexed_dict_from_onsets(onsets):
     indexed_dict = defaultdict(list)
 
     for i, onset in enumerate(onsets):
-        if math.isnan(onset): # Ignore NaNs
+        if math.isnan(onset):  # Ignore NaNs
             continue
         if abs(onset - current_onset) > tol:
             current_onset = onset
         indexed_dict[current_onset].append(i)
 
     return indexed_dict
-
-# def _indexed_dict_from_onsets(onsets):
-#     """Finds series of consecutive lines with the same(or close enough) onset"""
-#     current_onset = -1000000.0
-#     tol = 1e-9
-#     from collections import defaultdict
-#     indexed_dict = defaultdict(list)
-#     for i, onset in enumerate(onsets):
-#         if abs(onset - current_onset) > tol:
-#             current_onset = onset
-#         indexed_dict[current_onset].append(i)
-#
-#     return indexed_dict
 
 
 def _filter_by_index_list(original_data, indexed_dict):

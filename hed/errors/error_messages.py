@@ -52,15 +52,15 @@ def val_error_invalid_tag_character(tag, problem_tag):
     return f"Invalid character '{problem_tag}' in tag '{tag}'"
 
 
-@hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, has_sub_tag=True,
+@hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, has_sub_tag=False,
                actual_code=ValidationErrors.CHARACTER_INVALID)
-def val_error_INVALID_VALUE_CLASS_CHARACTER(tag, problem_tag, value_class):
+def val_error_val_error_invalid_value_class_character(tag, problem_tag, value_class):
     return f"Invalid character '{problem_tag}' in tag '{tag}' for value class '{value_class}'"
 
 
 @hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, has_sub_tag=True,
                actual_code=ValidationErrors.VALUE_INVALID)
-def val_error_INVALID_VALUE_CLASS_VALUE(tag, problem_tag, value_class):
+def val_error_invalid_value_class_value(tag, problem_tag, value_class):
     return f"'{tag}' has an invalid value portion for value class '{value_class}'"
 
 
@@ -70,15 +70,21 @@ def val_error_tildes_not_supported(source_string, char_index):
     return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'"
 
 
-@hed_tag_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, has_sub_tag=True,
+@hed_tag_error(ValidationErrors.HED_PLACEHOLDER_OUT_OF_CONTEXT, has_sub_tag=False,
+               actual_code=ValidationErrors.PLACEHOLDER_INVALID)
+def val_error_hed_placeholder_out_of_context(tag):
+    return f"'{tag}' has a '#' placeholder where it is not allowed or where it should have been replaced with a value."
+
+
+@hed_tag_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, has_sub_tag=False,
                actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
-def val_error_CURLY_BRACE_UNSUPPORTED_HERE(tag, problem_tag):
+def val_error_curly_brace_unsupported_here(tag, problem_tag):
     return (f"Curly braces are only permitted in sidecars, fully wrapping text in place of a tag.  "
             f"Invalid character '{problem_tag}' in tag '{tag}'")
 
 
 @hed_error(ValidationErrors.ONSETS_UNORDERED, default_severity=ErrorSeverity.WARNING)
-def val_error_ONSETS_UNORDERED():
+def val_error_onsets_unordered():
     return "Onsets need to be temporally increasing and defined for many downstream tools to work."
 
 
@@ -95,6 +101,17 @@ def val_error_duplicate_tag(tag):
 @hed_error(ValidationErrors.HED_TAG_REPEATED_GROUP, actual_code=ValidationErrors.TAG_EXPRESSION_REPEATED)
 def val_error_duplicate_group(group):
     return f'Repeated group - "{group}"'
+
+
+@hed_error(ValidationErrors.HED_RESERVED_TAG_REPEATED, actual_code=ValidationErrors.TAG_GROUP_ERROR)
+def val_error_duplicate_reserved_tag(tag, group):
+    return f'Repeated reserved tag "{tag}" or multiple reserved tags in group "{group}"'
+
+
+@hed_error(ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR, actual_code=ValidationErrors.TAG_GROUP_ERROR)
+def val_error_group_for_reserved_tag(group, group_count):
+    return (f'The number of non-def-expand subgroups for group "{group}" is {group_count}, "'
+            f'which does not meet reserved tag requirements."')
 
 
 @hed_error(ValidationErrors.PARENTHESES_MISMATCH)
@@ -236,12 +253,12 @@ def val_error_def_expand_value_extra(tag):
 
 @hed_tag_error(ValidationErrors.HED_TOP_LEVEL_TAG, actual_code=ValidationErrors.TAG_GROUP_ERROR)
 def val_error_top_level_tag(tag):
-    return f"A tag that must be in a top level group was found in another location.  {str(tag)}"
+    return f'Tag "{tag}" must be in a top level group but was found in another location.'
 
 
 @hed_tag_error(ValidationErrors.HED_TAG_GROUP_TAG, actual_code=ValidationErrors.TAG_GROUP_ERROR)
 def val_error_tag_group_tag(tag):
-    return f"A tag that must be in a group was found in another location.  {str(tag)}"
+    return f'Tag "{tag}" that must be in a group was found in another location.'
 
 
 @hed_tag_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, actual_code=ValidationErrors.TAG_GROUP_ERROR)
@@ -249,6 +266,11 @@ def val_error_top_level_tags(tag, multiple_tags):
     tags_as_string = [str(tag) for tag in multiple_tags]
     return f"Multiple top level tags found in a single group.  First one found: {str(tag)}. " + \
            f"Remainder:{str(tags_as_string)}"
+
+
+@hed_tag_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, actual_code=ValidationErrors.TAG_GROUP_ERROR)
+def val_error_tags_in_group_with_reserved(tag, group):
+    return f'Tag "{tag}" is not allowed with the other tag(s) or Def-expand sub-group in group "{group}"'
 
 
 @hed_error(ValidationErrors.REQUIRED_TAG_MISSING)
@@ -259,11 +281,6 @@ def val_warning_required_prefix_missing(tag_namespace):
 @hed_tag_error(ValidationErrors.STYLE_WARNING, default_severity=ErrorSeverity.WARNING)
 def val_warning_capitalization(tag):
     return f"First word not capitalized or camel case - '{tag}'"
-
-
-@hed_tag_error(ValidationErrors.UNITS_MISSING, default_severity=ErrorSeverity.WARNING)
-def val_warning_default_units_used(tag, default_unit):
-    return f"Tag '{tag}' expects units, but no units were given."
 
 
 @hed_error(SidecarErrors.BLANK_HED_STRING)
@@ -293,12 +310,12 @@ def sidecar_error_unknown_column(column_name):
 
 
 @hed_error(SidecarErrors.SIDECAR_HED_USED, actual_code=ValidationErrors.SIDECAR_INVALID)
-def SIDECAR_HED_USED():
+def sidecar_hed_used():
     return "'HED' is a reserved name and cannot be used as a sidecar except in expected places."
 
 
 @hed_error(SidecarErrors.SIDECAR_HED_USED_COLUMN, actual_code=ValidationErrors.SIDECAR_INVALID)
-def SIDECAR_HED_USED_COLUMN():
+def sidecar_hed_used_column():
     return "'HED' is a reserved name and cannot be used as a sidecar column name"
 
 
@@ -384,7 +401,7 @@ def onset_error_inset_before_onset(tag):
 
 @hed_tag_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_no_def_found(tag):
-    return f"'{tag}' tag has no def or def-expand tag in string."
+    return f"'{tag}' tag has no def tag or def-expand group or too many when 1 is required in string."
 
 
 @hed_tag_error(TemporalErrors.ONSET_TOO_MANY_DEFS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
@@ -401,7 +418,7 @@ def onset_too_many_groups(tag, tag_list):
 
 
 @hed_tag_error(TemporalErrors.DURATION_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
-def onset_DURATION_WRONG_NUMBER_GROUPS(tag, tag_list):
+def onset_duration_wrong_number_groups(tag, tag_list):
     tag_list_strings = [str(a_tag) for a_tag in tag_list]
     return f"A duration and/or delay tag '{tag}'should have exactly one child group." \
            f"Found {len(tag_list_strings)}: {tag_list_strings}"
@@ -421,7 +438,7 @@ def onset_wrong_placeholder(tag, has_placeholder):
 
 
 @hed_tag_error(TemporalErrors.DURATION_HAS_OTHER_TAGS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
-def onset_DURATION_HAS_OTHER_TAGS(tag):
+def onset_duration_has_other_tags(tag):
     return f"Tag '{tag}' should not be grouped with Duration or Delay.  Context tags should be in a sub-group."
 
 
