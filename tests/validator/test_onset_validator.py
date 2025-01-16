@@ -308,7 +308,7 @@ class Test(TestHedBase):
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=False)
 
     def test_check_for_banned_tags(self):
-        hed_string = HedString("Event, (Duration/Short, Label/Example)", self.hed_schema)
+        hed_string = HedString("Event, (Delay/5, (Label/Example))", self.hed_schema)
         issues = OnsetValidator.check_for_banned_tags(hed_string)
         self.assertEqual(len(issues), 1)
 
@@ -316,9 +316,9 @@ class Test(TestHedBase):
         issues = OnsetValidator.check_for_banned_tags(hed_string)
         self.assertEqual(len(issues), 2)
 
-        hed_string = HedString("(Onset, Duration/Long), Label/Example", self.hed_schema)
+        hed_string = HedString("(Onset, Duration/5.0), Label/Example", self.hed_schema)
         issues = OnsetValidator.check_for_banned_tags(hed_string)
-        self.assertEqual(len(issues), 2)
+        self.assertEqual(len(issues), 1)
 
 
 if __name__ == '__main__':

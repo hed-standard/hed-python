@@ -1,6 +1,7 @@
 """ Validates spreadsheet tabular data. """
 import copy
 import pandas as pd
+import math
 from hed.models.base_input import BaseInput
 from hed.errors.error_types import ColumnErrors, ErrorContext, ValidationErrors
 from hed.errors.error_reporter import ErrorHandler
@@ -16,6 +17,8 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class SpreadsheetValidator:
+    ONSET_TOLERANCE = 10-7
+
     def __init__(self, hed_schema):
         """
         Constructor for the SpreadsheetValidator class.
@@ -79,6 +82,7 @@ class SpreadsheetValidator:
         issues += self._run_checks(df, error_handler=error_handler, row_adj=row_adj, onset_mask=onset_mask)
         if self._onset_validator:
             issues += self._run_onset_checks(onsets, error_handler=error_handler, row_adj=row_adj)
+            issues += self._recheck_duplicates(onsets, error_handler=error_handler, row_adj=row_adj)
         error_handler.pop_error_context()
 
         issues = sort_issues(issues)
@@ -118,6 +122,7 @@ class SpreadsheetValidator:
                 error_handler.pop_error_context()  # Row
                 continue
 
+            # Continue on if not a timeline file
             row_string = HedString.from_hed_strings(row_strings)
 
             if row_string:
@@ -149,8 +154,55 @@ class SpreadsheetValidator:
             error_handler.pop_error_context()  # Row
         return issues
 
-    def _run_onset_nan_checks(self, onsets, error_handler, row_adj):
-        return
+    def _recheck_duplicates(self, onset_filtered, error_handler, row_adj):
+        issues = []
+        for i in range(len(onset_filtered) - 1):
+            current_row = onset_filtered.iloc[i]
+            next_row = onset_filtered.iloc[i + 1]
+
+            # Skip if the HED column is empty or there was already an error
+            if not current_row["HED"] or \
+                (current_row["original_index"] in self.invalid_original_rows) or \
+                (not self._is_within_tolerance(next_row["onset"], current_row["onset"])):
+                continue
+
+            # At least two rows have been merged with their onsets recognized as the same.
+            error_handler.push_error_context(ErrorContext.ROW, current_row.original_index + row_adj)
+            row_string = HedString(current_row.HED, self._schema, self._hed_validator._def_validator)
+            error_handler.push_error_context(ErrorContext.HED_STRING, row_string)
+            new_column_issues = self._hed_validator.run_full_string_checks(row_string)
+            error_handler.add_context_and_filter(new_column_issues)
+            error_handler.pop_error_context()  # HedString
+            issues += new_column_issues
+            error_handler.pop_error_context()  # Row
+
+        return issues
+
+    def _is_within_tolerance(self, onset1, onset2):
+        """
+        Checks if two onset strings are within the specified tolerance.
+
+        Parameters:
+            onset1 (str): The first onset value as a string.
+            onset2 (str): The second onset value as a string.
+
+        Returns:
+            bool: True if the values are within tolerance and valid, False otherwise.
+        """
+        try:
+            # Convert to floats
+            onset1 = float(onset1)
+            onset2 = float(onset2)
+
+            # Check if both values are finite
+            if not (math.isfinite(onset1) and math.isfinite(onset2)):
+                return False
+
+            # Check if the difference is within tolerance
+            return abs(onset1 - onset2) <= self.ONSET_TOLERANCE
+        except ValueError:
+            # Return False if either value is not convertible to a float
+            return False
 
     def _validate_column_structure(self, base_input, error_handler, row_adj):
         """

@@ -64,15 +64,15 @@ class OnsetValidator:
 
     @staticmethod
     def check_for_banned_tags(hed_string):
-        """ Returns an issue for every tag found from the banned list
+        """ Returns an issue for every tag found from the banned list (for files without onset column).
 
         Parameters:
-            hed_string(HedString): the string to check
+            hed_string(HedString): The string to check.
 
         Returns:
             list: The validation issues associated with the characters. Each issue is dictionary.
         """
-        banned_tag_list = DefTagNames.ALL_TIME_KEYS
+        banned_tag_list = DefTagNames.TIMELINE_KEYS
         issues = []
         for tag in hed_string.get_all_tags():
             if tag.short_base_tag in banned_tag_list:

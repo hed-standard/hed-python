@@ -436,21 +436,31 @@ class TestTagLevels(TestHed):
         }
         from hed import HedString
         expected_issues = {
-            'topLevelDuplicate': self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=1),
-            'groupDuplicate': self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=3),
+            'topLevelDuplicate': [
+                {'code': 'TAG_EXPRESSION_REPEATED', 'message': 'Repeated tag - "Event/Sensory-event"', 'severity': 1}
+            ],
+            'groupDuplicate': [
+                {'code': 'TAG_EXPRESSION_REPEATED', 'message': 'Repeated tag - "Event/Sensory-event"', 'severity': 1}
+            ],
             'legalDuplicate': [],
             'noDuplicate': [],
-            'duplicateGroup': self.format_error(ValidationErrors.HED_TAG_REPEATED_GROUP,
-                                                group=HedString("(Sensory-event, Man-made-object/VehicleTrain)",
-                                                                self.hed_schema)),
-            'duplicateSubGroup': self.format_error(
-                ValidationErrors.HED_TAG_REPEATED_GROUP,
-                group=HedString("(Event,(Sensory-event,Man-made-object/VehicleTrain))", self.hed_schema)),
-            'duplicateSubGroupF': self.format_error(
-                ValidationErrors.HED_TAG_REPEATED_GROUP,
-                group=HedString("((Sensory-event,Man-made-object/VehicleTrain),Event)", self.hed_schema)),
+            'duplicateGroup': [
+                {'code': 'TAG_EXPRESSION_REPEATED',
+                 'message': 'Repeated group - "(Man-made-object/VehicleTrain,Sensory-event)"',
+                 'severity': 1}
+            ],
+            'duplicateSubGroup': [
+                {'code': 'TAG_EXPRESSION_REPEATED',
+                 'message': 'Repeated group - "(Event,(Man-made-object/VehicleTrain,Sensory-event))"',
+                 'severity': 1}
+            ],
+            'duplicateSubGroupF': [
+                {'code': 'TAG_EXPRESSION_REPEATED',
+                 'message': 'Repeated group - "((Man-made-object/VehicleTrain,Sensory-event),Event)"',
+                 'severity': 1}
+            ],
         }
-        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+        self.validator_semantic_new(test_strings, expected_results, expected_issues, False)
 
     def test_no_duplicates_semantic(self):
         test_strings = {

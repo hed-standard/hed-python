@@ -1,11 +1,12 @@
 """ Validation of the HED tags as strings. """
-
+from collections import deque
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.model_constants import DefTagNames
 from hed.schema.hed_schema_constants import HedKey
 from hed.models.hed_tag import HedTag
 from hed.errors.error_types import ValidationErrors, TemporalErrors
 from hed.validator.reserved_checker import ReservedChecker
+from hed.validator.util.dup_util import DuplicateChecker
 
 
 class GroupValidator:
@@ -23,6 +24,7 @@ class GroupValidator:
             raise ValueError("HedSchema required for validation")
         self._hed_schema = hed_schema
         self._reserved_checker = ReservedChecker.get_instance()
+        self._duplicate_checker = DuplicateChecker(hed_schema)
 
     def run_tag_level_validators(self, hed_string_obj):
         """ Report invalid groups at each level.
@@ -39,7 +41,7 @@ class GroupValidator:
 
         checks = [
             self._check_group_relationships,
-            self._check_for_duplicate_groups,
+            self._duplicate_checker.check_for_duplicates,
             # self.validate_duration_tags,
         ]
 
@@ -282,31 +284,4 @@ class GroupValidator:
         validation_issues = []
         validation_issues += self.check_for_required_tags(tags)
         validation_issues += self.check_multiple_unique_tags_exist(tags)
-        return validation_issues
-
-    def _check_for_duplicate_groups_recursive(self, sorted_group, validation_issues):
-        prev_child = None
-        for child in sorted_group:
-            if child == prev_child:
-                if isinstance(child, HedTag):
-                    error_code = ValidationErrors.HED_TAG_REPEATED
-                    validation_issues += ErrorHandler.format_error(error_code, child)
-                else:
-                    error_code = ValidationErrors.HED_TAG_REPEATED_GROUP
-                    found_group = child
-                    base_steps_up = 0
-                    while isinstance(found_group, list):
-                        found_group = found_group[0]
-                        base_steps_up += 1
-                    for _ in range(base_steps_up):
-                        found_group = found_group._parent
-                    validation_issues += ErrorHandler.format_error(error_code, found_group)
-            if not isinstance(child, HedTag):
-                self._check_for_duplicate_groups_recursive(child, validation_issues)
-            prev_child = child
-
-    def _check_for_duplicate_groups(self, original_group):
-        sorted_group = original_group._sorted()
-        validation_issues = []
-        self._check_for_duplicate_groups_recursive(sorted_group, validation_issues)
         return validation_issues

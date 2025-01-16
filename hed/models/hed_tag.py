@@ -618,12 +618,14 @@ class HedTag:
             else:
                 self._tag = self.tag.replace("#", placeholder_value)
 
-    def __hash__(self):
+    def get_normalized_str(self):
         if self._schema_entry:
-            return hash(
-                self._namespace + self._schema_entry.short_tag_name.casefold() + self._extension_value.casefold())
+            return self._namespace + self._schema_entry.short_tag_name.casefold() + self._extension_value.casefold()
         else:
-            return hash(self.casefold())
+            return self.casefold()
+
+    def __hash__(self):
+        return hash(self.get_normalized_str())
 
     def __eq__(self, other):
         if self is other:

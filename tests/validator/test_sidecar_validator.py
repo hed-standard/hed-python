@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
         issues = sidecar.validate(self.hed_schema)
 
         # 3 issues are expected for repeated tags from stacking lines
-        self.assertEqual(len(issues), 3)
+        self.assertEqual(len(issues), 2)
         refs = sidecar.get_column_refs()
         self.assertEqual(len(refs), 2)
 

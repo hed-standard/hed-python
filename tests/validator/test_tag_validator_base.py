@@ -99,13 +99,13 @@ class TestValidatorBase(TestHedBase):
                            hed_schema, check_for_warnings=False):
         # This does direct comparison of the issue before formatting or context.
         for test_key in test_strings:
+            # print(f"\n{test_key}: {test_strings[test_key]}")
             hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
             test_issues = []
             if self.compute_forms:
                 test_issues += hed_string_obj._calculate_to_canonical_forms(hed_schema)
             if not test_issues:
                 test_issues += test_function(hed_string_obj)
-            # print(f"result: {str(test_issues)}")
             filtered_issues = self.filter_issues(test_issues)
             # print(f"filtered: {str(filtered_issues)}")
             these_issues = expected_issues[test_key]
