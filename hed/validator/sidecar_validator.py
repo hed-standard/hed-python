@@ -89,6 +89,7 @@ class SidecarValidator:
 
                 # Only do full string checks on full columns, not partial ref columns.
                 if not is_ref_column:
+                    # TODO: Figure out why this pattern is giving lint errors.
                     refs = re.findall("\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
                     refs_strings = {data.column_name: data.get_hed_strings() for data in sidecar}
                     if "HED" not in refs_strings:

@@ -5,28 +5,46 @@ from hed.errors.error_types import ValidationErrors
 
 class DuplicateChecker:
 
-    def __init__(self, hed_schema):
-        """ Constructor for GroupValidator
+    def __init__(self):
+        """ Checker for duplications in HED groups.
+
+        Notes:
+            This checker has an early out strategy -- it returns when it finds an error.
+
+        """
+        self.issues = []
+
+    def check_for_duplicates(self, group):
+        """ Find duplicates in a HED group and return the errors found.
 
         Parameters:
-            hed_schema (HedSchema): A HedSchema object.
-        """
-        if hed_schema is None:
-            raise ValueError("HedSchema required for validation")
-        self._hed_schema = hed_schema
-        self.issues = []
+             group (HedGroup): The HED group to be checked.
 
-    def check_for_duplicates(self, original_group):
+        Returns:
+            list:   List of validation issues -- which might be empty if no duplicates detected.
+
+
+        """
         self.issues = []
-        self._get_recursive_hash(original_group)
+        self._get_recursive_hash(group)
         return self.issues
 
-    def get_hash(self, original_group):
+    def get_hash(self, group):
+        """  Return the unique hash for the group as long as no duplicates.
+
+        Parameters:
+             group (HedGroup): The HED group to be checked.
+
+        Returns:
+            int or None: Unique hash or None if duplicates were detected within the group.
+
+        """
         self.issues = []
-        duplication_hash = self._get_recursive_hash(original_group)
+        duplication_hash = self._get_recursive_hash(group)
         return duplication_hash
 
     def _get_recursive_hash(self, group):
+
         if len(self.issues) > 0:
             return None
         group_hashes = set()

@@ -1,5 +1,4 @@
 """ Validation of the HED tags as strings. """
-from collections import deque
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.model_constants import DefTagNames
 from hed.schema.hed_schema_constants import HedKey
@@ -24,7 +23,7 @@ class GroupValidator:
             raise ValueError("HedSchema required for validation")
         self._hed_schema = hed_schema
         self._reserved_checker = ReservedChecker.get_instance()
-        self._duplicate_checker = DuplicateChecker(hed_schema)
+        self._duplicate_checker = DuplicateChecker()
 
     def run_tag_level_validators(self, hed_string_obj):
         """ Report invalid groups at each level.

@@ -172,13 +172,13 @@ class CharRexValidator(CharValidator):
         super().__init__(modern_allowed_char_rules)
         self._rex_dict = self._get_rex_dict()
 
-    def get_problem_chars(self, input_string, class_name):
+    def get_problem_chars(self, in_str, cname):
 
         # List to store problem indices and characters
         bad_indices = []
 
         # Retrieve the allowed character classes for the given class_name
-        allowed_classes = self._rex_dict["class_chars"].get(class_name, [])
+        allowed_classes = self._rex_dict["class_chars"].get(cname, [])
         if not allowed_classes:
             return bad_indices
         # Combine the corresponding regular expressions from the char_regex section
@@ -191,19 +191,19 @@ class CharRexValidator(CharValidator):
         compiled_regex = re.compile(combined_regex)
 
         # Iterate through the input string, checking each character
-        for index, char in enumerate(input_string):
+        for index, char in enumerate(in_str):
             # If the character doesn't match the combined regex, it's a problem
             if not compiled_regex.match(char):
                 bad_indices.append((index, char))
 
         return bad_indices
 
-    def is_valid_value(self, input_string, class_name):
+    def is_valid_value(self, in_string, cname):
         # Retrieve the allowed character classes for the given class_name
-        class_regex = self._rex_dict["class_words"].get(class_name, [])
+        class_regex = self._rex_dict["class_words"].get(cname, [])
         if not class_regex:
             return True
-        match = re.match(class_regex, input_string)
+        match = re.match(class_regex, in_string)
         match = match if match else False
         return match
 

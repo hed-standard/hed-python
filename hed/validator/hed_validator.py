@@ -79,13 +79,6 @@ class HedValidator:
         issues += self._def_validator.validate_def_tags(hed_string, self)
         return issues
 
-    # def run_full_string_checks(self, hed_string):
-    #     issues = []
-    #     issues += self._group_validator.run_all_tags_validators(hed_string)
-    #     issues += self._group_validator.run_tag_level_validators(hed_string)
-    #     issues += self._def_validator.validate_onset_offset(hed_string)
-        return issues
-
     def run_full_string_checks(self, hed_string):
         checks = [
             self._group_validator.run_all_tags_validators,
@@ -178,14 +171,11 @@ class HedValidator:
             issues += self._unit_validator.check_tag_unit_class_units_are_valid(original_tag,
                                                                                 validate_text,
                                                                                 report_as=report_as,
-                                                                                error_code=error_code,
-                                                                                index_offset=index_offset)
+                                                                                error_code=error_code)
         elif original_tag.is_value_class_tag():
             issues += self._unit_validator.check_tag_value_class_valid(original_tag,
                                                                        validate_text,
-                                                                       report_as=report_as,
-                                                                       error_code=error_code,
-                                                                       index_offset=index_offset)
+                                                                       report_as=report_as)
         elif original_tag.extension:
             issues += self._char_validator.check_for_invalid_extension_chars(original_tag,
                                                                              validate_text,

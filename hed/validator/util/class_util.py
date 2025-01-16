@@ -45,8 +45,7 @@ class UnitValueValidator:
 
         return validator_dict
 
-    def check_tag_unit_class_units_are_valid(self, original_tag, validate_text, report_as=None, error_code=None,
-                                             index_offset=0):
+    def check_tag_unit_class_units_are_valid(self, original_tag, validate_text, report_as=None, error_code=None):
         """ Report incorrect unit class or units.
 
         Parameters:
@@ -54,7 +53,6 @@ class UnitValueValidator:
             validate_text (str): The text to validate.
             report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
             error_code (str): Override error codes.
-            index_offset (int):  Offset into the extension validate_text starts at.
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
@@ -69,8 +67,7 @@ class UnitValueValidator:
                 return validation_issues
 
             # Check the value classes
-            validation_issues += self._check_value_class(original_tag, stripped_value, report_as, error_code,
-                                                         index_offset)
+            validation_issues += self._check_value_class(original_tag, stripped_value, report_as)
             if validation_issues:
                 return validation_issues
 
@@ -82,21 +79,18 @@ class UnitValueValidator:
 
         return validation_issues
 
-    def check_tag_value_class_valid(self, original_tag, validate_text, report_as=None, error_code=None,
-                                    index_offset=0):
+    def check_tag_value_class_valid(self, original_tag, validate_text, report_as=None):
         """ Report an invalid value portion.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             validate_text (str): The text to validate.
             report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
-            error_code (str): Override error codes.
-            index_offset(int): Offset into the extension validate_text starts at.
 
         Returns:
             list: Validation issues.
         """
-        return self._check_value_class(original_tag, validate_text, report_as, error_code, index_offset)
+        return self._check_value_class(original_tag, validate_text, report_as)
 
     def _get_problem_indices(self, stripped_value, class_name, start_index=0):
         indices = self._char_validator.get_problem_chars(stripped_value, class_name)
@@ -106,15 +100,13 @@ class UnitValueValidator:
         # value_classes = original_tag.value_classes.values()
         # allowed_characters = schema_validation_util.get_allowed_characters(original_tag.value_classes.values())
 
-    def _check_value_class(self, original_tag, stripped_value, report_as, error_code=None, index_offset=0):
+    def _check_value_class(self, original_tag, stripped_value, report_as):
         """ Return any issues found if this is a value tag,
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             stripped_value (str): value without units
             report_as (HedTag): Report as this tag.
-            error_code(str): The code to override the error as.  Again mostly for def/def-expand tags.
-            index_offset(int): Offset into the extension validate_text starts at.
 
         Returns:
             list:  List of dictionaries of validation issues.
@@ -139,12 +131,12 @@ class UnitValueValidator:
             char_errors[class_name] = self._get_problem_indices(stripped_value, class_name, start_index=start_index)
             if class_valid[class_name] and not char_errors[class_name]:  # We have found a valid class
                 return []
-        index_adj = len(report_as.org_base_tag) - len(original_tag.org_base_tag)
-        validation_issues = self.report_value_errors(char_errors, class_valid, report_as, index_adj)
+
+        validation_issues = self.report_value_errors(char_errors, class_valid, report_as)
         return validation_issues
 
     @staticmethod
-    def report_value_errors(error_dict, class_valid, report_as, index_adj):
+    def report_value_errors(error_dict, class_valid, report_as):
         validation_issues = []
         for class_name, errors in error_dict.items():
             if not errors and class_valid[class_name]:
@@ -154,18 +146,16 @@ class UnitValueValidator:
                                                                index_in_tag=0, index_in_tag_end=len(report_as.org_tag),
                                                                value_class=class_name, tag=report_as)
             elif errors:
-                validation_issues.extend(UnitValueValidator.report_value_char_errors(class_name, errors,
-                                                                                     report_as, index_adj))
+                validation_issues.extend(UnitValueValidator.report_value_char_errors(class_name, errors, report_as))
         return validation_issues
 
     @staticmethod
-    def report_value_char_errors(class_name, errors, report_as, index_adj):
+    def report_value_char_errors(class_name, errors, report_as):
         validation_issues = []
         for value in errors:
-            index = value[1] + index_adj
             if value[0] in "{}":
                 validation_issues += ErrorHandler.format_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE,
-                                                               tag=report_as,problem_tag=value[0])
+                                                               tag=report_as, problem_tag=value[0])
             else:
                 validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
                                                                tag=report_as, value_class=class_name,

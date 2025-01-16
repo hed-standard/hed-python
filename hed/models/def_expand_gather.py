@@ -145,16 +145,15 @@ class DefExpandGatherer:
             if def_tag == def_expand_group:
                 continue
 
-            if not self._handle_known_definition(def_tag, def_expand_group, def_group):
+            if not self._handle_known_definition(def_tag, def_expand_group):
                 self._handle_ambiguous_definition(def_tag, def_expand_group)
 
-    def _handle_known_definition(self, def_tag, def_expand_group, def_group):
+    def _handle_known_definition(self, def_tag, def_expand_group):
         """Handle known def-expand tag in a HED string.
 
         Parameters:
             def_tag (HedTag): The def-expand tag.
             def_expand_group (HedGroup): The group containing the entire Def-expand tag and its group.
-            def_group (HedGroup): The group containing the Def-expand contents.
 
         Returns:
             bool: True if the def-expand tag is known and handled, False otherwise.

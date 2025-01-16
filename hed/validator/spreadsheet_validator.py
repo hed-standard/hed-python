@@ -163,7 +163,7 @@ class SpreadsheetValidator:
             # Skip if the HED column is empty or there was already an error
             if not current_row["HED"] or \
                 (current_row["original_index"] in self.invalid_original_rows) or \
-                (not self._is_within_tolerance(next_row["onset"], current_row["onset"])):
+                    (not self._is_within_tolerance(next_row["onset"], current_row["onset"])):
                 continue
 
             # At least two rows have been merged with their onsets recognized as the same.
