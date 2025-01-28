@@ -18,7 +18,7 @@ class BidsDataset:
 
     """
 
-    def __init__(self, root_path, schema=None, tabular_types=['events'],
+    def __init__(self, root_path, schema=None, tabular_types=['events', 'participants'],
                  exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli', 'phenotype']):
         """ Constructor for a BIDS dataset.
 
@@ -41,7 +41,7 @@ class BidsDataset:
         self.exclude_dirs = exclude_dirs
         self.tabular_files = {}
         if not tabular_types:
-            self.tabular_files["events"] = BidsFileGroup(root_path, suffix="events", obj_type="tabular",
+            self.tabular_files["events"] = BidsFileGroup(root_path, obj_type="tabular",
                                                          exclude_dirs=exclude_dirs)
         else:
             for suffix in tabular_types:

@@ -15,6 +15,7 @@ class HedExceptions:
 
     INVALID_DATAFRAME = 'INVALID_DATAFRAME'
     INVALID_FILE_FORMAT = 'INVALID_FILE_FORMAT'
+
     # These are actual schema issues, not that the file cannot be found or parsed
     SCHEMA_HEADER_MISSING = 'SCHEMA_HEADER_INVALID'
     SCHEMA_HEADER_INVALID = 'SCHEMA_HEADER_INVALID'
@@ -32,6 +33,7 @@ class HedExceptions:
 
     SCHEMA_VERSION_INVALID = 'SCHEMA_VERSION_INVALID'
     SCHEMA_SECTION_MISSING = 'SCHEMA_SECTION_MISSING'
+    SCHEMA_INVALID = 'SCHEMA_INVALID'
 
     WIKI_SEPARATOR_INVALID = 'invalidSectionSeparator'
 
