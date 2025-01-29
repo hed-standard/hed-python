@@ -37,18 +37,11 @@ class ReservedChecker:
         self.special_names = set(self.reserved_map.keys())
         self.require_value_tags = self._get_special_tags_by_property("requireValue")
         self.no_extension_tags = self._get_special_tags_by_property("noExtension")
-        self.allow_two_level_value_tags = self._get_special_tags_by_property("allowTwoLevelValue")
         self.top_group_tags = self._get_special_tags_by_property("topLevelTagGroup")
         self.requires_def_tags = self._get_special_tags_by_property("requiresDef")
         self.group_tags = self._get_special_tags_by_property("tagGroup")
-        self.exclusive_tags = self._get_special_tags_by_property("exclusive")
         self.timelineTags = self._get_special_tags_by_property("requiresTimeline")
         self.no_splice_in_group = self._get_special_tags_by_property("noSpliceInGroup")
-        self.has_forbidden_subgroup_tags = {
-            value["name"]
-            for value in self.reserved_map.values()
-            if len(value.get("forbiddenSubgroupTags", [])) > 0
-        }
 
     def _get_special_tags_by_property(self, property_name):
         return {

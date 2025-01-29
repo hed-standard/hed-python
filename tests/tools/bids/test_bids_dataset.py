@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
                                      '../../data/bids_tests/eeg_ds003645s_empty')
 
     def test_constructor(self):
-        bids = BidsDataset(self.root_path)
+        bids = BidsDataset(self.root_path, tabular_types=['events'])
         self.assertIsInstance(bids, BidsDataset, "BidsDataset should create a valid object from valid dataset")
         parts = bids.get_tabular_group("participants")
         self.assertFalse(parts)
@@ -33,6 +33,15 @@ class Test(unittest.TestCase):
             self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
         self.assertIsInstance(bids.schema, HedSchema, "BidsDataset schema should be HedSchema")
+
+    def test_constructor_all_tsv(self):
+        bids = BidsDataset(self.root_path)
+        self.assertIsInstance(bids, BidsDataset, "BidsDataset should create a valid object from valid dataset")
+        parts = bids.get_tabular_group("participants")
+        self.assertIsInstance(parts, BidsFileGroup)
+        events = bids.get_tabular_group("events")
+        self.assertIsInstance(events, BidsFileGroup)
+        self.assertEqual(len(events.datafile_dict), 6)
 
     def test_constructor_libraries(self):
         bids = BidsDataset(self.library_path, tabular_types=['participants', 'events'])
