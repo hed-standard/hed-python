@@ -49,7 +49,6 @@ class ColumnMapper:
         # Maps column number to column_entry.  This is what's actually used by most code.
         self._final_column_map = {}
         self._no_mapping_info = True
-
         self._column_map = {}
         self._reverse_column_map = {}
         self._warn_on_missing_column = warn_on_missing_column

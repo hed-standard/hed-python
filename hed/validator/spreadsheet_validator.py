@@ -236,7 +236,6 @@ class SpreadsheetValidator:
         columns = base_input.columns
         for ref in column_refs:
             if ref not in columns:
-                issues += error_handler.format_error_with_context(ColumnErrors.INVALID_COLUMN_REF,
-                                                                  bad_ref=ref)
+                issues += error_handler.format_error_with_context(ValidationErrors.TSV_COLUMN_MISSING, invalid_key=ref)
 
         return issues

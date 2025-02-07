@@ -244,7 +244,7 @@ class SidecarValidator:
         """
         val_issues = []
         if column_name in self.reserved_column_names:
-            val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED_COLUMN)
+            val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED)
             return val_issues
 
         column_type = ColumnMetadata._detect_column_type(dict_for_entry=dict_for_entry, basic_validation=False)

@@ -215,6 +215,12 @@ def val_error_sidecar_key_missing(invalid_key, category_keys):
     return f"Category key '{invalid_key}' does not exist in column.  Valid keys are: {category_keys}"
 
 
+@hed_error(ValidationErrors.TSV_COLUMN_MISSING, actual_code=ValidationErrors.SIDECAR_KEY_MISSING,
+           default_severity=ErrorSeverity.WARNING)
+def val_error_tsv_column_missing(invalid_key):
+    return f"{{HED}} is used as a key in a sidecar but does not appear as a column in the tabular file"
+
+
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
     return f"A data-recording's Def-expand tag does not match the given definition." \
@@ -312,11 +318,6 @@ def sidecar_error_unknown_column(column_name):
 @hed_error(SidecarErrors.SIDECAR_HED_USED, actual_code=ValidationErrors.SIDECAR_INVALID)
 def sidecar_hed_used():
     return "'HED' is a reserved name and cannot be used as a sidecar except in expected places."
-
-
-@hed_error(SidecarErrors.SIDECAR_HED_USED_COLUMN, actual_code=ValidationErrors.SIDECAR_INVALID)
-def sidecar_hed_used_column():
-    return "'HED' is a reserved name and cannot be used as a sidecar column name"
 
 
 @hed_error(SidecarErrors.SIDECAR_NA_USED, actual_code=ValidationErrors.SIDECAR_INVALID)
