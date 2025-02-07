@@ -145,6 +145,8 @@ class SidecarValidator:
         found_column_references = {}
         for column_data in sidecar:
             column_name = column_data.column_name
+            if column_data.column_type == ColumnType.Ignore:
+                continue
             hed_strings = column_data.get_hed_strings()
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
             matches = []
@@ -183,7 +185,6 @@ class SidecarValidator:
             for ref in refs:
                 if ref in found_column_references and ref != column_name:
                     issues += error_handler.format_error_with_context(ColumnErrors.NESTED_COLUMN_REF, column_name, ref)
-
         return issues
 
     @staticmethod
