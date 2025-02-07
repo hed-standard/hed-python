@@ -180,20 +180,25 @@ def _handle_curly_braces_refs(df, refs, column_names):
         modified_df(pd.DataFrame): The modified dataframe with refs replaced
     """
     # Filter out columns and refs that don't exist.
-    refs = [ref for ref in refs if ref in column_names]
-    remaining_columns = [column for column in column_names if column not in refs]
+    refs_new = [ref for ref in refs if ref in column_names]
+    remaining_columns = [column for column in column_names if column not in refs_new]
 
     new_df = df.copy()
     # Replace references in the columns we are saving out.
-    saved_columns = new_df[refs]
+    saved_columns = new_df[refs_new]
     for column_name in remaining_columns:
-        for replacing_name in refs:
+        for replacing_name in refs_new:
             # If the data has no n/a values, this version is MUCH faster.
             # column_name_brackets = f"{{{replacing_name}}}"
             # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
             #                             in zip(df[column_name], saved_columns[replacing_name]))
             new_df[column_name] = pd.Series(replace_ref(x, f"{{{replacing_name}}}", y) for x, y
                                             in zip(new_df[column_name], saved_columns[replacing_name]))
+    # Handle the special case of {HED} when the tsv file has no {HED} column
+    if 'HED' in refs and 'HED' not in column_names:
+        for column_name in remaining_columns:
+            new_df[column_name] =\
+                pd.Series(replace_ref(x, "{HED}", "n/a") for x in new_df[column_name])
     new_df = new_df[remaining_columns]
 
     return new_df

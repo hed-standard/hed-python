@@ -24,7 +24,6 @@ skip_tests = {
 runAll = True
 runOnly = {}
 
-
 class MyTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
