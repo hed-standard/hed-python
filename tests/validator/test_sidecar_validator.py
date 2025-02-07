@@ -125,6 +125,22 @@ class Test(unittest.TestCase):
         issues = sidecar.validate(self.hed_schema)
         self.assertEqual(len(issues), 3)
 
+    def test_missing_hed(self):
+        sidecar_with_hed_missing = '''
+        {
+            "event_code": {
+                "HED": {
+                    "face": "Statistical-accuracy/0.677, {response}"
+                }
+            },
+            "response": "Label/#",
+            "other": "Description"
+        }
+    '''
+        sidecar = Sidecar(io.StringIO(sidecar_with_hed_missing))
+        issues = sidecar.validate(self.hed_schema)
+        self.assertEqual(len(issues), 1)
+
     def test_invalid_list(self):
         sidecar_json = '''
         {
