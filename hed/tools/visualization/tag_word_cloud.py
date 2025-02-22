@@ -6,6 +6,7 @@ from hed.errors.exceptions import HedFileError
 from hed.tools.visualization import word_cloud_util
 from wordcloud import WordCloud
 
+MIN_WORD_CLOUD_SIZE = 100
 
 def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400, height=300, **kwargs):
     """ Takes a word dict and returns a generated word cloud object.
@@ -27,22 +28,23 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     mask_image = None
     if mask_path:
         mask_image = load_and_resize_mask(mask_path, width, height)
-        width = mask_image.shape[1]
-        height = mask_image.shape[0]
+        width = round(mask_image.shape[1])
+        height = round(mask_image.shape[0])
     if height is None and width is None:
         width = 400
         height = 300
     elif height is None:
-        height = width // 1.5
+        height = round(width/1.5)
     elif width is None:
-        width = height * 1.5
-
+        width = round(height * 1.5)
+    width = max(width, MIN_WORD_CLOUD_SIZE)
+    height = max(height, MIN_WORD_CLOUD_SIZE)
     kwargs.setdefault('contour_width', 3)
     kwargs.setdefault('contour_color', 'black')
     kwargs.setdefault('prefer_horizontal', 0.75)
     kwargs.setdefault('color_func', word_cloud_util.default_color_func)
     kwargs.setdefault('relative_scaling', 1)
-    kwargs.setdefault('max_font_size', height / 20)
+    kwargs.setdefault('max_font_size', round(height / 20))
     kwargs.setdefault('min_font_size', 8)
     if 'font_path' not in kwargs:
         kwargs['font_path'] = None

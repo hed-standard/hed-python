@@ -15,9 +15,8 @@ from hed.errors import ErrorHandler, get_printable_issue_string, SchemaWarnings
 
 
 skip_tests = {
-    "VERSION_DEPRECATED": "Not applicable",
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
-    "curly-braces-has-no-hed": "Need to fix issue #1006",
+    # "curly-braces-has-no-hed": "Need to fix issue #1006",
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
     "invalid-character-name-value-class-deprecated": "Removing support for 8.2.0 or earlier name classes"
 }
