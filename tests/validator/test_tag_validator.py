@@ -3,7 +3,6 @@ import unittest
 from hed.errors.error_types import ValidationErrors, DefinitionErrors
 from tests.validator.test_tag_validator_base import TestValidatorBase
 from hed.schema.hed_schema_io import load_schema_version
-from hed import HedTag, HedString
 from functools import partial
 
 
@@ -92,60 +91,6 @@ class IndividualHedTagsShort(TestHed):
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
-    # def test_proper_capitalization(self):
-    #     test_strings = {
-    #         'proper': 'Event/Sensory-event',
-    #         'camelCase': 'EvEnt/Something',
-    #         'takesValue': 'Sampling-rate/20 Hz',
-    #         'numeric': 'Statistical-uncertainty/20',
-    #         'lowercase': 'Event/something',
-    #         'multipleUpper': 'Event/SomeThing'
-    #     }
-    #     expected_results = {
-    #         'proper': True,
-    #         'camelCase': False,
-    #         'takesValue': True,
-    #         'numeric': True,
-    #         'lowercase': False,
-    #         'multipleUpper': False
-    #     }
-    #     expected_issues = {
-    #         'proper': [],
-    #         'camelCase': self.format_error(ValidationErrors.STYLE_WARNING, tag=0),
-    #         'takesValue': [],
-    #         'numeric': [],
-    #         'lowercase': self.format_error(ValidationErrors.STYLE_WARNING, tag=0),
-    #         'multipleUpper': self.format_error(ValidationErrors.STYLE_WARNING, tag=0)
-    #     }
-    #     self.validator_semantic(test_strings, expected_results, expected_issues, True)
-    #
-    # def test_proper_capitalization_semantic(self):
-    #     test_strings = {
-    #         'proper': 'Event/Sensory-event',
-    #         'camelCase': 'EvEnt/Sensory-event',
-    #         'takesValue': 'Sampling-rate/20 Hz',
-    #         'numeric': 'Statistical-uncertainty/20',
-    #         'lowercase': 'Event/sensory-event',
-    #         'multipleUpper': 'Event/Sensory-Event'
-    #     }
-    #     expected_results = {
-    #         'proper': True,
-    #         'camelCase': False,
-    #         'takesValue': True,
-    #         'numeric': True,
-    #         'lowercase': False,
-    #         'multipleUpper': False
-    #     }
-    #     expected_issues = {
-    #         'proper': [],
-    #         'camelCase': self.format_error(ValidationErrors.STYLE_WARNING, tag=0),
-    #         'takesValue': [],
-    #         'numeric': [],
-    #         'lowercase': self.format_error(ValidationErrors.STYLE_WARNING, tag=0),
-    #         'multipleUpper': self.format_error(ValidationErrors.STYLE_WARNING, tag=0)
-    #     }
-    #     self.validator_semantic(test_strings, expected_results, expected_issues, True)
-
     def test_child_required(self):
         test_strings = {
             'hasChild': 'Experimental-stimulus',
@@ -197,13 +142,7 @@ class IndividualHedTagsShort(TestHed):
 
     def test_correct_units(self):
         test_strings = {
-            # 'correctUnit': 'Duration/3 ms',
-            # 'correctUnitScientific': 'Duration/3.5e1 ms',
-            # 'correctPluralUnit': 'Duration/3 milliseconds',
-            # 'correctNoPluralUnit': 'Frequency/3 hertz',
-            # 'correctNonSymbolCapitalizedUnit': 'Duration/3 MilliSeconds',
-            # 'correctSymbolCapitalizedUnit': 'Frequency/3 kHz',
-
+            'correctUnit': 'Duration/3 s',
             'incorrectUnit': 'Duration/3 cm',
             'incorrectSiUsage': 'Duration/3 decaday',
             'incorrectPluralUnit': 'Frequency/3 hertzs',
@@ -213,12 +152,6 @@ class IndividualHedTagsShort(TestHed):
             'notRequiredScientific': 'Statistical-accuracy/5e-1',
             'specialAllowedCharBadUnit': 'Creation-date/ba',
             'specialAllowedCharUnit': 'Creation-date/1900-01-01T01:01:01',
-            # todo: restore these when we have a currency node in the valid beta schema.
-            # 'specialAllowedCharCurrency': 'Event/Currency-Test/$100',
-            # 'specialNotAllowedCharCurrency': 'Event/Currency-Test/@100'
-            # Update tests - 8.0 currently has no clockTime nodes.
-            # 'properTime': 'Item/2D shape/Clock face/08:30',
-            # 'invalidTime': 'Item/2D shape/Clock face/54:54'
             'voltsTest1': 'Finding-amplitude/30 v',
             'voltsTest2': 'Finding-amplitude/30 Volt',
             'voltsTest3': 'Finding-amplitude/30 volts',
@@ -250,10 +183,6 @@ class IndividualHedTagsShort(TestHed):
             'notRequiredScientific': True,
             'specialAllowedCharBadUnit': False,
             'specialAllowedCharUnit': True,
-            # 'properTime': True,
-            # 'invalidTime': True,
-            # 'specialAllowedCharCurrency': True,
-            # 'specialNotAllowedCharCurrency': False,
             'voltsTest1': True,
             'voltsTest2': True,
             'voltsTest3': True,
@@ -270,10 +199,7 @@ class IndividualHedTagsShort(TestHed):
             'volumeTest7': False,
         }
         legal_time_units = ['s', 'second', 'day', 'minute', 'hour']
-        # legal_clock_time_units = ['hour:min', 'hour:min:sec']
-        # legal_datetime_units = ['YYYY-MM-DDThh:mm:ss']
         legal_freq_units = ['Hz', 'hertz']
-        # legal_currency_units = ['dollar', "$", "point"]
         legal_intensity_units = ["candela", "cd", "dB"]
 
         expected_issues = {
@@ -301,13 +227,6 @@ class IndividualHedTagsShort(TestHed):
                                                            value_class="dateTimeClass",
                                                            actual_error=ValidationErrors.VALUE_INVALID),
             'specialAllowedCharUnit': [],
-            # 'properTime': [],
-            # 'invalidTime': self.format_error(ValidationErrors.UNITS_INVALID,  tag=0,
-            #                                 units=legal_clock_time_units)
-            # 'specialAllowedCharCurrency': [],
-            # 'specialNotAllowedCharCurrency': self.format_error(ValidationErrors.UNITS_INVALID,
-            #                                                                    tag=0,
-            #                                                                    units=legal_currency_units),
             'voltsTest1': [],
             'voltsTest2': [],
             'voltsTest3': [],
@@ -434,7 +353,7 @@ class TestTagLevels(TestHed):
             'duplicateSubGroup': False,
             'duplicateSubGroupF': False,
         }
-        from hed import HedString
+
         expected_issues = {
             'topLevelDuplicate': [
                 {'code': 'TAG_EXPRESSION_REPEATED', 'message': 'Repeated tag - "Event/Sensory-event"', 'severity': 1}
@@ -562,64 +481,6 @@ class TestTagLevels(TestHed):
             ],
         }
         self.validator_semantic_new(test_strings, expected_results, expected_issues, False)
-
-    # def test_topLevelTagGroup_validation(self):
-    #     test_strings = {
-    #         'invalid1': 'Definition/InvalidDef',
-    #         'valid1': '(Definition/ValidDef)',
-    #         'valid2': '(Definition/ValidDef), (Definition/ValidDef2)',
-    #         'invalid2': '(Event, (Definition/InvalidDef2))',
-    #         'invalidTwoInOne': '(Definition/InvalidDef2, Definition/InvalidDef3)',
-    #         'invalid2TwoInOne': '(Definition/InvalidDef2, Onset)',
-    #         'valid2TwoInOne': '(Duration/5.0 s, Delay, (Event))',
-    #         'invalid3InOne': '(Duration/5.0 s, Delay, Onset, (Event))',
-    #         'invalidDuration': '(Duration/5.0 s, Onset, (Event))',
-    #         'validDelay': '(Delay, Onset, (Event))',
-    #         'invalidDurationPair': '(Duration/5.0 s, Duration/3.0 s, (Event))',
-    #         'invalidDelayPair': '(Delay/3.0 s, Delay, (Event))',
-    #     }
-    #     expected_results = {
-    #         'invalid1': False,
-    #         'valid1': True,
-    #         'valid2': True,
-    #         'invalid2': False,
-    #         'invalidTwoInOne': False,
-    #         'invalid2TwoInOne': False,
-    #         'valid2TwoInOne': True,
-    #         'invalid3InOne': False,
-    #         'invalidDuration': False,
-    #         'validDelay': True,
-    #         'invalidDurationPair': False,
-    #         'invalidDelayPair': False,
-    #     }
-    #     expected_issues = {
-    #         'invalid1': self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0,
-    #                                       actual_error=ValidationErrors.DEFINITION_INVALID)
-    #                     + self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=0),
-    #         'valid1': [],
-    #         'valid2': [],
-    #         'invalid2':
-    #             self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1,
-    #                               actual_error=ValidationErrors.DEFINITION_INVALID) +
-    #             self.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=1),
-    #         'invalidTwoInOne': self.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED,
-    #                                              tag=HedTag("Definition/InvalidDef3", hed_schema=self.hed_schema),
-    #                                              group=HedString("(Definition/InvalidDef2, Definition/InvalidDef3)",
-    #                                                              hed_schema=self.hed_schema)),
-    #         'invalid2TwoInOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-    #                                               multiple_tags="Onset".split(", ")),
-    #         'valid2TwoInOne': [],
-    #         'invalid3InOne': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-    #                                            multiple_tags="Delay, Onset".split(", ")),
-    #         'invalidDuration': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-    #                                              multiple_tags="Onset".split(", ")),
-    #         'validDelay': [],
-    #         'invalidDurationPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-    #                                                  multiple_tags="Duration/3.0 s".split(", ")),
-    #         'invalidDelayPair': self.format_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, tag=0,
-    #                                               multiple_tags="Delay".split(", ")),
-    #     }
-    #     self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_taggroup_validation(self):
         test_strings = {
@@ -753,14 +614,6 @@ class FullHedString(TestHed):
                 'Action/Reach/To touch,'
                 '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),Attribute/Location/Screen/Top/70 px,'
                 'Attribute/Location/Screen/Left/23 px,',
-            # 'extraOpeningParen':
-            #     '(Action/Reach/To touch,'
-            #     '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),'
-            #     'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px',
-            # 'extraClosingParen':
-            #     'Action/Reach/To touch,'
-            #     '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),'
-            #     'Attribute/Location/Screen/Top/70 px,Attribute/Location/Screen/Left/23 px)',
             'multipleExtraOpeningDelimiters':
                 ',,,Action/Reach/To touch,'
                 '(Attribute/Object side/Left,Participant/Effect/Body part/Arm),Attribute/Location/Screen/Top/70 px,'
@@ -789,7 +642,6 @@ class FullHedString(TestHed):
                 'Thing, (Thing, (Thing))',
             'validNestedParentheses4': 'Thing, ((Thing, (Thing)), Thing)',
             'invalidNestedParentheses': 'Thing, ((Thing, (Thing)) Thing)',
-            # 'emptyGroup': 'Thing, ()'
         }
 
         expected_results = {
@@ -808,7 +660,6 @@ class FullHedString(TestHed):
             'validNestedParentheses3': True,
             'validNestedParentheses4': True,
             'invalidNestedParentheses': False,
-            # 'emptyGroup': False
         }
         expected_issues = {
             'missingOpeningComma': self.format_error(ValidationErrors.COMMA_MISSING,
@@ -822,10 +673,6 @@ class FullHedString(TestHed):
                                                    source_string=test_strings['extraClosingComma'],
                                                    char_index=len(
                                                        test_strings['extraClosingComma']) - 1),
-            # 'extraOpeningParen': self.format_error(ValidationErrors.TAG_EMPTY,
-            #                                                       character='(', index_in_tag=0),
-            # 'extraClosingParen': self.format_error(ValidationErrors.TAG_EMPTY, character=')',
-            #                                       index_in_tag=len(test_strings['extraClosingParen']) - 1),
             'extraOpeningParen': self.format_error(ValidationErrors.PARENTHESES_MISMATCH,
                                                    opening_parentheses_count=2,
                                                    closing_parentheses_count=1),
@@ -865,8 +712,7 @@ class FullHedString(TestHed):
             'validNestedParentheses3': [],
             'validNestedParentheses4': [],
             'invalidNestedParentheses': self.format_error(ValidationErrors.COMMA_MISSING,
-                                                          tag="Thing)) "),
-            # 'emptyGroup': []
+                                                          tag="Thing)) ")
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
@@ -915,8 +761,6 @@ class FullHedString(TestHed):
             'leadingDoubleSlashWithSpace': '/ /Event/Extension',
             'trailingDoubleSlashWithSpace': 'Event/Extension/ /',
         }
-        # expected_event_extension = 'Event/Extension'
-        # expected_tanker = 'Item/Object/Man-made/Vehicle/Boat/Tanker'
         expected_results = {
             'twoLevelDoubleSlash': False,
             'threeLevelDoubleSlash': False,
