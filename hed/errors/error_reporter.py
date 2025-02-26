@@ -473,6 +473,31 @@ def get_printable_issue_string_html(issues, title=None, severity=None, skip_file
         root_element.insert(0, title_element)
     return ET.tostring(root_element, encoding='unicode')
 
+def iter_errors(issues):
+    """ An iterator over issues represented as flat dictionaries.
+
+    Parameters:
+        issues (list):  Issues to iterator over.
+
+    Yields:
+        dict: Represents the information in a single error.
+    """
+
+    for issue in issues:
+        flat_issue = dict()
+        single_issue_context = _get_context_from_issue(issue, False)
+        flat_issue.update(single_issue_context)
+        flat_issue.update(issue)
+        # Add a link to the error if it's a known error code.
+        error_url = create_doc_link(issue.get('code', ''))
+        if error_url:
+            flat_issue['url'] = create_doc_link(issue.get('code', ''))
+        if 'source_tag' in flat_issue:
+            flat_issue['source_tag'] = str(issue['source_tag'])
+        if 'ec_HedString' in flat_issue:
+            flat_issue['ec_HedString'] = str(issue['ec_HedString'])
+        yield flat_issue
+
 
 def create_doc_link(error_code):
     """If error code is a known code, return a documentation url for it.
