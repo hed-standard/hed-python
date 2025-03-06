@@ -12,7 +12,6 @@ class BidsFile:
         suffix (str):                Suffix part of the filename.
         ext (str):                   Extension (including the .).
         entity_dict (dict):          Dictionary of entity-names (keys) and entity-values (values).
-        sidecar (BidsSidecarFile):   Merged sidecar for this file.
 
     Notes:
         - This class may hold the merged sidecar giving metadata for this file as well as contents.
@@ -31,7 +30,6 @@ class BidsFile:
         self.suffix = suffix
         self.ext = ext
         self.entity_dict = entity_dict
-        self.sidecar = None    # list of sidecars starting at the root (including itself if sidecar)
         self._contents = None
         self.has_hed = False
 
@@ -98,6 +96,4 @@ class BidsFile:
         """ Return a string representation of this object. """
         my_str = self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
             " entity_dict=" + str(self.entity_dict)
-        if self.sidecar:
-            my_str = my_str + "\n\tmerged sidecar=" + str(self.sidecar.file_path)
         return my_str

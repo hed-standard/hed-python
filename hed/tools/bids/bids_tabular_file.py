@@ -15,6 +15,7 @@ class BidsTabularFile(BidsFile):
             file_path (str):  Path of the tabular file.
         """
         super().__init__(file_path)
+        self.sidecar = None
 
     def set_contents(self, content_info=None, overwrite=False):
         """ Set the contents of this tabular file.
@@ -28,12 +29,20 @@ class BidsTabularFile(BidsFile):
             return
 
         if self.sidecar:
-            self._contents = TabularInput(file=self.file_path, sidecar=self.sidecar._contents,
+            self._contents = TabularInput(file=self.file_path, sidecar=self.sidecar.contents,
                                           name=os.path.realpath(self.file_path))
-            if self.sidecar.has_hed:
-                self.has_hed = True
+            self.has_hed = True
         else:
             self._contents = TabularInput(file=self.file_path, name=os.path.realpath(self.file_path))
         columns = self._contents.columns
         if 'HED' in columns or 'HED_assembled' in columns:
             self.has_hed = True
+
+    def set_sidecar(self, sidecar):
+        """ Set the sidecar for this tabular file.
+
+        Parameters:
+            sidecar (Sidecar):  The sidecar for this tabular file.
+
+        """
+        self.sidecar = sidecar

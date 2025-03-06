@@ -73,6 +73,11 @@ class Sidecar:
         """
         return {col_name: ColumnMetadata(name=col_name, source=self.loaded_dict) for col_name in self.loaded_dict}
 
+    @property
+    def loaded_json(self):
+        return self.loaded_json
+
+
     def get_def_dict(self, hed_schema, extra_def_dicts=None):
         """ Return the definition dict for this sidecar.
 

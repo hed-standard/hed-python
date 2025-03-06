@@ -84,6 +84,63 @@ def get_alphanumeric_path(pathname, replace_char='_'):
     """
     return re.sub(r'[^a-zA-Z0-9]+', replace_char, pathname)
 
+def get_full_extension(filename):
+    """ Return the full extension of a file, including the period.
+
+    Parameters:
+        filename (str):   The filename to be parsed.
+
+    Returns:
+        (str, str):  (File name without extension, full extension)
+
+    """
+    name, ext = os.path.splitext(filename)
+    full_ext = ext
+    while ext: # Keep splitting if there's another extension
+        name, ext = os.path.splitext(name)
+        if not ext:
+            break
+        full_ext = ext + full_ext
+    return name, full_ext
+
+
+def get_unique_suffixes(file_paths, extensions=['.json', '.tsv']):
+    suffixes = set()
+    extension_set = set(extensions)
+    for file_path in file_paths:
+        name, ext = get_full_extension(file_path)
+        if ext not in extension_set:
+            continue
+
+        result = os.path.basename(name).split('_')
+        if len(result) == 2:
+            suffixes.add(result[1])
+    return suffixes
+
+def group_by_suffix(file_list, exact_match=False):
+    """ Group files by suffix. If exact_match is True, only files with the exact suffixare grouped.
+
+    Parameters:
+        file_list (list):  List of file paths.
+        exact_match (bool):  If True, only files with the exact suffix are grouped.
+
+    Returns:
+        dict:  Dictionary with suffixes as keys and file lists as values.
+
+    """
+    suffix_groups = {}
+    for file_path in file_list:
+        name, ext = get_full_extension(file_path)
+        result = os.path.basename(name).rsplit('_', 1)
+        if len(result) == 2:
+            suffix_groups.setdefault(result[1], []).append(file_path)
+        elif not exact_match:
+            suffix_groups.setdefault(None, []).append(file_path)
+        else:
+            suffix_groups.setdefault(result[0], []).append(file_path)
+    return suffix_groups
+
+
 
 def extract_suffix_path(path, prefix_path):
     """ Return the suffix of path after prefix path has been removed.
@@ -122,38 +179,41 @@ def clean_filename(filename):
     out_name = re.sub(r'[^a-zA-Z0-9._-]+', '_', filename)
     return out_name
 
+def get_basename(file_path):
+    filename_with_ext = os.path.basename(file_path)  # 'myfile.txt'
+    return os.path.splitext(filename_with_ext)[0]  # 'myfile'
 
-def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True,
-                       exclude_dirs=None):
-
-    """ Create dictionary directory paths keys.
-
-    Parameters:
-        dir_path (str):               Full path of the directory tree to be traversed (no ending slash).
-        name_prefix (str, None):      An optional name_prefix for the base filename.
-        name_suffix (str, None):      An optional name_suffix for the base file name.
-        extensions (list, None):      An optional list of file extensions.
-        skip_empty (bool):            Do not put entry for directories that have no files.
-        exclude_dirs (list):          List of directories to skip.
-
-    Returns:
-        dict:  Dictionary with directories as keys and file lists values.
-
-    """
-
-    if not exclude_dirs:
-        exclude_dirs = []
-    dir_dict = {}
-    for root, dirs, files in os.walk(dir_path, topdown=True):
-        dirs[:] = [d for d in dirs if d not in exclude_dirs]
-        file_list = []
-        for r_file in files:
-            if check_filename(r_file, name_prefix, name_suffix, extensions):
-                file_list.append(os.path.join(os.path.realpath(root), r_file))
-        if skip_empty and not file_list:
-            continue
-        dir_dict[os.path.realpath(root)] = file_list
-    return dir_dict
+# def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True,
+#                        exclude_dirs=None):
+#
+#     """ Create dictionary directory paths keys.
+#
+#     Parameters:
+#         dir_path (str):               Full path of the directory tree to be traversed (no ending slash).
+#         name_prefix (str, None):      An optional name_prefix for the base filename.
+#         name_suffix (str, None):      An optional name_suffix for the base file name.
+#         extensions (list, None):      An optional list of file extensions.
+#         skip_empty (bool):            Do not put entry for directories that have no files.
+#         exclude_dirs (list):          List of directories to skip.
+#
+#     Returns:
+#         dict:  Dictionary with directories as keys and file lists values.
+#
+#     """
+#
+#     if not exclude_dirs:
+#         exclude_dirs = []
+#     dir_dict = {}
+#     for root, dirs, files in os.walk(dir_path, topdown=True):
+#         dirs[:] = [d for d in dirs if d not in exclude_dirs]
+#         file_list = []
+#         for r_file in files:
+#             if check_filename(r_file, name_prefix, name_suffix, extensions):
+#                 file_list.append(os.path.join(os.path.realpath(root), r_file))
+#         if skip_empty and not file_list:
+#             continue
+#         dir_dict[os.path.realpath(root)] = file_list
+#     return dir_dict
 
 
 def get_filtered_by_element(file_list, elements):
@@ -196,8 +256,8 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
 
     Parameters:
         root_path (str):              Full path of the directory tree to be traversed (no ending slash).
-        name_prefix (str, None):      An optional name_prefix for the base filename.
-        name_suffix (str, None):      The name_suffix of the paths to be extracted.
+        name_prefix (list, str, None):      An optional name_prefix for the base filename.
+        name_suffix (list, str, None):  An optional name_prefix for the base filename.
         extensions (list, None):      A list of extensions to be selected.
         exclude_dirs (list, None):    A list of paths to be excluded.
 

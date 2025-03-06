@@ -3,6 +3,7 @@ import unittest
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_file_group import BidsFileGroup
+from hed.tools.util import io_util
 
 # TODO: Add test when exclude directories have files of the type needed (such as JSON in code directory).
 
@@ -13,7 +14,10 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         cls.root_path = os.path.realpath(os.path.join(os.path.dirname(__file__),
                                                       '../../data/bids_tests/eeg_ds003645s_hed'))
+        cls.exclude_dirs = ['sourcedata', 'derivatives', 'code', 'stimuli']
         file_name = 'eeg/sub-002_task-FacePerception_run-1_events.tsv'
+        cls.file_paths =  file_paths = io_util.get_file_list(self.root_path, extensions=['.tsv', '.json'],
+                                           exclude_dirs=self.exclude_dirs, name_suffix=['_events'])
         cls.event_path = \
             os.path.realpath(os.path.join(os.path.dirname(__file__),
                                           '../../data/bids_tests/eeg_ds003645s_hed/sub-002', file_name))
@@ -21,7 +25,9 @@ class Test(unittest.TestCase):
         cls.sidecar_path = os.path.realpath(os.path.join(os.path.dirname(__file__), events_file))
 
     def test_constructor(self):
-        events = BidsFileGroup(self.root_path)
+        file_paths = io_util.get_file_list(self.root_path, extensions=['.tsv', '.json'],
+                                           exclude_dirs=self.exclude_dirs, name_suffix=['_events'])
+        events = BidsFileGroup(self.root_path, file_paths, 'events')
         self.assertIsInstance(events, BidsFileGroup, "BidsFileGroup should create an BidsFileGroup instance")
         self.assertIsInstance(events.datafile_dict, dict, "BidsFileGroup should have an event files dictionary")
         self.assertEqual(len(events.datafile_dict), 6, "BidsFileGroup event files dictionary should have 2 entries")
@@ -30,6 +36,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(events.sidecar_dir_dict, dict, "BidsFileGroup should have sidecar directory dictionary")
 
     def test_validator(self):
+
         events = BidsFileGroup(self.root_path)
         hed_schema = load_schema_version("8.0.0")
         validation_issues = events.validate_datafiles(hed_schema, check_for_warnings=False)

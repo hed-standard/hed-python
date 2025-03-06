@@ -2,8 +2,8 @@ import os
 import unittest
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import check_filename, extract_suffix_path, clean_filename, \
-    get_alphanumeric_path, get_dir_dictionary, get_file_list, get_path_components, get_task_from_file, \
-    parse_bids_filename, _split_entity, get_allowed, get_filtered_by_element
+    get_alphanumeric_path, get_file_list, get_path_components, get_task_from_file, \
+    parse_bids_filename, _split_entity, get_allowed, get_filtered_by_element, get_full_extension, group_by_suffix
 
 
 class Test(unittest.TestCase):
@@ -49,17 +49,6 @@ class Test(unittest.TestCase):
     def test_clean_file_name(self):
         file1 = clean_filename('mybase')
         self.assertEqual(file1, "mybase", "generate_file_name should return the base when other arguments not set")
-        # file2 = clean_filename('mybase', name_prefix="prefix")
-        # self.assertEqual(file2, "prefixmybase", "generate_file_name should return correct name when prefix set")
-        # file3 = clean_filename('mybase', name_prefix="prefix", extension=".json")
-        # self.assertEqual(file3, "prefixmybase.json", "generate_file_name should return correct name for extension")
-        # file4 = clean_filename('mybase', name_suffix="suffix")
-        # self.assertEqual(file4, "mybasesuffix", "generate_file_name should return correct name when suffix set")
-        # file5 = clean_filename('mybase', name_suffix="suffix", extension=".json")
-        # self.assertEqual(file5, "mybasesuffix.json", "generate_file_name should return correct name for extension")
-        # file6 = clean_filename('mybase', name_prefix="prefix", name_suffix="suffix", extension=".json")
-        # self.assertEqual(file6, "prefixmybasesuffix.json",
-        #                  "generate_file_name should return correct name for all set")
         filename = clean_filename("")
         self.assertEqual('', filename, "Return empty when all arguments are none")
         filename = clean_filename(None)
@@ -68,18 +57,6 @@ class Test(unittest.TestCase):
         filename = clean_filename('c:/temp.json')
         self.assertEqual('c_temp.json', filename,
                          "Returns stripped base_name + extension when prefix, and suffix are None")
-        # filename = clean_filename('temp.json', name_prefix='prefix_', name_suffix='_suffix', extension='.txt')
-        # self.assertEqual('prefix_temp_suffix.txt', filename,
-        #                  "Return stripped base_name + extension when prefix, and suffix are None")
-        # filename = clean_filename(None, name_prefix='prefix_', name_suffix='suffix', extension='.txt')
-        # self.assertEqual('prefix_suffix.txt', filename,
-        #                  "Returns correct string when no base_name")
-        # filename = clean_filename('event-strategy-v3_task-matchingpennies_events.json',
-        #                           name_suffix='_blech', extension='.txt')
-        # self.assertEqual('event-strategy-v3_task-matchingpennies_events_blech.txt', filename,
-        #                  "Returns correct string when base_name with hyphens")
-        # filename = clean_filename('HED7.2.0.xml', name_suffix='_blech', extension='.txt')
-        # self.assertEqual('HED7.2.0_blech.txt', filename, "Returns correct string when base_name has periods")
 
     def test_get_allowed(self):
         test_value = 'events.tsv'
@@ -100,10 +77,10 @@ class Test(unittest.TestCase):
         repath2 = get_alphanumeric_path(mypath1, '$')
         self.assertEqual('g$String1$sTring2$string3$string4$pnG', repath2)
 
-    def test_get_dir_dictionary(self):
-        dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
-        self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")
-        self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
+    # def test_get_dir_dictionary(self):
+    #     dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
+    #     self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")
+    #     self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
 
     def test_get_file_list_case(self):
         dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
@@ -177,20 +154,6 @@ class Test(unittest.TestCase):
         file_path3 = os.path.join(base_path, 'temp_events.tsv')
         comps3 = get_path_components(base_path, file_path3)
         self.assertFalse(comps3, "get_path_components files directly in base_path don't have components ")
-
-        # TODO: This test doesn't work on Linux
-        # file_path4 = 'P:/Baloney/sidecar/events.tsv'
-        #
-        # try:
-        #     get_path_components(base_path, file_path4)
-        # except ValueError as ex:
-        #     print(f"{ex}")
-        #     pass
-        # except Exception as ex:
-        #     print(f"{ex}")
-        #     self.fail("parse_bids_filename threw the wrong exception when filename invalid")
-        # else:
-        #     self.fail("parse_bids_filename should have thrown an exception")
 
     def test_get_task_from_file(self):
         task1 = get_task_from_file("H:/alpha/base_task-blech.tsv")
@@ -271,6 +234,88 @@ class Test(unittest.TestCase):
         self.assertEqual(1, len(ent_dict4), "_split_entity is returns a dictionary with 1 entry if invalid")
         self.assertTrue("bad" in ent_dict4, "_split_entity should have a bad component if invalid")
         self.assertFalse(ent_dict4["bad"], "_split_entity bad value should be empty if blank piece")
+
+
+class TestGetFullExtension(unittest.TestCase):
+    def test_single_extension(self):
+        self.assertEqual(get_full_extension("file.txt"), ("file", ".txt"),
+                         "Should work with single extensions.")
+
+    def test_multiple_extensions(self):
+        self.assertEqual(get_full_extension("archive.tar.gz"), ("archive", ".tar.gz"),
+                         "Should work with multiple extensions.")
+
+    def test_no_extension(self):
+        self.assertEqual(get_full_extension("filename"), ("filename", ""),
+                         "Should work with no extension.")
+
+    def test_hidden_file_no_extension(self):
+        self.assertEqual(get_full_extension(".gitignore"), (".gitignore", ""),
+                        "Should work with hidden files without extensions.")
+
+    def test_hidden_file_with_extension(self):
+        self.assertEqual(get_full_extension(".config.json"), (".config", ".json"),
+                         "Should work with hidden files with extensions.")
+
+    def test_nested_directory(self):
+        self.assertEqual(get_full_extension("path/to/archive.tar.gz"), ("path/to/archive", ".tar.gz"),
+                         "")
+
+
+class TestGroupBySuffixes(unittest.TestCase):
+    def test_basic_grouping(self):
+        file_list = [
+            "/path/to/file_abc.json",
+            "/path/to/another_def.json",
+            "/path/to/something_xyz.tsv"
+        ]
+        expected_groups = {
+            "abc": ["/path/to/file_abc.json"],
+            "def": ["/path/to/another_def.json"],
+            "xyz": ["/path/to/something_xyz.tsv"]
+        }
+
+        result = group_by_suffix(file_list)
+        self.assertEqual(result, expected_groups, "Basic grouping should work correctly")
+
+    def test_files_without_underscore(self):
+        file_list = [
+            "/path/to/filename.json",  # No underscore
+            "/path/to/anotherfile.tsv",
+            "/path/to/ignore_me.txt"
+        ]
+        expected1 = {
+            "filename": ["/path/to/filename.json"],
+            "anotherfile": ["/path/to/anotherfile.tsv"],
+            "me": ["/path/to/ignore_me.txt"]
+        }
+        expected2 = {
+            None: ["/path/to/filename.json", "/path/to/anotherfile.tsv"],
+            "me": ["/path/to/ignore_me.txt"]
+        }
+        result1 = group_by_suffix(file_list, exact_match=True)
+        self.assertEqual(result1, expected1, "valid_groups")
+        result2 = group_by_suffix(file_list, exact_match=False)
+        self.assertEqual(result2, expected2, "valid_groups")
+
+    def test_files_with_multiple_underscores(self):
+        file_list = [
+            "/path/to/project_file_abc.json",
+            "/path/to/another_long_name_def.json",
+            "/path/to/another_def.json",
+        ]
+        expected = {
+            "abc": ["/path/to/project_file_abc.json"],
+            "def": ["/path/to/another_long_name_def.json", "/path/to/another_def.json"]
+        }
+        result = group_by_suffix(file_list)
+        self.assertEqual(result, expected, "It should parse with multiple underscores")  # Should be empty since len(split) > 2
+
+    def test_empty_file_list(self):
+        result1 = group_by_suffix([], exact_match=True)
+        self.assertEqual(result1, {})  # Should return an empty dict
+        result2 = group_by_suffix([], exact_match=False)
+        self.assertEqual(result2, {})  # Should return an empty dict
 
 
 if __name__ == '__main__':

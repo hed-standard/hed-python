@@ -168,7 +168,7 @@ class BidsValidator:
         extension_is_valid = bids_file.extension.lower() == ".json"
         suffix_is_valid = (bids_file.suffix == tsv_file.suffix) or not tsv_file.suffix
         entities_match = all(
-            bids_file.enties.get(entity) == tsv_file.entities.get(entity) for entity in tsv_file.entities.keys())
+            bids_file.entities.get(entity) == tsv_file.entities.get(entity) for entity in tsv_file.entities.keys())
         return extension_is_valid and suffix_is_valid and entities_match
 
     @staticmethod

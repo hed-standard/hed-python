@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(parts.sidecar_dict), 1, "BidsDataset should have one participants.json file")
         self.assertEqual(len(parts.datafile_dict), 1, "BidsDataset should have one participants.tsv file")
         self.assertIsInstance(bids.dataset_description, dict, "BidsDataset dataset_description should be a dict")
-        for group in bids.tabular_files.values():
+        for group in bids.tabular_groups.values():
             self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
         self.assertIsInstance(bids.schema, HedSchema, "BidsDataset schema should be HedSchema")
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(parts.sidecar_dict), 1, "BidsDataset should have one participants.json file")
         self.assertEqual(len(parts.datafile_dict), 1, "BidsDataset should have one participants.tsv file")
         self.assertIsInstance(bids.dataset_description, dict, "BidsDataset dataset_description should be a dict")
-        for group in bids.tabular_files.values():
+        for group in bids.tabular_groups.values():
             self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
         self.assertIsInstance(bids.schema, HedSchemaGroup, "BidsDataset schema should be HedSchemaGroup")
@@ -68,7 +68,7 @@ class Test(unittest.TestCase):
         self.assertFalse(chans.sidecar_dict)
         self.assertEqual(len(chans.datafile_dict), 6, "BidsDataset should have one participants.tsv file")
         self.assertIsInstance(bids.dataset_description, dict, "BidsDataset dataset_description should be a dict")
-        for group in bids.tabular_files.values():
+        for group in bids.tabular_groups.values():
             self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
         events = bids.get_tabular_group("events")
         self.assertFalse(events, "BidsDataset should not have events if tabular_files do not include them.")
@@ -99,7 +99,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(parts.sidecar_dict), 1, "BidsDataset should have one participants.json file")
         self.assertEqual(len(parts.datafile_dict), 1, "BidsDataset should have one participants.tsv file")
         self.assertIsInstance(bids.dataset_description, dict, "BidsDataset dataset_description should be a dict")
-        for group in bids.tabular_files.values():
+        for group in bids.tabular_groups.values():
             self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
         self.assertIsInstance(bids.schema, HedSchema, "BidsDataset schema should be HedSchema")
@@ -124,7 +124,7 @@ class Test(unittest.TestCase):
 
         self.assertIsInstance(bids.dataset_description, dict,
                               "BidsDataset with libraries dataset_description should be a dict")
-        for group in bids.tabular_files.values():
+        for group in bids.tabular_groups.values():
             self.assertIsInstance(group, BidsFileGroup,
                                   "BidsDataset with libraries event_files should be  BidsFileGroup")
         self.assertIsInstance(bids.schema, HedSchemaGroup,
