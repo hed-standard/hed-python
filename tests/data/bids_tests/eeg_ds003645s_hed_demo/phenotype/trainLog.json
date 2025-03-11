@@ -1,0 +1,33 @@
+{
+  "trainLog": {
+    "Description": "logbook filled in by the participants after each training session"
+  },
+  "train_num": {
+    "Description": "The number of this practice session",
+    "HED": "(Item-count/#, Label/Train-session)"
+  },
+  "duration_finger": {
+    "Description": "reported practice time for the finger tapping task",
+    "Units": "minutes",
+    "HED": "(Duration/# minute, (Move, (Finger)))"
+  },
+  "duration_foot": {
+    "Description": "reported practice time for the foot stepping task",
+    "Units": "minutes",
+    "HED": "(Duration/# minute, (Move, (Foot)))"
+  },
+  "assess_finger": {
+    "Description": "'On a scale from 1 to 10, how would rate your performance today?' for the finger tapping task",
+    "Range": "1 (can't perform the sequence at all) to 10 (automaticity is reached)",
+    "HED": "(Finger, Categorical-level-value, Label/#)"
+  },
+  "assess_foot": {
+    "Description": "'On a scale from 1 to 10, how would rate your performance today?' for the foot stepping task",
+    "Range": "1 (can't perform the sequence at all) to 10 (automaticity is reached)",
+    "HED": "(Foot, Categorical-level-value, Label/#)"
+  },
+  "notes": {
+    "Description": "additional comments/observations/notes, reported by the participant",
+    "HED": "Experimental-note/#"
+  }
+}

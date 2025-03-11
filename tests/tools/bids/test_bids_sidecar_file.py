@@ -37,9 +37,10 @@ class Test(unittest.TestCase):
         self.assertFalse(sidecar1.has_hed)
 
     def test_bad_constructor(self):
-        with self.assertRaises(HedFileError) as context:
-            BidsSidecarFile(self.description_path)
-        self.assertEqual(context.exception.args[0], 'BadKeyValue')
+        sidecar1 = BidsSidecarFile("-bad.json")
+        self.assertEqual(sidecar1.bad, ["-bad"], "BidsSidecarFile detect bad file names")
+        self.assertEqual(sidecar1.ext, '.json', "BidsSidecarFile should have correct ext")
+
 
     def test_bids_sidecar_file_str(self):
         sidecar1 = BidsSidecarFile(self.sidecar_path)

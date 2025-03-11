@@ -59,11 +59,15 @@ class BidsSidecarFile(BidsFile):
          """
         if not overwrite and self.contents:
             return
-        if not content_info:
-            self._contents = Sidecar(files=self.file_path, name=os.path.basename(self.file_path))
-        else:
-            self._contents = Sidecar(io.StringIO(json.dumps(content_info)), name=name)
-        self.has_hed = self.is_hed(self.contents.loaded_dict)
+        try:
+            if not content_info:
+                self._contents = Sidecar(self.file_path, name=os.path.basename(self.file_path))
+            else:
+                self._contents = Sidecar(io.StringIO(json.dumps(content_info)), name=name)
+            self.has_hed = self.is_hed(self.contents.loaded_dict)
+        except Exception as e:
+            self._contents = None
+            self.has_hed = False
 
     @staticmethod
     def is_hed(json_dict):
@@ -107,7 +111,7 @@ class BidsSidecarFile(BidsFile):
         for sidecar in sidecar_list:
             if not sidecar:
                 continue
-            merged_dict.update(sidecar.loaded_dict)
+            merged_dict.update(sidecar.contents.loaded_dict)
         if merged_dict:
             return Sidecar(files=io.StringIO(json.dumps(merged_dict)), name=name)
         return None

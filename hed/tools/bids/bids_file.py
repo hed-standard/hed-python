@@ -26,10 +26,12 @@ class BidsFile:
 
         """
         self.file_path = os.path.realpath(file_path)
-        suffix, ext, entity_dict = io_util.parse_bids_filename(self.file_path)
-        self.suffix = suffix
-        self.ext = ext
-        self.entity_dict = entity_dict
+        name_dict = io_util.parse_bids_filename(self.file_path)
+        self.basename = name_dict.get("basename")
+        self.suffix = name_dict.get("suffix")
+        self.ext = name_dict.get("ext")
+        self.entity_dict = name_dict.get("entities")
+        self.bad = name_dict.get("bad")
         self._contents = None
         self.has_hed = False
 
@@ -80,7 +82,7 @@ class BidsFile:
         """ Set the contents of this object.
 
         Parameters:
-            content_info (Any):      The contents appropriate for this object.
+            content_info (Any):      JSON dictionary The contents appropriate for this object.
             overwrite (bool):  If False and the contents are not empty, do nothing.
 
         Notes:

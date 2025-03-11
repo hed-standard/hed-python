@@ -283,7 +283,7 @@ class Test(unittest.TestCase):
         exclude_dirs = ['stimuli']
         skip_columns = ["onset", "duration", "sample", "trial", "response_time"]
         value_columns = ["rep_lag", "stim_file", "value"]
-        event_files = io_util.get_file_list(self.bids_root_path, extensions=[".tsv"], name_suffix="_events",
+        event_files = io_util.get_file_list(self.bids_root_path, extensions=[".tsv"], name_suffix="events",
                                             exclude_dirs=exclude_dirs)
         value_sum = TabularSummary(value_cols=value_columns, skip_cols=skip_columns)
         value_sum.update(event_files)

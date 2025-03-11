@@ -29,8 +29,6 @@ def get_parser():
                         help="Name of the default backup for remodeling")
     parser.add_argument("-b", "--bids-format", action='store_true', dest="use_bids",
                         help="If present, the dataset is in BIDS format with sidecars. HED analysis is available.")
-    parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
-                        help="File extensions to allow in locating files.")
     parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events',
                         help="Filename suffix excluding file type of items to be analyzed (events by default).")
     parser.add_argument("-i", "--individual-summaries", dest="individual_summaries", default="separate",
@@ -105,8 +103,6 @@ def parse_arguments(arg_list=None):
     args = parser.parse_args(arg_list)
     if '*' in args.file_suffix:
         args.file_suffix = None
-    if '*' in args.extensions:
-        args.extensions = None
     args.data_dir = os.path.realpath(args.data_dir)
     args.exclude_dirs = args.exclude_dirs + ['remodel']
     args.model_path = os.path.realpath(args.model_path)
@@ -148,11 +144,11 @@ def run_bids_ops(dispatch, args, tabular_files):
         tabular_files (list): List of tabular files to run the ops on.
 
     """
-    bids = BidsDataset(dispatch.data_root, tabular_types=['events'], exclude_dirs=args.exclude_dirs)
+    bids = BidsDataset(dispatch.data_root, suffixes=['events'], exclude_dirs=args.exclude_dirs)
     dispatch.hed_schema = bids.schema
     if args.verbose:
         print(f"Successfully parsed BIDS dataset with HED schema {str(bids.schema.get_schema_versions())}")
-    data = bids.get_tabular_group(args.file_suffix)
+    data = bids.get_file_group(args.file_suffix)
     if args.verbose:
         print(f"Processing {dispatch.data_root}")
     filtered_events = [data.datafile_dict[key] for key in tabular_files]
@@ -218,7 +214,7 @@ def main(arg_list=None):
         save_dir = None
         if args.work_dir:
             save_dir = os.path.realpath(os.path.join(args.work_dir, Dispatcher.REMODELING_SUMMARY_PATH))
-        files = io_util.get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
+        files = io_util.get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=[".tsv", ".json"],
                                       exclude_dirs=args.exclude_dirs)
         task_dict = parse_tasks(files, args.task_names)
         for task, files in task_dict.items():
