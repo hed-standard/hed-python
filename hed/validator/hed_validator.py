@@ -204,13 +204,6 @@ class HedValidator:
                 if not self._definitions_allowed and hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY:
                     validation_issues += error_reporter.ErrorHandler.format_error(
                         DefinitionErrors.BAD_DEFINITION_LOCATION, hed_tag)
-                # todo: unclear if this should be restored at some point
-                # if hed_tag.expandable and not hed_tag.expanded:
-                #     for tag in hed_tag.expandable.get_all_tags():
-                #         validation_issues += self._group_validator. \
-                #             run_individual_tag_validators(tag, allow_placeholders=allow_placeholders,
-                #                                           is_definition=is_definition)
-                # else:
                 validation_issues += \
                     self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
                                                                       is_definition=is_definition)

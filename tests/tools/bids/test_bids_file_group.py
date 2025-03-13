@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(events.sidecar_dict), 1, "BidsFileGroup event files dictionary should have 1 entry")
         self.assertIsInstance(events.sidecar_dir_dict, dict, "BidsFileGroup should have sidecar directory dictionary")
         empty_stuff = BidsFileGroup(self.root_path, [], 'events')
-        self.assertIsInstance(events, BidsFileGroup, "BidsFileGroup should create an BidsFileGroup instance")
+        self.assertIsInstance(empty_stuff, BidsFileGroup, "BidsFileGroup should create an BidsFileGroup instance")
 
     def test_create_file_group(self):
         events = BidsFileGroup.create_file_group(self.root_path, self.file_paths, 'events')

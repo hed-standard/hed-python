@@ -32,15 +32,15 @@ class BidsFileGroup:
         """
 
         self.suffix = suffix
-        [tsv_list, json_list] = self.separate_file_list(file_list)
+        ext_dict = io_util.separate_by_ext(file_list)
         self.bad_files = {}
         self.sidecar_dict = {}
         self.sidecar_dir_dict = {}
         self.datafile_dict = {}
         self.has_hed = False
-        self._make_sidecar_dict(json_list)
+        self._make_sidecar_dict(ext_dict.get('.json', []))
         self._make_dir_dict(root_path)
-        self._make_datafile_dict(root_path, tsv_list)
+        self._make_datafile_dict(root_path, ext_dict.get('.tsv', []))
 
     def summarize(self, value_cols=None, skip_cols=None):
         """ Return a BidsTabularSummary of group files.
@@ -168,7 +168,7 @@ class BidsFileGroup:
             try:
                 column_headers = list(pd.read_csv(file_path, sep='\t', nrows=0).columns)
             except Exception as e:
-                self.bad_files[file_path] = f"{file_path} does not have a valid column header"
+                self.bad_files[file_path] = f"{file_path} does not have a valid column header: {str(e)}"
                 continue
             if "HED" in column_headers or "HED_assembled" in column_headers or tsv_obj.sidecar:
                 self.has_hed = True
@@ -196,7 +196,7 @@ class BidsFileGroup:
                 sidecar_list.append(candidate)
         if len(sidecar_list) > 1:
             merged_name = "merged_" + io_util.get_basename(tsv_obj.file_path) + '.json'
-            return BidsSidecarFile.get_merged_sidecar(sidecar_list, name=merged_name)
+            return BidsSidecarFile.merge_sidecar_list(sidecar_list, name=merged_name)
         elif len(sidecar_list) == 1:
             return sidecar_list[0].contents
         return None
@@ -251,45 +251,6 @@ class BidsFileGroup:
             if sidecar_file.has_hed:
                 self.sidecar_dict[os.path.realpath(file_path)] = sidecar_file
                 self.has_hed = True
-
-    @staticmethod
-    def separate_file_list(file_list):
-        """ Separate a list of files into tsv and json files.
-
-        Parameters:
-            file_list (list):  A list of file paths.
-
-        Returns:
-            tuple:  A tuple of lists of tsv and json files.
-
-        """
-        tsv_files = []
-        json_files = []
-        for file in file_list:
-            if file.endswith('.tsv'):
-                tsv_files.append(file)
-            elif file.endswith('.json'):
-                json_files.append(file)
-        return tsv_files, json_files
-
-
-
-    @staticmethod
-    def _get_candidate(candidate_list, tsv_file):
-        if not candidate_list:
-            return None
-        candidates = []
-        for sidecar_candidate in candidate_list:
-            if sidecar_candidate.is_sidecar_for(tsv_file):
-                candidates.append(sidecar_candidate)
-        if len(candidates) == 1:
-            return candidates[0]
-        elif len(candidates) == 0:
-            return None
-        else:
-            paths = sorted(file.file_path for file in candidates)
-            raise Exception({"code": "MULTIPLE_INHERITABLE_FILES", "location": paths[0], "affects": tsv_file.file_path,
-                            "issueMessage": f"Candidate files: {paths}"})
 
     @staticmethod
     def create_file_group(root_path, file_list, suffix):

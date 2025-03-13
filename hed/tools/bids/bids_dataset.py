@@ -2,10 +2,11 @@
 
 import os
 import json
+from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_schema import HedSchema
-from hed.schema.hed_schema_io import load_schema_version
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_file_group import BidsFileGroup
+from hed.tools.bids import bids_util
 from hed.tools.util import io_util
 
 
@@ -32,12 +33,11 @@ class BidsDataset:
 
         """
         self.root_path = os.path.realpath(root_path)
-        with open(os.path.join(self.root_path, "dataset_description.json"), "r") as fp:
-            self.dataset_description = json.load(fp)
         if schema:
             self.schema = schema
         else:
-            self.schema = load_schema_version(self.dataset_description.get("HEDVersion", None))
+            self.schema = bids_util.get_schema_from_description(self.root_path)
+
         self.exclude_dirs = exclude_dirs
         self.suffixes = suffixes
         self.file_groups = self._set_file_groups()
@@ -54,25 +54,33 @@ class BidsDataset:
         """
         return self.file_groups.get(suffix, None)
 
-    def validate(self, check_for_warnings=False):
+    def validate(self, check_for_warnings=False, schema=None):
         """ Validate the dataset.
 
         Parameters:
             check_for_warnings (bool):  If True, check for warnings.
+            schema (HedSchema or HedSchemaGroup or None):  The schema used for validation.
 
         Returns:
             list:  List of issues encountered during validation. Each issue is a dictionary.
 
         """
         issues = []
+        if schema:
+            this_schema = schema
+        elif self.schema:
+            this_schema = self.schema
+        else:
+            return [{"code": "SCHEMA_LOAD_FAILED",
+                     "message": "BIDS dataset_description.json has invalid HEDVersion and passed schema was invalid}",}]
         for suffix, group in self.file_groups.items():
             if group.has_hed:
-                issues += group.validate(self.schema, check_for_warnings=check_for_warnings)
+                issues += group.validate(this_schema, check_for_warnings=check_for_warnings)
         return issues
 
     def get_summary(self):
         """ Return an abbreviated summary of the dataset. """
-        summary = {"dataset": self.dataset_description['Name'],
+        summary = {"dataset": self.root_path,
                    "hed_schema_versions": self.schema.get_schema_versions(),
                    "file_group_types": f"{str(list(self.file_groups.keys()))}"}
         return summary
@@ -80,7 +88,7 @@ class BidsDataset:
     def _set_file_groups(self):
         file_paths = io_util.get_file_list(self.root_path, extensions=['.tsv', '.json'],
                                            exclude_dirs=self.exclude_dirs, name_suffix=self.suffixes)
-        file_dict = io_util.group_by_suffix(file_paths)
+        file_dict = bids_util.group_by_suffix(file_paths)
 
         file_groups = {}
         for suffix, files in file_dict.items():

@@ -83,6 +83,7 @@ def get_alphanumeric_path(pathname, replace_char='_'):
     """
     return re.sub(r'[^a-zA-Z0-9]+', replace_char, pathname)
 
+
 def get_full_extension(filename):
     """ Return the full extension of a file, including the period.
 
@@ -115,27 +116,6 @@ def get_unique_suffixes(file_paths, extensions=['.json', '.tsv']):
         if len(result) == 2:
             suffixes.add(result[1])
     return suffixes
-
-def group_by_suffix(file_list):
-    """ Group files by suffix.
-
-    Parameters:
-        file_list (list):  List of file paths.
-
-    Returns:
-        dict:  Dictionary with suffixes as keys and file lists as values.
-
-    """
-    suffix_groups = {}
-    for file_path in file_list:
-        name, ext = get_full_extension(file_path)
-        result = os.path.basename(name).rsplit('_', 1)
-        if len(result) == 2:
-            suffix_groups.setdefault(result[1], []).append(file_path)
-        else:
-            suffix_groups.setdefault(result[0], []).append(file_path)
-    return suffix_groups
-
 
 
 def extract_suffix_path(path, prefix_path):
@@ -175,9 +155,9 @@ def clean_filename(filename):
     out_name = re.sub(r'[^a-zA-Z0-9._-]+', '_', filename)
     return out_name
 
+
 def get_basename(file_path):
-    filename_with_ext = os.path.basename(file_path)  # 'myfile.txt'
-    return os.path.splitext(filename_with_ext)[0]  # 'myfile'
+    return get_full_extension(file_path)[0]
 
 
 def get_filtered_by_element(file_list, elements):
@@ -302,210 +282,6 @@ def make_path(root_path, sub_path, filename):
     os.makedirs(dir_path, exist_ok=True)
 
 
-def parse_bids_filename(file_path):
-    """Split a filename into BIDS-relevant components.
-
-    Parameters:
-        file_path (str): Path to be parsed.
-
-    Returns:
-        dict: Dictionary with keys 'basename', 'suffix', 'prefix', 'ext', 'bad', and 'entities'.
-
-    Notes:
-        - Splits into BIDS suffix, extension, and a dictionary of entity name-value pairs.
-    """
-
-    split_dict = {}
-    name, ext = get_full_extension(file_path.strip())
-    basename = os.path.basename(name)
-    name_dict = {"basename": basename, "suffix": None, "prefix": None, "ext": ext, "bad": [], "entities": {}}
-    if not basename:
-        return name_dict
-
-    entity_pieces = basename.rsplit('_', 1)
-
-    # Case: No underscore in filename → could be a single entity (e.g., "task-blech.tsv")
-    if len(entity_pieces) == 1:
-        entity_count = entity_pieces[0].count('-')
-        if entity_count > 1:
-            name_dict["bad"].append(entity_pieces[0])
-        elif entity_count == 1: # Looks like an entity-type pair
-            update_entity(name_dict, entity_pieces[0])
-        else:
-            name_dict["suffix"] = entity_pieces[0]
-        return name_dict
-
-    # Case: Underscore present → split into entities + possible suffix
-    rest, suffix = entity_pieces
-
-    # If suffix is a valid entity-type pair (e.g., "task-motor"), move it into the entity dictionary
-    if '-' in suffix and suffix.count('-') == 1:
-        update_entity(name_dict, suffix)
-    else:
-        name_dict["suffix"] = suffix
-
-    # Look for prefix - first entity piece without a hyphen
-    entity_pieces = rest.split('_')
-    if '-' not in entity_pieces[0]:
-        name_dict["prefix"] = entity_pieces[0]
-        del entity_pieces[0]
-
-    if len(entity_pieces) == 0:
-        return name_dict
-
-    # Process entities
-    for entity in entity_pieces:
-        update_entity(name_dict, entity)
-
-    return name_dict
-
-
-def update_entity(name_dict, entity):
-    """Update the dictionary with a new entity.
-
-    Parameters:
-        name_dict (dict): Dictionary of entities.
-        entity (str): Entity to be added.
-    """
-    parts = entity.split('-')
-
-    if len(parts) == 2 and all(parts):  # Valid entity pair
-        name_dict["entities"][parts[0]] = parts[1]
-    else:
-        name_dict["bad"].append(entity)
-
-# def parse_bids_filename(file_path):
-#     """Split a filename into BIDS-relevant components.
-#
-#     Parameters:
-#         file_path (str): Path to be parsed.
-#
-#     Returns:
-#         str: BIDS suffix name.
-#         str: File extension (including the .).
-#         dict: Dictionary with key-value pairs (entity type, entity value).
-#
-#     Notes:
-#         - Splits into BIDS suffix, extension, and a dictionary of entity name-value pairs.
-#     """
-#
-#     split_dict = {}
-#     name, ext = get_full_extension(file_path.strip())
-#
-#     # If the name is empty, return only the extension with a "bad" category
-#     basename = os.path.basename(name)
-#     if not basename:
-#         return None, ext, {"bad": [""]}
-#
-#     entity_pieces = basename.rsplit('_', 1)
-#
-#     # Case: No underscore in filename → could be a single entity (e.g., "task-blech.tsv")
-#     if len(entity_pieces) == 1:
-#         if '-' in entity_pieces[0]:  # Looks like an entity-type pair, not a malformed name
-#             update_entity(split_dict, entity_pieces[0])
-#             return "", ext, split_dict
-#         return entity_pieces[0], ext, split_dict
-#
-#     # Case: Underscore present → split into entities + suffix
-#     rest, suffix = entity_pieces
-#     suffix_parts = suffix.split("-")
-#
-#     # If suffix contains multiple hyphens, it's malformed
-#     if len(suffix_parts) > 2:
-#         split_dict.setdefault("bad", []).append(basename)
-#         return '', ext, split_dict
-#
-#     # Process entities
-#     for entity in rest.split('_'):
-#         update_entity(split_dict, entity)
-#
-#     return suffix, ext, split_dict
-#
-#
-# def update_entity(split_dict, entity):
-#     """Update the dictionary with a new entity.
-#
-#     Parameters:
-#         split_dict (dict): Dictionary of entities.
-#         entity (str): Entity to be added.
-#     """
-#     parts = entity.split('-')
-#
-#     if len(parts) == 2 and all(parts):  # Valid entity pair
-#         split_dict[parts[0]] = parts[1]
-#     else:
-#         split_dict.setdefault("bad", []).append(entity)
-
-# def parse_bids_filename(file_path):
-#     """ Split a filename into BIDS-relevant components.
-#
-#     Parameters:
-#         file_path (str):     Path to be parsed.
-#
-#     Returns:
-#         str:   BIDS suffix name.
-#         str:   File extension (including the .).
-#         dict:  Dictionary with key-value pair being (entity type, entity value).
-#
-#     Notes:
-#         - splits into BIDS suffix, extension, and a dictionary of entity name-value pairs.
-#
-#     """
-#
-#     split_dict = {}
-#     name, ext = get_full_extension(file_path.strip())
-#
-#     # If the name is empty, extension is the only thing
-#     basename = os.path.basename(name)
-#     if len(basename) == 0:
-#         return None, ext, {"bad": [""]}
-#     prefix = ""
-#     entity_pieces = basename.rsplit('_', 1)
-#     if len(entity_pieces) == 1:
-#         suffix_split = entity_pieces[0].split("-")
-#         if len(suffix_split) == 1:
-#             return entity_pieces[0], ext, split_dict
-#         elif len(suffix_split) >= 2:
-#             split_dict.setdefault("bad", []).append(basename)
-#             return '', ext, split_dict
-#         else:
-#             suffix = ""
-#             rest = basename
-#     else:
-#         suffix_split = entity_pieces[1].split("-")
-#         if len(suffix_split) == 1:
-#             suffix = suffix_split[0]
-#             rest = entity_pieces[0]
-#         elif len(suffix_split) > 2:
-#             split_dict.setdefault("bad", []).append(basename)
-#             return '', ext, split_dict
-#         else:
-#             suffix = ""
-#             rest = basename
-#     entity_pieces = rest.split('_')
-#     for entity_piece in entity_pieces:
-#         update_entity(split_dict, entity_piece)
-#     return suffix, ext, split_dict
-#
-# def update_entity(split_dict, entity):
-#     """ Update the split dictionary with a new entity.
-#
-#     Parameters:
-#         split_dict (dict):  Dictionary of entities.
-#         entity (str):  Entity to be added.
-#
-#     Returns:
-#         dict:  Updated dictionary.
-#
-#     """
-#     split_piece = entity.split('-')
-#     if len(split_piece) != 2:
-#         split_dict.setdefault("bad", []).append(entity)
-#     elif not split_piece[0] or not split_piece[1]:
-#         split_dict.setdefault("bad", []).append(entity)
-#     else:
-#         split_dict[split_piece[0]] = split_piece[1]
-
 def get_task_from_file(file_path):
     """ Returns the task name entity from a BIDS-type file path.
 
@@ -544,3 +320,23 @@ def get_task_dict(files):
         task_entry.append(my_file)
         task_dict[task] = task_entry
     return task_dict
+
+
+def separate_by_ext(file_paths):
+    """ Separate a list of files into tsv and json files.
+
+    Parameters:
+        file_paths (list):  A list of file paths.
+
+    Returns:
+        dict:  key is extension and value is list of files with that extension.
+
+    """
+    ext_dict = {}
+    for file_path in file_paths:
+        basename, ext = get_full_extension(file_path)
+        if ext not in ext_dict:
+            ext_dict[ext] = [file_path]
+        else:
+            ext_dict[ext].append(file_path)
+    return ext_dict

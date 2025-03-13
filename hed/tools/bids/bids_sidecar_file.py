@@ -96,7 +96,7 @@ class BidsSidecarFile(BidsFile):
         return False
 
     @staticmethod
-    def get_merged_sidecar(sidecar_list, name='merged_sidecar.json'):
+    def merge_sidecar_list(sidecar_list, name='merged_sidecar.json'):
         """ Merge a list of sidecars into a single sidecar.
 
         Parameters:

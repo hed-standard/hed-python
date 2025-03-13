@@ -1,16 +1,17 @@
 """ Main command-line program for running the remodeling tools. """
 
 import os
+import io
 import json
 import argparse
 import logging
 from hed.errors.exceptions import HedFileError
-
-from hed.tools.bids.bids_dataset import BidsDataset
+from hed.models.sidecar import Sidecar
 from hed.tools.remodeling.remodeler_validator import RemodelerValidator
 from hed.tools.remodeling.dispatcher import Dispatcher
 from hed.tools.remodeling.backup_manager import BackupManager
 from hed.tools.util import io_util
+from hed.tools.bids import bids_util
 
 
 def get_parser():
@@ -29,8 +30,8 @@ def get_parser():
                         help="Name of the default backup for remodeling")
     parser.add_argument("-b", "--bids-format", action='store_true', dest="use_bids",
                         help="If present, the dataset is in BIDS format with sidecars. HED analysis is available.")
-    parser.add_argument("-f", "--file-suffix", dest="file_suffix", default='events',
-                        help="Filename suffix excluding file type of items to be analyzed (events by default).")
+    parser.add_argument("-fs", "--file-suffix", dest="suffixes", nargs="*", default=['events'],
+                        help="Optional list of suffixes (no under_bar) of tsv files to validate. If -s with no values, will use all possible suffixes as with single argument '*'.")
     parser.add_argument("-i", "--individual-summaries", dest="individual_summaries", default="separate",
                         choices=["separate", "consolidated", "none"],
                         help="Controls individual file summaries ('none', 'separate', 'consolidated')")
@@ -38,15 +39,13 @@ def get_parser():
                         help="Optional path to JSON sidecar with HED information")
     parser.add_argument("-ld", "--log_dir", dest="log_dir", default="",
                         help="Directory for storing log entries for errors.")
-#    parser.add_argument("-n", "--backup-name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
-#                        help="Name of the default backup for remodeling")
     parser.add_argument("-nb", "--no-backup", action='store_true', dest="no_backup",
                         help="If present, the operations are run directly on the files with no backup.")
     parser.add_argument("-ns", "--no-summaries", action='store_true', dest="no_summaries",
                         help="If present, the summaries are not saved, but rather discarded.")
     parser.add_argument("-nu", "--no-update", action='store_true', dest="no_update",
                         help="If present, the files are not saved, but rather discarded.")
-    parser.add_argument("-r", "--hed-versions", dest="hed_versions", nargs="*", default=[],
+    parser.add_argument("-hv", "--hed-versions", dest="hed_versions", nargs="*", default=[],
                         help="Optional list of HED schema versions used for annotation, include prefixes.")
     parser.add_argument("-s", "--save-formats", nargs="*", default=['.json', '.txt'], dest="save_formats",
                         help="Format for saving any summaries, if any. If no summaries are to be written," +
@@ -101,8 +100,8 @@ def parse_arguments(arg_list=None):
     """
     parser = get_parser()
     args = parser.parse_args(arg_list)
-    if '*' in args.file_suffix:
-        args.file_suffix = None
+    if '*' in args.suffixes:
+        args.suffixes = None
     args.data_dir = os.path.realpath(args.data_dir)
     args.exclude_dirs = args.exclude_dirs + ['remodel']
     args.model_path = os.path.realpath(args.model_path)
@@ -135,37 +134,7 @@ def parse_tasks(files, task_args):
     return task_dict
 
 
-def run_bids_ops(dispatch, args, tabular_files):
-    """ Run the remodeler on a BIDS dataset.
-
-    Parameters:
-        dispatch (Dispatcher): Manages the execution of the operations.
-        args (Object): The command-line arguments as an object.
-        tabular_files (list): List of tabular files to run the ops on.
-
-    """
-    bids = BidsDataset(dispatch.data_root, suffixes=['events'], exclude_dirs=args.exclude_dirs)
-    dispatch.hed_schema = bids.schema
-    if args.verbose:
-        print(f"Successfully parsed BIDS dataset with HED schema {str(bids.schema.get_schema_versions())}")
-    data = bids.get_file_group(args.file_suffix)
-    if args.verbose:
-        print(f"Processing {dispatch.data_root}")
-    filtered_events = [data.datafile_dict[key] for key in tabular_files]
-    for data_obj in filtered_events:
-        sidecar_list = data.get_sidecars_from_path(data_obj)
-        if sidecar_list:
-            sidecar = data.sidecar_dict[sidecar_list[-1]].contents
-        else:
-            sidecar = None
-        if args.verbose:
-            print(f"Tabular file {data_obj.file_path}  sidecar {sidecar}")
-        df = dispatch.run_operations(data_obj.file_path, sidecar=sidecar, verbose=args.verbose)
-        if not args.no_update:
-            df.to_csv(data_obj.file_path, sep='\t', index=False, header=True)
-
-
-def run_direct_ops(dispatch, args, tabular_files):
+def run_ops(dispatch, args, tabular_files):
     """ Run the remodeler on files of a specified form in a directory tree.
 
     Parameters:
@@ -176,18 +145,39 @@ def run_direct_ops(dispatch, args, tabular_files):
     """
 
     if args.verbose:
-        print(f"Found {len(tabular_files)} files with suffix {args.file_suffix} and extensions {str(args.extensions)}")
+        print(f"Found {len(tabular_files)} files to process")
     if hasattr(args, 'json_sidecar'):
-        sidecar = args.json_sidecar
+        base_sidecar = Sidecar(args.json_sidecar, name=args.json_sidecar)
     else:
-        sidecar = None
+        base_sidecar = None
     for file_path in tabular_files:
+        if not base_sidecar and args.use_bids:
+            sidecar = get_sidecar(file_path, args.data_dir)
+        else:
+            sidecar = base_sidecar
         if args.verbose:
-            print(f"Tabular file {file_path}  sidecar {sidecar}")
+            print(f"Tabular file {file_path}  sidecar {str(sidecar)}")
         df = dispatch.run_operations(file_path, verbose=args.verbose, sidecar=sidecar)
         if not args.no_update:
             df.to_csv(file_path, sep='\t', index=False, header=True)
 
+def get_sidecar(data_dir, tsv_path):
+    """ Get the sidecar for a file if it exists.
+
+    Parameters:
+        data_dir (str):  Full path of the data directory.
+        tsv_path (str):  Full path of the file.
+
+
+    Returns:
+        Sidecar or None:  The Sidecar if it exists, otherwise None.
+
+    """
+    merged_dict = bids_util.get_merged_sidecar(data_dir, tsv_path)
+    if not merged_dict:
+        return None
+    name = 'merged_' + io_util.get_basename(tsv_path)[0] + '.json'
+    return Sidecar(files=io.StringIO(json.dumps(merged_dict)), name=name)
 
 def main(arg_list=None):
     """ The command-line program.
@@ -205,7 +195,9 @@ def main(arg_list=None):
 
     if args.log_dir:
         os.makedirs(args.log_dir, exist_ok=True)
-        timestamp = io_util.get_timestamp()
+        timestamp = '_' + io_util.get_timestamp()
+    else:
+        timestamp = ''
     try:
         if not os.path.isdir(args.data_dir):
             raise HedFileError("DataDirectoryDoesNotExist",
@@ -214,22 +206,19 @@ def main(arg_list=None):
         save_dir = None
         if args.work_dir:
             save_dir = os.path.realpath(os.path.join(args.work_dir, Dispatcher.REMODELING_SUMMARY_PATH))
-        files = io_util.get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=[".tsv", ".json"],
+        tsv_files = io_util.get_file_list(args.data_dir, name_suffix=args.suffixes, extensions=[".tsv"],
                                       exclude_dirs=args.exclude_dirs)
-        task_dict = parse_tasks(files, args.task_names)
+        task_dict = parse_tasks(tsv_files, args.task_names)
         for task, files in task_dict.items():
             dispatch = Dispatcher(operations, data_root=args.data_dir, backup_name=backup_name,
                                   hed_versions=args.hed_versions)
-            if args.use_bids:
-                run_bids_ops(dispatch, args, files)
-            else:
-                run_direct_ops(dispatch, args, files)
+            run_ops(dispatch, args, files)
             if not args.no_summaries:
                 dispatch.save_summaries(args.save_formats, individual_summaries=args.individual_summaries,
                                         summary_dir=save_dir, task_name=task)
     except Exception:
         if args.log_dir:
-            log_name = io_util.get_alphanumeric_path(os.path.realpath(args.data_dir)) + '_' + timestamp + '.txt'
+            log_name = io_util.get_alphanumeric_path(os.path.realpath(args.data_dir)) + timestamp + '.txt'
             logging.basicConfig(filename=os.path.join(args.log_dir, log_name), level=logging.ERROR)
             logging.exception(f"{args.data_dir}: {args.model_path}")
         raise

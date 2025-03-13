@@ -1,7 +1,6 @@
 import os
 import unittest
 import json
-from hed.errors import HedFileError
 from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_file import BidsFile

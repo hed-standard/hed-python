@@ -19,9 +19,7 @@ def get_parser():
                         help="Directory for the backup that is being created")
     parser.add_argument("-bn", "--backup_name", default=BackupManager.DEFAULT_BACKUP_NAME, dest="backup_name",
                         help="Name of the default backup for remodeling")
-    parser.add_argument("-e", "--extensions", nargs="*", default=['.tsv'], dest="extensions",
-                        help="File extensions to allow in locating files. A * indicates all files allowed.")
-    parser.add_argument("-f", "--file-suffix", dest="file_suffix", nargs="*", default=['events'],
+    parser.add_argument("-fs", "--file-suffix", dest="suffixes", nargs="*", default=['events'],
                         help="Filename suffix of files to be backed up. A * indicates all files allowed.")
 
     parser.add_argument("-t", "--task-names", dest="task_names", nargs="*", default=[], help="The name of the task.")
@@ -48,12 +46,10 @@ def main(arg_list=None):
 
     parser = get_parser()
     args = parser.parse_args(arg_list)
-    if '*' in args.file_suffix:
-        args.file_suffix = None
-    if '*' in args.extensions:
-        args.extensions = None
+    if '*' in args.suffixes:
+        args.suffixes = None
     exclude_dirs = args.exclude_dirs + ['remodeling']
-    file_list = io_util.get_file_list(args.data_dir, name_suffix=args.file_suffix, extensions=args.extensions,
+    file_list = io_util.get_file_list(args.data_dir, name_suffix=args.suffixes, extensions=['.tsv'],
                                       exclude_dirs=exclude_dirs)
     if args.task_names:
         file_list = io_util.get_filtered_by_element(file_list, args.task_names)

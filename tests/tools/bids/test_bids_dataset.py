@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         events = bids.get_file_group("events")
         self.assertIsInstance(events, BidsFileGroup, "BidsDataset events should be a BidsFileGroup")
         self.assertEqual(len(events.sidecar_dict), 1, "BidsDataset should have one participants.json file")
-        self.assertIsInstance(bids.dataset_description, dict, "BidsDataset dataset_description should be a dict")
+
         for group in bids.file_groups.values():
             self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
@@ -69,7 +69,6 @@ class Test(unittest.TestCase):
         events = bids.get_file_group("events")
         self.assertIsInstance(events, BidsFileGroup, "BidsDataset events should be a BidsFileGroup")
         self.assertEqual(len(events.sidecar_dict), 1, "BidsDataset should have one participants.json file")
-        self.assertIsInstance(bids.dataset_description, dict, "BidsDataset dataset_description should be a dict")
         for group in bids.file_groups.values():
             self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
@@ -155,7 +154,7 @@ class Test(unittest.TestCase):
                               "BidsDataset with libraries should create a valid object from valid dataset")
         parts = bids.get_file_group("participants")
         self.assertIsNotNone(parts, "BidsDataset participants should be none if no HED")
-        self.assertIsInstance(bids.dataset_description, dict, "BidsDataset dataset_description should be a dict")
+
         for group in bids.file_groups.values():
             self.assertIsInstance(group, BidsFileGroup, "BidsDataset event files should be in a BidsFileGroup")
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
@@ -182,8 +181,6 @@ class Test(unittest.TestCase):
         parts = bids.get_file_group("participants")
         self.assertIsNotNone(parts, "BidsDataset participants should be a None")
 
-        self.assertIsInstance(bids.dataset_description, dict,
-                              "BidsDataset with libraries dataset_description should be a dict")
         for group in bids.file_groups.values():
             self.assertIsInstance(group, BidsFileGroup,
                                   "BidsDataset with libraries event_files should be  BidsFileGroup")

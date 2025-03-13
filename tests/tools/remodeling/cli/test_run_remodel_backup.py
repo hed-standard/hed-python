@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
     def test_main_events(self):
         self.assertFalse(os.path.exists(self.derv_path), 'backup directory does not exist before creation')
         arg_list = [self.test_root, '-bn', BackupManager.DEFAULT_BACKUP_NAME, '-bd', self.derv_path,
-                    '-x', 'derivatives', '-f', 'events', '-e', '.tsv']
+                    '-x', 'derivatives', '-fs', 'events']
         main(arg_list)
         self.assertTrue(os.path.exists(self.derv_path), 'backup directory exists before creation')
         json_path = os.path.realpath(os.path.join(self.derv_path, BackupManager.DEFAULT_BACKUP_NAME,
@@ -58,12 +58,12 @@ class Test(unittest.TestCase):
         with open(json_path, 'r') as fp:
             key_dict = json.load(fp)
         self.assertEqual(len(key_dict), 3, "The backup of events.tsv does not include top_level.tsv")
-        file_list = get_file_list(self.derv_path, name_suffix='events', extensions=['.tsv'])
+        file_list = get_file_list(self.derv_path, name_suffix='events')
         self.assertEqual(len(file_list), 3, "The backup of events.tsv has the right number of files")
 
     def test_main_all(self):
         arg_list = [self.test_root, '-bn', BackupManager.DEFAULT_BACKUP_NAME, '-bd', self.derv_path,
-                    '-x', 'derivatives', '-f', '*', '-e', '*']
+                    '-x', 'derivatives', '-fs', '*']
 
         self.assertFalse(os.path.exists(self.derv_path), 'backup directory does not exist before creation')
         main(arg_list)
@@ -84,7 +84,7 @@ class Test(unittest.TestCase):
         shutil.rmtree(der_path)
         self.assertFalse(os.path.exists(der_path))
         arg_list = [self.data_root, '-bn', BackupManager.DEFAULT_BACKUP_NAME, '-x', 'derivatives',
-                    '-f', 'events', '-e', '.tsv', '-t', 'FacePerception']
+                    '-fs', 'events', '-t', 'FacePerception']
         main(arg_list)
         self.assertTrue(os.path.exists(der_path))
         back_path = os.path.realpath(os.path.join(self.data_root, BackupManager.RELATIVE_BACKUP_LOCATION,
@@ -99,7 +99,7 @@ class Test(unittest.TestCase):
         shutil.rmtree(der_path)
         self.assertFalse(os.path.exists(der_path))
         arg_list = [self.data_root, '-bn', BackupManager.DEFAULT_BACKUP_NAME, '-x', 'derivatives',
-                    '-f', 'events', '-e', '.tsv', '-t', 'Baloney']
+                    '-fs', 'events','-t', 'Baloney']
         main(arg_list)
         self.assertTrue(os.path.exists(der_path))
         back_path = os.path.realpath(os.path.join(self.data_root, BackupManager.RELATIVE_BACKUP_LOCATION,
@@ -113,7 +113,7 @@ class Test(unittest.TestCase):
             shutil.rmtree(self.alt_path)
         self.assertFalse(os.path.exists(self.alt_path))
         arg_list = [self.data_root, '-bn', BackupManager.DEFAULT_BACKUP_NAME, '-x', 'derivatives', '-bd', self.alt_path,
-                    '-f', 'events', '-e', '.tsv', ]
+                    '-fs', 'events' ]
         main(arg_list)
         self.assertTrue(os.path.exists(self.alt_path))
         back_path = os.path.realpath(os.path.join(self.alt_path, 'default_back/backup_root'))
@@ -125,7 +125,7 @@ class Test(unittest.TestCase):
         der_path = os.path.realpath(os.path.join(self.data_root, 'derivatives'))
         self.assertTrue(os.path.exists(der_path))
         arg_list = [self.data_root, '-bn', BackupManager.DEFAULT_BACKUP_NAME, '-x', 'derivatives',
-                    '-f', 'events', '-e', '.tsv', '-t', 'Baloney']
+                    '-fs', 'events', '-t', 'Baloney']
         with self.assertRaises(HedFileError) as context:
             main(arg_list)
         self.assertEqual(context.exception.args[0], "BackupExists")
