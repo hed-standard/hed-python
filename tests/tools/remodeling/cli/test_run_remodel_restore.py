@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
             shutil.rmtree(self.alt_path)
         self.assertFalse(os.path.exists(self.alt_path))
         arg_list = [self.test_root_back1, '-bn', 'back1', '-x', 'derivatives', '-bd', self.alt_path,
-                    '-f', 'events', '-e', '.tsv']
+                    '-fs', 'events']
         back_main(arg_list)
         files1 = get_file_list(self.test_root_back1, exclude_dirs=['derivatives'])
         self.assertEqual(len(files1), 4, "run_restore starts with the right number of files.")

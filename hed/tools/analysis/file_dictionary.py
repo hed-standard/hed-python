@@ -101,7 +101,7 @@ class FileDictionary:
             list: The symmetric difference of the keys in this dictionary and the other one.
 
         """
-        diffs = set(self._file_dict.keys()).symmetric_difference(set(other_dict._file_dict.keys()))
+        diffs = set(self._file_dict.keys()).symmetric_difference(set(other_dict.file_dict.keys()))
         return list(diffs)
 
     def output_files(self, title=None, logger=None):

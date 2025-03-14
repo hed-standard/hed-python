@@ -1,6 +1,8 @@
 """ Container for a BIDS sidecar file. """
 
 import os
+import io
+import json
 from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_file import BidsFile
 
@@ -31,9 +33,7 @@ class BidsSidecarFile(BidsFile):
 
          """
 
-        if obj.file_path == self.file_path:
-            return True
-        elif obj.suffix != self.suffix:
+        if obj.suffix != self.suffix:
             return False
         elif os.path.dirname(self.file_path) != os.path.commonpath([obj.file_path, self.file_path]):
             return False
@@ -43,26 +43,31 @@ class BidsSidecarFile(BidsFile):
                 return False
         return True
 
-    def set_contents(self, content_info=None, overwrite=False):
+    def set_contents(self, content_info=None, name='unknown', overwrite=False):
         """ Set the contents of the sidecar.
 
         Parameters:
-            content_info (list, str, or None): If None, create a Sidecar from the object's file-path.
+            content_info (dict, or None): If None, create a Sidecar from the object's file-path.
+            name (str): The name of the sidecar.
             overwrite (bool): If True, overwrite contents if already set.
 
         Notes:
             - The handling of content_info is as follows:
                 - None: This object's file_path is used.
-                - str:  The string is interpreted as a path of the JSON.
-                - list: The list is of paths.
+                - dict:  This is interpreted as a JSON dictionary.
 
          """
         if not overwrite and self.contents:
             return
-        if not content_info:
-            content_info = self.file_path
-        self._contents = Sidecar(files=content_info, name=os.path.basename(self.file_path))
-        self.has_hed = self.is_hed(self.contents.loaded_dict)
+        try:
+            if not content_info:
+                self._contents = Sidecar(self.file_path, name=os.path.basename(self.file_path))
+            else:
+                self._contents = Sidecar(io.StringIO(json.dumps(content_info)), name=name)
+            self.has_hed = self.is_hed(self.contents.loaded_dict)
+        except Exception as e:
+            self._contents = None
+            self.has_hed = False
 
     @staticmethod
     def is_hed(json_dict):
@@ -89,3 +94,24 @@ class BidsSidecarFile(BidsFile):
                 return True
 
         return False
+
+    @staticmethod
+    def merge_sidecar_list(sidecar_list, name='merged_sidecar.json'):
+        """ Merge a list of sidecars into a single sidecar.
+
+        Parameters:
+            sidecar_list (list): A list of Sidecar objects.
+            name (str): The name of the merged sidecar.
+
+        Returns:
+            Sidecar or None: A sidecar constructed from the merged list.
+
+        """
+        merged_dict = {}
+        for sidecar in sidecar_list:
+            if not sidecar:
+                continue
+            merged_dict.update(sidecar.contents.loaded_dict)
+        if merged_dict:
+            return Sidecar(files=io.StringIO(json.dumps(merged_dict)), name=name)
+        return None

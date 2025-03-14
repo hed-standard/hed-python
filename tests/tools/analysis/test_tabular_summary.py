@@ -194,7 +194,7 @@ class Test(unittest.TestCase):
         self.assertFalse(col_info, "get_columns_info should return a dictionary with a key for each column included")
 
     def test_make_combined_dicts(self):
-        files_bids = get_file_list(self.bids_base_dir, extensions=[".tsv"], name_suffix="_events")
+        files_bids = get_file_list(self.bids_base_dir, extensions=[".tsv"], name_suffix="events")
         file_dict1 = FileDictionary("my name", files_bids)
         dicts_all1, dicts1 = TabularSummary.make_combined_dicts(file_dict1.file_dict)
         self.assertTrue(isinstance(dicts_all1, TabularSummary),
@@ -213,7 +213,7 @@ class Test(unittest.TestCase):
                          "make_combined_dicts should return right number of entries")
 
     def test_update_summary(self):
-        files_bids = get_file_list(self.bids_base_dir, extensions=[".tsv"], name_suffix="_events")
+        files_bids = get_file_list(self.bids_base_dir, extensions=[".tsv"], name_suffix="events")
         tab_list = []
         skip_cols = ['onset', 'duration', 'sample', 'value']
         value_cols = ['stim_file', 'trial']

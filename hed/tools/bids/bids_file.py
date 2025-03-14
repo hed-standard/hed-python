@@ -1,7 +1,7 @@
 """ Models a BIDS file. """
 
 import os
-from hed.tools.util import io_util
+from hed.tools.bids import bids_util
 
 
 class BidsFile:
@@ -12,7 +12,6 @@ class BidsFile:
         suffix (str):                Suffix part of the filename.
         ext (str):                   Extension (including the .).
         entity_dict (dict):          Dictionary of entity-names (keys) and entity-values (values).
-        sidecar (BidsSidecarFile):   Merged sidecar for this file.
 
     Notes:
         - This class may hold the merged sidecar giving metadata for this file as well as contents.
@@ -27,11 +26,12 @@ class BidsFile:
 
         """
         self.file_path = os.path.realpath(file_path)
-        suffix, ext, entity_dict = io_util.parse_bids_filename(self.file_path)
-        self.suffix = suffix
-        self.ext = ext
-        self.entity_dict = entity_dict
-        self.sidecar = None    # list of sidecars starting at the root (including itself if sidecar)
+        name_dict = bids_util.parse_bids_filename(self.file_path)
+        self.basename = name_dict.get("basename")
+        self.suffix = name_dict.get("suffix")
+        self.ext = name_dict.get("ext")
+        self.entity_dict = name_dict.get("entities")
+        self.bad = name_dict.get("bad")
         self._contents = None
         self.has_hed = False
 
@@ -82,7 +82,7 @@ class BidsFile:
         """ Set the contents of this object.
 
         Parameters:
-            content_info (Any):      The contents appropriate for this object.
+            content_info (Any):      JSON dictionary The contents appropriate for this object.
             overwrite (bool):  If False and the contents are not empty, do nothing.
 
         Notes:
@@ -98,6 +98,4 @@ class BidsFile:
         """ Return a string representation of this object. """
         my_str = self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
             " entity_dict=" + str(self.entity_dict)
-        if self.sidecar:
-            my_str = my_str + "\n\tmerged sidecar=" + str(self.sidecar.file_path)
         return my_str

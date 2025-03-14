@@ -3,7 +3,6 @@
 import os
 import re
 from datetime import datetime
-from hed.errors.exceptions import HedFileError
 
 TIME_FORMAT = '%Y_%m_%d_T_%H_%M_%S_%f'
 
@@ -85,6 +84,40 @@ def get_alphanumeric_path(pathname, replace_char='_'):
     return re.sub(r'[^a-zA-Z0-9]+', replace_char, pathname)
 
 
+def get_full_extension(filename):
+    """ Return the full extension of a file, including the period.
+
+    Parameters:
+        filename (str):   The filename to be parsed.
+
+    Returns:
+        (str, str):  (File name without extension, full extension)
+
+    """
+    name, ext = os.path.splitext(filename)
+    full_ext = ext
+    while ext: # Keep splitting if there's another extension
+        name, ext = os.path.splitext(name)
+        if not ext:
+            break
+        full_ext = ext + full_ext
+    return name, full_ext
+
+
+def get_unique_suffixes(file_paths, extensions=['.json', '.tsv']):
+    suffixes = set()
+    extension_set = set(extensions)
+    for file_path in file_paths:
+        name, ext = get_full_extension(file_path)
+        if ext not in extension_set:
+            continue
+
+        result = os.path.basename(name).split('_')
+        if len(result) == 2:
+            suffixes.add(result[1])
+    return suffixes
+
+
 def extract_suffix_path(path, prefix_path):
     """ Return the suffix of path after prefix path has been removed.
 
@@ -123,37 +156,8 @@ def clean_filename(filename):
     return out_name
 
 
-def get_dir_dictionary(dir_path, name_prefix=None, name_suffix=None, extensions=None, skip_empty=True,
-                       exclude_dirs=None):
-
-    """ Create dictionary directory paths keys.
-
-    Parameters:
-        dir_path (str):               Full path of the directory tree to be traversed (no ending slash).
-        name_prefix (str, None):      An optional name_prefix for the base filename.
-        name_suffix (str, None):      An optional name_suffix for the base file name.
-        extensions (list, None):      An optional list of file extensions.
-        skip_empty (bool):            Do not put entry for directories that have no files.
-        exclude_dirs (list):          List of directories to skip.
-
-    Returns:
-        dict:  Dictionary with directories as keys and file lists values.
-
-    """
-
-    if not exclude_dirs:
-        exclude_dirs = []
-    dir_dict = {}
-    for root, dirs, files in os.walk(dir_path, topdown=True):
-        dirs[:] = [d for d in dirs if d not in exclude_dirs]
-        file_list = []
-        for r_file in files:
-            if check_filename(r_file, name_prefix, name_suffix, extensions):
-                file_list.append(os.path.join(os.path.realpath(root), r_file))
-        if skip_empty and not file_list:
-            continue
-        dir_dict[os.path.realpath(root)] = file_list
-    return dir_dict
+def get_basename(file_path):
+    return get_full_extension(file_path)[0]
 
 
 def get_filtered_by_element(file_list, elements):
@@ -196,8 +200,8 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
 
     Parameters:
         root_path (str):              Full path of the directory tree to be traversed (no ending slash).
-        name_prefix (str, None):      An optional name_prefix for the base filename.
-        name_suffix (str, None):      The name_suffix of the paths to be extracted.
+        name_prefix (list, str, None):      An optional prefix for the base filename.
+        name_suffix (list, str, None):  An optional suffix for the base filename.
         extensions (list, None):      A list of extensions to be selected.
         exclude_dirs (list, None):    A list of paths to be excluded.
 
@@ -276,73 +280,6 @@ def make_path(root_path, sub_path, filename):
 
     dir_path = os.path.realpath(os.path.join(root_path, sub_path))
     os.makedirs(dir_path, exist_ok=True)
-    return os.path.realpath(os.path.join(dir_path, filename))
-
-
-def parse_bids_filename(file_path):
-    """ Split a filename into BIDS-relevant components.
-
-    Parameters:
-        file_path (str):     Path to be parsed.
-
-    Returns:
-        str:   BIDS suffix name.
-        str:   File extension (including the .).
-        dict:  Dictionary with key-value pair being (entity type, entity value).
-
-    :raises HedFileError:
-        - If filename does not conform to name-value_suffix format.
-
-    Notes:
-        - splits into BIDS suffix, extension, and a dictionary of entity name-value pairs.
-
-    """
-
-    filename = os.path.splitext(os.path.basename(file_path))
-    ext = filename[1].lower()
-    basename = filename[0].strip()
-    entity_dict = {}
-
-    if len(basename) == 0:
-        raise HedFileError("BlankFileName", f"The basename for {file_path} is blank", "")
-    entity_pieces = basename.split('_')
-    split_dict = _split_entity(entity_pieces[-1])
-    if "bad" in split_dict:
-        raise HedFileError("BadSuffixPiece",
-                           f"The basename for {entity_pieces[-1]} has bad {split_dict['bad']}", "")
-    if "suffix" in split_dict:
-        suffix = split_dict["suffix"]
-    else:
-        suffix = None
-        entity_dict[split_dict["key"]] = split_dict["value"]
-    for pos, entity in reversed(list(enumerate(entity_pieces[:-1]))):
-        split_dict = _split_entity(entity)
-        if "key" not in split_dict:
-            raise HedFileError("BadKeyValue", f"The piece {entity} is not in key-value form", "")
-        entity_dict[split_dict["key"]] = split_dict["value"]
-    return suffix, ext, entity_dict
-
-
-def _split_entity(piece):
-    """ Split a piece into an entity or suffix.
-
-    Parameters:
-        piece (str):   A string to be parsed.
-
-    Returns:
-        dict:  Entities as keys as well as the key "bad" and the key "suffix".
-
-    """
-    piece = piece.strip()
-    if not piece:
-        return {"bad": ""}
-    split_piece = piece.split('-')
-    if len(split_piece) == 1:
-        return {"suffix": piece}
-    if len(split_piece) == 2:
-        return {"key": split_piece[0].strip(), "value": split_piece[1].strip()}
-    else:
-        return {"bad": piece}
 
 
 def get_task_from_file(file_path):
@@ -383,3 +320,23 @@ def get_task_dict(files):
         task_entry.append(my_file)
         task_dict[task] = task_entry
     return task_dict
+
+
+def separate_by_ext(file_paths):
+    """ Separate a list of files into tsv and json files.
+
+    Parameters:
+        file_paths (list):  A list of file paths.
+
+    Returns:
+        dict:  key is extension and value is list of files with that extension.
+
+    """
+    ext_dict = {}
+    for file_path in file_paths:
+        basename, ext = get_full_extension(file_path)
+        if ext not in ext_dict:
+            ext_dict[ext] = [file_path]
+        else:
+            ext_dict[ext].append(file_path)
+    return ext_dict

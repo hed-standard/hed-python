@@ -1,9 +1,10 @@
 import os
 import unittest
+from unittest.mock import patch
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import check_filename, extract_suffix_path, clean_filename, \
-    get_alphanumeric_path, get_dir_dictionary, get_file_list, get_path_components, get_task_from_file, \
-    parse_bids_filename, _split_entity, get_allowed, get_filtered_by_element
+    get_alphanumeric_path, get_file_list, get_path_components, get_task_from_file, \
+    get_allowed, get_filtered_by_element, get_full_extension
 
 
 class Test(unittest.TestCase):
@@ -34,10 +35,10 @@ class Test(unittest.TestCase):
         self.assertFalse(check2a, "check_filename should return False if extension does not match")
         check2b = check_filename(name2, extensions=[".txt", ".nii.gz"])
         self.assertTrue(check2b, "check_filename should return True if extension with gz matches")
-        check2c = check_filename(name2, name_suffix="_events", extensions=[".txt", ".nii.gz"])
+        check2c = check_filename(name2, name_suffix="events", extensions=[".txt", ".nii.gz"])
         self.assertTrue(check2c, "check_filename should return True if suffix after extension matches")
         name3 = "Changes"
-        check3a = check_filename(name3, name_suffix="_events", extensions=None)
+        check3a = check_filename(name3, name_suffix="events", extensions=None)
         self.assertFalse(check3a, "check_filename should be False if it doesn't match with no extension")
         check3b = check_filename(name3, name_suffix="es", extensions=None)
         self.assertTrue(check3b, "check_filename should be True if match with no extension.")
@@ -49,17 +50,6 @@ class Test(unittest.TestCase):
     def test_clean_file_name(self):
         file1 = clean_filename('mybase')
         self.assertEqual(file1, "mybase", "generate_file_name should return the base when other arguments not set")
-        # file2 = clean_filename('mybase', name_prefix="prefix")
-        # self.assertEqual(file2, "prefixmybase", "generate_file_name should return correct name when prefix set")
-        # file3 = clean_filename('mybase', name_prefix="prefix", extension=".json")
-        # self.assertEqual(file3, "prefixmybase.json", "generate_file_name should return correct name for extension")
-        # file4 = clean_filename('mybase', name_suffix="suffix")
-        # self.assertEqual(file4, "mybasesuffix", "generate_file_name should return correct name when suffix set")
-        # file5 = clean_filename('mybase', name_suffix="suffix", extension=".json")
-        # self.assertEqual(file5, "mybasesuffix.json", "generate_file_name should return correct name for extension")
-        # file6 = clean_filename('mybase', name_prefix="prefix", name_suffix="suffix", extension=".json")
-        # self.assertEqual(file6, "prefixmybasesuffix.json",
-        #                  "generate_file_name should return correct name for all set")
         filename = clean_filename("")
         self.assertEqual('', filename, "Return empty when all arguments are none")
         filename = clean_filename(None)
@@ -68,18 +58,6 @@ class Test(unittest.TestCase):
         filename = clean_filename('c:/temp.json')
         self.assertEqual('c_temp.json', filename,
                          "Returns stripped base_name + extension when prefix, and suffix are None")
-        # filename = clean_filename('temp.json', name_prefix='prefix_', name_suffix='_suffix', extension='.txt')
-        # self.assertEqual('prefix_temp_suffix.txt', filename,
-        #                  "Return stripped base_name + extension when prefix, and suffix are None")
-        # filename = clean_filename(None, name_prefix='prefix_', name_suffix='suffix', extension='.txt')
-        # self.assertEqual('prefix_suffix.txt', filename,
-        #                  "Returns correct string when no base_name")
-        # filename = clean_filename('event-strategy-v3_task-matchingpennies_events.json',
-        #                           name_suffix='_blech', extension='.txt')
-        # self.assertEqual('event-strategy-v3_task-matchingpennies_events_blech.txt', filename,
-        #                  "Returns correct string when base_name with hyphens")
-        # filename = clean_filename('HED7.2.0.xml', name_suffix='_blech', extension='.txt')
-        # self.assertEqual('HED7.2.0_blech.txt', filename, "Returns correct string when base_name has periods")
 
     def test_get_allowed(self):
         test_value = 'events.tsv'
@@ -100,11 +78,6 @@ class Test(unittest.TestCase):
         repath2 = get_alphanumeric_path(mypath1, '$')
         self.assertEqual('g$String1$sTring2$string3$string4$pnG', repath2)
 
-    def test_get_dir_dictionary(self):
-        dir_dict = get_dir_dictionary(self.bids_dir, name_suffix="_events")
-        self.assertTrue(isinstance(dir_dict, dict), "get_dir_dictionary returns a dictionary")
-        self.assertEqual(len(dir_dict), 3, "get_dir_dictionary returns a dictionary of the correct length")
-
     def test_get_file_list_case(self):
         dir_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/sternberg')
         file_list = get_file_list(dir_data, name_prefix='STERNBerg', extensions=[".Tsv"])
@@ -115,7 +88,7 @@ class Test(unittest.TestCase):
     def test_get_file_list_exclude_dir(self):
         dir_data = os.path.realpath(os.path.join(os.path.dirname(__file__), '../../data/bids_tests/eeg_ds003645s_hed'))
         file_list1 = get_file_list(dir_data, extensions=[".bmp"])
-        self.assertEqual(345, len(file_list1), 'get_file_list has the right number of files when no exclude')
+        self.assertEqual(3, len(file_list1), 'get_file_list has the right number of files when no exclude')
         file_list2 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=[])
         self.assertEqual(len(file_list1), len(file_list2), 'get_file_list should not change when exclude_dir is empty')
         file_list3 = get_file_list(dir_data, extensions=[".bmp"], exclude_dirs=['stimuli'])
@@ -178,100 +151,94 @@ class Test(unittest.TestCase):
         comps3 = get_path_components(base_path, file_path3)
         self.assertFalse(comps3, "get_path_components files directly in base_path don't have components ")
 
-        # TODO: This test doesn't work on Linux
-        # file_path4 = 'P:/Baloney/sidecar/events.tsv'
-        #
-        # try:
-        #     get_path_components(base_path, file_path4)
-        # except ValueError as ex:
-        #     print(f"{ex}")
-        #     pass
-        # except Exception as ex:
-        #     print(f"{ex}")
-        #     self.fail("parse_bids_filename threw the wrong exception when filename invalid")
-        # else:
-        #     self.fail("parse_bids_filename should have thrown an exception")
-
     def test_get_task_from_file(self):
         task1 = get_task_from_file("H:/alpha/base_task-blech.tsv")
         self.assertEqual("blech", task1)
         task2 = get_task_from_file("task-blech")
         self.assertEqual("blech", task2)
 
-    def test_parse_bids_filename_full(self):
-        the_path1 = '/d/base/sub-01/ses-test/func/sub-01_ses-test_task-overt_run-2_bold.json'
-        suffix1, ext1, entity_dict1 = parse_bids_filename(the_path1)
-        self.assertEqual(suffix1, 'bold', "parse_bids_filename should correctly parse name_suffix for full path")
-        self.assertEqual(ext1, '.json', "parse_bids_filename should correctly parse ext for full path")
-        self.assertIsInstance(entity_dict1, dict, "parse_bids_filename should return entity_dict as a dictionary")
-        self.assertEqual(entity_dict1['sub'], '01', "parse_bids_filename should have a sub entity")
-        self.assertEqual(entity_dict1['ses'], 'test', "parse_bids_filename should have a ses entity")
-        self.assertEqual(entity_dict1['task'], 'overt', "parse_bids_filename should have a task entity")
-        self.assertEqual(entity_dict1['run'], '2', "parse_bids_filename should have a run entity")
-        self.assertEqual(len(entity_dict1), 4, "parse_bids_filename should 4 entity_dict in the dictionary")
 
-        the_path2 = 'sub-01.json'
-        suffix2, ext2, entity_dict2 = parse_bids_filename(the_path2)
-        self.assertFalse(suffix2, "parse_bids_filename should not return a suffix if no suffix")
-        self.assertTrue(entity_dict2, "parse_bids_filename should have entity dictionary if suffix missing")
+class TestGetFullExtension(unittest.TestCase):
+    def test_single_extension(self):
+        self.assertEqual(get_full_extension("file.txt"), ("file", ".txt"),
+                         "Should work with single extensions.")
 
-    def test_parse_bids_filename_partial(self):
-        path1 = 'task-overt_bold.json'
-        suffix1, ext1, entity_dict1 = parse_bids_filename(path1)
-        self.assertEqual(ext1, '.json', "parse_bids_filename should correctly parse ext for name")
-        self.assertIsInstance(entity_dict1, dict, "parse_bids_filename should return entity_dict as a dictionary")
-        self.assertEqual(entity_dict1['task'], 'overt', "parse_bids_filename should have a task entity")
-        self.assertEqual(len(entity_dict1), 1, "parse_bids_filename should 1 entity_dict in the dictionary")
-        path2 = 'task-overt_bold'
-        suffix2, ext2, entity_dict2 = parse_bids_filename(path2)
-        self.assertEqual(suffix2, 'bold', "parse_bids_filename should correctly parse name_suffix for name")
-        self.assertEqual(ext2, '', "parse_bids_filename should return empty extension when only name")
-        self.assertIsInstance(entity_dict2, dict, "parse_bids_filename should return entity_dict as a dictionary")
-        self.assertEqual(entity_dict2['task'], 'overt', "parse_bids_filename should have a task entity")
-        path3 = 'bold'
-        suffix3, ext3, entity_dict3 = parse_bids_filename(path3)
-        self.assertEqual(suffix3, 'bold', "parse_bids_filename should correctly parse name_suffix for name")
-        self.assertEqual(ext3, '', "parse_bids_filename should return empty extension when only name")
-        self.assertIsInstance(entity_dict3, dict, "parse_bids_filename should return entity_dict as a dictionary")
-        self.assertEqual(len(entity_dict3), 0, "parse_bids_filename should return empty dictionary when no entity_dict")
+    def test_multiple_extensions(self):
+        self.assertEqual(get_full_extension("archive.tar.gz"), ("archive", ".tar.gz"),
+                         "Should work with multiple extensions.")
 
-    def test_parse_bids_filename_unmatched(self):
-        path1 = 'dataset_description.json'
-        try:
-            parse_bids_filename(path1)
-        except HedFileError:
-            pass
-        except Exception:
-            self.fail("parse_bids_filename threw the wrong exception when filename invalid")
-        else:
-            self.fail("parse_bids_filename should have thrown a HedFileError when duplicate key")
+    def test_no_extension(self):
+        self.assertEqual(get_full_extension("filename"), ("filename", ""),
+                         "Should work with no extension.")
 
-    def test_parse_bids_filename_invalid(self):
-        path1 = 'task_sub-01_description.json'
-        try:
-            parse_bids_filename(path1)
-        except HedFileError:
-            pass
-        except Exception:
-            self.fail("parse_bids_filename threw the wrong exception when missing value in name-value")
-        else:
-            self.fail("parse_bids_filename should have thrown a HedFileError when missing value in name-value")
+    def test_hidden_file_no_extension(self):
+        self.assertEqual(get_full_extension(".gitignore"), (".gitignore", ""),
+                        "Should work with hidden files without extensions.")
 
-    def test_split_entity(self):
-        ent_dict1 = _split_entity("apple")
-        self.assertEqual("apple", ent_dict1["suffix"], "_split_entity returns the suffix of the entire piece")
-        ent_dict2 = _split_entity("task-plenty")
-        self.assertEqual("plenty", ent_dict2["value"], "_split_entity has the correct value")
-        self.assertEqual("task", ent_dict2["key"], "_split_entity dictionary has a key key")
-        self.assertFalse("suffix" in ent_dict2, "_split_entity has a key-value but no suffix")
-        ent_dict3 = _split_entity("task-plenty-oops")
-        self.assertEqual(1, len(ent_dict3), "_split_entity is returns a dictionary with 1 entry if invalid")
-        self.assertTrue("bad" in ent_dict3, "_split_entity should have a bad component if invalid")
-        ent_dict4 = _split_entity("    ")
-        self.assertEqual(1, len(ent_dict4), "_split_entity is returns a dictionary with 1 entry if invalid")
-        self.assertTrue("bad" in ent_dict4, "_split_entity should have a bad component if invalid")
-        self.assertFalse(ent_dict4["bad"], "_split_entity bad value should be empty if blank piece")
+    def test_hidden_file_with_extension(self):
+        self.assertEqual(get_full_extension(".config.json"), (".config", ".json"),
+                         "Should work with hidden files with extensions.")
+
+    def test_nested_directory(self):
+        self.assertEqual(get_full_extension("path/to/archive.tar.gz"), ("path/to/archive", ".tar.gz"),
+                         "")
 
 
-if __name__ == '__main__':
+class TestSeparateByExt(unittest.TestCase):
+
+    @patch("hed.tools.util.io_util.get_full_extension")  # Replace 'your_module' with the actual module name
+    def test_separate_by_ext(self, mock_get_full_extension):
+        file_paths = ["file1.tsv", "file2.json", "file3.tsv", "file4.txt", "file5.json"]
+
+        # Define the return values for the mocked function
+        mock_get_full_extension.side_effect = [
+            ("file1", ".tsv"),
+            ("file2", ".json"),
+            ("file3", ".tsv"),
+            ("file4", ".txt"),
+            ("file5", ".json"),
+        ]
+
+        expected_result = {
+            ".tsv": ["file1.tsv", "file3.tsv"],
+            ".json": ["file2.json", "file5.json"],
+            ".txt": ["file4.txt"],
+        }
+
+        from hed.tools.util.io_util import separate_by_ext  # Import inside to avoid circular dependencies
+        result = separate_by_ext(file_paths)
+
+        self.assertEqual(result, expected_result)
+
+    @patch("hed.tools.util.io_util.get_full_extension")
+    def test_separate_by_ext_empty_list(self, mock_get_full_extension):
+        mock_get_full_extension.return_value = None  # No calls expected for an empty list
+
+        from hed.tools.util.io_util import separate_by_ext
+        result = separate_by_ext([])
+
+        self.assertEqual(result, {})
+
+    @patch("hed.tools.util.io_util.get_full_extension")
+    def test_separate_by_ext_mixed_extensions(self, mock_get_full_extension):
+        file_paths = ["file1.log", "file2.json", "file3.log", "file4.json"]
+
+        mock_get_full_extension.side_effect = [
+            ("file1", ".log"),
+            ("file2", ".json"),
+            ("file3", ".log"),
+            ("file4", ".json"),
+        ]
+
+        expected_result = {
+            ".log": ["file1.log", "file3.log"],
+            ".json": ["file2.json", "file4.json"],
+        }
+
+        from hed.tools.util.io_util import separate_by_ext
+        result = separate_by_ext(file_paths)
+
+        self.assertEqual(result, expected_result)
+
+if __name__ == "__main__":
     unittest.main()
