@@ -49,6 +49,7 @@ class MyTestCase(unittest.TestCase):
                 print(f"Skipping {error_code} test because: {skip_tests[error_code]}")
                 continue
             name = info.get('name', '')
+            print(name)
             if name in skip_tests:
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
@@ -77,6 +78,7 @@ class MyTestCase(unittest.TestCase):
             else:
                 def_dict = DefinitionDict()
             for section_name, section in info["tests"].items():
+                print(f"\t{section_name} tests")
                 if test_type is not None and test_type != section_name:
                     continue
                 if section_name == "string_tests":
@@ -208,8 +210,11 @@ class MyTestCase(unittest.TestCase):
                 self.report_result(result, issues, error_code, all_codes, description, name, test, "schema_tests")
 
     def test_errors(self):
+        count = 1
         for test_file in self.test_files:
+            print(f"{count} of {len(self.test_files)}: {test_file}")
             self.run_single_test(test_file)
+            count = count + 1
 
         print(f"{len(self.fail_count)} tests got an unexpected result")
         print("\n".join(self.fail_count))

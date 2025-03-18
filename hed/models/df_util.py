@@ -182,6 +182,7 @@ def _handle_curly_braces_refs(df, refs, column_names):
     # Filter out columns and refs that don't exist.
     refs_new = [ref for ref in refs if ref in column_names]
     remaining_columns = [column for column in column_names if column not in refs_new]
+    other_refs = [ref for ref in refs if ref not in column_names]
 
     new_df = df.copy()
     # Replace references in the columns we are saving out.
@@ -197,8 +198,14 @@ def _handle_curly_braces_refs(df, refs, column_names):
     # Handle the special case of {HED} when the tsv file has no {HED} column
     if 'HED' in refs and 'HED' not in column_names:
         for column_name in remaining_columns:
-            new_df[column_name] =\
+            new_df[column_name] = \
                 pd.Series(replace_ref(x, "{HED}", "n/a") for x in new_df[column_name])
+
+    # Handle any other refs that aren't in the dataframe.
+    for ref in other_refs:
+        for column_name in remaining_columns:
+            new_df[column_name] = \
+                pd.Series(replace_ref(x, "{" + ref + "}", "n/a") for x in new_df[column_name])
     new_df = new_df[remaining_columns]
 
     return new_df

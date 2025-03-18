@@ -9,9 +9,10 @@ def get_schema_from_description(root_path):
         description_path = os.path.abspath(os.path.join(root_path, "dataset_description.json"))
         with open(description_path, "r") as fp:
             dataset_description = json.load(fp)
-        version = dataset_description.get("HEDVersion", None)
-        return hed_schema_io.load_schema_version(version)
+            version = dataset_description.get("HEDVersion", None)
+            return hed_schema_io.load_schema_version(version)
     except Exception as e:
+        print(f"{str(e)}")
         return None
 
 
