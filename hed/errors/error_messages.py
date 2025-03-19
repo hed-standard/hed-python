@@ -211,14 +211,14 @@ def val_error_extra_slashes_spaces(tag, problem_tag):
 
 
 @hed_error(ValidationErrors.SIDECAR_KEY_MISSING, default_severity=ErrorSeverity.WARNING)
-def val_error_sidecar_key_missing(invalid_key, category_keys):
-    return f"Category key '{invalid_key}' does not exist in column.  Valid keys are: {category_keys}"
+def val_error_sidecar_key_missing(invalid_keys, category_keys):
+    return f"Category keys '{invalid_keys}' do not exist in column.  Valid keys are: {category_keys}"
 
 
 @hed_error(ValidationErrors.TSV_COLUMN_MISSING, actual_code=ValidationErrors.SIDECAR_KEY_MISSING,
            default_severity=ErrorSeverity.WARNING)
-def val_error_tsv_column_missing(invalid_key):
-    return f"{{HED}} is used as a key in a sidecar but does not appear as a column in the tabular file"
+def val_error_tsv_column_missing(invalid_keys):
+    return f"{invalid_keys} used as column references in sidecar but are not columns in the tabular file"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)

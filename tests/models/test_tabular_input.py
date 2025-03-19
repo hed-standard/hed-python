@@ -1,9 +1,10 @@
 import unittest
 import os
+import io
 import shutil
 
 from hed.models import Sidecar, TabularInput
-from hed import schema
+from hed import schema, get_printable_issue_string
 from hed.errors import HedFileError
 from hed.errors import ErrorHandler, ErrorContext
 
@@ -34,6 +35,13 @@ class Test(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.base_output_folder)
 
+    def get_tabular(self, events_list, sidecar):
+        string = ""
+        for event_row in events_list:
+            string += "\t".join(str(x) for x in event_row) + "\n"
+        file_obj = io.BytesIO(string.encode("utf-8"))
+        return TabularInput(file_obj, sidecar=sidecar)
+
     def test_missing_column_name_issue(self):
         events_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                     '../data/validator_tests/bids_events_bad_column_name.tsv'))
@@ -58,8 +66,46 @@ class Test(unittest.TestCase):
         input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate(hed_schema=self.hed_schema)
-        self.assertEqual(validation_issues[0][ErrorContext.ROW], 2)
+        self.assertEqual(validation_issues[0][ErrorContext.COLUMN], 'event-type')
         self.assertEqual(len(validation_issues), 1)
+
+    def test_nan_issues(self):
+        events1 = [["onset", "duration", "event-type", "HED"],
+                   [1.0, 0, "go", "Blue"],
+                  [2.0, 0, "cue", "(Delay/3.0, (Green))"],
+                   [3.0, 0, "go", "Red"],]
+        events2 = [["onset", "duration", "event-type", "HED"],
+                   [1.0, 0, "go", "Blue"],
+                   ["n/a", 0, "cue", "(Delay/3.0, (Green))"],
+                   [3.0, 0, "go", "Red"],
+                   ["n/a", 0, "go", "(Duration/5, (Red))"],]
+        events3 = [["onset", "duration", "event-type", "HED"],
+                   [1.0, 0, "go", "Blue"],
+                   ["n/a", 0, "cue", "(Delay/3.0, (Green)), (Delay/5.0, (Black))"],
+                   [3.0, 0, "go", "Red"],
+                   ["n/a", 0, "go", "(Duration/5, (Red))"], ]
+        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 "../data/validator_tests/bids_events.json")
+        sidecar = Sidecar(json_path)
+
+        error_handler1 = ErrorHandler(check_for_warnings=False)
+        tab_input1 = self.get_tabular(events1, sidecar)
+        validation_issues = tab_input1.validate(hed_schema=self.hed_schema, error_handler=error_handler1)
+        self.assertEqual(len(validation_issues), 0)
+
+        tab_input2 = self.get_tabular(events2, sidecar)
+        validation_issues = tab_input2.validate(hed_schema=self.hed_schema, error_handler=error_handler1)
+        self.assertEqual(len(validation_issues), 1)
+
+        tab_input3 = self.get_tabular(events3, sidecar)
+        validation_issues = tab_input3.validate(hed_schema=self.hed_schema, error_handler=error_handler1)
+        self.assertEqual(len(validation_issues), 2)
+
+        error_handler2 = ErrorHandler(check_for_warnings=True)
+        tab_input3 = self.get_tabular(events3, sidecar)
+        validation_issues = tab_input3.validate(hed_schema=self.hed_schema, error_handler=error_handler2)
+        self.assertEqual(len(validation_issues), 3)
+
 
     def test_blank_and_duplicate_columns(self):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),

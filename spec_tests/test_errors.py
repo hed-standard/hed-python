@@ -49,7 +49,6 @@ class MyTestCase(unittest.TestCase):
                 print(f"Skipping {error_code} test because: {skip_tests[error_code]}")
                 continue
             name = info.get('name', '')
-            print(name)
             if name in skip_tests:
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
@@ -78,7 +77,6 @@ class MyTestCase(unittest.TestCase):
             else:
                 def_dict = DefinitionDict()
             for section_name, section in info["tests"].items():
-                print(f"\t{section_name} tests")
                 if test_type is not None and test_type != section_name:
                     continue
                 if section_name == "string_tests":
@@ -163,9 +161,13 @@ class MyTestCase(unittest.TestCase):
         from hed import TabularInput
         for result, tests in info.items():
             for test in tests:
-                buffer = io.BytesIO(json.dumps(test['sidecar']).encode("utf-8"))
+                sidecar_test = test['sidecar']
+                default_dict = self.default_sidecar.loaded_dict
+                for key, value in default_dict.items():
+                    sidecar_test.setdefault(key, value)
+
+                buffer = io.BytesIO(json.dumps(sidecar_test).encode("utf-8"))
                 sidecar = Sidecar(buffer)
-                sidecar.loaded_dict.update(self.default_sidecar.loaded_dict)
                 issues = sidecar.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
                 string = ""
                 try:
@@ -212,7 +214,6 @@ class MyTestCase(unittest.TestCase):
     def test_errors(self):
         count = 1
         for test_file in self.test_files:
-            print(f"{count} of {len(self.test_files)}: {test_file}")
             self.run_single_test(test_file)
             count = count + 1
 

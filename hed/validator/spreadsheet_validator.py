@@ -2,8 +2,9 @@
 import copy
 import pandas as pd
 import math
+import re
 from hed.models.base_input import BaseInput
-from hed.errors.error_types import ColumnErrors, ErrorContext, ValidationErrors
+from hed.errors.error_types import  ErrorContext, ValidationErrors, TemporalErrors
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.column_mapper import ColumnType
 from hed.models.hed_string import HedString
@@ -11,6 +12,7 @@ from hed.errors.error_reporter import sort_issues, check_for_any_errors
 from hed.validator.onset_validator import OnsetValidator
 from hed.validator.hed_validator import HedValidator
 from hed.models import df_util
+from hed.models.model_constants import DefTagNames
 
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
@@ -18,6 +20,7 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 class SpreadsheetValidator:
     ONSET_TOLERANCE = 10-7
+    TEMPORAL_ANCHORS = re.compile(r"|".join(map(re.escape, ["onset", "inset", "offset", "delay"])))
 
     def __init__(self, hed_schema):
         """
@@ -44,7 +47,6 @@ class SpreadsheetValidator:
             issues (list of dict): A list of issues for HED string
         """
 
-        issues = []
         if error_handler is None:
             error_handler = ErrorHandler()
 
@@ -59,7 +61,8 @@ class SpreadsheetValidator:
         # Adjust to account for column names
         if data.has_column_names:
             row_adj += 1
-        issues += self._validate_column_structure(data, error_handler, row_adj)
+
+        issues = self._validate_column_structure(data, error_handler)
 
         if data.needs_sorting:
             data_new = copy.deepcopy(data)
@@ -67,11 +70,24 @@ class SpreadsheetValidator:
             issues += error_handler.format_error_with_context(ValidationErrors.ONSETS_UNORDERED)
             data = data_new
 
-        onsets = df_util.split_delay_tags(data.series_a, self._schema, data.onsets)
+        # If there are n/a errors in the onset column, further validation cannot proceed
+        onsets = data.onsets
+        if onsets is not None:
+            onsets = onsets.astype(str).str.strip()
+            onsets = pd.to_numeric(onsets, errors='coerce')
+            assembled = data.series_a
+            na_issues = self._check_onset_nans(onsets, assembled, self._schema, error_handler, row_adj)
+            issues += na_issues
+            if len(na_issues) > 0:
+                return issues
+            onsets = df_util.split_delay_tags(assembled, self._schema, onsets)
+        else:
+            onsets = None
+
         df = data.dataframe_a
 
         self._hed_validator = HedValidator(self._schema, def_dicts=def_dicts)
-        if data.onsets is not None:
+        if onsets is not None:
             self._onset_validator = OnsetValidator()
             onset_mask = ~pd.isna(pd.to_numeric(onsets['onset'], errors='coerce'))
         else:
@@ -204,14 +220,13 @@ class SpreadsheetValidator:
             # Return False if either value is not convertible to a float
             return False
 
-    def _validate_column_structure(self, base_input, error_handler, row_adj):
+    def _validate_column_structure(self, base_input, error_handler):
         """
         Validate that each column in the input data has valid values.
 
         Parameters:
             base_input (BaseInput): The input data to be validated.
             error_handler (ErrorHandler): Holds context
-            row_adj(int): Number to adjust row by for reporting errors
         Returns:
             List of issues associated with each invalid value. Each issue is a dictionary.
         """
@@ -221,21 +236,56 @@ class SpreadsheetValidator:
         issues += col_issues
         for column in base_input.column_metadata().values():
             if column.column_type == ColumnType.Categorical:
-                error_handler.push_error_context(ErrorContext.COLUMN, column.column_name)
-                valid_keys = column.hed_dict.keys()
-                for row_number, value in enumerate(base_input.dataframe[column.column_name]):
-                    if value != "n/a" and value not in valid_keys:
-                        error_handler.push_error_context(ErrorContext.ROW, row_number + row_adj)
-                        issues += error_handler.format_error_with_context(ValidationErrors.SIDECAR_KEY_MISSING,
-                                                                          invalid_key=value,
-                                                                          category_keys=list(valid_keys))
-                        error_handler.pop_error_context()
-                error_handler.pop_error_context()
+                valid_keys = set(column.hed_dict.keys())
+                column_values = base_input.dataframe[column.column_name]
 
-        column_refs = base_input.get_column_refs()
-        columns = base_input.columns
-        for ref in column_refs:
-            if ref not in columns:
-                issues += error_handler.format_error_with_context(ValidationErrors.TSV_COLUMN_MISSING, invalid_key=ref)
+                # Find non n/a values that are not in the valid keys
+                invalid_values = set(column_values[(column_values != "n/a") & (~column_values.isin(valid_keys))])
+
+                # If there are invalid values, log a single error
+                if invalid_values:
+                    error_handler.push_error_context(ErrorContext.COLUMN, column.column_name)
+                    issues += error_handler.format_error_with_context(ValidationErrors.SIDECAR_KEY_MISSING,
+                        invalid_keys=str(list(invalid_values)),  category_keys=list(valid_keys))
+                    error_handler.pop_error_context()
+
+        column_refs = set(base_input.get_column_refs())  # Convert to set for O(1) lookup
+        columns = set(base_input.columns)  # Convert to set for efficient comparison
+
+        # Find missing column references
+        missing_refs = column_refs - columns  # Set difference: elements in column_refs but not in columns
+
+        # If there are missing references, log a single error
+        if missing_refs:
+            issues += error_handler.format_error_with_context(
+                ValidationErrors.TSV_COLUMN_MISSING,
+                invalid_keys=list(missing_refs)  # Include all missing column references
+            )
 
         return issues
+
+    def _check_onset_nans(self, onsets, assembled, hed_schema, error_handler, row_adj):
+        onset_mask = pd.isna(onsets)
+        if not onset_mask.any():
+            return []
+        filtered = assembled[onset_mask]
+        issues = []
+        for index, value in filtered.items():
+            if not bool(self.TEMPORAL_ANCHORS.search(value.casefold())):
+                continue
+            hed_obj = HedString(value, hed_schema)
+            error_handler.push_error_context(ErrorContext.ROW, index + row_adj)
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_obj)
+            for tag in hed_obj.find_top_level_tags(anchor_tags=DefTagNames.TIMELINE_KEYS, include_groups=0):
+                issues += error_handler.format_error_with_context(TemporalErrors.TEMPORAL_TAG_NO_TIME, tag=tag)
+            error_handler.pop_error_context()
+            error_handler.pop_error_context()
+        return issues
+        #filtered = assembled.loc[onset_mask.index[onset_mask]]
+        # for row_number, text_file_row in filtered.iteritems():
+        #     error_handler.push_error_context(ErrorContext.ROW, row_number + row_adj)
+        #     error_handler.push_error_context(ErrorContext.COLUMN, text_file_row.name)
+        #     error_handler.push_error_context(ErrorContext.HED_STRING, text_file_row)
+        #     issues = error_handler.format_error_with_context(ValidationErrors.ONSETS_NAN)
+        #     error_handler.pop_error_context()
+
