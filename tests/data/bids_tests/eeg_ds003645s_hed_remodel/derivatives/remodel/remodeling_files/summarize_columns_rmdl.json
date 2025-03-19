@@ -1,0 +1,20 @@
+[
+   {
+        "operation": "summarize_column_names",
+        "description": "Summarize the unique orders of column names.",
+        "parameters": {
+            "summary_name": "Summary of column names",
+            "summary_filename": "column_name_summary"
+        }
+    },
+    {
+        "operation": "summarize_column_values",
+        "description": "Summarize column values.",
+        "parameters": {
+            "summary_name": "Summary of column values",
+            "summary_filename": "column_values_summary",
+            "skip_columns": ["onset", "duration", "sample"],
+            "value_columns": ["trial", "response_time", "stimuli", "stim_file"]
+        }
+    }
+]

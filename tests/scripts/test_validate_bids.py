@@ -16,7 +16,8 @@ class Test(unittest.TestCase):
         arg_list = [self.data_root,  '-x', 'derivatives', 'stimuli' ]
         with patch('sys.stdout', new=io.StringIO()) as fp:
             main(arg_list)
-            self.assertFalse(fp.getvalue())
+            x = fp.getvalue()
+        self.assertFalse(x)
 
     def test_main_warnings(self):
         arg_list = [self.data_root,  '-x', 'derivatives', 'stimuli', '-w', '-p', '-s' ]

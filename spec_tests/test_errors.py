@@ -161,9 +161,13 @@ class MyTestCase(unittest.TestCase):
         from hed import TabularInput
         for result, tests in info.items():
             for test in tests:
-                buffer = io.BytesIO(json.dumps(test['sidecar']).encode("utf-8"))
+                sidecar_test = test['sidecar']
+                default_dict = self.default_sidecar.loaded_dict
+                for key, value in default_dict.items():
+                    sidecar_test.setdefault(key, value)
+
+                buffer = io.BytesIO(json.dumps(sidecar_test).encode("utf-8"))
                 sidecar = Sidecar(buffer)
-                sidecar.loaded_dict.update(self.default_sidecar.loaded_dict)
                 issues = sidecar.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
                 string = ""
                 try:
@@ -208,8 +212,10 @@ class MyTestCase(unittest.TestCase):
                 self.report_result(result, issues, error_code, all_codes, description, name, test, "schema_tests")
 
     def test_errors(self):
+        count = 1
         for test_file in self.test_files:
             self.run_single_test(test_file)
+            count = count + 1
 
         print(f"{len(self.fail_count)} tests got an unexpected result")
         print("\n".join(self.fail_count))

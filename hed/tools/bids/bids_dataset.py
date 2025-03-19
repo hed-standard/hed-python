@@ -1,8 +1,6 @@
 """ The contents of a BIDS dataset. """
 
 import os
-import json
-from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_file_group import BidsFileGroup
@@ -72,7 +70,7 @@ class BidsDataset:
             this_schema = self.schema
         else:
             return [{"code": "SCHEMA_LOAD_FAILED",
-                     "message": "BIDS dataset_description.json has invalid HEDVersion and passed schema was invalid}",}]
+                     "message": "BIDS dataset_description.json has invalid HEDVersion and passed schema was invalid}"}]
         for suffix, group in self.file_groups.items():
             if group.has_hed:
                 issues += group.validate(this_schema, check_for_warnings=check_for_warnings)
