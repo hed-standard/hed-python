@@ -51,7 +51,7 @@ def get_config() -> VersioneerConfig:
     cfg = VersioneerConfig()
     cfg.VCS = "git"
     cfg.style = "pep440"
-    cfg.tag_prefix = "hedtools-"
+    cfg.tag_prefix = ""
     cfg.parentdir_prefix = "hedtools-"
     cfg.versionfile_source = "hed/_version.py"
     cfg.verbose = False
