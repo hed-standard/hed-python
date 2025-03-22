@@ -67,8 +67,8 @@ class Schema2DF(Schema2Base):
             constants.name: name,
             constants.attributes: attributes,
             constants.subclass_of: base_object,
-            constants.description: description.replace("\n", "\\n"),
-            constants.equivalent_to: self._get_header_equivalent_to(attributes, base_object)
+            constants.description: description.replace("\n", "\\n")
+            # constants.equivalent_to: self._get_header_equivalent_to(attributes, base_object)
         }
         self.output[constants.STRUCT_KEY].loc[len(self.output[constants.STRUCT_KEY])] = new_row
 
@@ -100,8 +100,8 @@ class Schema2DF(Schema2Base):
                 else tag_entry.short_tag_name + "-#",
             constants.subclass_of: self._get_subclass_of(tag_entry),
             constants.attributes: self._format_tag_attributes(tag_entry.attributes),
-            constants.description: tag_entry.description,
-            constants.equivalent_to: self._get_tag_equivalent_to(tag_entry),
+            constants.description: tag_entry.description
+            #constants.equivalent_to: self._get_tag_equivalent_to(tag_entry),
         }
         # Todo: do other sections like this as well for efficiency
         self._tag_rows.append(new_row)
@@ -123,8 +123,8 @@ class Schema2DF(Schema2Base):
             constants.name: entry.name,
             constants.subclass_of: self._get_subclass_of(entry),
             constants.attributes: self._format_tag_attributes(entry.attributes),
-            constants.description: entry.description,
-            constants.equivalent_to: self._get_tag_equivalent_to(entry),
+            constants.description: entry.description
+            # constants.equivalent_to: self._get_tag_equivalent_to(entry),
         }
         # Handle the special case of units, which have the extra unit class
         if hasattr(entry, "unit_class_entry"):

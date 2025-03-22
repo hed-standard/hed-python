@@ -54,13 +54,12 @@ equivalent_to = "omn:EquivalentTo"
 has_unit_class = "hasUnitClass"
 annotations = "Annotations"
 
-
-struct_columns = [hed_id, name, attributes, subclass_of, description, equivalent_to]
-tag_columns = [hed_id, name, level, subclass_of, attributes, description, equivalent_to]
-unit_columns = [hed_id, name, subclass_of, has_unit_class, attributes, description, equivalent_to]
+struct_columns = [hed_id, name, attributes, subclass_of, description]
+tag_columns = [hed_id, name, level, subclass_of, attributes, description]
+unit_columns = [hed_id, name, subclass_of, has_unit_class, attributes, description]
 
 # The columns for unit class, value class, and unit modifier
-other_columns = [hed_id, name, subclass_of, attributes, description, equivalent_to]
+other_columns = [hed_id, name, subclass_of, attributes, description]
 
 # for schema attributes
 property_type = "Type"
