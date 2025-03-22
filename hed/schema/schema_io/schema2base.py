@@ -80,6 +80,11 @@ class Schema2Base:
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _output_tags(self, tags):
+        """ Output the tags section of the schema.
+
+        Parameters:
+            tags
+        """
         schema_node = self._start_section(HedSectionKey.Tags)
 
         # This assumes .all_entries is sorted in a reasonable way for output.
