@@ -51,9 +51,12 @@ class TestHedSchemaDF(unittest.TestCase):
         filenames = convert_filenames_to_dict(filename)
         new_file_strings = {}
         for key, value in filenames.items():
-            with open(value, "r") as f:
-                all_lines = f.readlines()
-                new_file_strings[key] = "".join(all_lines)
+            try:
+                with open(value, "r") as f:
+                    all_lines = f.readlines()
+                    new_file_strings[key] = "".join(all_lines)
+            except FileNotFoundError as e:
+                pass
 
         reloaded_schema = from_dataframes(new_file_strings)
         self.assertEqual(schema, reloaded_schema)
