@@ -327,6 +327,8 @@ class HedSchema(HedSchemaBase):
             - File cannot be saved for some reason.
         """
         output_dfs = Schema2DF().process_schema(self, save_merged)
+        if hasattr(self, 'extras') and self.extras:
+           output_dfs.update(self.extras)
         df_util.save_dataframes(base_filename, output_dfs)
 
     def set_schema_prefix(self, schema_namespace):
