@@ -236,10 +236,12 @@ def get_prefixes(dataframes):
     extensions = dataframes.get(constants.EXTERNAL_ANNOTATION_KEY)
     if prefixes is None or extensions is None:
         return {}
-    all_prefixes = {prefix.Prefix: prefix[2] for prefix in prefixes.itertuples()}
+    prefixes.columns = prefixes.columns.str.lower()
+    all_prefixes = {prefix.prefix: prefix[2] for prefix in prefixes.itertuples()}
+    extensions.columns = extensions.columns.str.lower()
     annotation_terms = {}
     for row in extensions.itertuples():
-        annotation_terms[row.Prefix + row.ID] = all_prefixes[row.Prefix]
+        annotation_terms[row.prefix + row.id] = all_prefixes[row.prefix]
 
     return annotation_terms
 
@@ -418,14 +420,14 @@ def _add_annotation_lines(row, annotation_properties, annotation_terms):
                 value = f'"{value}"'
             annotation_lines.append(f"\t\t{annotation_id} {value}")
 
-    if constants.annotations in row.index:
-        portions = _split_on_unquoted_commas(row[constants.annotations])
-        annotations = _split_annotation_values(portions)
-
-        for key, value in annotations.items():
-            if key not in annotation_terms:
-                raise ValueError(f"Problem.  Found {key} which is not in the prefix/annotation list.")
-            annotation_lines.append(f"\t\t{key} {value}")
+    # if constants.annotations in row.index:
+    #     portions = _split_on_unquoted_commas(row[constants.annotations])
+    #     annotations = _split_annotation_values(portions)
+    #
+    #     for key, value in annotations.items():
+    #         if key not in annotation_terms:
+    #             raise ValueError(f"Problem.  Found {key} which is not in the prefix/annotation list.")
+    #         annotation_lines.append(f"\t\t{key} {value}")
 
     output_text = ""
     if annotation_lines:

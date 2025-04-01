@@ -52,7 +52,7 @@ attributes = "Attributes"
 description = "dc:description"
 equivalent_to = "omn:EquivalentTo"
 has_unit_class = "hasUnitClass"
-annotations = "Annotations"
+#annotations = "Annotations"
 
 struct_columns = [hed_id, name, attributes, subclass_of, description]
 tag_columns = [hed_id, name, level, subclass_of, attributes, description]
