@@ -156,7 +156,7 @@ class TestValidateAllSchemaFormats(unittest.TestCase):
         with contextlib.redirect_stdout(None):
             issues = validate_all_schema_formats(os.path.join(self.base_path, self.basename))
         self.assertTrue(issues)
-        self.assertIn("Multiple schemas of type", issues[0])
+        self.assertIn("Error loading schema: No columns to parse from file", issues[0])
 
     @classmethod
     def tearDownClass(cls):

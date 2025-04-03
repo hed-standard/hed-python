@@ -50,6 +50,12 @@ class Schema2Wiki(Schema2Base):
         self.current_tag_string = wiki_constants.END_SCHEMA_STRING
         self._flush_current_tag()
 
+    def _end_units_section(self):
+        pass
+
+    def _end_section(self, section_key):
+        pass
+
     def _write_tag_entry(self, tag_entry, parent_node=None, level=0):
         tag = tag_entry.name
         if level == 0:

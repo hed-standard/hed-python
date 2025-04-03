@@ -19,16 +19,17 @@ ATTRIBUTE_PROPERTY_KEY = "AttributeProperty"
 
 PREFIXES_KEY = "Prefixes"
 EXTERNAL_ANNOTATION_KEY = "AnnotationPropertyExternal"
+SOURCES_KEY = "Sources"
 
 PROPERTY_KEYS = [ANNOTATION_KEY, DATA_KEY, OBJECT_KEY]
 DF_SUFFIXES = {TAG_KEY, STRUCT_KEY, VALUE_CLASS_KEY,
                UNIT_CLASS_KEY, UNIT_KEY, UNIT_MODIFIER_KEY,
-               *PROPERTY_KEYS, ATTRIBUTE_PROPERTY_KEY, PREFIXES_KEY, EXTERNAL_ANNOTATION_KEY}
+               *PROPERTY_KEYS, ATTRIBUTE_PROPERTY_KEY, PREFIXES_KEY,
+               EXTERNAL_ANNOTATION_KEY, SOURCES_KEY}
 
 
-DF_EXTRA_SUFFIXES = {PREFIXES_KEY, EXTERNAL_ANNOTATION_KEY}
+DF_EXTRA_SUFFIXES = {PREFIXES_KEY, EXTERNAL_ANNOTATION_KEY, SOURCES_KEY}
 #DF_SUFFIXES_OMN = {*DF_SUFFIXES, *DF_EXTRA_SUFFIXES}
-DF_SUFFIXES_OMN = DF_SUFFIXES
 
 section_mapping_hed_id = {
     STRUCT_KEY: None,
@@ -41,6 +42,16 @@ section_mapping_hed_id = {
     DATA_KEY: HedSectionKey.Attributes,
     OBJECT_KEY: HedSectionKey.Attributes,
     ATTRIBUTE_PROPERTY_KEY: HedSectionKey.Properties,
+}
+
+section_key_to_suffixes = {
+    HedSectionKey.Tags: [TAG_KEY],
+    HedSectionKey.Units: [UNIT_KEY],
+    HedSectionKey.UnitClasses: [UNIT_CLASS_KEY],
+    HedSectionKey.UnitModifiers: [UNIT_MODIFIER_KEY],
+    HedSectionKey.ValueClasses: [VALUE_CLASS_KEY],
+    HedSectionKey.Attributes: [DATA_KEY, OBJECT_KEY, ANNOTATION_KEY],
+    HedSectionKey.Properties: [ATTRIBUTE_PROPERTY_KEY],
 }
 
 # Spreadsheet column ids
@@ -95,7 +106,10 @@ valid_omn_attributes = {
     hed_schema_constants.UNMERGED_ATTRIBUTE: "HED_0000303"
 }
 
-# Extra spreadsheet column ideas
-Prefix = "Prefix"
-ID = "ID"
-NamespaceIRI = "Namespace IRI"
+# Extra spreadsheet columns
+EXTRAS_CONVERSIONS = {"Prefix": "prefix", "namespace IRI": "namespaceIRI", "namespace iri": "namespaceIRI", "ID": "id"}
+
+
+Prefix = "prefix"
+ID = "id"
+NamespaceIRI = "namespaceIRI"

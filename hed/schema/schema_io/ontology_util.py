@@ -258,11 +258,15 @@ def convert_df_to_omn(dataframes):
             omn_data(dict): a dict of DF_SUFFIXES:str, representing each .tsv file in omn format.
     """
     from hed.schema.hed_schema_io import from_dataframes
-
+    from hed.schema.schema_io.schema2df import Schema2DF  # Late import as this is recursive
     annotation_terms = get_prefixes(dataframes)
 
     # Load the schema, so we can save it out with ID's
     schema = from_dataframes(dataframes)
+    schema2df = Schema2DF(get_as_ids=True)
+    output1 = schema2df.process_schema(schema, save_merged=False)
+    if hasattr(schema, 'extras') and schema.extras:
+        output1.update(schema.extras)
     # Convert dataframes to hedId format, and add any missing hedId's(generally, they should be replaced before here)
     dataframes_u = update_dataframes_from_schema(dataframes, schema, get_as_ids=True)
 
@@ -350,10 +354,11 @@ def _convert_extra_df_to_omn(df, suffix):
     """
     output_text = ""
     for index, row in df.iterrows():
+        renamed_row = row.rename(index=constants.EXTRAS_CONVERSIONS)
         if suffix == constants.PREFIXES_KEY:
-            output_text += f"Prefix: {row[constants.Prefix]} <{row[constants.NamespaceIRI]}>"
+            output_text += f"Prefix: {renamed_row[constants.Prefix]} <{renamed_row[constants.NamespaceIRI]}>"
         elif suffix == constants.EXTERNAL_ANNOTATION_KEY:
-            output_text += f"AnnotationProperty: {row[constants.Prefix]}{row[constants.ID]}"
+            output_text += f"AnnotationProperty: {renamed_row[constants.Prefix]}{renamed_row[constants.ID]}"
         else:
             raise ValueError(f"Unknown tsv suffix attempting to be converted {suffix}")
 

@@ -39,22 +39,22 @@ class Schema2XML(Schema2Base):
     def _end_tag_section(self):
         pass
 
-    def _write_tag_entry(self, tag_entry, parent_node=None, level=0):
-        """
-            Creates a tag node and adds it to the parent.
+    def _end_units_section(self):
+        pass
 
-        Parameters
-        ----------
-        tag_entry: HedTagEntry
-            The entry for that tag we want to write out
-        parent_node: SubElement
-            The parent node if any of this tag.
-        level: int
-            The level of this tag, 0 being a root tag.
-        Returns
-        -------
-        SubElement
-            The added node
+    def _end_section(self, section_key):
+        pass
+
+    def _write_tag_entry(self, tag_entry, parent_node=None, level=0):
+        """ Create a tag node and adds it to the parent.
+
+        Parameters:
+            tag_entry (HedTagEntry): The entry for that tag we want to write out.
+            parent_node (SubElement): The parent node if any of this tag.
+            level (int): The level of this tag, 0 being a root tag.
+
+        Returns:
+            SubElement: The added node.
         """
         key_class = HedSectionKey.Tags
         tag_element = xml_constants.ELEMENT_NAMES[key_class]
@@ -74,21 +74,15 @@ class Schema2XML(Schema2Base):
         return tag_node
 
     def _write_entry(self, entry, parent_node=None, include_props=True):
-        """
-            Creates an entry node and adds it to the parent.
+        """ Create an entry node and adds it to the parent.
 
-        Parameters
-        ----------
-        entry: HedSchemaEntry
-            The entry for that tag we want to write out
-        parent_node: SubElement
-            The parent node of this tag, if any
-        include_props: bool
-            Add the description and attributes to new node.
-        Returns
-        -------
-        SubElement
-            The added node
+        Parameters:
+            entry (HedSchemaEntry): The entry for that tag we want to write out.
+            parent_node (SubElement): The parent node of this tag, if any.
+            include_props (bool): Whether to include the properties and description of this tag.
+
+        Returns:
+            SubElement: The added node
         """
         key_class = entry.section_key
         element = xml_constants.ELEMENT_NAMES[key_class]
@@ -112,18 +106,13 @@ class Schema2XML(Schema2Base):
     # Output helper functions to create nodes
     # =========================================
     def _add_tag_node_attributes(self, tag_node, tag_attributes, attribute_node_name=xml_constants.ATTRIBUTE_ELEMENT):
-        """Adds the attributes to a tag.
+        """Add the attributes to a tag.
 
-        Parameters
-        ----------
-        tag_node: Element
-            A tag element.
-        tag_attributes: {str:str}
-            A dictionary of attributes to add to this node
-        attribute_node_name: str
-            The type of the node to use for attributes.  Mostly used to override to property for attributes section.
-        Returns
-        -------
+        Parameters:
+            tag_node (Element):  A tag element.
+            tag_attributes ({str:str}): A dictionary of attributes to add to this node.
+            attribute_node_name (str): The type of the node to use for attributes.  Mostly used to override to property for attributes section.
+
         """
         for attribute, value in tag_attributes.items():
             if self._attribute_disallowed(attribute):

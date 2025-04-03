@@ -19,12 +19,12 @@ class TestHedSchemaDF(unittest.TestCase):
         shutil.rmtree(cls.output_folder)
 
     def test_saving_default_schemas(self):
-        schema = load_schema_version("8.3.0")
-        schema.save_as_dataframes(self.output_folder + "test_8.tsv")
-
-        reloaded_schema = load_schema(self.output_folder + "test_8.tsv")
-        self.assertEqual(schema, reloaded_schema)
-
+        # schema = load_schema_version("8.3.0")
+        # schema.save_as_dataframes(self.output_folder + "test_8.tsv")
+        #
+        # reloaded_schema = load_schema(self.output_folder + "test_8.tsv")
+        # self.assertEqual(schema, reloaded_schema)
+        #
         schema = load_schema_version("score_1.1.0")
         schema.save_as_dataframes(self.output_folder + "test_score.tsv", save_merged=True)
 

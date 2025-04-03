@@ -73,6 +73,17 @@ class Schema2Base:
     def _end_tag_section(self):
         raise NotImplementedError("This needs to be defined in the subclass")
 
+    def _end_units_section(self):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _end_section(self, section_key):
+        """ Clean up for sections other than tags and units.
+
+        Parameters:
+            section_key (HedSectionKey): The section key to end.
+        """
+        raise NotImplementedError("This needs to be defined in the subclass")
+
     def _write_tag_entry(self, tag_entry, parent=None, level=0):
         raise NotImplementedError("This needs to be defined in the subclass")
 
@@ -133,6 +144,7 @@ class Schema2Base:
                     continue
 
                 self._write_entry(unit_entry, unit_class_node)
+        self._end_units_section()
 
     def _output_section(self, hed_schema, key_class):
         parent_node = self._start_section(key_class)
@@ -140,6 +152,7 @@ class Schema2Base:
             if self._should_skip(entry):
                 continue
             self._write_entry(entry, parent_node)
+        self._end_section(key_class)
 
     def _should_skip(self, entry):
         has_lib_attr = entry.has_attribute(HedKey.InLibrary)
@@ -153,17 +166,13 @@ class Schema2Base:
         return self._strip_out_in_library and attribute == HedKey.InLibrary
 
     def _format_tag_attributes(self, attributes):
-        """
-            Takes a dictionary of tag attributes and returns a string with the .mediawiki representation
+        """ Takes a dictionary of tag attributes and returns a string with the .mediawiki representation.
 
-        Parameters
-        ----------
-        attributes : {str:str}
-            {attribute_name : attribute_value}
-        Returns
-        -------
-        str:
-            The formatted string that should be output to the file.
+        Parameters:
+            attributes: {str:str}: Dictionary with {attribute_name : attribute_value}
+
+        Returns:
+            str: The formatted string that should be output to the file.
         """
         prop_string = ""
         final_props = []
@@ -189,18 +198,13 @@ class Schema2Base:
 
     @staticmethod
     def _get_attribs_string_from_schema(header_attributes, sep=" "):
-        """
-        Gets the schema attributes and converts it to a string.
+        """ Gets the schema attributes and converts it to a string.
 
-        Parameters
-        ----------
-        header_attributes : dict
-            Attributes to format attributes from
+        Parameters:
+            header_attributes (dict): Attributes to format attributes from
 
-        Returns
-        -------
-        str:
-            A string of the attributes that can be written to a .mediawiki formatted file
+        Returns:
+            str - A string of the attributes that can be written to a .mediawiki formatted file
         """
         attrib_values = [f"{attr}=\"{value}\"" for attr, value in header_attributes.items()]
         final_attrib_string = sep.join(attrib_values)

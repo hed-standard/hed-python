@@ -83,18 +83,17 @@ def save_dataframes(base_filename, dataframe_dict):
                              lineterminator="\n")
 
 
-def convert_filenames_to_dict(filenames, include_prefix_dfs=False):
+def convert_filenames_to_dict(filenames):
     """Infers filename meaning based on suffix, e.g. _Tag for the tags sheet
 
     Parameters:
         filenames(str or None or list or dict): The list to convert to a dict
             If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
             If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
-        include_prefix_dfs(bool): If True, include the prefixes and external annotation dataframes.
     Returns:
         filename_dict(str: str): The required suffix to filename mapping"""
     result_filenames = {}
-    dataframe_names = constants.DF_SUFFIXES_OMN if include_prefix_dfs else constants.DF_SUFFIXES
+    dataframe_names = constants.DF_SUFFIXES
     if isinstance(filenames, str):
         if filenames.endswith(".tsv"):
             base, base_ext = os.path.splitext(filenames)
@@ -133,30 +132,30 @@ def create_empty_dataframes():
     return base_dfs
 
 
-def load_dataframes(filenames, include_prefix_dfs=False):
+def load_dataframes(filenames):
     """Load the dataframes from the source folder or series of files.
 
     Parameters:
         filenames(str or None or list or dict): The input filenames
             If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
             If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
-        include_prefix_dfs(bool): If True, include the prefixes and external annotation dataframes.
     Returns:
         dataframes_dict(str: dataframes): The suffix:dataframe dict
     """
-    dict_filenames = convert_filenames_to_dict(filenames, include_prefix_dfs=include_prefix_dfs)
+    dict_filenames = convert_filenames_to_dict(filenames)
     dataframes = create_empty_dataframes()
     for key, filename in dict_filenames.items():
         try:
-            loaded_dataframe = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
             if key in dataframes:
+                loaded_dataframe = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
                 columns_not_in_loaded = dataframes[key].columns[~dataframes[key].columns.isin(loaded_dataframe.columns)]
                 # and not dataframes[key].columns.isin(loaded_dataframe.columns).all():
                 if columns_not_in_loaded.any():
                     raise HedFileError(HedExceptions.SCHEMA_LOAD_FAILED,
-                                       f"Required column(s) {list(columns_not_in_loaded)} missing from {filename}.  "
+                                          f"Required column(s) {list(columns_not_in_loaded)} missing from {filename}.  "
                                        f"The required columns are {list(dataframes[key].columns)}", filename=filename)
-            dataframes[key] = loaded_dataframe
+            elif os.path.exists(filename):                                      
+                dataframes[key] = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
         except OSError:
             # todo: consider if we want to report this error(we probably do)
             pass  # We will use a blank one for this
