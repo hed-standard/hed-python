@@ -29,6 +29,21 @@ class Schema2Wiki(Schema2Base):
         self.current_tag_string += prologue
         self._flush_current_tag()
 
+    def _output_annotations(self, hed_schema):
+        pass
+
+    def _output_extras(self, hed_schema):
+        """ Check for missing sections and extras and output them if needed.
+
+        Parameters:
+            hed_schema (HedSchema): The schema being processed.
+
+        Allow subclasses to add additional sections if needed.
+        This is a placeholder for any additional output that needs to be done after the main sections.
+        """
+        # In the base class, we do nothing, but subclasses can override this method.
+        pass
+
     def _output_footer(self, epilogue):
         self.current_tag_string = wiki_constants.EPILOGUE_SECTION_ELEMENT
         self._flush_current_tag()

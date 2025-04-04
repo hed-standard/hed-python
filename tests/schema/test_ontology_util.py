@@ -145,7 +145,8 @@ class TestUpdateDataframes(unittest.TestCase):
         updated_dataframes = update_dataframes_from_schema(schema_dataframes, schema_83)
 
         for key, df in updated_dataframes.items():
-            self.assertTrue((df['test_column'] == fixed_value).all())
+            if key not in constants.DF_EXTRA_SUFFIXES:
+                self.assertTrue((df['test_column'] == fixed_value).all())
         # this is expected to bomb horribly, since schema lacks many of the spreadsheet entries.
         schema = load_schema_version("8.3.0")
         schema_dataframes_new = load_schema_version("8.3.0").get_as_dataframes()
@@ -162,7 +163,7 @@ class TestConvertOmn(unittest.TestCase):
 
         # make these more robust, for now just verify it's somewhere in the result
         for df_name, df in dataframes.items():
-            if df_name == constants.STRUCT_KEY:
+            if df_name == constants.STRUCT_KEY or 'rdfs:label' not in df.columns:
                 continue  # Not implemented yet
             for label in df['rdfs:label']:
                 # Verify that the label is somewhere in the OMN text

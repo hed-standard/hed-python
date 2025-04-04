@@ -54,6 +54,8 @@ class Schema2Base:
         self._output_section(hed_schema, HedSectionKey.ValueClasses)
         self._output_section(hed_schema, HedSectionKey.Attributes)
         self._output_section(hed_schema, HedSectionKey.Properties)
+        self._output_annotations(hed_schema)
+        self._output_extras(hed_schema)  # Allow subclasses to add additional sections if needed
         self._output_footer(hed_schema.epilogue)
 
         return self.output
@@ -62,6 +64,12 @@ class Schema2Base:
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _output_header(self, attributes, prologue):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _output_annotations(self, hed_schema):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _output_extras(self, hed_schema):
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _output_footer(self, epilogue):

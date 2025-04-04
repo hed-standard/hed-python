@@ -60,27 +60,39 @@ level = "Level"
 name = "rdfs:label"
 subclass_of = "omn:SubClassOf"
 attributes = "Attributes"
-description = "dc:description"
+dcdescription = "dc:description"
 equivalent_to = "omn:EquivalentTo"
 has_unit_class = "hasUnitClass"
-#annotations = "Annotations"
+prefix = "prefix"  # for the prefixes section, this is the column name in the prefixes dataframe
+namespace = "namespace"  # for the prefixes section, this is the column name in the prefixes dataframe
+id = "id"  # for the prefixes section, this is the column name in the prefixes dataframe
+iri = "iri"  # for the prefixes section, this is the column name in the prefixes dataframe
+ref = "ref"  # for the sources section, this is the column name in the sources dataframe
+link = "link"
+type = "Type"
+domain = "omn:Domain"
+range = "omn:Range"
+properties = "Properties"  # for the schema properties, this is the column name in the properties dataframe
+description = "description"
 
-struct_columns = [hed_id, name, attributes, subclass_of, description]
-tag_columns = [hed_id, name, level, subclass_of, attributes, description]
-unit_columns = [hed_id, name, subclass_of, has_unit_class, attributes, description]
+struct_columns = [hed_id, name, attributes, subclass_of, dcdescription]
+tag_columns = [hed_id, name, level, subclass_of, attributes, dcdescription]
+unit_columns = [hed_id, name, subclass_of, has_unit_class, attributes, dcdescription]
+attribute_columns = [hed_id, name, type, domain, range, properties, dcdescription]  # For the annotation property
+property_columns = [hed_id, name, type, dcdescription]
+prefix_columns = [prefix, namespace, description]
+external_annotation_columns = [prefix, id, iri, description]
+source_columns = [ref, link]  # For the sources section
 
 # The columns for unit class, value class, and unit modifier
-other_columns = [hed_id, name, subclass_of, attributes, description]
+other_columns = [hed_id, name, subclass_of, attributes, dcdescription]
 
 # for schema attributes
 property_type = "Type"
 property_domain = "omn:Domain"
 property_range = "omn:Range"
 properties = "Properties"
-property_columns = [hed_id, name, property_type, property_domain, property_range, properties, description]
 
-# For the schema properties
-property_columns_reduced = [hed_id, name, property_type, description]
 
 # HED_00X__YY where X is the library starting index, and Y is the entity number below.
 struct_base_ids = {
@@ -107,7 +119,8 @@ valid_omn_attributes = {
 }
 
 # Extra spreadsheet columns
-EXTRAS_CONVERSIONS = {"Prefix": "prefix", "namespace IRI": "namespaceIRI", "namespace iri": "namespaceIRI", "ID": "id"}
+EXTRAS_CONVERSIONS = {"Prefix": "prefix", "namespace IRI": "namespace", "namespace iri": "namespace", "ID": "id",
+                      "definition": "description", "Description": "description", "IRI": "iri"}
 
 
 Prefix = "prefix"

@@ -27,6 +27,17 @@ class Schema2XML(Schema2Base):
             prologue_node = SubElement(self.hed_node, xml_constants.PROLOGUE_ELEMENT)
             prologue_node.text = prologue
 
+    def _output_annotations(self, hed_schema):
+        pass
+
+    def _output_extras(self, hed_schema):
+        """
+        Allow subclasses to add additional sections if needed.
+        This is a placeholder for any additional output that needs to be done after the main sections.
+        """
+        # In the base class, we do nothing, but subclasses can override this method.
+        pass
+
     def _output_footer(self, epilogue):
         if epilogue:
             prologue_node = SubElement(self.hed_node, xml_constants.EPILOGUE_ELEMENT)

@@ -88,6 +88,8 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
         schema_name = schema.library
     # 1. Verify existing HED ids don't conflict between schema/dataframes
     for df_key, df in dataframes.items():
+        if df_key in constants.DF_SUFFIXES:
+            continue
         section_key = constants.section_mapping_hed_id.get(df_key)
         if not section_key:
             continue
@@ -108,7 +110,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     if assign_missing_ids:
         # 3: Add any HED ID's as needed to these generated dfs
         for df_key, df in output_dfs.items():
-            if df_key == constants.STRUCT_KEY:
+            if df_key == constants.STRUCT_KEY or df_key in constants.DF_EXTRA_SUFFIXES:
                 continue
             unused_tag_ids = _get_hedid_range(schema_name, df_key)
 
@@ -271,9 +273,9 @@ def convert_df_to_omn(dataframes):
     dataframes_u = update_dataframes_from_schema(dataframes, schema, get_as_ids=True)
 
     # Copy over remaining non schema dataframes.
-    if constants.PREFIXES_KEY in dataframes:
-        dataframes_u[constants.PREFIXES_KEY] = dataframes[constants.PREFIXES_KEY]
-        dataframes_u[constants.EXTERNAL_ANNOTATION_KEY] = dataframes[constants.EXTERNAL_ANNOTATION_KEY]
+    for suffix in constants.DF_EXTRA_SUFFIXES:
+        if suffix in dataframes:
+            dataframes_u[suffix] = dataframes[suffix]
 
     # Write out the new dataframes in omn format
     annotation_props = _get_annotation_prop_ids(schema)
@@ -406,9 +408,9 @@ def _split_annotation_values(parts):
 
 def _add_annotation_lines(row, annotation_properties, annotation_terms):
     annotation_lines = []
-    description = row[constants.description]
+    description = row[constants.dcdescription]
     if description:
-        annotation_lines.append(f"\t\t{constants.description} \"{description}\"")
+        annotation_lines.append(f"\t\t{constants.dcdescription} \"{description}\"")
     name = row[constants.name]
     if name:
         annotation_lines.append(f"\t\t{constants.name} \"{name}\"")

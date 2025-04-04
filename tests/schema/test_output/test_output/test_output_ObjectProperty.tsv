@@ -1,7 +1,0 @@
-hedId	rdfs:label	Type	omn:Domain	omn:Range	Properties	dc:description
-HED_0010104	defaultUnits	ObjectProperty	HedUnitClass	HedUnit	unitClassDomain, unitRange	The default units to use if the placeholder has a unit class but the substituted value has no units.
-HED_0010109	isPartOf	ObjectProperty	HedTag	HedTag	tagDomain, tagRange	This tag is part of the indicated tag -- as in the nose is part of the face.
-HED_0010105	relatedTag	ObjectProperty	HedTag	HedTag	tagDomain, tagRange	A HED tag that is closely related to this tag. This attribute is used by tagging tools.
-HED_0010106	suggestedTag	ObjectProperty	HedTag	HedTag	tagDomain, tagRange	A tag that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.
-HED_0010107	unitClass	ObjectProperty	HedTag	HedUnitClass	tagDomain, unitClassRange	The unit class that the value of a placeholder node can belong to.
-HED_0010108	valueClass	ObjectProperty	HedTag	HedValueClass	tagDomain, valueClassRange	Type of value taken on by the value of a placeholder node.

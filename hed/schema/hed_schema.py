@@ -29,6 +29,7 @@ class HedSchema(HedSchemaBase):
         self.filename = None
         self.prologue = ""
         self.epilogue = ""
+        self.extras = {} # Used to store any additional data that might be needed for serialization (like OWL or other formats)
 
         # This is the specified library name_prefix - tags will be {schema_namespace}:{tag_name}
         self._namespace = ""
@@ -366,12 +367,16 @@ class HedSchema(HedSchemaBase):
         if other is None:
             return False
         if self.get_save_header_attributes() != other.get_save_header_attributes():
+            # print(f"Header attributes not equal: '{self.get_save_header_attributes()}' vs '{other.get_save_header_attributes()}'")
             return False
         if self.has_duplicates() != other.has_duplicates():
+            # print(f"Duplicates: '{self.has_duplicates()}' vs '{other.has_duplicates()}'")
             return False
         if self.prologue.strip() != other.prologue.strip():
+            # print(f"PROLOGUE NOT EQUAL: '{self.prologue.strip()}' vs '{other.prologue.strip()}'")
             return False
         if self.epilogue.strip() != other.epilogue.strip():
+            # print(f"EPILOGUE NOT EQUAL: '{self.epilogue.strip()}' vs '{other.epilogue.strip()}'")
             return False
         if self._sections != other._sections:
             # This block is useful for debugging when modifying the schema class itself.
@@ -394,6 +399,7 @@ class HedSchema(HedSchemaBase):
             #                     print(s)
             return False
         if self._namespace != other._namespace:
+            print(f"NAMESPACE NOT EQUAL: '{self._namespace}' vs '{other._namespace}'")
             return False
         return True
 

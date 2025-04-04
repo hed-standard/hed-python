@@ -44,7 +44,9 @@ class SchemaLoaderDF(SchemaLoader):
             schema(HedSchema): The new schema
         """
         loader = cls(filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name)
-        return loader._load()
+        hed_schema = loader._load()
+        cls._fix_extras(hed_schema)
+        return hed_schema
 
     def _open_file(self):
         if self.filenames:
@@ -53,6 +55,20 @@ class SchemaLoaderDF(SchemaLoader):
             dataframes = load_dataframes_from_strings(self.schema_as_strings_or_df)
 
         return dataframes
+
+    @staticmethod
+    def _fix_extras(hed_schema):
+        """ Fixes the extras after loading the schema, to ensure they are in the correct format.
+
+        Parameters:
+            hed_schema (HedSchema): The loaded HedSchema object to fix extras for.
+
+        """
+        if not hed_schema or not hasattr(hed_schema, 'extras') or not hed_schema.extras:
+            return
+
+        for key, extra in hed_schema.extras.items():
+            hed_schema.extras[key] = extra.rename(columns=constants.EXTRAS_CONVERSIONS)
 
     def _get_header_attributes(self, file_data):
         header_attributes = {}
@@ -90,7 +106,7 @@ class SchemaLoaderDF(SchemaLoader):
         prologue, epilogue = "", ""
         for row_number, row in file_data[constants.STRUCT_KEY].iterrows():
             cls = row[constants.subclass_of]
-            description = row[constants.description]
+            description = row[constants.dcdescription]
             if cls == "HedPrologue" and description:
                 prologue = description.replace("\\n", "\n")
                 continue
@@ -232,7 +248,7 @@ class SchemaLoaderDF(SchemaLoader):
         if hed_id:
             node_attributes[HedKey.HedID] = hed_id
 
-        description = row[constants.description]
+        description = row[constants.dcdescription]
         tag_entry = self._schema._create_tag_entry(element_name, key_class)
 
         if description:

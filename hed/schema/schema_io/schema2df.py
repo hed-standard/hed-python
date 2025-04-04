@@ -67,7 +67,7 @@ class Schema2DF(Schema2Base):
             constants.name: name,
             constants.attributes: attributes,
             constants.subclass_of: base_object,
-            constants.description: description.replace("\n", "\\n")
+            constants.dcdescription: description.replace("\n", "\\n")
             # constants.equivalent_to: self._get_header_equivalent_to(attributes, base_object)
         }
         self.output[constants.STRUCT_KEY].loc[len(self.output[constants.STRUCT_KEY])] = new_row
@@ -80,6 +80,20 @@ class Schema2DF(Schema2Base):
         base_object = "HedPrologue"
         self._create_and_add_object_row(base_object, description=prologue)
 
+    def _output_annotations(self, hed_schema):
+        #if self.output
+        pass
+
+    def _output_extras(self, hed_schema):
+        """ Make sure that the extras files have at least a header.
+
+        Parameters:
+            hed_schema(HedSchema): The HED schema to extract the information from
+
+        """
+        # In the base class, we do nothing, but subclasses can override this method.
+        pass
+
     def _output_footer(self, epilogue):
         base_object = "HedEpilogue"
         self._create_and_add_object_row(base_object, description=epilogue)
@@ -91,8 +105,10 @@ class Schema2DF(Schema2Base):
         self.output[constants.TAG_KEY] = pd.DataFrame(self._suffix_rows[constants.TAG_KEY], dtype=str)
 
     def _end_units_section(self):
-        self.output[constants.UNIT_KEY] = pd.DataFrame(self._suffix_rows[constants.UNIT_KEY], dtype=str)
-        self.output[constants.UNIT_CLASS_KEY] = pd.DataFrame(self._suffix_rows[constants.UNIT_CLASS_KEY], dtype=str)
+        if self._suffix_rows[constants.UNIT_KEY]:
+            self.output[constants.UNIT_KEY] = pd.DataFrame(self._suffix_rows[constants.UNIT_KEY], dtype=str)
+        if self._suffix_rows[constants.UNIT_CLASS_KEY]:
+            self.output[constants.UNIT_CLASS_KEY] = pd.DataFrame(self._suffix_rows[constants.UNIT_CLASS_KEY], dtype=str)
 
     def _end_section(self, section_key):
         """ Updates the output with the current values from the section
@@ -102,7 +118,7 @@ class Schema2DF(Schema2Base):
         """
         suffix_keys = constants.section_key_to_suffixes.get(section_key, [])
         for suffix_key in suffix_keys:
-            if suffix_key in self._suffix_rows:
+            if suffix_key in self._suffix_rows and self._suffix_rows[suffix_key]:
                 self.output[suffix_key] = pd.DataFrame(self._suffix_rows[suffix_key], dtype=str)
 
     def _write_tag_entry(self, tag_entry, parent_node=None, level=0):
@@ -115,7 +131,7 @@ class Schema2DF(Schema2Base):
                 else tag_entry.short_tag_name + "-#",
             constants.subclass_of: self._get_subclass_of(tag_entry),
             constants.attributes: self._format_tag_attributes(tag_entry.attributes),
-            constants.description: tag_entry.description
+            constants.dcdescription: tag_entry.description
         }
         if self._get_as_ids:
             new_row[constants.equivalent_to] = self._get_tag_equivalent_to(tag_entry)
@@ -150,7 +166,7 @@ class Schema2DF(Schema2Base):
             constants.name: entry.name,
             constants.subclass_of: self._get_subclass_of(entry),
             constants.attributes: self._format_tag_attributes(entry.attributes),
-            constants.description: entry.description
+            constants.dcdescription: entry.description
         }
         if self._get_as_ids:
             new_row[constants.equivalent_to] = self._get_tag_equivalent_to(entry)
@@ -223,7 +239,7 @@ class Schema2DF(Schema2Base):
             constants.property_domain: domain_string,
             constants.property_range: range_string,
             constants.properties: self._format_tag_attributes(entry.attributes) if include_props else "",
-            constants.description: entry.description,
+            constants.dcdescription: entry.description,
         }
         self._suffix_rows[df_key].append(new_row)
 
@@ -242,7 +258,7 @@ class Schema2DF(Schema2Base):
             constants.hed_id: f"{tag_id}",
             constants.name: entry.name,
             constants.property_type: property_type,
-            constants.description: entry.description,
+            constants.dcdescription: entry.description,
         }
         self._suffix_rows[constants.ATTRIBUTE_PROPERTY_KEY].append(new_row)
         pass
