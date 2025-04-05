@@ -20,7 +20,7 @@ SCHEMA_ELEMENT = "schema"
 EPILOGUE_ELEMENT = "epilogue"
 
 TAG_DEF_ELEMENT = "node"
-
+LINK_ELEMENT = "link"
 
 UNIT_CLASS_SECTION_ELEMENT = "unitClassDefinitions"
 UNIT_CLASS_DEF_ELEMENT = "unitClassDefinition"

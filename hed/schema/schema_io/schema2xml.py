@@ -2,7 +2,7 @@
 
 from xml.etree.ElementTree import Element, SubElement
 from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema.schema_io import xml_constants
+from hed.schema.schema_io import xml_constants, df_constants as df_constants
 from hed.schema.schema_io.schema2base import Schema2Base
 
 
@@ -36,6 +36,28 @@ class Schema2XML(Schema2Base):
         This is a placeholder for any additional output that needs to be done after the main sections.
         """
         # In the base class, we do nothing, but subclasses can override this method.
+        self._output_sources(hed_schema)
+        self._output_prefixes(hed_schema)
+        self.output_external_annotations(hed_schema)
+
+    def _output_sources(self, hed_schema):
+        if not hasattr(hed_schema, 'extras') or not df_constants.SOURCES_KEY in hed_schema.extras:
+            return
+        sources = hed_schema.extras[df_constants.SOURCES_KEY]
+        if sources.empty:
+            return
+        sources_node = SubElement(self.hed_node, xml_constants.SCHEMA_SOURCE_SECTION_ELEMENT)
+        for _, row in sources.iterrows():
+            source_node = SubElement(sources_node, xml_constants.SCHEMA_SOURCE_DEF_ELEMENT)
+            source_name = SubElement(source_node, xml_constants.NAME_ELEMENT)
+            source_name.text = row[df_constants.source]
+            source_link = SubElement(source_node, xml_constants.LINK_ELEMENT)
+            source_link.text = row[df_constants.link]
+
+    def _output_prefixes(self, hed_schema):
+        pass
+
+    def output_external_annotations(self, hed_schema):
         pass
 
     def _output_footer(self, epilogue):

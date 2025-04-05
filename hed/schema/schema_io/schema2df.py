@@ -6,7 +6,7 @@ from hed.schema.schema_io.df_util import create_empty_dataframes, get_library_na
 from hed.schema.schema_io.schema2base import Schema2Base
 from hed.schema.schema_io import text_util
 import pandas as pd
-import hed.schema.hed_schema_df_constants as constants
+import hed.schema.schema_io.df_constants as constants
 from hed.schema.hed_schema_entry import HedTagEntry
 
 section_key_to_df = {

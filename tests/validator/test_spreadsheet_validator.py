@@ -144,6 +144,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
         '''
         sidecar = Sidecar(io.StringIO(sidecar_hed_json))
         issues = sidecar.validate(self.hed_schema)
+        self.assertEqual(len(issues), 0)
         data = [
             ["onset", "duration", "event_code"],
             [4.5, 0, "face"],
@@ -153,7 +154,6 @@ class TestSpreadsheetValidation(unittest.TestCase):
         my_tab = TabularInput(df, sidecar=sidecar, name='test_no_hed')
         error_handler = ErrorHandler(check_for_warnings=False)
         issues = self.validator.validate(my_tab, error_handler=error_handler)
-        print(issues)
         self.assertEqual(len(issues), 0)
 
     def test_onset_na(self):

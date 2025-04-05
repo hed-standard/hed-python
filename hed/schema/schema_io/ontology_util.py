@@ -2,9 +2,8 @@
 
 import pandas as pd
 
-from hed.schema.schema_io import schema_util
+from hed.schema.schema_io import schema_util, df_constants as constants
 from hed.errors.exceptions import HedFileError
-from hed.schema import hed_schema_df_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema.schema_io.df_util import remove_prefix, calculate_attribute_type, get_attributes_from_row
 from hed.schema.hed_cache import get_library_data

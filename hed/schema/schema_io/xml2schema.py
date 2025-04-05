@@ -4,10 +4,11 @@ This module is used to create a HedSchema object from an XML file or tree.
 
 from defusedxml import ElementTree
 import xml
+import pandas as pd
 
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey, NS_ATTRIB, NO_LOC_ATTRIB
-from hed.schema.schema_io import xml_constants
+from hed.schema.schema_io import xml_constants, df_constants
 from hed.schema.schema_io.base2schema import SchemaLoader
 from functools import partial
 
@@ -56,6 +57,7 @@ class SchemaLoaderXML(SchemaLoader):
         }
         self._schema.prologue = self._read_prologue()
         self._schema.epilogue = self._read_epilogue()
+        self._read_extras()
         self._parse_sections(self._root_element, parse_order)
 
     def _parse_sections(self, root_element, parse_order):
@@ -89,6 +91,19 @@ class SchemaLoaderXML(SchemaLoader):
         if len(epilogue_elements) == 1:
             return epilogue_elements[0].text
         return ""
+
+    def _read_extras(self):
+        self._schema.extras = {}
+        self._read_sources()
+
+    def _read_sources(self):
+        source_elements = self._get_elements_by_name(xml_constants.SCHEMA_SOURCE_DEF_ELEMENT)
+        data = []
+        for source_element in source_elements:
+            source_name = self._get_element_tag_value(source_element, xml_constants.NAME_ELEMENT)
+            source_link = self._get_element_tag_value(source_element, xml_constants.LINK_ELEMENT)
+            data.append({df_constants.source: source_name, df_constants.link: source_link})
+        self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(data, columns=df_constants.source_columns)
 
     def _add_tags_recursive(self, new_tags, parent_tags):
         for tag_element in new_tags:

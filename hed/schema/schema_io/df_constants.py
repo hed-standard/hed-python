@@ -67,7 +67,7 @@ prefix = "prefix"  # for the prefixes section, this is the column name in the pr
 namespace = "namespace"  # for the prefixes section, this is the column name in the prefixes dataframe
 id = "id"  # for the prefixes section, this is the column name in the prefixes dataframe
 iri = "iri"  # for the prefixes section, this is the column name in the prefixes dataframe
-ref = "ref"  # for the sources section, this is the column name in the sources dataframe
+source = "source"  # for the sources section, this is the column name in the sources dataframe
 link = "link"
 type = "Type"
 domain = "omn:Domain"
@@ -82,7 +82,7 @@ attribute_columns = [hed_id, name, type, domain, range, properties, dcdescriptio
 property_columns = [hed_id, name, type, dcdescription]
 prefix_columns = [prefix, namespace, description]
 external_annotation_columns = [prefix, id, iri, description]
-source_columns = [ref, link]  # For the sources section
+source_columns = [source, link]  # For the sources section
 
 # The columns for unit class, value class, and unit modifier
 other_columns = [hed_id, name, subclass_of, attributes, dcdescription]

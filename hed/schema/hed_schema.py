@@ -399,7 +399,7 @@ class HedSchema(HedSchemaBase):
             #                     print(s)
             return False
         if self._namespace != other._namespace:
-            print(f"NAMESPACE NOT EQUAL: '{self._namespace}' vs '{other._namespace}'")
+            # print(f"NAMESPACE NOT EQUAL: '{self._namespace}' vs '{other._namespace}'")
             return False
         return True
 

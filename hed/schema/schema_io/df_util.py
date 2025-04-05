@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 from hed.errors import HedFileError, HedExceptions
-from hed.schema import hed_schema_df_constants as constants
+from hed.schema.schema_io import df_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema.hed_cache import get_library_data
 from hed.schema.schema_io.text_util import parse_attribute_string, _parse_header_attributes_line

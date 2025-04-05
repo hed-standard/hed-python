@@ -12,7 +12,6 @@ def get_schema_from_description(root_path):
             version = dataset_description.get("HEDVersion", None)
             return hed_schema_io.load_schema_version(version)
     except Exception as e:
-        print(f"{str(e)}")
         return None
 
 
