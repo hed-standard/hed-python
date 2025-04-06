@@ -38,7 +38,7 @@ class Schema2XML(Schema2Base):
         # In the base class, we do nothing, but subclasses can override this method.
         self._output_sources(hed_schema)
         self._output_prefixes(hed_schema)
-        self.output_external_annotations(hed_schema)
+        self._output_external_annotations(hed_schema)
 
     def _output_sources(self, hed_schema):
         if not hasattr(hed_schema, 'extras') or not df_constants.SOURCES_KEY in hed_schema.extras:
@@ -55,10 +55,38 @@ class Schema2XML(Schema2Base):
             source_link.text = row[df_constants.link]
 
     def _output_prefixes(self, hed_schema):
-        pass
+        if not hasattr(hed_schema, 'extras') or not df_constants.PREFIXES_KEY in hed_schema.extras:
+            return
+        prefixes = hed_schema.extras[df_constants.PREFIXES_KEY]
+        if prefixes.empty:
+            return
+        prefixes_node = SubElement(self.hed_node, xml_constants.SCHEMA_PREFIX_SECTION_ELEMENT)
+        for _, row in prefixes.iterrows():
+            prefix_node = SubElement(prefixes_node, xml_constants.SCHEMA_PREFIX_DEF_ELEMENT)
+            prefix_name = SubElement(prefix_node, xml_constants.NAME_ELEMENT)
+            prefix_name.text = row[df_constants.prefix]
+            prefix_namespace = SubElement(prefix_node, xml_constants.NAMESPACE_ELEMENT)
+            prefix_namespace.text = row[df_constants.namespace]
+            prefix_description = SubElement(prefix_node, xml_constants.DESCRIPTION_ELEMENT)
+            prefix_description.text = row[df_constants.description]
 
-    def output_external_annotations(self, hed_schema):
-        pass
+    def _output_external_annotations(self, hed_schema):
+        if not hasattr(hed_schema, 'extras') or not df_constants.EXTERNAL_ANNOTATION_KEY in hed_schema.extras:
+            return
+        externals = hed_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY]
+        if externals.empty:
+            return
+        externals_node = SubElement(self.hed_node, xml_constants.SCHEMA_EXTERNAL_SECTION_ELEMENT)
+        for _, row in externals.iterrows():
+            external_node = SubElement(externals_node, xml_constants.SCHEMA_EXTERNAL_DEF_ELEMENT)
+            external_name = SubElement(external_node, xml_constants.NAME_ELEMENT)
+            external_name.text = row[df_constants.prefix]
+            external_id = SubElement(external_node, xml_constants.ID_ELEMENT)
+            external_id.text = row[df_constants.id]
+            external_iri = SubElement(external_node, xml_constants.IRI_ELEMENT)
+            external_iri.text = row[df_constants.iri]
+            external_description = SubElement(external_node, xml_constants.DESCRIPTION_ELEMENT)
+            external_description.text = row[df_constants.description]
 
     def _output_footer(self, epilogue):
         if epilogue:

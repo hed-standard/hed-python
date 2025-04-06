@@ -21,6 +21,10 @@ EPILOGUE_ELEMENT = "epilogue"
 
 TAG_DEF_ELEMENT = "node"
 LINK_ELEMENT = "link"
+NAMESPACE_ELEMENT = "namespace"
+DESCRIPTION_ELEMENT = "description"
+ID_ELEMENT = "id"
+IRI_ELEMENT = "iri"
 
 UNIT_CLASS_SECTION_ELEMENT = "unitClassDefinitions"
 UNIT_CLASS_DEF_ELEMENT = "unitClassDefinition"
@@ -35,6 +39,12 @@ SCHEMA_VALUE_CLASSES_DEF_ELEMENT = "valueClassDefinition"
 
 SCHEMA_SOURCE_SECTION_ELEMENT = "schemaSources"
 SCHEMA_SOURCE_DEF_ELEMENT = "schemaSource"
+
+SCHEMA_PREFIX_SECTION_ELEMENT = "schemaPrefixes"
+SCHEMA_PREFIX_DEF_ELEMENT = "schemaPrefix"
+
+SCHEMA_EXTERNAL_SECTION_ELEMENT = "externalAnnotations"
+SCHEMA_EXTERNAL_DEF_ELEMENT = "externalAnnotation"
 
 SECTION_ELEMENTS = {
     HedSectionKey.Tags: SCHEMA_ELEMENT,

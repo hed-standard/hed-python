@@ -95,6 +95,8 @@ class SchemaLoaderXML(SchemaLoader):
     def _read_extras(self):
         self._schema.extras = {}
         self._read_sources()
+        self._read_prefixes()
+        self._read_external_annotations()
 
     def _read_sources(self):
         source_elements = self._get_elements_by_name(xml_constants.SCHEMA_SOURCE_DEF_ELEMENT)
@@ -104,6 +106,29 @@ class SchemaLoaderXML(SchemaLoader):
             source_link = self._get_element_tag_value(source_element, xml_constants.LINK_ELEMENT)
             data.append({df_constants.source: source_name, df_constants.link: source_link})
         self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(data, columns=df_constants.source_columns)
+
+    def _read_prefixes(self):
+        prefix_elements = self._get_elements_by_name(xml_constants.SCHEMA_PREFIX_DEF_ELEMENT)
+        data = []
+        for prefix_element in prefix_elements:
+            prefix_name = self._get_element_tag_value(prefix_element, xml_constants.NAME_ELEMENT)
+            prefix_namespace= self._get_element_tag_value(prefix_element, xml_constants.NAMESPACE_ELEMENT)
+            prefix_description = self._get_element_tag_value(prefix_element, xml_constants.DESCRIPTION_ELEMENT)
+            data.append({df_constants.prefix: prefix_name, df_constants.namespace: prefix_namespace,
+                         df_constants.description: prefix_description})
+        self._schema.extras[df_constants.PREFIXES_KEY] = pd.DataFrame(data, columns=df_constants.prefix_columns)
+
+    def _read_external_annotations(self):
+        external_elements = self._get_elements_by_name(xml_constants.SCHEMA_EXTERNAL_DEF_ELEMENT)
+        data = []
+        for external_element in external_elements:
+            external_name = self._get_element_tag_value(external_element, xml_constants.NAME_ELEMENT)
+            external_id = self._get_element_tag_value(external_element, xml_constants.ID_ELEMENT)
+            external_iri = self._get_element_tag_value(external_element, xml_constants.IRI_ELEMENT)
+            external_description = self._get_element_tag_value(external_element, xml_constants.DESCRIPTION_ELEMENT)
+            data.append({df_constants.prefix: external_name, df_constants.id: external_id,
+                         df_constants.iri: external_iri, df_constants.description: external_description})
+        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(data, columns=df_constants.external_annotation_columns)
 
     def _add_tags_recursive(self, new_tags, parent_tags):
         for tag_element in new_tags:
