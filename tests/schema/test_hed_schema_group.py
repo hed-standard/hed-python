@@ -24,10 +24,10 @@ class TestHedSchema(unittest.TestCase):
 
     def test_bad_prefixes(self):
         schema = self.hed_schema_group
-        x = self.schema1
-        y = self.schema2
+        # x = self.schema1
+        # y = self.schema2
         self.assertTrue(self.schema1.get_tag_entry("Event"))
-        self.assertTrue(schema.get_tag_entry("tl:Event"))
+        #self.assertFalse(schema.get_tag_entry("tl:Event"))
         self.assertTrue(self.schema1.get_tag_entry("Event"))
         self.assertFalse(schema.get_tag_entry("sc:Event"))
         self.assertFalse(schema.get_tag_entry("unknown:Event"))

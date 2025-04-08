@@ -7,7 +7,7 @@ import pandas as pd
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors import error_reporter
-from hed.schema.schema_io import wiki_constants
+from hed.schema.schema_io import wiki_constants, df_constants
 from hed.schema.schema_io.base2schema import SchemaLoader
 from hed.schema.schema_io.wiki_constants import HedWikiSection, SectionNames
 from hed.schema.schema_io import text_util
@@ -107,10 +107,11 @@ class SchemaLoaderWiki(SchemaLoader):
             parse_func(lines_for_section)
 
     def _parse_extras(self, wiki_lines_by_section):
-        self._schema.extras = {}
+        self._schema.extras = {df_constants.SOURCES_KEY:  pd.DataFrame([], columns=df_constants.source_columns),
+                               df_constants.PREFIXES_KEY: pd.DataFrame([], columns=df_constants.prefix_columns),
+                               df_constants.EXTERNAL_ANNOTATION_KEY:
+                                  pd.DataFrame([], columns=df_constants.external_annotation_columns)}
         extra_keys = [key for key in wiki_lines_by_section.keys() if key not in required_keys]
-        if not extra_keys:
-            return
         for extra_key in extra_keys:
             lines_for_section = wiki_lines_by_section[extra_key]
             data = []

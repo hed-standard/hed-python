@@ -342,7 +342,6 @@ class TestHedSchemaMerging(unittest.TestCase):
             loaded_schema.append(load_schema(os.path.join(self.full_base_folder, filename)))
         for save_merged in [True, False]:
             for i in range(len(files) - 1):
-                print(f"Comparing {i}:{files[i]} and {i + 1}:{files[i + 1]}")
                 s1 = loaded_schema[i]
                 s2 = loaded_schema[i + 1]
                 self.assertEqual(s1, s2, "Loaded schemas are not equal.")
@@ -402,19 +401,11 @@ class TestHedSchemaMerging(unittest.TestCase):
         self._base_merging_test(files)
 
     def test_saving_merged_rooted(self):
-        files = [
-            load_schema(os.path.join(self.full_base_folder, "basic_root.mediawiki")),
-            load_schema(os.path.join(self.full_base_folder, "basic_root.xml")),
-        ]
-
+        files = [ "basic_root.mediawiki", "basic_root.xml"]
         self._base_merging_test(files)
 
     def test_saving_merged_rooted_sorting(self):
-        files = [
-            load_schema(os.path.join(self.full_base_folder, "sorted_root.mediawiki")),
-            load_schema(os.path.join(self.full_base_folder, "sorted_root_merged.xml")),
-        ]
-
+        files = ["sorted_root.mediawiki", "sorted_root_merged.xml"]
         self._base_merging_test(files)
 
     @with_temp_file(".mediawiki")
