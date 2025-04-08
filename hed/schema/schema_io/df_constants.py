@@ -82,7 +82,7 @@ attribute_columns = [hed_id, name, type, domain, range, properties, dcdescriptio
 property_columns = [hed_id, name, type, dcdescription]
 prefix_columns = [prefix, namespace, description]
 external_annotation_columns = [prefix, id, iri, description]
-source_columns = [source, link]  # For the sources section
+source_columns = [source, link, description]  # For the sources section
 
 # The columns for unit class, value class, and unit modifier
 other_columns = [hed_id, name, subclass_of, attributes, dcdescription]

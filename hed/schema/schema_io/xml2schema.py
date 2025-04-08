@@ -104,6 +104,7 @@ class SchemaLoaderXML(SchemaLoader):
         for source_element in source_elements:
             source_name = self._get_element_tag_value(source_element, xml_constants.NAME_ELEMENT)
             source_link = self._get_element_tag_value(source_element, xml_constants.LINK_ELEMENT)
+            description = self._get_element_tag_value(source_element, xml_constants.DESCRIPTION_ELEMENT)
             data.append({df_constants.source: source_name, df_constants.link: source_link})
         self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(data, columns=df_constants.source_columns)
 
