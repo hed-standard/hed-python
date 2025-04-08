@@ -72,11 +72,12 @@ class Schema2DF(Schema2Base):
         }
         self.output[constants.STRUCT_KEY].loc[len(self.output[constants.STRUCT_KEY])] = new_row
 
-    def _output_header(self, attributes, prologue):
+    def _output_header(self, attributes):
         base_object = "HedHeader"
         attributes_string = self._get_attribs_string_from_schema(attributes, sep=", ")
         self._create_and_add_object_row(base_object, attributes_string)
 
+    def _output_prologue(self, prologue):
         base_object = "HedPrologue"
         self._create_and_add_object_row(base_object, description=prologue)
 
@@ -94,9 +95,12 @@ class Schema2DF(Schema2Base):
         # In the base class, we do nothing, but subclasses can override this method.
         pass
 
-    def _output_footer(self, epilogue):
+    def _output_epilogue(self, epilogue):
         base_object = "HedEpilogue"
         self._create_and_add_object_row(base_object, description=epilogue)
+
+    def _output_footer(self):
+        pass
 
     def _start_section(self, key_class):
         pass

@@ -1,7 +1,7 @@
 """Allows output of HedSchema objects as .mediawiki format"""
 
 from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema.schema_io import wiki_constants
+from hed.schema.schema_io import wiki_constants, df_constants
 from hed.schema.schema_io.schema2base import Schema2Base
 
 
@@ -19,36 +19,64 @@ class Schema2Wiki(Schema2Base):
         self.current_tag_extra = ""
         self.output = []
 
-    def _output_header(self, attributes, prologue):
+    def _output_header(self, attributes):
         hed_attrib_string = self._get_attribs_string_from_schema(attributes)
         self.current_tag_string = f"{wiki_constants.HEADER_LINE_STRING} {hed_attrib_string}"
         self._flush_current_tag()
+
+    def _output_prologue(self, prologue):
         self._add_blank_line()
         self.current_tag_string = wiki_constants.PROLOGUE_SECTION_ELEMENT
         self._flush_current_tag()
-        self.current_tag_string += prologue
-        self._flush_current_tag()
+        if prologue:
+            self.current_tag_string += prologue
+            self._flush_current_tag()
 
     def _output_annotations(self, hed_schema):
         pass
 
     def _output_extras(self, hed_schema):
-        """ Check for missing sections and extras and output them if needed.
+        """ Add additional sections if needed.
 
         Parameters:
-            hed_schema (HedSchema): The schema being processed.
-
-        Allow subclasses to add additional sections if needed.
+            hed_schema (H: The schema object to output.
         This is a placeholder for any additional output that needs to be done after the main sections.
         """
         # In the base class, we do nothing, but subclasses can override this method.
-        pass
+        self._output_extra(hed_schema, df_constants.SOURCES_KEY, wiki_constants.SOURCES_SECTION_ELEMENT)
+        self._output_extra(hed_schema, df_constants.PREFIXES_KEY, wiki_constants.PREFIXES_SECTION_ELEMENT)
+        self._output_extra(hed_schema, df_constants.EXTERNAL_ANNOTATION_KEY,
+                           wiki_constants.EXTERNAL_ANNOTATION_SECTION_ELEMENT)
 
-    def _output_footer(self, epilogue):
+    def _output_extra(self, hed_schema, section_key, wiki_key):
+        """ Add additional section if needed.
+
+        Parameters:
+            hed_schema (HedSchema): The schema object to output.
+            section_key (string): The key in the extras dictionary of the schema.
+            wiki_key (string): The key in the wiki constants for the section.
+
+        """
+        # In the base class, we do nothing, but subclasses can override this method.
+        extra = hed_schema.get_extras(section_key)
+        if extra is None:
+            return
+        self._add_blank_line()
+        self.current_tag_string = wiki_key
+        self._flush_current_tag()
+        for _, row in extra.iterrows():
+            self.current_tag_string += '*'
+            self.current_tag_extra = ','.join(f'{col}={row[col]}' for col in extra.columns)
+            self._flush_current_tag()
+
+    def _output_epilogue(self, epilogue):
+        self._add_blank_line()
         self.current_tag_string = wiki_constants.EPILOGUE_SECTION_ELEMENT
         self._flush_current_tag()
         self.current_tag_string += epilogue
         self._flush_current_tag()
+
+    def _output_footer(self):
         self._add_blank_line()
         self.current_tag_string = wiki_constants.END_HED_STRING
         self._flush_current_tag()

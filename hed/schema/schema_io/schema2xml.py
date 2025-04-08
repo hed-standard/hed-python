@@ -20,9 +20,11 @@ class Schema2XML(Schema2Base):
         # alias this to output to match baseclass expectation.
         self.output = self.hed_node
 
-    def _output_header(self, attributes, prologue):
+    def _output_header(self, attributes):
         for attrib_name, attrib_value in attributes.items():
             self.hed_node.set(attrib_name, attrib_value)
+
+    def _output_prologue(self, prologue):
         if prologue:
             prologue_node = SubElement(self.hed_node, xml_constants.PROLOGUE_ELEMENT)
             prologue_node.text = prologue
@@ -41,10 +43,8 @@ class Schema2XML(Schema2Base):
         self._output_external_annotations(hed_schema)
 
     def _output_sources(self, hed_schema):
-        if not hasattr(hed_schema, 'extras') or not df_constants.SOURCES_KEY in hed_schema.extras:
-            return
-        sources = hed_schema.extras[df_constants.SOURCES_KEY]
-        if sources.empty:
+        sources = hed_schema.get_extras(df_constants.SOURCES_KEY)
+        if sources is None:
             return
         sources_node = SubElement(self.hed_node, xml_constants.SCHEMA_SOURCE_SECTION_ELEMENT)
         for _, row in sources.iterrows():
@@ -55,10 +55,8 @@ class Schema2XML(Schema2Base):
             source_link.text = row[df_constants.link]
 
     def _output_prefixes(self, hed_schema):
-        if not hasattr(hed_schema, 'extras') or not df_constants.PREFIXES_KEY in hed_schema.extras:
-            return
-        prefixes = hed_schema.extras[df_constants.PREFIXES_KEY]
-        if prefixes.empty:
+        prefixes = hed_schema.get_extras(df_constants.PREFIXES_KEY)
+        if prefixes is None:
             return
         prefixes_node = SubElement(self.hed_node, xml_constants.SCHEMA_PREFIX_SECTION_ELEMENT)
         for _, row in prefixes.iterrows():
@@ -71,10 +69,8 @@ class Schema2XML(Schema2Base):
             prefix_description.text = row[df_constants.description]
 
     def _output_external_annotations(self, hed_schema):
-        if not hasattr(hed_schema, 'extras') or not df_constants.EXTERNAL_ANNOTATION_KEY in hed_schema.extras:
-            return
-        externals = hed_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY]
-        if externals.empty:
+        externals = hed_schema.get_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
+        if externals is None:
             return
         externals_node = SubElement(self.hed_node, xml_constants.SCHEMA_EXTERNAL_SECTION_ELEMENT)
         for _, row in externals.iterrows():
@@ -88,10 +84,13 @@ class Schema2XML(Schema2Base):
             external_description = SubElement(external_node, xml_constants.DESCRIPTION_ELEMENT)
             external_description.text = row[df_constants.description]
 
-    def _output_footer(self, epilogue):
+    def _output_epilogue(self, epilogue):
         if epilogue:
             prologue_node = SubElement(self.hed_node, xml_constants.EPILOGUE_ELEMENT)
             prologue_node.text = epilogue
+
+    def _output_footer(self):
+        pass
 
     def _start_section(self, key_class):
         unit_modifier_node = SubElement(self.hed_node, xml_constants.SECTION_ELEMENTS[key_class])

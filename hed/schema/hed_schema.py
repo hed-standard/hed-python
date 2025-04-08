@@ -228,6 +228,22 @@ class HedSchema(HedSchemaBase):
         """
         return [self._namespace]
 
+    def get_extras(self, extras_key):
+        """ Get the extras corresponding to the given key
+
+        Parameters:
+            extras_key (str): The key to check for in the extras dictionary.
+
+        Returns:
+            DataFrame: True if the extras dictionary has this key.
+        """
+        if not hasattr(self, 'extras') or not extras_key in self.extras:
+            return None
+        externals = self.extras[extras_key]
+        if externals.empty:
+            None
+        return externals
+
     # ===============================================
     # Creation and saving functions
     # ===============================================
@@ -478,6 +494,7 @@ class HedSchema(HedSchemaBase):
                                                           schema_namespace, self.valid_prefixes)
             return None, None, validation_issues
         return self._find_tag_entry(tag, schema_namespace)
+
 
     # ===============================================
     # Private utility functions for getting/finding tags

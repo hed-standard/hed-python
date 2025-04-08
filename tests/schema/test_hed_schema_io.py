@@ -337,25 +337,30 @@ class TestHedSchemaMerging(unittest.TestCase):
 
     def _base_merging_test(self, files):
         import filecmp
-
+        loaded_schema = []
+        for filename in files:
+            loaded_schema.append(load_schema(os.path.join(self.full_base_folder, filename)))
         for save_merged in [True, False]:
             for i in range(len(files) - 1):
-                s1 = files[i]
-                s2 = files[i + 1]
-                self.assertEqual(s1, s2)
+                print(f"Comparing {i}:{files[i]} and {i + 1}:{files[i + 1]}")
+                s1 = loaded_schema[i]
+                s2 = loaded_schema[i + 1]
+                self.assertEqual(s1, s2, "Loaded schemas are not equal.")
                 filename1 = get_temp_filename(".xml")
                 filename2 = get_temp_filename(".xml")
                 try:
                     s1.save_as_xml(filename1, save_merged=save_merged)
                     s2.save_as_xml(filename2, save_merged=save_merged)
                     result = filecmp.cmp(filename1, filename2)
-                    # print(s1.filename)
-                    # print(s2.filename)
-                    self.assertTrue(result)
+
+                    # print(i, files[i], s1.filename)
+                    # print(files[i+1], s2.filename)
+                    self.assertTrue(result, f"Saved xml {files[i]} and {files[i+1]} are not equal.")
                     reload1 = load_schema(filename1)
                     reload2 = load_schema(filename2)
-                    self.assertEqual(reload1, reload2)
-                except Exception:
+                    self.assertEqual(reload1, reload2, f"Reloaded xml {files[i]} and {files[i+1]} are not equal.")
+                except Exception as ex:
+                    print(ex)
                     self.assertTrue(False)
                 finally:
                     os.remove(filename1)
@@ -367,12 +372,13 @@ class TestHedSchemaMerging(unittest.TestCase):
                     s1.save_as_mediawiki(filename1, save_merged=save_merged)
                     s2.save_as_mediawiki(filename2, save_merged=save_merged)
                     result = filecmp.cmp(filename1, filename2)
-                    self.assertTrue(result)
+                    self.assertTrue(result, f"Saved wiki {files[i]} and {files[i+1]} are not equal.")
 
                     reload1 = load_schema(filename1)
                     reload2 = load_schema(filename2)
-                    self.assertEqual(reload1, reload2)
-                except Exception:
+                    self.assertEqual(reload1, reload2, f"Reloaded wiki {files[i]} and {files[i+1]} are not equal.")
+                except Exception as ex:
+                    print(ex)
                     self.assertTrue(False)
                 finally:
                     os.remove(filename1)
@@ -380,20 +386,18 @@ class TestHedSchemaMerging(unittest.TestCase):
 
                 lines1 = s1.get_as_mediawiki_string(save_merged=save_merged)
                 lines2 = s2.get_as_mediawiki_string(save_merged=save_merged)
-                self.assertEqual(lines1, lines2)
+                self.assertEqual(lines1, lines2, f"Mediawiki string {files[i]} and {files[i + 1]} are not equal.")
 
                 lines1 = s1.get_as_xml_string(save_merged=save_merged)
                 lines2 = s2.get_as_xml_string(save_merged=save_merged)
-                self.assertEqual(lines1, lines2)
+                self.assertEqual(lines1, lines2, f"XML string {files[i]} and {files[i + 1]} are not equal.")
 
     def test_saving_merged(self):
-        files = [
-            load_schema(os.path.join(self.full_base_folder, "HED_score_1.1.0.mediawiki")),
-            load_schema(os.path.join(self.full_base_folder, "HED_score_unmerged.mediawiki")),
-            load_schema(os.path.join(self.full_base_folder, "HED_score_merged.mediawiki")),
-            load_schema(os.path.join(self.full_base_folder, "HED_score_merged.xml")),
-            load_schema(os.path.join(self.full_base_folder, "HED_score_unmerged.xml"))
-        ]
+        files = ["HED_score_1.1.0.mediawiki",
+                 "HED_score_unmerged.mediawiki",
+                 "HED_score_merged.mediawiki",
+                 "HED_score_merged.xml",
+                 "HED_score_unmerged.xml"]
 
         self._base_merging_test(files)
 

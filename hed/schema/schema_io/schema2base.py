@@ -47,7 +47,8 @@ class Schema2Base:
 
         self._save_merged = save_merged
 
-        self._output_header(hed_schema.get_save_header_attributes(self._save_merged), hed_schema.prologue)
+        self._output_header(hed_schema.get_save_header_attributes(self._save_merged))
+        self._output_prologue(hed_schema.prologue)
         self._output_tags(hed_schema.tags)
         self._output_units(hed_schema.unit_classes)
         self._output_section(hed_schema, HedSectionKey.UnitModifiers)
@@ -55,8 +56,9 @@ class Schema2Base:
         self._output_section(hed_schema, HedSectionKey.Attributes)
         self._output_section(hed_schema, HedSectionKey.Properties)
         self._output_annotations(hed_schema)
+        self._output_epilogue(hed_schema.epilogue)
         self._output_extras(hed_schema)  # Allow subclasses to add additional sections if needed
-        self._output_footer(hed_schema.epilogue)
+        self._output_footer()
 
         return self.output
 
@@ -66,13 +68,19 @@ class Schema2Base:
     def _output_header(self, attributes, prologue):
         raise NotImplementedError("This needs to be defined in the subclass")
 
+    def _output_prologue(self, attributes, prologue):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
     def _output_annotations(self, hed_schema):
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _output_extras(self, hed_schema):
         raise NotImplementedError("This needs to be defined in the subclass")
 
-    def _output_footer(self, epilogue):
+    def _output_epilogue(self, epilogue):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _output_footer(self):
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _start_section(self, key_class):
