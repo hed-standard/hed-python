@@ -45,7 +45,6 @@ class SchemaLoaderDF(SchemaLoader):
         """
         loader = cls(filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name)
         hed_schema = loader._load()
-        cls._fix_extras(hed_schema)
         return hed_schema
 
     def _open_file(self):
@@ -56,19 +55,7 @@ class SchemaLoaderDF(SchemaLoader):
 
         return dataframes
 
-    @staticmethod
-    def _fix_extras(hed_schema):
-        """ Fixes the extras after loading the schema, to ensure they are in the correct format.
 
-        Parameters:
-            hed_schema (HedSchema): The loaded HedSchema object to fix extras for.
-
-        """
-        if not hed_schema or not hasattr(hed_schema, 'extras') or not hed_schema.extras:
-            return
-
-        for key, extra in hed_schema.extras.items():
-            hed_schema.extras[key] = extra.rename(columns=constants.EXTRAS_CONVERSIONS)
 
     def _get_header_attributes(self, file_data):
         header_attributes = {}
