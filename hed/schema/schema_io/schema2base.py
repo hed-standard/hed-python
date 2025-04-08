@@ -47,14 +47,18 @@ class Schema2Base:
 
         self._save_merged = save_merged
 
-        self._output_header(hed_schema.get_save_header_attributes(self._save_merged), hed_schema.prologue)
+        self._output_header(hed_schema.get_save_header_attributes(self._save_merged))
+        self._output_prologue(hed_schema.prologue)
         self._output_tags(hed_schema.tags)
         self._output_units(hed_schema.unit_classes)
         self._output_section(hed_schema, HedSectionKey.UnitModifiers)
         self._output_section(hed_schema, HedSectionKey.ValueClasses)
         self._output_section(hed_schema, HedSectionKey.Attributes)
         self._output_section(hed_schema, HedSectionKey.Properties)
-        self._output_footer(hed_schema.epilogue)
+        self._output_annotations(hed_schema)
+        self._output_epilogue(hed_schema.epilogue)
+        self._output_extras(hed_schema)  # Allow subclasses to add additional sections if needed
+        self._output_footer()
 
         return self.output
 
@@ -64,13 +68,36 @@ class Schema2Base:
     def _output_header(self, attributes, prologue):
         raise NotImplementedError("This needs to be defined in the subclass")
 
-    def _output_footer(self, epilogue):
+    def _output_prologue(self, attributes, prologue):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _output_annotations(self, hed_schema):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _output_extras(self, hed_schema):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _output_epilogue(self, epilogue):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _output_footer(self):
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _start_section(self, key_class):
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _end_tag_section(self):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _end_units_section(self):
+        raise NotImplementedError("This needs to be defined in the subclass")
+
+    def _end_section(self, section_key):
+        """ Clean up for sections other than tags and units.
+
+        Parameters:
+            section_key (HedSectionKey): The section key to end.
+        """
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _write_tag_entry(self, tag_entry, parent=None, level=0):
@@ -133,6 +160,7 @@ class Schema2Base:
                     continue
 
                 self._write_entry(unit_entry, unit_class_node)
+        self._end_units_section()
 
     def _output_section(self, hed_schema, key_class):
         parent_node = self._start_section(key_class)
@@ -140,6 +168,7 @@ class Schema2Base:
             if self._should_skip(entry):
                 continue
             self._write_entry(entry, parent_node)
+        self._end_section(key_class)
 
     def _should_skip(self, entry):
         has_lib_attr = entry.has_attribute(HedKey.InLibrary)
@@ -153,17 +182,13 @@ class Schema2Base:
         return self._strip_out_in_library and attribute == HedKey.InLibrary
 
     def _format_tag_attributes(self, attributes):
-        """
-            Takes a dictionary of tag attributes and returns a string with the .mediawiki representation
+        """ Takes a dictionary of tag attributes and returns a string with the .mediawiki representation.
 
-        Parameters
-        ----------
-        attributes : {str:str}
-            {attribute_name : attribute_value}
-        Returns
-        -------
-        str:
-            The formatted string that should be output to the file.
+        Parameters:
+            attributes: {str:str}: Dictionary with {attribute_name : attribute_value}
+
+        Returns:
+            str: The formatted string that should be output to the file.
         """
         prop_string = ""
         final_props = []
@@ -189,18 +214,13 @@ class Schema2Base:
 
     @staticmethod
     def _get_attribs_string_from_schema(header_attributes, sep=" "):
-        """
-        Gets the schema attributes and converts it to a string.
+        """ Gets the schema attributes and converts it to a string.
 
-        Parameters
-        ----------
-        header_attributes : dict
-            Attributes to format attributes from
+        Parameters:
+            header_attributes (dict): Attributes to format attributes from
 
-        Returns
-        -------
-        str:
-            A string of the attributes that can be written to a .mediawiki formatted file
+        Returns:
+            str - A string of the attributes that can be written to a .mediawiki formatted file
         """
         attrib_values = [f"{attr}=\"{value}\"" for attr, value in header_attributes.items()]
         final_attrib_string = sep.join(attrib_values)

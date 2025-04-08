@@ -212,5 +212,4 @@ class SchemaLoader(ABC):
 
     def _add_fatal_error(self, line_number, line, warning_message="Schema term is empty or the line is malformed",
                          error_code=HedExceptions.WIKI_DELIMITERS_INVALID):
-
         self.fatal_errors += schema_util.format_error(line_number, line, warning_message, error_code)

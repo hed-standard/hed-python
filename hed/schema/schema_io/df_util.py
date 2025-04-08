@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 from hed.errors import HedFileError, HedExceptions
-from hed.schema import hed_schema_df_constants as constants
+from hed.schema.schema_io import df_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema.hed_cache import get_library_data
 from hed.schema.schema_io.text_util import parse_attribute_string, _parse_header_attributes_line
@@ -83,18 +83,17 @@ def save_dataframes(base_filename, dataframe_dict):
                              lineterminator="\n")
 
 
-def convert_filenames_to_dict(filenames, include_prefix_dfs=False):
+def convert_filenames_to_dict(filenames):
     """Infers filename meaning based on suffix, e.g. _Tag for the tags sheet
 
     Parameters:
         filenames(str or None or list or dict): The list to convert to a dict
             If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
             If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
-        include_prefix_dfs(bool): If True, include the prefixes and external annotation dataframes.
     Returns:
         filename_dict(str: str): The required suffix to filename mapping"""
     result_filenames = {}
-    dataframe_names = constants.DF_SUFFIXES_OMN if include_prefix_dfs else constants.DF_SUFFIXES
+    dataframe_names = constants.DF_SUFFIXES
     if isinstance(filenames, str):
         if filenames.endswith(".tsv"):
             base, base_ext = os.path.splitext(filenames)
@@ -126,37 +125,46 @@ def create_empty_dataframes():
                 constants.UNIT_CLASS_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
                 constants.UNIT_MODIFIER_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
                 constants.VALUE_CLASS_KEY: pd.DataFrame(columns=constants.other_columns, dtype=str),
-                constants.ANNOTATION_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
-                constants.DATA_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
-                constants.OBJECT_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
-                constants.ATTRIBUTE_PROPERTY_KEY: pd.DataFrame(columns=constants.property_columns_reduced, dtype=str), }
+                constants.ANNOTATION_KEY: pd.DataFrame(columns=constants.attribute_columns, dtype=str),
+                constants.DATA_KEY: pd.DataFrame(columns=constants.attribute_columns, dtype=str),
+                constants.OBJECT_KEY: pd.DataFrame(columns=constants.attribute_columns, dtype=str),
+                constants.ATTRIBUTE_PROPERTY_KEY: pd.DataFrame(columns=constants.property_columns, dtype=str),
+                constants.PREFIXES_KEY: pd.DataFrame(columns=constants.prefix_columns, dtype=str),
+                constants.SOURCES_KEY: pd.DataFrame(columns=constants.source_columns, dtype=str),
+                constants.EXTERNAL_ANNOTATION_KEY:
+                    pd.DataFrame(columns=constants.external_annotation_columns, dtype=str)
+                }
     return base_dfs
 
 
-def load_dataframes(filenames, include_prefix_dfs=False):
+def load_dataframes(filenames):
     """Load the dataframes from the source folder or series of files.
 
     Parameters:
         filenames(str or None or list or dict): The input filenames
             If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
             If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
-        include_prefix_dfs(bool): If True, include the prefixes and external annotation dataframes.
     Returns:
         dataframes_dict(str: dataframes): The suffix:dataframe dict
     """
-    dict_filenames = convert_filenames_to_dict(filenames, include_prefix_dfs=include_prefix_dfs)
+    dict_filenames = convert_filenames_to_dict(filenames)
     dataframes = create_empty_dataframes()
     for key, filename in dict_filenames.items():
         try:
-            loaded_dataframe = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
             if key in dataframes:
+                loaded_dataframe = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
+                loaded_dataframe = loaded_dataframe.rename(columns=constants.EXTRAS_CONVERSIONS)
+
                 columns_not_in_loaded = dataframes[key].columns[~dataframes[key].columns.isin(loaded_dataframe.columns)]
                 # and not dataframes[key].columns.isin(loaded_dataframe.columns).all():
                 if columns_not_in_loaded.any():
                     raise HedFileError(HedExceptions.SCHEMA_LOAD_FAILED,
-                                       f"Required column(s) {list(columns_not_in_loaded)} missing from {filename}.  "
+                                          f"Required column(s) {list(columns_not_in_loaded)} missing from {filename}.  "
                                        f"The required columns are {list(dataframes[key].columns)}", filename=filename)
-            dataframes[key] = loaded_dataframe
+                dataframes[key] = loaded_dataframe
+            elif os.path.exists(filename):
+                # Handle the extra files if they are present.
+                dataframes[key] = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
         except OSError:
             # todo: consider if we want to report this error(we probably do)
             pass  # We will use a blank one for this
