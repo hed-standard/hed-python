@@ -9,6 +9,7 @@ from hed.schema.hed_schema_constants import HedKey
 from abc import abstractmethod, ABC
 from hed.schema import schema_header_util
 from hed.schema import hed_schema_constants
+from hed.schema.schema_io import df_constants
 
 
 class SchemaLoader(ABC):
@@ -127,7 +128,7 @@ class SchemaLoader(ABC):
 
         self._parse_data()
         self._schema.finalize_dictionaries()
-
+        self.fix_extras()
         return self._schema
 
     @abstractmethod
@@ -213,3 +214,26 @@ class SchemaLoader(ABC):
     def _add_fatal_error(self, line_number, line, warning_message="Schema term is empty or the line is malformed",
                          error_code=HedExceptions.WIKI_DELIMITERS_INVALID):
         self.fatal_errors += schema_util.format_error(line_number, line, warning_message, error_code)
+
+
+    def fix_extras(self):
+        """ Fixes the extras after loading the schema, to ensure they are in the correct format."""
+        if not self._schema or not hasattr(self._schema, 'extras') or not self._schema.extras:
+            return
+
+        for key, extra in self._schema.extras.items():
+            self._schema.extras[key] = extra.rename(columns=df_constants.EXTRAS_CONVERSIONS)
+            if key in df_constants.extras_column_dict:
+               self._schema.extras[key] = SchemaLoader.fix_extra(self._schema, key)
+
+    @staticmethod
+    def fix_extra(schema, key):
+        df = schema.extras[key]
+        priority_cols = df_constants.extras_column_dict[key]
+        col_to_add = [col for col in priority_cols if col not in df.columns]
+        if col_to_add:
+            df[col_to_add] = ""
+        other_cols = sorted(set(df.columns) - set(priority_cols))
+        df = df[priority_cols + other_cols]
+        df = df.sort_values(by=list(df.columns))
+        return df
