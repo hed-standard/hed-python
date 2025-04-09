@@ -53,6 +53,8 @@ class Schema2XML(Schema2Base):
             source_name.text = row[df_constants.source]
             source_link = SubElement(source_node, xml_constants.LINK_ELEMENT)
             source_link.text = row[df_constants.link]
+            description = SubElement(source_node, xml_constants.DESCRIPTION_ELEMENT)
+            description.text = row[df_constants.description]
 
     def _output_prefixes(self, hed_schema):
         prefixes = hed_schema.get_extras(df_constants.PREFIXES_KEY)
