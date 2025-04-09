@@ -120,7 +120,7 @@ class SchemaLoaderWiki(SchemaLoader):
             if not data:
                 continue
             df = pd.DataFrame(data).fillna('').astype(str)
-            self._schema.extras[extra_key] = df
+            self._schema.extras[extra_key.strip('"')] = df
 
     @staticmethod
     def parse_star_string(s):
