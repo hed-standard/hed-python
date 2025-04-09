@@ -102,19 +102,20 @@ class SchemaLoaderXML(SchemaLoader):
         source_elements = self._get_elements_by_name(xml_constants.SCHEMA_SOURCE_DEF_ELEMENT)
         data = []
         for source_element in source_elements:
-            source_name = self._get_element_tag_value(source_element, xml_constants.NAME_ELEMENT)
-            source_link = self._get_element_tag_value(source_element, xml_constants.LINK_ELEMENT)
-            description = self._get_element_tag_value(source_element, xml_constants.DESCRIPTION_ELEMENT)
-            data.append({df_constants.source: source_name, df_constants.link: source_link})
+            source_name = self._get_element_value(source_element, xml_constants.NAME_ELEMENT)
+            source_link = self._get_element_value(source_element, xml_constants.LINK_ELEMENT)
+            description = self._get_element_value(source_element, xml_constants.DESCRIPTION_ELEMENT)
+            data.append({df_constants.source: source_name, df_constants.link: source_link,
+                         df_constants.description: description})
         self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(data, columns=df_constants.source_columns)
 
     def _read_prefixes(self):
         prefix_elements = self._get_elements_by_name(xml_constants.SCHEMA_PREFIX_DEF_ELEMENT)
         data = []
         for prefix_element in prefix_elements:
-            prefix_name = self._get_element_tag_value(prefix_element, xml_constants.NAME_ELEMENT)
-            prefix_namespace= self._get_element_tag_value(prefix_element, xml_constants.NAMESPACE_ELEMENT)
-            prefix_description = self._get_element_tag_value(prefix_element, xml_constants.DESCRIPTION_ELEMENT)
+            prefix_name = self._get_element_value(prefix_element, xml_constants.NAME_ELEMENT)
+            prefix_namespace= self._get_element_value(prefix_element, xml_constants.NAMESPACE_ELEMENT)
+            prefix_description = self._get_element_value(prefix_element, xml_constants.DESCRIPTION_ELEMENT)
             data.append({df_constants.prefix: prefix_name, df_constants.namespace: prefix_namespace,
                          df_constants.description: prefix_description})
         self._schema.extras[df_constants.PREFIXES_KEY] = pd.DataFrame(data, columns=df_constants.prefix_columns)
@@ -123,10 +124,10 @@ class SchemaLoaderXML(SchemaLoader):
         external_elements = self._get_elements_by_name(xml_constants.SCHEMA_EXTERNAL_DEF_ELEMENT)
         data = []
         for external_element in external_elements:
-            external_name = self._get_element_tag_value(external_element, xml_constants.NAME_ELEMENT)
-            external_id = self._get_element_tag_value(external_element, xml_constants.ID_ELEMENT)
-            external_iri = self._get_element_tag_value(external_element, xml_constants.IRI_ELEMENT)
-            external_description = self._get_element_tag_value(external_element, xml_constants.DESCRIPTION_ELEMENT)
+            external_name = self._get_element_value(external_element, xml_constants.NAME_ELEMENT)
+            external_id = self._get_element_value(external_element, xml_constants.ID_ELEMENT)
+            external_iri = self._get_element_value(external_element, xml_constants.IRI_ELEMENT)
+            external_description = self._get_element_value(external_element, xml_constants.DESCRIPTION_ELEMENT)
             data.append({df_constants.prefix: external_name, df_constants.id: external_id,
                          df_constants.iri: external_iri, df_constants.description: external_description})
         self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(data, columns=df_constants.external_annotation_columns)
@@ -238,6 +239,12 @@ class SchemaLoaderXML(SchemaLoader):
                                    self.name)
             return element.text
         return ""
+
+    def _get_element_value(self, element, tag_name):
+        if element is None or element.text is None:
+            return ''
+        else:
+            return element.text
 
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """ Get the elements that have a specific element name.
