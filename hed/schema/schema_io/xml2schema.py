@@ -240,11 +240,13 @@ class SchemaLoaderXML(SchemaLoader):
             return element.text
         return ""
 
-    def _get_element_value(self, element, tag_name):
-        if element is None or element.text is None:
+    @staticmethod
+    def _get_element_value(element, tag_name):
+        this_element = element.find(tag_name)
+        if this_element is None or this_element.text is None:
             return ''
         else:
-            return element.text
+            return this_element.text
 
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """ Get the elements that have a specific element name.
