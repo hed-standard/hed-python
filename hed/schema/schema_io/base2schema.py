@@ -224,7 +224,7 @@ class SchemaLoader(ABC):
         for key, extra in self._schema.extras.items():
             self._schema.extras[key] = extra.rename(columns=df_constants.EXTRAS_CONVERSIONS)
             if key in df_constants.extras_column_dict:
-               self._schema.extras[key] = SchemaLoader.fix_extra(self._schema, key)
+               self._schema.extras[key] = self.fix_extra(self._schema, key)
 
     @staticmethod
     def fix_extra(schema, key):
