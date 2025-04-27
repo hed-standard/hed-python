@@ -210,6 +210,7 @@ class SchemaLoader(ABC):
                 return None
 
             return rooted_entry
+        return None
 
     def _add_fatal_error(self, line_number, line, warning_message="Schema term is empty or the line is malformed",
                          error_code=HedExceptions.WIKI_DELIMITERS_INVALID):
@@ -224,11 +225,10 @@ class SchemaLoader(ABC):
         for key, extra in self._schema.extras.items():
             self._schema.extras[key] = extra.rename(columns=df_constants.EXTRAS_CONVERSIONS)
             if key in df_constants.extras_column_dict:
-               self._schema.extras[key] = self.fix_extra(self._schema, key)
+               self._schema.extras[key] = self.fix_extra(key)
 
-    @staticmethod
-    def fix_extra(schema, key):
-        df = schema.extras[key]
+    def fix_extra(self, key):
+        df = self._schema.extras[key]
         priority_cols = df_constants.extras_column_dict[key]
         col_to_add = [col for col in priority_cols if col not in df.columns]
         if col_to_add:
