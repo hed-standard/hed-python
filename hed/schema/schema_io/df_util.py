@@ -11,6 +11,27 @@ from hed.schema.schema_io.text_util import parse_attribute_string, _parse_header
 
 UNKNOWN_LIBRARY_VALUE = 0
 
+def merge_dataframes(df1, df2, key) :
+    """ Create a new dataframe where df2 is merged into df1 and duplicates are eliminated.
+
+    Parameters:
+        df1(df.DataFrame): dataframe to use as destination merge.
+        df2(df.DataFrame): dataframe to use as a merge element.
+        key(str): name of the column that is treated as the key when dataframes are merged
+
+    Returns:
+        df.DataFrame: The merged dataframe.
+    """
+    if df2 is None or df2.empty:
+        return df1
+    if set(df1.columns) != set(df2.columns):
+        raise HedFileError(HedExceptions.BAD_COLUMN_NAMES,
+                           f"Both dataframes corresponding to {key} to be merged must have the same columns.  "
+                           f"df1 columns: {list(df1.columns)} df2 columns: {list(df2.columns)}", "")
+    combined = pd.concat([df1, df2], ignore_index=True)
+    combined = combined.sort_values(by=list(combined.columns))
+    combined = combined.drop_duplicates()
+    return combined
 
 def merge_dataframe_dicts(df_dict1, df_dict2, key_column=constants.KEY_COLUMN_NAME):
     """ Create a new dictionary of DataFrames where dict2 is merged into dict1.

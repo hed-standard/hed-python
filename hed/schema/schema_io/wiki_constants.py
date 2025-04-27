@@ -1,4 +1,5 @@
 from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.schema_io import df_constants
 START_HED_STRING = "!# start schema"
 END_SCHEMA_STRING = "!# end schema"
 END_HED_STRING = "!# end hed"
@@ -16,6 +17,11 @@ EPILOGUE_SECTION_ELEMENT = "'''Epilogue'''"
 SOURCES_SECTION_ELEMENT = "'''Sources'''"
 PREFIXES_SECTION_ELEMENT = "'''Prefixes'''"
 EXTERNAL_ANNOTATION_SECTION_ELEMENT = "'''External annotations'''"
+
+WIKI_EXTRA_DICT = {'Sources': df_constants.SOURCES_KEY,
+                   'Prefixes': df_constants.PREFIXES_KEY,
+                   'External annotations': df_constants.EXTERNAL_ANNOTATION_KEY}
+
 
 wiki_section_headers = {
     HedSectionKey.Tags: START_HED_STRING,
