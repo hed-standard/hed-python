@@ -6,6 +6,39 @@ from hed.schema.schema_compare import compare_differences
 
 all_extensions = [".tsv", ".mediawiki", ".xml"]
 
+def validate_schema_object(base_schema, schema_name):
+    validation_issues = []
+    try:
+        issues = base_schema.check_compliance()
+        issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
+        if issues:
+            error_message = get_printable_issue_string(issues, title=schema_name)
+            validation_issues.append(error_message)
+            return validation_issues
+
+        mediawiki_string = base_schema.get_as_mediawiki_string(save_merged=True)
+        reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki")
+
+        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "mediawiki")
+
+        xml_string = base_schema.get_as_xml_string(save_merged=True)
+        reloaded_schema = from_string(xml_string, schema_format=".xml")
+
+        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "xml")
+
+        tsv_dataframes = base_schema.get_as_dataframes(save_merged=True)
+        reloaded_schema = from_dataframes(tsv_dataframes)
+
+        validation_issues += _get_schema_comparison(base_schema, reloaded_schema,schema_name, "tsv")
+    except HedFileError as e:
+        print(f"Saving/loading error: {schema_name} {e.message}")
+        error_text = e.message
+        if e.issues:
+            error_text = get_printable_issue_string(e.issues, title=schema_name)
+        validation_issues.append(error_text)
+
+    return validation_issues
+
 
 def validate_schema(file_path):
     """ Validates the given schema, ensuring it can save/load as well as validates.
@@ -16,37 +49,16 @@ def validate_schema(file_path):
     Returns:
         validation_issues(list): A list of issues found
     """
+
+    _, extension = os.path.splitext(file_path)
+    if extension.lower() != extension:
+        return [f"Only fully lowercase extensions are allowed for schema files.  "
+                f"Invalid extension on file: {file_path}"]
+
     validation_issues = []
     try:
-        _, extension = os.path.splitext(file_path)
-        if extension.lower() != extension:
-            error_message = f"Only fully lowercase extensions are allowed for schema files.  " \
-                             f"Invalid extension on file: {file_path}"
-            validation_issues.append(error_message)
-            return validation_issues
-
         base_schema = load_schema(file_path)
-        issues = base_schema.check_compliance()
-        issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
-        if issues:
-            error_message = get_printable_issue_string(issues, title=file_path)
-            validation_issues.append(error_message)
-            return validation_issues
-
-        mediawiki_string = base_schema.get_as_mediawiki_string(save_merged=True)
-        reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki")
-
-        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "mediawiki")
-
-        xml_string = base_schema.get_as_xml_string(save_merged=True)
-        reloaded_schema = from_string(xml_string, schema_format=".xml")
-
-        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "xml")
-
-        tsv_dataframes = base_schema.get_as_dataframes(save_merged=True)
-        reloaded_schema = from_dataframes(tsv_dataframes)
-
-        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, file_path, "tsv")
+        validation_issues = validate_schema_object(base_schema, file_path)
     except HedFileError as e:
         print(f"Saving/loading error: {file_path} {e.message}")
         error_text = e.message
