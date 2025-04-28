@@ -8,7 +8,7 @@ from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.schema_io.base2schema import SchemaLoader
 import pandas as pd
-import hed.schema.hed_schema_df_constants as constants
+import hed.schema.schema_io.df_constants as constants
 from hed.errors import error_reporter
 from hed.schema.schema_io import text_util
 
@@ -44,7 +44,8 @@ class SchemaLoaderDF(SchemaLoader):
             schema(HedSchema): The new schema
         """
         loader = cls(filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name)
-        return loader._load()
+        hed_schema = loader._load()
+        return hed_schema
 
     def _open_file(self):
         if self.filenames:
@@ -53,6 +54,8 @@ class SchemaLoaderDF(SchemaLoader):
             dataframes = load_dataframes_from_strings(self.schema_as_strings_or_df)
 
         return dataframes
+
+
 
     def _get_header_attributes(self, file_data):
         header_attributes = {}
@@ -83,12 +86,15 @@ class SchemaLoaderDF(SchemaLoader):
                                f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
                                f"parameter on this exception for more details.", self.name,
                                issues=self.fatal_errors)
+        extras =  {key: self.input_data[key] for key in constants.DF_EXTRA_SUFFIXES if key in self.input_data}
+        for key, item in extras.items():
+            self._schema.extras[key] = df_util.merge_dataframes(extras[key], self._schema.extras.get(key, None), key)
 
     def _get_prologue_epilogue(self, file_data):
         prologue, epilogue = "", ""
         for row_number, row in file_data[constants.STRUCT_KEY].iterrows():
             cls = row[constants.subclass_of]
-            description = row[constants.description]
+            description = row[constants.dcdescription]
             if cls == "HedPrologue" and description:
                 prologue = description.replace("\\n", "\n")
                 continue
@@ -230,7 +236,7 @@ class SchemaLoaderDF(SchemaLoader):
         if hed_id:
             node_attributes[HedKey.HedID] = hed_id
 
-        description = row[constants.description]
+        description = row[constants.dcdescription]
         tag_entry = self._schema._create_tag_entry(element_name, key_class)
 
         if description:

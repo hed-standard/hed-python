@@ -76,7 +76,8 @@ class TestConvertAndUpdate(unittest.TestCase):
         self.assertEqual(result, 0)
 
         schema_reloaded = load_schema(add_extension(basename, ".xml"))
-
+        x = schema_reloaded == schema_edited
+        self.assertTrue(x)
         self.assertEqual(schema_reloaded, schema_edited)
 
         with contextlib.redirect_stdout(None):

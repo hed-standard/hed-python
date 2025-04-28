@@ -180,20 +180,32 @@ def _handle_curly_braces_refs(df, refs, column_names):
         modified_df(pd.DataFrame): The modified dataframe with refs replaced
     """
     # Filter out columns and refs that don't exist.
-    refs = [ref for ref in refs if ref in column_names]
-    remaining_columns = [column for column in column_names if column not in refs]
+    refs_new = [ref for ref in refs if ref in column_names]
+    remaining_columns = [column for column in column_names if column not in refs_new]
+    other_refs = [ref for ref in refs if ref not in column_names]
 
     new_df = df.copy()
     # Replace references in the columns we are saving out.
-    saved_columns = new_df[refs]
+    saved_columns = new_df[refs_new]
     for column_name in remaining_columns:
-        for replacing_name in refs:
+        for replacing_name in refs_new:
             # If the data has no n/a values, this version is MUCH faster.
             # column_name_brackets = f"{{{replacing_name}}}"
             # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
             #                             in zip(df[column_name], saved_columns[replacing_name]))
             new_df[column_name] = pd.Series(replace_ref(x, f"{{{replacing_name}}}", y) for x, y
                                             in zip(new_df[column_name], saved_columns[replacing_name]))
+    # Handle the special case of {HED} when the tsv file has no {HED} column
+    if 'HED' in refs and 'HED' not in column_names:
+        for column_name in remaining_columns:
+            new_df[column_name] = \
+                pd.Series(replace_ref(x, "{HED}", "n/a") for x in new_df[column_name])
+
+    # Handle any other refs that aren't in the dataframe.
+    for ref in other_refs:
+        for column_name in remaining_columns:
+            new_df[column_name] = \
+                pd.Series(replace_ref(x, "{" + ref + "}", "n/a") for x in new_df[column_name])
     new_df = new_df[remaining_columns]
 
     return new_df
@@ -253,12 +265,10 @@ def filter_series_by_onset(series, onsets):
     Returns:
         Series or Dataframe: the series with rows filtered together.
     """
-    #indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))
-    #return _filter_by_index_list(series, indexed_dict=indexed_dict)
+
     indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))
-    y =  _filter_by_index_list(series, indexed_dict=indexed_dict)
+    y = _filter_by_index_list(series, indexed_dict=indexed_dict)
     return y
-    # return _filter_by_index_list(series, indexed_dict=indexed_dict)
 
 
 def _indexed_dict_from_onsets(onsets):
@@ -268,26 +278,13 @@ def _indexed_dict_from_onsets(onsets):
     indexed_dict = defaultdict(list)
 
     for i, onset in enumerate(onsets):
-        if math.isnan(onset): # Ignore NaNs
+        if math.isnan(onset):  # Ignore NaNs
             continue
         if abs(onset - current_onset) > tol:
             current_onset = onset
         indexed_dict[current_onset].append(i)
 
     return indexed_dict
-
-# def _indexed_dict_from_onsets(onsets):
-#     """Finds series of consecutive lines with the same(or close enough) onset"""
-#     current_onset = -1000000.0
-#     tol = 1e-9
-#     from collections import defaultdict
-#     indexed_dict = defaultdict(list)
-#     for i, onset in enumerate(onsets):
-#         if abs(onset - current_onset) > tol:
-#             current_onset = onset
-#         indexed_dict[current_onset].append(i)
-#
-#     return indexed_dict
 
 
 def _filter_by_index_list(original_data, indexed_dict):

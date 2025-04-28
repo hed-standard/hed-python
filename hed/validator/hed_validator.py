@@ -80,11 +80,18 @@ class HedValidator:
         return issues
 
     def run_full_string_checks(self, hed_string):
-        issues = []
-        issues += self._group_validator.run_all_tags_validators(hed_string)
-        issues += self._group_validator.run_tag_level_validators(hed_string)
-        issues += self._def_validator.validate_onset_offset(hed_string)
-        return issues
+        checks = [
+            self._group_validator.run_all_tags_validators,
+            self._group_validator.run_tag_level_validators,
+            self._def_validator.validate_onset_offset,
+        ]
+
+        for check in checks:
+            issues = check(hed_string)  # Call each function with `hed_string`
+            if issues:
+                return issues
+
+        return []  # Return an empty list if no issues are found
 
     # Todo: mark semi private/actually private below this
     def _run_validate_tag_characters(self, original_tag, allow_placeholders):
@@ -164,14 +171,11 @@ class HedValidator:
             issues += self._unit_validator.check_tag_unit_class_units_are_valid(original_tag,
                                                                                 validate_text,
                                                                                 report_as=report_as,
-                                                                                error_code=error_code,
-                                                                                index_offset=index_offset)
+                                                                                error_code=error_code)
         elif original_tag.is_value_class_tag():
             issues += self._unit_validator.check_tag_value_class_valid(original_tag,
                                                                        validate_text,
-                                                                       report_as=report_as,
-                                                                       error_code=error_code,
-                                                                       index_offset=index_offset)
+                                                                       report_as=report_as)
         elif original_tag.extension:
             issues += self._char_validator.check_for_invalid_extension_chars(original_tag,
                                                                              validate_text,
@@ -200,13 +204,6 @@ class HedValidator:
                 if not self._definitions_allowed and hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY:
                     validation_issues += error_reporter.ErrorHandler.format_error(
                         DefinitionErrors.BAD_DEFINITION_LOCATION, hed_tag)
-                # todo: unclear if this should be restored at some point
-                # if hed_tag.expandable and not hed_tag.expanded:
-                #     for tag in hed_tag.expandable.get_all_tags():
-                #         validation_issues += self._group_validator. \
-                #             run_individual_tag_validators(tag, allow_placeholders=allow_placeholders,
-                #                                           is_definition=is_definition)
-                # else:
                 validation_issues += \
                     self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
                                                                       is_definition=is_definition)

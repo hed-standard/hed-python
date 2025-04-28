@@ -2,9 +2,8 @@
 
 import pandas as pd
 
-from hed.schema.schema_io import schema_util
+from hed.schema.schema_io import schema_util, df_constants as constants
 from hed.errors.exceptions import HedFileError
-from hed.schema import hed_schema_df_constants as constants
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema.schema_io.df_util import remove_prefix, calculate_attribute_type, get_attributes_from_row
 from hed.schema.hed_cache import get_library_data
@@ -88,6 +87,8 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
         schema_name = schema.library
     # 1. Verify existing HED ids don't conflict between schema/dataframes
     for df_key, df in dataframes.items():
+        if df_key in constants.DF_SUFFIXES:
+            continue
         section_key = constants.section_mapping_hed_id.get(df_key)
         if not section_key:
             continue
@@ -108,7 +109,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     if assign_missing_ids:
         # 3: Add any HED ID's as needed to these generated dfs
         for df_key, df in output_dfs.items():
-            if df_key == constants.STRUCT_KEY:
+            if df_key == constants.STRUCT_KEY or df_key in constants.DF_EXTRA_SUFFIXES:
                 continue
             unused_tag_ids = _get_hedid_range(schema_name, df_key)
 
@@ -236,10 +237,12 @@ def get_prefixes(dataframes):
     extensions = dataframes.get(constants.EXTERNAL_ANNOTATION_KEY)
     if prefixes is None or extensions is None:
         return {}
-    all_prefixes = {prefix.Prefix: prefix[2] for prefix in prefixes.itertuples()}
+    prefixes.columns = prefixes.columns.str.lower()
+    all_prefixes = {prefix.prefix: prefix[2] for prefix in prefixes.itertuples()}
+    extensions.columns = extensions.columns.str.lower()
     annotation_terms = {}
     for row in extensions.itertuples():
-        annotation_terms[row.Prefix + row.ID] = all_prefixes[row.Prefix]
+        annotation_terms[row.prefix + row.id] = all_prefixes[row.prefix]
 
     return annotation_terms
 
@@ -256,18 +259,22 @@ def convert_df_to_omn(dataframes):
             omn_data(dict): a dict of DF_SUFFIXES:str, representing each .tsv file in omn format.
     """
     from hed.schema.hed_schema_io import from_dataframes
-
+    from hed.schema.schema_io.schema2df import Schema2DF  # Late import as this is recursive
     annotation_terms = get_prefixes(dataframes)
 
     # Load the schema, so we can save it out with ID's
     schema = from_dataframes(dataframes)
+    schema2df = Schema2DF(get_as_ids=True)
+    output1 = schema2df.process_schema(schema, save_merged=False)
+    if hasattr(schema, 'extras') and schema.extras:
+        output1.update(schema.extras)
     # Convert dataframes to hedId format, and add any missing hedId's(generally, they should be replaced before here)
     dataframes_u = update_dataframes_from_schema(dataframes, schema, get_as_ids=True)
 
     # Copy over remaining non schema dataframes.
-    if constants.PREFIXES_KEY in dataframes:
-        dataframes_u[constants.PREFIXES_KEY] = dataframes[constants.PREFIXES_KEY]
-        dataframes_u[constants.EXTERNAL_ANNOTATION_KEY] = dataframes[constants.EXTERNAL_ANNOTATION_KEY]
+    for suffix in constants.DF_EXTRA_SUFFIXES:
+        if suffix in dataframes:
+            dataframes_u[suffix] = dataframes[suffix]
 
     # Write out the new dataframes in omn format
     annotation_props = _get_annotation_prop_ids(schema)
@@ -348,10 +355,11 @@ def _convert_extra_df_to_omn(df, suffix):
     """
     output_text = ""
     for index, row in df.iterrows():
+        renamed_row = row.rename(index=constants.EXTRAS_CONVERSIONS)
         if suffix == constants.PREFIXES_KEY:
-            output_text += f"Prefix: {row[constants.Prefix]} <{row[constants.NamespaceIRI]}>"
+            output_text += f"Prefix: {renamed_row[constants.Prefix]} <{renamed_row[constants.NamespaceIRI]}>"
         elif suffix == constants.EXTERNAL_ANNOTATION_KEY:
-            output_text += f"AnnotationProperty: {row[constants.Prefix]}{row[constants.ID]}"
+            output_text += f"AnnotationProperty: {renamed_row[constants.Prefix]}{renamed_row[constants.ID]}"
         else:
             raise ValueError(f"Unknown tsv suffix attempting to be converted {suffix}")
 
@@ -399,9 +407,9 @@ def _split_annotation_values(parts):
 
 def _add_annotation_lines(row, annotation_properties, annotation_terms):
     annotation_lines = []
-    description = row[constants.description]
+    description = row[constants.dcdescription]
     if description:
-        annotation_lines.append(f"\t\t{constants.description} \"{description}\"")
+        annotation_lines.append(f"\t\t{constants.dcdescription} \"{description}\"")
     name = row[constants.name]
     if name:
         annotation_lines.append(f"\t\t{constants.name} \"{name}\"")
@@ -418,14 +426,14 @@ def _add_annotation_lines(row, annotation_properties, annotation_terms):
                 value = f'"{value}"'
             annotation_lines.append(f"\t\t{annotation_id} {value}")
 
-    if constants.annotations in row.index:
-        portions = _split_on_unquoted_commas(row[constants.annotations])
-        annotations = _split_annotation_values(portions)
-
-        for key, value in annotations.items():
-            if key not in annotation_terms:
-                raise ValueError(f"Problem.  Found {key} which is not in the prefix/annotation list.")
-            annotation_lines.append(f"\t\t{key} {value}")
+    # if constants.annotations in row.index:
+    #     portions = _split_on_unquoted_commas(row[constants.annotations])
+    #     annotations = _split_annotation_values(portions)
+    #
+    #     for key, value in annotations.items():
+    #         if key not in annotation_terms:
+    #             raise ValueError(f"Problem.  Found {key} which is not in the prefix/annotation list.")
+    #         annotation_lines.append(f"\t\t{key} {value}")
 
     output_text = ""
     if annotation_lines:

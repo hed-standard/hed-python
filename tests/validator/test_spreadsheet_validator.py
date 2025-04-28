@@ -9,6 +9,7 @@ from hed import load_schema_version, load_schema
 from hed.validator import SpreadsheetValidator
 from hed import TabularInput, SpreadsheetInput, Sidecar
 from hed.errors.error_types import ValidationErrors
+from hed.errors.error_reporter import ErrorHandler
 
 
 class TestSpreadsheetValidation(unittest.TestCase):
@@ -95,6 +96,65 @@ class TestSpreadsheetValidation(unittest.TestCase):
         issues = self.validator.validate(TabularInput(self.df_with_onset_has_tags_unordered), def_dicts=def_dict)
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues[0]['code'], ValidationErrors.TEMPORAL_TAG_ERROR)
+
+    def test_empty(self):
+        spreadsheet = SpreadsheetInput(file=io.StringIO("BadFile"), worksheet_name=None,
+                                       file_type=".tsv", tag_columns=[3],
+                                       has_column_names=True, column_prefix_dictionary=None,
+                                       name='spreadsheets.tsv')
+        error_handler = ErrorHandler(check_for_warnings=True)
+        issues = self.validator.validate(spreadsheet, error_handler=error_handler)
+        self.assertEqual(len(issues), 0)
+
+    def test_tabular_with_hed(self):
+        sidecar_hed_json = '''
+           {
+               "event_code": {
+                   "HED": {
+                        "face": "{HED}",
+                        "ball": "Red"
+                   }
+               }
+           }
+           '''
+        sidecar = Sidecar(io.StringIO(sidecar_hed_json))
+        issues = sidecar.validate(self.hed_schema)
+        self.assertEqual(len(issues), 0)
+        data = [
+            ["onset", "duration", "event_code", "HED"],
+            [4.5, 0, "face", "Black"],
+            [5.0, 0, "n/a", ""]
+        ]
+        df = pd.DataFrame(data[1:], columns=data[0])
+        my_tab = TabularInput(df, sidecar=sidecar, name='test_no_hed')
+        error_handler = ErrorHandler(check_for_warnings=False)
+        issues = self.validator.validate(my_tab, error_handler=error_handler)
+        self.assertEqual(len(issues), 0)
+
+    def test_tabular_no_hed(self):
+        sidecar_hed_json = '''
+        {
+            "event_code": {
+                "HED": {
+                     "face": "{HED}",
+                     "ball": "Red"
+                }
+            }
+        }
+        '''
+        sidecar = Sidecar(io.StringIO(sidecar_hed_json))
+        issues = sidecar.validate(self.hed_schema)
+        self.assertEqual(len(issues), 0)
+        data = [
+            ["onset", "duration", "event_code"],
+            [4.5, 0, "face"],
+            [5.0, 0, "ball"]
+        ]
+        df = pd.DataFrame(data[1:], columns=data[0])
+        my_tab = TabularInput(df, sidecar=sidecar, name='test_no_hed')
+        error_handler = ErrorHandler(check_for_warnings=False)
+        issues = self.validator.validate(my_tab, error_handler=error_handler)
+        self.assertEqual(len(issues), 0)
 
     def test_onset_na(self):
         # Test with no sidecar

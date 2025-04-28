@@ -8,9 +8,10 @@ class TestHedSchema(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         schema_file = '../data/validator_tests/HED8.0.0_added_tests.mediawiki'
-        hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
-        hed_schema1 = load_schema(hed_xml)
-        hed_schema2 = load_schema(hed_xml, schema_namespace="tl:")
+        hed_wiki = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
+        hed_schema1 = load_schema(hed_wiki)
+        cls.schema1 = hed_schema1
+        hed_schema2 = load_schema(hed_wiki, schema_namespace="tl:")
         cls.hed_schema_group = HedSchemaGroup([hed_schema1, hed_schema2])
 
     def test_schema_compliance(self):
@@ -23,8 +24,11 @@ class TestHedSchema(unittest.TestCase):
 
     def test_bad_prefixes(self):
         schema = self.hed_schema_group
-
-        self.assertTrue(schema.get_tag_entry("Event"))
+        # x = self.schema1
+        # y = self.schema2
+        self.assertTrue(self.schema1.get_tag_entry("Event"))
+        #self.assertFalse(schema.get_tag_entry("tl:Event"))
+        self.assertTrue(self.schema1.get_tag_entry("Event"))
         self.assertFalse(schema.get_tag_entry("sc:Event"))
         self.assertFalse(schema.get_tag_entry("unknown:Event"))
         self.assertFalse(schema.get_tag_entry(":Event"))

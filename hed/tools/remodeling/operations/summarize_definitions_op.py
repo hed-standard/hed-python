@@ -152,12 +152,13 @@ class DefinitionSummary(BaseSummary):
         """
         known_defs_summary = self._build_summary_dict(def_gatherer.def_dict, "Known Definitions", None,
                                                       display_description=True)
-        ambiguous_defs_summary = self._build_summary_dict(def_gatherer.ambiguous_defs, "Ambiguous Definitions",
-                                                          def_gatherer.get_ambiguous_group)
+        # ambiguous_defs_summary = self._build_summary_dict(def_gatherer.ambiguous_defs, "Ambiguous Definitions",
+        #                                                   def_gatherer.get_ambiguous_group)
+        # ambiguous_defs_summary = {}
+        # TODO: Summary of ambiguous definitions is not implemented
         errors_summary = self._build_summary_dict(
             def_gatherer.errors, "Errors", None)
 
-        known_defs_summary.update(ambiguous_defs_summary)
         known_defs_summary.update(errors_summary)
         return {"Name": "", "Total events": 0, "Total files": 0, "Files": [], "Specifics": known_defs_summary}
         # return known_defs_summary

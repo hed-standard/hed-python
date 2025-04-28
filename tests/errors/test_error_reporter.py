@@ -1,8 +1,8 @@
 import unittest
 from hed.errors import ErrorHandler, ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings, \
     get_printable_issue_string, sort_issues, replace_tag_references
-from hed.errors.error_reporter import hed_tag_error, get_printable_issue_string_html
-from hed import HedString
+from hed.errors.error_reporter import hed_tag_error, get_printable_issue_string_html, iter_errors
+from hed import HedString, HedTag
 from hed import load_schema_version
 
 
@@ -134,6 +134,31 @@ class Test(unittest.TestCase):
         self.assertEqual(printable_issues3.count(my_file), 1)
 
         self.error_handler.reset_error_context()
+
+    def test_iter_errors_no_context(self):
+        self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
+                                                                   "dummy", problem_char="#", char_index=0)
+        result = list(iter_errors(error_list))
+        self.assertEqual(len(result), 2)
+
+    def test_iter_errors_with_context(self):
+        my_file = 'my_file.txt'
+        self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Blech")
+        self.error_handler.push_error_context(ErrorContext.FILE_NAME, my_file)
+        error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
+        # error_list += self.error_handler.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED,
+        #                                  tag=grouped[multiples[0]][1], group=group)
+        incompatible_tag = HedTag('Green', self._schema)
+        incompatible_group = HedString('Green, Red', self._schema)
+        error_list += self.error_handler.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=incompatible_tag,
+                     group=incompatible_group)
+
+        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
+                                                                   "dummy", problem_char="#", char_index=0)
+        result = list(iter_errors(error_list))
+        self.assertEqual(len(result), 3)
 
     def test_sort_issues(self):
         schema = load_schema_version("8.1.0")

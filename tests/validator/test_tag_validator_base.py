@@ -42,6 +42,11 @@ class TestHedBase(unittest.TestCase):
         # return params
         return [params]
 
+    def filter_issues(self, issue_list):
+        if not issue_list:
+            return []
+        return [{key: d[key] for key in ('code', 'message', 'severity') if key in d} for d in issue_list]
+
     def format_errors_fully(self, error_handler, hed_string, params):
         formatted_errors = []
         for code, args, kwargs in params:
@@ -87,15 +92,35 @@ class TestValidatorBase(TestHedBase):
                                                       params=expected_params)
             error_handler.add_context_and_filter(test_issues)
             test_result = not test_issues
-
-            # print(str(expected_issue))
-            # print(str(test_issues))
-            # error_handler.pop_error_context()
             self.assertEqual(test_result, expected_result, test_strings[test_key])
             self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
+
+    def validator_base_new(self, test_strings, expected_results, expected_issues, test_function,
+                           hed_schema, check_for_warnings=False):
+        # This does direct comparison of the issue before formatting or context.
+        for test_key in test_strings:
+            # print(f"\n{test_key}: {test_strings[test_key]}")
+            hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
+            test_issues = []
+            if self.compute_forms:
+                test_issues += hed_string_obj._calculate_to_canonical_forms(hed_schema)
+            if not test_issues:
+                test_issues += test_function(hed_string_obj)
+            filtered_issues = self.filter_issues(test_issues)
+            # print(f"filtered: {str(filtered_issues)}")
+            these_issues = expected_issues[test_key]
+            self.assertEqual(len(filtered_issues), len(these_issues),
+                             f"{test_strings[test_key]} should have the same number of issues.")
+            self.assertCountEqual(filtered_issues, these_issues, test_strings[test_key])
 
     def validator_semantic(self, test_strings, expected_results, expected_issues, check_for_warnings):
         validator = self.semantic_hed_input_reader
         self.validator_base(test_strings, expected_results, expected_issues,
                             self.string_obj_func(validator), check_for_warnings=check_for_warnings,
                             hed_schema=validator._hed_schema)
+
+    def validator_semantic_new(self, test_strings, expected_results, expected_issues, check_for_warnings):
+        validator = self.semantic_hed_input_reader
+        self.validator_base_new(test_strings, expected_results, expected_issues,
+                                self.string_obj_func(validator), check_for_warnings=check_for_warnings,
+                                hed_schema=validator._hed_schema)

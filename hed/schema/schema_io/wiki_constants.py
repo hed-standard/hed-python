@@ -1,9 +1,11 @@
 from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.schema_io import df_constants
 START_HED_STRING = "!# start schema"
 END_SCHEMA_STRING = "!# end schema"
 END_HED_STRING = "!# end hed"
 
 ROOT_TAG = "'''"
+END_TAG = "!#"
 HEADER_LINE_STRING = "HED"
 UNIT_CLASS_STRING = "'''Unit classes'''"
 UNIT_MODIFIER_STRING = "'''Unit modifiers'''"
@@ -12,6 +14,14 @@ ATTRIBUTE_PROPERTY_STRING = "'''Properties'''"
 VALUE_CLASS_STRING = "'''Value classes'''"
 PROLOGUE_SECTION_ELEMENT = "'''Prologue'''"
 EPILOGUE_SECTION_ELEMENT = "'''Epilogue'''"
+SOURCES_SECTION_ELEMENT = "'''Sources'''"
+PREFIXES_SECTION_ELEMENT = "'''Prefixes'''"
+EXTERNAL_ANNOTATION_SECTION_ELEMENT = "'''External annotations'''"
+
+WIKI_EXTRA_DICT = {'Sources': df_constants.SOURCES_KEY,
+                   'Prefixes': df_constants.PREFIXES_KEY,
+                   'External annotations': df_constants.EXTERNAL_ANNOTATION_KEY}
+
 
 wiki_section_headers = {
     HedSectionKey.Tags: START_HED_STRING,
@@ -36,10 +46,14 @@ class HedWikiSection:
     Attributes = 9
     Properties = 10
     Epilogue = 11
-    EndHed = 12
+    Sources = 12
+    Prefixes = 13
+    ExternalAnnotations = 14
+    EndHed = 15
 
 
 SectionStarts = {
+    HedWikiSection.HeaderLine: HEADER_LINE_STRING,
     HedWikiSection.Prologue: PROLOGUE_SECTION_ELEMENT,
     HedWikiSection.Schema: START_HED_STRING,
     HedWikiSection.EndSchema: END_SCHEMA_STRING,
@@ -49,8 +63,13 @@ SectionStarts = {
     HedWikiSection.Attributes: ATTRIBUTE_DEFINITION_STRING,
     HedWikiSection.Properties: ATTRIBUTE_PROPERTY_STRING,
     HedWikiSection.Epilogue: EPILOGUE_SECTION_ELEMENT,
+    HedWikiSection.Sources: SOURCES_SECTION_ELEMENT,
+    HedWikiSection.Prefixes: PREFIXES_SECTION_ELEMENT,
+    HedWikiSection.ExternalAnnotations: EXTERNAL_ANNOTATION_SECTION_ELEMENT,
     HedWikiSection.EndHed: END_HED_STRING
 }
+
+SectionReversed = {value: key for key, value in SectionStarts.items()}
 
 SectionNames = {
     HedWikiSection.HeaderLine: "Header",

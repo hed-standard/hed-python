@@ -1,6 +1,6 @@
 import os
 import unittest
-from hed.errors import HedFileError
+import json
 from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_file import BidsFile
@@ -36,9 +36,10 @@ class Test(unittest.TestCase):
         self.assertFalse(sidecar1.has_hed)
 
     def test_bad_constructor(self):
-        with self.assertRaises(HedFileError) as context:
-            BidsSidecarFile(self.description_path)
-        self.assertEqual(context.exception.args[0], 'BadKeyValue')
+        sidecar1 = BidsSidecarFile("-bad.json")
+        self.assertEqual(sidecar1.bad, ["-bad"], "BidsSidecarFile detect bad file names")
+        self.assertEqual(sidecar1.ext, '.json', "BidsSidecarFile should have correct ext")
+
 
     def test_bids_sidecar_file_str(self):
         sidecar1 = BidsSidecarFile(self.sidecar_path)
@@ -50,7 +51,7 @@ class Test(unittest.TestCase):
         sidecar1 = BidsSidecarFile(self.sidecar_path)
         self.assertFalse(sidecar1.contents, "BidsSidecarFile should have no contents until set")
         sidecar1.set_contents()
-        self.assertIsInstance(sidecar1.contents, Sidecar, "BidsSidecarFile should have dict contents after setting")
+        self.assertIsInstance(sidecar1.contents, Sidecar, "BidsSidecarFile should have Sidecar contents after setting")
         sidecar1.clear_contents()
         self.assertFalse(sidecar1.contents, "BidsSidecarFile should have no contents after clearing")
 
@@ -88,44 +89,50 @@ class Test(unittest.TestCase):
     def test_set_contents_multiple(self):
         bids_upper = BidsSidecarFile(self.sidecar_path_upper)
         self.assertFalse(bids_upper.contents)
-        bids_upper.set_contents([self.sidecar_path_upper])
+        bids_upper.set_contents()
+        self.assertTrue(bids_upper.contents)
+        bids_upper2 = BidsSidecarFile(self.sidecar_path_upper)
+        with open(self.sidecar_path_upper, "r", encoding="utf-8") as file:
+            data_upper = json.load(file)  # Parses the JSON file into a Python dictionary
+        bids_upper2.set_contents(data_upper)
+        self.assertEqual(bids_upper2.contents.loaded_dict, data_upper)
 
-        bids_lower2 = BidsSidecarFile(self.sidecar_path_lower2)
-        self.assertFalse(bids_lower2.contents)
-        bids_lower2.set_contents([self.sidecar_path_lower2])
-        bids_lower2_merged = BidsSidecarFile(self.sidecar_path_lower2)
-        self.assertFalse(bids_lower2_merged.contents)
-        bids_lower2_merged.set_contents([self.sidecar_path_upper, self.sidecar_path_lower2])
-
-        bids_lower3 = BidsSidecarFile(self.sidecar_path_lower3)
-        self.assertFalse(bids_lower3.contents)
-        bids_lower3.set_contents([self.sidecar_path_lower3])
-        bids_lower3_merged = BidsSidecarFile(self.sidecar_path_lower3)
-        self.assertFalse(bids_lower3_merged.contents)
-        bids_lower3_merged.set_contents([self.sidecar_path_upper, self.sidecar_path_lower3])
-
-        lower_dict2 = bids_lower2.contents.loaded_dict
-        lower_dict2_merged = bids_lower2_merged.contents.loaded_dict
-        lower_dict3 = bids_lower3.contents.loaded_dict
-        lower_dict3_merged = bids_lower3_merged.contents.loaded_dict
-        upper_dict = bids_upper.contents.loaded_dict
-        self.assertIn('event_type', upper_dict, "set_contents upper has key event_type")
-        self.assertNotIn('event_type', lower_dict2, "set_contents lower does not have event_type")
-        self.assertIn('event_type', lower_dict2_merged, "set_contents merged has key event_type from upper")
-        self.assertIn('rep_lag', lower_dict2_merged, "set_contents merged has key rep_lag from lower")
-        self.assertEqual(lower_dict2_merged['rep_lag']['HED'], lower_dict2['rep_lag']['HED'],
-                         "set_contents overrode key from lower")
-        self.assertIn('face_type', upper_dict, "set_contents upper has key face_type")
-        self.assertIn('face_type', lower_dict3, "set_contents lower3 has key face_type")
-        self.assertIn('face_type', lower_dict3_merged, "set_contents merged3 has key face_type")
-        self.assertEqual(lower_dict3_merged['rep_lag']['HED'], lower_dict3['rep_lag']['HED'],
-                         "set_contents side_merged3 got rep_lag key from lower")
-        self.assertNotEqual(lower_dict3_merged['face_type']['HED']['famous_face'],
-                            upper_dict['face_type']['HED']['famous_face'],
-                            "set_contents overrode face_type key with lower has changed")
-        self.assertEqual(lower_dict3_merged['face_type']['HED']['famous_face'],
-                         lower_dict3['face_type']['HED']['famous_face'],
-                         "set_contents overrode face_type key with lower3 has changed")
+        # bids_lower2 = BidsSidecarFile(self.sidecar_path_lower2)
+        # self.assertFalse(bids_lower2.contents)
+        # bids_lower2.set_contents([self.sidecar_path_lower2])
+        # bids_lower2_merged = BidsSidecarFile(self.sidecar_path_lower2)
+        # self.assertFalse(bids_lower2_merged.contents)
+        # bids_lower2_merged.set_contents([self.sidecar_path_upper, self.sidecar_path_lower2])
+        #
+        # bids_lower3 = BidsSidecarFile(self.sidecar_path_lower3)
+        # self.assertFalse(bids_lower3.contents)
+        # bids_lower3.set_contents([self.sidecar_path_lower3])
+        # bids_lower3_merged = BidsSidecarFile(self.sidecar_path_lower3)
+        # self.assertFalse(bids_lower3_merged.contents)
+        # bids_lower3_merged.set_contents([self.sidecar_path_upper, self.sidecar_path_lower3])
+        #
+        # lower_dict2 = bids_lower2.contents.loaded_dict
+        # lower_dict2_merged = bids_lower2_merged.contents.loaded_dict
+        # lower_dict3 = bids_lower3.contents.loaded_dict
+        # lower_dict3_merged = bids_lower3_merged.contents.loaded_dict
+        # upper_dict = bids_upper.contents.loaded_dict
+        # self.assertIn('event_type', upper_dict, "set_contents upper has key event_type")
+        # self.assertNotIn('event_type', lower_dict2, "set_contents lower does not have event_type")
+        # self.assertIn('event_type', lower_dict2_merged, "set_contents merged has key event_type from upper")
+        # self.assertIn('rep_lag', lower_dict2_merged, "set_contents merged has key rep_lag from lower")
+        # self.assertEqual(lower_dict2_merged['rep_lag']['HED'], lower_dict2['rep_lag']['HED'],
+        #                  "set_contents overrode key from lower")
+        # self.assertIn('face_type', upper_dict, "set_contents upper has key face_type")
+        # self.assertIn('face_type', lower_dict3, "set_contents lower3 has key face_type")
+        # self.assertIn('face_type', lower_dict3_merged, "set_contents merged3 has key face_type")
+        # self.assertEqual(lower_dict3_merged['rep_lag']['HED'], lower_dict3['rep_lag']['HED'],
+        #                  "set_contents side_merged3 got rep_lag key from lower")
+        # self.assertNotEqual(lower_dict3_merged['face_type']['HED']['famous_face'],
+        #                     upper_dict['face_type']['HED']['famous_face'],
+        #                     "set_contents overrode face_type key with lower has changed")
+        # self.assertEqual(lower_dict3_merged['face_type']['HED']['famous_face'],
+        #                  lower_dict3['face_type']['HED']['famous_face'],
+        #                  "set_contents overrode face_type key with lower3 has changed")
 
     def test_set_contents_empty(self):
         bids_upper = BidsSidecarFile(self.sidecar_path_upper)

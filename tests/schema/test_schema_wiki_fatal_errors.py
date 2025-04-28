@@ -18,7 +18,7 @@ class TestHedSchema(unittest.TestCase):
             "HED_separator_invalid.mediawiki": HedExceptions.WIKI_SEPARATOR_INVALID,
             "HED_header_missing.mediawiki": HedExceptions.SCHEMA_HEADER_MISSING,
             "HED_header_invalid.mediawiki": HedExceptions.SCHEMA_HEADER_INVALID,
-            "empty_file.mediawiki": HedExceptions.SCHEMA_HEADER_INVALID,
+            "empty_file.mediawiki": HedExceptions.WIKI_LINE_INVALID,
             "HED_header_invalid_version.mediawiki": HedExceptions.SCHEMA_VERSION_INVALID,
             "HED_header_missing_version.mediawiki": HedExceptions.SCHEMA_VERSION_INVALID,
             "HED_header_unknown_attribute.mediawiki": HedExceptions.SCHEMA_UNKNOWN_HEADER_ATTRIBUTE,
@@ -73,8 +73,8 @@ class TestHedSchema(unittest.TestCase):
             issues = context.exception.issues
 
             self.assertIsInstance(get_printable_issue_string(issues), str)
-
-            self.assertTrue(context.exception.args[0] == error)
+            self.assertEqual(context.exception.args[0], self.files_and_errors[filename],
+                             f"Error message mismatch for {filename}")
             self.assertTrue(context.exception.filename == full_filename)
 
     def test_merging_errors_schema(self):
@@ -104,8 +104,8 @@ class TestHedSchema(unittest.TestCase):
             issues += context.exception.issues
             self.assertIsInstance(get_printable_issue_string(issues), str)
 
-            self.assertTrue(context.exception.args[0] == error)
-            self.assertTrue(context.exception.filename == full_filename)
+            self.assertEqual(context.exception.args[0], error, f"Error message mismatch for merged {filename}")
+            self.assertEqual(context.exception.filename, full_filename)
 
     def test_attribute_invalid(self):
         path = os.path.join(self.full_base_folder, "attribute_unknown1.mediawiki")

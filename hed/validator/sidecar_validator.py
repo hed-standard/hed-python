@@ -89,6 +89,7 @@ class SidecarValidator:
 
                 # Only do full string checks on full columns, not partial ref columns.
                 if not is_ref_column:
+                    # TODO: Figure out why this pattern is giving lint errors.
                     refs = re.findall("\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
                     refs_strings = {data.column_name: data.get_hed_strings() for data in sidecar}
                     if "HED" not in refs_strings:
@@ -144,6 +145,8 @@ class SidecarValidator:
         found_column_references = {}
         for column_data in sidecar:
             column_name = column_data.column_name
+            if column_data.column_type == ColumnType.Ignore:
+                continue
             hed_strings = column_data.get_hed_strings()
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
             matches = []
@@ -182,7 +185,6 @@ class SidecarValidator:
             for ref in refs:
                 if ref in found_column_references and ref != column_name:
                     issues += error_handler.format_error_with_context(ColumnErrors.NESTED_COLUMN_REF, column_name, ref)
-
         return issues
 
     @staticmethod
@@ -243,7 +245,7 @@ class SidecarValidator:
         """
         val_issues = []
         if column_name in self.reserved_column_names:
-            val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED_COLUMN)
+            val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED)
             return val_issues
 
         column_type = ColumnMetadata._detect_column_type(dict_for_entry=dict_for_entry, basic_validation=False)

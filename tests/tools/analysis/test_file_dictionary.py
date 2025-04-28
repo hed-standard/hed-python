@@ -13,20 +13,20 @@ class Test(unittest.TestCase):
                                          '../../data/bids_tests/eeg_ds003645s_hed')
 
     def test_constructor_valid(self):
-        file_list = get_file_list(self.bids_base_dir, name_suffix="_events",
+        file_list = get_file_list(self.bids_base_dir, name_suffix="events",
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
         dict1 = FileDictionary("My name", file_list)
         self.assertEqual(6, len(dict1.key_list), "FileDictionary should have correct number of entries when key okay")
 
     def test_constructor_invalid(self):
-        file_list = get_file_list(self.bids_base_dir, name_suffix="_events",
+        file_list = get_file_list(self.bids_base_dir, name_suffix="events",
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
         with self.assertRaises(HedFileError) as context:
             FileDictionary("My name", file_list, key_indices=(0, 1))
         self.assertEqual(context.exception.args[0], 'NonUniqueFileKeys')
 
     def test_file_list(self):
-        file_list = get_file_list(self.bids_base_dir, name_suffix="_events",
+        file_list = get_file_list(self.bids_base_dir, name_suffix="events",
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
         dict1 = FileDictionary("My name", file_list)
         internal_list = dict1.file_list
@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
         self.assertEqual(6, len(internal_list))
 
     def test_get_file_path(self):
-        file_list = get_file_list(self.bids_base_dir, name_suffix="_events",
+        file_list = get_file_list(self.bids_base_dir, name_suffix="events",
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
         dict1 = FileDictionary("My name", file_list)
         new_path = dict1.get_file_path('sub-002_run-1')
@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
         self.assertFalse(bad_path)
 
     def test_iter_files(self):
-        file_list = get_file_list(self.bids_base_dir, name_suffix="_events",
+        file_list = get_file_list(self.bids_base_dir, name_suffix="events",
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
         dict1 = FileDictionary("My name", file_list)
         new_list = [next_file for key, next_file in dict1.iter_files()]
@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(new_list), len(file_list))
 
     def test_key_diffs(self):
-        file_list = get_file_list(self.bids_base_dir, name_suffix="_events",
+        file_list = get_file_list(self.bids_base_dir, name_suffix="events",
                                   extensions=['.tsv'], exclude_dirs=['stimuli'])
         dict1 = FileDictionary("My name", file_list)
         dict2 = FileDictionary("Your name", file_list, key_indices=(0, 1, 2))

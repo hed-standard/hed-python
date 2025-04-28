@@ -1,6 +1,6 @@
 import unittest
 from hed import HedString, load_schema_version
-from hed.models.string_util import split_base_tags, split_def_tags, gather_descriptions
+from hed.models.string_util import split_base_tags, split_def_tags, gather_descriptions, cleanup_empties
 import copy
 
 
@@ -186,6 +186,76 @@ class TestGatherDescriptions(unittest.TestCase):
 
         self.assertEqual(result, expected_result)
         self.assertNotIn("Description", str(result))
+
+
+
+class TestCleanupEmpties(unittest.TestCase):
+    def check_expression(self, test_strings):
+        for test_key, test in test_strings.items():
+            result = cleanup_empties(test[0])
+            self.assertEqual(result, test[1], f"for {test_key} expected {test[1]} but received {result}")
+
+    def test_trailing_commas_and_parentheses(self):
+        tests = {
+            "multipleCommasAndBlanks": ["(value1, value2,  ,  ,  ) ", "(value1, value2)"],
+            "justAComma": ["value1, value2, )", "value1, value2)"],
+            "noComma": ["value1, value2 )", "value1, value2)"],
+            "multipleParens": ["((value1, value2),)", "((value1, value2))"],
+            "noAction": ["value1, value2", "value1, value2"],
+            "singleValueWithComma": ["value1,)", "value1)"],
+            "multipleSpacesBeforeParen": ["value1, value2    )", "value1, value2)"],
+            "multipleCommasBeforeParen": ["value1, value2,,,,)", "value1, value2)"],
+            "nestedParensWithCommas": ["((Red, Blue,),)", "((Red, Blue))"],
+            "extraSpacesAndCommas": ["value1,   , , ,    )", "value1)"],
+            "multipleNestedGroups": ["((A, B), (C, D,),)", "((A, B), (C, D))"],
+            "commaAtEndWithoutSpace": ["value1,)", "value1)"],
+            "onlyCommasBeforeParen": [",,,,)", ")"],
+            "emptyString": ["", ""],
+            "onlyParens": ["))", "))"],
+            "multipleCommas": ["value1,,value2,,,value3", "value1,value2,value3"],
+            "spacesBetweenCommas": ["value1,  , value2, , , value3", "value1, value2, value3"],
+            "leadingCommas": [",,value1,,value2", "value1,value2"],
+            "trailingCommas": ["value1,,value2,,", "value1,value2"],
+            "commasWithSpaces": ["value1, , value2,   ,   value3", "value1, value2,   value3"],
+            "onlyCommas": [",,,,", ""],
+            "mixedContent": ["(value1,, (value2, , value3),)", "(value1, (value2, value3))"],
+            "noChange": ["value1, value2, value3", "value1, value2, value3"],
+            "singleComma": [",", ""],
+            "singleTrailingComma": ["value1,", "value1"],
+            "multipleTrailingCommas": ["value1,,,", "value1"],
+            "trailingCommaWithSpaces": ["value1,   ", "value1"],
+            "multipleTrailingCommasWithSpaces": ["value1, , ,   ", "value1"],
+            "nestedParensWithTrailingComma": ["(value1, value2,),", "(value1, value2)"],
+            "nestedParensWithSpacesAndComma": ["(value1, value2, )  ,", "(value1, value2)"],
+            "multipleGroupsWithTrailingComma": ["(A, B), (C, D,),", "(A, B), (C, D)"],
+            "spacesOnly": ["    ", ""],
+            "singleLeadingComma": [",value1", "value1"],
+            "multipleLeadingCommas": [",,,value1", "value1"],
+            "leadingCommaWithSpaces": ["   ,value1", "value1"],
+            "multipleLeadingCommasWithSpaces": [" , , ,   value1", "value1"],
+            "nestedParensWithLeadingComma": [", (value1, value2)", "(value1, value2)"],
+            "leadingSpacesAndComma": ["   , (value1, value2)", "(value1, value2)"],
+            "multipleGroupsWithLeadingComma": [", (A, B), (C, D)", "(A, B), (C, D)"],
+            "emptyParentheses": ["()", ""],
+            "multipleEmptyParentheses": ["() ()", ""],
+            "nestedEmptyParentheses": ["(())", ""],
+            "deeplyNestedEmptyParentheses": ["(((())))", ""],
+            "emptyParenthesesWithSpaces": ["(   )", ""],
+            "emptyParenthesesWithCommas": ["(,, ,)", ""],
+            "multipleEmptyGroups": ["(,,), ()", ""],
+            "validContentUnchanged": ["(value1, value2)", "(value1, value2)"],
+            "mixedValidAndEmpty": ["(value1, value2), (,,), ()", "(value1, value2)"],
+            "nestedValidAndEmpty": ["(value1, (), value2)", "(value1, value2)"],
+            "multipleLevelsOfEmptyParens": ["((), (,,), ( , (,), ()))", ""],
+            "mixedNestedValidAndEmpty": ["((value1, ( , )), value2)", "((value1), value2)"],
+            "onlySpacesInside": ["(    )", ""],
+            "lotsOfParents": [
+                "((((((((((((((((((((((((((((((((((((((((((((((((value1)))))))))))))))))))))))))))))))))))))))))))))))))",
+                "((((((((((((((((((((((((((((((((((((((((((((((((value1)))))))))))))))))))))))))))))))))))))))))))))))))",
+            ],
+        }
+
+        self.check_expression(tests)
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ from hed.schema.schema_io.df_util import create_empty_dataframes, get_library_na
 from hed.schema.schema_io.schema2base import Schema2Base
 from hed.schema.schema_io import text_util
 import pandas as pd
-import hed.schema.hed_schema_df_constants as constants
+import hed.schema.schema_io.df_constants as constants
 from hed.schema.hed_schema_entry import HedTagEntry
 
 section_key_to_df = {
@@ -30,7 +30,7 @@ class Schema2DF(Schema2Base):
         """
         super().__init__()
         self._get_as_ids = get_as_ids
-        self._tag_rows = []
+        self._suffix_rows = {v: [] for v in constants.DF_SUFFIXES}
 
     def _get_object_name_and_id(self, object_name, include_prefix=False):
         """ Get the adjusted name and ID for the given object type.
@@ -58,7 +58,7 @@ class Schema2DF(Schema2Base):
     # =========================================
     def _initialize_output(self):
         self.output = create_empty_dataframes()
-        self._tag_rows = []
+        self._suffix_rows = {v: [] for v in constants.DF_SUFFIXES}
 
     def _create_and_add_object_row(self, base_object, attributes="", description=""):
         name, full_hed_id = self._get_object_name_and_id(base_object)
@@ -67,28 +67,63 @@ class Schema2DF(Schema2Base):
             constants.name: name,
             constants.attributes: attributes,
             constants.subclass_of: base_object,
-            constants.description: description.replace("\n", "\\n"),
-            constants.equivalent_to: self._get_header_equivalent_to(attributes, base_object)
+            constants.dcdescription: description.replace("\n", "\\n")
+            # constants.equivalent_to: self._get_header_equivalent_to(attributes, base_object)
         }
         self.output[constants.STRUCT_KEY].loc[len(self.output[constants.STRUCT_KEY])] = new_row
 
-    def _output_header(self, attributes, prologue):
+    def _output_header(self, attributes):
         base_object = "HedHeader"
         attributes_string = self._get_attribs_string_from_schema(attributes, sep=", ")
         self._create_and_add_object_row(base_object, attributes_string)
 
+    def _output_prologue(self, prologue):
         base_object = "HedPrologue"
         self._create_and_add_object_row(base_object, description=prologue)
 
-    def _output_footer(self, epilogue):
+    def _output_annotations(self, hed_schema):
+        #if self.output
+        pass
+
+    def _output_extras(self, hed_schema):
+        """ Make sure that the extras files have at least a header.
+
+        Parameters:
+            hed_schema(HedSchema): The HED schema to extract the information from
+
+        """
+        # In the base class, we do nothing, but subclasses can override this method.
+        pass
+
+    def _output_epilogue(self, epilogue):
         base_object = "HedEpilogue"
         self._create_and_add_object_row(base_object, description=epilogue)
+
+    def _output_footer(self):
+        pass
 
     def _start_section(self, key_class):
         pass
 
     def _end_tag_section(self):
-        self.output[constants.TAG_KEY] = pd.DataFrame(self._tag_rows, columns=constants.tag_columns, dtype=str)
+        self.output[constants.TAG_KEY] = pd.DataFrame(self._suffix_rows[constants.TAG_KEY], dtype=str)
+
+    def _end_units_section(self):
+        if self._suffix_rows[constants.UNIT_KEY]:
+            self.output[constants.UNIT_KEY] = pd.DataFrame(self._suffix_rows[constants.UNIT_KEY], dtype=str)
+        if self._suffix_rows[constants.UNIT_CLASS_KEY]:
+            self.output[constants.UNIT_CLASS_KEY] = pd.DataFrame(self._suffix_rows[constants.UNIT_CLASS_KEY], dtype=str)
+
+    def _end_section(self, section_key):
+        """ Updates the output with the current values from the section
+
+        Parameters:
+            section_key (HedSectionKey): The section key to end.
+        """
+        suffix_keys = constants.section_key_to_suffixes.get(section_key, [])
+        for suffix_key in suffix_keys:
+            if suffix_key in self._suffix_rows and self._suffix_rows[suffix_key]:
+                self.output[suffix_key] = pd.DataFrame(self._suffix_rows[suffix_key], dtype=str)
 
     def _write_tag_entry(self, tag_entry, parent_node=None, level=0):
         tag_id = tag_entry.attributes.get(HedKey.HedID, "")
@@ -100,13 +135,25 @@ class Schema2DF(Schema2Base):
                 else tag_entry.short_tag_name + "-#",
             constants.subclass_of: self._get_subclass_of(tag_entry),
             constants.attributes: self._format_tag_attributes(tag_entry.attributes),
-            constants.description: tag_entry.description,
-            constants.equivalent_to: self._get_tag_equivalent_to(tag_entry),
+            constants.dcdescription: tag_entry.description
         }
+        if self._get_as_ids:
+            new_row[constants.equivalent_to] = self._get_tag_equivalent_to(tag_entry)
+
+        # constants.equivalent_to: self._get_tag_equivalent_to(tag_entry),
         # Todo: do other sections like this as well for efficiency
-        self._tag_rows.append(new_row)
+        self._suffix_rows[constants.TAG_KEY].append(new_row)
 
     def _write_entry(self, entry, parent_node, include_props=True):
+        """ Produce a dictionary for a single row for a non-tag HedSchemaEntry object.
+
+        Parameters:
+            entry (HedSchemaEntry): The HedSchemaEntry object to write.
+            parent_node (str): The parent node of the entry.
+            include_props (bool): Whether to include properties in the output.
+
+        Returns:
+        """
         df_key = section_key_to_df.get(entry.section_key)
         if not df_key:
             return
@@ -116,23 +163,24 @@ class Schema2DF(Schema2Base):
             return self._write_property_entry(entry)
         elif df_key == HedSectionKey.Attributes:
             return self._write_attribute_entry(entry, include_props=include_props)
-        df = self.output[df_key]
+
         tag_id = entry.attributes.get(HedKey.HedID, "")
         new_row = {
             constants.hed_id: f"{tag_id}",
             constants.name: entry.name,
             constants.subclass_of: self._get_subclass_of(entry),
             constants.attributes: self._format_tag_attributes(entry.attributes),
-            constants.description: entry.description,
-            constants.equivalent_to: self._get_tag_equivalent_to(entry),
+            constants.dcdescription: entry.description
         }
+        if self._get_as_ids:
+            new_row[constants.equivalent_to] = self._get_tag_equivalent_to(entry)
         # Handle the special case of units, which have the extra unit class
         if hasattr(entry, "unit_class_entry"):
             class_entry_name = entry.unit_class_entry.name
             if self._get_as_ids:
                 class_entry_name = f"{entry.unit_class_entry.attributes.get(constants.hed_id)}"
             new_row[constants.has_unit_class] = class_entry_name
-        df.loc[len(df)] = new_row
+        self._suffix_rows[df_key].append(new_row)
         pass
 
     def _write_attribute_entry(self, entry, include_props):
@@ -187,7 +235,6 @@ class Schema2DF(Schema2Base):
             domain_string = " or ".join(domain_attributes[key] for key in domain_keys)
             range_string = " or ".join(range_attributes[key] for key in range_keys)
 
-        df = self.output[df_key]
         tag_id = entry.attributes.get(HedKey.HedID, "")
         new_row = {
             constants.hed_id: f"{tag_id}",
@@ -196,22 +243,30 @@ class Schema2DF(Schema2Base):
             constants.property_domain: domain_string,
             constants.property_range: range_string,
             constants.properties: self._format_tag_attributes(entry.attributes) if include_props else "",
-            constants.description: entry.description,
+            constants.dcdescription: entry.description,
         }
-        df.loc[len(df)] = new_row
+        self._suffix_rows[df_key].append(new_row)
 
     def _write_property_entry(self, entry):
-        df_key = constants.ATTRIBUTE_PROPERTY_KEY
+        """ Updates self.classes with the AttributeProperty
+
+        Parameters:
+            entry (HedSchemaEntry): entry with property type AnnotationProperty
+
+        """
+        #df_key = constants.ATTRIBUTE_PROPERTY_KEY
         property_type = "AnnotationProperty"
-        df = self.output[df_key]
+        #df = self.output[df_key]
         tag_id = entry.attributes.get(HedKey.HedID, "")
         new_row = {
             constants.hed_id: f"{tag_id}",
             constants.name: entry.name,
             constants.property_type: property_type,
-            constants.description: entry.description,
+            constants.dcdescription: entry.description,
         }
-        df.loc[len(df)] = new_row
+        self._suffix_rows[constants.ATTRIBUTE_PROPERTY_KEY].append(new_row)
+        pass
+        #df.loc[len(df)] = new_row
 
     def _attribute_disallowed(self, attribute):
         if super()._attribute_disallowed(attribute):
@@ -322,6 +377,14 @@ class Schema2DF(Schema2Base):
         return None
 
     def _process_unit_class_entry(self, tag_entry):
+        """ Extract a list of unit class equivalent_to strings from a unit class entry.
+
+        Parameters:
+            tag_entry (HedUnitClassEntry): The unit class entry to process.
+
+        Returns:
+            list: A list of strings representing the equivalent_to for the unit class.
+        """
         attribute_strings = []
 
         if hasattr(tag_entry, "unit_class_entry"):

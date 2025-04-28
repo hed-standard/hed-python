@@ -21,7 +21,7 @@ def create_ontology(repo_path, schema_name, schema_version, dest):
     final_source = get_prerelease_path(repo_path, schema_name, schema_version)
     # print(f"Creating ontology from {final_source}")
 
-    dataframes = load_dataframes(final_source, include_prefix_dfs=True)
+    dataframes = load_dataframes(final_source)
     try:
         _, omn_dict = convert_df_to_omn(dataframes)
     except HedFileError as e:

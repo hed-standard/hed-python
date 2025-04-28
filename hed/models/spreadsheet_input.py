@@ -41,6 +41,7 @@ class SpreadsheetInput(BaseInput):
             - The specified worksheet name does not exist.
         """
 
+        self.tag_columns = tag_columns
         new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
                                   warn_on_missing_column=False)
 

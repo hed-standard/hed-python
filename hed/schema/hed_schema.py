@@ -29,6 +29,7 @@ class HedSchema(HedSchemaBase):
         self.filename = None
         self.prologue = ""
         self.epilogue = ""
+        self.extras = {} # Used to store any additional data that might be needed for serialization (like OWL or other formats)
 
         # This is the specified library name_prefix - tags will be {schema_namespace}:{tag_name}
         self._namespace = ""
@@ -227,6 +228,22 @@ class HedSchema(HedSchemaBase):
         """
         return [self._namespace]
 
+    def get_extras(self, extras_key):
+        """ Get the extras corresponding to the given key
+
+        Parameters:
+            extras_key (str): The key to check for in the extras dictionary.
+
+        Returns:
+            DataFrame: True if the extras dictionary has this key.
+        """
+        if not hasattr(self, 'extras') or not extras_key in self.extras:
+            return None
+        externals = self.extras[extras_key]
+        if externals.empty:
+            None
+        return externals
+
     # ===============================================
     # Creation and saving functions
     # ===============================================
@@ -266,9 +283,8 @@ class HedSchema(HedSchemaBase):
     def get_as_dataframes(self, save_merged=False):
         """ Get a dict of dataframes representing this file
 
-        save_merged: bool
-            If True, this will save the schema as a merged schema if it is a "withStandard" schema.
-            If it is not a "withStandard" schema, this setting has no effect.
+        Parameters:
+            save_merged (bool): If True, returns DFs as if merged with standard.
 
         Returns:
             dataframes(dict): a dict of dataframes you can load as a schema
@@ -328,6 +344,8 @@ class HedSchema(HedSchemaBase):
             - File cannot be saved for some reason.
         """
         output_dfs = Schema2DF().process_schema(self, save_merged)
+        if hasattr(self, 'extras') and self.extras:
+           output_dfs.update(self.extras)
         df_util.save_dataframes(base_filename, output_dfs)
 
     def set_schema_prefix(self, schema_namespace):
@@ -365,12 +383,16 @@ class HedSchema(HedSchemaBase):
         if other is None:
             return False
         if self.get_save_header_attributes() != other.get_save_header_attributes():
+            # print(f"Header attributes not equal: '{self.get_save_header_attributes()}' vs '{other.get_save_header_attributes()}'")
             return False
         if self.has_duplicates() != other.has_duplicates():
+            # print(f"Duplicates: '{self.has_duplicates()}' vs '{other.has_duplicates()}'")
             return False
         if self.prologue.strip() != other.prologue.strip():
+            # print(f"PROLOGUE NOT EQUAL: '{self.prologue.strip()}' vs '{other.prologue.strip()}'")
             return False
         if self.epilogue.strip() != other.epilogue.strip():
+            # print(f"EPILOGUE NOT EQUAL: '{self.epilogue.strip()}' vs '{other.epilogue.strip()}'")
             return False
         if self._sections != other._sections:
             # This block is useful for debugging when modifying the schema class itself.
@@ -393,6 +415,7 @@ class HedSchema(HedSchemaBase):
             #                     print(s)
             return False
         if self._namespace != other._namespace:
+            # print(f"NAMESPACE NOT EQUAL: '{self._namespace}' vs '{other._namespace}'")
             return False
         return True
 
@@ -471,6 +494,7 @@ class HedSchema(HedSchemaBase):
                                                           schema_namespace, self.valid_prefixes)
             return None, None, validation_issues
         return self._find_tag_entry(tag, schema_namespace)
+
 
     # ===============================================
     # Private utility functions for getting/finding tags

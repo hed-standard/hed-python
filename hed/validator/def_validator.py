@@ -26,7 +26,7 @@ class DefValidator(DefinitionDict):
         """ Validate Def/Def-Expand tags.
 
         Parameters:
-            hed_string_obj (HedString): The hed string to process.
+            hed_string_obj (HedString): The HED string to process.
             hed_validator (HedValidator): Used to validate the placeholder replacement.
         Returns:
             list: Issues found related to validating defs. Each issue is a dictionary.
@@ -71,33 +71,30 @@ class DefValidator(DefinitionDict):
             def_expand_group (HedGroup or HedTag): Source group for this def-expand tag.
                                                    Same as def_tag if this is not a def-expand tag.
             hed_validator (HedValidator): Used to validate the placeholder replacement.
-
+        TODO: Figure out whether the hed_validator is needed as a parameter.
         Returns:
-            issues(list): Issues found from validating placeholders.
+            list: Issues found from validating placeholders.
         """
-        def_issues = []
         is_def_expand_tag = def_expand_group != def_tag
         tag_label, _, placeholder = def_tag.extension.partition('/')
-
         label_tag_lower = tag_label.casefold()
+
+        # Check if def_entry in def_dicts.
         def_entry = self.defs.get(label_tag_lower)
-        if def_entry is None:
+        if def_entry is None or def_entry.takes_value == (not placeholder):
             error_code = ValidationErrors.HED_DEF_UNMATCHED
             if is_def_expand_tag:
                 error_code = ValidationErrors.HED_DEF_EXPAND_UNMATCHED
-            def_issues += ErrorHandler.format_error(error_code, tag=def_tag)
-        else:
-            def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder,
-                                                    return_copy_of_tag=True)
-            if def_contents is not None:
-                if is_def_expand_tag and def_expand_group != def_contents:
-                    def_issues += ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_INVALID,
-                                                            tag=def_tag, actual_def=def_contents,
-                                                            found_def=def_expand_group)
-            else:
-                def_issues += self._report_missing_or_invalid_value(def_tag, def_entry, is_def_expand_tag)
+            return ErrorHandler.format_error(error_code, tag=def_tag)
 
-        return def_issues
+        # Check the special case of a definition without contents.
+        def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
+        if is_def_expand_tag and def_expand_group != def_contents:
+            return ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_INVALID,
+                                             tag=def_tag, actual_def=def_contents,
+                                             found_def=def_expand_group)
+
+        return []
 
     def validate_def_value_units(self, def_tag, hed_validator, allow_placeholders=False):
         """Equivalent to HedValidator.validate_units for the special case of a Def or Def-expand tag"""
@@ -109,13 +106,17 @@ class DefValidator(DefinitionDict):
         if def_entry is None:
             return []
 
+        # Make sure that there aren't any errant placeholders.
+        if not allow_placeholders and '#' in placeholder:
+            return ErrorHandler.format_error(ValidationErrors.HED_PLACEHOLDER_OUT_OF_CONTEXT, tag=def_tag.tag)
+
+        # Set the appropriate error code
         error_code = ValidationErrors.DEF_INVALID
         if is_def_expand_tag:
             error_code = ValidationErrors.DEF_EXPAND_INVALID
 
         # Validate the def name vs the name class
-        def_issues = hed_validator._unit_validator._check_value_class(def_tag, tag_label, report_as=None,
-                                                                      error_code=error_code, index_offset=0)
+        def_issues = hed_validator._unit_validator._check_value_class(def_tag, tag_label, report_as=None)
         # def_issues += hed_validator.validate_units(def_tag,
         #                                            tag_label,
         #                                            error_code=error_code)
@@ -123,11 +124,6 @@ class DefValidator(DefinitionDict):
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
         if def_contents and def_entry.takes_value and hed_validator:
             placeholder_tag = def_contents.get_first_group().find_placeholder_tag()
-            # Handle the case where they're adding a unit as part of a placeholder.  eg Speed/# mph
-            if placeholder_tag:
-                placeholder = placeholder_tag.extension
-                if placeholder.startswith('# '):
-                    placeholder = placeholder[2:]
             def_issues += hed_validator.validate_units(placeholder_tag,
                                                        placeholder,
                                                        report_as=def_tag,
@@ -193,7 +189,8 @@ class DefValidator(DefinitionDict):
 
         return onset_issues
 
-    def _find_onset_tags(self, hed_string_obj):
+    @staticmethod
+    def _find_onset_tags(hed_string_obj):
         return hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.TEMPORAL_KEYS)
 
     def _handle_onset_or_offset(self, def_tag):

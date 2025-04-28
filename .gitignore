@@ -62,6 +62,7 @@ var/
 .installed.cfg
 *.egg
 tests/scratch
+tests/test_output
 
 # Installer logs
 pip-log.txt

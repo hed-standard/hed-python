@@ -178,11 +178,11 @@ class TestConvertToForm(unittest.TestCase):
         # all simple cases with no duplicates
         test_strings = [
             "(Def-expand/A1/1, (Action/1, Acceleration/5, Item-count/3))",
-            "(Def-expand/A1/2, (Action/2, Acceleration/5, Item-count/3))",
-            "(Def-expand/B2/3, (Action/3, Collection/animals, Alert))",
-            "(Def-expand/B2/4, (Action/4, Collection/animals, Alert))",
-            "(Def-expand/C3/5, (Action/5, Joyful, Event))",
-            "(Def-expand/C3/6, (Action/6, Joyful, Event))"
+            "(Def-expand/A1/2, (Action/1, Acceleration/5, Item-count/3))",
+            "(Def-expand/B2/3, (Label/3, Collection/animals, Alert))",
+            "(Def-expand/B2/4, (Label/4, Collection/animals, Alert))",
+            "(Def-expand/C3/5, (Label/5, Joyful, Event))",
+            "(Def-expand/C3/6, (Label/6, Joyful, Event))"
         ]
         process_def_expands(test_strings, self.schema)
 
@@ -190,32 +190,46 @@ class TestConvertToForm(unittest.TestCase):
         # Cases where you can only retroactively identify the first def-expand
         test_strings = [
             # Basic example first just to verify
-            "(Def-expand/A1/1, (Action/1, Acceleration/5, Item-count/2))",
-            "(Def-expand/A1/2, (Action/2, Acceleration/5, Item-count/2))",
+            "(Def-expand/A1/1, (Label/1, Acceleration/5, Item-count/2))",
+            "(Def-expand/A1/2, (Label/2, Acceleration/5, Item-count/2))",
             # Out of order ambiguous
-            "(Def-expand/B2/3, (Action/3, Collection/animals, Acceleration/3))",
-            "(Def-expand/B2/4, (Action/4, Collection/animals, Acceleration/3))",
+            "(Def-expand/B2/3, (Label/3, Collection/animals, Acceleration/3))",
+            "(Def-expand/B2/4, (Label/4, Collection/animals, Acceleration/3))",
             # Multiple tags
-            "(Def-expand/C3/5, (Action/5, Acceleration/5, Item-count/5))",
-            "(Def-expand/C3/6, (Action/6, Acceleration/5, Item-count/5))",
+            "(Def-expand/C3/5, (Label/5, Acceleration/5, Item-count/5))",
+            "(Def-expand/C3/6, (Label/6, Acceleration/5, Item-count/5))",
             # Multiple tags2
-            "(Def-expand/D4/7, (Action/7, Acceleration/7, Item-count/8))",
-            "(Def-expand/D4/8, (Action/8, Acceleration/7, Item-count/8))"
+            "(Def-expand/D4/7, (Label/7, Acceleration/7, Item-count/8))",
+            "(Def-expand/D4/8, (Label/8, Acceleration/7, Item-count/8))"
             # Multiple tags3
-            "(Def-expand/D5/7, (Action/7, Acceleration/7, Item-count/8, Event))",
-            "(Def-expand/D5/8, (Action/8, Acceleration/7, Item-count/8, Event))"
+            "(Def-expand/D5/7, (Label/7, Acceleration/7, Item-count/8, Event))",
+            "(Def-expand/D5/8, (Label/8, Acceleration/7, Item-count/8, Event))"
         ]
-        def_dict, ambiguous_defs, _ = process_def_expands(test_strings, self.schema)
+        def_dict, ambiguous_defs, errors = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(def_dict), 5)
 
-    def test_ambiguous_defs(self):
-        # Cases that can't be identified
+    def test_error_double_defs(self):
+        # One case can't be identified.  Action doesn't count -- it doesn't take value.
         test_strings = [
             "(Def-expand/A1/2, (Action/2, Acceleration/5, Item-count/2))",
             "(Def-expand/B2/3, (Action/3, Collection/animals, Acceleration/3))",
             "(Def-expand/C3/5, (Action/5, Acceleration/5, Item-count/5))",
             "(Def-expand/D4/7, (Action/7, Acceleration/7, Item-count/8))",
             "(Def-expand/D5/7, (Action/7, Acceleration/7, Item-count/8, Event))",
+        ]
+        def_dict, ambiguous_defs, errors = process_def_expands(test_strings, self.schema)
+        self.assertEqual(len(ambiguous_defs), 1)
+        self.assertEqual(len(def_dict), 4)
+        self.assertEqual(len(errors), 0)
+
+    def test_ambiguous_defs(self):
+        # Cases that can't be identified
+        test_strings = [
+            "(Def-expand/A1/2, (Label/2, Acceleration/5, Item-count/2))",
+            "(Def-expand/B2/3, (Label/3, Collection/animals, Acceleration/3))",
+            "(Def-expand/C3/5, (Label/5, Acceleration/5, Item-count/5))",
+            "(Def-expand/D4/7, (Label/7, Acceleration/7, Item-count/8))",
+            "(Def-expand/D5/7, (Label/7, Acceleration/7, Item-count/8, Event))",
         ]
         _, ambiguous_defs, _ = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(ambiguous_defs), 5)
@@ -237,23 +251,34 @@ class TestConvertToForm(unittest.TestCase):
     def test_errors(self):
         # Basic recognition of conflicting errors
         test_strings = [
-            "(Def-expand/A1/1, (Action/1, Age/5, Item-count/2))",
-            "(Def-expand/A1/2, (Action/2, Age/5, Item-count/2))",
-            "(Def-expand/A1/3, (Action/3, Age/5, Item-count/3))",
+            "(Def-expand/A1/1, (Acceleration/1, Age/5, Item-count/2))",
+            "(Def-expand/A1/2, (Acceleration/2, Age/5, Item-count/2))",
+            "(Def-expand/A1/3, (Acceleration/3, Age/5, Item-count/3))",
         ]
         _, _, errors = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(errors), 1)
 
-    def test_errors_ambiguous(self):
+    def test_errors(self):
         # Verify we recognize errors when we had a def that can't be resolved.
         test_strings = [
-            "(Def-expand/A1/1, (Action/1, Age/5, Item-count/1))",
-            "(Def-expand/A1/2, (Action/2, Age/5, Item-count/3))",
-            "(Def-expand/A1/3, (Action/3, Age/5, Item-count/3))",
+            "(Def-expand/A1/1, (Acceleration/1, Age/5, Item-count/1))",
+            "(Def-expand/A1/2, (Acceleration/2, Age/5, Item-count/3))",
+            "(Def-expand/A1/3, (Acceleration/2, Age/5, Item-count/3))",
         ]
         known, ambiguous, errors = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(errors), 1)
         self.assertEqual(len(errors["a1"]), 3)
+
+    def test_errors_ambiguous(self):
+        # Verify we recognize errors when we had a def that can't be resolved.
+        test_strings = [
+            "(Def-expand/A1/1, (Acceleration/1, Age/5, Item-count/1))",
+            "(Def-expand/A1/2, (Acceleration/2, Age/5, Item-count/2))",
+            "(Def-expand/A1/3, (Acceleration/3, Age/5, Item-count/3))",
+        ]
+        known, ambiguous, errors = process_def_expands(test_strings, self.schema)
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(len(ambiguous), 0)
 
     def test_errors_unresolved(self):
         # Verify we recognize errors when we had a def that can't be resolved.
@@ -263,54 +288,53 @@ class TestConvertToForm(unittest.TestCase):
         ]
         known, ambiguous, errors = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(errors), 1)
-        self.assertEqual(len(errors["a1"]), 2)
 
     def test_def_expand_detection(self):
         test_strings = [
-            "(Def-expand/A1/1, (Action/1, Acceleration/5, Item-Count/2))",
-            "(Def-expand/A1/2, (Action/2, Acceleration/5, Item-Count/2))",
-            "(Def-expand/B2/3, (Action/3, Collection/animals, Alert))",
-            "(Def-expand/B2/4, (Action/4, Collection/animals, Alert))",
-            "(Def-expand/C3/5, (Action/5, Joyful, Event))",
-            "(Def-expand/C3/6, (Action/6, Joyful, Event))",
-            "((Def-expand/A1/7, (Action/7, Acceleration/5, Item-Count/2)), Event, Acceleration/10)",
-            "((Def-expand/A1/8, (Action/8, Acceleration/5, Item-Count/2)), Collection/toys, Item-Count/5)",
-            "((Def-expand/B2/9, (Action/9, Collection/animals, Alert)), Event, Collection/plants)",
-            "((Def-expand/B2/10, (Action/10, Collection/animals, Alert)), Joyful, Item-Count/3)",
-            "((Def-expand/C3/11, (Action/11, Joyful, Event)), Collection/vehicles, Acceleration/20)",
-            "((Def-expand/C3/12, (Action/12, Joyful, Event)), Alert, Item-Count/8)",
-            "((Def-expand/A1/13, (Action/13, Acceleration/5, Item-Count/2)), " +
-            "(Def-expand/B2/13, (Action/13, Collection/animals, Alert)), Event)",
-            "((Def-expand/A1/14, (Action/14, Acceleration/5, Item-Count/2)), Joyful, " +
-            "(Def-expand/C3/14, (Action/14, Joyful, Event)))",
-            "(Def-expand/B2/15, (Action/15, Collection/animals, Alert)), (Def-expand/C3/15, " +
-            "(Action/15, Joyful, Event)), Acceleration/30",
-            "((Def-expand/A1/16, (Action/16, Acceleration/5, Item-Count/2)), " +
-            "(Def-expand/B2/16, (Action/16, Collection/animals, Alert)), Collection/food)",
-            "(Def-expand/C3/17, (Action/17, Joyful, Event)), (Def-expand/A1/17, " +
-            "(Action/17, Acceleration/5, Item-Count/2)), Item-Count/6",
-            "((Def-expand/B2/18, (Action/18, Collection/animals, Alert)), " +
-            "(Def-expand/C3/18, (Action/18, Joyful, Event)), Alert)",
-            "(Def-expand/D1/Apple, (Task/Apple, Collection/cars, Attribute/color))",
-            "(Def-expand/D1/Banana, (Task/Banana, Collection/cars, Attribute/color))",
-            "(Def-expand/E2/Carrot, (Collection/Carrot, Collection/plants, Attribute/type))",
-            "(Def-expand/E2/Dog, (Collection/Dog, Collection/plants, Attribute/type))",
-            "((Def-expand/D1/Elephant, (Task/Elephant, Collection/cars, Attribute/color)), " +
-            "(Def-expand/E2/Fox, (Collection/Fox, Collection/plants, Attribute/type)), Event)",
-            "((Def-expand/D1/Giraffe, (Task/Giraffe, Collection/cars, Attribute/color)), " +
-            "Joyful, (Def-expand/E2/Horse, (Collection/Horse, Collection/plants, Attribute/type)))",
-            "(Def-expand/D1/Iguana, (Task/Iguana, Collection/cars, Attribute/color)), " +
-            "(Def-expand/E2/Jaguar, (Collection/Jaguar, Collection/plants, Attribute/type)), Acceleration/30",
-            "(Def-expand/F1/Lion, (Task/Lion, Collection/boats, Attribute/length))",
-            "(Def-expand/F1/Monkey, (Task/Monkey, Collection/boats, Attribute/length))",
-            "(Def-expand/G2/Nest, (Collection/Nest, Collection/instruments, Attribute/material))",
-            "(Def-expand/G2/Octopus, (Collection/Octopus, Collection/instruments, Attribute/material))",
-            "((Def-expand/F1/Panda, (Task/Panda, Collection/boats, Attribute/length)), " +
-            "(Def-expand/G2/Quail, (Collection/Quail, Collection/instruments, Attribute/material)), Event)",
-            "((Def-expand/F1/Rabbit, (Task/Rabbit, Collection/boats, Attribute/length)), Joyful, " +
-            "(Def-expand/G2/Snake, (Collection/Snake, Collection/instruments, Attribute/material)))",
-            "(Def-expand/F1/Turtle, (Task/Turtle, Collection/boats, Attribute/length)), " +
-            "(Def-expand/G2/Umbrella, (Collection/Umbrella, Collection/instruments, Attribute/material))"
+            "(Def-expand/A1/1, (Action/1, Acceleration/5, Item-count/1))",
+            "(Def-expand/A1/2, (Action/1, Acceleration/5, Item-count/2))",
+            "(Def-expand/B2/3, (Item-count/3, Collection/animals, Alert))",
+            "(Def-expand/B2/4, (Item-count/4, Collection/animals, Alert))",
+            "(Def-expand/C3/5, (Item-count/5, Joyful, Event))",
+            "(Def-expand/C3/6, (Item-count/6, Joyful, Event))",
+            "((Def-expand/A1/7, (Item-count/7, Acceleration/5, Action/1)), Event, Acceleration/10)",
+            "((Def-expand/A1/8, (Item-count/8, Acceleration/5, Action/1)), Collection/toys, Item-Count/5)",
+            "((Def-expand/B2/9, (Item-count/9, Collection/animals, Alert)), Event, Collection/plants)",
+            "((Def-expand/B2/10, (Item-count/10, Collection/animals, Alert)), Joyful, Item-Count/3)",
+            "((Def-expand/C3/11, (Item-count/11, Joyful, Event)), Collection/vehicles, Acceleration/20)",
+            "((Def-expand/C3/12, (Item-count/12, Joyful, Event)), Alert, Item-Count/8)",
+            "((Def-expand/A1/13, (Item-count/13, Acceleration/5, Action/1)), " +
+            "(Def-expand/B2/13, (Item-count/13, Collection/animals, Alert)), Event)",
+            "((Def-expand/A1/14, (Item-count/14, Acceleration/5, Action/1), Joyful, " +
+            "(Def-expand/C3/14, (Item-count/14, Joyful, Event)))",
+            "(Def-expand/B2/15, (Item-count/15, Collection/animals, Alert)), (Def-expand/C3/15, " +
+            "(Item-count/15, Joyful, Event)), Acceleration/30",
+            "((Def-expand/A1/16, (Item-count/16, Acceleration/5, Action/1)), " +
+            "(Def-expand/B2/16, (Item-count/16, Collection/animals, Alert)), Collection/food)",
+            "(Def-expand/C3/17, (Item-count/17, Joyful, Event)), (Def-expand/A1/17, " +
+            "(Action/1, Acceleration/5, Item-Count/17)), Item-Count/6",
+            "((Def-expand/B2/18, (Item-count/18, Collection/animals, Alert)), " +
+            "(Def-expand/C3/18, (Item-count/18, Joyful, Event)), Alert)",
+            "(Def-expand/D1/Apple, (Task/Apple, Collection/cars, Red))",
+            "(Def-expand/D1/Banana, (Task/Banana, Collection/cars, Red))",
+            "(Def-expand/E2/Carrot, (Collection/Carrot, Collection/plants, Collection/Baloney))",
+            "(Def-expand/E2/Dog, (Collection/Dog, Collection/plants, Collection/Baloney))",
+            "((Def-expand/D1/Elephant, (Task/Elephant, Collection/cars, Red)), " +
+            "(Def-expand/E2/Fox, (Collection/Fox, Collection/plants, Collection/Baloney)), Event)",
+            "((Def-expand/D1/Giraffe, (Task/Giraffe, Collection/cars, Red)), " +
+            "Joyful, (Def-expand/E2/Horse, (Collection/Horse, Collection/plants, Collection/Baloney)))",
+            "(Def-expand/D1/Iguana, (Task/Iguana, Collection/cars, Red)), " +
+            "(Def-expand/E2/Jaguar, (Collection/Jaguar, Collection/plants, Collection/Baloney)), Acceleration/30",
+            "(Def-expand/F1/Lion, (Task/Lion, Collection/boats, Length/5))",
+            "(Def-expand/F1/Monkey, (Task/Monkey, Collection/boats, Length/5))",
+            "(Def-expand/G2/Nest, (Collection/Nest, Collection/instruments, Item))",
+            "(Def-expand/G2/Octopus, (Collection/Octopus, Collection/instruments, Item))",
+            "((Def-expand/F1/Panda, (Task/Panda, Collection/boats, Length/5)), " +
+            "(Def-expand/G2/Quail, (Collection/Quail, Collection/instruments, Item)), Event)",
+            "((Def-expand/F1/Rabbit, (Task/Rabbit, Collection/boats, Length/5)), Joyful, " +
+            "(Def-expand/G2/Snake, (Collection/Snake, Collection/instruments, Item)))",
+            "(Def-expand/F1/Turtle, (Task/Turtle, Collection/boats, Length/5)), " +
+            "(Def-expand/G2/Umbrella, (Collection/Umbrella, Collection/instruments, Item))"
         ]
 
         def_dict, ambiguous, errors = process_def_expands(test_strings, self.schema)

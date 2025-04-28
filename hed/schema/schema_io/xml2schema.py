@@ -4,10 +4,11 @@ This module is used to create a HedSchema object from an XML file or tree.
 
 from defusedxml import ElementTree
 import xml
+import pandas as pd
 
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey, NS_ATTRIB, NO_LOC_ATTRIB
-from hed.schema.schema_io import xml_constants
+from hed.schema.schema_io import xml_constants, df_constants
 from hed.schema.schema_io.base2schema import SchemaLoader
 from functools import partial
 
@@ -56,6 +57,7 @@ class SchemaLoaderXML(SchemaLoader):
         }
         self._schema.prologue = self._read_prologue()
         self._schema.epilogue = self._read_epilogue()
+        self._read_extras()
         self._parse_sections(self._root_element, parse_order)
 
     def _parse_sections(self, root_element, parse_order):
@@ -89,6 +91,46 @@ class SchemaLoaderXML(SchemaLoader):
         if len(epilogue_elements) == 1:
             return epilogue_elements[0].text
         return ""
+
+    def _read_extras(self):
+        self._schema.extras = {}
+        self._read_sources()
+        self._read_prefixes()
+        self._read_external_annotations()
+
+    def _read_sources(self):
+        source_elements = self._get_elements_by_name(xml_constants.SCHEMA_SOURCE_DEF_ELEMENT)
+        data = []
+        for source_element in source_elements:
+            source_name = self._get_element_value(source_element, xml_constants.NAME_ELEMENT)
+            source_link = self._get_element_value(source_element, xml_constants.LINK_ELEMENT)
+            description = self._get_element_value(source_element, xml_constants.DESCRIPTION_ELEMENT)
+            data.append({df_constants.source: source_name, df_constants.link: source_link,
+                         df_constants.description: description})
+        self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(data, columns=df_constants.source_columns)
+
+    def _read_prefixes(self):
+        prefix_elements = self._get_elements_by_name(xml_constants.SCHEMA_PREFIX_DEF_ELEMENT)
+        data = []
+        for prefix_element in prefix_elements:
+            prefix_name = self._get_element_value(prefix_element, xml_constants.NAME_ELEMENT)
+            prefix_namespace= self._get_element_value(prefix_element, xml_constants.NAMESPACE_ELEMENT)
+            prefix_description = self._get_element_value(prefix_element, xml_constants.DESCRIPTION_ELEMENT)
+            data.append({df_constants.prefix: prefix_name, df_constants.namespace: prefix_namespace,
+                         df_constants.description: prefix_description})
+        self._schema.extras[df_constants.PREFIXES_KEY] = pd.DataFrame(data, columns=df_constants.prefix_columns)
+
+    def _read_external_annotations(self):
+        external_elements = self._get_elements_by_name(xml_constants.SCHEMA_EXTERNAL_DEF_ELEMENT)
+        data = []
+        for external_element in external_elements:
+            external_name = self._get_element_value(external_element, xml_constants.NAME_ELEMENT)
+            external_id = self._get_element_value(external_element, xml_constants.ID_ELEMENT)
+            external_iri = self._get_element_value(external_element, xml_constants.IRI_ELEMENT)
+            external_description = self._get_element_value(external_element, xml_constants.DESCRIPTION_ELEMENT)
+            data.append({df_constants.prefix: external_name, df_constants.id: external_id,
+                         df_constants.iri: external_iri, df_constants.description: external_description})
+        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(data, columns=df_constants.external_annotation_columns)
 
     def _add_tags_recursive(self, new_tags, parent_tags):
         for tag_element in new_tags:
@@ -197,6 +239,14 @@ class SchemaLoaderXML(SchemaLoader):
                                    self.name)
             return element.text
         return ""
+
+    @staticmethod
+    def _get_element_value(element, tag_name):
+        this_element = element.find(tag_name)
+        if this_element is None or this_element.text is None:
+            return ''
+        else:
+            return this_element.text
 
     def _get_elements_by_name(self, element_name='node', parent_element=None):
         """ Get the elements that have a specific element name.
