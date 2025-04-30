@@ -1,4 +1,5 @@
-
+import os
+from hed import load_schema_version
 from hed.tools.analysis.event_manager import EventManager
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.hed_tag_manager import HedTagManager
@@ -7,9 +8,9 @@ from hed.tools.analysis.hed_tag_manager import HedTagManager
 REMOVE_TYPES = ['Condition-variable', 'Task']
 
 # Tags organized by whether they are found with either of these
-# MATCH_TYPES = ['Sensory-event', 'Agent-action']
 MATCH_TYPES = ['Experimental-stimulus', 'Participant-response', 'Incidental', 'Instructional', 'Mishap',
-               'Task-activity', 'Warning']
+               'Task-activity', 'Warning', 'Sensory-event', 'Agent-action']
+
 # If a tag has any of these as a parent, it is excluded
 EXCLUDED_PARENTS = {'data-marker', 'data-resolution', 'quantitative-value', 'spatiotemporal-value',
                     'statistical-value', 'informational-property', 'organizational-property',
@@ -40,12 +41,12 @@ FILTERED_TAGS = {'event', 'agent', 'action', 'move-body-part', 'item', 'biologic
                  'tactile-attribute', 'visual-attribute', 'sensory-presentation', 'task-property', 'task-action-type',
                  'task-attentional-demand', 'task-event-role', 'task-stimulus-role'}
 
-def extract_tag_summary(hed_schema, df, sidecar=None, name=None):
+def extract_tag_summary(hed_schema, tsv_file, sidecar_file=None, name=None):
     """ Extract a summary of the tags in a given tabular input file.
     Parameters:
         hed_schema (HedSchema): The HedSchema object to use for the summary.
-        df (pd.DataFrame): The DataFrame to summarize.
-        sidecar (str): The sidecar file to use for the summary.
+        tsv_file(str): The path of the tsv file
+        sidecar_file (str): The sidecar file to use for the summary.
         name (str): The name of the summary.
 
     Returns:
@@ -54,7 +55,7 @@ def extract_tag_summary(hed_schema, df, sidecar=None, name=None):
 
     group_dict = {key: set() for key in MATCH_TYPES}
     other = set()
-    input_data = TabularInput(df, sidecar=sidecar, name=name)
+    input_data = TabularInput(tsv_file, sidecar=sidecar_file, name=name)
     event_manager = EventManager(input_data, hed_schema)
     tag_man = HedTagManager(event_manager, remove_types=REMOVE_TYPES)
     hed_objs = tag_man.get_hed_objs(include_context=False, replace_defs=True)
@@ -92,3 +93,23 @@ def update_tags(tag_set, all_tags):
         else:
             tag_set.update(tag.tag_terms)
     return tag_set
+
+
+if __name__ == '__main__':
+    schema = load_schema_version('8.4.0')
+    root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds003645s_hed'
+    sidecar_path = os.path.join(root_dir, 'task-FacePerception_events.json')
+    tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
+
+    tag_dict, others = extract_tag_summary(schema, tsv_path, sidecar_file=sidecar_path, name='eeg_ds003645s_hed')
+
+    for the_key, the_item in tag_dict.items():
+        if not the_item:
+            continue
+        print(f"{the_key}:")
+        for tag in the_item:
+            print(f"  {tag}")
+
+    print("Other:")
+    for tag in others:
+        print(f"  {tag}")
