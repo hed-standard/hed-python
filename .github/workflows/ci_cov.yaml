@@ -46,8 +46,6 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: |
-          python -m pip uninstall pip setuptools
-          pip install --upgrade pip
           pip install flake8 coverage -r requirements.txt -r docs/requirements.txt
 
       # Run flake8
