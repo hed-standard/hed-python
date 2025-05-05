@@ -5,7 +5,7 @@ Add new errors here, or any other file imported after error_reporter.py.
 
 from hed.errors.error_reporter import hed_error, hed_tag_error
 from hed.errors.error_types import (ValidationErrors, SidecarErrors, ErrorSeverity, DefinitionErrors,
-                                    TemporalErrors, ColumnErrors)
+                                    TemporalErrors, ColumnErrors, TagQualityErrors)
 
 
 @hed_tag_error(ValidationErrors.UNITS_INVALID)
@@ -462,3 +462,22 @@ def nested_column_ref(column_name, ref_column):
 @hed_error(ColumnErrors.MALFORMED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def malformed_column_ref(column_name, index, symbol):
     return f"Column {column_name} has a malformed column reference.  Improper symbol {symbol} found at index {index}."
+
+
+@hed_error(TagQualityErrors.MISSING_EVENT_TYPE, default_severity=ErrorSeverity.WARNING,
+           actual_code=TagQualityErrors.MISSING_EVENT_TYPE)
+def missing_event_type(string, line):
+    return f"The HED string '{string}' at line {line} has no Event type."
+
+
+@hed_error(TagQualityErrors.MISSING_TASK_ROLE, default_severity=ErrorSeverity.WARNING,
+           actual_code=TagQualityErrors.MISSING_TASK_ROLE)
+def missing_task_role(event_type, string, line):
+    return f"The HED string '{string}' at line {line} with event {event_type} has no Task-event-role type tag."
+
+
+@hed_error(TagQualityErrors.IMPROPER_TAG_GROUPING, default_severity=ErrorSeverity.WARNING,
+           actual_code=TagQualityErrors.IMPROPER_TAG_GROUPING)
+def improper_tag_grouping(event_types, string, line):
+    return f"The HED string '{string}' at line {line} has multiple events [{event_types}] but is improperly " + \
+    f"parenthesized so the other tags cannot be uniquely associated with an event."
