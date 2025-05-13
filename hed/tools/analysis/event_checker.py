@@ -181,8 +181,7 @@ class EventsSummary:
         """ Verify that the events in the HED strings validly represent events.
 
         Returns:
-            dict: A dictionary with the summary information.
-            set: A set of tags that do not match any of the specified types but are not excluded.
+            issues: list of issues (each of which is a dictionary with 'code' and 'message' keys).
         """
         all_issues = []
         error_handler = ErrorHandler()
@@ -251,10 +250,10 @@ if __name__ == '__main__':
     schema = load_schema_version('8.4.0')
 
     # # Wakeman Henson example
-    # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds003645s_hed'
-    # sidecar_path = os.path.join(root_dir, 'task-FacePerception_events.json')
-    # tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
-    # data_name = 'eeg_ds003645s_hed'
+    root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds003645s_hed'
+    sidecar_path = os.path.join(root_dir, 'task-FacePerception_events.json')
+    tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
+    data_name = 'eeg_ds003645s_hed'
 
     # # Attention shift example
     # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds002893s_hed_attention_shift'
@@ -263,18 +262,18 @@ if __name__ == '__main__':
     # data_name = 'eeg_ds002893s_hed_attention_shift'
 
     # Sternberg example
-    root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds004117s_hed_sternberg'
-    sidecar_path = os.path.join(root_dir, 'task-WorkingMemory_events.json')
-    tsv_path = os.path.join(root_dir, 'sub-001/ses-01/eeg/sub-001_ses-01_task-WorkingMemory_run-1_events.tsv')
-    data_name = 'eeg_ds004117s_hed_sternberg'
+    # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds004117s_hed_sternberg'
+    # sidecar_path = os.path.join(root_dir, 'task-WorkingMemory_events.json')
+    # tsv_path = os.path.join(root_dir, 'sub-001/ses-01/eeg/sub-001_ses-01_task-WorkingMemory_run-1_events.tsv')
+    # data_name = 'eeg_ds004117s_hed_sternberg'
 
     # Create the event summary
     events_summary = EventsSummary(schema, tsv_path, sidecar_path, data_name)
 
     # Check the validity of the event tags
-    issues = events_summary.validate_event_tags()
-    if issues:
-        print(f"Errors found in {get_printable_issue_string(issues, '')}")
+    these_issues = events_summary.validate_event_tags()
+    if these_issues:
+        print(f"Errors found in {get_printable_issue_string(these_issues, '')}")
     else:
         print(f"No errors found in {data_name}.")
 
@@ -285,9 +284,9 @@ if __name__ == '__main__':
         if not the_item:
             continue
         print(f"{the_key}:")
-        for tag in the_item:
-            print(f"  {tag}")
+        for the_tag in the_item:
+            print(f"  {the_tag}")
 
     print("Other:")
-    for tag in others:
-        print(f"  {tag}")
+    for the_tag in others:
+        print(f"  {the_tag}")

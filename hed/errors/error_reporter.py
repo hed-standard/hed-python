@@ -185,7 +185,7 @@ class ErrorHandler:
         """ Push a new error context to narrow down error scope.
 
         Parameters:
-            context_type (ErrorContext): A value from ErrorContext representing the type of scope.
+            context_type (str): A value from ErrorContext representing the type of scope.
             context (str, int, or HedString): The main value for the context_type.
 
         Notes:
