@@ -246,7 +246,8 @@ class SpreadsheetValidator:
                 if invalid_values:
                     error_handler.push_error_context(ErrorContext.COLUMN, column.column_name)
                     issues += error_handler.format_error_with_context(ValidationErrors.SIDECAR_KEY_MISSING,
-                        invalid_keys=str(list(invalid_values)),  category_keys=list(valid_keys))
+                        invalid_keys=str(list(invalid_values)),  category_keys=list(valid_keys),
+                        column_name=column.column_name)
                     error_handler.pop_error_context()
 
         column_refs = set(base_input.get_column_refs())  # Convert to set for O(1) lookup
