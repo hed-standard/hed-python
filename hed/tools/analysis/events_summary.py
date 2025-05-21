@@ -1,0 +1,153 @@
+import os
+from hed import TabularInput
+from hed.schema import load_schema_version
+from hed.errors import ErrorHandler, ErrorContext, get_printable_issue_string
+from hed.tools import EventManager, HedTagManager
+from hed.tools.analysis.event_checker import EventsChecker
+
+
+class EventsSummary:
+    # Excluding tags for condition-variables and task -- these can be done separately if we want to.
+    REMOVE_TYPES = ['Condition-variable', 'Task']
+    # Tags organized by whether they are found with either of these
+    MATCH_TYPES = ['Experimental-stimulus', 'Participant-response', 'Cue', 'Feedback', 'Instructional', 'Sensory-event', 'Agent-action']
+
+    # If a tag has any of these as a parent, it is excluded
+    EXCLUDED_PARENTS = {'data-marker', 'data-resolution', 'quantitative-value', 'spatiotemporal-value',
+                        'statistical-value', 'informational-property', 'organizational-property',
+                        'grayscale', 'hsv-color', 'rgb-color', 'luminance', 'luminance-contrast', 'opacity',
+                        'task-effect-evidence', 'task-relationship', 'relation'}
+
+    # If a tag has any of these as a parent, it is replaced by this parent only
+    CUTOFF_TAGS = {'blue-color', 'brown-color', 'cyan-color', 'gray-color', 'green-color', 'orange-color',
+                   'pink-color', 'purple-color', 'red-color', 'white-color', 'yellow-color',
+                   'visual-presentation'}
+
+    # These tags are removed at the end as non-informational
+    FILTERED_TAGS = {'event', 'agent', 'action', 'move-body-part', 'item', 'biological-item', 'anatomical-item',
+                     'body-part',
+                     'lower-extremity-part', 'upper-extremity-part', 'head-part', 'torso-part', 'face-part',
+                     'language-item', 'object', 'geometric-object',
+                     'man-made-object', 'device', 'computing-device', 'io-device', 'input-device', 'output-device',
+                     'auditory-device', 'display-device',
+                     'recording-device', 'natural-object', 'document', 'media', 'media-clip', 'visualization',
+                     'property', 'agent-property', 'agent-state',
+                     'agent-cognitive-state', 'agent-emotional-state', 'agent-physiological-state',
+                     'agent-postural-state',
+                     'agent-task-role', 'agent-trait',
+                     'data-property', 'biological-artifact', 'nonbiological-artifact',
+                     'spatial-property', 'temporal-property', 'spectral-property', 'dara-source-type', 'data-value',
+                     'categorical-value', 'categorical-class-value', 'categorical-judgment-value',
+                     'categorical-level-value', 'categorical-location-value', 'categorical-orientation-value',
+                     'physical-value', 'data-variability-attribute', 'environmental-property', 'sensory-property',
+                     'sensory-attribute', 'auditory-attribute', 'gustatory-attribute', 'olfactory-attribute',
+                     'tactile-attribute', 'visual-attribute', 'sensory-presentation', 'task-property',
+                     'task-action-type',
+                     'task-attentional-demand', 'task-event-role', 'task-stimulus-role'}
+
+    def __init__(self, hed_schema, file, sidecar=None, name=None):
+        """ Constructor for the HedString class."""
+        self._initialize(hed_schema, file, sidecar, name)
+
+    def _initialize(self, hed_schema, file, sidecar, name):
+        self.input_data = TabularInput(file, sidecar, name)
+        checker = EventsChecker(hed_schema, self.input_data, name)
+        self.hed_objs = checker.hed_objs
+        self.input_data = checker.input_data
+        issues = checker.validate_event_tags()
+        self.error_lines = EventsChecker.get_error_lines(issues)
+ 
+
+    def extract_tag_summary(self):
+        """ Extract a summary of the tags in a given tabular input file.
+
+        Returns:
+            dict: A dictionary with the summary information - (str, list)
+            list: A set of tags that do not match any of the specified types but are not excluded.
+        """
+
+        group_dict = {key: set() for key in self.MATCH_TYPES}
+        other = set()
+        group_error_lines = self.error_lines.get()
+        for index, hed_obj in enumerate(self.hed_objs):
+            if not hed_obj or index in self.group_error_lines:
+                continue
+            all_tags = hed_obj.get_all_tags()
+            # if index in self.missing_error_lines:
+            #     other = self.update_tags(other, all_tags)
+            #     continue
+            found = False
+            for key, tags in group_dict.items():
+                if self.match_tags(all_tags, key):
+                    group_dict[key] = self.update_tags(group_dict[key], all_tags)
+                    found = True
+                    break
+            if not found:
+                other = self.update_tags(other, all_tags)
+
+        for key, tags in group_dict.items():
+            group_dict[key] = sorted(tags - self.FILTERED_TAGS)
+        other = sorted(other - self.FILTERED_TAGS)
+        return group_dict, other
+
+    @staticmethod
+    def match_tags(all_tags, key):
+        return any(tag.short_base_tag == key for tag in all_tags)
+
+    def update_tags(self, tag_set, all_tags):
+        for tag in all_tags:
+            terms = tag.tag_terms
+            if any(item in self.EXCLUDED_PARENTS for item in terms):
+                continue
+            match = next((item for item in terms if item in self.CUTOFF_TAGS), None)
+            if match:
+                tag_set.add(match)
+            else:
+                tag_set.update(tag.tag_terms)
+        return tag_set
+
+
+if __name__ == '__main__':
+    schema = load_schema_version('8.4.0')
+
+    # # Wakeman Henson example
+    root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds003645s_hed'
+    sidecar_path = os.path.join(root_dir, 'task-FacePerception_events.json')
+    tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
+    data_name = 'eeg_ds003645s_hed'
+
+    # # Attention shift example
+    # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds002893s_hed_attention_shift'
+    # sidecar_path = os.path.join(root_dir, 'task-AuditoryVisualShift_events.json')
+    # tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-AuditoryVisualShift_run-01_events.tsv')
+    # data_name = 'eeg_ds002893s_hed_attention_shift'
+
+    # Sternberg example
+    # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds004117s_hed_sternberg'
+    # sidecar_path = os.path.join(root_dir, 'task-WorkingMemory_events.json')
+    # tsv_path = os.path.join(root_dir, 'sub-001/ses-01/eeg/sub-001_ses-01_task-WorkingMemory_run-1_events.tsv')
+    # data_name = 'eeg_ds004117s_hed_sternberg'
+
+    # Create the event summary
+    events_summary = EventsSummary(schema, tsv_path, sidecar_path, data_name)
+    print(f"Data name: {data_name}")
+    # # Check the validity of the event tags
+    # these_issues = events_summary.validate_event_tags()
+    # if these_issues:
+    #     print(f"Errors found in {get_printable_issue_string(these_issues, '')}")
+    # else:
+    #     print(f"No errors found in {data_name}.")
+
+    # Extract the tag summary
+    tag_dict, others = events_summary.extract_tag_summary()
+
+    for the_key, the_item in tag_dict.items():
+        if not the_item:
+            continue
+        print(f"{the_key}:")
+        for the_tag in the_item:
+            print(f"  {the_tag}")
+
+    print("Other:")
+    for the_tag in others:
+        print(f"  {the_tag}")

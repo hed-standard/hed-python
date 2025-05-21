@@ -5,7 +5,8 @@ You can scope the formatted errors with calls to push_error_context and pop_erro
 """
 
 from functools import wraps
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as et
+from collections import defaultdict
 
 from hed.errors.error_types import ErrorContext, ErrorSeverity
 from hed.errors.known_error_codes import known_error_codes
@@ -47,7 +48,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
 
     Parameters:
         error_type (str): A value from error_types or optionally another value.
-        default_severity (ErrorSeverity): The default severity for the decorated error.
+        default_severity (int): The default severity for the decorated error.
         actual_code (str): The actual error to report to the outside world.
 
     """
@@ -61,7 +62,7 @@ def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None
 
             Parameters:
                 args (args): non keyword args.
-                severity (ErrorSeverity): Will override the default error value if passed.
+                severity (int): Will override the default error value if passed.
                 kwargs (**kwargs): Any keyword args to be passed down to error message function.
 
             Returns:
@@ -82,7 +83,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
     Parameters:
         error_type (str): A value from error_types or optionally another value.
-        default_severity (ErrorSeverity): The default severity for the decorated error.
+        default_severity (int): The default severity for the decorated error.
         has_sub_tag (bool): If True, this error message also wants a sub_tag passed down.  eg "This" in "This/Is/A/Tag"
         actual_code (str): The actual error to report to the outside world.
 
@@ -101,7 +102,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     index_in_tag (int): The index into the tag with a problem(usually 0).
                     index_in_tag_end (int): The last index into the tag with a problem - usually len(tag).
                     args (args): Any other non keyword args.
-                    severity (ErrorSeverity): Used to include warnings as well as errors.
+                    severity (int): Used to include warnings as well as errors.
                     kwargs (**kwargs): Any keyword args to be passed down to error message function.
 
                 Returns:
@@ -218,6 +219,19 @@ class ErrorHandler:
         """
         self.error_context = []
 
+    def add_context_and_filter(self, issues):
+        """ Filter out warnings if requested, while adding context to issues.
+
+            issues(list):
+                list:   A list containing a single dictionary representing a single error.
+        """
+        if not self._check_for_warnings:
+            issues[:] = self.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
+
+        for error_object in issues:
+            self._add_context_to_errors(error_object, self.error_context)
+            self._update_error_with_char_pos(error_object)
+
     def format_error_with_context(self, *args, **kwargs):
         error_object = ErrorHandler.format_error(*args, **kwargs)
         if self is not None:
@@ -258,19 +272,6 @@ class ErrorHandler:
             error_object['code'] = actual_error
 
         return [error_object]
-
-    def add_context_and_filter(self, issues):
-        """ Filter out warnings if requested, while adding context to issues.
-
-            issues(list):
-                list:   A list containing a single dictionary representing a single error.
-        """
-        if not self._check_for_warnings:
-            issues[:] = self.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
-
-        for error_object in issues:
-            self._add_context_to_errors(error_object, self.error_context)
-            self._update_error_with_char_pos(error_object)
 
     @staticmethod
     def format_error_from_context(error_type, error_context, *args, actual_error=None, **kwargs):
@@ -392,6 +393,57 @@ class ErrorHandler:
         """
         return [issue for issue in issues_list if issue['severity'] <= severity]
 
+    @staticmethod
+    def filter_issues_by_count(issues, count, by_file=False):
+        """ Filter the issues list to only include the first count issues of each code.
+
+        Parameters:
+            issues (list): A list of dictionaries containing the full issue list.
+            count (int): The number of issues to keep for each code.
+            by_file (bool): If True, group by file name.
+
+        Returns:
+            list: A list of dictionaries containing the issue list after filtering by count.
+            dict: A dictionary with the codes as keys and the number of occurrences as values.
+
+        """
+        total_seen = {}
+        file_dicts = {'': {}}
+        filtered_issues = []
+        for issue in issues:
+            seen_codes = file_dicts['']
+            if by_file and 'ec_filename' in issue:
+                file_name = issue['ec_filename']
+                if file_name not in file_dicts:
+                    file_dicts[file_name] = {}
+                seen_codes = file_dicts[file_name]
+
+            code = issue['code']
+            if code not in seen_codes:
+                seen_codes[code] = 0
+            seen_codes[code] += 1
+            if seen_codes[code] > count:
+                continue
+            filtered_issues.append(issue)
+
+        return filtered_issues, ErrorHandler.aggregate_code_counts(file_dicts)
+
+    @staticmethod
+    def aggregate_code_counts(file_code_dict):
+        """ Aggregate the counts of codes across multiple files.
+
+        Parameters:
+            file_code_dict (dict): A dictionary where keys are filenames and values are dictionaries of code counts.
+
+        Returns:
+            dict: A dictionary with the aggregated counts of codes across all files.
+        """
+        total_counts = defaultdict(int)
+        for file_dict in file_code_dict.values():
+            for code, count in file_dict.items():
+                total_counts[code] += count
+        return dict(total_counts)
+
 
 def sort_issues(issues, reverse=False):
     """Sort a list of issues by the error context values.
@@ -425,7 +477,7 @@ def check_for_any_errors(issues_list):
     return False
 
 
-def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True, add_link=False):
+def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True, add_link=False, show_details=False):
     """ Return a string with issues list flatted into single string, one per line.
 
     Parameters:
@@ -434,6 +486,7 @@ def get_printable_issue_string(issues, title=None, severity=None, skip_filename=
         severity (int):        Return only warnings >= severity.
         skip_filename (bool):  If True, don't add the filename context to the printable string.
         add_link (bool): Add a link at the end of message to the appropriate error if True
+        show_details (bool):  If True, show details about the issues.
     Returns:
         str:   A string containing printable version of the issues or ''.
 
@@ -442,14 +495,14 @@ def get_printable_issue_string(issues, title=None, severity=None, skip_filename=
         issues = ErrorHandler.filter_issues_by_severity(issues, severity)
 
     output_dict = _build_error_context_dict(issues, skip_filename)
-    issue_string = _error_dict_to_string(output_dict, add_link=add_link)
+    issue_string = _error_dict_to_string(output_dict, add_link=add_link, show_details=show_details)
 
     if title:
         issue_string = title + '\n' + issue_string
     return issue_string
 
 
-def get_printable_issue_string_html(issues, title=None, severity=None, skip_filename=True):
+def get_printable_issue_string_html(issues, title=None, severity=None, skip_filename=True, show_details=False):
     """ Return a string with issues list as an HTML tree.
 
     Parameters:
@@ -457,6 +510,7 @@ def get_printable_issue_string_html(issues, title=None, severity=None, skip_file
         title (str):  Optional title that will always show up first if present.
         severity (int): Return only warnings >= severity.
         skip_filename (bool): If True, don't add the filename context to the printable string.
+        show_details (bool):  If True, show details about the issues.
 
     Returns:
         str: An HTML string containing the issues or ''.
@@ -468,10 +522,10 @@ def get_printable_issue_string_html(issues, title=None, severity=None, skip_file
 
     root_element = _create_error_tree(output_dict)
     if title:
-        title_element = ET.Element("h1")
+        title_element = et.Element("h1")
         title_element.text = title
         root_element.insert(0, title_element)
-    return ET.tostring(root_element, encoding='unicode')
+    return et.tostring(root_element, encoding='unicode')
 
 def iter_errors(issues):
     """ An iterator over issues represented as flat dictionaries.
@@ -556,7 +610,7 @@ def _add_single_error_to_dict(items, root=None, issue_to_add=None):
     return root
 
 
-def _error_dict_to_string(print_dict, add_link=True, level=0):
+def _error_dict_to_string(print_dict, add_link=True, show_details=False, level=0):
     output = ""
     if print_dict is None:
         return output
@@ -569,14 +623,33 @@ def _error_dict_to_string(print_dict, add_link=True, level=0):
                 if add_link:
                     link_url = create_doc_link(child['code'])
                     if link_url:
-                        single_issue_message += f"   See... {link_url}"
+                        single_issue_message += "\n" + (level + 1) * "\t" + f"   See... {link_url}"
+                if show_details and "details" in child:
+                    issue_string += _expand_details(child["details"], level + 1)
                 output += issue_string
             continue
         output += _format_single_context_string(context[0], context[1], level)
-        output += _error_dict_to_string(value, add_link, level + 1)
+        output += _error_dict_to_string(value, add_link, show_details, level + 1)
 
     return output
 
+
+def _expand_details(details, indent=0):
+    """ Expand the details of an error into a string.
+
+    Parameters:
+        details (str): The details to expand.
+        indent (int): The indentation level.
+
+    Returns:
+        str: The expanded details string.
+    """
+    if not details:
+        return ""
+    expanded_details = ""
+    for line in details:
+        expanded_details += indent * "\t" + line + "\n"
+    return expanded_details
 
 def _get_context_from_issue(val_issue, skip_filename=True):
     """ Extract all the context values from the given issue.
@@ -653,12 +726,12 @@ def _format_single_context_string(context_type, context, tab_count=0):
 
 def _create_error_tree(error_dict, parent_element=None, add_link=True):
     if parent_element is None:
-        parent_element = ET.Element("ul")
+        parent_element = et.Element("ul")
 
     for context, value in error_dict.items():
         if context == "children":
             for child in value:
-                child_li = ET.SubElement(parent_element, "li")
+                child_li = et.SubElement(parent_element, "li")
                 error_prefix = _get_error_prefix(child)
                 single_issue_message = child["message"]
 
@@ -666,7 +739,7 @@ def _create_error_tree(error_dict, parent_element=None, add_link=True):
                 if add_link:
                     link_url = create_doc_link(child['code'])
                     if link_url:
-                        a_element = ET.SubElement(child_li, "a", href=link_url)
+                        a_element = et.SubElement(child_li, "a", href=link_url)
                         a_element.text = error_prefix
                         a_element.tail = " " + single_issue_message
                     else:
@@ -675,9 +748,9 @@ def _create_error_tree(error_dict, parent_element=None, add_link=True):
                     child_li.text = error_prefix + " " + single_issue_message
             continue
 
-        context_li = ET.SubElement(parent_element, "li")
+        context_li = et.SubElement(parent_element, "li")
         context_li.text = _format_single_context_string(context[0], context[1])
-        context_ul = ET.SubElement(context_li, "ul")
+        context_ul = et.SubElement(context_li, "ul")
         _create_error_tree(value, context_ul, add_link)
 
     return parent_element

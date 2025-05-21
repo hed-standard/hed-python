@@ -137,7 +137,7 @@ def replace_ref(text, oldvalue, newvalue="n/a"):
         str: The modified string with the ref replaced or removed.
     """
     # If it's not n/a, we can just replace directly.
-    if newvalue != "n/a":
+    if newvalue != "n/a" and newvalue != "":
         return text.replace(oldvalue, newvalue)
 
     def _remover(match):

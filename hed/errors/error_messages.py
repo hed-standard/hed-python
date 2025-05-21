@@ -211,8 +211,8 @@ def val_error_extra_slashes_spaces(tag, problem_tag):
 
 
 @hed_error(ValidationErrors.SIDECAR_KEY_MISSING, default_severity=ErrorSeverity.WARNING)
-def val_error_sidecar_key_missing(invalid_keys, category_keys):
-    return f"Category keys '{invalid_keys}' do not exist in column.  Valid keys are: {category_keys}"
+def val_error_sidecar_key_missing(invalid_keys, category_keys, column_name):
+    return f"Category keys {invalid_keys} do not exist in sidecar for column '{column_name}'.  Valid keys are: {category_keys}"
 
 
 @hed_error(ValidationErrors.TSV_COLUMN_MISSING, actual_code=ValidationErrors.SIDECAR_KEY_MISSING,
@@ -470,14 +470,34 @@ def missing_event_type(string, line):
     return f"The HED string '{string}' at line {line} has no Event type."
 
 
+@hed_error(TagQualityErrors.IMPROPER_EVENT_GROUPS, default_severity=ErrorSeverity.WARNING,
+           actual_code=TagQualityErrors.IMPROPER_EVENT_GROUPS)
+def improper_event_groups(event_types, string, line):
+    return f"The HED string '{string}' at line {line} has multiple events [{event_types}] but is improperly " + \
+    f"parenthesized so the other tags cannot be uniquely associated with an event."
+
+
 @hed_error(TagQualityErrors.MISSING_TASK_ROLE, default_severity=ErrorSeverity.WARNING,
            actual_code=TagQualityErrors.MISSING_TASK_ROLE)
 def missing_task_role(event_type, string, line):
     return f"The HED string '{string}' at line {line} with event {event_type} has no Task-event-role type tag."
 
 
-@hed_error(TagQualityErrors.IMPROPER_TAG_GROUPING, default_severity=ErrorSeverity.WARNING,
-           actual_code=TagQualityErrors.IMPROPER_TAG_GROUPING)
-def improper_tag_grouping(event_types, string, line):
-    return f"The HED string '{string}' at line {line} has multiple events [{event_types}] but is improperly " + \
-    f"parenthesized so the other tags cannot be uniquely associated with an event."
+@hed_error(TagQualityErrors.AMBIGUOUS_TAG_GROUPING, default_severity=ErrorSeverity.WARNING,
+           actual_code=TagQualityErrors.AMBIGUOUS_TAG_GROUPING)
+def ambiguous_tag_grouping(tags, string, line):
+    return f"The HED string '{string}' at line {line} has ambiguously grouped tags [{tags}] and needs parentheses."
+
+
+@hed_error(TagQualityErrors.MISSING_SENSORY_PRESENTATION, default_severity=ErrorSeverity.WARNING,
+           actual_code=TagQualityErrors.MISSING_SENSORY_PRESENTATION)
+def missing_sensory_presentation(string, line):
+    return f"The HED string '{string}' at line {line} is a Sensory-event but does not have a sensory presentation " + \
+    f"modality tag such as Visual-presentation or Auditory-presentation."
+
+
+@hed_error(TagQualityErrors.MISSING_ACTION_TAG, default_severity=ErrorSeverity.WARNING,
+           actual_code=TagQualityErrors.MISSING_ACTION_TAG)
+def missing_action_tag(string, line):
+    return f"The HED string '{string}' at line {line} is an Agent-action event but does not any Action tags " + \
+    f"such as Move or Perform."
