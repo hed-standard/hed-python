@@ -1,5 +1,5 @@
 from hed.errors.error_types import TagQualityErrors
-from hed.errors import ErrorHandler, ErrorContext, get_printable_issue_string
+from hed.errors import ErrorHandler, ErrorContext, sort_issues
 from hed import TabularInput
 from hed.tools import EventManager, HedTagManager
 
@@ -20,17 +20,22 @@ class EventChecker:
 
     ALL_ROLES = TASK_ROLES.union(ACTION_ROLES).union(STIMULUS_ROLES)
 
-    def __init__(self, hed_obj, line_number, error_handler=None):
+    def __init__(self, hed_obj, line_number, original_line_number=None, error_handler=None):
         """ Constructor for the EventChecker class.
 
         Parameters:
             hed_obj (HedString): The HED string to check.
             line_number (int or None): The index of the HED string in the file.
+            original_line_number (int or None): The original line number in the file.
             error_handler (ErrorHandler): The ErrorHandler object to use for error handling.
 
         """
         self.hed_obj = hed_obj
         self.line_number = line_number
+        if original_line_number is None:
+            self.original_line_number = line_number
+        else:
+            self.original_line_number = int(original_line_number)
         if error_handler is None:
             self.error_handler = ErrorHandler()
         else:
@@ -76,7 +81,7 @@ class EventChecker:
         event_tags = [tag.short_base_tag for tag in all_tags if tag.short_base_tag in self.EVENT_TAGS]
         if not event_tags:
             return ErrorHandler.format_error_with_context(self.error_handler, TagQualityErrors.MISSING_EVENT_TYPE,
-                                                           string=str(group), line=self.line_number)
+                                                           string=str(group), line=self.original_line_number)
 
         if len(event_tags) == 1:
             return self._check_event_group(group, event_tags[0], all_tags)
@@ -84,7 +89,7 @@ class EventChecker:
         # At this point, we know we have multiple event tags in the group.
         if any(tag.short_base_tag in event_tags for tag in group.tags()):
             return ErrorHandler.format_error_with_context(self.error_handler, TagQualityErrors.IMPROPER_EVENT_GROUPS,
-                                                          string=str(group), line=self.line_number,
+                                                          string=str(group), line=self.original_line_number,
                                                           event_types =', '.join(event_tags))
         hed_groups.extend(group.groups())
         return []
@@ -132,7 +137,7 @@ class EventChecker:
 
         return ErrorHandler.format_error_with_context(self.error_handler, TagQualityErrors.MISSING_TASK_ROLE,
                                                       event_type=event_tag, string=str(hed_group),
-                                                      line=self.line_number)
+                                                      line=self.original_line_number)
 
     def _check_presentation_modality(self, hed_group, event_tag, all_tags):
         """ Check that a group with a single event sensory event tag
@@ -151,7 +156,7 @@ class EventChecker:
         if any('sensory-presentation' in tag.tag_terms for tag in all_tags):
             return []
         return ErrorHandler.format_error_with_context(self.error_handler, TagQualityErrors.MISSING_SENSORY_PRESENTATION,
-                                                      string=str(hed_group), line=self.line_number)
+                                                      string=str(hed_group), line=self.original_line_number)
 
     def _check_action_tags(self, hed_group, event_tag, all_tags):
         """ Check that a group with a single event tag has at least one task role tag unless it is a non-task event.
@@ -170,7 +175,7 @@ class EventChecker:
         if any('action' in tag.tag_terms for tag in all_tags):
             return []
         return ErrorHandler.format_error_with_context(self.error_handler, TagQualityErrors.MISSING_ACTION_TAG,
-                                                      string=str(hed_group), line=self.line_number)
+                                                      string=str(hed_group), line=self.original_line_number)
 
 class EventsChecker:
     """ Class to check for event tag quality errors in an event file."""
@@ -191,8 +196,6 @@ class EventsChecker:
         self._schema = hed_schema
         self.input_data = input_data
         self.name = name
-        self.group_error_lines = []
-        self.missing_error_lines = []
         self._initialize()
 
     def _initialize(self):
@@ -200,6 +203,8 @@ class EventsChecker:
         event_manager = EventManager(self.input_data, self._schema)
         tag_man = HedTagManager(event_manager, remove_types=self.REMOVE_TYPES)
         self.hed_objs = tag_man.get_hed_objs(include_context=False, replace_defs=True)
+        self.onsets = event_manager.onsets
+        self.original_index = event_manager.original_index
 
     def validate_event_tags(self):
         """ Verify that the events in the HED strings validly represent events.
@@ -211,12 +216,13 @@ class EventsChecker:
         error_handler = ErrorHandler()
         error_handler.push_error_context(ErrorContext.FILE_NAME, self.name)
         for index, hed_obj in enumerate(self.hed_objs):
-            if not hed_obj:
+            if not hed_obj or hed_obj is None:
                 continue
-            error_handler.push_error_context(ErrorContext.LINE, index)
-            event_check = EventChecker(hed_obj, index, error_handler)
+            error_handler.push_error_context(ErrorContext.LINE, int(self.original_index.iloc[index]))
+            event_check = EventChecker(hed_obj, index, int(self.original_index.iloc[index]), error_handler)
             issues += event_check.issues
             error_handler.pop_error_context()
+        issues = sort_issues(issues)
         return issues
 
     def insert_issue_details(self, issues):
@@ -231,20 +237,17 @@ class EventsChecker:
             line = issue.get('ec_line')
             if line is None:
                 continue
-            lines = self.get_onset_lines(line)
-            data_info = self.input_data._dataframe.iloc[lines]
-            details = ["Sources:"]
-            for index, row in data_info.iterrows():
-               details += EventsChecker.get_issue_details(row, index, side_data)
+            data_info = self.input_data._dataframe.iloc[line]
+            details = [f"Sources: line:{line} onset:{self.onsets[line]}"] + \
+                 EventsChecker.get_issue_details(data_info, side_data)
             issue['details'] = details
 
     @staticmethod
-    def get_issue_details(data_info, line, side_data):
+    def get_issue_details(data_info, side_data):
         """ Get the source details for the issue.
 
         Parameters:
             data_info (pd.Series): The row information from the original tsv.
-            line (list): A list of lines from the original tsv.
             side_data (pd.Series): The sidecar data.
 
         Returns:
@@ -260,8 +263,7 @@ class EventsChecker:
                 col_line = f"  => sidecar_source:{EventsChecker.get_hed_source(side_data[col].hed_dict, value)}"
             if not col_line and col != 'HED':
                 continue
-            col_line = f"\t[line:{line} column_name:{col} column_value:{data_info[col]}]" + col_line
-            details.append(col_line)
+            details.append(f"\t[Column_name:{col} Column_value:{data_info[col]}]" + col_line)
         return details
 
     @staticmethod

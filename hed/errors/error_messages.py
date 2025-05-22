@@ -7,6 +7,17 @@ from hed.errors.error_reporter import hed_error, hed_tag_error
 from hed.errors.error_types import (ValidationErrors, SidecarErrors, ErrorSeverity, DefinitionErrors,
                                     TemporalErrors, ColumnErrors, TagQualityErrors)
 
+def get_tag_list_str(tag_list):
+    """ Return a string representation of a list of tags.
+
+    Parameters:
+        tag_list (list): A list of tags to convert to a string.
+
+    Returns:
+        str: A string representation of the list of tags.
+    """
+    return "[" + ', '.join([str(tag) for tag in tag_list]) + "]"
+
 
 @hed_tag_error(ValidationErrors.UNITS_INVALID)
 def val_error_invalid_unit(tag, units):
@@ -109,9 +120,9 @@ def val_error_duplicate_reserved_tag(tag, group):
 
 
 @hed_error(ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR, actual_code=ValidationErrors.TAG_GROUP_ERROR)
-def val_error_group_for_reserved_tag(group, group_count):
+def val_error_group_for_reserved_tag(group, group_count, tag_list):
     return (f'The number of non-def-expand subgroups for group "{group}" is {group_count}, "'
-            f'which does not meet reserved tag requirements."')
+            f'which does not meet reserved tags {get_tag_list_str(tag_list)} requirements."')
 
 
 @hed_error(ValidationErrors.PARENTHESES_MISMATCH)
@@ -338,8 +349,7 @@ def def_error_no_group_tags(def_name):
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_wrong_number_groups(def_name, tag_list):
-    tag_list_strings = [str(tag) for tag in tag_list]
-    return f"Too many group tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}"
+    return f"Too many group tags found in definition for {def_name}.  Expected 1, found: {get_tag_list_str(tag_list)}"
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
@@ -350,9 +360,8 @@ def def_error_wrong_number_tags(def_name, tag_list):
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_wrong_placeholder_count(def_name, expected_count, tag_list):
-    tag_list_strings = [str(tag) for tag in tag_list]
     return f"Incorrect number placeholders or placeholder tags found in definition for {def_name}.  " + \
-           f"Expected {expected_count}, found: {tag_list_strings}"
+           f"Expected {expected_count}, found:  {get_tag_list_str(tag_list)}"
 
 
 @hed_error(DefinitionErrors.DUPLICATE_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
@@ -485,8 +494,8 @@ def missing_task_role(event_type, string, line):
 
 @hed_error(TagQualityErrors.AMBIGUOUS_TAG_GROUPING, default_severity=ErrorSeverity.WARNING,
            actual_code=TagQualityErrors.AMBIGUOUS_TAG_GROUPING)
-def ambiguous_tag_grouping(tags, string, line):
-    return f"The HED string '{string}' at line {line} has ambiguously grouped tags [{tags}] and needs parentheses."
+def ambiguous_tag_grouping(tag_list, string, line):
+    return f"The HED string '{string}' at line {line} has ambiguously grouped tags {get_tag_list_str(tag_list)}and needs parentheses."
 
 
 @hed_error(TagQualityErrors.MISSING_SENSORY_PRESENTATION, default_severity=ErrorSeverity.WARNING,
