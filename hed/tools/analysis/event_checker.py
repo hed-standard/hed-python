@@ -305,4 +305,6 @@ class EventsChecker:
             line = issue.get('ec_line')
             if line:
                 error_lines[code].append(line)
+        for key, value in error_lines.items():
+            error_lines[key] = set(value)
         return error_lines
