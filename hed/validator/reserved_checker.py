@@ -6,7 +6,6 @@ from collections import defaultdict
 from hed.errors.error_types import ValidationErrors, TemporalErrors
 from hed.errors.error_reporter import ErrorHandler
 
-
 class ReservedChecker:
     _instance = None
     _lock = Lock()
@@ -111,10 +110,10 @@ class ReservedChecker:
         min_allowed, max_allowed = self.get_group_requirements(reserved_tags)
         if not math.isinf(max_allowed) and len(other_groups) > max_allowed:
             return ErrorHandler.format_error(ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR, group=group,
-                                             group_count=str(len(other_groups)))
+                                             group_count=str(len(other_groups)), tag_list=reserved_tags)
         if group.is_group and not math.isinf(max_allowed) and min_allowed > len(other_groups):
             return ErrorHandler.format_error(ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR, group=group,
-                                             group_count=str(len(other_groups)))
+                                             group_count=str(len(other_groups)), tag_list=reserved_tags)
         return []
 
     def get_group_requirements(self, reserved_tags):

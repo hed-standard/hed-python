@@ -35,6 +35,7 @@ class EventManager:
         self.input_data = input_data
         self.def_dict = input_data.get_def_dict(hed_schema, extra_def_dicts=extra_defs)
         self.onsets = None  # list of onset times or None if not an events file
+        self.original_index = None  # list of original indices of the events
         self.base = None  # list of strings containing the starts of event processes
         self.context = None  # list of strings containing the contexts of event processes
         self.hed_strings = None  # list of HedString objects without the temporal events
@@ -62,6 +63,7 @@ class EventManager:
 
         hed_strings = [HedString(hed_string, self.hed_schema) for hed_string in delay_df.HED]
         self.onsets = pd.to_numeric(delay_df.onset, errors='coerce')
+        self.original_index = pd.to_numeric(delay_df.original_index, errors='coerce')
         self.event_list = [[] for _ in range(len(hed_strings))]
         onset_dict = {}  # Temporary dictionary keeping track of temporal events that haven't ended yet.
         for event_index, hed in enumerate(hed_strings):

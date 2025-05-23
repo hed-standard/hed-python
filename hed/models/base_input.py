@@ -117,12 +117,14 @@ class BaseInput:
         """
         if self.onsets is not None:
             return filter_series_by_onset(self.series_a, self.onsets)
+        return None
 
     @property
     def onsets(self):
         """Return the onset column if it exists. """
         if "onset" in self.columns:
             return self._dataframe["onset"]
+        return None
 
     @property
     def needs_sorting(self):
