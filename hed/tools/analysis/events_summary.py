@@ -60,7 +60,6 @@ class EventsSummary:
         self.checker = EventsChecker(hed_schema, self.input_data, name)
         self.issues = self.checker.validate_event_tags()
         self.error_lines = EventsChecker.get_error_lines(self.issues)
- 
 
     def extract_tag_summary(self):
         """ Extract a summary of the tags in a given tabular input file.
@@ -72,7 +71,7 @@ class EventsSummary:
 
         group_dict = {key: set() for key in self.MATCH_TYPES}
         other = set()
-        group_error_lines = self.error_lines.get(TagQualityErrors.IMPROPER_EVENT_GROUPS)
+        group_error_lines = self.error_lines.get(TagQualityErrors.IMPROPER_EVENT_GROUPS, [])
         for index, hed_obj in enumerate(self.checker.hed_objs):
             if not hed_obj or index in group_error_lines:
                 continue
@@ -111,9 +110,9 @@ class EventsSummary:
 def summarize_tags(schema, tsv, sidecar, name):
     """ Summarize the tags in a given tabular input file.
 
-    Args:
-        hed_schema: The HED schema to use for validation.
-        file: The path to the input file.
+    Parameters:
+        schema: The HED schema to use for validation.
+        tsv: The path to the input file.
         sidecar: The path to the sidecar file (optional).
         name: The name of the dataset (optional).
 
@@ -129,21 +128,21 @@ def summarize_tags(schema, tsv, sidecar, name):
 
 
 if __name__ == '__main__':
-    schema = load_schema_version('8.4.0')
+    schema = load_schema_version('8.3.0')
 
-    # # Wakeman Henson example
-    root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds003645s_hed'
-    sidecar_path = os.path.join(root_dir, 'task-FacePerception_events.json')
-    tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
-    data_name = 'eeg_ds003645s_hed'
+    # # # Wakeman Henson example
+    # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds003645s_hed'
+    # sidecar_path = os.path.join(root_dir, 'task-FacePerception_events.json')
+    # tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
+    # data_name = 'eeg_ds003645s_hed'
 
-    # # Attention shift example
-    # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds002893s_hed_attention_shift'
-    # sidecar_path = os.path.join(root_dir, 'task-AuditoryVisualShift_events.json')
-    # tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-AuditoryVisualShift_run-01_events.tsv')
-    # data_name = 'eeg_ds002893s_hed_attention_shift'
+    # Attention shift example
+    root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds002893s_hed_attention_shift'
+    sidecar_path = os.path.join(root_dir, 'task-AuditoryVisualShift_events.json')
+    tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-AuditoryVisualShift_run-01_events.tsv')
+    data_name = 'eeg_ds002893s_hed_attention_shift'
 
-    # Sternberg example
+    # # Sternberg example
     # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds004117s_hed_sternberg'
     # sidecar_path = os.path.join(root_dir, 'task-WorkingMemory_events.json')
     # tsv_path = os.path.join(root_dir, 'sub-001/ses-01/eeg/sub-001_ses-01_task-WorkingMemory_run-1_events.tsv')
