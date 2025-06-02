@@ -5,12 +5,14 @@ from hed import load_schema_version
 
 from tests.schema import util_create_schemas
 
+# Load the schema once, globally
+hed_schema_global = load_schema_version('8.4.0')
 
 class TestValidatorUtilityFunctions(TestHedBase):
 
     @classmethod
     def setUpClass(cls):
-        cls.hed_schema = load_schema_version("8.3.0")
+        cls.hed_schema = hed_schema_global
 
     def test_if_tag_exists(self):
         valid_tag1 = HedTag('Left-handed', hed_schema=self.hed_schema)
@@ -28,12 +30,7 @@ class TestValidatorUtilityFunctions(TestHedBase):
         invalid_tag1_results = invalid_tag1.tag_exists_in_schema()
         invalid_tag2_results = invalid_tag2.tag_exists_in_schema()
         invalid_tag3_results = invalid_tag3.tag_exists_in_schema()
-        # valid_tag1_results = self.semantic_tag_validator.check_tag_exists_in_schema(valid_tag1)
-        # valid_tag2_results = self.semantic_tag_validator.check_tag_exists_in_schema(valid_tag2)
-        # valid_tag3_results = self.semantic_tag_validator.check_tag_exists_in_schema(valid_tag3)
-        # invalid_tag1_results = self.semantic_tag_validator.check_tag_exists_in_schema(invalid_tag1)
-        # invalid_tag2_results = self.semantic_tag_validator.check_tag_exists_in_schema(invalid_tag2)
-        # invalid_tag3_results = self.semantic_tag_validator.check_tag_exists_in_schema(invalid_tag3)
+
         self.assertEqual(valid_tag1_results, True)
         self.assertEqual(valid_tag2_results, True)
         self.assertEqual(valid_tag3_results, True)
@@ -45,7 +42,7 @@ class TestValidatorUtilityFunctions(TestHedBase):
 class TestSchemaUtilityFunctions(TestHedBase):
     @classmethod
     def setUpClass(cls):
-        cls.hed_schema = load_schema_version("8.3.0")
+        cls.hed_schema = hed_schema_global
 
     def test_correctly_determine_tag_takes_value(self):
         value_tag1 = HedTag('Distance/35 px', hed_schema=self.hed_schema)
@@ -113,12 +110,6 @@ class TestSchemaUtilityFunctions(TestHedBase):
             'meter',
             'mile',
         ]))
-        # self.assertCountEqual(unit_class_tag2_result, [
-        #     'dollar',
-        #     '$',
-        #     'point',
-        #     'fraction',
-        # ])
         self.assertEqual(no_unit_class_tag_result, [])
 
     def test_strip_off_units_from_value(self):

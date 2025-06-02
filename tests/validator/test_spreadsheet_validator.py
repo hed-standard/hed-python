@@ -15,7 +15,7 @@ from hed.errors.error_reporter import ErrorHandler
 class TestSpreadsheetValidation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.schema = load_schema_version("8.3.0")
+        cls.schema = load_schema_version("8.4.0")
         cls.validator = SpreadsheetValidator(cls.schema)
         base = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
         cls.base_data_dir = base

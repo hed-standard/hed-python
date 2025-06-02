@@ -3,11 +3,12 @@ from hed import HedString, load_schema_version
 from hed.models.string_util import split_base_tags, split_def_tags, gather_descriptions, cleanup_empties
 import copy
 
+hed_schema_global = load_schema_version('8.4.0')
 
 class TestHedStringSplit(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.schema = load_schema_version("8.3.0")
+        cls.schema = hed_schema_global
 
     def check_split_base_tags(self, hed_string, base_tags, expected_string, expected_string2):
         # Test case 1: remove_group=False
@@ -71,7 +72,7 @@ class TestHedStringSplit(unittest.TestCase):
 class TestHedStringSplitDef(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.schema = load_schema_version("8.3.0")
+        cls.schema = hed_schema_global
 
     def check_split_def_tags(self, hed_string, def_names, expected_string, expected_string2):
         # Test case 1: remove_group=False
@@ -135,7 +136,7 @@ class TestHedStringSplitDef(unittest.TestCase):
 
 class TestGatherDescriptions(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version("8.3.0")
+        self.schema = hed_schema_global
 
     def test_gather_single_description(self):
         input_str = "Sensory-event, Description/This is a test."
@@ -186,7 +187,6 @@ class TestGatherDescriptions(unittest.TestCase):
 
         self.assertEqual(result, expected_result)
         self.assertNotIn("Description", str(result))
-
 
 
 class TestCleanupEmpties(unittest.TestCase):

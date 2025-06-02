@@ -148,7 +148,7 @@ class Test(unittest.TestCase):
             self.assertFalse(fp.getvalue())
 
     def test_main_direct_sidecar_with_hed(self):
-        arg_list = [self.data_root, self.summary_model_path, '-x', 'derivatives', 'stimuli', '-hv', '8.3.0',
+        arg_list = [self.data_root, self.summary_model_path, '-x', 'derivatives', 'stimuli', '-hv', '8.4.0',
                     '-j', self.sidecar_path, '-v']
         with patch('sys.stdout', new=io.StringIO()) as fp:
             main(arg_list)

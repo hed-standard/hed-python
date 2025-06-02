@@ -28,8 +28,9 @@ DF_SUFFIXES = {TAG_KEY, STRUCT_KEY, VALUE_CLASS_KEY,
                EXTERNAL_ANNOTATION_KEY, SOURCES_KEY}
 
 
-DF_EXTRA_SUFFIXES = {PREFIXES_KEY, EXTERNAL_ANNOTATION_KEY, SOURCES_KEY}
-#DF_SUFFIXES_OMN = {*DF_SUFFIXES, *DF_EXTRA_SUFFIXES}
+DF_EXTRAS = {PREFIXES_KEY, EXTERNAL_ANNOTATION_KEY, SOURCES_KEY}
+
+#DF_SUFFIXES_OMN = {*DF_SUFFIXES, *DF_EXTRAS}
 
 section_mapping_hed_id = {
     STRUCT_KEY: None,
@@ -129,3 +130,6 @@ EXTRAS_CONVERSIONS = {"Prefix": "prefix", "namespace IRI": "namespace", "namespa
 Prefix = "prefix"
 ID = "id"
 NamespaceIRI = "namespaceIRI"
+
+# Unique extras keys
+UNIQUE_EXTRAS_KEYS = {PREFIXES_KEY: ["prefix"], EXTERNAL_ANNOTATION_KEY: ["prefix", "id"], SOURCES_KEY:"source"}

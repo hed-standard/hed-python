@@ -2,7 +2,7 @@ import os.path
 from collections import defaultdict
 from hed.schema import from_string, load_schema, from_dataframes
 from hed.errors import get_printable_issue_string, HedFileError, SchemaWarnings
-from hed.schema.schema_compare import compare_differences
+from hed.schema.schema_comparer import SchemaComparer
 
 all_extensions = [".tsv", ".mediawiki", ".xml"]
 
@@ -235,7 +235,7 @@ def _get_schema_comparison(schema, schema_reload, file_path, file_format):
                      f"There is either a problem with the source file, or the saving/loading code."
         title_prompt = ("If the problem is in the schema file, "
                         "the following comparison should indicate the approximate source of the issues:")
-        error_text += "\n" + compare_differences(schema, schema_reload, title=title_prompt)
+        error_text += "\n" + SchemaComparer(schema, schema_reload).compare_differences(title=title_prompt)
         return [error_text]
 
     return []
