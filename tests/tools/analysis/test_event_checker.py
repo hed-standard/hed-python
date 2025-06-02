@@ -9,7 +9,7 @@ class TestEventChecker(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.hed_schema = load_schema_version('8.3.0')
+        cls.hed_schema = load_schema_version('8.4.0')
 
     def check_issues(self, hed_string, expected_code=None, line_number=0):
         hed_obj = HedString(hed_string, hed_schema=self.hed_schema)

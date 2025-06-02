@@ -8,6 +8,7 @@ from hed.schema.schema_io.ontology_util import _verify_hedid_matches, assign_hed
 from hed.schema.schema_io.df_util import get_library_name_and_id
 from hed import load_schema_version
 
+hed_schema_global = load_schema_version('8.4.0')
 
 class TestLibraryFunctions(unittest.TestCase):
     def setUp(self):
@@ -15,8 +16,7 @@ class TestLibraryFunctions(unittest.TestCase):
 
     def test_get_library_name_and_id_default(self):
         # Test default case where no library name is provided
-        schema = load_schema_version("8.3.0")
-        name, first_id = get_library_name_and_id(schema)
+        name, first_id = get_library_name_and_id(hed_schema_global)
         self.assertEqual(name, "Standard")
         self.assertEqual(first_id, 10000)
 
@@ -53,7 +53,6 @@ class TestLibraryFunctions(unittest.TestCase):
 class TestVerifyHedIdMatches(unittest.TestCase):
     def setUp(self):
         self.schema_82 = load_schema_version("8.2.0")
-        self.schema_id = load_schema_version("8.3.0")
 
     def test_no_hedid(self):
         df = pd.DataFrame([{'rdfs:label': 'Event', 'hedId': ''}, {'rdfs:label': 'Age-#', 'hedId': ''}])
@@ -63,20 +62,20 @@ class TestVerifyHedIdMatches(unittest.TestCase):
     def test_id_matches(self):
         df = pd.DataFrame(
             [{'rdfs:label': 'Event', 'hedId': 'HED_0012001'}, {'rdfs:label': 'Age-#', 'hedId': 'HED_0012475'}])
-        errors = _verify_hedid_matches(self.schema_id.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
+        errors = _verify_hedid_matches(hed_schema_global.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 0)
 
     def test_label_mismatch_id(self):
         df = pd.DataFrame(
             [{'rdfs:label': 'Event', 'hedId': 'HED_0012005'}, {'rdfs:label': 'Age-#', 'hedId': 'HED_0012007'}])
 
-        errors = _verify_hedid_matches(self.schema_id.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
+        errors = _verify_hedid_matches(hed_schema_global.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 2)
 
     def test_label_no_entry(self):
         df = pd.DataFrame([{'rdfs:label': 'NotARealEvent', 'hedId': 'does_not_matter'}])
 
-        errors = _verify_hedid_matches(self.schema_id.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
+        errors = _verify_hedid_matches(hed_schema_global.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 1)
 
     def test_out_of_range(self):
@@ -134,7 +133,7 @@ class TestVerifyHedIdMatches(unittest.TestCase):
 class TestUpdateDataframes(unittest.TestCase):
     def test_update_dataframes_from_schema(self):
         # valid direction first
-        schema_dataframes = load_schema_version("8.3.0").get_as_dataframes()
+        schema_dataframes = hed_schema_global.get_as_dataframes()
         schema_83 = load_schema_version("8.3.0")
         # Add a test column and ensure it stays around
         fixed_value = "test_column_value"
@@ -144,20 +143,20 @@ class TestUpdateDataframes(unittest.TestCase):
         updated_dataframes = update_dataframes_from_schema(schema_dataframes, schema_83)
 
         for key, df in updated_dataframes.items():
-            if key not in constants.DF_EXTRA_SUFFIXES:
+            if key not in constants.DF_EXTRAS:
                 self.assertTrue((df['test_column'] == fixed_value).all())
         # this is expected to bomb horribly, since schema lacks many of the spreadsheet entries.
         schema = load_schema_version("8.3.0")
         schema_dataframes_new = load_schema_version("8.3.0").get_as_dataframes()
         try:
-            updated_dataframes = update_dataframes_from_schema(schema_dataframes_new, schema)
+            update_dataframes_from_schema(schema_dataframes_new, schema)
         except HedFileError as e:
             self.assertEqual(len(e.issues), 115)
 
 
 class TestConvertOmn(unittest.TestCase):
     def test_convert_df_to_omn(self):
-        dataframes = load_schema_version("8.3.0").get_as_dataframes()
+        dataframes = hed_schema_global.get_as_dataframes()
         omn_version, _ = convert_df_to_omn(dataframes)
 
         # make these more robust, for now just verify it's somewhere in the result

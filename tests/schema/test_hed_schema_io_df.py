@@ -13,6 +13,7 @@ class TestHedSchemaDF(unittest.TestCase):
     def setUpClass(cls):
         cls.output_folder = "test_output/"
         os.makedirs(cls.output_folder, exist_ok=True)
+        cls.schema = load_schema_version("8.4.0")
 
     @classmethod
     def tearDownClass(cls):
@@ -45,9 +46,8 @@ class TestHedSchemaDF(unittest.TestCase):
         self.assertEqual(schema, reloaded_schema)
 
     def test_from_dataframes(self):
-        schema = load_schema_version("8.3.0")
         filename = self.output_folder + "test_8_string.tsv"
-        schema.save_as_dataframes(self.output_folder + "test_8_string.tsv")
+        self.schema.save_as_dataframes(self.output_folder + "test_8_string.tsv")
 
         filenames = convert_filenames_to_dict(filename)
         new_file_strings = {}
@@ -60,36 +60,33 @@ class TestHedSchemaDF(unittest.TestCase):
                 pass
 
         reloaded_schema = from_dataframes(new_file_strings)
-        self.assertEqual(schema, reloaded_schema)
+        self.assertEqual(self.schema, reloaded_schema)
 
-        schema = load_schema_version("8.3.0")
-        dfs = schema.get_as_dataframes()
+        dfs = self.schema.get_as_dataframes()
         reloaded_schema = from_dataframes(dfs)
-        self.assertEqual(schema, reloaded_schema)
+        self.assertEqual(self.schema, reloaded_schema)
 
     def test_save_load_location(self):
-        schema = load_schema_version("8.3.0")
         schema_name = "test_output"
         output_location = self.output_folder + schema_name
-        schema.save_as_dataframes(output_location)
+        self.schema.save_as_dataframes(output_location)
         expected_location = os.path.join(output_location, f"{schema_name}_Tag.tsv")
         self.assertTrue(os.path.exists(expected_location))
 
         reloaded_schema = load_schema(output_location)
 
-        self.assertEqual(schema, reloaded_schema)
+        self.assertEqual(self.schema, reloaded_schema)
 
     def test_save_load_location2(self):
-        schema = load_schema_version("8.3.0")
         schema_name = "test_output"
         output_location = self.output_folder + schema_name + ".tsv"
-        schema.save_as_dataframes(output_location)
+        self.schema.save_as_dataframes(output_location)
         expected_location = self.output_folder + schema_name + "_Tag.tsv"
         self.assertTrue(os.path.exists(expected_location))
 
         reloaded_schema = load_schema(output_location)
 
-        self.assertEqual(schema, reloaded_schema)
+        self.assertEqual(self.schema, reloaded_schema)
 
     def _create_structure_df(self):
         data = {"hedId": ["HED_0060010"],
@@ -177,3 +174,7 @@ class TestHedSchemaDF(unittest.TestCase):
         with self.assertRaises(HedFileError) as error:
             _ = from_dataframes(dataframes)
         self.assertEqual(error.exception.args[0], HedExceptions.SCHEMA_TAG_TSV_BAD_PARENT)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -180,6 +180,18 @@ class SchemaLoaderXML(SchemaLoader):
                 self._add_to_dict(unit_class_unit_entry, HedSectionKey.Units)
                 unit_class_entry.add_unit(unit_class_unit_entry)
 
+    # def _reformat_xsd_attrib(self, attrib_dict):
+    #     final_attrib = {}
+    #     for attrib_name in attrib_dict:
+    #         if attrib_name == xml_constants.NO_NAMESPACE_XSD_KEY:
+    #             xsd_value = attrib_dict[attrib_name]
+    #             final_attrib[NS_ATTRIB] = xml_constants.XSI_SOURCE
+    #             final_attrib[NO_LOC_ATTRIB] = xsd_value
+    #         else:
+    #             final_attrib[attrib_name] = attrib_dict[attrib_name]
+    #
+    #     return final_attrib
+
     def _reformat_xsd_attrib(self, attrib_dict):
         final_attrib = {}
         for attrib_name in attrib_dict:
@@ -187,6 +199,20 @@ class SchemaLoaderXML(SchemaLoader):
                 xsd_value = attrib_dict[attrib_name]
                 final_attrib[NS_ATTRIB] = xml_constants.XSI_SOURCE
                 final_attrib[NO_LOC_ATTRIB] = xsd_value
+
+            elif attrib_name == xml_constants.NAMESPACE_XSD_KEY:
+                schema_value = attrib_dict[attrib_name].strip()
+                parts = schema_value.split()
+
+                if len(parts) != 2:
+                    raise HedFileError(HedExceptions.HED_SCHEMA_INVALID,
+                                       "schemaLocation must contain exactly one namespace and location",
+                                       self.name)
+
+                namespace_uri, location_uri = parts
+                final_attrib[NS_ATTRIB] = namespace_uri
+                final_attrib[NO_LOC_ATTRIB] = location_uri
+
             else:
                 final_attrib[attrib_name] = attrib_dict[attrib_name]
 

@@ -4,7 +4,7 @@ from hed.models.basic_search_util import convert_query
 
 
 class TestConvertQueryToForm(unittest.TestCase):
-    schema = load_schema_version("8.3.0")
+    schema = load_schema_version("8.4.0")
 
     def test_basic_convert(self):
         this_input = "@Event, Head-part*, Time-interval/1"

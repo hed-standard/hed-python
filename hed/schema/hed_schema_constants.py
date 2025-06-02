@@ -94,8 +94,10 @@ VERSION_ATTRIBUTE = 'version'
 LIBRARY_ATTRIBUTE = 'library'
 WITH_STANDARD_ATTRIBUTE = "withStandard"
 UNMERGED_ATTRIBUTE = "unmerged"
+NS_SPEC = 'xmlns'
 NS_ATTRIB = "xmlns:xsi"
 NO_LOC_ATTRIB = "xsi:noNamespaceSchemaLocation"
+LOC_ATTRIB = 'xsi:schemaLocation'
 
 # A list of all attributes that can appear in the header line
 valid_header_attributes = {
@@ -103,7 +105,9 @@ valid_header_attributes = {
     LIBRARY_ATTRIBUTE,
     WITH_STANDARD_ATTRIBUTE,
     NS_ATTRIB,
+    NS_SPEC,
     NO_LOC_ATTRIB,
+    LOC_ATTRIB,
     UNMERGED_ATTRIBUTE
 }
 

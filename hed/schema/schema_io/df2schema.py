@@ -86,7 +86,7 @@ class SchemaLoaderDF(SchemaLoader):
                                f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
                                f"parameter on this exception for more details.", self.name,
                                issues=self.fatal_errors)
-        extras =  {key: self.input_data[key] for key in constants.DF_EXTRA_SUFFIXES if key in self.input_data}
+        extras =  {key: self.input_data[key] for key in constants.DF_EXTRAS if key in self.input_data}
         for key, item in extras.items():
             self._schema.extras[key] = df_util.merge_dataframes(extras[key], self._schema.extras.get(key, None), key)
 

@@ -8,10 +8,11 @@ from hed import DefinitionDict
 from hed.models.df_util import (_handle_curly_braces_refs, _indexed_dict_from_onsets,
                                 _filter_by_index_list, split_delay_tags)
 
+hed_schema_global = load_schema_version('8.4.0')
 
 class TestShrinkDefs(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version("8.3.0")
+        self.schema = hed_schema_global
 
     def test_shrink_defs_normal(self):
         df = pd.DataFrame(
@@ -74,7 +75,7 @@ class TestShrinkDefs(unittest.TestCase):
 
 class TestExpandDefs(unittest.TestCase):
     def setUp(self):
-        self.schema = load_schema_version("8.3.0")
+        self.schema = hed_schema_global
         self.def_dict = DefinitionDict(["(Definition/TestDefNormal,(Acceleration/2471,Action/TestDef2))",
                                        "(Definition/TestDefPlaceholder/#,(Acceleration/#,Action/TestDef2))"],
                                        hed_schema=self.schema)
@@ -258,7 +259,7 @@ class TestConvertToForm(unittest.TestCase):
         _, _, errors = process_def_expands(test_strings, self.schema)
         self.assertEqual(len(errors), 1)
 
-    def test_errors(self):
+    def test_errors_1(self):
         # Verify we recognize errors when we had a def that can't be resolved.
         test_strings = [
             "(Def-expand/A1/1, (Acceleration/1, Age/5, Item-count/1))",
@@ -583,8 +584,7 @@ class TestOnsetDict(unittest.TestCase):
 
 
 class TestSplitDelayTags(unittest.TestCase):
-    schema = load_schema_version("8.3.0")
-
+    schema = hed_schema_global
     def test_empty_series_and_onsets(self):
         empty_series = pd.Series([], dtype="object")
         empty_onsets = pd.Series([], dtype="float")
