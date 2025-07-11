@@ -109,8 +109,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     if assign_missing_ids:
         # 3: Add any HED ID's as needed to these generated dfs
         for df_key, df in output_dfs.items():
-            if (df_key == constants.STRUCT_KEY or df_key in constants.DF_EXTRAS or
-                    df_key in constants.DF_EXTRAS):
+            if df_key == constants.STRUCT_KEY or df_key in constants.DF_EXTRAS:
                 continue
             unused_tag_ids = _get_hedid_range(schema_name, df_key)
 
