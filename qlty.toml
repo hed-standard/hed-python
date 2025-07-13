@@ -1,0 +1,64 @@
+# Qlty configuration file
+# Migrated from .codeclimate.yml
+
+[rules]
+# Complexity and maintainability checks
+argument-count = { enabled = true, threshold = 4 }
+complex-logic = { enabled = true, threshold = 4 }
+file-lines = { enabled = true, threshold = 300 }
+method-complexity = { enabled = true, threshold = 5 }
+method-count = { enabled = true, threshold = 20 }
+method-lines = { enabled = true, threshold = 50 }
+nested-control-flow = { enabled = true, threshold = 4 }
+return-statements = { enabled = true, threshold = 4 }
+similar-code = { enabled = true }
+identical-code = { enabled = true }
+
+[ignore]
+# Exclude patterns migrated from .codeclimate.yml
+paths = [
+    "config/",
+    "db/",
+    "dist/",
+    "features/",
+    "**/node_modules/",
+    "script/",
+    "**/spec/",
+    "**/test/",
+    "**/tests/",
+    "**/spec_tests/",
+    "**/docs/",
+    "Tests/",
+    "**/vendor/",
+    "**/*_test.go",
+    "**/*.d.ts",
+    "**/*__init__.py",
+    "**/*setup.py",
+    "**/setup.cfg",
+    "**/static/",
+    "**/constants/",
+    "**/deploy_hed/",
+    "**/README*",
+    "**/.gitignore",
+    "**/LICENSE",
+    "**/examples/",
+    "**/*.yml",
+    "**/*.yaml",
+    "**/config_template.py",
+    "**/*.txt",
+    "**/*.html",
+    "**/.coveragerc",
+    "**/*.md",
+    "**/*.rst",
+    "**/templates/",
+    "**/conf.py",
+    "**/deprecated/",
+    "**/versioneer.py",
+    "**/_version.py"
+]
+
+[coverage]
+# Coverage configuration for Python projects
+# This will be used by the qlty-action/coverage action
+formats = ["lcov"]
+paths = ["target/lcov.info"]
