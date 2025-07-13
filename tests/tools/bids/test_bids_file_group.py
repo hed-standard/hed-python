@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
 
     def test_validator(self):
         events = BidsFileGroup(self.root_path, self.file_paths, 'events')
-        hed_schema = load_schema_version("8.3.0")
+        hed_schema = load_schema_version("8.4.0")
         validation_issues = events.validate_datafiles(hed_schema)
         self.assertFalse(validation_issues, "BidsFileGroup should have no validation errors")
         validation_issues = events.validate_datafiles(hed_schema, error_handler=ErrorHandler(check_for_warnings=True))

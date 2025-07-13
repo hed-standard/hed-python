@@ -18,7 +18,7 @@ jobs:
         # perform secret check & put boolean result as an output
         shell: bash
         run: |
-          if [ "${{ secrets.CC_TEST_REPORTER_ID }}" != '' ]; then
+          if [ "${{ secrets.QLTY_COVERAGE_TOKEN }}" != '' ]; then
             echo "defined=true" >> $GITHUB_OUTPUT;
           else
             echo "defined=false" >> $GITHUB_OUTPUT;
@@ -71,9 +71,10 @@ jobs:
           coverage xml
           ls -la
 
-      # Upload coverage to Code Climate
-      - name: Upload coverage to Code Climate
+      # Upload coverage to qlty
+      - name: Upload coverage to qlty
         if: needs.check-secret.outputs.secrets-exist == 'true'
-        uses: paambaati/codeclimate-action@v9.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        uses: qltysh/qlty-action/coverage@v1
+        with:
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: coverage.xml

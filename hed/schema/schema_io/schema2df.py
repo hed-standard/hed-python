@@ -82,7 +82,7 @@ class Schema2DF(Schema2Base):
         self._create_and_add_object_row(base_object, description=prologue)
 
     def _output_annotations(self, hed_schema):
-        #if self.output
+        # This is taken care of in the extras section
         pass
 
     def _output_extras(self, hed_schema):
@@ -92,17 +92,19 @@ class Schema2DF(Schema2Base):
             hed_schema(HedSchema): The HED schema to extract the information from
 
         """
-        # In the base class, we do nothing, but subclasses can override this method.
-        pass
+        for key, df in hed_schema.extras.items():
+            self.output[key] = df.copy()
 
     def _output_epilogue(self, epilogue):
         base_object = "HedEpilogue"
         self._create_and_add_object_row(base_object, description=epilogue)
 
     def _output_footer(self):
+        # This is not needed for the dataframe output
         pass
 
     def _start_section(self, key_class):
+        # This is not needed for the dataframe output
         pass
 
     def _end_tag_section(self):

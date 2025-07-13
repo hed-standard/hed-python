@@ -7,7 +7,7 @@ import copy
 class TestHedStrings(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.schema = load_schema_version("8.3.0")
+        cls.schema = load_schema_version("8.4.0")
 
     def validator_scalar(self, test_strings, expected_results, test_function):
         for test_key in test_strings:

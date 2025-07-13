@@ -109,7 +109,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
     if assign_missing_ids:
         # 3: Add any HED ID's as needed to these generated dfs
         for df_key, df in output_dfs.items():
-            if df_key == constants.STRUCT_KEY or df_key in constants.DF_EXTRA_SUFFIXES:
+            if df_key == constants.STRUCT_KEY or df_key in constants.DF_EXTRAS:
                 continue
             unused_tag_ids = _get_hedid_range(schema_name, df_key)
 
@@ -118,6 +118,8 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
 
     # 4: Merge the dataframes
     for df_key in output_dfs.keys():
+        if df_key in constants.DF_EXTRAS:
+            continue
         out_df = output_dfs[df_key]
         df = dataframes[df_key]
         merge_dfs(out_df, df)
@@ -203,9 +205,9 @@ def assign_hed_ids_section(df, unused_tag_ids):
 def merge_dfs(dest_df, source_df):
     """ Merges extra columns from source_df into dest_df, adding the extra columns from the ontology to the schema df.
 
-    Args:
-        dest_df: The dataframe to add extra columns to
-        source_df: The dataframe to get extra columns from
+    Parameters:
+        dest_df (DataFrame): The dataframe to add extra columns to
+        source_df (DataFrame): The dataframe to get extra columns from
     """
     # todo: vectorize this at some point
     save_df1_columns = dest_df.columns.copy()
@@ -233,18 +235,23 @@ def _get_annotation_prop_ids(schema):
 
 
 def get_prefixes(dataframes):
+    """ Get the prefixes and external annotation terms from the dataframes for ontology conversion."""
     prefixes = dataframes.get(constants.PREFIXES_KEY)
     extensions = dataframes.get(constants.EXTERNAL_ANNOTATION_KEY)
+    sources = dataframes.get(constants.SOURCES_KEY)
     if prefixes is None or extensions is None:
         return {}
     prefixes.columns = prefixes.columns.str.lower()
     all_prefixes = {prefix.prefix: prefix[2] for prefix in prefixes.itertuples()}
     extensions.columns = extensions.columns.str.lower()
+    sources.columns = sources.columns.str.lower()
     annotation_terms = {}
     for row in extensions.itertuples():
         annotation_terms[row.prefix + row.id] = all_prefixes[row.prefix]
-
-    return annotation_terms
+    source_dict = {}
+    for row in sources.itertuples():
+        source_dict[row.source] = row.link
+    return annotation_terms, source_dict
 
 
 def convert_df_to_omn(dataframes):
@@ -254,13 +261,12 @@ def convert_df_to_omn(dataframes):
         dataframes(dict): A set of dataframes representing a schema, potentially including extra columns
 
     Returns:
-        tuple:
-            omn_file(str): A combined string representing (most of) a schema omn file.
-            omn_data(dict): a dict of DF_SUFFIXES:str, representing each .tsv file in omn format.
+        omn_file(str): A combined string representing (most of) a schema omn file.
+        omn_data(dict): a dict of DF_SUFFIXES:str, representing each .tsv file in omn format.
     """
     from hed.schema.hed_schema_io import from_dataframes
     from hed.schema.schema_io.schema2df import Schema2DF  # Late import as this is recursive
-    annotation_terms = get_prefixes(dataframes)
+    annotation_terms, source_dict = get_prefixes(dataframes)
 
     # Load the schema, so we can save it out with ID's
     schema = from_dataframes(dataframes)
@@ -272,7 +278,7 @@ def convert_df_to_omn(dataframes):
     dataframes_u = update_dataframes_from_schema(dataframes, schema, get_as_ids=True)
 
     # Copy over remaining non schema dataframes.
-    for suffix in constants.DF_EXTRA_SUFFIXES:
+    for suffix in constants.DF_EXTRAS:
         if suffix in dataframes:
             dataframes_u[suffix] = dataframes[suffix]
 
@@ -281,7 +287,7 @@ def convert_df_to_omn(dataframes):
     full_text = ""
     omn_data = {}
     for suffix, dataframe in dataframes_u.items():
-        if suffix in constants.DF_EXTRA_SUFFIXES:
+        if suffix in constants.DF_EXTRAS:
             output_text = _convert_extra_df_to_omn(dataframes_u[suffix], suffix)
         else:
             output_text = _convert_df_to_omn(dataframes_u[suffix], annotation_properties=annotation_props,
@@ -357,9 +363,15 @@ def _convert_extra_df_to_omn(df, suffix):
     for index, row in df.iterrows():
         renamed_row = row.rename(index=constants.EXTRAS_CONVERSIONS)
         if suffix == constants.PREFIXES_KEY:
-            output_text += f"Prefix: {renamed_row[constants.Prefix]} <{renamed_row[constants.NamespaceIRI]}>"
+            output_text += f"Prefix: {renamed_row[constants.Prefix]} <{renamed_row[constants.namespace]}>"
         elif suffix == constants.EXTERNAL_ANNOTATION_KEY:
             output_text += f"AnnotationProperty: {renamed_row[constants.Prefix]}{renamed_row[constants.ID]}"
+        elif suffix == constants.SOURCES_KEY:
+            output_text += f"Source: {renamed_row[constants.source]}"
+            if renamed_row[constants.link]:
+                output_text += f" <{renamed_row[constants.link]}>"
+            if renamed_row[constants.description]:
+                output_text += f" \"{renamed_row[constants.description]}\""
         else:
             raise ValueError(f"Unknown tsv suffix attempting to be converted {suffix}")
 

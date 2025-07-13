@@ -136,7 +136,7 @@ class TestValidateAllSchemaFormats(unittest.TestCase):
     def test_error_no_error(self):
         """Test the function with correctly saved schemas in all three formats."""
         # Load specific schema versions and save them correctly
-        schema = load_schema_version("8.3.0")
+        schema = load_schema_version("8.4.0")
         schema.save_as_xml(os.path.join(self.base_path, self.basename + ".xml"))
         schema.save_as_dataframes(os.path.join(self.base_path, "hedtsv", self.basename))
         with contextlib.redirect_stdout(None):

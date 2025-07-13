@@ -167,7 +167,7 @@ class CharRexValidator(CharValidator):
         """Does basic character validation for HED strings/tags
 
         Parameters:
-            modern_allowed_char_rules(bool): If True, use 8.3 style rules for unicode characters.
+            modern_allowed_char_rules(bool): If True, use 8.3 style rules for Unicode characters.
         """
         super().__init__(modern_allowed_char_rules)
         self._rex_dict = self._get_rex_dict()

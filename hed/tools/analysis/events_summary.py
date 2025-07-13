@@ -60,7 +60,6 @@ class EventsSummary:
         self.checker = EventsChecker(hed_schema, self.input_data, name)
         self.issues = self.checker.validate_event_tags()
         self.error_lines = EventsChecker.get_error_lines(self.issues)
- 
 
     def extract_tag_summary(self):
         """ Extract a summary of the tags in a given tabular input file.
@@ -72,7 +71,7 @@ class EventsSummary:
 
         group_dict = {key: set() for key in self.MATCH_TYPES}
         other = set()
-        group_error_lines = self.error_lines.get(TagQualityErrors.IMPROPER_EVENT_GROUPS)
+        group_error_lines = self.error_lines.get(TagQualityErrors.IMPROPER_EVENT_GROUPS, [])
         for index, hed_obj in enumerate(self.checker.hed_objs):
             if not hed_obj or index in group_error_lines:
                 continue
@@ -111,9 +110,9 @@ class EventsSummary:
 def summarize_tags(schema, tsv, sidecar, name):
     """ Summarize the tags in a given tabular input file.
 
-    Args:
-        hed_schema: The HED schema to use for validation.
-        file: The path to the input file.
+    Parameters:
+        schema: The HED schema to use for validation.
+        tsv: The path to the input file.
         sidecar: The path to the sidecar file (optional).
         name: The name of the dataset (optional).
 
@@ -127,37 +126,3 @@ def summarize_tags(schema, tsv, sidecar, name):
     summary, others = events_summary.extract_tag_summary()
     return summary
 
-
-if __name__ == '__main__':
-    schema = load_schema_version('8.4.0')
-
-    # # Wakeman Henson example
-    root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds003645s_hed'
-    sidecar_path = os.path.join(root_dir, 'task-FacePerception_events.json')
-    tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv')
-    data_name = 'eeg_ds003645s_hed'
-
-    # # Attention shift example
-    # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds002893s_hed_attention_shift'
-    # sidecar_path = os.path.join(root_dir, 'task-AuditoryVisualShift_events.json')
-    # tsv_path = os.path.join(root_dir, 'sub-002/eeg/sub-002_task-AuditoryVisualShift_run-01_events.tsv')
-    # data_name = 'eeg_ds002893s_hed_attention_shift'
-
-    # Sternberg example
-    # root_dir = 'g:/HEDExamples/hed-examples/datasets/eeg_ds004117s_hed_sternberg'
-    # sidecar_path = os.path.join(root_dir, 'task-WorkingMemory_events.json')
-    # tsv_path = os.path.join(root_dir, 'sub-001/ses-01/eeg/sub-001_ses-01_task-WorkingMemory_run-1_events.tsv')
-    # data_name = 'eeg_ds004117s_hed_sternberg'
-
-    # Create the event summary
-    summary = summarize_tags(schema, tsv_path, sidecar=sidecar_path, name=data_name)
-    if summary is None:
-        print("Fatal errors in the input file. Cannot summarize tags.")
-        exit(1)
-
-    for the_key, the_item in summary.items():
-        if not the_item:
-            continue
-        print(f"{the_key}:")
-        for the_tag in the_item:
-            print(f"  {the_tag}")
