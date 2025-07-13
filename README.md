@@ -1,7 +1,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8056010.svg)](https://doi.org/10.5281/zenodo.8056010)
-[![Maintainability](https://api.codeclimate.com/v1/badges/11bf2329590e7b0164ba/maintainability)](https://codeclimate.com/github/hed-standard/hed-python/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/11bf2329590e7b0164ba/test_coverage)](https://codeclimate.com/github/hed-standard/hed-python/test_coverage)
-![Python3](https://img.shields.io/badge/python->=3.8-yellow.svg)
+[![Maintainability](https://qlty.sh/gh/hed-standard/projects/hed-python/maintainability.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
+[![Code Coverage](https://qlty.sh/gh/hed-standard/projects/hed-python/coverage.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
+![Python3](https://img.shields.io/badge/python->=3.9-yellow.svg)
 ![PyPI - Status](https://img.shields.io/pypi/v/hedtools)
 [![Documentation Status](https://readthedocs.org/projects/hed-python/badge/?version=latest)](https://hed-python.readthedocs.io/en/latest/?badge=latest)
 
