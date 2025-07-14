@@ -395,20 +395,6 @@ class ErrorHandler:
         return f"Unknown error. Args: {str(args), str(kwargs)}"
 
     @staticmethod
-    def filter_issues_by_severity(issues_list, severity)-> list[dict]:
-        """ Gather all issues matching or below a given severity.
-
-        Parameters:
-            issues_list (list): A list of dictionaries containing the full issue list.
-            severity (int): The level of issues to keep.
-
-        Returns:
-            list[dict]: A list of dictionaries containing the issue list after filtering by severity.
-
-        """
-        return [issue for issue in issues_list if issue['severity'] <= severity]
-
-    @staticmethod
     def filter_issues_by_count(issues, count, by_file=False)-> tuple[list[dict], dict[str, int]]:
         """ Filter the issues list to only include the first count issues of each code.
 
