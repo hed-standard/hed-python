@@ -64,6 +64,7 @@ var/
 tests/scratch
 tests/test_output
 
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -101,6 +102,7 @@ cover/
 
 # Sphinx documentation
 docs/_build/
+site/
 
 #machine specific files
 .vimrc

@@ -69,8 +69,12 @@ def _merge_dataframes(df1, df2, key_column):
         if col not in df1.columns and col != key_column:
             df1 = df1.merge(df2[[key_column, col]], on=key_column, how='left')
 
-    # Fill missing values with ''
-    df1.fillna('', inplace=True)
+    # Fill missing values with '' for object columns, 0 for numeric columns
+    for col in df1.columns:
+        if df1[col].dtype == 'object':
+            df1[col] = df1[col].fillna('')
+        else:
+            df1[col] = df1[col].fillna(0)
 
     return df1
 

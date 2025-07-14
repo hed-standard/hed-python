@@ -98,6 +98,16 @@ The HED cache can be shared across processes.
 Starting with `hedtools 0.2.0` local copies of the most recent schema versions
 are stored within the code modules for easy access.  
 
-### Other links of interest
+### Building the docs locally
 
-Code climate reports: [https://codeclimate.com/github/hed-standard/hed-python](https://codeclimate.com/github/hed-standard/hed-python).
+You can build the documentation locally by executing the following commands in the hed-python repository root directory:
+
+```bash
+# Build the documentation
+mkdocs build
+
+# Serve locally with live reload
+mkdocs serve
+```
+The API documentation can be viewed at [ http://localhost:8000]( http://localhost:8000).
+

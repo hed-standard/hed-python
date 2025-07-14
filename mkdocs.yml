@@ -1,0 +1,83 @@
+site_name: HED Python Tools
+site_description: Hierarchical Event Descriptor (HED) Python Tools Documentation
+site_url: https://hed-standard.github.io/hed-python/
+repo_url: https://github.com/hed-standard/hed-python
+repo_name: hed-standard/hed-python
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+nav:
+  - Home: index.md
+  - Introduction: introduction.md
+  - User Guide: user_guide.md
+  - API Reference:
+    - Overview: api/index.md
+    - Models: api/models.md
+    - Schema: api/schema.md
+    - Validator: api/validator.md
+    - Tools: api/tools.md
+    - Errors: api/errors.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            separate_signature: true
+            filters: ["!^_"]
+            heading_level: 2
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/hed-standard/hed-python
+
+

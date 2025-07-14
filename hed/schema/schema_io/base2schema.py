@@ -66,7 +66,7 @@ class SchemaLoader(ABC):
                                    self.name)
             elif with_standard != self._schema.with_standard:
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD_MULTIPLE_VALUES,
-                                   "Merging schemas requires same withStandard value.",
+                   f"Merging schemas requires same withStandard value ({with_standard} != {self._schema.with_standard}).",
                                    self.name)
             hed_attributes[hed_schema_constants.VERSION_ATTRIBUTE] = self._schema.version_number + f",{version_number}"
             hed_attributes[hed_schema_constants.LIBRARY_ATTRIBUTE] = self._schema.library + f",{self.library}"

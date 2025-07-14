@@ -132,4 +132,4 @@ ID = "id"
 NamespaceIRI = "namespaceIRI"
 
 # Unique extras keys
-UNIQUE_EXTRAS_KEYS = {PREFIXES_KEY: ["prefix"], EXTERNAL_ANNOTATION_KEY: ["prefix", "id"], SOURCES_KEY:"source"}
+UNIQUE_EXTRAS_KEYS = {PREFIXES_KEY: ["prefix"], EXTERNAL_ANNOTATION_KEY: ["prefix", "id"], SOURCES_KEY:["source"]}

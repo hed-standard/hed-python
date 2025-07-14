@@ -11,14 +11,14 @@ class OnsetValidator:
     def __init__(self):
         self._onsets = {}
 
-    def validate_temporal_relations(self, hed_string_obj):
+    def validate_temporal_relations(self, hed_string_obj) -> list[dict]:
         """ Validate onset/offset/inset tag relations
 
         Parameters:
             hed_string_obj (HedString): The HED string to check.
 
         Returns:
-            list: A list of issues found in validating onsets (i.e., out of order onsets, repeated def names).
+            list[dict]: A list of issues found in validating onsets (i.e., out of order onsets, repeated def names).
         """
         onset_issues = []
         used_def_names = set()
@@ -63,14 +63,14 @@ class OnsetValidator:
         return []
 
     @staticmethod
-    def check_for_banned_tags(hed_string):
+    def check_for_banned_tags(hed_string) -> list[dict]:
         """ Returns an issue for every tag found from the banned list (for files without onset column).
 
         Parameters:
-            hed_string(HedString): The string to check.
+            hed_string (HedString): The string to check.
 
         Returns:
-            list: The validation issues associated with the characters. Each issue is dictionary.
+            list[dict]: The validation issues associated with the characters. Each issue is dictionary.
         """
         banned_tag_list = DefTagNames.TIMELINE_KEYS
         issues = []

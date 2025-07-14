@@ -1,5 +1,6 @@
 """ Controller for applying operations to tabular files and saving the results. """
 
+from __future__ import annotations
 import os
 import numpy as np
 import pandas as pd
@@ -53,14 +54,14 @@ class Dispatcher:
         self.hed_schema = self.get_schema(hed_versions)
         self.summary_dicts = {}
 
-    def get_summaries(self, file_formats=['.txt', '.json']):
+    def get_summaries(self, file_formats=['.txt', '.json']) -> list[dict]:
         """ Return the summaries in a dictionary of strings suitable for saving or archiving.
 
         Parameters:
             file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
 
         Returns:
-            list: A list of dictionaries of summaries keyed to filenames.
+            list[dict]: A list of dictionaries of summaries keyed to filenames.
         """
 
         summary_list = []

@@ -1,7 +1,7 @@
 """ Summarize the contents of columnar files. """
 
-
 import json
+from typing import Union
 from hed.errors.exceptions import HedFileError
 from hed.tools.util import data_util
 from hed.tools.analysis import annotation_util
@@ -57,7 +57,7 @@ class TabularSummary:
             summary_list.append(f"{indent * 2}{key}: {self.value_info[key]}")
         return "\n".join(summary_list)
 
-    def extract_sidecar_template(self):
+    def extract_sidecar_template(self) -> dict:
         """ Extract a BIDS sidecar-compatible dictionary.
 
         Returns:
@@ -74,12 +74,14 @@ class TabularSummary:
             side_dict[column_name] = annotation_util.generate_sidecar_entry(column_name, [])
         return side_dict
 
-    def get_summary(self, as_json=False):
+    def get_summary(self, as_json=False) -> Union[dict, str]:
         """ Return the summary in dictionary format.
 
         Parameters:
             as_json (bool): If False, return as a Python dictionary, otherwise convert to a JSON dictionary.
 
+        Returns:
+            Union[dict, str]: A dictionary containing the summary information or a JSON string if as_json is True.
         """
         sorted_keys = sorted(self.categorical_info.keys())
         categorical_cols = {}
@@ -102,7 +104,7 @@ class TabularSummary:
         else:
             return summary
 
-    def get_number_unique(self, column_names=None):
+    def get_number_unique(self, column_names=None) -> dict:
         """ Return the number of unique values in columns.
 
         Parameters:
@@ -263,7 +265,7 @@ class TabularSummary:
                                         self.value_info[col][1] + col_dict.value_info[col][1]]
 
     @staticmethod
-    def extract_summary(summary_info):
+    def extract_summary(summary_info) -> 'TabularSummary':
         """ Create a TabularSummary object from a serialized summary.
 
         Parameters:
@@ -287,16 +289,16 @@ class TabularSummary:
         return new_tab
 
     @staticmethod
-    def get_columns_info(dataframe, skip_cols=None):
+    def get_columns_info(dataframe, skip_cols=None) -> dict[str, dict]:
         """ Extract unique value counts for columns.
 
         Parameters:
             dataframe (DataFrame): The DataFrame to be analyzed.
-            skip_cols(list): List of names of columns to be skipped in the extraction.
+            skip_cols (list): List of names of columns to be skipped in the extraction.
 
         Returns:
-            dict:   A dictionary with keys that are column names and values that
-                    are dictionaries of unique value counts.
+            dict[str, dict]: A dictionary with keys that are column names (strings) and values that
+                           are dictionaries of unique value counts.
 
         """
         col_info = dict()
@@ -308,17 +310,17 @@ class TabularSummary:
         return col_info
 
     @staticmethod
-    def make_combined_dicts(file_dictionary, skip_cols=None):
+    def make_combined_dicts(file_dictionary, skip_cols=None) -> tuple['TabularSummary', dict[str, 'TabularSummary']]:
         """ Return combined and individual summaries.
 
         Parameters:
-            file_dictionary (FileDictionary):  Dictionary of file name keys and full path.
-            skip_cols (list):  Name of the column.
+            file_dictionary (FileDictionary): Dictionary of file name keys and full path.
+            skip_cols (list): Name of the column.
 
         Returns:
             tuple:
-                - TabularSummary: Summary of the file dictionary.
-                - dict: of individual TabularSummary objects.
+                - TabularSummary: A combined summary of all files in the dictionary.
+                - dict[str, TabularSummary]: A dictionary where keys are file names and values are individual TabularSummary objects.
 
         """
 

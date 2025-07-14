@@ -1,4 +1,6 @@
 """ Definition handler class. """
+from typing import Union
+
 from hed.models.definition_entry import DefinitionEntry
 from hed.models.hed_string import HedString
 from hed.errors.error_types import DefinitionErrors
@@ -16,7 +18,7 @@ class DefinitionDict:
         Parameters:
             def_dicts (str or list or DefinitionDict): DefDict or list of DefDicts/strings or
                 a single string whose definitions should be added.
-            hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
+            hed_schema (HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
         :raises TypeError:
             - Bad type passed as def_dicts.
@@ -33,7 +35,7 @@ class DefinitionDict:
         Parameters:
             def_dicts (list, DefinitionDict, dict, or str): DefinitionDict or list of DefinitionDicts/strings/dicts
                                                             whose definitions should be added.
-            hed_schema(HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
+            hed_schema (HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
         Note - dict form expects DefinitionEntries in the same form as a DefinitionDict
                 Note - str or list of strings will parse the strings using the hed_schema.
@@ -59,7 +61,7 @@ class DefinitionDict:
         if def_tag in self.defs:
             error_context = self.defs[def_tag].source_context
             self._issues += ErrorHandler.format_error_from_context(DefinitionErrors.DUPLICATE_DEFINITION,
-                                                                   error_context=error_context, def_name=def_tag)
+                error_context=error_context, def_name=def_tag, actual_error=DefinitionErrors.DUPLICATE_DEFINITION)
         else:
             self.defs[def_tag] = def_value
 
@@ -73,7 +75,7 @@ class DefinitionDict:
         for def_tag, def_value in def_dict.items():
             self._add_definition(def_tag, def_value)
 
-    def get(self, def_name):
+    def get(self, def_name) -> Union[DefinitionEntry, None]:
         """ Get the definition entry for the definition name.
 
             Not case-sensitive
@@ -82,7 +84,7 @@ class DefinitionDict:
             def_name (str):  Name of the definition to retrieve.
 
         Returns:
-            DefinitionEntry:  Definition entry for the requested definition.
+            Union[DefinitionEntry, None]:  Definition entry for the requested definition.
         """
         return self.defs.get(def_name.casefold())
 
@@ -107,7 +109,7 @@ class DefinitionDict:
         """Return issues about duplicate definitions."""
         return self._issues
 
-    def check_for_definitions(self, hed_string_obj, error_handler=None):
+    def check_for_definitions(self, hed_string_obj, error_handler=None) -> list[dict]:
         """ Check string for definition tags, adding them to self.
 
         Parameters:
@@ -115,7 +117,7 @@ class DefinitionDict:
             error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
 
         Returns:
-            list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
+            list[dict]:  List of issues encountered in checking for definitions. Each issue is a dictionary.
         """
         def_issues = []
         for definition_tag, group in hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}):
@@ -319,14 +321,14 @@ class DefinitionDict:
         return def_contents
 
     @staticmethod
-    def get_as_strings(def_dict):
+    def get_as_strings(def_dict) -> dict[str, str]:
         """ Convert the entries to strings of the contents
 
         Parameters:
-            def_dict(DefinitionDict or dict): A dict of definitions
+            def_dict (dict): A dict of definitions
 
         Returns:
-            dict(str): definition name and contents
+            dict[str,str]: definition name and contents
         """
         if isinstance(def_dict, DefinitionDict):
             def_dict = def_dict.defs

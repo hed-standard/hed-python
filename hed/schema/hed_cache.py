@@ -1,4 +1,5 @@
 """Infrastructure for caching HED schema from remote repositories."""
+from __future__ import annotations
 
 import shutil
 import os
@@ -10,6 +11,8 @@ import functools
 
 
 import re
+from typing import Union
+
 from semantic_version import Version
 from hed.schema.hed_cache_lock import CacheException, CacheLock
 from hed.schema.schema_io.schema_util import url_to_file, make_url_request
@@ -60,12 +63,21 @@ def set_cache_directory(new_cache_dir):
         os.makedirs(new_cache_dir, exist_ok=True)
 
 
-def get_cache_directory():
-    """ Return the current value of HED_CACHE_DIRECTORY. """
+def get_cache_directory(cache_folder=None) -> str:
+    """ Return the current value of HED_CACHE_DIRECTORY.
+
+    Parameters:
+        cache_folder (str): Optional cache folder override.
+
+    Returns:
+        str: The cache directory path.
+    """
+    if cache_folder:
+        return cache_folder
     return HED_CACHE_DIRECTORY
 
 
-def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=False):
+def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=False) -> Union[list, dict]:
     """ Get the HED versions in the HED directory.
 
     Parameters:
@@ -76,7 +88,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
         check_prerelease (bool): If True, results can include prerelease schemas
 
     Returns:
-        list or dict: List of version numbers or dictionary {library_name: [versions]}.
+        Union[list, dict]: List of version numbers or dictionary {library_name: [versions]}.
 
     """
     if not local_hed_directory:
@@ -127,7 +139,7 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
         library_name (str or None): Optional the schema library name.
         xml_version (str): Returns this version if it exists
         local_hed_directory (str): Path to local HED directory.  Defaults to HED_CACHE_DIRECTORY
-        check_prerelease(bool): Also check for prerelease schemas
+        check_prerelease (bool): Also check for prerelease schemas
     Returns:
         str: The path to the latest HED version the HED directory.
 
@@ -142,7 +154,7 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
         return _create_xml_filename(xml_version, library_name, local_hed_directory, check_prerelease)
 
 
-def cache_local_versions(cache_folder):
+def cache_local_versions(cache_folder) -> int:
     """ Cache all schemas included with the HED installation.
 
     Parameters:
@@ -163,7 +175,7 @@ def cache_local_versions(cache_folder):
 
 
 def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_LIBRARY_URL_LIST,
-                       skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None):
+                       skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None) -> float:
     """ Cache all schemas at the given URLs.
 
     Parameters:
@@ -212,17 +224,17 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_
 
 
 @functools.lru_cache(maxsize=50)
-def get_library_data(library_name, cache_folder=None):
+def get_library_data(library_name, cache_folder=None) -> dict:
     """Retrieve the library data for the given library.
 
        Currently, this is just the valid ID range.
 
        Parameters:
-           library_name(str): The schema name.  "" for standard schema.
-           cache_folder(str): The cache folder to use if not using the default.
+           library_name (str): The schema name.  "" for standard schema.
+           cache_folder (str): The cache folder to use if not using the default.
 
        Returns:
-           library_data(dict): The data for a specific library.
+           dict: The data for a specific library.
     """
     if cache_folder is None:
         cache_folder = HED_CACHE_DIRECTORY

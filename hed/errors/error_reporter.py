@@ -3,10 +3,11 @@ Support functions for reporting validation errors.
 
 You can scope the formatted errors with calls to push_error_context and pop_error_context.
 """
-
+from __future__ import annotations
 from functools import wraps
 import xml.etree.ElementTree as et
 from collections import defaultdict
+from typing import Optional
 
 from hed.errors.error_types import ErrorContext, ErrorSeverity
 from hed.errors.known_error_codes import known_error_codes
@@ -43,13 +44,13 @@ def _register_error_function(error_type, wrapper_func):
     error_functions[error_type] = wrapper_func
 
 
-def hed_error(error_type, default_severity=ErrorSeverity.ERROR, actual_code=None):
+def hed_error(error_type: str, actual_code: Optional[str] = None, default_severity: int = ErrorSeverity.ERROR):
     """ Decorator for errors in error handler or inherited classes.
 
     Parameters:
         error_type (str): A value from error_types or optionally another value.
+        actual_code (str or None): The actual error to report to the outside world.
         default_severity (int): The default severity for the decorated error.
-        actual_code (str): The actual error to report to the outside world.
 
     """
     if actual_code is None:
@@ -94,7 +95,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
     def inner_decorator(func):
         if has_sub_tag:
             @wraps(func)
-            def wrapper(tag, index_in_tag, index_in_tag_end, *args, severity=default_severity, **kwargs):
+            def wrapper(tag, index_in_tag, index_in_tag_end, *args, severity=default_severity, **kwargs) -> list[dict]:
                 """ Wrapper function for error handling tag errors with sub tags.
 
                 Parameters:
@@ -106,7 +107,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     kwargs (**kwargs): Any keyword args to be passed down to error message function.
 
                 Returns:
-                    list: A list of dict with the errors.
+                    list[dict]: A list of dict with the errors.
 
                 """
                 try:
@@ -229,7 +230,7 @@ class ErrorHandler:
             issues[:] = self.filter_issues_by_severity(issues, ErrorSeverity.ERROR)
 
         for error_object in issues:
-            self._add_context_to_errors(error_object, self.error_context)
+            self._add_context_to_error(error_object, self.error_context)
             self._update_error_with_char_pos(error_object)
 
     def format_error_with_context(self, *args, **kwargs):
@@ -239,23 +240,37 @@ class ErrorHandler:
             # # Filter out warning errors
             if not self._check_for_warnings and actual_error['severity'] >= ErrorSeverity.WARNING:
                 return []
-            self._add_context_to_errors(actual_error, self.error_context)
+            self._add_context_to_error(actual_error, self.error_context)
             self._update_error_with_char_pos(actual_error)
 
         return error_object
 
     @staticmethod
-    def format_error(error_type, *args, actual_error=None, **kwargs):
+    def filter_issues_by_severity(issues_list: list[dict], severity: int) -> list[dict]:
+        """ Gather all issues matching or below a given severity.
+
+        Parameters:
+            issues_list (list[dict]): A list of dictionaries containing the full issue list.
+            severity (int): The level of issues to keep.
+
+        Returns:
+            list[dict]: A list of dictionaries containing the issue list after filtering by severity.
+
+        """
+        return [issue for issue in issues_list if issue['severity'] <= severity]
+
+    @staticmethod
+    def format_error(error_type: str, *args, actual_error=None, **kwargs) -> list[dict]:
         """ Format an error based on the parameters, which vary based on what type of error this is.
 
         Parameters:
-            error_type (str): The type of error for this.  Registered with @hed_error or @hed_tag_error.
-            args (args): Any remaining non keyword args after those required by the error type.
+            error_type (str): The type of error for this. Registered with @hed_error or @hed_tag_error.
+            args (args): Any remaining non-keyword args after those required by the error type.
             actual_error (str or None): Code to actually add to report out.
             kwargs (kwargs): The other keyword args to pass down to the error handling func.
 
         Returns:
-            list:   A list containing a single dictionary representing a single error.
+            list[dict]: A list containing a single dictionary representing a single error.
 
         Notes:
             The actual error is useful for errors that are shared like invalid character.
@@ -274,41 +289,41 @@ class ErrorHandler:
         return [error_object]
 
     @staticmethod
-    def format_error_from_context(error_type, error_context, *args, actual_error=None, **kwargs):
+    def format_error_from_context(error_type: str, error_context: list, *args, actual_error: Optional[str], **kwargs) -> list[dict]:
         """ Format an error based on the error type.
 
         Parameters:
-            error_type (str): The type of error.  Registered with @hed_error or @hed_tag_error.
+            error_type (str): The type of error. Registered with @hed_error or @hed_tag_error.
             error_context (list): Contains the error context to use for this error.
-            args (args): Any remaining non keyword args.
+            args (args): Any remaining non-keyword args.
             actual_error (str or None): Error code to actually add to report out.
             kwargs (kwargs): Keyword parameters to pass down to the error handling func.
 
         Returns:
-            list:  A list containing a single dictionary.
+            list[dict]: A list containing a single dictionary.
 
         Notes:
-            - Generally the error_context is returned from _add_context_to_errors.
+            - Generally the error_context is returned from _add_context_to_error.
             - The actual_error is useful for errors that are shared like invalid character.
             - This can't filter out warnings like the other ones.
 
         """
         error_list = ErrorHandler.format_error(error_type, *args, actual_error=actual_error, **kwargs)
 
-        ErrorHandler._add_context_to_errors(error_list[0], error_context)
+        ErrorHandler._add_context_to_error(error_list[0], error_context)
         ErrorHandler._update_error_with_char_pos(error_list[0])
         return error_list
 
     @staticmethod
-    def _add_context_to_errors(error_object, error_context_to_add):
+    def _add_context_to_error(error_object: dict, error_context_to_add: list) -> list[dict]:
         """ Add relevant context such as row number or column name around an error object.
 
         Parameters:
             error_object (dict): Generated error containing at least a code and message entry.
-            error_context_to_add (list): Source context to use.  If none, the error handler context is used.
+            error_context_to_add (list): Source context to use. If none, the error handler context is used.
 
         Returns:
-            list: A list of dict with needed context strings added at the beginning of the list.
+            dict: A list of dict with needed context strings added at the beginning of the list.
 
         """
         for (context_type, context) in error_context_to_add:
@@ -366,35 +381,21 @@ class ErrorHandler:
             error_object['message'] += f"  Problem spans string indexes: {new_start}, {new_end}"
 
     @hed_error("Unknown")
-    def val_error_unknown(*args, **kwargs):
+    def val_error_unknown(*args, **kwargs) -> str:
         """ Default error handler if no error of this type was registered.
 
         Parameters:
-            args (args):  List of non-keyword parameters (varies).
+            args (args): List of non-keyword parameters (varies).
             kwargs (kwargs): Keyword parameters (varies)
 
         Returns:
             str: The error message.
 
         """
-        return f"Unknown error.  Args: {str(args), str(kwargs)}"
+        return f"Unknown error. Args: {str(args), str(kwargs)}"
 
     @staticmethod
-    def filter_issues_by_severity(issues_list, severity):
-        """ Gather all issues matching or below a given severity.
-
-        Parameters:
-            issues_list (list): A list of dictionaries containing the full issue list.
-            severity (int): The level of issues to keep.
-
-        Returns:
-            list: A list of dictionaries containing the issue list after filtering by severity.
-
-        """
-        return [issue for issue in issues_list if issue['severity'] <= severity]
-
-    @staticmethod
-    def filter_issues_by_count(issues, count, by_file=False):
+    def filter_issues_by_count(issues, count, by_file=False)-> tuple[list[dict], dict[str, int]]:
         """ Filter the issues list to only include the first count issues of each code.
 
         Parameters:
@@ -402,9 +403,10 @@ class ErrorHandler:
             count (int): The number of issues to keep for each code.
             by_file (bool): If True, group by file name.
 
-        Returns:
-            list: A list of dictionaries containing the issue list after filtering by count.
-            dict: A dictionary with the codes as keys and the number of occurrences as values.
+    Returns:
+        tuple[list[dict], dict[str, int]]: A tuple containing:
+            - A list of dictionaries representing the filtered issue list.
+            - A dictionary with the codes as keys and the number of occurrences as values.
 
         """
         total_seen = {}
@@ -429,7 +431,7 @@ class ErrorHandler:
         return filtered_issues, ErrorHandler.aggregate_code_counts(file_dicts)
 
     @staticmethod
-    def aggregate_code_counts(file_code_dict):
+    def aggregate_code_counts(file_code_dict) -> dict:
         """ Aggregate the counts of codes across multiple files.
 
         Parameters:
@@ -445,7 +447,7 @@ class ErrorHandler:
         return dict(total_counts)
 
 
-def sort_issues(issues, reverse=False):
+def sort_issues(issues, reverse=False) -> list[dict]:
     """Sort a list of issues by the error context values.
 
     Parameters:
@@ -453,7 +455,8 @@ def sort_issues(issues, reverse=False):
         reverse (bool, optional): If True, sorts the list in descending order. Default is False.
 
     Returns:
-        list: The sorted list of issues."""
+        list[dict]: The sorted list of issues.
+    """
     def _get_keys(d):
         result = []
         for key in default_sort_list:

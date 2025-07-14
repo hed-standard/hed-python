@@ -1,4 +1,8 @@
 """ A BIDS tabular file with sidecar. """
+from __future__ import annotations
+
+from typing import Union
+
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
 from hed.models.sidecar import Sidecar
@@ -56,11 +60,11 @@ class TabularInput(BaseInput):
 
         self.reset_mapper(new_mapper)
 
-    def get_def_dict(self, hed_schema, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> 'DefinitionDict':
         """ Return the definition dict for this sidecar.
 
         Parameters:
-            hed_schema(HedSchema): Used to identify tags to find definitions.
+            hed_schema (HedSchema): Used to identify tags to find definitions.
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:
@@ -71,18 +75,18 @@ class TabularInput(BaseInput):
         else:
             return super().get_def_dict(hed_schema, extra_def_dicts)
 
-    def get_column_refs(self):
+    def get_column_refs(self) -> list[str]:
         """ Return a list of column refs for this file.
 
             Default implementation returns none.
 
         Returns:
-            column_refs(list): A list of unique column refs found.
+            list[str]: A list of unique column refs found.
         """
         if self._sidecar:
             return self._sidecar.get_column_refs()
         return []
 
-    def get_sidecar(self):
+    def get_sidecar(self) -> Union[Sidecar, None]:
         """Return the sidecar associated with this TabularInput."""
         return self._sidecar

@@ -122,15 +122,15 @@ class ColumnMapper:
         return final_transformers, need_categorical
 
     @staticmethod
-    def check_for_blank_names(column_map, allow_blank_names):
+    def check_for_blank_names(column_map, allow_blank_names) -> list[dict]:
         """ Validate there are no blank column names.
 
         Parameters:
-            column_map(iterable): A list of column names.
-            allow_blank_names(bool): Only find issues if True.
+            column_map (iterable): A list of column names.
+            allow_blank_names (bool): Only find issues if True.
 
         Returns:
-            issues(list): A list of dicts, one per issue.
+            list[dict]: A list of dicts, one per issue.
         """
         # We don't have any checks right now if blank/duplicate is allowed
         if allow_blank_names:
@@ -205,7 +205,7 @@ class ColumnMapper:
         if finalize_mapping:
             self._finalize_mapping()
 
-    def set_column_map(self, new_column_map=None):
+    def set_column_map(self, new_column_map=None) -> list[dict]:
         """ Set the column number to name mapping.
 
         Parameters:
@@ -213,7 +213,7 @@ class ColumnMapper:
                 dictionary. In both cases, column numbers start at 0.
 
         Returns:
-            list: List of issues. Each issue is a dictionary.
+            list[dict]: List of issues. Each issue is a dictionary.
 
         """
         if new_column_map is None:
@@ -308,7 +308,9 @@ class ColumnMapper:
 
         return column_lists, list_names
 
-    def _check_for_duplicates_and_required(self, list_names, column_lists):
+    def _check_for_duplicates_and_required(self, list_names, column_lists) -> list[dict]:
+        """ Check for duplicates and required columns in the given lists.
+        """
         issues = []
         for list_name, col_list in zip(list_names, column_lists):
             # Convert all known strings to ints, then check for duplicates
@@ -334,14 +336,14 @@ class ColumnMapper:
                                                 self._column_map.get(duplicate), list_names)
         return issues
 
-    def check_for_mapping_issues(self, allow_blank_names=False):
+    def check_for_mapping_issues(self, allow_blank_names=False) ->list[dict]:
         """ Find all issues given the current column_map, tag_columns, etc.
 
         Parameters:
-            allow_blank_names(bool): Only flag blank names if False.
+            allow_blank_names (bool): Only flag blank names if False.
 
         Returns:
-            issue_list(list of dict): All issues found as a list of dicts.
+            list[dict]: All issues found as a list of dicts.
         """
         # 1. Get the lists with entries
         column_lists, list_names = self._get_column_lists()
@@ -379,10 +381,10 @@ class ColumnMapper:
         self._final_column_map = dict(sorted(final_map.items()))
 
     @staticmethod
-    def _remove_from_list(list_to_alter, to_remove):
+    def _remove_from_list(list_to_alter, to_remove) -> list:
         return [item for item in list_to_alter if item not in to_remove]
 
-    def get_def_dict(self, hed_schema, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> DefinitionDict:
         """ Return def dicts from every column description.
 
         Parameters:
@@ -397,14 +399,14 @@ class ColumnMapper:
 
         return DefinitionDict(extra_def_dicts, hed_schema=hed_schema)
 
-    def get_column_mapping_issues(self):
+    def get_column_mapping_issues(self) -> list[dict]:
         """ Get all the issues with finalizing column mapping(duplicate columns, missing required, etc.).
 
         Notes:
             - This is deprecated and now a wrapper for "check_for_mapping_issues()".
 
         Returns:
-            list: A list dictionaries of all issues found from mapping column names to numbers.
+            list[dict]: A list dictionaries of all issues found from mapping column names to numbers.
 
         """
         return self.check_for_mapping_issues()
