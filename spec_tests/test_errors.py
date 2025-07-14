@@ -222,7 +222,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(len(self.fail_count), 0)
 
     # def test_debug(self):
-    #     test_file = os.path.realpath('./temp6.json')
+    #     test_file = os.path.realpath('./temp7.json')
     #     test_name = None
     #     test_type = None
     #     self.run_single_test(test_file, test_name, test_type)

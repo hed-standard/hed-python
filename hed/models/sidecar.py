@@ -54,7 +54,7 @@ class Sidecar:
         return possible_column_references
 
     @property
-    def def_dict(self):
+    def def_dict(self) -> 'DefinitionDict':
         """ Definitions from this sidecar.
 
             Generally you should instead call get_def_dict to get the relevant definitions.
@@ -73,11 +73,11 @@ class Sidecar:
         """
         return {col_name: ColumnMetadata(name=col_name, source=self.loaded_dict) for col_name in self.loaded_dict}
 
-    def get_def_dict(self, hed_schema, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> 'DefinitionDict':
         """ Return the definition dict for this sidecar.
 
         Parameters:
-            hed_schema(HedSchema): Identifies tags to find definitions.
+            hed_schema (HedSchema): Identifies tags to find definitions.
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:
@@ -104,7 +104,7 @@ class Sidecar:
         with open(save_filename, "w") as fp:
             json.dump(self.loaded_dict, fp, indent=4)
 
-    def get_as_json_string(self):
+    def get_as_json_string(self) -> str:
         """ Return this sidecar's column metadata as a string.
 
         Returns:
@@ -156,17 +156,17 @@ class Sidecar:
             merged_dict.update(loaded_json)
         return merged_dict
 
-    def validate(self, hed_schema, extra_def_dicts=None, name=None, error_handler=None):
+    def validate(self, hed_schema, extra_def_dicts=None, name=None, error_handler=None) -> list[dict]:
         """Create a SidecarValidator and validate this sidecar with the schema.
 
         Parameters:
             hed_schema (HedSchema): Input data to be validated.
-            extra_def_dicts(list or DefinitionDict): Extra def dicts in addition to sidecar.
-            name(str): The name to report this sidecar as.
+            extra_def_dicts (list or DefinitionDict): Extra def dicts in addition to sidecar.
+            name (str): The name to report this sidecar as.
             error_handler (ErrorHandler): Error context to use.  Creates a new one if None.
 
         Returns:
-            issues (list of dict): A list of issues associated with each level in the HED string.
+            list[dict]: A list of issues associated with each level in the HED string.
         """
         from hed.validator.sidecar_validator import SidecarValidator
 
@@ -191,7 +191,7 @@ class Sidecar:
         except (json.decoder.JSONDecodeError, AttributeError) as e:
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name) from e
 
-    def extract_definitions(self, hed_schema, error_handler=None):
+    def extract_definitions(self, hed_schema, error_handler=None) -> 'DefinitionDict':
         """ Gather and validate definitions in metadata.
 
         Parameters:

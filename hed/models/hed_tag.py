@@ -1,4 +1,6 @@
 """ A single HED tag. """
+from __future__ import annotations
+from typing import Union
 from hed.schema.hed_schema_constants import HedKey
 import copy
 from hed.models.model_constants import DefTagNames
@@ -20,7 +22,7 @@ class HedTag:
             hed_string (str): Source HED string for this tag.
             hed_schema (HedSchema): A parameter for calculating canonical forms on creation.
             span  (int, int): The start and end indexes of the tag in the hed_string.
-            def_dict(DefinitionDict or None): The def dict to use to identify def/def expand tags.
+            def_dict (DefinitionDict or None): The def dict to use to identify def/def expand tags.
         """
         self._hed_string = hed_string
         if span is None:
@@ -52,7 +54,7 @@ class HedTag:
             if self.short_base_tag in {DefTagNames.DEF_KEY, DefTagNames.DEF_EXPAND_KEY}:
                 self._def_entry = def_dict.get_definition_entry(self)
 
-    def copy(self):
+    def copy(self) -> "HedTag":
         """ Return a deep copy of this tag.
 
         Returns:
@@ -66,7 +68,7 @@ class HedTag:
         return return_copy
 
     @property
-    def schema_namespace(self):
+    def schema_namespace(self) -> str:
         """ Library namespace for this tag if one exists.
 
         Returns:
@@ -76,7 +78,7 @@ class HedTag:
         return self._namespace
 
     @property
-    def short_tag(self):
+    def short_tag(self) -> str:
         """ Short form including value or extension.
 
         Returns:
@@ -89,7 +91,7 @@ class HedTag:
         return str(self)
 
     @property
-    def base_tag(self):
+    def base_tag(self) -> str:
         """ Long form without value or extension.
 
         Returns:
@@ -100,7 +102,7 @@ class HedTag:
         return str(self)
 
     @property
-    def short_base_tag(self):
+    def short_base_tag(self) -> str:
         """ Short form without value or extension.
 
         Returns:
@@ -139,7 +141,7 @@ class HedTag:
             raise ValueError("Cannot set unidentified tags")
 
     @property
-    def org_base_tag(self):
+    def org_base_tag(self) -> str:
         """ Original form without value or extension.
 
         Returns:
@@ -161,7 +163,7 @@ class HedTag:
             return self.tag[:org_len - extension_len]
         return str(self)
 
-    def tag_modified(self):
+    def tag_modified(self) -> bool:
         """ Return True if tag has been modified from original.
 
         Returns:
@@ -174,7 +176,7 @@ class HedTag:
         return bool(self._tag)
 
     @property
-    def tag(self):
+    def tag(self) -> str:
         """ Returns the tag.
 
             Returns the original tag if no user form set.
@@ -203,7 +205,7 @@ class HedTag:
         self._calculate_to_canonical_forms(self._schema)
 
     @property
-    def extension(self):
+    def extension(self) -> str:
         """ Get the extension or value of tag.
 
             Generally this is just the portion after the last slash.
@@ -226,7 +228,7 @@ class HedTag:
         self._extension_value = f"/{x}"
 
     @property
-    def long_tag(self):
+    def long_tag(self) -> str:
         """ Long form including value or extension.
 
         Returns:
@@ -238,7 +240,7 @@ class HedTag:
         return str(self)
 
     @property
-    def org_tag(self):
+    def org_tag(self) -> str:
         """ Return the original unmodified tag.
 
         Returns:
@@ -248,7 +250,7 @@ class HedTag:
         return self._hed_string[self.span[0]:self.span[1]]
 
     @property
-    def expanded(self):
+    def expanded(self) -> bool:
         """Return if this is currently expanded or not.
 
            Will always be False unless expandable is set.  This is primarily used for Def/Def-expand tags at present.
@@ -259,7 +261,7 @@ class HedTag:
         return self._expanded
 
     @property
-    def expandable(self):
+    def expandable(self) -> Union["HedGroup", "HedTag", None]:
         """Return what this expands to.
 
            This is primarily used for Def/Def-expand tags at present.
@@ -267,7 +269,7 @@ class HedTag:
            Lazily set the first time it's called.
 
         Returns:
-            HedGroup or HedTag or None: Returns the expanded form of this tag.
+            Union[HedGroup,HedTag,None]: Returns the expanded form of this tag.
         """
         if self._expandable is None and self._def_entry:
             save_parent = self._parent
@@ -280,7 +282,7 @@ class HedTag:
                 self._expanded = self.short_base_tag == DefTagNames.DEF_EXPAND_KEY
         return self._expandable
 
-    def is_column_ref(self):
+    def is_column_ref(self) -> bool:
         """ Return if this tag is a column reference from a sidecar.
 
             You should only see these if you are directly accessing sidecar strings, tools should remove them otherwise.
@@ -290,7 +292,7 @@ class HedTag:
         """
         return self.org_tag.startswith('{') and self.org_tag.endswith('}')
 
-    def __str__(self):
+    def __str__(self) -> str:
         """ Convert this HedTag to a string.
 
         Returns:
@@ -305,15 +307,15 @@ class HedTag:
 
         return self._hed_string[self.span[0]:self.span[1]]
 
-    def lower(self):
+    def lower(self) -> str:
         """ Convenience function, equivalent to str(self).lower(). """
         return str(self).lower()
 
-    def casefold(self):
+    def casefold(self) -> str:
         """ Convenience function, equivalent to str(self).casefold(). """
         return str(self).casefold()
 
-    def _calculate_to_canonical_forms(self, hed_schema):
+    def _calculate_to_canonical_forms(self, hed_schema) -> list:
         """ Update internal state based on schema.
 
         Parameters:
@@ -335,7 +337,7 @@ class HedTag:
 
         return tag_issues
 
-    def get_stripped_unit_value(self, extension_text):
+    def get_stripped_unit_value(self, extension_text) -> tuple[Union[str, None], Union[str, None]]:
         """ Return the extension divided into value and units, if the units are valid.
 
         Parameters:
@@ -357,7 +359,7 @@ class HedTag:
             return None, units
         return extension_text, None
 
-    def value_as_default_unit(self):
+    def value_as_default_unit(self) -> Union[float, None]:
         """ Return the value converted to default units if possible or None if invalid.
 
         Returns:
@@ -379,7 +381,7 @@ class HedTag:
         return float(stripped_value)
 
     @property
-    def unit_classes(self):
+    def unit_classes(self) -> dict:
         """ Return a dict of all the unit classes this tag accepts.
 
         Returns:
@@ -395,7 +397,7 @@ class HedTag:
         return {}
 
     @property
-    def value_classes(self):
+    def value_classes(self) -> dict:
         """ Return a dict of all the value classes this tag accepts.
 
         Returns:
@@ -411,7 +413,7 @@ class HedTag:
         return {}
 
     @property
-    def attributes(self):
+    def attributes(self) -> dict:
         """ Return a dict of all the attributes this tag has.
 
             Returns empty dict if this is not a value tag.
@@ -428,7 +430,7 @@ class HedTag:
             return self._schema_entry.attributes
         return {}
 
-    def tag_exists_in_schema(self):
+    def tag_exists_in_schema(self) -> bool:
         """ Return whether the schema entry for this tag exists.
 
         Returns:
@@ -439,7 +441,7 @@ class HedTag:
         """
         return bool(self._schema_entry)
 
-    def is_takes_value_tag(self):
+    def is_takes_value_tag(self) -> bool:
         """ Return True if this is a takes value tag.
 
         Returns:
@@ -450,7 +452,7 @@ class HedTag:
             return self._schema_entry.has_attribute(HedKey.TakesValue)
         return False
 
-    def is_unit_class_tag(self):
+    def is_unit_class_tag(self) -> bool:
         """ Return True if this is a unit class tag.
 
         Returns:
@@ -461,7 +463,7 @@ class HedTag:
             return bool(self._schema_entry.unit_classes)
         return False
 
-    def is_value_class_tag(self):
+    def is_value_class_tag(self) -> bool:
         """ Return True if this is a value class tag.
 
         Returns:
@@ -472,7 +474,7 @@ class HedTag:
             return bool(self._schema_entry.value_classes)
         return False
 
-    def is_basic_tag(self):
+    def is_basic_tag(self) -> bool:
         """  Return True if a known tag with no extension or value.
 
         Returns:
@@ -481,7 +483,7 @@ class HedTag:
         """
         return bool(self._schema_entry and not self.extension)
 
-    def has_attribute(self, attribute):
+    def has_attribute(self, attribute) -> bool:
         """ Return True if this is an attribute this tag has.
 
         Parameters:
@@ -495,7 +497,7 @@ class HedTag:
             return self._schema_entry.has_attribute(attribute)
         return False
 
-    def get_tag_unit_class_units(self):
+    def get_tag_unit_class_units(self) -> list:
         """ Get the unit class units associated with a particular tag.
 
         Returns:
@@ -525,7 +527,7 @@ class HedTag:
             default_unit = first_unit_class_entry.has_attribute(HedKey.DefaultUnits, return_value=True)
             return first_unit_class_entry.units.get(default_unit, None)
 
-    def base_tag_has_attribute(self, tag_attribute):
+    def base_tag_has_attribute(self, tag_attribute) -> bool:
         """ Check to see if the tag has a specific attribute.
 
             This is primarily used to check for things like TopLevelTag on Definitions and similar.
@@ -543,7 +545,7 @@ class HedTag:
         return self._schema_entry.base_tag_has_attribute(tag_attribute)
 
     @staticmethod
-    def _get_schema_namespace(org_tag):
+    def _get_schema_namespace(org_tag) -> str:
         """ Finds the library namespace for the tag.
 
         Parameters:
@@ -593,7 +595,7 @@ class HedTag:
                 return value, units, possible_match
         return value, units, None
 
-    def is_placeholder(self):
+    def is_placeholder(self) -> bool:
         """Returns if this tag has a placeholder in it.
 
         Returns:

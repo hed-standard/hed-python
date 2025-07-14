@@ -2,7 +2,12 @@
 """
 
 
+from __future__ import annotations
+
 import json
+from typing import Union
+
+from hed.schema.hed_schema import HedSchema
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.errors import ErrorHandler, ValidationErrors
 from hed.schema.hed_schema_constants import HedSectionKey
@@ -45,15 +50,15 @@ class HedSchemaGroup(HedSchemaBase):
         self.source_format = source_formats[0] if len(set(source_formats)) == 1 else None
         self._name = name
 
-    def get_schema_versions(self):
-        """ A list of HED version strings including namespace and library name if any of this schema.
+    def get_schema_versions(self) -> list[str]:
+        """ A list of HED version strings including namespace and library name if any for these schemas.
 
         Returns:
-            list: The complete version of this schema including library name and namespace.
+            list[str]: The complete version of this schema including library name and namespace.
         """
         return [schema.version for schema in self._schemas.values()]
 
-    def get_formatted_version(self):
+    def get_formatted_version(self) -> str:
         """ The HED version string including namespace and library name if any of this schema.
 
         Returns:
@@ -64,30 +69,30 @@ class HedSchemaGroup(HedSchemaBase):
     def __eq__(self, other):
         return self._schemas == other._schemas
 
-    def schema_for_namespace(self, namespace):
+    def schema_for_namespace(self, namespace) -> Union[HedSchema,None]:
         """ Return the HedSchema for the library namespace.
 
         Parameters:
             namespace (str): A schema library name namespace.
 
         Returns:
-            HedSchema or None: The specific schema for this library name namespace if exists.
+            Union[HedSchema,None]: The specific schema for this library name namespace if exists.
 
         """
         schema = self._schemas.get(namespace)
         return schema
 
     @property
-    def valid_prefixes(self):
+    def valid_prefixes(self) -> list[str]:
         """ Return a list of all prefixes this group will accept.
 
         Returns:
-            list:  A list of strings representing valid prefixes for this group.
+            list[str]:  A list of strings representing valid prefixes for this group.
 
         """
         return list(self._schemas.keys())
 
-    def check_compliance(self, check_for_warnings=True, name=None, error_handler=None):
+    def check_compliance(self, check_for_warnings=True, name=None, error_handler=None) -> list[dict]:
         """ Check for HED3 compliance of this schema.
 
         Parameters:
@@ -97,14 +102,14 @@ class HedSchemaGroup(HedSchemaBase):
             error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
 
         Returns:
-            list: A list of all warnings and errors found in the file. Each issue is a dictionary.
+            list[dict]: A list of all warnings and errors found in the file. Each issue is a dictionary.
         """
         issues_list = []
         for schema in self._schemas.values():
             issues_list += schema.check_compliance(check_for_warnings, name, error_handler)
         return issues_list
 
-    def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags):
+    def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags) -> list:
         """ Return tag entries with the given attribute.
 
         Parameters:
@@ -122,7 +127,7 @@ class HedSchemaGroup(HedSchemaBase):
             tags.update(schema.get_tags_with_attribute(attribute, key_class))
         return list(tags)
 
-    def get_tag_entry(self, name, key_class=HedSectionKey.Tags, schema_namespace=""):
+    def get_tag_entry(self, name, key_class=HedSectionKey.Tags, schema_namespace="") -> Union["HedSchemaEntry", None]:
         """ Return the schema entry for this tag, if one exists.
 
         Parameters:
@@ -141,7 +146,7 @@ class HedSchemaGroup(HedSchemaBase):
 
         return specific_schema.get_tag_entry(name, key_class, schema_namespace)
 
-    def find_tag_entry(self, tag, schema_namespace=""):
+    def find_tag_entry(self, tag, schema_namespace="") -> tuple[Union["HedTagEntry", None], Union[str, None], list]:
         """ Find the schema entry for a given source tag.
 
         Parameters:

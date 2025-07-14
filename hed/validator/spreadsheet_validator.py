@@ -1,4 +1,5 @@
 """ Validates spreadsheet tabular data. """
+from __future__ import annotations
 import copy
 import pandas as pd
 import math
@@ -34,17 +35,17 @@ class SpreadsheetValidator:
         self._onset_validator = None
         self.invalid_original_rows = set()
 
-    def validate(self, data, def_dicts=None, name=None, error_handler=None):
+    def validate(self, data, def_dicts=None, name=None, error_handler=None) -> list[dict]:
         """
         Validate the input data using the schema
 
         Parameters:
             data (BaseInput): Input data to be validated.
-            def_dicts(list of DefDict or DefDict): all definitions to use for validation
-            name(str): The name to report errors from this file as
+            def_dicts (list of DefDict or DefDict): all definitions to use for validation
+            name (str): The name to report errors from this file as
             error_handler (ErrorHandler): Error context to use.  Creates a new one if None
         Returns:
-            issues (list of dict): A list of issues for HED string
+            list[dict]: A list of issues for HED string
         """
 
         if error_handler is None:

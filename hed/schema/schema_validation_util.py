@@ -1,4 +1,5 @@
 """Utilities used in HED validation/loading using a HED schema."""
+from typing import Union
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import SchemaWarnings
@@ -7,14 +8,14 @@ from hed.schema.hed_schema_constants import character_types
 from hed.schema.hed_schema import HedSchema
 
 
-def validate_schema_tag_new(hed_entry):
+def validate_schema_tag_new(hed_entry) -> list[dict]:
     """ Check tag entry for capitalization and illegal characters.
 
     Parameters:
         hed_entry (HedTagEntry): A single tag entry
 
     Returns:
-        list: A list of all formatting issues found in the term. Each issue is a dictionary.
+        list[dict]: A list of all formatting issues found in the term. Each issue is a dictionary.
     """
     issues_list = []
     hed_term = hed_entry.short_tag_name
@@ -29,7 +30,7 @@ def validate_schema_tag_new(hed_entry):
     return issues_list
 
 
-def validate_schema_term_new(hed_entry, hed_term=None):
+def validate_schema_term_new(hed_entry, hed_term=None) -> list[dict]:
     """ Check the term for invalid character issues
 
     Parameters:
@@ -37,7 +38,7 @@ def validate_schema_term_new(hed_entry, hed_term=None):
         hed_term (str or None): Use instead of hed_entry.name if present.
 
     Returns:
-        list: A list of all formatting issues found in the term. Each issue is a dictionary.
+        list[dict]: A list of all formatting issues found in the term. Each issue is a dictionary.
     """
     if not hed_term:
         hed_term = hed_entry.name
@@ -52,14 +53,14 @@ def validate_schema_term_new(hed_entry, hed_term=None):
     return issues_list
 
 
-def validate_schema_description_new(hed_entry):
+def validate_schema_description_new(hed_entry) -> list[dict]:
     """ Check the description of the entry for invalid character issues
 
     Parameters:
         hed_entry (HedSchemaEntry): A single schema entry
 
     Returns:
-        list: A list of all invalid characters found in description. Each issue is a dictionary.
+        list[dict]: A list issues pertaining to all invalid characters found in description. Each issue is a dictionary.
     """
     if not hed_entry.description:
         return []
@@ -77,7 +78,7 @@ def validate_schema_description_new(hed_entry):
     return issues_list
 
 
-def schema_version_for_library(hed_schema, library_name):
+def schema_version_for_library(hed_schema, library_name) -> Union[str, None]:
     """ Given the library name and HED schema object, return the version
 
     Parameters:
@@ -85,7 +86,7 @@ def schema_version_for_library(hed_schema, library_name):
         library_name (str or None): The library name you're interested in.  "" for the standard schema.
 
     Returns:
-        version_number (str): The version number of the given library name.  Returns None if unknown library_name.
+        Union[str, None]: The version number of the given library name.  Returns None if unknown library_name.
     """
     if library_name is None:
         library_name = ""
@@ -101,14 +102,14 @@ def schema_version_for_library(hed_schema, library_name):
     return None
 
 
-def get_allowed_characters(value_classes):
+def get_allowed_characters(value_classes) -> set[str]:
     """Returns the allowed characters in a given container of value classes
 
     Parameters:
-        value_classes(list of HedSchemaEntry): A list of schema entries that should have the allowedCharacter attribute
+        value_classes (list of HedSchemaEntry): A list of schema entries that should have the allowedCharacter attribute
 
     Returns:
-        character_set(set): The set of all characters from the given classes
+        set[str]: The set of all characters from the given classes
     """
     # This could be pre-computed
     character_set_names = []
@@ -123,16 +124,16 @@ def get_allowed_characters(value_classes):
     return character_set
 
 
-def get_allowed_characters_by_name(character_set_names):
+def get_allowed_characters_by_name(character_set_names) -> set[str]:
     """Returns the allowed characters from a list of character set names
 
     Note: "nonascii" is a special case "character" that can be included as well
 
     Parameters:
-        character_set_names(list of str): A list of character sets to allow.  See hed_schema_constants.character_types
+        character_set_names (list of str): A list of character sets to allow.  See hed_schema_constants.character_types
 
     Returns:
-        character_set(set): The set of all characters from the names
+        set[str]: The set of all characters from the names
     """
     character_set = set()
     for name in character_set_names:
@@ -143,16 +144,16 @@ def get_allowed_characters_by_name(character_set_names):
     return character_set
 
 
-def get_problem_indexes(validation_string, character_set, index_adj=0):
+def get_problem_indexes(validation_string, character_set, index_adj=0) -> list[tuple[str, int]]:
     """Finds indexes with values not in character set
 
     Parameters:
-        validation_string(str): The string to check characters in
-        character_set(set): the list of valid characters(or the value "nonascii" as a set entry)
-        index_adj(int): the value to adjust the reported indices by, if this isn't the start of a string.
+        validation_string (str): The string to check characters in.
+        character_set (set): The list of valid characters (or the value "nonascii" as a set entry).
+        index_adj (int): The value to adjust the reported indices by, if this isn't the start of a string.
 
     Returns:
-        index_list(tuple of (str, int)): The list of problematic characters and indices
+        list[tuple[str, int]]: The list of problematic characters and their indices.
     """
     if not character_set:
         return []

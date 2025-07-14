@@ -1,4 +1,5 @@
 """ Remove columns from a columnar file. """
+from __future__ import annotations
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
@@ -49,7 +50,7 @@ class RemoveColumnsOp(BaseOp):
         else:
             self.error_handling = 'raise'
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> 'pd.DataFrame':
         """ Remove indicated columns from a dataframe.
 
         Parameters:
@@ -59,7 +60,7 @@ class RemoveColumnsOp(BaseOp):
             sidecar (Sidecar or file-like):  Not needed for this operation.
 
         Returns:
-            Dataframe: A new dataframe after processing.
+            pd.Dataframe: A new dataframe after processing.
 
         :raises KeyError:
             - If ignore_missing is False and a column not in the data is to be removed.

@@ -1,3 +1,5 @@
+from __future__ import annotations
+from typing import Union, Any
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.hed_schema_constants import HedKey
 
@@ -48,7 +50,7 @@ class HedSchemaEntry:
             for item in to_remove:
                 self._unknown_attributes.pop(item)
 
-    def has_attribute(self, attribute, return_value=False):
+    def has_attribute(self, attribute, return_value=False) -> Union[bool, Any]:
         """ Checks for the existence of an attribute in this entry.
 
         Parameters:
@@ -68,7 +70,7 @@ class HedSchemaEntry:
         else:
             return attribute in self.attributes
 
-    def attribute_has_property(self, attribute, property_name):
+    def attribute_has_property(self, attribute, property_name) -> bool:
         """ Return True if attribute has property.
 
         Parameters:
@@ -82,6 +84,7 @@ class HedSchemaEntry:
         attr_entry = self._section.valid_attributes.get(attribute)
         if attr_entry and attr_entry.has_attribute(property_name):
             return True
+        return False
 
     def _set_attribute_value(self, attribute, attribute_value):
         """ Add attribute and set its value.
