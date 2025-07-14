@@ -60,7 +60,7 @@ class RemoveColumnsOp(BaseOp):
             sidecar (Sidecar or file-like):  Not needed for this operation.
 
         Returns:
-            pd.Dataframe: A new dataframe after processing.
+            pd.DataFrame: A new dataframe after processing.
 
         :raises KeyError:
             - If ignore_missing is False and a column not in the data is to be removed.
