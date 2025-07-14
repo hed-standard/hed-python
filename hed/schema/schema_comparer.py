@@ -44,6 +44,7 @@ class SchemaComparer:
         EXTRAS_SECTION: "Extras",
     }
 
+    # TODO: Check that the cases of these are correct.
     DF_EXTRAS = {SOURCES, PREFIXES, ANNOTATION_PROPERTY_EXTERNAL}
 
     def __init__(self, schema1, schema2):

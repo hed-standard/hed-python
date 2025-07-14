@@ -1,4 +1,5 @@
 """ Validates of Def, Def-expand and Temporal groups. """
+from __future__ import annotations
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
@@ -35,12 +36,12 @@ class DefValidator(DefinitionDict):
         def_issues = []
         # We need to check for labels to expand in ALL groups
         for def_tag, def_expand_group, def_group in hed_string_obj.find_def_tags(recursive=True):
-            def_issues += self._validate_def_contents(def_tag, def_expand_group, hed_validator)
+            def_issues += self._validate_def_contents(def_tag, def_expand_group)
 
         return def_issues
 
     @staticmethod
-    def _report_missing_or_invalid_value(def_tag, def_entry, is_def_expand_tag):
+    def _report_missing_or_invalid_value(def_tag, def_entry, is_def_expand_tag) -> list[dict]:
         """Returns the correct error for this type of def tag
 
         Parameters:
@@ -49,7 +50,7 @@ class DefValidator(DefinitionDict):
             is_def_expand_tag(bool): If the given def_tag is a def-expand tag or not.
 
         Returns:
-            issues(list): Issues found from validating placeholders.
+            list[dict]: Issues found from validating placeholders.
         """
         def_issues = []
         if def_entry.takes_value:
@@ -63,17 +64,15 @@ class DefValidator(DefinitionDict):
         def_issues += ErrorHandler.format_error(error_code, tag=def_tag)
         return def_issues
 
-    def _validate_def_contents(self, def_tag, def_expand_group, hed_validator):
+    def _validate_def_contents(self, def_tag, def_expand_group) -> list[dict]:
         """ Check for issues with expanding a tag from Def to a Def-expand tag group
 
         Parameters:
             def_tag (HedTag): Source HED tag that may be a Def or Def-expand tag.
             def_expand_group (HedGroup or HedTag): Source group for this def-expand tag.
                                                    Same as def_tag if this is not a def-expand tag.
-            hed_validator (HedValidator): Used to validate the placeholder replacement.
-        TODO: Figure out whether the hed_validator is needed as a parameter.
         Returns:
-            list: Issues found from validating placeholders.
+            list[dict]: Issues found from validating placeholders.
         """
         is_def_expand_tag = def_expand_group != def_tag
         tag_label, _, placeholder = def_tag.extension.partition('/')
@@ -96,7 +95,7 @@ class DefValidator(DefinitionDict):
 
         return []
 
-    def validate_def_value_units(self, def_tag, hed_validator, allow_placeholders=False):
+    def validate_def_value_units(self, def_tag, hed_validator, allow_placeholders=False) -> list[dict]:
         """Equivalent to HedValidator.validate_units for the special case of a Def or Def-expand tag"""
         tag_label, _, placeholder = def_tag.extension.partition('/')
         is_def_expand_tag = def_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY
@@ -132,14 +131,14 @@ class DefValidator(DefinitionDict):
 
         return def_issues
 
-    def validate_onset_offset(self, hed_string_obj):
+    def validate_onset_offset(self, hed_string_obj) -> list[dict]:
         """ Validate onset/offset
 
         Parameters:
             hed_string_obj (HedString): The HED string to check.
 
         Returns:
-            list: A list of issues found in validating onsets (i.e., out of order onsets, unknown def names).
+            list[dict]: A list of issues found in validating onsets (i.e., out of order onsets, unknown def names).
         """
         onset_issues = []
         for found_onset, found_group in self._find_onset_tags(hed_string_obj):
@@ -193,7 +192,7 @@ class DefValidator(DefinitionDict):
     def _find_onset_tags(hed_string_obj):
         return hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.TEMPORAL_KEYS)
 
-    def _handle_onset_or_offset(self, def_tag):
+    def _handle_onset_or_offset(self, def_tag) -> list[dict]:
         def_name, _, placeholder = def_tag.extension.partition('/')
 
         def_entry = self.defs.get(def_name.casefold())

@@ -1,4 +1,5 @@
 """ A single parenthesized HED string. """
+from __future__ import annotations
 from hed.models.hed_tag import HedTag
 from hed.models.model_constants import DefTagNames
 import copy
@@ -40,7 +41,7 @@ class HedGroup:
         tag_or_group._parent = self
         self.children.append(tag_or_group)
 
-    def check_if_in_original(self, tag_or_group):
+    def check_if_in_original(self, tag_or_group) -> bool:
         """ Check if the tag or group in original string.
 
         Parameters:
@@ -135,7 +136,7 @@ class HedGroup:
     def __copy__(self):
         raise ValueError("Cannot make shallow copies of HedGroups")
 
-    def copy(self):
+    def copy(self) -> "HedGroup":
         """ Return a deep copy of this group.
 
         Returns:
@@ -152,7 +153,7 @@ class HedGroup:
         """ Sort the tags and groups in this HedString in a consistent order."""
         self._sorted(update_self=True)
 
-    def sorted(self):
+    def sorted(self) -> "HedGroup":
         """ Return a sorted copy of this HED group
 
         Returns:
@@ -162,7 +163,7 @@ class HedGroup:
         string_copy._sorted(update_self=True)
         return string_copy
 
-    def _sorted(self, update_self=False):
+    def _sorted(self, update_self=False) -> list:
         """ Return a sorted copy of this HED group as a list of it's children.
 
         Parameters:
@@ -192,7 +193,7 @@ class HedGroup:
         """ True if this is a parenthesized group. """
         return True
 
-    def get_all_tags(self):
+    def get_all_tags(self) -> list:
         """ Return HedTags, including descendants.
 
         Returns:
@@ -211,7 +212,7 @@ class HedGroup:
                 final_list.append(current_group_or_tag)
         return final_list
 
-    def get_all_groups(self, also_return_depth=False):
+    def get_all_groups(self, also_return_depth=False) -> list:
         """ Return HedGroups, including descendants and self.
 
         Parameters:
@@ -238,7 +239,7 @@ class HedGroup:
         return final_list
 
     @staticmethod
-    def _check_in_group(group, group_list):
+    def _check_in_group(group, group_list) -> bool:
         """ Return True if the group is list.
 
         Parameters:
@@ -254,7 +255,7 @@ class HedGroup:
                 return True
         return False
 
-    def tags(self):
+    def tags(self) -> list:
         """ Return the direct child tags of this group.
 
         Returns:
@@ -263,7 +264,7 @@ class HedGroup:
         """
         return [tag for tag in self.children if isinstance(tag, HedTag)]
 
-    def groups(self):
+    def groups(self) -> list:
         """ Return the direct child groups of this group.
 
         Returns:
@@ -272,7 +273,7 @@ class HedGroup:
         """
         return [group for group in self.children if isinstance(group, HedGroup)]
 
-    def get_first_group(self):
+    def get_first_group(self) -> HedGroup:
         """ Return the first group in this HED string or group.
 
             Useful for things like Def-expand where they only have a single group.
@@ -285,7 +286,7 @@ class HedGroup:
         """
         return self.groups()[0]
 
-    def get_original_hed_string(self):
+    def get_original_hed_string(self) -> str:
         """ Get the original HED string.
 
         Returns:
@@ -305,7 +306,7 @@ class HedGroup:
         """
         return self._startpos, self._endpos
 
-    def __str__(self):
+    def __str__(self) -> str:
         """ Convert this HedGroup to a string.
 
         Returns:
@@ -316,7 +317,7 @@ class HedGroup:
             return "(" + ",".join([str(child) for child in self.children]) + ")"
         return ",".join([str(child) for child in self.children])
 
-    def get_as_short(self):
+    def get_as_short(self) -> str:
         """ Return this HedGroup as a short tag string.
 
         Returns:
@@ -325,7 +326,7 @@ class HedGroup:
         """
         return self.get_as_form("short_tag")
 
-    def get_as_long(self):
+    def get_as_long(self) -> str:
         """ Return this HedGroup as a long tag string.
 
         Returns:
@@ -334,7 +335,7 @@ class HedGroup:
         """
         return self.get_as_form("long_tag")
 
-    def get_as_form(self, tag_attribute):
+    def get_as_form(self, tag_attribute) -> str:
         """ Get the string corresponding to the specified form.
 
         Parameters:
@@ -390,11 +391,11 @@ class HedGroup:
 
         return indented
 
-    def find_placeholder_tag(self):
+    def find_placeholder_tag(self) -> Union[HedTag, None]:
         """ Return a placeholder tag, if present in this group.
 
         Returns:
-            HedTag or None: The placeholder tag if found.
+            Union[HedTag, None]: The placeholder tag if found.
 
         Notes:
             - Assumes a valid HedString with no erroneous "#" characters.
@@ -426,7 +427,7 @@ class HedGroup:
             return False
         return True
 
-    def find_tags(self, search_tags, recursive=False, include_groups=2):
+    def find_tags(self, search_tags, recursive=False, include_groups=2) -> list:
         """ Find the base tags and their containing groups.
         This searches by short_base_tag, ignoring any ancestors or extensions/values.
 
@@ -455,7 +456,7 @@ class HedGroup:
             return [tag[include_groups] for tag in found_tags]
         return found_tags
 
-    def find_wildcard_tags(self, search_tags, recursive=False, include_groups=2):
+    def find_wildcard_tags(self, search_tags, recursive=False, include_groups=2) -> list:
         """ Find the tags and their containing groups.
 
             This searches tag.short_tag.casefold(), with an implicit wildcard on the end.
@@ -492,13 +493,13 @@ class HedGroup:
             return [tag[include_groups] for tag in found_tags]
         return found_tags
 
-    def find_exact_tags(self, exact_tags, recursive=False, include_groups=1):
+    def find_exact_tags(self, exact_tags, recursive=False, include_groups=1) -> list:
         """  Find the given tags.  This will only find complete matches, any extension or value must also match.
 
         Parameters:
             exact_tags (list of HedTag): A container of tags to locate.
             recursive (bool): If true, also check subgroups.
-            include_groups(bool): 0, 1 or 2.
+            include_groups (bool): 0, 1 or 2.
                 If 0: Return only tags
                 If 1: Return only groups
                 If 2 or any other value: Return both
@@ -519,7 +520,7 @@ class HedGroup:
             return [tag[include_groups] for tag in found_tags]
         return found_tags
 
-    def find_def_tags(self, recursive=False, include_groups=3):
+    def find_def_tags(self, recursive=False, include_groups=3) -> list:
         """ Find def and def-expand tags.
 
         Parameters:
@@ -557,7 +558,7 @@ class HedGroup:
                         def_tags.append((tag, child, group))
         return def_tags
 
-    def find_tags_with_term(self, term, recursive=False, include_groups=2):
+    def find_tags_with_term(self, term, recursive=False, include_groups=2) -> list:
         """  Find any tags that contain the given term.
 
             Note: This can only find identified tags.
@@ -565,7 +566,7 @@ class HedGroup:
         Parameters:
             term (str): A single term to search for.
             recursive (bool): If true, recursively check subgroups.
-            include_groups(0, 1 or 2): Controls return values
+            include_groups (0, 1 or 2): Controls return values
                 If 0: Return only tags.
                 If 1: Return only groups.
                 If 2 or any other value: Return both.

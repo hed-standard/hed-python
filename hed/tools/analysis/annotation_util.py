@@ -2,6 +2,7 @@
 
 import io
 import re
+from typing import Union
 
 import pandas as pd
 from pandas import DataFrame, Series
@@ -13,7 +14,7 @@ from hed.errors.exceptions import HedFileError
 from hed.models import df_util
 
 
-def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')):
+def check_df_columns(df, required_cols=('column_name', 'column_value', 'description', 'HED')) -> list[str]:
     """ Return a list of the specified columns that are missing from a dataframe.
 
     Parameters:
@@ -21,7 +22,7 @@ def check_df_columns(df, required_cols=('column_name', 'column_value', 'descript
         required_cols (tuple):  List of column names that must be present.
 
     Returns:
-        list:   List of column names that are missing.
+        list[str]:   List of column names that are missing.
 
     """
     missing_cols = []
@@ -32,7 +33,7 @@ def check_df_columns(df, required_cols=('column_name', 'column_value', 'descript
     return missing_cols
 
 
-def df_to_hed(dataframe, description_tag=True):
+def df_to_hed(dataframe, description_tag=True) -> dict:
     """ Create sidecar-like dictionary from a 4-column dataframe.
 
     Parameters:
@@ -65,7 +66,7 @@ def df_to_hed(dataframe, description_tag=True):
     return hed_dict
 
 
-def extract_tags(hed_string, search_tag):
+def extract_tags(hed_string, search_tag) -> tuple[str, list[str]]:
     """ Extract all instances of specified tag from a tag_string.
 
         Parameters:
@@ -73,9 +74,9 @@ def extract_tags(hed_string, search_tag):
            search_tag (str):   HED tag to extract.
 
         Returns:
-            tuple:
-                - str:   Tag string without the tags.
-                - list:  A list of the tags that were extracted, for example descriptions.
+            tuple[str, list[str]
+                - Tag string without the tags.
+                - A list of the tags that were extracted, for example descriptions.
 
     """
     possible_descriptions = hed_string.replace(")", "").replace("(", "").split(",")
@@ -87,7 +88,7 @@ def extract_tags(hed_string, search_tag):
     return remainder, extracted
 
 
-def generate_sidecar_entry(column_name, column_values=None):
+def generate_sidecar_entry(column_name, column_values=None) -> dict:
     """ Create a sidecar column dictionary for column.
 
     Parameters:
@@ -117,7 +118,7 @@ def generate_sidecar_entry(column_name, column_values=None):
     return sidecar_entry
 
 
-def hed_to_df(sidecar_dict, col_names=None):
+def hed_to_df(sidecar_dict, col_names=None) -> DataFrame:
     """ Return a 4-column dataframe of HED portions of sidecar.
 
     Parameters:
@@ -162,7 +163,7 @@ def merge_hed_dict(sidecar_dict, hed_dict):
 
     Parameters:
         sidecar_dict (dict):  Dictionary representation of a BIDS JSON sidecar.
-        hed_dict(dict):       Dictionary derived from a dataframe representation of HED in sidecar.
+        hed_dict (dict):       Dictionary derived from a dataframe representation of HED in sidecar.
 
     """
 
@@ -178,14 +179,14 @@ def merge_hed_dict(sidecar_dict, hed_dict):
             sidecar_dict[key]['Levels'] = value_dict['Levels']
 
 
-def series_to_factor(series):
+def series_to_factor(series) -> list[int]:
     """Convert a series to an integer factor list.
 
     Parameters:
-        series (Series) - Series to be converted to a list.
+        series (pd.Series): Series to be converted to a list.
 
     Returns:
-        list - contains 0's and 1's, empty, 'n/a' and np.nan are converted to 0.
+        list[int] - contains 0's and 1's, empty, 'n/a' and np.nan are converted to 0.
     """
     replaced = series.replace('n/a', False)
     filled = replaced.fillna(False)
@@ -193,7 +194,7 @@ def series_to_factor(series):
     return [int(value) for value in bool_list]
 
 
-def str_to_tabular(tsv_str, sidecar=None):
+def str_to_tabular(tsv_str, sidecar=None) -> TabularInput:
     """ Return a TabularInput a tsv string.
 
     Parameters:
@@ -207,7 +208,7 @@ def str_to_tabular(tsv_str, sidecar=None):
     return TabularInput(file=io.StringIO(tsv_str), sidecar=sidecar)
 
 
-def strs_to_hed_objs(hed_strings, hed_schema):
+def strs_to_hed_objs(hed_strings, hed_schema) -> Union[list[HedString], None]:
     """ Returns a list of HedString objects from a list of strings.
 
      Parameters:
@@ -215,9 +216,9 @@ def strs_to_hed_objs(hed_strings, hed_schema):
          hed_schema (HedSchema or HedSchemaGroup): Schema version for the strings.
 
      Returns:
-         list or None:  list of HedString objects or None.
-     """
+         Union[list[HedString], None]:  A list of HedString objects or None.
 
+     """
     if not hed_strings:
         return None
     if not isinstance(hed_strings, list):
@@ -228,14 +229,14 @@ def strs_to_hed_objs(hed_strings, hed_schema):
         return None
 
 
-def strs_to_sidecar(sidecar_strings):
+def strs_to_sidecar(sidecar_strings) -> Union[Sidecar, None]:
     """ Return a Sidecar from a sidecar as string or as a list of sidecars as strings.
 
      Parameters:
          sidecar_strings (string or list):  String or strings representing sidecars.
 
      Returns:
-         Sidecar or None:  the merged sidecar from the list.
+         Union[Sidecar, None]:  the merged sidecar from the list.
      """
 
     if not sidecar_strings:
@@ -251,15 +252,16 @@ def strs_to_sidecar(sidecar_strings):
         return None
 
 
-def to_factor(data, column=None):
+def to_factor(data, column=None) -> list[int]:
     """Convert data to an integer factor list.
 
     Parameters:
-        data (Series or DataFrame) - Series to be converted to a list.
-        column (str): Optional column name if DataFrame (otherwise column 0).
+        data (Series or DataFrame): Series or DataFrame to be converted to a list.
+        column (str, optional): Column name if DataFrame, otherwise column 0 is used.
 
     Returns:
-        list - contains 0's and 1's, empty, 'n/a' and np.nan are converted to 0.
+        list[int]: A list containing 0's and 1's. Empty, 'n/a', and np.nan values are converted to 0.
+
     """
     if isinstance(data, Series):
         series = data
@@ -277,32 +279,38 @@ def to_factor(data, column=None):
     return [int(value) for value in bool_list]
 
 
-def to_strlist(obj_list):
-    """ Return a list with the objects converted to string except for None elements.
+def to_strlist(obj_list) -> list[str]:
+    """Convert objects in a list to strings, preserving None values.
 
     Parameters:
-        obj_list (list):  A list of objects that are None or have a str method.
+        obj_list (list): A list of objects that are None or have a str method.
 
     Returns:
-        list:  A list with the objects converted to strings -- except None values are preserved.
-    """
+        list[str]: A list with the objects converted to strings. None values are preserved as empty strings.
 
+    """
     # Using list comprehension to convert non-None items to strings
     return [str(item) if item is not None else '' for item in obj_list]
 
 
 def _flatten_cat_col(col_key, col_dict):
-    """ Flatten a sidecar entry corresponding to a categorical column.
+    """Flatten a sidecar entry corresponding to a categorical column.
 
     Parameters:
-        col_key (str):    Name of the column.
-        col_dict (dict):  Dictionary corresponding to categorical of column (must include HED key).
+        col_key (str): Name of the column.
+        col_dict (dict): Dictionary corresponding to the categorical column (must include a 'HED' key).
 
     Returns:
-        list:  A list of keys
-        list:  A list of values.
-        list:  A list of descriptions.
-        list:  A list of HED tag strings.
+        tuple[list[str], list[str], list[str], list[str]]:
+            - A list of keys (column names).
+            - A list of values (unique categorical values).
+            - A list of descriptions (associated descriptions for each value).
+            - A list of HED tag strings (associated HED tags for each value).
+
+    Notes:
+        - The `col_dict` must include a 'HED' key containing HED tag strings for each value.
+        - The function extracts descriptions from HED tags and associates them with values.
+        - If no description is found, the function uses the `Levels` dictionary in `col_dict`.
 
     """
     keys = []
@@ -328,18 +336,24 @@ def _flatten_cat_col(col_key, col_dict):
     return keys, values, descriptions, tags
 
 
-def _flatten_val_col(col_key, col_dict):
-    """ Flatten a sidecar entry corresponding to a value column.
+def _flatten_val_col(col_key, col_dict) -> tuple[list[str], list[str], list[str], list[str]]:
+    """Flatten a sidecar entry corresponding to a value column.
 
     Parameters:
-        col_key (str):    Name of the column.
-        col_dict (dict):  Dictionary corresponding to value of column (must include HED key).
+        col_key (str): Name of the column.
+        col_dict (dict): Dictionary corresponding to the value column (must include a 'HED' key).
 
     Returns:
-        list:  A one-element list containing the name of the column.
-        list:  The list ['n/a'].
-        list:  A one-element list containing the description.
-        list:  A one-element list containing the HED string.
+        tuple[list[str], list[str], list[str], list[str]]:
+            - A one-element list containing the name of the column.
+            - A one-element list containing the value 'n/a'.
+            - A one-element list containing the description.
+            - A one-element list containing the HED string.
+
+    Notes:
+        - The `col_dict` must include a 'HED' key containing the HED tag string for the column.
+        - The function extracts descriptions from HED tags and associates them with the column.
+        - If no description is found, the function uses the `Description` key in `col_dict`.
 
     """
     tags, extracted = extract_tags(col_dict['HED'], 'Description/')
@@ -473,7 +487,7 @@ def _update_cat_dict(cat_dict, value_entry, hed_entry, description_entry, descri
 #         return remainder
 #     elif not remainder:
 #         return update_piece
-#     elif remainder.endswith('(') or update_piece.startswith(')'):
+#     elif remainder.endswith(')') or update_piece.startswith('('):
 #         return remainder + update_piece
 #     else:
 #         return remainder + ", " + update_piece

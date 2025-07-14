@@ -1,4 +1,6 @@
 """ A HED string with its schema and definitions. """
+from __future__ import annotations
+
 import copy
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
@@ -17,7 +19,7 @@ class HedString(HedGroup):
         Parameters:
             hed_string (str): A HED string consisting of tags and tag groups.
             hed_schema (HedSchema): The schema to use to identify tags.
-            def_dict(DefinitionDict or None): The def dict to use to identify def/def expand tags.
+            def_dict (DefinitionDict or None): The def dict to use to identify def/def expand tags.
             _contents ([HedGroup and/or HedTag] or None): Create a HedString from this exact list of children.
                                                           Does not make a copy.
         Notes:
@@ -99,7 +101,7 @@ class HedString(HedGroup):
 
         return new_string
 
-    def copy(self):
+    def copy(self) -> 'HedString':
         """ Return a deep copy of this string.
 
         Returns:
@@ -118,7 +120,7 @@ class HedString(HedGroup):
         if definition_groups:
             self.remove(definition_groups)
 
-    def shrink_defs(self):
+    def shrink_defs(self) -> 'HedString':
         """ Replace def-expand tags with def tags.
 
             This does not validate them and will blindly shrink invalid ones as well.
@@ -135,13 +137,13 @@ class HedString(HedGroup):
 
         return self
 
-    def expand_defs(self):
+    def expand_defs(self) -> "HedString":
         """ Replace def tags with def-expand tags.
 
             This does very minimal validation.
 
         Returns:
-            self
+            HedString: self
         """
         def_tags = self.find_def_tags(recursive=True, include_groups=0)
 
@@ -158,7 +160,7 @@ class HedString(HedGroup):
 
         return self
 
-    def get_as_original(self):
+    def get_as_original(self) -> str:
         """ Return the original form of this string.
 
         Returns:
@@ -176,7 +178,7 @@ class HedString(HedGroup):
         Parameters:
             hed_string (str): A HED string consisting of tags and tag groups to be processed.
             hed_schema (HedSchema): HED schema to use to identify tags.
-            def_dict(DefinitionDict): The definitions to identify.
+            def_dict (DefinitionDict): The definitions to identify.
         Returns:
             list:  A list of HedTag and/or HedGroup.
 
@@ -263,14 +265,14 @@ class HedString(HedGroup):
         return tag_or_group.span[0] + string_start_index, tag_or_group.span[1] + string_start_index
 
     @staticmethod
-    def split_hed_string(hed_string):
+    def split_hed_string(hed_string) -> list[tuple[bool, tuple[int, int]]]:
         """ Split a HED string into delimiters and tags.
 
         Parameters:
             hed_string (str): The HED string to split.
 
         Returns:
-            list:  A list of tuples where each tuple is (is_hed_tag, (start_pos, end_pos)).
+            list[tuple[bool, tuple[int, int]]]:  A list of tuples where each tuple is (is_hed_tag, (start_pos, end_pos)).
 
         Notes:
             - The tuple format is as follows
@@ -325,14 +327,14 @@ class HedString(HedGroup):
 
         return result_positions
 
-    def validate(self, allow_placeholders=True, error_handler=None):
+    def validate(self, allow_placeholders=True, error_handler=None) -> list[dict]:
         """ Validate the string using the schema.
 
         Parameters:
-            allow_placeholders(bool): Allow placeholders in the string.
-            error_handler(ErrorHandler or None): The error handler to use, creates a default one if none passed.
+            allow_placeholders (bool): Allow placeholders in the string.
+            error_handler (ErrorHandler or None): The error handler to use, creates a default one if none passed.
         Returns:
-            issues (list of dict): A list of issues for HED string.
+            list[dict]: A list of issues for HED string.
         """
         from hed.validator import HedValidator
 

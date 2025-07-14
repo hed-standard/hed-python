@@ -2,6 +2,7 @@
 Superclass representing a basic columnar file.
 """
 import os
+from typing import Union
 
 import openpyxl
 import pandas as pd
@@ -91,29 +92,29 @@ class BaseInput:
         return self._dataframe
 
     @property
-    def dataframe_a(self):
+    def dataframe_a(self) ->pd.DataFrame:
         """Return the assembled dataframe Probably a placeholder name.
 
         Returns:
-            Dataframe: the assembled dataframe"""
+            pd.Dataframe: the assembled dataframe"""
         return self.assemble()
 
     @property
-    def series_a(self):
+    def series_a(self) ->pd.Series:
         """Return the assembled dataframe as a series.
 
         Returns:
-            Series: the assembled dataframe with columns merged.
+            pd.Series: the assembled dataframe with columns merged.
         """
 
         return self.combine_dataframe(self.assemble())
 
     @property
-    def series_filtered(self):
+    def series_filtered(self) -> Union[pd.Series, None]:
         """Return the assembled dataframe as a series, with rows that have the same onset combined.
 
         Returns:
-            Series or None: the assembled dataframe with columns merged, and the rows filtered together.
+            Union[pd.Series, None] the assembled dataframe with columns merged, and the rows filtered together.
         """
         if self.onsets is not None:
             return filter_series_by_onset(self.series_a, self.onsets)
@@ -127,7 +128,7 @@ class BaseInput:
         return None
 
     @property
-    def needs_sorting(self):
+    def needs_sorting(self) -> bool:
         """Return True if this both has an onset column, and it needs sorting."""
         onsets = self.onsets
         if onsets is not None:
@@ -137,12 +138,12 @@ class BaseInput:
             return False
 
     @property
-    def name(self):
+    def name(self) -> str:
         """ Name of the data. """
         return self._name
 
     @property
-    def has_column_names(self):
+    def has_column_names(self) -> bool:
         """ True if dataframe has column names. """
         return self._has_column_names
 
@@ -161,7 +162,7 @@ class BaseInput:
 
         Parameters:
             hed_schema (HedSchema): The schema to use to convert tags.
-            tag_form(str): HedTag property to convert tags to.
+            tag_form (str): HedTag property to convert tags to.
                 Most cases should use convert_to_short or convert_to_long below.
         """
         from hed.models.df_util import convert_to_form
@@ -172,8 +173,9 @@ class BaseInput:
 
         Parameters:
             hed_schema (HedSchema): The schema to use to convert tags.
+
         """
-        return self.convert_to_form(hed_schema, "short_tag")
+        self.convert_to_form(hed_schema, "short_tag")
 
     def convert_to_long(self, hed_schema):
         """ Convert all tags in underlying dataframe to long form.
@@ -181,7 +183,7 @@ class BaseInput:
         Parameters:
             hed_schema (HedSchema or None): The schema to use to convert tags.
         """
-        return self.convert_to_form(hed_schema, "long_tag")
+        self.convert_to_form(hed_schema, "long_tag")
 
     def shrink_defs(self, hed_schema):
         """ Shrinks any def-expand found in the underlying dataframe.
@@ -264,11 +266,11 @@ class BaseInput:
             columns = list(self._dataframe.columns)
         return columns
 
-    def column_metadata(self):
+    def column_metadata(self) -> dict[int, 'ColumnMeta']:
         """ Return the metadata for each column.
 
         Returns:
-            dict: Number/ColumnMeta pairs.
+            dict[int, 'ColumnMeta']: Number/ColumnMeta pairs.
         """
         if self._mapper:
             return self._mapper._final_column_map
@@ -301,14 +303,14 @@ class BaseInput:
         new_text = new_string_obj.get_as_form(tag_form)
         self._dataframe.iloc[row_number, column_number] = new_text
 
-    def get_worksheet(self, worksheet_name=None):
+    def get_worksheet(self, worksheet_name=None) -> Union[openpyxl.workbook.Workbook, None]:
         """ Get the requested worksheet.
 
         Parameters:
             worksheet_name (str or None): The name of the requested worksheet by name or the first one if None.
 
         Returns:
-            openpyxl.workbook.Workbook: The workbook request.
+            Union[openpyxl.workbook.Workbook, None]: The workbook request.
 
         Notes:
             If None, returns the first worksheet.
@@ -325,7 +327,7 @@ class BaseInput:
             return None
 
     @staticmethod
-    def _get_dataframe_from_worksheet(worksheet, has_headers):
+    def _get_dataframe_from_worksheet(worksheet, has_headers) -> pd.DataFrame:
         """ Create a dataframe from the worksheet.
 
         Parameters:
@@ -333,7 +335,7 @@ class BaseInput:
             has_headers (bool): True if this worksheet has column headers.
 
         Returns:
-            DataFrame: The converted data frame.
+            pd.DataFrame: The converted data frame.
 
         """
         if has_headers:
@@ -345,17 +347,17 @@ class BaseInput:
         else:
             return pd.DataFrame(worksheet.values, dtype=str)
 
-    def validate(self, hed_schema, extra_def_dicts=None, name=None, error_handler=None):
+    def validate(self, hed_schema, extra_def_dicts=None, name=None, error_handler=None) -> list[dict]:
         """Creates a SpreadsheetValidator and returns all issues with this file.
 
         Parameters:
-            hed_schema(HedSchema): The schema to use for validation.
-            extra_def_dicts(list of DefDict or DefDict): All definitions to use for validation.
-            name(str): The name to report errors from this file as.
+            hed_schema (HedSchema): The schema to use for validation.
+            extra_def_dicts (list of DefDict or DefDict): All definitions to use for validation.
+            name (str): The name to report errors from this file as.
             error_handler (ErrorHandler): Error context to use.  Creates a new one if None.
 
         Returns:
-            issues (list of dict): A list of issues for a HED string.
+            list[dict]: A list of issues for a HED string.
         """
         from hed.validator.spreadsheet_validator import SpreadsheetValidator
         if not name:
@@ -366,20 +368,20 @@ class BaseInput:
         return validation_issues
 
     @staticmethod
-    def _dataframe_has_names(dataframe):
+    def _dataframe_has_names(dataframe) -> bool:
         for column in dataframe.columns:
             if isinstance(column, str):
                 return True
         return False
 
-    def assemble(self, mapper=None, skip_curly_braces=False):
+    def assemble(self, mapper=None, skip_curly_braces=False) ->pd.DataFrame:
         """ Assembles the HED strings.
 
         Parameters:
-            mapper(ColumnMapper or None): Generally pass none here unless you want special behavior.
+            mapper (ColumnMapper or None): Generally pass none here unless you want special behavior.
             skip_curly_braces (bool): If True, don't plug in curly brace values into columns.
         Returns:
-            Dataframe: The assembled dataframe.
+            pd.Dataframe: The assembled dataframe.
         """
         if mapper is None:
             mapper = self._mapper
@@ -392,7 +394,21 @@ class BaseInput:
         column_names = list(transformers)
         return _handle_curly_braces_refs(all_columns, refs, column_names)
 
-    def _handle_transforms(self, mapper):
+    def _handle_transforms(self, mapper) -> pd.DataFrame:
+        """ Apply transformations to the dataframe using the provided mapper.
+
+        Parameters:
+            mapper: The column mapper object containing transformation functions.
+
+        Returns:
+            pd.DataFrame: The transformed dataframe with all transformations applied.
+
+        Notes:
+            - Handles categorical column conversions before and after transformations
+            - Returns original dataframe if no transformers are defined
+            - Categorical columns are temporarily converted to 'category' type for processing
+              then converted back to 'str' type after transformation
+        """
         transformers, need_categorical = mapper.get_transformers()
         if transformers:
             all_columns = self._dataframe
@@ -409,15 +425,15 @@ class BaseInput:
         return all_columns
 
     @staticmethod
-    def combine_dataframe(dataframe):
+    def combine_dataframe(dataframe) ->pd.Series:
         """ Combine all columns in the given dataframe into a single HED string series,
             skipping empty columns and columns with empty strings.
 
         Parameters:
-            dataframe(Dataframe): The dataframe to combine
+            dataframe (pd.Dataframe): The dataframe to combine
 
         Returns:
-            Series: The assembled series.
+            pd.Series: The assembled series.
         """
         dataframe = dataframe.apply(
             lambda x: ', '.join(filter(lambda e: bool(e) and e != "n/a", map(str, x))),
@@ -425,13 +441,13 @@ class BaseInput:
         )
         return dataframe
 
-    def get_def_dict(self, hed_schema, extra_def_dicts=None):
+    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> 'DefinitionDict':
         """ Return the definition dict for this file.
 
         Note: Baseclass implementation returns just extra_def_dicts.
 
         Parameters:
-            hed_schema(HedSchema): Identifies tags to find definitions(if needed).
+            hed_schema (HedSchema): Identifies tags to find definitions(if needed).
             extra_def_dicts (list, DefinitionDict, or None): Extra dicts to add to the list.
 
         Returns:
@@ -440,18 +456,46 @@ class BaseInput:
         from hed.models.definition_dict import DefinitionDict
         return DefinitionDict(extra_def_dicts, hed_schema)
 
-    def get_column_refs(self):
+    def get_column_refs(self) -> list:
         """ Return a list of column refs for this file.
 
-            Default implementation returns none.
+            Default implementation returns empty list.
 
         Returns:
-            column_refs(list): A list of unique column refs found.
+           list: A list of unique column refs found.
         """
         return []
 
     def _open_dataframe_file(self, file, has_column_names, input_type):
-        """ Set the _dataframe property of BaseInput. """
+        """ Load data from various file types into the internal DataFrame.
+
+        This method handles loading data from different file formats including Excel files,
+        text files (TSV/CSV), and existing pandas DataFrames. It sets the _dataframe property
+        and handles appropriate type conversions and error handling for each file type.
+
+        Parameters:
+            file (str, file-like, or pd.DataFrame): The input data source.
+                - str: File path to load from
+                - file-like: File object to read from
+                - pd.DataFrame: Existing DataFrame to use directly
+            has_column_names (bool): Whether the file contains column headers.
+                Used to determine pandas header parameter for text files.
+            input_type (str): File extension indicating the file type.
+                Supported types: '.xlsx' (Excel), '.tsv', '.txt' (tab-separated text).
+
+        Raises:
+            HedFileError:
+                - If file is empty or None (FILE_NOT_FOUND)
+                - If unsupported file extension provided (INVALID_EXTENSION)
+                - If file loading fails due to format issues (INVALID_FILE_FORMAT)
+
+        Notes:
+            - For DataFrame input: Converts to string type and auto-detects column names
+            - For Excel files: Loads workbook and converts specified worksheet to DataFrame
+            - For text files: Uses pandas read_csv with tab delimiter and handles empty files
+            - All loaded data is converted to string type for consistency
+            - NaN values in text files are replaced with "n/a"
+        """
         pandas_header = 0 if has_column_names else None
 
         # If file is already a DataFrame
@@ -478,7 +522,30 @@ class BaseInput:
         self._load_text_file(file, pandas_header)
 
     def _load_excel_file(self, file, has_column_names):
-        """ Load an Excel file into a Pandas dataframe"""
+        """ Load an Excel file into a pandas DataFrame.
+
+        This method loads an Excel workbook using openpyxl, retrieves the specified
+        worksheet (or the first one if none specified), and converts it to a pandas
+        DataFrame. The loaded workbook is stored for potential later use in saving.
+
+        Parameters:
+            file (str or file-like): Path to the Excel file or file-like object to load.
+                Must be a valid Excel file format (.xlsx).
+            has_column_names (bool): Whether the first row of the worksheet contains
+                column headers that should be used as DataFrame column names.
+
+        Raises:
+            HedFileError: If loading fails due to file format issues, missing file,
+                corrupted Excel file, or any other openpyxl-related errors.
+                The original exception is chained for debugging purposes.
+
+        Notes:
+            - Uses openpyxl library for Excel file handling
+            - Stores the loaded workbook in self._loaded_workbook for later use
+            - Retrieves worksheet using self._worksheet_name (or first sheet if None)
+            - Converts worksheet data to DataFrame using _get_dataframe_from_worksheet
+            - All data is converted to string type for consistency
+        """
         try:
             self._loaded_workbook = openpyxl.load_workbook(file)
             loaded_worksheet = self.get_worksheet(self._worksheet_name)
@@ -488,7 +555,33 @@ class BaseInput:
                                f"Failed to load Excel file: {str(e)}", self.name) from e
 
     def _load_text_file(self, file, pandas_header):
-        """ Load a text file"""
+        """ Load a text file (TSV/CSV) into a pandas DataFrame.
+
+        This method handles loading tab-separated value files and other text-based
+        formats using pandas read_csv. It includes special handling for empty files,
+        proper NaN value replacement, and comprehensive error handling.
+
+        Parameters:
+            file (str or file-like): Path to the text file or file-like object to load.
+                Can be any format supported by pandas read_csv with tab delimiter.
+            pandas_header (int or None): Row number to use as column headers.
+                - 0: First row contains headers
+                - None: No header row, generate default column names
+
+        Raises:
+            HedFileError: If loading fails due to file format issues, encoding problems,
+                or any other pandas-related errors. The original exception is chained
+                for debugging purposes.
+
+        Notes:
+            - Uses tab delimiter for parsing (appropriate for .tsv files)
+            - Handles empty files by creating an empty DataFrame
+            - Converts all data to string type for consistency
+            - Replaces NaN values with "n/a" for consistent handling
+            - Skips blank lines during parsing
+            - Uses specific na_values configuration ("", "null")
+            - Handles pandas.errors.EmptyDataError for files with no data
+        """
         if isinstance(file, str) and os.path.exists(file) and os.path.getsize(file) == 0:
             self._dataframe = pd.DataFrame()  # Handle empty file
             return

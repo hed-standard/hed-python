@@ -1,4 +1,5 @@
 """ Validates sidecars. """
+from __future__ import annotations
 import copy
 import re
 import itertools
@@ -27,16 +28,16 @@ class SidecarValidator:
         """
         self._schema = hed_schema
 
-    def validate(self, sidecar, extra_def_dicts=None, name=None, error_handler=None):
+    def validate(self, sidecar, extra_def_dicts=None, name=None, error_handler=None) -> list[dict]:
         """Validate the input data using the schema
 
         Parameters:
             sidecar (Sidecar): Input data to be validated.
-            extra_def_dicts(list or DefinitionDict): extra def dicts in addition to sidecar
-            name(str): The name to report this sidecar as
+            extra_def_dicts (list or DefinitionDict): extra def dicts in addition to sidecar
+            name (str): The name to report this sidecar as
             error_handler (ErrorHandler): Error context to use.  Creates a new one if None
         Returns:
-            issues (list of dict): A list of issues associated with each level in the HED string.
+            list[dict]: A list of issues associated with each level in the HED string.
         """
         from hed.validator import HedValidator
         issues = []
@@ -90,7 +91,7 @@ class SidecarValidator:
                 # Only do full string checks on full columns, not partial ref columns.
                 if not is_ref_column:
                     # TODO: Figure out why this pattern is giving lint errors.
-                    refs = re.findall("\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
+                    refs = re.findall(r"\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
                     refs_strings = {data.column_name: data.get_hed_strings() for data in sidecar}
                     if "HED" not in refs_strings:
                         refs_strings["HED"] = ["n/a"]
@@ -122,11 +123,11 @@ class SidecarValidator:
         """ Validate the raw structure of this sidecar.
 
         Parameters:
-            sidecar(Sidecar): the sidecar to validate
-            error_handler(ErrorHandler): The error handler to use for error context
+            sidecar (Sidecar): the sidecar to validate
+            error_handler (ErrorHandler): The error handler to use for error context
 
         Returns:
-            issues(list): A list of issues found with the structure
+            issues (list): A list of issues found with the structure
         """
         all_validation_issues = []
         for column_name, dict_for_entry in sidecar.loaded_dict.items():
