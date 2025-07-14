@@ -1,6 +1,7 @@
 # HED Python Tools
 
-![HED Logo](assets/images/croppedWideLogo.png){ width="220" }
+<img src="assets/images/croppedWideLogo.png" alt="HED Logo" style="width:220px;">
+
 
 Welcome to the Hierarchical Event Descriptor (HED) Python Tools documentation. This library provides comprehensive tools for working with HED schemas and annotations.
 
