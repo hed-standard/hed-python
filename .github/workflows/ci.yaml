@@ -14,11 +14,11 @@ jobs:
     steps:
       - id: set-matrix
         run: |
-          if [[ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/master' ]]; then
-            # Push to master branch
+          if [[ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/main' ]]; then
+            # Push to main branch
             echo 'matrix=["3.9", "3.10", "3.11", "3.12", "3.13"]' >> $GITHUB_OUTPUT
-          elif [[ "${{ github.event_name }}" == 'pull_request' && "${{ github.event.pull_request.base.ref }}" == 'master' ]]; then
-            # PR to master branch
+          elif [[ "${{ github.event_name }}" == 'pull_request' && "${{ github.event.pull_request.base.ref }}" == 'main' ]]; then
+            # PR to main branch
             echo 'matrix=["3.9", "3.10", "3.11", "3.12", "3.13"]' >> $GITHUB_OUTPUT
           else
             echo 'matrix=["3.9", "3.13"]' >> $GITHUB_OUTPUT

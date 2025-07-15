@@ -32,10 +32,10 @@ Use `pip` to install `hedtools` from PyPI:
    ```
 
 To install directly from the 
-[GitHub](https://github.com/hed-standard/hed-python) repository `master` branch:
+[GitHub](https://github.com/hed-standard/hed-python) repository `main` branch:
 
    ```
-       pip install git+https://github.com/hed-standard/hed-python/@master
+       pip install git+https://github.com/hed-standard/hed-python/@main
    ```
 
 The HEDTools in this repository require Python 3.8 or greater.
@@ -57,14 +57,14 @@ the official HED schemas. The tools access this repository to retrieve and cache
 during execution. Starting with `hedtools 0.2.0` local copies of the most recent schema versions
 are stored within the code modules for easy access.
 
-#### Develop versus master versus stable branches
+#### Develop versus main versus stable branches
 
 The `hed-python` repository
 
-| Branch |  Meaning | Synchronized with |
-| ------ | -------- | ------------------ |
-| stable | Officially released on PyPI as a tagged version. | `stable@hed-web`<br/>`stable@hed-specification`<br/>`stable@hed-examples` |
-| latest | Most recent usable version. | `latest@hed-web`<br/>`latest@hed-specification`<br/>`latest@hed-examples` |
+| Branch  |  Meaning | Synchronized with |
+|---------| -------- | ------------------ |
+| stable  | Officially released on PyPI as a tagged version. | `stable@hed-web`<br/>`stable@hed-specification`<br/>`stable@hed-examples` |
+| main    | Most recent usable version. | `latest@hed-web`<br/>`latest@hed-specification`<br/>`latest@hed-examples` |
 | develop | Experimental and evolving. | `develop@hed-web`<br/>`develop@hed-specification`<br/>`develop@hed-examples` |
 
 As features are integrated, they first appear in the `develop` branches of the
@@ -72,7 +72,7 @@ repositories.
 The `develop` branches of the repositories will be kept in sync as much as possible
 If an interface change in `hed-python` triggers a change in `hed-web` or `hed-examples`,
 every effort will be made to get the three types of branches
-(`develop`, `latest`, `stable`) of the respective repositories in
+(`develop`, `main`, `stable`) of the respective repositories in
 sync.
 
 API documentation is generated on ReadTheDocs when a new version is
@@ -86,7 +86,7 @@ Please use the [Github issues](https://github.com/hed-standard/hed-python/issues
 for suggestions or bug reports.
 The [Github pull request](https://github.com/hed-standard/hed-python/pulls)
 may also be used for contributions.
-These PRs should be made to the `develop` branch, not the `master` branch.
+These PRs should be made to the `main` branch but should have a branch name other than `main`.
 
 #### Local Settings Storage
 Cached Schemas by default are stored in "home/.hedtools/" 
