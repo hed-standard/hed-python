@@ -28,7 +28,7 @@ class BaseSummary(ABC):
             include_individual (bool):  If True, summaries for individual files are included.
 
         Returns:
-            dict - a dictionary with 'Dataset' and 'Individual files' keys.
+            dict: A dictionary with 'Dataset' and 'Individual files' keys.
 
         Notes:
             - The 'Dataset' value is either a string or a dictionary with the overall summary.
@@ -57,7 +57,7 @@ class BaseSummary(ABC):
             individual_summaries (str): "separate", "consolidated", or "none"
 
         Returns:
-            dict - dictionary with "Dataset" and "Individual files" keys.
+            dict: Dictionary with "Dataset" and "Individual files" keys.
 
         Notes: The individual_summaries value is processed as follows:
            -  "separate" individual summaries are to be in separate files.

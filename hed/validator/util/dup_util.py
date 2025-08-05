@@ -36,7 +36,7 @@ class DuplicateChecker:
              group (HedGroup): The HED group to be checked.
 
         Returns:
-            int or None: Unique hash or None if duplicates were detected within the group.
+            Union[int, None] Unique hash or None if duplicates were detected within the group.
 
         """
         self.issues = []

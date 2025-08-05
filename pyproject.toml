@@ -32,7 +32,7 @@ dependencies = [
     "inflect",
     "jdcal",
     "jsonschema",
-    "matplotlib",
+    "matplotlib>=3.9.0",
     "numpy",
     "openpyxl",
     "pandas",

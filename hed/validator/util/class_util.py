@@ -35,6 +35,7 @@ class UnitValueValidator:
 
         Returns:
             dict:  Dictionary of value class validator functions.
+
         """
         validator_dict = {
             self.DATE_TIME_VALUE_CLASS: is_date_time_value_class,
@@ -193,7 +194,7 @@ class UnitValueValidator:
             valid_types (list): The names of value class or unit class types (e.g. dateTime or dateTimeClass).
 
         Returns:
-            type_valid (bool): True if this is one of the valid_types validators.
+            bool: True if this is one of the valid_types validators.
 
         """
         has_valid_func = False

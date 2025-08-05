@@ -111,8 +111,8 @@ class SplitRowsOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        :raises TypeError:
-            -If bad onset or duration.
+        Raises:
+            TypeError: If bad onset or duration.
 
         """
         if 'onset' not in df.columns:

@@ -18,7 +18,7 @@ def get_api_key():
         Tries to get the GitHub access token from the environment.  Defaults to above value if not found.
 
     Returns:
-        A GitHub access key or an empty string.
+        srt: A GitHub access key or an empty string.
     """
     try:
         return os.environ["HED_GITHUB_TOKEN"]

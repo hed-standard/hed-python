@@ -1,7 +1,28 @@
-""""
+"""
 Support functions for reporting validation errors.
 
 You can scope the formatted errors with calls to push_error_context and pop_error_context.
+The standard context keys are:
+
+    CUSTOM_TITLE = 'ec_title'
+    FILE_NAME = 'ec_filename'
+    SIDECAR_COLUMN_NAME = 'ec_sidecarColumnName'
+    SIDECAR_KEY_NAME = 'ec_sidecarKeyName'
+    ROW = 'ec_row'
+    COLUMN = 'ec_column'
+    LINE = "ec_line"
+    HED_STRING = 'ec_HedString'
+    SCHEMA_SECTION = 'ec_section'
+    SCHEMA_TAG = 'ec_schema_tag'
+    SCHEMA_ATTRIBUTE = 'ec_attribute'
+
+The standard error keys are:
+    'code' -- the standard HED error code
+    'message' -- the error message
+    'severity' -- 1 is error and 10 is warning.
+    'url' -- the web page in the HED Specification corresponding to the error (has explanation of how can occur).
+    'source_tag' -- the source tag that caused the error if application.
+
 """
 from __future__ import annotations
 from functools import wraps
@@ -490,6 +511,7 @@ def get_printable_issue_string(issues, title=None, severity=None, skip_filename=
         skip_filename (bool):  If True, don't add the filename context to the printable string.
         add_link (bool): Add a link at the end of message to the appropriate error if True
         show_details (bool):  If True, show details about the issues.
+
     Returns:
         str:   A string containing printable version of the issues or ''.
 
@@ -531,13 +553,25 @@ def get_printable_issue_string_html(issues, title=None, severity=None, skip_file
     return et.tostring(root_element, encoding='unicode')
 
 def iter_errors(issues):
-    """ An iterator over issues represented as flat dictionaries.
+    """ An iterator over issues that flattens the context into each issue dictionary.
+
+    This function takes a list of issues and transforms each one into a "flat" dictionary.
+    A flat dictionary contains all the information about a single error, including its context,
+    in a single, non-nested dictionary. This is useful for reporting or logging errors
+    in a simple, straightforward format.
+
+    For example, context information like file name or row number, which might be stored
+    in a nested structure or separate from the issue dictionary, is merged into the
+    top level of the dictionary.
+
+    It also adds a 'url' key with a link to the documentation for known HED error codes.
+    Any complex objects like HedTag or HedString are converted to their string representations.
 
     Parameters:
-        issues (list):  Issues to iterator over.
+        issues (list):  A list of issue dictionaries to iterate over.
 
     Yields:
-        dict: Represents the information in a single error.
+        dict: A flattened dictionary representing a single error.
     """
 
     for issue in issues:
@@ -563,7 +597,7 @@ def create_doc_link(error_code):
         error_code(str): A HED error code.
 
     Returns:
-        url(str or None): The URL if it's a valid code.
+        Union[str, None]: The URL if it's a valid code.
     """
     if error_code in known_error_codes["hed_validation_errors"] \
             or error_code in known_error_codes["schema_validation_errors"]:
@@ -684,7 +718,7 @@ def _get_error_prefix(single_issue):
         single_issue(dict): A single issue object.
 
     Returns:
-        error_prefix(str):  the prefix to use.
+        str:  the prefix to use.
     """
     severity = single_issue.get('severity', ErrorSeverity.ERROR)
     error_code = single_issue['code']

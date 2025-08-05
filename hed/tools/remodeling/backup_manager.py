@@ -22,8 +22,8 @@ class BackupManager:
             data_root (str): Full path of the root of the data directory.
             backups_root (str or None):  Full path to the root where backups subdirectory is located.
 
-        :raises HedFileError:
-            - If the data_root does not correspond to a real directory.
+        Raises:
+            HedFileError: If the data_root does not correspond to a real directory.
 
         Notes: The backup_root will have remodeling/backups appended.
         """
@@ -47,13 +47,11 @@ class BackupManager:
             verbose (bool):     If True, print out the files that are being backed up.
 
         Returns:
-            bool:  True if the backup was successful. False if a backup of that name already exists.
+            bool: True if the backup was successful. False if a backup of that name already exists.
 
-        :raises HedFileError:
-            - For missing or incorrect files.
-
-        :raises OS-related error:
-            - OS-related error when file copying occurs.
+        Raises:
+            HedFileError: For missing or incorrect files.
+            OS-related error: OS-related error when file copying occurs.
 
         """
         if not backup_name:
@@ -87,7 +85,7 @@ class BackupManager:
             backup_name (str): Name of the backup to be retrieved.
 
         Returns:
-            The dictionary with the backup info.
+            dict: The dictionary with the backup info.
 
         Notes:
             The dictionary with backup information has keys that are the paths of
@@ -107,10 +105,10 @@ class BackupManager:
             original_paths (bool):   If True return the original paths.
 
         Returns:
-            list:  Full paths of the original files backed (original_paths=True) or the paths in the backup.
+            list: Full paths of the original files backed (original_paths=True) or the paths in the backup.
 
-        :raises HedFileError:
-            - If not backup named backup_name exists.
+        Raises:
+            HedFileError: If not backup named backup_name exists.
 
         """
 
@@ -195,9 +193,10 @@ class BackupManager:
             backup_name (str): Name of the backup.
 
         Returns:
-            dict:  dictionary containing the backup info.
-            list:  Files in backup directory that are not in the backup dict.
-            list:  Files in backup dictionary not in backup directory
+            tuple[dict, list, list]:
+            - Dictionary containing the backup info.
+            - Files in backup directory that are not in the backup dict.
+            - Files in backup dictionary not in backup directory.
 
         Notes:
             If file_path is None, this checks against consistency in the backup dictionary.

@@ -70,8 +70,8 @@ class KeyMap:
         Returns:
             DataFrame:  A dataframe containing the template.
 
-        :raises HedFileError:
-            - If additional columns are not disjoint from the key columns.
+        Raises:
+            HedFileError: If additional columns are not disjoint from the key columns.
 
         Notes:
             -  The template consists of the unique key columns in this map plus additional columns.
@@ -109,12 +109,12 @@ class KeyMap:
             data (DataFrame, str):  Columnar data (either DataFrame or filename) whose columns are to be remapped.
 
         Returns:
-            tuple:
-                - DataFrame: New dataframe with columns remapped.
-                - list:  List of row numbers that had no correspondence in the mapping.
+            tuple [DataFrame, list]:
+            - New dataframe with columns remapped.
+            - List of row numbers that had no correspondence in the mapping.
 
-        :raises HedFileError:
-            - If data is missing some of the key columns.
+        Raises:
+            HedFileError: If data is missing some of the key columns.
 
         """
 
@@ -174,8 +174,8 @@ class KeyMap:
             data (DataFrame or str):     DataFrame or filename of an events file or event map.
             allow_missing (bool):        If True allow missing keys and add as n/a columns.
 
-        :raises HedFileError:
-            - If there are missing keys and allow_missing is False.
+        Raises:
+            HedFileError: If there are missing keys and allow_missing is False.
 
         """
         df = data_util.get_new_dataframe(data)
@@ -224,7 +224,9 @@ class KeyMap:
             next_pos (int):    Index into the row_list of this row
 
         Returns:
-            tuple: (key, pos_update)  key is the row hash and pos_update is 1 if new row or 0 otherwise.
+            tuple[int, int]:
+            - the row hash.
+            - 1 if new row or 0 otherwise.
 
         """
         key = data_util.get_row_hash(row, self.key_cols)
@@ -244,6 +246,7 @@ class KeyMap:
         Parameters:
             df (Dataframe):   Dataframe to process by removing quotes.
             columns (list):  List of column names. If None, all columns are used.
+
         Notes:
             - Replacement is done in place.
         """

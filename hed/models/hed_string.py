@@ -48,7 +48,7 @@ class HedString(HedGroup):
                                         This takes ownership of their children.
 
         Returns:
-            new_string(HedString): The newly combined HedString.
+            HedString: The newly combined HedString.
         """
         if not hed_strings:
             raise TypeError("Passed an empty list to from_hed_strings")
@@ -126,7 +126,7 @@ class HedString(HedGroup):
             This does not validate them and will blindly shrink invalid ones as well.
 
         Returns:
-            self
+            HedString: self
         """
         for def_expand_tag, def_expand_group in self.find_tags({DefTagNames.DEF_EXPAND_KEY}, recursive=True):
             expanded_parent = def_expand_group._parent
@@ -179,11 +179,12 @@ class HedString(HedGroup):
             hed_string (str): A HED string consisting of tags and tag groups to be processed.
             hed_schema (HedSchema): HED schema to use to identify tags.
             def_dict (DefinitionDict): The definitions to identify.
+
         Returns:
             list:  A list of HedTag and/or HedGroup.
 
-        :raises ValueError:
-            - The string is significantly malformed, such as mismatched parentheses.
+        Raises:
+            ValueError: If the string is significantly malformed, such as mismatched parentheses.
 
         Notes:
             - The parse tree consists of tag groups, tags, and delimiters.
@@ -333,6 +334,7 @@ class HedString(HedGroup):
         Parameters:
             allow_placeholders (bool): Allow placeholders in the string.
             error_handler (ErrorHandler or None): The error handler to use, creates a default one if none passed.
+
         Returns:
             list[dict]: A list of issues for HED string.
         """
@@ -352,6 +354,7 @@ class HedString(HedGroup):
                 If 0: return only tags.
                 If 1: return only groups.
                 If 2 or any other value: return both.
+
         Returns:
             list: The returned result depends on include_groups.
         """

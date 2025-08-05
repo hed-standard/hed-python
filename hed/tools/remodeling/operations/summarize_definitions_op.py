@@ -167,7 +167,7 @@ class DefinitionSummary(BaseSummary):
         """ Create an Object containing the definition summary.
 
         Returns:
-            Object - the overall summary object for type_defs.
+            Object: The overall summary object for type_defs.
 
         """
         return self.def_gatherer
@@ -181,7 +181,7 @@ class DefinitionSummary(BaseSummary):
             indent (str): A string containing spaces used for indentation (usually 3 spaces).
 
         Returns:
-            str - The results in a printable format ready to be saved to a text file.
+            str: The results in a printable format ready to be saved to a text file.
 
         Notes:
             This calls _get_dataset_string to get the overall summary string and
@@ -238,9 +238,9 @@ class DefinitionSummary(BaseSummary):
             def_entry (DefinitionEntry): Definition entry from which to remove its definition.
 
         Returns:
-            tuple:
-                str:  Description string.
-                DefinitionEntry: DefinitionEntry after description has been removed.
+            tuple[str, DefinitionEntry]:
+            - Description string.
+            - DefinitionEntry after description has been removed.
 
 
         """

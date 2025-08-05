@@ -123,7 +123,9 @@ class ReservedChecker:
             reserved_tags (list of HedTag): The reserved tags to be checked.
 
         Returns:
-            tuple (max_required, min_required)
+            tuple[float, float]:
+            - max_required
+            - min_required
 
         """
         max_allowed = float('inf')
@@ -153,7 +155,7 @@ class ReservedChecker:
             reserved_tags (list of HedTag) - reserved tags (no duplicates)
 
         Returns:
-            list of HedTag
+            list[HedTag]
 
         """
         requirements = self.reserved_map[tag.short_base_tag]

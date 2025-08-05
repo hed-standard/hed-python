@@ -97,7 +97,8 @@ def _numpy_to_svg(contour, radius=1, color="black"):
     Parameters:
         contour (np.Array): Image to be converted.
         radius (float): The radius of the contour to draw.
-        color(string): the color to draw it as, e.g. "red"
+        color(string): the color to draw it as, e.g. "red".
+
     Returns:
         str: The SVG representation.
     """

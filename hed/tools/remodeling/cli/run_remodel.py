@@ -69,7 +69,7 @@ def handle_backup(args):
         args (obj): Parsed arguments as an object.
 
     Returns:
-        str or None:  Backup name if there was a backup done.
+        Union[str, None]:  Backup name if there was a backup done.
 
     """
     if args.no_backup:
@@ -91,11 +91,12 @@ def parse_arguments(arg_list=None):
         arg_list (list):  List of command line arguments as a list.
 
     Returns:
-        Object:  Argument object.
-        List: A list of parsed operations (each operation is a dictionary).
+        Tuple[Object, list]:
+        - Argument object.
+        - A list of parsed operations (each operation is a dictionary).
 
-    :raises ValueError:
-        - If the operations were unable to be correctly parsed.
+    Raises:
+        ValueError: If the operations were unable to be correctly parsed.
 
     """
     parser = get_parser()
@@ -168,9 +169,8 @@ def get_sidecar(data_dir, tsv_path):
         data_dir (str):  Full path of the data directory.
         tsv_path (str):  Full path of the file.
 
-
     Returns:
-        Sidecar or None:  The Sidecar if it exists, otherwise None.
+        Union[Sidecar, None]:  The Sidecar if it exists, otherwise None.
 
     """
     merged_dict = bids_util.get_merged_sidecar(data_dir, tsv_path)
@@ -186,7 +186,8 @@ def main(arg_list=None):
         arg_list (list or None):   Called with value None when called from the command line.
                                    Otherwise, called with the command-line parameters as an argument list.
 
-    :raises HedFileError:
+    Raises:
+        HedFileError:
         - if the data root directory does not exist.
         - if the specified backup does not exist.
 

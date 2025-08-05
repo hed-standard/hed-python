@@ -140,6 +140,7 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
         xml_version (str): Returns this version if it exists
         local_hed_directory (str): Path to local HED directory.  Defaults to HED_CACHE_DIRECTORY
         check_prerelease (bool): Also check for prerelease schemas
+
     Returns:
         str: The path to the latest HED version the HED directory.
 
@@ -161,7 +162,7 @@ def cache_local_versions(cache_folder) -> int:
         cache_folder (str): The folder holding the cache.
 
     Returns:
-        int or None: Returns -1 on cache access failure.  None otherwise
+        Union[int, None]: Returns -1 on cache access failure.  None otherwise
 
     """
     if not cache_folder:
@@ -374,7 +375,7 @@ def _get_hed_xml_versions_from_url_all_libraries(hed_base_library_url, library_n
         skip_folders (list): A list of sub folders to skip over when downloading.
 
     Returns:
-        list or dict: List of version numbers or dictionary {library_name: [versions]}.
+        Union[list, dict]: List of version numbers or dictionary {library_name: [versions]}.
 
     Notes:
         - The Default skip_folders is 'deprecated'.
@@ -435,7 +436,7 @@ def _safe_move_tmp_to_folder(temp_hed_xml_file, dest_filename):
         dest_filename (str): A destination folder and filename.
 
     Returns:
-        dest_filename (str): The new filename on success or None on failure.
+        str: The new filename on success or None on failure.
 
     """
     _, temp_xml_file = os.path.split(temp_hed_xml_file)

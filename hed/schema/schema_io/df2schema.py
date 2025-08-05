@@ -39,9 +39,10 @@ class SchemaLoaderDF(SchemaLoader):
             filenames(str or None or dict of str): A valid set of schema spreadsheet filenames
                                                    If a single filename string, assumes the standard filename suffixes.
             schema_as_strings_or_df(None or dict of str): A valid set of schema spreadsheet files(tsv as strings)
-            name (str): what to identify this schema as
+            name (str): what to identify this schema as.
+
         Returns:
-            schema(HedSchema): The new schema
+            HedSchema: The new schema
         """
         loader = cls(filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name)
         hed_schema = loader._load()
@@ -253,6 +254,7 @@ class SchemaLoaderDF(SchemaLoader):
         Parameters:
             row_number (int): The row number to report errors as.
             row (pd.Series): A tag row.
+
         Returns:
             dict: Dictionary of attributes.
         """
@@ -277,7 +279,8 @@ def load_dataframes_from_strings(schema_data):
         schema_data(dict): The dict of files(strings or pd.DataFrames) key being constants like TAG_KEY
 
     Returns:
-        schema_data(dict): A dict with the same keys as schema_data, but values are dataframes if not before
+        dict: A dict with the same keys as schema_data, but values are dataframes if not before.
+
     """
     return {key: value if isinstance(value, pd.DataFrame) else pd.read_csv(io.StringIO(value), sep="\t",
                                                                            dtype=str, na_filter=False)

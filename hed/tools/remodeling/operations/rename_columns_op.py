@@ -65,8 +65,8 @@ class RenameColumnsOp (BaseOp):
         Returns:
             pd.Dataframe: A new dataframe after processing.
 
-        :raises KeyError:
-            - When ignore_missing is False and column_mapping has columns not in the data.
+        Raises:
+            KeyError: When ignore_missing is False and column_mapping has columns not in the data.
 
         """
         df_new = df.copy()

@@ -29,6 +29,7 @@ class DefValidator(DefinitionDict):
         Parameters:
             hed_string_obj (HedString): The HED string to process.
             hed_validator (HedValidator): Used to validate the placeholder replacement.
+
         Returns:
             list: Issues found related to validating defs. Each issue is a dictionary.
         """

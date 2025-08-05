@@ -115,8 +115,9 @@ class HedTagCounts:
             tag_template (dict): A dictionary whose keys are titles and values are lists of HED tags (str).
 
         Returns:
-            dict: Keys are tags (strings) and values are list of HedTagCount for items fitting template.
-            list: HedTagCount objects corresponding to tags that don't fit the template.
+            [tuple[dict, list]]: A tuple containing two elements.
+            - dict: Keys are tags (strings) and values are list of HedTagCount for items fitting template.
+            - list: HedTagCount objects corresponding to tags that don't fit the template.
 
         """
         template = self.create_template(tag_template)

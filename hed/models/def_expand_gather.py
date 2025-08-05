@@ -51,9 +51,11 @@ class AmbiguousDef:
     def resolve_definition(self):
         """ Try to resolve the definition based on the information available.
 
-        Returns: boolean - True if successfully resolved and False if it can't be resolved from information available.
+        Returns:
+            boolean: True if successfully resolved and False if it can't be resolved from information available.
 
-        Raises: ValueError - If the actual_contents conflict.
+        Raises:
+            ValueError: If the actual_contents conflict.
 
         If the definition has already been resolved, this rechecks based on the information.
 

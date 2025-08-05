@@ -104,8 +104,8 @@ class RemapColumnsOp(BaseOp):
     def _make_key_map(self):
         """
 
-        :raises ValueError:
-        - If a column designated as an integer source does not have valid integers.
+        Raises:
+            ValueError: If a column designated as an integer source does not have valid integers.
 
         """
 

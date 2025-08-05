@@ -121,7 +121,7 @@ class HedValidationSummary(BaseSummary):
             indent (str): A string containing spaces used for indentation (usually 3 spaces).
 
         Returns:
-            str - The results in a printable format ready to be saved to a text file.
+            str: The results in a printable format ready to be saved to a text file.
 
         Notes:
             This gets the error list from "sidecar_issues" and "event_issues".
@@ -186,7 +186,7 @@ class HedValidationSummary(BaseSummary):
         """ Create a dictionary containing all the errors in the dataset.
 
         Returns:
-            dict - dictionary of issues organized into sidecar_issues and event_issues.
+            dict: dictionary of issues organized into sidecar_issues and event_issues.
 
         """
         results = self.get_empty_results()

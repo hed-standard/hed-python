@@ -18,8 +18,8 @@ class HedType:
             name (str): Name of the tabular file as a unique identifier.
             type_tag (str): Lowercase short form of the tag to be managed.
 
-        :raises HedFileError:
-            - On errors such as unmatched onsets or missing definitions.
+        Raises:
+            HedFileError: On errors such as unmatched onsets or missing definitions.
 
         """
         self.name = name
@@ -40,7 +40,7 @@ class HedType:
             type_value (str): The tag corresponding to the type's value (such as the name of the condition variable).
 
         Returns:
-            HedTypeFactors or None
+            Union[HedTypeFactors, None]
 
         """
         return self._type_map.get(type_value.casefold(), None)
@@ -86,7 +86,7 @@ class HedType:
             factor_encoding (str):      Type of factor encoding (one-hot or categorical).
 
         Returns:
-            DataFrame:  Contains the specified factors associated with this type tag.
+            pd.DataFrame:  Contains the specified factors associated with this type tag.
 
 
         """

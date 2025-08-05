@@ -177,8 +177,8 @@ def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate')
     Returns:
         dict:  Dictionary with key_col values as the keys and the corresponding value_col values as the values.
 
-    :raises HedFileError:
-        - When tsv_path does not correspond to a file that can be read into a DataFrame.
+    Raises:
+        HedFileError: When tsv_path does not correspond to a file that can be read into a DataFrame.
 
     """
 
@@ -261,11 +261,11 @@ def reorder_columns(data, col_order, skip_missing=True):
         skip_missing (bool):        If true, col_order columns missing from data are skipped, otherwise error.
 
     Returns:
-        DataFrame:                  A new reordered dataframe.
+        DataFrame: A new reordered dataframe.
 
-    :raises HedFileError:
-        - If col_order contains columns not in data and skip_missing is False.
-        - If data corresponds to a filename from which a dataframe cannot be created.
+    Raises:
+        HedFileError: If col_order contains columns not in data and skip_missing is False.
+        If data corresponds to a filename from which a dataframe cannot be created.
 
     """
     df = get_new_dataframe(data)
@@ -284,9 +284,9 @@ def separate_values(values, target_values):
         target_values (list):   List of desired values.
 
      Returns:
-        tuple:
-            list:  Target values present in values.
-            list:  Target values missing from values.
+        tuple[list, list]: A tuple containing two lists:
+        - Target values present in values.
+        - Target values missing from values.
 
      Notes:
          - The function computes the set difference of target_cols and base_cols and returns a list

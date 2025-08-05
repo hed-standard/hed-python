@@ -112,7 +112,7 @@ def sort_dataframe_by_onsets(df):
         df(pd.Dataframe): Dataframe to sort.
 
     Returns:
-        The sorted dataframe, or the original dataframe if it didn't have an onset column.
+        pd.DataFrame: The sorted dataframe, or the original dataframe if it didn't have an onset column.
     """
     if "onset" in df.columns:
         # Create a copy and sort by onsets as floats(if needed), but continue to keep the string version.
@@ -177,7 +177,7 @@ def _handle_curly_braces_refs(df, refs, column_names):
         column_names(list): the columns we are interested in(should include all ref columns)
 
     Returns:
-        modified_df(pd.DataFrame): The modified dataframe with refs replaced
+        pd.DataFrame: The modified dataframe with refs replaced
     """
     # Filter out columns and refs that don't exist.
     refs_new = [ref for ref in refs if ref in column_names]
@@ -221,7 +221,7 @@ def split_delay_tags(series, hed_schema, onsets):
         onsets(pd.Series or None)
 
     Returns:
-        sorted_df(pd.Dataframe or None): If we had onsets, a dataframe with 3 columns
+        Union[pd.Dataframe, None]: If we had onsets, a dataframe with 3 columns
             "HED": The HED strings(still str)
             "onset": the updated onsets
             "original_index": the original source line.  Multiple lines can have the same original source line.
@@ -260,10 +260,11 @@ def filter_series_by_onset(series, onsets):
     """Return the series, with rows that have the same onset combined.
 
     Parameters:
-        series(pd.Series or pd.Dataframe): the series to filter.  If dataframe, it filters the "HED" column
-        onsets(pd.Series): the onset column to filter by
+        series(pd.Series or pd.Dataframe): The series to filter.  If dataframe, it filters the "HED" column.
+        onsets(pd.Series): The onset column to filter by.
+
     Returns:
-        Series or Dataframe: the series with rows filtered together.
+        Union[Series, Dataframe]: the series with rows filtered together.
     """
 
     indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))

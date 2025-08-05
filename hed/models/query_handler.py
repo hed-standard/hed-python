@@ -54,8 +54,7 @@ class QueryHandler:
             hed_string_obj (HedString): String to search
 
         Returns:
-            list(SearchResult): Generally you should just treat this as a bool
-                                True if a match was found.
+            list: List of search result. Generally you should just treat this as a bool. True if a match was found.
         """
         current_node = self.tree
 

@@ -48,8 +48,8 @@ def parse_attribute_string(attr_string):
     Returns:
         attributes(dict): The located attributes.  Can be empty.
 
-    :raises ValueError:
-        - Very malformed input
+    Raises:
+        ValueError: Very malformed input.
     """
     if attr_string:
         attributes_split = [x.strip() for x in attr_string.split(',')]

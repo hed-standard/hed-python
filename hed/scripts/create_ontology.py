@@ -16,7 +16,10 @@ def create_ontology(repo_path, schema_name, schema_version, dest):
         dest(str): Location for output
 
     Returns:
-        error(int): 0 on success.  Raises an exception otherwise.
+        int: 0 on success.
+
+    Raises:
+        HedFileError: An exception otherwise.
     """
     final_source = get_prerelease_path(repo_path, schema_name, schema_version)
     # print(f"Creating ontology from {final_source}")

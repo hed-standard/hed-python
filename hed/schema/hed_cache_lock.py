@@ -16,7 +16,7 @@ class CacheException(Exception):
 class CacheLock:
     """Class to lock the cache folder to ensure it doesn't get hit by another version at the same time."""
     def __init__(self, cache_folder, write_time=True, time_threshold=CACHE_TIME_THRESHOLD):
-        """Constructor for hed locking object
+        """Constructor for HED locking object
 
         Parameters:
             cache_folder(str): The folder to create the lock in(implicitly locking that folder)
@@ -56,7 +56,7 @@ def _read_last_cached_time(cache_folder):
     """ Check the given cache folder to see when it was last updated.
 
     Parameters:
-        cache_folder (str): The folder we're caching hed schema in.
+        cache_folder (str): The folder we're caching HED schema in.
 
     Returns:
         float: The time we last updated the cache.  Zero if no update found.
@@ -77,10 +77,10 @@ def _write_last_cached_time(new_time, cache_folder):
 
     Parameters:
         new_time (float): The time this was updated.
-        cache_folder (str): The folder used for caching the hed schema.
+        cache_folder (str): The folder used for caching the HED schema.
 
-    :raises ValueError:
-        - something went wrong writing to the file
+    Raises:
+        ValueError: Something went wrong writing to the file.
     """
     timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
     try:

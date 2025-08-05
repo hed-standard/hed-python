@@ -26,8 +26,9 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     Returns:
         list: A list of all warnings and errors found in the file. Each issue is a dictionary.
 
-    :raises ValueError:
-        - Trying to validate a HedSchemaGroup directly
+    Raises:
+        ValueError: Trying to validate a HedSchemaGroup directly.
+
     """
     if not isinstance(hed_schema, HedSchema):
         raise ValueError("To check compliance of a HedGroupSchema, call self.check_compliance on the schema itself.")

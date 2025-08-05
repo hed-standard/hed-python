@@ -66,7 +66,8 @@ def word_cloud_to_svg(wc):
         wc (WordCloud): the word cloud object.
 
     Returns:
-        svg_string (str): The svg for the word cloud.
+       str: The svg for the word cloud.
+
     """
     svg_string = wc.to_svg()
     svg_string = svg_string.replace("fill:", "fill:rgb")

@@ -37,10 +37,10 @@ class DefinitionEntry:
             return_copy_of_tag(bool): Set to True for validation.
 
         Returns:
-            HedGroup:     The contents of this definition(including the def tag itself).
+            Union[HedGroup, None]:     The contents of this definition(including the def tag itself).
 
-        :raises ValueError:
-            - Something internally went wrong with finding the placeholder tag.  This should not be possible.
+        Raises:
+            ValueError: Something internally went wrong with finding the placeholder tag. This should not be possible.
         """
         if self.takes_value == (not placeholder_value):
             return None

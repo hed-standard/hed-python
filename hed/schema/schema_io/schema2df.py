@@ -37,10 +37,12 @@ class Schema2DF(Schema2Base):
 
         Parameters:
             object_name(str): The name of the base HED object, e.g. HedHeader, HedUnit
-            include_prefix(bool): If True, include the "hed:"
+            include_prefix(bool): If True, include the "hed:".
+
         Returns:
-            object_name(str): The inherited object name, e.g. StandardHeader
-            hed_id(str): The full formatted hed_id
+            tuple[str, str]: A tuple containing:
+            - The inherited object name, e.g. StandardHeader.
+            - The full formatted hed_id.
         """
         prefix, obj_id = get_library_name_and_id(self._schema)
         name = f"{prefix}{remove_prefix(object_name, 'Hed')}"

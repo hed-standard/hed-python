@@ -376,8 +376,9 @@ class SchemaLoaderWiki(SchemaLoader):
             starting_index (int): The first index we can check for the brackets.
 
         Returns:
-            dict: Dictionary of attributes.
-            int: The last index we found tag attributes at.
+            tuple[dict, int]: A tuple containing
+            - Dictionary of attributes.
+            - The last index we found tag attributes at.
 
         """
         attr_string, starting_index = self._get_line_section(row, starting_index, '{', '}')
@@ -398,8 +399,9 @@ class SchemaLoaderWiki(SchemaLoader):
             end_delim (str): The string that ends this block.
 
         Returns:
-            str: The tag description.
-            int: The last index we found tag attributes at.
+            tuple[str, int]: A tuple containing.
+            - The tag description.
+            - The last index we found tag attributes at.
 
         """
         count1 = row.count(start_delim)
@@ -453,9 +455,11 @@ class SchemaLoaderWiki(SchemaLoader):
         Parameters:
             line (str): The line to check.
             current_section_number (str): The current section.
+
         Returns:
-            str: The new section name if found, otherwise None.
-            number: The updated section number
+            tuple[str, number]: A tuple containing:
+            - The new section name if found, otherwise None.
+            - The updated section number.
         """
         if not line:
             return None, current_section_number
@@ -496,8 +500,8 @@ class SchemaLoaderWiki(SchemaLoader):
            wiki_lines : [str]
 
         Returns:
-            sections: {str: [str]}
-            A list of lines for each section of the schema(not including the identifying section line)
+            dict[str, [str]]: A dictionary with section names as keys and lists of lines as values.
+
         """
         current_section_name = wiki_constants.HEADER_LINE_STRING
         current_section_number = 2

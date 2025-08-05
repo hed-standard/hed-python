@@ -66,8 +66,8 @@ class ReorderColumnsOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        :raises ValueError:
-            - When ignore_missing is false and column_order has columns not in the data.
+        Raises:
+            ValueError: When ignore_missing is false and column_order has columns not in the data.
 
         """
         df_new = df.copy()

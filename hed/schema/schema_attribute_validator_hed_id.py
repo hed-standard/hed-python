@@ -65,7 +65,8 @@ class HedIDValidator:
         Parameters:
             hed_schema (HedSchema): The schema to use for validation
             tag_entry (HedSchemaEntry): The schema entry for this tag.
-            attribute_name (str): The name of this attribute
+            attribute_name (str): The name of this attribute.
+
         Returns:
             issues(list): A list of issues from validating this attribute.
         """

@@ -94,8 +94,9 @@ class SchemaLoader(ABC):
             file_format(str or None): If this is an owl file being loaded, this is the format.
                 Allowed values include: turtle, json-ld, and owl(xml)
             name(str or None): Optional user supplied identifier, by default uses filename
+
         Returns:
-            schema(HedSchema): The new schema
+            HedSchema: The new schema
         """
         loader = cls(filename, schema_as_string, schema, file_format, name)
         return loader._load()
@@ -168,7 +169,7 @@ class SchemaLoader(ABC):
             loading_merged(bool): If this schema was already merged before loading
 
         Returns:
-            rooted_tag(HedTagEntry or None): The base tag entry from the standard schema
+            Union[HedTagEntry, None]: The base tag entry from the standard schema
                 Returns None if this tag isn't rooted
 
         :raises HedFileError:

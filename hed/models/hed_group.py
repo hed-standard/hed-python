@@ -72,11 +72,9 @@ class HedGroup:
             item_to_replace (HedTag or HedGroup): The item to replace must exist or this will raise an error.
             new_contents (HedTag or HedGroup): Replacement contents.
 
-        :raises KeyError:
-            - item_to_replace does not exist.
-
-        :raises AttributeError:
-            - item_to_replace has no parent set.
+        Raises:
+            KeyError: Item_to_replace does not exist.
+            AttributeError: Item_to_replace has no parent set.
         """
         parent = item_to_replace._parent
         parent._replace(item_to_replace=item_to_replace, new_contents=new_contents)
@@ -89,8 +87,8 @@ class HedGroup:
                                                   or this will raise an error.
             new_contents (HedTag or HedGroup): Replacement contents.
 
-        :raises KeyError:
-            - item_to_replace does not exist.
+        Raises:
+            KeyError: Item_to_replace does not exist.
         """
         if self._original_children is self.children:
             self._original_children = self.children.copy()
@@ -157,14 +155,14 @@ class HedGroup:
         """ Return a sorted copy of this HED group
 
         Returns:
-            sorted_copy (HedGroup): The sorted copy.
+            HedGroup: The sorted copy.
         """
         string_copy = self.copy()
         string_copy._sorted(update_self=True)
         return string_copy
 
     def _sorted(self, update_self=False) -> list:
-        """ Return a sorted copy of this HED group as a list of it's children.
+        """ Return a sorted copy of this HED group as a list of its children.
 
         Parameters:
             update_self (bool): If True, update the contents of this group to be sorted as well.
@@ -278,10 +276,11 @@ class HedGroup:
 
             Useful for things like Def-expand where they only have a single group.
 
-            Raises a ValueError if there are no groups.
-
         Returns:
             HedGroup: The first group.
+
+        Raises:
+            ValueError: If there are no groups.
 
         """
         return self.groups()[0]
@@ -299,7 +298,7 @@ class HedGroup:
     def span(self):
         """ Return the source span.
 
-        Return:
+        Returns:
             int: start index of the group (including parentheses) from the source string.
             int: end index of the group (including parentheses) from the source string.
 
@@ -365,7 +364,7 @@ class HedGroup:
             tag_attribute (str): The hed_tag property to use to construct the string (usually short_tag or long_tag).
 
         Returns:
-            formatted_hed (str): The indented string.
+            str: The indented string.
         """
         hed_string = self.sorted().get_as_form(tag_attribute)
 
@@ -572,7 +571,7 @@ class HedGroup:
                 If 2 or any other value: Return both.
 
         Returns:
-            list:
+            list: A list of tuples. The contents depend on the values of the include_group.
         """
         found_tags = []
         if recursive:

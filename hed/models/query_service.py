@@ -49,10 +49,10 @@ def search_hed_objs(hed_objs, queries, query_names):
         query_names (list): A list of column names for results of queries.
 
     Returns:
-        DataFrame: Contains the factor vectors with results of the queries.
+        pd.DataFrame: Contains the factor vectors with results of the queries.
 
-    :raises ValueError:
-        - If query names are invalid or duplicated.
+    Raises:
+        ValueError: If query names are invalid or duplicated.
     """
     df_factors = pd.DataFrame(0, index=range(len(hed_objs)), columns=query_names)
     for parse_ind, parser in enumerate(queries):

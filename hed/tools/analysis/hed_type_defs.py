@@ -155,8 +155,9 @@ class HedTypeDefs:
             lowercase (bool): If True (default), return values are converted to lowercase.
 
         Returns:
-            str:   name of the definition.
-            str:   value of the definition if it has one.
+            tuple[str, str]:
+            - Name of the definition.
+            - Value of the definition if it has one.
 
         """
         if not name:

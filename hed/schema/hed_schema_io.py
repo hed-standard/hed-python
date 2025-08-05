@@ -33,7 +33,8 @@ def load_schema_version(xml_version=None, xml_folder=None) -> Union['HedSchema',
     Returns:
         HedSchema or HedSchemaGroup: The schema or schema group extracted.
 
-    :raises HedFileError:
+    Raises:
+        HedFileError: For the following issues:
         - The xml_version is not valid.
         - The specified version cannot be found or loaded
         - Other fatal errors loading the schema (These are unlikely if you are not editing them locally)
@@ -75,7 +76,8 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> 'Hed
     Returns:
         HedSchema: The loaded schema.
 
-    :raises HedFileError:
+    Raises:
+        HedFileError: For the following issues:
         - Empty path passed
         - Unknown extension
         - Any fatal issues when loading the schema.
@@ -123,7 +125,7 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         name (str or None): User supplied identifier for this schema
 
     Returns:
-        (HedSchema):  The loaded schema.
+        HedSchema: The loaded schema.
 
     :raises HedFileError:
         - If empty string or invalid extension is passed.
@@ -165,8 +167,8 @@ def from_dataframes(schema_data, schema_namespace=None, name=None) -> 'HedSchema
     Returns:
         HedSchema:  The loaded schema.
 
-    :raises HedFileError:
-        - Empty/invalid parameters
+    Raises:
+        HedFileError: If empty/invalid parameters.
 
     Notes:
         - The loading is determined by file type.
@@ -248,14 +250,15 @@ def _load_schema_version(xml_version=None, xml_folder=None):
         xml_folder (str): Path to a folder containing schema.
 
     Returns:
-        HedSchema or HedSchemaGroup: The requested HedSchema object.
+        Union[HedSchema, HedSchemaGroup]: The requested HedSchema object.
 
-    :raises HedFileError:
+    Raises:
+        HedFileError: For the following issues:
         - The xml_version is not valid.
-        - The specified version cannot be found or loaded
-        - Multiple schemas are being loaded with the same prefix, and they have duplicate tags
-        - Other fatal errors loading the schema (These are unlikely if you are not editing them locally)
-        - The prefix is invalid
+        - The specified version cannot be found or loaded.
+        - Multiple schemas are being loaded with the same prefix, and they have duplicate tags.
+        - Other fatal errors loading the schema (These are unlikely if you are not editing them locally).
+        - The prefix is invalid.
     """
     schema_namespace = ""
     name = xml_version
@@ -321,7 +324,8 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
     Returns:
         HedSchema: The requested HedSchema object.
 
-    :raises HedFileError:
+    Raises:
+        HedFileError: For the following issues:
         - The xml_version is not valid.
         - The specified version cannot be found or loaded
         - Other fatal errors loading the schema (These are unlikely if you are not editing them locally)

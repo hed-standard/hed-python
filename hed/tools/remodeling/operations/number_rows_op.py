@@ -60,7 +60,7 @@ class NumberRowsOp(BaseOp):
             sidecar (Sidecar or file-like):   Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         """
         if self.number_column_name in df.columns:

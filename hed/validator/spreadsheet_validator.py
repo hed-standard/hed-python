@@ -43,7 +43,8 @@ class SpreadsheetValidator:
             data (BaseInput): Input data to be validated.
             def_dicts (list of DefDict or DefDict): all definitions to use for validation
             name (str): The name to report errors from this file as
-            error_handler (ErrorHandler): Error context to use.  Creates a new one if None
+            error_handler (ErrorHandler): Error context to use.  Creates a new one if None.
+
         Returns:
             list[dict]: A list of issues for HED string
         """
@@ -227,9 +228,10 @@ class SpreadsheetValidator:
 
         Parameters:
             base_input (BaseInput): The input data to be validated.
-            error_handler (ErrorHandler): Holds context
+            error_handler (ErrorHandler): Holds context.
+
         Returns:
-            List of issues associated with each invalid value. Each issue is a dictionary.
+            List[dict]: Issues associated with each invalid value. Each issue is a dictionary.
         """
         issues = []
         col_issues = base_input._mapper.check_for_mapping_issues()

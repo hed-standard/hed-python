@@ -105,8 +105,8 @@ class FactorHedTagsOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        :raises ValueError:
-            - If a name for a new query factor column is already a column.
+        Raises:
+            ValueError: If a name for a new query factor column is already a column.
 
         """
 

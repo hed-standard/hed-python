@@ -206,7 +206,7 @@ class ColumnValueSummary(BaseSummary):
             indent (str): A string containing spaces used for indentation (usually 3 spaces).
 
         Returns:
-            str - The results in a printable format ready to be saved to a text file.
+            str: The results in a printable format ready to be saved to a text file.
 
         Notes:
             This calls _get_dataset_string to get the overall summary string and

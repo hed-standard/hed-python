@@ -358,10 +358,10 @@ class HedTagSummary(BaseSummary):
             scale_adjustment(int): Value added after transform.
 
         Returns:
-            word_dict(dict): a dict of the words and their occurrence count.
+            dict: A dict of the words and their occurrence count.
 
-        :raises KeyError:
-            A malformed dictionary was passed.
+        Raises:
+            KeyError: A malformed dictionary was passed.
 
         """
         if transform is None:
