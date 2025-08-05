@@ -116,7 +116,7 @@ class RemapColumnsOp(BaseOp):
         key_map.update(key_df)
         return key_map
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Remap new columns from combinations of others.
 
         Parameters:

@@ -20,7 +20,7 @@ from hed.schema.schema_validation_util import schema_version_for_library
 from semantic_version import Version
 
 
-def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name):
+def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name) -> list:
     """Check if comma separated list has valid HedTags.
 
     Parameters:
@@ -49,7 +49,7 @@ def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def attribute_is_deprecated(hed_schema, tag_entry, attribute_name):
+def attribute_is_deprecated(hed_schema, tag_entry, attribute_name) -> list:
     """ Check if the attribute is deprecated.  does not check value.
 
     Parameters:
@@ -77,7 +77,7 @@ def attribute_is_deprecated(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def item_exists_check(hed_schema, tag_entry, attribute_name, section_key):
+def item_exists_check(hed_schema, tag_entry, attribute_name, section_key) -> list:
     """Check if the list of possible items exists in the schema and are not deprecated.
 
     Parameters:
@@ -121,7 +121,7 @@ def item_exists_check(hed_schema, tag_entry, attribute_name, section_key):
     return issues
 
 
-def unit_exists(hed_schema, tag_entry, attribute_name):
+def unit_exists(hed_schema, tag_entry, attribute_name) -> list:
     """Check the given unit is valid, and not deprecated.
 
     Parameters:
@@ -150,7 +150,7 @@ def unit_exists(hed_schema, tag_entry, attribute_name):
 
 
 # This is effectively unused and can never fail - The schema would catch these errors and refuse to load
-def tag_exists_base_schema_check(hed_schema, tag_entry, attribute_name):
+def tag_exists_base_schema_check(hed_schema, tag_entry, attribute_name) -> list:
     """Check if the single tag is a partnered schema tag
 
     Parameters:
@@ -172,7 +172,7 @@ def tag_exists_base_schema_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name):
+def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name) -> list:
     """ Check if the element has a valid deprecatedFrom attribute, and that any children have it
 
     Parameters:
@@ -208,7 +208,7 @@ def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def conversion_factor(hed_schema, tag_entry, attribute_name):
+def conversion_factor(hed_schema, tag_entry, attribute_name) -> list:
     """Check if the conversion_factor on is valid
 
     Parameters:
@@ -233,7 +233,7 @@ def conversion_factor(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def allowed_characters_check(hed_schema, tag_entry, attribute_name):
+def allowed_characters_check(hed_schema, tag_entry, attribute_name) -> list:
     """ Check allowed character has a valid value
 
     Parameters:
@@ -257,7 +257,7 @@ def allowed_characters_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def in_library_check(hed_schema, tag_entry, attribute_name):
+def in_library_check(hed_schema, tag_entry, attribute_name) -> list:
     """Check if the library attribute is a valid schema name
 
     Parameters:
@@ -278,7 +278,7 @@ def in_library_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def is_numeric_value(hed_schema, tag_entry, attribute_name):
+def is_numeric_value(hed_schema, tag_entry, attribute_name) -> list:
     """Check if the attribute is a valid numeric(float) value
 
     Parameters:

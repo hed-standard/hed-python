@@ -1,5 +1,6 @@
 """ Append to tabular file columns of factors based on column values. """
 
+import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
@@ -67,7 +68,7 @@ class FactorColumnOp(BaseOp):
         self.factor_values = parameters.get('factor_values', None)
         self.factor_names = parameters.get('factor_names', None)
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Create factor columns based on values in a specified column.
 
         Parameters:

@@ -54,7 +54,7 @@ class FactorHedTypeOp(BaseOp):
         self.type_tag = parameters["type_tag"]
         self.type_values = parameters.get("type_values", None)
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Factor columns based on HED type and append to tabular data.
 
         Parameters:

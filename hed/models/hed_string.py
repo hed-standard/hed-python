@@ -39,9 +39,9 @@ class HedString(HedGroup):
         self._from_strings = None
         self._def_dict = def_dict
 
-    @classmethod
-    def from_hed_strings(cls, hed_strings):
-        """ Factory for creating HedStrings via combination.
+    @staticmethod
+    def from_hed_strings(hed_strings) -> HedString:
+        """ Create a new HedString from a list of HedStrings.
 
         Parameters:
             hed_strings (list or None): A list of HedString objects to combine.
@@ -172,7 +172,7 @@ class HedString(HedGroup):
         return self.get_as_form("org_tag")
 
     @staticmethod
-    def split_into_groups(hed_string, hed_schema, def_dict=None):
+    def split_into_groups(hed_string, hed_schema, def_dict=None) -> list:
         """ Split the HED string into a parse tree.
 
         Parameters:
@@ -343,7 +343,7 @@ class HedString(HedGroup):
         validator = HedValidator(self._schema, def_dicts=self._def_dict)
         return validator.validate(self, allow_placeholders=allow_placeholders, error_handler=error_handler)
 
-    def find_top_level_tags(self, anchor_tags, include_groups=2):
+    def find_top_level_tags(self, anchor_tags, include_groups=2) -> list:
         """ Find top level groups with an anchor tag.
 
             A max of 1 tag located per top level group.

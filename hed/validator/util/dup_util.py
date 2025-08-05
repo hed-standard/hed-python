@@ -1,3 +1,5 @@
+from typing import Union
+
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.hed_tag import HedTag
 from hed.errors.error_types import ValidationErrors
@@ -14,7 +16,7 @@ class DuplicateChecker:
         """
         self.issues = []
 
-    def check_for_duplicates(self, group):
+    def check_for_duplicates(self, group) -> list[dict]:
         """ Find duplicates in a HED group and return the errors found.
 
         Parameters:
@@ -36,15 +38,22 @@ class DuplicateChecker:
              group (HedGroup): The HED group to be checked.
 
         Returns:
-            Union[int, None] Unique hash or None if duplicates were detected within the group.
+            Union[int, None]: Unique hash or None if duplicates were detected within the group.
 
         """
         self.issues = []
         duplication_hash = self._get_recursive_hash(group)
         return duplication_hash
 
-    def _get_recursive_hash(self, group):
+    def _get_recursive_hash(self, group) -> Union[int, None]:
+        """Get recursive hash for a group.
 
+        Parameters:
+            group: The HED group to process.
+
+        Returns:
+            int | None: Hash value or None if issues detected.
+        """
         if len(self.issues) > 0:
             return None
         group_hashes = set()
@@ -62,7 +71,7 @@ class DuplicateChecker:
         return hash(frozenset(group_hashes))
 
     @staticmethod
-    def _get_duplication_error(child):
+    def _get_duplication_error(child) -> list[dict]:
         if isinstance(child, HedTag):
             return ErrorHandler.format_error(ValidationErrors.HED_TAG_REPEATED, child)
         else:

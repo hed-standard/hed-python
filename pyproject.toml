@@ -30,7 +30,6 @@ dependencies = [
     "defusedxml",
     "et-xmlfile",
     "inflect",
-    "jdcal",
     "jsonschema",
     "matplotlib>=3.9.0",
     "numpy",

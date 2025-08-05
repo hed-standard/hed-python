@@ -82,14 +82,14 @@ class Dispatcher:
                                      'file_type': 'summary', 'content': summary})
         return summary_list
 
-    def get_data_file(self, file_designator):
+    def get_data_file(self, file_designator) -> 'pd.DataFrame':
         """ Get the correct data file give the file designator.
 
         Parameters:
             file_designator (str, DataFrame ): A dataFrame or the full path of the dataframe in the original dataset.
 
         Returns:
-            DataFrame:  DataFrame after reading the path.
+            pd.DataFrame:  DataFrame after reading the path.
 
         Raises
             HedFileError: If a valid file cannot be found.
@@ -117,7 +117,7 @@ class Dispatcher:
                                "")
         return df
 
-    def get_summary_save_dir(self):
+    def get_summary_save_dir(self) -> str:
         """ Return the directory in which to save the summaries.
 
         Returns:
@@ -131,7 +131,7 @@ class Dispatcher:
             return os.path.realpath(os.path.join(self.data_root, 'derivatives', Dispatcher.REMODELING_SUMMARY_PATH))
         raise HedFileError("NoDataRoot", "Dispatcher must have a data root to produce directories", "")
 
-    def run_operations(self, file_path, sidecar=None, verbose=False):
+    def run_operations(self, file_path, sidecar=None, verbose=False) -> 'pd.DataFrame':
         """ Run the dispatcher operations on a file.
 
         Parameters:
@@ -140,7 +140,7 @@ class Dispatcher:
             verbose (bool):  If True, print out progress reports.
 
         Returns:
-            DataFrame:  The processed dataframe.
+            pd.DataFrame:  The processed dataframe.
         """
 
         # string to functions
@@ -181,7 +181,7 @@ class Dispatcher:
             summary_item.save(summary_dir, save_formats, individual_summaries=individual_summaries, task_name=task_name)
 
     @staticmethod
-    def parse_operations(operation_list):
+    def parse_operations(operation_list) -> list:
         """ Return a parsed a list of remodeler operations.
 
         Parameters:
@@ -198,11 +198,14 @@ class Dispatcher:
         return operations
 
     @staticmethod
-    def prep_data(df):
+    def prep_data(df) -> 'pd.DataFrame':
         """ Make a copy and replace all n/a entries in the data frame by np.nan for processing.
 
         Parameters:
-            df (DataFrame) - The DataFrame to be processed.
+            df (DataFrame): The DataFrame to be processed.
+
+        Returns:
+            DataFrame: A copy of the DataFrame with n/a entries replaced by np.nan.
         """
 
         result = df.replace('n/a', np.nan)
@@ -211,14 +214,14 @@ class Dispatcher:
         return result
 
     @staticmethod
-    def post_proc_data(df):
+    def post_proc_data(df) -> 'pd.DataFrame':
         """ Replace all nan entries with 'n/a' for BIDS compliance.
 
         Parameters:
             df (DataFrame): The DataFrame to be processed.
 
         Returns:
-            DataFrame: DataFrame with the 'np.nan replaced by 'n/a'.
+            pd.DataFrame: DataFrame with the 'np.nan replaced by 'n/a'.
         """
 
         dtypes = df.dtypes.to_dict()
@@ -228,7 +231,7 @@ class Dispatcher:
         return df.fillna('n/a')
 
     @staticmethod
-    def errors_to_str(messages, title="", sep='\n'):
+    def errors_to_str(messages, title="", sep='\n') -> str:
         """ Return an error string representing error messages in a list.
 
         Parameters:

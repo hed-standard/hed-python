@@ -93,8 +93,8 @@ class FactorHedTagsOp(BaseOp):
         if issues:
             raise ValueError("FactorHedTagInvalidQueries", "\n".join(issues))
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Factor the column using HED tag queries.
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
+        """ Create factor columns based on HED tag queries.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -103,7 +103,7 @@ class FactorHedTagsOp(BaseOp):
             sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            Dataframe: A new dataframe after processing.
+            DataFrame: A new dataframe after processing.
 
         Raises:
             ValueError: If a name for a new query factor column is already a column.
@@ -129,7 +129,7 @@ class FactorHedTagsOp(BaseOp):
         return df_new
 
     @staticmethod
-    def validate_input_data(parameters):
+    def validate_input_data(parameters) -> list:
         """ Parse and valid the queries and return issues in parsing queries, if any.
 
         Parameters:

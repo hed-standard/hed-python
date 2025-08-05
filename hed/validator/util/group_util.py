@@ -25,7 +25,7 @@ class GroupValidator:
         self._reserved_checker = ReservedChecker.get_instance()
         self._duplicate_checker = DuplicateChecker()
 
-    def run_tag_level_validators(self, hed_string_obj):
+    def run_tag_level_validators(self, hed_string_obj) -> list[dict]:
         """ Report invalid groups at each level.
 
         Parameters:
@@ -51,7 +51,7 @@ class GroupValidator:
 
         return []  # Return an empty list if no issues are found
 
-    def run_all_tags_validators(self, hed_string_obj):
+    def run_all_tags_validators(self, hed_string_obj) -> list[dict]:
         """ Report invalid the multi-tag properties in a HED string, e.g. required tags.
 
          Parameters:
@@ -128,7 +128,7 @@ class GroupValidator:
         return validation_issues
 
     @staticmethod
-    def check_tag_level_issue(original_tag_list, is_top_level, is_group):
+    def check_tag_level_issue(original_tag_list, is_top_level, is_group) -> list:
         """ Report tags incorrectly positioned in hierarchy.
 
         Parameters:
@@ -197,7 +197,7 @@ class GroupValidator:
                                                                tag=tag_group_tag)
         return validation_issues
 
-    def check_for_required_tags(self, tags):
+    def check_for_required_tags(self, tags) -> list:
         """ Report missing required tags.
 
         Parameters:
@@ -215,7 +215,7 @@ class GroupValidator:
                                                                tag_namespace=required_prefix)
         return validation_issues
 
-    def check_multiple_unique_tags_exist(self, tags):
+    def check_multiple_unique_tags_exist(self, tags) -> list:
         """ Report if multiple identical unique tags exist
 
             A unique Term can only appear once in a given HedString.
@@ -237,7 +237,7 @@ class GroupValidator:
         return validation_issues
 
     @staticmethod
-    def validate_duration_tags(hed_string_obj):
+    def validate_duration_tags(hed_string_obj) -> list:
         """ Validate Duration/Delay tag groups
 
         Parameters:

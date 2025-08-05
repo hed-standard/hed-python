@@ -7,64 +7,56 @@ This section provides comprehensive documentation for all HED Python tools modul
 ### [Models](models.md)
 Core data models for working with HED data:
 
-- **HedString**: Represents and validates HED annotation strings
-- **HedTag**: Individual HED tag manipulation
-- **HedGroup**: Grouped HED annotations
-- **Sidecar**: BIDS sidecar file handling
-- **TabularInput**: Spreadsheet and tabular data processing
+- **Core Models**: HedString, HedTag, HedGroup, DefinitionDict, DefinitionEntry
+- **Input Models**: BaseInput, TabularInput, SpreadsheetInput, TimeseriesInput, Sidecar
+- **Query Models**: QueryHandler and query service functions
+- **Utility Models**: ColumnMapper, ColumnMetadata, DataFrame utilities
 
 ### [Schema](schema.md)
 HED schema management and validation:
 
-- **HedSchema**: Main schema class for loading and querying schemas
-- **HedSchemaIO**: Schema input/output operations
-- **SchemaComparer**: Compare different schema versions
+- **Core Schema**: HedSchema, HedSchemaEntry, HedSchemaGroup, HedSchemaSection
+- **Schema I/O**: Schema loading, caching, and file operations
+- **Schema Utilities**: Comparison tools, validation utilities, compliance checking
 
 ### [Validator](validator.md)
 Validation tools and error handling:
 
-- **HedValidator**: Main validation engine
-- **ErrorReporter**: Error collection and reporting
-- **ValidationContext**: Validation state management
+- **Core Validators**: HedValidator, SidecarValidator
+- **Specialized Validators**: Definition validator, onset validator, spreadsheet validator
 
 ### [Tools](tools.md)
-Utility tools and scripts:
+Utility tools and data transformation operations:
 
-- **BidsTabularSummary**: BIDS dataset analysis
-- **ReorderColumns**: Spreadsheet manipulation
-- **TagCompareUtil**: Tag comparison utilities
+- **Analysis Tools**: TabularSummary, annotation utilities, tag counting
+- **Remodeling Operations**: Comprehensive set of data transformation operations
+- **Remodeling Utilities**: Remodeler, backup manager, dispatcher
 
 ### [Errors](errors.md)
 Error handling and exception classes:
 
-- **HedFileError**: File-related errors
-- **HedExceptions**: General HED exceptions
-- **ErrorMessages**: Error message definitions
+- **Exception Classes**: HedFileError, HedExceptions
+- **Error Reporting**: ErrorHandler, ErrorReporter, validation context
+- **Error Messages**: Comprehensive error message definitions
 
 ## Quick Reference
 
-### Loading and Using Schemas
+### Loading Schemas
 
 ::: hed.load_schema
     options:
-      show_source: true
+      show_source: false
+      heading_level: 3
 
-### Basic Validation
+::: hed.load_schema_version
+    options:
+      show_source: false
+      heading_level: 3
+
+### Working with HED Strings
 
 ::: hed.HedString
     options:
-      show_source: true
-      members:
-        - __init__
-        - validate
-        - remove_definitions
-
-### Working with BIDS Data
-
-::: hed.models.Sidecar
-    options:
-      show_source: true
-      members:
-        - __init__
-        - validate
-        - extract_definitions
+      show_source: false
+      heading_level: 3
+      members: []

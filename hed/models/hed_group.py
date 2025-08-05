@@ -295,12 +295,11 @@ class HedGroup:
         return self._hed_string[self._startpos:self._endpos]
 
     @property
-    def span(self):
+    def span(self) -> tuple[int, int]:
         """ Return the source span.
 
         Returns:
-            int: start index of the group (including parentheses) from the source string.
-            int: end index of the group (including parentheses) from the source string.
+            tuple[int, int]: start and end index of the group (including parentheses) from the source string.
 
         """
         return self._startpos, self._endpos

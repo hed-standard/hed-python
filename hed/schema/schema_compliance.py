@@ -14,7 +14,7 @@ from semantic_version import Version
 from hed.schema.schema_attribute_validator_hed_id import HedIDValidator
 
 
-def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handler=None):
+def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handler=None) -> list:
     """ Check for hed3 compliance of a schema object.
 
     Parameters:

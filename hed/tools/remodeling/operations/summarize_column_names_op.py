@@ -1,5 +1,6 @@
 """  Summarize the column names in a collection of tabular files. """
 
+import pandas as pd
 from hed.tools.analysis.column_name_summary import ColumnNameSummary
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
@@ -57,7 +58,7 @@ class SummarizeColumnNamesOp(BaseOp):
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Create a column name summary for df.
 
         Parameters:
@@ -83,10 +84,9 @@ class SummarizeColumnNamesOp(BaseOp):
         return df_new
 
     @staticmethod
-    def validate_input_data(parameters):
+    def validate_input_data(parameters) -> list:
         """ Additional validation required of operation parameters not performed by JSON schema validator. """
         return []
-
 
 class ColumnNamesSummary(BaseSummary):
     """ Manager for summaries of column names for a dataset. """
@@ -115,7 +115,7 @@ class ColumnNamesSummary(BaseSummary):
             self.summary_dict[name] = ColumnNameSummary(name=name)
         self.summary_dict[name].update(name, new_info["column_names"])
 
-    def get_details_dict(self, column_summary):
+    def get_details_dict(self, column_summary) -> dict:
         """ Return the summary dictionary extracted from a ColumnNameSummary.
 
         Parameters:
@@ -131,7 +131,7 @@ class ColumnNamesSummary(BaseSummary):
                 "Files": [name for name in column_summary.file_dict.keys()],
                 "Specifics": {"Columns": summary['Columns']}}
 
-    def merge_all_info(self):
+    def merge_all_info(self) -> 'ColumnNameSummary':
         """ Create a ColumnNameSummary containing the overall dataset summary.
 
         Returns:
@@ -144,13 +144,13 @@ class ColumnNamesSummary(BaseSummary):
                 all_sum.update(name, counts.unique_headers[pos])
         return all_sum
 
-    def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
+    def _get_result_string(self, name, summary, individual=False) -> str:
         """ Return a formatted string with the summary for the indicated name.
 
         Parameters:
             name (str):  Identifier (usually the filename) of the individual file.
-            result (dict): The dictionary of the summary results indexed by name.
-            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+            summary (dict): The dictionary of the summary results indexed by name.
+            individual (bool): True if individual summary, False otherwise.
 
         Returns:
             str - The results in a printable format ready to be saved to a text file.
@@ -160,10 +160,10 @@ class ColumnNamesSummary(BaseSummary):
 
         """
         if name == "Dataset":
-            return self._get_dataset_string(result, indent)
-        columns = result.get("Specifics", {}).get("Columns", [])
+            return self._get_dataset_string(summary, BaseSummary.DISPLAY_INDENT)
+        columns = summary.get("Specifics", {}).get("Columns", [])
         if columns:
-            return f"{indent}{str(columns[0])}"
+            return f"{BaseSummary.DISPLAY_INDENT}{str(columns[0])}"
         else:
             return ""
 

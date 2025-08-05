@@ -1,6 +1,7 @@
 """ Summarize the HED tags in collection of tabular files.  """
 import os
 import numpy as np
+import pandas as pd
 from hed.models.tabular_input import TabularInput
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
 from hed.tools.analysis.event_manager import EventManager
@@ -191,7 +192,7 @@ class SummarizeHedTagsOp(BaseOp):
             if self.word_cloud["font_path"]:
                 self.word_cloud["font_path"] = os.path.realpath(self.word_cloud["font_path"])
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Summarize the HED tags present in the dataset.
 
         Parameters:
@@ -257,7 +258,7 @@ class HedTagSummary(BaseSummary):
             counts.update_tag_counts(hed, new_info['name'])
         self.summary_dict[new_info["name"]] = counts
 
-    def get_details_dict(self, tag_counts):
+    def get_details_dict(self, tag_counts) -> dict:
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
@@ -297,7 +298,7 @@ class HedTagSummary(BaseSummary):
             return self._get_dataset_string(result, indent=indent)
         return self._get_individual_string(result, indent=indent)
 
-    def merge_all_info(self):
+    def merge_all_info(self) -> 'HedTagCounts':
         """ Create a HedTagCounts containing the overall dataset HED tag  summary.
 
         Returns:
@@ -348,14 +349,14 @@ class HedTagSummary(BaseSummary):
             outfile.writelines(svg_data)
 
     @staticmethod
-    def summary_to_dict(specifics, transform=np.log10, scale_adjustment=7):
+    def summary_to_dict(specifics, transform=np.log10, scale_adjustment=7) -> dict:
         """Convert a HedTagSummary json specifics dict into the word cloud input format.
 
         Parameters:
-            specifics(dict): Dictionary with keys "Main tags" and "Other tags".
-            transform(func): The function to transform the number of found tags.
+            specifics (dict): Dictionary with keys "Main tags" and "Other tags".
+            transform (func): The function to transform the number of found tags.
                              Default log10
-            scale_adjustment(int): Value added after transform.
+            scale_adjustment (int): Value added after transform.
 
         Returns:
             dict: A dict of the words and their occurrence count.
