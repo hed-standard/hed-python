@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 import os
+from typing import Union
+
 import numpy as np
 import pandas as pd
 import json
@@ -235,7 +237,7 @@ class Dispatcher:
         """ Return an error string representing error messages in a list.
 
         Parameters:
-            messages (list):  List of error dictionaries each representing a single error.
+            messages (list of dict):  List of error dictionaries each representing a single error.
             title (str):  If provided the title is concatenated at the top.
             sep (str): Character used between lines in concatenation.
 
@@ -255,14 +257,14 @@ class Dispatcher:
         return errors
 
     @staticmethod
-    def get_schema(hed_versions):
+    def get_schema(hed_versions) -> Union['HedSchema', 'HedSchemaGroup', None]:
         """ Return the schema objects represented by the hed_versions.
 
         Parameters:
             hed_versions (str, list, HedSchema, HedSchemaGroup): If str, interpreted as a version number.
 
         Returns:
-             HedSchema or HedSchemaGroup: Objects loaded from the hed_versions specification.
+             Union[HedSchema, HedSchemaGroup, None]: Objects loaded from the hed_versions specification.
         """
 
         if not hed_versions:

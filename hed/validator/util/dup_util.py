@@ -31,7 +31,7 @@ class DuplicateChecker:
         self._get_recursive_hash(group)
         return self.issues
 
-    def get_hash(self, group):
+    def get_hash(self, group) -> Union[int, None]:
         """  Return the unique hash for the group as long as no duplicates.
 
         Parameters:
@@ -40,6 +40,7 @@ class DuplicateChecker:
         Returns:
             Union[int, None]: Unique hash or None if duplicates were detected within the group.
 
+        Note: As a side effect, this method will clear the issues list if no duplicates are found.
         """
         self.issues = []
         duplication_hash = self._get_recursive_hash(group)

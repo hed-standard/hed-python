@@ -120,7 +120,7 @@ class SidecarValidator:
 
         return issues
 
-    def validate_structure(self, sidecar, error_handler):
+    def validate_structure(self, sidecar, error_handler) -> list[dict]:
         """ Validate the raw structure of this sidecar.
 
         Parameters:
@@ -128,7 +128,7 @@ class SidecarValidator:
             error_handler (ErrorHandler): The error handler to use for error context.
 
         Returns:
-            list: A list of issues found with the structure.
+            list[dict]: A list of issues found with the structure.
         """
         all_validation_issues = []
         for column_name, dict_for_entry in sidecar.loaded_dict.items():

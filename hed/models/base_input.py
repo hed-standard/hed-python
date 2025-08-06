@@ -239,14 +239,14 @@ class BaseInput:
         else:
             dataframe.to_excel(file, header=self._has_column_names)
 
-    def to_csv(self, file=None):
+    def to_csv(self, file=None) -> Union[str, None]:
         """ Write to file or return as a string.
 
         Parameters:
             file (str, file-like, or None): Location to save this file. If None, return as string.
 
         Returns:
-            None or str:  None if file is given or the contents as a str if file is None.
+            Union[str, None]:  None if file is given or the contents as a str if file is None.
 
         Raises:
             OSError: If the file cannot be opened.
@@ -256,7 +256,7 @@ class BaseInput:
         return csv_string_if_filename_none
 
     @property
-    def columns(self):
+    def columns(self) -> list[str]:
         """ Returns a list of the column names.
 
             Empty if no column names.

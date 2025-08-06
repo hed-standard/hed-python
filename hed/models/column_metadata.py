@@ -1,5 +1,7 @@
 """ Column type for a column in a ColumnMapper. """
 from enum import Enum
+from typing import Union
+
 from hed.errors.error_types import SidecarErrors
 import pandas as pd
 import copy
@@ -40,11 +42,11 @@ class ColumnMetadata:
         self.column_type = column_type
 
     @property
-    def hed_dict(self):
+    def hed_dict(self) -> Union[dict, str]:
         """ The HED strings for any given entry.
 
         Returns:
-            dict or str: A string or dict of strings for this column.
+            Union[dict, str]: A string or dict of strings for this column.
 
         """
         if self._source is None or isinstance(self._source, str):
@@ -52,21 +54,21 @@ class ColumnMetadata:
         return self._source[self.column_name].get("HED", {})
 
     @property
-    def source_dict(self):
+    def source_dict(self) -> Union[dict, str]:
         """ The raw dict for this entry(if it exists).
 
         Returns:
-            dict or str: A string or dict of strings for this column.
+            Union[dict, str]: A string or dict of strings for this column.
         """
         if self._source is None or isinstance(self._source, str):
             return {"HED": self._source}
         return self._source[self.column_name]
 
-    def get_hed_strings(self):
+    def get_hed_strings(self) -> pd.Series:
         """ Return the HED strings for this entry as a series.
 
         Returns:
-            hed_strings(pd.Series): The HED strings for this series.(potentially empty).
+            pd.Series: The HED strings for this series.(potentially empty).
         """
         if not self.column_type:
             return pd.Series(dtype=str)
@@ -75,15 +77,15 @@ class ColumnMetadata:
 
         return series
 
-    def set_hed_strings(self, new_strings):
+    def set_hed_strings(self, new_strings) -> bool:
         """ Set the HED strings for this entry.
 
         Parameters:
-            new_strings(pd.Series, dict, or str): The HED strings to set.
+            new_strings (pd.Series, dict, or str): The HED strings to set.
                 This should generally be the return value from get_hed_strings.
 
         Returns:
-            hed_strings(pd.Series): The HED strings for this series.(potentially empty).
+            bool: True if the strings were successfully set, False otherwise.
         """
         if new_strings is None:
             return False
@@ -139,16 +141,16 @@ class ColumnMetadata:
         return ColumnType.Value
 
     @staticmethod
-    def expected_pound_sign_count(column_type):
+    def expected_pound_sign_count(column_type)-> tuple[int, int]:
         """ Return how many pound signs a column string should have.
 
         Parameters:
-            column_type(ColumnType): The type of the column.
+            column_type (ColumnType): The type of the column.
 
         Returns:
-            tuple:
-                expected_count(int): The expected count.  0 or 1.
-                error_type(str): The type of the error we should issue.
+            tuple[int, int]:
+                - The expected count:  0 or 1.
+                - The type of the error we should issue.
         """
         if column_type == ColumnType.Value:
             expected_count = 1

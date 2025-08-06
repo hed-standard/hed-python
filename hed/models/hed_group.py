@@ -356,7 +356,7 @@ class HedGroup:
         """ Convenience function, equivalent to str(self).casefold(). """
         return str(self).casefold()
 
-    def get_as_indented(self, tag_attribute="short_tag"):
+    def get_as_indented(self, tag_attribute="short_tag") -> str:
         """Return the string as a multiline indented format.
 
         Parameters:

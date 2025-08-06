@@ -104,7 +104,8 @@ class DefExpandGatherer:
         Parameters:
             hed_schema (HedSchema): The HED schema to be used for processing.
             known_defs (str or list or DefinitionDict): A dictionary of known definitions.
-            ambiguous_defs (dict, optional): A dictionary of ambiguous def-expand definitions.
+            ambiguous_defs (dict or None): An optional dictionary of ambiguous def-expand definitions.
+            errors (dict or None): An optional dictionary to store errors keyed by definition names.
 
         """
         self.hed_schema = hed_schema
@@ -112,7 +113,7 @@ class DefExpandGatherer:
         self.errors = errors if errors else {}
         self.def_dict = DefinitionDict(known_defs, self.hed_schema)
 
-    def process_def_expands(self, hed_strings, known_defs=None):
+    def process_def_expands(self, hed_strings, known_defs=None) -> tuple ['DefinitionDict', dict, dict]:
         """Process the HED strings containing def-expand tags.
 
         Parameters:
@@ -120,7 +121,8 @@ class DefExpandGatherer:
             known_defs (dict, optional): A dictionary of known definitions to be added.
 
         Returns:
-            tuple: A tuple containing the DefinitionDict, ambiguous definitions, and errors.
+            tuple [DefinitionDict, dict, dict]: A tuple containing the DefinitionDict, ambiguous definitions, and a
+                                            dictionary of error lists keyed by definition name
         """
         if not isinstance(hed_strings, pd.Series):
             hed_strings = pd.Series(hed_strings)

@@ -43,7 +43,7 @@ class Sidecar:
         return ColumnMetadata(name=column_name)
 
     @property
-    def all_hed_columns(self):
+    def all_hed_columns(self) -> list[str]:
         """ Return all columns that are HED compatible.
 
         Returns:
@@ -225,13 +225,13 @@ class Sidecar:
 
         return def_dict
 
-    def get_column_refs(self):
+    def get_column_refs(self) -> list[str]:
         """ Returns a list of column refs found in this sidecar.
 
             This does not validate
 
         Returns:
-            list: A list of unique column refs found.
+            list[str]: A list of unique column refs found.
         """
         found_vals = set()
         for column_data in self:

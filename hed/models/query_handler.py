@@ -47,14 +47,14 @@ class QueryHandler:
         self.tree = self._parse(expression_string.casefold())
         self._org_string = expression_string
 
-    def search(self, hed_string_obj):
-        """Returns if a match is found in the given string
+    def search(self, hed_string_obj) -> list:
+        """ Search for the query in the given HED string.
 
         Parameters:
             hed_string_obj (HedString): String to search
 
         Returns:
-            list: List of search result. Generally you should just treat this as a bool. True if a match was found.
+            list[any]: List of search result. Generally you should just treat this as a bool. True if a match was found.
         """
         current_node = self.tree
 

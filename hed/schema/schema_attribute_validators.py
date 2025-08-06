@@ -2,15 +2,18 @@
 
 Template for the functions:
 
-- ``attribute_checker_template(hed_schema, tag_entry, attribute_name)``:
+All attribute validation functions should follow this signature:
+  ``attribute_checker_template(hed_schema, tag_entry, attribute_name)``
+
+Parameters:
   - ``hed_schema (HedSchema)``: The schema to use for validation.
   - ``tag_entry (HedSchemaEntry)``: The schema entry for this tag.
   - ``attribute_name (str)``: The name of this attribute.
 
-Returns:
-    list: A list of issues found validating this attribute.
+Return value:
+  ``list[dict]``: A list of issues found validating this attribute.
 
-    """
+"""
 
 from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors, SchemaErrors
 from hed.errors.error_reporter import ErrorHandler

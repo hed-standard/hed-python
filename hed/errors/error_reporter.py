@@ -336,7 +336,7 @@ class ErrorHandler:
         return error_list
 
     @staticmethod
-    def _add_context_to_error(error_object: dict, error_context_to_add: list) -> list[dict]:
+    def _add_context_to_error(error_object: dict, error_context_to_add: list) -> dict:
         """ Add relevant context such as row number or column name around an error object.
 
         Parameters:
@@ -501,7 +501,7 @@ def check_for_any_errors(issues_list):
     return False
 
 
-def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True, add_link=False, show_details=False):
+def get_printable_issue_string(issues, title=None, severity=None, skip_filename=True, add_link=False, show_details=False) -> str:
     """ Return a string with issues list flatted into single string, one per line.
 
     Parameters:
@@ -801,7 +801,7 @@ def replace_tag_references(list_or_dict):
        If you'd prefer a copy returned, use replace_tag_references(list_or_dict.copy()).
 
     Parameters:
-       list_or_dict(list or dict): An arbitrarily nested list/dict structure
+       list_or_dict (list or dict): An arbitrarily nested list/dict structure
     """
     if isinstance(list_or_dict, dict):
         for key, value in list_or_dict.items():

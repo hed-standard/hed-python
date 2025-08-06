@@ -132,7 +132,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
     return all_hed_versions
 
 
-def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None, check_prerelease=False):
+def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None, check_prerelease=False) -> Union[str, None]:
     """ Get HED XML file path in a directory.  Only returns filenames that exist.
 
     Parameters:
@@ -142,7 +142,7 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
         check_prerelease (bool): Also check for prerelease schemas
 
     Returns:
-        str: The path to the latest HED version the HED directory.
+        Union[str, None]: The path to the latest HED version the HED directory.
 
     """
     if not local_hed_directory:
@@ -153,9 +153,10 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
         return None
     if xml_version in hed_versions:
         return _create_xml_filename(xml_version, library_name, local_hed_directory, check_prerelease)
+    return None
 
 
-def cache_local_versions(cache_folder) -> int:
+def cache_local_versions(cache_folder) -> Union[int, None]:
     """ Cache all schemas included with the HED installation.
 
     Parameters:
@@ -365,7 +366,7 @@ def _get_hed_xml_versions_one_library(hed_one_library_url):
 
 
 def _get_hed_xml_versions_from_url_all_libraries(hed_base_library_url, library_name=None,
-                                                 skip_folders=DEFAULT_SKIP_FOLDERS):
+                                                 skip_folders=DEFAULT_SKIP_FOLDERS) -> Union[list, dict]:
     """ Get all available schemas and their hash values
 
     Parameters:

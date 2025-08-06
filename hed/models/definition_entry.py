@@ -1,5 +1,7 @@
 """ A single definition. """
 import copy
+from typing import Union
+
 from hed.models.hed_group import HedGroup
 
 
@@ -25,19 +27,19 @@ class DefinitionEntry:
         self.takes_value = takes_value
         self.source_context = source_context
 
-    def get_definition(self, replace_tag, placeholder_value=None, return_copy_of_tag=False):
+    def get_definition(self, replace_tag, placeholder_value=None, return_copy_of_tag=False) -> Union['HedGroup', None]:
         """ Return a copy of the definition with the tag expanded and the placeholder plugged in.
 
             Returns None if placeholder_value passed when it doesn't take value, or vice versa.
 
         Parameters:
             replace_tag (HedTag): The def HED tag to replace with an expanded version.
-            placeholder_value (str or None):    If present and required, will replace any pound signs
+            placeholder_value (str or None): If present and required, will replace any pound signs
                                                 in the definition contents.
-            return_copy_of_tag(bool): Set to True for validation.
+            return_copy_of_tag (bool): Set to True for validation.
 
         Returns:
-            Union[HedGroup, None]:     The contents of this definition(including the def tag itself).
+            Union[HedGroup, None]: The contents of this definition(including the def tag itself).
 
         Raises:
             ValueError: Something internally went wrong with finding the placeholder tag. This should not be possible.

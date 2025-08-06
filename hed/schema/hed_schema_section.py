@@ -1,3 +1,5 @@
+from typing import Union
+
 from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey, HedKeyOld
 
@@ -71,7 +73,7 @@ class HedSchemaSection:
         self.all_entries.append(new_entry)
         return return_entry
 
-    def get_entries_with_attribute(self, attribute_name, return_name_only=False, schema_namespace=""):
+    def get_entries_with_attribute(self, attribute_name, return_name_only=False, schema_namespace="") -> list[Union[HedSchemaEntry, str]]:
         """ Return entries or names with given attribute.
 
         Parameters:
@@ -80,7 +82,7 @@ class HedSchemaSection:
             schema_namespace (str): Prepends given namespace to each name if returning names.
 
         Returns:
-            list: List of HedSchemaEntry or strings representing the names.
+            list[Union[HedSchemaEntry, str]]: List of HedSchemaEntry or strings representing the names.
 
         """
         if attribute_name not in self._attribute_cache:
