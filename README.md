@@ -3,7 +3,7 @@
 [![Code Coverage](https://qlty.sh/gh/hed-standard/projects/hed-python/coverage.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
 ![Python3](https://img.shields.io/badge/python->=3.9-yellow.svg)
 ![PyPI - Status](https://img.shields.io/pypi/v/hedtools)
-[![Documentation Status](https://readthedocs.org/projects/hed-python/badge/?version=latest)](https://hed-python.readthedocs.io/en/latest/?badge=latest)
+[![Documentation](https://img.shields.io/badge/docs-hedtags.org-blue.svg)](https://www.hedtags.org/hed-python)
 
 # HEDTools - Python
 HED (Hierarchical Event Descriptors) is a framework for systematically describing
@@ -65,19 +65,7 @@ The `hed-python` repository
 |---------| -------- | ------------------ |
 | stable  | Officially released on PyPI as a tagged version. | `stable@hed-web`<br/>`stable@hed-specification`<br/>`stable@hed-examples` |
 | main    | Most recent usable version. | `latest@hed-web`<br/>`latest@hed-specification`<br/>`latest@hed-examples` |
-| develop | Experimental and evolving. | `develop@hed-web`<br/>`develop@hed-specification`<br/>`develop@hed-examples` |
 
-As features are integrated, they first appear in the `develop` branches of the
-repositories.
-The `develop` branches of the repositories will be kept in sync as much as possible
-If an interface change in `hed-python` triggers a change in `hed-web` or `hed-examples`,
-every effort will be made to get the three types of branches
-(`develop`, `main`, `stable`) of the respective repositories in
-sync.
-
-API documentation is generated on ReadTheDocs when a new version is
-pushed on any of the three branches. For example, the API documentation for the
-`latest` branch can be found on [hed-python.readthedocs.io/en/latest/](hed-python.readthedocs.io/en/latest/).
 
 #### To contribute
 
