@@ -72,7 +72,7 @@ class HedTag:
         """ Library namespace for this tag if one exists.
 
         Returns:
-            namespace (str): The library namespace, including the colon.
+            str: The library namespace, including the colon.
 
         """
         return self._namespace
@@ -95,7 +95,7 @@ class HedTag:
         """ Long form without value or extension.
 
         Returns:
-            base_tag (str): The long form of the tag, without value or extension.
+            str: The long form of the tag, without value or extension.
         """
         if self._schema_entry:
             return self._schema_entry.long_tag_name
@@ -123,8 +123,8 @@ class HedTag:
         Parameters:
             new_tag_val (str): The new short_base_tag for this tag.
 
-        :raises ValueError:
-            - If the tag wasn't already identified.
+        Raises:
+            ValueError: If the tag wasn't already identified.
 
         Note:
             - Generally this is used to swap def to def-expand.
@@ -177,9 +177,7 @@ class HedTag:
 
     @property
     def tag(self) -> str:
-        """ Returns the tag.
-
-            Returns the original tag if no user form set.
+        """ Returns the tag or the original tag if no user form set.
 
         Returns:
             str: The custom set user form of the tag.
@@ -288,7 +286,7 @@ class HedTag:
             You should only see these if you are directly accessing sidecar strings, tools should remove them otherwise.
 
         Returns:
-            bool: Returns True if this is a column ref.
+            bool: True if this is a column ref.
         """
         return self.org_tag.startswith('{') and self.org_tag.endswith('}')
 
@@ -322,7 +320,7 @@ class HedTag:
             hed_schema (HedSchema or HedSchemaGroup): The schema to use to validate this tag.
 
         Returns:
-            list:  A list of issues found during conversion. Each element is a dictionary.
+            list[dict]:  A list of issues found during conversion. Each element is a dictionary.
 
         """
         tag_entry, remainder, tag_issues = hed_schema.find_tag_entry(self, self.schema_namespace)
@@ -344,8 +342,8 @@ class HedTag:
             extension_text (str): The text to split, in case it's a portion of a tag.
 
         Returns:
-            str or None: The extension portion with the units removed or None if invalid units.
-            str or None: The units or None if no units of the right unit class are found.
+            Union[str, None]: The extension portion with the units removed or None if invalid units.
+            Union[str, None]: The units or None if no units of the right unit class are found.
 
         Examples:
             'Duration/3 ms' will return ('3', 'ms')
@@ -363,8 +361,7 @@ class HedTag:
         """ Return the value converted to default units if possible or None if invalid.
 
         Returns:
-            float or None: The extension value in default units.
-                                   If no default units it assumes that the extension value is in default units.
+            Union[float, None]: The extension value in default units. If no default units it assumes that the extension value is in default units.
 
         Examples:
             'Duration/300 ms' will return .3
@@ -414,9 +411,7 @@ class HedTag:
 
     @property
     def attributes(self) -> dict:
-        """ Return a dict of all the attributes this tag has.
-
-            Returns empty dict if this is not a value tag.
+        """ Return a dict of all the attributes this tag has or empty dict if this is not a value tag.
 
         Returns:
             dict: A dict of attributes this tag has.
@@ -599,7 +594,7 @@ class HedTag:
         """Returns if this tag has a placeholder in it.
 
         Returns:
-            has_placeholder(bool): True if it has a placeholder
+            bool: True if it has a placeholder.
         """
         if "#" in self.org_tag or "#" in self._extension_value:
             return True

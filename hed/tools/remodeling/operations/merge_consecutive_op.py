@@ -75,7 +75,7 @@ class MergeConsecutiveOp(BaseOp):
         self.ignore_missing = parameters["ignore_missing"]
         self.match_columns = parameters.get("match_columns", None)
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Merge consecutive rows with the same column value.
 
         Parameters:

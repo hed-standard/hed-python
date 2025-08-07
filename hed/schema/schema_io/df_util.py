@@ -21,6 +21,7 @@ def merge_dataframes(df1, df2, key) :
 
     Returns:
         df.DataFrame: The merged dataframe.
+
     """
     if df2 is None or df2.empty:
         return df1
@@ -115,8 +116,11 @@ def convert_filenames_to_dict(filenames):
         filenames(str or None or list or dict): The list to convert to a dict
             If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
             If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
+
     Returns:
-        filename_dict(str: str): The required suffix to filename mapping"""
+        dict[str: str]: The required suffix to filename mapping.
+
+    """
     result_filenames = {}
     dataframe_names = constants.DF_SUFFIXES
     if isinstance(filenames, str):
@@ -169,8 +173,9 @@ def load_dataframes(filenames):
         filenames(str or None or list or dict): The input filenames
             If a string with a .tsv suffix: Save to that location, adding the suffix to each .tsv file
             If a string with no .tsv suffix: Save to that folder, with the contents being the separate .tsv files.
+
     Returns:
-        dataframes_dict(str: dataframes): The suffix:dataframe dict
+        dict[str: dataframes]: The suffix:dataframe dict
     """
     dict_filenames = convert_filenames_to_dict(filenames)
     dataframes = create_empty_dataframes()
@@ -203,8 +208,9 @@ def get_library_name_and_id(schema):
         schema(HedSchema): The schema to check
 
     Returns:
-        library_name(str): The capitalized library name
-        first_id(int): the first id for a given library
+        tuple [str, int]:
+        - The capitalized library name.
+        - The first id for a given library.
     """
 
     name = schema.library
@@ -227,7 +233,7 @@ def calculate_attribute_type(attribute_entry):
     """Returns the type of this attribute(annotation, object, data)
 
     Returns:
-        attribute_type(str): "annotation", "object", or "data".
+        str: "annotation", "object", or "data".
     """
     attributes = attribute_entry.attributes
     object_ranges = {HedKey.TagRange, HedKey.UnitRange, HedKey.UnitClassRange, HedKey.ValueClassRange}
@@ -243,6 +249,7 @@ def get_attributes_from_row(row):
 
     Parameters:
         row (pd.Series): A tag line.
+
     Returns:
         dict: Dictionary of attributes.
     """

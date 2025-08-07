@@ -1,5 +1,6 @@
-""" Summarize a HED type tag in a collection of tabular files. """
+""" Summarize the HED type tags in collection of tabular files.  """
 
+import pandas as pd
 from hed.models.tabular_input import TabularInput
 from hed.models.sidecar import Sidecar
 from hed.tools.analysis.hed_type import HedType
@@ -70,7 +71,7 @@ class SummarizeHedTypeOp(BaseOp):
         self.type_tag = parameters['type_tag'].casefold()
         self.append_timecode = parameters.get('append_timecode', False)
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Summarize a specified HED type variable such as Condition-variable.
 
         Parameters:
@@ -137,24 +138,24 @@ class HedTypeSummary(BaseSummary):
         counts.add_descriptions(type_values.type_defs)
         self.summary_dict[new_info["name"]] = counts
 
-    def get_details_dict(self, counts):
+    def get_details_dict(self, hed_type_counts) -> dict:
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
-            counts (HedTypeCounts):  Contains the counts of the events in which the type occurs.
+            hed_type_counts (HedTypeCounts):  Contains the counts of the events in which the type occurs.
 
         Returns:
             dict: dictionary with the summary results.
 
         """
-        summary = counts.get_summary()
+        summary = hed_type_counts.get_summary()
         files = summary.get('files', [])
         return {"Name": summary.get("name", ""), "Total events": summary.get("total_events", 0),
                 "Total files": len(files), "Files": files,
                 "Specifics": {"Type tag": summary.get('type_tag', 'condition-variable'),
                               "Type info": summary.get('details', {})}}
 
-    def merge_all_info(self):
+    def merge_all_info(self) -> 'HedTypeCounts':
         """ Create a HedTypeCounts containing the overall dataset HED type summary.
 
         Returns:
@@ -166,16 +167,16 @@ class HedTypeSummary(BaseSummary):
             all_counts.update(counts)
         return all_counts
 
-    def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
+    def _get_result_string(self, name, summary, individual=False) -> str:
         """ Return a formatted string with the summary for the indicated name.
 
         Parameters:
             name (str):  Identifier (usually the filename) of the individual file.
-            result (dict): The dictionary of the summary results indexed by name.
-            indent (str): A string containing spaces used for indentation (usually 3 spaces).
+            summary (dict): The dictionary of the summary results indexed by name.
+            individual (bool): Whether this is for an individual file summary.
 
         Returns:
-            str - The results in a printable format ready to be saved to a text file.
+            str: The results in a printable format ready to be saved to a text file.
 
         Notes:
             This calls _get_dataset_string to get the overall summary string and
@@ -183,8 +184,8 @@ class HedTypeSummary(BaseSummary):
 
         """
         if name == "Dataset":
-            return self._get_dataset_string(result, indent=indent)
-        return self._get_individual_string(result, indent=indent)
+            return self._get_dataset_string(summary, indent=BaseSummary.DISPLAY_INDENT)
+        return self._get_individual_string(summary, indent=BaseSummary.DISPLAY_INDENT)
 
     @staticmethod
     def _get_dataset_string(result, indent=BaseSummary.DISPLAY_INDENT):

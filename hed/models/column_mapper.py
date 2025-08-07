@@ -151,13 +151,14 @@ class ColumnMapper:
         Parameters:
             sidecar (Sidecar or None): The sidecar to use.
 
-        :raises ValueError:
-            - A sidecar was previously set.
+        Raises:
+             ValueError: A sidecar was previously set.
+
         """
         if self._sidecar:
             raise ValueError("Trying to set a second sidecar on a column mapper.")
         if not sidecar:
-            return None
+            return
 
         self._sidecar = sidecar
 

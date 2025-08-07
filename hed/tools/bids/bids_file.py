@@ -51,7 +51,7 @@ class BidsFile:
             entity_name (str): Name of the BIDS entity, for example task, run, or sub.
 
         Returns:
-            str or None: Entity value if any, otherwise None.
+            Union[str, None]: Entity value if any, otherwise None.
         """
         return self.entity_dict.get(entity_name, None)
 

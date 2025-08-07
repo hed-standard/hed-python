@@ -104,8 +104,8 @@ class RemapColumnsOp(BaseOp):
     def _make_key_map(self):
         """
 
-        :raises ValueError:
-        - If a column designated as an integer source does not have valid integers.
+        Raises:
+            ValueError: If a column designated as an integer source does not have valid integers.
 
         """
 
@@ -116,7 +116,7 @@ class RemapColumnsOp(BaseOp):
         key_map.update(key_df)
         return key_map
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Remap new columns from combinations of others.
 
         Parameters:

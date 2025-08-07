@@ -106,8 +106,8 @@ class SequenceMap:
             data (Series): DataFrame or filename of an events file or event map.
             allow_missing (bool):  If True allow missing keys and add as n/a columns.
 
-        :raises HedFileError:
-            - If there are missing keys and allow_missing is False.
+        Raises:
+            HedFileError: If there are missing keys and allow_missing is False.
 
         """
         filtered = self.prep(data)
@@ -166,7 +166,9 @@ class SequenceMap:
         Parameters:
             data (Series):   Dataframe to process by removing quotes.
 
-        Returns: Series
+        Returns:
+            Series
+
         Notes:
             - Replacement is done in place.
         """

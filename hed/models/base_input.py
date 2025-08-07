@@ -36,7 +36,10 @@ class BaseInput:
             name (str or None): Optional field for how this file will report errors.
             allow_blank_names(bool): If True, column names can be blank
 
-        :raises HedFileError:
+        Raises:
+             HedFileError: For various issues.
+
+        Notes: Reasons for raising HedFileError include:
             - file is blank.
             - An invalid dataframe was passed with size 0.
             - An invalid extension was provided.
@@ -96,7 +99,8 @@ class BaseInput:
         """Return the assembled dataframe Probably a placeholder name.
 
         Returns:
-            pd.Dataframe: the assembled dataframe"""
+            pd.Dataframe: the assembled dataframe
+        """
         return self.assemble()
 
     @property
@@ -114,7 +118,7 @@ class BaseInput:
         """Return the assembled dataframe as a series, with rows that have the same onset combined.
 
         Returns:
-            Union[pd.Series, None] the assembled dataframe with columns merged, and the rows filtered together.
+            Union[pd.Series, None]: the assembled dataframe with columns merged, and the rows filtered together.
         """
         if self.onsets is not None:
             return filter_series_by_onset(self.series_a, self.onsets)
@@ -210,11 +214,9 @@ class BaseInput:
         Parameters:
             file (str or file-like): Location to save this base input.
 
-        :raises ValueError:
-            - If empty file object was passed.
-
-        :raises OSError:
-            - Cannot open the indicated file.
+        Raises:
+            ValueError: If empty file object was passed.
+            OSError: If the file cannot be opened.
         """
         if not file:
             raise ValueError("Empty file name or object passed in to BaseInput.save.")
@@ -237,29 +239,30 @@ class BaseInput:
         else:
             dataframe.to_excel(file, header=self._has_column_names)
 
-    def to_csv(self, file=None):
+    def to_csv(self, file=None) -> Union[str, None]:
         """ Write to file or return as a string.
 
         Parameters:
             file (str, file-like, or None): Location to save this file. If None, return as string.
-        Returns:
-            None or str:  None if file is given or the contents as a str if file is None.
 
-        :raises OSError:
-            - Cannot open the indicated file.
+        Returns:
+            Union[str, None]:  None if file is given or the contents as a str if file is None.
+
+        Raises:
+            OSError: If the file cannot be opened.
         """
         dataframe = self._dataframe
         csv_string_if_filename_none = dataframe.to_csv(file, sep='\t', index=False, header=self._has_column_names)
         return csv_string_if_filename_none
 
     @property
-    def columns(self):
+    def columns(self) -> list[str]:
         """ Returns a list of the column names.
 
             Empty if no column names.
 
         Returns:
-            columns(list): The column names.
+            list: The column names.
         """
         columns = []
         if self._dataframe is not None and self._has_column_names:
@@ -288,14 +291,10 @@ class BaseInput:
         Notes:
              Any attribute of a HedTag that returns a string is a valid value of tag_form.
 
-        :raises ValueError:
-            - There is not a loaded dataframe.
-
-        :raises KeyError:
-            - The indicated row/column does not exist.
-
-        :raises AttributeError:
-            - The indicated tag_form is not an attribute of HedTag.
+        Raises:
+            ValueError: If there is not a loaded dataframe.
+            KeyError: If the indicated row/column does not exist.
+            AttributeError: If the indicated tag_form is not an attribute of HedTag.
         """
         if self._dataframe is None:
             raise ValueError("No data frame loaded")
@@ -315,8 +314,8 @@ class BaseInput:
         Notes:
             If None, returns the first worksheet.
 
-        :raises KeyError:
-            - The specified worksheet name does not exist.
+        Raises:
+            KeyError: If the specified worksheet name does not exist.
         """
         if worksheet_name and self._loaded_workbook:
             # return self._loaded_workbook.get_sheet_by_name(worksheet_name)
@@ -380,6 +379,7 @@ class BaseInput:
         Parameters:
             mapper (ColumnMapper or None): Generally pass none here unless you want special behavior.
             skip_curly_braces (bool): If True, don't plug in curly brace values into columns.
+
         Returns:
             pd.Dataframe: The assembled dataframe.
         """

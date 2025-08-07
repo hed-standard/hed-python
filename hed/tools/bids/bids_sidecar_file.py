@@ -104,7 +104,7 @@ class BidsSidecarFile(BidsFile):
             name (str): The name of the merged sidecar.
 
         Returns:
-            Sidecar or None: A sidecar constructed from the merged list.
+            Union[Sidecar, None]: A sidecar constructed from the merged list.
 
         """
         merged_dict = {}

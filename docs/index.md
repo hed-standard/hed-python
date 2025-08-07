@@ -20,10 +20,10 @@ pip install hedtools
 Basic usage:
 
 ```python
-from hed import HedString, load_schema
+from hed import HedString, load_schema_version
 
 # Load a HED schema
-schema = load_schema()
+schema = load_schema_version('8.4.0')
 
 # Create and validate a HED string
 hed_string = HedString("Sensory-event, Visual-presentation")

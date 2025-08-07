@@ -36,7 +36,7 @@ class HedTypeFactors:
             factor_encoding (str):   Specifies type of factor encoding (one-hot or categorical).
 
         Returns:
-            DataFrame:   DataFrame containing the factor vectors as the columns.
+            pd.DataFrame:   DataFrame containing the factor vectors as the columns.
 
         """
 
@@ -71,7 +71,7 @@ class HedTypeFactors:
             levels (list):  List of categorical columns to convert.
 
         Return:
-            DataFrame:  Contains one-hot representation of requested levels.
+            pd.ataFrame:  Contains one-hot representation of requested levels.
 
         """
         df = pd.DataFrame('n/a', index=range(len(factors.index)), columns=[self.type_value])

@@ -99,7 +99,7 @@ class SplitRowsOp(BaseOp):
         self.new_events = parameters['new_events']
         self.remove_parent_row = parameters['remove_parent_row']
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Split a row representing a particular event into multiple rows.
 
         Parameters:
@@ -111,8 +111,8 @@ class SplitRowsOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        :raises TypeError:
-            -If bad onset or duration.
+        Raises:
+            TypeError: If bad onset or duration.
 
         """
         if 'onset' not in df.columns:

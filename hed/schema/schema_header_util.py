@@ -13,7 +13,7 @@ def validate_library_name(library_name):
         library_name (str): Name of the library.
 
     Returns:
-        bool or str:  If not False, string indicates the issue.
+        Union[bool, str]:  If not False, string indicates the issue.
 
     """
     for i, character in enumerate(library_name):
@@ -30,7 +30,7 @@ def validate_version_string(version_string):
         version_string (str):  A version string.
 
     Returns:
-        bool or str:  If not False, string indicates the issue.
+        Union[bool, str]:  If not False, string indicates the issue.
 
     """
     try:
@@ -56,8 +56,9 @@ def validate_present_attributes(attrib_dict, name):
         Returns:
             list: List of issues. Each issue is a dictionary.
 
-        :raises  HedFileError:
-            - withStandard is found in th header, but a library attribute is not specified
+        Raises:
+            HedFileError: If withStandard is found in th header, but a library attribute is not specified.
+
         """
     if constants.WITH_STANDARD_ATTRIBUTE in attrib_dict and constants.LIBRARY_ATTRIBUTE not in attrib_dict:
         raise HedFileError(HedExceptions.BAD_WITH_STANDARD,
@@ -75,7 +76,8 @@ def validate_attributes(attrib_dict, name):
     Returns:
         list: List of issues. Each issue is a dictionary.
 
-    :raises  HedFileError:
+    Raises:
+        HedFileError: If any of the following issues are found:
         - Invalid library name
         - Version not present
         - Invalid combinations of attributes in header

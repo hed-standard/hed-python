@@ -217,10 +217,10 @@ class Schema2Base:
         """ Gets the schema attributes and converts it to a string.
 
         Parameters:
-            header_attributes (dict): Attributes to format attributes from
+            header_attributes (dict): Attributes to format attributes from.
 
         Returns:
-            str - A string of the attributes that can be written to a .mediawiki formatted file
+            str: A string of the attributes that can be written to a .mediawiki formatted file.
         """
         attrib_values = [f"{attr}=\"{value}\"" for attr, value in header_attributes.items()]
         final_attrib_string = sep.join(attrib_values)

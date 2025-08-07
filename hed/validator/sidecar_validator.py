@@ -35,7 +35,8 @@ class SidecarValidator:
             sidecar (Sidecar): Input data to be validated.
             extra_def_dicts (list or DefinitionDict): extra def dicts in addition to sidecar
             name (str): The name to report this sidecar as
-            error_handler (ErrorHandler): Error context to use.  Creates a new one if None
+            error_handler (ErrorHandler): Error context to use.  Creates a new one if None.
+
         Returns:
             list[dict]: A list of issues associated with each level in the HED string.
         """
@@ -119,15 +120,15 @@ class SidecarValidator:
 
         return issues
 
-    def validate_structure(self, sidecar, error_handler):
+    def validate_structure(self, sidecar, error_handler) -> list[dict]:
         """ Validate the raw structure of this sidecar.
 
         Parameters:
             sidecar (Sidecar): the sidecar to validate
-            error_handler (ErrorHandler): The error handler to use for error context
+            error_handler (ErrorHandler): The error handler to use for error context.
 
         Returns:
-            issues (list): A list of issues found with the structure
+            list[dict]: A list of issues found with the structure.
         """
         all_validation_issues = []
         for column_name, dict_for_entry in sidecar.loaded_dict.items():

@@ -20,8 +20,8 @@ class DefinitionDict:
                 a single string whose definitions should be added.
             hed_schema (HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
-        :raises TypeError:
-            - Bad type passed as def_dicts.
+        Raises:
+             TypeError: Bad type passed as def_dicts.
         """
 
         self.defs = {}
@@ -41,8 +41,8 @@ class DefinitionDict:
                 Note - str or list of strings will parse the strings using the hed_schema.
                 Note - You can mix and match types, eg [DefinitionDict, str, list of str] would be valid input.
 
-        :raises TypeError:
-            - Bad type passed as def_dicts.
+        Raises:
+             TypeError: Bad type passed as def_dicts.
         """
         if not isinstance(def_dicts, list):
             def_dicts = [def_dicts]
@@ -181,8 +181,9 @@ class DefinitionDict:
             def_takes_value (bool): True if the definition takes a value (should have #).
             error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
 
-            Returns:
-               list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
+        Returns:
+            list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
+
         """
         new_issues = []
         placeholder_tags = []
@@ -232,8 +233,9 @@ class DefinitionDict:
             group (HedGroup): The entire definition group include the Definition tag.
             error_handler (ErrorHandler or None): Error context used to identify where definitions are found.
 
-            Returns:
-               list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
+        Returns:
+            list:  List of issues encountered in checking for definitions. Each issue is a dictionary.
+
         """
         # initial validation
         groups = group.groups()
@@ -306,8 +308,7 @@ class DefinitionDict:
             def_tag (HedTag): Source HED tag that may be a Def or Def-expand tag.
 
         Returns:
-            def_contents: HedGroup
-            The contents to replace the previous def-tag with.
+            HedGroup: The contents to replace the previous def-tag with.
         """
         tag_label, _, placeholder = def_tag.extension.partition('/')
 
@@ -328,7 +329,7 @@ class DefinitionDict:
             def_dict (dict): A dict of definitions
 
         Returns:
-            dict[str,str]: definition name and contents
+            dict[str,str]: Definition name and contents
         """
         if isinstance(def_dict, DefinitionDict):
             def_dict = def_dict.defs

@@ -50,7 +50,7 @@ class BidsFileGroup:
             skip_cols (list):   Column names designated as columns to skip.
 
         Returns:
-            TabularSummary or None:  A summary of the number of values in different columns if tabular group.
+            Union[TabularSummary, None]:  A summary of the number of values in different columns if tabular group.
 
         Notes:
             - The columns that are not value_cols or skip_col are summarized by counting
@@ -183,7 +183,7 @@ class BidsFileGroup:
             tsv_obj (BidsTabularFile):  The BIDS tabular file to get the sidecars for.
 
         Returns:
-            Sidecar or None:  The merged Sidecar for the tsv_obj, if any.
+            Union[Sidecar, None]:  The merged Sidecar for the tsv_obj, if any.
 
         """
         path_components = [root_path] + io_util.get_path_components(root_path, tsv_obj.file_path)
@@ -209,7 +209,7 @@ class BidsFileGroup:
             current_path (str):  The path of the directory whose sidecars are to be checked.
 
         Returns:
-            BidsSidecarFile or None:  The BidsSidecarFile in current_path relevant to obj, if any.
+            Union[BidsSidecarFile, None]:  The BidsSidecarFile in current_path relevant to obj, if any.
 
          """
         sidecar_paths = self.sidecar_dir_dict.get(current_path, [])

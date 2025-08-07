@@ -59,7 +59,7 @@ class HedSchemaEntry:
                                  If False, returns a boolean indicating the presence of the attribute.
 
         Returns:
-            bool or any: If return_value is False, returns True if the attribute exists and False otherwise.
+            Union[bool, any]: If return_value is False, returns True if the attribute exists and False otherwise.
             If return_value is True, returns the value of the attribute if it exists, else returns None.
 
         Notes:
@@ -196,7 +196,8 @@ class UnitClassEntry(HedSchemaEntry):
             units (str): The unit name to check, can be plural or include a modifier.
 
         Returns:
-            unit_entry(UnitEntry or None): The unit entry if it exists
+            Union[UnitEntry, None]: The unit entry if it exists.
+
         """
         possible_match = self.derivative_units.get(units)
         # If we have a match that's a unit symbol, we're done, return it.
@@ -257,7 +258,7 @@ class UnitEntry(HedSchemaEntry):
             unit_name (str or None): the full name of the unit with modifier
 
         Returns:
-            conversion_factor(float or None): Returns the conversion factor or None
+            Union[float, None]: Returns the conversion factor or None
         """
         if HedKey.ConversionFactor in self.attributes:
             return float(self.derivative_units.get(unit_name))
@@ -298,7 +299,7 @@ class HedTagEntry(HedSchemaEntry):
                                  If False, returns a boolean indicating the presence of the attribute.
 
         Returns:
-            bool or any: If return_value is False, returns True if the attribute exists and False otherwise.
+            Union[bool, any]: If return_value is False, returns True if the attribute exists and False otherwise.
             If return_value is True, returns the value of the attribute if it exists, else returns None.
 
         Notes:
@@ -333,7 +334,7 @@ class HedTagEntry(HedSchemaEntry):
                                  If False, returns a boolean indicating the presence of the attribute.
 
         Returns:
-            bool or any: Depending on the flag return_value,
+            Union[bool, any]: Depending on the flag return_value,
             returns either the presence of the attribute, or its value.
 
         Notes:

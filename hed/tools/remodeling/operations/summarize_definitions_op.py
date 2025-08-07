@@ -1,5 +1,6 @@
 """ Summarize the type_defs in the dataset. """
 
+import pandas as pd
 from hed.models.tabular_input import TabularInput
 from hed.tools.remodeling.operations.base_op import BaseOp
 from hed.tools.remodeling.operations.base_summary import BaseSummary
@@ -58,7 +59,7 @@ class SummarizeDefinitionsOp(BaseOp):
         self.summary_filename = parameters['summary_filename']
         self.append_timecode = parameters.get('append_timecode', False)
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Create summaries of definitions.
 
         Parameters:
@@ -140,34 +141,34 @@ class DefinitionSummary(BaseSummary):
         summary_dict[title] = items
         return summary_dict
 
-    def get_details_dict(self, def_gatherer):
+    def get_details_dict(self, def_summary) -> dict:
         """ Return the summary-specific information in a dictionary.
 
         Parameters:
-            def_gatherer (DefExpandGatherer):  Contains the resolved dictionaries.
+            def_summary (DefExpandGatherer):  Contains the resolved dictionaries.
 
         Returns:
             dict: dictionary with the summary results.
 
         """
-        known_defs_summary = self._build_summary_dict(def_gatherer.def_dict, "Known Definitions", None,
+        known_defs_summary = self._build_summary_dict(def_summary.def_dict, "Known Definitions", None,
                                                       display_description=True)
         # ambiguous_defs_summary = self._build_summary_dict(def_gatherer.ambiguous_defs, "Ambiguous Definitions",
         #                                                   def_gatherer.get_ambiguous_group)
         # ambiguous_defs_summary = {}
         # TODO: Summary of ambiguous definitions is not implemented
         errors_summary = self._build_summary_dict(
-            def_gatherer.errors, "Errors", None)
+            def_summary.errors, "Errors", None)
 
         known_defs_summary.update(errors_summary)
         return {"Name": "", "Total events": 0, "Total files": 0, "Files": [], "Specifics": known_defs_summary}
         # return known_defs_summary
 
-    def merge_all_info(self):
+    def merge_all_info(self) -> object:
         """ Create an Object containing the definition summary.
 
         Returns:
-            Object - the overall summary object for type_defs.
+            Object: The overall summary object for type_defs.
 
         """
         return self.def_gatherer
@@ -181,7 +182,7 @@ class DefinitionSummary(BaseSummary):
             indent (str): A string containing spaces used for indentation (usually 3 spaces).
 
         Returns:
-            str - The results in a printable format ready to be saved to a text file.
+            str: The results in a printable format ready to be saved to a text file.
 
         Notes:
             This calls _get_dataset_string to get the overall summary string and
@@ -238,9 +239,9 @@ class DefinitionSummary(BaseSummary):
             def_entry (DefinitionEntry): Definition entry from which to remove its definition.
 
         Returns:
-            tuple:
-                str:  Description string.
-                DefinitionEntry: DefinitionEntry after description has been removed.
+            tuple[str, DefinitionEntry]:
+            - Description string.
+            - DefinitionEntry after description has been removed.
 
 
         """

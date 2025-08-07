@@ -35,6 +35,7 @@ class UnitValueValidator:
 
         Returns:
             dict:  Dictionary of value class validator functions.
+
         """
         validator_dict = {
             self.DATE_TIME_VALUE_CLASS: is_date_time_value_class,
@@ -45,7 +46,7 @@ class UnitValueValidator:
 
         return validator_dict
 
-    def check_tag_unit_class_units_are_valid(self, original_tag, validate_text, report_as=None, error_code=None):
+    def check_tag_unit_class_units_are_valid(self, original_tag, validate_text, report_as=None, error_code=None) -> list[dict]:
         """ Report incorrect unit class or units.
 
         Parameters:
@@ -79,7 +80,7 @@ class UnitValueValidator:
 
         return validation_issues
 
-    def check_tag_value_class_valid(self, original_tag, validate_text, report_as=None):
+    def check_tag_value_class_valid(self, original_tag, validate_text, report_as=None) -> list[dict]:
         """ Report an invalid value portion.
 
         Parameters:
@@ -185,7 +186,7 @@ class UnitValueValidator:
         value_class_types = original_tag.value_classes
         return self.validate_value_class_type(portion_to_validate, value_class_types)
 
-    def validate_value_class_type(self, unit_or_value_portion, valid_types):
+    def validate_value_class_type(self, unit_or_value_portion, valid_types) -> bool:
         """ Report invalid unit or valid class values.
 
         Parameters:
@@ -193,7 +194,7 @@ class UnitValueValidator:
             valid_types (list): The names of value class or unit class types (e.g. dateTime or dateTimeClass).
 
         Returns:
-            type_valid (bool): True if this is one of the valid_types validators.
+            bool: True if this is one of the valid_types validators.
 
         """
         has_valid_func = False
@@ -219,7 +220,7 @@ def find_invalid_positions(s, pattern):
     return invalid_positions
 
 
-def is_date_time_value_class(date_time_string):
+def is_date_time_value_class(date_time_string) -> bool:
     """Check if the specified string is a valid datetime.
 
     Parameters:
@@ -239,7 +240,7 @@ def is_date_time_value_class(date_time_string):
         return False
 
 
-def is_name_value_class(name_str):
+def is_name_value_class(name_str) -> bool:
     pattern = r'^[\w\-\u0080-\uFFFF]+$'
     if re.fullmatch(pattern, name_str):
         return True
@@ -247,7 +248,7 @@ def is_name_value_class(name_str):
         return False
 
 
-def is_numeric_value_class(numeric_string):
+def is_numeric_value_class(numeric_string) -> bool:
     """ Check to see if valid numeric value.
 
     Parameters:
@@ -263,7 +264,7 @@ def is_numeric_value_class(numeric_string):
     return False
 
 
-def is_text_value_class(text_string):
+def is_text_value_class(text_string) -> bool:
     """ Placeholder for eventual text value class validation.
 
     Parameters:
@@ -276,7 +277,7 @@ def is_text_value_class(text_string):
     return True
 
 
-def is_clock_face_time(time_string):
+def is_clock_face_time(time_string) -> bool:
     """ Check if a valid HH:MM time string.
 
     Parameters:

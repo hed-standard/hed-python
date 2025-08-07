@@ -31,9 +31,9 @@ class HedSchemaGroup(HedSchemaBase):
         Returns:
             HedSchemaGroup: the container created.
 
-        :raises HedFileError:
-            - Multiple schemas have the same library prefixes.
-            - Empty list passed
+        Raises
+            HedFileError: If multiple schemas have the same library prefixes or empty list passed.
+
         """
         super().__init__()
         if len(schema_list) == 0:
@@ -76,7 +76,7 @@ class HedSchemaGroup(HedSchemaBase):
             namespace (str): A schema library name namespace.
 
         Returns:
-            Union[HedSchema,None]: The specific schema for this library name namespace if exists.
+            Union[HedSchema, None]: The specific schema for this library name namespace if exists.
 
         """
         schema = self._schemas.get(namespace)

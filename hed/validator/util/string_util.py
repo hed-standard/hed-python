@@ -17,7 +17,7 @@ class StringValidator:
         return validation_issues
 
     @staticmethod
-    def check_count_tag_group_parentheses(hed_string):
+    def check_count_tag_group_parentheses(hed_string) -> list[dict]:
         """ Report unmatched parentheses.
 
         Parameters:
@@ -35,7 +35,7 @@ class StringValidator:
                                                            closing_parentheses_count=number_closed_parentheses)
         return validation_issues
 
-    def check_delimiter_issues_in_hed_string(self, hed_string):
+    def check_delimiter_issues_in_hed_string(self, hed_string) -> list[dict]:
         """ Report missing commas or commas in value tags.
 
         Parameters:

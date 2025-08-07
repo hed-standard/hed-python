@@ -2,14 +2,18 @@
 
 Template for the functions:
 
-- ``attribute_checker_template(hed_schema, tag_entry, attribute_name)``:
+All attribute validation functions should follow this signature:
+  ``attribute_checker_template(hed_schema, tag_entry, attribute_name)``
+
+Parameters:
   - ``hed_schema (HedSchema)``: The schema to use for validation.
   - ``tag_entry (HedSchemaEntry)``: The schema entry for this tag.
   - ``attribute_name (str)``: The name of this attribute.
 
-Returns:
-    - ``issues (list)``: A list of issues found validating this attribute
-    """
+Return value:
+  ``list[dict]``: A list of issues found validating this attribute.
+
+"""
 
 from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors, SchemaErrors
 from hed.errors.error_reporter import ErrorHandler
@@ -19,15 +23,16 @@ from hed.schema.schema_validation_util import schema_version_for_library
 from semantic_version import Version
 
 
-def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name):
+def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name) -> list:
     """Check if comma separated list has valid HedTags.
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
+        attribute_name (str): The name of this attribute.
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
     if not tag_entry.name.endswith("/#"):
@@ -47,15 +52,16 @@ def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def attribute_is_deprecated(hed_schema, tag_entry, attribute_name):
+def attribute_is_deprecated(hed_schema, tag_entry, attribute_name) -> list:
     """ Check if the attribute is deprecated.  does not check value.
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
+        attribute_name (str): The name of this attribute.
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
     # Attributes has to check properties
@@ -74,7 +80,7 @@ def attribute_is_deprecated(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def item_exists_check(hed_schema, tag_entry, attribute_name, section_key):
+def item_exists_check(hed_schema, tag_entry, attribute_name, section_key) -> list:
     """Check if the list of possible items exists in the schema and are not deprecated.
 
     Parameters:
@@ -83,8 +89,9 @@ def item_exists_check(hed_schema, tag_entry, attribute_name, section_key):
         attribute_name (str): The name of this attribute
         section_key (HedSectionKey): The section this item should be in.
                                    This is generally passed via functools.partial
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
     item_values = tag_entry.attributes.get(attribute_name, "")
@@ -117,15 +124,16 @@ def item_exists_check(hed_schema, tag_entry, attribute_name, section_key):
     return issues
 
 
-def unit_exists(hed_schema, tag_entry, attribute_name):
+def unit_exists(hed_schema, tag_entry, attribute_name) -> list:
     """Check the given unit is valid, and not deprecated.
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
+        attribute_name (str): The name of this attribute.
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
     unit = tag_entry.attributes.get(attribute_name, "")
@@ -145,15 +153,16 @@ def unit_exists(hed_schema, tag_entry, attribute_name):
 
 
 # This is effectively unused and can never fail - The schema would catch these errors and refuse to load
-def tag_exists_base_schema_check(hed_schema, tag_entry, attribute_name):
+def tag_exists_base_schema_check(hed_schema, tag_entry, attribute_name) -> list:
     """Check if the single tag is a partnered schema tag
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
+        attribute_name (str): The name of this attribute.
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
     rooted_tag = tag_entry.attributes.get(attribute_name, "")
@@ -166,15 +175,16 @@ def tag_exists_base_schema_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name):
+def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name) -> list:
     """ Check if the element has a valid deprecatedFrom attribute, and that any children have it
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
+        attribute_name (str): The name of this attribute.
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
     deprecated_version = tag_entry.attributes.get(attribute_name, "")
@@ -201,15 +211,16 @@ def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def conversion_factor(hed_schema, tag_entry, attribute_name):
+def conversion_factor(hed_schema, tag_entry, attribute_name) -> list:
     """Check if the conversion_factor on is valid
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
+        attribute_name (str): The name of this attribute.
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
     cf = tag_entry.attributes.get(attribute_name, "1.0")
@@ -225,15 +236,16 @@ def conversion_factor(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def allowed_characters_check(hed_schema, tag_entry, attribute_name):
+def allowed_characters_check(hed_schema, tag_entry, attribute_name) -> list:
     """ Check allowed character has a valid value
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
+        attribute_name (str): The name of this attribute.
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
     allowed_strings = character_types
@@ -248,15 +260,16 @@ def allowed_characters_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def in_library_check(hed_schema, tag_entry, attribute_name):
+def in_library_check(hed_schema, tag_entry, attribute_name) -> list:
     """Check if the library attribute is a valid schema name
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
+        attribute_name (str): The name of this attribute.
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
 
@@ -268,15 +281,16 @@ def in_library_check(hed_schema, tag_entry, attribute_name):
     return issues
 
 
-def is_numeric_value(hed_schema, tag_entry, attribute_name):
+def is_numeric_value(hed_schema, tag_entry, attribute_name) -> list:
     """Check if the attribute is a valid numeric(float) value
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation
         tag_entry (HedSchemaEntry): The schema entry for this tag.
-        attribute_name (str): The name of this attribute
+        attribute_name (str): The name of this attribute.
+
     Returns:
-        issues(list): A list of issues from validating this attribute.
+        list[dict]: A list of issues from validating this attribute.
     """
     issues = []
 

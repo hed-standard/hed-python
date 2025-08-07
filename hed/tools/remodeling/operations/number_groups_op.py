@@ -92,7 +92,7 @@ class NumberGroupsOp(BaseOp):
             sidecar (Sidecar or file-like):  Only needed for HED operations.
 
         Returns:
-            Dataframe - a new dataframe after processing.
+            Dataframe: A new dataframe after processing.
 
         """
         # check if number_column_name exists and if so, check overwrite setting

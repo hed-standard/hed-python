@@ -1,4 +1,6 @@
 """ Reorder columns in a columnar file. """
+
+import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
@@ -54,7 +56,7 @@ class ReorderColumnsOp(BaseOp):
         self.ignore_missing = parameters['ignore_missing']
         self.keep_others = parameters['keep_others']
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Reorder columns as specified in event dictionary.
 
         Parameters:
@@ -66,8 +68,8 @@ class ReorderColumnsOp(BaseOp):
         Returns:
             Dataframe: A new dataframe after processing.
 
-        :raises ValueError:
-            - When ignore_missing is false and column_order has columns not in the data.
+        Raises:
+            ValueError: When ignore_missing is false and column_order has columns not in the data.
 
         """
         df_new = df.copy()

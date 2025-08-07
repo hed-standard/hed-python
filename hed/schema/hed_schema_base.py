@@ -32,7 +32,9 @@ class HedSchemaBase(ABC):
         """Returns if this is an 8.3.0 or greater schema.
 
         Returns:
-            is_83_schema(bool): True if standard or partnered schema is 8.3.0 or greater."""
+            bool: True if standard or partnered schema is 8.3.0 or greater.
+
+        """
         if self._schema83 is not None:
             return self._schema83
 
@@ -77,7 +79,7 @@ class HedSchemaBase(ABC):
         """ Return a list of all prefixes this group will accept.
 
         Returns:
-            prefixes(list of str):  A list of strings representing valid prefixes for this group.
+            list[str]:  A list of strings representing valid prefixes for this group.
         """
         raise NotImplementedError("This function must be implemented in the baseclass")
 

@@ -6,6 +6,7 @@ from functools import partial
 import pandas as pd
 from hed.models.hed_string import HedString
 from hed.models.model_constants import DefTagNames
+from hed.models.definition_dict import DefinitionDict
 
 
 def convert_to_form(df, hed_schema, tag_form, columns=None):
@@ -14,7 +15,7 @@ def convert_to_form(df, hed_schema, tag_form, columns=None):
     Parameters:
         df (pd.Dataframe or pd.Series): The dataframe or series to modify.
         hed_schema (HedSchema): The schema to use to convert tags.
-        tag_form(str): HedTag property to convert tags to.
+        tag_form (str): HedTag property to convert tags to.
         columns (list): The columns to modify on the dataframe.
 
     """
@@ -85,7 +86,7 @@ def _expand_defs(hed_string, hed_schema, def_dict):
     return str(HedString(hed_string, hed_schema, def_dict).expand_defs())
 
 
-def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None):
+def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None) -> tuple ['DefinitionDict', dict, dict]:
     """ Gather def-expand tags in the strings/compare with known definitions to find any differences.
 
     Parameters:
@@ -98,7 +99,8 @@ def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs
             format TBD.  Currently def name key: list of lists of HED tags values
 
     Returns:
-        tuple: A tuple containing the DefinitionDict, ambiguous definitions, and errors.
+        tuple [DefinitionDict, dict, dict]: A tuple containing the DefinitionDict, ambiguous definitions, and a
+                                            dictionary of error lists keyed by definition name
     """
     from hed.models.def_expand_gather import DefExpandGatherer
     def_gatherer = DefExpandGatherer(hed_schema, known_defs, ambiguous_defs)
@@ -112,7 +114,7 @@ def sort_dataframe_by_onsets(df):
         df(pd.Dataframe): Dataframe to sort.
 
     Returns:
-        The sorted dataframe, or the original dataframe if it didn't have an onset column.
+        pd.DataFrame: The sorted dataframe, or the original dataframe if it didn't have an onset column.
     """
     if "onset" in df.columns:
         # Create a copy and sort by onsets as floats(if needed), but continue to keep the string version.
@@ -125,20 +127,20 @@ def sort_dataframe_by_onsets(df):
     return df
 
 
-def replace_ref(text, oldvalue, newvalue="n/a"):
+def replace_ref(text, old_value, new_value="n/a"):
     """ Replace column ref in x with y.  If it's n/a, delete extra commas/parentheses.
 
     Parameters:
         text (str): The input string containing the ref enclosed in curly braces.
-        oldvalue (str): The full tag or ref to replace
-        newvalue (str): The replacement value for the ref.
+        old_value (str): The full tag or ref to replace
+        new_value (str): The replacement value for the ref.
 
     Returns:
         str: The modified string with the ref replaced or removed.
     """
     # If it's not n/a, we can just replace directly.
-    if newvalue != "n/a" and newvalue != "":
-        return text.replace(oldvalue, newvalue)
+    if new_value != "n/a" and new_value != "":
+        return text.replace(old_value, new_value)
 
     def _remover(match):
         p1 = match.group("p1").count("(")
@@ -162,7 +164,7 @@ def replace_ref(text, oldvalue, newvalue="n/a"):
     # c1/c2 contain the comma(and possibly spaces) separating this ref from other tags
     # p1/p2 contain the parentheses directly surrounding the tag
     # All four groups can have spaces.
-    pattern = r'(?P<c1>[\s,]*)(?P<p1>[(\s]*)' + oldvalue + r'(?P<p2>[\s)]*)(?P<c2>[\s,]*)'
+    pattern = r'(?P<c1>[\s,]*)(?P<p1>[(\s]*)' + old_value + r'(?P<p2>[\s)]*)(?P<c2>[\s,]*)'
     return re.sub(pattern, _remover, text)
 
 
@@ -177,7 +179,7 @@ def _handle_curly_braces_refs(df, refs, column_names):
         column_names(list): the columns we are interested in(should include all ref columns)
 
     Returns:
-        modified_df(pd.DataFrame): The modified dataframe with refs replaced
+        pd.DataFrame: The modified dataframe with refs replaced
     """
     # Filter out columns and refs that don't exist.
     refs_new = [ref for ref in refs if ref in column_names]
@@ -221,7 +223,7 @@ def split_delay_tags(series, hed_schema, onsets):
         onsets(pd.Series or None)
 
     Returns:
-        sorted_df(pd.Dataframe or None): If we had onsets, a dataframe with 3 columns
+        Union[pd.Dataframe, None]: If we had onsets, a dataframe with 3 columns
             "HED": The HED strings(still str)
             "onset": the updated onsets
             "original_index": the original source line.  Multiple lines can have the same original source line.
@@ -260,10 +262,11 @@ def filter_series_by_onset(series, onsets):
     """Return the series, with rows that have the same onset combined.
 
     Parameters:
-        series(pd.Series or pd.Dataframe): the series to filter.  If dataframe, it filters the "HED" column
-        onsets(pd.Series): the onset column to filter by
+        series(pd.Series or pd.Dataframe): The series to filter.  If dataframe, it filters the "HED" column.
+        onsets(pd.Series): The onset column to filter by.
+
     Returns:
-        Series or Dataframe: the series with rows filtered together.
+        Union[Series, Dataframe]: the series with rows filtered together.
     """
 
     indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))

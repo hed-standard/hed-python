@@ -28,7 +28,7 @@ class CharValidator:
         """
         self._validate_characters = modern_allowed_char_rules
 
-    def check_invalid_character_issues(self, hed_string, allow_placeholders):
+    def check_invalid_character_issues(self, hed_string, allow_placeholders) -> list[dict]:
         """ Report invalid characters.
 
         Parameters:
@@ -56,7 +56,7 @@ class CharValidator:
 
         return validation_issues
 
-    def check_tag_invalid_chars(self, original_tag, allow_placeholders):
+    def check_tag_invalid_chars(self, original_tag, allow_placeholders) -> list[dict]:
         """ Report invalid characters in the given tag.
 
         Parameters:
@@ -73,14 +73,14 @@ class CharValidator:
         validation_issues += self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
         return validation_issues
 
-    def check_for_invalid_extension_chars(self, original_tag, validate_text, error_code=None, index_offset=0):
+    def check_for_invalid_extension_chars(self, original_tag, validate_text, error_code=None, index_offset=0) -> list[dict]:
         """Report invalid characters in extension/value.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             validate_text (str): the text we want to validate, if not the full extension.
-            error_code(str): The code to override the error as.  Again mostly for def/def-expand tags.
-            index_offset(int): Offset into the extension validate_text starts at.
+            error_code (str): The code to override the error as.  Again mostly for def/def-expand tags.
+            index_offset (int): Offset into the extension validate_text starts at.
 
         Returns:
             list: Validation issues. Each issue is a dictionary.

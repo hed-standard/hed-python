@@ -22,7 +22,7 @@ pip install hedtools
 ### Basic Example
 
 ```python
-from hed import HedString, load_schema
+from hed import HedString, load_schema_version
 
 # Load the latest HED schema
 schema = load_schema()

@@ -38,7 +38,7 @@ class HedTagCount:
         else:
             self.value_dict[value] = 1
 
-    def get_info(self, verbose=False):
+    def get_info(self, verbose=False) -> dict:
         """ Return counts for this tag.
 
         Parameters:
@@ -53,7 +53,7 @@ class HedTagCount:
             files = len(self.files)
         return {'tag': self.tag, 'events': self.events, 'files': files}
 
-    def get_summary(self):
+    def get_summary(self) -> dict:
         """ Return a dictionary summary of the events and files for this tag.
 
         Returns:
@@ -108,15 +108,16 @@ class HedTagCounts:
 
         self.merge_tag_dicts(tag_dict)
 
-    def organize_tags(self, tag_template):
+    def organize_tags(self, tag_template) -> tuple:
         """ Organize tags into categories as specified by the tag_template.
 
         Parameters:
             tag_template (dict): A dictionary whose keys are titles and values are lists of HED tags (str).
 
         Returns:
-            dict: Keys are tags (strings) and values are list of HedTagCount for items fitting template.
-            list: HedTagCount objects corresponding to tags that don't fit the template.
+            [tuple[dict, list]]: A tuple containing two elements.
+            - dict: Keys are tags (strings) and values are list of HedTagCount for items fitting template.
+            - list: HedTagCount objects corresponding to tags that don't fit the template.
 
         """
         template = self.create_template(tag_template)
@@ -146,7 +147,7 @@ class HedTagCounts:
                 else:
                     self.tag_dict[tag].value_dict[value] = val_count
 
-    def get_summary(self):
+    def get_summary(self) -> dict:
         """ Return a summary object containing the tag count information of this summary.
 
         Returns:
@@ -159,7 +160,7 @@ class HedTagCounts:
                 'total_events': self.total_events, 'details': details}
 
     @staticmethod
-    def create_template(tags):
+    def create_template(tags) -> dict:
         """ Creates a dictionary with keys based on list of keys in tags dictionary.
 
         Parameters:

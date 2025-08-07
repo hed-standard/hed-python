@@ -1,5 +1,6 @@
-""" Remove rows from a columnar file based on the values in a specified row. """
+""" Remove rows from a columnar file based on column values. """
 
+import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
@@ -51,7 +52,7 @@ class RemoveRowsOp(BaseOp):
         self.column_name = parameters["column_name"]
         self.remove_values = parameters["remove_values"]
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
         """ Remove rows with the values indicated in the column.
 
         Parameters:
