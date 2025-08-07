@@ -16,11 +16,10 @@ authors = [
     { name = "Owen Winterberg" },
     { name = "Kay Robbins", email = "Kay.Robbins@utsa.edu" },
 ]
-license = { text = "MIT License" }
+license = "MIT"
 keywords = [] # Add keywords here if any
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 
