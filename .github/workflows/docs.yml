@@ -64,6 +64,8 @@ jobs:
   deploy:
     # This job depends on the 'build' job completing successfully
     needs: build
+    # Only deploy when pushing to main branch, not on pull requests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       pages: write
       id-token: write

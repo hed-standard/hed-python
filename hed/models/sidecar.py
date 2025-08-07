@@ -43,11 +43,11 @@ class Sidecar:
         return ColumnMetadata(name=column_name)
 
     @property
-    def all_hed_columns(self):
+    def all_hed_columns(self) -> list[str]:
         """ Return all columns that are HED compatible.
 
-            Returns:
-                column_refs(list): A list of all valid HED columns by name.
+        Returns:
+            list: A list of all valid HED columns by name.
         """
         possible_column_references = [column.column_name for column in self if column.column_type != ColumnType.Ignore]
 
@@ -119,8 +119,8 @@ class Sidecar:
         Parameters:
             file (str or FileLike): If a string, this is a filename. Otherwise, it will be parsed as a file-like.
 
-        :raises HedFileError:
-            - If the file was not found or could not be parsed into JSON.
+        Raises:
+            HedFileError: If the file was not found or could not be parsed into JSON.
         """
         if not file:
             return {}
@@ -141,8 +141,8 @@ class Sidecar:
         Parameters:
             files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
 
-        :raises HedFileError:
-            - If the file was not found or could not be parsed into JSON.
+        Raises:
+            HedFileError: If the file was not found or could not be parsed into JSON.
 
         """
         if not files:
@@ -183,8 +183,8 @@ class Sidecar:
         Parameters:
             fp (File-like): The JSON source stream.
 
-        :raises HedFileError:
-            - If the file cannot be parsed.
+        Raises:
+            HedFileError: If the file cannot be parsed.
         """
         try:
             return json.load(fp)
@@ -225,13 +225,13 @@ class Sidecar:
 
         return def_dict
 
-    def get_column_refs(self):
+    def get_column_refs(self) -> list[str]:
         """ Returns a list of column refs found in this sidecar.
 
             This does not validate
 
         Returns:
-            column_refs(list): A list of unique column refs found.
+            list[str]: A list of unique column refs found.
         """
         found_vals = set()
         for column_data in self:

@@ -224,7 +224,7 @@ class HedSchema(HedSchemaBase):
             namespace (str): The schema library name namespace.
 
         Returns:
-            HedSchema or None: The HED schema object for this schema, or None if namespace doesn't match.
+            Union[HedSchema, None]: The HED schema object for this schema, or None if namespace doesn't match.
         """
         if self._namespace != namespace:
             return None
@@ -249,7 +249,7 @@ class HedSchema(HedSchemaBase):
             extras_key (str): The key to check for in the extras dictionary.
 
         Returns:
-            Union[DataFrame, None]: The DataFrame for this extras key, or None if it doesn't exist or is empty.
+            Union[pd.DataFrame, None]: The DataFrame for this extras key, or None if it doesn't exist or is empty.
         """
         if not hasattr(self, 'extras') or not extras_key in self.extras:
             return None
@@ -314,7 +314,6 @@ class HedSchema(HedSchemaBase):
             save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
                                 If it is not a "withStandard" schema, this setting has no effect.
 
-
         Raises:
             OSError: File cannot be saved for some reason.
         """
@@ -331,7 +330,6 @@ class HedSchema(HedSchemaBase):
             filename (str): Save location.
             save_merged (bool): If true, this will save the schema as a merged schema if it is a "withStandard" schema.
                                 If it is not a "withStandard" schema, this setting has no effect.
-
 
         Raises:
             OSError: File cannot be saved for some reason.
@@ -353,7 +351,6 @@ class HedSchema(HedSchemaBase):
             save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
                                 If it is not a "withStandard" schema, this setting has no effect.
 
-
         Raises:
             OSError: File cannot be saved for some reason.
         """
@@ -368,8 +365,8 @@ class HedSchema(HedSchemaBase):
         Parameters:
             schema_namespace (str): Should be empty, or end with a colon.(Colon will be automated added if missing).
 
-        :raises HedFileError:
-            - The prefix is invalid
+        Raises:
+            HedFileError: The prefix is invalid.
         """
         if schema_namespace and schema_namespace[-1] != ":":
             schema_namespace += ":"
@@ -478,7 +475,7 @@ class HedSchema(HedSchemaBase):
             schema_namespace (str): Only used on Tags.  If incorrect, will return None.
 
         Returns:
-            HedSchemaEntry or None: The schema entry for the given tag, or None if not found.
+            Union[HedSchemaEntry, None]: The schema entry for the given tag, or None if not found.
         """
         if key_class == HedSectionKey.Tags:
             if schema_namespace != self._namespace:
@@ -614,8 +611,8 @@ class HedSchema(HedSchemaBase):
     def _validate_remaining_terms(self, tag, working_tag, prefix_tag_adj, current_slash_index):
         """ Validates the terms past current_slash_index.
 
-        :raises _TagIdentifyError:
-            - One of the extension terms already exists as a schema term.
+        Raises:
+            _TagIdentifyError: One of the extension terms already exists as a schema term.
         """
         child_names = working_tag[current_slash_index + 1:].split("/")
         word_start_index = current_slash_index + 1 + prefix_tag_adj
@@ -703,7 +700,7 @@ class HedSchema(HedSchemaBase):
             unit (str): A known unit.
 
         Returns:
-            derived_unit_list(list of HedSchemaEntry): The derived units for this unit
+           list[HedSchemaEntry]: The derived units for this unit.
 
         Notes:
             This is a lower level one that doesn't rely on the Unit entries being fully setup.

@@ -22,17 +22,14 @@ class TabularInput(BaseInput):
             sidecar (str or Sidecar or FileLike): A Sidecar or source file/filename.
             name (str): The name to display for this file for error purposes.
 
-        :raises HedFileError:
+        Raises:
+            HedFileError: For the following issues:
             - The file is blank.
             - An invalid dataframe was passed with size 0.
             - An invalid extension was provided.
             - A duplicate or empty column name appears.
-
-        :raises OSError:
-            - Cannot open the indicated file.
-
-        :raises ValueError:
-            - This file has no column names.
+        OSError: If it cannot open the indicated file.
+        ValueError: If this file has no column names.
         """
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)

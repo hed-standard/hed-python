@@ -23,14 +23,15 @@ class DefValidator(DefinitionDict):
         """
         super().__init__(def_dicts, hed_schema=hed_schema)
 
-    def validate_def_tags(self, hed_string_obj, hed_validator=None):
+    def validate_def_tags(self, hed_string_obj, hed_validator=None) -> list[dict]:
         """ Validate Def/Def-Expand tags.
 
         Parameters:
             hed_string_obj (HedString): The HED string to process.
             hed_validator (HedValidator): Used to validate the placeholder replacement.
+
         Returns:
-            list: Issues found related to validating defs. Each issue is a dictionary.
+            list[dict]: Issues found related to validating defs. Each issue is a dictionary.
         """
         # This is needed primarily to validate the contents of a def-expand matches the default.
         def_issues = []

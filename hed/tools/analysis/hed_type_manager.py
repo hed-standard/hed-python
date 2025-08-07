@@ -15,8 +15,8 @@ class HedTypeManager:
         Parameters:
             event_manager (EventManager): An event manager for the tabular file.
 
-        :raises HedFileError:
-            - On errors such as unmatched onsets or missing definitions.
+        Raises:
+            HedFileError: On errors such as unmatched onsets or missing definitions.
 
         """
 
@@ -54,7 +54,7 @@ class HedTypeManager:
             factor_encoding (str):   Specifies type of factor encoding (one-hot or categorical).
 
         Returns:
-            DataFrame or None:   DataFrame containing the factor vectors as the columns.
+            Union[pd.DataFrame, None]:   DataFrame containing the factor vectors as the columns.
 
         """
         this_var = self.get_type(type_tag.casefold())
@@ -78,7 +78,7 @@ class HedTypeManager:
             type_tag (str): HED tag to retrieve the type for.
 
         Returns:
-            HedType or None: the values associated with this type tag.
+            Union[HedType, None]: the values associated with this type tag.
 
         """
         return self._type_map.get(type_tag.casefold(), None)
@@ -118,7 +118,7 @@ class HedTypeManager:
              as_json (bool): If False (the default), return as an object otherwise return as a JSON string.
 
         Returns:
-            dict or str:  Dictionary with the summary.
+            Union[dict, str]:  Dictionary with the summary.
 
         """
         summary = {}

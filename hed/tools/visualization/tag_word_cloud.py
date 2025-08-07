@@ -44,7 +44,7 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
     kwargs.setdefault('prefer_horizontal', 0.75)
     kwargs.setdefault('color_func', word_cloud_util.default_color_func)
     kwargs.setdefault('relative_scaling', 1)
-    kwargs.setdefault('max_font_size', round(height / 20))
+    kwargs.setdefault('max_font_size', max(round(height / 20), 12))
     kwargs.setdefault('min_font_size', 8)
     if 'font_path' not in kwargs:
         kwargs['font_path'] = None
@@ -66,7 +66,8 @@ def word_cloud_to_svg(wc):
         wc (WordCloud): the word cloud object.
 
     Returns:
-        svg_string (str): The svg for the word cloud.
+       str: The svg for the word cloud.
+
     """
     svg_string = wc.to_svg()
     svg_string = svg_string.replace("fill:", "fill:rgb")

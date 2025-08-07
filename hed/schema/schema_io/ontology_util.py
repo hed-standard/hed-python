@@ -25,11 +25,11 @@ def _get_hedid_range(schema_name, df_key):
     """ Get the set of HedId's for this object type/schema name.
 
     Parameters:
-        schema_name(str): The known schema name with an assigned id range
-        df_key(str): The dataframe range type we're interested in.  a key from constants.DF_SUFFIXES
+        schema_name(str): The known schema name with an assigned id range.
+        df_key(str): The dataframe range type we're interested in.  a key from constants.DF_SUFFIXES.
 
     Returns:
-        number_set(set): A set of all id's in the requested range
+        set: A set of all id's in the requested range.
     """
     if df_key == constants.STRUCT_KEY:
         raise NotImplementedError("Cannot assign hed_ids struct section")
@@ -59,7 +59,7 @@ def get_all_ids(df):
         df(pd.DataFrame): The dataframe
 
     Returns:
-        numbers(Set or None): None if this has no HED column, otherwise all unique numbers as a set.
+        Union[Set, None]: None if this has no HED column, otherwise all unique numbers as a set.
     """
     if constants.hed_id in df.columns:
         modified_df = df[constants.hed_id].apply(lambda x: remove_prefix(x, "HED_"))
@@ -79,8 +79,8 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
         assign_missing_ids(bool): If True, replacing any blank(new) HedIds with valid ones
 
     Returns:
-        dataframes(dict of str:pd.DataFrames): The updated dataframes
-                                               These dataframes can potentially have extra columns
+        dict[str:pd.DataFrames]: The updated dataframes. These dataframes can potentially have extra columns.
+
     """
     hedid_errors = []
     if not schema_name:
@@ -133,10 +133,10 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
     Parameters:
         section(HedSchemaSection): The loaded schema section to compare ID's with
         df(pd.DataFrame): The loaded spreadsheet dataframe to compare with
-        unused_tag_ids(set): The valid range of ID's for this df
+        unused_tag_ids(set): The valid range of IDs for this df.
 
     Returns:
-        error_list(list of str): A list of errors found matching id's
+        list[str]: A list of errors found matching IDs.
     """
     hedid_errors = []
     for row_number, row in df.iterrows():
@@ -261,8 +261,9 @@ def convert_df_to_omn(dataframes):
         dataframes(dict): A set of dataframes representing a schema, potentially including extra columns
 
     Returns:
-        omn_file(str): A combined string representing (most of) a schema omn file.
-        omn_data(dict): a dict of DF_SUFFIXES:str, representing each .tsv file in omn format.
+        tuple[str, dict]:
+        - A combined string representing (most of) a schema omn file.
+        - A of DF_SUFFIXES:str, representing each .tsv file in omn format.
     """
     from hed.schema.hed_schema_io import from_dataframes
     from hed.schema.schema_io.schema2df import Schema2DF  # Late import as this is recursive
@@ -308,9 +309,11 @@ def _convert_df_to_omn(df, annotation_properties=("",), annotation_terms=None):
     Parameters:
         df(pd.DataFrame): the dataframe to turn into omn
         annotation_properties(dict): Known annotation properties, with the values being their hedId.
-        annotation_terms(dict): The list of valid external omn tags, such as "dc:source"
+        annotation_terms(dict): The list of valid external omn tags, such as "dc:source".
+
     Returns:
-        omn_text(str): the omn formatted text for this section
+        str: The omn formatted text for this section.
+
     """
     output_text = ""
     for index, row in df.iterrows():
@@ -356,8 +359,10 @@ def _convert_extra_df_to_omn(df, suffix):
     Parameters:
         df(pd.DataFrame): the dataframe to turn into omn
         suffix(dict): Known annotation properties, with the values being their hedId.
+
     Returns:
-        omn_text(str): the omn formatted text for this section
+        str: the omn formatted text for this section.
+
     """
     output_text = ""
     for index, row in df.iterrows():
@@ -386,7 +391,7 @@ def _split_on_unquoted_commas(input_string):
         input_string: The string to split
 
     Returns:
-        parts(list): The split apart string.
+        list: The split apart string.
     """
     # Note: does not handle escaped double quotes.
     parts = []

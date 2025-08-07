@@ -24,7 +24,7 @@ class BidsTabularFile(BidsFile):
 
         Parameters:
             content_info (None):   This always uses the internal file_path to create the contents.
-            overwrite:  If False (The Default), do not overwrite existing contents if any.
+            overwrite(bool):  If False (The Default), do not overwrite existing contents if any.
 
         """
         if self._contents and not overwrite:

@@ -65,8 +65,9 @@ class EventsSummary:
         """ Extract a summary of the tags in a given tabular input file.
 
         Returns:
-            dict: A dictionary with the summary information - (str, list)
-            list: A set of tags that do not match any of the specified types but are not excluded.
+            tuple[dict, list]:
+            - dict: A dictionary with the summary information - (str, list)
+            - list: A set of tags that do not match any of the specified types but are not excluded.
         """
 
         group_dict = {key: set() for key in self.MATCH_TYPES}
@@ -117,8 +118,9 @@ def summarize_tags(schema, tsv, sidecar, name):
         name: The name of the dataset (optional).
 
     Returns:
-        dict: A dictionary with the summary information - (str, list)
-        list: A set of tags that do not match any of the specified types but are not excluded.
+        tuple[dict, list]:
+        - dict: A dictionary with the summary information - (str, list).
+        - list: A set of tags that do not match any of the specified types but are not excluded.
     """
     events_summary = EventsSummary(schema, tsv, sidecar, name)
     if events_summary.fatal_errors:

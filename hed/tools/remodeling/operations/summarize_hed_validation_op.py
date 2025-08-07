@@ -1,6 +1,7 @@
 """ Validate the HED tags in a dataset and report errors. """
 
 import os
+import pandas as pd
 from hed.errors import error_reporter
 from hed.errors import error_types
 from hed.models.sidecar import Sidecar
@@ -68,7 +69,7 @@ class SummarizeHedValidationOp(BaseOp):
         self.append_timecode = parameters.get('append_timecode', False)
         self.check_for_warnings = parameters['check_for_warnings']
 
-    def do_op(self, dispatcher, df, name, sidecar=None):
+    def do_op(self, dispatcher, df, name, sidecar=None) -> 'pd.DataFrame':
         """ Validate the dataframe with the accompanying sidecar, if any.
 
         Parameters:
@@ -78,7 +79,7 @@ class SummarizeHedValidationOp(BaseOp):
             sidecar (Sidecar or file-like): Usually needed unless only HED tags in HED column of event file.
 
         Returns:
-            DataFrame: A copy of df
+            pd.DataFrame: A copy of df
 
         Side effect:
             Updates the relevant summary.
@@ -121,7 +122,7 @@ class HedValidationSummary(BaseSummary):
             indent (str): A string containing spaces used for indentation (usually 3 spaces).
 
         Returns:
-            str - The results in a printable format ready to be saved to a text file.
+            str: The results in a printable format ready to be saved to a text file.
 
         Notes:
             This gets the error list from "sidecar_issues" and "event_issues".
@@ -166,7 +167,7 @@ class HedValidationSummary(BaseSummary):
             results['total_event_issues'] = len(issues)
         self.summary_dict[new_info["name"]] = results
 
-    def get_details_dict(self, summary_info):
+    def get_details_dict(self, summary_info) -> dict:
         """Return the summary details from the summary_info.
 
         Parameters:
@@ -182,11 +183,11 @@ class HedValidationSummary(BaseSummary):
                 "Files": summary_info.get("event_files", []),
                 "Specifics": summary_info}
 
-    def merge_all_info(self):
+    def merge_all_info(self) -> dict:
         """ Create a dictionary containing all the errors in the dataset.
 
         Returns:
-            dict - dictionary of issues organized into sidecar_issues and event_issues.
+            dict: dictionary of issues organized into sidecar_issues and event_issues.
 
         """
         results = self.get_empty_results()
@@ -229,7 +230,7 @@ class HedValidationSummary(BaseSummary):
             results["sidecar_issues"][ikey] = errors
 
     @staticmethod
-    def get_empty_results():
+    def get_empty_results() -> dict:
         """ Return an empty results dictionary to use as a template.
 
         Returns:
@@ -241,7 +242,7 @@ class HedValidationSummary(BaseSummary):
                 "sidecar_had_issues": False}
 
     @staticmethod
-    def get_error_list(error_dict, count_only=False):
+    def get_error_list(error_dict, count_only=False) -> list:
         """ Convert errors produced by the HED validation into a list which includes filenames.
 
         Parameters:

@@ -9,8 +9,8 @@ def gather_descriptions(hed_string):
     Parameters:
         hed_string(HedString): To be modified.
 
-    Returns: tuple
-        description(str): The concatenated values of all description tags.
+    Returns:
+        str: The concatenated values of all description tags.
 
     Side effect:
          The input HedString has its description tags removed.
@@ -34,9 +34,9 @@ def split_base_tags(hed_string, base_tags, remove_group=False):
         remove_group (bool, optional): Flag indicating whether to remove the parent group. Defaults to False.
 
     Returns:
-        tuple: A tuple containing two HedString objects:
-            - The first HedString object contains the remaining tags from hed_string.
-            - The second HedString object contains the tags from hed_string that match the base_tags.
+        tuple[HedString, HedString]:
+            - HedString: The HedString with the base_tags removed.
+            - HedString: The HedString containing only the base_tags.
     """
 
     base_tags = [tag.casefold() for tag in base_tags]
@@ -64,9 +64,9 @@ def split_def_tags(hed_string, def_names, remove_group=False):
         remove_group (bool, optional): Flag indicating whether to remove the parent group. Defaults to False.
 
     Returns:
-        tuple: A tuple containing two HedString objects:
-            - The first HedString object contains the remaining tags from hed_string.
-            - The second HedString object contains the tags from hed_string that match the def_names.
+        tuple[HedString, HedString]:
+            - The HedString with the remaining tags from hed_string.
+            - The HedString with the tags from hed_string that match the def_names.
     """
     include_groups = 0
     if remove_group:

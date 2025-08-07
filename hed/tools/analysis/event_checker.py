@@ -293,7 +293,6 @@ class EventsChecker:
         Parameters:
             issues (list): A list of issues to check.
 
-
         Returns:
            dict: A dict with keys that are error codes and values that are lists of line numbers.
         """

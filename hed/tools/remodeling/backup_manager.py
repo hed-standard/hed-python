@@ -4,6 +4,8 @@ import os
 import json
 import shutil
 from datetime import datetime
+from typing import Union
+
 from hed.errors.exceptions import HedFileError
 from hed.tools.util import io_util
 
@@ -22,8 +24,8 @@ class BackupManager:
             data_root (str): Full path of the root of the data directory.
             backups_root (str or None):  Full path to the root where backups subdirectory is located.
 
-        :raises HedFileError:
-            - If the data_root does not correspond to a real directory.
+        Raises:
+            HedFileError: If the data_root does not correspond to a real directory.
 
         Notes: The backup_root will have remodeling/backups appended.
         """
@@ -38,7 +40,7 @@ class BackupManager:
         os.makedirs(self.backups_path, exist_ok=True)
         self.backups_dict = self._get_backups()
 
-    def create_backup(self, file_list, backup_name=None, verbose=False):
+    def create_backup(self, file_list, backup_name=None, verbose=False) -> bool:
         """ Create a new backup from file_list.
 
         Parameters:
@@ -47,13 +49,11 @@ class BackupManager:
             verbose (bool):     If True, print out the files that are being backed up.
 
         Returns:
-            bool:  True if the backup was successful. False if a backup of that name already exists.
+            bool: True if the backup was successful. False if a backup of that name already exists.
 
-        :raises HedFileError:
-            - For missing or incorrect files.
-
-        :raises OS-related error:
-            - OS-related error when file copying occurs.
+        Raises:
+            HedFileError: For missing or incorrect files.
+            OS-related error: OS-related error when file copying occurs.
 
         """
         if not backup_name:
@@ -80,14 +80,14 @@ class BackupManager:
             json.dump(backup, fp, indent=4)
         return True
 
-    def get_backup(self, backup_name):
+    def get_backup(self, backup_name) -> Union[dict, None]:
         """ Return the dictionary corresponding to backup_name.
 
         Parameters:
             backup_name (str): Name of the backup to be retrieved.
 
         Returns:
-            The dictionary with the backup info.
+            Union[dict, None]: The dictionary with the backup info.
 
         Notes:
             The dictionary with backup information has keys that are the paths of
@@ -99,7 +99,7 @@ class BackupManager:
             return None
         return self.backups_dict[backup_name]
 
-    def get_backup_files(self, backup_name, original_paths=False):
+    def get_backup_files(self, backup_name, original_paths=False) -> list:
         """ Returns a list of full paths of files contained in the backup.
 
         Parameters:
@@ -107,22 +107,24 @@ class BackupManager:
             original_paths (bool):   If True return the original paths.
 
         Returns:
-            list:  Full paths of the original files backed (original_paths=True) or the paths in the backup.
+            list: Full paths of the original files backed (original_paths=True) or the paths in the backup.
 
-        :raises HedFileError:
-            - If not backup named backup_name exists.
+        Raises:
+            HedFileError: If not backup named backup_name exists.
 
         """
 
         backup_dict = self.backups_dict.get(backup_name, None)
         if not backup_dict:
             raise HedFileError("NoBackup", f"{backup_name} is not a valid backup", "")
+
         if original_paths:
             return [os.path.realpath(os.path.join(self.data_root, backup_key)) for backup_key in backup_dict.keys()]
-        return [os.path.realpath(os.path.join(self.backups_path, backup_name, self.BACKUP_ROOT, backup_key))
-                for backup_key in backup_dict.keys()]
+        else:
+            return [os.path.realpath(os.path.join(self.backups_path, backup_name, self.BACKUP_ROOT, backup_key))
+                    for backup_key in backup_dict.keys()]
 
-    def get_backup_path(self, backup_name, file_name):
+    def get_backup_path(self, backup_name, file_name) -> str:
         """ Retrieve the file from the backup or throw an error.
 
         Parameters:
@@ -167,8 +169,8 @@ class BackupManager:
         Returns:
             dict: dictionary of dictionaries of the valid backups in the backups_path directory.
 
-        :raises HedFileError:
-            - If a backup is inconsistent for any reason.
+        Raises:
+             HedFileError: If a backup is inconsistent for any reason.
 
         """
         backups = {}
@@ -195,9 +197,10 @@ class BackupManager:
             backup_name (str): Name of the backup.
 
         Returns:
-            dict:  dictionary containing the backup info.
-            list:  Files in backup directory that are not in the backup dict.
-            list:  Files in backup dictionary not in backup directory
+            tuple[dict, list, list]:
+            - Dictionary containing the backup info.
+            - Files in backup directory that are not in the backup dict.
+            - Files in backup dictionary not in backup directory.
 
         Notes:
             If file_path is None, this checks against consistency in the backup dictionary.
@@ -224,7 +227,7 @@ class BackupManager:
         return backup_dict, files_not_in_backup, backups_not_in_directory
 
     @staticmethod
-    def get_task(task_names, file_path):
+    def get_task(task_names, file_path) -> str:
         """ Return the task if the file name contains a task_xxx where xxx is in task_names.
 
         Parameters:
@@ -242,3 +245,44 @@ class BackupManager:
                 return task
         else:
             return ''
+
+    def make_backup(self, task, backup_name=None, verbose=False) -> bool:
+        """ Make a backup copy the files in the task file list.
+
+        Parameters:
+            task (dict):        Dictionary representing the remodeling task.
+            backup_name (str or None):  Name of the backup. If None, uses the default
+            verbose (bool):     If True, print out the files that are being backed up.
+
+        Returns:
+            bool: True if the backup was successful. False if a backup of that name already exists.
+
+        Raises:
+            HedFileError: For missing or incorrect files.
+            OS-related error: OS-related error when file copying occurs.
+
+        """
+        if not backup_name:
+            backup_name = self.DEFAULT_BACKUP_NAME
+        if self.backups_dict and backup_name in self.backups_dict:
+            return False
+        backup = {}
+        time_stamp = f"{str(datetime.now())}"
+        if verbose:
+            print(f"Creating backup {backup_name}")
+        backup_dir_path = os.path.realpath(os.path.join(self.backups_path, backup_name, BackupManager.BACKUP_ROOT))
+        os.makedirs(backup_dir_path, exist_ok=True)
+        file_list = task.get('file_list', [])
+        for file in file_list:
+            backup_file = self.get_backup_path(backup_name, file)
+            os.makedirs(os.path.dirname(backup_file), exist_ok=True)
+            if verbose:
+                print(f"Copying {file} to {backup_file}")
+            shutil.copy2(file, backup_file)
+            backup[self.get_file_key(file)] = time_stamp
+        self.backups_dict[backup_name] = backup
+        backup_dict_path = os.path.realpath(os.path.join(self.backups_path, backup_name,
+                                                         self.BACKUP_DICTIONARY))
+        with open(backup_dict_path, 'w') as fp:
+            json.dump(backup, fp, indent=4)
+        return True

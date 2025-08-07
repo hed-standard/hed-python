@@ -48,7 +48,8 @@ class BidsDataset:
             suffix (str):  Suffix of the BidsFileGroup to be returned.
 
         Returns:
-            BidsFileGroup or None:  The requested tabular group.
+            Union[BidsFileGroup, None]:  The requested tabular group.
+
         """
         return self.file_groups.get(suffix, None)
 

@@ -11,7 +11,7 @@ class TagValidator:
     CAMEL_CASE_EXPRESSION = r'([A-Z]+\s*[a-z-]*)+'
 
     def run_individual_tag_validators(self, original_tag, allow_placeholders=False,
-                                      is_definition=False):
+                                      is_definition=False) -> list[dict]:
         """ Runs the validators on the individual tags.
 
             This ignores most illegal characters except in extensions.
@@ -38,7 +38,7 @@ class TagValidator:
     # Mostly internal functions to check individual types of errors
     # =========================================================================+
     @staticmethod
-    def check_tag_exists_in_schema(original_tag):
+    def check_tag_exists_in_schema(original_tag) -> list[dict]:
         """ Report invalid tag or doesn't take a value.
 
         Parameters:
@@ -65,7 +65,7 @@ class TagValidator:
         return validation_issues
 
     @staticmethod
-    def check_tag_requires_child(original_tag):
+    def check_tag_requires_child(original_tag) -> list[dict]:
         """ Report if tag is a leaf with 'requiredTag' attribute.
 
         Parameters:
@@ -80,7 +80,7 @@ class TagValidator:
                                                            tag=original_tag)
         return validation_issues
 
-    def check_capitalization(self, original_tag):
+    def check_capitalization(self, original_tag) -> list[dict]:
         """Report warning if incorrect tag capitalization.
 
         Parameters:
@@ -99,7 +99,7 @@ class TagValidator:
                 break
         return validation_issues
 
-    def check_tag_is_deprecated(self, original_tag):
+    def check_tag_is_deprecated(self, original_tag) -> list[dict]:
         validation_issues = []
         if original_tag.has_attribute(HedKey.DeprecatedFrom):
             validation_issues += ErrorHandler.format_error(ValidationErrors.ELEMENT_DEPRECATED,
@@ -112,7 +112,7 @@ class TagValidator:
     # =========================================================================+
 
     @staticmethod
-    def check_for_placeholder(original_tag, is_definition=False):
+    def check_for_placeholder(original_tag, is_definition=False) -> list[dict]:
         """ Report invalid placeholder characters.
 
         Parameters:

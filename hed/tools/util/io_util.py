@@ -49,7 +49,7 @@ def get_allowed(value, allowed_values=None, starts_with=True):
         starts_with (bool):  If True match is done at beginning of string, otherwise the end.
 
     Returns:
-        str or list:  portion of value that matches the various allowed_values.
+        Union[str,list]:  portion of value that matches the various allowed_values.
 
     Notes:
         - match is done in lower case.
@@ -91,7 +91,9 @@ def get_full_extension(filename):
         filename (str):   The filename to be parsed.
 
     Returns:
-        (str, str):  (File name without extension, full extension)
+        Tuple[str, str]:
+        - File name without extension
+        - Full extension
 
     """
     name, ext = os.path.splitext(filename)
@@ -230,7 +232,7 @@ def get_path_components(root_path, this_path):
         this_path (str):      The path of a file or directory descendant of root_path.
 
     Returns:
-        list or None:   A list with the remaining elements directory components to the file.
+        Union[list, None]:   A list with the remaining elements directory components to the file.
 
     Notes: this_path must be a descendant of root_path.
 

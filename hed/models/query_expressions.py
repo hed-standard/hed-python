@@ -96,7 +96,7 @@ class ExpressionAnd(Expression):
             groups2(list): a list of search results
 
         Returns:
-            combined_groups(list): groups in both lists narrowed down results to where none of the tags overlap
+            list: Groups in both lists narrowed down results to where none of the tags overlap.
         """
         return_list = []
         for group in groups1:

@@ -32,7 +32,8 @@ class SpreadsheetInput(BaseInput):
               It will be a validation issue if column 1 is called "key" in the above example.
               This means it no longer accepts anything but the value portion only in the columns.
 
-        :raises HedFileError:
+        Raises:
+            HedFileError: for any of the following issues:
             - The file is blank.
             - An invalid dataframe was passed with size 0.
             - An invalid extension was provided.

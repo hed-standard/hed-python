@@ -22,8 +22,8 @@ class EventManager:
             hed_schema (HedSchema): HED schema used.
             extra_defs (DefinitionDict):  Extra definitions not included in the input_data information.
 
-        :raises HedFileError:
-            - if there are any unmatched offsets.
+        Raises:
+            HedFileError: If there are any unmatched offsets.
 
         Notes:  Keeps the events of temporal extend by their starting index in events file. These events
         are separated from the rest of the annotations, which are contained in self.hed_strings.
@@ -48,8 +48,8 @@ class EventManager:
         Parameters:
             input_data (TabularInput): A tabular input that includes its relevant sidecar.
 
-        :raises HedFileError:
-            - If the hed_strings contain unmatched offsets.
+        Raises:
+            HedFileError: If the hed_strings contain unmatched offsets.
 
         Notes:
 
@@ -127,11 +127,11 @@ class EventManager:
             remove_types (list):  List of types to remove.
 
         Returns:
-            list of str or HedString representing the information without the events of temporal extent.
-            list of str or HedString or None representing the onsets of the events of temporal extent.
-            list of str or HedString or None representing the ongoing context information.
+            tuple[Union[list(str),  HedString], Union[list(str),  HedString, None], Union[list(str),  HedString, None]]:
+            Union[list(str),  HedString]: The information without the events of temporal extent.
+            Union[list(str),  HedString, None]: The onsets of the events of temporal extent.
+            Union[list(str),  HedString, None]: The ongoing context information.
 
-        If the
         """
 
         remove_defs = self.get_type_defs(remove_types)  # definitions corresponding to remove types to be filtered out
@@ -207,7 +207,7 @@ class EventManager:
             str_list (list): A list of strings to be concatenated with commas and then converted.
 
         Returns:
-            HedString or None:  The converted list.
+            Union[HedString, None]:  The converted list.
 
         """
         filtered_list = [item for item in str_list if item != '']  # list of strings

@@ -116,14 +116,14 @@ class ReservedChecker:
                                              group_count=str(len(other_groups)), tag_list=reserved_tags)
         return []
 
-    def get_group_requirements(self, reserved_tags):
+    def get_group_requirements(self, reserved_tags) -> tuple[float, float]:
         """ Returns the maximum and minimum number of groups required for these reserved tags.
 
         Parameters:
             reserved_tags (list of HedTag): The reserved tags to be checked.
 
         Returns:
-            tuple (max_required, min_required)
+            tuple[float, float]: the maximum required and the minimum required.
 
         """
         max_allowed = float('inf')
@@ -140,20 +140,29 @@ class ReservedChecker:
             min_allowed = max_allowed
         return min_allowed, max_allowed
 
-    def get_def_information(self, group, reserved_tags):
+    def get_def_information(self, group, reserved_tags) -> list[list]:
+        """Get definition information for reserved tags.
+
+        Parameters:
+            group (HedGroup): The HED group to check.
+            reserved_tags (list of HedTag): The reserved tags to process.
+
+        Returns:
+            list[list]: A list containing [requires_defs, defs].
+        """
         requires_defs = [tag for tag in reserved_tags if tag.short_base_tag in self.requires_def_tags]
         defs = group.find_def_tags(recursive=False, include_groups=1)
         return [requires_defs, defs]
 
-    def get_incompatible(self, tag, reserved_tags):
+    def get_incompatible(self, tag, reserved_tags) -> list:
         """ Return the list of tags that cannot be in the same group with tag.
 
         Parameters:
-            tag (HedTag) - reserved tag to be tested.
-            reserved_tags (list of HedTag) - reserved tags (no duplicates)
+            tag (HedTag): Reserved tag to be tested.
+            reserved_tags (list of HedTag): Reserved tags (no duplicates).
 
         Returns:
-            list of HedTag
+            list[HedTag]: List of incompatible tags.
 
         """
         requirements = self.reserved_map[tag.short_base_tag]

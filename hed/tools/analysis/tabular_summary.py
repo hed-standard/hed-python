@@ -318,9 +318,9 @@ class TabularSummary:
             skip_cols (list): Name of the column.
 
         Returns:
-            tuple:
-                - TabularSummary: A combined summary of all files in the dictionary.
-                - dict[str, TabularSummary]: A dictionary where keys are file names and values are individual TabularSummary objects.
+            tuple[TabularSummary, dict[str, TabularSummary]]:
+            - A combined summary of all files in the dictionary.
+            - A dictionary where keys are file names and values are individual TabularSummary objects.
 
         """
 

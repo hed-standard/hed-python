@@ -283,6 +283,7 @@ class SchemaLoaderXML(SchemaLoader):
 
         Returns:
             list: A list containing elements that have a specific element name.
+
         Notes:
             If a parent element is specified then only the children of the
             parent will be returned with the given 'element_name'.

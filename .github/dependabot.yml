@@ -2,17 +2,17 @@ version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
-    target-branch: "develop"
+    target-branch: "main"
     schedule:
       interval: "weekly"
   - package-ecosystem: "pip"
     directory: "/"
-    target-branch: "develop"
+    target-branch: "main"
     schedule:
       interval: "weekly"
 
   - package-ecosystem: gitsubmodule
     schedule:
         interval: "daily"
-    target-branch: "develop"
+    target-branch: "main"
     directory: /

@@ -1,10 +1,12 @@
 """ Functions to get and use HED queries. """
+from typing import Union
+
 import pandas as pd
 
 from hed.models import QueryHandler
 
 
-def get_query_handlers(queries, query_names=None):
+def get_query_handlers(queries, query_names=None) -> tuple[list[Union[QueryHandler, None]], list[Union[QueryHandler, None]], list]:
     """ Return a list of query handlers, query names, and issues if any.
 
     Parameters:
@@ -12,9 +14,10 @@ def get_query_handlers(queries, query_names=None):
         query_names (list or None): A list of column names for results of queries. If missing --- query_1, query_2, etc.
 
     Returns:
-        list - QueryHandlers for successfully parsed queries.
-        list - str names to assign to results of the queries.
-        list - issues if any of the queries could not be parsed or other errors occurred.
+        tuple: A tuple containing:
+            - list: QueryHandlers for successfully parsed queries or None.
+            - list: str names to assign to results of the queries or None.
+            - list: issues if any of the queries could not be parsed or other errors occurred.
 
     """
     if not queries:
@@ -40,7 +43,7 @@ def get_query_handlers(queries, query_names=None):
     return expression_parsers, query_names, issues
 
 
-def search_hed_objs(hed_objs, queries, query_names):
+def search_hed_objs(hed_objs, queries, query_names) -> pd.DataFrame:
     """ Return a DataFrame of factors based on results of queries.
 
     Parameters:
@@ -49,10 +52,10 @@ def search_hed_objs(hed_objs, queries, query_names):
         query_names (list): A list of column names for results of queries.
 
     Returns:
-        DataFrame: Contains the factor vectors with results of the queries.
+        pd.DataFrame: Contains the factor vectors with results of the queries.
 
-    :raises ValueError:
-        - If query names are invalid or duplicated.
+    Raises:
+        ValueError: If query names are invalid or duplicated.
     """
     df_factors = pd.DataFrame(0, index=range(len(hed_objs)), columns=query_names)
     for parse_ind, parser in enumerate(queries):

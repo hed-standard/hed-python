@@ -21,14 +21,14 @@ class BaseSummary(ABC):
         self.op = sum_op
         self.summary_dict = {}
 
-    def get_summary_details(self, include_individual=True):
+    def get_summary_details(self, include_individual=True) -> dict:
         """ Return a dictionary with the details for individual files and the overall dataset.
 
         Parameters:
             include_individual (bool):  If True, summaries for individual files are included.
 
         Returns:
-            dict - a dictionary with 'Dataset' and 'Individual files' keys.
+            dict: A dictionary with 'Dataset' and 'Individual files' keys.
 
         Notes:
             - The 'Dataset' value is either a string or a dictionary with the overall summary.
@@ -57,7 +57,7 @@ class BaseSummary(ABC):
             individual_summaries (str): "separate", "consolidated", or "none"
 
         Returns:
-            dict - dictionary with "Dataset" and "Individual files" keys.
+            dict: Dictionary with "Dataset" and "Individual files" keys.
 
         Notes: The individual_summaries value is processed as follows:
            -  "separate" individual summaries are to be in separate files.
@@ -91,11 +91,14 @@ class BaseSummary(ABC):
                 individual_dict[name] = name_summary
         return individual_dict
 
-    def get_text_summary_details(self, include_individual=True):
+    def get_text_summary_details(self, include_individual=True) -> dict:
         """ Return a text summary of the information represented by this summary.
 
         Parameters:
             include_individual (bool): If True (the default), individual summaries are in "Individual files".
+
+        Returns:
+            dict: Dictionary with "Dataset" and "Individual files" keys.
 
         """
         result = self.get_summary_details(include_individual=include_individual)
@@ -106,14 +109,14 @@ class BaseSummary(ABC):
                 summary_details["Individual files"][name] = self._get_result_string(name, individual_result)
         return summary_details
 
-    def get_text_summary(self, individual_summaries="separate"):
+    def get_text_summary(self, individual_summaries="separate") -> dict:
         """ Return a complete text summary by assembling the individual pieces.
 
         Parameters:
             individual_summaries(str):  One of the values "separate", "consolidated", or "none".
 
         Returns:
-            str: Complete text summary.
+            dict: Complete text summary.
 
         Notes: The options are:
             - "none":  Just has "Dataset" key.

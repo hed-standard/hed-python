@@ -105,20 +105,19 @@ class RemodelerValidator:
         self.schema = self._construct_schema()  # The compiled json schema against which remodeler files are validated.
         self.validator = jsonschema.Draft202012Validator(self.schema)  # The instantiated json schema validator.
 
-    def validate(self, operations):
+    def validate(self, operations) -> list[str]:
         """ Validate remodeler operations against the json schema specification and specific op requirements.
 
         Parameters:
-            operations (list): Dictionary with input operations to run through the remodeler.
+            operations (list[dict]): List of di with input operations to run through the remodeler.
 
         Returns:
-            list: List with the error messages for errors identified by the validator.
+            list[str]: List with the error messages for errors identified by the validator.
         """
 
         list_of_error_strings = []
         for error in sorted(self.validator.iter_errors(operations), key=lambda e: e.path):
-            list_of_error_strings.append(
-                self._parse_message(error, operations))
+            list_of_error_strings.append( self._parse_message(error, operations))
         if list_of_error_strings:
             return list_of_error_strings
 
@@ -136,7 +135,7 @@ class RemodelerValidator:
 
         Parameters:
             error (ValidationError): A validation error from jsonschema validator.
-            operations (dict): The operations that were validated.
+            operations (list of dict): The operations that were validated.
 
         Note:
         - json schema error does not contain all necessary information to return a
