@@ -74,7 +74,7 @@ jobs:
       # Upload coverage to qlty
       - name: Upload coverage to qlty
         if: needs.check-secret.outputs.secrets-exist == 'true'
-        uses: qltysh/qlty-action/coverage@v1
+        uses: qltysh/qlty-action/coverage@v2
         with:
           token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
           files: coverage.xml
