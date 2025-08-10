@@ -206,15 +206,12 @@ class ColumnMapper:
         if finalize_mapping:
             self._finalize_mapping()
 
-    def set_column_map(self, new_column_map=None) -> list[dict]:
+    def set_column_map(self, new_column_map=None):
         """ Set the column number to name mapping.
 
         Parameters:
             new_column_map (list or dict):  Either an ordered list of the column names or column_number:column name.
                 dictionary. In both cases, column numbers start at 0.
-
-        Returns:
-            list[dict]: List of issues. Each issue is a dictionary.
 
         """
         if new_column_map is None:

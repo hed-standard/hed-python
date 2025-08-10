@@ -6,26 +6,13 @@ on:
   pull_request:
     branches: ["*"]
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
 
-  check-secret:
-    runs-on: ubuntu-latest
-    outputs:
-      secrets-exist: ${{ steps.check-for-secrets.outputs.defined }}
-    steps:
-      - name: Check for Secret availability
-        id: check-for-secrets
-        # perform secret check & put boolean result as an output
-        shell: bash
-        run: |
-          if [ "${{ secrets.QLTY_COVERAGE_TOKEN }}" != '' ]; then
-            echo "defined=true" >> $GITHUB_OUTPUT;
-          else
-            echo "defined=false" >> $GITHUB_OUTPUT;
-          fi
-
   build:
-    needs: check-secret
     strategy:
       matrix:
         platform: [ubuntu-latest]
@@ -57,7 +44,7 @@ jobs:
       # Run unittest with coverage
       - name: Test with unittest and coverage
         env:
-          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         continue-on-error: true
         run: |  
           coverage run -m unittest discover tests
@@ -65,7 +52,7 @@ jobs:
       # Run spec tests with coverage
       - name: Run spec_test coverage
         env:
-          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |  
           coverage run --append -m unittest discover spec_tests
           coverage xml
@@ -73,8 +60,6 @@ jobs:
 
       # Upload coverage to qlty
       - name: Upload coverage to qlty
-        if: needs.check-secret.outputs.secrets-exist == 'true'
         uses: qltysh/qlty-action/coverage@v2
         with:
-          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
           files: coverage.xml

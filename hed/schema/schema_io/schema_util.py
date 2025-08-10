@@ -23,7 +23,10 @@ def get_api_key():
     try:
         return os.environ["HED_GITHUB_TOKEN"]
     except KeyError:
-        return github_api_access_token
+        try:
+            return os.environ["GITHUB_TOKEN"]
+        except KeyError:
+            return github_api_access_token
 
 
 def make_url_request(resource_url, try_authenticate=True):
