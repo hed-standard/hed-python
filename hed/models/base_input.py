@@ -3,10 +3,10 @@ Superclass representing a basic columnar file.
 """
 import os
 from typing import Union
-
 import openpyxl
 import pandas as pd
-
+from hed.models.column_metadata import ColumnMetadata
+from hed.models.definition_dict import DefinitionDict
 from hed.models.column_mapper import ColumnMapper
 from hed.errors.exceptions import HedFileError, HedExceptions
 
@@ -269,11 +269,11 @@ class BaseInput:
             columns = list(self._dataframe.columns)
         return columns
 
-    def column_metadata(self) -> dict[int, 'ColumnMeta']:
+    def column_metadata(self) -> dict[int, 'ColumnMetadata']:
         """ Return the metadata for each column.
 
         Returns:
-            dict[int, 'ColumnMeta']: Number/ColumnMeta pairs.
+            dict[int, ColumnMetadata]: Number/ColumnMetadata pairs.
         """
         if self._mapper:
             return self._mapper._final_column_map

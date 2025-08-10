@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ["*"]
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   determine_version:
     runs-on: ubuntu-latest
@@ -58,7 +62,7 @@ jobs:
       # Run spec tests without coverage for non Python 3.9
       - name: Run spec_test
         env:
-          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         continue-on-error: true
         run: |  
            python -m unittest discover spec_tests
@@ -66,6 +70,6 @@ jobs:
       # Run unittest without coverage
       - name: Test with unittest
         env:
-          HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           python -m unittest discover tests
