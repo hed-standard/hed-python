@@ -42,6 +42,7 @@ no_tab_context = {ErrorContext.HED_STRING, ErrorContext.SCHEMA_ATTRIBUTE}
 default_sort_list = [
     ErrorContext.CUSTOM_TITLE,
     ErrorContext.FILE_NAME,
+    ErrorContext.TABLE_NAME,
     ErrorContext.SIDECAR_COLUMN_NAME,
     ErrorContext.SIDECAR_KEY_NAME,
     ErrorContext.ROW,
@@ -744,7 +745,8 @@ def _format_single_context_string(context_type, context, tab_count=0):
     """
     tab_string = tab_count * '\t'
     error_types = {
-        ErrorContext.FILE_NAME: f"\nErrors in file '{context}'",
+        ErrorContext.FILE_NAME: f"\nErrors in file '{context}':",
+        ErrorContext.TABLE_NAME: f"\nErrors in table '{context}':",
         ErrorContext.SIDECAR_COLUMN_NAME: f"Column '{context}':",
         ErrorContext.SIDECAR_KEY_NAME: f"Key: {context}",
         ErrorContext.ROW: f'Issues in row {context}:',

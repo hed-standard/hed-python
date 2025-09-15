@@ -29,11 +29,11 @@ class DefinitionDict:
         if def_dicts:
             self.add_definitions(def_dicts, hed_schema)
 
-    def add_definitions(self, def_dicts, hed_schema=None):
+    def add_definitions(self, defs, hed_schema=None):
         """ Add definitions from dict(s) or strings(s) to this dict.
 
         Parameters:
-            def_dicts (list, DefinitionDict, dict, or str): DefinitionDict or list of DefinitionDicts/strings/dicts
+            defs (list, DefinitionDict, dict, or str): DefinitionDict or list of DefinitionDicts/strings/dicts
                                                             whose definitions should be added.
             hed_schema (HedSchema or None): Required if passing strings or lists of strings, unused otherwise.
 
@@ -42,23 +42,25 @@ class DefinitionDict:
                 Note - You can mix and match types, eg [DefinitionDict, str, list of str] would be valid input.
 
         Raises:
-             TypeError: Bad type passed as def_dicts.
+             TypeError: Bad type passed as defs.
         """
-        if not isinstance(def_dicts, list):
-            def_dicts = [def_dicts]
-        for def_dict in def_dicts:
-            if isinstance(def_dict, (DefinitionDict, dict)):
-                self._add_definitions_from_dict(def_dict)
-            elif isinstance(def_dict, str) and hed_schema:
-                self.check_for_definitions(HedString(def_dict, hed_schema))
-            elif isinstance(def_dict, list) and hed_schema:
-                for definition in def_dict:
-                    self.check_for_definitions(HedString(definition, hed_schema))
+        if not isinstance(defs, list):
+            defs = [defs]
+        for definition in defs:
+            if isinstance(definition, (DefinitionDict, dict)):
+                self._add_definitions_from_dict(definition)
+            elif isinstance(definition, str) and hed_schema:
+                self._issues += self.check_for_definitions(HedString(definition, hed_schema))
+            elif isinstance(definition, list) and hed_schema:
+                for def_item in definition:
+                    self._issues = self.check_for_definitions(HedString(def_item, hed_schema))
             else:
-                raise TypeError(f"Invalid type '{type(def_dict)}' passed to DefinitionDict")
+                raise TypeError(f"Invalid type '{type(defs)}' passed to DefinitionDict")
 
     def _add_definition(self, def_tag, def_value):
-        if def_tag in self.defs:
+        if def_tag in self.defs and def_value == self.defs[def_tag]:
+            return
+        elif def_tag in self.defs:
             error_context = self.defs[def_tag].source_context
             self._issues += ErrorHandler.format_error_from_context(DefinitionErrors.DUPLICATE_DEFINITION,
                 error_context=error_context, def_name=def_tag, actual_error=DefinitionErrors.DUPLICATE_DEFINITION)
@@ -69,8 +71,10 @@ class DefinitionDict:
         """ Add the definitions found in the given definition dictionary to this mapper.
 
          Parameters:
-             def_dict (DefinitionDict or dict): DefDict whose definitions should be added.
+             def_dict (DefinitionDict or dict): Dictionary-like whose definitions should be added.
 
+         Note:
+             Expects DefinitionEntries in the same form as a DefinitionDict
         """
         for def_tag, def_value in def_dict.items():
             self._add_definition(def_tag, def_value)

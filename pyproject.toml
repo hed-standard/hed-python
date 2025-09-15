@@ -21,6 +21,10 @@ keywords = [] # Add keywords here if any
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
 ]
 
 requires-python = ">=3.9"
@@ -43,8 +47,10 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/hed-standard/hed-python/"
+"Homepage" = "https://www.hedtags.org/"
+"Repo" = "https://github.com/hed-standard/hed-python/"
 "Bug Tracker" = "https://github.com/hed-standard/hed-python/issues"
+"API docs" = "https://www.hedtags.org/hed-python/"
 
 [project.optional-dependencies]
 # Define any optional dependencies here
