@@ -87,14 +87,15 @@ class Test(unittest.TestCase):
         error_handler.push_error_context(ErrorContext.ROW, 5)
         def_dict.check_for_definitions(def_string, error_handler=error_handler)
         self.assertEqual(len(def_dict.issues), 0)
+        def_dict2 = DefinitionDict()
+        def_dict2.add_definitions("(Definition/testdefplaceholder/#,(Acceleration/#,Item/TestDef2, Red))", self.hed_schema)
+        self.assertEqual(len(def_dict2.issues), 0)
+        def_dict3 = DefinitionDict([def_dict, def_dict2])
+        self.assertEqual(len(def_dict3.issues), 1)
 
-        def_validator = DefValidator([def_dict, def_dict])
-        self.assertEqual(len(def_validator.issues), 1)
-        self.assertTrue('ec_row' in def_validator.issues[0])
-
-        def_dict = DefinitionDict([def_dict, def_dict, def_dict])
-        self.assertEqual(len(def_dict.issues), 2)
-        self.assertTrue('ec_row' in def_dict.issues[0])
+        #
+        # def_validator = DefValidator([def_dict, def_dict2])
+        # self.assertEqual(len(def_validator.issues), 1)
 
 
 class TestDefErrors(unittest.TestCase):

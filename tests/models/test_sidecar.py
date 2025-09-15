@@ -6,7 +6,7 @@ import shutil
 from hed.errors import HedFileError, ValidationErrors
 from hed.models import ColumnMetadata, HedString, Sidecar
 from hed import schema
-from hed.models import DefinitionDict
+from hed.models import DefinitionDict, DefinitionEntry
 from hed.errors import ErrorHandler
 
 
@@ -112,11 +112,14 @@ class Test(unittest.TestCase):
 
     def test_duplicate_def(self):
         sidecar = self.json_def_sidecar
-
+        # If external defs are the same, no error
         duplicate_dict = sidecar.extract_definitions(hed_schema=self.hed_schema)
         issues = sidecar.validate(self.hed_schema, extra_def_dicts=duplicate_dict, error_handler=ErrorHandler(False))
-        self.assertEqual(len(issues), 5)
-        self.assertTrue(issues[0]['code'], ValidationErrors.DEFINITION_INVALID)
+        self.assertEqual(len(issues), 0)
+        test_dict = {"jsonfiledef3": DefinitionEntry("jsonfiledef3", None, False, None)}
+        issues2 = sidecar.validate(self.hed_schema, extra_def_dicts=test_dict, error_handler=ErrorHandler(False))
+        self.assertEqual(len(issues2), 1)
+        self.assertTrue(issues2[0]['code'], ValidationErrors.DEFINITION_INVALID)
 
     def test_save_load(self):
         sidecar = Sidecar(self.json_def_filename)

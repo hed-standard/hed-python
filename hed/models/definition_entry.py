@@ -17,7 +17,7 @@ class DefinitionEntry:
             takes_value (bool):    If True, expects ONE tag to have a single # sign in it.
             source_context (list, None): List (stack) of dictionaries giving context for reporting errors.
         """
-        self.name = name
+        self.name = name.casefold()
         if contents:
             contents = contents.copy()
             contents.sort()
@@ -66,3 +66,19 @@ class DefinitionEntry:
 
     def __str__(self):
         return str(self.contents)
+
+    def __eq__(self, other):
+        """ Check equality based on name, contents, and takes_value.
+
+        Parameters:
+            other (DefinitionEntry): Another DefinitionEntry to compare with.
+
+        Returns:
+            bool: True if name, contents, and takes_value are equal, False otherwise.
+        """
+        if not isinstance(other, DefinitionEntry):
+            return False
+
+        return (self.name == other.name and
+                self.contents == other.contents and
+                self.takes_value == other.takes_value)

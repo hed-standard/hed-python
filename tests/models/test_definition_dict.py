@@ -147,6 +147,21 @@ class TestDefinitionDict(TestDefBase):
 
         self.assertNotEqual(hed_string1, hed_string2)
 
+    def test_add_definition(self):
+        # Bad input string
+        def_dict = DefinitionDict()
+        def_dict.add_definitions("(Definition/testdefplaceholder,(Acceleration/#,Item/TestDef2,Red))",
+                                  self.hed_schema)
+        self.assertEqual(len(def_dict.issues), 1)
+        self.assertEqual(len(def_dict.defs), 0)
+
+        # Good input string
+        def_dict2 = DefinitionDict()
+        def_dict2.add_definitions("(Definition/testdefplaceholder/#,(Acceleration/#,Item/TestDef2, Red))",
+                                  self.hed_schema)
+        self.assertEqual(len(def_dict2.issues), 0)
+        self.assertEqual(len(def_dict2.defs), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

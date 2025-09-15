@@ -90,7 +90,7 @@ def val_error_hed_placeholder_out_of_context(tag):
 @hed_tag_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, has_sub_tag=False,
                actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def val_error_curly_brace_unsupported_here(tag, problem_tag):
-    return (f"Curly braces are only permitted in sidecars, fully wrapping text in place of a tag.  "
+    return (f"Curly braces are only permitted in metadata (e.g., a BIDS sidecar or NWB MeaningsTable) and must contain a column name.  "
             f"Invalid character '{problem_tag}' in tag '{tag}'")
 
 
@@ -184,7 +184,7 @@ def val_error_extra_column(column_name):
 
 @hed_error(ValidationErrors.SIDECAR_AND_OTHER_COLUMNS)
 def val_error_sidecar_with_column(column_names):
-    return f"You cannot use a sidecar and tag or prefix columns at the same time. " \
+    return f"You cannot use a column name in curly braces and to designate a tag column. " \
             f"Found {column_names}."
 
 
@@ -193,7 +193,7 @@ def val_error_duplicate_column(column_number, column_name, list_name):
     if column_name:
         return f"Found column '{column_name}' at index {column_number} twice in {list_name}."
     else:
-        return f"Found column number {column_number} twice in {list_name}.  This may indicate a mistake."
+        return f"Found column number {column_number} twice in {list_name}. This may indicate a mistake."
 
 
 @hed_error(ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
@@ -223,13 +223,13 @@ def val_error_extra_slashes_spaces(tag, problem_tag):
 
 @hed_error(ValidationErrors.SIDECAR_KEY_MISSING, default_severity=ErrorSeverity.WARNING)
 def val_error_sidecar_key_missing(invalid_keys, category_keys, column_name):
-    return f"Category keys {invalid_keys} do not exist in sidecar for column '{column_name}'.  Valid keys are: {category_keys}"
+    return f"Category values {invalid_keys} do not exist in metadata (e.g., BIDS sidecar or NWB meanings) for column '{column_name}'.  Valid keys are: {category_keys}"
 
 
 @hed_error(ValidationErrors.TSV_COLUMN_MISSING, actual_code=ValidationErrors.SIDECAR_KEY_MISSING,
            default_severity=ErrorSeverity.WARNING)
 def val_error_tsv_column_missing(invalid_keys):
-    return f"{invalid_keys} used as column references in sidecar but are not columns in the tabular file"
+    return f"{invalid_keys} used as column references in metadata (e.g., BIDS sidecar or NWB meanings) but are not columns in the tabular file"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
@@ -307,17 +307,17 @@ def sidecar_error_blank_hed_string():
 
 @hed_error(SidecarErrors.WRONG_HED_DATA_TYPE)
 def sidecar_error_hed_data_type(expected_type, given_type):
-    return f"Invalid HED string datatype sidecar. Should be '{expected_type}', but got '{given_type}'"
+    return f"Invalid datatype in metadata (e.g., a BIDS sidecar or NWB meanings). Should be '{expected_type}', but got '{given_type}'"
 
 
 @hed_error(SidecarErrors.INVALID_POUND_SIGNS_VALUE, actual_code=ValidationErrors.PLACEHOLDER_INVALID)
 def sidecar_error_invalid_pound_sign_count(pound_sign_count):
-    return f"There should be exactly one # character in a sidecar string. Found {pound_sign_count}"
+    return f"There should be exactly one # character in a HED value string. Found {pound_sign_count}"
 
 
 @hed_error(SidecarErrors.INVALID_POUND_SIGNS_CATEGORY, actual_code=ValidationErrors.PLACEHOLDER_INVALID)
 def sidecar_error_too_many_pound_signs(pound_sign_count):
-    return f"There should be no # characters in a category sidecar string. Found {pound_sign_count}"
+    return f"There should be no # characters in an annotation for a category value. Found {pound_sign_count}"
 
 
 @hed_error(SidecarErrors.UNKNOWN_COLUMN_TYPE)
@@ -328,7 +328,7 @@ def sidecar_error_unknown_column(column_name):
 
 @hed_error(SidecarErrors.SIDECAR_HED_USED, actual_code=ValidationErrors.SIDECAR_INVALID)
 def sidecar_hed_used():
-    return "'HED' is a reserved name and cannot be used as a sidecar except in expected places."
+    return "'HED' is a reserved name and cannot be used as a metadata column key except in expected places."
 
 
 @hed_error(SidecarErrors.SIDECAR_NA_USED, actual_code=ValidationErrors.SIDECAR_INVALID)

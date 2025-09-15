@@ -21,6 +21,7 @@ class ErrorContext:
     SCHEMA_SECTION = 'ec_section'
     SCHEMA_TAG = 'ec_schema_tag'
     SCHEMA_ATTRIBUTE = 'ec_attribute'
+    TABLE_NAME = 'ec_table_name'
 
 
 class ValidationErrors:
