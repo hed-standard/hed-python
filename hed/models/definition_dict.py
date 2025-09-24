@@ -1,13 +1,13 @@
 """ Definition handler class. """
-from typing import Union
+from __future__ import annotations
+from typing import Union, TYPE_CHECKING
 
 from hed.models.definition_entry import DefinitionEntry
 from hed.models.hed_string import HedString
 from hed.errors.error_types import DefinitionErrors
-from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 from hed.models.model_constants import DefTagNames
 from hed.schema.hed_schema_constants import HedKey
-
 
 class DefinitionDict:
     """ Gathers definitions from a single source. """
@@ -124,6 +124,17 @@ class DefinitionDict:
             list[dict]:  List of issues encountered in checking for definitions. Each issue is a dictionary.
         """
         def_issues = []
+        if "definition" not in hed_string_obj._hed_string.casefold():
+            # Check if the casefold of hed_string contains "definition" so checking is applicable
+            return def_issues
+        if hed_string_obj._schema:
+            from hed.validator.hed_validator import HedValidator
+            validator = HedValidator(hed_string_obj._schema, def_dicts=self, definitions_allowed=True)
+            issues = validator.validate(hed_string_obj, allow_placeholders=True, error_handler=error_handler)
+            if check_for_any_errors(issues):
+                return issues
+            else:
+                def_issues += issues
         for definition_tag, group in hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}):
             group_tag, new_def_issues = self._find_group(definition_tag, group, error_handler)
             def_tag_name, def_takes_value = self._strip_value_placeholder(definition_tag.extension)

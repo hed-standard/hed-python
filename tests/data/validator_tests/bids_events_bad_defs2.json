@@ -41,9 +41,9 @@
             "3": "Stage 3. BCI was trained on data from stages 1 and 2."
         },
 		"HED": {
-            "1": "Description/BCI acts randomly, (Definition/Random-selection, (Experimental-condition, (Random, Predict))), Def/Random-selection/InvalidPlaceholder",
-            "2": "Description/BCI was trained on data from stage 1., (Definition/Trained-on-random, (Experimental-condition)), Def/Trained-on-random",
-            "3": "Description/BCI was trained on data from stages 1 and 2."
+            "1": "(Definition/Random-selection, (Condition-variable/random-select, (Random, Predict)))",
+            "2": "(Definition/Trained-on-random, (Condition-variable/trained))",
+            "3": "(Definition/NextOne)"
 		}
     },
 	"trial": {

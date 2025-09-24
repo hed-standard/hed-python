@@ -88,7 +88,7 @@ class Test(unittest.TestCase):
         def_dict.check_for_definitions(def_string, error_handler=error_handler)
         self.assertEqual(len(def_dict.issues), 0)
         def_dict2 = DefinitionDict()
-        def_dict2.add_definitions("(Definition/testdefplaceholder/#,(Acceleration/#,Item/TestDef2, Red))", self.hed_schema)
+        def_dict2.add_definitions("(Definition/testdefplaceholder/#,(Acceleration/#,Item, Red))", self.hed_schema)
         self.assertEqual(len(def_dict2.issues), 0)
         def_dict3 = DefinitionDict([def_dict, def_dict2])
         self.assertEqual(len(def_dict3.issues), 1)

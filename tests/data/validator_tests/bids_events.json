@@ -81,9 +81,16 @@
     },
     "defs": {
         "HED": {
-            "1": "Description/BCI acts randomly, (Definition/Random-selection, (Condition-variable, (Random, Predict))), Def/Random-selection",
-            "2": "Description/BCI was trained on data from stage 1., (Definition/Trained-on-random, (Condition-variable)), Def/Trained-on-random",
-            "3": "Description/BCI was trained on data from stages 1 and 2., (Definition/Trained-on-all, (Condition-variable)), Def/Trained-on-all"
+            "1": "Description/BCI acts randomly, Def/Random-selection",
+            "2": "Description/BCI was trained on data from stage 1., Def/Trained-on-random",
+            "3": "Description/BCI was trained on data from stages 1 and 2.,  Def/Trained-on-all"
+        }
+    },
+    "defs_actual": {
+      "HED":{
+            "1": "(Definition/Random-selection, (Condition-variable, (Random, Predict)))",
+            "2": "(Definition/Trained-on-random, (Condition-variable))",
+            "3": "(Definition/Trained-on-all, (Condition-variable))"
         }
     }
 }
