@@ -24,13 +24,14 @@ class Test(unittest.TestCase):
                 HedString(
                     '(Definition/Cond3/#, (Organizational-property/Condition-variable/Var3, Label/#, Ellipse, Cross))',
                     hed_schema=schema),
-                HedString('(Definition/Cond4, (Condition-variable, Apple, Banana))', hed_schema=schema),
-                HedString('(Definition/Cond5, (Condition-variable/Lumber, Apple, Banana))', hed_schema=schema),
-                HedString('(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Apple, Banana))',
+                HedString('(Definition/Cond4, (Condition-variable, Item, Circle))', hed_schema=schema),
+                HedString('(Definition/Cond5, (Condition-variable/Lumber, Item, Circle))', hed_schema=schema),
+                HedString('(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Item, Circle))',
                           hed_schema=schema)]
         def_dict = DefinitionDict()
         for value in defs:
             def_dict.check_for_definitions(value)
+        cls.setup_dict = def_dict
         test_strings1 = ["Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset)",
                          "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4",
                          "(Def/Cond1, Offset)",

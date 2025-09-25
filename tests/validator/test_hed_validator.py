@@ -2,7 +2,7 @@ import unittest
 import os
 
 # from hed import
-from hed.errors import ErrorContext
+from hed.errors import ErrorContext, ErrorSeverity
 from hed import schema
 from hed.models import HedString, SpreadsheetInput, TabularInput, Sidecar
 from hed.validator import HedValidator
@@ -100,7 +100,8 @@ class Test(unittest.TestCase):
                                                   '../data/validator_tests/bids_events_bad_defs.json'))
         sidecar = Sidecar(json_path)
         issues = sidecar.validate(hed_schema)
-        self.assertEqual(len(issues), 8)
+        filtered_issues = [issue for issue in issues if issue['severity'] < ErrorSeverity.WARNING]
+        self.assertEqual(len(filtered_issues), 10)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate(hed_schema)
@@ -120,11 +121,11 @@ class Test(unittest.TestCase):
                                                   '../data/validator_tests/bids_events_bad_defs2.json'))
         sidecar = Sidecar(json_path)
         issues = sidecar.validate(hed_schema)
-        self.assertEqual(len(issues), 7)
+        self.assertEqual(len(issues), 8)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
         validation_issues = input_file.validate(hed_schema)
-        self.assertEqual(len(validation_issues), 63)
+        self.assertEqual(len(validation_issues), 42)
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),

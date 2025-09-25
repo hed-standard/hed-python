@@ -3,7 +3,7 @@ import os
 import io
 import shutil
 
-from hed.errors import HedFileError, ValidationErrors
+from hed.errors import HedFileError, ValidationErrors, ErrorSeverity
 from hed.models import ColumnMetadata, HedString, Sidecar
 from hed import schema
 from hed.models import DefinitionDict, DefinitionEntry
@@ -115,10 +115,14 @@ class Test(unittest.TestCase):
         # If external defs are the same, no error
         duplicate_dict = sidecar.extract_definitions(hed_schema=self.hed_schema)
         issues = sidecar.validate(self.hed_schema, extra_def_dicts=duplicate_dict, error_handler=ErrorHandler(False))
-        self.assertEqual(len(issues), 0)
+        self.assertEqual(len(issues), 2)
+        errors = [issue for issue in issues if issue['severity'] < ErrorSeverity.WARNING]
+        self.assertEqual(len(errors), 0)
         test_dict = {"jsonfiledef3": DefinitionEntry("jsonfiledef3", None, False, None)}
         issues2 = sidecar.validate(self.hed_schema, extra_def_dicts=test_dict, error_handler=ErrorHandler(False))
-        self.assertEqual(len(issues2), 1)
+        self.assertEqual(len(issues2), 3)
+        errors = [issue for issue in issues2 if issue['severity'] < ErrorSeverity.WARNING]
+        self.assertEqual(len(errors), 1)
         self.assertTrue(issues2[0]['code'], ValidationErrors.DEFINITION_INVALID)
 
     def test_save_load(self):

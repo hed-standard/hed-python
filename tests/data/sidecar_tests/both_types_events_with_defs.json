@@ -20,12 +20,12 @@
    "stim_file": {
        "LongName": "Stimulus file name",
        "Description": "Relative path of the stimulus image file",
-       "HED": "Age/#, (Definition/JsonFileDef2/#, (Age/#,Item/JsonDef2)), (Definition/JsonFileDef3/#, (Age/#))"
+       "HED": "(Definition/JsonFileDef2/#, (Age/#,Item/JsonDef2)), (Definition/JsonFileDef3/#, (Age/#))"
    },
      "takes_value_def": {
        "LongName": "Def with a takes value tag",
        "Description": "Relative path of the stimulus image file",
-       "HED": "Age/#, (Definition/TakesValueDef/#, (Age/#))"
+       "HED": "(Definition/TakesValueDef/#, (Age/#))"
    },
   "unit_class_def": {
        "LongName": "Def with a value class",
