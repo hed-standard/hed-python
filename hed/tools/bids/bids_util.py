@@ -111,11 +111,14 @@ def update_entity(name_dict, entity):
 def get_merged_sidecar(root_path, tsv_file):
     sidecar_files = list(walk_back(root_path, tsv_file))
     merged_sidecar = {}
-    while sidecar_files:
-        this_sidecar_file = sidecar_files.pop()
-        with open(this_sidecar_file, 'r',  encoding='utf-8') as this_sidecar:
-            this_sidecar = json.load(this_sidecar)
-        merged_sidecar.update(this_sidecar)
+    # Process from closest to most distant - first file wins for each key
+    for sidecar_file in sidecar_files:
+        with open(sidecar_file, 'r', encoding='utf-8') as f:
+            sidecar_data = json.load(f)
+        # Only add keys that don't already exist (closer files have precedence)
+        for key, value in sidecar_data.items():
+            if key not in merged_sidecar:
+                merged_sidecar[key] = value
     return merged_sidecar
 
 
@@ -124,8 +127,11 @@ def walk_back(root_path, file_path):
     source_dir = os.path.dirname(file_path)
     root_path = os.path.abspath(root_path)  # Normalize root_path for cross-platform support
 
-    while source_dir and source_dir != root_path:
-        candidates = get_candidates(source_dir, file_path)
+    # Parse the filename once to get the BIDS dictionary
+    tsv_file_dict = parse_bids_filename(file_path)
+
+    while source_dir and len(source_dir) >= len(root_path):
+        candidates = get_candidates(source_dir, tsv_file_dict)
         if len(candidates) == 1:
             yield candidates[0]
         elif len(candidates) > 1:
@@ -136,9 +142,11 @@ def walk_back(root_path, file_path):
                 "issueMessage": f"Candidate files: {candidates}",
             })
 
-            # Stop when we reach the root directory (handling Windows and Unix)
+        # Stop when we reach the root directory
+        if source_dir == root_path:
+            break
         new_source_dir = os.path.dirname(source_dir)
-        if new_source_dir == source_dir or new_source_dir == root_path:
+        if new_source_dir == source_dir:  # Reached filesystem root
             break
         source_dir = new_source_dir
 
@@ -162,5 +170,6 @@ def matches_criteria(json_file_dict, tsv_file_dict):
     suffix_is_valid = (json_file_dict["suffix"] == tsv_file_dict["suffix"]) or not tsv_file_dict["suffix"]
     json_entities = json_file_dict["entities"]
     tsv_entities = tsv_file_dict["entities"]
-    entities_match = all(json_entities.get(entity) == tsv_entities.get(entity) for entity in tsv_entities.keys())
+    # BIDS inheritance: All entities in JSON must have matching values in TSV
+    entities_match = all(json_entities.get(entity) == tsv_entities.get(entity) for entity in json_entities.keys())
     return extension_is_valid and suffix_is_valid and entities_match

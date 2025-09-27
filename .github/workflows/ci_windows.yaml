@@ -39,4 +39,4 @@ jobs:
         env:
           HED_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python -m unittest
+          python -m unittest discover tests
