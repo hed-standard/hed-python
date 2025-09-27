@@ -35,8 +35,10 @@ class MyTestCase(unittest.TestCase):
         if not os.path.exists(test_dir):
             cls.test_files = []
             cls.skip_tests = True
-            print(f"WARNING: Test directory not found: {test_dir}")
-            print("To run spec error tests, copy hed-specification repository content to spec_tests/hed-specification/")
+            # Only print warning if not in CI environment to avoid interference
+            if not os.environ.get('GITHUB_ACTIONS'):
+                print(f"WARNING: Test directory not found: {test_dir}")
+                print("To run spec error tests, copy hed-specification repository content to spec_tests/hed-specification/")
         else:
             cls.test_files = [os.path.join(test_dir, f) for f in os.listdir(test_dir)
                               if os.path.isfile(os.path.join(test_dir, f))]

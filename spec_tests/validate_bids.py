@@ -15,8 +15,10 @@ class MyTestCase(unittest.TestCase):
         # Check if the required directory exists
         if not os.path.exists(cls.base_dir):
             cls.skip_tests = True
-            print(f"WARNING: Test directory not found: {cls.base_dir}")
-            print("To run BIDS validation tests, copy hed-examples repository content to spec_tests/hed-examples/")
+            # Only print warning if not in CI environment to avoid interference
+            if not os.environ.get('GITHUB_ACTIONS'):
+                print(f"WARNING: Test directory not found: {cls.base_dir}")
+                print("To run BIDS validation tests, copy hed-examples repository content to spec_tests/hed-examples/")
         else:
             cls.skip_tests = False
 

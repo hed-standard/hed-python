@@ -378,9 +378,12 @@ class TestGetCandidates(unittest.TestCase):
         candidates = get_candidates(self.test_dir, tsv_dict)
         
         # Should find both JSON files (exact match and subset match)
+        # Normalize paths for Windows compatibility (handles RUNNER~1 vs runneradmin)
+        file1_norm = os.path.realpath(file1)
+        file2_norm = os.path.realpath(file2)
         self.assertEqual(len(candidates), 2)
-        self.assertIn(file1, candidates)
-        self.assertIn(file2, candidates)
+        self.assertIn(file1_norm, candidates)
+        self.assertIn(file2_norm, candidates)
         
     def test_get_candidates_no_valid_files(self):
         from hed.tools.bids.bids_util import get_candidates
@@ -425,10 +428,14 @@ class TestGetCandidates(unittest.TestCase):
         candidates = get_candidates(self.test_dir, tsv_dict)
         
         # Should find exact match and subset match, but not different subject
+        # Normalize paths for Windows compatibility (handles RUNNER~1 vs runneradmin)
+        file1_norm = os.path.realpath(file1)
+        file2_norm = os.path.realpath(file2)
+        file3_norm = os.path.realpath(file3)
         self.assertEqual(len(candidates), 2)
-        self.assertIn(file1, candidates)
-        self.assertIn(file2, candidates)
-        self.assertNotIn(file3, candidates)
+        self.assertIn(file1_norm, candidates)
+        self.assertIn(file2_norm, candidates)
+        self.assertNotIn(file3_norm, candidates)
 
 
 class TestMatchesCriteria(unittest.TestCase):
