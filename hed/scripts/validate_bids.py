@@ -1,5 +1,24 @@
+#!/usr/bin/env python3
+"""
+Command-line script for validating BIDS datasets with HED annotations.
+
+Logging Options:
+- Default: WARNING level logs go to stderr (quiet unless there are issues)
+- --verbose or --log-level INFO: Show informational messages about progress
+- --log-level DEBUG: Show detailed debugging information
+- --log-file FILE: Save logs to a file instead of/in addition to stderr
+- --log-quiet: When using --log-file, suppress stderr output (file only)
+
+Examples:
+  validate_bids /path/to/dataset                    # Quiet validation
+  validate_bids /path/to/dataset --verbose         # Show progress
+  validate_bids /path/to/dataset --log-level DEBUG # Detailed debugging
+  validate_bids /path/to/dataset --log-file log.txt --log-quiet  # Log to file only
+"""
+
 import argparse
 import json
+import logging
 import sys
 
 def get_parser():
@@ -21,8 +40,15 @@ def get_parser():
                         help = "Optional list of suffixes (no under_bar) of tsv files to validate." +
                                " If -s with no values, will use all possible suffixes as with single argument '*'.")
 
+    parser.add_argument("-l", "--log-level", 
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                        default="WARNING", help="Log level (case insensitive). Default: WARNING")
+    parser.add_argument("-lf", "--log-file", dest="log_file", default=None,
+                        help="Full path to save log output to file. If not specified, logs go to stderr.")
+    parser.add_argument("-lq", "--log-quiet", action='store_true', dest="log_quiet",
+                        help="If present, suppress log output to stderr (only applies if --log-file is used).")
     parser.add_argument("-v", "--verbose", action='store_true',
-                        help="If present, output informative messages as computation progresses.")
+                        help="If present, output informative messages as computation progresses (equivalent to --log-level INFO).")
     parser.add_argument("-w", "--check_for_warnings", action='store_true', dest="check_for_warnings",
                         help="If present, check for warnings as well as errors.")
     parser.add_argument("-x", "--exclude-dirs", nargs="*", default=['sourcedata', 'derivatives', 'code', 'stimuli'],
@@ -37,7 +63,51 @@ def main(arg_list=None):
 
     # Parse the arguments
     args = parser.parse_args(arg_list)
-    issue_list = validate_dataset(args)
+    
+    # Setup logging configuration
+    log_level = args.log_level.upper() if args.log_level else 'WARNING'
+    if args.verbose:
+        log_level = 'INFO'
+    
+    # Configure logging format
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    date_format = '%Y-%m-%d %H:%M:%S'
+    
+    # Clear any existing handlers from root logger
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+    
+    # Set the root logger level - this is crucial for filtering
+    root_logger.setLevel(getattr(logging, log_level))
+    
+    # Create and configure handlers
+    formatter = logging.Formatter(log_format, datefmt=date_format)
+    
+    # File handler if log file specified
+    if args.log_file:
+        file_handler = logging.FileHandler(args.log_file, mode='w', encoding='utf-8')
+        file_handler.setLevel(getattr(logging, log_level))
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
+    
+    # Console handler (stderr) unless explicitly quieted and file logging is used
+    if not args.log_quiet or not args.log_file:
+        console_handler = logging.StreamHandler(sys.stderr)
+        console_handler.setLevel(getattr(logging, log_level))
+        console_handler.setFormatter(formatter)
+        root_logger.addHandler(console_handler)
+    
+    logger = logging.getLogger('validate_bids')
+    logger.info(f"Starting BIDS validation with log level: {log_level}")
+    if args.log_file:
+        logger.info(f"Log output will be saved to: {args.log_file}")
+    
+    try:
+        issue_list = validate_dataset(args)
+    except Exception as e:
+        logger.exception(f"Validation failed with exception: {e}")
+        raise
 
     # Return 1 if there are issues, 0 otherwise
     return int(bool(issue_list))
@@ -49,15 +119,31 @@ def validate_dataset(args):
     from hed.tools import BidsDataset
     from hed import _version as vr
 
-    if args.verbose:
-        print(f"Data directory: {args.data_path}")
+    logger = logging.getLogger('validate_bids')
+    logger.info(f"Data directory: {args.data_path}")
+    logger.info(f"HED tools version: {str(vr.get_versions())}")
+    logger.debug(f"Exclude directories: {args.exclude_dirs}")
+    logger.debug(f"File suffixes: {args.suffixes}")
+    logger.debug(f"Check for warnings: {args.check_for_warnings}")
 
     if args.suffixes == ['*'] or args.suffixes == []:
         args.suffixes = None
+        logger.debug("Using all available suffixes")
 
     # Validate the dataset
-    bids = BidsDataset(args.data_path, suffixes=args.suffixes, exclude_dirs=args.exclude_dirs)
-    issue_list = bids.validate(check_for_warnings=args.check_for_warnings)
+    try:
+        logger.info("Creating BIDS dataset object...")
+        bids = BidsDataset(args.data_path, suffixes=args.suffixes, exclude_dirs=args.exclude_dirs)
+        logger.info(f"BIDS dataset created with schema versions: {bids.schema.get_schema_versions() if bids.schema else 'None'}")
+        logger.info(f"Found file groups: {list(bids.file_groups.keys())}")
+        
+        logger.info("Starting validation...")
+        issue_list = bids.validate(check_for_warnings=args.check_for_warnings)
+        logger.info(f"Validation completed. Found {len(issue_list)} issues")
+    except Exception as e:
+        logger.error(f"Error during dataset validation: {e}")
+        logger.debug("Full exception details:", exc_info=True)
+        raise
 
     # Output based on format
     output = ""
