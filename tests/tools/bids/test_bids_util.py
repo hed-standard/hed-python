@@ -500,7 +500,9 @@ class TestWalkBack(unittest.TestCase):
         
         result = list(walk_back(self.test_dir, tsv_file))
         self.assertEqual(len(result), 1)
-        self.assertIn(json_file, result)
+        # Normalize path for Windows compatibility (handles RUNNER~1 vs runneradmin)
+        json_file_norm = os.path.realpath(json_file)
+        self.assertIn(json_file_norm, result)
 
     def test_walk_back_single_match(self):
         from hed.tools.bids.bids_util import walk_back
@@ -521,7 +523,9 @@ class TestWalkBack(unittest.TestCase):
         
         result = list(walk_back(self.test_dir, tsv_file))
         self.assertEqual(len(result), 1)
-        self.assertIn(json_file, result)
+        # Normalize path for Windows compatibility (handles RUNNER~1 vs runneradmin)
+        json_file_norm = os.path.realpath(json_file)
+        self.assertIn(json_file_norm, result)
 
     def test_walk_back_no_match(self):
         from hed.tools.bids.bids_util import walk_back
