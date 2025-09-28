@@ -228,3 +228,43 @@ class Test(unittest.TestCase):
                                                                   "param1", param2=0,
                                                                   actual_error=actual_code)
         self.assertEqual(error_list[0]['code'], actual_code)
+
+    def test_get_code_counts(self):
+        """Test the get_code_counts static method."""
+        # Create test issues with different error codes
+        issues = [
+            {'code': 'ERROR_CODE_1', 'message': 'First error'},
+            {'code': 'ERROR_CODE_2', 'message': 'Second error'},
+            {'code': 'ERROR_CODE_1', 'message': 'Another first error'},
+            {'code': 'ERROR_CODE_3', 'message': 'Third error'},
+            {'code': 'ERROR_CODE_1', 'message': 'Yet another first error'},
+            {'code': 'ERROR_CODE_2', 'message': 'Another second error'}
+        ]
+        
+        result = ErrorHandler.get_code_counts(issues)
+        
+        # Check that counts are correct
+        expected = {
+            'ERROR_CODE_1': 3,
+            'ERROR_CODE_2': 2,
+            'ERROR_CODE_3': 1
+        }
+        self.assertEqual(result, expected)
+        
+        # Test with empty list
+        empty_result = ErrorHandler.get_code_counts([])
+        self.assertEqual(empty_result, {})
+        
+        # Test with issue missing 'code' key
+        issues_with_missing_code = [
+            {'code': 'VALID_CODE', 'message': 'Valid error'},
+            {'message': 'Missing code error'},  # No 'code' key
+            {'code': 'VALID_CODE', 'message': 'Another valid error'}
+        ]
+        
+        result_with_missing = ErrorHandler.get_code_counts(issues_with_missing_code)
+        expected_with_missing = {
+            'VALID_CODE': 2,
+            'UNKNOWN': 1  # Default for missing code
+        }
+        self.assertEqual(result_with_missing, expected_with_missing)
