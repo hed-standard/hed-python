@@ -468,6 +468,23 @@ class ErrorHandler:
                 total_counts[code] += count
         return dict(total_counts)
 
+    @staticmethod
+    def get_code_counts(issues: list[dict]) -> dict[str, int]:
+        """ Count the occurrences of each error code in the issues list.
+
+        Parameters:
+            issues (list[dict]): A list of dictionaries containing the issues.
+
+        Returns:
+            dict[str, int]: A dictionary with error codes as keys and their occurrence counts as values.
+
+        """
+        code_counts = defaultdict(int)
+        for issue in issues:
+            code = issue.get('code', 'UNKNOWN')
+            code_counts[code] += 1
+        return dict(code_counts)
+
 
 def sort_issues(issues, reverse=False) -> list[dict]:
     """Sort a list of issues by the error context values.
