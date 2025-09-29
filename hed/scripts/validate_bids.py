@@ -45,7 +45,7 @@ def get_parser():
                         help="Full path of output of validator -- otherwise output written to standard error.")
     parser.add_argument("-p", "--print_output", action='store_true', dest="print_output",
                         help="If present, output the results to standard out in addition to any saving of the files.")
-    parser.add_argument("-s", "--suffixes", dest="suffixes", nargs="*", default=['*'],
+    parser.add_argument("-s", "--suffixes", dest="suffixes", nargs="*", default=['events', 'participants'],
                         help = "Optional list of suffixes (no under_bar) of tsv files to validate." +
                                " If -s with no values, will use all possible suffixes as with single argument '*'.")
     parser.add_argument("-v", "--verbose", action='store_true',
