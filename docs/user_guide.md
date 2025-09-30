@@ -1,6 +1,13 @@
-# User Guide
+# HED Python Tools - User Guide
 
-This guide provides step-by-step instructions for using HED Python tools in various scenarios.
+This comprehensive guide provides step-by-step instructions for using HED Python tools in various scenarios, from basic validation to advanced analysis workflows.
+
+## Quick Links
+
+- 📚 [API Reference](api/index.md)
+- 🐛 [GitHub Issues](https://github.com/hed-standard/hed-python/issues)
+- 📖 [HED Specification](https://hed-specification.readthedocs.io/)
+- 🌐 [Online Tools](https://hedtools.org)
 
 ## Table of Contents
 
@@ -10,19 +17,29 @@ This guide provides step-by-step instructions for using HED Python tools in vari
 4. [Working with BIDS Datasets](#working-with-bids-datasets)
 5. [Spreadsheet Integration](#spreadsheet-integration)
 6. [Advanced Usage](#advanced-usage)
+7. [Best Practices](#best-practices)
+8. [Troubleshooting](#troubleshooting)
 
 ## Getting Started
 
 ### Installation
 
+Install HEDTools from PyPI:
 ```bash
 pip install hedtools
 ```
 
+For the latest development version from GitHub:
+```bash
+pip install git+https://github.com/hed-standard/hed-python/@main
+```
+
 ### Basic Example
 
+Here's a simple example to get you started with HED validation:
+
 ```python
-from hed import HedString, load_schema_version
+from hed import HedString, load_schema
 
 # Load the latest HED schema
 schema = load_schema()
@@ -35,9 +52,9 @@ issues = hed_string.validate(schema)
 if issues:
     print("Validation issues found:")
     for issue in issues:
-        print(f"- {issue}")
+        print(f"  - {issue}")
 else:
-    print("HED string is valid!")
+    print("✓ HED string is valid!")
 ```
 
 ## Working with HED Schemas
