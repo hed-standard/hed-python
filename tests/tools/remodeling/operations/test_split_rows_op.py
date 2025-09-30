@@ -15,22 +15,22 @@ class Test(unittest.TestCase):
         cls.events_path = os.path.realpath(os.path.join(base_dir, 'sub-0013_task-stopsignal_acq-seq_events.tsv'))
         cls.model1_path = os.path.realpath(os.path.join(base_dir, 'only_splitrow_rmdl.json'))
         cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
-                           [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
+                           [5.5774, 0.5083, 'unsuccessful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
                            [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
-                           [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
-                           [17.1021, 0.5083, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
+                           [13.5939, 0.5083, 'successful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
+                           [17.1021, 0.5083, 'unsuccessful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
                            [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male']]
 
         cls.split = [[0.0776, 0.5083, 'go', 'n/a', 0.565, 'correct', 'right', 'female'],
                      [0.6426, 0, 'response', 'n/a', 'n/a', 'correct', 'right', 'female'],
-                     [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
+                     [5.5774, 0.5083, 'unsuccessful_stop', 0.2, 0.49, 'correct', 'right', 'female'],
                      [5.7774, 0.5, 'stop_signal', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a'],
                      [6.0674, 0, 'response', 'n/a', 'n/a', 'correct', 'right', 'female'],
                      [9.5856, 0.5084, 'go', 'n/a', 0.45, 'correct', 'right', 'female'],
                      [10.0356, 0, 'response', 'n/a', 'n/a', 'correct', 'right', 'female'],
-                     [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
+                     [13.5939, 0.5083, 'successful_stop', 0.2, 'n/a', 'n/a', 'n/a', 'female'],
                      [13.7939, 0.5, 'stop_signal', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a'],
-                     [17.1021, 0.5083, 'unsuccesful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
+                     [17.1021, 0.5083, 'unsuccessful_stop', 0.25, 0.633, 'correct', 'left', 'male'],
                      [17.3521, 0.5, 'stop_signal', 'n/a', 'n/a', 'n/a', 'n/a', 'n/a'],
                      [17.7351, 0, 'response', 'n/a', 'n/a', 'correct', 'left', 'male'],
                      [21.6103, 0.5083, 'go', 'n/a', 0.443, 'correct', 'left', 'male'],

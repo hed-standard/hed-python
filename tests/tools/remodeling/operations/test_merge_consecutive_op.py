@@ -12,28 +12,28 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.sample_data = [[0.0776, 0.5083, 'go', 'n/a', 'right', 'female'],
-                           [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 'right', 'female'],
+                           [5.5774, 0.5083, 'unsuccessful_stop', 0.2, 'right', 'female'],
                            [9.5856, 0.5083, 'go', 'n/a', 'right', 'female'],
-                           [13.5939, 0.5083, 'succesful_stop', 0.2, 'n/a', 'female'],
-                           [14.2, 0.5083, 'succesful_stop', 0.2,  'n/a', 'female'],
-                           [15.3, 0.7083, 'succesful_stop', 0.2,  'n/a', 'female'],
-                           [17.3, 0.5083, 'succesful_stop', 0.25,  'n/a', 'female'],
-                           [19.0, 0.5083, 'succesful_stop', 0.25, 'n/a', 'female'],
-                           [21.1021, 0.5083, 'unsuccesful_stop', 0.25, 'left', 'male'],
+                           [13.5939, 0.5083, 'successful_stop', 0.2, 'n/a', 'female'],
+                           [14.2, 0.5083, 'successful_stop', 0.2,  'n/a', 'female'],
+                           [15.3, 0.7083, 'successful_stop', 0.2,  'n/a', 'female'],
+                           [17.3, 0.5083, 'successful_stop', 0.25,  'n/a', 'female'],
+                           [19.0, 0.5083, 'successful_stop', 0.25, 'n/a', 'female'],
+                           [21.1021, 0.5083, 'unsuccessful_stop', 0.25, 'left', 'male'],
                            [22.6103, 0.5083, 'go', 'n/a', 'left', 'male']]
         cls.sample_columns = ['onset', 'duration', 'trial_type', 'stop_signal_delay',  'response_hand', 'sex']
 
         cls.result_data = [[0.0776, 0.5083, 'go', 'n/a', 'right', 'female'],
-                           [5.5774, 0.5083, 'unsuccesful_stop', 0.2, 'right', 'female'],
+                           [5.5774, 0.5083, 'unsuccessful_stop', 0.2, 'right', 'female'],
                            [9.5856, 0.5083, 'go', 'n/a', 'right', 'female'],
-                           [13.5939, 2.4144, 'succesful_stop', 0.2, 'n/a', 'female'],
-                           [17.3, 2.2083, 'succesful_stop', 0.25,  'n/a', 'female'],
-                           [21.1021, 0.5083, 'unsuccesful_stop', 0.25, 'left', 'male'],
+                           [13.5939, 2.4144, 'successful_stop', 0.2, 'n/a', 'female'],
+                           [17.3, 2.2083, 'successful_stop', 0.25,  'n/a', 'female'],
+                           [21.1021, 0.5083, 'unsuccessful_stop', 0.25, 'left', 'male'],
                            [22.6103, 0.5083, 'go', 'n/a', 'left', 'male']]
 
         base_parameters = {
                 "column_name": "trial_type",
-                "event_code": "succesful_stop",
+                "event_code": "successful_stop",
                 "match_columns": ['stop_signal_delay', 'response_hand', 'sex'],
                 "set_durations": True,
                 "ignore_missing": True
