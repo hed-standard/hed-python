@@ -144,7 +144,8 @@ class NumberGroupsOp(BaseOp):
         in_group = False
         
         for idx in range(len(df_new)):
-            value = df_new.iloc[idx][self.source_column]
+            # Use the original df to read source values in case we're overwriting the source column
+            value = df.iloc[idx][self.source_column]
             
             # Check if this is a start marker
             if value in self.start['values']:
