@@ -8,11 +8,14 @@ class NumberRowsOp(BaseOp):
     """ Number rows in a dataframe based on optional criteria.
 
     Required remodeling parameters:
-        - **number_column_name** (*str*): The name of the column to add with the row numbers.
+        - **number_column_name** (*str*): The name of the column to add
+          with the row numbers.
 
     Optional remodeling parameters:
-        - **overwrite** (*bool*): If true, overwrite an existing column with the same name.
-        - **match_value** (*dict*): If provided, only number rows where the specified column matches the specified value.
+        - **overwrite** (*bool*): If true, overwrite an existing column
+          with the same name.
+        - **match_value** (*dict*): If provided, only number rows where
+          the specified column matches the specified value.
             - **column** (*str*): The column name to match.
             - **value** (*str* or *number*): The value to match.
 
@@ -66,8 +69,9 @@ class NumberRowsOp(BaseOp):
         Parameters:
             dispatcher (Dispatcher): Manages operation I/O.
             df (DataFrame): - The DataFrame to be remodeled.
-            name (str): - Unique identifier for the dataframe -- often the original file path.
-            sidecar (Sidecar or file-like):   Only needed for HED operations.
+            name (str): - Unique identifier for the dataframe -- often
+                the original file path.
+            sidecar (Sidecar or file-like): Only needed for HED operations.
 
         Returns:
             Dataframe: A new dataframe after processing.
@@ -75,24 +79,32 @@ class NumberRowsOp(BaseOp):
         """
         if self.number_column_name in df.columns:
             if self.overwrite is False:
-                raise ValueError("ExistingNumberColumn",
-                                 f"Column {self.number_column_name} already exists in event file.", "")
+                raise ValueError(
+                    "ExistingNumberColumn",
+                    f"Column {self.number_column_name} already exists "
+                    f"in event file.", "")
 
         if self.match_value:
             if self.match_value['column'] not in df.columns:
-                raise ValueError("MissingMatchColumn",
-                                 f"Column {self.match_value['column']} does not exist in event file.", "")
-            if self.match_value['value'] not in df[self.match_value['column']].tolist():
-                raise ValueError("MissingMatchValue",
-                                 f"Value {self.match_value['value']} does not exist in event file column"
-                                 f"{self.match_value['column']}.", "")
+                raise ValueError(
+                    "MissingMatchColumn",
+                    f"Column {self.match_value['column']} does not "
+                    f"exist in event file.", "")
+            if self.match_value['value'] not in \
+                    df[self.match_value['column']].tolist():
+                raise ValueError(
+                    "MissingMatchValue",
+                    f"Value {self.match_value['value']} does not exist "
+                    f"in event file column "
+                    f"{self.match_value['column']}.", "")
 
         df_new = df.copy()
         df_new[self.number_column_name] = np.nan
         if self.match_value:
-            filter = df[self.match_value['column']] == self.match_value['value']
-            numbers = [*range(1, sum(filter)+1)]
-            df_new.loc[filter, self.number_column_name] = numbers
+            filter_mask = \
+                df[self.match_value['column']] == self.match_value['value']
+            numbers = [*range(1, sum(filter_mask)+1)]
+            df_new.loc[filter_mask, self.number_column_name] = numbers
         else:
             df_new[self.number_column_name] = df_new.index + 1
 
@@ -100,5 +112,6 @@ class NumberRowsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
-        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        """ Additional validation required of operation parameters not
+        performed by JSON schema validator. """
         return []
