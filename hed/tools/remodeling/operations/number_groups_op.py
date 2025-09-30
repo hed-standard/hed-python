@@ -1,13 +1,26 @@
-""" Implementation in progress. """
+""" Number groups of rows in a dataframe based on start and stop markers. """
 
+import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
-# TODO: This class is under development
-
-
 class NumberGroupsOp(BaseOp):
-    """ Implementation in progress. """
+    """ Number groups of rows in a dataframe based on start and stop markers.
+
+    Required remodeling parameters:
+        - **number_column_name** (*str*): The name of the column to add with the group numbers.
+        - **source_column** (*str*): The column to check for start and stop markers.
+        - **start** (*dict*): Specification for start markers.
+            - **values** (*list*): List of values that mark the start of a group.
+            - **inclusion** (*str*): Either "include" or "exclude" to specify whether the start marker row should be included in the group.
+        - **stop** (*dict*): Specification for stop markers.
+            - **values** (*list*): List of values that mark the end of a group.
+            - **inclusion** (*str*): Either "include" or "exclude" to specify whether the stop marker row should be included in the group.
+
+    Optional remodeling parameters:
+        - **overwrite** (*bool*): If true, overwrite an existing column with the same name.
+
+    """
     NAME = "number_groups"
 
     PARAMS = {
@@ -83,7 +96,7 @@ class NumberGroupsOp(BaseOp):
         self.overwrite = parameters.get('overwrite', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Add numbers to groups of events in dataframe.
+        """ Add numbers to groups of rows in the events dataframe.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -124,6 +137,42 @@ class NumberGroupsOp(BaseOp):
                              f"Start value(s) {missing} does not exist in {self.source_column} of event file {name}")
 
         df_new = df.copy()
+        df_new[self.number_column_name] = np.nan
+        
+        # Track current group number and whether we're inside a group
+        current_group = 0
+        in_group = False
+        
+        for idx in range(len(df_new)):
+            value = df_new.iloc[idx][self.source_column]
+            
+            # Check if this is a start marker
+            if value in self.start['values']:
+                if not in_group:  # Start a new group only if not already in one
+                    current_group += 1
+                    in_group = True
+                    if self.start['inclusion'] == 'include':
+                        df_new.at[idx, self.number_column_name] = current_group
+                # If already in a group and this is a start marker:
+                # - If inclusion is 'exclude', it acts as both end and start
+                elif self.start['inclusion'] == 'exclude':
+                    # This marker ends the previous group and starts a new one
+                    current_group += 1
+                    # Don't assign the number to this row (it's excluded)
+                continue
+            
+            # Check if this is a stop marker
+            if value in self.stop['values']:
+                if in_group:
+                    if self.stop['inclusion'] == 'include':
+                        df_new.at[idx, self.number_column_name] = current_group
+                    in_group = False
+                continue
+            
+            # Regular row - if in group, assign current group number
+            if in_group:
+                df_new.at[idx, self.number_column_name] = current_group
+        
         return df_new
 
     @staticmethod

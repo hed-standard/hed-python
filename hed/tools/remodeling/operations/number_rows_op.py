@@ -1,12 +1,22 @@
-""" Implementation in progress. """
+""" Number rows in a dataframe based on optional criteria. """
 
+import numpy as np
 from hed.tools.remodeling.operations.base_op import BaseOp
-
-# TODO: This class is under development
 
 
 class NumberRowsOp(BaseOp):
-    """ Implementation in progress. """
+    """ Number rows in a dataframe based on optional criteria.
+
+    Required remodeling parameters:
+        - **number_column_name** (*str*): The name of the column to add with the row numbers.
+
+    Optional remodeling parameters:
+        - **overwrite** (*bool*): If true, overwrite an existing column with the same name.
+        - **match_value** (*dict*): If provided, only number rows where the specified column matches the specified value.
+            - **column** (*str*): The column name to match.
+            - **value** (*str* or *number*): The value to match.
+
+    """
     NAME = "number_rows"
 
     PARAMS = {
@@ -51,7 +61,7 @@ class NumberRowsOp(BaseOp):
         self.match_value = parameters.get('match_value', False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Add numbers events dataframe.
+        """ Add numbers to rows in the events dataframe.
 
         Parameters:
             dispatcher (Dispatcher): Manages operation I/O.
@@ -78,13 +88,13 @@ class NumberRowsOp(BaseOp):
                                  f"{self.match_value['column']}.", "")
 
         df_new = df.copy()
-        # df_new[self.number_column_name] = np.nan
-        # if self.match_value:
-        #     filter = df[self.match_value['column']] == self.match_value['value']
-        #     numbers = [*range(1, sum(filter)+1)]
-        #     df_new.loc[filter, self.number_column_name] = numbers
-        # else:
-        #     df_new[self.number_column_name] = df_new.index + 1
+        df_new[self.number_column_name] = np.nan
+        if self.match_value:
+            filter = df[self.match_value['column']] == self.match_value['value']
+            numbers = [*range(1, sum(filter)+1)]
+            df_new.loc[filter, self.number_column_name] = numbers
+        else:
+            df_new[self.number_column_name] = df_new.index + 1
 
         return df_new
 
