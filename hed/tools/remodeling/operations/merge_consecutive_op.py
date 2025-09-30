@@ -188,5 +188,5 @@ class MergeConsecutiveOp(BaseOp):
         match_columns = parameters.get("match_columns", None)
         name = parameters.get("column_name", None)
         if match_columns and name in match_columns:
-            return [f"column_name `{name}` cannot not be a match_column."]
+            return [f"column_name `{name}` cannot be a match_column."]
         return []
