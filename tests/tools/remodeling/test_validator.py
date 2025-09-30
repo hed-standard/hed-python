@@ -157,7 +157,7 @@ class Test(unittest.TestCase):
         merge_consecutive_validate[0]["parameters"]["match_columns"].append("trial_type")
         error_strings = self.validator.validate(merge_consecutive_validate)
         self.assertEqual(error_strings[0], "Operation 1 (merge_consecutive): column_name `trial_type` " +
-                         "cannot not be a match_column.")
+                         "cannot be a match_column.")
 
         remap_columns_validate_same_length = [deepcopy(self.remodel_file)[5]]
         remap_columns_validate_same_length[0]["parameters"]["map_list"][0] = [""]
