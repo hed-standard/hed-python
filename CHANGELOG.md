@@ -1,3 +1,29 @@
+Release 0.7.0 October 2, 2025
+- Added comprehensive logging infrastructure with configurable log levels and file output to validation tools.
+- Enhanced validate_bids script with improved error reporting and filtering capabilities.
+- Added error code counting and filtering by count/file in ErrorHandler.
+- Improved validation output formatting with version tracking in JSON output.
+- Added comprehensive CONTRIBUTING.md with development guidelines and best practices.
+- Enhanced README.md with better documentation structure and examples.
+- Improved user guide documentation with clearer installation and usage instructions.
+- Fixed typos and improved code documentation throughout the codebase.
+- Enhanced Windows compatibility with normalized path handling in tests.
+- Updated pyproject.toml with improved metadata and dependencies.
+
+Release 0.6.0 August 7, 2024
+- Added MATLAB integration support with improved function visibility in __init__.py.
+- Enhanced ontology creation and validation with better handling of equivalent classes.
+- Improved schema scripts with migration from hed-schemas repository.
+- Added DataFrame loading/saving optimizations and folder-based operations.
+- Enhanced HED ID validation with more robust checks.
+- Improved sidecar and tabular input utilities with new helper functions.
+- Added support for empty tabular files and whitespace-only files.
+- Enhanced annotation utilities for better MATLAB compatibility.
+- Improved matplotlib compatibility and updated color map access.
+- Fixed various bugs in spreadsheet handling and schema loading.
+- Updated dependencies and improved Python 3.7+ compatibility.
+- Improved code quality with better type handling and error messages.
+
 Release 0.5.0
 - Added JSON schema specification of remodeling commands.
 - Added support for schema that are specified by .tsv files.
