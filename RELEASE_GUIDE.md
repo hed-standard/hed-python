@@ -490,7 +490,7 @@ python -m twine upload dist/*                 # Upload
 # Complete release workflow
 git status                                    # Check working tree
 git add CHANGELOG.md                          # Stage changelog
-git commit -m "Update CHANGELOG for v0.7.0"   # Commit
+git commit -m "Update CHANGELOG for 0.7.0"    # Commit
 git push origin main                          # Push to main
 git tag -a 0.7.0 -m "Release version 0.7.0"   # Create tag
 git push origin 0.7.0                         # Push tag
