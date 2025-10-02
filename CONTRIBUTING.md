@@ -96,7 +96,7 @@ Example docstring:
 def validate_hed_string(hed_string, schema)->list[dict]:
     """Validate a HED string against a schema.
     
-    Paramters:
+    Parameters:
         hed_string (str): The HED string to validate.
         schema (HedSchema): The schema to validate against.
         
