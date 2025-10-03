@@ -60,5 +60,7 @@ paths = [
 [coverage]
 # Coverage configuration for Python projects
 # This will be used by the qlty-action/coverage action
-formats = ["lcov"]
-paths = ["target/lcov.info"]
+formats = ["cobertura"]
+paths = ["coverage.xml"]
+path_style = "relative"
+sources = ["hed"]
