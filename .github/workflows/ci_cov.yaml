@@ -62,3 +62,4 @@ jobs:
         with:
           oidc: true
           files: coverage.xml
+          add-prefix: hed/
