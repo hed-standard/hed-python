@@ -58,6 +58,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r docs/requirements.txt
+          pip install -e .[test]
 
       # Run spec tests without coverage for non Python 3.9
       - name: Run spec_test
