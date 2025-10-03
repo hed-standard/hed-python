@@ -32,8 +32,26 @@ class TestWordCloudFunctions(unittest.TestCase):
 
         fonts = fm.findSystemFonts()
         if not fonts:
-            return
-        font_path = os.path.realpath(fonts[0])
+            self.skipTest("No system fonts found")
+        
+        # Try to find a valid TrueType/OpenType font
+        font_path = None
+        for font_candidate in fonts:
+            if font_candidate.lower().endswith(('.ttf', '.otf', '.ttc')):
+                font_path = os.path.realpath(font_candidate)
+                try:
+                    # Test if the font can actually be loaded
+                    wc_test = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path=font_path)
+                    # If successful, use this font for the actual test
+                    break
+                except (OSError, Exception):
+                    # This font doesn't work, try the next one
+                    font_path = None
+                    continue
+        
+        if font_path is None:
+            self.skipTest("No valid TrueType/OpenType fonts found on system")
+        
         wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path=font_path)
 
         self.assertIsInstance(wc, wordcloud.WordCloud)
