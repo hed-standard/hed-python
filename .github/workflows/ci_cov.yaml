@@ -2,9 +2,7 @@ name: CI_COV
 
 on:
   push:
-    branches: ["*"]
-  pull_request:
-    branches: ["*"]
+    branches: [main]
 
 permissions:
   contents: read
@@ -62,4 +60,5 @@ jobs:
       - name: Upload coverage to qlty
         uses: qltysh/qlty-action/coverage@v2
         with:
+          oidc: true
           files: coverage.xml
