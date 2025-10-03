@@ -32,7 +32,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 coverage -r requirements.txt -r docs/requirements.txt
+          pip install flake8 -r requirements.txt -r docs/requirements.txt
+          pip install -e .[test]
 
       # Run flake8
       - name: Lint with flake8
@@ -54,7 +55,6 @@ jobs:
         run: |  
           coverage run --append -m unittest discover spec_tests
           coverage xml
-          ls -la
 
       # Upload coverage to qlty
       - name: Upload coverage to qlty
