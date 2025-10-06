@@ -44,7 +44,6 @@ jobs:
       - name: Test with unittest and coverage
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        continue-on-error: true
         run: |  
           coverage run -m unittest discover tests
 

@@ -1,7 +1,5 @@
 [run]
 branch = True
-source =
-    hed
 omit =
         */__init__.py
         */venv/*
@@ -11,7 +9,6 @@ omit =
         */test*
         **/__init__.py
         **/_version.py
-relative_files = True
 
 
 [report]
