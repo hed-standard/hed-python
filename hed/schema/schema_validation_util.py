@@ -5,7 +5,6 @@ from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import SchemaWarnings
 from hed.schema import hed_schema_constants as constants
 from hed.schema.hed_schema_constants import character_types
-from hed.schema.hed_schema import HedSchema
 
 
 def validate_schema_tag_new(hed_entry) -> list[dict]:

@@ -251,7 +251,7 @@ class HedSchema(HedSchemaBase):
         Returns:
             Union[pd.DataFrame, None]: The DataFrame for this extras key, or None if it doesn't exist or is empty.
         """
-        if not hasattr(self, 'extras') or not extras_key in self.extras:
+        if not hasattr(self, 'extras') or extras_key not in self.extras:
             return None
         externals = self.extras[extras_key]
         if externals.empty:

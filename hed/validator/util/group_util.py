@@ -2,7 +2,6 @@
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.model_constants import DefTagNames
 from hed.schema.hed_schema_constants import HedKey
-from hed.models.hed_tag import HedTag
 from hed.errors.error_types import ValidationErrors, TemporalErrors
 from hed.validator.reserved_checker import ReservedChecker
 from hed.validator.util.dup_util import DuplicateChecker

@@ -9,7 +9,7 @@ from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors import error_reporter
 from hed.schema.schema_io import wiki_constants, df_constants
 from hed.schema.schema_io.base2schema import SchemaLoader
-from hed.schema.schema_io.wiki_constants import HedWikiSection, SectionNames, WIKI_EXTRA_DICT
+from hed.schema.schema_io.wiki_constants import HedWikiSection, WIKI_EXTRA_DICT
 from hed.schema.schema_io import text_util
 
 

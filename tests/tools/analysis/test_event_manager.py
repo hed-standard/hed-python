@@ -10,7 +10,6 @@ from hed.models.sidecar import Sidecar, HedString
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager
-from hed.validator import SpreadsheetValidator
 
 
 class Test(unittest.TestCase):

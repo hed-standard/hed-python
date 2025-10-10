@@ -1,7 +1,5 @@
-import os
 from hed import TabularInput
 from hed.errors import ErrorHandler
-from hed.schema import load_schema_version
 from hed.errors.error_types import TagQualityErrors
 from hed.tools.analysis.event_checker import EventsChecker
 

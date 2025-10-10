@@ -30,7 +30,7 @@ class MyTestCase(unittest.TestCase):
                                                  'hed-specification/tests/json_tests'))
         cls.test_dir = test_dir
         cls.fail_count = []
-        
+
         # Check if the required directory exists
         if not os.path.exists(test_dir):
             cls.test_files = []
@@ -43,7 +43,7 @@ class MyTestCase(unittest.TestCase):
             cls.test_files = [os.path.join(test_dir, f) for f in os.listdir(test_dir)
                               if os.path.isfile(os.path.join(test_dir, f))]
             cls.skip_tests = False
-            
+
         cls.default_sidecar = Sidecar(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                                     'test_sidecar.json')))
 
@@ -226,7 +226,7 @@ class MyTestCase(unittest.TestCase):
     def test_errors(self):
         if hasattr(self, 'skip_tests') and self.skip_tests:
             self.skipTest("hed-specification directory not found. Copy submodule content to run this test.")
-            
+
         count = 1
         for test_file in self.test_files:
             self.run_single_test(test_file)

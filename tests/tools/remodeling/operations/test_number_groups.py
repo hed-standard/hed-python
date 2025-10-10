@@ -1,7 +1,6 @@
 from copy import deepcopy
 import json
 import unittest
-from hed.tools.remodeling.operations.number_groups_op import NumberGroupsOp
 
 
 class Test(unittest.TestCase):

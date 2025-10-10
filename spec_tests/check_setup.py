@@ -5,13 +5,12 @@ This script verifies that the required directories and files exist.
 """
 
 import os
-import sys
 
 def check_directory(path, description):
     """Check if a directory exists and list its contents."""
     print(f"\nChecking {description}:")
     print(f"  Path: {path}")
-    
+
     if os.path.exists(path):
         if os.path.isdir(path):
             contents = os.listdir(path)
@@ -23,7 +22,7 @@ def check_directory(path, description):
                         item_type = "📁" if os.path.isdir(item_path) else "📄"
                         print(f"    {item_type} {item}")
                 else:
-                    print(f"    (showing first 10 items)")
+                    print("    (showing first 10 items)")
                     for item in sorted(contents)[:10]:
                         item_path = os.path.join(path, item)
                         item_type = "📁" if os.path.isdir(item_path) else "📄"
@@ -43,38 +42,38 @@ def main():
     """Main function to check spec_tests setup."""
     print("🔍 Checking spec_tests setup for local development")
     print("=" * 60)
-    
+
     # Get the spec_tests directory
     spec_tests_dir = os.path.dirname(os.path.abspath(__file__))
     print(f"Spec tests directory: {spec_tests_dir}")
-    
+
     # Required directories and their purposes
     required_dirs = [
         ("hed-specification", "HED specification repository"),
-        ("hed-specification/tests", "HED specification test directory"), 
+        ("hed-specification/tests", "HED specification test directory"),
         ("hed-specification/tests/json_tests", "JSON test files for error testing"),
         ("hed-examples", "HED examples repository"),
         ("hed-examples/datasets", "BIDS datasets for validation testing"),
     ]
-    
+
     all_good = True
-    
+
     for dir_name, description in required_dirs:
         full_path = os.path.join(spec_tests_dir, dir_name)
         result = check_directory(full_path, description)
         if not result:
             all_good = False
-    
+
     # Check for the sidecar file
     sidecar_path = os.path.join(spec_tests_dir, "test_sidecar.json")
-    print(f"\nChecking test sidecar file:")
+    print("\nChecking test sidecar file:")
     print(f"  Path: {sidecar_path}")
     if os.path.exists(sidecar_path):
         print("  ✅ test_sidecar.json exists")
     else:
         print("  ❌ test_sidecar.json does not exist")
         all_good = False
-    
+
     print("\n" + "=" * 60)
     if all_good:
         print("✅ All required directories and files are present!")
@@ -84,15 +83,15 @@ def main():
     else:
         print("⚠️  Some directories are missing, but spec_tests can still run partially.")
         print("Tests that require missing content will be skipped gracefully.")
-        print(f"\nCurrently available: test_hed_cache.py (works without submodules)")
-        print(f"Currently skipped: test_errors.py, validate_bids.py (need submodule content)")
+        print("\nCurrently available: test_hed_cache.py (works without submodules)")
+        print("Currently skipped: test_errors.py, validate_bids.py (need submodule content)")
         print("\nTo set up full spec_tests:")
         print("1. Copy the hed-specification repository content to spec_tests/hed-specification/")
         print("2. Copy the hed-examples repository content to spec_tests/hed-examples/")
-        
-    print(f"\nTo run available tests now:")
+
+    print("\nTo run available tests now:")
     print(f"  cd {os.path.dirname(spec_tests_dir)}")
-    print(f"  python -m unittest discover spec_tests -v")
+    print("  python -m unittest discover spec_tests -v")
 
 if __name__ == "__main__":
     main()

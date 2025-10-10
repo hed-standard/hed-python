@@ -65,7 +65,7 @@ class BidsSidecarFile(BidsFile):
             else:
                 self._contents = Sidecar(io.StringIO(json.dumps(content_info)), name=name)
             self.has_hed = self.is_hed(self.contents.loaded_dict)
-        except Exception as e:
+        except Exception:
             self._contents = None
             self.has_hed = False
 

@@ -1,7 +1,4 @@
 import unittest
-from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.schema_io.wiki_constants import HedWikiSection
-from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
 
 
 class TestCheckForNewSection(unittest.TestCase):

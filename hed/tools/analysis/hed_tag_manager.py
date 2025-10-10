@@ -2,7 +2,6 @@
 
 from hed.models.hed_string import HedString
 from hed.models import string_util
-from hed.tools.analysis.event_manager import EventManager
 
 
 class HedTagManager:

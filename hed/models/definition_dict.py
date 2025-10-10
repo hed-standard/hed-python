@@ -1,6 +1,6 @@
 """ Definition handler class. """
 from __future__ import annotations
-from typing import Union, TYPE_CHECKING
+from typing import Union
 
 from hed.models.definition_entry import DefinitionEntry
 from hed.models.hed_string import HedString

@@ -178,7 +178,7 @@ class UnitClassEntry(HedSchemaEntry):
             unit_entry.unit_class_entry = self
         derivative_units = {}
         for unit_entry in self.units.values():
-            derivative_units.update({key: unit_entry for key in unit_entry.derivative_units.keys()})
+            derivative_units.update(dict.fromkeys(unit_entry.derivative_units.keys(), unit_entry))
 
         self.derivative_units = derivative_units
 

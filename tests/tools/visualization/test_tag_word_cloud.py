@@ -33,7 +33,7 @@ class TestWordCloudFunctions(unittest.TestCase):
         fonts = fm.findSystemFonts()
         if not fonts:
             self.skipTest("No system fonts found")
-        
+
         # Try to find a valid TrueType/OpenType font
         font_path = None
         for font_candidate in fonts:
@@ -48,10 +48,10 @@ class TestWordCloudFunctions(unittest.TestCase):
                     # This font doesn't work, try the next one
                     font_path = None
                     continue
-        
+
         if font_path is None:
             self.skipTest("No valid TrueType/OpenType fonts found on system")
-        
+
         wc = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path=font_path)
 
         self.assertIsInstance(wc, wordcloud.WordCloud)

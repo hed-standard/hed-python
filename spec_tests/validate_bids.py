@@ -11,7 +11,7 @@ class MyTestCase(unittest.TestCase):
         cls.base_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                         'hed-examples/datasets'))
         cls.fail_count = []
-        
+
         # Check if the required directory exists
         if not os.path.exists(cls.base_dir):
             cls.skip_tests = True
@@ -29,7 +29,7 @@ class MyTestCase(unittest.TestCase):
     def test_validation(self):
         if hasattr(self, 'skip_tests') and self.skip_tests:
             self.skipTest("hed-examples directory not found. Copy submodule content to run this test.")
-            
+
         base_dir = self.base_dir
         for directory in os.listdir(base_dir):
             dataset_path = os.path.join(base_dir, directory)
