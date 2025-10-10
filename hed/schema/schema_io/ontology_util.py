@@ -221,7 +221,7 @@ def merge_dfs(dest_df, source_df):
 
 
 def _get_annotation_prop_ids(schema):
-    annotation_props = dict()
+    annotation_props = {}
     for entry in schema.attributes.values():
         attribute_type = calculate_attribute_type(entry)
 
@@ -414,7 +414,7 @@ def _split_on_unquoted_commas(input_string):
 
 
 def _split_annotation_values(parts):
-    annotations = dict()
+    annotations = {}
     for part in parts:
         key, value = part.split(" ", 1)
         annotations[key] = value

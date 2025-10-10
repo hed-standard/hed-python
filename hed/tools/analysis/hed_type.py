@@ -65,7 +65,7 @@ class HedType:
         """ Return the type defs names """
         tag_list = []
         for variable, factor in self._type_map.items():
-            tag_list = tag_list + [key for key in factor.levels.keys()]
+            tag_list = tag_list + list(factor.levels.keys())
         return list(set(tag_list))
 
     def get_type_value_names(self):

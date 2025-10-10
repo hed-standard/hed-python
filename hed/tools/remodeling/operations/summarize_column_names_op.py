@@ -128,7 +128,7 @@ class ColumnNamesSummary(BaseSummary):
         summary = column_summary.get_summary()
         return {"Name": summary['Summary name'], "Total events": "n/a",
                 "Total files": summary['Number files'],
-                "Files": [name for name in column_summary.file_dict.keys()],
+                "Files": list(column_summary.file_dict.keys()),
                 "Specifics": {"Columns": summary['Columns']}}
 
     def merge_all_info(self) -> 'ColumnNameSummary':

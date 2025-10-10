@@ -46,10 +46,10 @@ class SequenceMap:
 
     def dot_str(self, group_spec=None):
         """ Produce a DOT string representing this sequence map.
-        
+
         Parameters:
             group_spec (dict or None): Specification for grouping nodes. If None, defaults to empty dict.
-            
+
         Returns:
             str: DOT format string representation of the sequence map.
         """

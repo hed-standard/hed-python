@@ -336,7 +336,7 @@ class HedTag:
             if remainder:
                 self._extension_value = remainder
         else:
-            self.tag_terms = tuple()
+            self.tag_terms = ()
 
         return tag_issues
 

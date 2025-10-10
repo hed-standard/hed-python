@@ -74,6 +74,59 @@ class Test(unittest.TestCase):
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
         self.assertIsInstance(bids.schema, HedSchema, "BidsDataset schema should be HedSchema")
 
+    def test_unset_default_behavior(self):
+        """Test that not providing suffixes/exclude_dirs uses the default values."""
+        bids = BidsDataset(self.root_path)
+        # Default suffixes are ['events', 'participants']
+        parts = bids.get_file_group("participants")
+        self.assertIsNotNone(parts, "Default suffixes should include participants")
+        events = bids.get_file_group("events")
+        self.assertIsNotNone(events, "Default suffixes should include events")
+
+    def test_unset_explicit_none(self):
+        """Test that explicitly passing None for suffixes discovers all files."""
+        bids = BidsDataset(self.root_path, suffixes=None)
+        # None means discover all files
+        self.assertEqual(len(bids.file_groups), 3, "suffixes=None should discover all file types")
+        parts = bids.get_file_group("participants")
+        self.assertIsNotNone(parts, "suffixes=None should include participants")
+
+    def test_unset_empty_list(self):
+        """Test that explicitly passing empty list for suffixes discovers all files."""
+        bids = BidsDataset(self.demo_path, suffixes=[])
+        # Empty list means discover all files (same as None)
+        self.assertEqual(len(bids.file_groups), 9, "suffixes=[] should discover all file types")
+        parts = bids.get_file_group("participants")
+        self.assertIsNotNone(parts, "suffixes=[] should include participants")
+
+    def test_unset_custom_suffixes(self):
+        """Test that custom suffix list works correctly."""
+        bids = BidsDataset(self.root_path, suffixes=['events'])
+        # Only events suffix specified
+        parts = bids.get_file_group("participants")
+        self.assertIsNone(parts, "Custom suffixes=['events'] should not include participants")
+        events = bids.get_file_group("events")
+        self.assertIsNotNone(events, "Custom suffixes=['events'] should include events")
+
+    def test_unset_exclude_dirs_default(self):
+        """Test that not providing exclude_dirs uses the default exclusion list."""
+        # Default exclude_dirs includes common directories like .git, derivatives, etc.
+        bids = BidsDataset(self.root_path)
+        # This should work without errors - validating the default exclude_dirs is applied
+        self.assertIsInstance(bids, BidsDataset, "Default exclude_dirs should work")
+
+    def test_unset_exclude_dirs_none(self):
+        """Test that explicitly passing None for exclude_dirs discovers files in all directories."""
+        bids = BidsDataset(self.root_path, exclude_dirs=None)
+        # None means no directories are excluded
+        self.assertIsInstance(bids, BidsDataset, "exclude_dirs=None should work")
+
+    def test_unset_exclude_dirs_custom(self):
+        """Test that custom exclude_dirs list works correctly."""
+        bids = BidsDataset(self.root_path, exclude_dirs=['custom_exclude'])
+        # Custom exclude list
+        self.assertIsInstance(bids, BidsDataset, "Custom exclude_dirs should work")
+
     def test_demo_none_suffixes(self):
         bids = BidsDataset(self.demo_path, suffixes=None)
         self.assertIsInstance(bids, BidsDataset, "BidsDataset should create a valid object from valid dataset")

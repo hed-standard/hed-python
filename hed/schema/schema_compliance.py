@@ -206,7 +206,7 @@ class SchemaValidator:
         issues_list = []
         for section_key in HedSectionKey:
             for name, duplicate_entries in self.hed_schema[section_key].duplicate_names.items():
-                values = set(entry.has_attribute(HedKey.InLibrary) for entry in duplicate_entries)
+                values = {entry.has_attribute(HedKey.InLibrary) for entry in duplicate_entries}
                 error_code = SchemaErrors.SCHEMA_DUPLICATE_NODE
                 if len(values) == 2:
                     error_code = SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY

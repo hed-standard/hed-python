@@ -62,7 +62,7 @@ class TestConverterBase(unittest.TestCase):
 
     def test_schema_as_string_xml(self):
         with open(self.xml_file) as file:
-            hed_schema_as_string = "".join([line for line in file])
+            hed_schema_as_string = "".join(list(file))
 
             string_schema = schema.from_string(hed_schema_as_string)
 
@@ -70,7 +70,7 @@ class TestConverterBase(unittest.TestCase):
 
     def test_schema_as_string_wiki(self):
         with open(self.wiki_file) as file:
-            hed_schema_as_string = "".join([line for line in file])
+            hed_schema_as_string = "".join(list(file))
 
         string_schema = schema.from_string(hed_schema_as_string, schema_format=".mediawiki")
         # !BFK! - Same as before, 8.2.0 has a difference

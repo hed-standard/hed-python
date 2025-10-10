@@ -15,7 +15,7 @@ def add_columns(df, column_list, value='n/a'):
 
     """
 
-    add_cols = list(set(column_list) - set(list(df)))
+    add_cols = list(set(column_list) - set(df))
     for col in add_cols:
         df[col] = value
 
@@ -60,7 +60,7 @@ def delete_columns(df, column_list):
 
     """
 
-    delete_cols = list(set(column_list).intersection(set(list(df))))
+    delete_cols = list(set(column_list).intersection(set(df)))
     df.drop(columns=delete_cols, axis=1, inplace=True)
 
 
@@ -78,7 +78,7 @@ def delete_rows_by_column(df, value, column_list=None):
 
     """
     if column_list:
-        cols = list(set(column_list).intersection(set(list(df))))
+        cols = list(set(column_list).intersection(set(df)))
     else:
         cols = list(df)
 
@@ -208,7 +208,7 @@ def make_info_dataframe(col_info, selected_col):
     if not col_dict:
         return None
     col_values = col_dict.keys()
-    df = pd.DataFrame(sorted(list(col_values)), columns=[selected_col])
+    df = pd.DataFrame(sorted(col_values), columns=[selected_col])
     return df
 
 
@@ -238,7 +238,7 @@ def replace_values(df, values=None, replace_value='n/a', column_list=None):
 
     num_replaced = 0
     if column_list:
-        cols = list(set(column_list).intersection(set(list(df))))
+        cols = list(set(column_list).intersection(set(df)))
     else:
         cols = list(df)
     if not values:

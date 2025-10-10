@@ -593,7 +593,7 @@ def iter_errors(issues):
     """
 
     for issue in issues:
-        flat_issue = dict()
+        flat_issue = {}
         single_issue_context = _get_context_from_issue(issue, False)
         flat_issue.update(single_issue_context)
         flat_issue.update(issue)

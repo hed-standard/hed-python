@@ -60,12 +60,12 @@ def get_parser():
 
 def format_validation_results(issue_list, args, ErrorHandler):
     """Generate and output validation results based on format and options.
-    
+
     Parameters:
         issue_list (list): List of validation issues found
         args: Parsed command line arguments containing format and output options
         ErrorHandler: Error handling class for filtering issues
-        
+
     Returns:
         str: Formatted validation results as a string in the requested format (text, json, or json_pp)
     """
@@ -90,10 +90,10 @@ def format_validation_results(issue_list, args, ErrorHandler):
 
 def format_final_report(issue_list):
     """Generate a final summary report of the validation results.
-    
+
     Parameters:
         issue_list (list): List of validation issues found
-        
+
     Returns:
         str: Summary report of the validation results
     """

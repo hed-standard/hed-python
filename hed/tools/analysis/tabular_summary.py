@@ -46,7 +46,7 @@ class TabularSummary:
         summary_list.append(f"{indent}Categorical columns ({len(sorted_keys)}):")
         for key in sorted_keys:
             value_dict = self.categorical_info[key]
-            sorted_v_keys = sorted(list(value_dict))
+            sorted_v_keys = sorted(value_dict)
             summary_list.append(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
             for v_key in sorted_v_keys:
                 summary_list.append(f"{indent * 3}{v_key}: {value_dict[v_key]}")
@@ -87,7 +87,7 @@ class TabularSummary:
         categorical_cols = {}
         for key in sorted_keys:
             cat_dict = self.categorical_info[key]
-            sorted_v_keys = sorted(list(cat_dict))
+            sorted_v_keys = sorted(cat_dict)
             val_dict = {}
             for v_key in sorted_v_keys:
                 val_dict[v_key] = cat_dict[v_key]
@@ -301,7 +301,7 @@ class TabularSummary:
                            are dictionaries of unique value counts.
 
         """
-        col_info = dict()
+        col_info = {}
 
         for col_name, col_values in dataframe.items():
             if skip_cols and col_name in skip_cols:

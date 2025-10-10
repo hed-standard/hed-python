@@ -200,7 +200,7 @@ class EventManager:
             remove_types = []
         if remove_defs is None:
             remove_defs = []
-        
+
         # Reconvert even if HED is already a HedString to make sure a copy and expandable.
         hed_obj = HedString(str(hed), hed_schema=self.hed_schema, def_dict=self.def_dict)
         hed_obj, temp1 = string_util.split_base_tags(hed_obj, remove_types, remove_group=remove_group)

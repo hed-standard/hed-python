@@ -275,7 +275,7 @@ class HedTagSummary(BaseSummary):
         leftovers = [value.get_info(verbose=True) for value in unmatched]
         return {"Name": tag_counts.name, "Total events": tag_counts.total_events,
                 "Total files": len(tag_counts.files.keys()),
-                "Files": [name for name in tag_counts.files.keys()],
+                "Files": list(tag_counts.files.keys()),
                 "Specifics": {"Main tags": details, "Other tags": leftovers}}
 
     def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):

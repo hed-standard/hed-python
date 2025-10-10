@@ -740,7 +740,7 @@ class HedSchema(HedSchemaBase):
         if key_class in [HedSectionKey.Attributes, HedSectionKey.Properties]:
             prop_added_dict = {}
             if key_class == HedSectionKey.Attributes:
-                prop_added_dict = {key: value for key, value in self._sections[HedSectionKey.Properties].items()}
+                prop_added_dict = dict(self._sections[HedSectionKey.Properties].items())
             self._add_element_property_attributes(prop_added_dict, element_prop_key)
             return prop_added_dict
 

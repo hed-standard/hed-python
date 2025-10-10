@@ -221,8 +221,8 @@ class BackupManager:
                                f"does not exist so backup invalid", "")
         with open(backup_dict_path, 'r') as fp:
             backup_dict = json.load(fp)
-        backup_paths = set([os.path.realpath(os.path.join(backup_root_path, backup_key))
-                            for backup_key in backup_dict.keys()])
+        backup_paths = {os.path.realpath(os.path.join(backup_root_path, backup_key))
+                            for backup_key in backup_dict.keys()}
         file_paths = set(io_util.get_file_list(backup_root_path))
         files_not_in_backup = list(file_paths.difference(backup_paths))
         backups_not_in_directory = list(backup_paths.difference(file_paths))
