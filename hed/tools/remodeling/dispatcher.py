@@ -54,15 +54,18 @@ class Dispatcher:
         self.hed_schema = self.get_schema(hed_versions)
         self.summary_dicts = {}
 
-    def get_summaries(self, file_formats=['.txt', '.json']) -> list[dict]:
+    def get_summaries(self, file_formats=None) -> list[dict]:
         """ Return the summaries in a dictionary of strings suitable for saving or archiving.
 
         Parameters:
-            file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
+            file_formats (list or None):  List of formats for the context files ('.json' and '.txt' are allowed).
+                If None, defaults to ['.txt', '.json'].
 
         Returns:
             list[dict]: A list of dictionaries of summaries keyed to filenames.
         """
+        if file_formats is None:
+            file_formats = ['.txt', '.json']
 
         summary_list = []
         time_stamp = '_' + io_util.get_timestamp()
@@ -155,12 +158,12 @@ class Dispatcher:
             df = self.post_proc_data(df)
         return df
 
-    def save_summaries(self, save_formats=['.json', '.txt'], individual_summaries="separate",
+    def save_summaries(self, save_formats=None, individual_summaries="separate",
                        summary_dir=None, task_name=""):
         """ Save the summary files in the specified formats.
 
         Parameters:
-            save_formats (list):  A list of formats [".txt", ."json"]
+            save_formats (list or None):  A list of formats [".txt", ".json"]. If None, defaults to ['.json', '.txt'].
             individual_summaries (str):  "consolidated", "individual", or "none".
             summary_dir (str or None): Directory for saving summaries.
             task_name (str): Name of task if summaries separated by task or "" if not separated.
@@ -173,6 +176,8 @@ class Dispatcher:
             - "individual" means that the summaries of individual files are in separate files.
             - "none" means that only the overall summary is produced.
         """
+        if save_formats is None:
+            save_formats = ['.json', '.txt']
 
         if not save_formats:
             return

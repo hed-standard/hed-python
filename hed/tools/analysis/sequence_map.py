@@ -44,8 +44,17 @@ class SequenceMap:
         #     temp_list.append(f"{str(list(row.values))}:\t{self.count_dict[key_hash]}")
         # return "\n".join(temp_list)
 
-    def dot_str(self, group_spec={}):
-        """ Produce a DOT string representing this sequence map. """
+    def dot_str(self, group_spec=None):
+        """ Produce a DOT string representing this sequence map.
+        
+        Parameters:
+            group_spec (dict or None): Specification for grouping nodes. If None, defaults to empty dict.
+            
+        Returns:
+            str: DOT format string representation of the sequence map.
+        """
+        if group_spec is None:
+            group_spec = {}
         base = 'digraph g { \n'
         if self.codes:
             node_list = [f"{node};" for node in self.codes if node not in self.node_counts]

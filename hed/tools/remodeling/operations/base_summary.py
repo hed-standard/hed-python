@@ -146,16 +146,18 @@ class BaseSummary(ABC):
 
         return summary
 
-    def save(self, save_dir, file_formats=['.txt'], individual_summaries="separate", task_name=""):
+    def save(self, save_dir, file_formats=None, individual_summaries="separate", task_name=""):
         """ Save the summaries using the format indicated.
 
         Parameters:
             save_dir (str):  Name of the directory to save the summaries in.
-            file_formats (list):  List of file formats to use for saving.
+            file_formats (list or None):  List of file formats to use for saving. If None, defaults to ['.txt'].
             individual_summaries (str):  Save one file or multiple files based on setting.
             task_name (str): If this summary corresponds to files from a task, the task_name is used in filename.
 
         """
+        if file_formats is None:
+            file_formats = ['.txt']
         for file_format in file_formats:
             if file_format == '.txt':
                 summary = self.get_text_summary(individual_summaries=individual_summaries)
@@ -168,16 +170,18 @@ class BaseSummary(ABC):
             self.save_visualizations(save_dir, file_formats=file_formats, individual_summaries=individual_summaries,
                                      task_name=task_name)
 
-    def save_visualizations(self, save_dir, file_formats=['.svg'], individual_summaries="separate", task_name=""):
+    def save_visualizations(self, save_dir, file_formats=None, individual_summaries="separate", task_name=""):
         """ Save summary visualizations, if any, using the format indicated.
 
         Parameters:
             save_dir (str):  Name of the directory to save the summaries in.
-            file_formats (list):  List of file formats to use for saving.
+            file_formats (list or None):  List of file formats to use for saving. If None, defaults to ['.svg'].
             individual_summaries (str):  Save one file or multiple files based on setting.
             task_name (str): If this summary corresponds to files from a task, the task_name is used in filename.
 
         """
+        if file_formats is None:
+            file_formats = ['.svg']
         pass
 
     def _save_summary_files(self, save_dir, file_format, summary, individual_summaries, task_name=''):

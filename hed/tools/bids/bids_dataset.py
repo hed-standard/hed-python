@@ -6,6 +6,9 @@ from hed.tools.bids.bids_file_group import BidsFileGroup
 from hed.tools.bids import bids_util
 from hed.tools.util import io_util
 
+# Sentinel value for default arguments (avoids mutable default bug)
+_UNSET = object()
+
 
 class BidsDataset:
     """ A BIDS dataset representation primarily focused on HED evaluation.
@@ -17,18 +20,24 @@ class BidsDataset:
 
     """
 
-    def __init__(self, root_path, schema=None, suffixes=['events', 'participants'],
-                 exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli']):
+    def __init__(self, root_path, schema=None, suffixes=_UNSET, exclude_dirs=_UNSET):
         """ Constructor for a BIDS dataset.
 
         Parameters:
             root_path (str):  Root path of the BIDS dataset.
             schema (HedSchema or HedSchemaGroup):  A schema that overrides the one specified in dataset.
             suffixes (list or None): File name suffixes of items to include.
-                If None or empty, then ['_events', 'participants'] is assumed.
-            exclude_dirs=['sourcedata', 'derivatives', 'code', 'phenotype']:
+                If not provided, defaults to ['events', 'participants'].
+                If None or empty list, includes all files.
+            exclude_dirs (list or None): Directory names to exclude from traversal.
+                If not provided, defaults to ['sourcedata', 'derivatives', 'code', 'stimuli'].
+                If None or empty list, no directories are excluded.
 
         """
+        if suffixes is _UNSET:
+            suffixes = ['events', 'participants']
+        if exclude_dirs is _UNSET:
+            exclude_dirs = ['sourcedata', 'derivatives', 'code', 'stimuli']
         logger = logging.getLogger('hed.bids_dataset')
         logger.debug(f"Initializing BidsDataset for path: {root_path}")
 

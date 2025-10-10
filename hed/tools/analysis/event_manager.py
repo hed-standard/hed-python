@@ -120,11 +120,11 @@ class EventManager:
             to_remove.append(group)
         hed.remove(to_remove)
 
-    def unfold_context(self, remove_types=[]):
+    def unfold_context(self, remove_types=None):
         """ Unfold the event information into a tuple based on context.
 
         Parameters:
-            remove_types (list):  List of types to remove.
+            remove_types (list or None):  List of types to remove. If None, defaults to empty list.
 
         Returns:
             tuple[Union[list(str),  HedString], Union[list(str),  HedString, None], Union[list(str),  HedString, None]]:
@@ -133,6 +133,8 @@ class EventManager:
             Union[list(str),  HedString, None]: The ongoing context information.
 
         """
+        if remove_types is None:
+            remove_types = []
 
         remove_defs = self.get_type_defs(remove_types)  # definitions corresponding to remove types to be filtered out
         new_hed = ["" for _ in range(len(self.hed_strings))]
@@ -178,13 +180,14 @@ class EventManager:
         self.base = self.compress_strings(base)
         self.contexts = self.compress_strings(contexts)
 
-    def _filter_hed(self, hed, remove_types=[], remove_defs=[], remove_group=False):
+    def _filter_hed(self, hed, remove_types=None, remove_defs=None, remove_group=False):
         """ Remove types and definitions from a HED string.
 
         Parameters:
             hed (string or HedString): The HED string to be filtered.
-            remove_types (list): List of HED tags to filter as types (usually Task and Condition-variable).
-            remove_defs (list): List of definition names to filter out.
+            remove_types (list or None): List of HED tags to filter as types (usually Task and Condition-variable).
+                If None, defaults to empty list.
+            remove_defs (list or None): List of definition names to filter out. If None, defaults to empty list.
             remove_group (bool): (Default False) Whether to remove the groups included when removing.
 
         Returns:
@@ -193,6 +196,11 @@ class EventManager:
         """
         if not hed:
             return ""
+        if remove_types is None:
+            remove_types = []
+        if remove_defs is None:
+            remove_defs = []
+        
         # Reconvert even if HED is already a HedString to make sure a copy and expandable.
         hed_obj = HedString(str(hed), hed_schema=self.hed_schema, def_dict=self.def_dict)
         hed_obj, temp1 = string_util.split_base_tags(hed_obj, remove_types, remove_group=remove_group)
