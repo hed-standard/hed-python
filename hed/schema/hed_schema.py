@@ -5,7 +5,7 @@ from typing import Union
 
 from pandas import DataFrame
 
-from hed.schema.hed_schema_entry import HedSchemaEntry
+from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry
 from hed.schema.hed_schema_constants import (HedKey, HedSectionKey, HedKeyOld,
                                            VERSION_ATTRIBUTE, LIBRARY_ATTRIBUTE,
                                            WITH_STANDARD_ATTRIBUTE, UNMERGED_ATTRIBUTE)

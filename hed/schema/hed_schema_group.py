@@ -11,6 +11,7 @@ from hed.schema.hed_schema import HedSchema
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.errors import ErrorHandler, ValidationErrors
 from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry
 from hed.schema.hed_schema_base import HedSchemaBase
 
 

@@ -1,9 +1,14 @@
 """ A single HED tag. """
 from __future__ import annotations
-from typing import Union
-from hed.schema.hed_schema_constants import HedKey
+
 import copy
+from typing import Union, TYPE_CHECKING
+
 from hed.models.model_constants import DefTagNames
+from hed.schema.hed_schema_constants import HedKey
+
+if TYPE_CHECKING:
+    from hed.models.hed_group import HedGroup
 
 
 class HedTag:

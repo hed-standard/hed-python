@@ -23,7 +23,7 @@ class DefValidator(DefinitionDict):
         """
         super().__init__(def_dicts, hed_schema=hed_schema)
 
-    def validate_def_tags(self, hed_string_obj, hed_validator=None) -> list[dict]:
+    def validate_def_tags(self, hed_string_obj) -> list[dict]:
         """ Validate Def/Def-Expand tags.
 
         Parameters:

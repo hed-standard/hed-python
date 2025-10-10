@@ -1,5 +1,8 @@
 """ Remove columns from a columnar file. """
 from __future__ import annotations
+
+import pandas as pd
+
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
