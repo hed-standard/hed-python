@@ -35,7 +35,7 @@ class SchemaLoaderXML(SchemaLoader):
             else:
                 root = ElementTree.fromstring(self.schema_as_string)
         except xml.etree.ElementTree.ParseError as e:
-            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, self.name)
+            raise HedFileError(HedExceptions.CANNOT_PARSE_XML, e.msg, self.name) from e
 
         return root
 

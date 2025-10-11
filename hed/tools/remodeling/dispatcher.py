@@ -116,10 +116,10 @@ class Dispatcher:
             actual_path = file_designator
         try:
             df = pd.read_csv(actual_path, sep='\t', header=0, keep_default_na=False, na_values=",null")
-        except Exception:
+        except Exception as e:
             raise HedFileError("BadDataFile",
                                f"{str(actual_path)} (orig: {file_designator}) does not correspond to a valid tsv file",
-                               "")
+                               "") from e
         return df
 
     def get_summary_save_dir(self) -> str:

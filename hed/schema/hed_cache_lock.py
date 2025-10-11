@@ -42,8 +42,8 @@ class CacheLock:
 
         try:
             self.cache_lock = portalocker.Lock(self.cache_lock_filename, timeout=1)
-        except portalocker.exceptions.LockException:
-            raise CacheError(f"Could not lock cache using {self.cache_lock_filename}")
+        except portalocker.exceptions.LockException as e:
+            raise CacheError(f"Could not lock cache using {self.cache_lock_filename}") from e
         pass
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -68,7 +68,7 @@ def _read_last_cached_time(cache_folder):
         with open(timestamp_filename, "r") as f:
             timestamp = float(f.readline())
             return timestamp
-    except FileNotFoundError or ValueError or IOError:
+    except (FileNotFoundError, ValueError, IOError):
         return 0
 
 
@@ -86,5 +86,5 @@ def _write_last_cached_time(new_time, cache_folder):
     try:
         with open(timestamp_filename, "w") as f:
             f.write(str(new_time))
-    except Exception:
-        raise ValueError("Error writing timestamp to hed cache")
+    except Exception as e:
+        raise ValueError("Error writing timestamp to hed cache") from e

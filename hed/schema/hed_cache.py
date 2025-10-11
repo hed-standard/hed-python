@@ -219,7 +219,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_
                 for version, version_info in hed_versions.items():
                     _cache_hed_version(version, library_name, version_info, cache_folder=cache_folder)
 
-    except CacheError or ValueError or URLError:
+    except (CacheError, ValueError, URLError):
         return -1
 
     return 0
