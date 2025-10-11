@@ -1,8 +1,9 @@
-""" Classes representing HED search results and tokens. """
+"""Classes representing HED search results and tokens."""
 
 
 class SearchResult:
-    """ Holder for and manipulation of search results. """
+    """Holder for and manipulation of search results."""
+
     def __init__(self, group, tag):
         self.group = group
         # todo: rename tag: children
@@ -42,6 +43,7 @@ class SearchResult:
 
 class Token:
     """Represents a single term/character"""
+
     And = 0
     Tag = 1
     DescendantGroup = 4
@@ -72,7 +74,7 @@ class Token:
             "{": Token.ExactMatch,  # Nothing else
             "}": Token.ExactMatchEnd,  # Nothing else
             ":": Token.ExactMatchOptional,
-            "@": Token.NotInLine
+            "@": Token.NotInLine,
         }
         self.kind = tokens.get(text, Token.Tag)
         self.text = text

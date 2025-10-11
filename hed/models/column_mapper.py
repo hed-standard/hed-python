@@ -1,6 +1,7 @@
 """
 Mapping of a base input file columns into HED tags.
 """
+
 from hed.models.column_metadata import ColumnMetadata, ColumnType
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
@@ -10,19 +11,25 @@ import copy
 from collections import Counter
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
-NO_WARN_COLUMNS = ['onset', 'duration']
+NO_WARN_COLUMNS = ["onset", "duration"]
 
 
 class ColumnMapper:
-    """ Mapping of a base input file columns into HED tags.
+    """Mapping of a base input file columns into HED tags.
 
     Notes:
         - All column numbers are 0 based.
     """
 
-    def __init__(self, sidecar=None, tag_columns=None, column_prefix_dictionary=None,
-                 optional_tag_columns=None, warn_on_missing_column=False):
-        """ Constructor for ColumnMapper.
+    def __init__(
+        self,
+        sidecar=None,
+        tag_columns=None,
+        column_prefix_dictionary=None,
+        optional_tag_columns=None,
+        warn_on_missing_column=False,
+    ):
+        """Constructor for ColumnMapper.
 
         Parameters:
             sidecar (Sidecar): A sidecar to gather column data from.
@@ -71,30 +78,30 @@ class ColumnMapper:
 
     @property
     def tag_columns(self):
-        """ Return the known tag and optional tag columns with numbers as names when possible.
+        """Return the known tag and optional tag columns with numbers as names when possible.
 
-            Returns:
-                tag_columns(list of str or int): A list of all tag and optional tag columns as labels.
+        Returns:
+            tag_columns(list of str or int): A list of all tag and optional tag columns as labels.
         """
         joined_list = self._tag_columns + self._optional_tag_columns
         return list(set(self._convert_to_names(self._column_map, joined_list)))
 
     @property
     def column_prefix_dictionary(self):
-        """ Return the column_prefix_dictionary with numbers turned into names where possible.
+        """Return the column_prefix_dictionary with numbers turned into names where possible.
 
-            Returns:
-                column_prefix_dictionary(list of str or int): A column_prefix_dictionary with column labels as keys.
+        Returns:
+            column_prefix_dictionary(list of str or int): A column_prefix_dictionary with column labels as keys.
         """
         return self._convert_to_names_dict(self._column_map, self._column_prefix_dictionary)
 
     def get_transformers(self):
-        """ Return the transformers to use on a dataframe.
+        """Return the transformers to use on a dataframe.
 
-            Returns:
-                tuple(dict, list):
-                    dict({str or int: func}): The functions to use to transform each column.
-                    need_categorical(list of int): A list of columns to treat as categorical.
+        Returns:
+            tuple(dict, list):
+                dict({str or int: func}): The functions to use to transform each column.
+                need_categorical(list of int): A list of columns to treat as categorical.
         """
         final_transformers = {}
         need_categorical = []
@@ -110,11 +117,13 @@ class ColumnMapper:
             elif column.column_type == ColumnType.Value:
                 value_str = column.hed_dict
                 from functools import partial
+
                 final_transformers[assign_to_column] = partial(self._value_handler, value_str)
             elif column.column_type == ColumnType.Categorical:
                 need_categorical.append(column.column_name)
                 category_values = column.hed_dict
                 from functools import partial
+
                 final_transformers[assign_to_column] = partial(self._category_handler, category_values)
             else:
                 final_transformers[assign_to_column] = lambda x: x
@@ -123,7 +132,7 @@ class ColumnMapper:
 
     @staticmethod
     def check_for_blank_names(column_map, allow_blank_names) -> list[dict]:
-        """ Validate there are no blank column names.
+        """Validate there are no blank column names.
 
         Parameters:
             column_map (iterable): A list of column names.
@@ -146,7 +155,7 @@ class ColumnMapper:
         return issues
 
     def _set_sidecar(self, sidecar):
-        """ Set the sidecar this column mapper uses.
+        """Set the sidecar this column mapper uses.
 
         Parameters:
             sidecar (Sidecar or None): The sidecar to use.
@@ -164,7 +173,7 @@ class ColumnMapper:
 
     @property
     def sidecar_column_data(self):
-        """ Pass through to get the sidecar ColumnMetadata.
+        """Pass through to get the sidecar ColumnMetadata.
 
         Returns:
             dict({str:ColumnMetadata}): The column metadata defined by this sidecar.
@@ -175,7 +184,7 @@ class ColumnMapper:
         return {}
 
     def get_tag_columns(self):
-        """ Return the column numbers or names that are mapped to be HedTags.
+        """Return the column numbers or names that are mapped to be HedTags.
 
             Note: This is NOT the tag_columns or optional_tag_columns parameter, though they set it.
 
@@ -183,11 +192,14 @@ class ColumnMapper:
             column_identifiers(list): A list of column numbers or names that are ColumnType.HedTags.
                 0-based if integer-based, otherwise column name.
         """
-        return [column_entry.column_name for number, column_entry in self._final_column_map.items()
-                if column_entry.column_type == ColumnType.HEDTags]
+        return [
+            column_entry.column_name
+            for number, column_entry in self._final_column_map.items()
+            if column_entry.column_type == ColumnType.HEDTags
+        ]
 
     def set_tag_columns(self, tag_columns=None, optional_tag_columns=None, finalize_mapping=True):
-        """ Set tag columns and optional tag columns.
+        """Set tag columns and optional tag columns.
 
         Parameters:
             tag_columns (list): A list of ints or strings containing the columns that contain the HED tags.
@@ -207,7 +219,7 @@ class ColumnMapper:
             self._finalize_mapping()
 
     def set_column_map(self, new_column_map=None):
-        """ Set the column number to name mapping.
+        """Set the column number to name mapping.
 
         Parameters:
             new_column_map (list or dict):  Either an ordered list of the column names or column_number:column name.
@@ -226,7 +238,7 @@ class ColumnMapper:
         self._finalize_mapping()
 
     def set_column_prefix_dictionary(self, column_prefix_dictionary, finalize_mapping=True):
-        """Set the column prefix dictionary. """
+        """Set the column prefix dictionary."""
         self._column_prefix_dictionary = column_prefix_dictionary
         if finalize_mapping:
             self._finalize_mapping()
@@ -301,28 +313,27 @@ class ColumnMapper:
         if not any(column for column in column_lists):
             return column_lists, list_names
         # Filter out empty lists from the above
-        column_lists, list_names = zip(*[(col_list, list_name) for col_list, list_name in zip(column_lists, list_names)
-                                         if col_list])
+        column_lists, list_names = zip(
+            *[(col_list, list_name) for col_list, list_name in zip(column_lists, list_names) if col_list]
+        )
 
         return column_lists, list_names
 
     def _check_for_duplicates_and_required(self, list_names, column_lists) -> list[dict]:
-        """ Check for duplicates and required columns in the given lists.
-        """
+        """Check for duplicates and required columns in the given lists."""
         issues = []
         for list_name, col_list in zip(list_names, column_lists):
             # Convert all known strings to ints, then check for duplicates
-            converted_list = [item if isinstance(item, int) else self._reverse_column_map.get(item, item)
-                              for item in col_list]
+            converted_list = [item if isinstance(item, int) else self._reverse_column_map.get(item, item) for item in col_list]
 
             if col_list != self._optional_tag_columns:
                 for test_col in converted_list:
                     if isinstance(test_col, str) and test_col not in self._reverse_column_map:
-                        issues += ErrorHandler.format_error(ValidationErrors.HED_MISSING_REQUIRED_COLUMN,
-                                                            test_col, list_name)
+                        issues += ErrorHandler.format_error(ValidationErrors.HED_MISSING_REQUIRED_COLUMN, test_col, list_name)
 
-            issues += self._check_for_duplicates_between_lists(converted_list, list_name,
-                                                               ValidationErrors.DUPLICATE_COLUMN_IN_LIST)
+            issues += self._check_for_duplicates_between_lists(
+                converted_list, list_name, ValidationErrors.DUPLICATE_COLUMN_IN_LIST
+            )
 
         return issues
 
@@ -330,12 +341,11 @@ class ColumnMapper:
         issues = []
         duplicates = [item for item, count in Counter(checking_list).items() if count > 1]
         for duplicate in duplicates:
-            issues += ErrorHandler.format_error(error_type, duplicate,
-                                                self._column_map.get(duplicate), list_names)
+            issues += ErrorHandler.format_error(error_type, duplicate, self._column_map.get(duplicate), list_names)
         return issues
 
-    def check_for_mapping_issues(self, allow_blank_names=False) ->list[dict]:
-        """ Find all issues given the current column_map, tag_columns, etc.
+    def check_for_mapping_issues(self, allow_blank_names=False) -> list[dict]:
+        """Find all issues given the current column_map, tag_columns, etc.
 
         Parameters:
             allow_blank_names (bool): Only flag blank names if False.
@@ -350,8 +360,9 @@ class ColumnMapper:
 
         combined_list = self.tag_columns + list(self.column_prefix_dictionary)
         # 3. Verify prefix and tag columns do not conflict.
-        issues += self._check_for_duplicates_between_lists(combined_list, list_names,
-                                                           ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
+        issues += self._check_for_duplicates_between_lists(
+            combined_list, list_names, ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES
+        )
 
         # 4. Verify we didn't get both a sidecar and a tag column list
         if self._sidecar and combined_list and combined_list != ["HED"]:
@@ -383,7 +394,7 @@ class ColumnMapper:
         return [item for item in list_to_alter if item not in to_remove]
 
     def get_def_dict(self, hed_schema, extra_def_dicts=None) -> DefinitionDict:
-        """ Return def dicts from every column description.
+        """Return def dicts from every column description.
 
         Parameters:
             hed_schema (Schema): A HED schema object to use for extracting definitions.
@@ -398,7 +409,7 @@ class ColumnMapper:
         return DefinitionDict(extra_def_dicts, hed_schema=hed_schema)
 
     def get_column_mapping_issues(self) -> list[dict]:
-        """ Get all the issues with finalizing column mapping(duplicate columns, missing required, etc.).
+        """Get all the issues with finalizing column mapping(duplicate columns, missing required, etc.).
 
         Notes:
             - This is deprecated and now a wrapper for "check_for_mapping_issues()".

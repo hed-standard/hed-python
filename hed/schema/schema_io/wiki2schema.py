@@ -1,6 +1,7 @@
 """
 This module is used to create a HedSchema object from a .mediawiki file.
 """
+
 import re
 import pandas as pd
 
@@ -13,13 +14,13 @@ from hed.schema.schema_io.wiki_constants import HedWikiSection, WIKI_EXTRA_DICT
 from hed.schema.schema_io import text_util
 
 
-extend_here_line = 'extend here'
+extend_here_line = "extend here"
 invalid_characters_to_strip = ["&#8203;"]
-tag_name_expression = r'(\*+|\'{3})(.*?)(\'{3})?\s*([\[\{]|$)+'
+tag_name_expression = r"(\*+|\'{3})(.*?)(\'{3})?\s*([\[\{]|$)+"
 tag_name_re = re.compile(tag_name_expression)
-no_wiki_tag = '</?nowiki>'
-no_wiki_start_tag = '<nowiki>'
-no_wiki_end_tag = '</nowiki>'
+no_wiki_tag = "</?nowiki>"
+no_wiki_start_tag = "<nowiki>"
+no_wiki_end_tag = "</nowiki>"
 
 required_sections = [
     HedWikiSection.Prologue,
@@ -34,15 +35,15 @@ required_sections = [
     HedWikiSection.EndHed,
 ]
 
-required_keys =  [wiki_constants.SectionStarts[sec] for sec in required_sections]
+required_keys = [wiki_constants.SectionStarts[sec] for sec in required_sections]
 
 
 class SchemaLoaderWiki(SchemaLoader):
-    """ Load MediaWiki schemas from filenames or strings.
+    """Load MediaWiki schemas from filenames or strings.
 
-        Expected usage is SchemaLoaderWiki.load(filename)
+    Expected usage is SchemaLoaderWiki.load(filename)
 
-        SchemaLoaderWiki(filename) will load just the header_attributes
+    SchemaLoaderWiki(filename) will load just the header_attributes
     """
 
     def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
@@ -51,7 +52,7 @@ class SchemaLoaderWiki(SchemaLoader):
 
     def _open_file(self):
         if self.filename:
-            with open(self.filename, 'r', encoding='utf-8', errors='replace') as wiki_file:
+            with open(self.filename, "r", encoding="utf-8", errors="replace") as wiki_file:
                 wiki_lines = wiki_file.readlines()
         else:
             # Split this into lines, but keep linebreaks.
@@ -64,7 +65,7 @@ class SchemaLoaderWiki(SchemaLoader):
         if file_data:
             line = file_data[0]
             if line.startswith(wiki_constants.HEADER_LINE_STRING):
-                hed_attributes = self._get_header_attributes_internal(line[len(wiki_constants.HEADER_LINE_STRING):])
+                hed_attributes = self._get_header_attributes_internal(line[len(wiki_constants.HEADER_LINE_STRING) :])
                 return hed_attributes
         msg = f"First line of file should be HED, instead found: {line}"
         raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING, msg, filename=self.name)
@@ -87,10 +88,13 @@ class SchemaLoaderWiki(SchemaLoader):
         self._parse_extras(wiki_lines_by_section)
         if self.fatal_errors:
             self.fatal_errors = error_reporter.sort_issues(self.fatal_errors)
-            raise HedFileError(self.fatal_errors[0]['code'],
-                               f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
-                               f"parameter on this exception for more details.", self.name,
-                               issues=self.fatal_errors)
+            raise HedFileError(
+                self.fatal_errors[0]["code"],
+                f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
+                f"parameter on this exception for more details.",
+                self.name,
+                issues=self.fatal_errors,
+            )
 
     def _verify_required_sections(self, wiki_lines_by_section):
         # Validate we didn't miss any required sections.
@@ -107,10 +111,11 @@ class SchemaLoaderWiki(SchemaLoader):
             parse_func(lines_for_section)
 
     def _parse_extras(self, wiki_lines_by_section):
-        self._schema.extras = {df_constants.SOURCES_KEY:  pd.DataFrame([], columns=df_constants.source_columns),
-                               df_constants.PREFIXES_KEY: pd.DataFrame([], columns=df_constants.prefix_columns),
-                               df_constants.EXTERNAL_ANNOTATION_KEY:
-                                  pd.DataFrame([], columns=df_constants.external_annotation_columns)}
+        self._schema.extras = {
+            df_constants.SOURCES_KEY: pd.DataFrame([], columns=df_constants.source_columns),
+            df_constants.PREFIXES_KEY: pd.DataFrame([], columns=df_constants.prefix_columns),
+            df_constants.EXTERNAL_ANNOTATION_KEY: pd.DataFrame([], columns=df_constants.external_annotation_columns),
+        }
         extra_keys = [key for key in wiki_lines_by_section.keys() if key not in required_keys]
         for extra_key in extra_keys:
             lines_for_section = wiki_lines_by_section[extra_key]
@@ -119,19 +124,19 @@ class SchemaLoaderWiki(SchemaLoader):
                 data.append(self.parse_star_string(line.strip()))
             if not data:
                 continue
-            df = pd.DataFrame(data).fillna('').astype(str)
+            df = pd.DataFrame(data).fillna("").astype(str)
             stripped_key = extra_key.strip("'")
             stripped_key = WIKI_EXTRA_DICT.get(stripped_key, stripped_key)
             self._schema.extras[stripped_key] = df
 
     @staticmethod
     def parse_star_string(s):
-        s = s.lstrip('* ').strip()  # remove leading '* ' and any surrounding whitespace
-        pairs = s.split(',') if s else []
+        s = s.lstrip("* ").strip()  # remove leading '* ' and any surrounding whitespace
+        pairs = s.split(",") if s else []
         result = {}
         for pair in pairs:
-            if '=' in pair:
-                key, value = pair.strip().split('=', 1)
+            if "=" in pair:
+                key, value = pair.strip().split("=", 1)
                 result[key.strip()] = value.strip()
         return result
 
@@ -192,9 +197,12 @@ class SchemaLoaderWiki(SchemaLoader):
                 if level < len(parent_tags):
                     parent_tags = parent_tags[:level]
                 elif level > len(parent_tags):
-                    self._add_fatal_error(row_number, row,
-                                          "Line has too many *'s at front.  You cannot skip a level.",
-                                          HedExceptions.WIKI_LINE_START_INVALID)
+                    self._add_fatal_error(
+                        row_number,
+                        row,
+                        "Line has too many *'s at front.  You cannot skip a level.",
+                        HedExceptions.WIKI_LINE_START_INVALID,
+                    )
                     continue
 
             # Create the entry
@@ -276,13 +284,15 @@ class SchemaLoaderWiki(SchemaLoader):
 
         for m in malformed:
             # todo: May shift this at some point to report all errors
-            raise HedFileError(code=HedExceptions.SCHEMA_HEADER_INVALID,
-                               message=f"Header line has a malformed attribute {m}",
-                               filename=self.name)
+            raise HedFileError(
+                code=HedExceptions.SCHEMA_HEADER_INVALID,
+                message=f"Header line has a malformed attribute {m}",
+                filename=self.name,
+            )
         return attributes
 
     def _get_header_attributes_internal_old(self, version_line):
-        """ Extract all valid attributes like version from the HED line in .mediawiki format.
+        """Extract all valid attributes like version from the HED line in .mediawiki format.
 
         Parameters:
             version_line (str): The line in the wiki file that contains the version or other attributes.
@@ -291,13 +301,13 @@ class SchemaLoaderWiki(SchemaLoader):
             dict: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}.
         """
         final_attributes = {}
-        attribute_pairs = version_line.split(',')
+        attribute_pairs = version_line.split(",")
         for pair in attribute_pairs:
-            divider_index = pair.find(':')
+            divider_index = pair.find(":")
             if divider_index == -1:
                 msg = f"Found poorly matched key:value pair in header: {pair}"
                 raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.name)
-            key, value = pair[:divider_index], pair[divider_index + 1:]
+            key, value = pair[:divider_index], pair[divider_index + 1 :]
             key = key.strip()
             value = value.strip()
             final_attributes[key] = value
@@ -306,7 +316,7 @@ class SchemaLoaderWiki(SchemaLoader):
 
     @staticmethod
     def _get_tag_level(row):
-        """ Get the tag level from a line in a wiki file.
+        """Get the tag level from a line in a wiki file.
 
         Parameters:
             row (str): A tag line.
@@ -319,7 +329,7 @@ class SchemaLoaderWiki(SchemaLoader):
 
         """
         count = 0
-        while row[count] == '*':
+        while row[count] == "*":
             count += 1
         if count == 0:
             return 1
@@ -341,12 +351,12 @@ class SchemaLoaderWiki(SchemaLoader):
             self._add_fatal_error(line_number, row, "Invalid or non matching <nowiki> tags found")
         elif index1 != -1 and index2 <= index1:
             self._add_fatal_error(line_number, row, "</nowiki> appears before <nowiki> on a line")
-        row = re.sub(no_wiki_tag, '', row)
+        row = re.sub(no_wiki_tag, "", row)
         return row
 
     @staticmethod
     def _get_tag_name(row):
-        """ Get the tag name from the tag line.
+        """Get the tag name from the tag line.
 
         Parameters:
             row (str): A tag line.
@@ -356,7 +366,7 @@ class SchemaLoaderWiki(SchemaLoader):
 
         """
         if row.find(extend_here_line) != -1:
-            return '', 0
+            return "", 0
         for invalid_chars in invalid_characters_to_strip:
             row = row.replace(invalid_chars, "")
         match = tag_name_re.search(row)
@@ -368,7 +378,7 @@ class SchemaLoaderWiki(SchemaLoader):
         return None, 0
 
     def _get_tag_attributes(self, line_number, row, starting_index):
-        """ Get the tag attributes from a line.
+        """Get the tag attributes from a line.
 
         Parameters:
             line_number (int): The line number to report errors as.
@@ -381,7 +391,7 @@ class SchemaLoaderWiki(SchemaLoader):
             - The last index we found tag attributes at.
 
         """
-        attr_string, starting_index = self._get_line_section(row, starting_index, '{', '}')
+        attr_string, starting_index = self._get_line_section(row, starting_index, "{", "}")
         try:
             return text_util.parse_attribute_string(attr_string), starting_index
         except ValueError as e:
@@ -389,8 +399,8 @@ class SchemaLoaderWiki(SchemaLoader):
         return {}, starting_index
 
     @staticmethod
-    def _get_line_section(row, starting_index, start_delim='[', end_delim=']'):
-        """ Get the portion enclosed by the given delimiters.
+    def _get_line_section(row, starting_index, start_delim="[", end_delim="]"):
+        """Get the portion enclosed by the given delimiters.
 
         Parameters:
             row (str): A tag line.
@@ -419,7 +429,7 @@ class SchemaLoaderWiki(SchemaLoader):
         if count1 == 0:
             return "", starting_index
 
-        return row[index1 + 1: index2], index2 + starting_index
+        return row[index1 + 1 : index2], index2 + starting_index
 
     def _create_entry(self, line_number, row, key_class, full_tag_name=None):
         node_name, index = self._get_tag_name(row)
@@ -451,7 +461,7 @@ class SchemaLoaderWiki(SchemaLoader):
 
     @staticmethod
     def _check_for_new_section(line, current_section_number, filename=None):
-        """ Check if the line is a new section.
+        """Check if the line is a new section.
         Parameters:
             line (str): The line to check.
             current_section_number (str): The current section.
@@ -494,7 +504,7 @@ class SchemaLoaderWiki(SchemaLoader):
             return None
 
     def _split_lines_into_sections(self, wiki_lines):
-        """ Takes a list of lines, and splits it into valid wiki sections.
+        """Takes a list of lines, and splits it into valid wiki sections.
 
         Parameters:
            wiki_lines : [str]
@@ -512,7 +522,9 @@ class SchemaLoaderWiki(SchemaLoader):
             if line_number == 0:
                 continue
             stripped_line = line.strip()
-            [new_section_name, current_section_number] = self._check_for_new_section(stripped_line, current_section_number, self.name)
+            [new_section_name, current_section_number] = self._check_for_new_section(
+                stripped_line, current_section_number, self.name
+            )
             if new_section_name:
                 if new_section_name in strings_for_section:
                     msg = f"Found section {new_section_name} twice"
@@ -521,7 +533,10 @@ class SchemaLoaderWiki(SchemaLoader):
                 current_section_name = new_section_name
                 continue
 
-            if current_section_name == wiki_constants.PROLOGUE_SECTION_ELEMENT or current_section_name == wiki_constants.EPILOGUE_SECTION_ELEMENT:
+            if (
+                current_section_name == wiki_constants.PROLOGUE_SECTION_ELEMENT
+                or current_section_name == wiki_constants.EPILOGUE_SECTION_ELEMENT
+            ):
                 strings_for_section[current_section_name].append((line_number + 1, line))
             else:
                 line = self._remove_nowiki_tag_from_line(line_number + 1, stripped_line)
@@ -547,7 +562,7 @@ class SchemaLoaderWiki(SchemaLoader):
         return tag_entry, level_adj
 
     def _create_tag_entry(self, parent_tags, row_number, row):
-        """ Create a tag entry(does not add to schema)
+        """Create a tag entry(does not add to schema)
 
         Parameters:
             parent_tags (list): A list of parent tags in order.
@@ -568,13 +583,14 @@ class SchemaLoaderWiki(SchemaLoader):
                 long_tag_name = tag_name
             return self._create_entry(row_number, row, HedSectionKey.Tags, long_tag_name)
 
-        self._add_fatal_error(row_number, row, "Schema term is empty or the line is malformed",
-                              error_code=HedExceptions.WIKI_DELIMITERS_INVALID)
+        self._add_fatal_error(
+            row_number, row, "Schema term is empty or the line is malformed", error_code=HedExceptions.WIKI_DELIMITERS_INVALID
+        )
 
     def _add_to_dict(self, row_number, row, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
-            self._add_fatal_error(row_number, row,
-                                  "Library tag in unmerged schema has InLibrary attribute",
-                                  HedExceptions.IN_LIBRARY_IN_UNMERGED)
+            self._add_fatal_error(
+                row_number, row, "Library tag in unmerged schema has InLibrary attribute", HedExceptions.IN_LIBRARY_IN_UNMERGED
+            )
 
         return self._add_to_dict_base(entry, key_class)

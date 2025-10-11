@@ -1,10 +1,11 @@
-""" Logger class with messages organized by key """
+"""Logger class with messages organized by key"""
 
 
 class HedLogger:
-    """ Log status messages organized by key. """
+    """Log status messages organized by key."""
+
     def __init__(self, name=None):
-        """ Constructor for the HED logger.
+        """Constructor for the HED logger.
 
         Parameters:
             name (str): Identifying name of the logger.
@@ -14,7 +15,7 @@ class HedLogger:
         self.name = name
 
     def add(self, key, msg, level="", also_print=False):
-        """ Add an entry to this log.
+        """Add an entry to this log.
 
         Parameters:
             key (str):  Key used to organize log messages.
@@ -30,7 +31,7 @@ class HedLogger:
             print(f"{key} [{level}]: {msg}")
 
     def get_log(self, key):
-        """ Get all the log entries stored under the key.
+        """Get all the log entries stored under the key.
 
         Parameters:
             key (str):  The key whose log messages are retrieved.
@@ -46,7 +47,7 @@ class HedLogger:
             return []
 
     def get_log_keys(self):
-        """ Return a list of keys for this log.
+        """Return a list of keys for this log.
 
         Returns:
             list:  list of organizational keys for this log.
@@ -55,7 +56,7 @@ class HedLogger:
         return list(self.log.keys())
 
     def get_log_string(self, level=None):
-        """ Return the log as a string, with entries separated by newlines.
+        """Return the log as a string, with entries separated by newlines.
 
         Parameters:
             level (str or None): Include only the entries from this level. If None, do all.

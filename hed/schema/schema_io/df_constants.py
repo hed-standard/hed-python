@@ -1,7 +1,7 @@
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema import hed_schema_constants
 
-KEY_COLUMN_NAME = 'rdfs.label'
+KEY_COLUMN_NAME = "rdfs.label"
 
 # Known tsv format suffixes
 STRUCT_KEY = "Structure"
@@ -22,15 +22,24 @@ EXTERNAL_ANNOTATION_KEY = "AnnotationPropertyExternal"
 SOURCES_KEY = "Sources"
 
 PROPERTY_KEYS = [ANNOTATION_KEY, DATA_KEY, OBJECT_KEY]
-DF_SUFFIXES = {TAG_KEY, STRUCT_KEY, VALUE_CLASS_KEY,
-               UNIT_CLASS_KEY, UNIT_KEY, UNIT_MODIFIER_KEY,
-               *PROPERTY_KEYS, ATTRIBUTE_PROPERTY_KEY, PREFIXES_KEY,
-               EXTERNAL_ANNOTATION_KEY, SOURCES_KEY}
+DF_SUFFIXES = {
+    TAG_KEY,
+    STRUCT_KEY,
+    VALUE_CLASS_KEY,
+    UNIT_CLASS_KEY,
+    UNIT_KEY,
+    UNIT_MODIFIER_KEY,
+    *PROPERTY_KEYS,
+    ATTRIBUTE_PROPERTY_KEY,
+    PREFIXES_KEY,
+    EXTERNAL_ANNOTATION_KEY,
+    SOURCES_KEY,
+}
 
 
 DF_EXTRAS = {PREFIXES_KEY, EXTERNAL_ANNOTATION_KEY, SOURCES_KEY}
 
-#DF_SUFFIXES_OMN = {*DF_SUFFIXES, *DF_EXTRAS}
+# DF_SUFFIXES_OMN = {*DF_SUFFIXES, *DF_EXTRAS}
 
 section_mapping_hed_id = {
     STRUCT_KEY: None,
@@ -85,8 +94,11 @@ prefix_columns = [prefix, namespace, description]
 external_annotation_columns = [prefix, id, iri, description]
 source_columns = [source, link, description]
 
-extras_column_dict = {PREFIXES_KEY: prefix_columns, EXTERNAL_ANNOTATION_KEY: external_annotation_columns,
-               SOURCES_KEY: source_columns}# For the sources section
+extras_column_dict = {
+    PREFIXES_KEY: prefix_columns,
+    EXTERNAL_ANNOTATION_KEY: external_annotation_columns,
+    SOURCES_KEY: source_columns,
+}  # For the sources section
 
 # The columns for unit class, value class, and unit modifier
 other_columns = [hed_id, name, subclass_of, attributes, dcdescription]
@@ -111,7 +123,7 @@ struct_base_ids = {
     "HedValueClass": 9,
     "HedHeader": 10,
     "HedPrologue": 11,
-    "HedEpilogue": 12
+    "HedEpilogue": 12,
 }
 
 # todo: this should be retrieved directly from the appropriate spreadsheet
@@ -119,12 +131,19 @@ valid_omn_attributes = {
     hed_schema_constants.VERSION_ATTRIBUTE: "HED_0000300",
     hed_schema_constants.LIBRARY_ATTRIBUTE: "HED_0000301",
     hed_schema_constants.WITH_STANDARD_ATTRIBUTE: "HED_0000302",
-    hed_schema_constants.UNMERGED_ATTRIBUTE: "HED_0000303"
+    hed_schema_constants.UNMERGED_ATTRIBUTE: "HED_0000303",
 }
 
 # Extra spreadsheet columns
-EXTRAS_CONVERSIONS = {"Prefix": "prefix", "namespace IRI": "namespace", "namespace iri": "namespace", "ID": "id",
-                      "definition": "description", "Description": "description", "IRI": "iri"}
+EXTRAS_CONVERSIONS = {
+    "Prefix": "prefix",
+    "namespace IRI": "namespace",
+    "namespace iri": "namespace",
+    "ID": "id",
+    "definition": "description",
+    "Description": "description",
+    "IRI": "iri",
+}
 
 
 Prefix = "prefix"
@@ -132,4 +151,4 @@ ID = "id"
 NamespaceIRI = "namespaceIRI"
 
 # Unique extras keys
-UNIQUE_EXTRAS_KEYS = {PREFIXES_KEY: ["prefix"], EXTERNAL_ANNOTATION_KEY: ["prefix", "id"], SOURCES_KEY:["source"]}
+UNIQUE_EXTRAS_KEYS = {PREFIXES_KEY: ["prefix"], EXTERNAL_ANNOTATION_KEY: ["prefix", "id"], SOURCES_KEY: ["source"]}

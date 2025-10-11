@@ -1,7 +1,16 @@
-""" Basic analysis tools. """
+"""Basic analysis tools."""
+
 from .file_dictionary import FileDictionary
-from .annotation_util import (check_df_columns, df_to_hed, extract_tags, generate_sidecar_entry,
-                              hed_to_df, str_to_tabular, strs_to_sidecar, to_strlist)
+from .annotation_util import (
+    check_df_columns,
+    df_to_hed,
+    extract_tags,
+    generate_sidecar_entry,
+    hed_to_df,
+    str_to_tabular,
+    strs_to_sidecar,
+    to_strlist,
+)
 from .event_manager import EventManager
 from .hed_tag_manager import HedTagManager
 from .hed_type_defs import HedTypeDefs

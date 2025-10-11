@@ -1,4 +1,4 @@
-""" The contents of a BIDS dataset. """
+"""The contents of a BIDS dataset."""
 
 import os
 import logging
@@ -11,7 +11,7 @@ _SENTINEL = object()
 
 
 class BidsDataset:
-    """ A BIDS dataset representation primarily focused on HED evaluation.
+    """A BIDS dataset representation primarily focused on HED evaluation.
 
     Attributes:
         root_path (str):  Real root path of the BIDS dataset.
@@ -21,7 +21,7 @@ class BidsDataset:
     """
 
     def __init__(self, root_path, schema=None, suffixes=_SENTINEL, exclude_dirs=_SENTINEL):
-        """ Constructor for a BIDS dataset.
+        """Constructor for a BIDS dataset.
 
         Parameters:
             root_path (str):  Root path of the BIDS dataset.
@@ -35,10 +35,10 @@ class BidsDataset:
 
         """
         if suffixes is _SENTINEL:
-            suffixes = ['events', 'participants']
+            suffixes = ["events", "participants"]
         if exclude_dirs is _SENTINEL:
-            exclude_dirs = ['sourcedata', 'derivatives', 'code', 'stimuli']
-        logger = logging.getLogger('hed.bids_dataset')
+            exclude_dirs = ["sourcedata", "derivatives", "code", "stimuli"]
+        logger = logging.getLogger("hed.bids_dataset")
         logger.debug(f"Initializing BidsDataset for path: {root_path}")
 
         self.root_path = os.path.realpath(root_path)
@@ -46,7 +46,9 @@ class BidsDataset:
 
         if schema:
             self.schema = schema
-            logger.debug(f"Using provided schema: {schema.get_schema_versions() if hasattr(schema, 'get_schema_versions') else 'custom'}")
+            logger.debug(
+                f"Using provided schema: {schema.get_schema_versions() if hasattr(schema, 'get_schema_versions') else 'custom'}"
+            )
         else:
             logger.debug("Loading schema from dataset description...")
             self.schema = bids_util.get_schema_from_description(self.root_path)
@@ -66,7 +68,7 @@ class BidsDataset:
         logger.info(f"BidsDataset initialized with {len(self.file_groups)} file groups: {list(self.file_groups.keys())}")
 
     def get_file_group(self, suffix):
-        """ Return the file group of files with the specified suffix.
+        """Return the file group of files with the specified suffix.
 
         Parameters:
             suffix (str):  Suffix of the BidsFileGroup to be returned.
@@ -78,7 +80,7 @@ class BidsDataset:
         return self.file_groups.get(suffix, None)
 
     def validate(self, check_for_warnings=False, schema=None):
-        """ Validate the dataset.
+        """Validate the dataset.
 
         Parameters:
             check_for_warnings (bool):  If True, check for warnings.
@@ -88,7 +90,7 @@ class BidsDataset:
             list:  List of issues encountered during validation. Each issue is a dictionary.
 
         """
-        logger = logging.getLogger('hed.bids_dataset')
+        logger = logging.getLogger("hed.bids_dataset")
         logger.info(f"Starting validation of {len(self.file_groups)} file groups")
         logger.debug(f"Check for warnings: {check_for_warnings}")
 
@@ -101,8 +103,12 @@ class BidsDataset:
             logger.debug(f"Using dataset schema for validation: {this_schema.get_schema_versions()}")
         else:
             logger.error("No valid schema available for validation")
-            return [{"code": "SCHEMA_LOAD_FAILED",
-                     "message": "BIDS dataset_description.json has invalid HEDVersion and passed schema was invalid}"}]
+            return [
+                {
+                    "code": "SCHEMA_LOAD_FAILED",
+                    "message": "BIDS dataset_description.json has invalid HEDVersion and passed schema was invalid}",
+                }
+            ]
 
         for suffix, group in self.file_groups.items():
             if group.has_hed:
@@ -117,18 +123,21 @@ class BidsDataset:
         return issues
 
     def get_summary(self):
-        """ Return an abbreviated summary of the dataset. """
-        summary = {"dataset": self.root_path,
-                   "hed_schema_versions": self.schema.get_schema_versions(),
-                   "file_group_types": f"{str(list(self.file_groups.keys()))}"}
+        """Return an abbreviated summary of the dataset."""
+        summary = {
+            "dataset": self.root_path,
+            "hed_schema_versions": self.schema.get_schema_versions(),
+            "file_group_types": f"{str(list(self.file_groups.keys()))}",
+        }
         return summary
 
     def _set_file_groups(self):
-        logger = logging.getLogger('hed.bids_dataset')
+        logger = logging.getLogger("hed.bids_dataset")
         logger.debug(f"Searching for files with extensions ['.tsv', '.json'] and suffixes {self.suffixes}")
 
-        file_paths = io_util.get_file_list(self.root_path, extensions=['.tsv', '.json'],
-                                           exclude_dirs=self.exclude_dirs, name_suffix=self.suffixes)
+        file_paths = io_util.get_file_list(
+            self.root_path, extensions=[".tsv", ".json"], exclude_dirs=self.exclude_dirs, name_suffix=self.suffixes
+        )
         logger.debug(f"Found {len(file_paths)} files matching criteria")
 
         file_dict = bids_util.group_by_suffix(file_paths)

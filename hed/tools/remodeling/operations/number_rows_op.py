@@ -1,4 +1,4 @@
-""" Implementation in progress. """
+"""Implementation in progress."""
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
@@ -6,52 +6,34 @@ from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class NumberRowsOp(BaseOp):
-    """ Implementation in progress. """
+    """Implementation in progress."""
+
     NAME = "number_rows"
 
     PARAMS = {
         "type": "object",
         "properties": {
-            "number_column_name": {
-                "type": "string"
-            },
-            "overwrite": {
-                "type": "boolean"
-            },
+            "number_column_name": {"type": "string"},
+            "overwrite": {"type": "boolean"},
             "match_value": {
                 "type": "object",
-                "properties": {
-                    "column": {
-                        "type": "string"
-                    },
-                    "value": {
-                        "type": [
-                            "string",
-                            "number"
-                        ]
-                    }
-                },
-                "required": [
-                    "column",
-                    "value"
-                ],
-                "additionalProperties": False
-            }
+                "properties": {"column": {"type": "string"}, "value": {"type": ["string", "number"]}},
+                "required": ["column", "value"],
+                "additionalProperties": False,
+            },
         },
-        "required": [
-            "number_column_name"
-        ],
-        "additionalProperties": False
+        "required": ["number_column_name"],
+        "additionalProperties": False,
     }
 
     def __init__(self, parameters):
         super().__init__(parameters)
-        self.number_column_name = parameters['number_column_name']
-        self.overwrite = parameters.get('overwrite', False)
-        self.match_value = parameters.get('match_value', False)
+        self.number_column_name = parameters["number_column_name"]
+        self.overwrite = parameters.get("overwrite", False)
+        self.match_value = parameters.get("match_value", False)
 
     def do_op(self, dispatcher, df, name, sidecar=None):
-        """ Add numbers events dataframe.
+        """Add numbers events dataframe.
 
         Parameters:
             dispatcher (Dispatcher): Manages operation I/O.
@@ -65,17 +47,19 @@ class NumberRowsOp(BaseOp):
         """
         if self.number_column_name in df.columns:
             if self.overwrite is False:
-                raise ValueError("ExistingNumberColumn",
-                                 f"Column {self.number_column_name} already exists in event file.", "")
+                raise ValueError("ExistingNumberColumn", f"Column {self.number_column_name} already exists in event file.", "")
 
         if self.match_value:
-            if self.match_value['column'] not in df.columns:
-                raise ValueError("MissingMatchColumn",
-                                 f"Column {self.match_value['column']} does not exist in event file.", "")
-            if self.match_value['value'] not in df[self.match_value['column']].tolist():
-                raise ValueError("MissingMatchValue",
-                                 f"Value {self.match_value['value']} does not exist in event file column"
-                                 f"{self.match_value['column']}.", "")
+            if self.match_value["column"] not in df.columns:
+                raise ValueError(
+                    "MissingMatchColumn", f"Column {self.match_value['column']} does not exist in event file.", ""
+                )
+            if self.match_value["value"] not in df[self.match_value["column"]].tolist():
+                raise ValueError(
+                    "MissingMatchValue",
+                    f"Value {self.match_value['value']} does not exist in event file column" f"{self.match_value['column']}.",
+                    "",
+                )
 
         df_new = df.copy()
         # df_new[self.number_column_name] = np.nan
@@ -90,5 +74,5 @@ class NumberRowsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
-        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        """Additional validation required of operation parameters not performed by JSON schema validator."""
         return []

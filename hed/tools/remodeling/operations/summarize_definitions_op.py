@@ -1,4 +1,4 @@
-""" Summarize the type_defs in the dataset. """
+"""Summarize the type_defs in the dataset."""
 
 import pandas as pd
 from hed.models.tabular_input import TabularInput
@@ -8,7 +8,7 @@ from hed.models.def_expand_gather import DefExpandGatherer
 
 
 class SummarizeDefinitionsOp(BaseOp):
-    """ Summarize the definitions used in the dataset based on Def and Def-expand.
+    """Summarize the definitions used in the dataset based on Def and Def-expand.
 
     Required remodeling parameters:
         - **summary_name** (*str*): The name of the summary.
@@ -20,47 +20,39 @@ class SummarizeDefinitionsOp(BaseOp):
     The purpose is to produce a summary of the definitions used in a dataset.
 
     """
+
     NAME = "summarize_definitions"
 
     PARAMS = {
         "type": "object",
         "properties": {
-            "summary_name": {
-                "type": "string",
-                "description": "Name to use for the summary in titles."
-            },
-            "summary_filename": {
-                "type": "string",
-                "description": "Name to use for the summary file name base."
-            },
+            "summary_name": {"type": "string", "description": "Name to use for the summary in titles."},
+            "summary_filename": {"type": "string", "description": "Name to use for the summary file name base."},
             "append_timecode": {
                 "type": "boolean",
-                "description": "If true, the timecode is appended to the base filename so each run has a unique name."
-            }
+                "description": "If true, the timecode is appended to the base filename so each run has a unique name.",
+            },
         },
-        "required": [
-            "summary_name",
-            "summary_filename"
-        ],
-        "additionalProperties": False
+        "required": ["summary_name", "summary_filename"],
+        "additionalProperties": False,
     }
 
-    SUMMARY_TYPE = 'type_defs'
+    SUMMARY_TYPE = "type_defs"
 
     def __init__(self, parameters):
-        """ Constructor for the summary of definitions used in the dataset.
+        """Constructor for the summary of definitions used in the dataset.
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
 
         """
         super().__init__(parameters)
-        self.summary_name = parameters['summary_name']
-        self.summary_filename = parameters['summary_filename']
-        self.append_timecode = parameters.get('append_timecode', False)
+        self.summary_name = parameters["summary_name"]
+        self.summary_filename = parameters["summary_filename"]
+        self.append_timecode = parameters.get("append_timecode", False)
 
     def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
-        """ Create summaries of definitions.
+        """Create summaries of definitions.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -76,23 +68,23 @@ class SummarizeDefinitionsOp(BaseOp):
 
         """
         df_new = df.copy()
-        summary = dispatcher.summary_dicts.setdefault(self.summary_name,
-                                                      DefinitionSummary(self, dispatcher.hed_schema))
-        summary.update_summary({'df': dispatcher.post_proc_data(df_new), 'name': name, 'sidecar': sidecar,
-                                'schema': dispatcher.hed_schema})
+        summary = dispatcher.summary_dicts.setdefault(self.summary_name, DefinitionSummary(self, dispatcher.hed_schema))
+        summary.update_summary(
+            {"df": dispatcher.post_proc_data(df_new), "name": name, "sidecar": sidecar, "schema": dispatcher.hed_schema}
+        )
         return df_new
 
     @staticmethod
     def validate_input_data(parameters):
-        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        """Additional validation required of operation parameters not performed by JSON schema validator."""
         return []
 
 
 class DefinitionSummary(BaseSummary):
-    """ Manager for summaries of the definitions used in a dataset."""
+    """Manager for summaries of the definitions used in a dataset."""
 
     def __init__(self, sum_op, hed_schema, known_defs=None):
-        """ Constructor for the summary of definitions.
+        """Constructor for the summary of definitions.
 
         Parameters:
             sum_op (SummarizeDefinitionsOp): Summary operation class for gathering definitions.
@@ -105,7 +97,7 @@ class DefinitionSummary(BaseSummary):
         self.def_gatherer = DefExpandGatherer(hed_schema, known_defs=known_defs)
 
     def update_summary(self, new_info):
-        """ Update the summary for a given tabular input file.
+        """Update the summary for a given tabular input file.
 
         Parameters:
             new_info (dict):  A dictionary with the parameters needed to update a summary.
@@ -114,10 +106,8 @@ class DefinitionSummary(BaseSummary):
             - The summary needs a "name" str, a "schema" and a "Sidecar".
 
         """
-        data_input = TabularInput(
-            new_info['df'], sidecar=new_info['sidecar'], name=new_info['name'])
-        series, def_dict = data_input.series_a, data_input.get_def_dict(
-            new_info['schema'])
+        data_input = TabularInput(new_info["df"], sidecar=new_info["sidecar"], name=new_info["name"])
+        series, def_dict = data_input.series_a, data_input.get_def_dict(new_info["schema"])
         self.def_gatherer.process_def_expands(series, def_dict)
 
     @staticmethod
@@ -130,10 +120,8 @@ class DefinitionSummary(BaseSummary):
             if "#" in str(value):
                 key = key + "/#"
             if display_description:
-                description, value = DefinitionSummary._remove_description(
-                    value)
-                items[key] = {"description": description,
-                              "contents": str(value)}
+                description, value = DefinitionSummary._remove_description(value)
+                items[key] = {"description": description, "contents": str(value)}
             elif isinstance(value, list):
                 items[key] = [str(x) for x in value]
             else:
@@ -142,7 +130,7 @@ class DefinitionSummary(BaseSummary):
         return summary_dict
 
     def get_details_dict(self, def_summary) -> dict:
-        """ Return the summary-specific information in a dictionary.
+        """Return the summary-specific information in a dictionary.
 
         Parameters:
             def_summary (DefExpandGatherer):  Contains the resolved dictionaries.
@@ -151,21 +139,21 @@ class DefinitionSummary(BaseSummary):
             dict: dictionary with the summary results.
 
         """
-        known_defs_summary = self._build_summary_dict(def_summary.def_dict, "Known Definitions", None,
-                                                      display_description=True)
+        known_defs_summary = self._build_summary_dict(
+            def_summary.def_dict, "Known Definitions", None, display_description=True
+        )
         # ambiguous_defs_summary = self._build_summary_dict(def_gatherer.ambiguous_defs, "Ambiguous Definitions",
         #                                                   def_gatherer.get_ambiguous_group)
         # ambiguous_defs_summary = {}
         # TODO: Summary of ambiguous definitions is not implemented
-        errors_summary = self._build_summary_dict(
-            def_summary.errors, "Errors", None)
+        errors_summary = self._build_summary_dict(def_summary.errors, "Errors", None)
 
         known_defs_summary.update(errors_summary)
         return {"Name": "", "Total events": 0, "Total files": 0, "Files": [], "Specifics": known_defs_summary}
         # return known_defs_summary
 
     def merge_all_info(self) -> object:
-        """ Create an Object containing the definition summary.
+        """Create an Object containing the definition summary.
 
         Returns:
             Object: The overall summary object for type_defs.
@@ -174,7 +162,7 @@ class DefinitionSummary(BaseSummary):
         return self.def_gatherer
 
     def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return a formatted string with the summary for the indicated name.
+        """Return a formatted string with the summary for the indicated name.
 
         Parameters:
             name (str):  Identifier (usually the filename) of the individual file.
@@ -195,7 +183,7 @@ class DefinitionSummary(BaseSummary):
 
     @staticmethod
     def _nested_dict_to_string(data, indent, level=1):
-        """ Return string summary of definitions used by recursively traversing the summary info.
+        """Return string summary of definitions used by recursively traversing the summary info.
 
         Parameters:
             data (dict):  Dictionary containing information.
@@ -207,8 +195,7 @@ class DefinitionSummary(BaseSummary):
         for key, value in data.items():
             if isinstance(value, dict):
                 result.append(f"{indent * level}{key}: {len(value)} items")
-                result.append(DefinitionSummary._nested_dict_to_string(
-                    value, indent, level + 1))
+                result.append(DefinitionSummary._nested_dict_to_string(value, indent, level + 1))
             elif isinstance(value, list):
                 result.append(f"{indent * level}{key}:")
                 for item in value:
@@ -219,7 +206,7 @@ class DefinitionSummary(BaseSummary):
 
     @staticmethod
     def _get_dataset_string(summary_dict, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return the string representing the summary of the definitions across the dataset.
+        """Return the string representing the summary of the definitions across the dataset.
 
         Parameters:
             summary_dict (dict): Contains the merged summary information.
@@ -233,7 +220,7 @@ class DefinitionSummary(BaseSummary):
 
     @staticmethod
     def _remove_description(def_entry):
-        """ Remove description from a definition entry.
+        """Remove description from a definition entry.
 
         Parameters:
             def_entry (DefinitionEntry): Definition entry from which to remove its definition.
@@ -257,7 +244,7 @@ class DefinitionSummary(BaseSummary):
 
     @staticmethod
     def _get_individual_string(result, indent=BaseSummary.DISPLAY_INDENT):
-        """ Return  a string with the summary for an individual tabular file.
+        """Return  a string with the summary for an individual tabular file.
 
         Parameters:
             result (dict): Dictionary of summary information for a particular tabular file.

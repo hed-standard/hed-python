@@ -7,7 +7,7 @@ import os
 
 
 def create_ontology(repo_path, schema_name, schema_version, dest):
-    """ Creates an ontology out of the given schema
+    """Creates an ontology out of the given schema
 
     Parameters:
         repo_path(str): the location of the hed-schemas folder relative to this one.  Should point into the folder.
@@ -37,18 +37,18 @@ def create_ontology(repo_path, schema_name, schema_version, dest):
     os.makedirs(output_dest, exist_ok=True)
     for suffix, omn_text in omn_dict.items():
         filename = os.path.join(output_dest, f"{base}_{suffix}.omn")
-        with open(filename, mode='w', encoding='utf-8') as opened_file:
+        with open(filename, mode="w", encoding="utf-8") as opened_file:
             opened_file.writelines(omn_text)
 
     return 0
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Convert a specified schema in the prerelease folder to an ontology.')
-    parser.add_argument('repo_path', help='The location of the hed-schemas directory')
-    parser.add_argument('schema_name', help='The name of the schema to convert("standard" for standard schema)')
-    parser.add_argument('schema_version', help='The schema version to modify')
-    parser.add_argument('--dest', default=os.path.join("src", "ontology"), help='The base location to save to')
+    parser = argparse.ArgumentParser(description="Convert a specified schema in the prerelease folder to an ontology.")
+    parser.add_argument("repo_path", help="The location of the hed-schemas directory")
+    parser.add_argument("schema_name", help='The name of the schema to convert("standard" for standard schema)')
+    parser.add_argument("schema_version", help="The schema version to modify")
+    parser.add_argument("--dest", default=os.path.join("src", "ontology"), help="The base location to save to")
 
     args = parser.parse_args()
 

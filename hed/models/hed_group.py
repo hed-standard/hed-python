@@ -1,4 +1,5 @@
-""" A single parenthesized HED string. """
+"""A single parenthesized HED string."""
+
 from __future__ import annotations
 from hed.models.hed_tag import HedTag
 from hed.models.model_constants import DefTagNames
@@ -7,10 +8,10 @@ from typing import Iterable, Union
 
 
 class HedGroup:
-    """ A single parenthesized HED string. """
+    """A single parenthesized HED string."""
 
     def __init__(self, hed_string="", startpos=None, endpos=None, contents=None):
-        """ Return an empty HedGroup object.
+        """Return an empty HedGroup object.
 
         Parameters:
             hed_string (str or None): Source HED string for this group.
@@ -33,7 +34,7 @@ class HedGroup:
         self._original_children = self.children
 
     def append(self, tag_or_group):
-        """ Add a tag or group to this group.
+        """Add a tag or group to this group.
 
         Parameters:
             tag_or_group (HedTag or HedGroup): The new object to add to this group.
@@ -42,7 +43,7 @@ class HedGroup:
         self.children.append(tag_or_group)
 
     def check_if_in_original(self, tag_or_group) -> bool:
-        """ Check if the tag or group in original string.
+        """Check if the tag or group in original string.
 
         Parameters:
             tag_or_group (HedTag or HedGroup): The HedTag or HedGroup to be looked for in this group.
@@ -64,7 +65,7 @@ class HedGroup:
 
     @staticmethod
     def replace(item_to_replace, new_contents):
-        """ Replace an existing tag or group.
+        """Replace an existing tag or group.
 
             Note: This is a static method that relies on the parent attribute of item_to_replace.
 
@@ -80,7 +81,7 @@ class HedGroup:
         parent._replace(item_to_replace=item_to_replace, new_contents=new_contents)
 
     def _replace(self, item_to_replace, new_contents):
-        """ Replace an existing tag or group.
+        """Replace an existing tag or group.
 
         Parameters:
             item_to_replace (HedTag or HedGroup): The item to replace must exist and be a direct child,
@@ -101,8 +102,8 @@ class HedGroup:
 
         raise KeyError(f"The tag {item_to_replace} not found in the group.")
 
-    def remove(self, items_to_remove: Iterable[Union[HedTag, 'HedGroup']]):
-        """ Remove any tags/groups in items_to_remove.
+    def remove(self, items_to_remove: Iterable[Union[HedTag, "HedGroup"]]):
+        """Remove any tags/groups in items_to_remove.
 
         Parameters:
             items_to_remove (list):  List of HedGroups and/or HedTags to remove by identity.
@@ -135,7 +136,7 @@ class HedGroup:
         raise ValueError("Cannot make shallow copies of HedGroups")
 
     def copy(self) -> "HedGroup":
-        """ Return a deep copy of this group.
+        """Return a deep copy of this group.
 
         Returns:
             HedGroup: The copied group.
@@ -148,11 +149,11 @@ class HedGroup:
         return return_copy
 
     def sort(self):
-        """ Sort the tags and groups in this HedString in a consistent order."""
+        """Sort the tags and groups in this HedString in a consistent order."""
         self._sorted(update_self=True)
 
     def sorted(self) -> "HedGroup":
-        """ Return a sorted copy of this HED group
+        """Return a sorted copy of this HED group
 
         Returns:
             HedGroup: The sorted copy.
@@ -162,7 +163,7 @@ class HedGroup:
         return string_copy
 
     def _sorted(self, update_self=False) -> list:
-        """ Return a sorted copy of this HED group as a list of its children.
+        """Return a sorted copy of this HED group as a list of its children.
 
         Parameters:
             update_self (bool): If True, update the contents of this group to be sorted as well.
@@ -188,11 +189,11 @@ class HedGroup:
 
     @property
     def is_group(self):
-        """ True if this is a parenthesized group. """
+        """True if this is a parenthesized group."""
         return True
 
     def get_all_tags(self) -> list:
-        """ Return HedTags, including descendants.
+        """Return HedTags, including descendants.
 
         Returns:
             list:  A list of all the tags in this group including descendants.
@@ -211,7 +212,7 @@ class HedGroup:
         return final_list
 
     def get_all_groups(self, also_return_depth=False) -> list:
-        """ Return HedGroups, including descendants and self.
+        """Return HedGroups, including descendants and self.
 
         Parameters:
             also_return_depth (bool): If True, yield tuples (group, depth) rather than just groups.
@@ -238,7 +239,7 @@ class HedGroup:
 
     @staticmethod
     def _check_in_group(group, group_list) -> bool:
-        """ Return True if the group is list.
+        """Return True if the group is list.
 
         Parameters:
             group (HedGroup): The group to check for.
@@ -254,7 +255,7 @@ class HedGroup:
         return False
 
     def tags(self) -> list:
-        """ Return the direct child tags of this group.
+        """Return the direct child tags of this group.
 
         Returns:
             list: All tags directly in this group, filtering out HedGroup children.
@@ -263,7 +264,7 @@ class HedGroup:
         return [tag for tag in self.children if isinstance(tag, HedTag)]
 
     def groups(self) -> list:
-        """ Return the direct child groups of this group.
+        """Return the direct child groups of this group.
 
         Returns:
             list: All groups directly in this group, filtering out HedTag children.
@@ -272,7 +273,7 @@ class HedGroup:
         return [group for group in self.children if isinstance(group, HedGroup)]
 
     def get_first_group(self) -> HedGroup:
-        """ Return the first group in this HED string or group.
+        """Return the first group in this HED string or group.
 
             Useful for things like Def-expand where they only have a single group.
 
@@ -286,17 +287,17 @@ class HedGroup:
         return self.groups()[0]
 
     def get_original_hed_string(self) -> str:
-        """ Get the original HED string.
+        """Get the original HED string.
 
         Returns:
             str: The original string with no modification.
 
         """
-        return self._hed_string[self._startpos:self._endpos]
+        return self._hed_string[self._startpos : self._endpos]
 
     @property
     def span(self) -> tuple[int, int]:
-        """ Return the source span.
+        """Return the source span.
 
         Returns:
             tuple[int, int]: start and end index of the group (including parentheses) from the source string.
@@ -305,7 +306,7 @@ class HedGroup:
         return self._startpos, self._endpos
 
     def __str__(self) -> str:
-        """ Convert this HedGroup to a string.
+        """Convert this HedGroup to a string.
 
         Returns:
             str: The group as a string, including any modified HedTags.
@@ -316,7 +317,7 @@ class HedGroup:
         return ",".join([str(child) for child in self.children])
 
     def get_as_short(self) -> str:
-        """ Return this HedGroup as a short tag string.
+        """Return this HedGroup as a short tag string.
 
         Returns:
             str: The group as a string with all tags as short tags.
@@ -325,7 +326,7 @@ class HedGroup:
         return self.get_as_form("short_tag")
 
     def get_as_long(self) -> str:
-        """ Return this HedGroup as a long tag string.
+        """Return this HedGroup as a long tag string.
 
         Returns:
             str: The group as a string with all tags as long tags.
@@ -334,7 +335,7 @@ class HedGroup:
         return self.get_as_form("long_tag")
 
     def get_as_form(self, tag_attribute) -> str:
-        """ Get the string corresponding to the specified form.
+        """Get the string corresponding to the specified form.
 
         Parameters:
             tag_attribute (str): The hed_tag property to use to construct the string (usually short_tag or long_tag).
@@ -342,18 +343,22 @@ class HedGroup:
         Returns:
             str: The constructed string after transformation.
         """
-        result = ",".join([child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else
-                           child.get_as_form(tag_attribute) for child in self.children])
+        result = ",".join(
+            [
+                child.__getattribute__(tag_attribute) if isinstance(child, HedTag) else child.get_as_form(tag_attribute)
+                for child in self.children
+            ]
+        )
         if self.is_group:
             return f"({result})"
         return result
 
     def lower(self):
-        """ Convenience function, equivalent to str(self).lower(). """
+        """Convenience function, equivalent to str(self).lower()."""
         return str(self).lower()
 
     def casefold(self):
-        """ Convenience function, equivalent to str(self).casefold(). """
+        """Convenience function, equivalent to str(self).casefold()."""
         return str(self).casefold()
 
     def get_as_indented(self, tag_attribute="short_tag") -> str:
@@ -370,7 +375,7 @@ class HedGroup:
         level_open = []
         level = 0
         indented = ""
-        prev = ''
+        prev = ""
         for c in hed_string:
             if c == "(":
                 level_open.append(level)
@@ -390,7 +395,7 @@ class HedGroup:
         return indented
 
     def find_placeholder_tag(self) -> Union[HedTag, None]:
-        """ Return a placeholder tag, if present in this group.
+        """Return a placeholder tag, if present in this group.
 
         Returns:
             Union[HedTag, None]: The placeholder tag if found.
@@ -408,9 +413,9 @@ class HedGroup:
         return bool(self.children)
 
     def __eq__(self, other):
-        """ Test whether other is equal to this object.
+        """Test whether other is equal to this object.
 
-            Note: This does not account for sorting.  Objects must be in the same order to match.
+        Note: This does not account for sorting.  Objects must be in the same order to match.
         """
         if self is other:
             return True
@@ -426,7 +431,7 @@ class HedGroup:
         return True
 
     def find_tags(self, search_tags, recursive=False, include_groups=2) -> list:
-        """ Find the base tags and their containing groups.
+        """Find the base tags and their containing groups.
         This searches by short_base_tag, ignoring any ancestors or extensions/values.
 
         Parameters:
@@ -455,7 +460,7 @@ class HedGroup:
         return found_tags
 
     def find_wildcard_tags(self, search_tags, recursive=False, include_groups=2) -> list:
-        """ Find the tags and their containing groups.
+        """Find the tags and their containing groups.
 
             This searches tag.short_tag.casefold(), with an implicit wildcard on the end.
 
@@ -492,7 +497,7 @@ class HedGroup:
         return found_tags
 
     def find_exact_tags(self, exact_tags, recursive=False, include_groups=1) -> list:
-        """  Find the given tags.  This will only find complete matches, any extension or value must also match.
+        """Find the given tags.  This will only find complete matches, any extension or value must also match.
 
         Parameters:
             exact_tags (list of HedTag): A container of tags to locate.
@@ -519,7 +524,7 @@ class HedGroup:
         return found_tags
 
     def find_def_tags(self, recursive=False, include_groups=3) -> list:
-        """ Find def and def-expand tags.
+        """Find def and def-expand tags.
 
         Parameters:
             recursive (bool): If true, also check subgroups.
@@ -557,7 +562,7 @@ class HedGroup:
         return def_tags
 
     def find_tags_with_term(self, term, recursive=False, include_groups=2) -> list:
-        """  Find any tags that contain the given term.
+        """Find any tags that contain the given term.
 
             Note: This can only find identified tags.
 

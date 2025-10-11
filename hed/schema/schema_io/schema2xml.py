@@ -16,7 +16,7 @@ class Schema2XML(Schema2Base):
     # Required baseclass function
     # =========================================
     def _initialize_output(self):
-        self.hed_node = Element('HED')
+        self.hed_node = Element("HED")
         # alias this to output to match baseclass expectation.
         self.output = self.hed_node
 
@@ -108,7 +108,7 @@ class Schema2XML(Schema2Base):
         pass
 
     def _write_tag_entry(self, tag_entry, parent_node=None, level=0):
-        """ Create a tag node and adds it to the parent.
+        """Create a tag node and adds it to the parent.
 
         Parameters:
             tag_entry (HedTagEntry): The entry for that tag we want to write out.
@@ -130,13 +130,12 @@ class Schema2XML(Schema2Base):
             description_node.text = tag_description
         if tag_attributes:
             attribute_node_name = xml_constants.ATTRIBUTE_PROPERTY_ELEMENTS[key_class]
-            self._add_tag_node_attributes(tag_node, tag_attributes,
-                                          attribute_node_name=attribute_node_name)
+            self._add_tag_node_attributes(tag_node, tag_attributes, attribute_node_name=attribute_node_name)
 
         return tag_node
 
     def _write_entry(self, entry, parent_node=None, include_props=True):
-        """ Create an entry node and adds it to the parent.
+        """Create an entry node and adds it to the parent.
 
         Parameters:
             entry (HedSchemaEntry): The entry for that tag we want to write out.
@@ -159,8 +158,7 @@ class Schema2XML(Schema2Base):
                 description_node.text = tag_description
             if tag_attributes:
                 attribute_node_name = xml_constants.ATTRIBUTE_PROPERTY_ELEMENTS[key_class]
-                self._add_tag_node_attributes(tag_node, tag_attributes,
-                                              attribute_node_name=attribute_node_name)
+                self._add_tag_node_attributes(tag_node, tag_attributes, attribute_node_name=attribute_node_name)
 
         return tag_node
 

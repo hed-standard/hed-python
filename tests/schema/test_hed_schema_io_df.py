@@ -89,14 +89,18 @@ class TestHedSchemaDF(unittest.TestCase):
         self.assertEqual(self.schema, reloaded_schema)
 
     def _create_structure_df(self):
-        data = {"hedId": ["HED_0060010"],
-                "rdfs:label": ["LangHeader"],
-                "Attributes": ['version="1.0.0", library="lang", withStandard="8.3.0", unmerged="True"'],
-                "omn:SubClassOf": ["HedHeader"],
-                "dc:description": [""],
-                "omn:EquivalentTo": ['HedHeader and (inHedSchema some LangSchema) and (version value "1.0.0")' +
-                                     'and (library value "lang") and (withStandard value "8.3.0")' +
-                                     'and (unmerged value "True")']}
+        data = {
+            "hedId": ["HED_0060010"],
+            "rdfs:label": ["LangHeader"],
+            "Attributes": ['version="1.0.0", library="lang", withStandard="8.3.0", unmerged="True"'],
+            "omn:SubClassOf": ["HedHeader"],
+            "dc:description": [""],
+            "omn:EquivalentTo": [
+                'HedHeader and (inHedSchema some LangSchema) and (version value "1.0.0")'
+                + 'and (library value "lang") and (withStandard value "8.3.0")'
+                + 'and (unmerged value "True")'
+            ],
+        }
 
         df = pd.DataFrame(data)
         return df
@@ -123,10 +127,8 @@ class TestHedSchemaDF(unittest.TestCase):
         issues = loaded_schema.check_compliance(check_for_warnings=False)
         self.assertEqual(len(issues), 0)
 
-        self.assertEqual(loaded_schema.tags['MadeUpLongTagNameChild'].name,
-                         "MadeUpLongTagNameParent/MadeUpLongTagNameChild")
-        self.assertEqual(loaded_schema.tags['MadeUpLongTagNameParent'].name,
-                         "MadeUpLongTagNameParent")
+        self.assertEqual(loaded_schema.tags["MadeUpLongTagNameChild"].name, "MadeUpLongTagNameParent/MadeUpLongTagNameChild")
+        self.assertEqual(loaded_schema.tags["MadeUpLongTagNameParent"].name, "MadeUpLongTagNameParent")
 
         tag_df = pd.DataFrame([], columns=df_constants.tag_columns, dtype=str)
 
@@ -138,10 +140,8 @@ class TestHedSchemaDF(unittest.TestCase):
         loaded_out_of_order = from_dataframes(dataframes)
         issues = loaded_schema.check_compliance(check_for_warnings=False)
         self.assertEqual(len(issues), 0)
-        self.assertEqual(loaded_schema.tags['MadeUpLongTagNameChild'].name,
-                         "MadeUpLongTagNameParent/MadeUpLongTagNameChild")
-        self.assertEqual(loaded_schema.tags['MadeUpLongTagNameParent'].name,
-                         "MadeUpLongTagNameParent")
+        self.assertEqual(loaded_schema.tags["MadeUpLongTagNameChild"].name, "MadeUpLongTagNameParent/MadeUpLongTagNameChild")
+        self.assertEqual(loaded_schema.tags["MadeUpLongTagNameParent"].name, "MadeUpLongTagNameParent")
         self.assertEqual(loaded_schema, loaded_out_of_order)
 
     def test_loading_circular(self):
@@ -176,5 +176,5 @@ class TestHedSchemaDF(unittest.TestCase):
         self.assertEqual(error.exception.args[0], HedExceptions.SCHEMA_TAG_TSV_BAD_PARENT)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

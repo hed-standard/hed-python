@@ -6,6 +6,7 @@ from collections import defaultdict
 from hed.errors.error_types import ValidationErrors, TemporalErrors
 from hed.errors.error_reporter import ErrorHandler
 
+
 class ReservedChecker:
     _instance = None
     _lock = Lock()
@@ -22,7 +23,7 @@ class ReservedChecker:
     def _initialize(self):
         # Load the JSON file during the first instantiation
         if not hasattr(self, "reserved_map"):
-            with open(self.reserved_reqs_path, 'r') as file:
+            with open(self.reserved_reqs_path, "r") as file:
                 self.reserved_map = json.load(file)
         self._initialize_special_tags()
 
@@ -43,11 +44,7 @@ class ReservedChecker:
         self.no_splice_in_group = self._get_special_tags_by_property("noSpliceInGroup")
 
     def _get_special_tags_by_property(self, property_name):
-        return {
-            value["name"]
-            for value in self.reserved_map.values()
-            if value.get(property_name) is True
-        }
+        return {value["name"] for value in self.reserved_map.values() if value.get(property_name) is True}
 
     def get_reserved(self, group):
         reserved_tags = [tag for tag in group.tags() if tag.short_base_tag in self.special_names]
@@ -61,7 +58,7 @@ class ReservedChecker:
         return grouped_tags
 
     def check_reserved_compatibility(self, group, reserved_tags):
-        """ Check to make sure that the reserved tags can be used together and no duplicates.
+        """Check to make sure that the reserved tags can be used together and no duplicates.
 
         Parameters:
             group (HedTagGroup): A group to be checked.
@@ -72,18 +69,18 @@ class ReservedChecker:
         grouped = self._get_duplicates(reserved_tags)
         multiples = [key for key, items in grouped.items() if len(items) > 1]
         if len(multiples) > 0:
-            return ErrorHandler.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED,
-                                             tag=grouped[multiples[0]][1], group=group)
+            return ErrorHandler.format_error(
+                ValidationErrors.HED_RESERVED_TAG_REPEATED, tag=grouped[multiples[0]][1], group=group
+            )
         # Test compatibility among the reserved tags
         for tag in reserved_tags:
             incompatible_tag = self.get_incompatible(tag, reserved_tags)
             if incompatible_tag:
-                return ErrorHandler.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=incompatible_tag[0],
-                                                 group=group)
+                return ErrorHandler.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=incompatible_tag[0], group=group)
         return []
 
     def check_tag_requirements(self, group, reserved_tags):
-        """ Check the tag requirements within the group.
+        """Check the tag requirements within the group.
 
         Parameters:
             group (HedTagGroup): A group to be checked.
@@ -93,8 +90,7 @@ class ReservedChecker:
         """
         [requires_defs, defs] = self.get_def_information(group, reserved_tags)
         if len(requires_defs) > 1:
-            return ErrorHandler.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED, tag=requires_defs[0],
-                                             group=group)
+            return ErrorHandler.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED, tag=requires_defs[0], group=group)
         if len(requires_defs) == 1 and len(defs) != 1:
             return ErrorHandler.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=requires_defs[0])
 
@@ -109,15 +105,23 @@ class ReservedChecker:
         other_groups = [group for group in group.groups() if group not in defs]
         min_allowed, max_allowed = self.get_group_requirements(reserved_tags)
         if not math.isinf(max_allowed) and len(other_groups) > max_allowed:
-            return ErrorHandler.format_error(ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR, group=group,
-                                             group_count=str(len(other_groups)), tag_list=reserved_tags)
+            return ErrorHandler.format_error(
+                ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR,
+                group=group,
+                group_count=str(len(other_groups)),
+                tag_list=reserved_tags,
+            )
         if group.is_group and not math.isinf(max_allowed) and min_allowed > len(other_groups):
-            return ErrorHandler.format_error(ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR, group=group,
-                                             group_count=str(len(other_groups)), tag_list=reserved_tags)
+            return ErrorHandler.format_error(
+                ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR,
+                group=group,
+                group_count=str(len(other_groups)),
+                tag_list=reserved_tags,
+            )
         return []
 
     def get_group_requirements(self, reserved_tags) -> tuple[float, float]:
-        """ Returns the maximum and minimum number of groups required for these reserved tags.
+        """Returns the maximum and minimum number of groups required for these reserved tags.
 
         Parameters:
             reserved_tags (list of HedTag): The reserved tags to be checked.
@@ -126,14 +130,14 @@ class ReservedChecker:
             tuple[float, float]: the maximum required and the minimum required.
 
         """
-        max_allowed = float('inf')
-        min_allowed = float('-inf')
+        max_allowed = float("inf")
+        min_allowed = float("-inf")
         for tag in reserved_tags:
             requirements = self.reserved_map[tag.short_base_tag]
-            this_min = requirements['minNonDefSubgroups']
+            this_min = requirements["minNonDefSubgroups"]
             if this_min is not None and this_min > min_allowed:
                 min_allowed = this_min
-            this_max = requirements['maxNonDefSubgroups']
+            this_max = requirements["maxNonDefSubgroups"]
             if this_max is not None and this_max < max_allowed:
                 max_allowed = this_max
         if max_allowed < min_allowed and len(reserved_tags) > 1:
@@ -155,7 +159,7 @@ class ReservedChecker:
         return [requires_defs, defs]
 
     def get_incompatible(self, tag, reserved_tags) -> list:
-        """ Return the list of tags that cannot be in the same group with tag.
+        """Return the list of tags that cannot be in the same group with tag.
 
         Parameters:
             tag (HedTag): Reserved tag to be tested.
@@ -167,8 +171,9 @@ class ReservedChecker:
         """
         requirements = self.reserved_map[tag.short_base_tag]
         other_allowed = requirements["otherAllowedNonDefTags"]
-        incompatible = [this_tag for this_tag in reserved_tags
-                        if this_tag.short_base_tag not in other_allowed and this_tag != tag]
+        incompatible = [
+            this_tag for this_tag in reserved_tags if this_tag.short_base_tag not in other_allowed and this_tag != tag
+        ]
         return incompatible
 
     # Additional methods for other checks should be implemented here following similar patterns.

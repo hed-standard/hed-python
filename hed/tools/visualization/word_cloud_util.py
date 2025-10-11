@@ -1,4 +1,5 @@
-""" Support utilities for word cloud generation. """
+"""Support utilities for word cloud generation."""
+
 import random
 from random import Random
 
@@ -9,7 +10,7 @@ import wordcloud as wcloud
 
 
 def generate_contour_svg(wc, width, height):
-    """ Generate an SVG contour mask based on a word cloud object and dimensions.
+    """Generate an SVG contour mask based on a word cloud object and dimensions.
 
     Parameters:
         wc (WordCloud): The word cloud object.
@@ -26,7 +27,7 @@ def generate_contour_svg(wc, width, height):
 
 
 def _get_contour_mask(wc, width, height):
-    """ Slightly tweaked copy of internal WorldCloud function to allow transparency for mask.
+    """Slightly tweaked copy of internal WorldCloud function to allow transparency for mask.
 
     Parameters:
         wc (WordCloud): Representation of the word cloud.
@@ -74,7 +75,7 @@ def _draw_contour(wc, img: Image):
     contour = Image.fromarray(contour)
     contour = contour.filter(ImageFilter.GaussianBlur(radius=radius))
     contour = np.array(contour) > 0
-    if img.mode == 'RGBA':
+    if img.mode == "RGBA":
         contour = np.dstack((contour, contour, contour, contour))
     else:
         contour = np.dstack((contour, contour, contour))
@@ -92,7 +93,7 @@ wcloud.WordCloud._draw_contour = _draw_contour
 
 
 def _numpy_to_svg(contour, radius=1, color="black"):
-    """ Convert a numpy array to SVG.
+    """Convert a numpy array to SVG.
 
     Parameters:
         contour (np.Array): Image to be converted.
@@ -107,7 +108,7 @@ def _numpy_to_svg(contour, radius=1, color="black"):
     for y, x in points:
         svg_elements.append(f'<circle cx="{x}" cy="{y}" r="{radius}" stroke="{color}" fill="{color}" />')
 
-    return '\n'.join(svg_elements)
+    return "\n".join(svg_elements)
 
 
 def random_color_darker(random_state=None):
@@ -126,8 +127,9 @@ def random_color_darker(random_state=None):
 
 
 class ColormapColorFunc:
-    """ Represents a colormap. """
-    def __init__(self, colormap='nipy_spectral', color_range=(0.0, 0.5), color_step_range=(0.15, 0.25)):
+    """Represents a colormap."""
+
+    def __init__(self, colormap="nipy_spectral", color_range=(0.0, 0.5), color_step_range=(0.15, 0.25)):
         """Initialize a word cloud color generator.
 
         Parameters:
@@ -146,7 +148,7 @@ class ColormapColorFunc:
         self.current_fraction = random.uniform(0, 1)  # Start at a random point
 
     def color_func(self, word, font_size, position, orientation, random_state=None, **kwargs):
-        """ Update the current color fraction and wrap around if necessary. """
+        """Update the current color fraction and wrap around if necessary."""
         color_step = random.uniform(*self.color_step_range)
         self.current_fraction = (self.current_fraction + color_step) % 1.0
 

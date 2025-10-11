@@ -13,7 +13,7 @@ from hed.errors import ErrorHandler
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
         cls.base_data_dir = base_data_dir
         hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
@@ -21,8 +21,9 @@ class Test(unittest.TestCase):
         cls.json_filename = json_filename
         json_def_filename = os.path.join(base_data_dir, "sidecar_tests/both_types_events_with_defs.json")
         cls.json_def_filename = json_def_filename
-        json_without_definitions_filename = \
-            os.path.join(base_data_dir, "sidecar_tests/both_types_events_without_definitions.json")
+        json_without_definitions_filename = os.path.join(
+            base_data_dir, "sidecar_tests/both_types_events_without_definitions.json"
+        )
         json_errors_filename = os.path.join(base_data_dir, "sidecar_tests/json_errors.json")
         json_errors_filename_minor = os.path.join(base_data_dir, "sidecar_tests/json_errors_minor.json")
         cls.default_sidecar = Sidecar(json_filename)
@@ -41,7 +42,7 @@ class Test(unittest.TestCase):
 
     def test_file_not_found(self):
         with self.assertRaises(HedFileError):
-            Sidecar('nonexistent_file.json')
+            Sidecar("nonexistent_file.json")
 
     def test_invalid_input_type_int(self):
         with self.assertRaises(HedFileError):
@@ -49,7 +50,7 @@ class Test(unittest.TestCase):
 
     def test_invalid_input_type_dict(self):
         with self.assertRaises(HedFileError):
-            Sidecar({'key': 'value'})
+            Sidecar({"key": "value"})
 
     def test_invalid_filenames(self):
         # Handle missing or invalid files.
@@ -74,7 +75,7 @@ class Test(unittest.TestCase):
         invalid_json = "invalidxmlfile.json"
         with self.assertRaises(HedFileError) as context:
             Sidecar(invalid_json)
-        self.assertEqual(context.exception.args[0], 'fileNotFound')
+        self.assertEqual(context.exception.args[0], "fileNotFound")
 
     def test_add_json_string(self):
         with open(self.json_filename) as file:
@@ -105,8 +106,7 @@ class Test(unittest.TestCase):
         extra_def_dict = DefinitionDict()
         extra_def_dict.check_for_definitions(hed_string)
 
-        validation_issues2 = self.json_without_definitions_sidecar.validate(self.hed_schema,
-                                                                            extra_def_dicts=extra_def_dict)
+        validation_issues2 = self.json_without_definitions_sidecar.validate(self.hed_schema, extra_def_dicts=extra_def_dict)
         # this removes one undef matched error
         self.assertEqual(len(validation_issues2), 7)
 
@@ -116,14 +116,14 @@ class Test(unittest.TestCase):
         duplicate_dict = sidecar.extract_definitions(hed_schema=self.hed_schema)
         issues = sidecar.validate(self.hed_schema, extra_def_dicts=duplicate_dict, error_handler=ErrorHandler(False))
         self.assertEqual(len(issues), 2)
-        errors = [issue for issue in issues if issue['severity'] < ErrorSeverity.WARNING]
+        errors = [issue for issue in issues if issue["severity"] < ErrorSeverity.WARNING]
         self.assertEqual(len(errors), 0)
         test_dict = {"jsonfiledef3": DefinitionEntry("jsonfiledef3", None, False, None)}
         issues2 = sidecar.validate(self.hed_schema, extra_def_dicts=test_dict, error_handler=ErrorHandler(False))
         self.assertEqual(len(issues2), 3)
-        errors = [issue for issue in issues2 if issue['severity'] < ErrorSeverity.WARNING]
+        errors = [issue for issue in issues2 if issue["severity"] < ErrorSeverity.WARNING]
         self.assertEqual(len(errors), 1)
-        self.assertTrue(issues2[0]['code'], ValidationErrors.DEFINITION_INVALID)
+        self.assertTrue(issues2[0]["code"], ValidationErrors.DEFINITION_INVALID)
 
     def test_save_load(self):
         sidecar = Sidecar(self.json_def_filename)
@@ -157,6 +157,7 @@ class Test(unittest.TestCase):
 
     def test_set_hed_strings(self):
         from hed.models import df_util
+
         sidecar = Sidecar(os.path.join(self.base_data_dir, "sidecar_tests/short_tag_test.json"))
 
         for column_data in sidecar:
@@ -176,5 +177,5 @@ class Test(unittest.TestCase):
         self.assertEqual(sidecar.loaded_dict, sidecar_short.loaded_dict)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

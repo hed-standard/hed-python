@@ -1,4 +1,4 @@
-""" Models for BIDS datasets and files. """
+"""Models for BIDS datasets and files."""
 
 from .bids_dataset import BidsDataset
 from .bids_file import BidsFile

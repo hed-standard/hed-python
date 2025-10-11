@@ -34,15 +34,15 @@ class Test(unittest.TestCase):
         status.add("olives", "Test message 4", level="ERROR")
         stuff1 = status.get_log_string()
         self.assertGreater(len(stuff1), 0, "get_log should contain messages.")
-        self.assertEqual(stuff1.count('\n'), 7, "get_log should output right number of lines.")
+        self.assertEqual(stuff1.count("\n"), 7, "get_log should output right number of lines.")
         status.add("banana", "Test message 5")
         stuff2 = status.get_log_string()
-        self.assertEqual(stuff2.count('\n'), 9, "get_log should output right number of lines.")
+        self.assertEqual(stuff2.count("\n"), 9, "get_log should output right number of lines.")
         stuff3 = status.get_log_string(level="ERROR")
-        self.assertEqual(stuff3.count('\n'), 7, "get_log should output right number of lines when level is given.")
+        self.assertEqual(stuff3.count("\n"), 7, "get_log should output right number of lines when level is given.")
 
     def test_get_log(self):
-        status = HedLogger(name='help')
+        status = HedLogger(name="help")
         status.add("baloney", "Test message 1", level="ERROR")
         status.add("baloney", "Test message 2", level="ERROR")
         status.add("bacon", "Test message 3", level="ERROR")
@@ -55,5 +55,5 @@ class Test(unittest.TestCase):
         self.assertEqual(len(oranges), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

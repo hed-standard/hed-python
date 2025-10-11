@@ -10,7 +10,7 @@ from hed.validator.sidecar_validator import SidecarValidator
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
         cls.base_data_dir = base_data_dir
         hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
         cls.hed_schema = schema.load_schema(hed_xml_file)
@@ -54,15 +54,9 @@ class Test(unittest.TestCase):
             "{column, Event, Action",
             "This is a {malformed {input string}} with extra {opening brackets",
             "{Event{Action}}",
-            "Event, Action}"
+            "Event, Action}",
         ]
-        error_counts = [
-            1,
-            1,
-            3,
-            2,
-            1
-        ]
+        error_counts = [1, 1, 3, 2, 1]
 
         for string, error_count in zip(hed_strings, error_counts):
             issues = SidecarValidator._find_non_matching_braces(string)
@@ -70,7 +64,7 @@ class Test(unittest.TestCase):
             self.assertEqual(len(issues), error_count)
 
     def test_bad_structure_na(self):
-        sidecar_with_na_json = '''
+        sidecar_with_na_json = """
 {
   "column3": {
        "HED": {
@@ -79,13 +73,13 @@ class Test(unittest.TestCase):
        }
    }
 }
-'''
+"""
         sidecar = Sidecar(io.StringIO(sidecar_with_na_json))
         issues = sidecar.validate(self.hed_schema)
         self.assertEqual(len(issues), 1)
 
     def test_bad_structure_HED_in_ignored(self):
-        sidecar_with_na_json = '''
+        sidecar_with_na_json = """
     {
       "column3": {
            "other": {
@@ -99,13 +93,13 @@ class Test(unittest.TestCase):
            "subbad": ["thing1", "HED", "Other"]
        }
     }
-    '''
+    """
         sidecar = Sidecar(io.StringIO(sidecar_with_na_json))
         issues = sidecar.validate(self.hed_schema)
         self.assertEqual(len(issues), 2)
 
     def test_bad_pound_signs(self):
-        sidecar_json = '''
+        sidecar_json = """
     {
       "columnCat": {
            "HED": {
@@ -120,13 +114,13 @@ class Test(unittest.TestCase):
             "HED": "Description/#, Weight/# g"
        }
     }
-    '''
+    """
         sidecar = Sidecar(io.StringIO(sidecar_json))
         issues = sidecar.validate(self.hed_schema)
         self.assertEqual(len(issues), 3)
 
     def test_missing_hed(self):
-        sidecar_with_hed_missing = '''
+        sidecar_with_hed_missing = """
         {
             "event_code": {
                 "HED": {
@@ -136,43 +130,43 @@ class Test(unittest.TestCase):
             "response": "Label/#",
             "other": "Description"
         }
-    '''
+    """
         sidecar = Sidecar(io.StringIO(sidecar_with_hed_missing))
         issues = sidecar.validate(self.hed_schema)
         self.assertEqual(len(issues), 1)
 
     def test_invalid_list(self):
-        sidecar_json = '''
+        sidecar_json = """
         {
           "columnInvalidList": {
                "HED": ["This", "should", "be", "a", "dictionary", "not", "a", "list"]
            }
         }
-        '''
+        """
         self.run_test(sidecar_json, expected_number_of_issues=1)
 
     def test_invalid_number(self):
-        sidecar_json = '''
+        sidecar_json = """
         {
           "columnInvalidNumber": {
                "HED": 12345
            }
         }
-        '''
+        """
         self.run_test(sidecar_json, expected_number_of_issues=1)
 
     def test_invalid_boolean(self):
-        sidecar_json = '''
+        sidecar_json = """
         {
           "columnInvalidBoolean": {
                "HED": true
            }
         }
-        '''
+        """
         self.run_test(sidecar_json, expected_number_of_issues=1)
 
     def test_mixed_category(self):
-        sidecar_json = '''
+        sidecar_json = """
         {
           "columnMixedCategory": {
                "HED": {
@@ -181,7 +175,7 @@ class Test(unittest.TestCase):
                }
            }
         }
-        '''
+        """
         self.run_test(sidecar_json, expected_number_of_issues=1)
 
     def run_test(self, sidecar_json, expected_number_of_issues):

@@ -1,9 +1,11 @@
-""" Classes representing parsed query expressions. """
+"""Classes representing parsed query expressions."""
+
 from hed.models.query_util import SearchResult
 
 
 class Expression:
-    """ Base class for parsed query expressions. """
+    """Base class for parsed query expressions."""
+
     def __init__(self, token, left=None, right=None):
         self.left = left
         self.right = right
@@ -44,12 +46,12 @@ class Expression:
     def handle_expr(self, hed_group, exact=False):
         """Handles parsing the given expression, recursively down the list as needed.
 
-           BaseClass implementation is search terms.
+        BaseClass implementation is search terms.
 
-           Parameters:
-               hed_group(HedGroup): The object to search
-               exact(bool): If True, we are only looking for groups containing this term directly, not descendants.
-           """
+        Parameters:
+            hed_group(HedGroup): The object to search
+            exact(bool): If True, we are only looking for groups containing this term directly, not descendants.
+        """
         if self._match_mode == 2:
             groups_found = hed_group.find_wildcard_tags([self.token.text], recursive=True, include_groups=2)
         elif self._match_mode:
@@ -196,8 +198,11 @@ class ExpressionNegation(Expression):
         # This simpler version works on python >= 3.9
         # negated_groups = [SearchResult(group, []) for group in hed_group.get_all_groups() if group not in groups]
         # Python 3.7/8 compatible version.
-        negated_groups = [SearchResult(group, []) for group in hed_group.get_all_groups()
-                          if not any(group is found_group.group for found_group in found_groups)]
+        negated_groups = [
+            SearchResult(group, [])
+            for group in hed_group.get_all_groups()
+            if not any(group is found_group.group for found_group in found_groups)
+        ]
 
         return negated_groups
 

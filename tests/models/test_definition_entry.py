@@ -9,7 +9,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
         hed_schema = load_schema_version("8.4.0")
         cls.contents1 = HedString("(Sensory-event)", hed_schema)
         cls.contents2 = HedString("(Agent-action)", hed_schema)
@@ -73,5 +73,5 @@ class Test(unittest.TestCase):
         self.assertFalse(entry1 == entry7)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

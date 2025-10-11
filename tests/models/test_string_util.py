@@ -3,7 +3,8 @@ from hed import HedString, load_schema_version
 from hed.models.string_util import split_base_tags, split_def_tags, gather_descriptions, cleanup_empties
 import copy
 
-hed_schema_global = load_schema_version('8.4.0')
+hed_schema_global = load_schema_version("8.4.0")
+
 
 class TestHedStringSplit(unittest.TestCase):
     @classmethod
@@ -34,38 +35,38 @@ class TestHedStringSplit(unittest.TestCase):
         self.assertTrue(all(tag not in [str(t) for t in remaining_hed.get_all_tags()] for tag in base_tags))
 
     def test_case_1(self):
-        hed_string = HedString('Memorize,Action,Area', self.schema)
-        base_tags = ['Area', 'Action']
-        expected_string = 'Memorize'
-        expected_string2 = 'Memorize'
+        hed_string = HedString("Memorize,Action,Area", self.schema)
+        base_tags = ["Area", "Action"]
+        expected_string = "Memorize"
+        expected_string2 = "Memorize"
         self.check_split_base_tags(hed_string, base_tags, expected_string, expected_string2)
 
     def test_case_2(self):
-        hed_string = HedString('Area,LightBlue,Handedness', self.schema)
-        base_tags = ['Area', 'LightBlue']
-        expected_string = 'Handedness'
-        expected_string2 = 'Handedness'
+        hed_string = HedString("Area,LightBlue,Handedness", self.schema)
+        base_tags = ["Area", "LightBlue"]
+        expected_string = "Handedness"
+        expected_string2 = "Handedness"
         self.check_split_base_tags(hed_string, base_tags, expected_string, expected_string2)
 
     def test_case_3(self):
-        hed_string = HedString('(Wink,Communicate),Face,HotPink', self.schema)
-        base_tags = ['Wink', 'Face']
-        expected_string = '(Communicate),HotPink'
+        hed_string = HedString("(Wink,Communicate),Face,HotPink", self.schema)
+        base_tags = ["Wink", "Face"]
+        expected_string = "(Communicate),HotPink"
         expected_string2 = "HotPink"
         self.check_split_base_tags(hed_string, base_tags, expected_string, expected_string2)
 
     def test_case_4(self):
-        hed_string = HedString('(Area,(LightBlue,Handedness,(Wink,Communicate))),Face,HotPink', self.schema)
-        base_tags = ['Area', 'LightBlue']
-        expected_string = '((Handedness,(Wink,Communicate))),Face,HotPink'
-        expected_string2 = 'Face,HotPink'
+        hed_string = HedString("(Area,(LightBlue,Handedness,(Wink,Communicate))),Face,HotPink", self.schema)
+        base_tags = ["Area", "LightBlue"]
+        expected_string = "((Handedness,(Wink,Communicate))),Face,HotPink"
+        expected_string2 = "Face,HotPink"
         self.check_split_base_tags(hed_string, base_tags, expected_string, expected_string2)
 
     def test_case_5(self):
-        hed_string = HedString('(Memorize,(Action,(Area,LightBlue),Handedness),Wink)', self.schema)
-        base_tags = ['Area', 'LightBlue']
-        expected_string = '(Memorize,(Action,Handedness),Wink)'
-        expected_string2 = '(Memorize,(Action,Handedness),Wink)'
+        hed_string = HedString("(Memorize,(Action,(Area,LightBlue),Handedness),Wink)", self.schema)
+        base_tags = ["Area", "LightBlue"]
+        expected_string = "(Memorize,(Action,Handedness),Wink)"
+        expected_string2 = "(Memorize,(Action,Handedness),Wink)"
         self.check_split_base_tags(hed_string, base_tags, expected_string, expected_string2)
 
 
@@ -98,39 +99,40 @@ class TestHedStringSplitDef(unittest.TestCase):
         self.assertTrue(all(tag.short_base_tag != "Def" for tag in remaining_hed2.get_all_tags()))
 
     def test_case_1(self):
-        hed_string = HedString('Memorize,Action,def/CustomTag1', self.schema)
-        def_names = ['CustomTag1']
-        expected_string = 'Memorize,Action'
-        expected_string2 = 'Memorize,Action'
+        hed_string = HedString("Memorize,Action,def/CustomTag1", self.schema)
+        def_names = ["CustomTag1"]
+        expected_string = "Memorize,Action"
+        expected_string2 = "Memorize,Action"
         self.check_split_def_tags(hed_string, def_names, expected_string, expected_string2)
 
     def test_case_2(self):
-        hed_string = HedString('def/CustomTag1,LightBlue,def/CustomTag2/123', self.schema)
-        def_names = ['CustomTag1', 'CustomTag2']
-        expected_string = 'LightBlue'
-        expected_string2 = 'LightBlue'
+        hed_string = HedString("def/CustomTag1,LightBlue,def/CustomTag2/123", self.schema)
+        def_names = ["CustomTag1", "CustomTag2"]
+        expected_string = "LightBlue"
+        expected_string2 = "LightBlue"
         self.check_split_def_tags(hed_string, def_names, expected_string, expected_string2)
 
     def test_case_3(self):
-        hed_string = HedString('(def/CustomTag1,Communicate),Face,def/CustomTag3/abc', self.schema)
-        def_names = ['CustomTag1', 'CustomTag3']
-        expected_string = '(Communicate),Face'
-        expected_string2 = 'Face'
+        hed_string = HedString("(def/CustomTag1,Communicate),Face,def/CustomTag3/abc", self.schema)
+        def_names = ["CustomTag1", "CustomTag3"]
+        expected_string = "(Communicate),Face"
+        expected_string2 = "Face"
         self.check_split_def_tags(hed_string, def_names, expected_string, expected_string2)
 
     def test_case_4(self):
-        hed_string = HedString('(def/CustomTag1,(LightBlue,def/CustomTag2/123,(Wink,Communicate))),' +
-                               'Face,def/CustomTag3/abc', self.schema)
-        def_names = ['CustomTag1', 'CustomTag2', 'CustomTag3']
-        expected_string = '((LightBlue,(Wink,Communicate))),Face'
-        expected_string2 = 'Face'
+        hed_string = HedString(
+            "(def/CustomTag1,(LightBlue,def/CustomTag2/123,(Wink,Communicate)))," + "Face,def/CustomTag3/abc", self.schema
+        )
+        def_names = ["CustomTag1", "CustomTag2", "CustomTag3"]
+        expected_string = "((LightBlue,(Wink,Communicate))),Face"
+        expected_string2 = "Face"
         self.check_split_def_tags(hed_string, def_names, expected_string, expected_string2)
 
     def test_case_5(self):
-        hed_string = HedString('(Memorize,(Action,(def/CustomTag1,LightBlue),def/CustomTag2/123),Wink)', self.schema)
-        def_names = ['CustomTag1', 'CustomTag2']
-        expected_string = '(Memorize,(Action,(LightBlue)),Wink)'
-        expected_string2 = '(Memorize,Wink)'
+        hed_string = HedString("(Memorize,(Action,(def/CustomTag1,LightBlue),def/CustomTag2/123),Wink)", self.schema)
+        def_names = ["CustomTag1", "CustomTag2"]
+        expected_string = "(Memorize,(Action,(LightBlue)),Wink)"
+        expected_string2 = "(Memorize,Wink)"
         self.check_split_def_tags(hed_string, def_names, expected_string, expected_string2)
 
 
@@ -258,5 +260,5 @@ class TestCleanupEmpties(unittest.TestCase):
         self.check_expression(tests)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,7 @@
 """
 Utilities to support HED searches based on strings.
 """
+
 import re
 from itertools import combinations, product
 from collections import defaultdict
@@ -8,7 +9,7 @@ import pandas as pd
 
 
 def find_matching(series, search_string, regex=False):
-    """ Find lines in the series that match the search string and returns a mask.
+    """Find lines in the series that match the search string and returns a mask.
 
     Syntax Rules:
         - '@': Prefixing a term in the search string means the term must appear anywhere within a line.
@@ -39,7 +40,7 @@ def find_matching(series, search_string, regex=False):
     """
     if not regex:
         # Replace *'s with a reasonable value for people who don't know regex
-        search_string = re.sub(r'(?<!\.)\*', '.*?', search_string)
+        search_string = re.sub(r"(?<!\.)\*", ".*?", search_string)
     anywhere_words, negative_words, specific_words = find_words(search_string)
     # If we have no nesting or anywhere words, assume they don't care about level
     if "(" not in search_string and "@" not in search_string:
@@ -74,7 +75,7 @@ def find_matching(series, search_string, regex=False):
 
 
 def _get_word_indexes(series, word):
-    pattern = r'(?:[ ,()]|^)' + word + r'(?:[ ,()]|$)'
+    pattern = r"(?:[ ,()]|^)" + word + r"(?:[ ,()]|$)"
     matches = series.str.contains(pattern, regex=True)
     return set(matches[matches].index.tolist())
 
@@ -92,7 +93,7 @@ def _verify_basic_words(series, anywhere_words, negative_words):
 
 
 def find_words(search_string):
-    """ Extract words in the search string based on their prefixes.
+    """Extract words in the search string based on their prefixes.
 
     Parameters:
         search_string (str): The search query string to parse.
@@ -105,7 +106,7 @@ def find_words(search_string):
             - Words with no prefix
     """
     # Match sequences of characters that are not commas or parentheses.
-    pattern = r'[^,()]+'
+    pattern = r"[^,()]+"
     words = re.findall(pattern, search_string)
 
     # Remove any extraneous whitespace from each word
@@ -119,7 +120,7 @@ def find_words(search_string):
 
 
 def check_parentheses(text):
-    """ Check for balanced parentheses in the given text and returns the unbalanced ones.
+    """Check for balanced parentheses in the given text and returns the unbalanced ones.
 
     Parameters:
         text (str): The text to be checked for balanced parentheses.
@@ -133,16 +134,16 @@ def check_parentheses(text):
 
     """
     # Extract all parentheses from the text
-    all_parentheses = ''.join(re.findall('[()]', text))
+    all_parentheses = "".join(re.findall("[()]", text))
 
     stack = []
     remaining_parentheses = []
 
     # Loop through all parentheses and find balanced ones
     for p in all_parentheses:
-        if p == '(':
+        if p == "(":
             stack.append(p)
-        elif p == ')' and stack:
+        elif p == ")" and stack:
             stack.pop()
         else:
             remaining_parentheses.append(p)
@@ -150,20 +151,20 @@ def check_parentheses(text):
     # Add unbalanced ( back to remaining parentheses
     remaining_parentheses.extend(stack)
 
-    return ''.join(remaining_parentheses)
+    return "".join(remaining_parentheses)
 
 
 def reverse_and_flip_parentheses(s):
-    """ Reverse a string and flips the parentheses.
+    """Reverse a string and flips the parentheses.
 
-        Parameters:
-            s (str): The string to be reversed and have its parentheses flipped.
+    Parameters:
+        s (str): The string to be reversed and have its parentheses flipped.
 
-        Returns:
-            str: The reversed string with flipped parentheses.
+    Returns:
+        str: The reversed string with flipped parentheses.
 
-        Notes:
-            - The function takes into account only the '(' and ')' characters for flipping.
+    Notes:
+        - The function takes into account only the '(' and ')' characters for flipping.
     """
     # Reverse the string
     reversed_s = s[::-1]
@@ -174,7 +175,7 @@ def reverse_and_flip_parentheses(s):
 
 
 def construct_delimiter_map(text, words):
-    """ Based on an input search query and list of words, return the parenthetical delimiters between them.
+    """Based on an input search query and list of words, return the parenthetical delimiters between them.
 
     Parameters:
         text (str): The search query.
@@ -186,7 +187,7 @@ def construct_delimiter_map(text, words):
     locations = {}
     # Find the locations of each word in the text
     for word in words:
-        for match in re.finditer(r'(?:[ ,()]|^)(' + word + r')(?:[ ,()]|$)', text):
+        for match in re.finditer(r"(?:[ ,()]|^)(" + word + r")(?:[ ,()]|$)", text):
             start_index = match.start(1)
             end_index = match.end(1)
             match_length = end_index - start_index
@@ -202,15 +203,17 @@ def construct_delimiter_map(text, words):
         delimiter_map[(word1, word2)] = check_parentheses(delimiter_text)
 
     # Add the reversed version of the above
-    reverse_map = {(word2, word1): reverse_and_flip_parentheses(delimiter_text) for ((word1, word2), delimiter_text) in
-                   delimiter_map.items()}
+    reverse_map = {
+        (word2, word1): reverse_and_flip_parentheses(delimiter_text)
+        for ((word1, word2), delimiter_text) in delimiter_map.items()
+    }
     delimiter_map.update(reverse_map)
 
     return delimiter_map
 
 
 def verify_search_delimiters(text, specific_words, delimiter_map):
-    """ Verify that the text contains specific words with expected delimiters between them.
+    """Verify that the text contains specific words with expected delimiters between them.
 
     Parameters:
         text (str): The text to search in.
@@ -224,7 +227,7 @@ def verify_search_delimiters(text, specific_words, delimiter_map):
 
     # Find all locations for each word in the text
     for word in specific_words:
-        for match in re.finditer(r'(?:[ ,()]|^)(' + word + r')(?:[ ,()]|$)', text):
+        for match in re.finditer(r"(?:[ ,()]|^)(" + word + r")(?:[ ,()]|$)", text):
             start_index = match.start(1)
             matched_word = match.group(1)
             locations[word].append((start_index, len(matched_word), word))

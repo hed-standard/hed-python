@@ -1,4 +1,5 @@
-""" Column type for a column in a ColumnMapper. """
+"""Column type for a column in a ColumnMapper."""
+
 from enum import Enum
 from typing import Union
 
@@ -8,10 +9,11 @@ import copy
 
 
 class ColumnType(Enum):
-    """ The overall column_type of a column in column mapper, e.g. treat it as HED tags.
+    """The overall column_type of a column in column mapper, e.g. treat it as HED tags.
 
-        Mostly internal to column mapper related code
+    Mostly internal to column mapper related code
     """
+
     Unknown = None
     # Do not return this column at all
     Ignore = "ignore"
@@ -24,10 +26,10 @@ class ColumnType(Enum):
 
 
 class ColumnMetadata:
-    """ Column in a ColumnMapper. """
+    """Column in a ColumnMapper."""
 
     def __init__(self, column_type=None, name=None, source=None):
-        """ A single column entry in the column mapper.
+        """A single column entry in the column mapper.
 
         Parameters:
             column_type (ColumnType or None): How to treat this column when reading data.
@@ -43,7 +45,7 @@ class ColumnMetadata:
 
     @property
     def hed_dict(self) -> Union[dict, str]:
-        """ The HED strings for any given entry.
+        """The HED strings for any given entry.
 
         Returns:
             Union[dict, str]: A string or dict of strings for this column.
@@ -55,7 +57,7 @@ class ColumnMetadata:
 
     @property
     def source_dict(self) -> Union[dict, str]:
-        """ The raw dict for this entry(if it exists).
+        """The raw dict for this entry(if it exists).
 
         Returns:
             Union[dict, str]: A string or dict of strings for this column.
@@ -65,7 +67,7 @@ class ColumnMetadata:
         return self._source[self.column_name]
 
     def get_hed_strings(self) -> pd.Series:
-        """ Return the HED strings for this entry as a series.
+        """Return the HED strings for this entry as a series.
 
         Returns:
             pd.Series: The HED strings for this series.(potentially empty).
@@ -78,7 +80,7 @@ class ColumnMetadata:
         return series
 
     def set_hed_strings(self, new_strings) -> bool:
-        """ Set the HED strings for this entry.
+        """Set the HED strings for this entry.
 
         Parameters:
             new_strings (pd.Series, dict, or str): The HED strings to set.
@@ -107,7 +109,7 @@ class ColumnMetadata:
 
     @staticmethod
     def _detect_column_type(dict_for_entry, basic_validation=True):
-        """ Determine the ColumnType of a given json entry.
+        """Determine the ColumnType of a given json entry.
 
         Parameters:
             dict_for_entry (dict): The loaded json entry a specific column.
@@ -141,8 +143,8 @@ class ColumnMetadata:
         return ColumnType.Value
 
     @staticmethod
-    def expected_pound_sign_count(column_type)-> tuple[int, int]:
-        """ Return how many pound signs a column string should have.
+    def expected_pound_sign_count(column_type) -> tuple[int, int]:
+        """Return how many pound signs a column string should have.
 
         Parameters:
             column_type (ColumnType): The type of the column.
@@ -165,6 +167,7 @@ class ColumnMetadata:
     def _get_unvalidated_data(self):
         """Returns a copy with less preliminary validation done(such as verifying all data types)"""
         return_copy = copy.deepcopy(self)
-        return_copy.column_type = ColumnMetadata._detect_column_type(dict_for_entry=return_copy.source_dict,
-                                                                     basic_validation=False)
+        return_copy.column_type = ColumnMetadata._detect_column_type(
+            dict_for_entry=return_copy.source_dict, basic_validation=False
+        )
         return return_copy

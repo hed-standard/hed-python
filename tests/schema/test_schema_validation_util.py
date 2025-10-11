@@ -33,16 +33,20 @@ class Test(unittest.TestCase):
             "@invalidcharatstart",
         ]
         expected_issues = [
-            ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, test_terms[0], char_index=0,
-                                      problem_char="i"),
+            ErrorHandler.format_error(
+                SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, test_terms[0], char_index=0, problem_char="i"
+            ),
             [],
             [],
-            ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, test_terms[3], char_index=11,
-                                      problem_char="#"),
-            ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, test_terms[4], char_index=0,
-                                      problem_char="@")
-            + ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, test_terms[4], char_index=0,
-                                        problem_char="@"),
+            ErrorHandler.format_error(
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, test_terms[3], char_index=11, problem_char="#"
+            ),
+            ErrorHandler.format_error(
+                SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, test_terms[4], char_index=0, problem_char="@"
+            )
+            + ErrorHandler.format_error(
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, test_terms[4], char_index=0, problem_char="@"
+            ),
         ]
         self.validate_term_base(test_terms, expected_issues)
 
@@ -51,21 +55,24 @@ class Test(unittest.TestCase):
             "This is a tag description with no invalid characters.",
             "This is (also) a tag description with no invalid characters.  -_:;./()+ ^",
             "This description has no invalid characters, as commas are allowed",
-            "This description has multiple invalid characters at the end {}[]"
+            "This description has multiple invalid characters at the end {}[]",
         ]
         expected_issues = [
             [],
             [],
             [],
-            ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
-                                      char_index=60, problem_char="{")
-            + ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
-                                        char_index=61, problem_char="}")
-            + ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
-                                        char_index=62, problem_char="[")
-            + ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy",
-                                        char_index=63, problem_char="]")
-
+            ErrorHandler.format_error(
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy", char_index=60, problem_char="{"
+            )
+            + ErrorHandler.format_error(
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy", char_index=61, problem_char="}"
+            )
+            + ErrorHandler.format_error(
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy", char_index=62, problem_char="["
+            )
+            + ErrorHandler.format_error(
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy", char_index=63, problem_char="]"
+            ),
         ]
         self.validate_desc_base(test_descs, expected_issues)
 

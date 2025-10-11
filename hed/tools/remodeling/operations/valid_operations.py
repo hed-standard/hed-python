@@ -1,4 +1,4 @@
-""" The valid operations for the remodeling tools. """
+"""The valid operations for the remodeling tools."""
 
 from hed.tools.remodeling.operations.factor_column_op import FactorColumnOp
 from hed.tools.remodeling.operations.factor_hed_tags_op import FactorHedTagsOp
@@ -22,23 +22,23 @@ from hed.tools.remodeling.operations.summarize_hed_validation_op import Summariz
 
 valid_operations = {
     # 'convert_columns': ConvertColumnsOp,
-    'factor_column': FactorColumnOp,
-    'factor_hed_tags': FactorHedTagsOp,
-    'factor_hed_type': FactorHedTypeOp,
-    'merge_consecutive': MergeConsecutiveOp,
-    'number_groups': NumberGroupsOp,
-    'number_rows': NumberRowsOp,
-    'remap_columns': RemapColumnsOp,
-    'remove_columns': RemoveColumnsOp,
-    'remove_rows': RemoveRowsOp,
-    'rename_columns': RenameColumnsOp,
-    'reorder_columns': ReorderColumnsOp,
-    'split_rows': SplitRowsOp,
-    'summarize_column_names': SummarizeColumnNamesOp,
-    'summarize_column_values': SummarizeColumnValuesOp,
-    'summarize_definitions': SummarizeDefinitionsOp,
-    'summarize_hed_tags': SummarizeHedTagsOp,
-    'summarize_hed_type': SummarizeHedTypeOp,
-    'summarize_hed_validation': SummarizeHedValidationOp,
-    'summarize_sidecar_from_events': SummarizeSidecarFromEventsOp
+    "factor_column": FactorColumnOp,
+    "factor_hed_tags": FactorHedTagsOp,
+    "factor_hed_type": FactorHedTypeOp,
+    "merge_consecutive": MergeConsecutiveOp,
+    "number_groups": NumberGroupsOp,
+    "number_rows": NumberRowsOp,
+    "remap_columns": RemapColumnsOp,
+    "remove_columns": RemoveColumnsOp,
+    "remove_rows": RemoveRowsOp,
+    "rename_columns": RenameColumnsOp,
+    "reorder_columns": ReorderColumnsOp,
+    "split_rows": SplitRowsOp,
+    "summarize_column_names": SummarizeColumnNamesOp,
+    "summarize_column_values": SummarizeColumnValuesOp,
+    "summarize_definitions": SummarizeDefinitionsOp,
+    "summarize_hed_tags": SummarizeHedTagsOp,
+    "summarize_hed_type": SummarizeHedTypeOp,
+    "summarize_hed_validation": SummarizeHedValidationOp,
+    "summarize_sidecar_from_events": SummarizeSidecarFromEventsOp,
 }

@@ -1,1 +1,1 @@
-""" Command-line interface for remodeling tools. """
+"""Command-line interface for remodeling tools."""

@@ -68,6 +68,7 @@ dependencies = [
 dev = [
     "ruff>=0.8.0",
     "codespell>=2.2.0",
+    "black>=24.0.0",
 ]
 docs = [
     "sphinx>=7.0.0",
@@ -173,3 +174,22 @@ max-complexity = 10
 
 [tool.ruff.lint.isort]
 known-first-party = ["hed"]
+
+[tool.black]
+line-length = 127
+target-version = ["py39", "py310", "py311", "py312", "py313"]
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | __pycache__
+  | build
+  | dist
+  | \.eggs
+  | .*\.egg-info
+  | hed/_version\.py
+  | spec_tests/hed-examples
+  | spec_tests/hed-specification
+)/
+'''

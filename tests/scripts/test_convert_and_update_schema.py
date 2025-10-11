@@ -13,7 +13,7 @@ class TestConvertAndUpdate(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create a temporary directory for schema files
-        cls.base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'schemas_update', 'prerelease')
+        cls.base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "schemas_update", "prerelease")
         if not os.path.exists(cls.base_path):
             os.makedirs(cls.base_path)
 

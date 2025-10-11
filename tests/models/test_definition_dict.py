@@ -18,11 +18,11 @@ class TestDefBase(TestHedBase):
             def_dict.add_definitions("(Definition/OkayDef, (White))", self.hed_schema)
             hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
             test_issues = def_dict.check_for_definitions(hed_string_obj)
-            issues = [issue for issue in test_issues if issue['severity'] < ErrorSeverity.WARNING]
+            issues = [issue for issue in test_issues if issue["severity"] < ErrorSeverity.WARNING]
             expected_params = expected_issues[test_key]
-            expected_issue = self.format_errors_fully(ErrorHandler(), hed_string=hed_string_obj,
-                                                      params=expected_params)
+            expected_issue = self.format_errors_fully(ErrorHandler(), hed_string=hed_string_obj, params=expected_params)
             self.assertCountEqual(issues, expected_issue, HedString(test_strings[test_key], self.hed_schema))
+
 
 class TestDefinitionDict(TestDefBase):
     def_contents_string = "(Item,Red)"
@@ -57,63 +57,83 @@ class TestDefinitionDict(TestDefBase):
 
     def test_definitions(self):
         test_strings = {
-            'noGroupTag': "(Definition/InvalidDef0)",
-            'placeholderNoGroupTag': "(Definition/InvalidDef1/#)",
-            'placeholderWrongSpot': "(Definition/InvalidDef1#)",
-            'twoDefTags': f"(Definition/InvalidDef1,Definition/InvalidDef2,{self.def_contents_string})",
-            'twoGroupTags': f"(Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2})",
-            'extraValidTags': "(Definition/InvalidDefA, Red, Blue)",
-            'extraOtherTags': "(Definition/InvalidDef1, Black)",
-            'duplicateDef': (f"(Definition/Def1, {self.def_contents_string}), "
-                             f"(Definition/Def1, (Green))"),
-            'duplicateDef2': (f"(Definition/Def1, {self.def_contents_string}), "
-                              f"(Definition/Def1/#, {self.placeholder_def_contents})"),
-            'defTooManyPlaceholders': self.placeholder_invalid_def_string,
-            'invalidPlaceholder': f"(Definition/InvalidDef1/InvalidPlaceholder, {self.def_contents_string})",
-            'invalidPlaceholderExtension':
-                f"(Definition/InvalidDef1/this-part-is-not-allowed/#, {self.def_contents_string})",
-            'defInGroup': "(Definition/ValidDefName, (Def/OkayDef))",
-            'defExpandInGroup': "(Definition/ValidDefName, (Def-expand/OkayDef, (White)))",
-            'doublePoundSignPlaceholder': f"(Definition/InvalidDef/##, {self.placeholder_def_contents})",
-            'doublePoundSignDiffPlaceholder': "(Definition/InvalidDef/#, (Age/##,Item/TestDef2))",
-            'placeholdersWrongSpot': "(Definition/InvalidDef/#, (Age/#,Item/TestDef2))",
+            "noGroupTag": "(Definition/InvalidDef0)",
+            "placeholderNoGroupTag": "(Definition/InvalidDef1/#)",
+            "placeholderWrongSpot": "(Definition/InvalidDef1#)",
+            "twoDefTags": f"(Definition/InvalidDef1,Definition/InvalidDef2,{self.def_contents_string})",
+            "twoGroupTags": f"(Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2})",
+            "extraValidTags": "(Definition/InvalidDefA, Red, Blue)",
+            "extraOtherTags": "(Definition/InvalidDef1, Black)",
+            "duplicateDef": (f"(Definition/Def1, {self.def_contents_string}), " f"(Definition/Def1, (Green))"),
+            "duplicateDef2": (
+                f"(Definition/Def1, {self.def_contents_string}), " f"(Definition/Def1/#, {self.placeholder_def_contents})"
+            ),
+            "defTooManyPlaceholders": self.placeholder_invalid_def_string,
+            "invalidPlaceholder": f"(Definition/InvalidDef1/InvalidPlaceholder, {self.def_contents_string})",
+            "invalidPlaceholderExtension": f"(Definition/InvalidDef1/this-part-is-not-allowed/#, {self.def_contents_string})",
+            "defInGroup": "(Definition/ValidDefName, (Def/OkayDef))",
+            "defExpandInGroup": "(Definition/ValidDefName, (Def-expand/OkayDef, (White)))",
+            "doublePoundSignPlaceholder": f"(Definition/InvalidDef/##, {self.placeholder_def_contents})",
+            "doublePoundSignDiffPlaceholder": "(Definition/InvalidDef/#, (Age/##,Item/TestDef2))",
+            "placeholdersWrongSpot": "(Definition/InvalidDef/#, (Age/#,Item/TestDef2))",
         }
         expected_results = {
-            'noGroupTag': [],
-            'placeholderNoGroupTag': self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS, "InvalidDef1/#"),
-            'placeholderWrongSpot': self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS, "InvalidDef1#") +
-            self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
-                              tag=0, def_name="InvalidDef1#"),
-            'twoDefTags': self.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED, "Definition/InvalidDef2",
-                                            "(Definition/InvalidDef1,Definition/InvalidDef2,(Item,Red))"),
-            'twoGroupTags': self.format_error(ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR,
-                                              "(Definition/InvalidDef1,(Item,Red),(Property,Blue))", 2,
-                                              ["Definition/InvalidDef1"]),
-            'extraValidTags': self.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, "Red",
-                                                "(Definition/InvalidDefA,Red,Blue)"),
-            'extraOtherTags': self.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, "Black",
-                                                "(Definition/InvalidDef1,Black)"),
-            'duplicateDef': self.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
-            'duplicateDef2': self.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
-
-            'defTooManyPlaceholders': self.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
-                                                        "TestDefPlaceholder", expected_count=1,
-                                                        tag_list=["Age/#", "Item-count/#"]),
-            'invalidPlaceholderExtension': self.format_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
-                 "Definition/InvalidDef1/this-part-is-not-allowed/#", "/", value_class="nameClass"),
-            'invalidPlaceholder': self.format_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
-                 "Definition/InvalidDef1/InvalidPlaceholder", "/", value_class="nameClass"),
-            'defInGroup': self.format_error(DefinitionErrors.DEF_TAG_IN_DEFINITION,
-                                            tag=HedTag("Def/OkayDef", self.hed_schema),
-                                            def_name="ValidDefName"),
-            'defExpandInGroup': self.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED,
-                                                  tag=HedTag("Definition/ValidDefName", self.hed_schema),
-                                                  group="(Definition/ValidDefName,(Def-expand/OkayDef,(White)))"),
-            'doublePoundSignPlaceholder': self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION,
-                                                            tag=0, def_name="InvalidDef/##"),
-            'doublePoundSignDiffPlaceholder': self.format_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
-                                                                "InvalidDef", expected_count=1, tag_list=['Age/##']),
-            'placeholdersWrongSpot': []
+            "noGroupTag": [],
+            "placeholderNoGroupTag": self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS, "InvalidDef1/#"),
+            "placeholderWrongSpot": self.format_error(DefinitionErrors.NO_DEFINITION_CONTENTS, "InvalidDef1#")
+            + self.format_error(DefinitionErrors.INVALID_DEFINITION_EXTENSION, tag=0, def_name="InvalidDef1#"),
+            "twoDefTags": self.format_error(
+                ValidationErrors.HED_RESERVED_TAG_REPEATED,
+                "Definition/InvalidDef2",
+                "(Definition/InvalidDef1,Definition/InvalidDef2,(Item,Red))",
+            ),
+            "twoGroupTags": self.format_error(
+                ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR,
+                "(Definition/InvalidDef1,(Item,Red),(Property,Blue))",
+                2,
+                ["Definition/InvalidDef1"],
+            ),
+            "extraValidTags": self.format_error(
+                ValidationErrors.HED_TAGS_NOT_ALLOWED, "Red", "(Definition/InvalidDefA,Red,Blue)"
+            ),
+            "extraOtherTags": self.format_error(
+                ValidationErrors.HED_TAGS_NOT_ALLOWED, "Black", "(Definition/InvalidDef1,Black)"
+            ),
+            "duplicateDef": self.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
+            "duplicateDef2": self.format_error(DefinitionErrors.DUPLICATE_DEFINITION, "Def1"),
+            "defTooManyPlaceholders": self.format_error(
+                DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS,
+                "TestDefPlaceholder",
+                expected_count=1,
+                tag_list=["Age/#", "Item-count/#"],
+            ),
+            "invalidPlaceholderExtension": self.format_error(
+                ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
+                "Definition/InvalidDef1/this-part-is-not-allowed/#",
+                "/",
+                value_class="nameClass",
+            ),
+            "invalidPlaceholder": self.format_error(
+                ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
+                "Definition/InvalidDef1/InvalidPlaceholder",
+                "/",
+                value_class="nameClass",
+            ),
+            "defInGroup": self.format_error(
+                DefinitionErrors.DEF_TAG_IN_DEFINITION, tag=HedTag("Def/OkayDef", self.hed_schema), def_name="ValidDefName"
+            ),
+            "defExpandInGroup": self.format_error(
+                ValidationErrors.HED_TAGS_NOT_ALLOWED,
+                tag=HedTag("Definition/ValidDefName", self.hed_schema),
+                group="(Definition/ValidDefName,(Def-expand/OkayDef,(White)))",
+            ),
+            "doublePoundSignPlaceholder": self.format_error(
+                DefinitionErrors.INVALID_DEFINITION_EXTENSION, tag=0, def_name="InvalidDef/##"
+            ),
+            "doublePoundSignDiffPlaceholder": self.format_error(
+                DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "InvalidDef", expected_count=1, tag_list=["Age/##"]
+            ),
+            "placeholdersWrongSpot": [],
         }
 
         self.check_def_base(test_strings, expected_results)
@@ -152,20 +172,18 @@ class TestDefinitionDict(TestDefBase):
     def test_add_definition(self):
         # Bad input string
         def_dict = DefinitionDict()
-        def_dict.add_definitions("(Definition/testdefplaceholder,(Acceleration/#,Item/TestDef2,Red))",
-                                  self.hed_schema)
+        def_dict.add_definitions("(Definition/testdefplaceholder,(Acceleration/#,Item/TestDef2,Red))", self.hed_schema)
         self.assertEqual(len(def_dict.issues), 2)
-        errors = [issue for issue in def_dict.issues if issue['severity'] < ErrorSeverity.WARNING]
+        errors = [issue for issue in def_dict.issues if issue["severity"] < ErrorSeverity.WARNING]
         self.assertEqual(len(errors), 1)
         self.assertEqual(len(def_dict.defs), 0)
 
         # Good input string
         def_dict2 = DefinitionDict()
-        def_dict2.add_definitions("(Definition/testdefplaceholder/#,(Acceleration/#,Item/TestDef2, Red))",
-                                  self.hed_schema)
+        def_dict2.add_definitions("(Definition/testdefplaceholder/#,(Acceleration/#,Item/TestDef2, Red))", self.hed_schema)
         self.assertEqual(len(def_dict2.issues), 1)
         self.assertEqual(len(def_dict2.defs), 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

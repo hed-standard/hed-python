@@ -1,4 +1,4 @@
-""" Data structures for HED tag handling. """
+"""Data structures for HED tag handling."""
 
 from .base_input import BaseInput
 from .column_mapper import ColumnMapper

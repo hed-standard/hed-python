@@ -1,2 +1,1 @@
-""" Data and file handling utilities. """
-
+"""Data and file handling utilities."""

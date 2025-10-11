@@ -1,13 +1,17 @@
-""" Utilities for HED schema checking. """
+"""Utilities for HED schema checking."""
 
 from hed.errors.error_types import ErrorContext, SchemaErrors, ErrorSeverity, SchemaAttributeErrors, SchemaWarnings
 from hed.errors.error_reporter import ErrorHandler, sort_issues
 from hed.schema.hed_schema import HedSchema, HedKey, HedSectionKey
 from hed.schema import schema_attribute_validators
-from hed.schema.schema_validation_util import validate_schema_tag_new, validate_schema_term_new, \
-    get_allowed_characters_by_name, get_problem_indexes, validate_schema_description_new
-from hed.schema.schema_validation_util_deprecated import validate_schema_tag, \
-    validate_schema_description, verify_no_brackets
+from hed.schema.schema_validation_util import (
+    validate_schema_tag_new,
+    validate_schema_term_new,
+    get_allowed_characters_by_name,
+    get_problem_indexes,
+    validate_schema_description_new,
+)
+from hed.schema.schema_validation_util_deprecated import validate_schema_tag, validate_schema_description, verify_no_brackets
 from functools import partial
 from hed.schema import hed_cache
 from semantic_version import Version
@@ -15,7 +19,7 @@ from hed.schema.schema_attribute_validator_hed_id import HedIDValidator
 
 
 def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handler=None) -> list:
-    """ Check for hed3 compliance of a schema object.
+    """Check for hed3 compliance of a schema object.
 
     Parameters:
         hed_schema (HedSchema): HedSchema object to check for hed3 compliance.
@@ -54,15 +58,18 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
 
 class SchemaValidator:
     """Validator class to wrap some code.  In general, just call check_compliance."""
+
     attribute_validators_old = {
         HedKey.SuggestedTag: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
         HedKey.RelatedTag: [partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.Tags)],
-        HedKey.UnitClass: [schema_attribute_validators.tag_is_placeholder_check,
-                           partial(schema_attribute_validators.item_exists_check,
-                                   section_key=HedSectionKey.UnitClasses)],
-        HedKey.ValueClass: [schema_attribute_validators.tag_is_placeholder_check,
-                            partial(schema_attribute_validators.item_exists_check,
-                                    section_key=HedSectionKey.ValueClasses)],
+        HedKey.UnitClass: [
+            schema_attribute_validators.tag_is_placeholder_check,
+            partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses),
+        ],
+        HedKey.ValueClass: [
+            schema_attribute_validators.tag_is_placeholder_check,
+            partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses),
+        ],
         # Rooted tag is implicitly verified on loading
         # HedKey.Rooted: [schema_attribute_validators.tag_exists_base_schema_check],
         HedKey.DeprecatedFrom: [schema_attribute_validators.tag_is_deprecated_check],
@@ -70,7 +77,7 @@ class SchemaValidator:
         HedKey.DefaultUnits: [schema_attribute_validators.unit_exists],
         HedKey.ConversionFactor: [schema_attribute_validators.conversion_factor],
         HedKey.AllowedCharacter: [schema_attribute_validators.allowed_characters_check],
-        HedKey.InLibrary: [schema_attribute_validators.in_library_check]
+        HedKey.InLibrary: [schema_attribute_validators.in_library_check],
     }  # Known attribute validators( < 8.3.0)
 
     attribute_validators = {
@@ -85,7 +92,7 @@ class SchemaValidator:
         HedKey.DefaultUnits: [],
         HedKey.ConversionFactor: [schema_attribute_validators.conversion_factor],
         HedKey.AllowedCharacter: [schema_attribute_validators.allowed_characters_check],
-        HedKey.InLibrary: [schema_attribute_validators.in_library_check]
+        HedKey.InLibrary: [schema_attribute_validators.in_library_check],
     }  # Known attribute validators ( > 8.3.0).  Does not include range or domain validation, that's added later.
 
     def __init__(self, hed_schema, error_handler):
@@ -101,15 +108,14 @@ class SchemaValidator:
         for library, version in zip(libraries, versions):
             all_known_versions = hed_cache.get_hed_versions(library_name=library)
             if "," not in library and not all_known_versions or Version(all_known_versions[0]) < Version(version):
-                issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED, version,
-                                                    all_known_versions)
+                issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED, version, all_known_versions)
 
         if self.hed_schema.with_standard:
             all_known_versions = hed_cache.get_hed_versions()
             if not all_known_versions or Version(all_known_versions[0]) < Version(self.hed_schema.with_standard):
-                issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED,
-                                                    self.hed_schema.with_standard,
-                                                    all_known_versions)
+                issues += ErrorHandler.format_error(
+                    SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED, self.hed_schema.with_standard, all_known_versions
+                )
         self.error_handler.add_context_and_filter(issues)
         return issues
 
@@ -119,14 +125,20 @@ class SchemaValidator:
             character_set = get_allowed_characters_by_name(["text", "newline"])
             indexes = get_problem_indexes(self.hed_schema.prologue, character_set)
             for _, index in indexes:
-                issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_PROLOGUE_CHARACTER_INVALID, char_index=index,
-                                                    source_string=self.hed_schema.prologue,
-                                                    section_name="Prologue")
+                issues += ErrorHandler.format_error(
+                    SchemaWarnings.SCHEMA_PROLOGUE_CHARACTER_INVALID,
+                    char_index=index,
+                    source_string=self.hed_schema.prologue,
+                    section_name="Prologue",
+                )
             indexes = get_problem_indexes(self.hed_schema.epilogue, character_set)
             for _, index in indexes:
-                issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_PROLOGUE_CHARACTER_INVALID, char_index=index,
-                                                    source_string=self.hed_schema.epilogue,
-                                                    section_name="Epilogue")
+                issues += ErrorHandler.format_error(
+                    SchemaWarnings.SCHEMA_PROLOGUE_CHARACTER_INVALID,
+                    char_index=index,
+                    source_string=self.hed_schema.epilogue,
+                    section_name="Epilogue",
+                )
         self.error_handler.add_context_and_filter(issues)
         return issues
 
@@ -155,13 +167,15 @@ class SchemaValidator:
         if tag_entry._unknown_attributes:
             for attribute_name in tag_entry._unknown_attributes:
                 issues_list += self.error_handler.format_error_with_context(
-                    SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID, attribute_name, source_tag=tag_entry.name)
+                    SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID, attribute_name, source_tag=tag_entry.name
+                )
         return issues_list
 
     def _get_validators(self, attribute_name):
         if self._new_character_validation:
             validators = self.attribute_validators.get(attribute_name, []) + [
-                schema_attribute_validators.attribute_is_deprecated]
+                schema_attribute_validators.attribute_is_deprecated
+            ]
             if attribute_name == HedKey.HedID:
                 validators += [self._id_validator.verify_tag_id]
             attribute_entry = self.hed_schema.get_tag_entry(attribute_name, HedSectionKey.Attributes)
@@ -170,7 +184,8 @@ class SchemaValidator:
         else:
             # Always check deprecated
             validators = self.attribute_validators_old.get(attribute_name, []) + [
-                schema_attribute_validators.attribute_is_deprecated]
+                schema_attribute_validators.attribute_is_deprecated
+            ]
         return validators
 
     def _get_range_validators(self, attribute_entry):
@@ -179,10 +194,12 @@ class SchemaValidator:
             HedKey.NumericRange: [schema_attribute_validators.is_numeric_value],
             HedKey.StringRange: [],  # Unclear what validation should be done here.
             HedKey.UnitClassRange: [
-                partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses)],
+                partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.UnitClasses)
+            ],
             HedKey.UnitRange: [schema_attribute_validators.unit_exists],
             HedKey.ValueClassRange: [
-                partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses)]
+                partial(schema_attribute_validators.item_exists_check, section_key=HedSectionKey.ValueClasses)
+            ],
         }
         validators = []
         for range_attribute in attribute_entry.attributes:
@@ -195,7 +212,7 @@ class SchemaValidator:
             self.error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name)
             new_issues = validator(self.hed_schema, tag_entry, attribute_name)
             for issue in new_issues:
-                issue['severity'] = ErrorSeverity.WARNING
+                issue["severity"] = ErrorSeverity.WARNING
             self.error_handler.add_context_and_filter(new_issues)
             issues_list += new_issues
             self.error_handler.pop_error_context()
@@ -211,8 +228,8 @@ class SchemaValidator:
                 if len(values) == 2:
                     error_code = SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY
                 issues_list += self.error_handler.format_error_with_context(
-                    error_code, name, duplicate_tag_list=[entry.name for entry in duplicate_entries],
-                    section=section_key)
+                    error_code, name, duplicate_tag_list=[entry.name for entry in duplicate_entries], section=section_key
+                )
         return issues_list
 
     def check_invalid_chars(self):
@@ -226,9 +243,7 @@ class SchemaValidator:
 
         # If above 8.3.0 use the character class validation instead
         if self._new_character_validation:
-            section_validators = {
-                HedSectionKey.Tags: validate_schema_tag_new
-            }
+            section_validators = {HedSectionKey.Tags: validate_schema_tag_new}
             default_validator = validate_schema_term_new
             description_validator = validate_schema_description_new
 

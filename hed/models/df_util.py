@@ -1,4 +1,5 @@
-""" Utilities for assembly and conversion of HED strings to different forms. """
+"""Utilities for assembly and conversion of HED strings to different forms."""
+
 import re
 import math
 from collections import defaultdict
@@ -10,7 +11,7 @@ from hed.models.definition_dict import DefinitionDict
 
 
 def convert_to_form(df, hed_schema, tag_form, columns=None):
-    """ Convert all tags in underlying dataframe to the specified form (in place).
+    """Convert all tags in underlying dataframe to the specified form (in place).
 
     Parameters:
         df (pd.Dataframe or pd.Series): The dataframe or series to modify.
@@ -30,7 +31,7 @@ def convert_to_form(df, hed_schema, tag_form, columns=None):
 
 
 def shrink_defs(df, hed_schema, columns=None):
-    """ Shrink (in place) any def-expand tags found in the specified columns in the dataframe.
+    """Shrink (in place) any def-expand tags found in the specified columns in the dataframe.
 
     Parameters:
         df (pd.Dataframe or pd.Series): The dataframe or series to modify.
@@ -39,19 +40,19 @@ def shrink_defs(df, hed_schema, columns=None):
 
     """
     if isinstance(df, pd.Series):
-        mask = df.str.contains('Def-expand/', case=False)
+        mask = df.str.contains("Def-expand/", case=False)
         df[mask] = df[mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
     else:
         if columns is None:
             columns = df.columns
 
         for column in columns:
-            mask = df[column].str.contains('Def-expand/', case=False)
+            mask = df[column].str.contains("Def-expand/", case=False)
             df[column][mask] = df[column][mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
 
 
 def expand_defs(df, hed_schema, def_dict, columns=None):
-    """ Expands any def tags found in the dataframe.
+    """Expands any def tags found in the dataframe.
 
         Converts in place
 
@@ -62,16 +63,15 @@ def expand_defs(df, hed_schema, def_dict, columns=None):
         columns (list or None): The columns to modify on the dataframe.
     """
     if isinstance(df, pd.Series):
-        mask = df.str.contains('Def/', case=False)
+        mask = df.str.contains("Def/", case=False)
         df[mask] = df[mask].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
     else:
         if columns is None:
             columns = df.columns
 
         for column in columns:
-            mask = df[column].str.contains('Def/', case=False)
-            df.loc[mask, column] = df.loc[mask, column].apply(partial(_expand_defs,
-                                                                      hed_schema=hed_schema, def_dict=def_dict))
+            mask = df[column].str.contains("Def/", case=False)
+            df.loc[mask, column] = df.loc[mask, column].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
 
 
 def _convert_to_form(hed_string, hed_schema, tag_form):
@@ -86,8 +86,8 @@ def _expand_defs(hed_string, hed_schema, def_dict):
     return str(HedString(hed_string, hed_schema, def_dict).expand_defs())
 
 
-def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None) -> tuple ['DefinitionDict', dict, dict]:
-    """ Gather def-expand tags in the strings/compare with known definitions to find any differences.
+def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None) -> tuple["DefinitionDict", dict, dict]:
+    """Gather def-expand tags in the strings/compare with known definitions to find any differences.
 
     Parameters:
         hed_strings (list or pd.Series): A list of HED strings to process.
@@ -103,12 +103,13 @@ def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs
                                             dictionary of error lists keyed by definition name
     """
     from hed.models.def_expand_gather import DefExpandGatherer
+
     def_gatherer = DefExpandGatherer(hed_schema, known_defs, ambiguous_defs)
     return def_gatherer.process_def_expands(hed_strings)
 
 
 def sort_dataframe_by_onsets(df):
-    """ Gather def-expand tags in the strings/compare with known definitions to find any differences.
+    """Gather def-expand tags in the strings/compare with known definitions to find any differences.
 
     Parameters:
         df(pd.Dataframe): Dataframe to sort.
@@ -119,16 +120,16 @@ def sort_dataframe_by_onsets(df):
     if "onset" in df.columns:
         # Create a copy and sort by onsets as floats(if needed), but continue to keep the string version.
         df_copy = df.copy()
-        df_copy['_temp_onset_sort'] = pd.to_numeric(df_copy['onset'], errors='coerce')
-        df_copy.sort_values(by='_temp_onset_sort', inplace=True)
-        df_copy.drop(columns=['_temp_onset_sort'], inplace=True)
+        df_copy["_temp_onset_sort"] = pd.to_numeric(df_copy["onset"], errors="coerce")
+        df_copy.sort_values(by="_temp_onset_sort", inplace=True)
+        df_copy.drop(columns=["_temp_onset_sort"], inplace=True)
 
         return df_copy
     return df
 
 
 def replace_ref(text, old_value, new_value="n/a"):
-    """ Replace column ref in x with y.  If it's n/a, delete extra commas/parentheses.
+    """Replace column ref in x with y.  If it's n/a, delete extra commas/parentheses.
 
     Parameters:
         text (str): The input string containing the ref enclosed in curly braces.
@@ -164,12 +165,12 @@ def replace_ref(text, old_value, new_value="n/a"):
     # c1/c2 contain the comma(and possibly spaces) separating this ref from other tags
     # p1/p2 contain the parentheses directly surrounding the tag
     # All four groups can have spaces.
-    pattern = r'(?P<c1>[\s,]*)(?P<p1>[(\s]*)' + old_value + r'(?P<p2>[\s)]*)(?P<c2>[\s,]*)'
+    pattern = r"(?P<c1>[\s,]*)(?P<p1>[(\s]*)" + old_value + r"(?P<p2>[\s)]*)(?P<c2>[\s,]*)"
     return re.sub(pattern, _remover, text)
 
 
 def _handle_curly_braces_refs(df, refs, column_names):
-    """ Fills in the refs in the dataframe
+    """Fills in the refs in the dataframe
 
         You probably shouldn't call this function directly, but rather use base input.
 
@@ -195,19 +196,18 @@ def _handle_curly_braces_refs(df, refs, column_names):
             # column_name_brackets = f"{{{replacing_name}}}"
             # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
             #                             in zip(df[column_name], saved_columns[replacing_name]))
-            new_df[column_name] = pd.Series(replace_ref(x, f"{{{replacing_name}}}", y) for x, y
-                                            in zip(new_df[column_name], saved_columns[replacing_name]))
+            new_df[column_name] = pd.Series(
+                replace_ref(x, f"{{{replacing_name}}}", y) for x, y in zip(new_df[column_name], saved_columns[replacing_name])
+            )
     # Handle the special case of {HED} when the tsv file has no {HED} column
-    if 'HED' in refs and 'HED' not in column_names:
+    if "HED" in refs and "HED" not in column_names:
         for column_name in remaining_columns:
-            new_df[column_name] = \
-                pd.Series(replace_ref(x, "{HED}", "n/a") for x in new_df[column_name])
+            new_df[column_name] = pd.Series(replace_ref(x, "{HED}", "n/a") for x in new_df[column_name])
 
     # Handle any other refs that aren't in the dataframe.
     for ref in other_refs:
         for column_name in remaining_columns:
-            new_df[column_name] = \
-                pd.Series(replace_ref(x, "{" + ref + "}", "n/a") for x in new_df[column_name])
+            new_df[column_name] = pd.Series(replace_ref(x, "{" + ref + "}", "n/a") for x in new_df[column_name])
     new_df = new_df[remaining_columns]
 
     return new_df
@@ -233,8 +233,9 @@ def split_delay_tags(series, hed_schema, onsets):
     if series is None or onsets is None:
         return None
     split_df = pd.DataFrame({"onset": onsets, "HED": series, "original_index": series.index})
-    delay_strings = [(i, HedString(hed_string, hed_schema)) for (i, hed_string) in series.items() if
-                     "delay/" in hed_string.casefold()]
+    delay_strings = [
+        (i, HedString(hed_string, hed_schema)) for (i, hed_string) in series.items() if "delay/" in hed_string.casefold()
+    ]
     delay_groups = []
     for i, delay_string in delay_strings:
         duration_tags = delay_string.find_top_level_tags({DefTagNames.DELAY_KEY})
@@ -242,15 +243,15 @@ def split_delay_tags(series, hed_schema, onsets):
         for tag, group in duration_tags:
             onset_mod = tag.value_as_default_unit() + float(onsets[i])
             to_remove.append(group)
-            insert_index = split_df['original_index'].index.max() + 1
-            split_df.loc[insert_index] = {'HED': str(group), 'onset': onset_mod, 'original_index': i}
+            insert_index = split_df["original_index"].index.max() + 1
+            split_df.loc[insert_index] = {"HED": str(group), "onset": onset_mod, "original_index": i}
         delay_string.remove(to_remove)
         # update the old string with the removals done
         split_df.at[i, "HED"] = str(delay_string)
 
     for i, onset_mod, group in delay_groups:
-        insert_index = split_df['original_index'].index.max() + 1
-        split_df.loc[insert_index] = {'HED': str(group), 'onset': onset_mod, 'original_index': i}
+        insert_index = split_df["original_index"].index.max() + 1
+        split_df.loc[insert_index] = {"HED": str(group), "onset": onset_mod, "original_index": i}
     split_df = sort_dataframe_by_onsets(split_df)
     split_df.reset_index(drop=True, inplace=True)
 
@@ -269,7 +270,7 @@ def filter_series_by_onset(series, onsets):
         Union[Series, Dataframe]: the series with rows filtered together.
     """
 
-    indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors='coerce'))
+    indexed_dict = _indexed_dict_from_onsets(pd.to_numeric(onsets, errors="coerce"))
     y = _filter_by_index_list(series, indexed_dict=indexed_dict)
     return y
 

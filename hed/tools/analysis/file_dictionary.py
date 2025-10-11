@@ -1,10 +1,11 @@
-""" A file dictionary keyed by entity indices. """
+"""A file dictionary keyed by entity indices."""
+
 import os
 from hed.errors.exceptions import HedFileError
 
 
 class FileDictionary:
-    """ A file dictionary keyed by entity pair indices.
+    """A file dictionary keyed by entity pair indices.
 
     Notes:
         - The entities are identified as 0, 1, ... depending on order in the base filename.
@@ -12,8 +13,8 @@ class FileDictionary:
 
     """
 
-    def __init__(self, collection_name, file_list, key_indices=(0, 2), separator='_'):
-        """ Create a dictionary with full paths as values.
+    def __init__(self, collection_name, file_list, key_indices=(0, 2), separator="_"):
+        """Create a dictionary with full paths as values.
 
 
         Parameters:
@@ -38,26 +39,26 @@ class FileDictionary:
 
     @property
     def name(self):
-        """ Name of this dictionary. """
+        """Name of this dictionary."""
         return self.collection_name
 
     @property
     def key_list(self):
-        """ Keys in this dictionary. """
+        """Keys in this dictionary."""
         return list(self._file_dict.keys())
 
     @property
     def file_dict(self):
-        """ Dictionary of path values in this dictionary. """
+        """Dictionary of path values in this dictionary."""
         return self._file_dict
 
     @property
     def file_list(self):
-        """ List of path values in this dictionary. """
+        """List of path values in this dictionary."""
         return list(self._file_dict.values())
 
     def create_file_dict(self, file_list, key_indices, separator):
-        """ Create new dict based on key indices.
+        """Create new dict based on key indices.
 
         Parameters:
             file_list (list): Paths of the files to include.
@@ -69,7 +70,7 @@ class FileDictionary:
             self._file_dict = self.make_file_dict(file_list, key_indices=key_indices, separator=separator)
 
     def get_file_path(self, key):
-        """ Return file path corresponding to key.
+        """Return file path corresponding to key.
 
         Parameters:
             key (str): Key used to retrieve the file path.
@@ -81,7 +82,7 @@ class FileDictionary:
         return self._file_dict.get(key, None)
 
     def iter_files(self):
-        """ Iterator over the files in this dictionary.
+        """Iterator over the files in this dictionary.
 
         Yields:
             - str: Key into the dictionary.
@@ -92,7 +93,7 @@ class FileDictionary:
             yield key, file
 
     def key_diffs(self, other_dict):
-        """ Return symmetric key difference with another dict.
+        """Return symmetric key difference with another dict.
 
         Parameters:
             other_dict (FileDictionary)  A file dictionary object.
@@ -105,7 +106,7 @@ class FileDictionary:
         return list(diffs)
 
     def output_files(self, title=None, logger=None):
-        """ Return a string with the output of the list.
+        """Return a string with the output of the list.
 
         Parameters:
             title (None, str):    Optional title.
@@ -129,8 +130,8 @@ class FileDictionary:
         return "\n".join(output_list)
 
     @staticmethod
-    def make_file_dict(file_list, key_indices=(0, 2), separator='_'):
-        """ Return a dictionary of files using entity keys.
+    def make_file_dict(file_list, key_indices=(0, 2), separator="_"):
+        """Return a dictionary of files using entity keys.
 
         Parameters:
             file_list (list):    Paths to files to use.
@@ -147,14 +148,15 @@ class FileDictionary:
             base = os.path.basename(the_file)
             key = FileDictionary.make_key(base, indices=key_indices, separator=separator)
             if key in file_dict:
-                raise HedFileError("NonUniqueFileKeys",
-                                   f"dictionary key {key} is associated with {the_file} and {file_dict[key]}", "")
+                raise HedFileError(
+                    "NonUniqueFileKeys", f"dictionary key {key} is associated with {the_file} and {file_dict[key]}", ""
+                )
             file_dict[key] = the_file
         return file_dict
 
     @staticmethod
-    def make_key(key_string, indices=(0, 2), separator='_'):
-        """ Create a key from specified entities.
+    def make_key(key_string, indices=(0, 2), separator="_"):
+        """Create a key from specified entities.
 
         Parameters:
             key_string (str): The string from which to extract the key (usually a filename or path).
@@ -165,7 +167,7 @@ class FileDictionary:
             str:  The created key.
 
         """
-        key_value = ''
+        key_value = ""
         pieces = key_string.split(separator)
         for index in list(indices):
             key_value += pieces[index] + separator

@@ -1,11 +1,12 @@
-""" Validates spreadsheet tabular data. """
+"""Validates spreadsheet tabular data."""
+
 from __future__ import annotations
 import copy
 import pandas as pd
 import math
 import re
 from hed.models.base_input import BaseInput
-from hed.errors.error_types import  ErrorContext, ValidationErrors, TemporalErrors
+from hed.errors.error_types import ErrorContext, ValidationErrors, TemporalErrors
 from hed.errors.error_reporter import ErrorHandler
 from hed.models.column_mapper import ColumnType
 from hed.models.hed_string import HedString
@@ -20,7 +21,7 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class SpreadsheetValidator:
-    ONSET_TOLERANCE = 10-7
+    ONSET_TOLERANCE = 10 - 7
     TEMPORAL_ANCHORS = re.compile(r"|".join(map(re.escape, ["onset", "inset", "offset", "delay"])))
 
     def __init__(self, hed_schema):
@@ -76,7 +77,7 @@ class SpreadsheetValidator:
         onsets = data.onsets
         if onsets is not None:
             onsets = onsets.astype(str).str.strip()
-            onsets = pd.to_numeric(onsets, errors='coerce')
+            onsets = pd.to_numeric(onsets, errors="coerce")
             assembled = data.series_a
             na_issues = self._check_onset_nans(onsets, assembled, self._schema, error_handler, row_adj)
             issues += na_issues
@@ -91,7 +92,7 @@ class SpreadsheetValidator:
         self._hed_validator = HedValidator(self._schema, def_dicts=def_dicts)
         if onsets is not None:
             self._onset_validator = OnsetValidator()
-            onset_mask = ~pd.isna(pd.to_numeric(onsets['onset'], errors='coerce'))
+            onset_mask = ~pd.isna(pd.to_numeric(onsets["onset"], errors="coerce"))
         else:
             self._onset_validator = None
             onset_mask = None
@@ -179,9 +180,11 @@ class SpreadsheetValidator:
             next_row = onset_filtered.iloc[i + 1]
 
             # Skip if the HED column is empty or there was already an error
-            if not current_row["HED"] or \
-                (current_row["original_index"] in self.invalid_original_rows) or \
-                    (not self._is_within_tolerance(next_row["onset"], current_row["onset"])):
+            if (
+                not current_row["HED"]
+                or (current_row["original_index"] in self.invalid_original_rows)
+                or (not self._is_within_tolerance(next_row["onset"], current_row["onset"]))
+            ):
                 continue
 
             # At least two rows have been merged with their onsets recognized as the same.
@@ -248,9 +251,12 @@ class SpreadsheetValidator:
                 # If there are invalid values, log a single error
                 if invalid_values:
                     error_handler.push_error_context(ErrorContext.COLUMN, column.column_name)
-                    issues += error_handler.format_error_with_context(ValidationErrors.SIDECAR_KEY_MISSING,
-                        invalid_keys=str(list(invalid_values)),  category_keys=list(valid_keys),
-                        column_name=column.column_name)
+                    issues += error_handler.format_error_with_context(
+                        ValidationErrors.SIDECAR_KEY_MISSING,
+                        invalid_keys=str(list(invalid_values)),
+                        category_keys=list(valid_keys),
+                        column_name=column.column_name,
+                    )
                     error_handler.pop_error_context()
 
         column_refs = set(base_input.get_column_refs())  # Convert to set for O(1) lookup
@@ -262,8 +268,7 @@ class SpreadsheetValidator:
         # If there are missing references, log a single error
         if missing_refs:
             issues += error_handler.format_error_with_context(
-                ValidationErrors.TSV_COLUMN_MISSING,
-                invalid_keys=list(missing_refs)  # Include all missing column references
+                ValidationErrors.TSV_COLUMN_MISSING, invalid_keys=list(missing_refs)  # Include all missing column references
             )
 
         return issues
@@ -285,11 +290,10 @@ class SpreadsheetValidator:
             error_handler.pop_error_context()
             error_handler.pop_error_context()
         return issues
-        #filtered = assembled.loc[onset_mask.index[onset_mask]]
+        # filtered = assembled.loc[onset_mask.index[onset_mask]]
         # for row_number, text_file_row in filtered.iteritems():
         #     error_handler.push_error_context(ErrorContext.ROW, row_number + row_adj)
         #     error_handler.push_error_context(ErrorContext.COLUMN, text_file_row.name)
         #     error_handler.push_error_context(ErrorContext.HED_STRING, text_file_row)
         #     issues = error_handler.format_error_with_context(ValidationErrors.ONSETS_NAN)
         #     error_handler.pop_error_context()
-

@@ -1,4 +1,5 @@
 """Utilities used in HED validation/loading using a HED schema."""
+
 from typing import Union
 
 from hed.errors.error_reporter import ErrorHandler
@@ -8,7 +9,7 @@ from hed.schema.hed_schema_constants import character_types
 
 
 def validate_schema_tag_new(hed_entry) -> list[dict]:
-    """ Check tag entry for capitalization and illegal characters.
+    """Check tag entry for capitalization and illegal characters.
 
     Parameters:
         hed_entry (HedTagEntry): A single tag entry
@@ -23,14 +24,15 @@ def validate_schema_tag_new(hed_entry) -> list[dict]:
         return issues_list
 
     if hed_term and hed_term[0] and not (hed_term[0].isdigit() or hed_term[0].isupper()):
-        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
-                                                 hed_term, char_index=0, problem_char=hed_term[0])
+        issues_list += ErrorHandler.format_error(
+            SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, hed_term, char_index=0, problem_char=hed_term[0]
+        )
     issues_list += validate_schema_term_new(hed_entry, hed_term)
     return issues_list
 
 
 def validate_schema_term_new(hed_entry, hed_term=None) -> list[dict]:
-    """ Check the term for invalid character issues
+    """Check the term for invalid character issues
 
     Parameters:
         hed_entry (HedSchemaEntry): A single schema entry
@@ -43,17 +45,17 @@ def validate_schema_term_new(hed_entry, hed_term=None) -> list[dict]:
         hed_term = hed_entry.name
     issues_list = []
     # todo: potentially optimize this someday, as most values are the same
-    character_set = get_allowed_characters_by_name(["name"] +
-                                                   hed_entry.attributes.get("allowedCharacter", "").split(","))
+    character_set = get_allowed_characters_by_name(["name"] + hed_entry.attributes.get("allowedCharacter", "").split(","))
     indexes = get_problem_indexes(hed_term, character_set)
     for char, index in indexes:
-        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
-                                                 hed_term, char_index=index, problem_char=char)
+        issues_list += ErrorHandler.format_error(
+            SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, hed_term, char_index=index, problem_char=char
+        )
     return issues_list
 
 
 def validate_schema_description_new(hed_entry) -> list[dict]:
-    """ Check the description of the entry for invalid character issues
+    """Check the description of the entry for invalid character issues
 
     Parameters:
         hed_entry (HedSchemaEntry): A single schema entry
@@ -72,13 +74,14 @@ def validate_schema_description_new(hed_entry) -> list[dict]:
         name = hed_entry.short_tag_name
     for char, index in indexes:
 
-        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
-                                                 hed_entry.description, name, problem_char=char, char_index=index)
+        issues_list += ErrorHandler.format_error(
+            SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, hed_entry.description, name, problem_char=char, char_index=index
+        )
     return issues_list
 
 
 def schema_version_for_library(hed_schema, library_name) -> Union[str, None]:
-    """ Given the library name and HED schema object, return the version
+    """Given the library name and HED schema object, return the version
 
     Parameters:
         hed_schema (HedSchema): the schema object

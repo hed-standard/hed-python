@@ -1,4 +1,4 @@
-""" Utilities for creating a word cloud. """
+"""Utilities for creating a word cloud."""
 
 import numpy as np
 from PIL import Image
@@ -8,8 +8,9 @@ from wordcloud import WordCloud
 
 MIN_WORD_CLOUD_SIZE = 100
 
+
 def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400, height=300, **kwargs):
-    """ Takes a word dict and returns a generated word cloud object.
+    """Takes a word dict and returns a generated word cloud object.
 
     Parameters:
         word_dict (dict): words and their frequencies
@@ -34,25 +35,24 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
         width = 400
         height = 300
     elif height is None:
-        height = round(width/1.5)
+        height = round(width / 1.5)
     elif width is None:
         width = round(height * 1.5)
     width = max(width, MIN_WORD_CLOUD_SIZE)
     height = max(height, MIN_WORD_CLOUD_SIZE)
-    kwargs.setdefault('contour_width', 3)
-    kwargs.setdefault('contour_color', 'black')
-    kwargs.setdefault('prefer_horizontal', 0.75)
-    kwargs.setdefault('color_func', word_cloud_util.default_color_func)
-    kwargs.setdefault('relative_scaling', 1)
-    kwargs.setdefault('max_font_size', max(round(height / 20), 12))
-    kwargs.setdefault('min_font_size', 8)
-    if 'font_path' not in kwargs:
-        kwargs['font_path'] = None
-    elif kwargs['font_path'] and not kwargs['font_path'].lower().endswith((".ttf", ".otf", ".ttc")):
+    kwargs.setdefault("contour_width", 3)
+    kwargs.setdefault("contour_color", "black")
+    kwargs.setdefault("prefer_horizontal", 0.75)
+    kwargs.setdefault("color_func", word_cloud_util.default_color_func)
+    kwargs.setdefault("relative_scaling", 1)
+    kwargs.setdefault("max_font_size", max(round(height / 20), 12))
+    kwargs.setdefault("min_font_size", 8)
+    if "font_path" not in kwargs:
+        kwargs["font_path"] = None
+    elif kwargs["font_path"] and not kwargs["font_path"].lower().endswith((".ttf", ".otf", ".ttc")):
         raise HedFileError("InvalidFontPath", f"Font {kwargs['font_path']} not valid on this system", "")
 
-    wc = WordCloud(background_color=background_color, mask=mask_image,
-                   width=width, height=height, mode="RGBA", **kwargs)
+    wc = WordCloud(background_color=background_color, mask=mask_image, width=width, height=height, mode="RGBA", **kwargs)
 
     wc.generate_from_frequencies(word_dict)
 
@@ -60,7 +60,7 @@ def create_wordcloud(word_dict, mask_path=None, background_color=None, width=400
 
 
 def word_cloud_to_svg(wc):
-    """ Return a WordCould as an SVG string.
+    """Return a WordCould as an SVG string.
 
     Parameters:
         wc (WordCloud): the word cloud object.
@@ -76,7 +76,7 @@ def word_cloud_to_svg(wc):
 
 
 def load_and_resize_mask(mask_path, width=None, height=None):
-    """ Load a mask image and resize it according to given dimensions.
+    """Load a mask image and resize it according to given dimensions.
 
         The image is resized maintaining aspect ratio if only width or height is provided.
 
@@ -110,9 +110,11 @@ def load_and_resize_mask(mask_path, width=None, height=None):
 
         mask_image_array = np.array(mask_image)
         # Treat transparency (alpha < 128) or white (R>127, G>127, B>127) as white, else black
-        mask_image_array = np.where((mask_image_array[:, :, 3] < 128) |
-                                    ((mask_image_array[:, :, 0] > 127) &
-                                     (mask_image_array[:, :, 1] > 127) &
-                                     (mask_image_array[:, :, 2] > 127)), 255, 0)
+        mask_image_array = np.where(
+            (mask_image_array[:, :, 3] < 128)
+            | ((mask_image_array[:, :, 0] > 127) & (mask_image_array[:, :, 1] > 127) & (mask_image_array[:, :, 2] > 127)),
+            255,
+            0,
+        )
 
         return mask_image_array.astype(np.uint8)

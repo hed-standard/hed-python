@@ -5,8 +5,14 @@ from hed import load_schema_version
 import os
 from hed import TabularInput
 from hed.models import basic_search
-from hed.models.basic_search import find_words, check_parentheses, reverse_and_flip_parentheses, \
-    construct_delimiter_map, verify_search_delimiters, find_matching
+from hed.models.basic_search import (
+    find_words,
+    check_parentheses,
+    reverse_and_flip_parentheses,
+    construct_delimiter_map,
+    verify_search_delimiters,
+    find_matching,
+)
 import numpy as np
 from hed.models.df_util import convert_to_form
 
@@ -14,11 +20,13 @@ from hed.models.df_util import convert_to_form
 class TestNewSearch(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                       '../data/bids_tests/eeg_ds003645s_hed'))
-        sidecar1_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
+        bids_root_path = os.path.realpath(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/bids_tests/eeg_ds003645s_hed")
+        )
+        sidecar1_path = os.path.realpath(os.path.join(bids_root_path, "task-FacePerception_events.json"))
         cls.events_path = os.path.realpath(
-            os.path.join(bids_root_path, 'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
+            os.path.join(bids_root_path, "sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv")
+        )
         cls.base_input = TabularInput(cls.events_path, sidecar1_path)
         cls.schema = load_schema_version("8.4.0")
         cls.df = cls.base_input.series_filtered
@@ -60,19 +68,19 @@ class TestFindWords(unittest.TestCase):
     def test_basic(self):
         search_string = "@global (local1, local2)"
         anywhere_words, _, specific_words = find_words(search_string)
-        self.assertEqual(anywhere_words, ['global'])
-        self.assertEqual(specific_words, ['local1', 'local2'])
+        self.assertEqual(anywhere_words, ["global"])
+        self.assertEqual(specific_words, ["local1", "local2"])
 
     def test_no_anywhere_words(self):
         search_string = "(local1, local2)"
         anywhere_words, _, specific_words = find_words(search_string)
         self.assertEqual(anywhere_words, [])
-        self.assertEqual(specific_words, ['local1', 'local2'])
+        self.assertEqual(specific_words, ["local1", "local2"])
 
     def test_no_specific_words(self):
         search_string = "@global1, @global2"
         anywhere_words, _, specific_words = find_words(search_string)
-        self.assertEqual(anywhere_words, ['global1', 'global2'])
+        self.assertEqual(anywhere_words, ["global1", "global2"])
         self.assertEqual(specific_words, [])
 
     def test_empty_string(self):
@@ -84,14 +92,14 @@ class TestFindWords(unittest.TestCase):
     def test_mixed_words(self):
         search_string = "@global (local1, local2), @another_global"
         anywhere_words, _, specific_words = find_words(search_string)
-        self.assertEqual(anywhere_words, ['global', 'another_global'])
-        self.assertEqual(specific_words, ['local1', 'local2'])
+        self.assertEqual(anywhere_words, ["global", "another_global"])
+        self.assertEqual(specific_words, ["local1", "local2"])
 
     def test_whitespace(self):
         search_string = " @Global ,  ( local1 , local2 ) "
         anywhere_words, _, specific_words = find_words(search_string)
-        self.assertEqual(anywhere_words, ['Global'])
-        self.assertEqual(specific_words, ['local1', 'local2'])
+        self.assertEqual(anywhere_words, ["Global"])
+        self.assertEqual(specific_words, ["local1", "local2"])
 
 
 class TestCheckParentheses(unittest.TestCase):
@@ -139,10 +147,7 @@ class TestConstructDelimiterMap(unittest.TestCase):
 
     def test_single_occurrence(self):
         text = "word1,word2"
-        expected_result = {
-            ("word1", "word2"): "",
-            ("word2", "word1"): ""
-        }
+        expected_result = {("word1", "word2"): "", ("word2", "word1"): ""}
         self.assertEqual(construct_delimiter_map(text, ["word1", "word2"]), expected_result)
 
     def test_multiple_words(self):
@@ -153,7 +158,7 @@ class TestConstructDelimiterMap(unittest.TestCase):
             ("word1", "word0"): "))",
             ("word1", "word2"): ")",
             ("word2", "word1"): "(",
-            ("word2", "word0"): ")"
+            ("word2", "word0"): ")",
         }
         self.assertEqual(construct_delimiter_map(text, ["word0", "word1", "word2"]), expected_result)
 
@@ -209,10 +214,7 @@ class TestFindMatching(unittest.TestCase):
         self.assertTrue(all(mask == expected), f"Expected {expected}, got {mask}")
 
     def test_basic_matching(self):
-        series = pd.Series([
-            "word0, word1, word2",
-            "word0, (word1, word2)"
-        ])
+        series = pd.Series(["word0, word1, word2", "word0, (word1, word2)"])
         search_string = "word0, word1"
         expected = pd.Series([True, True])
         self.base_find_matching(series, search_string, expected)
@@ -221,106 +223,97 @@ class TestFindMatching(unittest.TestCase):
         self.base_find_matching(series, search_string, expected)
 
     def test_group_matching(self):
-        series = pd.Series([
-            "(word1), word0, ((word2))",
-            "word0, ((word1)), word2",
-            "(word1), word0, (word2)"
-        ])
+        series = pd.Series(["(word1), word0, ((word2))", "word0, ((word1)), word2", "(word1), word0, (word2)"])
         search_string = "word0, ((word1)), word2"
         expected = pd.Series([False, True, False])
         self.base_find_matching(series, search_string, expected)
 
     def test_anywhere_words(self):
-        series = pd.Series([
-            "(word1), word0, ((word2))",
-            "word0, ((word1)), word2",
-            "word0, (word3), ((word1)), word2"
-        ])
+        series = pd.Series(["(word1), word0, ((word2))", "word0, ((word1)), word2", "word0, (word3), ((word1)), word2"])
         search_string = "@word3, word0, ((word1)), word2"
         expected = pd.Series([False, False, True])
         self.base_find_matching(series, search_string, expected)
 
     def test_mismatched_parentheses(self):
-        series = pd.Series([
-            "(word1), word0, ((word2))",
-            "word0, ((word1)), word2",
-            "word0, (word1)), word2",
-            "word0, ((word1), word2"
-        ])
+        series = pd.Series(
+            ["(word1), word0, ((word2))", "word0, ((word1)), word2", "word0, (word1)), word2", "word0, ((word1), word2"]
+        )
         search_string = "word0, ((word1)), word2"
         expected = pd.Series([False, True, False, False])
         self.base_find_matching(series, search_string, expected)
 
     def test_wildcard_matching(self):
-        series = pd.Series([
-            "word2, word0, ((word1X))",
-            "word0, ((word1Y)), word2Z",
-            "word0, ((word1)), word2",
-            "word0, (word1), word2"
-        ])
+        series = pd.Series(
+            ["word2, word0, ((word1X))", "word0, ((word1Y)), word2Z", "word0, ((word1)), word2", "word0, (word1), word2"]
+        )
         search_string = "word0, ((word1*)), word2*"
         expected = pd.Series([True, True, True, False])
         self.base_find_matching(series, search_string, expected)
 
     def test_complex_case_with_word_identifiers(self):
         query_text = "word0, ((word1), @word2, @word3, word4)"
-        series = pd.Series([
-            "word0, ((word1), word2, word3, word4)",
-            "word2, word0, ((word1), word3, word4)",
-            "word3, ((word1), word2, word4), word0",
-            "word0, ((word1), word4), word2, word3",
-            "word0, word1, word4, word2",
-            "word2, word3"
-        ])
+        series = pd.Series(
+            [
+                "word0, ((word1), word2, word3, word4)",
+                "word2, word0, ((word1), word3, word4)",
+                "word3, ((word1), word2, word4), word0",
+                "word0, ((word1), word4), word2, word3",
+                "word0, word1, word4, word2",
+                "word2, word3",
+            ]
+        )
         expected = pd.Series([True, True, True, True, False, False])
 
         self.base_find_matching(series, query_text, expected)
 
     def test_very_complex_case_with_word_identifiers(self):
         query_text = "word0, (((word1, word2), @word3)), ((word4, word5)))"
-        series = pd.Series([
-            "word0, (((word1, word2), word3)), ((word4, word5)))",
-            "word3, word0, (((word1, word2))), ((word4, word5)))",
-            "word0, ((word1, word2), word3), (word4, word5)",
-            "word0, (((word1, word2), word3)), (word4)",
-            "word0, (((word1, word2))), ((word4, word5)))"
-        ])
+        series = pd.Series(
+            [
+                "word0, (((word1, word2), word3)), ((word4, word5)))",
+                "word3, word0, (((word1, word2))), ((word4, word5)))",
+                "word0, ((word1, word2), word3), (word4, word5)",
+                "word0, (((word1, word2), word3)), (word4)",
+                "word0, (((word1, word2))), ((word4, word5)))",
+            ]
+        )
         expected = pd.Series([True, True, False, False, False])
 
         self.base_find_matching(series, query_text, expected)
 
     def test_incorrect_single_delimiter(self):
         query_text = "word0, ((word1)), word2"
-        series = pd.Series([
-            "word0, ((word1)), word2",
-            "(word0, ((word1)), word2)",
-            "word0, ((word1), word2)",
-            "word0, (word1)), word2"
-        ])
+        series = pd.Series(
+            ["word0, ((word1)), word2", "(word0, ((word1)), word2)", "word0, ((word1), word2)", "word0, (word1)), word2"]
+        )
         expected = pd.Series([True, True, False, False])
         self.base_find_matching(series, query_text, expected)
 
     def test_mismatched_parentheses2(self):
         query_text = "word0, ((word1)), (word2, word3)"
-        series = pd.Series([
-            "word0, ((word1)), (word2, word3)",
-            "(word2, word3), word0, ((word1))",
-            "word0, someExtraText, ((word1)), someMoreText, (word2, word3)",
-            "word0, ((word1), (word2, word3))",
-            "word0, ((word1), ((word2, word3)"
-        ])
+        series = pd.Series(
+            [
+                "word0, ((word1)), (word2, word3)",
+                "(word2, word3), word0, ((word1))",
+                "word0, someExtraText, ((word1)), someMoreText, (word2, word3)",
+                "word0, ((word1), (word2, word3))",
+                "word0, ((word1), ((word2, word3)",
+            ]
+        )
         expected = pd.Series([True, True, True, False, False])
         self.base_find_matching(series, query_text, expected)
 
     def test_negative_words(self):
-        series = pd.Series([
-            "word0, word1",
-            "word0, word2",
-            "word0, word2, word3",
-            "word0, (word1), word2",
-            "word0, (word2, word3), word1",
-            "word0, word1suffix",
-        ])
+        series = pd.Series(
+            [
+                "word0, word1",
+                "word0, word2",
+                "word0, word2, word3",
+                "word0, (word1), word2",
+                "word0, (word2, word3), word1",
+                "word0, word1suffix",
+            ]
+        )
 
         # 1. Basic Negative Test Case
         search_string1 = "~word1, word0"
@@ -345,12 +338,14 @@ class TestFindMatching(unittest.TestCase):
         self.base_find_matching(series, search_string4, expected4)
 
     def test_negative_words_group(self):
-        series = pd.Series([
-            "word0, (word1, (word2))",
-            "word0, (word1, (word2)), word3",
-            "word0, (word1, (word2), word3)",
-            "word0, (word1, (word2, word3))",
-            ])
+        series = pd.Series(
+            [
+                "word0, (word1, (word2))",
+                "word0, (word1, (word2)), word3",
+                "word0, (word1, (word2), word3)",
+                "word0, (word1, (word2, word3))",
+            ]
+        )
         search_string = "word0, (word1, (word2))"
         expected = pd.Series([True, True, True, True])
         self.base_find_matching(series, search_string, expected)

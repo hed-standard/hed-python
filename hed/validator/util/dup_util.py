@@ -8,7 +8,7 @@ from hed.errors.error_types import ValidationErrors
 class DuplicateChecker:
 
     def __init__(self):
-        """ Checker for duplications in HED groups.
+        """Checker for duplications in HED groups.
 
         Notes:
             This checker has an early out strategy -- it returns when it finds an error.
@@ -17,7 +17,7 @@ class DuplicateChecker:
         self.issues = []
 
     def check_for_duplicates(self, group) -> list[dict]:
-        """ Find duplicates in a HED group and return the errors found.
+        """Find duplicates in a HED group and return the errors found.
 
         Parameters:
              group (HedGroup): The HED group to be checked.
@@ -32,7 +32,7 @@ class DuplicateChecker:
         return self.issues
 
     def get_hash(self, group) -> Union[int, None]:
-        """  Return the unique hash for the group as long as no duplicates.
+        """Return the unique hash for the group as long as no duplicates.
 
         Parameters:
              group (HedGroup): The HED group to be checked.

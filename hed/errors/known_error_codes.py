@@ -1,4 +1,4 @@
-""" Known error codes as reported in the HED specification. """
+"""Known error codes as reported in the HED specification."""
 
 known_error_codes = {
     "hed_validation_errors": [
@@ -29,7 +29,7 @@ known_error_codes = {
         "UNITS_INVALID",
         "UNITS_MISSING",
         "VALUE_INVALID",
-        "VERSION_DEPRECATED"
+        "VERSION_DEPRECATED",
     ],
     "schema_validation_errors": [
         "SCHEMA_ATTRIBUTE_INVALID",
@@ -43,6 +43,6 @@ known_error_codes = {
         "WIKI_DELIMITERS_INVALID",
         "WIKI_LINE_START_INVALID",
         "WIKI_SEPARATOR_INVALID",
-        "XML_SYNTAX_INVALID"
-    ]
+        "XML_SYNTAX_INVALID",
+    ],
 }

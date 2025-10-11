@@ -1,4 +1,5 @@
-""" A BIDS tabular file with sidecar. """
+"""A BIDS tabular file with sidecar."""
+
 from __future__ import annotations
 
 from typing import Union, TYPE_CHECKING
@@ -12,13 +13,12 @@ if TYPE_CHECKING:
 
 
 class TabularInput(BaseInput):
-    """ A BIDS tabular file with sidecar. """
+    """A BIDS tabular file with sidecar."""
 
     HED_COLUMN_NAME = "HED"
 
     def __init__(self, file=None, sidecar=None, name=None):
-
-        """ Constructor for the TabularInput class.
+        """Constructor for the TabularInput class.
 
         Parameters:
             file (str or FileLike or pd.Dataframe): A tsv file to open.
@@ -36,20 +36,28 @@ class TabularInput(BaseInput):
         """
         if sidecar and not isinstance(sidecar, Sidecar):
             sidecar = Sidecar(sidecar)
-        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME],
-                                  warn_on_missing_column=True)
+        new_mapper = ColumnMapper(sidecar=sidecar, optional_tag_columns=[self.HED_COLUMN_NAME], warn_on_missing_column=True)
 
         self._sidecar = sidecar
 
-        super().__init__(file, file_type=".tsv", worksheet_name=None, has_column_names=True, mapper=new_mapper,
-                         name=name, allow_blank_names=False, )
+        super().__init__(
+            file,
+            file_type=".tsv",
+            worksheet_name=None,
+            has_column_names=True,
+            mapper=new_mapper,
+            name=name,
+            allow_blank_names=False,
+        )
 
         if not self._has_column_names:
-            raise ValueError("You are attempting to open a bids_old style file with no column headers provided.\n"
-                             "This is probably not intended.")
+            raise ValueError(
+                "You are attempting to open a bids_old style file with no column headers provided.\n"
+                "This is probably not intended."
+            )
 
     def reset_column_mapper(self, sidecar=None):
-        """ Change the sidecars and settings.
+        """Change the sidecars and settings.
 
         Parameters:
             sidecar (str or [str] or Sidecar or [Sidecar]): A list of json filenames to pull sidecar info from.
@@ -60,8 +68,8 @@ class TabularInput(BaseInput):
 
         self.reset_mapper(new_mapper)
 
-    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> 'DefinitionDict':
-        """ Return the definition dict for this sidecar.
+    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> "DefinitionDict":
+        """Return the definition dict for this sidecar.
 
         Parameters:
             hed_schema (HedSchema): Used to identify tags to find definitions.
@@ -76,7 +84,7 @@ class TabularInput(BaseInput):
             return super().get_def_dict(hed_schema, extra_def_dicts)
 
     def get_column_refs(self) -> list[str]:
-        """ Return a list of column refs for this file.
+        """Return a list of column refs for this file.
 
             Default implementation returns none.
 

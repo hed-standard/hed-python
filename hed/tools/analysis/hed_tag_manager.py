@@ -1,14 +1,14 @@
-""" Manager for HED tags from a columnar file. """
+"""Manager for HED tags from a columnar file."""
 
 from hed.models.hed_string import HedString
 from hed.models import string_util
 
 
 class HedTagManager:
-    """ Manager for the HED tags from a columnar file. """
+    """Manager for the HED tags from a columnar file."""
 
     def __init__(self, event_manager, remove_types=None):
-        """ Create a tag manager for one tabular file.
+        """Create a tag manager for one tabular file.
 
         Parameters:
             event_manager (EventManager): an event manager for the tabular file.
@@ -21,12 +21,13 @@ class HedTagManager:
 
         self.event_manager = event_manager
         self.remove_types = remove_types
-        self.hed_strings, self.base_strings, self.context_strings = (
-            self.event_manager.unfold_context(remove_types=remove_types))
+        self.hed_strings, self.base_strings, self.context_strings = self.event_manager.unfold_context(
+            remove_types=remove_types
+        )
         self.type_def_names = self.event_manager.get_type_defs(remove_types)
 
     def get_hed_objs(self, include_context=True, replace_defs=False):
-        """ Return a list of HED string objects of same length as the tabular file.
+        """Return a list of HED string objects of same length as the tabular file.
 
         Parameters:
             include_context (bool): If True (default), include the Event-context group in the HED string.
@@ -48,7 +49,7 @@ class HedTagManager:
         return hed_objs
 
     def get_hed_obj(self, hed_str, remove_types=False, remove_group=False):
-        """ Return a HED string object with the types removed.
+        """Return a HED string object with the types removed.
 
         Parameters:
             hed_str (str): Represents a HED string.

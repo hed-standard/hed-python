@@ -7,7 +7,7 @@ import argparse
 
 
 def convert_and_update(filenames, set_ids):
-    """ Validate, convert, and update as needed all schemas listed in filenames
+    """Validate, convert, and update as needed all schemas listed in filenames
 
         If any schema fails to validate, no schemas will be updated.
 
@@ -34,8 +34,7 @@ def convert_and_update(filenames, set_ids):
         if "prerelease" not in basename:
             print(f"Skipping updates on {basename}, not in a prerelease folder.")
             continue
-        source_filename = add_extension(basename,
-                                        list(extensions)[0])  # Load any changed schema version, they're all the same
+        source_filename = add_extension(basename, list(extensions)[0])  # Load any changed schema version, they're all the same
 
         # todo: more properly decide how we want to handle non lowercase extensions.
         tsv_extension = ".tsv"
@@ -53,8 +52,7 @@ def convert_and_update(filenames, set_ids):
             source_dataframes = schema.get_as_dataframes()
 
         try:
-            result = update_dataframes_from_schema(source_dataframes, schema, schema.library,
-                                                   assign_missing_ids=set_ids)
+            result = update_dataframes_from_schema(source_dataframes, schema, schema.library, assign_missing_ids=set_ids)
         except HedFileError as e:
             print(get_printable_issue_string(e.issues, title="Issues updating schema:"))
             raise e
@@ -74,9 +72,9 @@ def convert_and_update(filenames, set_ids):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Update other schema formats based on the changed one.')
-    parser.add_argument('filenames', nargs='*', help='List of files to process')
-    parser.add_argument('--set-ids', action='store_true', help='Add missing HED ids')
+    parser = argparse.ArgumentParser(description="Update other schema formats based on the changed one.")
+    parser.add_argument("filenames", nargs="*", help="List of files to process")
+    parser.add_argument("--set-ids", action="store_true", help="Add missing HED ids")
 
     args = parser.parse_args()
 

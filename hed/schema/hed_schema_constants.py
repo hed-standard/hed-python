@@ -2,41 +2,42 @@ from enum import Enum
 
 
 class HedSectionKey(Enum):
-    """ Keys designating specific sections in a HedSchema object.
-    """
+    """Keys designating specific sections in a HedSchema object."""
+
     # overarching category listing all tags
-    Tags = 'tags'
+    Tags = "tags"
     # Overarching category listing all unit classes
-    UnitClasses = 'unitClasses'
+    UnitClasses = "unitClasses"
     # Overarching category listing all units(not divided by type)
-    Units = 'units'
+    Units = "units"
     # Overarching category listing all unit modifiers.
-    UnitModifiers = 'unitModifiers'
+    UnitModifiers = "unitModifiers"
     # Overarching category listing all value classes
     ValueClasses = "valueClasses"
     # These are the allowed attributes list, gathered from the schema on load.
-    Attributes = 'attributes'
+    Attributes = "attributes"
     # These are the allowed attribute property list, gathered from the schema on load.
-    Properties = 'properties'
+    Properties = "properties"
 
 
 class HedKey:
-    """ Known property and attribute names.
+    """Known property and attribute names.
 
     Notes:
         - These names should match the attribute values in the XML/wiki.
 
     """
+
     # Tag attributes
-    ExtensionAllowed = 'extensionAllowed'
-    Recommended = 'recommended'
-    Required = 'required'
-    RequireChild = 'requireChild'
-    TagGroup = 'tagGroup'
-    TakesValue = 'takesValue'
-    TopLevelTagGroup = 'topLevelTagGroup'
-    Unique = 'unique'
-    UnitClass = 'unitClass'
+    ExtensionAllowed = "extensionAllowed"
+    Recommended = "recommended"
+    Required = "required"
+    RequireChild = "requireChild"
+    TagGroup = "tagGroup"
+    TakesValue = "takesValue"
+    TopLevelTagGroup = "topLevelTagGroup"
+    Unique = "unique"
+    UnitClass = "unitClass"
     ValueClass = "valueClass"
     RelatedTag = "relatedTag"
     SuggestedTag = "suggestedTag"
@@ -45,21 +46,21 @@ class HedKey:
     ConversionFactor = "conversionFactor"
     Reserved = "reserved"
 
-    SIUnit = 'SIUnit'
-    UnitSymbol = 'unitSymbol'
+    SIUnit = "SIUnit"
+    UnitSymbol = "unitSymbol"
     # Default Units for Type
-    DefaultUnits = 'defaultUnits'
-    UnitPrefix = 'unitPrefix'
+    DefaultUnits = "defaultUnits"
+    UnitPrefix = "unitPrefix"
 
-    SIUnitModifier = 'SIUnitModifier'
-    SIUnitSymbolModifier = 'SIUnitSymbolModifier'
+    SIUnitModifier = "SIUnitModifier"
+    SIUnitSymbolModifier = "SIUnitSymbolModifier"
 
     # value class attributes
-    AllowedCharacter = 'allowedCharacter'
+    AllowedCharacter = "allowedCharacter"
 
     # Node attributes
     InLibrary = "inLibrary"
-    HedID = 'hedId'
+    HedID = "hedId"
 
     UnitClassDomain = "unitClassDomain"
     UnitDomain = "unitDomain"
@@ -80,24 +81,24 @@ class HedKey:
 
 class HedKeyOld:
     # Fully Deprecated properties
-    BoolProperty = 'boolProperty'
-    UnitClassProperty = 'unitClassProperty'
-    UnitProperty = 'unitProperty'
-    UnitModifierProperty = 'unitModifierProperty'
-    ValueClassProperty = 'valueClassProperty'
-    ElementProperty = 'elementProperty'
-    NodeProperty = 'nodeProperty'
-    IsInheritedProperty = 'isInheritedProperty'
+    BoolProperty = "boolProperty"
+    UnitClassProperty = "unitClassProperty"
+    UnitProperty = "unitProperty"
+    UnitModifierProperty = "unitModifierProperty"
+    ValueClassProperty = "valueClassProperty"
+    ElementProperty = "elementProperty"
+    NodeProperty = "nodeProperty"
+    IsInheritedProperty = "isInheritedProperty"
 
 
-VERSION_ATTRIBUTE = 'version'
-LIBRARY_ATTRIBUTE = 'library'
+VERSION_ATTRIBUTE = "version"
+LIBRARY_ATTRIBUTE = "library"
 WITH_STANDARD_ATTRIBUTE = "withStandard"
 UNMERGED_ATTRIBUTE = "unmerged"
-NS_SPEC = 'xmlns'
+NS_SPEC = "xmlns"
 NS_ATTRIB = "xmlns:xsi"
 NO_LOC_ATTRIB = "xsi:noNamespaceSchemaLocation"
-LOC_ATTRIB = 'xsi:schemaLocation'
+LOC_ATTRIB = "xsi:schemaLocation"
 
 # A list of all attributes that can appear in the header line
 valid_header_attributes = {
@@ -108,7 +109,7 @@ valid_header_attributes = {
     NS_SPEC,
     NO_LOC_ATTRIB,
     LOC_ATTRIB,
-    UNMERGED_ATTRIBUTE
+    UNMERGED_ATTRIBUTE,
 }
 
 character_types = {
@@ -158,6 +159,7 @@ character_types["alphanumeric"] = character_types["letters"] | character_types["
 character_types["text"] = character_types["printable"].copy()
 character_types["text"].add("nonascii")
 character_types["text"] -= banned_delimiters
-character_types["name"] = (character_types["alphanumeric"] | character_types["hyphen"] |
-                           character_types["period"] | character_types["underscore"])
+character_types["name"] = (
+    character_types["alphanumeric"] | character_types["hyphen"] | character_types["period"] | character_types["underscore"]
+)
 character_types["name"].add("nonascii")

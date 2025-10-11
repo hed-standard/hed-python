@@ -1,5 +1,6 @@
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.schema_io import df_constants
+
 START_HED_STRING = "!# start schema"
 END_SCHEMA_STRING = "!# end schema"
 END_HED_STRING = "!# end hed"
@@ -18,9 +19,11 @@ SOURCES_SECTION_ELEMENT = "'''Sources'''"
 PREFIXES_SECTION_ELEMENT = "'''Prefixes'''"
 EXTERNAL_ANNOTATION_SECTION_ELEMENT = "'''External annotations'''"
 
-WIKI_EXTRA_DICT = {'Sources': df_constants.SOURCES_KEY,
-                   'Prefixes': df_constants.PREFIXES_KEY,
-                   'External annotations': df_constants.EXTERNAL_ANNOTATION_KEY}
+WIKI_EXTRA_DICT = {
+    "Sources": df_constants.SOURCES_KEY,
+    "Prefixes": df_constants.PREFIXES_KEY,
+    "External annotations": df_constants.EXTERNAL_ANNOTATION_KEY,
+}
 
 
 wiki_section_headers = {
@@ -66,7 +69,7 @@ SectionStarts = {
     HedWikiSection.Sources: SOURCES_SECTION_ELEMENT,
     HedWikiSection.Prefixes: PREFIXES_SECTION_ELEMENT,
     HedWikiSection.ExternalAnnotations: EXTERNAL_ANNOTATION_SECTION_ELEMENT,
-    HedWikiSection.EndHed: END_HED_STRING
+    HedWikiSection.EndHed: END_HED_STRING,
 }
 
 SectionReversed = {value: key for key, value in SectionStarts.items()}
@@ -81,5 +84,5 @@ SectionNames = {
     HedWikiSection.ValueClasses: "Value Classes",
     HedWikiSection.Attributes: "Attributes",
     HedWikiSection.Properties: "Properties",
-    HedWikiSection.EndHed: "EndHed"
+    HedWikiSection.EndHed: "EndHed",
 }

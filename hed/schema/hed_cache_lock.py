@@ -1,4 +1,5 @@
 """Support utilities for hed_cache locking"""
+
 import time
 import os
 import portalocker
@@ -10,11 +11,13 @@ CACHE_TIME_THRESHOLD = 300 * 6
 
 class CacheError(Exception):
     """Exception for cache locking or threshold errors."""
+
     pass
 
 
 class CacheLock:
     """Class to lock the cache folder to ensure it doesn't get hit by another version at the same time."""
+
     def __init__(self, cache_folder, write_time=True, time_threshold=CACHE_TIME_THRESHOLD):
         """Constructor for HED locking object
 
@@ -53,7 +56,7 @@ class CacheLock:
 
 
 def _read_last_cached_time(cache_folder):
-    """ Check the given cache folder to see when it was last updated.
+    """Check the given cache folder to see when it was last updated.
 
     Parameters:
         cache_folder (str): The folder we're caching HED schema in.
@@ -73,7 +76,7 @@ def _read_last_cached_time(cache_folder):
 
 
 def _write_last_cached_time(new_time, cache_folder):
-    """ Set the time of last cache update.
+    """Set the time of last cache update.
 
     Parameters:
         new_time (float): The time this was updated.

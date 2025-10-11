@@ -55,6 +55,7 @@ This project adheres to a code of conduct that we expect all contributors to fol
    pip install -e .
    pip install -r requirements.txt
    pip install -r docs/requirements.txt
+   pip install -e .[dev]  # Install development tools (black, ruff, codespell)
    ```
 
 4. **Run tests to verify setup:**
@@ -74,6 +75,21 @@ This project adheres to a code of conduct that we expect all contributors to fol
 ### Code Quality Tools
 
 We use several tools to maintain code quality:
+
+- **black:** For automatic code formatting
+  ```bash
+  # Check if code is formatted correctly
+  black --check .
+  
+  # Automatically format all code
+  black .
+  
+  # Format specific files or directories
+  black hed/ tests/
+  
+  # Windows: Use --workers 1 if you encounter file I/O errors
+  black --workers 1 .
+  ```
 
 - **ruff:** For linting, style checking, and import sorting
   ```bash

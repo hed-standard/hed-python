@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
         pass
 
     def test_flatten_schema(self):
-        hed_schema = load_schema_version('8.1.0')
+        hed_schema = load_schema_version("8.1.0")
         df = flatten_schema(hed_schema, skip_non_tag=True)
         # df.to_csv("h:/Version_3_column.tsv", sep='\t', index=None)
         self.assertIsInstance(df, pd.DataFrame)
@@ -23,5 +23,5 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df.index), 1037)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

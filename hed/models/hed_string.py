@@ -1,4 +1,5 @@
-""" A HED string with its schema and definitions. """
+"""A HED string with its schema and definitions."""
+
 from __future__ import annotations
 
 import copy
@@ -8,13 +9,13 @@ from hed.models.model_constants import DefTagNames
 
 
 class HedString(HedGroup):
-    """ A HED string with its schema and definitions. """
+    """A HED string with its schema and definitions."""
 
-    OPENING_GROUP_CHARACTER = '('
-    CLOSING_GROUP_CHARACTER = ')'
+    OPENING_GROUP_CHARACTER = "("
+    CLOSING_GROUP_CHARACTER = ")"
 
     def __init__(self, hed_string, hed_schema, def_dict=None, _contents=None):
-        """ Constructor for the HedString class.
+        """Constructor for the HedString class.
 
         Parameters:
             hed_string (str): A HED string consisting of tags and tag groups.
@@ -41,7 +42,7 @@ class HedString(HedGroup):
 
     @staticmethod
     def from_hed_strings(hed_strings) -> HedString:
-        """ Create a new HedString from a list of HedStrings.
+        """Create a new HedString from a list of HedStrings.
 
         Parameters:
             hed_strings (list or None): A list of HedString objects to combine.
@@ -63,11 +64,11 @@ class HedString(HedGroup):
 
     @property
     def is_group(self):
-        """ Always False since the underlying string is not a group with parentheses. """
+        """Always False since the underlying string is not a group with parentheses."""
         return False
 
     def _calculate_to_canonical_forms(self, hed_schema):
-        """ Identify all tags using the given schema.
+        """Identify all tags using the given schema.
 
         Parameters:
             hed_schema (HedSchema, HedSchemaGroup): The schema to use to validate/convert tags.
@@ -101,8 +102,8 @@ class HedString(HedGroup):
 
         return new_string
 
-    def copy(self) -> 'HedString':
-        """ Return a deep copy of this string.
+    def copy(self) -> "HedString":
+        """Return a deep copy of this string.
 
         Returns:
             HedString: The copied group.
@@ -112,16 +113,16 @@ class HedString(HedGroup):
         return return_copy
 
     def remove_definitions(self):
-        """ Remove definition tags and groups from this string.
+        """Remove definition tags and groups from this string.
 
-            This does not validate definitions and will blindly removing invalid ones as well.
+        This does not validate definitions and will blindly removing invalid ones as well.
         """
         definition_groups = self.find_top_level_tags({DefTagNames.DEFINITION_KEY}, include_groups=1)
         if definition_groups:
             self.remove(definition_groups)
 
-    def shrink_defs(self) -> 'HedString':
-        """ Replace def-expand tags with def tags.
+    def shrink_defs(self) -> "HedString":
+        """Replace def-expand tags with def tags.
 
             This does not validate them and will blindly shrink invalid ones as well.
 
@@ -138,7 +139,7 @@ class HedString(HedGroup):
         return self
 
     def expand_defs(self) -> "HedString":
-        """ Replace def tags with def-expand tags.
+        """Replace def tags with def-expand tags.
 
             This does very minimal validation.
 
@@ -161,7 +162,7 @@ class HedString(HedGroup):
         return self
 
     def get_as_original(self) -> str:
-        """ Return the original form of this string.
+        """Return the original form of this string.
 
         Returns:
             str: The string with all the tags in their original form.
@@ -173,7 +174,7 @@ class HedString(HedGroup):
 
     @staticmethod
     def split_into_groups(hed_string, hed_schema, def_dict=None) -> list:
-        """ Split the HED string into a parse tree.
+        """Split the HED string into a parse tree.
 
         Parameters:
             hed_string (str): A HED string consisting of tags and tag groups to be processed.
@@ -228,7 +229,7 @@ class HedString(HedGroup):
         return current_tag_group[0]
 
     def _get_org_span(self, tag_or_group):
-        """ If this tag or group was in the original HED string, find its original span.
+        """If this tag or group was in the original HED string, find its original span.
 
         Parameters:
             tag_or_group (HedTag or HedGroup): The HED tag to locate in this string.
@@ -250,7 +251,7 @@ class HedString(HedGroup):
         return None, None
 
     def _get_org_span_from_strings(self, tag_or_group):
-        """ A different case of the above, to handle if this was created from HED string objects."""
+        """A different case of the above, to handle if this was created from HED string objects."""
         found_string = None
         string_start_index = 0
         for string in self._from_strings:
@@ -267,7 +268,7 @@ class HedString(HedGroup):
 
     @staticmethod
     def split_hed_string(hed_string) -> list[tuple[bool, tuple[int, int]]]:
-        """ Split a HED string into delimiters and tags.
+        """Split a HED string into delimiters and tags.
 
         Parameters:
             hed_string (str): The HED string to split.
@@ -329,7 +330,7 @@ class HedString(HedGroup):
         return result_positions
 
     def validate(self, allow_placeholders=True, error_handler=None) -> list[dict]:
-        """ Validate the string using the schema.
+        """Validate the string using the schema.
 
         Parameters:
             allow_placeholders (bool): Allow placeholders in the string.
@@ -344,7 +345,7 @@ class HedString(HedGroup):
         return validator.validate(self, allow_placeholders=allow_placeholders, error_handler=error_handler)
 
     def find_top_level_tags(self, anchor_tags, include_groups=2) -> list:
-        """ Find top level groups with an anchor tag.
+        """Find top level groups with an anchor tag.
 
             A max of 1 tag located per top level group.
 
@@ -372,10 +373,10 @@ class HedString(HedGroup):
         return top_level_tags
 
     def remove_refs(self):
-        """ Remove any refs(tags contained entirely inside curly braces) from the string.
+        """Remove any refs(tags contained entirely inside curly braces) from the string.
 
-            This does NOT validate the contents of the curly braces.  This is only relevant when directly
-            editing sidecar strings.  Tools will naturally ignore these.
+        This does NOT validate the contents of the curly braces.  This is only relevant when directly
+        editing sidecar strings.  Tools will naturally ignore these.
         """
         ref_tags = [tag for tag in self.get_all_tags() if tag.is_column_ref()]
         if ref_tags:

@@ -1,6 +1,7 @@
 """
 Utilities to support HED searches based on strings.
 """
+
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 
@@ -18,7 +19,7 @@ def convert_query(search_query, schema):
     input_tags = HedString.split_hed_string(search_query)
     output_string = ""
     skippable_prefix = ("@", "~")
-    skippable_suffix = ("*", )
+    skippable_suffix = ("*",)
     for is_hed_tag, (startpos, endpos) in input_tags:
         input_tag = search_query[startpos:endpos]
         add_suffix = ""

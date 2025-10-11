@@ -1,6 +1,4 @@
-"""
-"""
-
+""" """
 
 from __future__ import annotations
 
@@ -16,15 +14,16 @@ from hed.schema.hed_schema_base import HedSchemaBase
 
 
 class HedSchemaGroup(HedSchemaBase):
-    """ Container for multiple HedSchema objects.
+    """Container for multiple HedSchema objects.
 
     Notes:
         - The container class is useful when library schema are included.
         - You cannot save/load/etc. the combined schema object directly.
 
     """
+
     def __init__(self, schema_list, name=""):
-        """ Combine multiple HedSchema objects from a list.
+        """Combine multiple HedSchema objects from a list.
 
         Parameters:
             schema_list (list): A list of HedSchema for the container.
@@ -38,13 +37,16 @@ class HedSchemaGroup(HedSchemaBase):
         """
         super().__init__()
         if len(schema_list) == 0:
-            raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty list passed to HedSchemaGroup constructor.",
-                               filename=self.name)
+            raise HedFileError(
+                HedExceptions.BAD_PARAMETERS, "Empty list passed to HedSchemaGroup constructor.", filename=self.name
+            )
         schema_prefixes = [hed_schema._namespace for hed_schema in schema_list]
         if len(set(schema_prefixes)) != len(schema_prefixes):
-            raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
-                               "Multiple schema share the same tag name_prefix.  This is not allowed.",
-                               filename=self.name)
+            raise HedFileError(
+                HedExceptions.SCHEMA_DUPLICATE_PREFIX,
+                "Multiple schema share the same tag name_prefix.  This is not allowed.",
+                filename=self.name,
+            )
         self._schemas = {hed_schema._namespace: hed_schema for hed_schema in schema_list}
         source_formats = [hed_schema.source_format for hed_schema in schema_list]
         # All must be same source format or return None.
@@ -52,7 +54,7 @@ class HedSchemaGroup(HedSchemaBase):
         self._name = name
 
     def get_schema_versions(self) -> list[str]:
-        """ A list of HED version strings including namespace and library name if any for these schemas.
+        """A list of HED version strings including namespace and library name if any for these schemas.
 
         Returns:
             list[str]: The complete version of this schema including library name and namespace.
@@ -60,7 +62,7 @@ class HedSchemaGroup(HedSchemaBase):
         return [schema.version for schema in self._schemas.values()]
 
     def get_formatted_version(self) -> str:
-        """ The HED version string including namespace and library name if any of this schema.
+        """The HED version string including namespace and library name if any of this schema.
 
         Returns:
             str: The complete version of this schema including library name and namespace.
@@ -70,8 +72,8 @@ class HedSchemaGroup(HedSchemaBase):
     def __eq__(self, other):
         return self._schemas == other._schemas
 
-    def schema_for_namespace(self, namespace) -> Union[HedSchema,None]:
-        """ Return the HedSchema for the library namespace.
+    def schema_for_namespace(self, namespace) -> Union[HedSchema, None]:
+        """Return the HedSchema for the library namespace.
 
         Parameters:
             namespace (str): A schema library name namespace.
@@ -85,7 +87,7 @@ class HedSchemaGroup(HedSchemaBase):
 
     @property
     def valid_prefixes(self) -> list[str]:
-        """ Return a list of all prefixes this group will accept.
+        """Return a list of all prefixes this group will accept.
 
         Returns:
             list[str]:  A list of strings representing valid prefixes for this group.
@@ -94,7 +96,7 @@ class HedSchemaGroup(HedSchemaBase):
         return list(self._schemas.keys())
 
     def check_compliance(self, check_for_warnings=True, name=None, error_handler=None) -> list[dict]:
-        """ Check for HED3 compliance of this schema.
+        """Check for HED3 compliance of this schema.
 
         Parameters:
             check_for_warnings (bool): If True, checks for formatting issues like invalid characters, capitalization.
@@ -111,7 +113,7 @@ class HedSchemaGroup(HedSchemaBase):
         return issues_list
 
     def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags) -> list:
-        """ Return tag entries with the given attribute.
+        """Return tag entries with the given attribute.
 
         Parameters:
             attribute (str): A tag attribute.  Eg HedKey.ExtensionAllowed
@@ -129,7 +131,7 @@ class HedSchemaGroup(HedSchemaBase):
         return list(tags)
 
     def get_tag_entry(self, name, key_class=HedSectionKey.Tags, schema_namespace="") -> Union["HedSchemaEntry", None]:
-        """ Return the schema entry for this tag, if one exists.
+        """Return the schema entry for this tag, if one exists.
 
         Parameters:
             name (str): Any form of basic tag(or other section entry) to look up.
@@ -148,7 +150,7 @@ class HedSchemaGroup(HedSchemaBase):
         return specific_schema.get_tag_entry(name, key_class, schema_namespace)
 
     def find_tag_entry(self, tag, schema_namespace="") -> tuple[Union["HedTagEntry", None], Union[str, None], list]:
-        """ Find the schema entry for a given source tag.
+        """Find the schema entry for a given source tag.
 
         Parameters:
             tag (str, HedTag): Any form of tag to look up.  Can have an extension, value, etc.
@@ -164,8 +166,9 @@ class HedSchemaGroup(HedSchemaBase):
         """
         specific_schema = self.schema_for_namespace(schema_namespace)
         if not specific_schema:
-            validation_issues = ErrorHandler.format_error(ValidationErrors.HED_LIBRARY_UNMATCHED, tag,
-                                                          schema_namespace, self.valid_prefixes)
+            validation_issues = ErrorHandler.format_error(
+                ValidationErrors.HED_LIBRARY_UNMATCHED, tag, schema_namespace, self.valid_prefixes
+            )
             return None, None, validation_issues
 
         return specific_schema._find_tag_entry(tag, schema_namespace)

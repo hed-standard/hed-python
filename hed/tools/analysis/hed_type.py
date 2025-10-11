@@ -1,4 +1,5 @@
-""" Manager a type variable and its associated context. """
+"""Manager a type variable and its associated context."""
+
 import pandas as pd
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
@@ -8,10 +9,10 @@ from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 
 class HedType:
-    """ Manager of a type variable and its associated context. """
+    """Manager of a type variable and its associated context."""
 
     def __init__(self, event_manager, name, type_tag="condition-variable"):
-        """ Create a variable manager for one type-variable for one tabular file.
+        """Create a variable manager for one type-variable for one tabular file.
 
         Parameters:
             event_manager (EventManager): Event manager instance
@@ -34,7 +35,7 @@ class HedType:
         return len(self.event_manager.event_list)
 
     def get_type_value_factors(self, type_value):
-        """ Return the HedTypeFactors associated with type_name or None.
+        """Return the HedTypeFactors associated with type_name or None.
 
         Parameters:
             type_value (str): The tag corresponding to the type's value (such as the name of the condition variable).
@@ -46,7 +47,7 @@ class HedType:
         return self._type_map.get(type_value.casefold(), None)
 
     def get_type_value_level_info(self, type_value):
-        """ Return type variable corresponding to type_value.
+        """Return type variable corresponding to type_value.
 
         Parameters:
             type_value (str) - name of the type variable
@@ -62,7 +63,7 @@ class HedType:
         return set(self._type_map.keys())
 
     def get_type_def_names(self):
-        """ Return the type defs names """
+        """Return the type defs names"""
         tag_list = []
         for _variable, factor in self._type_map.items():
             tag_list = tag_list + list(factor.levels.keys())
@@ -79,7 +80,7 @@ class HedType:
         return summary
 
     def get_type_factors(self, type_values=None, factor_encoding="one-hot"):
-        """ Create a dataframe with the indicated type tag values as factors.
+        """Create a dataframe with the indicated type tag values as factors.
 
         Parameters:
             type_values (list or None): A list of values of type tags for which to generate factors.
@@ -107,7 +108,7 @@ class HedType:
         return f"{self.type_tag} type_variables: {str(list(self._type_map.keys()))}"
 
     def _extract_definition_variables(self, item, index):
-        """ Extract the definition uses from a HedTag, HedGroup, or HedString.
+        """Extract the definition uses from a HedTag, HedGroup, or HedString.
 
         Parameters:
             item (HedTag, HedGroup, or HedString): The item to extract variable information from.
@@ -153,7 +154,7 @@ class HedType:
             hed_var.levels[level] = var_levels
 
     def _extract_variables(self):
-        """ Extract all type_variables from hed_strings and event_contexts. """
+        """Extract all type_variables from hed_strings and event_contexts."""
 
         hed, base, context = self.event_manager.unfold_context()
         for index in range(len(hed)):
@@ -165,7 +166,7 @@ class HedType:
 
     @staticmethod
     def get_type_list(type_tag, item):
-        """ Find a list of the given type tag from a HedTag, HedGroup, or HedString.
+        """Find a list of the given type tag from a HedTag, HedGroup, or HedString.
 
         Parameters:
             type_tag (str): a tag whose direct items you wish to remove
@@ -184,7 +185,7 @@ class HedType:
         return tag_list
 
     def _update_variables(self, tag_list, index):
-        """ Update the HedTypeFactors based on tags in the list.
+        """Update the HedTypeFactors based on tags in the list.
 
         Parameters:
             tag_list (list): A list of Condition-variable HedTags.
@@ -199,4 +200,4 @@ class HedType:
             if hed_var is None:
                 hed_var = HedTypeFactors(self.type_tag, tag_value, self.total_events)
             self._type_map[tag_value] = hed_var
-            hed_var.direct_indices[index] = ''
+            hed_var.direct_indices[index] = ""

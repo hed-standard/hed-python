@@ -1,4 +1,4 @@
-""" Utilities supporting validation of HED tags as strings. """
+"""Utilities supporting validation of HED tags as strings."""
 
 import re
 from hed.errors.error_reporter import ErrorHandler
@@ -7,12 +7,12 @@ from hed.errors.error_types import ValidationErrors
 
 
 class TagValidator:
-    """ Validation for individual HED tags. """
-    CAMEL_CASE_EXPRESSION = r'([A-Z]+\s*[a-z-]*)+'
+    """Validation for individual HED tags."""
 
-    def run_individual_tag_validators(self, original_tag, allow_placeholders=False,
-                                      is_definition=False) -> list[dict]:
-        """ Runs the validators on the individual tags.
+    CAMEL_CASE_EXPRESSION = r"([A-Z]+\s*[a-z-]*)+"
+
+    def run_individual_tag_validators(self, original_tag, allow_placeholders=False, is_definition=False) -> list[dict]:
+        """Runs the validators on the individual tags.
 
             This ignores most illegal characters except in extensions.
 
@@ -24,7 +24,7 @@ class TagValidator:
         Returns:
             list: The validation issues associated with the tags. Each issue is dictionary.
 
-         """
+        """
         validation_issues = []
         validation_issues += self.check_tag_exists_in_schema(original_tag)
         if not allow_placeholders:
@@ -39,7 +39,7 @@ class TagValidator:
     # =========================================================================+
     @staticmethod
     def check_tag_exists_in_schema(original_tag) -> list[dict]:
-        """ Report invalid tag or doesn't take a value.
+        """Report invalid tag or doesn't take a value.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
@@ -56,17 +56,21 @@ class TagValidator:
             actual_error = None
             if "#" in original_tag.extension:
                 actual_error = ValidationErrors.PLACEHOLDER_INVALID
-            validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_EXTENSION_INVALID, tag=original_tag,
-                                                           actual_error=actual_error)
+            validation_issues += ErrorHandler.format_error(
+                ValidationErrors.TAG_EXTENSION_INVALID, tag=original_tag, actual_error=actual_error
+            )
         else:
-            validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_EXTENDED, tag=original_tag,
-                                                           index_in_tag=len(original_tag.org_base_tag),
-                                                           index_in_tag_end=None)
+            validation_issues += ErrorHandler.format_error(
+                ValidationErrors.TAG_EXTENDED,
+                tag=original_tag,
+                index_in_tag=len(original_tag.org_base_tag),
+                index_in_tag_end=None,
+            )
         return validation_issues
 
     @staticmethod
     def check_tag_requires_child(original_tag) -> list[dict]:
-        """ Report if tag is a leaf with 'requiredTag' attribute.
+        """Report if tag is a leaf with 'requiredTag' attribute.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
@@ -76,8 +80,7 @@ class TagValidator:
         """
         validation_issues = []
         if original_tag.has_attribute(HedKey.RequireChild):
-            validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_REQUIRES_CHILD,
-                                                           tag=original_tag)
+            validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_REQUIRES_CHILD, tag=original_tag)
         return validation_issues
 
     def check_capitalization(self, original_tag) -> list[dict]:
@@ -94,16 +97,14 @@ class TagValidator:
         for tag_name in tag_names:
             correct_tag_name = tag_name.capitalize()
             if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
-                validation_issues += ErrorHandler.format_error(ValidationErrors.STYLE_WARNING,
-                                                               tag=original_tag)
+                validation_issues += ErrorHandler.format_error(ValidationErrors.STYLE_WARNING, tag=original_tag)
                 break
         return validation_issues
 
     def check_tag_is_deprecated(self, original_tag) -> list[dict]:
         validation_issues = []
         if original_tag.has_attribute(HedKey.DeprecatedFrom):
-            validation_issues += ErrorHandler.format_error(ValidationErrors.ELEMENT_DEPRECATED,
-                                                           tag=original_tag)
+            validation_issues += ErrorHandler.format_error(ValidationErrors.ELEMENT_DEPRECATED, tag=original_tag)
 
         return validation_issues
 
@@ -113,7 +114,7 @@ class TagValidator:
 
     @staticmethod
     def check_for_placeholder(original_tag, is_definition=False) -> list[dict]:
-        """ Report invalid placeholder characters.
+        """Report invalid placeholder characters.
 
         Parameters:
             original_tag (HedTag):  The HedTag to be checked
@@ -131,10 +132,12 @@ class TagValidator:
             starting_index = len(original_tag.org_base_tag) + 1
             for i, character in enumerate(original_tag.extension):
                 if character == "#":
-                    validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
-                                                                   tag=original_tag,
-                                                                   index_in_tag=starting_index + i,
-                                                                   index_in_tag_end=starting_index + i + 1,
-                                                                   actual_error=ValidationErrors.PLACEHOLDER_INVALID)
+                    validation_issues += ErrorHandler.format_error(
+                        ValidationErrors.INVALID_TAG_CHARACTER,
+                        tag=original_tag,
+                        index_in_tag=starting_index + i,
+                        index_in_tag_end=starting_index + i + 1,
+                        actual_error=ValidationErrors.PLACEHOLDER_INVALID,
+                    )
 
         return validation_issues

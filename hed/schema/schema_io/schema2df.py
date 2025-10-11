@@ -1,8 +1,12 @@
 """Allows output of HedSchema objects as .tsv format"""
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.schema.schema_io.df_util import create_empty_dataframes, get_library_name_and_id, remove_prefix, \
-    calculate_attribute_type
+from hed.schema.schema_io.df_util import (
+    create_empty_dataframes,
+    get_library_name_and_id,
+    remove_prefix,
+    calculate_attribute_type,
+)
 from hed.schema.schema_io.schema2base import Schema2Base
 from hed.schema.schema_io import text_util
 import pandas as pd
@@ -16,13 +20,13 @@ section_key_to_df = {
     HedSectionKey.UnitModifiers: constants.UNIT_MODIFIER_KEY,
     HedSectionKey.ValueClasses: constants.VALUE_CLASS_KEY,
     HedSectionKey.Attributes: HedSectionKey.Attributes,
-    HedSectionKey.Properties: HedSectionKey.Properties
+    HedSectionKey.Properties: HedSectionKey.Properties,
 }
 
 
 class Schema2DF(Schema2Base):
     def __init__(self, get_as_ids=False):
-        """ Constructor for schema to dataframe converter
+        """Constructor for schema to dataframe converter
 
         Parameters:
             get_as_ids(bool): If true, return the hedId rather than name in most places
@@ -33,7 +37,7 @@ class Schema2DF(Schema2Base):
         self._suffix_rows = {v: [] for v in constants.DF_SUFFIXES}
 
     def _get_object_name_and_id(self, object_name, include_prefix=False):
-        """ Get the adjusted name and ID for the given object type.
+        """Get the adjusted name and ID for the given object type.
 
         Parameters:
             object_name(str): The name of the base HED object, e.g. HedHeader, HedUnit
@@ -69,7 +73,7 @@ class Schema2DF(Schema2Base):
             constants.name: name,
             constants.attributes: attributes,
             constants.subclass_of: base_object,
-            constants.dcdescription: description.replace("\n", "\\n")
+            constants.dcdescription: description.replace("\n", "\\n"),
             # constants.equivalent_to: self._get_header_equivalent_to(attributes, base_object)
         }
         self.output[constants.STRUCT_KEY].loc[len(self.output[constants.STRUCT_KEY])] = new_row
@@ -88,7 +92,7 @@ class Schema2DF(Schema2Base):
         pass
 
     def _output_extras(self, hed_schema):
-        """ Make sure that the extras files have at least a header.
+        """Make sure that the extras files have at least a header.
 
         Parameters:
             hed_schema(HedSchema): The HED schema to extract the information from
@@ -119,7 +123,7 @@ class Schema2DF(Schema2Base):
             self.output[constants.UNIT_CLASS_KEY] = pd.DataFrame(self._suffix_rows[constants.UNIT_CLASS_KEY], dtype=str)
 
     def _end_section(self, section_key):
-        """ Updates the output with the current values from the section
+        """Updates the output with the current values from the section
 
         Parameters:
             section_key (HedSectionKey): The section key to end.
@@ -134,12 +138,10 @@ class Schema2DF(Schema2Base):
         new_row = {
             constants.hed_id: f"{tag_id}",
             constants.level: f"{level}",
-            constants.name:
-                tag_entry.short_tag_name if not tag_entry.name.endswith("#")
-                else tag_entry.short_tag_name + "-#",
+            constants.name: tag_entry.short_tag_name if not tag_entry.name.endswith("#") else tag_entry.short_tag_name + "-#",
             constants.subclass_of: self._get_subclass_of(tag_entry),
             constants.attributes: self._format_tag_attributes(tag_entry.attributes),
-            constants.dcdescription: tag_entry.description
+            constants.dcdescription: tag_entry.description,
         }
         if self._get_as_ids:
             new_row[constants.equivalent_to] = self._get_tag_equivalent_to(tag_entry)
@@ -149,7 +151,7 @@ class Schema2DF(Schema2Base):
         self._suffix_rows[constants.TAG_KEY].append(new_row)
 
     def _write_entry(self, entry, parent_node, include_props=True):
-        """ Produce a dictionary for a single row for a non-tag HedSchemaEntry object.
+        """Produce a dictionary for a single row for a non-tag HedSchemaEntry object.
 
         Parameters:
             entry (HedSchemaEntry): The HedSchemaEntry object to write.
@@ -174,7 +176,7 @@ class Schema2DF(Schema2Base):
             constants.name: entry.name,
             constants.subclass_of: self._get_subclass_of(entry),
             constants.attributes: self._format_tag_attributes(entry.attributes),
-            constants.dcdescription: entry.description
+            constants.dcdescription: entry.description,
         }
         if self._get_as_ids:
             new_row[constants.equivalent_to] = self._get_tag_equivalent_to(entry)
@@ -193,9 +195,11 @@ class Schema2DF(Schema2Base):
         if HedKey.AnnotationProperty in entry.attributes:
             df_key = constants.ANNOTATION_KEY
             property_type = "AnnotationProperty"
-        elif (HedKey.NumericRange in entry.attributes
-              or HedKey.StringRange in entry.attributes
-              or HedKey.BoolRange in entry.attributes):
+        elif (
+            HedKey.NumericRange in entry.attributes
+            or HedKey.StringRange in entry.attributes
+            or HedKey.BoolRange in entry.attributes
+        ):
             df_key = constants.DATA_KEY
             property_type = "DataProperty"
 
@@ -208,7 +212,7 @@ class Schema2DF(Schema2Base):
             "HedElement": self._get_object_id("HedElement", include_prefix=True),
             "string": "xsd:string",
             "boolean": "xsd:boolean",
-            "float": "xsd:float"
+            "float": "xsd:float",
         }
 
         domain_attributes = {
@@ -217,7 +221,7 @@ class Schema2DF(Schema2Base):
             HedKey.UnitClassDomain: "HedUnitClass",
             HedKey.UnitModifierDomain: "HedUnitModifier",
             HedKey.ValueClassDomain: "HedValueClass",
-            HedKey.ElementDomain: "HedElement"
+            HedKey.ElementDomain: "HedElement",
         }
         range_attributes = {
             HedKey.StringRange: "string",
@@ -226,7 +230,7 @@ class Schema2DF(Schema2Base):
             HedKey.BoolRange: "boolean",
             HedKey.UnitRange: "HedUnit",
             HedKey.UnitClassRange: "HedUnitClass",
-            HedKey.ValueClassRange: "HedValueClass"
+            HedKey.ValueClassRange: "HedValueClass",
         }
 
         domain_keys = [key for key in entry.attributes if key in domain_attributes]
@@ -252,15 +256,15 @@ class Schema2DF(Schema2Base):
         self._suffix_rows[df_key].append(new_row)
 
     def _write_property_entry(self, entry):
-        """ Updates self.classes with the AttributeProperty
+        """Updates self.classes with the AttributeProperty
 
         Parameters:
             entry (HedSchemaEntry): entry with property type AnnotationProperty
 
         """
-        #df_key = constants.ATTRIBUTE_PROPERTY_KEY
+        # df_key = constants.ATTRIBUTE_PROPERTY_KEY
         property_type = "AnnotationProperty"
-        #df = self.output[df_key]
+        # df = self.output[df_key]
         tag_id = entry.attributes.get(HedKey.HedID, "")
         new_row = {
             constants.hed_id: f"{tag_id}",
@@ -270,7 +274,7 @@ class Schema2DF(Schema2Base):
         }
         self._suffix_rows[constants.ATTRIBUTE_PROPERTY_KEY].append(new_row)
         pass
-        #df.loc[len(df)] = new_row
+        # df.loc[len(df)] = new_row
 
     def _attribute_disallowed(self, attribute):
         if super()._attribute_disallowed(attribute):
@@ -322,16 +326,13 @@ class Schema2DF(Schema2Base):
 
     def _process_attributes(self, tag_entry):
         attribute_strings = []
-        attribute_types = {
-            "object": "some",
-            "data": "value"
-        }
+        attribute_types = {"object": "some", "data": "value"}
         range_types = {
             HedKey.TagRange: HedSectionKey.Tags,
             HedKey.UnitRange: HedSectionKey.Units,
             HedKey.UnitClassRange: HedSectionKey.UnitClasses,
             HedKey.ValueClassRange: HedSectionKey.ValueClasses,
-            HedKey.NumericRange: HedKey.NumericRange
+            HedKey.NumericRange: HedKey.NumericRange,
         }
 
         for attribute, value in tag_entry.attributes.items():
@@ -369,7 +370,7 @@ class Schema2DF(Schema2Base):
                 values = [f'"{v}"' for v in values]
         else:
             if value is True:
-                value = 'true'
+                value = "true"
             values = [value]
 
         return values
@@ -381,7 +382,7 @@ class Schema2DF(Schema2Base):
         return None
 
     def _process_unit_class_entry(self, tag_entry):
-        """ Extract a list of unit class equivalent_to strings from a unit class entry.
+        """Extract a list of unit class equivalent_to strings from a unit class entry.
 
         Parameters:
             tag_entry (HedUnitClassEntry): The unit class entry to process.
@@ -432,7 +433,7 @@ class Schema2DF(Schema2Base):
             HedSectionKey.Units: "HedUnit",
             HedSectionKey.UnitClasses: "HedUnitClass",
             HedSectionKey.UnitModifiers: "HedUnitModifier",
-            HedSectionKey.ValueClasses: "HedValueClass"
+            HedSectionKey.ValueClasses: "HedValueClass",
         }
         name, obj_id = self._get_object_name_and_id(base_objects[tag_entry.section_key], include_prefix=True)
 

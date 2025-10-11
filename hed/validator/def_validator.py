@@ -1,4 +1,5 @@
-""" Validates of Def, Def-expand and Temporal groups. """
+"""Validates of Def, Def-expand and Temporal groups."""
+
 from __future__ import annotations
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
@@ -10,12 +11,10 @@ from hed.errors.error_types import TemporalErrors
 
 
 class DefValidator(DefinitionDict):
-    """ Validates Def/ and Def-expand/, as well as Temporal groups: Onset, Inset, and Offset
-
-    """
+    """Validates Def/ and Def-expand/, as well as Temporal groups: Onset, Inset, and Offset"""
 
     def __init__(self, def_dicts=None, hed_schema=None):
-        """ Initialize for definitions in HED strings.
+        """Initialize for definitions in HED strings.
 
         Parameters:
             def_dicts (list or DefinitionDict or str): DefinitionDicts containing the definitions to pass to baseclass
@@ -24,7 +23,7 @@ class DefValidator(DefinitionDict):
         super().__init__(def_dicts, hed_schema=hed_schema)
 
     def validate_def_tags(self, hed_string_obj) -> list[dict]:
-        """ Validate Def/Def-Expand tags.
+        """Validate Def/Def-Expand tags.
 
         Parameters:
             hed_string_obj (HedString): The HED string to process.
@@ -66,7 +65,7 @@ class DefValidator(DefinitionDict):
         return def_issues
 
     def _validate_def_contents(self, def_tag, def_expand_group) -> list[dict]:
-        """ Check for issues with expanding a tag from Def to a Def-expand tag group
+        """Check for issues with expanding a tag from Def to a Def-expand tag group
 
         Parameters:
             def_tag (HedTag): Source HED tag that may be a Def or Def-expand tag.
@@ -76,7 +75,7 @@ class DefValidator(DefinitionDict):
             list[dict]: Issues found from validating placeholders.
         """
         is_def_expand_tag = def_expand_group != def_tag
-        tag_label, _, placeholder = def_tag.extension.partition('/')
+        tag_label, _, placeholder = def_tag.extension.partition("/")
         label_tag_lower = tag_label.casefold()
 
         # Check if def_entry in def_dicts.
@@ -90,15 +89,15 @@ class DefValidator(DefinitionDict):
         # Check the special case of a definition without contents.
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
         if is_def_expand_tag and def_expand_group != def_contents:
-            return ErrorHandler.format_error(ValidationErrors.HED_DEF_EXPAND_INVALID,
-                                             tag=def_tag, actual_def=def_contents,
-                                             found_def=def_expand_group)
+            return ErrorHandler.format_error(
+                ValidationErrors.HED_DEF_EXPAND_INVALID, tag=def_tag, actual_def=def_contents, found_def=def_expand_group
+            )
 
         return []
 
     def validate_def_value_units(self, def_tag, hed_validator, allow_placeholders=False) -> list[dict]:
         """Equivalent to HedValidator.validate_units for the special case of a Def or Def-expand tag"""
-        tag_label, _, placeholder = def_tag.extension.partition('/')
+        tag_label, _, placeholder = def_tag.extension.partition("/")
         is_def_expand_tag = def_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY
 
         def_entry = self.defs.get(tag_label.casefold())
@@ -107,7 +106,7 @@ class DefValidator(DefinitionDict):
             return []
 
         # Make sure that there aren't any errant placeholders.
-        if not allow_placeholders and '#' in placeholder:
+        if not allow_placeholders and "#" in placeholder:
             return ErrorHandler.format_error(ValidationErrors.HED_PLACEHOLDER_OUT_OF_CONTEXT, tag=def_tag.tag)
 
         # Set the appropriate error code
@@ -124,16 +123,14 @@ class DefValidator(DefinitionDict):
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
         if def_contents and def_entry.takes_value and hed_validator:
             placeholder_tag = def_contents.get_first_group().find_placeholder_tag()
-            def_issues += hed_validator.validate_units(placeholder_tag,
-                                                       placeholder,
-                                                       report_as=def_tag,
-                                                       error_code=error_code,
-                                                       index_offset=len(tag_label) + 1)
+            def_issues += hed_validator.validate_units(
+                placeholder_tag, placeholder, report_as=def_tag, error_code=error_code, index_offset=len(tag_label) + 1
+            )
 
         return def_issues
 
     def validate_onset_offset(self, hed_string_obj) -> list[dict]:
-        """ Validate onset/offset
+        """Validate onset/offset
 
         Parameters:
             hed_string_obj (HedString): The HED string to check.
@@ -152,37 +149,35 @@ class DefValidator(DefinitionDict):
                 continue
 
             if len(def_tags) > 1:
-                onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS,
-                                                          tag=def_tags[0][0],
-                                                          tag_list=[tag[0] for tag in def_tags[1:]])
+                onset_issues += ErrorHandler.format_error(
+                    TemporalErrors.ONSET_TOO_MANY_DEFS, tag=def_tags[0][0], tag_list=[tag[0] for tag in def_tags[1:]]
+                )
                 continue
 
             # Get all children but def group and onset/offset, then validate #/type of children.
             def_tag, def_group, _ = def_tags[0]
             if def_group is None:
                 def_group = def_tag
-            children = [child for child in found_group.children if
-                        def_group is not child and found_onset is not child]
+            children = [child for child in found_group.children if def_group is not child and found_onset is not child]
 
             # Delay tag is checked for uniqueness elsewhere, so we can safely remove all of them
-            children = [child for child in children
-                        if not isinstance(child, HedTag) or child.short_base_tag != DefTagNames.DELAY_KEY]
+            children = [
+                child for child in children if not isinstance(child, HedTag) or child.short_base_tag != DefTagNames.DELAY_KEY
+            ]
             max_children = 1
             if found_onset.short_base_tag == DefTagNames.OFFSET_KEY:
                 max_children = 0
             if len(children) > max_children:
-                onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS,
-                                                          def_tag,
-                                                          found_group.children)
+                onset_issues += ErrorHandler.format_error(
+                    TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, def_tag, found_group.children
+                )
                 continue
 
             if children:
                 # Make this a loop if max_children can be > 1
                 child = children[0]
                 if not isinstance(child, HedGroup):
-                    onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP,
-                                                              child,
-                                                              def_tag)
+                    onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, child, def_tag)
 
             # At this point we have either an onset or offset tag and it's name
             onset_issues += self._handle_onset_or_offset(def_tag)
@@ -194,13 +189,14 @@ class DefValidator(DefinitionDict):
         return hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.TEMPORAL_KEYS)
 
     def _handle_onset_or_offset(self, def_tag) -> list[dict]:
-        def_name, _, placeholder = def_tag.extension.partition('/')
+        def_name, _, placeholder = def_tag.extension.partition("/")
 
         def_entry = self.defs.get(def_name.casefold())
         if def_entry is None:
             return ErrorHandler.format_error(TemporalErrors.ONSET_DEF_UNMATCHED, tag=def_tag)
         if bool(def_entry.takes_value) != bool(placeholder):
-            return ErrorHandler.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=def_tag,
-                                             has_placeholder=bool(def_entry.takes_value))
+            return ErrorHandler.format_error(
+                TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=def_tag, has_placeholder=bool(def_entry.takes_value)
+            )
 
         return []

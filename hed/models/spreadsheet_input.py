@@ -1,14 +1,22 @@
-""" A spreadsheet of HED tags. """
+"""A spreadsheet of HED tags."""
+
 from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
 
 
 class SpreadsheetInput(BaseInput):
-    """ A spreadsheet of HED tags. """
+    """A spreadsheet of HED tags."""
 
-    def __init__(self, file=None, file_type=None, worksheet_name=None, tag_columns=None,
-                 has_column_names=True, column_prefix_dictionary=None,
-                 name=None):
+    def __init__(
+        self,
+        file=None,
+        file_type=None,
+        worksheet_name=None,
+        tag_columns=None,
+        has_column_names=True,
+        column_prefix_dictionary=None,
+        name=None,
+    ):
         """Constructor for the SpreadsheetInput class.
 
         Parameters:
@@ -43,7 +51,8 @@ class SpreadsheetInput(BaseInput):
         """
 
         self.tag_columns = tag_columns
-        new_mapper = ColumnMapper(tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary,
-                                  warn_on_missing_column=False)
+        new_mapper = ColumnMapper(
+            tag_columns=tag_columns, column_prefix_dictionary=column_prefix_dictionary, warn_on_missing_column=False
+        )
 
         super().__init__(file, file_type, worksheet_name, has_column_names, new_mapper, name=name)

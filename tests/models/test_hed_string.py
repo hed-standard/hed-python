@@ -30,22 +30,22 @@ class TestHedString(unittest.TestCase):
 
     def test_constructor(self):
         test_strings = {
-            'normal': "Tag1,Tag2",
-            'normalParen': "(Tag1,Tag2)",
-            'normalDoubleParen': "(Tag1,Tag2,(Tag3,Tag4))",
-            'extraOpeningParen': "((Tag1,Tag2,(Tag3,Tag4))",
-            'extra2OpeningParen': "(((Tag1,Tag2,(Tag3,Tag4))",
-            'extraClosingParen': "(Tag1,Tag2,(Tag3,Tag4)))",
-            'extra2ClosingParen': "(Tag1,Tag2,(Tag3,Tag4))))"
+            "normal": "Tag1,Tag2",
+            "normalParen": "(Tag1,Tag2)",
+            "normalDoubleParen": "(Tag1,Tag2,(Tag3,Tag4))",
+            "extraOpeningParen": "((Tag1,Tag2,(Tag3,Tag4))",
+            "extra2OpeningParen": "(((Tag1,Tag2,(Tag3,Tag4))",
+            "extraClosingParen": "(Tag1,Tag2,(Tag3,Tag4)))",
+            "extra2ClosingParen": "(Tag1,Tag2,(Tag3,Tag4))))",
         }
         expected_result = {
-            'normal': True,
-            'normalParen': True,
-            'normalDoubleParen': True,
-            'extraOpeningParen': False,
-            'extra2OpeningParen': False,
-            'extraClosingParen': False,
-            'extra2ClosingParen': False
+            "normal": True,
+            "normalParen": True,
+            "normalDoubleParen": True,
+            "extraOpeningParen": False,
+            "extra2OpeningParen": False,
+            "extraClosingParen": False,
+            "extra2ClosingParen": False,
         }
 
         # Just make sure it doesn't crash while parsing super invalid strings.
@@ -60,34 +60,42 @@ class TestHedString(unittest.TestCase):
 
 class HedTagLists(TestHedStrings):
     def test_type(self):
-        hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
+        hed_string = "Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple"
         result = HedString.split_into_groups(hed_string, self.schema)
         self.assertIsInstance(result, list)
 
     def test_top_level_tags(self):
-        hed_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
+        hed_string = "Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple"
         result = HedString.split_into_groups(hed_string, self.schema)
         tags_as_strings = [str(tag) for tag in result]
-        self.assertCountEqual(tags_as_strings, ['Event/Category/Experimental stimulus', 'Item/Object/Vehicle/Train',
-                                                'Attribute/Visual/Color/Purple'])
+        self.assertCountEqual(
+            tags_as_strings,
+            ["Event/Category/Experimental stimulus", "Item/Object/Vehicle/Train", "Attribute/Visual/Color/Purple"],
+        )
 
     def test_group_tags(self):
-        hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
-                     '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
+        hed_string = (
+            "/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),"
+            "/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px "
+        )
         string_obj = HedString(hed_string, self.schema)
         tags_as_strings = [str(tag) for tag in string_obj.children]
-        self.assertCountEqual(tags_as_strings,
-                              ['/Action/Reach/To touch',
-                               '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)',
-                               '/Attribute/Location/Screen/Top/70 px', '/Attribute/Location/Screen/Left/23 px'])
+        self.assertCountEqual(
+            tags_as_strings,
+            [
+                "/Action/Reach/To touch",
+                "(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)",
+                "/Attribute/Location/Screen/Top/70 px",
+                "/Attribute/Location/Screen/Left/23 px",
+            ],
+        )
 
     def test_square_brackets_in_string(self):
         # just verifying this parses, square brackets do not validate
-        hed_string = '[test_ref], Event/Sensory-event, Participant, ([test_ref2], Event)'
+        hed_string = "[test_ref], Event/Sensory-event, Participant, ([test_ref2], Event)"
         string_obj = HedString(hed_string, self.schema)
         tags_as_strings = [str(tag) for tag in string_obj.children]
-        self.assertCountEqual(tags_as_strings,
-                              ['[test_ref]', 'Sensory-event', 'Participant', '([test_ref2],Event)'])
+        self.assertCountEqual(tags_as_strings, ["[test_ref]", "Sensory-event", "Participant", "([test_ref2],Event)"])
 
     # Potentially restore some similar behavior later if desired.
     # We no longer automatically remove things like quotes.
@@ -101,26 +109,22 @@ class HedTagLists(TestHedStrings):
 
     def test_blanks(self):
         test_strings = {
-            'doubleTilde':
-                '/Item/Object/Vehicle/Car~~/Attribute/Object control/Perturb',
-            'doubleComma':
-                '/Item/Object/Vehicle/Car,,/Attribute/Object control/Perturb',
-            'doubleInvalidCharacter':
-                '/Item/Object/Vehicle/Car[]/Attribute/Object control/Perturb',
-            'trailingBlank':
-                '/Item/Object/Vehicle/Car,/Attribute/Object control/Perturb,',
+            "doubleTilde": "/Item/Object/Vehicle/Car~~/Attribute/Object control/Perturb",
+            "doubleComma": "/Item/Object/Vehicle/Car,,/Attribute/Object control/Perturb",
+            "doubleInvalidCharacter": "/Item/Object/Vehicle/Car[]/Attribute/Object control/Perturb",
+            "trailingBlank": "/Item/Object/Vehicle/Car,/Attribute/Object control/Perturb,",
         }
         expected_list = [
-            '/Item/Object/Vehicle/Car',
-            '/Attribute/Object control/Perturb',
+            "/Item/Object/Vehicle/Car",
+            "/Attribute/Object control/Perturb",
         ]
         expected_results = {
-            'doubleTilde': [
-                '/Item/Object/Vehicle/Car~~/Attribute/Object control/Perturb',
+            "doubleTilde": [
+                "/Item/Object/Vehicle/Car~~/Attribute/Object control/Perturb",
             ],
-            'doubleComma': expected_list,
-            'doubleInvalidCharacter': ['/Item/Object/Vehicle/Car[]/Attribute/Object control/Perturb'],
-            'trailingBlank': expected_list,
+            "doubleComma": expected_list,
+            "doubleInvalidCharacter": ["/Item/Object/Vehicle/Car[]/Attribute/Object control/Perturb"],
+            "trailingBlank": expected_list,
         }
 
         def test_function(string):
@@ -131,20 +135,29 @@ class HedTagLists(TestHedStrings):
 
 class ProcessedHedTags(TestHedStrings):
     def test_parsed_tags(self):
-        hed_string = '/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),' \
-                     '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px '
+        hed_string = (
+            "/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),"
+            "/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px "
+        )
         parsed_string = HedString(hed_string, self.schema)
-        self.assertCountEqual([str(tag) for tag in parsed_string.get_all_tags()], [
-            '/Action/Reach/To touch',
-            '/Attribute/Object side/Left',
-            '/Participant/Effect/Body part/Arm',
-            '/Attribute/Location/Screen/Top/70 px',
-            '/Attribute/Location/Screen/Left/23 px',
-        ])
-        self.assertCountEqual([str(group) for group in parsed_string.get_all_groups()],
-                              ['/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),'
-                               '/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px',
-                               '(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)'])
+        self.assertCountEqual(
+            [str(tag) for tag in parsed_string.get_all_tags()],
+            [
+                "/Action/Reach/To touch",
+                "/Attribute/Object side/Left",
+                "/Participant/Effect/Body part/Arm",
+                "/Attribute/Location/Screen/Top/70 px",
+                "/Attribute/Location/Screen/Left/23 px",
+            ],
+        )
+        self.assertCountEqual(
+            [str(group) for group in parsed_string.get_all_groups()],
+            [
+                "/Action/Reach/To touch,(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm),"
+                "/Attribute/Location/Screen/Top/70 px,/Attribute/Location/Screen/Left/23 px",
+                "(/Attribute/Object side/Left,/Participant/Effect/Body part/Arm)",
+            ],
+        )
 
 
 class TestHedStringUtil(unittest.TestCase):
@@ -158,29 +171,64 @@ class TestHedStringUtil(unittest.TestCase):
 
     def test_split_hed_string(self):
         test_strings = {
-            'single': 'Event',
-            'double': 'Event, Event/Extension',
-            'singleAndGroup': 'Event/Extension, (Event/Extension2, Event/Extension3)',
-            'singleAndGroupWithBlank': 'Event/Extension, (Event, ,Event/Extension3)',
-            'manyParens': 'Event/Extension,(((Event/Extension2, )(Event)',
-            'manyParensEndingSpace': 'Event/Extension,(((Event/Extension2, )(Event) ',
-            'manyParensOpeningSpace': ' Event/Extension,(((Event/Extension2, )(Event)',
-            'manyParensBothSpace': ' Event/Extension,(((Event/Extension2, )(Event ',
-            'manyClosingParens': 'Event/Extension, (Event/Extension2, ))(Event)',
+            "single": "Event",
+            "double": "Event, Event/Extension",
+            "singleAndGroup": "Event/Extension, (Event/Extension2, Event/Extension3)",
+            "singleAndGroupWithBlank": "Event/Extension, (Event, ,Event/Extension3)",
+            "manyParens": "Event/Extension,(((Event/Extension2, )(Event)",
+            "manyParensEndingSpace": "Event/Extension,(((Event/Extension2, )(Event) ",
+            "manyParensOpeningSpace": " Event/Extension,(((Event/Extension2, )(Event)",
+            "manyParensBothSpace": " Event/Extension,(((Event/Extension2, )(Event ",
+            "manyClosingParens": "Event/Extension, (Event/Extension2, ))(Event)",
         }
         expected_results = {
-            'single': ['Event'],
-            'double': ['Event', ', ', 'Event/Extension'],
-            'singleAndGroup': ['Event/Extension', ', ', '(', 'Event/Extension2', ', ', 'Event/Extension3', ')'],
-            'singleAndGroupWithBlank': ['Event/Extension', ', ', '(', 'Event', ', ', ',', 'Event/Extension3', ')'],
-            'manyParens': ['Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ')'],
-            'manyParensEndingSpace':
-                ['Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ') '],
-            'manyParensOpeningSpace':
-                [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ')'],
-            'manyParensBothSpace':
-                [' ', 'Event/Extension', ',', '(', '(', '(', 'Event/Extension2', ', ', ')', '(', 'Event', ' '],
-            'manyClosingParens': ['Event/Extension', ', ', '(', 'Event/Extension2', ', ', ')', ')', '(', 'Event', ')']
+            "single": ["Event"],
+            "double": ["Event", ", ", "Event/Extension"],
+            "singleAndGroup": ["Event/Extension", ", ", "(", "Event/Extension2", ", ", "Event/Extension3", ")"],
+            "singleAndGroupWithBlank": ["Event/Extension", ", ", "(", "Event", ", ", ",", "Event/Extension3", ")"],
+            "manyParens": ["Event/Extension", ",", "(", "(", "(", "Event/Extension2", ", ", ")", "(", "Event", ")"],
+            "manyParensEndingSpace": [
+                "Event/Extension",
+                ",",
+                "(",
+                "(",
+                "(",
+                "Event/Extension2",
+                ", ",
+                ")",
+                "(",
+                "Event",
+                ") ",
+            ],
+            "manyParensOpeningSpace": [
+                " ",
+                "Event/Extension",
+                ",",
+                "(",
+                "(",
+                "(",
+                "Event/Extension2",
+                ", ",
+                ")",
+                "(",
+                "Event",
+                ")",
+            ],
+            "manyParensBothSpace": [
+                " ",
+                "Event/Extension",
+                ",",
+                "(",
+                "(",
+                "(",
+                "Event/Extension2",
+                ", ",
+                ")",
+                "(",
+                "Event",
+                " ",
+            ],
+            "manyClosingParens": ["Event/Extension", ", ", "(", "Event/Extension2", ", ", ")", ")", "(", "Event", ")"],
         }
 
         self.compare_split_results(test_strings, expected_results)
@@ -216,17 +264,17 @@ class TestFromHedStrings(unittest.TestCase):
     def setUp(self):
         self.schema = load_schema_version("8.1.0")
         self.hed_strings = [
-            HedString('Event', self.schema),
-            HedString('Action', self.schema),
-            HedString('Age/20', self.schema),
-            HedString('Item', self.schema),
+            HedString("Event", self.schema),
+            HedString("Action", self.schema),
+            HedString("Age/20", self.schema),
+            HedString("Item", self.schema),
         ]
 
     def test_from_hed_strings(self):
         combined_hed_string = HedString.from_hed_strings(self.hed_strings)
 
         # Test that the combined HED string is as expected
-        self.assertEqual(combined_hed_string._hed_string, 'Event,Action,Age/20,Item')
+        self.assertEqual(combined_hed_string._hed_string, "Event,Action,Age/20,Item")
 
         # Test that the schema of the combined HED string is the same as the first HED string
         self.assertEqual(combined_hed_string._schema, self.schema)
@@ -248,15 +296,15 @@ class TestFromHedStrings(unittest.TestCase):
 
     def test_complex_hed_strings(self):
         complex_hed_strings = [
-            HedString('Event,Action', self.schema),
-            HedString('Age/20,Hand', self.schema),
-            HedString('Item,(Leg, Nose)', self.schema),
+            HedString("Event,Action", self.schema),
+            HedString("Age/20,Hand", self.schema),
+            HedString("Item,(Leg, Nose)", self.schema),
         ]
 
         combined_hed_string = HedString.from_hed_strings(complex_hed_strings)
 
         # Test that the combined HED string is as expected
-        self.assertEqual(combined_hed_string._hed_string, 'Event,Action,Age/20,Hand,Item,(Leg, Nose)')
+        self.assertEqual(combined_hed_string._hed_string, "Event,Action,Age/20,Hand,Item,(Leg, Nose)")
 
         # Test that the schema of the combined HED string is the same as the first HED string
         self.assertEqual(combined_hed_string._schema, self.schema)
@@ -296,13 +344,13 @@ class TestFromHedStrings(unittest.TestCase):
             self.assertEqual(copied_hed_string._from_strings, original_hed_string._from_strings)
 
     def test_deepcopy(self):
-        original_hed_string = HedString('Event,Action', self.schema)
+        original_hed_string = HedString("Event,Action", self.schema)
 
         self._verify_copied_string(original_hed_string)
         complex_hed_strings = [
-            HedString('Event,Action', self.schema),
-            HedString('Age/20,Hand', self.schema),
-            HedString('Item,(Leg, Nose)', self.schema),
+            HedString("Event,Action", self.schema),
+            HedString("Age/20,Hand", self.schema),
+            HedString("Item,(Leg, Nose)", self.schema),
         ]
 
         combined_hed_string = HedString.from_hed_strings(complex_hed_strings)

@@ -1,4 +1,5 @@
-""" Classes responsible for basic character validation of a string or tag."""
+"""Classes responsible for basic character validation of a string or tag."""
+
 import json
 import re
 import os
@@ -6,7 +7,7 @@ import os
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 
-CLASS_REX_FILENAME = '../data/class_regex.json'
+CLASS_REX_FILENAME = "../data/class_regex.json"
 
 
 class CharValidator:
@@ -17,8 +18,8 @@ class CharValidator:
     # Placeholder characters are checked elsewhere, but by default allowed
     TAG_ALLOWED_CHARS = "-_/"
 
-    INVALID_STRING_CHARS = '[]{}~'
-    INVALID_STRING_CHARS_PLACEHOLDERS = '[]~'
+    INVALID_STRING_CHARS = "[]{}~"
+    INVALID_STRING_CHARS_PLACEHOLDERS = "[]~"
 
     def __init__(self, modern_allowed_char_rules=False):
         """Does basic character validation for HED strings/tags
@@ -29,7 +30,7 @@ class CharValidator:
         self._validate_characters = modern_allowed_char_rules
 
     def check_invalid_character_issues(self, hed_string, allow_placeholders) -> list[dict]:
-        """ Report invalid characters.
+        """Report invalid characters.
 
         Parameters:
             hed_string (str): A HED string.
@@ -57,7 +58,7 @@ class CharValidator:
         return validation_issues
 
     def check_tag_invalid_chars(self, original_tag, allow_placeholders) -> list[dict]:
-        """ Report invalid characters in the given tag.
+        """Report invalid characters in the given tag.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
@@ -88,13 +89,17 @@ class CharValidator:
         allowed_chars = self.TAG_ALLOWED_CHARS
         allowed_chars += self.DEFAULT_ALLOWED_PLACEHOLDER_CHARS
         allowed_chars += " "
-        return self._check_invalid_chars(validate_text, allowed_chars, original_tag,
-                                         starting_index=len(original_tag.org_base_tag) + 1 + index_offset,
-                                         error_code=error_code)
+        return self._check_invalid_chars(
+            validate_text,
+            allowed_chars,
+            original_tag,
+            starting_index=len(original_tag.org_base_tag) + 1 + index_offset,
+            error_code=error_code,
+        )
 
     @staticmethod
     def _check_invalid_chars(check_string, allowed_chars, source_tag, starting_index=0, error_code=None):
-        """ Helper for checking for invalid characters.
+        """Helper for checking for invalid characters.
 
         Parameters:
             check_string (str): String to be checked for invalid characters.
@@ -115,10 +120,13 @@ class CharValidator:
             # Todo: Remove this patch when clock times and invalid characters are more properly checked
             if character == ":":
                 continue
-            validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_TAG_CHARACTER,
-                                                           tag=source_tag, index_in_tag=starting_index + i,
-                                                           index_in_tag_end=starting_index + i + 1,
-                                                           actual_error=error_code)
+            validation_issues += ErrorHandler.format_error(
+                ValidationErrors.INVALID_TAG_CHARACTER,
+                tag=source_tag,
+                index_in_tag=starting_index + i,
+                index_in_tag_end=starting_index + i + 1,
+                actual_error=error_code,
+            )
         return validation_issues
 
     @staticmethod
@@ -136,13 +144,14 @@ class CharValidator:
         issues = []
         schema_namespace = original_tag.schema_namespace
         if schema_namespace and not schema_namespace[:-1].isalpha():
-            issues += ErrorHandler.format_error(ValidationErrors.TAG_NAMESPACE_PREFIX_INVALID,
-                                                tag=original_tag, tag_namespace=schema_namespace)
+            issues += ErrorHandler.format_error(
+                ValidationErrors.TAG_NAMESPACE_PREFIX_INVALID, tag=original_tag, tag_namespace=schema_namespace
+            )
         return issues
 
     @staticmethod
     def _report_invalid_character_error(hed_string, index):
-        """ Report an invalid character.
+        """Report an invalid character.
 
         Parameters:
             hed_string (str): The HED string that caused the error.
@@ -156,8 +165,7 @@ class CharValidator:
         character = hed_string[index]
         if character == "~":
             error_type = ValidationErrors.TILDES_UNSUPPORTED
-        return ErrorHandler.format_error(error_type, char_index=index,
-                                         source_string=hed_string)
+        return ErrorHandler.format_error(error_type, char_index=index, source_string=hed_string)
 
 
 class CharRexValidator(CharValidator):
@@ -211,7 +219,7 @@ class CharRexValidator(CharValidator):
     def _get_rex_dict():
         current_dir = os.path.dirname(os.path.abspath(__file__))
         json_path = os.path.realpath(os.path.join(current_dir, CLASS_REX_FILENAME))
-        with open(json_path, 'r', encoding='utf-8') as f:
+        with open(json_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
 

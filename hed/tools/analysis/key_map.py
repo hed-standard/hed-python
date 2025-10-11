@@ -1,4 +1,4 @@
-""" A map of column value keys into new column values. """
+"""A map of column value keys into new column values."""
 
 import pandas as pd
 from hed.errors.exceptions import HedFileError
@@ -6,7 +6,7 @@ from hed.tools.util import data_util
 
 
 class KeyMap:
-    """ A map of unique column values for remapping columns.
+    """A map of unique column values for remapping columns.
 
     Attributes:
         key_cols (list):  A list of column names that will be hashed into the keys for the map.
@@ -18,8 +18,8 @@ class KeyMap:
 
     """
 
-    def __init__(self, key_cols, target_cols=None, name=''):
-        """ Information for remapping columns of tabular files.
+    def __init__(self, key_cols, target_cols=None, name=""):
+        """Information for remapping columns of tabular files.
 
         Parameters:
             key_cols (list): List of columns to be replaced (assumed in the DataFrame).
@@ -36,8 +36,11 @@ class KeyMap:
         else:
             self.target_cols = []
         if set(self.key_cols).intersection(set(self.target_cols)):
-            raise ValueError("KEY_AND_TARGET_COLUMNS_NOT_DISJOINT",
-                             f"Key cols {str(key_cols)} and target cols {str(target_cols)} must be disjoint", "")
+            raise ValueError(
+                "KEY_AND_TARGET_COLUMNS_NOT_DISJOINT",
+                f"Key cols {str(key_cols)} and target cols {str(target_cols)} must be disjoint",
+                "",
+            )
         self.name = name
         self.col_map = pd.DataFrame(columns=self.key_cols + self.target_cols)
         self.map_dict = {}  # Index of key to position in the col_map DataFrame
@@ -45,7 +48,7 @@ class KeyMap:
 
     @property
     def columns(self):
-        """ Return the column names of the columns managed by this map.
+        """Return the column names of the columns managed by this map.
 
         Returns:
             list:  Column names of the columns managed by this map.
@@ -60,7 +63,7 @@ class KeyMap:
         return "\n".join(temp_list)
 
     def make_template(self, additional_cols=None, show_counts=True):
-        """ Return a dataframe template.
+        """Return a dataframe template.
 
         Parameters:
             additional_cols (list or None): Optional list of additional columns to append to the returned dataframe.
@@ -78,19 +81,22 @@ class KeyMap:
 
         """
         if additional_cols and set(self.key_cols).intersection(additional_cols):
-            raise HedFileError("AdditionalColumnsNotDisjoint",
-                               f"Additional columns {str(additional_cols)} must be disjoint from \
-                                {str(self.columns)} must be disjoint", "")
+            raise HedFileError(
+                "AdditionalColumnsNotDisjoint",
+                f"Additional columns {str(additional_cols)} must be disjoint from \
+                                {str(self.columns)} must be disjoint",
+                "",
+            )
         df = self.col_map[self.key_cols].copy()
         if additional_cols:
-            df[additional_cols] = 'n/a'
+            df[additional_cols] = "n/a"
         if show_counts:
-            df.insert(0, 'key_counts', self._get_counts())
-            df.sort_values(by=['key_counts'], inplace=True, ignore_index=True, ascending=False)
+            df.insert(0, "key_counts", self._get_counts())
+            df.sort_values(by=["key_counts"], inplace=True, ignore_index=True, ascending=False)
         return df
 
     def _get_counts(self):
-        """ Return counts for the key column combinations.
+        """Return counts for the key column combinations.
 
         Returns:
             list:  List which is the same length as the col_map containing the counts of the combinations.
@@ -103,7 +109,7 @@ class KeyMap:
         return counts
 
     def remap(self, data):
-        """ Remap the columns of a dataframe or columnar file.
+        """Remap the columns of a dataframe or columnar file.
 
         Parameters:
             data (DataFrame, str):  Columnar data (either DataFrame or filename) whose columns are to be remapped.
@@ -123,12 +129,12 @@ class KeyMap:
         if missing_keys:
             raise HedFileError("MissingKeys", f"File must have key columns {str(self.key_cols)}", "")
         self.remove_quotes(df_new, columns=present_keys)
-        df_new[self.target_cols] = 'n/a'
+        df_new[self.target_cols] = "n/a"
         missing_indices = self._remap(df_new)
         return df_new, missing_indices
 
     def _remap(self, df):
-        """ Utility method that does the remapping
+        """Utility method that does the remapping
 
         Parameters:
             df (DataFrame):    DataFrame in which to perform the mapping.
@@ -148,12 +154,13 @@ class KeyMap:
         merged_df = df.assign(key_value=key_values.values)
 
         # Copy all the map_dict data into merged_df as new columns, merging on the map_dict_index number of both
-        remapped_df = pd.merge(merged_df, self.col_map, left_on='key_value', right_index=True,
-                               suffixes=('', '_new'), how='left').fillna("n/a")
+        remapped_df = pd.merge(
+            merged_df, self.col_map, left_on="key_value", right_index=True, suffixes=("", "_new"), how="left"
+        ).fillna("n/a")
 
         # Override the original columns with our newly calculated ones
         for col in self.target_cols:
-            df[col] = remapped_df[col + '_new']
+            df[col] = remapped_df[col + "_new"]
 
         # Finally calculate missing indices
         missing_indices = key_series.index[key_values.isna()].tolist()
@@ -161,14 +168,14 @@ class KeyMap:
         return missing_indices
 
     def resort(self):
-        """ Sort the col_map in place by the key columns. """
+        """Sort the col_map in place by the key columns."""
         self.col_map.sort_values(by=self.key_cols, inplace=True, ignore_index=True)
         for index, row in self.col_map.iterrows():
             key_hash = data_util.get_row_hash(row, self.key_cols)
             self.map_dict[key_hash] = index
 
     def update(self, data, allow_missing=True):
-        """ Update the existing map with information from data.
+        """Update the existing map with information from data.
 
         Parameters:
             data (DataFrame or str):     DataFrame or filename of an events file or event map.
@@ -182,22 +189,21 @@ class KeyMap:
         col_list = df.columns.values.tolist()
         keys_present, keys_missing = data_util.separate_values(col_list, self.key_cols)
         if keys_missing and not allow_missing:
-            raise HedFileError("MissingKeyColumn",
-                               f"make_template data does not have key columns {str(keys_missing)}", "")
+            raise HedFileError("MissingKeyColumn", f"make_template data does not have key columns {str(keys_missing)}", "")
 
         base_df = df[keys_present].copy()
         self.remove_quotes(base_df)
         if keys_missing:
-            base_df[keys_missing] = 'n/a'
+            base_df[keys_missing] = "n/a"
         if self.target_cols:
-            base_df[self.target_cols] = 'n/a'
+            base_df[self.target_cols] = "n/a"
             targets_present, targets_missing = data_util.separate_values(col_list, self.target_cols)
             if targets_present:
                 base_df[targets_present] = df[targets_present].values
         self._update(base_df)
 
     def _update(self, base_df):
-        """ Update the dictionary of key values based on information in the dataframe.
+        """Update the dictionary of key values based on information in the dataframe.
 
         Parameters:
             base_df (DataFrame):       DataFrame of consisting of the columns in the KeyMap
@@ -216,7 +222,7 @@ class KeyMap:
             self.col_map = pd.concat([col_map, df], axis=0, ignore_index=True)
 
     def _handle_update(self, row, row_list, next_pos):
-        """ Update the dictionary and counts of the number of times this combination of key columns appears.
+        """Update the dictionary and counts of the number of times this combination of key columns appears.
 
         Parameters:
             row (DataSeries):  Data the values in a row.
@@ -241,7 +247,7 @@ class KeyMap:
 
     @staticmethod
     def remove_quotes(df, columns=None):
-        """ Remove quotes from the specified columns and convert to string.
+        """Remove quotes from the specified columns and convert to string.
 
         Parameters:
             df (Dataframe):   Dataframe to process by removing quotes.
@@ -255,7 +261,7 @@ class KeyMap:
         if not columns:
             columns = df.columns.values.tolist()
         for index, col in enumerate(df.columns):
-            if col in columns and col_types.iloc[index] in ['string', 'object']:
+            if col in columns and col_types.iloc[index] in ["string", "object"]:
                 df[col] = df[col].astype(str)
-                df.iloc[:, index] = df.iloc[:, index].str.replace('"', '')
+                df.iloc[:, index] = df.iloc[:, index].str.replace('"', "")
                 df.iloc[:, index] = df.iloc[:, index].str.replace("'", "")

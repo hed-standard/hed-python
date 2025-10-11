@@ -11,6 +11,7 @@ from hed.schema import HedKey
 # 1. Verify HED id(HARDEST, MAY SKIP)
 # 4. Json tests
 
+
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

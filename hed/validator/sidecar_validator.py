@@ -1,4 +1,5 @@
-""" Validates sidecars. """
+"""Validates sidecars."""
+
 from __future__ import annotations
 import copy
 import re
@@ -41,6 +42,7 @@ class SidecarValidator:
             list[dict]: A list of issues associated with each level in the HED string.
         """
         from hed.validator import HedValidator
+
         issues = []
         if error_handler is None:
             error_handler = ErrorHandler()
@@ -54,7 +56,7 @@ class SidecarValidator:
             error_handler.pop_error_context()
             return issues
         sidecar_def_dict = sidecar.get_def_dict(hed_schema=self._schema, extra_def_dicts=extra_def_dicts)
-        hed_validator = HedValidator(self._schema, def_dicts=sidecar_def_dict,  definitions_allowed=True)
+        hed_validator = HedValidator(self._schema, def_dicts=sidecar_def_dict, definitions_allowed=True)
 
         issues += sidecar._extract_definition_issues
         issues += sidecar_def_dict.issues
@@ -78,8 +80,7 @@ class SidecarValidator:
                 error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
                 new_issues += hed_validator.run_basic_checks(hed_string_obj, allow_placeholders=True)
                 def_check_list = definition_checks.setdefault(column_name, [])
-                def_check_list.append(hed_string_obj.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True,
-                                                               include_groups=0))
+                def_check_list.append(hed_string_obj.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True, include_groups=0))
 
                 # Might refine this later - for now just skip checking placeholder counts in definition columns.
                 if not def_check_list[-1]:
@@ -121,7 +122,7 @@ class SidecarValidator:
         return issues
 
     def validate_structure(self, sidecar, error_handler) -> list[dict]:
-        """ Validate the raw structure of this sidecar.
+        """Validate the raw structure of this sidecar.
 
         Parameters:
             sidecar (Sidecar): the sidecar to validate
@@ -157,13 +158,13 @@ class SidecarValidator:
                 if len(hed_strings) > 1:
                     error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
 
-                error_handler.push_error_context(ErrorContext.HED_STRING,
-                                                 HedString(hed_string, hed_schema=self._schema))
+                error_handler.push_error_context(ErrorContext.HED_STRING, HedString(hed_string, hed_schema=self._schema))
                 invalid_locations = self._find_non_matching_braces(hed_string)
                 for loc in invalid_locations:
                     bad_symbol = hed_string[loc]
-                    new_issues += error_handler.format_error_with_context(ColumnErrors.MALFORMED_COLUMN_REF,
-                                                                          column_name, loc, bad_symbol)
+                    new_issues += error_handler.format_error_with_context(
+                        ColumnErrors.MALFORMED_COLUMN_REF, column_name, loc, bad_symbol
+                    )
 
                 sub_matches = re.findall(r"\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
                 matches.append(sub_matches)
@@ -195,11 +196,11 @@ class SidecarValidator:
         open_brace_index = -1
 
         for i, char in enumerate(hed_string):
-            if char == '{':
+            if char == "{":
                 if open_brace_index >= 0:  # Nested brace detected
                     issues.append(open_brace_index)
                 open_brace_index = i
-            elif char == '}':
+            elif char == "}":
                 if open_brace_index >= 0:
                     open_brace_index = -1
                 else:
@@ -236,7 +237,7 @@ class SidecarValidator:
         return False
 
     def _validate_column_structure(self, column_name, dict_for_entry, error_handler):
-        """ Checks primarily for type errors such as expecting a string and getting a list in a json sidecar.
+        """Checks primarily for type errors such as expecting a string and getting a list in a json sidecar.
 
         Parameters:
             error_handler (ErrorHandler)  Sets the context for the error reporting. Cannot be None.
@@ -252,8 +253,7 @@ class SidecarValidator:
 
         column_type = ColumnMetadata._detect_column_type(dict_for_entry=dict_for_entry, basic_validation=False)
         if column_type is None:
-            val_issues += error_handler.format_error_with_context(SidecarErrors.UNKNOWN_COLUMN_TYPE,
-                                                                  column_name=column_name)
+            val_issues += error_handler.format_error_with_context(SidecarErrors.UNKNOWN_COLUMN_TYPE, column_name=column_name)
         elif column_type == ColumnType.Ignore:
             found_hed = self._check_for_key("HED", dict_for_entry)
             if found_hed:
@@ -274,16 +274,16 @@ class SidecarValidator:
             if not hed_string:
                 val_issues += error_handler.format_error_with_context(SidecarErrors.BLANK_HED_STRING)
             elif not isinstance(hed_string, str):
-                val_issues += error_handler.format_error_with_context(SidecarErrors.WRONG_HED_DATA_TYPE,
-                                                                      given_type=type(hed_string),
-                                                                      expected_type="str")
+                val_issues += error_handler.format_error_with_context(
+                    SidecarErrors.WRONG_HED_DATA_TYPE, given_type=type(hed_string), expected_type="str"
+                )
             elif key_name in self.reserved_category_values:
                 val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_NA_USED, column_name)
             error_handler.pop_error_context()
         return val_issues
 
     def _validate_pound_sign_count(self, hed_string, column_type):
-        """ Check if a given HED string in the column has the correct number of pound signs.
+        """Check if a given HED string in the column has the correct number of pound signs.
 
         Parameters:
             hed_string (str or HedString): HED string to be checked.

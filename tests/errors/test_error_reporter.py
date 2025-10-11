@@ -1,6 +1,14 @@
 import unittest
-from hed.errors import ErrorHandler, ErrorContext, ErrorSeverity, ValidationErrors, SchemaWarnings, \
-    get_printable_issue_string, sort_issues, replace_tag_references
+from hed.errors import (
+    ErrorHandler,
+    ErrorContext,
+    ErrorSeverity,
+    ValidationErrors,
+    SchemaWarnings,
+    get_printable_issue_string,
+    sort_issues,
+    replace_tag_references,
+)
 from hed.errors.error_reporter import hed_tag_error, get_printable_issue_string_html, iter_errors
 from hed import HedString, HedTag
 from hed import load_schema_version
@@ -74,18 +82,19 @@ class Test(unittest.TestCase):
 
     def test_filter_issues_by_severity(self):
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
-                                                                   "dummy", problem_char="#", char_index=0)
+        error_list += self.error_handler.format_error_with_context(
+            SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, "dummy", problem_char="#", char_index=0
+        )
         self.assertTrue(len(error_list) == 2)
-        filtered_list = self.error_handler.filter_issues_by_severity(issues_list=error_list,
-                                                                     severity=ErrorSeverity.ERROR)
+        filtered_list = self.error_handler.filter_issues_by_severity(issues_list=error_list, severity=ErrorSeverity.ERROR)
         self.assertTrue(len(filtered_list) == 1)
 
     def test_printable_issue_string(self):
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
-                                                                   "dummy", problem_char="#", char_index=0)
+        error_list += self.error_handler.format_error_with_context(
+            SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, "dummy", problem_char="#", char_index=0
+        )
 
         printable_issues = get_printable_issue_string(error_list)
         self.assertTrue(len(printable_issues) > 10)
@@ -93,19 +102,21 @@ class Test(unittest.TestCase):
         printable_issues2 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR)
         self.assertTrue(len(printable_issues) > len(printable_issues2))
 
-        printable_issues3 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR,
-                                                       title="Later added custom title that is longer")
+        printable_issues3 = get_printable_issue_string(
+            error_list, severity=ErrorSeverity.ERROR, title="Later added custom title that is longer"
+        )
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
 
         self.error_handler.reset_error_context()
 
     def test_printable_issue_string_with_filenames(self):
-        my_file = 'my_file.txt'
+        my_file = "my_file.txt"
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
         self.error_handler.push_error_context(ErrorContext.FILE_NAME, my_file)
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
-                                                                   "dummy", problem_char="#", char_index=0)
+        error_list += self.error_handler.format_error_with_context(
+            SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, "dummy", problem_char="#", char_index=0
+        )
 
         printable_issues = get_printable_issue_string(error_list, skip_filename=False)
         self.assertTrue(len(printable_issues) > 10)
@@ -114,8 +125,9 @@ class Test(unittest.TestCase):
         printable_issues2 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR, skip_filename=False)
         self.assertTrue(len(printable_issues) > len(printable_issues2))
         self.assertEqual(printable_issues2.count(my_file), 1)
-        printable_issues3 = get_printable_issue_string(error_list, severity=ErrorSeverity.ERROR, skip_filename=False,
-                                                       title="Later added custom title that is longer")
+        printable_issues3 = get_printable_issue_string(
+            error_list, severity=ErrorSeverity.ERROR, skip_filename=False, title="Later added custom title that is longer"
+        )
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
         self.assertEqual(printable_issues3.count(my_file), 1)
 
@@ -123,13 +135,12 @@ class Test(unittest.TestCase):
         self.assertTrue(len(printable_issues) > 10)
         self.assertEqual(printable_issues.count(my_file), 1)
 
-        printable_issues2 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR,
-                                                            skip_filename=False)
+        printable_issues2 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR, skip_filename=False)
         self.assertTrue(len(printable_issues) > len(printable_issues2))
         self.assertEqual(printable_issues2.count(my_file), 1)
-        printable_issues3 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR,
-                                                            skip_filename=False,
-                                                            title="Later added custom title that is longer")
+        printable_issues3 = get_printable_issue_string_html(
+            error_list, severity=ErrorSeverity.ERROR, skip_filename=False, title="Later added custom title that is longer"
+        )
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
         self.assertEqual(printable_issues3.count(my_file), 1)
 
@@ -138,73 +149,89 @@ class Test(unittest.TestCase):
     def test_iter_errors_no_context(self):
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
-                                                                   "dummy", problem_char="#", char_index=0)
+        error_list += self.error_handler.format_error_with_context(
+            SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, "dummy", problem_char="#", char_index=0
+        )
         result = list(iter_errors(error_list))
         self.assertEqual(len(result), 2)
 
     def test_iter_errors_with_context(self):
-        my_file = 'my_file.txt'
+        my_file = "my_file.txt"
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Blech")
         self.error_handler.push_error_context(ErrorContext.FILE_NAME, my_file)
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
         # error_list += self.error_handler.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED,
         #                                  tag=grouped[multiples[0]][1], group=group)
-        incompatible_tag = HedTag('Green', self._schema)
-        incompatible_group = HedString('Green, Red', self._schema)
-        error_list += self.error_handler.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=incompatible_tag,
-                     group=incompatible_group)
+        incompatible_tag = HedTag("Green", self._schema)
+        incompatible_group = HedString("Green, Red", self._schema)
+        error_list += self.error_handler.format_error(
+            ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=incompatible_tag, group=incompatible_group
+        )
 
-        error_list += self.error_handler.format_error_with_context(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
-                                                                   "dummy", problem_char="#", char_index=0)
+        error_list += self.error_handler.format_error_with_context(
+            SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, "dummy", problem_char="#", char_index=0
+        )
         result = list(iter_errors(error_list))
         self.assertEqual(len(result), 3)
 
     def test_sort_issues(self):
         schema = load_schema_version("8.1.0")
         issues = [
-            {ErrorContext.CUSTOM_TITLE: 'issue3', ErrorContext.FILE_NAME: 'File2', ErrorContext.ROW: 5,
-             ErrorContext.HED_STRING: HedString('Test C', schema)},
-            {ErrorContext.CUSTOM_TITLE: 'issue1', ErrorContext.FILE_NAME: 'File1', ErrorContext.ROW: 10,
-             ErrorContext.HED_STRING: HedString('Test A', schema)},
-            {ErrorContext.CUSTOM_TITLE: 'issue2', ErrorContext.FILE_NAME: 'File1', ErrorContext.ROW: 2},
-            {ErrorContext.CUSTOM_TITLE: 'issue4', ErrorContext.FILE_NAME: 'File2', ErrorContext.ROW: 1,
-             ErrorContext.HED_STRING: HedString('Test D', schema)},
-            {ErrorContext.CUSTOM_TITLE: 'issue5', ErrorContext.FILE_NAME: 'File3', ErrorContext.ROW: 15}
+            {
+                ErrorContext.CUSTOM_TITLE: "issue3",
+                ErrorContext.FILE_NAME: "File2",
+                ErrorContext.ROW: 5,
+                ErrorContext.HED_STRING: HedString("Test C", schema),
+            },
+            {
+                ErrorContext.CUSTOM_TITLE: "issue1",
+                ErrorContext.FILE_NAME: "File1",
+                ErrorContext.ROW: 10,
+                ErrorContext.HED_STRING: HedString("Test A", schema),
+            },
+            {ErrorContext.CUSTOM_TITLE: "issue2", ErrorContext.FILE_NAME: "File1", ErrorContext.ROW: 2},
+            {
+                ErrorContext.CUSTOM_TITLE: "issue4",
+                ErrorContext.FILE_NAME: "File2",
+                ErrorContext.ROW: 1,
+                ErrorContext.HED_STRING: HedString("Test D", schema),
+            },
+            {ErrorContext.CUSTOM_TITLE: "issue5", ErrorContext.FILE_NAME: "File3", ErrorContext.ROW: 15},
         ]
 
         sorted_issues = sort_issues(issues)
-        self.assertEqual(sorted_issues[0][ErrorContext.CUSTOM_TITLE], 'issue1')
-        self.assertEqual(sorted_issues[1][ErrorContext.CUSTOM_TITLE], 'issue2')
-        self.assertEqual(sorted_issues[2][ErrorContext.CUSTOM_TITLE], 'issue3')
-        self.assertEqual(sorted_issues[3][ErrorContext.CUSTOM_TITLE], 'issue4')
-        self.assertEqual(sorted_issues[4][ErrorContext.CUSTOM_TITLE], 'issue5')
+        self.assertEqual(sorted_issues[0][ErrorContext.CUSTOM_TITLE], "issue1")
+        self.assertEqual(sorted_issues[1][ErrorContext.CUSTOM_TITLE], "issue2")
+        self.assertEqual(sorted_issues[2][ErrorContext.CUSTOM_TITLE], "issue3")
+        self.assertEqual(sorted_issues[3][ErrorContext.CUSTOM_TITLE], "issue4")
+        self.assertEqual(sorted_issues[4][ErrorContext.CUSTOM_TITLE], "issue5")
 
         reversed_issues = sort_issues(issues, reverse=True)
-        self.assertEqual(reversed_issues[0][ErrorContext.CUSTOM_TITLE], 'issue5')
-        self.assertEqual(reversed_issues[1][ErrorContext.CUSTOM_TITLE], 'issue4')
-        self.assertEqual(reversed_issues[2][ErrorContext.CUSTOM_TITLE], 'issue3')
-        self.assertEqual(reversed_issues[3][ErrorContext.CUSTOM_TITLE], 'issue2')
-        self.assertEqual(reversed_issues[4][ErrorContext.CUSTOM_TITLE], 'issue1')
+        self.assertEqual(reversed_issues[0][ErrorContext.CUSTOM_TITLE], "issue5")
+        self.assertEqual(reversed_issues[1][ErrorContext.CUSTOM_TITLE], "issue4")
+        self.assertEqual(reversed_issues[2][ErrorContext.CUSTOM_TITLE], "issue3")
+        self.assertEqual(reversed_issues[3][ErrorContext.CUSTOM_TITLE], "issue2")
+        self.assertEqual(reversed_issues[4][ErrorContext.CUSTOM_TITLE], "issue1")
 
     def test_replace_tag_references(self):
         # Test with mixed data types and HedString in a nested dict
-        nested_dict = {'a': HedString('Hed1', self._schema),
-                       'b': {'c': 2, 'd': [3, {'e': HedString('Hed2', self._schema)}]}, 'f': [5, 6]}
+        nested_dict = {
+            "a": HedString("Hed1", self._schema),
+            "b": {"c": 2, "d": [3, {"e": HedString("Hed2", self._schema)}]},
+            "f": [5, 6],
+        }
         replace_tag_references(nested_dict)
-        self.assertEqual(nested_dict, {'a': 'Hed1', 'b': {'c': 2, 'd': [3, {'e': 'Hed2'}]}, 'f': [5, 6]})
+        self.assertEqual(nested_dict, {"a": "Hed1", "b": {"c": 2, "d": [3, {"e": "Hed2"}]}, "f": [5, 6]})
 
         # Test with mixed data types and HedString in a nested list
-        nested_list = [HedString('Hed1', self._schema),
-                       {'a': 2, 'b': [3, {'c': HedString('Hed2', self._schema)}]}]
+        nested_list = [HedString("Hed1", self._schema), {"a": 2, "b": [3, {"c": HedString("Hed2", self._schema)}]}]
         replace_tag_references(nested_list)
-        self.assertEqual(nested_list, ['Hed1', {'a': 2, 'b': [3, {'c': 'Hed2'}]}])
+        self.assertEqual(nested_list, ["Hed1", {"a": 2, "b": [3, {"c": "Hed2"}]}])
 
         # Test with mixed data types and HedString in a list within a dict
-        mixed = {'a': HedString('Hed1', self._schema),
-                 'b': [2, 3, {'c': HedString('Hed2', self._schema)}, 4]}
+        mixed = {"a": HedString("Hed1", self._schema), "b": [2, 3, {"c": HedString("Hed2", self._schema)}, 4]}
         replace_tag_references(mixed)
-        self.assertEqual(mixed, {'a': 'Hed1', 'b': [2, 3, {'c': 'Hed2'}, 4]})
+        self.assertEqual(mixed, {"a": "Hed1", "b": [2, 3, {"c": "Hed2"}, 4]})
 
     def test_register_error_twice(self):
         test_code = "test_error_code"
@@ -214,6 +241,7 @@ class Test(unittest.TestCase):
             pass
 
         with self.assertRaises(KeyError):
+
             @hed_tag_error(test_code)
             def test_error_code(tag):
                 pass
@@ -221,34 +249,30 @@ class Test(unittest.TestCase):
     def test_format_unknown_error(self):
         error_code = "Unknown error type"
         error_list = self.error_handler.format_error(error_code, "param1", param2=0)
-        self.assertEqual(error_list[0]['code'], error_code)
+        self.assertEqual(error_list[0]["code"], error_code)
 
         actual_code = "Actual unknown error type"
-        error_list = self.error_handler.format_error_from_context(error_code, self.error_handler.error_context,
-                                                                  "param1", param2=0,
-                                                                  actual_error=actual_code)
-        self.assertEqual(error_list[0]['code'], actual_code)
+        error_list = self.error_handler.format_error_from_context(
+            error_code, self.error_handler.error_context, "param1", param2=0, actual_error=actual_code
+        )
+        self.assertEqual(error_list[0]["code"], actual_code)
 
     def test_get_code_counts(self):
         """Test the get_code_counts static method."""
         # Create test issues with different error codes
         issues = [
-            {'code': 'ERROR_CODE_1', 'message': 'First error'},
-            {'code': 'ERROR_CODE_2', 'message': 'Second error'},
-            {'code': 'ERROR_CODE_1', 'message': 'Another first error'},
-            {'code': 'ERROR_CODE_3', 'message': 'Third error'},
-            {'code': 'ERROR_CODE_1', 'message': 'Yet another first error'},
-            {'code': 'ERROR_CODE_2', 'message': 'Another second error'}
+            {"code": "ERROR_CODE_1", "message": "First error"},
+            {"code": "ERROR_CODE_2", "message": "Second error"},
+            {"code": "ERROR_CODE_1", "message": "Another first error"},
+            {"code": "ERROR_CODE_3", "message": "Third error"},
+            {"code": "ERROR_CODE_1", "message": "Yet another first error"},
+            {"code": "ERROR_CODE_2", "message": "Another second error"},
         ]
 
         result = ErrorHandler.get_code_counts(issues)
 
         # Check that counts are correct
-        expected = {
-            'ERROR_CODE_1': 3,
-            'ERROR_CODE_2': 2,
-            'ERROR_CODE_3': 1
-        }
+        expected = {"ERROR_CODE_1": 3, "ERROR_CODE_2": 2, "ERROR_CODE_3": 1}
         self.assertEqual(result, expected)
 
         # Test with empty list
@@ -257,14 +281,11 @@ class Test(unittest.TestCase):
 
         # Test with issue missing 'code' key
         issues_with_missing_code = [
-            {'code': 'VALID_CODE', 'message': 'Valid error'},
-            {'message': 'Missing code error'},  # No 'code' key
-            {'code': 'VALID_CODE', 'message': 'Another valid error'}
+            {"code": "VALID_CODE", "message": "Valid error"},
+            {"message": "Missing code error"},  # No 'code' key
+            {"code": "VALID_CODE", "message": "Another valid error"},
         ]
 
         result_with_missing = ErrorHandler.get_code_counts(issues_with_missing_code)
-        expected_with_missing = {
-            'VALID_CODE': 2,
-            'UNKNOWN': 1  # Default for missing code
-        }
+        expected_with_missing = {"VALID_CODE": 2, "UNKNOWN": 1}  # Default for missing code
         self.assertEqual(result_with_missing, expected_with_missing)

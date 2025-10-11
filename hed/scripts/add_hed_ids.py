@@ -6,10 +6,10 @@ from hed.schema.schema_io.df_util import convert_filenames_to_dict
 
 # Slightly tweaked version of convert_and_update_schema.py with a new main function to allow different parameters.
 def main():
-    parser = argparse.ArgumentParser(description='Add hed ids to a specific schema.')
-    parser.add_argument('repo_path', help='The location of the hed-schemas directory')
-    parser.add_argument('schema_name', help='The name of the schema("standard" for standard schema) to modify')
-    parser.add_argument('schema_version', help='The schema version to modify')
+    parser = argparse.ArgumentParser(description="Add hed ids to a specific schema.")
+    parser.add_argument("repo_path", help="The location of the hed-schemas directory")
+    parser.add_argument("schema_name", help='The name of the schema("standard" for standard schema) to modify')
+    parser.add_argument("schema_version", help="The schema version to modify")
 
     args = parser.parse_args()
 

@@ -1,14 +1,14 @@
-"""Utilities for generating and handling file names. """
+"""Utilities for generating and handling file names."""
 
 import os
 import re
 from datetime import datetime
 
-TIME_FORMAT = '%Y_%m_%d_T_%H_%M_%S_%f'
+TIME_FORMAT = "%Y_%m_%d_T_%H_%M_%S_%f"
 
 
 def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=None):
-    """ Return True if correct extension, suffix, and prefix.
+    """Return True if correct extension, suffix, and prefix.
 
     Parameters:
         test_file (str):  Path of filename to test.
@@ -32,7 +32,7 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
         ext = get_allowed(basename, allowed_values=extensions, starts_with=False)
         if not ext:
             return False
-        basename = basename[:-len(ext)]
+        basename = basename[: -len(ext)]
     else:
         basename = os.path.splitext(basename)[0]
     if name_suffix and not get_allowed(basename, allowed_values=name_suffix, starts_with=False):
@@ -41,7 +41,7 @@ def check_filename(test_file, name_prefix=None, name_suffix=None, extensions=Non
 
 
 def get_allowed(value, allowed_values=None, starts_with=True):
-    """ Return the portion of the value that matches a value in allowed_values or None if no match.
+    """Return the portion of the value that matches a value in allowed_values or None if no match.
 
     Parameters:
         value (str): value to be matched.
@@ -70,22 +70,22 @@ def get_allowed(value, allowed_values=None, starts_with=True):
     return result
 
 
-def get_alphanumeric_path(pathname, replace_char='_'):
-    """ Replace sequences of non-alphanumeric characters in string (usually a path) with specified character.
+def get_alphanumeric_path(pathname, replace_char="_"):
+    """Replace sequences of non-alphanumeric characters in string (usually a path) with specified character.
 
-        Parameters:
-            pathname (str): A string usually representing a pathname, but could be any string.
-            replace_char (str): Replacement character(s).
+    Parameters:
+        pathname (str): A string usually representing a pathname, but could be any string.
+        replace_char (str): Replacement character(s).
 
-        Returns:
-            str: New string with characters replaced.
+    Returns:
+        str: New string with characters replaced.
 
     """
-    return re.sub(r'[^a-zA-Z0-9]+', replace_char, pathname)
+    return re.sub(r"[^a-zA-Z0-9]+", replace_char, pathname)
 
 
 def get_full_extension(filename):
-    """ Return the full extension of a file, including the period.
+    """Return the full extension of a file, including the period.
 
     Parameters:
         filename (str):   The filename to be parsed.
@@ -98,7 +98,7 @@ def get_full_extension(filename):
     """
     name, ext = os.path.splitext(filename)
     full_ext = ext
-    while ext: # Keep splitting if there's another extension
+    while ext:  # Keep splitting if there's another extension
         name, ext = os.path.splitext(name)
         if not ext:
             break
@@ -107,7 +107,7 @@ def get_full_extension(filename):
 
 
 def get_unique_suffixes(file_paths, extensions=None):
-    """ Get unique suffixes from file paths with specified extensions.
+    """Get unique suffixes from file paths with specified extensions.
 
     Parameters:
         file_paths (list): List of file paths to process.
@@ -117,7 +117,7 @@ def get_unique_suffixes(file_paths, extensions=None):
         set: Set of unique suffixes found.
     """
     if extensions is None:
-        extensions = ['.json', '.tsv']
+        extensions = [".json", ".tsv"]
     suffixes = set()
     extension_set = set(extensions)
     for file_path in file_paths:
@@ -125,14 +125,14 @@ def get_unique_suffixes(file_paths, extensions=None):
         if ext not in extension_set:
             continue
 
-        result = os.path.basename(name).split('_')
+        result = os.path.basename(name).split("_")
         if len(result) == 2:
             suffixes.add(result[1])
     return suffixes
 
 
 def extract_suffix_path(path, prefix_path):
-    """ Return the suffix of path after prefix path has been removed.
+    """Return the suffix of path after prefix path has been removed.
 
     Parameters:
         path (str)           path of the root directory.
@@ -150,12 +150,12 @@ def extract_suffix_path(path, prefix_path):
     suffix_path = os.path.normpath(os.path.realpath(path).lower())
     return_path = os.path.normpath(os.path.realpath(path))
     if suffix_path.startswith(real_prefix):
-        return_path = return_path[len(real_prefix):]
+        return_path = return_path[len(real_prefix) :]
     return return_path
 
 
 def clean_filename(filename):
-    """ Replace invalid characters with under-bars.
+    """Replace invalid characters with under-bars.
 
     Parameters:
         filename (str):   source filename.
@@ -165,7 +165,7 @@ def clean_filename(filename):
     """
     if not filename:
         return ""
-    out_name = re.sub(r'[^a-zA-Z0-9._-]+', '_', filename)
+    out_name = re.sub(r"[^a-zA-Z0-9._-]+", "_", filename)
     return out_name
 
 
@@ -174,7 +174,7 @@ def get_basename(file_path):
 
 
 def get_filtered_by_element(file_list, elements):
-    """ Filter a file list by whether the base names have a substring matching any of the members of elements.
+    """Filter a file list by whether the base names have a substring matching any of the members of elements.
 
     Parameters:
         file_list (list):  List of file paths to be filtered.
@@ -189,7 +189,7 @@ def get_filtered_by_element(file_list, elements):
 
 
 def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=None):
-    """ Get list of filenames satisfying the criteria.
+    """Get list of filenames satisfying the criteria.
 
     Everything is converted to lower case prior to testing so this test should be case-insensitive.
 
@@ -202,14 +202,17 @@ def get_filtered_list(file_list, name_prefix=None, name_suffix=None, extensions=
      Returns:
          list:  The filtered file names.
 
-     """
-    filtered_files = [file for file in file_list if
-                      check_filename(file, name_prefix=name_prefix, name_suffix=name_suffix, extensions=extensions)]
+    """
+    filtered_files = [
+        file
+        for file in file_list
+        if check_filename(file, name_prefix=name_prefix, name_suffix=name_suffix, extensions=extensions)
+    ]
     return filtered_files
 
 
 def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None, exclude_dirs=None):
-    """ Return paths satisfying various conditions.
+    """Return paths satisfying various conditions.
 
     Parameters:
         root_path (str):              Full path of the directory tree to be traversed (no ending slash).
@@ -236,7 +239,7 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
 
 
 def get_path_components(root_path, this_path):
-    """ Get a list of the remaining components after root path.
+    """Get a list of the remaining components after root path.
 
     Parameters:
         root_path (str):      A path (no trailing separator).
@@ -266,7 +269,7 @@ def get_path_components(root_path, this_path):
 
 
 def get_timestamp():
-    """ Return a timestamp string suitable for using in filenames.
+    """Return a timestamp string suitable for using in filenames.
 
     Returns:
         str:  Represents the current time.
@@ -277,7 +280,7 @@ def get_timestamp():
 
 
 def make_path(root_path, sub_path, filename):
-    """ Get path for a file, verifying all components exist.
+    """Get path for a file, verifying all components exist.
 
     Parameters:
         root_path (str):   path of the root directory.
@@ -296,7 +299,7 @@ def make_path(root_path, sub_path, filename):
 
 
 def get_task_from_file(file_path):
-    """ Returns the task name entity from a BIDS-type file path.
+    """Returns the task name entity from a BIDS-type file path.
 
     Parameters:
         file_path (str):  File path.
@@ -310,12 +313,12 @@ def get_task_from_file(file_path):
     position = basename.lower().find("task-")
     if position == -1:
         return ""
-    splits = re.split(r'[_.]', basename[position+5:])
+    splits = re.split(r"[_.]", basename[position + 5 :])
     return splits[0]
 
 
 def get_task_dict(files):
-    """ Return a dictionary of the tasks that appear in the file names of a list of files.
+    """Return a dictionary of the tasks that appear in the file names of a list of files.
 
     Parameters:
         files (list): List of filenames to be separated by task.
@@ -336,7 +339,7 @@ def get_task_dict(files):
 
 
 def separate_by_ext(file_paths):
-    """ Separate a list of files into tsv and json files.
+    """Separate a list of files into tsv and json files.
 
     Parameters:
         file_paths (list):  A list of file paths.

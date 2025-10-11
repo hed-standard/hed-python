@@ -13,7 +13,7 @@ import os
 class TestSchemaComparison(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/schema_tests/')
+        cls.base_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/")
 
     def test_find_matching_tags(self):
         # create entries for schema1

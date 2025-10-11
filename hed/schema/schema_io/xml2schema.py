@@ -14,12 +14,13 @@ from functools import partial
 
 
 class SchemaLoaderXML(SchemaLoader):
-    """ Loads XML schemas from filenames or strings.
+    """Loads XML schemas from filenames or strings.
 
-        Expected usage is SchemaLoaderXML.load(filename)
+    Expected usage is SchemaLoaderXML.load(filename)
 
-        SchemaLoaderXML(filename) will load just the header_attributes
+    SchemaLoaderXML(filename) will load just the header_attributes
     """
+
     def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
         super().__init__(filename, schema_as_string, schema, file_format, name)
         self._root_element = None
@@ -67,8 +68,9 @@ class SchemaLoaderXML(SchemaLoader):
             if section_element:
                 section_element = section_element[0]
             if isinstance(section_element, list):
-                raise HedFileError(HedExceptions.INVALID_HED_FORMAT,
-                                   "Attempting to load an outdated or invalid XML schema", self.name)
+                raise HedFileError(
+                    HedExceptions.INVALID_HED_FORMAT, "Attempting to load an outdated or invalid XML schema", self.name
+                )
             parse_func = parse_order[section_key]
             parse_func(section_element)
 
@@ -105,8 +107,9 @@ class SchemaLoaderXML(SchemaLoader):
             source_name = self._get_element_value(source_element, xml_constants.NAME_ELEMENT)
             source_link = self._get_element_value(source_element, xml_constants.LINK_ELEMENT)
             description = self._get_element_value(source_element, xml_constants.DESCRIPTION_ELEMENT)
-            data.append({df_constants.source: source_name, df_constants.link: source_link,
-                         df_constants.description: description})
+            data.append(
+                {df_constants.source: source_name, df_constants.link: source_link, df_constants.description: description}
+            )
         self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(data, columns=df_constants.source_columns)
 
     def _read_prefixes(self):
@@ -114,10 +117,15 @@ class SchemaLoaderXML(SchemaLoader):
         data = []
         for prefix_element in prefix_elements:
             prefix_name = self._get_element_value(prefix_element, xml_constants.NAME_ELEMENT)
-            prefix_namespace= self._get_element_value(prefix_element, xml_constants.NAMESPACE_ELEMENT)
+            prefix_namespace = self._get_element_value(prefix_element, xml_constants.NAMESPACE_ELEMENT)
             prefix_description = self._get_element_value(prefix_element, xml_constants.DESCRIPTION_ELEMENT)
-            data.append({df_constants.prefix: prefix_name, df_constants.namespace: prefix_namespace,
-                         df_constants.description: prefix_description})
+            data.append(
+                {
+                    df_constants.prefix: prefix_name,
+                    df_constants.namespace: prefix_namespace,
+                    df_constants.description: prefix_description,
+                }
+            )
         self._schema.extras[df_constants.PREFIXES_KEY] = pd.DataFrame(data, columns=df_constants.prefix_columns)
 
     def _read_external_annotations(self):
@@ -128,9 +136,17 @@ class SchemaLoaderXML(SchemaLoader):
             external_id = self._get_element_value(external_element, xml_constants.ID_ELEMENT)
             external_iri = self._get_element_value(external_element, xml_constants.IRI_ELEMENT)
             external_description = self._get_element_value(external_element, xml_constants.DESCRIPTION_ELEMENT)
-            data.append({df_constants.prefix: external_name, df_constants.id: external_id,
-                         df_constants.iri: external_iri, df_constants.description: external_description})
-        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(data, columns=df_constants.external_annotation_columns)
+            data.append(
+                {
+                    df_constants.prefix: external_name,
+                    df_constants.id: external_id,
+                    df_constants.iri: external_iri,
+                    df_constants.description: external_description,
+                }
+            )
+        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(
+            data, columns=df_constants.external_annotation_columns
+        )
 
     def _add_tags_recursive(self, new_tags, parent_tags):
         for tag_element in new_tags:
@@ -162,7 +178,7 @@ class SchemaLoaderXML(SchemaLoader):
 
     def _populate_unit_class_dictionaries(self, unit_section):
         """Populates a dictionary of dictionaries associated with all the unit classes, unit class units, and unit
-           class default units."""
+        class default units."""
         self._schema._initialize_attributes(HedSectionKey.UnitClasses)
         self._schema._initialize_attributes(HedSectionKey.Units)
         def_element_name = xml_constants.ELEMENT_NAMES[HedSectionKey.UnitClasses]
@@ -205,9 +221,11 @@ class SchemaLoaderXML(SchemaLoader):
                 parts = schema_value.split()
 
                 if len(parts) != 2:
-                    raise HedFileError(HedExceptions.HED_SCHEMA_INVALID,
-                                       "schemaLocation must contain exactly one namespace and location",
-                                       self.name)
+                    raise HedFileError(
+                        HedExceptions.HED_SCHEMA_INVALID,
+                        "schemaLocation must contain exactly one namespace and location",
+                        self.name,
+                    )
 
                 namespace_uri, location_uri = parts
                 final_attrib[NS_ATTRIB] = namespace_uri
@@ -244,7 +262,7 @@ class SchemaLoaderXML(SchemaLoader):
         return tag_entry
 
     def _get_element_tag_value(self, element, tag_name=xml_constants.NAME_ELEMENT):
-        """ Get the value of the element's tag.
+        """Get the value of the element's tag.
 
         Parameters:
             element (Element): A element in the HED XML file.
@@ -260,9 +278,11 @@ class SchemaLoaderXML(SchemaLoader):
         element = element.find(tag_name)
         if element is not None:
             if element.text is None and tag_name != "units":
-                raise HedFileError(HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
-                                   f"A Schema node is empty for tag of element name: '{tag_name}'.",
-                                   self.name)
+                raise HedFileError(
+                    HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
+                    f"A Schema node is empty for tag of element name: '{tag_name}'.",
+                    self.name,
+                )
             return element.text
         return ""
 
@@ -270,12 +290,12 @@ class SchemaLoaderXML(SchemaLoader):
     def _get_element_value(element, tag_name):
         this_element = element.find(tag_name)
         if this_element is None or this_element.text is None:
-            return ''
+            return ""
         else:
             return this_element.text
 
-    def _get_elements_by_name(self, element_name='node', parent_element=None):
-        """ Get the elements that have a specific element name.
+    def _get_elements_by_name(self, element_name="node", parent_element=None):
+        """Get the elements that have a specific element name.
 
         Parameters:
             element_name (str): The name of the element. The default is 'node'.
@@ -291,15 +311,15 @@ class SchemaLoaderXML(SchemaLoader):
 
         """
         if parent_element is None:
-            elements = self._root_element.findall('.//%s' % element_name)
+            elements = self._root_element.findall(".//%s" % element_name)
         else:
-            elements = parent_element.findall('.//%s' % element_name)
+            elements = parent_element.findall(".//%s" % element_name)
         return elements
 
     def _add_to_dict(self, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
-            raise HedFileError(HedExceptions.IN_LIBRARY_IN_UNMERGED,
-                               "Library tag in unmerged schema has InLibrary attribute",
-                               self.name)
+            raise HedFileError(
+                HedExceptions.IN_LIBRARY_IN_UNMERGED, "Library tag in unmerged schema has InLibrary attribute", self.name
+            )
 
         return self._add_to_dict_base(entry, key_class)

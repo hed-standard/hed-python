@@ -1,4 +1,5 @@
-""" Functions to get and use HED queries. """
+"""Functions to get and use HED queries."""
+
 from typing import Union
 
 import pandas as pd
@@ -6,8 +7,10 @@ import pandas as pd
 from hed.models import QueryHandler
 
 
-def get_query_handlers(queries, query_names=None) -> tuple[list[Union[QueryHandler, None]], list[Union[QueryHandler, None]], list]:
-    """ Return a list of query handlers, query names, and issues if any.
+def get_query_handlers(
+    queries, query_names=None
+) -> tuple[list[Union[QueryHandler, None]], list[Union[QueryHandler, None]], list]:
+    """Return a list of query handlers, query names, and issues if any.
 
     Parameters:
         queries (list):  A list of query strings.
@@ -30,8 +33,10 @@ def get_query_handlers(queries, query_names=None) -> tuple[list[Union[QueryHandl
         query_names = [f"query_{index}" for index in range(len(queries))]
 
     if len(queries) != len(query_names):
-        issues.append(f"QueryNamesLengthBad: The query_names length {len(query_names)} must be empty or equal " +
-                      f"to the queries length {len(queries)}.")
+        issues.append(
+            f"QueryNamesLengthBad: The query_names length {len(query_names)} must be empty or equal "
+            + f"to the queries length {len(queries)}."
+        )
     elif len(set(query_names)) != len(query_names):
         issues.append(f"DuplicateQueryNames: The query names {str(query_names)} list has duplicates")
 
@@ -44,7 +49,7 @@ def get_query_handlers(queries, query_names=None) -> tuple[list[Union[QueryHandl
 
 
 def search_hed_objs(hed_objs, queries, query_names) -> pd.DataFrame:
-    """ Return a DataFrame of factors based on results of queries.
+    """Return a DataFrame of factors based on results of queries.
 
     Parameters:
         hed_objs (list):  A list of HedString objects (empty entries or None entries are 0's
