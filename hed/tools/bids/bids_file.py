@@ -1,11 +1,11 @@
-""" Models a BIDS file. """
+"""Models a BIDS file."""
 
 import os
 from hed.tools.bids import bids_util
 
 
 class BidsFile:
-    """ A BIDS file with entity dictionary.
+    """A BIDS file with entity dictionary.
 
     Attributes:
         file_path (str):             Real path of the file.
@@ -19,7 +19,7 @@ class BidsFile:
     """
 
     def __init__(self, file_path):
-        """ Constructor for a file path.
+        """Constructor for a file path.
 
         Parameters:
             file_path(str): Full path of the file.
@@ -37,15 +37,15 @@ class BidsFile:
 
     @property
     def contents(self):
-        """ Return the current contents of this object. """
+        """Return the current contents of this object."""
         return self._contents
 
     def clear_contents(self):
-        """ Set the contents attribute of this object to None. """
+        """Set the contents attribute of this object to None."""
         self._contents = None
 
     def get_entity(self, entity_name):
-        """ Return the entity value for the specified entity.
+        """Return the entity value for the specified entity.
 
         Parameters:
             entity_name (str): Name of the BIDS entity, for example task, run, or sub.
@@ -56,7 +56,7 @@ class BidsFile:
         return self.entity_dict.get(entity_name, None)
 
     def get_key(self, entities=None):
-        """ Return a key for this BIDS file given a list of entities.
+        """Return a key for this BIDS file given a list of entities.
 
         Parameters:
             entities (tuple):  A tuple of strings representing entities.
@@ -75,11 +75,11 @@ class BidsFile:
         for entity in entities:
             if entity in self.entity_dict:
                 key_list.append(f"{entity}-{self.entity_dict[entity]}")
-        key = '_'.join(key_list)
+        key = "_".join(key_list)
         return key
 
     def set_contents(self, content_info=None, overwrite=False):
-        """ Set the contents of this object.
+        """Set the contents of this object.
 
         Parameters:
             content_info (Any):      JSON dictionary The contents appropriate for this object.
@@ -95,7 +95,8 @@ class BidsFile:
         self.has_hed = False
 
     def __str__(self):
-        """ Return a string representation of this object. """
-        my_str = self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + \
-            " entity_dict=" + str(self.entity_dict)
+        """Return a string representation of this object."""
+        my_str = (
+            self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + " entity_dict=" + str(self.entity_dict)
+        )
         return my_str

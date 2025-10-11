@@ -1,4 +1,5 @@
-""" A single definition. """
+"""A single definition."""
+
 import copy
 from typing import Union
 
@@ -6,10 +7,10 @@ from hed.models.hed_group import HedGroup
 
 
 class DefinitionEntry:
-    """ A single definition. """
+    """A single definition."""
 
     def __init__(self, name, contents, takes_value, source_context):
-        """ Initialize info for a single definition.
+        """Initialize info for a single definition.
 
         Parameters:
             name (str):            The label portion of this name (not including Definition/).
@@ -27,8 +28,8 @@ class DefinitionEntry:
         self.takes_value = takes_value
         self.source_context = source_context
 
-    def get_definition(self, replace_tag, placeholder_value=None, return_copy_of_tag=False) -> Union['HedGroup', None]:
-        """ Return a copy of the definition with the tag expanded and the placeholder plugged in.
+    def get_definition(self, replace_tag, placeholder_value=None, return_copy_of_tag=False) -> Union["HedGroup", None]:
+        """Return a copy of the definition with the tag expanded and the placeholder plugged in.
 
             Returns None if placeholder_value passed when it doesn't take value, or vice versa.
 
@@ -60,15 +61,16 @@ class DefinitionEntry:
 
             output_contents = [replace_tag, output_group]
 
-        output_contents = HedGroup(replace_tag._hed_string,
-                                   startpos=replace_tag.span[0], endpos=replace_tag.span[1], contents=output_contents)
+        output_contents = HedGroup(
+            replace_tag._hed_string, startpos=replace_tag.span[0], endpos=replace_tag.span[1], contents=output_contents
+        )
         return output_contents
 
     def __str__(self):
         return str(self.contents)
 
     def __eq__(self, other):
-        """ Check equality based on name, contents, and takes_value.
+        """Check equality based on name, contents, and takes_value.
 
         Parameters:
             other (DefinitionEntry): Another DefinitionEntry to compare with.
@@ -79,6 +81,4 @@ class DefinitionEntry:
         if not isinstance(other, DefinitionEntry):
             return False
 
-        return (self.name == other.name and
-                self.contents == other.contents and
-                self.takes_value == other.takes_value)
+        return self.name == other.name and self.contents == other.contents and self.takes_value == other.takes_value

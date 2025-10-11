@@ -7,15 +7,9 @@ class TestOp(BaseOp):
     NAME = "test"
     PARAMS = {
         "type": "object",
-        "properties": {
-            "column_name": {
-                "type": "string"
-            }
-        },
-        "required": [
-            "column_name"
-        ],
-        "additionalProperties": False
+        "properties": {"column_name": {"type": "string"}},
+        "required": ["column_name"],
+        "additionalProperties": False,
     }
 
     def do_op(self, dispatcher, df, name, sidecar=None):
@@ -30,9 +24,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        base_parameters = {
-            "column_name": "a_descriptive_name"
-        }
+        base_parameters = {"column_name": "a_descriptive_name"}
         cls.json_parameters = json.dumps(base_parameters)
 
     @classmethod
@@ -48,15 +40,9 @@ class Test(unittest.TestCase):
         class TestOpNoName(BaseOp):
             PARAMS = {
                 "type": "object",
-                "properties": {
-                    "column_name": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "column_name"
-                ],
-                "additionalProperties": False
+                "properties": {"column_name": {"type": "string"}},
+                "required": ["column_name"],
+                "additionalProperties": False,
             }
 
             def do_op(self, dispatcher, df, name, sidecar=None):
@@ -66,5 +52,5 @@ class Test(unittest.TestCase):
             TestOpNoName({})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

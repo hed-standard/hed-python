@@ -22,7 +22,7 @@ object_type_id_offset = {
 
 
 def _get_hedid_range(schema_name, df_key):
-    """ Get the set of HedId's for this object type/schema name.
+    """Get the set of HedId's for this object type/schema name.
 
     Parameters:
         schema_name(str): The known schema name with an assigned id range.
@@ -69,7 +69,7 @@ def get_all_ids(df):
 
 
 def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids=False, assign_missing_ids=False):
-    """ Write out schema as a dataframe, then merge in extra columns from dataframes.
+    """Write out schema as a dataframe, then merge in extra columns from dataframes.
 
     Parameters:
         dataframes(dict): A full set of schema spreadsheet formatted dataframes
@@ -98,12 +98,17 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
         hedid_errors += _verify_hedid_matches(section, df, unused_tag_ids)
 
     if hedid_errors:
-        raise HedFileError(hedid_errors[0]['code'],
-                           f"{len(hedid_errors)} issues found with hedId mismatches.  See the .issues "
-                           f"parameter on this exception for more details.", schema.name, issues=hedid_errors)
+        raise HedFileError(
+            hedid_errors[0]["code"],
+            f"{len(hedid_errors)} issues found with hedId mismatches.  See the .issues "
+            f"parameter on this exception for more details.",
+            schema.name,
+            issues=hedid_errors,
+        )
 
     # 2. Get the new schema as DFs
     from hed.schema.schema_io.schema2df import Schema2DF  # Late import as this is recursive
+
     output_dfs = Schema2DF(get_as_ids=get_as_ids).process_schema(schema, save_merged=False)
 
     if assign_missing_ids:
@@ -128,7 +133,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", get_as_ids
 
 
 def _verify_hedid_matches(section, df, unused_tag_ids):
-    """ Verify ID's in both have the same label, and verify all entries in the dataframe are already in the schema
+    """Verify ID's in both have the same label, and verify all entries in the dataframe are already in the schema
 
     Parameters:
         section(HedSchemaSection): The loaded schema section to compare ID's with
@@ -151,39 +156,46 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
             # Neither side has a hedID, so nothing to do.
             if not df_id:
                 continue
-            hedid_errors += schema_util.format_error(row_number, row,
-                                                     f"'{label}' does not exist in schema file only the spreadsheet.")
+            hedid_errors += schema_util.format_error(
+                row_number, row, f"'{label}' does not exist in schema file only the spreadsheet."
+            )
             continue
         entry_id = entry.attributes.get(HedKey.HedID)
         if df_id:
             if not (df_id.startswith("HED_") and len(df_id) == len("HED_0000000")):
-                hedid_errors += schema_util.format_error(row_number, row,
-                                                         f"'{label}' has an improperly formatted hedID in dataframe.")
+                hedid_errors += schema_util.format_error(
+                    row_number, row, f"'{label}' has an improperly formatted hedID in dataframe."
+                )
                 continue
             id_value = remove_prefix(df_id, "HED_")
             try:
                 id_int = int(id_value)
                 if id_int not in unused_tag_ids:
                     hedid_errors += schema_util.format_error(
-                        row_number, row, f"'{label}' has id {id_int} which is outside " +
-                        "of the valid range for this type.  Valid range is: " +
-                        f"{min(unused_tag_ids)} to {max(unused_tag_ids)}")
+                        row_number,
+                        row,
+                        f"'{label}' has id {id_int} which is outside "
+                        + "of the valid range for this type.  Valid range is: "
+                        + f"{min(unused_tag_ids)} to {max(unused_tag_ids)}",
+                    )
                     continue
             except ValueError:
                 hedid_errors += schema_util.format_error(
-                    row_number, row, f"'{label}' has a non-numeric hedID in the dataframe.")
+                    row_number, row, f"'{label}' has a non-numeric hedID in the dataframe."
+                )
                 continue
 
         if entry_id and entry_id != df_id:
             hedid_errors += schema_util.format_error(
-                row_number, row, f"'{label}' has hedID '{df_id}' in dataframe, but '{entry_id}' in schema.")
+                row_number, row, f"'{label}' has hedID '{df_id}' in dataframe, but '{entry_id}' in schema."
+            )
             continue
 
     return hedid_errors
 
 
 def assign_hed_ids_section(df, unused_tag_ids):
-    """ Adds missing HedIds to dataframe.
+    """Adds missing HedIds to dataframe.
 
     Parameters:
         df(pd.DataFrame): The dataframe to add id's to.
@@ -203,7 +215,7 @@ def assign_hed_ids_section(df, unused_tag_ids):
 
 
 def merge_dfs(dest_df, source_df):
-    """ Merges extra columns from source_df into dest_df, adding the extra columns from the ontology to the schema df.
+    """Merges extra columns from source_df into dest_df, adding the extra columns from the ontology to the schema df.
 
     Parameters:
         dest_df (DataFrame): The dataframe to add extra columns to
@@ -213,7 +225,7 @@ def merge_dfs(dest_df, source_df):
     save_df1_columns = dest_df.columns.copy()
     for _index, row in source_df.iterrows():
         # Find matching index in df1 based on 'rdfs:label'
-        match_index = dest_df[dest_df['rdfs:label'] == row['rdfs:label']].index
+        match_index = dest_df[dest_df["rdfs:label"] == row["rdfs:label"]].index
         if not match_index.empty:
             for col in source_df.columns:
                 if col not in save_df1_columns:
@@ -235,7 +247,7 @@ def _get_annotation_prop_ids(schema):
 
 
 def get_prefixes(dataframes):
-    """ Get the prefixes and external annotation terms from the dataframes for ontology conversion."""
+    """Get the prefixes and external annotation terms from the dataframes for ontology conversion."""
     prefixes = dataframes.get(constants.PREFIXES_KEY)
     extensions = dataframes.get(constants.EXTERNAL_ANNOTATION_KEY)
     sources = dataframes.get(constants.SOURCES_KEY)
@@ -255,7 +267,7 @@ def get_prefixes(dataframes):
 
 
 def convert_df_to_omn(dataframes):
-    """ Convert the dataframe format schema to omn format.
+    """Convert the dataframe format schema to omn format.
 
     Parameters:
         dataframes(dict): A set of dataframes representing a schema, potentially including extra columns
@@ -267,13 +279,14 @@ def convert_df_to_omn(dataframes):
     """
     from hed.schema.hed_schema_io import from_dataframes
     from hed.schema.schema_io.schema2df import Schema2DF  # Late import as this is recursive
+
     annotation_terms, source_dict = get_prefixes(dataframes)
 
     # Load the schema, so we can save it out with ID's
     schema = from_dataframes(dataframes)
     schema2df = Schema2DF(get_as_ids=True)
     output1 = schema2df.process_schema(schema, save_merged=False)
-    if hasattr(schema, 'extras') and schema.extras:
+    if hasattr(schema, "extras") and schema.extras:
         output1.update(schema.extras)
     # Convert dataframes to hedId format, and add any missing hedId's(generally, they should be replaced before here)
     dataframes_u = update_dataframes_from_schema(dataframes, schema, get_as_ids=True)
@@ -291,8 +304,9 @@ def convert_df_to_omn(dataframes):
         if suffix in constants.DF_EXTRAS:
             output_text = _convert_extra_df_to_omn(dataframes_u[suffix], suffix)
         else:
-            output_text = _convert_df_to_omn(dataframes_u[suffix], annotation_properties=annotation_props,
-                                             annotation_terms=annotation_terms)
+            output_text = _convert_df_to_omn(
+                dataframes_u[suffix], annotation_properties=annotation_props, annotation_terms=annotation_terms
+            )
         omn_data[suffix] = output_text
         full_text += output_text + "\n"
 
@@ -376,7 +390,7 @@ def _convert_extra_df_to_omn(df, suffix):
             if renamed_row[constants.link]:
                 output_text += f" <{renamed_row[constants.link]}>"
             if renamed_row[constants.description]:
-                output_text += f" \"{renamed_row[constants.description]}\""
+                output_text += f' "{renamed_row[constants.description]}"'
         else:
             raise ValueError(f"Unknown tsv suffix attempting to be converted {suffix}")
 
@@ -385,7 +399,7 @@ def _convert_extra_df_to_omn(df, suffix):
 
 
 def _split_on_unquoted_commas(input_string):
-    """ Splits the given string into comma separated portions, ignoring commas inside double quotes.
+    """Splits the given string into comma separated portions, ignoring commas inside double quotes.
 
     Parameters:
         input_string: The string to split
@@ -401,14 +415,14 @@ def _split_on_unquoted_commas(input_string):
     for char in input_string:
         if char == '"':
             in_quotes = not in_quotes
-        if char == ',' and not in_quotes:
-            parts.append(''.join(current).strip())
+        if char == "," and not in_quotes:
+            parts.append("".join(current).strip())
             current = []
         else:
             current.append(char)
 
     if current:  # Add the last part if there is any.
-        parts.append(''.join(current).strip())
+        parts.append("".join(current).strip())
 
     return parts
 
@@ -426,10 +440,10 @@ def _add_annotation_lines(row, annotation_properties, annotation_terms):
     annotation_lines = []
     description = row[constants.dcdescription]
     if description:
-        annotation_lines.append(f"\t\t{constants.dcdescription} \"{description}\"")
+        annotation_lines.append(f'\t\t{constants.dcdescription} "{description}"')
     name = row[constants.name]
     if name:
-        annotation_lines.append(f"\t\t{constants.name} \"{name}\"")
+        annotation_lines.append(f'\t\t{constants.name} "{name}"')
 
     # Add annotation properties(other than HedId)
     attributes = get_attributes_from_row(row)

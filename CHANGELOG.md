@@ -1,3 +1,24 @@
+Release 0.7.1 October 11, 2025
+- Applied Black code formatter to entire codebase for consistent code style (148 files reformatted).
+- Added Black to development dependencies (`pip install -e .[dev]`) and GitHub Actions CI workflow.
+- Created `.github/workflows/black.yaml` for automated code formatting checks on all PRs and pushes.
+- Migrated from flake8 to ruff for linting and code quality checks (faster, more comprehensive).
+- Applied code corrections throughout codebase as suggested by ruff linter.
+- Removed `.flake8` configuration file in favor of ruff configuration in pyproject.toml.
+- Removed unneeded parameters from validator functions for cleaner API.
+- Added TYPE_CHECKING imports to avoid circular import issues in type annotations.
+- Changed sentinel value name from `_UNSET` to `_SENTINEL` in bids_dataset.py for clarity.
+- Enhanced coverage workflow configuration for improved CI/CD reliability.
+  - Changed ci_cov.yaml to only run on main branch (not all branches).
+  - Updated Python version from 3.12 to 3.10 for coverage tests.
+  - Configured qlty.toml for proper coverage reporting with relative paths.
+  - Updated .coveragerc to remove explicit source specification.
+- Added `pip install -e .[test]` to all GitHub Actions workflows (ci.yaml, ci_windows.yaml, spec_tests.yaml).
+- Enhanced CONTRIBUTING.md with Black and ruff usage guidelines and code quality tools section.
+- Updated README.md with "Code Formatting with Black" section including Windows-specific workarounds.
+- Updated RELEASE_GUIDE.md to include code quality checks (Black, ruff, codespell) as pre-release step.
+- Configured Black in pyproject.toml with 127 character line length matching existing ruff configuration.
+
 Release 0.7.0 October 2, 2025
 - Added comprehensive logging infrastructure with configurable log levels and file output to validation tools.
 - Enhanced validate_bids script with improved error reporting and filtering capabilities.

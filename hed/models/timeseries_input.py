@@ -1,9 +1,10 @@
-""" A BIDS time series tabular file. """
+"""A BIDS time series tabular file."""
+
 from hed.models.base_input import BaseInput
 
 
 class TimeseriesInput(BaseInput):
-    """ A BIDS time series tabular file. """
+    """A BIDS time series tabular file."""
 
     HED_COLUMN_NAME = "HED"
 
@@ -21,5 +22,4 @@ class TimeseriesInput(BaseInput):
 
         """
 
-        super().__init__(file, file_type=".tsv", worksheet_name=None, has_column_names=False, mapper=None,
-                         name=name)
+        super().__init__(file, file_type=".tsv", worksheet_name=None, has_column_names=False, mapper=None, name=name)

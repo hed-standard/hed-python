@@ -4,10 +4,11 @@ import argparse
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Validate schema files.')
-    parser.add_argument('schema_files', nargs='+', help='List of schema files to validate.')
-    parser.add_argument('--add-all-extensions', action='store_true',
-                        help='Always verify all versions of the same schema are equal.')
+    parser = argparse.ArgumentParser(description="Validate schema files.")
+    parser.add_argument("schema_files", nargs="+", help="List of schema files to validate.")
+    parser.add_argument(
+        "--add-all-extensions", action="store_true", help="Always verify all versions of the same schema are equal."
+    )
 
     args = parser.parse_args()
 

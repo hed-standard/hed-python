@@ -1,4 +1,4 @@
-""" Top level validation of HED strings. """
+"""Top level validation of HED strings."""
 
 import re
 from hed.errors.error_types import ValidationErrors, DefinitionErrors
@@ -9,7 +9,7 @@ from hed.validator.util import UnitValueValidator, CharRexValidator, StringValid
 
 
 class HedValidator:
-    """ Top level validation of HED strings.
+    """Top level validation of HED strings.
 
     This module contains the HedValidator class which is used to validate the tags in a HED string or a file.
     The file types include .tsv, .txt, and .xlsx. To get the validation issues after creating a
@@ -17,7 +17,7 @@ class HedValidator:
     """
 
     def __init__(self, hed_schema, def_dicts=None, definitions_allowed=False):
-        """ Constructor for the HedValidator class.
+        """Constructor for the HedValidator class.
 
         Parameters:
             hed_schema (HedSchema or HedSchemaGroup): HedSchema object to use for validation.
@@ -41,7 +41,7 @@ class HedValidator:
         self._group_validator = GroupValidator(hed_schema)
 
     def validate(self, hed_string, allow_placeholders, error_handler=None) -> list[dict]:
-        """ Validate the HED string object using the schema.
+        """Validate the HED string object using the schema.
 
         Parameters:
             hed_string (HedString): the string to validate.
@@ -125,7 +125,7 @@ class HedValidator:
 
     # Todo: mark semi private/actually private below this
     def _run_validate_tag_characters(self, original_tag, allow_placeholders) -> list[dict]:
-        """ Basic character validation of tags
+        """Basic character validation of tags
 
         Parameters:
             original_tag (HedTag): A original tag.
@@ -148,10 +148,11 @@ class HedValidator:
 
         Returns:
             list[dict]: The validation issues associated with a HED string. Each issue is a dictionary.
-         """
+        """
         validation_issues = []
         validation_issues += self._char_validator.check_invalid_character_issues(
-            hed_string_obj.get_original_hed_string(), allow_placeholders)
+            hed_string_obj.get_original_hed_string(), allow_placeholders
+        )
         validation_issues += self._string_validator.run_string_validator(hed_string_obj)
         for original_tag in hed_string_obj.get_all_tags():
             validation_issues += self.check_tag_formatting(original_tag)
@@ -160,7 +161,7 @@ class HedValidator:
     pattern_doubleslash = re.compile(r"([ \t/]{2,}|^/|/$)")
 
     def check_tag_formatting(self, original_tag) -> list[dict]:
-        """ Report repeated or erroneous slashes.
+        """Report repeated or erroneous slashes.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
@@ -170,15 +171,13 @@ class HedValidator:
         """
         validation_issues = []
         for match in self.pattern_doubleslash.finditer(original_tag.org_tag):
-            validation_issues += error_reporter.ErrorHandler.format_error(ValidationErrors.NODE_NAME_EMPTY,
-                                                                          tag=original_tag,
-                                                                          index_in_tag=match.start(),
-                                                                          index_in_tag_end=match.end())
+            validation_issues += error_reporter.ErrorHandler.format_error(
+                ValidationErrors.NODE_NAME_EMPTY, tag=original_tag, index_in_tag=match.start(), index_in_tag_end=match.end()
+            )
 
         return validation_issues
 
-    def validate_units(self, original_tag, validate_text=None, report_as=None, error_code=None,
-                       index_offset=0) -> list[dict]:
+    def validate_units(self, original_tag, validate_text=None, report_as=None, error_code=None, index_offset=0) -> list[dict]:
         """Validate units and value classes
 
         Parameters:
@@ -195,57 +194,54 @@ class HedValidator:
         if validate_text is None:
             validate_text = original_tag.extension
         issues = []
-        if validate_text == '#':
+        if validate_text == "#":
             return []
         if original_tag.is_unit_class_tag():
-            issues += self._unit_validator.check_tag_unit_class_units_are_valid(original_tag,
-                                                                                validate_text,
-                                                                                report_as=report_as,
-                                                                                error_code=error_code)
+            issues += self._unit_validator.check_tag_unit_class_units_are_valid(
+                original_tag, validate_text, report_as=report_as, error_code=error_code
+            )
         elif original_tag.is_value_class_tag():
-            issues += self._unit_validator.check_tag_value_class_valid(original_tag,
-                                                                       validate_text,
-                                                                       report_as=report_as)
+            issues += self._unit_validator.check_tag_value_class_valid(original_tag, validate_text, report_as=report_as)
         elif original_tag.extension:
-            issues += self._char_validator.check_for_invalid_extension_chars(original_tag,
-                                                                             validate_text,
-                                                                             index_offset=index_offset)
+            issues += self._char_validator.check_for_invalid_extension_chars(
+                original_tag, validate_text, index_offset=index_offset
+            )
 
         return issues
 
     def _validate_individual_tags_in_hed_string(self, hed_string_obj, allow_placeholders=False) -> list[dict]:
-        """ Validate individual tags in a HED string.
+        """Validate individual tags in a HED string.
 
-         Parameters:
-            hed_string_obj (HedString): A HedString  object.
-            allow_placeholders (bool): Allow placeholders in the tags.
+        Parameters:
+           hed_string_obj (HedString): A HedString  object.
+           allow_placeholders (bool): Allow placeholders in the tags.
 
-         Returns:
-            list[dict]: The issues associated with the individual tags. Each issue is a dictionary.
+        Returns:
+           list[dict]: The issues associated with the individual tags. Each issue is a dictionary.
 
-         """
+        """
         from hed.models.definition_dict import DefTagNames
+
         validation_issues = []
-        definition_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY},
-                                                               include_groups=1)
+        definition_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1)
         all_definition_groups = [group for sub_group in definition_groups for group in sub_group.get_all_groups()]
         for group in hed_string_obj.get_all_groups():
             is_definition = group in all_definition_groups
             for hed_tag in group.tags():
                 if not self._definitions_allowed and hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY:
                     validation_issues += error_reporter.ErrorHandler.format_error(
-                        DefinitionErrors.BAD_DEFINITION_LOCATION, hed_tag)
-                validation_issues += \
-                    self._tag_validator.run_individual_tag_validators(hed_tag, allow_placeholders=allow_placeholders,
-                                                                      is_definition=is_definition)
-                if (hed_tag.short_base_tag == DefTagNames.DEF_KEY or
-                        hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY):
-                    validation_issues += (
-                        self._def_validator.validate_def_value_units(hed_tag,
-                                                                     self, allow_placeholders=allow_placeholders))
+                        DefinitionErrors.BAD_DEFINITION_LOCATION, hed_tag
+                    )
+                validation_issues += self._tag_validator.run_individual_tag_validators(
+                    hed_tag, allow_placeholders=allow_placeholders, is_definition=is_definition
+                )
+                if hed_tag.short_base_tag == DefTagNames.DEF_KEY or hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY:
+                    validation_issues += self._def_validator.validate_def_value_units(
+                        hed_tag, self, allow_placeholders=allow_placeholders
+                    )
                 elif (hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY) and hed_tag.extension.endswith("/#"):
                     validation_issues += self.validate_units(hed_tag, hed_tag.extension[:-2])
-                elif not (allow_placeholders and '#' in hed_tag.extension):
+                elif not (allow_placeholders and "#" in hed_tag.extension):
                     validation_issues += self.validate_units(hed_tag)
 
         return validation_issues

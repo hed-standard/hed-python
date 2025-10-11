@@ -36,7 +36,7 @@ class Schema2Wiki(Schema2Base):
         pass
 
     def _output_extras(self, hed_schema):
-        """ Add additional sections if needed.
+        """Add additional sections if needed.
 
         Parameters:
             hed_schema (H: The schema object to output.
@@ -45,11 +45,12 @@ class Schema2Wiki(Schema2Base):
         # In the base class, we do nothing, but subclasses can override this method.
         self._output_extra(hed_schema, df_constants.SOURCES_KEY, wiki_constants.SOURCES_SECTION_ELEMENT)
         self._output_extra(hed_schema, df_constants.PREFIXES_KEY, wiki_constants.PREFIXES_SECTION_ELEMENT)
-        self._output_extra(hed_schema, df_constants.EXTERNAL_ANNOTATION_KEY,
-                           wiki_constants.EXTERNAL_ANNOTATION_SECTION_ELEMENT)
+        self._output_extra(
+            hed_schema, df_constants.EXTERNAL_ANNOTATION_KEY, wiki_constants.EXTERNAL_ANNOTATION_SECTION_ELEMENT
+        )
 
     def _output_extra(self, hed_schema, section_key, wiki_key):
-        """ Add additional section if needed.
+        """Add additional section if needed.
 
         Parameters:
             hed_schema (HedSchema): The schema object to output.
@@ -65,8 +66,8 @@ class Schema2Wiki(Schema2Base):
         self.current_tag_string = wiki_key
         self._flush_current_tag()
         for _, row in extra.iterrows():
-            self.current_tag_string += '*'
-            self.current_tag_extra = ','.join(f'{col}={row[col]}' for col in extra.columns)
+            self.current_tag_string += "*"
+            self.current_tag_extra = ",".join(f"{col}={row[col]}" for col in extra.columns)
             self._flush_current_tag()
 
     def _output_epilogue(self, epilogue):
@@ -108,7 +109,7 @@ class Schema2Wiki(Schema2Base):
             self.current_tag_string += f"'''{tag}'''"
         else:
             short_tag = tag.split("/")[-1]
-            tab_char = ''  # GitHub mangles these, so remove spacing for now.
+            tab_char = ""  # GitHub mangles these, so remove spacing for now.
             # takes value tags should appear after the nowiki tag.
             if short_tag.endswith("#"):
                 self.current_tag_string += f"{tab_char * level}{'*' * level} "

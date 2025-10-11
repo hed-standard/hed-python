@@ -25,7 +25,7 @@ required_non_tag = [
     "'''Value classes'''",
     "'''Schema attributes'''",
     "'''Properties'''",
-    "'''Epilogue'''"
+    "'''Epilogue'''",
 ]
 
 
@@ -42,25 +42,26 @@ def _get_test_schema(node_lines, other_lines=(default_end_lines,)):
 
 
 def load_schema1():
-    test_nodes = ["'''TestNode''' <nowiki> [This is a simple test node]</nowiki>\n",
-                  " *TestNode2",
-                  " *TestNode3",
-                  " *TestNode4"
-                  ]
+    test_nodes = [
+        "'''TestNode''' <nowiki> [This is a simple test node]</nowiki>\n",
+        " *TestNode2",
+        " *TestNode3",
+        " *TestNode4",
+    ]
     return _get_test_schema(test_nodes)
 
 
 def load_schema2():
-    test_nodes = ["'''TestNode''' <nowiki> [This is a simple test node]</nowiki>\n",
-                  " *TestNode2",
-                  " **TestNode3",
-                  " *TestNode5"
-                  ]
+    test_nodes = [
+        "'''TestNode''' <nowiki> [This is a simple test node]</nowiki>\n",
+        " *TestNode2",
+        " **TestNode3",
+        " *TestNode5",
+    ]
 
     return _get_test_schema(test_nodes)
 
 
 def load_schema_intensity():
-    test_nodes = ["'''IntensityTakesValue'''",
-                  " * # {unitClass=intensityUnits}"]
+    test_nodes = ["'''IntensityTakesValue'''", " * # {unitClass=intensityUnits}"]
     return _get_test_schema(test_nodes)

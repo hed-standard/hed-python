@@ -10,6 +10,7 @@ from hed.errors.error_reporter import ErrorHandler
 
 class HedIDValidator:
     """Support class to validate hedIds in schemas"""
+
     def __init__(self, hed_schema):
         """Support class to validate hedIds in schemas
 
@@ -43,8 +44,9 @@ class HedIDValidator:
                 self.library_data[""] = get_library_data("")
 
         if prev_versions:
-            self._previous_schemas = {library: load_schema_version(full_version) for library, full_version in
-                                      prev_versions.items()}
+            self._previous_schemas = {
+                library: load_schema_version(full_version) for library, full_version in prev_versions.items()
+            }
 
     @staticmethod
     def _get_previous_version(version, library):
@@ -100,14 +102,20 @@ class HedIDValidator:
 
         issues = []
         if old_id and old_id != new_id:
-            issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, tag_entry.name, new_id,
-                                                old_id=old_id)
+            issues += ErrorHandler.format_error(
+                SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, tag_entry.name, new_id, old_id=old_id
+            )
 
         library_data = self.library_data.get(tag_library)
         if library_data and new_id is not None:
             starting_id, ending_id = library_data["id_range"]
             if new_id < starting_id or new_id > ending_id:
-                issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, tag_entry.name,
-                                                    new_id, valid_min=starting_id, valid_max=ending_id)
+                issues += ErrorHandler.format_error(
+                    SchemaAttributeErrors.SCHEMA_HED_ID_INVALID,
+                    tag_entry.name,
+                    new_id,
+                    valid_min=starting_id,
+                    valid_max=ending_id,
+                )
 
         return issues

@@ -1,4 +1,4 @@
-""" Utilities for writing content to files and for other file manipulation."""
+"""Utilities for writing content to files and for other file manipulation."""
 
 import tempfile
 import os
@@ -30,7 +30,7 @@ def get_api_key():
 
 
 def make_url_request(resource_url, try_authenticate=True):
-    """ Make a request and adds the above GitHub access credentials.
+    """Make a request and adds the above GitHub access credentials.
 
     Parameters:
         resource_url (str): The url to retrieve.
@@ -42,12 +42,12 @@ def make_url_request(resource_url, try_authenticate=True):
     """
     request = urllib.request.Request(resource_url)
     if try_authenticate and get_api_key():
-        request.add_header('Authorization', 'token %s' % get_api_key())
+        request.add_header("Authorization", "token %s" % get_api_key())
     return urllib.request.urlopen(request)
 
 
 def url_to_file(resource_url):
-    """ Write data from a URL resource into a file. Data is decoded as unicode.
+    """Write data from a URL resource into a file. Data is decoded as unicode.
 
     Parameters:
         resource_url (str): The URL to the resource.
@@ -57,14 +57,14 @@ def url_to_file(resource_url):
     """
     url_request = make_url_request(resource_url)
     suffix = os.path.splitext(resource_url)[1]
-    url_data = str(url_request.read(), 'utf-8')
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False, mode='w', encoding='utf-8') as opened_file:
+    url_data = str(url_request.read(), "utf-8")
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False, mode="w", encoding="utf-8") as opened_file:
         opened_file.write(url_data)
         return opened_file.name
 
 
 def url_to_string(resource_url):
-    """ Get the data from the specified url as a string.
+    """Get the data from the specified url as a string.
 
     Parameters:
         resource_url (str): The URL to the resource.
@@ -73,12 +73,12 @@ def url_to_string(resource_url):
         str: The data at the target url.
     """
     url_request = make_url_request(resource_url)
-    url_data = str(url_request.read(), 'utf-8')
+    url_data = str(url_request.read(), "utf-8")
     return url_data
 
 
 def xml_element_2_str(elem):
-    """ Convert an XML element to an XML string.
+    """Convert an XML element to an XML string.
 
     Parameters:
         elem (Element):  An XML element.
@@ -87,13 +87,13 @@ def xml_element_2_str(elem):
         str: An XML string representing the XML element.
 
     """
-    rough_string = ElementTree.tostring(elem, method='xml')
+    rough_string = ElementTree.tostring(elem, method="xml")
     parsed = minidom.parseString(rough_string)
     return parsed.toprettyxml(indent="   ")
 
 
 def schema_version_greater_equal(hed_schema, target_version):
-    """ Check if the given schema standard version is above target version
+    """Check if the given schema standard version is above target version
 
     Parameters:
         hed_schema (HedSchema or HedSchemaGroup): If a schema group, checks if any version is above.
@@ -119,12 +119,9 @@ def schema_version_greater_equal(hed_schema, target_version):
     return False
 
 
-def format_error(row_number, row, warning_message="Schema term is empty or the line is malformed",
-                 error_code=HedExceptions.GENERIC_ERROR):
-    error = {'code': error_code,
-             ErrorContext.ROW: row_number,
-             ErrorContext.LINE: str(row),
-             "message": f"{warning_message}"
-             }
+def format_error(
+    row_number, row, warning_message="Schema term is empty or the line is malformed", error_code=HedExceptions.GENERIC_ERROR
+):
+    error = {"code": error_code, ErrorContext.ROW: row_number, ErrorContext.LINE: str(row), "message": f"{warning_message}"}
 
     return [error]

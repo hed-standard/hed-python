@@ -3,7 +3,7 @@
 import re
 
 # Might need separate version again for wiki
-header_attr_expression = "([^ ,]+?)=\"(.*?)\""
+header_attr_expression = '([^ ,]+?)="(.*?)"'
 attr_re = re.compile(header_attr_expression)
 
 
@@ -32,7 +32,7 @@ def _parse_header_attributes_line(version_line):
 
 def _validate_attribute_string(attribute_string):
     """Raises ValueError on bad input"""
-    pattern = r'^[A-Za-z]+(=.+)?$'
+    pattern = r"^[A-Za-z]+(=.+)?$"
     match = re.fullmatch(pattern, attribute_string)
     if match:
         return match.group()
@@ -40,7 +40,7 @@ def _validate_attribute_string(attribute_string):
 
 
 def parse_attribute_string(attr_string):
-    """ Parse attributes for a single element into a dict.
+    """Parse attributes for a single element into a dict.
 
     Parameters:
         attr_string(str): Formatted attributes (a=b, c=d, etc.)
@@ -52,7 +52,7 @@ def parse_attribute_string(attr_string):
         ValueError: Very malformed input.
     """
     if attr_string:
-        attributes_split = [x.strip() for x in attr_string.split(',')]
+        attributes_split = [x.strip() for x in attr_string.split(",")]
 
         final_attributes = {}
         for attribute in attributes_split:

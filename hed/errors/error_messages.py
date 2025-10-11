@@ -4,11 +4,19 @@ Add new errors here, or any other file imported after error_reporter.py.
 """
 
 from hed.errors.error_reporter import hed_error, hed_tag_error
-from hed.errors.error_types import (ValidationErrors, SidecarErrors, ErrorSeverity, DefinitionErrors,
-                                    TemporalErrors, ColumnErrors, TagQualityErrors)
+from hed.errors.error_types import (
+    ValidationErrors,
+    SidecarErrors,
+    ErrorSeverity,
+    DefinitionErrors,
+    TemporalErrors,
+    ColumnErrors,
+    TagQualityErrors,
+)
+
 
 def get_tag_list_str(tag_list):
-    """ Return a string representation of a list of tags.
+    """Return a string representation of a list of tags.
 
     Parameters:
         tag_list (list): A list of tags to convert to a string.
@@ -16,12 +24,12 @@ def get_tag_list_str(tag_list):
     Returns:
         str: A string representation of the list of tags.
     """
-    return "[" + ', '.join([str(tag) for tag in tag_list]) + "]"
+    return "[" + ", ".join([str(tag) for tag in tag_list]) + "]"
 
 
 @hed_tag_error(ValidationErrors.UNITS_INVALID)
 def val_error_invalid_unit(tag, units):
-    units_string = ','.join(sorted(units))
+    units_string = ",".join(sorted(units))
     return f'Invalid unit - "{tag}" valid units are "{units_string}"'
 
 
@@ -57,20 +65,19 @@ def val_error_element_deprecated(tag):
     return f"Element '{tag}' has been deprecated and an alternative method of tagging should be used"
 
 
-@hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True,
-               actual_code=ValidationErrors.CHARACTER_INVALID)
+@hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True, actual_code=ValidationErrors.CHARACTER_INVALID)
 def val_error_invalid_tag_character(tag, problem_tag):
     return f"Invalid character '{problem_tag}' in tag '{tag}'"
 
 
-@hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, has_sub_tag=False,
-               actual_code=ValidationErrors.CHARACTER_INVALID)
+@hed_tag_error(
+    ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, has_sub_tag=False, actual_code=ValidationErrors.CHARACTER_INVALID
+)
 def val_error_val_error_invalid_value_class_character(tag, problem_tag, value_class):
     return f"Invalid character '{problem_tag}' in tag '{tag}' for value class '{value_class}'"
 
 
-@hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, has_sub_tag=True,
-               actual_code=ValidationErrors.VALUE_INVALID)
+@hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, has_sub_tag=True, actual_code=ValidationErrors.VALUE_INVALID)
 def val_error_invalid_value_class_value(tag, problem_tag, value_class):
     return f"'{tag}' has an invalid value portion for value class '{value_class}'"
 
@@ -81,17 +88,21 @@ def val_error_tildes_not_supported(source_string, char_index):
     return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'"
 
 
-@hed_tag_error(ValidationErrors.HED_PLACEHOLDER_OUT_OF_CONTEXT, has_sub_tag=False,
-               actual_code=ValidationErrors.PLACEHOLDER_INVALID)
+@hed_tag_error(
+    ValidationErrors.HED_PLACEHOLDER_OUT_OF_CONTEXT, has_sub_tag=False, actual_code=ValidationErrors.PLACEHOLDER_INVALID
+)
 def val_error_hed_placeholder_out_of_context(tag):
     return f"'{tag}' has a '#' placeholder where it is not allowed or where it should have been replaced with a value."
 
 
-@hed_tag_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, has_sub_tag=False,
-               actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
+@hed_tag_error(
+    ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, has_sub_tag=False, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID
+)
 def val_error_curly_brace_unsupported_here(tag, problem_tag):
-    return (f"Curly braces are only permitted in metadata (e.g., a BIDS sidecar or NWB MeaningsTable) and must contain a column name.  "
-            f"Invalid character '{problem_tag}' in tag '{tag}'")
+    return (
+        f"Curly braces are only permitted in metadata (e.g., a BIDS sidecar or NWB MeaningsTable) and must contain a column name.  "
+        f"Invalid character '{problem_tag}' in tag '{tag}'"
+    )
 
 
 @hed_error(ValidationErrors.ONSETS_UNORDERED, default_severity=ErrorSeverity.WARNING)
@@ -121,15 +132,19 @@ def val_error_duplicate_reserved_tag(tag, group):
 
 @hed_error(ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR, actual_code=ValidationErrors.TAG_GROUP_ERROR)
 def val_error_group_for_reserved_tag(group, group_count, tag_list):
-    return (f'The number of non-def-expand subgroups for group "{group}" is {group_count}, "'
-            f'which does not meet reserved tags {get_tag_list_str(tag_list)} requirements."')
+    return (
+        f'The number of non-def-expand subgroups for group "{group}" is {group_count}, "'
+        f'which does not meet reserved tags {get_tag_list_str(tag_list)} requirements."'
+    )
 
 
 @hed_error(ValidationErrors.PARENTHESES_MISMATCH)
 def val_error_parentheses(opening_parentheses_count, closing_parentheses_count):
-    return f'Number of opening and closing parentheses are unequal. '\
-           f'{opening_parentheses_count} opening parentheses. {closing_parentheses_count} '\
-           'closing parentheses'
+    return (
+        f"Number of opening and closing parentheses are unequal. "
+        f"{opening_parentheses_count} opening parentheses. {closing_parentheses_count} "
+        "closing parentheses"
+    )
 
 
 @hed_tag_error(ValidationErrors.TAG_REQUIRES_CHILD)
@@ -152,8 +167,7 @@ def val_error_invalid_extension(tag):
     return f'Invalid extension on tag - "{tag}"'
 
 
-@hed_tag_error(ValidationErrors.INVALID_PARENT_NODE, has_sub_tag=True,
-               actual_code=ValidationErrors.TAG_EXTENSION_INVALID)
+@hed_tag_error(ValidationErrors.INVALID_PARENT_NODE, has_sub_tag=True, actual_code=ValidationErrors.TAG_EXTENSION_INVALID)
 def val_error_invalid_parent(tag, problem_tag, expected_parent_tag):
     return f"In '{tag}', '{problem_tag}' appears as '{str(expected_parent_tag)}' and cannot be used as an extension."
 
@@ -164,7 +178,7 @@ def val_error_no_valid_tag(tag, problem_tag):
 
 
 @hed_tag_error(ValidationErrors.VALUE_INVALID)
-def val_error_no_value(tag, value_class=''):
+def val_error_no_value(tag, value_class=""):
     if value_class:
         return f"'{tag}' has an invalid value portion because it is not a valid '{value_class}' value."
     else:
@@ -178,14 +192,12 @@ def val_error_missing_column(column_name, column_type):
 
 @hed_error(ValidationErrors.HED_UNKNOWN_COLUMN, default_severity=ErrorSeverity.WARNING)
 def val_error_extra_column(column_name):
-    return f"Column named '{column_name}' found in file, but not specified as a tag column " + \
-        "or identified in sidecars."
+    return f"Column named '{column_name}' found in file, but not specified as a tag column " + "or identified in sidecars."
 
 
 @hed_error(ValidationErrors.SIDECAR_AND_OTHER_COLUMNS)
 def val_error_sidecar_with_column(column_names):
-    return f"You cannot use a column name in curly braces and to designate a tag column. " \
-            f"Found {column_names}."
+    return f"You cannot use a column name in curly braces and to designate a tag column. " f"Found {column_names}."
 
 
 @hed_error(ValidationErrors.DUPLICATE_COLUMN_IN_LIST)
@@ -199,11 +211,12 @@ def val_error_duplicate_column(column_number, column_name, list_name):
 @hed_error(ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
 def val_error_duplicate_column_between_sources(column_number, column_name, list_names):
     if column_name:
-        return f"Found column '{column_name}' at index {column_number} in the following inputs: {list_names}. " \
-               f"Each entry must be unique."
+        return (
+            f"Found column '{column_name}' at index {column_number} in the following inputs: {list_names}. "
+            f"Each entry must be unique."
+        )
     else:
-        return f"Found column number {column_number} in the following inputs: {list_names}. " \
-               f"Each entry must be unique."
+        return f"Found column number {column_number} in the following inputs: {list_names}. " f"Each entry must be unique."
 
 
 @hed_error(ValidationErrors.HED_BLANK_COLUMN, default_severity=ErrorSeverity.WARNING)
@@ -226,16 +239,21 @@ def val_error_sidecar_key_missing(invalid_keys, category_keys, column_name):
     return f"Category values {invalid_keys} do not exist in metadata (e.g., BIDS sidecar or NWB meanings) for column '{column_name}'.  Valid keys are: {category_keys}"
 
 
-@hed_error(ValidationErrors.TSV_COLUMN_MISSING, actual_code=ValidationErrors.SIDECAR_KEY_MISSING,
-           default_severity=ErrorSeverity.WARNING)
+@hed_error(
+    ValidationErrors.TSV_COLUMN_MISSING,
+    actual_code=ValidationErrors.SIDECAR_KEY_MISSING,
+    default_severity=ErrorSeverity.WARNING,
+)
 def val_error_tsv_column_missing(invalid_keys):
     return f"{invalid_keys} used as column references in metadata (e.g., BIDS sidecar or NWB meanings) but are not columns in the tabular file"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_INVALID, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_bad_def_expand(tag, actual_def, found_def):
-    return f"A data-recording's Def-expand tag does not match the given definition." \
-           f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}"
+    return (
+        f"A data-recording's Def-expand tag does not match the given definition."
+        f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}"
+    )
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_UNMATCHED, actual_code=ValidationErrors.DEF_INVALID)
@@ -281,8 +299,9 @@ def val_error_tag_group_tag(tag):
 @hed_tag_error(ValidationErrors.HED_MULTIPLE_TOP_TAGS, actual_code=ValidationErrors.TAG_GROUP_ERROR)
 def val_error_top_level_tags(tag, multiple_tags):
     tags_as_string = [str(tag) for tag in multiple_tags]
-    return f"Multiple top level tags found in a single group.  First one found: {str(tag)}. " + \
-           f"Remainder:{str(tags_as_string)}"
+    return (
+        f"Multiple top level tags found in a single group.  First one found: {str(tag)}. " + f"Remainder:{str(tags_as_string)}"
+    )
 
 
 @hed_tag_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, actual_code=ValidationErrors.TAG_GROUP_ERROR)
@@ -322,8 +341,10 @@ def sidecar_error_too_many_pound_signs(pound_sign_count):
 
 @hed_error(SidecarErrors.UNKNOWN_COLUMN_TYPE)
 def sidecar_error_unknown_column(column_name):
-    return f"Could not automatically identify column '{column_name}' type from file. "\
-           "Most likely the column definition in question needs a # sign to replace a number somewhere."
+    return (
+        f"Could not automatically identify column '{column_name}' type from file. "
+        "Most likely the column definition in question needs a # sign to replace a number somewhere."
+    )
 
 
 @hed_error(SidecarErrors.SIDECAR_HED_USED, actual_code=ValidationErrors.SIDECAR_INVALID)
@@ -338,8 +359,10 @@ def sidecar_na_used(column_name):
 
 @hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_def_tag_in_definition(tag, def_name):
-    return f"Invalid tag {tag} found in definition for {def_name}. " \
-           f"Def, Def-expand, and Definition tags cannot be in definitions."
+    return (
+        f"Invalid tag {tag} found in definition for {def_name}. "
+        f"Def, Def-expand, and Definition tags cannot be in definitions."
+    )
 
 
 @hed_error(DefinitionErrors.NO_DEFINITION_CONTENTS, actual_code=ValidationErrors.DEFINITION_INVALID)
@@ -360,8 +383,10 @@ def def_error_wrong_number_tags(def_name, tag_list):
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_wrong_placeholder_count(def_name, expected_count, tag_list):
-    return f"Incorrect number placeholders or placeholder tags found in definition for {def_name}.  " + \
-           f"Expected {expected_count}, found:  {get_tag_list_str(tag_list)}"
+    return (
+        f"Incorrect number placeholders or placeholder tags found in definition for {def_name}.  "
+        + f"Expected {expected_count}, found:  {get_tag_list_str(tag_list)}"
+    )
 
 
 @hed_error(DefinitionErrors.DUPLICATE_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
@@ -423,21 +448,27 @@ def onset_too_many_defs(tag, tag_list):
 @hed_tag_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_too_many_groups(tag, tag_list):
     tag_list_strings = [str(a_tag) for a_tag in tag_list]
-    return f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1. " \
-           f"Found {len(tag_list_strings)}: {tag_list_strings}"
+    return (
+        f"An onset tag should have at most 2 sibling nodes, an offset tag should have 1. "
+        f"Found {len(tag_list_strings)}: {tag_list_strings}"
+    )
 
 
 @hed_tag_error(TemporalErrors.DURATION_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_duration_wrong_number_groups(tag, tag_list):
     tag_list_strings = [str(a_tag) for a_tag in tag_list]
-    return f"A duration and/or delay tag '{tag}'should have exactly one child group." \
-           f"Found {len(tag_list_strings)}: {tag_list_strings}"
+    return (
+        f"A duration and/or delay tag '{tag}'should have exactly one child group."
+        f"Found {len(tag_list_strings)}: {tag_list_strings}"
+    )
 
 
 @hed_tag_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_wrong_type_tag(tag, def_tag):
-    return f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be " \
-           f"in a single group together."
+    return (
+        f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be "
+        f"in a single group together."
+    )
 
 
 @hed_tag_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
@@ -464,8 +495,10 @@ def self_column_ref(self_ref):
 
 @hed_error(ColumnErrors.NESTED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def nested_column_ref(column_name, ref_column):
-    return f"Column {column_name} has a nested reference to {ref_column}.  " \
-           f"Column reference columns cannot contain other column references."
+    return (
+        f"Column {column_name} has a nested reference to {ref_column}.  "
+        f"Column reference columns cannot contain other column references."
+    )
 
 
 @hed_error(ColumnErrors.MALFORMED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
@@ -473,40 +506,62 @@ def malformed_column_ref(column_name, index, symbol):
     return f"Column {column_name} has a malformed column reference.  Improper symbol {symbol} found at index {index}."
 
 
-@hed_error(TagQualityErrors.MISSING_EVENT_TYPE, default_severity=ErrorSeverity.WARNING,
-           actual_code=TagQualityErrors.MISSING_EVENT_TYPE)
+@hed_error(
+    TagQualityErrors.MISSING_EVENT_TYPE,
+    default_severity=ErrorSeverity.WARNING,
+    actual_code=TagQualityErrors.MISSING_EVENT_TYPE,
+)
 def missing_event_type(string, line):
     return f"The HED string '{string}' at line {line} has no Event type."
 
 
-@hed_error(TagQualityErrors.IMPROPER_EVENT_GROUPS, default_severity=ErrorSeverity.WARNING,
-           actual_code=TagQualityErrors.IMPROPER_EVENT_GROUPS)
+@hed_error(
+    TagQualityErrors.IMPROPER_EVENT_GROUPS,
+    default_severity=ErrorSeverity.WARNING,
+    actual_code=TagQualityErrors.IMPROPER_EVENT_GROUPS,
+)
 def improper_event_groups(event_types, string, line):
-    return f"The HED string '{string}' at line {line} has multiple events [{event_types}] but is improperly " + \
-    "parenthesized so the other tags cannot be uniquely associated with an event."
+    return (
+        f"The HED string '{string}' at line {line} has multiple events [{event_types}] but is improperly "
+        + "parenthesized so the other tags cannot be uniquely associated with an event."
+    )
 
 
-@hed_error(TagQualityErrors.MISSING_TASK_ROLE, default_severity=ErrorSeverity.WARNING,
-           actual_code=TagQualityErrors.MISSING_TASK_ROLE)
+@hed_error(
+    TagQualityErrors.MISSING_TASK_ROLE, default_severity=ErrorSeverity.WARNING, actual_code=TagQualityErrors.MISSING_TASK_ROLE
+)
 def missing_task_role(event_type, string, line):
     return f"The HED string '{string}' at line {line} with event {event_type} has no Task-event-role type tag."
 
 
-@hed_error(TagQualityErrors.AMBIGUOUS_TAG_GROUPING, default_severity=ErrorSeverity.WARNING,
-           actual_code=TagQualityErrors.AMBIGUOUS_TAG_GROUPING)
+@hed_error(
+    TagQualityErrors.AMBIGUOUS_TAG_GROUPING,
+    default_severity=ErrorSeverity.WARNING,
+    actual_code=TagQualityErrors.AMBIGUOUS_TAG_GROUPING,
+)
 def ambiguous_tag_grouping(tag_list, string, line):
     return f"The HED string '{string}' at line {line} has ambiguously grouped tags {get_tag_list_str(tag_list)}and needs parentheses."
 
 
-@hed_error(TagQualityErrors.MISSING_SENSORY_PRESENTATION, default_severity=ErrorSeverity.WARNING,
-           actual_code=TagQualityErrors.MISSING_SENSORY_PRESENTATION)
+@hed_error(
+    TagQualityErrors.MISSING_SENSORY_PRESENTATION,
+    default_severity=ErrorSeverity.WARNING,
+    actual_code=TagQualityErrors.MISSING_SENSORY_PRESENTATION,
+)
 def missing_sensory_presentation(string, line):
-    return f"The HED string '{string}' at line {line} is a Sensory-event but does not have a sensory presentation " + \
-    "modality tag such as Visual-presentation or Auditory-presentation."
+    return (
+        f"The HED string '{string}' at line {line} is a Sensory-event but does not have a sensory presentation "
+        + "modality tag such as Visual-presentation or Auditory-presentation."
+    )
 
 
-@hed_error(TagQualityErrors.MISSING_ACTION_TAG, default_severity=ErrorSeverity.WARNING,
-           actual_code=TagQualityErrors.MISSING_ACTION_TAG)
+@hed_error(
+    TagQualityErrors.MISSING_ACTION_TAG,
+    default_severity=ErrorSeverity.WARNING,
+    actual_code=TagQualityErrors.MISSING_ACTION_TAG,
+)
 def missing_action_tag(string, line):
-    return f"The HED string '{string}' at line {line} is an Agent-action event but does not any Action tags " + \
-    "such as Move or Perform."
+    return (
+        f"The HED string '{string}' at line {line} is an Agent-action event but does not any Action tags "
+        + "such as Move or Perform."
+    )

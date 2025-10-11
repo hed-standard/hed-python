@@ -1,4 +1,5 @@
-""" Utilities to support HED validation. """
+"""Utilities to support HED validation."""
+
 import datetime
 import re
 
@@ -8,16 +9,17 @@ from hed.validator.util.char_util import CharRexValidator
 
 
 class UnitValueValidator:
-    """ Validates units. """
-    DATE_TIME_VALUE_CLASS = 'dateTimeClass'
+    """Validates units."""
+
+    DATE_TIME_VALUE_CLASS = "dateTimeClass"
     NUMERIC_VALUE_CLASS = "numericClass"
     TEXT_VALUE_CLASS = "textClass"
     NAME_VALUE_CLASS = "nameClass"
 
-    DIGIT_OR_POUND_EXPRESSION = r'^(-?[\d.]+(?:e-?\d+)?|#)$'
+    DIGIT_OR_POUND_EXPRESSION = r"^(-?[\d.]+(?:e-?\d+)?|#)$"
 
     def __init__(self, modern_allowed_char_rules=False, value_validators=None):
-        """ Validates the unit and value classes on a given tag.
+        """Validates the unit and value classes on a given tag.
 
         Parameters:
             value_validators(dict or None): Override or add value class validators
@@ -31,7 +33,7 @@ class UnitValueValidator:
             self._value_validators.update(value_validators)
 
     def _get_default_value_class_validators(self):
-        """ Return a dictionary of value class validator functions.
+        """Return a dictionary of value class validator functions.
 
         Returns:
             dict:  Dictionary of value class validator functions.
@@ -41,13 +43,13 @@ class UnitValueValidator:
             self.DATE_TIME_VALUE_CLASS: is_date_time_value_class,
             self.NUMERIC_VALUE_CLASS: is_numeric_value_class,
             self.TEXT_VALUE_CLASS: is_text_value_class,
-            self.NAME_VALUE_CLASS: is_name_value_class
+            self.NAME_VALUE_CLASS: is_name_value_class,
         }
 
         return validator_dict
 
     def check_tag_unit_class_units_are_valid(self, original_tag, validate_text, report_as=None, error_code=None) -> list[dict]:
-        """ Report incorrect unit class or units.
+        """Report incorrect unit class or units.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
@@ -73,15 +75,15 @@ class UnitValueValidator:
                 return validation_issues
 
             # We don't want to give this overall error twice
-            if error_code and validation_issues and not any(error_code == issue['code'] for issue in validation_issues):
+            if error_code and validation_issues and not any(error_code == issue["code"] for issue in validation_issues):
                 new_issue = validation_issues[0].copy()
-                new_issue['code'] = error_code
+                new_issue["code"] = error_code
                 validation_issues += [new_issue]
 
         return validation_issues
 
     def check_tag_value_class_valid(self, original_tag, validate_text, report_as=None) -> list[dict]:
-        """ Report an invalid value portion.
+        """Report an invalid value portion.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
@@ -102,7 +104,7 @@ class UnitValueValidator:
         # allowed_characters = schema_validation_util.get_allowed_characters(original_tag.value_classes.values())
 
     def _check_value_class(self, original_tag, stripped_value, report_as):
-        """ Return any issues found if this is a value tag,
+        """Return any issues found if this is a value tag,
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
@@ -143,9 +145,13 @@ class UnitValueValidator:
             if not errors and class_valid[class_name]:
                 continue
             elif not class_valid[class_name]:
-                validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE,
-                                                               index_in_tag=0, index_in_tag_end=len(report_as.org_tag),
-                                                               value_class=class_name, tag=report_as)
+                validation_issues += ErrorHandler.format_error(
+                    ValidationErrors.INVALID_VALUE_CLASS_VALUE,
+                    index_in_tag=0,
+                    index_in_tag_end=len(report_as.org_tag),
+                    value_class=class_name,
+                    tag=report_as,
+                )
             elif errors:
                 validation_issues.extend(UnitValueValidator.report_value_char_errors(class_name, errors, report_as))
         return validation_issues
@@ -155,12 +161,13 @@ class UnitValueValidator:
         validation_issues = []
         for value in errors:
             if value[0] in "{}":
-                validation_issues += ErrorHandler.format_error(ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE,
-                                                               tag=report_as, problem_tag=value[0])
+                validation_issues += ErrorHandler.format_error(
+                    ValidationErrors.CURLY_BRACE_UNSUPPORTED_HERE, tag=report_as, problem_tag=value[0]
+                )
             else:
-                validation_issues += ErrorHandler.format_error(ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
-                                                               tag=report_as, value_class=class_name,
-                                                               problem_tag=value[0])
+                validation_issues += ErrorHandler.format_error(
+                    ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, tag=report_as, value_class=class_name, problem_tag=value[0]
+                )
         return validation_issues
 
     @staticmethod
@@ -187,7 +194,7 @@ class UnitValueValidator:
         return self.validate_value_class_type(portion_to_validate, value_class_types)
 
     def validate_value_class_type(self, unit_or_value_portion, valid_types) -> bool:
-        """ Report invalid unit or valid class values.
+        """Report invalid unit or valid class values.
 
         Parameters:
             unit_or_value_portion (str): The value portion to validate.
@@ -241,7 +248,7 @@ def is_date_time_value_class(date_time_string) -> bool:
 
 
 def is_name_value_class(name_str) -> bool:
-    pattern = r'^[\w\-\u0080-\uFFFF]+$'
+    pattern = r"^[\w\-\u0080-\uFFFF]+$"
     if re.fullmatch(pattern, name_str):
         return True
     else:
@@ -249,7 +256,7 @@ def is_name_value_class(name_str) -> bool:
 
 
 def is_numeric_value_class(numeric_string) -> bool:
-    """ Check to see if valid numeric value.
+    """Check to see if valid numeric value.
 
     Parameters:
         numeric_string (str): A string that should be only a number with no units.
@@ -265,7 +272,7 @@ def is_numeric_value_class(numeric_string) -> bool:
 
 
 def is_text_value_class(text_string) -> bool:
-    """ Placeholder for eventual text value class validation.
+    """Placeholder for eventual text value class validation.
 
     Parameters:
         text_string (str): Text class.
@@ -278,7 +285,7 @@ def is_text_value_class(text_string) -> bool:
 
 
 def is_clock_face_time(time_string) -> bool:
-    """ Check if a valid HH:MM time string.
+    """Check if a valid HH:MM time string.
 
     Parameters:
         time_string (str): A time string.

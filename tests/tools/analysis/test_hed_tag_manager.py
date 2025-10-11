@@ -15,52 +15,59 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.2.0")
         # Set up the definition dictionary
-        defs = [HedString('(Definition/Cond1, (Condition-variable/Var1, Circle, Square))', hed_schema=schema),
-                HedString('(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))',
-                          hed_schema=schema),
-                HedString('(Definition/Cond3/#, (Condition-variable/Var3, Label/#, Ellipse, Cross))',
-                          hed_schema=schema),
-                HedString('(Definition/Cond4, (Condition-variable, Apple, Banana))', hed_schema=schema),
-                HedString('(Definition/Cond5, (Condition-variable/Lumber, Apple, Banana))', hed_schema=schema),
-                HedString('(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Apple, Banana))',
-                          hed_schema=schema)]
+        defs = [
+            HedString("(Definition/Cond1, (Condition-variable/Var1, Circle, Square))", hed_schema=schema),
+            HedString(
+                "(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))", hed_schema=schema
+            ),
+            HedString("(Definition/Cond3/#, (Condition-variable/Var3, Label/#, Ellipse, Cross))", hed_schema=schema),
+            HedString("(Definition/Cond4, (Condition-variable, Apple, Banana))", hed_schema=schema),
+            HedString("(Definition/Cond5, (Condition-variable/Lumber, Apple, Banana))", hed_schema=schema),
+            HedString("(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Apple, Banana))", hed_schema=schema),
+        ]
         def_dict = DefinitionDict()
         for value in defs:
             def_dict.check_for_definitions(value)
 
-        test_strings1 = ["Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset)",
-                         "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4",
-                         "(Def/Cond1, Offset)",
-                         "White, Black, Condition-variable/Wonder, Condition-variable/Fast",
-                         "",
-                         "(Def/Cond2, Onset)",
-                         "(Def/Cond3/4.3, Onset)",
-                         "Arm, Leg, Condition-variable/Fast"]
+        test_strings1 = [
+            "Sensory-event,(Def/Cond1,(Red, Blue, Condition-variable/Trouble),Onset)",
+            "(Def/Cond2,Onset),Green,Yellow, Def/Cond5, Def/Cond6/4",
+            "(Def/Cond1, Offset)",
+            "White, Black, Condition-variable/Wonder, Condition-variable/Fast",
+            "",
+            "(Def/Cond2, Onset)",
+            "(Def/Cond3/4.3, Onset)",
+            "Arm, Leg, Condition-variable/Fast",
+        ]
         test_onsets1 = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
-        df1 = DataFrame(test_onsets1, columns=['onset'])
-        df1['HED'] = test_strings1
+        df1 = DataFrame(test_onsets1, columns=["onset"])
+        df1["HED"] = test_strings1
         input_data1 = TabularInput(df1)
         cls.event_man1 = EventManager(input_data1, schema, extra_defs=def_dict)
-        test_strings2 = ["Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
-                         "Yellow",
-                         "Def/Cond2, (Def/Cond6/4, Onset)",
-                         "Def/Cond2, Def/Cond6/5.2 (Def/Cond6/7.8, Offset)",
-                         "Def/Cond2, Def/Cond6/4"]
+        test_strings2 = [
+            "Def/Cond2, (Def/Cond6/4, Onset), (Def/Cond6/7.8, Onset), Def/Cond6/Alpha",
+            "Yellow",
+            "Def/Cond2, (Def/Cond6/4, Onset)",
+            "Def/Cond2, Def/Cond6/5.2 (Def/Cond6/7.8, Offset)",
+            "Def/Cond2, Def/Cond6/4",
+        ]
         test_onsets2 = [0.0, 1.0, 2.0, 3.0, 4.0]
-        df2 = DataFrame(test_onsets2, columns=['onset'])
-        df2['HED'] = test_strings2
+        df2 = DataFrame(test_onsets2, columns=["onset"])
+        df2["HED"] = test_strings2
         input_data2 = TabularInput(df2)
         cls.event_man2 = EventManager(input_data2, schema, extra_defs=def_dict)
-        test_strings3 = ['(Def/Cond3, Offset)']
+        test_strings3 = ["(Def/Cond3, Offset)"]
         test_onsets3 = [0.0]
-        df3 = DataFrame(test_onsets3, columns=['onset'])
-        df3['HED'] = test_strings3
+        df3 = DataFrame(test_onsets3, columns=["onset"])
+        df3["HED"] = test_strings3
         cls.input_data3 = TabularInput(df3)
-        bids_root_path = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../data/bids_tests/eeg_ds003645s_hed'))
-        events_path = os.path.realpath(os.path.join(bids_root_path,
-                                       'sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv'))
-        sidecar_path = os.path.realpath(os.path.join(bids_root_path, 'task-FacePerception_events.json'))
+        bids_root_path = os.path.realpath(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed")
+        )
+        events_path = os.path.realpath(
+            os.path.join(bids_root_path, "sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv")
+        )
+        sidecar_path = os.path.realpath(os.path.join(bids_root_path, "task-FacePerception_events.json"))
         cls.input_data = TabularInput(events_path, sidecar_path)
         cls.schema = schema
         cls.def_dict = def_dict
@@ -76,30 +83,30 @@ class Test(unittest.TestCase):
         tag_man1 = HedTagManager(EventManager(self.input_data, self.schema))
         self.assertIsInstance(tag_man1, HedTagManager)
         hed_objs1a = tag_man1.get_hed_objs(include_context=False, replace_defs=False)
-        self.assertNotIn('Event-context', str(hed_objs1a[1]))
-        self.assertIn('Def', str(hed_objs1a[1]))
-        self.assertNotIn('Condition-variable', str(hed_objs1a[1]))
+        self.assertNotIn("Event-context", str(hed_objs1a[1]))
+        self.assertIn("Def", str(hed_objs1a[1]))
+        self.assertNotIn("Condition-variable", str(hed_objs1a[1]))
         hed_objs1b = tag_man1.get_hed_objs(include_context=True, replace_defs=False)
-        self.assertIn('Event-context', str(hed_objs1b[1]))
-        self.assertIn('Def', str(hed_objs1b[1]))
-        self.assertNotIn('Condition-variable', str(hed_objs1b[1]))
+        self.assertIn("Event-context", str(hed_objs1b[1]))
+        self.assertIn("Def", str(hed_objs1b[1]))
+        self.assertNotIn("Condition-variable", str(hed_objs1b[1]))
         hed_objs1c = tag_man1.get_hed_objs(include_context=False, replace_defs=True)
-        self.assertNotIn('Event-context', str(hed_objs1c[1]))
-        self.assertNotIn('Def', str(hed_objs1c[1]))
-        self.assertIn('Condition-variable', str(hed_objs1c[1]))
+        self.assertNotIn("Event-context", str(hed_objs1c[1]))
+        self.assertNotIn("Def", str(hed_objs1c[1]))
+        self.assertIn("Condition-variable", str(hed_objs1c[1]))
         hed_objs1d = tag_man1.get_hed_objs(include_context=True, replace_defs=True)
-        self.assertIn('Event-context', str(hed_objs1d[1]))
-        self.assertNotIn('Def', str(hed_objs1d[1]))
-        self.assertIn('Condition-variable', str(hed_objs1d[1]))
-        tag_man2 = HedTagManager(event_man, remove_types=['Condition-variable', 'Task'])
+        self.assertIn("Event-context", str(hed_objs1d[1]))
+        self.assertNotIn("Def", str(hed_objs1d[1]))
+        self.assertIn("Condition-variable", str(hed_objs1d[1]))
+        tag_man2 = HedTagManager(event_man, remove_types=["Condition-variable", "Task"])
         hed_objs2a = tag_man2.get_hed_objs(include_context=False, replace_defs=False)
-        self.assertNotIn('Condition-variable', str(hed_objs2a[1]))
+        self.assertNotIn("Condition-variable", str(hed_objs2a[1]))
         hed_objs2b = tag_man2.get_hed_objs(include_context=True, replace_defs=False)
-        self.assertNotIn('Condition-variable', str(hed_objs2b[1]))
+        self.assertNotIn("Condition-variable", str(hed_objs2b[1]))
         hed_objs2c = tag_man2.get_hed_objs(include_context=False, replace_defs=True)
-        self.assertNotIn('Condition-variable', str(hed_objs2c[1]))
+        self.assertNotIn("Condition-variable", str(hed_objs2c[1]))
         hed_objs2d = tag_man2.get_hed_objs(include_context=True, replace_defs=True)
-        self.assertNotIn('Condition-variable', str(hed_objs2d[1]))
+        self.assertNotIn("Condition-variable", str(hed_objs2d[1]))
         self.assertIsInstance(tag_man2, HedTagManager)
         self.assertIsInstance(tag_man2, HedTagManager)
 
@@ -183,5 +190,5 @@ class Test(unittest.TestCase):
     #     self.assertEqual(len(list1), 5, "get_type_def_names list should have the right length")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

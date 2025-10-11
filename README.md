@@ -101,6 +101,37 @@ mkdocs build
 mkdocs serve
 ```
 
+### Code Formatting with Black
+
+This project uses [Black](https://black.readthedocs.io/) for consistent code formatting.
+
+```bash
+# Check if code is properly formatted (without making changes)
+black --check .
+
+# Check and show what would change
+black --check --diff .
+
+# Format all Python code in the repository
+black .
+
+# Format specific files or directories
+black hed/
+black tests/
+```
+
+**Windows Users:** If you encounter "I/O operation on closed file" errors, use the `--workers 1` flag:
+```bash
+black --workers 1 --check .
+black --workers 1 .
+```
+
+**Configuration:** Black settings are in `pyproject.toml` with a line length of 127 characters (matching our ruff configuration).
+
+**Exclusions:** Black automatically excludes `.venv/`, `__pycache__/`, auto-generated files (`hed/_version.py`), and external repos (`spec_tests/hed-examples/`, `spec_tests/hed-specification/`).
+
+**CI Integration:** All code is automatically checked for Black formatting in GitHub Actions. Run `black .` before committing to ensure your code passes CI checks.
+
 ## Related Repositories
 
 The HED ecosystem consists of several interconnected repositories:

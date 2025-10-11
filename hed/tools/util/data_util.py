@@ -1,12 +1,12 @@
-""" Data handling utilities involving dataframes. """
+"""Data handling utilities involving dataframes."""
 
 import pandas as pd
 import numpy as np
 from hed.errors.exceptions import HedFileError
 
 
-def add_columns(df, column_list, value='n/a'):
-    """ Add specified columns to df if not there.
+def add_columns(df, column_list, value="n/a"):
+    """Add specified columns to df if not there.
 
     Parameters:
         df (DataFrame):      Pandas dataframe.
@@ -21,7 +21,7 @@ def add_columns(df, column_list, value='n/a'):
 
 
 def check_match(ds1, ds2, numeric=False):
-    """ Check two Pandas data series have the same values.
+    """Check two Pandas data series have the same values.
 
     Parameters:
         ds1 (DataSeries):      Pandas data series to check.
@@ -36,8 +36,7 @@ def check_match(ds1, ds2, numeric=False):
     if len(ds1.index) != len(ds2.index):
         return f"First series has length {len(ds1.index)} and {len(ds2.index)} events"
     if numeric:
-        close_test = np.isclose(pd.to_numeric(ds1, errors='coerce'), pd.to_numeric(ds2, errors='coerce'),
-                                equal_nan=True)
+        close_test = np.isclose(pd.to_numeric(ds1, errors="coerce"), pd.to_numeric(ds2, errors="coerce"), equal_nan=True)
         if sum(np.logical_not(close_test)):
             return f"Series differ at positions {list(ds1.loc[np.logical_not(close_test)].index)}"
     else:
@@ -48,7 +47,7 @@ def check_match(ds1, ds2, numeric=False):
 
 
 def delete_columns(df, column_list):
-    """ Delete the specified columns from a dataframe.
+    """Delete the specified columns from a dataframe.
 
     Parameters:
         df (DataFrame):      Pandas dataframe from which to delete columns.
@@ -65,7 +64,7 @@ def delete_columns(df, column_list):
 
 
 def delete_rows_by_column(df, value, column_list=None):
-    """ Delete rows where columns have this value.
+    """Delete rows where columns have this value.
 
     Parameters:
         df (DataFrame):      Pandas dataframe from which to delete rows.
@@ -88,7 +87,7 @@ def delete_rows_by_column(df, value, column_list=None):
 
 
 def get_eligible_values(values, values_included):
-    """ Return a list of the items from values that are in values_included or None if no values_included.
+    """Return a list of the items from values that are in values_included or None if no values_included.
 
     Parameters:
         values (list): List of strings against which to test.
@@ -108,7 +107,7 @@ def get_eligible_values(values, values_included):
 
 
 def get_key_hash(key_tuple):
-    """ Calculate a hash key for tuple of values.
+    """Calculate a hash key for tuple of values.
 
     Parameters:
         key_tuple (tuple, list):  The key values in the correct order for lookup.
@@ -122,7 +121,7 @@ def get_key_hash(key_tuple):
 
 
 def get_new_dataframe(data):
-    """ Get a new dataframe representing a tsv file.
+    """Get a new dataframe representing a tsv file.
 
     Parameters:
         data (DataFrame or str):  DataFrame or filename representing a tsv file.
@@ -137,7 +136,7 @@ def get_new_dataframe(data):
     """
 
     if isinstance(data, str):
-        df = pd.read_csv(data, delimiter='\t', header=0, keep_default_na=True, na_values=[",", "null"])
+        df = pd.read_csv(data, delimiter="\t", header=0, keep_default_na=True, na_values=[",", "null"])
     elif isinstance(data, pd.DataFrame):
         df = data.copy()
     else:
@@ -146,7 +145,7 @@ def get_new_dataframe(data):
 
 
 def get_row_hash(row, key_list):
-    """ Get a hash key from key column values for row.
+    """Get a hash key from key column values for row.
 
     Parameters:
         row (DataSeries)   A Pandas data series corresponding to a row in a spreadsheet.
@@ -162,12 +161,12 @@ def get_row_hash(row, key_list):
     columns_present, columns_missing = separate_values(list(row.index.values), key_list)
     if columns_missing:
         raise HedFileError("lookup_row", f"row must have all keys, missing{str(columns_missing)}", "")
-    new_row = row[key_list].fillna('n/a').astype(str)
+    new_row = row[key_list].fillna("n/a").astype(str)
     return get_key_hash(new_row)
 
 
-def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate'):
-    """ Get a dictionary of two columns of a dataframe.
+def get_value_dict(tsv_path, key_col="file_basename", value_col="sampling_rate"):
+    """Get a dictionary of two columns of a dataframe.
 
     Parameters:
         tsv_path (str):   Path to a tsv file with a header row to be read into a DataFrame.
@@ -192,7 +191,7 @@ def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate')
 
 
 def make_info_dataframe(col_info, selected_col):
-    """ Get a dataframe from selected columns.
+    """Get a dataframe from selected columns.
 
     Parameters:
         col_info (dict):      Dictionary of dictionaries of column values and counts.
@@ -213,18 +212,18 @@ def make_info_dataframe(col_info, selected_col):
 
 
 def replace_na(df):
-    """ Replace (in place) the n/a with np.nan taking care of categorical columns.  """
+    """Replace (in place) the n/a with np.nan taking care of categorical columns."""
     for column in df.columns:
-        if df[column].dtype.name != 'category':
-            df[column] = df[column].replace('n/a', np.nan)
-        elif 'n/a' in df[column].cat.categories:
-            df[column] = df[column].astype('object')
-            df[column] = df[column].replace('n/a', np.nan)
+        if df[column].dtype.name != "category":
+            df[column] = df[column].replace("n/a", np.nan)
+        elif "n/a" in df[column].cat.categories:
+            df[column] = df[column].astype("object")
+            df[column] = df[column].replace("n/a", np.nan)
             df[column] = pd.Categorical(df[column])
 
 
-def replace_values(df, values=None, replace_value='n/a', column_list=None):
-    """ Replace string values in specified columns.
+def replace_values(df, values=None, replace_value="n/a", column_list=None):
+    """Replace string values in specified columns.
 
     Parameters:
         df (DataFrame):            Dataframe whose values will be replaced.
@@ -242,7 +241,7 @@ def replace_values(df, values=None, replace_value='n/a', column_list=None):
     else:
         cols = list(df)
     if not values:
-        values = ['']
+        values = [""]
     for col in cols:
         for value in values:
             value_mask = df[col].map(str) == str(value)
@@ -253,7 +252,7 @@ def replace_values(df, values=None, replace_value='n/a', column_list=None):
 
 
 def reorder_columns(data, col_order, skip_missing=True):
-    """ Create a new dataframe with columns reordered.
+    """Create a new dataframe with columns reordered.
 
     Parameters:
         data (DataFrame, str):      Dataframe or filename of dataframe whose columns are to be reordered.
@@ -277,7 +276,7 @@ def reorder_columns(data, col_order, skip_missing=True):
 
 
 def separate_values(values, target_values):
-    """ Get target values from the target_values list.
+    """Get target values from the target_values list.
 
     Parameters:
         values (list):          List of values to be tested.
@@ -292,7 +291,7 @@ def separate_values(values, target_values):
          - The function computes the set difference of target_cols and base_cols and returns a list
            of columns of target_cols that are in base_cols and a list of those missing.
 
-     """
+    """
 
     if not target_values:
         return [], []

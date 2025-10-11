@@ -1,6 +1,7 @@
 """
 This module is used to create a HedSchema object from a set of .tsv files.
 """
+
 import io
 
 from hed.schema.schema_io import df_util, load_dataframes
@@ -14,11 +15,11 @@ from hed.schema.schema_io import text_util
 
 
 class SchemaLoaderDF(SchemaLoader):
-    """ Load dataframe schemas from filenames
+    """Load dataframe schemas from filenames
 
-        Expected usage is SchemaLoaderDF.load(filenames)
+    Expected usage is SchemaLoaderDF.load(filenames)
 
-        Note: due to supporting multiple files, this one differs from the other schema loaders
+    Note: due to supporting multiple files, this one differs from the other schema loaders
     """
 
     def __init__(self, filenames, schema_as_strings_or_df, name=""):
@@ -33,7 +34,7 @@ class SchemaLoaderDF(SchemaLoader):
 
     @classmethod
     def load_spreadsheet(cls, filenames=None, schema_as_strings_or_df=None, name=""):
-        """ Loads and returns the schema, including partnered schema if applicable.
+        """Loads and returns the schema, including partnered schema if applicable.
 
         Parameters:
             filenames(str or None or dict of str): A valid set of schema spreadsheet filenames
@@ -56,8 +57,6 @@ class SchemaLoaderDF(SchemaLoader):
 
         return dataframes
 
-
-
     def _get_header_attributes(self, file_data):
         header_attributes = {}
         for _row_number, row in file_data[constants.STRUCT_KEY].iterrows():
@@ -72,8 +71,7 @@ class SchemaLoaderDF(SchemaLoader):
     def _parse_data(self):
         self._schema.prologue, self._schema.epilogue = self._get_prologue_epilogue(self.input_data)
         self._schema._initialize_attributes(HedSectionKey.Properties)
-        self._read_attribute_section(self.input_data[constants.ATTRIBUTE_PROPERTY_KEY],
-                                     section_key=HedSectionKey.Properties)
+        self._read_attribute_section(self.input_data[constants.ATTRIBUTE_PROPERTY_KEY], section_key=HedSectionKey.Properties)
         self._read_attributes()
         self._read_section(self.input_data[constants.UNIT_MODIFIER_KEY], HedSectionKey.UnitModifiers)
         self._read_section(self.input_data[constants.VALUE_CLASS_KEY], HedSectionKey.ValueClasses)
@@ -83,11 +81,14 @@ class SchemaLoaderDF(SchemaLoader):
         self._read_schema(self.input_data)
         if self.fatal_errors:
             self.fatal_errors = error_reporter.sort_issues(self.fatal_errors)
-            raise HedFileError(self.fatal_errors[0]['code'],
-                               f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
-                               f"parameter on this exception for more details.", self.name,
-                               issues=self.fatal_errors)
-        extras =  {key: self.input_data[key] for key in constants.DF_EXTRAS if key in self.input_data}
+            raise HedFileError(
+                self.fatal_errors[0]["code"],
+                f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
+                f"parameter on this exception for more details.",
+                self.name,
+                issues=self.fatal_errors,
+            )
+        extras = {key: self.input_data[key] for key in constants.DF_EXTRAS if key in self.input_data}
         for key, _item in extras.items():
             self._schema.extras[key] = df_util.merge_dataframes(extras[key], self._schema.extras.get(key, None), key)
 
@@ -143,8 +144,10 @@ class SchemaLoaderDF(SchemaLoader):
             if len(next_round_rows) == len(current_rows):
                 for row_number, row in current_rows:
                     tag_name = self._get_tag_name(row)
-                    msg = (f"Cannot resolve parent tag.  "
-                           f"There is probably an issue with circular parent tags of {tag_name} on row {row_number}.")
+                    msg = (
+                        f"Cannot resolve parent tag.  "
+                        f"There is probably an issue with circular parent tags of {tag_name} on row {row_number}."
+                    )
                     self._add_fatal_error(row_number, row, msg, HedExceptions.SCHEMA_TAG_TSV_BAD_PARENT)
                 break
             current_rows = next_round_rows
@@ -165,7 +168,7 @@ class SchemaLoaderDF(SchemaLoader):
         return tag_entry
 
     def _create_tag_entry(self, parent_tags, row_number, row):
-        """ Create a tag entry(does not add to dict)
+        """Create a tag entry(does not add to dict)
 
         Parameters:
             parent_tags (list): A list of parent tags in order.
@@ -186,8 +189,7 @@ class SchemaLoaderDF(SchemaLoader):
                 long_tag_name = tag_name
             return self._create_entry(row_number, row, HedSectionKey.Tags, long_tag_name)
 
-        self._add_fatal_error(row_number, row, "No tag name found in row.",
-                              error_code=HedExceptions.GENERIC_ERROR)
+        self._add_fatal_error(row_number, row, "No tag name found in row.", error_code=HedExceptions.GENERIC_ERROR)
 
     def _read_section(self, df, section_key):
         self._schema._initialize_attributes(section_key)
@@ -249,7 +251,7 @@ class SchemaLoaderDF(SchemaLoader):
         return tag_entry
 
     def _get_tag_attributes(self, row_number, row):
-        """ Get the tag attributes from a row.
+        """Get the tag attributes from a row.
 
         Parameters:
             row_number (int): The row number to report errors as.
@@ -265,15 +267,15 @@ class SchemaLoaderDF(SchemaLoader):
 
     def _add_to_dict(self, row_number, row, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
-            self._add_fatal_error(row_number, row,
-                                  "Library tag in unmerged schema has InLibrary attribute",
-                                  HedExceptions.IN_LIBRARY_IN_UNMERGED)
+            self._add_fatal_error(
+                row_number, row, "Library tag in unmerged schema has InLibrary attribute", HedExceptions.IN_LIBRARY_IN_UNMERGED
+            )
 
         return self._add_to_dict_base(entry, key_class)
 
 
 def load_dataframes_from_strings(schema_data):
-    """ Load the given strings/dataframes as dataframes.
+    """Load the given strings/dataframes as dataframes.
 
     Parameters:
         schema_data(dict): The dict of files(strings or pd.DataFrames) key being constants like TAG_KEY
@@ -282,6 +284,9 @@ def load_dataframes_from_strings(schema_data):
         dict: A dict with the same keys as schema_data, but values are dataframes if not before.
 
     """
-    return {key: value if isinstance(value, pd.DataFrame) else pd.read_csv(io.StringIO(value), sep="\t",
-                                                                           dtype=str, na_filter=False)
-            for key, value in schema_data.items()}
+    return {
+        key: (
+            value if isinstance(value, pd.DataFrame) else pd.read_csv(io.StringIO(value), sep="\t", dtype=str, na_filter=False)
+        )
+        for key, value in schema_data.items()
+    }

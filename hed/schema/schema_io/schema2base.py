@@ -1,4 +1,5 @@
 """Baseclass for mediawiki/xml writers"""
+
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 
@@ -14,7 +15,7 @@ class Schema2Base:
         self._schema = None
 
     def process_schema(self, hed_schema, save_merged=False):
-        """ Takes a HedSchema object and returns it in the inherited form(mediawiki, xml, etc)
+        """Takes a HedSchema object and returns it in the inherited form(mediawiki, xml, etc)
 
         Parameters:
             hed_schema (HedSchema): The schema to be processed.
@@ -25,9 +26,11 @@ class Schema2Base:
 
         """
         if not hed_schema.can_save():
-            raise HedFileError(HedExceptions.SCHEMA_LIBRARY_INVALID,
-                               "Cannot save a schema merged from multiple library schemas",
-                               hed_schema.filename)
+            raise HedFileError(
+                HedExceptions.SCHEMA_LIBRARY_INVALID,
+                "Cannot save a schema merged from multiple library schemas",
+                hed_schema.filename,
+            )
 
         self._initialize_output()
         self._save_lib = False
@@ -93,7 +96,7 @@ class Schema2Base:
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _end_section(self, section_key):
-        """ Clean up for sections other than tags and units.
+        """Clean up for sections other than tags and units.
 
         Parameters:
             section_key (HedSectionKey): The section key to end.
@@ -107,7 +110,7 @@ class Schema2Base:
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _output_tags(self, tags):
-        """ Output the tags section of the schema.
+        """Output the tags section of the schema.
 
         Parameters:
             tags
@@ -131,8 +134,12 @@ class Schema2Base:
                 all_nodes[tag_entry.name] = root_tag
             else:
                 # Only output the rooted parent nodes if they have a parent(for duplicates that don't)
-                if tag_entry.has_attribute(HedKey.InLibrary) and tag_entry.parent and \
-                        not tag_entry.parent.has_attribute(HedKey.InLibrary) and not self._save_merged:
+                if (
+                    tag_entry.has_attribute(HedKey.InLibrary)
+                    and tag_entry.parent
+                    and not tag_entry.parent.has_attribute(HedKey.InLibrary)
+                    and not self._save_merged
+                ):
                     if tag_entry.parent.name not in all_nodes:
                         level_adj = level
 
@@ -182,7 +189,7 @@ class Schema2Base:
         return self._strip_out_in_library and attribute == HedKey.InLibrary
 
     def _format_tag_attributes(self, attributes):
-        """ Takes a dictionary of tag attributes and returns a string with the .mediawiki representation.
+        """Takes a dictionary of tag attributes and returns a string with the .mediawiki representation.
 
         Parameters:
             attributes: {str:str}: Dictionary with {attribute_name : attribute_value}
@@ -214,7 +221,7 @@ class Schema2Base:
 
     @staticmethod
     def _get_attribs_string_from_schema(header_attributes, sep=" "):
-        """ Gets the schema attributes and converts it to a string.
+        """Gets the schema attributes and converts it to a string.
 
         Parameters:
             header_attributes (dict): Attributes to format attributes from.
@@ -222,6 +229,6 @@ class Schema2Base:
         Returns:
             str: A string of the attributes that can be written to a .mediawiki formatted file.
         """
-        attrib_values = [f"{attr}=\"{value}\"" for attr, value in header_attributes.items()]
+        attrib_values = [f'{attr}="{value}"' for attr, value in header_attributes.items()]
         final_attrib_string = sep.join(attrib_values)
         return final_attrib_string

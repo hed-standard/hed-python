@@ -1,4 +1,4 @@
-""" Manager for definitions associated with a type such as condition-variable. """
+"""Manager for definitions associated with a type such as condition-variable."""
 
 from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
@@ -18,8 +18,9 @@ class HedTypeDefs:
 
 
     """
-    def __init__(self, definitions, type_tag='condition-variable'):
-        """ Create a definition manager for a type of variable.
+
+    def __init__(self, definitions, type_tag="condition-variable"):
+        """Create a definition manager for a type of variable.
 
         Parameters:
             definitions (dict or DefinitionDict): A dictionary of DefinitionEntry objects.
@@ -38,7 +39,7 @@ class HedTypeDefs:
         self.type_map = self._extract_type_map()  # Dictionary of type_values vs dict definition names
 
     def get_type_values(self, item):
-        """ Return a list of type_tag values in item.
+        """Return a list of type_tag values in item.
 
         Parameters:
             item (HedTag, HedGroup, or HedString): An item potentially containing def tags.
@@ -57,7 +58,7 @@ class HedTypeDefs:
 
     @property
     def type_def_names(self):
-        """ Return list of names of definition that have this type-variable.
+        """Return list of names of definition that have this type-variable.
 
         Returns:
             list:  definition names that have this type.
@@ -67,7 +68,7 @@ class HedTypeDefs:
 
     @property
     def type_names(self):
-        """ Return list of names of the type-variables associated with type definitions.
+        """Return list of names of the type-variables associated with type definitions.
 
         Returns:
             list:  type names associated with the type definitions
@@ -76,30 +77,34 @@ class HedTypeDefs:
         return list(self.type_map.keys())
 
     def _extract_def_map(self):
-        """ Extract type_variables associated with each definition and add them to def_map. """
+        """Extract type_variables associated with each definition and add them to def_map."""
         def_map = {}
         for entry in self.definitions.values():
             type_def, type_values, description, other_tags = self._extract_entry_values(entry)
             if type_def:
-                def_map[type_def.casefold()] = \
-                    {'def_name': type_def, 'type_values': type_values, 'description': description, 'tags': other_tags}
+                def_map[type_def.casefold()] = {
+                    "def_name": type_def,
+                    "type_values": type_values,
+                    "description": description,
+                    "tags": other_tags,
+                }
         return def_map
 
     def _extract_type_map(self):
-        """ Extract the definitions associated with each type value and add them to the dictionary. """
+        """Extract the definitions associated with each type value and add them to the dictionary."""
 
         type_map = {}
         for def_name, def_values in self.def_map.items():
-            if not def_values['type_values']:
+            if not def_values["type_values"]:
                 continue
-            for type_value in def_values['type_values']:
+            for type_value in def_values["type_values"]:
                 this_map = type_map.get(type_value, {})
-                this_map[def_name] = ''
+                this_map[def_name] = ""
                 type_map[type_value] = this_map
         return type_map
 
     def _extract_entry_values(self, entry):
-        """ Extract a list of type_variables associated with a definition.
+        """Extract a list of type_variables associated with a definition.
 
         Parameters:
             entry (DictionaryEntry): A definition entry to be processed.
@@ -112,10 +117,10 @@ class HedTypeDefs:
         tag_list = entry.contents.get_all_tags()
         type_values = []
         type_def = ""
-        description = ''
+        description = ""
         other_tags = []
         for hed_tag in tag_list:
-            if hed_tag.short_base_tag == 'Description':
+            if hed_tag.short_base_tag == "Description":
                 description = hed_tag.extension
             elif hed_tag.short_base_tag.casefold() != self.type_tag:
                 other_tags.append(hed_tag.short_base_tag)
@@ -126,20 +131,20 @@ class HedTypeDefs:
 
     @staticmethod
     def extract_def_names(item, no_value=True):
-        """ Return a list of Def values in item.
+        """Return a list of Def values in item.
 
-           Parameters:
-               item (HedTag, HedGroup, or HedString): An item containing a def tag.
-               no_value (bool):  If True, strip off extra values after the definition name.
+        Parameters:
+            item (HedTag, HedGroup, or HedString): An item containing a def tag.
+            no_value (bool):  If True, strip off extra values after the definition name.
 
-           Returns:
-               list:  A list of definition names (as strings).
+        Returns:
+            list:  A list of definition names (as strings).
 
-           """
-        if isinstance(item, HedTag) and 'def' in item.tag_terms:
+        """
+        if isinstance(item, HedTag) and "def" in item.tag_terms:
             names = [item.extension.casefold()]
         else:
-            names = [tag.extension.casefold() for tag in item.get_all_tags() if 'def' in tag.tag_terms]
+            names = [tag.extension.casefold() for tag in item.get_all_tags() if "def" in tag.tag_terms]
         if no_value:
             for index, name in enumerate(names):
                 name, name_value = HedTypeDefs.split_name(name)
@@ -148,7 +153,7 @@ class HedTypeDefs:
 
     @staticmethod
     def split_name(name, lowercase=True):
-        """ Split a name/# or name/x into name, x.
+        """Split a name/# or name/x into name, x.
 
         Parameters:
             name (str):  The extension or value portion of a tag.
@@ -162,9 +167,9 @@ class HedTypeDefs:
         """
         if not name:
             return None, None
-        parts = name.split('/', 1)
+        parts = name.split("/", 1)
         def_name = parts[0]
-        def_value = ''
+        def_value = ""
         if len(parts) > 1:
             def_value = parts[1]
         if lowercase:

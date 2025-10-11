@@ -15,10 +15,10 @@ entries_by_section = {
 
 
 class HedSchemaSection:
-    """Container with entries in one section of the schema. """
+    """Container with entries in one section of the schema."""
 
     def __init__(self, section_key, case_sensitive=True):
-        """ Construct schema section.
+        """Construct schema section.
 
         Parameters:
             section_key (HedSectionKey):  Name of the schema section.
@@ -63,7 +63,7 @@ class HedSchemaSection:
         return return_entry
 
     def _add_to_dict(self, name, new_entry):
-        """ Add a name to the dictionary for this section. """
+        """Add a name to the dictionary for this section."""
         name_key = name
         if not self.case_sensitive:
             name_key = name.casefold()
@@ -73,8 +73,10 @@ class HedSchemaSection:
         self.all_entries.append(new_entry)
         return return_entry
 
-    def get_entries_with_attribute(self, attribute_name, return_name_only=False, schema_namespace="") -> list[Union[HedSchemaEntry, str]]:
-        """ Return entries or names with given attribute.
+    def get_entries_with_attribute(
+        self, attribute_name, return_name_only=False, schema_namespace=""
+    ) -> list[Union[HedSchemaEntry, str]]:
+        """Return entries or names with given attribute.
 
         Parameters:
             attribute_name (str): The name of the attribute(generally a HedKey entry).
@@ -104,15 +106,15 @@ class HedSchemaSection:
         return len(self.all_names)
 
     def items(self):
-        """ Return the items. """
+        """Return the items."""
         return self.all_names.items()
 
     def values(self):
-        """ All names of the sections. """
+        """All names of the sections."""
         return self.all_names.values()
 
     def keys(self):
-        """ The names of the keys. """
+        """The names of the keys."""
         return self.all_names.keys()
 
     def __getitem__(self, key):
@@ -121,7 +123,7 @@ class HedSchemaSection:
         return self.all_names[key]
 
     def get(self, key):
-        """ Return the name associated with key.
+        """Return the name associated with key.
 
         Parameters:
             key (str): The name of the key.
@@ -153,6 +155,7 @@ class HedSchemaSection:
 
 class HedSchemaUnitSection(HedSchemaSection):
     """The schema section containing units."""
+
     def _check_if_duplicate(self, name_key, new_entry):
         """We need to mark duplicate units(units with unitSymbol are case sensitive, while others are not."""
         if not new_entry.has_attribute(HedKey.UnitSymbol):
@@ -172,10 +175,10 @@ class HedSchemaUnitSection(HedSchemaSection):
 
 class HedSchemaUnitClassSection(HedSchemaSection):
     """The schema section containing unit classes."""
+
     def _check_if_duplicate(self, name_key, new_entry):
         """Allow adding units to existing unit classes, using a placeholder one with no attributes."""
-        if name_key in self and len(new_entry.attributes) == 1 \
-                and HedKey.InLibrary in new_entry.attributes:
+        if name_key in self and len(new_entry.attributes) == 1 and HedKey.InLibrary in new_entry.attributes:
             return self.all_names[name_key]
         return super()._check_if_duplicate(name_key, new_entry)
 
@@ -200,7 +203,7 @@ class HedSchemaTagSection(HedSchemaSection):
             if slash_index == -1:
                 break
             else:
-                name_key = name_key[slash_index + 1:]
+                name_key = name_key[slash_index + 1 :]
 
         # We can't add value tags by themselves
         if tag_forms[-1] == "#":
@@ -257,7 +260,7 @@ class HedSchemaTagSection(HedSchemaSection):
     def _group_by_top_level_tag(divide_list):
         result = {}
         for item in divide_list:
-            key, _, value = item.long_tag_name.partition('/')
+            key, _, value = item.long_tag_name.partition("/")
             if key not in result:
                 result[key] = []
             result[key].append(item)
@@ -268,11 +271,13 @@ class HedSchemaTagSection(HedSchemaSection):
         # Find the attributes with the inherited property
         attribute_section = hed_schema.attributes
         if hed_schema.schema_83_props:
-            self.inheritable_attributes = [name for name, value in attribute_section.items()
-                                           if not value.has_attribute(HedKey.AnnotationProperty)]
+            self.inheritable_attributes = [
+                name for name, value in attribute_section.items() if not value.has_attribute(HedKey.AnnotationProperty)
+            ]
         else:
-            self.inheritable_attributes = [name for name, value in attribute_section.items()
-                                           if value.has_attribute(HedKeyOld.IsInheritedProperty)]
+            self.inheritable_attributes = [
+                name for name, value in attribute_section.items() if value.has_attribute(HedKeyOld.IsInheritedProperty)
+            ]
 
         # Hardcode in extension allowed as it is critical for validation in older schemas
         if not self.inheritable_attributes:
@@ -287,8 +292,12 @@ class HedSchemaTagSection(HedSchemaSection):
                 values.sort(key=lambda x: x.long_tag_name.replace("/", "\0"))
 
         # Sort ones without inLibrary to the end, and then sort library ones at the top.
-        split_list.sort(key=lambda x: (x[0].has_attribute(HedKey.InLibrary, return_value=True) is None,
-                                       x[0].has_attribute(HedKey.InLibrary, return_value=True)))
+        split_list.sort(
+            key=lambda x: (
+                x[0].has_attribute(HedKey.InLibrary, return_value=True) is None,
+                x[0].has_attribute(HedKey.InLibrary, return_value=True),
+            )
+        )
 
         # split_list.sort(key=lambda x: x[0].has_attribute(HedKey.ExtensionAllowed))
         self.all_entries = [subitem for tag_list in split_list for subitem in tag_list]

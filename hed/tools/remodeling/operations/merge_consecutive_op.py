@@ -1,11 +1,11 @@
-""" Merge consecutive rows of a columnar file with same column value. """
+"""Merge consecutive rows of a columnar file with same column value."""
 
 import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class MergeConsecutiveOp(BaseOp):
-    """ Merge consecutive rows of a columnar file with same column value.
+    """Merge consecutive rows of a columnar file with same column value.
 
     Required remodeling parameters:
         - **column_name** (*str*): name of column whose consecutive values are to be compared (the merge column).
@@ -20,6 +20,7 @@ class MergeConsecutiveOp(BaseOp):
           This operation is meant for time-based tabular files that have an onset column.
 
     """
+
     NAME = "merge_consecutive"
 
     PARAMS = {
@@ -27,42 +28,26 @@ class MergeConsecutiveOp(BaseOp):
         "properties": {
             "column_name": {
                 "type": "string",
-                "description": "The name of the column to check for repeated consecutive codes."
+                "description": "The name of the column to check for repeated consecutive codes.",
             },
-            "event_code": {
-                "type": [
-                    "string",
-                    "number"
-                ],
-                "description": "The event code to match for duplicates."
-            },
+            "event_code": {"type": ["string", "number"], "description": "The event code to match for duplicates."},
             "match_columns": {
                 "type": "array",
                 "description": "List of columns whose values must also match to be considered a repeat.",
-                "items": {
-                    "type": "string"
-                }
+                "items": {"type": "string"},
             },
             "set_durations": {
                 "type": "boolean",
-                "description": "If true, then the duration should be computed based on start of first to end of last."
+                "description": "If true, then the duration should be computed based on start of first to end of last.",
             },
-            "ignore_missing": {
-                "type": "boolean",
-                "description": "If true, missing match columns are ignored."
-            }
+            "ignore_missing": {"type": "boolean", "description": "If true, missing match columns are ignored."},
         },
-        "required": [
-            "column_name",
-            "event_code",
-            "set_durations",
-            "ignore_missing"
-        ],
-        "additionalProperties": False
+        "required": ["column_name", "event_code", "set_durations", "ignore_missing"],
+        "additionalProperties": False,
     }
 
     def __init__(self, parameters):
-        """ Constructor for the merge consecutive operation.
+        """Constructor for the merge consecutive operation.
 
         Parameters:
             parameters (dict): Actual values of the parameters for the operation.
@@ -76,7 +61,7 @@ class MergeConsecutiveOp(BaseOp):
         self.match_columns = parameters.get("match_columns", None)
 
     def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
-        """ Merge consecutive rows with the same column value.
+        """Merge consecutive rows with the same column value.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -96,22 +81,22 @@ class MergeConsecutiveOp(BaseOp):
         """
 
         if not self.ignore_missing and self.column_name not in df.columns:
-            raise ValueError("ColumnMissing",
-                             f"{name}: {self.column_name} is not in data columns [{str(df.columns)}] "
-                             f"and missing columns are not ignored")
+            raise ValueError(
+                "ColumnMissing",
+                f"{name}: {self.column_name} is not in data columns [{str(df.columns)}] "
+                f"and missing columns are not ignored",
+            )
         if self.set_durations and "onset" not in df.columns:
-            raise ValueError("MissingOnsetColumn",
-                             f"{name}: Data must have an onset column in order to set durations")
+            raise ValueError("MissingOnsetColumn", f"{name}: Data must have an onset column in order to set durations")
         if self.set_durations and "duration" not in df.columns:
-            raise ValueError("MissingDurationColumn",
-                             f"{name}: Data must have a duration column in order to set durations")
+            raise ValueError("MissingDurationColumn", f"{name}: Data must have a duration column in order to set durations")
         missing = set(self.match_columns).difference(set(df.columns))
         if self.match_columns and not self.ignore_missing and missing:
-            raise ValueError("MissingMatchColumns",
-                             f"{name}: {str(missing)} columns are unmatched by data columns"
-                             f"[{str(df.columns)}] and not ignored")
-        match_columns = list(
-            set(self.match_columns).intersection(set(df.columns)))
+            raise ValueError(
+                "MissingMatchColumns",
+                f"{name}: {str(missing)} columns are unmatched by data columns" f"[{str(df.columns)}] and not ignored",
+            )
+        match_columns = list(set(self.match_columns).intersection(set(df.columns)))
 
         df_new = df.copy()
         code_mask = df_new[self.column_name] == self.event_code
@@ -128,7 +113,7 @@ class MergeConsecutiveOp(BaseOp):
 
     @staticmethod
     def _get_remove_groups(match_df, code_mask):
-        """ Return a list of same length as match_df with group numbers of consecutive items.
+        """Return a list of same length as match_df with group numbers of consecutive items.
 
         Parameters:
             match_df (DataFrame): DataFrame containing columns to be matched.
@@ -158,7 +143,7 @@ class MergeConsecutiveOp(BaseOp):
 
     @staticmethod
     def _update_durations(df_new, remove_groups):
-        """ Update the durations for the columns based on merged columns.
+        """Update the durations for the columns based on merged columns.
 
         Parameters:
             df_new (DataFrame): Tabular data to merge.
@@ -168,18 +153,15 @@ class MergeConsecutiveOp(BaseOp):
         remove_df = pd.DataFrame(remove_groups, columns=["remove"])
         max_groups = max(remove_groups)
         for index in range(max_groups):
-            df_group = df_new.loc[remove_df["remove"]
-                                  == index + 1, ["onset", "duration"]]
+            df_group = df_new.loc[remove_df["remove"] == index + 1, ["onset", "duration"]]
             max_group = df_group.sum(axis=1, skipna=True).max()
             anchor = df_group.index[0] - 1
-            max_anchor = df_new.loc[anchor, [
-                "onset", "duration"]].sum(skipna=True).max()
-            df_new.loc[anchor, "duration"] = max(
-                max_group, max_anchor) - df_new.loc[anchor, "onset"]
+            max_anchor = df_new.loc[anchor, ["onset", "duration"]].sum(skipna=True).max()
+            df_new.loc[anchor, "duration"] = max(max_group, max_anchor) - df_new.loc[anchor, "onset"]
 
     @staticmethod
     def validate_input_data(parameters):
-        """ Verify that the column name is not in match columns.
+        """Verify that the column name is not in match columns.
 
         Parameters:
             parameters (dict): Dictionary of parameters of actual implementation.

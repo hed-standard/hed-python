@@ -1,4 +1,3 @@
-
 from semantic_version import Version
 
 from hed.schema import hed_schema_constants as constants
@@ -7,7 +6,7 @@ from hed.schema.hed_schema_constants import valid_header_attributes
 
 
 def validate_library_name(library_name):
-    """ Check the validity of the library name.
+    """Check the validity of the library name.
 
     Parameters:
         library_name (str): Name of the library.
@@ -24,7 +23,7 @@ def validate_library_name(library_name):
 
 
 def validate_version_string(version_string):
-    """ Check validity of the version.
+    """Check validity of the version.
 
     Parameters:
         version_string (str):  A version string.
@@ -42,32 +41,32 @@ def validate_version_string(version_string):
 
 header_attribute_validators = {
     constants.VERSION_ATTRIBUTE: (validate_version_string, HedExceptions.SCHEMA_VERSION_INVALID),
-    constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME)
+    constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME),
 }
 
 
 def validate_present_attributes(attrib_dict, name):
-    """ Validate combinations of attributes
+    """Validate combinations of attributes
 
-        Parameters:
-            attrib_dict (dict): Dictionary of attributes to be evaluated.
-            name (str):  File name to use in reporting errors.
+    Parameters:
+        attrib_dict (dict): Dictionary of attributes to be evaluated.
+        name (str):  File name to use in reporting errors.
 
-        Returns:
-            list: List of issues. Each issue is a dictionary.
+    Returns:
+        list: List of issues. Each issue is a dictionary.
 
-        Raises:
-            HedFileError: If withStandard is found in th header, but a library attribute is not specified.
+    Raises:
+        HedFileError: If withStandard is found in th header, but a library attribute is not specified.
 
-        """
+    """
     if constants.WITH_STANDARD_ATTRIBUTE in attrib_dict and constants.LIBRARY_ATTRIBUTE not in attrib_dict:
-        raise HedFileError(HedExceptions.BAD_WITH_STANDARD,
-                           "withStandard header attribute found, but no library attribute is present",
-                           name)
+        raise HedFileError(
+            HedExceptions.BAD_WITH_STANDARD, "withStandard header attribute found, but no library attribute is present", name
+        )
 
 
 def validate_attributes(attrib_dict, name):
-    """ Validate attributes in the dictionary.
+    """Validate attributes in the dictionary.
 
     Parameters:
         attrib_dict (dict): Dictionary of attributes to be evaluated.
@@ -91,9 +90,11 @@ def validate_attributes(attrib_dict, name):
             if had_error:
                 raise HedFileError(error_code, had_error, name)
         if attribute_name not in valid_header_attributes:
-            raise HedFileError(HedExceptions.SCHEMA_UNKNOWN_HEADER_ATTRIBUTE,
-                               f"Unknown attribute {attribute_name} found in header line", filename=name)
+            raise HedFileError(
+                HedExceptions.SCHEMA_UNKNOWN_HEADER_ATTRIBUTE,
+                f"Unknown attribute {attribute_name} found in header line",
+                filename=name,
+            )
 
     if constants.VERSION_ATTRIBUTE not in attrib_dict:
-        raise HedFileError(HedExceptions.SCHEMA_VERSION_INVALID,
-                           "No version attribute found in header", filename=name)
+        raise HedFileError(HedExceptions.SCHEMA_VERSION_INVALID, "No version attribute found in header", filename=name)

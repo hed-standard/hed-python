@@ -1,1 +1,1 @@
-""" Remodeling operations. """
+"""Remodeling operations."""

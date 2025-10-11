@@ -1,4 +1,4 @@
-""" A group of BIDS files with specified suffix name. """
+"""A group of BIDS files with specified suffix name."""
 
 import os
 import logging
@@ -13,7 +13,7 @@ from hed.tools.util import io_util
 
 
 class BidsFileGroup:
-    """ Container for BIDS files with a specified suffix.
+    """Container for BIDS files with a specified suffix.
 
     Attributes:
         suffix (str):             The file suffix specifying the class of file represented in this group (e.g., events).
@@ -25,13 +25,13 @@ class BidsFileGroup:
     """
 
     def __init__(self, root_path, file_list, suffix="events"):
-        """ Constructor for a BidsFileGroup.
+        """Constructor for a BidsFileGroup.
 
         Parameters:
             file_list (list):  List of paths to the relevant tsv and json files.
             suffix (str):     Suffix indicating the type this group represents (e.g. events, or channels, etc.).
         """
-        logger = logging.getLogger('hed.bids_file_group')
+        logger = logging.getLogger("hed.bids_file_group")
         logger.debug(f"Creating BidsFileGroup for suffix '{suffix}' with {len(file_list)} files")
 
         self.suffix = suffix
@@ -45,20 +45,22 @@ class BidsFileGroup:
         self.has_hed = False
 
         logger.debug(f"Processing {len(ext_dict.get('.json', []))} JSON sidecar files...")
-        self._make_sidecar_dict(ext_dict.get('.json', []))
+        self._make_sidecar_dict(ext_dict.get(".json", []))
 
         logger.debug("Creating directory mapping...")
         self._make_dir_dict(root_path)
 
         logger.debug(f"Processing {len(ext_dict.get('.tsv', []))} TSV data files...")
-        self._make_datafile_dict(root_path, ext_dict.get('.tsv', []))
+        self._make_datafile_dict(root_path, ext_dict.get(".tsv", []))
 
-        logger.info(f"BidsFileGroup '{suffix}' created: {len(self.sidecar_dict)} sidecars, {len(self.datafile_dict)} data files, has_hed={self.has_hed}")
+        logger.info(
+            f"BidsFileGroup '{suffix}' created: {len(self.sidecar_dict)} sidecars, {len(self.datafile_dict)} data files, has_hed={self.has_hed}"
+        )
         if self.bad_files:
             logger.warning(f"Found {len(self.bad_files)} bad files in group '{suffix}'")
 
     def summarize(self, value_cols=None, skip_cols=None):
-        """ Return a BidsTabularSummary of group files.
+        """Return a BidsTabularSummary of group files.
 
         Parameters:
             value_cols (list):  Column names designated as value columns.
@@ -77,7 +79,7 @@ class BidsFileGroup:
         return info
 
     def validate(self, hed_schema, extra_def_dicts=None, check_for_warnings=False):
-        """ Validate the sidecars and datafiles and return a list of issues.
+        """Validate the sidecars and datafiles and return a list of issues.
 
         Parameters:
             hed_schema (HedSchema):  Schema to apply to the validation.
@@ -87,14 +89,16 @@ class BidsFileGroup:
         Returns:
             list:  A list of validation issues found. Each issue is a dictionary.
         """
-        logger = logging.getLogger('hed.bids_file_group')
-        logger.info(f"Starting validation of file group '{self.suffix}' (sidecars: {len(self.sidecar_dict)}, data files: {len(self.datafile_dict)})")
+        logger = logging.getLogger("hed.bids_file_group")
+        logger.info(
+            f"Starting validation of file group '{self.suffix}' (sidecars: {len(self.sidecar_dict)}, data files: {len(self.datafile_dict)})"
+        )
 
         error_handler = ErrorHandler(check_for_warnings)
         issues = []
 
         logger.debug(f"Validating {len(self.sidecar_dict)} sidecars...")
-        sidecar_issues = self.validate_sidecars(hed_schema, extra_def_dicts=extra_def_dicts,  error_handler=error_handler)
+        sidecar_issues = self.validate_sidecars(hed_schema, extra_def_dicts=extra_def_dicts, error_handler=error_handler)
         logger.info(f"Sidecar validation completed: {len(sidecar_issues)} issues found")
         issues += sidecar_issues
 
@@ -107,7 +111,7 @@ class BidsFileGroup:
         return issues
 
     def validate_sidecars(self, hed_schema, extra_def_dicts=None, error_handler=None):
-        """ Validate merged sidecars.
+        """Validate merged sidecars.
 
         Parameters:
             hed_schema (HedSchema):  HED schema for validation.
@@ -123,12 +127,13 @@ class BidsFileGroup:
         issues = []
         validator = SidecarValidator(hed_schema)
         for sidecar in self.sidecar_dict.values():
-            issues += validator.validate(sidecar.contents, extra_def_dicts=extra_def_dicts,
-                                         name=sidecar.file_path, error_handler=error_handler)
+            issues += validator.validate(
+                sidecar.contents, extra_def_dicts=extra_def_dicts, name=sidecar.file_path, error_handler=error_handler
+            )
         return issues
 
     def validate_datafiles(self, hed_schema, extra_def_dicts=None, error_handler=None):
-        """ Validate the datafiles and return an error list.
+        """Validate the datafiles and return an error list.
 
         Parameters:
             hed_schema (HedSchema):  Schema to apply to the validation.
@@ -140,7 +145,7 @@ class BidsFileGroup:
 
         Notes: This will clear the contents of the datafiles if they were not previously set.
         """
-        logger = logging.getLogger('hed.bids_file_group')
+        logger = logging.getLogger("hed.bids_file_group")
 
         if not error_handler:
             error_handler = ErrorHandler(False)
@@ -154,8 +159,9 @@ class BidsFileGroup:
 
             had_contents = data_obj.contents
             data_obj.set_contents(overwrite=False)
-            file_issues = data_obj.contents.validate(hed_schema, extra_def_dicts=extra_def_dicts, name=data_obj.file_path,
-                                                     error_handler=error_handler)
+            file_issues = data_obj.contents.validate(
+                hed_schema, extra_def_dicts=extra_def_dicts, name=data_obj.file_path, error_handler=error_handler
+            )
 
             if file_issues:
                 logger.debug(f"File {os.path.basename(data_obj.file_path)}: {len(file_issues)} issues found")
@@ -168,7 +174,7 @@ class BidsFileGroup:
         return issues
 
     def _make_dir_dict(self, root_path):
-        """ Create dictionary directory paths keys and assign to self.sidecar_dir_dict.
+        """Create dictionary directory paths keys and assign to self.sidecar_dir_dict.
 
         Parameters:
             root_path (str):  The root path of the BIDS dataset.
@@ -188,7 +194,7 @@ class BidsFileGroup:
             self.sidecar_dir_dict[os.path.realpath(root)] = sidecar_list
 
     def _make_datafile_dict(self, root_path, tsv_list):
-        """ Sets the dictionary of BIDS Tabular file objects for the give list of tabular files.
+        """Sets the dictionary of BIDS Tabular file objects for the give list of tabular files.
 
         Parameters:
             root_path (str):  The root path of the BIDS dataset.
@@ -205,7 +211,7 @@ class BidsFileGroup:
                 continue
             tsv_obj.set_sidecar(self._get_tsv_sidecar(root_path, tsv_obj))
             try:
-                column_headers = list(pd.read_csv(file_path, sep='\t', nrows=0).columns)
+                column_headers = list(pd.read_csv(file_path, sep="\t", nrows=0).columns)
             except Exception as e:
                 self.bad_files[file_path] = f"{file_path} does not have a valid column header: {str(e)}"
                 continue
@@ -215,7 +221,7 @@ class BidsFileGroup:
             self.datafile_dict[os.path.realpath(file_path)] = tsv_obj
 
     def _get_tsv_sidecar(self, root_path, tsv_obj):
-        """ Return the merged Sidecar for the tsv_obj
+        """Return the merged Sidecar for the tsv_obj
 
         Parameters:
             root_path (str):  The root path of the BIDS dataset.
@@ -227,21 +233,21 @@ class BidsFileGroup:
         """
         path_components = [root_path] + io_util.get_path_components(root_path, tsv_obj.file_path)
         sidecar_list = []
-        current_path = ''
+        current_path = ""
         for comp in path_components:
             current_path = os.path.realpath(os.path.join(current_path, comp))
             candidate = self._get_sidecar_for_obj(tsv_obj, current_path)
             if candidate:
                 sidecar_list.append(candidate)
         if len(sidecar_list) > 1:
-            merged_name = "merged_" + io_util.get_basename(tsv_obj.file_path) + '.json'
+            merged_name = "merged_" + io_util.get_basename(tsv_obj.file_path) + ".json"
             return BidsSidecarFile.merge_sidecar_list(sidecar_list, name=merged_name)
         elif len(sidecar_list) == 1:
             return sidecar_list[0].contents
         return None
 
     def _get_sidecar_for_obj(self, tsv_obj, current_path):
-        """ Return a single BidsSidecarFile relevant to obj from the sidecars in the current path.
+        """Return a single BidsSidecarFile relevant to obj from the sidecars in the current path.
 
         Parameters:
             tsv_obj (BidsTabularFile): A file whose sidecars are to be found.
@@ -250,7 +256,7 @@ class BidsFileGroup:
         Returns:
             Union[BidsSidecarFile, None]:  The BidsSidecarFile in current_path relevant to obj, if any.
 
-         """
+        """
         sidecar_paths = self.sidecar_dir_dict.get(current_path, [])
         if not sidecar_paths:
             return None
@@ -263,12 +269,14 @@ class BidsFileGroup:
             return candidates[0]
         elif len(candidates) > 1:
             for candidate in candidates:
-                self.bad_files[candidate] = f"Sidecar {str(candidate.file_path)} conflicts with other sidecars for {tsv_obj.file_path} in {current_path}"
+                self.bad_files[candidate] = (
+                    f"Sidecar {str(candidate.file_path)} conflicts with other sidecars for {tsv_obj.file_path} in {current_path}"
+                )
             return None
         return None
 
     def _make_sidecar_dict(self, json_files):
-        """ Create a dictionary of BidsSidecarFile objects for the specified entity type and set contents.
+        """Create a dictionary of BidsSidecarFile objects for the specified entity type and set contents.
 
         Parameters:
             json_files (list):  A list of paths to the json files.
@@ -282,7 +290,7 @@ class BidsFileGroup:
         for file_path in json_files:
             if os.path.getsize(file_path) == 0:
                 continue
-            sidecar_file =  BidsSidecarFile(os.path.realpath(file_path))
+            sidecar_file = BidsSidecarFile(os.path.realpath(file_path))
             if sidecar_file.bad:
                 self.bad_files[file_path] = f"{file_path} violates BIDS naming convention for {str(sidecar_file.bad)}"
                 continue
@@ -293,7 +301,7 @@ class BidsFileGroup:
 
     @staticmethod
     def create_file_group(root_path, file_list, suffix):
-        logger = logging.getLogger('hed.bids_file_group')
+        logger = logging.getLogger("hed.bids_file_group")
         logger.debug(f"Creating file group for suffix '{suffix}' from {len(file_list)} files")
 
         file_group = BidsFileGroup(root_path, file_list, suffix=suffix)

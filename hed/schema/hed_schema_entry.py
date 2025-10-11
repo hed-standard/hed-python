@@ -10,13 +10,14 @@ pluralize.defnoun("hertz", "hertz")
 
 
 class HedSchemaEntry:
-    """ A single node in a HedSchema.
+    """A single node in a HedSchema.
 
-        The structure contains all the node information including attributes and properties.
+    The structure contains all the node information including attributes and properties.
 
     """
+
     def __init__(self, name, section):
-        """ Constructor for HedSchemaEntry.
+        """Constructor for HedSchemaEntry.
 
         Parameters:
             name (str): The name of the entry.
@@ -34,7 +35,7 @@ class HedSchemaEntry:
         self._unknown_attributes = None
 
     def finalize_entry(self, schema):
-        """ Called once after loading to set internal state.
+        """Called once after loading to set internal state.
 
         Parameters:
             schema (HedSchema): The schema that holds the rules.
@@ -51,7 +52,7 @@ class HedSchemaEntry:
                 self._unknown_attributes.pop(item)
 
     def has_attribute(self, attribute, return_value=False) -> Union[bool, Any]:
-        """ Checks for the existence of an attribute in this entry.
+        """Checks for the existence of an attribute in this entry.
 
         Parameters:
             attribute (str): The attribute to check for.
@@ -71,7 +72,7 @@ class HedSchemaEntry:
             return attribute in self.attributes
 
     def attribute_has_property(self, attribute, property_name) -> bool:
-        """ Return True if attribute has property.
+        """Return True if attribute has property.
 
         Parameters:
             attribute (str): Attribute name to check for property_name.
@@ -87,7 +88,7 @@ class HedSchemaEntry:
         return False
 
     def _set_attribute_value(self, attribute, attribute_value):
-        """ Add attribute and set its value.
+        """Add attribute and set its value.
 
         Parameters:
             attribute (str): The name of the schema entry attribute.
@@ -131,16 +132,14 @@ class HedSchemaEntry:
     @staticmethod
     def _compare_attributes_no_order(left, right):
         if left != right:
-            left = {name: (set(value.split(",")) if isinstance(value, str) else value)
-                    for (name, value) in left.items()}
-            right = {name: (set(value.split(",")) if isinstance(value, str) else value)
-                     for (name, value) in right.items()}
+            left = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in left.items()}
+            right = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in right.items()}
 
         return left == right
 
 
 class UnitClassEntry(HedSchemaEntry):
-    """ A single unit class entry in the HedSchema. """
+    """A single unit class entry in the HedSchema."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -150,7 +149,7 @@ class UnitClassEntry(HedSchemaEntry):
 
     @property
     def children(self):
-        """ Alias to get the units for this class
+        """Alias to get the units for this class
 
         Returns:
             unit_list(list): The unit list for this class
@@ -158,7 +157,7 @@ class UnitClassEntry(HedSchemaEntry):
         return self.units
 
     def add_unit(self, unit_entry):
-        """ Add the given unit entry to this unit class.
+        """Add the given unit entry to this unit class.
 
         Parameters:
             unit_entry (HedSchemaEntry): Unit entry to add.
@@ -167,7 +166,7 @@ class UnitClassEntry(HedSchemaEntry):
         self._units.append(unit_entry)
 
     def finalize_entry(self, schema):
-        """ Called once after schema load to set state.
+        """Called once after schema load to set state.
 
         Parameters:
             schema (HedSchema): The object with the schema rules.
@@ -190,7 +189,7 @@ class UnitClassEntry(HedSchemaEntry):
         return True
 
     def get_derivative_unit_entry(self, units):
-        """ Gets the (derivative) unit entry if it exists
+        """Gets the (derivative) unit entry if it exists
 
         Parameters:
             units (str): The unit name to check, can be plural or include a modifier.
@@ -213,7 +212,8 @@ class UnitClassEntry(HedSchemaEntry):
 
 
 class UnitEntry(HedSchemaEntry):
-    """ A single unit entry with modifiers in the HedSchema. """
+    """A single unit entry with modifiers in the HedSchema."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.unit_modifiers = []
@@ -221,7 +221,7 @@ class UnitEntry(HedSchemaEntry):
         self.unit_class_entry = None
 
     def finalize_entry(self, schema):
-        """ Called once after loading to set internal state.
+        """Called once after loading to set internal state.
 
         Parameters:
             schema (HedSchema): The schema rules come from.
@@ -265,7 +265,8 @@ class UnitEntry(HedSchemaEntry):
 
 
 class HedTagEntry(HedSchemaEntry):
-    """ A single tag entry in the HedSchema. """
+    """A single tag entry in the HedSchema."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.unit_classes = {}
@@ -289,7 +290,7 @@ class HedTagEntry(HedSchemaEntry):
         return True
 
     def has_attribute(self, attribute, return_value=False):
-        """ Returns th existence or value of an attribute in this entry.
+        """Returns th existence or value of an attribute in this entry.
 
             This also checks parent tags for inheritable attributes like ExtensionAllowed.
 
@@ -354,7 +355,7 @@ class HedTagEntry(HedSchemaEntry):
         return bool(attribute_values)
 
     def base_tag_has_attribute(self, tag_attribute):
-        """ Check if the base tag has a specific attribute.
+        """Check if the base tag has a specific attribute.
 
         Parameters:
             tag_attribute (str): A tag attribute.
@@ -407,7 +408,7 @@ class HedTagEntry(HedSchemaEntry):
                 self.inherited_attributes[attribute] = self._check_inherited_attribute(attribute, True)
 
     def finalize_entry(self, schema):
-        """ Called once after schema loading to set state.
+        """Called once after schema loading to set state.
 
         Parameters:
             schema (HedSchema): The schema that the rules come from.

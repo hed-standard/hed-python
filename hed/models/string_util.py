@@ -1,4 +1,5 @@
-""" Utilities for manipulating HedString objects. """
+"""Utilities for manipulating HedString objects."""
+
 import re
 from hed.models.hed_string import HedString
 
@@ -25,7 +26,7 @@ def gather_descriptions(hed_string):
 
 
 def split_base_tags(hed_string, base_tags, remove_group=False):
-    """ Split a HedString object into two separate HedString objects based on the presence of base tags.
+    """Split a HedString object into two separate HedString objects based on the presence of base tags.
 
     Parameters:
         hed_string (HedString): The input HedString object to be split.
@@ -54,7 +55,7 @@ def split_base_tags(hed_string, base_tags, remove_group=False):
 
 
 def split_def_tags(hed_string, def_names, remove_group=False):
-    """ Split a HedString object into two separate HedString objects based on the presence of def tags
+    """Split a HedString object into two separate HedString objects based on the presence of def tags
 
         This does NOT handle def-expand tags currently.
 
@@ -83,12 +84,12 @@ def split_def_tags(hed_string, def_names, remove_group=False):
 
 
 def cleanup_empties(string_in: str) -> str:
-    leading_comma_regex = re.compile(r'^\s*,+')
-    trailing_comma_regex = re.compile(r',\s*$')
-    inner_comma_regex = re.compile(r',\s*,+')
-    empty_parens_regex = re.compile(r'\(\s*\)')
-    redundant_parens_regex = re.compile(r'\(\s*([,\s]*)\s*\)')
-    trailing_inner_comma_regex = re.compile(r'[\s,]+\)')
+    leading_comma_regex = re.compile(r"^\s*,+")
+    trailing_comma_regex = re.compile(r",\s*$")
+    inner_comma_regex = re.compile(r",\s*,+")
+    empty_parens_regex = re.compile(r"\(\s*\)")
+    redundant_parens_regex = re.compile(r"\(\s*([,\s]*)\s*\)")
+    trailing_inner_comma_regex = re.compile(r"[\s,]+\)")
 
     result = string_in
     previous_result = None
@@ -97,27 +98,27 @@ def cleanup_empties(string_in: str) -> str:
         previous_result = result
 
         # Step 1: Remove empty parentheses
-        result = empty_parens_regex.sub('', result)
+        result = empty_parens_regex.sub("", result)
 
         # Step 2: Remove redundant parentheses containing only commas/spaces
         def replace_redundant_parens(match):
             group1 = match.group(1)
-            if re.fullmatch(r'[,\s()]*', group1):
-                return ''
+            if re.fullmatch(r"[,\s()]*", group1):
+                return ""
             return f"({group1.strip().lstrip(',').rstrip(',')})"
 
         result = redundant_parens_regex.sub(replace_redundant_parens, result)
 
         # Step 3: Remove leading and trailing commas
-        result = leading_comma_regex.sub('', result)
-        result = trailing_comma_regex.sub('', result)
+        result = leading_comma_regex.sub("", result)
+        result = trailing_comma_regex.sub("", result)
 
         # Step 4: Collapse multiple commas inside
-        result = inner_comma_regex.sub(',', result)
+        result = inner_comma_regex.sub(",", result)
 
         # Step 5: Remove trailing commas inside parentheses
-        result = trailing_inner_comma_regex.sub(')', result)
+        result = trailing_inner_comma_regex.sub(")", result)
 
-    result = re.sub(r'\(\s*,+', '(', result)
+    result = re.sub(r"\(\s*,+", "(", result)
 
     return result.strip()

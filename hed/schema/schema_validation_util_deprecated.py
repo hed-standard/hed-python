@@ -1,4 +1,5 @@
 """Legacy validation for terms and descriptions prior to 8.3.0."""
+
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import SchemaWarnings
 
@@ -8,7 +9,7 @@ ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 
 
 def validate_schema_tag(hed_entry):
-    """ Check short tag for capitalization and illegal characters.
+    """Check short tag for capitalization and illegal characters.
 
     Parameters:
         hed_entry (HedTagEntry): A single HED term.
@@ -25,18 +26,20 @@ def validate_schema_tag(hed_entry):
 
     for i, char in enumerate(hed_term):
         if i == 0 and not (char.isdigit() or char.isupper()):
-            issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION,
-                                                     hed_term, char_index=i, problem_char=char)
+            issues_list += ErrorHandler.format_error(
+                SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, hed_term, char_index=i, problem_char=char
+            )
             continue
         if char in ALLOWED_TAG_CHARS or char.isalnum():
             continue
-        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
-                                                 hed_term, char_index=i, problem_char=char)
+        issues_list += ErrorHandler.format_error(
+            SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, hed_term, char_index=i, problem_char=char
+        )
     return issues_list
 
 
 def validate_schema_description(hed_entry):
-    """ Check the description of a single schema entry.
+    """Check the description of a single schema entry.
 
     Parameters:
         hed_entry (HedSchemaEntry): A single schema entry
@@ -54,13 +57,18 @@ def validate_schema_description(hed_entry):
             continue
         if char in ALLOWED_DESC_CHARS:
             continue
-        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
-                                                 hed_entry.description, hed_entry.name, char_index=i, problem_char=char)
+        issues_list += ErrorHandler.format_error(
+            SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
+            hed_entry.description,
+            hed_entry.name,
+            char_index=i,
+            problem_char=char,
+        )
     return issues_list
 
 
 def verify_no_brackets(hed_entry):
-    """ Extremely basic check to block curly braces
+    """Extremely basic check to block curly braces
 
     Parameters:
         hed_entry (HedSchemaEntry): A single schema entry
@@ -72,8 +80,9 @@ def verify_no_brackets(hed_entry):
     issues_list = []
     indexes = _get_disallowed_character_indexes(hed_term)
     for char, index in indexes:
-        issues_list += ErrorHandler.format_error(SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
-                                                 hed_term, char_index=index, problem_char=char)
+        issues_list += ErrorHandler.format_error(
+            SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG, hed_term, char_index=index, problem_char=char
+        )
     return issues_list
 
 

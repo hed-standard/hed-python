@@ -12,7 +12,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
         hed_xml_file = os.path.realpath(os.path.join(cls.base_data_dir, "schema_tests/HED8.0.0t.xml"))
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
@@ -21,8 +21,7 @@ class Test(unittest.TestCase):
 
         cls.placeholder_definition_contents = "(Acceleration/#,Item/TestDef2)"
         cls.placeholder_definition_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents})"
-        cls.placeholder_definition_string_no_paren = \
-            f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
+        cls.placeholder_definition_string_no_paren = f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
         cls.label_def_string = "Def/TestDef"
         cls.expanded_def_string = f"(Def-expand/TestDef,{cls.def_contents_string})"
         cls.basic_hed_string = "Item/BasicTestTag1,Item/BasicTestTag2"
@@ -75,8 +74,9 @@ class Test(unittest.TestCase):
         def_issues = def_validator.validate_def_tags(valid_placeholder)
         self.assertFalse(def_issues)
 
-        invalid_placeholder = HedString("(Def-expand/TestDefPlaceholder/2471,(Acceleration/21,Item/TestDef2))",
-                                        self.hed_schema)
+        invalid_placeholder = HedString(
+            "(Def-expand/TestDefPlaceholder/2471,(Acceleration/21,Item/TestDef2))", self.hed_schema
+        )
         def_issues = def_validator.validate_def_tags(invalid_placeholder)
         self.assertTrue(bool(def_issues))
 
@@ -103,7 +103,7 @@ class TestDefErrors(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
         hed_xml_file = os.path.realpath(os.path.join(cls.base_data_dir, "schema_tests/HED8.0.0t.xml"))
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
@@ -118,17 +118,23 @@ class TestDefErrors(unittest.TestCase):
         cls.placeholder_label_def_string = "Def/TestDefPlaceholder/2471"
         cls.placeholder_definition_contents = "(Acceleration/#,Item/TestDef2)"
         cls.placeholder_definition_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents})"
-        cls.placeholder_definition_string_no_paren = \
-            f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
+        cls.placeholder_definition_string_no_paren = f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
         cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Acceleration/2471,Item/TestDef2))"
 
         cls.placeholder_hed_string_with_def = f"{cls.basic_hed_string},{cls.placeholder_label_def_string}"
         cls.placeholder_hed_string_with_def_first = f"{cls.placeholder_label_def_string},{cls.basic_hed_string}"
         cls.placeholder_hed_string_with_def_first_paren = f"({cls.placeholder_label_def_string},{cls.basic_hed_string})"
 
-    def base_def_validator(self, test_strings, result_strings, expand_defs, shrink_defs,
-                           remove_definitions, extra_ops=None,
-                           basic_definition_string=None):
+    def base_def_validator(
+        self,
+        test_strings,
+        result_strings,
+        expand_defs,
+        shrink_defs,
+        remove_definitions,
+        extra_ops=None,
+        basic_definition_string=None,
+    ):
         if not basic_definition_string:
             basic_definition_string = self.basic_definition_string
         def_dict = DefValidator(basic_definition_string, hed_schema=self.hed_schema)
@@ -148,101 +154,141 @@ class TestDefErrors(unittest.TestCase):
 
     def test_expand_def_tags(self):
         basic_def_strings = {
-            'str_no_defs': self.basic_definition_string,
-            'str2': self.basic_definition_string_no_paren,
-            'str3': self.basic_hed_string + "," + self.basic_definition_string,
-            'str4': self.basic_definition_string + "," + self.basic_hed_string,
-            'str5': self.basic_hed_string_with_def,
-            'str6': self.basic_hed_string_with_def_first,
-            'str7': self.basic_hed_string_with_def_first_paren,
-            'str8': "(" + self.basic_hed_string_with_def_first_paren + ")",
+            "str_no_defs": self.basic_definition_string,
+            "str2": self.basic_definition_string_no_paren,
+            "str3": self.basic_hed_string + "," + self.basic_definition_string,
+            "str4": self.basic_definition_string + "," + self.basic_hed_string,
+            "str5": self.basic_hed_string_with_def,
+            "str6": self.basic_hed_string_with_def_first,
+            "str7": self.basic_hed_string_with_def_first_paren,
+            "str8": "(" + self.basic_hed_string_with_def_first_paren + ")",
         }
         expanded_def_strings = {
-            'str_no_defs': "",
-            'str2': self.basic_definition_string_no_paren,
-            'str3': self.basic_hed_string,
-            'str4': self.basic_hed_string,
-            'str5': self.basic_hed_string + "," + self.expanded_def_string,
-            'str6': self.expanded_def_string + "," + self.basic_hed_string,
-            'str7': "(" + self.expanded_def_string + "," + self.basic_hed_string + ")",
-            'str8': "((" + self.expanded_def_string + "," + self.basic_hed_string + "))",
+            "str_no_defs": "",
+            "str2": self.basic_definition_string_no_paren,
+            "str3": self.basic_hed_string,
+            "str4": self.basic_hed_string,
+            "str5": self.basic_hed_string + "," + self.expanded_def_string,
+            "str6": self.expanded_def_string + "," + self.basic_hed_string,
+            "str7": "(" + self.expanded_def_string + "," + self.basic_hed_string + ")",
+            "str8": "((" + self.expanded_def_string + "," + self.basic_hed_string + "))",
         }
         expanded_def_strings_with_definition = {
-            'str_no_defs': self.basic_definition_string,
-            'str2': self.basic_definition_string_no_paren,
-            'str3': self.basic_hed_string + "," + self.basic_definition_string,
-            'str4': self.basic_definition_string + "," + self.basic_hed_string,
-            'str5': self.basic_hed_string + "," + self.expanded_def_string,
-            'str6': self.expanded_def_string + "," + self.basic_hed_string,
-            'str7': "(" + self.expanded_def_string + "," + self.basic_hed_string + ")",
-            'str8': "((" + self.expanded_def_string + "," + self.basic_hed_string + "))",
+            "str_no_defs": self.basic_definition_string,
+            "str2": self.basic_definition_string_no_paren,
+            "str3": self.basic_hed_string + "," + self.basic_definition_string,
+            "str4": self.basic_definition_string + "," + self.basic_hed_string,
+            "str5": self.basic_hed_string + "," + self.expanded_def_string,
+            "str6": self.expanded_def_string + "," + self.basic_hed_string,
+            "str7": "(" + self.expanded_def_string + "," + self.basic_hed_string + ")",
+            "str8": "((" + self.expanded_def_string + "," + self.basic_hed_string + "))",
         }
 
-        self.base_def_validator(basic_def_strings, expanded_def_strings_with_definition,
-                                expand_defs=True,
-                                shrink_defs=False, remove_definitions=False)
-        self.base_def_validator(basic_def_strings, basic_def_strings,
-                                expand_defs=False, shrink_defs=False, remove_definitions=False)
-        self.base_def_validator(basic_def_strings, basic_def_strings,
-                                expand_defs=False, shrink_defs=True, remove_definitions=False)
-        self.base_def_validator(expanded_def_strings_with_definition, basic_def_strings,
-                                expand_defs=False, shrink_defs=True,
-                                remove_definitions=False)
-        self.base_def_validator(expanded_def_strings_with_definition, expanded_def_strings_with_definition,
-                                expand_defs=True, shrink_defs=False,
-                                remove_definitions=False)
-        self.base_def_validator(basic_def_strings, expanded_def_strings,
-                                expand_defs=True, shrink_defs=False, remove_definitions=True)
+        self.base_def_validator(
+            basic_def_strings,
+            expanded_def_strings_with_definition,
+            expand_defs=True,
+            shrink_defs=False,
+            remove_definitions=False,
+        )
+        self.base_def_validator(
+            basic_def_strings, basic_def_strings, expand_defs=False, shrink_defs=False, remove_definitions=False
+        )
+        self.base_def_validator(
+            basic_def_strings, basic_def_strings, expand_defs=False, shrink_defs=True, remove_definitions=False
+        )
+        self.base_def_validator(
+            expanded_def_strings_with_definition,
+            basic_def_strings,
+            expand_defs=False,
+            shrink_defs=True,
+            remove_definitions=False,
+        )
+        self.base_def_validator(
+            expanded_def_strings_with_definition,
+            expanded_def_strings_with_definition,
+            expand_defs=True,
+            shrink_defs=False,
+            remove_definitions=False,
+        )
+        self.base_def_validator(
+            basic_def_strings, expanded_def_strings, expand_defs=True, shrink_defs=False, remove_definitions=True
+        )
 
     def test_expand_def_tags_placeholder(self):
         basic_def_strings = {
-            'str_no_defs': self.placeholder_definition_string,
-            'str2': self.placeholder_definition_string_no_paren,
-            'str3': self.basic_hed_string + "," + self.placeholder_definition_string,
-            'str4': self.placeholder_definition_string + "," + self.basic_hed_string,
-            'str5': self.placeholder_hed_string_with_def,
-            'str6': self.placeholder_hed_string_with_def_first,
-            'str7': self.placeholder_hed_string_with_def_first_paren,
+            "str_no_defs": self.placeholder_definition_string,
+            "str2": self.placeholder_definition_string_no_paren,
+            "str3": self.basic_hed_string + "," + self.placeholder_definition_string,
+            "str4": self.placeholder_definition_string + "," + self.basic_hed_string,
+            "str5": self.placeholder_hed_string_with_def,
+            "str6": self.placeholder_hed_string_with_def_first,
+            "str7": self.placeholder_hed_string_with_def_first_paren,
         }
         expanded_def_strings = {
-            'str_no_defs': "",
-            'str2': self.placeholder_definition_string_no_paren,
-            'str3': self.basic_hed_string,
-            'str4': self.basic_hed_string,
-            'str5': self.basic_hed_string + "," + self.placeholder_expanded_def_string,
-            'str6': self.placeholder_expanded_def_string + "," + self.basic_hed_string,
-            'str7': "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")",
+            "str_no_defs": "",
+            "str2": self.placeholder_definition_string_no_paren,
+            "str3": self.basic_hed_string,
+            "str4": self.basic_hed_string,
+            "str5": self.basic_hed_string + "," + self.placeholder_expanded_def_string,
+            "str6": self.placeholder_expanded_def_string + "," + self.basic_hed_string,
+            "str7": "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")",
         }
         expanded_def_strings_with_definition = {
-            'str_no_defs': self.placeholder_definition_string,
-            'str2': self.placeholder_definition_string_no_paren,
-            'str3': self.basic_hed_string + "," + self.placeholder_definition_string,
-            'str4': self.placeholder_definition_string + "," + self.basic_hed_string,
-            'str5': self.basic_hed_string + "," + self.placeholder_expanded_def_string,
-            'str6': self.placeholder_expanded_def_string + "," + self.basic_hed_string,
-            'str7': "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")",
+            "str_no_defs": self.placeholder_definition_string,
+            "str2": self.placeholder_definition_string_no_paren,
+            "str3": self.basic_hed_string + "," + self.placeholder_definition_string,
+            "str4": self.placeholder_definition_string + "," + self.basic_hed_string,
+            "str5": self.basic_hed_string + "," + self.placeholder_expanded_def_string,
+            "str6": self.placeholder_expanded_def_string + "," + self.basic_hed_string,
+            "str7": "(" + self.placeholder_expanded_def_string + "," + self.basic_hed_string + ")",
         }
 
-        self.base_def_validator(basic_def_strings, expanded_def_strings_with_definition,
-                                expand_defs=True, shrink_defs=False,
-                                remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
+        self.base_def_validator(
+            basic_def_strings,
+            expanded_def_strings_with_definition,
+            expand_defs=True,
+            shrink_defs=False,
+            remove_definitions=False,
+            basic_definition_string=self.placeholder_definition_string,
+        )
 
-        self.base_def_validator(basic_def_strings, basic_def_strings,
-                                expand_defs=False, shrink_defs=False,
-                                remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
+        self.base_def_validator(
+            basic_def_strings,
+            basic_def_strings,
+            expand_defs=False,
+            shrink_defs=False,
+            remove_definitions=False,
+            basic_definition_string=self.placeholder_definition_string,
+        )
 
-        self.base_def_validator(basic_def_strings, basic_def_strings,
-                                expand_defs=False, shrink_defs=True,
-                                remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
+        self.base_def_validator(
+            basic_def_strings,
+            basic_def_strings,
+            expand_defs=False,
+            shrink_defs=True,
+            remove_definitions=False,
+            basic_definition_string=self.placeholder_definition_string,
+        )
 
-        self.base_def_validator(expanded_def_strings_with_definition, basic_def_strings,
-                                expand_defs=False, shrink_defs=True,
-                                remove_definitions=False, basic_definition_string=self.placeholder_definition_string)
+        self.base_def_validator(
+            expanded_def_strings_with_definition,
+            basic_def_strings,
+            expand_defs=False,
+            shrink_defs=True,
+            remove_definitions=False,
+            basic_definition_string=self.placeholder_definition_string,
+        )
 
-        self.base_def_validator(basic_def_strings, expanded_def_strings,
-                                expand_defs=True, shrink_defs=False,
-                                remove_definitions=True, basic_definition_string=self.placeholder_definition_string)
+        self.base_def_validator(
+            basic_def_strings,
+            expanded_def_strings,
+            expand_defs=True,
+            shrink_defs=False,
+            remove_definitions=True,
+            basic_definition_string=self.placeholder_definition_string,
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -13,12 +13,13 @@ from hed.schema.schema_io import df_constants
 
 
 class SchemaLoader(ABC):
-    """ Baseclass for schema loading, to handle basic errors and partnered schemas
+    """Baseclass for schema loading, to handle basic errors and partnered schemas
 
-        Expected usage is SchemaLoaderXML.load(filename)
+    Expected usage is SchemaLoaderXML.load(filename)
 
-        SchemaLoaderXML(filename) will load just the header_attributes
+    SchemaLoaderXML(filename) will load just the header_attributes
     """
+
     def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
         """Loads the given schema from one of the two parameters.
 
@@ -31,8 +32,7 @@ class SchemaLoader(ABC):
             name(str or None): Optional user supplied identifier, by default uses filename
         """
         if schema_as_string and filename:
-            raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.",
-                               filename)
+            raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.", filename)
         self.file_format = file_format
         self.filename = filename
         self.name = name if name else filename
@@ -60,14 +60,18 @@ class SchemaLoader(ABC):
             self._schema = schema
             self.appending_to_schema = True
             if not self._schema.with_standard:
-                raise HedFileError(HedExceptions.SCHEMA_DUPLICATE_PREFIX,
-                                   "Loading multiple normal schemas as a merged one with the same namespace.  "
-                                   "Ensure schemas have the withStandard header attribute set",
-                                   self.name)
+                raise HedFileError(
+                    HedExceptions.SCHEMA_DUPLICATE_PREFIX,
+                    "Loading multiple normal schemas as a merged one with the same namespace.  "
+                    "Ensure schemas have the withStandard header attribute set",
+                    self.name,
+                )
             elif with_standard != self._schema.with_standard:
-                raise HedFileError(HedExceptions.BAD_WITH_STANDARD_MULTIPLE_VALUES,
-                   f"Merging schemas requires same withStandard value ({with_standard} != {self._schema.with_standard}).",
-                                   self.name)
+                raise HedFileError(
+                    HedExceptions.BAD_WITH_STANDARD_MULTIPLE_VALUES,
+                    f"Merging schemas requires same withStandard value ({with_standard} != {self._schema.with_standard}).",
+                    self.name,
+                )
             hed_attributes[hed_schema_constants.VERSION_ATTRIBUTE] = self._schema.version_number + f",{version_number}"
             hed_attributes[hed_schema_constants.LIBRARY_ATTRIBUTE] = self._schema.library + f",{self.library}"
         if name:
@@ -79,12 +83,12 @@ class SchemaLoader(ABC):
 
     @property
     def schema(self):
-        """ The partially loaded schema if you are after just header attributes."""
+        """The partially loaded schema if you are after just header attributes."""
         return self._schema
 
     @classmethod
     def load(cls, filename=None, schema_as_string=None, schema=None, file_format=None, name=""):
-        """ Loads and returns the schema, including partnered schema if applicable.
+        """Loads and returns the schema, including partnered schema if applicable.
 
         Parameters:
             filename(str or None): A valid filepath or None
@@ -102,7 +106,7 @@ class SchemaLoader(ABC):
         return loader._load()
 
     def _load(self):
-        """ Parses the previously loaded data, including loading a partnered schema if needed.
+        """Parses the previously loaded data, including loading a partnered schema if needed.
 
         Returns:
             schema(HedSchema): The new schema
@@ -111,14 +115,17 @@ class SchemaLoader(ABC):
         # Do a full load of the standard schema if this is a partnered schema
         if not self.appending_to_schema and self._schema.with_standard and not self._schema.merged:
             from hed.schema.hed_schema_io import load_schema_version
+
             saved_attr = self._schema.header_attributes
             saved_format = self._schema.source_format
             try:
                 base_version = load_schema_version(self._schema.with_standard)
             except HedFileError as e:
-                raise HedFileError(HedExceptions.BAD_WITH_STANDARD,
-                                   message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
-                                   filename=e.filename) from e
+                raise HedFileError(
+                    HedExceptions.BAD_WITH_STANDARD,
+                    message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
+                    filename=e.filename,
+                ) from e
             # Copy the non-alterable cached schema
             self._schema = copy.deepcopy(base_version)
             self._schema.filename = self.filename
@@ -151,8 +158,7 @@ class SchemaLoader(ABC):
         if not entry.has_attribute(HedKey.InLibrary) and self.appending_to_schema and self._schema.merged:
             return None
 
-        if self.library and (
-                not self._schema.with_standard or (not self._schema.merged and self._schema.with_standard)):
+        if self.library and (not self._schema.with_standard or (not self._schema.merged and self._schema.with_standard)):
             # only add it if not already present - This is a rare case
             if not entry.has_attribute(HedKey.InLibrary):
                 entry._set_attribute_value(HedKey.InLibrary, self.library)
@@ -161,7 +167,7 @@ class SchemaLoader(ABC):
 
     @staticmethod
     def find_rooted_entry(tag_entry, schema, loading_merged):
-        """ This semi-validates rooted tags, raising an exception on major errors
+        """This semi-validates rooted tags, raising an exception on major errors
 
         Parameters:
             tag_entry(HedTagEntry): the possibly rooted tag
@@ -182,30 +188,40 @@ class SchemaLoader(ABC):
         rooted_tag = tag_entry.has_attribute(constants.HedKey.Rooted, return_value=True)
         if rooted_tag is not None:
             if not schema.with_standard:
-                raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                                   f"Rooted tag attribute found on '{tag_entry.short_tag_name}' in a standard schema.",
-                                   schema.name)
+                raise HedFileError(
+                    HedExceptions.ROOTED_TAG_INVALID,
+                    f"Rooted tag attribute found on '{tag_entry.short_tag_name}' in a standard schema.",
+                    schema.name,
+                )
 
             if not isinstance(rooted_tag, str):
-                raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                                   f'Rooted tag \'{tag_entry.short_tag_name}\' is not a string."',
-                                   schema.name)
+                raise HedFileError(
+                    HedExceptions.ROOTED_TAG_INVALID,
+                    f"Rooted tag '{tag_entry.short_tag_name}' is not a string.\"",
+                    schema.name,
+                )
 
             if tag_entry.parent_name and not loading_merged:
-                raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                                   f'Found rooted tag \'{tag_entry.short_tag_name}\' as a non root node.',
-                                   schema.name)
+                raise HedFileError(
+                    HedExceptions.ROOTED_TAG_INVALID,
+                    f"Found rooted tag '{tag_entry.short_tag_name}' as a non root node.",
+                    schema.name,
+                )
 
             if not tag_entry.parent_name and loading_merged:
-                raise HedFileError(HedExceptions.ROOTED_TAG_INVALID,
-                                   f'Found rooted tag \'{tag_entry.short_tag_name}\' as a root node in a merged schema.',
-                                   schema.name)
+                raise HedFileError(
+                    HedExceptions.ROOTED_TAG_INVALID,
+                    f"Found rooted tag '{tag_entry.short_tag_name}' as a root node in a merged schema.",
+                    schema.name,
+                )
 
             rooted_entry = schema.tags.get(rooted_tag)
             if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):
-                raise HedFileError(HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
-                                   f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",
-                                   schema.name)
+                raise HedFileError(
+                    HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
+                    f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",
+                    schema.name,
+                )
 
             if loading_merged:
                 return None
@@ -213,20 +229,24 @@ class SchemaLoader(ABC):
             return rooted_entry
         return None
 
-    def _add_fatal_error(self, line_number, line, warning_message="Schema term is empty or the line is malformed",
-                         error_code=HedExceptions.WIKI_DELIMITERS_INVALID):
+    def _add_fatal_error(
+        self,
+        line_number,
+        line,
+        warning_message="Schema term is empty or the line is malformed",
+        error_code=HedExceptions.WIKI_DELIMITERS_INVALID,
+    ):
         self.fatal_errors += schema_util.format_error(line_number, line, warning_message, error_code)
 
-
     def fix_extras(self):
-        """ Fixes the extras after loading the schema, to ensure they are in the correct format."""
-        if not self._schema or not hasattr(self._schema, 'extras') or not self._schema.extras:
+        """Fixes the extras after loading the schema, to ensure they are in the correct format."""
+        if not self._schema or not hasattr(self._schema, "extras") or not self._schema.extras:
             return
 
         for key, extra in self._schema.extras.items():
             self._schema.extras[key] = extra.rename(columns=df_constants.EXTRAS_CONVERSIONS)
             if key in df_constants.extras_column_dict:
-               self._schema.extras[key] = self.fix_extra(key)
+                self._schema.extras[key] = self.fix_extra(key)
 
     def fix_extra(self, key):
         df = self._schema.extras[key]

@@ -1,4 +1,4 @@
-""" Container for a BIDS sidecar file. """
+"""Container for a BIDS sidecar file."""
 
 import os
 import io
@@ -8,10 +8,10 @@ from hed.tools.bids.bids_file import BidsFile
 
 
 class BidsSidecarFile(BidsFile):
-    """ A BIDS sidecar file. """
+    """A BIDS sidecar file."""
 
     def __init__(self, file_path):
-        """ Constructs a bids sidecar from a file.
+        """Constructs a bids sidecar from a file.
 
         Parameters:
             file_path (str): The real path of the sidecar.
@@ -20,18 +20,18 @@ class BidsSidecarFile(BidsFile):
         super().__init__(file_path)
 
     def is_sidecar_for(self, obj):
-        """ Return True if this is a sidecar for obj.
+        """Return True if this is a sidecar for obj.
 
-         Parameters:
-             obj (BidsFile):  A BidsFile object to check.
+        Parameters:
+            obj (BidsFile):  A BidsFile object to check.
 
-         Returns:
-             bool:   True if this is a BIDS parent of obj and False otherwise.
+        Returns:
+            bool:   True if this is a BIDS parent of obj and False otherwise.
 
-         Notes:
-             - A sidecar is a sidecar for itself.
+        Notes:
+            - A sidecar is a sidecar for itself.
 
-         """
+        """
 
         if obj.suffix != self.suffix:
             return False
@@ -43,8 +43,8 @@ class BidsSidecarFile(BidsFile):
                 return False
         return True
 
-    def set_contents(self, content_info=None, name='unknown', overwrite=False):
-        """ Set the contents of the sidecar.
+    def set_contents(self, content_info=None, name="unknown", overwrite=False):
+        """Set the contents of the sidecar.
 
         Parameters:
             content_info (dict, or None): If None, create a Sidecar from the object's file-path.
@@ -56,7 +56,7 @@ class BidsSidecarFile(BidsFile):
                 - None: This object's file_path is used.
                 - dict:  This is interpreted as a JSON dictionary.
 
-         """
+        """
         if not overwrite and self.contents:
             return
         try:
@@ -71,7 +71,7 @@ class BidsSidecarFile(BidsFile):
 
     @staticmethod
     def is_hed(json_dict):
-        """ Return True if the json has HED.
+        """Return True if the json has HED.
 
         Parameters:
             json_dict (dict): A dictionary representing a JSON file or merged file.
@@ -84,20 +84,20 @@ class BidsSidecarFile(BidsFile):
         if not json_dict or not isinstance(json_dict, dict):
             return False
         json_keys = json_dict.keys()
-        if 'HED' in json_keys or 'HED_assembled' in json_keys:
+        if "HED" in json_keys or "HED_assembled" in json_keys:
             return True
         for _key, value in json_dict.items():
             if not isinstance(value, dict):
                 continue
             val_keys = value.keys()
-            if 'HED' in val_keys or 'HED_assembled' in val_keys:
+            if "HED" in val_keys or "HED_assembled" in val_keys:
                 return True
 
         return False
 
     @staticmethod
-    def merge_sidecar_list(sidecar_list, name='merged_sidecar.json'):
-        """ Merge a list of sidecars into a single sidecar.
+    def merge_sidecar_list(sidecar_list, name="merged_sidecar.json"):
+        """Merge a list of sidecars into a single sidecar.
 
         Parameters:
             sidecar_list (list): A list of Sidecar objects.

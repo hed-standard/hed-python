@@ -1,4 +1,4 @@
-""" Validates the onset/offset conditions. """
+"""Validates the onset/offset conditions."""
 
 from hed.models.model_constants import DefTagNames
 from hed.errors.error_reporter import ErrorHandler
@@ -6,13 +6,13 @@ from hed.errors.error_types import TemporalErrors
 
 
 class OnsetValidator:
-    """ Validates onset/offset pairs. """
+    """Validates onset/offset pairs."""
 
     def __init__(self):
         self._onsets = {}
 
     def validate_temporal_relations(self, hed_string_obj) -> list[dict]:
-        """ Validate onset/offset/inset tag relations
+        """Validate onset/offset/inset tag relations
 
         Parameters:
             hed_string_obj (HedString): The HED string to check.
@@ -33,8 +33,9 @@ class OnsetValidator:
             def_tag = def_tags[0]
             def_name = def_tag.extension
             if def_name.casefold() in used_def_names:
-                onset_issues += ErrorHandler.format_error(TemporalErrors.ONSET_SAME_DEFS_ONE_ROW, tag=temporal_tag,
-                                                          def_name=def_name)
+                onset_issues += ErrorHandler.format_error(
+                    TemporalErrors.ONSET_SAME_DEFS_ONE_ROW, tag=temporal_tag, def_name=def_name
+                )
                 continue
 
             used_def_names.add(def_tag.extension.casefold())
@@ -64,7 +65,7 @@ class OnsetValidator:
 
     @staticmethod
     def check_for_banned_tags(hed_string) -> list[dict]:
-        """ Returns an issue for every tag found from the banned list (for files without onset column).
+        """Returns an issue for every tag found from the banned list (for files without onset column).
 
         Parameters:
             hed_string (HedString): The string to check.

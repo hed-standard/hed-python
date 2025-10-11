@@ -1,4 +1,5 @@
-""" Manager of events of temporal extent. """
+"""Manager of events of temporal extent."""
+
 import pandas as pd
 import bisect
 
@@ -12,10 +13,10 @@ from hed.tools.analysis.hed_type_defs import HedTypeDefs
 
 
 class EventManager:
-    """ Manager of events of temporal extent. """
+    """Manager of events of temporal extent."""
 
     def __init__(self, input_data, hed_schema, extra_defs=None):
-        """ Create an event manager for an events file. Manages events of temporal extent.
+        """Create an event manager for an events file. Manages events of temporal extent.
 
         Parameters:
             input_data (TabularInput): Represents an events file with its sidecar.
@@ -43,7 +44,7 @@ class EventManager:
         self._create_event_list(input_data)
 
     def _create_event_list(self, input_data):
-        """ Populate the event_list with the events with temporal extent indexed by event number.
+        """Populate the event_list with the events with temporal extent indexed by event number.
 
         Parameters:
             input_data (TabularInput): A tabular input that includes its relevant sidecar.
@@ -62,8 +63,8 @@ class EventManager:
         delay_df = df_util.split_delay_tags(hed_strings, self.hed_schema, input_data.onsets)
 
         hed_strings = [HedString(hed_string, self.hed_schema) for hed_string in delay_df.HED]
-        self.onsets = pd.to_numeric(delay_df.onset, errors='coerce')
-        self.original_index = pd.to_numeric(delay_df.original_index, errors='coerce')
+        self.onsets = pd.to_numeric(delay_df.onset, errors="coerce")
+        self.original_index = pd.to_numeric(delay_df.original_index, errors="coerce")
         self.event_list = [[] for _ in range(len(hed_strings))]
         onset_dict = {}  # Temporary dictionary keeping track of temporal events that haven't ended yet.
         for event_index, hed in enumerate(hed_strings):
@@ -90,7 +91,7 @@ class EventManager:
         hed.remove(to_remove)
 
     def _extract_temporal_events(self, hed, event_index, onset_dict):
-        """ Extract the temporal events and remove them from the other HED strings.
+        """Extract the temporal events and remove them from the other HED strings.
 
         Parameters:
             hed (HedString):  The assembled HedString at position event_index in the data.
@@ -100,11 +101,10 @@ class EventManager:
         Note:
             This removes the events of temporal extent from HED.
 
-         """
+        """
         if not hed:
             return
-        group_tuples = hed.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY},
-                                               include_groups=2)
+        group_tuples = hed.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY}, include_groups=2)
 
         to_remove = []
         for def_tag, group in group_tuples:
@@ -121,7 +121,7 @@ class EventManager:
         hed.remove(to_remove)
 
     def unfold_context(self, remove_types=None):
-        """ Unfold the event information into a tuple based on context.
+        """Unfold the event information into a tuple based on context.
 
         Parameters:
             remove_types (list or None):  List of types to remove. If None, defaults to empty list.
@@ -139,15 +139,14 @@ class EventManager:
         remove_defs = self.get_type_defs(remove_types)  # definitions corresponding to remove types to be filtered out
         new_hed = ["" for _ in range(len(self.hed_strings))]
         for index, item in enumerate(self.hed_strings):
-            new_hed[index] = self._filter_hed(item, remove_types=remove_types,
-                                              remove_defs=remove_defs, remove_group=False)
+            new_hed[index] = self._filter_hed(item, remove_types=remove_types, remove_defs=remove_defs, remove_group=False)
         if self.onsets is None:
             return new_hed, None, None
         new_base, new_contexts = self._get_base_contexts(remove_types, remove_defs)
         return new_hed, new_base, new_contexts
 
     def _get_base_contexts(self, remove_types, remove_defs):
-        """ Expand the context and filter to remove specified types.
+        """Expand the context and filter to remove specified types.
 
         Parameters:
             remove_types (list):  List of types to remove.
@@ -157,14 +156,16 @@ class EventManager:
         new_base = ["" for _ in range(len(self.hed_strings))]
         new_contexts = ["" for _ in range(len(self.hed_strings))]
         for index, _item in enumerate(self.hed_strings):
-            new_base[index] = self._filter_hed(self.base[index], remove_types=remove_types,
-                                               remove_defs=remove_defs, remove_group=True)
-            new_contexts[index] = self._filter_hed(self.contexts[index], remove_types=remove_types,
-                                                   remove_defs=remove_defs, remove_group=True)
-        return new_base, new_contexts   # these are each a list of strings
+            new_base[index] = self._filter_hed(
+                self.base[index], remove_types=remove_types, remove_defs=remove_defs, remove_group=True
+            )
+            new_contexts[index] = self._filter_hed(
+                self.contexts[index], remove_types=remove_types, remove_defs=remove_defs, remove_group=True
+            )
+        return new_base, new_contexts  # these are each a list of strings
 
     def _extract_context(self):
-        """ Expand the onset and the ongoing context for additional processing.
+        """Expand the onset and the ongoing context for additional processing.
 
         Notes: For each event, the Onset goes in the base list and the remainder of the times go in the contexts list.
 
@@ -181,7 +182,7 @@ class EventManager:
         self.contexts = self.compress_strings(contexts)
 
     def _filter_hed(self, hed, remove_types=None, remove_defs=None, remove_group=False):
-        """ Remove types and definitions from a HED string.
+        """Remove types and definitions from a HED string.
 
         Parameters:
             hed (string or HedString): The HED string to be filtered.
@@ -209,7 +210,7 @@ class EventManager:
         return str(hed_obj)
 
     def str_list_to_hed(self, str_list):
-        """ Create a HedString object from a list of strings.
+        """Create a HedString object from a list of strings.
 
         Parameters:
             str_list (list): A list of strings to be concatenated with commas and then converted.
@@ -218,13 +219,13 @@ class EventManager:
             Union[HedString, None]:  The converted list.
 
         """
-        filtered_list = [item for item in str_list if item != '']  # list of strings
+        filtered_list = [item for item in str_list if item != ""]  # list of strings
         if not filtered_list:  # empty lists don't contribute
             return None
         return HedString(",".join(filtered_list), self.hed_schema, def_dict=self.def_dict)
 
     def get_type_defs(self, types):
-        """ Return a list of definition names (lower case) that correspond to any of the specified types.
+        """Return a list of definition names (lower case) that correspond to any of the specified types.
 
         Parameters:
             types (list or None):  List of tags that are treated as types such as 'Condition-variable'
@@ -243,7 +244,7 @@ class EventManager:
 
     @staticmethod
     def compress_strings(list_to_compress):
-        """ Compress a list of lists of strings into a single str with comma-separated elements.
+        """Compress a list of lists of strings into a single str with comma-separated elements.
 
         Parameters:
             list_to_compress (list):  List of lists of HED str to turn into a list of single HED strings.

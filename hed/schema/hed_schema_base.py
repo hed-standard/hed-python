@@ -1,16 +1,18 @@
 """
-    Abstract base class for HedSchema and HedSchemaGroup, showing the common functionality
+Abstract base class for HedSchema and HedSchemaGroup, showing the common functionality
 """
+
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from abc import ABC, abstractmethod
 from hed.schema.schema_io import schema_util
 
 
 class HedSchemaBase(ABC):
-    """ Baseclass for schema and schema group.
+    """Baseclass for schema and schema group.
 
-        Implementing the abstract functions will allow you to use the schema for validation
+    Implementing the abstract functions will allow you to use the schema for validation
     """
+
     def __init__(self):
         self._name = ""  # User provided identifier for this schema(not used for equality comparison or saved)
         self._schema83 = None  # If True, this is an 8.3 style schema for validation/attribute purposes
@@ -45,7 +47,7 @@ class HedSchemaBase(ABC):
 
     @abstractmethod
     def get_schema_versions(self):
-        """ A list of HED version strings including namespace and library name if any of this schema.
+        """A list of HED version strings including namespace and library name if any of this schema.
 
         Returns:
             list: The complete version of this schema including library name and namespace.
@@ -54,7 +56,7 @@ class HedSchemaBase(ABC):
 
     @abstractmethod
     def get_formatted_version(self):
-        """ The HED version string including namespace and library name if any of this schema.
+        """The HED version string including namespace and library name if any of this schema.
 
         Returns:
             str: The complete version of this schema including library name and namespace.
@@ -63,7 +65,7 @@ class HedSchemaBase(ABC):
 
     @abstractmethod
     def schema_for_namespace(self, namespace):
-        """ Return the HedSchema for the library namespace.
+        """Return the HedSchema for the library namespace.
 
         Parameters:
             namespace (str): A schema library name namespace.
@@ -76,7 +78,7 @@ class HedSchemaBase(ABC):
     @property
     @abstractmethod
     def valid_prefixes(self):
-        """ Return a list of all prefixes this group will accept.
+        """Return a list of all prefixes this group will accept.
 
         Returns:
             list[str]:  A list of strings representing valid prefixes for this group.
@@ -85,7 +87,7 @@ class HedSchemaBase(ABC):
 
     @abstractmethod
     def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags):
-        """ Return tag entries with the given attribute.
+        """Return tag entries with the given attribute.
 
         Parameters:
             attribute (str): A tag attribute.  Eg HedKey.ExtensionAllowed
@@ -102,7 +104,7 @@ class HedSchemaBase(ABC):
     # todo: maybe tweak this API so you don't have to pass in library namespace?
     @abstractmethod
     def get_tag_entry(self, name, key_class=HedSectionKey.Tags, schema_namespace=""):
-        """ Return the schema entry for this tag, if one exists.
+        """Return the schema entry for this tag, if one exists.
 
         Parameters:
             name (str): Any form of basic tag(or other section entry) to look up.
@@ -118,7 +120,7 @@ class HedSchemaBase(ABC):
 
     @abstractmethod
     def find_tag_entry(self, tag, schema_namespace=""):
-        """ Find the schema entry for a given source tag.
+        """Find the schema entry for a given source tag.
 
         Parameters:
             tag (str, HedTag): Any form of tag to look up.  Can have an extension, value, etc.
@@ -140,7 +142,7 @@ class HedSchemaBase(ABC):
 
     @abstractmethod
     def check_compliance(self, check_for_warnings=True, name=None, error_handler=None):
-        """ Check for HED3 compliance of this schema.
+        """Check for HED3 compliance of this schema.
 
         Parameters:
             check_for_warnings (bool): If True, checks for formatting issues like invalid characters, capitalization.

@@ -17,4 +17,5 @@ from hed.schema.hed_schema_io import load_schema, load_schema_version
 
 
 from . import _version
-__version__ = _version.get_versions()['version']
+
+__version__ = _version.get_versions()["version"]

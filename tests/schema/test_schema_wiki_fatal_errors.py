@@ -6,7 +6,7 @@ from hed.errors import HedFileError, HedExceptions
 
 
 class TestHedSchema(unittest.TestCase):
-    base_schema_dir = '../data/schema_tests/wiki_tests/'
+    base_schema_dir = "../data/schema_tests/wiki_tests/"
 
     @classmethod
     def setUpClass(cls):
@@ -32,7 +32,7 @@ class TestHedSchema(unittest.TestCase):
             "malformed_line5.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
             "malformed_line6.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
             "malformed_line7.mediawiki": HedExceptions.WIKI_DELIMITERS_INVALID,
-            "empty_node.xml": HedExceptions.HED_SCHEMA_NODE_NAME_INVALID
+            "empty_node.xml": HedExceptions.HED_SCHEMA_NODE_NAME_INVALID,
         }
 
         cls.expected_count = {
@@ -44,7 +44,7 @@ class TestHedSchema(unittest.TestCase):
             "malformed_line5.mediawiki": 1,
             "malformed_line6.mediawiki": 2,
             "malformed_line7.mediawiki": 2,
-            'HED_schema_no_start.mediawiki': 1
+            "HED_schema_no_start.mediawiki": 1,
         }
         cls.expected_line_numbers = {
             "empty_node.mediawiki": [9],
@@ -73,8 +73,9 @@ class TestHedSchema(unittest.TestCase):
             issues = context.exception.issues
 
             self.assertIsInstance(get_printable_issue_string(issues), str)
-            self.assertEqual(context.exception.args[0], self.files_and_errors[filename],
-                             f"Error message mismatch for {filename}")
+            self.assertEqual(
+                context.exception.args[0], self.files_and_errors[filename], f"Error message mismatch for {filename}"
+            )
             self.assertTrue(context.exception.filename == full_filename)
 
     def test_merging_errors_schema(self):
@@ -85,6 +86,7 @@ class TestHedSchema(unittest.TestCase):
                 # all of these should produce exceptions.
             from hed.errors import ErrorHandler, ErrorContext, get_printable_issue_string
             from hed.errors.error_types import SchemaAttributeErrors
+
             # Verify basic properties of exception
             expected_line_numbers = self.expected_line_numbers.get(filename, [])
             if expected_line_numbers:
@@ -96,8 +98,9 @@ class TestHedSchema(unittest.TestCase):
             error_handler.push_error_context(ErrorContext.ROW, 1)
             error_handler.push_error_context(ErrorContext.COLUMN, 2)
 
-            issues = error_handler.format_error_with_context(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID,
-                                                             "error_attribute", source_tag="error_tag")
+            issues = error_handler.format_error_with_context(
+                SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID, "error_attribute", source_tag="error_tag"
+            )
             error_handler.pop_error_context()
             error_handler.pop_error_context()
 

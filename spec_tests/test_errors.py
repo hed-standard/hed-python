@@ -21,11 +21,13 @@ skip_tests = {
     "invalid-character-name-value-class-deprecated": "Removing support for 8.2.0 or earlier name classes"
 }
 
+
 class MyTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        test_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                 'hed-specification/tests/json_tests'))
+        test_dir = os.path.realpath(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-specification/tests/json_tests")
+        )
         cls.test_dir = test_dir
         cls.fail_count = []
 
@@ -34,16 +36,18 @@ class MyTestCase(unittest.TestCase):
             cls.test_files = []
             cls.skip_tests = True
             # Only print warning if not in CI environment to avoid interference
-            if not os.environ.get('GITHUB_ACTIONS'):
+            if not os.environ.get("GITHUB_ACTIONS"):
                 print(f"WARNING: Test directory not found: {test_dir}")
                 print("To run spec error tests, copy hed-specification repository content to spec_tests/hed-specification/")
         else:
-            cls.test_files = [os.path.join(test_dir, f) for f in os.listdir(test_dir)
-                              if os.path.isfile(os.path.join(test_dir, f))]
+            cls.test_files = [
+                os.path.join(test_dir, f) for f in os.listdir(test_dir) if os.path.isfile(os.path.join(test_dir, f))
+            ]
             cls.skip_tests = False
 
-        cls.default_sidecar = Sidecar(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                                    'test_sidecar.json')))
+        cls.default_sidecar = Sidecar(
+            os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_sidecar.json"))
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -53,20 +57,20 @@ class MyTestCase(unittest.TestCase):
         with open(test_file, "r") as fp:
             test_info = json.load(fp)
         for info in test_info:
-            error_code = info['error_code']
-            all_codes = [error_code] + info.get('alt_codes', [])
+            error_code = info["error_code"]
+            all_codes = [error_code] + info.get("alt_codes", [])
             if error_code in skip_tests:
                 print(f"Skipping {error_code} test because: {skip_tests[error_code]}")
                 continue
-            name = info.get('name', '')
+            name = info.get("name", "")
             if name in skip_tests:
                 print(f"Skipping {name} test because: {skip_tests[name]}")
                 continue
             if test_name is not None and name != test_name:
                 print(f"Skipping {name} test because it is not the one specified")
                 continue
-            description = info['description']
-            schema = info['schema']
+            description = info["description"]
+            schema = info["schema"]
             check_for_warnings = info.get("warning", False)
             error_handler = ErrorHandler(check_for_warnings)
             if schema:
@@ -75,12 +79,11 @@ class MyTestCase(unittest.TestCase):
                 except HedFileError as e:
                     issues = e.issues
                     if not issues:
-                        issues += [{"code": e.code,
-                                    "message": e.message}]
+                        issues += [{"code": e.code, "message": e.message}]
                     self.report_result("fails", issues, error_code, all_codes, description, name, "dummy", "Schema")
                     # self.fail_count.append(name)
                     continue
-                definitions = info.get('definitions', None)
+                definitions = info.get("definitions", None)
                 def_dict = DefinitionDict(definitions, schema)
                 self.assertFalse(def_dict.issues)
 
@@ -90,17 +93,21 @@ class MyTestCase(unittest.TestCase):
                 if test_type is not None and test_type != section_name:
                     continue
                 if section_name == "string_tests":
-                    self._run_single_string_test(section, schema, def_dict, error_code, all_codes,
-                                                 description, name, error_handler)
+                    self._run_single_string_test(
+                        section, schema, def_dict, error_code, all_codes, description, name, error_handler
+                    )
                 if section_name == "sidecar_tests":
-                    self._run_single_sidecar_test(section, schema, def_dict, error_code, all_codes,
-                                                  description, name, error_handler)
+                    self._run_single_sidecar_test(
+                        section, schema, def_dict, error_code, all_codes, description, name, error_handler
+                    )
                 if section_name == "event_tests":
-                    self._run_single_events_test(section, schema, def_dict, error_code, all_codes,
-                                                 description, name, error_handler)
+                    self._run_single_events_test(
+                        section, schema, def_dict, error_code, all_codes, description, name, error_handler
+                    )
                 if section_name == "combo_tests":
-                    self._run_single_combo_test(section, schema, def_dict, error_code, all_codes,
-                                                description, name, error_handler)
+                    self._run_single_combo_test(
+                        section, schema, def_dict, error_code, all_codes, description, name, error_handler
+                    )
                 if section_name == "schema_tests":
                     self._run_single_schema_test(section, error_code, all_codes, description, name, error_handler)
 
@@ -114,7 +121,7 @@ class MyTestCase(unittest.TestCase):
                 print(get_printable_issue_string(issues))
                 self.fail_count.append(name)
             else:
-                if any(issue['code'] in all_codes for issue in issues):
+                if any(issue["code"] in all_codes for issue in issues):
                     return
                 print(f"{error_code}: {description} all codes:[{str(all_codes)}]")
                 print(f"Failed '{test_type}' (unexpected errors found) '{name}': {test}")
@@ -148,6 +155,7 @@ class MyTestCase(unittest.TestCase):
 
     def _run_single_events_test(self, info, schema, def_dict, error_code, all_codes, description, name, error_handler):
         from hed import TabularInput
+
         for result, tests in info.items():
             for test in tests:
                 string = ""
@@ -159,7 +167,7 @@ class MyTestCase(unittest.TestCase):
                     string += "\t".join(str(x) for x in row) + "\n"
 
                 if not string:
-                    print(F"Invalid blank events found in test: {error_code}:{name}")
+                    print(f"Invalid blank events found in test: {error_code}:{name}")
                     continue
                 file_obj = io.BytesIO(string.encode("utf-8"))
 
@@ -169,9 +177,10 @@ class MyTestCase(unittest.TestCase):
 
     def _run_single_combo_test(self, info, schema, def_dict, error_code, all_codes, description, name, error_handler):
         from hed import TabularInput
+
         for result, tests in info.items():
             for test in tests:
-                sidecar_test = test['sidecar']
+                sidecar_test = test["sidecar"]
                 default_dict = self.default_sidecar.loaded_dict
                 for key, value in default_dict.items():
                     sidecar_test.setdefault(key, value)
@@ -181,7 +190,7 @@ class MyTestCase(unittest.TestCase):
                 issues = sidecar.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
                 string = ""
                 try:
-                    for row in test['events']:
+                    for row in test["events"]:
                         if not isinstance(row, list):
                             print(f"Improper grouping in test: {error_code}:{name}")
                             print(f"Improper data for test {name}: {test}")
@@ -190,7 +199,7 @@ class MyTestCase(unittest.TestCase):
                         string += "\t".join(str(x) for x in row) + "\n"
 
                     if not string:
-                        print(F"Invalid blank events found in test: {error_code}:{name}")
+                        print(f"Invalid blank events found in test: {error_code}:{name}")
                         continue
                     file_obj = io.BytesIO(string.encode("utf-8"))
 
@@ -214,15 +223,18 @@ class MyTestCase(unittest.TestCase):
                 except HedFileError as e:
                     issues = e.issues
                     if not issues:
-                        issues += [{"code": e.code,
-                                   "message": e.message}]
+                        issues += [{"code": e.code, "message": e.message}]
                 except urllib.error.HTTPError:
-                    issues += [{"code": "Http_error",
-                                "message": "HTTP error in testing, probably due to rate limiting for local testing."}]
+                    issues += [
+                        {
+                            "code": "Http_error",
+                            "message": "HTTP error in testing, probably due to rate limiting for local testing.",
+                        }
+                    ]
                 self.report_result(result, issues, error_code, all_codes, description, name, test, "schema_tests")
 
     def test_errors(self):
-        if hasattr(self, 'skip_tests') and self.skip_tests:
+        if hasattr(self, "skip_tests") and self.skip_tests:
             self.skipTest("hed-specification directory not found. Copy submodule content to run this test.")
 
         count = 1
@@ -241,5 +253,5 @@ class MyTestCase(unittest.TestCase):
     #     self.run_single_test(test_file, test_name, test_type)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

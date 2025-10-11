@@ -6,6 +6,7 @@ This script verifies that the required directories and files exist.
 
 import os
 
+
 def check_directory(path, description):
     """Check if a directory exists and list its contents."""
     print(f"\nChecking {description}:")
@@ -37,6 +38,7 @@ def check_directory(path, description):
     else:
         print("  ❌ Directory does not exist")
         return False
+
 
 def main():
     """Main function to check spec_tests setup."""
@@ -92,6 +94,7 @@ def main():
     print("\nTo run available tests now:")
     print(f"  cd {os.path.dirname(spec_tests_dir)}")
     print("  python -m unittest discover spec_tests -v")
+
 
 if __name__ == "__main__":
     main()

@@ -1,48 +1,38 @@
-""" Remove rows from a columnar file based on column values. """
+"""Remove rows from a columnar file based on column values."""
 
 import pandas as pd
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
 class RemoveRowsOp(BaseOp):
-    """ Remove rows from a columnar file based on the values in a specified row.
+    """Remove rows from a columnar file based on the values in a specified row.
 
     Required remodeling parameters:
         - **column_name** (*str*): The name of column to be tested.
         - **remove_values** (*list*): The values to test for row removal.
 
     """
+
     NAME = "remove_rows"
 
     PARAMS = {
         "type": "object",
         "properties": {
-            "column_name": {
-                "type": "string",
-                "description": "Name of the key column to determine which rows to remove."
-            },
+            "column_name": {"type": "string", "description": "Name of the key column to determine which rows to remove."},
             "remove_values": {
                 "type": "array",
                 "description": "List of key values for rows to remove.",
-                "items": {
-                    "type": [
-                        "string",
-                        "number"
-                    ]
-                },
+                "items": {"type": ["string", "number"]},
                 "minItems": 1,
-                "uniqueItems": True
-            }
+                "uniqueItems": True,
+            },
         },
-        "required": [
-            "column_name",
-            "remove_values"
-        ],
-        "additionalProperties": False
+        "required": ["column_name", "remove_values"],
+        "additionalProperties": False,
     }
 
     def __init__(self, parameters):
-        """ Constructor for remove rows operation.
+        """Constructor for remove rows operation.
 
         Parameters:
             parameters (dict): Dictionary with the parameter values for required and optional parameters.
@@ -53,7 +43,7 @@ class RemoveRowsOp(BaseOp):
         self.remove_values = parameters["remove_values"]
 
     def do_op(self, dispatcher, df, name, sidecar=None) -> pd.DataFrame:
-        """ Remove rows with the values indicated in the column.
+        """Remove rows with the values indicated in the column.
 
         Parameters:
             dispatcher (Dispatcher): Manages the operation I/O.
@@ -75,5 +65,5 @@ class RemoveRowsOp(BaseOp):
 
     @staticmethod
     def validate_input_data(parameters):
-        """ Additional validation required of operation parameters not performed by JSON schema validator. """
+        """Additional validation required of operation parameters not performed by JSON schema validator."""
         return []

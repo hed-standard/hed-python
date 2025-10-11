@@ -67,8 +67,7 @@ class TestHedSchema(unittest.TestCase):
             load_schema(bad_filename)
 
     def test_load_schema_name(self):
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   '../data/schema_tests/HED8.2.0.mediawiki')
+        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.2.0.mediawiki")
 
         hed_schema = load_schema(schema_path, schema_namespace="testspace", name="Test Name")
         self.assertEqual(hed_schema.schema_namespace, "testspace:")
@@ -128,10 +127,10 @@ class TestHedSchema(unittest.TestCase):
 
     def test_load_and_verify_tags(self):
         # Load 'testlib' by itself
-        testlib = load_schema_version('testlib_2.0.0')
+        testlib = load_schema_version("testlib_2.0.0")
 
         # Load 'score' by itself
-        score = load_schema_version('score_1.1.0')
+        score = load_schema_version("score_1.1.0")
 
         # Load both 'testlib' and 'score' together
         schemas3 = load_schema_version(["testlib_2.0.0", "score_1.1.0"])
@@ -157,10 +156,14 @@ class TestHedSchema(unittest.TestCase):
         unique_testlib_tags = testlib_tags - score_tags
         unique_score_tags = score_tags - testlib_tags
 
-        self.assertTrue(any(tag in merged_tags for tag in unique_testlib_tags),
-                        "There should be unique tags from testlib in the merged schema.")
-        self.assertTrue(any(tag in merged_tags for tag in unique_score_tags),
-                        "There should be unique tags from score in the merged schema.")
+        self.assertTrue(
+            any(tag in merged_tags for tag in unique_testlib_tags),
+            "There should be unique tags from testlib in the merged schema.",
+        )
+        self.assertTrue(
+            any(tag in merged_tags for tag in unique_score_tags),
+            "There should be unique tags from score in the merged schema.",
+        )
 
     def test_load_schema_version_libraries(self):
         ver1 = "score_1.0.0"
@@ -168,16 +171,22 @@ class TestHedSchema(unittest.TestCase):
         self.assertIsInstance(schemas1, HedSchema, "load_schema_version returns a HedSchema if a string version")
         self.assertEqual(schemas1.version_number, "1.0.0", "load_schema_version has the right version")
         self.assertEqual(schemas1.library, "score", "load_schema_version works with single library no namespace")
-        self.assertEqual(schemas1.get_formatted_version(), '"score_1.0.0"',
-                         "load_schema_version gives correct version_string with single library no namespace")
+        self.assertEqual(
+            schemas1.get_formatted_version(),
+            '"score_1.0.0"',
+            "load_schema_version gives correct version_string with single library no namespace",
+        )
 
         ver2 = "base:score_1.0.0"
         schemas2 = load_schema_version(ver2)
         self.assertIsInstance(schemas2, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertEqual(schemas2.version_number, "1.0.0", "load_schema_version has the right version with namespace")
         self.assertEqual(schemas2._namespace, "base:", "load_schema_version has the right version with namespace")
-        self.assertEqual(schemas2.get_formatted_version(), '"base:score_1.0.0"',
-                         "load_schema_version gives correct version_string with single library with namespace")
+        self.assertEqual(
+            schemas2.get_formatted_version(),
+            '"base:score_1.0.0"',
+            "load_schema_version gives correct version_string with single library with namespace",
+        )
         self.assertEqual(schemas2.name, "base:score_1.0.0")
         ver3 = ["8.0.0", "sc:score_1.0.0"]
         schemas3 = load_schema_version(ver3)
@@ -187,21 +196,27 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(schemas3.name, "8.0.0,sc:score_1.0.0")
         s = schemas3._schemas[""]
         self.assertEqual(s.version_number, "8.0.0", "load_schema_version has the right version with namespace")
-        self.assertEqual(schemas3.get_formatted_version(), '["8.0.0", "sc:score_1.0.0"]',
-                         "load_schema_version gives correct version_string with single library with namespace")
+        self.assertEqual(
+            schemas3.get_formatted_version(),
+            '["8.0.0", "sc:score_1.0.0"]',
+            "load_schema_version gives correct version_string with single library with namespace",
+        )
         formatted_list = schemas3.get_formatted_version()
         schemas4 = load_schema_version(formatted_list)
         self.assertIsInstance(schemas4, HedSchemaGroup, "load_schema_version returns HedSchema version+namespace")
         self.assertIsInstance(schemas4._schemas, dict, "load_schema_version group keeps dictionary of HED versions")
         self.assertEqual(len(schemas4._schemas), 2, "load_schema_version group dictionary is right length")
-        self.assertEqual(schemas4.get_formatted_version(), '["8.0.0", "sc:score_1.0.0"]',
-                         "load_schema_version gives correct version_string with multiple prefixes")
+        self.assertEqual(
+            schemas4.get_formatted_version(),
+            '["8.0.0", "sc:score_1.0.0"]',
+            "load_schema_version gives correct version_string with multiple prefixes",
+        )
         self.assertEqual(schemas4.name, "8.0.0,sc:score_1.0.0")
         s = schemas4._schemas["sc:"]
         self.assertEqual(s.version_number, "1.0.0", "load_schema_version has the right version with namespace")
         with self.assertRaises(KeyError) as context:
             schemas4._schemas["ts:"]
-        self.assertEqual(context.exception.args[0], 'ts:')
+        self.assertEqual(context.exception.args[0], "ts:")
 
         with self.assertRaises(HedFileError) as context:
             load_schema_version("[Malformed,,json]")
@@ -218,8 +233,7 @@ class TestHedSchemaUnmerged(unittest.TestCase):
     # Verify the HED cache can handle loading unmerged with_standard schemas in case they are ever used
     @classmethod
     def setUpClass(cls):
-        hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                     '../schema_cache_test_local_unmerged/')
+        hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../schema_cache_test_local_unmerged/")
         if os.path.exists(hed_cache_dir) and os.path.isdir(hed_cache_dir):
             shutil.rmtree(hed_cache_dir)
         _load_schema_version.cache_clear()
@@ -292,10 +306,10 @@ class TestHedSchemaUnmerged(unittest.TestCase):
 
     def test_load_and_verify_tags(self):
         # Load 'testlib' by itself
-        testlib = load_schema_version('testlib_2.0.0')
+        testlib = load_schema_version("testlib_2.0.0")
 
         # Load 'score' by itself
-        score = load_schema_version('score_1.1.0')
+        score = load_schema_version("score_1.1.0")
 
         # Load both 'testlib' and 'score' together
         schemas3 = load_schema_version(["testlib_2.0.0", "score_1.1.0"])
@@ -321,15 +335,19 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         unique_testlib_tags = testlib_tags - score_tags
         unique_score_tags = score_tags - testlib_tags
 
-        self.assertTrue(any(tag in merged_tags for tag in unique_testlib_tags),
-                        "There should be unique tags from testlib in the merged schema.")
-        self.assertTrue(any(tag in merged_tags for tag in unique_score_tags),
-                        "There should be unique tags from score in the merged schema.")
+        self.assertTrue(
+            any(tag in merged_tags for tag in unique_testlib_tags),
+            "There should be unique tags from testlib in the merged schema.",
+        )
+        self.assertTrue(
+            any(tag in merged_tags for tag in unique_score_tags),
+            "There should be unique tags from score in the merged schema.",
+        )
 
 
 class TestHedSchemaMerging(unittest.TestCase):
     # Verify all 5 schemas produce the same results
-    base_schema_dir = '../data/schema_tests/merge_tests/'
+    base_schema_dir = "../data/schema_tests/merge_tests/"
 
     @classmethod
     def setUpClass(cls):
@@ -337,6 +355,7 @@ class TestHedSchemaMerging(unittest.TestCase):
 
     def _base_merging_test(self, files):
         import filecmp
+
         loaded_schema = []
         for filename in files:
             loaded_schema.append(load_schema(os.path.join(self.full_base_folder, filename)))
@@ -392,16 +411,18 @@ class TestHedSchemaMerging(unittest.TestCase):
                 self.assertEqual(lines1, lines2, f"XML string {files[i]} and {files[i + 1]} are not equal.")
 
     def test_saving_merged(self):
-        files = ["HED_score_1.1.0.mediawiki",
-                 "HED_score_unmerged.mediawiki",
-                 "HED_score_merged.mediawiki",
-                 "HED_score_merged.xml",
-                 "HED_score_unmerged.xml"]
+        files = [
+            "HED_score_1.1.0.mediawiki",
+            "HED_score_unmerged.mediawiki",
+            "HED_score_merged.mediawiki",
+            "HED_score_merged.xml",
+            "HED_score_unmerged.xml",
+        ]
 
         self._base_merging_test(files)
 
     def test_saving_merged_rooted(self):
-        files = [ "basic_root.mediawiki", "basic_root.xml"]
+        files = ["basic_root.mediawiki", "basic_root.xml"]
         self._base_merging_test(files)
 
     def test_saving_merged_rooted_sorting(self):
@@ -479,7 +500,7 @@ class TestHedSchemaMerging(unittest.TestCase):
             load_schema(os.path.join(self.full_base_folder, "issues_tests/overlapping_tags4.mediawiki")),
             load_schema(os.path.join(self.full_base_folder, "issues_tests/overlapping_unit_classes.mediawiki")),
             load_schema(os.path.join(self.full_base_folder, "issues_tests/overlapping_units.mediawiki")),
-            load_schema(os.path.join(self.full_base_folder, "issues_tests/HED_dupesubroot_0.0.1.mediawiki"))
+            load_schema(os.path.join(self.full_base_folder, "issues_tests/HED_dupesubroot_0.0.1.mediawiki")),
         ]
         expected_code = [
             HedExceptions.SCHEMA_LIBRARY_INVALID,
@@ -505,7 +526,6 @@ class TestHedSchemaMerging(unittest.TestCase):
             os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid1.mediawiki"),
             os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid2.mediawiki"),
             os.path.join(self.full_base_folder, "issues_tests/HED_root_invalid3.mediawiki"),
-
         ]
         for file in files:
             with self.assertRaises(HedFileError) as context:
@@ -582,8 +602,10 @@ class TestParseVersionList(unittest.TestCase):
     def test_single_and_multiple_libraries_with_different_prefixes(self):
         """Test a single library with a prefix and multiple libraries with different prefixes are handled correctly."""
         self.assertEqual(parse_version_list(["ol:otherlib"]), {"ol": "ol:otherlib"})
-        self.assertEqual(parse_version_list(["score", "ol:otherlib", "ul:anotherlib"]),
-                         {"": "score", "ol": "ol:otherlib", "ul": "ul:anotherlib"})
+        self.assertEqual(
+            parse_version_list(["score", "ol:otherlib", "ul:anotherlib"]),
+            {"": "score", "ol": "ol:otherlib", "ul": "ul:anotherlib"},
+        )
 
     def test_duplicate_library_raises_error(self):
         """Test that duplicate libraries raise the correct error."""
@@ -594,8 +616,10 @@ class TestParseVersionList(unittest.TestCase):
 
     def test_triple_prefixes(self):
         """Test that libraries with triple prefixes are handled correctly."""
-        self.assertEqual(parse_version_list(["test:score", "ol:otherlib", "test:testlib", "abc:anotherlib"]),
-                         {"test": "test:score,testlib", "ol": "ol:otherlib", "abc": "abc:anotherlib"})
+        self.assertEqual(
+            parse_version_list(["test:score", "ol:otherlib", "test:testlib", "abc:anotherlib"]),
+            {"test": "test:score,testlib", "ol": "ol:otherlib", "abc": "abc:anotherlib"},
+        )
 
 
 # class TestOwlBase(unittest.TestCase):

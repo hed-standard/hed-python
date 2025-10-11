@@ -1,4 +1,5 @@
-""" Contents of a JSON file or merged JSON files. """
+"""Contents of a JSON file or merged JSON files."""
+
 import json
 import re
 
@@ -12,12 +13,10 @@ from hed.models.definition_dict import DefinitionDict
 
 
 class Sidecar:
-    """ Contents of a JSON file or JSON files.
-
-    """
+    """Contents of a JSON file or JSON files."""
 
     def __init__(self, files, name=None):
-        """ Construct a Sidecar object representing a JSON file.
+        """Construct a Sidecar object representing a JSON file.
 
         Parameters:
             files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
@@ -29,7 +28,7 @@ class Sidecar:
         self._extract_definition_issues = []
 
     def __iter__(self):
-        """ An iterator to go over the individual column metadata.
+        """An iterator to go over the individual column metadata.
 
         Returns:
             iterator: An iterator over the column metadata values.
@@ -44,7 +43,7 @@ class Sidecar:
 
     @property
     def all_hed_columns(self) -> list[str]:
-        """ Return all columns that are HED compatible.
+        """Return all columns that are HED compatible.
 
         Returns:
             list: A list of all valid HED columns by name.
@@ -54,8 +53,8 @@ class Sidecar:
         return possible_column_references
 
     @property
-    def def_dict(self) -> 'DefinitionDict':
-        """ Definitions from this sidecar.
+    def def_dict(self) -> "DefinitionDict":
+        """Definitions from this sidecar.
 
             Generally you should instead call get_def_dict to get the relevant definitions.
 
@@ -66,15 +65,15 @@ class Sidecar:
 
     @property
     def column_data(self):
-        """ Generate the ColumnMetadata for this sidecar.
+        """Generate the ColumnMetadata for this sidecar.
 
         Returns:
             dict({str:ColumnMetadata}): The column metadata defined by this sidecar.
         """
         return {col_name: ColumnMetadata(name=col_name, source=self.loaded_dict) for col_name in self.loaded_dict}
 
-    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> 'DefinitionDict':
-        """ Return the definition dict for this sidecar.
+    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> "DefinitionDict":
+        """Return the definition dict for this sidecar.
 
         Parameters:
             hed_schema (HedSchema): Identifies tags to find definitions.
@@ -95,7 +94,7 @@ class Sidecar:
         return DefinitionDict(def_dicts)
 
     def save_as_json(self, save_filename):
-        """ Save column metadata to a JSON file.
+        """Save column metadata to a JSON file.
 
         Parameters:
             save_filename (str): Path to save file.
@@ -105,7 +104,7 @@ class Sidecar:
             json.dump(self.loaded_dict, fp, indent=4)
 
     def get_as_json_string(self) -> str:
-        """ Return this sidecar's column metadata as a string.
+        """Return this sidecar's column metadata as a string.
 
         Returns:
             str: The json string representing this sidecar.
@@ -114,7 +113,7 @@ class Sidecar:
         return json.dumps(self.loaded_dict, indent=4)
 
     def load_sidecar_file(self, file):
-        """ Load column metadata from a given json file.
+        """Load column metadata from a given json file.
 
         Parameters:
             file (str or FileLike): If a string, this is a filename. Otherwise, it will be parsed as a file-like.
@@ -136,7 +135,7 @@ class Sidecar:
             return self._load_json_file(file)
 
     def load_sidecar_files(self, files):
-        """ Load json from a given file or list.
+        """Load json from a given file or list.
 
         Parameters:
             files (str or FileLike or list): A string or file-like object representing a JSON file, or a list of such.
@@ -178,7 +177,7 @@ class Sidecar:
         return issues
 
     def _load_json_file(self, fp):
-        """ Load the raw json of a given file.
+        """Load the raw json of a given file.
 
         Parameters:
             fp (File-like): The JSON source stream.
@@ -191,8 +190,8 @@ class Sidecar:
         except (json.decoder.JSONDecodeError, AttributeError) as e:
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name) from e
 
-    def extract_definitions(self, hed_schema, error_handler=None) -> 'DefinitionDict':
-        """ Gather and validate definitions in metadata.
+    def extract_definitions(self, hed_schema, error_handler=None) -> "DefinitionDict":
+        """Gather and validate definitions in metadata.
 
         Parameters:
             hed_schema (HedSchema): The schema to used to identify tags.
@@ -226,7 +225,7 @@ class Sidecar:
         return def_dict
 
     def get_column_refs(self) -> list[str]:
-        """ Returns a list of column refs found in this sidecar.
+        """Returns a list of column refs found in this sidecar.
 
             This does not validate
 

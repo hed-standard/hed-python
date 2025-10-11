@@ -1,10 +1,10 @@
-""" Classes for managing counts of HED tags for columnar files. """
+"""Classes for managing counts of HED tags for columnar files."""
 
 import copy
 
 
 class HedTagCount:
-    """ Counts for a particular HedTag in particular file."""
+    """Counts for a particular HedTag in particular file."""
 
     def __init__(self, hed_tag, file_name):
         """
@@ -17,12 +17,12 @@ class HedTagCount:
         self.tag = hed_tag.short_base_tag
         self.tag_terms = hed_tag.tag_terms
         self.events = 1
-        self.files = {file_name: ''}
+        self.files = {file_name: ""}
         self.value_dict = {}
         self.set_value(hed_tag)
 
     def set_value(self, hed_tag):
-        """ Update the tag term value counts for a HedTag.
+        """Update the tag term value counts for a HedTag.
 
         Parameters:
             hed_tag (HedTag or None):  Item to use to update the value counts.
@@ -39,7 +39,7 @@ class HedTagCount:
             self.value_dict[value] = 1
 
     def get_info(self, verbose=False) -> dict:
-        """ Return counts for this tag.
+        """Return counts for this tag.
 
         Parameters:
             verbose (bool): If False (the default) only number of files included, otherwise a list of files.
@@ -51,16 +51,16 @@ class HedTagCount:
             files = list(self.files)
         else:
             files = len(self.files)
-        return {'tag': self.tag, 'events': self.events, 'files': files}
+        return {"tag": self.tag, "events": self.events, "files": files}
 
     def get_summary(self) -> dict:
-        """ Return a dictionary summary of the events and files for this tag.
+        """Return a dictionary summary of the events and files for this tag.
 
         Returns:
             dict:  dictionary summary of events and files that contain this tag.
 
         """
-        return {'tag': self.tag, 'events': self.events, 'files': list(self.files)}
+        return {"tag": self.tag, "events": self.events, "files": list(self.files)}
 
     def get_empty(self):
         empty = copy.copy(self)
@@ -71,7 +71,7 @@ class HedTagCount:
 
 
 class HedTagCounts:
-    """ Counts of HED tags for a group of columnar files.
+    """Counts of HED tags for a group of columnar files.
 
     Parameters:
         name (str):  An identifier for these counts (usually the filename of the tabular file).
@@ -86,7 +86,7 @@ class HedTagCounts:
         self.total_events = total_events
 
     def update_tag_counts(self, hed_string_obj, file_name):
-        """ Update the tag counts based on a HedString object.
+        """Update the tag counts based on a HedString object.
 
         Parameters:
             hed_string_obj (HedString): The HED string whose tags should be counted.
@@ -109,7 +109,7 @@ class HedTagCounts:
         self.merge_tag_dicts(tag_dict)
 
     def organize_tags(self, tag_template) -> tuple:
-        """ Organize tags into categories as specified by the tag_template.
+        """Organize tags into categories as specified by the tag_template.
 
         Parameters:
             tag_template (dict): A dictionary whose keys are titles and values are lists of HED tags (str).
@@ -127,7 +127,7 @@ class HedTagCounts:
         return template, unmatched
 
     def merge_tag_dicts(self, other_dict):
-        """ Merge the information from another dictionary with this object's tag dictionary.
+        """Merge the information from another dictionary with this object's tag dictionary.
 
         Parameters:
             other_dict (dict):  Dictionary of tag, HedTagCount to merge.
@@ -138,7 +138,7 @@ class HedTagCounts:
                 self.tag_dict[tag] = count.get_empty()
             self.tag_dict[tag].events = self.tag_dict[tag].events + count.events
             for file in count.files:
-                self.tag_dict[tag].files[file] = ''
+                self.tag_dict[tag].files[file] = ""
             if not self.tag_dict[tag].value_dict:
                 continue
             for value, val_count in count.value_dict.items():
@@ -148,7 +148,7 @@ class HedTagCounts:
                     self.tag_dict[tag].value_dict[value] = val_count
 
     def get_summary(self) -> dict:
-        """ Return a summary object containing the tag count information of this summary.
+        """Return a summary object containing the tag count information of this summary.
 
         Returns:
             dict: Keys are 'name', 'files', 'total_events', and 'details'.
@@ -156,12 +156,16 @@ class HedTagCounts:
         details = {}
         for tag, count in self.tag_dict.items():
             details[tag] = count.get_summary()
-        return {'name': str(self.name), 'files': list(self.files.keys()),
-                'total_events': self.total_events, 'details': details}
+        return {
+            "name": str(self.name),
+            "files": list(self.files.keys()),
+            "total_events": self.total_events,
+            "details": details,
+        }
 
     @staticmethod
     def create_template(tags) -> dict:
-        """ Creates a dictionary with keys based on list of keys in tags dictionary.
+        """Creates a dictionary with keys based on list of keys in tags dictionary.
 
         Parameters:
             tags (dict):  dictionary of tags and key lists.
@@ -180,7 +184,7 @@ class HedTagCounts:
 
     @staticmethod
     def _update_template(tag_count, template, unmatched):
-        """ Update the template or unmatched with info in the tag_count.
+        """Update the template or unmatched with info in the tag_count.
 
         Parameters:
             tag_count (HedTagCount): Information for a particular tag.

@@ -6,6 +6,7 @@ from hed.schema.schema_comparer import SchemaComparer
 
 all_extensions = [".tsv", ".mediawiki", ".xml"]
 
+
 def validate_schema_object(base_schema, schema_name):
     validation_issues = []
     try:
@@ -29,7 +30,7 @@ def validate_schema_object(base_schema, schema_name):
         tsv_dataframes = base_schema.get_as_dataframes(save_merged=True)
         reloaded_schema = from_dataframes(tsv_dataframes)
 
-        validation_issues += _get_schema_comparison(base_schema, reloaded_schema,schema_name, "tsv")
+        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "tsv")
     except HedFileError as e:
         print(f"Saving/loading error: {schema_name} {e.message}")
         error_text = e.message
@@ -41,7 +42,7 @@ def validate_schema_object(base_schema, schema_name):
 
 
 def validate_schema(file_path):
-    """ Validates the given schema, ensuring it can save/load as well as validates.
+    """Validates the given schema, ensuring it can save/load as well as validates.
 
     Parameters:
         file_path(str): the specific schema file to validate
@@ -52,8 +53,7 @@ def validate_schema(file_path):
 
     _, extension = os.path.splitext(file_path)
     if extension.lower() != extension:
-        return [f"Only fully lowercase extensions are allowed for schema files.  "
-                f"Invalid extension on file: {file_path}"]
+        return [f"Only fully lowercase extensions are allowed for schema files.  " f"Invalid extension on file: {file_path}"]
 
     validation_issues = []
     try:
@@ -78,7 +78,7 @@ def add_extension(basename, extension):
 
 
 def sort_base_schemas(filenames, add_all_extensions=False):
-    """ Sort and group the changed files based on basename
+    """Sort and group the changed files based on basename
 
         Example input: ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.xml"]
 
@@ -130,7 +130,7 @@ def sort_base_schemas(filenames, add_all_extensions=False):
 
 
 def validate_all_schema_formats(basename):
-    """ Validate all 3 versions of the given schema.
+    """Validate all 3 versions of the given schema.
 
     Parameters:
          basename(str): a schema to check all 3 formats are identical of.
@@ -147,7 +147,8 @@ def validate_all_schema_formats(basename):
         if not all_equal:
             return [
                 f"Multiple schemas of type {basename} were modified, and are not equal.\n"
-                f"Only modify one source schema type at a time(mediawiki, xml, tsv), or modify all 3 at once."]
+                f"Only modify one source schema type at a time(mediawiki, xml, tsv), or modify all 3 at once."
+            ]
     except HedFileError as e:
         error_message = f"Error loading schema: {e.message}"
         return [error_message]
@@ -187,7 +188,7 @@ def validate_all_schemas(schema_files):
 
 
 def get_schema_filename(schema_name, schema_version):
-    """ Returns the assembled name of a schema given the name and version
+    """Returns the assembled name of a schema given the name and version
 
         e.g. "standard" and "8.3.0" returns "HED8.3.0"
 
@@ -206,7 +207,7 @@ def get_schema_filename(schema_name, schema_version):
 
 
 def get_prerelease_path(repo_path, schema_name, schema_version):
-    """ Returns the location of the given pre-release schema in the repo
+    """Returns the location of the given pre-release schema in the repo
 
     Parameters:
         repo_path(str): the location of the hed-schemas folder relative to this one.  Should point into the folder.
@@ -231,10 +232,14 @@ def get_prerelease_path(repo_path, schema_name, schema_version):
 
 def _get_schema_comparison(schema, schema_reload, file_path, file_format):
     if schema_reload != schema:
-        error_text = f"Failed to reload {file_path} as {file_format}.  " \
-                     f"There is either a problem with the source file, or the saving/loading code."
-        title_prompt = ("If the problem is in the schema file, "
-                        "the following comparison should indicate the approximate source of the issues:")
+        error_text = (
+            f"Failed to reload {file_path} as {file_format}.  "
+            f"There is either a problem with the source file, or the saving/loading code."
+        )
+        title_prompt = (
+            "If the problem is in the schema file, "
+            "the following comparison should indicate the approximate source of the issues:"
+        )
         error_text += "\n" + SchemaComparer(schema, schema_reload).compare_differences(title=title_prompt)
         return [error_text]
 

@@ -1,8 +1,16 @@
-""" Holder for and manipulation of search results. """
+"""Holder for and manipulation of search results."""
+
 import re
 
-from hed.models.query_expressions import Expression, ExpressionAnd, ExpressionWildcardNew, ExpressionOr, \
-    ExpressionNegation, ExpressionDescendantGroup, ExpressionExactMatch
+from hed.models.query_expressions import (
+    Expression,
+    ExpressionAnd,
+    ExpressionWildcardNew,
+    ExpressionOr,
+    ExpressionNegation,
+    ExpressionDescendantGroup,
+    ExpressionExactMatch,
+)
 from hed.models.query_util import Token
 
 
@@ -48,7 +56,7 @@ class QueryHandler:
         self._org_string = expression_string
 
     def search(self, hed_string_obj) -> list:
-        """ Search for the query in the given HED string.
+        """Search for the query in the given HED string.
 
         Parameters:
             hed_string_obj (HedString): String to search
@@ -96,7 +104,7 @@ class QueryHandler:
         grouping_re = r"\[\[|\[|\]\]|\]|}|{|:"
         paren_re = r"\)|\(|~"
         word_re = r"\?+|\&\&|\|\||,|[\"_\-a-zA-Z0-9/.^#\*@]+"
-        re_string = fr"({grouping_re}|{paren_re}|{word_re})"
+        re_string = rf"({grouping_re}|{paren_re}|{word_re})"
         token_re = re.compile(re_string)
 
         tokens = token_re.findall(expression_string)
@@ -129,16 +137,17 @@ class QueryHandler:
         if next_token == Token.LogicalNegation:
             interior = self._handle_grouping_op()
             if "?" in str(interior):
-                raise ValueError("Cannot negate wildcards, or expressions that contain wildcards."
-                                 "Use {required_expression : optional_expression}.")
+                raise ValueError(
+                    "Cannot negate wildcards, or expressions that contain wildcards."
+                    "Use {required_expression : optional_expression}."
+                )
             expr = ExpressionNegation(next_token, right=interior)
             return expr
         else:
             return self._handle_grouping_op()
 
     def _handle_grouping_op(self):
-        next_token = self._next_token_is(
-            [Token.LogicalGroup, Token.DescendantGroup, Token.ExactMatch])
+        next_token = self._next_token_is([Token.LogicalGroup, Token.DescendantGroup, Token.ExactMatch])
         if next_token == Token.LogicalGroup:
             expr = self._handle_or_op()
             next_token = self._next_token_is([Token.LogicalGroupEnd])
@@ -163,9 +172,11 @@ class QueryHandler:
                     expr.left = optional_portion
                     next_token = self._next_token_is([Token.ExactMatchEnd])
                 if "~" in str(expr):
-                    raise ValueError("Cannot use negation in exact matching groups,"
-                                     " as it's not clear what is being matched.\n"
-                                     "{thing and ~(expression)} is allowed.")
+                    raise ValueError(
+                        "Cannot use negation in exact matching groups,"
+                        " as it's not clear what is being matched.\n"
+                        "{thing and ~(expression)} is allowed."
+                    )
 
             if next_token is None:
                 raise ValueError("Parse error: Missing closing curly bracket")

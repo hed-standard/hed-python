@@ -16,7 +16,7 @@ def get_schema_from_description(root_path):
 
 
 def group_by_suffix(file_list):
-    """ Group files by suffix.
+    """Group files by suffix.
 
     Parameters:
         file_list (list):  List of file paths.
@@ -28,7 +28,7 @@ def group_by_suffix(file_list):
     suffix_groups = {}
     for file_path in file_list:
         name, ext = get_full_extension(file_path)
-        result = os.path.basename(name).rsplit('_', 1)
+        result = os.path.basename(name).rsplit("_", 1)
         if len(result) == 2:
             suffix_groups.setdefault(result[1], []).append(file_path)
         else:
@@ -55,14 +55,14 @@ def parse_bids_filename(file_path):
     if not basename:
         return name_dict
 
-    entity_pieces = basename.rsplit('_', 1)
+    entity_pieces = basename.rsplit("_", 1)
 
     # Case: No underscore in filename → could be a single entity (e.g., "task-blech.tsv")
     if len(entity_pieces) == 1:
-        entity_count = entity_pieces[0].count('-')
+        entity_count = entity_pieces[0].count("-")
         if entity_count > 1:
             name_dict["bad"].append(entity_pieces[0])
-        elif entity_count == 1: # Looks like an entity-type pair
+        elif entity_count == 1:  # Looks like an entity-type pair
             update_entity(name_dict, entity_pieces[0])
         else:
             name_dict["suffix"] = entity_pieces[0]
@@ -72,14 +72,14 @@ def parse_bids_filename(file_path):
     rest, suffix = entity_pieces
 
     # If suffix is a valid entity-type pair (e.g., "task-motor"), move it into the entity dictionary
-    if '-' in suffix and suffix.count('-') == 1:
+    if "-" in suffix and suffix.count("-") == 1:
         update_entity(name_dict, suffix)
     else:
         name_dict["suffix"] = suffix
 
     # Look for prefix - first entity piece without a hyphen
-    entity_pieces = rest.split('_')
-    if '-' not in entity_pieces[0]:
+    entity_pieces = rest.split("_")
+    if "-" not in entity_pieces[0]:
         name_dict["prefix"] = entity_pieces[0]
         del entity_pieces[0]
 
@@ -100,7 +100,7 @@ def update_entity(name_dict, entity):
         name_dict (dict): Dictionary of entities.
         entity (str): Entity to be added.
     """
-    parts = entity.split('-')
+    parts = entity.split("-")
 
     if len(parts) == 2 and all(parts):  # Valid entity pair
         name_dict["entities"][parts[0]] = parts[1]
@@ -113,7 +113,7 @@ def get_merged_sidecar(root_path, tsv_file):
     merged_sidecar = {}
     # Process from closest to most distant - first file wins for each key
     for sidecar_file in sidecar_files:
-        with open(sidecar_file, 'r', encoding='utf-8') as f:
+        with open(sidecar_file, "r", encoding="utf-8") as f:
             sidecar_data = json.load(f)
         # Only add keys that don't already exist (closer files have precedence)
         for key, value in sidecar_data.items():
@@ -135,12 +135,14 @@ def walk_back(root_path, file_path):
         if len(candidates) == 1:
             yield candidates[0]
         elif len(candidates) > 1:
-            raise Exception({
-                "code": "MULTIPLE_INHERITABLE_FILES",
-                "location": candidates[0],
-                "affects": file_path,
-                "issueMessage": f"Candidate files: {candidates}",
-            })
+            raise Exception(
+                {
+                    "code": "MULTIPLE_INHERITABLE_FILES",
+                    "location": candidates[0],
+                    "affects": file_path,
+                    "issueMessage": f"Candidate files: {candidates}",
+                }
+            )
 
         # Stop when we reach the root directory
         if source_dir == root_path:

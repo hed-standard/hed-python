@@ -1,4 +1,5 @@
 """Infrastructure for caching HED schema from remote repositories."""
+
 from __future__ import annotations
 
 import shutil
@@ -22,15 +23,16 @@ from urllib.error import URLError
 
 # From https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 HED_VERSION_P1 = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"
-HED_VERSION_P2 = r"(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)" \
-                 r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
+HED_VERSION_P2 = (
+    r"(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)" r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
+)
 HED_VERSION_P3 = r"(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
 HED_VERSION = HED_VERSION_P1 + HED_VERSION_P2 + HED_VERSION_P3
 # Actual local HED filename re.
-HED_VERSION_FINAL = r'^[hH][eE][dD](_([a-z0-9]+)_)?(' + HED_VERSION + r')\.[xX][mM][lL]$'
+HED_VERSION_FINAL = r"^[hH][eE][dD](_([a-z0-9]+)_)?(" + HED_VERSION + r")\.[xX][mM][lL]$"
 
-HED_XML_PREFIX = 'HED'
-HED_XML_EXTENSION = '.xml'
+HED_XML_PREFIX = "HED"
+HED_XML_EXTENSION = ".xml"
 hedxml_suffix = "/hedxml"  # The suffix for schema and library schema at the given urls
 prerelease_suffix = "/prerelease"  # The prerelease schemas at the given URLs
 
@@ -41,17 +43,17 @@ DEFAULT_URL_LIST = (DEFAULT_HED_LIST_VERSIONS_URL,)
 DEFAULT_LIBRARY_URL_LIST = (LIBRARY_HED_URL,)
 
 
-DEFAULT_SKIP_FOLDERS = ('deprecated',)
+DEFAULT_SKIP_FOLDERS = ("deprecated",)
 
-HED_CACHE_DIRECTORY = os.path.join(Path.home(), '.hedtools/hed_cache/')
+HED_CACHE_DIRECTORY = os.path.join(Path.home(), ".hedtools/hed_cache/")
 
 # This is the schemas included in the hedtools package.
-INSTALLED_CACHE_LOCATION = os.path.realpath(os.path.join(os.path.dirname(__file__), 'schema_data/'))
+INSTALLED_CACHE_LOCATION = os.path.realpath(os.path.join(os.path.dirname(__file__), "schema_data/"))
 version_pattern = re.compile(HED_VERSION_FINAL)
 
 
 def set_cache_directory(new_cache_dir):
-    """ Set default global HED cache directory.
+    """Set default global HED cache directory.
 
     Parameters:
         new_cache_dir (str): Directory to check for versions.
@@ -64,7 +66,7 @@ def set_cache_directory(new_cache_dir):
 
 
 def get_cache_directory(cache_folder=None) -> str:
-    """ Return the current value of HED_CACHE_DIRECTORY.
+    """Return the current value of HED_CACHE_DIRECTORY.
 
     Parameters:
         cache_folder (str): Optional cache folder override.
@@ -78,7 +80,7 @@ def get_cache_directory(cache_folder=None) -> str:
 
 
 def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=False) -> Union[list, dict]:
-    """ Get the HED versions in the HED directory.
+    """Get the HED versions in the HED directory.
 
     Parameters:
         local_hed_directory (str): Directory to check for versions which defaults to hed_cache.
@@ -133,7 +135,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
 
 
 def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None, check_prerelease=False) -> Union[str, None]:
-    """ Get HED XML file path in a directory.  Only returns filenames that exist.
+    """Get HED XML file path in a directory.  Only returns filenames that exist.
 
     Parameters:
         library_name (str or None): Optional the schema library name.
@@ -157,7 +159,7 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
 
 
 def cache_local_versions(cache_folder) -> Union[int, None]:
-    """ Cache all schemas included with the HED installation.
+    """Cache all schemas included with the HED installation.
 
     Parameters:
         cache_folder (str): The folder holding the cache.
@@ -176,9 +178,13 @@ def cache_local_versions(cache_folder) -> Union[int, None]:
         return -1
 
 
-def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_LIBRARY_URL_LIST,
-                       skip_folders=DEFAULT_SKIP_FOLDERS, cache_folder=None) -> float:
-    """ Cache all schemas at the given URLs.
+def cache_xml_versions(
+    hed_base_urls=DEFAULT_URL_LIST,
+    hed_library_urls=DEFAULT_LIBRARY_URL_LIST,
+    skip_folders=DEFAULT_SKIP_FOLDERS,
+    cache_folder=None,
+) -> float:
+    """Cache all schemas at the given URLs.
 
     Parameters:
         hed_base_urls (str or list): Path or list of paths.   These should point to a single folder.
@@ -211,8 +217,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_
                 new_hed_versions = _get_hed_xml_versions_one_library(hed_base_url)
                 _merge_in_versions(all_hed_versions, new_hed_versions)
             for hed_library_url in hed_library_urls:
-                new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(hed_library_url,
-                                                                                skip_folders=skip_folders)
+                new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(hed_library_url, skip_folders=skip_folders)
                 _merge_in_versions(all_hed_versions, new_hed_versions)
 
             for library_name, hed_versions in all_hed_versions.items():
@@ -229,14 +234,14 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_
 def get_library_data(library_name, cache_folder=None) -> dict:
     """Retrieve the library data for the given library.
 
-       Currently, this is just the valid ID range.
+    Currently, this is just the valid ID range.
 
-       Parameters:
-           library_name (str): The schema name.  "" for standard schema.
-           cache_folder (str): The cache folder to use if not using the default.
+    Parameters:
+        library_name (str): The schema name.  "" for standard schema.
+        cache_folder (str): The cache folder to use if not using the default.
 
-       Returns:
-           dict: The data for a specific library.
+    Returns:
+        dict: The data for a specific library.
     """
     if cache_folder is None:
         cache_folder = HED_CACHE_DIRECTORY
@@ -320,12 +325,12 @@ def _sort_version_list(hed_versions):
 
 def _get_hed_xml_versions_one_folder(hed_folder_url):
     url_request = make_url_request(hed_folder_url)
-    url_data = str(url_request.read(), 'utf-8')
+    url_data = str(url_request.read(), "utf-8")
     loaded_json = json.loads(url_data)
 
     all_hed_versions = {}
     for file_entry in loaded_json:
-        if file_entry['type'] == "dir":
+        if file_entry["type"] == "dir":
             continue
         expression_match = version_pattern.match(file_entry["name"])
         if expression_match is not None:
@@ -334,7 +339,10 @@ def _get_hed_xml_versions_one_folder(hed_folder_url):
             if found_library_name not in all_hed_versions:
                 all_hed_versions[found_library_name] = {}
             all_hed_versions[found_library_name][version] = (
-                file_entry["sha"], file_entry["download_url"], hed_folder_url.endswith(prerelease_suffix))
+                file_entry["sha"],
+                file_entry["download_url"],
+                hed_folder_url.endswith(prerelease_suffix),
+            )
 
     return all_hed_versions
 
@@ -342,15 +350,13 @@ def _get_hed_xml_versions_one_folder(hed_folder_url):
 def _get_hed_xml_versions_one_library(hed_one_library_url):
     all_hed_versions = {}
     try:
-        finalized_versions = \
-            _get_hed_xml_versions_one_folder(hed_one_library_url + hedxml_suffix)
+        finalized_versions = _get_hed_xml_versions_one_folder(hed_one_library_url + hedxml_suffix)
         _merge_in_versions(all_hed_versions, finalized_versions)
     except urllib.error.URLError:
         # Silently ignore ones without a hedxml section for now.
         pass
     try:
-        pre_release_folder_versions = \
-            _get_hed_xml_versions_one_folder(hed_one_library_url + prerelease_suffix)
+        pre_release_folder_versions = _get_hed_xml_versions_one_folder(hed_one_library_url + prerelease_suffix)
         _merge_in_versions(all_hed_versions, pre_release_folder_versions)
     except urllib.error.URLError:
         # Silently ignore ones without a prerelease section for now.
@@ -365,9 +371,10 @@ def _get_hed_xml_versions_one_library(hed_one_library_url):
     return ordered_versions
 
 
-def _get_hed_xml_versions_from_url_all_libraries(hed_base_library_url, library_name=None,
-                                                 skip_folders=DEFAULT_SKIP_FOLDERS) -> Union[list, dict]:
-    """ Get all available schemas and their hash values
+def _get_hed_xml_versions_from_url_all_libraries(
+    hed_base_library_url, library_name=None, skip_folders=DEFAULT_SKIP_FOLDERS
+) -> Union[list, dict]:
+    """Get all available schemas and their hash values
 
     Parameters:
         hed_base_library_url(str): A single GitHub API url to cache, which contains library schema folders
@@ -385,15 +392,15 @@ def _get_hed_xml_versions_from_url_all_libraries(hed_base_library_url, library_n
             https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml
     """
     url_request = make_url_request(hed_base_library_url)
-    url_data = str(url_request.read(), 'utf-8')
+    url_data = str(url_request.read(), "utf-8")
     loaded_json = json.loads(url_data)
 
     all_hed_versions = {}
     for file_entry in loaded_json:
-        if file_entry['type'] == "dir":
-            if file_entry['name'] in skip_folders:
+        if file_entry["type"] == "dir":
+            if file_entry["name"] in skip_folders:
                 continue
-            found_library_name = file_entry['name']
+            found_library_name = file_entry["name"]
             if library_name is not None and found_library_name != library_name:
                 continue
             single_library_versions = _get_hed_xml_versions_one_library(hed_base_library_url + "/" + found_library_name)
@@ -414,15 +421,15 @@ def _merge_in_versions(all_hed_versions, sub_folder_versions):
 
 
 def _calculate_sha1(filename):
-    """ Calculate sha1 hash for filename
+    """Calculate sha1 hash for filename
 
-        Can be compared to GitHub hash values
+    Can be compared to GitHub hash values
     """
     try:
-        with open(filename, 'rb') as f:
+        with open(filename, "rb") as f:
             data = f.read()
             githash = sha1()
-            githash.update(f"blob {len(data)}\0".encode('utf-8'))
+            githash.update(f"blob {len(data)}\0".encode("utf-8"))
             githash.update(data)
             return githash.hexdigest()
     except FileNotFoundError:
@@ -430,7 +437,7 @@ def _calculate_sha1(filename):
 
 
 def _safe_move_tmp_to_folder(temp_hed_xml_file, dest_filename):
-    """ Copy to destination folder and rename.
+    """Copy to destination folder and rename.
 
     Parameters:
         temp_hed_xml_file (str): An XML file, generally from a temp folder.

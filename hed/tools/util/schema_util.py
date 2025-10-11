@@ -1,11 +1,11 @@
-""" Utilities"""
+"""Utilities"""
 
 import pandas as pd
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 
 
 def flatten_schema(hed_schema, skip_non_tag=False):
-    """ Returns a 3-column dataframe representing a schema.
+    """Returns a 3-column dataframe representing a schema.
 
     Parameters:
         hed_schema (HedSchema): the schema to flatten

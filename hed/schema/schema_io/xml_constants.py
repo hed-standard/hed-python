@@ -1,11 +1,11 @@
-""" Constants used for the """
+"""Constants used for the"""
 
 from hed.schema.hed_schema_constants import HedSectionKey
 
 # These are only currently used by the XML reader/writer, but that may change.
-XSI_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
-NO_NAMESPACE_XSD_KEY = f'{{{XSI_NAMESPACE}}}noNamespaceSchemaLocation'
-NAMESPACE_XSD_KEY = f'{{{XSI_NAMESPACE}}}schemaLocation'
+XSI_NAMESPACE = "http://www.w3.org/2001/XMLSchema-instance"
+NO_NAMESPACE_XSD_KEY = f"{{{XSI_NAMESPACE}}}noNamespaceSchemaLocation"
+NAMESPACE_XSD_KEY = f"{{{XSI_NAMESPACE}}}schemaLocation"
 XSI_SOURCE = XSI_NAMESPACE
 
 NAME_ELEMENT = "name"
@@ -16,7 +16,7 @@ VALUE_ELEMENT = "value"
 # These are repeated here for clarification primarily
 ATTRIBUTE_ELEMENT = "attribute"
 ATTRIBUTE_PROPERTY_ELEMENT = "property"
-UNIT_CLASS_UNIT_ELEMENT = 'unit'
+UNIT_CLASS_UNIT_ELEMENT = "unit"
 PROLOGUE_ELEMENT = "prologue"
 SCHEMA_ELEMENT = "schema"
 EPILOGUE_ELEMENT = "epilogue"
@@ -76,5 +76,5 @@ ATTRIBUTE_PROPERTY_ELEMENTS = {
     HedSectionKey.UnitModifiers: ATTRIBUTE_ELEMENT,
     HedSectionKey.ValueClasses: ATTRIBUTE_ELEMENT,
     HedSectionKey.Attributes: ATTRIBUTE_PROPERTY_ELEMENT,
-    HedSectionKey.Properties: ATTRIBUTE_PROPERTY_ELEMENT
+    HedSectionKey.Properties: ATTRIBUTE_PROPERTY_ELEMENT,
 }

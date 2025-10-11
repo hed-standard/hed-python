@@ -1,4 +1,4 @@
-""" HED remodeling, analysis and summarization tools. """
+"""HED remodeling, analysis and summarization tools."""
 
 from .analysis.event_manager import EventManager
 from .analysis.file_dictionary import FileDictionary
@@ -45,9 +45,17 @@ from .util.data_util import get_new_dataframe, get_value_dict, replace_values, r
 from .util.io_util import check_filename, clean_filename, extract_suffix_path, get_file_list, make_path
 from .util.io_util import get_path_components
 
-from .analysis.annotation_util import \
-    check_df_columns, extract_tags, generate_sidecar_entry, hed_to_df, df_to_hed, merge_hed_dict, \
-    str_to_tabular, strs_to_sidecar, to_strlist
+from .analysis.annotation_util import (
+    check_df_columns,
+    extract_tags,
+    generate_sidecar_entry,
+    hed_to_df,
+    df_to_hed,
+    merge_hed_dict,
+    str_to_tabular,
+    strs_to_sidecar,
+    to_strlist,
+)
 
 from .remodeling.cli import run_remodel
 from .remodeling.cli import run_remodel_backup

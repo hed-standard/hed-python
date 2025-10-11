@@ -15,7 +15,7 @@ from tests.validator.test_tag_validator_base import TestHedBase
 class Test(TestHedBase):
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
+        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
         hed_xml_file = os.path.join(cls.base_data_dir, "schema_tests/HED8.2.0.mediawiki")
         cls.hed_schema = schema.load_schema(hed_xml_file)
         cls.placeholder_label_def_string = "Def/TestDefPlaceholder/2471"
@@ -86,37 +86,31 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string}, Def/InvalidDef, Onset, (Event))",
             "(Def/TestDefInvalid, Onset)",
             "(Def/TestDefPlaceholder, Onset)",
-            f"({self.placeholder_label_def_string}, Offset, (Event))"
+            f"({self.placeholder_label_def_string}, Offset, (Event))",
         ]
         # count of how many onset names are in the mapper after the line is run
-        expected_context = [
-            1,
-            0,
-            0,
-            0,
-            0,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1
-        ]
+        expected_context = [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
         # count of issues the line generates
         test_issues = [
             [],
             [],
             self.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=0),
             self.format_error(TemporalErrors.INSET_BEFORE_ONSET, tag=0),
-            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
-                              tag_list=['Def/TestDefPlaceholder/2471', 'Onset', '(Event)', '(Event)']),
+            self.format_error(
+                TemporalErrors.ONSET_WRONG_NUMBER_GROUPS,
+                tag=0,
+                tag_list=["Def/TestDefPlaceholder/2471", "Onset", "(Event)", "(Event)"],
+            ),
             [],
             self.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
-            self.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=['Def/InvalidDef']),
+            self.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=["Def/InvalidDef"]),
             self.format_error(TemporalErrors.ONSET_DEF_UNMATCHED, tag=0),
             self.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
-            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
-                              tag_list=[self.placeholder_label_def_string, 'Offset', '(Event)']),
+            self.format_error(
+                TemporalErrors.ONSET_WRONG_NUMBER_GROUPS,
+                tag=0,
+                tag_list=[self.placeholder_label_def_string, "Offset", "(Event)"],
+            ),
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=True)
@@ -132,36 +126,30 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string}, Def/TestDefPlaceholder/2, Onset, (Event))",
             "(Def/TestDefInvalid, Onset)",
             "(Def/TestDefPlaceholder, Onset)",
-            f"({self.placeholder_label_def_string}, Offset, (Event))"
+            f"({self.placeholder_label_def_string}, Offset, (Event))",
         ]
         # count of how many onset names are in the mapper after the line is run
-        expected_context = [
-            1,
-            0,
-            0,
-            0,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1
-        ]
+        expected_context = [1, 0, 0, 0, 1, 1, 1, 1, 1, 1]
         # count of issues the line generates
         test_issues = [
             [],
             [],
             self.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=0),
-            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
-                              tag_list=[self.placeholder_label_def_string, 'Onset', '(Event)', '(Event)']),
+            self.format_error(
+                TemporalErrors.ONSET_WRONG_NUMBER_GROUPS,
+                tag=0,
+                tag_list=[self.placeholder_label_def_string, "Onset", "(Event)", "(Event)"],
+            ),
             [],
             self.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
-            self.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS, tag=0,
-                              tag_list=['Def/TestDefPlaceholder/2']),
+            self.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=["Def/TestDefPlaceholder/2"]),
             self.format_error(TemporalErrors.ONSET_DEF_UNMATCHED, tag=0),
             self.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
-            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
-                              tag_list=[self.placeholder_label_def_string, 'Offset', '(Event)']),
+            self.format_error(
+                TemporalErrors.ONSET_WRONG_NUMBER_GROUPS,
+                tag=0,
+                tag_list=[self.placeholder_label_def_string, "Offset", "(Event)"],
+            ),
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=True)
@@ -177,34 +165,26 @@ class Test(TestHedBase):
             f"({self.placeholder_expanded_def_string}, Def/InvalidDef, Onset, (Event))",
             "(Def/TestDefInvalid, Onset)",
             "(Def/TestDefPlaceholder, Onset)",
-            "(Def/TestDefNormal/InvalidPlaceholder, Onset)"
+            "(Def/TestDefNormal/InvalidPlaceholder, Onset)",
         ]
         # count of how many onset names are in the mapper after the line is run
-        expected_context = [
-            1,
-            0,
-            0,
-            0,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1
-        ]
+        expected_context = [1, 0, 0, 0, 1, 1, 1, 1, 1, 1]
         # count of issues the line generates
         test_issues = [
             [],
             [],
             self.format_error(TemporalErrors.OFFSET_BEFORE_ONSET, tag=0),
-            self.format_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, tag=0,
-                              tag_list=[self.placeholder_expanded_def_string, 'Onset', '(Event)', '(Event)']),
+            self.format_error(
+                TemporalErrors.ONSET_WRONG_NUMBER_GROUPS,
+                tag=0,
+                tag_list=[self.placeholder_expanded_def_string, "Onset", "(Event)", "(Event)"],
+            ),
             [],
             self.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=0),
-            self.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=['Def/InvalidDef']),
+            self.format_error(TemporalErrors.ONSET_TOO_MANY_DEFS, tag=0, tag_list=["Def/InvalidDef"]),
             self.format_error(TemporalErrors.ONSET_DEF_UNMATCHED, tag=0),
             self.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=True),
-            self.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=False)
+            self.format_error(TemporalErrors.ONSET_PLACEHOLDER_WRONG, tag=0, has_placeholder=False),
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=False)
@@ -251,9 +231,7 @@ class Test(TestHedBase):
             1,
         ]
         # count of issues the line generates
-        test_issues = [
-            []
-        ]
+        test_issues = [[]]
 
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=True)
 
@@ -264,14 +242,27 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset, Offset)",
         ]
         test_issues = [
-            [{'code': 'TEMPORAL_TAG_ERROR',
-              'message': 'Tag "Onset" must be in a top level group but was found in another location.', 'severity': 1}],
-            [{'code': 'TAG_GROUP_ERROR',
-              'message': 'Repeated reserved tag "Onset" or multiple reserved tags in group "(Def/TestDefPlaceholder/2471,Onset,Onset)"',
-              'severity': 1}],
-            [{'code': 'TAG_GROUP_ERROR',
-              'message': 'Tag "Offset" is not allowed with the other tag(s) or Def-expand sub-group in group "(Def/TestDefPlaceholder/2471,Onset,Offset)"',
-              'severity': 1}]
+            [
+                {
+                    "code": "TEMPORAL_TAG_ERROR",
+                    "message": 'Tag "Onset" must be in a top level group but was found in another location.',
+                    "severity": 1,
+                }
+            ],
+            [
+                {
+                    "code": "TAG_GROUP_ERROR",
+                    "message": 'Repeated reserved tag "Onset" or multiple reserved tags in group "(Def/TestDefPlaceholder/2471,Onset,Onset)"',
+                    "severity": 1,
+                }
+            ],
+            [
+                {
+                    "code": "TAG_GROUP_ERROR",
+                    "message": 'Tag "Offset" is not allowed with the other tag(s) or Def-expand sub-group in group "(Def/TestDefPlaceholder/2471,Onset,Offset)"',
+                    "severity": 1,
+                }
+            ],
         ]
 
         self._test_issues_no_context(test_strings, test_issues)
@@ -286,14 +277,7 @@ class Test(TestHedBase):
             f"({self.placeholder_label_def_string},Onset), ({self.placeholder_label_def_string},Onset)",
         ]
         # count of how many onset names are in the mapper after the line is run
-        expected_context = [
-            2,
-            1,
-            0,
-            1,
-            1,
-            2
-        ]
+        expected_context = [2, 1, 0, 1, 1, 2]
         # count of issues the line generates
         test_issues = [
             [],
@@ -301,7 +285,7 @@ class Test(TestHedBase):
             [],
             [],
             [],
-            self.format_error(TemporalErrors.ONSET_SAME_DEFS_ONE_ROW, tag=3, def_name="TestDefPlaceholder/2471")
+            self.format_error(TemporalErrors.ONSET_SAME_DEFS_ONE_ROW, tag=3, def_name="TestDefPlaceholder/2471"),
         ]
 
         self._test_issues_base(test_strings, test_issues, expected_context, placeholder_def_only=False)
@@ -320,5 +304,5 @@ class Test(TestHedBase):
         self.assertEqual(len(issues), 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

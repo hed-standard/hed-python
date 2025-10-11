@@ -1,11 +1,11 @@
-""" Defined constants for definitions, def labels, and expanded labels. """
+"""Defined constants for definitions, def labels, and expanded labels."""
 
 
 class DefTagNames:
-    """ Source names for definitions, def labels, and expanded labels. """
+    """Source names for definitions, def labels, and expanded labels."""
 
-    DEF_KEY = 'Def'
-    DEF_EXPAND_KEY = 'Def-expand'
+    DEF_KEY = "Def"
+    DEF_EXPAND_KEY = "Def-expand"
     DEFINITION_KEY = "Definition"
 
     ONSET_KEY = "Onset"

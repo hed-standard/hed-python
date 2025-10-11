@@ -1,28 +1,30 @@
-""" A single event process with starting and ending times. """
+"""A single event process with starting and ending times."""
+
 from hed.models.hed_group import HedGroup
 from hed.models.model_constants import DefTagNames
 
 
 class TemporalEvent:
-    """ A single event process with starting and ending times.
+    """A single event process with starting and ending times.
 
     Note:  the contents have the Onset and duration removed.
     """
+
     def __init__(self, contents, start_index, start_time):
         if not contents:
             raise ValueError("A temporal event must have contents")
-        self.contents = None    # Must not have definition expanded if there is a definition.
+        self.contents = None  # Must not have definition expanded if there is a definition.
         self.start_index = start_index
         self.start_time = float(start_time)
         self.end_index = None
         self.end_time = None
-        self.anchor = None    # Lowercase def name with value
+        self.anchor = None  # Lowercase def name with value
         self.internal_group = None
         self.insets = []
         self._split_group(contents)
 
     def set_end(self, end_index, end_time):
-        """ Set end time information for an event process.
+        """Set end time information for an event process.
 
         Parameters:
             end_index (int): Position of ending event marker corresponding to the end of this event process.
@@ -51,7 +53,7 @@ class TemporalEvent:
             self.contents = self.anchor
 
     def __str__(self):
-        """ Return a string representation of this event process.
+        """Return a string representation of this event process.
 
         Returns:
             str: A string representation of this event process.
