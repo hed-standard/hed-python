@@ -44,7 +44,7 @@ git commit -m "Pre-release cleanup"
 #### 1.2 Update CHANGELOG.md
 
 Add a new entry at the top of `CHANGELOG.md` with:
-- Release version number (e.g., "Release 0.7.0")
+- Release version number (e.g., "Release 0.7.1")
 - Release date
 - Bullet points describing:
   - New features
@@ -55,22 +55,44 @@ Add a new entry at the top of `CHANGELOG.md` with:
 
 **Example:**
 ```markdown
-Release 0.7.0 October 2, 2025
-- Added comprehensive logging infrastructure
-- Enhanced validate_bids script with improved error reporting
-- Added CONTRIBUTING.md with development guidelines
-- Fixed Windows path handling in tests
+Release 0.7.1 October 11, 2025
+- Applied Black code formatter to entire codebase for consistent code style
+- Added Black to development dependencies and CI workflow
+- Enhanced CONTRIBUTING.md with code formatting guidelines
+- Updated README.md with Black usage instructions
 ```
 
-#### 1.3 Commit CHANGELOG Updates
+#### 1.3 Run Code Quality Checks
+
+Before releasing, ensure all code quality checks pass:
+
+**All Platforms:**
+```bash
+# Run code formatter check
+black --check .
+# On Windows, use: black --workers 1 --check .
+
+# Run linter
+ruff check hed/ tests/
+
+# Run spell checker
+codespell
+
+# Run all tests
+python -m unittest discover tests -v
+```
+
+Fix any issues before proceeding.
+
+#### 1.4 Commit CHANGELOG Updates
 
 **All Platforms:**
 ```bash
 git add CHANGELOG.md
-git commit -m "Update CHANGELOG for version 0.7.0"
+git commit -m "Update CHANGELOG for version 0.7.1"
 ```
 
-#### 1.4 Merge to Main Branch
+#### 1.5 Merge to Main Branch
 
 If you're working on a feature branch:
 
