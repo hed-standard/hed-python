@@ -275,7 +275,7 @@ class HedTagSummary(BaseSummary):
         leftovers = [value.get_info(verbose=True) for value in unmatched]
         return {"Name": tag_counts.name, "Total events": tag_counts.total_events,
                 "Total files": len(tag_counts.files.keys()),
-                "Files": [name for name in tag_counts.files.keys()],
+                "Files": list(tag_counts.files.keys()),
                 "Specifics": {"Main tags": details, "Other tags": leftovers}}
 
     def _get_result_string(self, name, result, indent=BaseSummary.DISPLAY_INDENT):
@@ -307,23 +307,25 @@ class HedTagSummary(BaseSummary):
         """
 
         all_counts = HedTagCounts('Dataset')
-        for key, counts in self.summary_dict.items():
+        for _key, counts in self.summary_dict.items():
             all_counts.merge_tag_dicts(counts.tag_dict)
             for file_name in counts.files.keys():
                 all_counts.files[file_name] = ""
             all_counts.total_events = all_counts.total_events + counts.total_events
         return all_counts
 
-    def save_visualizations(self, save_dir, file_formats=['.svg'], individual_summaries="separate", task_name=""):
+    def save_visualizations(self, save_dir, file_formats=None, individual_summaries="separate", task_name=""):
         """ Save the summary visualizations if any.
 
         Parameters:
             save_dir (str):  Path to directory in which visualizations should be saved.
-            file_formats (list):  List of file formats to use in saving.
+            file_formats (list or None):  List of file formats to use in saving. If None, defaults to ['.svg'].
             individual_summaries (str): One of "consolidated", "separate", or "none" indicating what to save.
             task_name (str): Name of task if segregated by task.
 
         """
+        if file_formats is None:
+            file_formats = ['.svg']
         if not self.sum_op.word_cloud:
             return
         else:

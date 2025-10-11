@@ -23,7 +23,7 @@ class DefValidator(DefinitionDict):
         """
         super().__init__(def_dicts, hed_schema=hed_schema)
 
-    def validate_def_tags(self, hed_string_obj, hed_validator=None) -> list[dict]:
+    def validate_def_tags(self, hed_string_obj) -> list[dict]:
         """ Validate Def/Def-Expand tags.
 
         Parameters:
@@ -36,7 +36,7 @@ class DefValidator(DefinitionDict):
         # This is needed primarily to validate the contents of a def-expand matches the default.
         def_issues = []
         # We need to check for labels to expand in ALL groups
-        for def_tag, def_expand_group, def_group in hed_string_obj.find_def_tags(recursive=True):
+        for def_tag, def_expand_group, _def_group in hed_string_obj.find_def_tags(recursive=True):
             def_issues += self._validate_def_contents(def_tag, def_expand_group)
 
         return def_issues

@@ -40,7 +40,7 @@ class AmbiguousDef:
                          tag.extension == def_extension[1] and tag.is_takes_value_tag()]
         if len(matching_tags) == 0:
             raise ValueError("Invalid Definition")
-        matching_names = set([tag.short_base_tag for tag in matching_tags])
+        matching_names = {tag.short_base_tag for tag in matching_tags}
         if self.matching_names is not None:
             self.matching_names = self.matching_names & matching_names
         else:
@@ -145,7 +145,7 @@ class DefExpandGatherer:
         """
         hed_str = HedString(string, self.hed_schema)
         hed_str.sort()
-        for def_tag, def_expand_group, def_group in hed_str.find_def_tags(recursive=True):
+        for def_tag, def_expand_group, _def_group in hed_str.find_def_tags(recursive=True):
             if def_tag == def_expand_group:
                 continue
 

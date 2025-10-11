@@ -102,7 +102,7 @@ class Test(unittest.TestCase):
         df = sum_op.do_op(dispatch, dispatch.prep_data(df), os.path.basename(events))
         self.assertEqual(len(df), old_len)
         context_dict = dispatch.summary_dicts
-        for key, item in context_dict.items():
+        for _key, item in context_dict.items():
             text_value = item.get_text_summary()
             self.assertTrue(text_value)
             json_value = item.get_summary()

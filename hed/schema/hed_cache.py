@@ -14,7 +14,7 @@ import re
 from typing import Union
 
 from semantic_version import Version
-from hed.schema.hed_cache_lock import CacheException, CacheLock
+from hed.schema.hed_cache_lock import CacheError, CacheLock
 from hed.schema.schema_io.schema_util import url_to_file, make_url_request
 from pathlib import Path
 import urllib
@@ -172,7 +172,7 @@ def cache_local_versions(cache_folder) -> Union[int, None]:
     try:
         with CacheLock(cache_folder, write_time=False):
             _copy_installed_folder_to_cache(cache_folder)
-    except CacheException:
+    except CacheError:
         return -1
 
 
@@ -219,7 +219,7 @@ def cache_xml_versions(hed_base_urls=DEFAULT_URL_LIST, hed_library_urls=DEFAULT_
                 for version, version_info in hed_versions.items():
                     _cache_hed_version(version, library_name, version_info, cache_folder=cache_folder)
 
-    except CacheException or ValueError or URLError:
+    except (CacheError, ValueError, URLError):
         return -1
 
     return 0
@@ -249,7 +249,7 @@ def get_library_data(library_name, cache_folder=None) -> dict:
             library_data = json.load(file)
         specific_library = library_data[library_name]
         return specific_library
-    except (OSError, CacheException, ValueError, KeyError):
+    except (OSError, CacheError, ValueError, KeyError):
         pass
 
     try:
@@ -260,7 +260,7 @@ def get_library_data(library_name, cache_folder=None) -> dict:
             library_data = json.load(file)
         specific_library = library_data[library_name]
         return specific_library
-    except (OSError, CacheException, ValueError, KeyError):
+    except (OSError, CacheError, ValueError, KeyError):
         pass
 
     try:
@@ -271,7 +271,7 @@ def get_library_data(library_name, cache_folder=None) -> dict:
             library_data = json.load(file)
         specific_library = library_data[library_name]
         return specific_library
-    except (OSError, CacheException, ValueError, URLError, KeyError):
+    except (OSError, CacheError, ValueError, URLError, KeyError):
         pass
 
     # This failed to get any data for some reason
@@ -407,7 +407,7 @@ def _get_hed_xml_versions_from_url_all_libraries(hed_base_library_url, library_n
 
 def _merge_in_versions(all_hed_versions, sub_folder_versions):
     """Build up the version dictionary, divided by library"""
-    for lib_name, hed_versions in sub_folder_versions.items():
+    for lib_name, _hed_versions in sub_folder_versions.items():
         if lib_name not in all_hed_versions:
             all_hed_versions[lib_name] = {}
         all_hed_versions[lib_name].update(sub_folder_versions[lib_name])

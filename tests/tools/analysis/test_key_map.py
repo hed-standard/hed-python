@@ -140,7 +140,7 @@ class Test(unittest.TestCase):
         stern_df = get_new_dataframe(self.stern_map_path)
         try:
             t_map.update(stern_df, allow_missing=False)
-        except HedFileError or KeyError:
+        except (HedFileError, KeyError):
             pass
         except Exception as ex:
             self.fail(f'update threw the wrong exception {ex} when key column missing')

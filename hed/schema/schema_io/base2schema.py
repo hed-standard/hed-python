@@ -41,11 +41,11 @@ class SchemaLoader(ABC):
         try:
             self.input_data = self._open_file()
         except OSError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, self.name)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, self.name) from e
         except TypeError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), self.name)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), self.name) from e
         except ValueError as e:
-            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), self.name)
+            raise HedFileError(HedExceptions.FILE_NOT_FOUND, str(e), self.name) from e
 
         # self._schema.filename = filename
         hed_attributes = self._get_header_attributes(self.input_data)
@@ -118,7 +118,7 @@ class SchemaLoader(ABC):
             except HedFileError as e:
                 raise HedFileError(HedExceptions.BAD_WITH_STANDARD,
                                    message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
-                                   filename=e.filename)
+                                   filename=e.filename) from e
             # Copy the non-alterable cached schema
             self._schema = copy.deepcopy(base_version)
             self._schema.filename = self.filename

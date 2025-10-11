@@ -1,9 +1,8 @@
 import os
 import io
 import unittest
-import logging
 from unittest.mock import patch
-from hed.scripts.validate_bids import get_parser, validate_dataset, main
+from hed.scripts.validate_bids import main
 
 
 class Test(unittest.TestCase):

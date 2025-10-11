@@ -1,7 +1,6 @@
 """ A BIDS tabular file including its associated sidecar. """
 
 import os
-import json
 from hed.models.tabular_input import TabularInput
 from hed.tools.bids.bids_file import BidsFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile

@@ -56,7 +56,7 @@ class TestHedSchemaDF(unittest.TestCase):
                 with open(value, "r") as f:
                     all_lines = f.readlines()
                     new_file_strings[key] = "".join(all_lines)
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 pass
 
         reloaded_schema = from_dataframes(new_file_strings)
@@ -102,7 +102,7 @@ class TestHedSchemaDF(unittest.TestCase):
         return df
 
     def _add_tag_row(self, tag_df, name, parent):
-        new_row = {col_name: "" for col_name in tag_df.columns}
+        new_row = dict.fromkeys(tag_df.columns, "")
         new_row[df_constants.name] = name
         new_row[df_constants.subclass_of] = parent
         return pd.concat([tag_df, pd.DataFrame([new_row])], ignore_index=True)

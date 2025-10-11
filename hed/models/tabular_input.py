@@ -1,11 +1,14 @@
 """ A BIDS tabular file with sidecar. """
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, TYPE_CHECKING
 
-from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
+from hed.models.column_mapper import ColumnMapper
 from hed.models.sidecar import Sidecar
+
+if TYPE_CHECKING:
+    from hed.models.definition_dict import DefinitionDict
 
 
 class TabularInput(BaseInput):

@@ -33,26 +33,26 @@ class BidsFileGroup:
         """
         logger = logging.getLogger('hed.bids_file_group')
         logger.debug(f"Creating BidsFileGroup for suffix '{suffix}' with {len(file_list)} files")
-        
+
         self.suffix = suffix
         ext_dict = io_util.separate_by_ext(file_list)
         logger.debug(f"Files by extension: .json={len(ext_dict.get('.json', []))}, .tsv={len(ext_dict.get('.tsv', []))}")
-        
+
         self.bad_files = {}
         self.sidecar_dict = {}
         self.sidecar_dir_dict = {}
         self.datafile_dict = {}
         self.has_hed = False
-        
+
         logger.debug(f"Processing {len(ext_dict.get('.json', []))} JSON sidecar files...")
         self._make_sidecar_dict(ext_dict.get('.json', []))
-        
+
         logger.debug("Creating directory mapping...")
         self._make_dir_dict(root_path)
-        
+
         logger.debug(f"Processing {len(ext_dict.get('.tsv', []))} TSV data files...")
         self._make_datafile_dict(root_path, ext_dict.get('.tsv', []))
-        
+
         logger.info(f"BidsFileGroup '{suffix}' created: {len(self.sidecar_dict)} sidecars, {len(self.datafile_dict)} data files, has_hed={self.has_hed}")
         if self.bad_files:
             logger.warning(f"Found {len(self.bad_files)} bad files in group '{suffix}'")
@@ -89,20 +89,20 @@ class BidsFileGroup:
         """
         logger = logging.getLogger('hed.bids_file_group')
         logger.info(f"Starting validation of file group '{self.suffix}' (sidecars: {len(self.sidecar_dict)}, data files: {len(self.datafile_dict)})")
-        
+
         error_handler = ErrorHandler(check_for_warnings)
         issues = []
-        
+
         logger.debug(f"Validating {len(self.sidecar_dict)} sidecars...")
         sidecar_issues = self.validate_sidecars(hed_schema, extra_def_dicts=extra_def_dicts,  error_handler=error_handler)
         logger.info(f"Sidecar validation completed: {len(sidecar_issues)} issues found")
         issues += sidecar_issues
-        
+
         logger.debug(f"Validating {len([f for f in self.datafile_dict.values() if f.has_hed])} HED-enabled data files...")
         datafile_issues = self.validate_datafiles(hed_schema, extra_def_dicts=extra_def_dicts, error_handler=error_handler)
         logger.info(f"Data file validation completed: {len(datafile_issues)} issues found")
         issues += datafile_issues
-        
+
         logger.info(f"File group '{self.suffix}' validation completed: {len(issues)} total issues")
         return issues
 
@@ -141,29 +141,29 @@ class BidsFileGroup:
         Notes: This will clear the contents of the datafiles if they were not previously set.
         """
         logger = logging.getLogger('hed.bids_file_group')
-        
+
         if not error_handler:
             error_handler = ErrorHandler(False)
         issues = []
-        
+
         hed_files = [f for f in self.datafile_dict.values() if f.has_hed]
         logger.debug(f"Processing {len(hed_files)} out of {len(self.datafile_dict)} data files with HED annotations")
-        
+
         for i, data_obj in enumerate(hed_files, 1):
             logger.debug(f"Validating data file {i}/{len(hed_files)}: {os.path.basename(data_obj.file_path)}")
-            
+
             had_contents = data_obj.contents
             data_obj.set_contents(overwrite=False)
             file_issues = data_obj.contents.validate(hed_schema, extra_def_dicts=extra_def_dicts, name=data_obj.file_path,
                                                      error_handler=error_handler)
-            
+
             if file_issues:
                 logger.debug(f"File {os.path.basename(data_obj.file_path)}: {len(file_issues)} issues found")
             issues += file_issues
-            
+
             if not had_contents:
                 data_obj.clear_contents()
-                
+
         logger.debug(f"Data file validation completed: {len(issues)} total issues from {len(hed_files)} files")
         return issues
 
@@ -177,7 +177,7 @@ class BidsFileGroup:
 
         """
         self.sidecar_dir_dict = {}
-        for root, dirs, files in os.walk(root_path, topdown=True):
+        for root, _dirs, files in os.walk(root_path, topdown=True):
             sidecar_list = []
             for r_file in files:
                 file_path = os.path.join(os.path.realpath(root), r_file)
@@ -295,12 +295,12 @@ class BidsFileGroup:
     def create_file_group(root_path, file_list, suffix):
         logger = logging.getLogger('hed.bids_file_group')
         logger.debug(f"Creating file group for suffix '{suffix}' from {len(file_list)} files")
-        
+
         file_group = BidsFileGroup(root_path, file_list, suffix=suffix)
-        
+
         if not file_group.sidecar_dict and not file_group.datafile_dict:
             logger.debug(f"File group '{suffix}' is empty (no sidecars or data files), returning None")
             return None
-            
+
         logger.debug(f"File group '{suffix}' created successfully")
         return file_group

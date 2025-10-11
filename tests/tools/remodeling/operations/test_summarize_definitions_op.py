@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
         df = pd.DataFrame({"HED": [
             "(Def-expand/B2/3, (Action/3, Collection/animals, Acceleration/3))",
         ]})
-        df_new = sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
+        sum_op.do_op(dispatch, dispatch.prep_data(df), 'subj2_run1', sidecar=self.json_path)
         self.assertIn(sum_op.summary_name, dispatch.summary_dicts)
         self.assertIsInstance(dispatch.summary_dicts[sum_op.summary_name], DefinitionSummary)
         # print(str(dispatch.summary_dicts[sum_op.summary_name].get_text_summary()['Dataset']))

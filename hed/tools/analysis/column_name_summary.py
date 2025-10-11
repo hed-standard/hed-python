@@ -47,7 +47,7 @@ class ColumnNameSummary:
             as_json (bool):  If False (the default), return the underlying summary object, otherwise transform to JSON.
 
         """
-        patterns = [list() for _ in self.unique_headers]
+        patterns = [[] for _ in self.unique_headers]
         for key, value in self.file_dict.items():
             patterns[value].append(key)
         column_headers = []

@@ -54,19 +54,22 @@ class Dispatcher:
         self.hed_schema = self.get_schema(hed_versions)
         self.summary_dicts = {}
 
-    def get_summaries(self, file_formats=['.txt', '.json']) -> list[dict]:
+    def get_summaries(self, file_formats=None) -> list[dict]:
         """ Return the summaries in a dictionary of strings suitable for saving or archiving.
 
         Parameters:
-            file_formats (list):  List of formats for the context files ('.json' and '.txt' are allowed).
+            file_formats (list or None):  List of formats for the context files ('.json' and '.txt' are allowed).
+                If None, defaults to ['.txt', '.json'].
 
         Returns:
             list[dict]: A list of dictionaries of summaries keyed to filenames.
         """
+        if file_formats is None:
+            file_formats = ['.txt', '.json']
 
         summary_list = []
         time_stamp = '_' + io_util.get_timestamp()
-        for context_name, context_item in self.summary_dicts.items():
+        for _context_name, context_item in self.summary_dicts.items():
             file_base = context_item.op.summary_filename
             if self.data_root:
                 file_base = io_util.extract_suffix_path(self.data_root, file_base)
@@ -113,10 +116,10 @@ class Dispatcher:
             actual_path = file_designator
         try:
             df = pd.read_csv(actual_path, sep='\t', header=0, keep_default_na=False, na_values=",null")
-        except Exception:
+        except Exception as e:
             raise HedFileError("BadDataFile",
                                f"{str(actual_path)} (orig: {file_designator}) does not correspond to a valid tsv file",
-                               "")
+                               "") from e
         return df
 
     def get_summary_save_dir(self) -> str:
@@ -155,12 +158,12 @@ class Dispatcher:
             df = self.post_proc_data(df)
         return df
 
-    def save_summaries(self, save_formats=['.json', '.txt'], individual_summaries="separate",
+    def save_summaries(self, save_formats=None, individual_summaries="separate",
                        summary_dir=None, task_name=""):
         """ Save the summary files in the specified formats.
 
         Parameters:
-            save_formats (list):  A list of formats [".txt", ."json"]
+            save_formats (list or None):  A list of formats [".txt", ".json"]. If None, defaults to ['.json', '.txt'].
             individual_summaries (str):  "consolidated", "individual", or "none".
             summary_dir (str or None): Directory for saving summaries.
             task_name (str): Name of task if summaries separated by task or "" if not separated.
@@ -173,13 +176,15 @@ class Dispatcher:
             - "individual" means that the summaries of individual files are in separate files.
             - "none" means that only the overall summary is produced.
         """
+        if save_formats is None:
+            save_formats = ['.json', '.txt']
 
         if not save_formats:
             return
         if not summary_dir:
             summary_dir = self.get_summary_save_dir()
         os.makedirs(summary_dir, exist_ok=True)
-        for summary_name, summary_item in self.summary_dicts.items():
+        for _summary_name, summary_item in self.summary_dicts.items():
             summary_item.save(summary_dir, save_formats, individual_summaries=individual_summaries, task_name=task_name)
 
     @staticmethod
@@ -194,7 +199,7 @@ class Dispatcher:
         """
 
         operations = []
-        for index, item in enumerate(operation_list):
+        for _index, item in enumerate(operation_list):
             new_operation = valid_operations[item["operation"]](item["parameters"])
             operations.append(new_operation)
         return operations

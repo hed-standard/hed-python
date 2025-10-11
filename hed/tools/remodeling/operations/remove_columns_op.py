@@ -1,5 +1,8 @@
 """ Remove columns from a columnar file. """
 from __future__ import annotations
+
+import pandas as pd
+
 from hed.tools.remodeling.operations.base_op import BaseOp
 
 
@@ -69,10 +72,10 @@ class RemoveColumnsOp(BaseOp):
         df_new = df.copy()
         try:
             return df_new.drop(self.column_names, axis=1, errors=self.error_handling)
-        except KeyError:
+        except KeyError as e:
             raise KeyError("MissingColumnCannotBeRemoved",
                            f"{name}: Ignore missing is False but a column in {str(self.column_names)} is "
-                           f"not in the data columns [{str(df_new.columns)}]")
+                           f"not in the data columns [{str(df_new.columns)}]") from e
 
     @staticmethod
     def validate_input_data(parameters):

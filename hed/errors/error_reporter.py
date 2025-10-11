@@ -26,7 +26,7 @@ The standard error keys are:
 """
 from __future__ import annotations
 from functools import wraps
-import xml.etree.ElementTree as et
+import xml.etree.ElementTree as ET
 from collections import defaultdict
 from typing import Optional
 
@@ -431,7 +431,6 @@ class ErrorHandler:
             - A dictionary with the codes as keys and the number of occurrences as values.
 
         """
-        total_seen = {}
         file_dicts = {'': {}}
         filtered_issues = []
         for issue in issues:
@@ -565,10 +564,10 @@ def get_printable_issue_string_html(issues, title=None, severity=None, skip_file
 
     root_element = _create_error_tree(output_dict)
     if title:
-        title_element = et.Element("h1")
+        title_element = ET.Element("h1")
         title_element.text = title
         root_element.insert(0, title_element)
-    return et.tostring(root_element, encoding='unicode')
+    return ET.tostring(root_element, encoding='unicode')
 
 def iter_errors(issues):
     """ An iterator over issues that flattens the context into each issue dictionary.
@@ -593,7 +592,7 @@ def iter_errors(issues):
     """
 
     for issue in issues:
-        flat_issue = dict()
+        flat_issue = {}
         single_issue_context = _get_context_from_issue(issue, False)
         flat_issue.update(single_issue_context)
         flat_issue.update(issue)
@@ -782,12 +781,12 @@ def _format_single_context_string(context_type, context, tab_count=0):
 
 def _create_error_tree(error_dict, parent_element=None, add_link=True):
     if parent_element is None:
-        parent_element = et.Element("ul")
+        parent_element = ET.Element("ul")
 
     for context, value in error_dict.items():
         if context == "children":
             for child in value:
-                child_li = et.SubElement(parent_element, "li")
+                child_li = ET.SubElement(parent_element, "li")
                 error_prefix = _get_error_prefix(child)
                 single_issue_message = child["message"]
 
@@ -795,7 +794,7 @@ def _create_error_tree(error_dict, parent_element=None, add_link=True):
                 if add_link:
                     link_url = create_doc_link(child['code'])
                     if link_url:
-                        a_element = et.SubElement(child_li, "a", href=link_url)
+                        a_element = ET.SubElement(child_li, "a", href=link_url)
                         a_element.text = error_prefix
                         a_element.tail = " " + single_issue_message
                     else:
@@ -804,9 +803,9 @@ def _create_error_tree(error_dict, parent_element=None, add_link=True):
                     child_li.text = error_prefix + " " + single_issue_message
             continue
 
-        context_li = et.SubElement(parent_element, "li")
+        context_li = ET.SubElement(parent_element, "li")
         context_li.text = _format_single_context_string(context[0], context[1])
-        context_ul = et.SubElement(context_li, "ul")
+        context_ul = ET.SubElement(context_li, "ul")
         _create_error_tree(value, context_ul, add_link)
 
     return parent_element

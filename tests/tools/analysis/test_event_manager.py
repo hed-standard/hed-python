@@ -10,7 +10,6 @@ from hed.models.sidecar import Sidecar, HedString
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager
-from hed.validator import SpreadsheetValidator
 
 
 class Test(unittest.TestCase):
@@ -115,7 +114,6 @@ class Test(unittest.TestCase):
             "HED": ["Age/100,Condition-variable/Temp", "Def/Con1", "Def/Con2", "n/a", "Green", "n/a", "Female", "n/a"],
         }
         tab = TabularInput(pd.DataFrame(tsv), sidecar=self.sidecar2)
-        defs = self.sidecar2.get_def_dict(self.schema)
         manager1 = EventManager(tab, self.schema)
         hed1, base1, context1 = manager1.unfold_context()
         hed2, base2, context2 = manager1.unfold_context(remove_types=["Condition-variable"])

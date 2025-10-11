@@ -329,7 +329,7 @@ class SchemaComparer:
 
     def _add_extras_changes(self, change_dict):
         """Compare the extras (dataframes) in two schemas and add differences to the change dictionary."""
-        from hed.schema.schema_io.df_constants import extras_column_dict, UNIQUE_EXTRAS_KEYS
+        from hed.schema.schema_io.df_constants import UNIQUE_EXTRAS_KEYS
 
         extras1 = getattr(self.schema1, "extras", {}) or {}
         extras2 = getattr(self.schema2, "extras", {}) or {}

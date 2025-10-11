@@ -106,7 +106,18 @@ def get_full_extension(filename):
     return name, full_ext
 
 
-def get_unique_suffixes(file_paths, extensions=['.json', '.tsv']):
+def get_unique_suffixes(file_paths, extensions=None):
+    """ Get unique suffixes from file paths with specified extensions.
+
+    Parameters:
+        file_paths (list): List of file paths to process.
+        extensions (list or None): List of file extensions to filter. If None, defaults to ['.json', '.tsv'].
+
+    Returns:
+        set: Set of unique suffixes found.
+    """
+    if extensions is None:
+        extensions = ['.json', '.tsv']
     suffixes = set()
     extension_set = set(extensions)
     for file_path in file_paths:

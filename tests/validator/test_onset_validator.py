@@ -2,11 +2,10 @@ import copy
 import unittest
 import os
 
-from hed.errors import ErrorHandler, TemporalErrors, ErrorContext, ValidationErrors
+from hed.errors import ErrorHandler, TemporalErrors, ErrorContext
 from hed.models import HedString, DefinitionDict
 from hed import schema
 from hed.validator import HedValidator, OnsetValidator, DefValidator
-from hed.validator.util.group_util import GroupValidator
 
 
 from tests.validator.test_tag_validator_base import TestHedBase

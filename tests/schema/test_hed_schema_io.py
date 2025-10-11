@@ -490,13 +490,13 @@ class TestHedSchemaMerging(unittest.TestCase):
             HedExceptions.SCHEMA_LIBRARY_INVALID,
             SchemaErrors.SCHEMA_DUPLICATE_NODE,
         ]
-        for schema1, expected_code in zip(files, expected_code):
+        for schema1, expected in zip(files, expected_code):
             # print(schema.filename)
             issues = schema1.check_compliance()
             # for issue in issues:
             #     print(str(issue))
             self.assertEqual(len(issues), 1)
-            self.assertEqual(issues[0]["code"], expected_code)
+            self.assertEqual(issues[0]["code"], expected)
 
     def test_cannot_load_schemas(self):
         files = [

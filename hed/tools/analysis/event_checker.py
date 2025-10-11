@@ -1,6 +1,5 @@
 from hed.errors.error_types import TagQualityErrors
 from hed.errors import ErrorHandler, ErrorContext, sort_issues
-from hed import TabularInput
 from hed.tools import EventManager, HedTagManager
 
 

@@ -4,7 +4,7 @@ import io
 import shutil
 
 from hed.models import Sidecar, TabularInput
-from hed import schema, get_printable_issue_string
+from hed import schema
 from hed.errors import HedFileError
 from hed.errors import ErrorHandler, ErrorContext
 

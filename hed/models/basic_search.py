@@ -196,7 +196,7 @@ def construct_delimiter_map(text, words):
 
     delimiter_map = {}
     # Use combinations to get every combination of two words in order
-    for (start1, (word1, length1)), (start2, (word2, length2)) in combinations(sorted_locations, 2):
+    for (start1, (word1, length1)), (start2, (word2, _length2)) in combinations(sorted_locations, 2):
         end1 = start1 + length1
         delimiter_text = text[end1:start2]
         delimiter_map[(word1, word2)] = check_parentheses(delimiter_text)

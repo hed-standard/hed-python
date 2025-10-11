@@ -96,8 +96,8 @@ class HedTypeFactors:
         count_list = [0] * self.number_elements
         for index in list(self.direct_indices.keys()):
             count_list[index] = count_list[index] + 1
-        for level, cond in self.levels.items():
-            for index, item in cond.items():
+        for _level, cond in self.levels.items():
+            for index, _item in cond.items():
                 count_list[index] = count_list[index] + 1
         number_events, number_multiple, max_multiple = self._count_level_events(count_list)
         summary = {'type_value': self.type_value, 'type_tag': self.type_tag,
@@ -134,7 +134,7 @@ class HedTypeFactors:
         number_events = 0
         number_multiple = 0
         max_multiple = count_list[0]
-        for index, count in enumerate(count_list):
+        for index, _count in enumerate(count_list):
             if count_list[index] > 0:
                 number_events = number_events + 1
             if count_list[index] > 1:

@@ -75,9 +75,14 @@ This project adheres to a code of conduct that we expect all contributors to fol
 
 We use several tools to maintain code quality:
 
-- **flake8:** For linting and style checking
+- **ruff:** For linting, style checking, and import sorting
   ```bash
-  flake8 hed/ tests/
+  ruff check hed/ tests/
+  ```
+  
+  To automatically fix issues:
+  ```bash
+  ruff check --fix hed/ tests/
   ```
 
 - **codespell:** For spell checking
@@ -185,7 +190,7 @@ python -m unittest tests.models.test_hed_string.TestHedString.test_constructor
 
 3. **Check code style:**
    ```bash
-   flake8 hed/ tests/
+   ruff check hed/ tests/
    ```
 
 4. **Update documentation** if you've added/changed functionality

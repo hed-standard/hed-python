@@ -2,11 +2,12 @@
 
 import os
 import logging
-from hed.schema.hed_schema import HedSchema
-from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.tools.bids.bids_file_group import BidsFileGroup
 from hed.tools.bids import bids_util
 from hed.tools.util import io_util
+
+# Sentinel value for default arguments (avoids mutable default bug)
+_SENTINEL = object()
 
 
 class BidsDataset:
@@ -19,24 +20,30 @@ class BidsDataset:
 
     """
 
-    def __init__(self, root_path, schema=None, suffixes=['events', 'participants'],
-                 exclude_dirs=['sourcedata', 'derivatives', 'code', 'stimuli']):
+    def __init__(self, root_path, schema=None, suffixes=_SENTINEL, exclude_dirs=_SENTINEL):
         """ Constructor for a BIDS dataset.
 
         Parameters:
             root_path (str):  Root path of the BIDS dataset.
             schema (HedSchema or HedSchemaGroup):  A schema that overrides the one specified in dataset.
             suffixes (list or None): File name suffixes of items to include.
-                If None or empty, then ['_events', 'participants'] is assumed.
-            exclude_dirs=['sourcedata', 'derivatives', 'code', 'phenotype']:
+                If not provided, defaults to ['events', 'participants'].
+                If None or empty list, includes all files.
+            exclude_dirs (list or None): Directory names to exclude from traversal.
+                If not provided, defaults to ['sourcedata', 'derivatives', 'code', 'stimuli'].
+                If None or empty list, no directories are excluded.
 
         """
+        if suffixes is _SENTINEL:
+            suffixes = ['events', 'participants']
+        if exclude_dirs is _SENTINEL:
+            exclude_dirs = ['sourcedata', 'derivatives', 'code', 'stimuli']
         logger = logging.getLogger('hed.bids_dataset')
         logger.debug(f"Initializing BidsDataset for path: {root_path}")
-        
+
         self.root_path = os.path.realpath(root_path)
         logger.debug(f"Real root path resolved to: {self.root_path}")
-        
+
         if schema:
             self.schema = schema
             logger.debug(f"Using provided schema: {schema.get_schema_versions() if hasattr(schema, 'get_schema_versions') else 'custom'}")
@@ -51,11 +58,11 @@ class BidsDataset:
         self.exclude_dirs = exclude_dirs
         self.suffixes = suffixes
         logger.debug(f"Using suffixes: {suffixes}, excluding directories: {exclude_dirs}")
-        
+
         logger.info("Setting up file groups...")
         self.file_groups = self._set_file_groups()
         self.bad_files = []
-        
+
         logger.info(f"BidsDataset initialized with {len(self.file_groups)} file groups: {list(self.file_groups.keys())}")
 
     def get_file_group(self, suffix):
@@ -84,7 +91,7 @@ class BidsDataset:
         logger = logging.getLogger('hed.bids_dataset')
         logger.info(f"Starting validation of {len(self.file_groups)} file groups")
         logger.debug(f"Check for warnings: {check_for_warnings}")
-        
+
         issues = []
         if schema:
             this_schema = schema
@@ -96,7 +103,7 @@ class BidsDataset:
             logger.error("No valid schema available for validation")
             return [{"code": "SCHEMA_LOAD_FAILED",
                      "message": "BIDS dataset_description.json has invalid HEDVersion and passed schema was invalid}"}]
-        
+
         for suffix, group in self.file_groups.items():
             if group.has_hed:
                 logger.info(f"Validating file group: {suffix} ({len(group.datafile_dict)} files)")
@@ -105,7 +112,7 @@ class BidsDataset:
                 issues += group_issues
             else:
                 logger.debug(f"Skipping file group {suffix} - no HED content")
-        
+
         logger.info(f"Dataset validation completed: {len(issues)} total issues found")
         return issues
 
@@ -119,11 +126,11 @@ class BidsDataset:
     def _set_file_groups(self):
         logger = logging.getLogger('hed.bids_dataset')
         logger.debug(f"Searching for files with extensions ['.tsv', '.json'] and suffixes {self.suffixes}")
-        
+
         file_paths = io_util.get_file_list(self.root_path, extensions=['.tsv', '.json'],
                                            exclude_dirs=self.exclude_dirs, name_suffix=self.suffixes)
         logger.debug(f"Found {len(file_paths)} files matching criteria")
-        
+
         file_dict = bids_util.group_by_suffix(file_paths)
         logger.debug(f"Files grouped by suffix: {[(suffix, len(files)) for suffix, files in file_dict.items()]}")
 

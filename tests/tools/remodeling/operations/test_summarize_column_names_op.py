@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
         df1 = df.drop(labels='onset', axis=1)
         sum_op.do_op(dispatch, df1, 'run-03')
         this_context = dispatch.summary_dicts[sum_op.summary_name]
-        for key, item in this_context.summary_dict.items():
+        for _key, item in this_context.summary_dict.items():
             summary = item.get_summary()
             self.assertIsInstance(summary, dict)
             json_value = item.get_summary(as_json=True)

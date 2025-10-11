@@ -48,7 +48,7 @@ class HedTagCount:
               dict:  Keys are 'tag', 'events', and 'files'.
         """
         if verbose:
-            files = [name for name in self.files]
+            files = list(self.files)
         else:
             files = len(self.files)
         return {'tag': self.tag, 'events': self.events, 'files': files}
@@ -60,7 +60,7 @@ class HedTagCount:
             dict:  dictionary summary of events and files that contain this tag.
 
         """
-        return {'tag': self.tag, 'events': self.events, 'files': [name for name in self.files]}
+        return {'tag': self.tag, 'events': self.events, 'files': list(self.files)}
 
     def get_empty(self):
         empty = copy.copy(self)
@@ -173,7 +173,7 @@ class HedTagCounts:
 
         """
         template_dict = {}
-        for key, key_list in tags.items():
+        for _key, key_list in tags.items():
             for element in key_list:
                 template_dict[element.casefold()] = []
         return template_dict

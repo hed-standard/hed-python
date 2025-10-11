@@ -1,7 +1,5 @@
-import os
 from hed import TabularInput
 from hed.errors import ErrorHandler
-from hed.schema import load_schema_version
 from hed.errors.error_types import TagQualityErrors
 from hed.tools.analysis.event_checker import EventsChecker
 
@@ -78,7 +76,7 @@ class EventsSummary:
                 continue
             all_tags = hed_obj.get_all_tags()
             found = False
-            for key, tags in group_dict.items():
+            for key, _tags in group_dict.items():
                 if self.match_tags(all_tags, key):
                     group_dict[key] = self.update_tags(group_dict[key], all_tags)
                     found = True

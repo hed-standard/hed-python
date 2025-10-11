@@ -189,7 +189,7 @@ class Test(unittest.TestCase):
 
     def test_replace_tag_references(self):
         # Test with mixed data types and HedString in a nested dict
-        nested_dict = {'a': HedString('Hed1', self._schema), 
+        nested_dict = {'a': HedString('Hed1', self._schema),
                        'b': {'c': 2, 'd': [3, {'e': HedString('Hed2', self._schema)}]}, 'f': [5, 6]}
         replace_tag_references(nested_dict)
         self.assertEqual(nested_dict, {'a': 'Hed1', 'b': {'c': 2, 'd': [3, {'e': 'Hed2'}]}, 'f': [5, 6]})
@@ -240,9 +240,9 @@ class Test(unittest.TestCase):
             {'code': 'ERROR_CODE_1', 'message': 'Yet another first error'},
             {'code': 'ERROR_CODE_2', 'message': 'Another second error'}
         ]
-        
+
         result = ErrorHandler.get_code_counts(issues)
-        
+
         # Check that counts are correct
         expected = {
             'ERROR_CODE_1': 3,
@@ -250,18 +250,18 @@ class Test(unittest.TestCase):
             'ERROR_CODE_3': 1
         }
         self.assertEqual(result, expected)
-        
+
         # Test with empty list
         empty_result = ErrorHandler.get_code_counts([])
         self.assertEqual(empty_result, {})
-        
+
         # Test with issue missing 'code' key
         issues_with_missing_code = [
             {'code': 'VALID_CODE', 'message': 'Valid error'},
             {'message': 'Missing code error'},  # No 'code' key
             {'code': 'VALID_CODE', 'message': 'Another valid error'}
         ]
-        
+
         result_with_missing = ErrorHandler.get_code_counts(issues_with_missing_code)
         expected_with_missing = {
             'VALID_CODE': 2,

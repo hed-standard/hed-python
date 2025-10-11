@@ -265,7 +265,7 @@ class ColumnValueSummary(BaseSummary):
             return []
         count_dict = specifics['Categorical counts']
         formatted_list = [
-            f"Categorical column values[Events, Files]:"]
+            "Categorical column values[Events, Files]:"]
         sorted_tuples = sorted(cat_dict.items(), key=lambda x: x[0])
         for entry in sorted_tuples:
             formatted_list = formatted_list + self._get_categorical_col( entry, count_dict, offset="", indent="   ")

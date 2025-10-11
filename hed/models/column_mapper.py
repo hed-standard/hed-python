@@ -220,7 +220,7 @@ class ColumnMapper:
             column_map = new_column_map
         # List like
         else:
-            column_map = {column_number: column_name for column_number, column_name in enumerate(new_column_map)}
+            column_map = dict(enumerate(new_column_map))
         self._column_map = column_map
         self._reverse_column_map = {column_name: column_number for column_number, column_name in column_map.items()}
         self._finalize_mapping()
@@ -236,7 +236,7 @@ class ColumnMapper:
         basic_final_map = {}
         unhandled_cols = []
         if column_map:
-            for column_number, column_name in column_map.items():
+            for _column_number, column_name in column_map.items():
                 if column_name is None:
                     continue
                 if column_name in column_data:

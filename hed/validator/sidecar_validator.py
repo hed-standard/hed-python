@@ -312,7 +312,7 @@ class SidecarValidator:
         # This could be simplified now
         for col_name, has_def in definition_checks.items():
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, col_name)
-            def_check = set(bool(d) for d in has_def)
+            def_check = {bool(d) for d in has_def}
             if len(def_check) != 1:
                 flat_def_list = [d for defs in has_def for d in defs]
                 for d in flat_def_list:

@@ -5,7 +5,7 @@ from typing import Union
 
 from pandas import DataFrame
 
-from hed.schema.hed_schema_entry import HedSchemaEntry
+from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry
 from hed.schema.hed_schema_constants import (HedKey, HedSectionKey, HedKeyOld,
                                            VERSION_ATTRIBUTE, LIBRARY_ATTRIBUTE,
                                            WITH_STANDARD_ATTRIBUTE, UNMERGED_ATTRIBUTE)
@@ -251,7 +251,7 @@ class HedSchema(HedSchemaBase):
         Returns:
             Union[pd.DataFrame, None]: The DataFrame for this extras key, or None if it doesn't exist or is empty.
         """
-        if not hasattr(self, 'extras') or not extras_key in self.extras:
+        if not hasattr(self, 'extras') or extras_key not in self.extras:
             return None
         externals = self.extras[extras_key]
         if externals.empty:
@@ -740,7 +740,7 @@ class HedSchema(HedSchemaBase):
         if key_class in [HedSectionKey.Attributes, HedSectionKey.Properties]:
             prop_added_dict = {}
             if key_class == HedSectionKey.Attributes:
-                prop_added_dict = {key: value for key, value in self._sections[HedSectionKey.Properties].items()}
+                prop_added_dict = dict(self._sections[HedSectionKey.Properties].items())
             self._add_element_property_attributes(prop_added_dict, element_prop_key)
             return prop_added_dict
 

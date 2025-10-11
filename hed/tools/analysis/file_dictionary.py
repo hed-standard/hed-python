@@ -121,7 +121,7 @@ class FileDictionary:
         output_list = []
         if title:
             output_list.append(f"{title} ({len(self.key_list)} files)")
-        for key, value in self._file_dict.items():
+        for key, _value in self._file_dict.items():
             basename = os.path.basename(self.get_file_path(key))
             output_list.append(f"{key}: {basename}")
             if logger:

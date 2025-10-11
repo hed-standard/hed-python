@@ -72,10 +72,10 @@ class RenameColumnsOp (BaseOp):
         df_new = df.copy()
         try:
             return df_new.rename(columns=self.column_mapping, errors=self.error_handling)
-        except KeyError:
+        except KeyError as e:
             raise KeyError("MappedColumnsMissingFromData",
                            f"{name}: ignore_missing is False, mapping columns [{self.column_mapping}]"
-                           f" but df columns are [{str(df.columns)}")
+                           f" but df columns are [{str(df.columns)}") from e
 
     @staticmethod
     def validate_input_data(parameters):

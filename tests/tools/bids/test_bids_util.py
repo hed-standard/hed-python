@@ -22,7 +22,7 @@ class TestGetSchemaFromDescription(unittest.TestCase):
         desc_file = os.path.join(self.test_dir, "dataset_description.json")
         with open(desc_file, "w") as f:
             json.dump({"HEDVersion": "8.0.0"}, f)
-        
+
         result = get_schema_from_description(self.test_dir)
         # Since we can't easily mock the schema loading without changing the implementation,
         # we'll just verify that the function doesn't return None and doesn't crash
@@ -41,7 +41,7 @@ class TestGetSchemaFromDescription(unittest.TestCase):
         desc_file = os.path.join(self.test_dir, "dataset_description.json")
         with open(desc_file, "w") as f:
             f.write("invalid json")
-            
+
         result = get_schema_from_description(self.test_dir)
         self.assertIsNone(result)
 
@@ -51,7 +51,7 @@ class TestGetSchemaFromDescription(unittest.TestCase):
         desc_file = os.path.join(self.test_dir, "dataset_description.json")
         with open(desc_file, "w") as f:
             json.dump({}, f)
-            
+
         result = get_schema_from_description(self.test_dir)
         # The function should still work, just load default schema
         self.assertIsNotNone(result)
@@ -287,23 +287,23 @@ class TestGetMergedSidecar(unittest.TestCase):
         # Create a nested directory structure
         self.sub_dir = os.path.join(self.test_dir, "sub-01", "func")
         os.makedirs(self.sub_dir)
-        
+
     def tearDown(self):
         """Clean up temporary directory"""
         shutil.rmtree(self.test_dir)
 
     def test_get_merged_sidecar_no_overlap(self):
         from hed.tools.bids.bids_util import get_merged_sidecar
-        
+
         # Create sidecar files at different levels
         root_sidecar = os.path.join(self.test_dir, "task-test_events.json")
         with open(root_sidecar, "w") as f:
             json.dump({"key1": "value1"}, f)
-            
+
         sub_sidecar = os.path.join(self.sub_dir, "task-test_events.json")
         with open(sub_sidecar, "w") as f:
             json.dump({"key2": "value2"}, f)
-        
+
         # Create test TSV file
         test_file = os.path.join(self.sub_dir, "sub-01_task-test_events.tsv")
         with open(test_file, "w") as f:
@@ -311,7 +311,7 @@ class TestGetMergedSidecar(unittest.TestCase):
 
         # Test merging
         merged = get_merged_sidecar(self.test_dir, test_file)
-        
+
         # Should contain both keys
         self.assertIn("key1", merged)
         self.assertIn("key2", merged)
@@ -320,16 +320,16 @@ class TestGetMergedSidecar(unittest.TestCase):
 
     def test_get_merged_sidecar_overlap(self):
         from hed.tools.bids.bids_util import get_merged_sidecar
-        
+
         # Create sidecar files with overlapping keys
         root_sidecar = os.path.join(self.test_dir, "task-test_events.json")
         with open(root_sidecar, "w") as f:
             json.dump({"key1": "value1", "key2": "value2"}, f)
-            
+
         sub_sidecar = os.path.join(self.sub_dir, "task-test_events.json")
         with open(sub_sidecar, "w") as f:
             json.dump({"key2": "value3", "key4": "value4"}, f)
-        
+
         # Create test TSV file
         test_file = os.path.join(self.sub_dir, "sub-01_task-test_events.tsv")
         with open(test_file, "w") as f:
@@ -337,7 +337,7 @@ class TestGetMergedSidecar(unittest.TestCase):
 
         # Test merging - more specific (deeper) sidecars should override
         merged = get_merged_sidecar(self.test_dir, test_file)
-        
+
         self.assertEqual(merged["key1"], "value1")  # Only in root
         self.assertEqual(merged["key2"], "value3")  # Sub should override root
         self.assertEqual(merged["key4"], "value4")  # Only in sub
@@ -348,35 +348,35 @@ class TestGetCandidates(unittest.TestCase):
     def setUp(self):
         """Set up temporary directory with test files"""
         self.test_dir = tempfile.mkdtemp()
-        
+
     def tearDown(self):
         """Clean up temporary directory"""
         shutil.rmtree(self.test_dir)
 
     def test_get_candidates_valid_files(self):
         from hed.tools.bids.bids_util import get_candidates
-        
+
         # Create real JSON files
         file1 = os.path.join(self.test_dir, "sub-01_task-rest_events.json")  # Exact match
         file2 = os.path.join(self.test_dir, "task-rest_events.json")  # Subset match (should inherit)
         file3 = os.path.join(self.test_dir, "readme.txt")
-        
+
         with open(file1, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
         with open(file2, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
         with open(file3, "w") as f:
             f.write("Not a JSON file")
-        
+
         # Test with TSV file dict that should match the JSON files
         tsv_dict = {
-            "suffix": "events", 
-            "entities": {"sub": "01", "task": "rest"}, 
+            "suffix": "events",
+            "entities": {"sub": "01", "task": "rest"},
             "bad": []
         }
-        
+
         candidates = get_candidates(self.test_dir, tsv_dict)
-        
+
         # Should find both JSON files (exact match and subset match)
         # Normalize paths for Windows compatibility (handles RUNNER~1 vs runneradmin)
         file1_norm = os.path.realpath(file1)
@@ -384,49 +384,49 @@ class TestGetCandidates(unittest.TestCase):
         self.assertEqual(len(candidates), 2)
         self.assertIn(file1_norm, candidates)
         self.assertIn(file2_norm, candidates)
-        
+
     def test_get_candidates_no_valid_files(self):
         from hed.tools.bids.bids_util import get_candidates
-        
+
         # Create JSON files that won't match
         file1 = os.path.join(self.test_dir, "sub-02_task-memory_events.json")
         with open(file1, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
-        
+
         # Test with TSV file dict that won't match
         tsv_dict = {
-            "suffix": "events", 
-            "entities": {"sub": "01", "task": "rest"}, 
+            "suffix": "events",
+            "entities": {"sub": "01", "task": "rest"},
             "bad": []
         }
-        
+
         candidates = get_candidates(self.test_dir, tsv_dict)
         self.assertEqual(len(candidates), 0)
 
     def test_get_candidates_mixed_files(self):
         from hed.tools.bids.bids_util import get_candidates
-        
+
         # Create mix of matching and non-matching files
         file1 = os.path.join(self.test_dir, "sub-01_task-rest_events.json")  # Exact match
-        file2 = os.path.join(self.test_dir, "task-rest_events.json")  # Subset match (should inherit) 
+        file2 = os.path.join(self.test_dir, "task-rest_events.json")  # Subset match (should inherit)
         file3 = os.path.join(self.test_dir, "sub-02_task-rest_events.json")  # Different subject
-        
+
         with open(file1, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
         with open(file2, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
         with open(file3, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
-        
-        # Test with TSV file dict 
+
+        # Test with TSV file dict
         tsv_dict = {
-            "suffix": "events", 
-            "entities": {"sub": "01", "task": "rest"}, 
+            "suffix": "events",
+            "entities": {"sub": "01", "task": "rest"},
             "bad": []
         }
-        
+
         candidates = get_candidates(self.test_dir, tsv_dict)
-        
+
         # Should find exact match and subset match, but not different subject
         # Normalize paths for Windows compatibility (handles RUNNER~1 vs runneradmin)
         file1_norm = os.path.realpath(file1)
@@ -476,28 +476,28 @@ class TestWalkBack(unittest.TestCase):
     def setUp(self):
         """Set up temporary directory structure for test files"""
         self.test_dir = tempfile.mkdtemp()
-        
+
     def tearDown(self):
         """Clean up temporary directory"""
         shutil.rmtree(self.test_dir)
 
     def test_walk_back_candidate_in_root(self):
         from hed.tools.bids.bids_util import walk_back
-        
+
         # Create directory structure
         level1_dir = os.path.join(self.test_dir, "level1")
         os.makedirs(level1_dir)
-        
+
         # Create matching JSON file in level1
         json_file = os.path.join(level1_dir, "task-test_events.json")
         with open(json_file, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
-        
+
         # Create TSV file in level1
         tsv_file = os.path.join(level1_dir, "sub-01_task-test_events.tsv")
         with open(tsv_file, "w") as f:
             f.write("onset\tduration\ttrial_type\n0\t1\tA\n")
-        
+
         result = list(walk_back(self.test_dir, tsv_file))
         self.assertEqual(len(result), 1)
         # Normalize path for Windows compatibility (handles RUNNER~1 vs runneradmin)
@@ -506,21 +506,21 @@ class TestWalkBack(unittest.TestCase):
 
     def test_walk_back_single_match(self):
         from hed.tools.bids.bids_util import walk_back
-        
-        # Create nested directory structure  
+
+        # Create nested directory structure
         subdir = os.path.join(self.test_dir, "subdir")
         os.makedirs(subdir)
-        
+
         # Create matching JSON file in subdir
         json_file = os.path.join(subdir, "task-test_events.json")
         with open(json_file, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
-        
+
         # Create TSV file in subdir
         tsv_file = os.path.join(subdir, "sub-01_task-test_events.tsv")
         with open(tsv_file, "w") as f:
             f.write("onset\tduration\ttrial_type\n0\t1\tA\n")
-        
+
         result = list(walk_back(self.test_dir, tsv_file))
         self.assertEqual(len(result), 1)
         # Normalize path for Windows compatibility (handles RUNNER~1 vs runneradmin)
@@ -529,43 +529,43 @@ class TestWalkBack(unittest.TestCase):
 
     def test_walk_back_no_match(self):
         from hed.tools.bids.bids_util import walk_back
-        
+
         # Create directory structure but no matching JSON files
         subdir = os.path.join(self.test_dir, "subdir")
         os.makedirs(subdir)
-        
+
         # Create TSV file but no matching JSON
         tsv_file = os.path.join(subdir, "sub-01_task-test_events.tsv")
         with open(tsv_file, "w") as f:
             f.write("onset\tduration\ttrial_type\n0\t1\tA\n")
-        
+
         result = list(walk_back(self.test_dir, tsv_file))
         self.assertEqual(len(result), 0)
 
     def test_walk_back_multiple_candidates(self):
         from hed.tools.bids.bids_util import walk_back
-        
+
         # Create directory structure
         level1_dir = os.path.join(self.test_dir, "level1")
         os.makedirs(level1_dir)
-        
+
         # Create two JSON files that would both match according to BIDS rules
         # This is an edge case that shouldn't happen in real BIDS data, but we test it
         json_file1 = os.path.join(level1_dir, "events.json")  # suffix=events, no entities
         json_file2 = os.path.join(level1_dir, "task-test_events.json")  # suffix=events, task=test
-        
+
         with open(json_file1, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
         with open(json_file2, "w") as f:
             json.dump({"trial_type": {"HED": "Event"}}, f)
-        
+
         # Create TSV file - both JSON files could match this
         # events.json matches (no entities to check)
         # task-test_events.json matches (task=test matches)
         tsv_file = os.path.join(level1_dir, "sub-01_task-test_events.tsv")
         with open(tsv_file, "w") as f:
             f.write("onset\tduration\ttrial_type\n0\t1\tA\n")
-        
+
         # This should raise an exception due to multiple candidates
         with self.assertRaises(Exception) as context:
             list(walk_back(self.test_dir, tsv_file))

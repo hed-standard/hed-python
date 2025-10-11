@@ -2,20 +2,22 @@
 
 from hed.models.hed_string import HedString
 from hed.models import string_util
-from hed.tools.analysis.event_manager import EventManager
 
 
 class HedTagManager:
     """ Manager for the HED tags from a columnar file. """
 
-    def __init__(self, event_manager, remove_types=[], extra_defs=None):
+    def __init__(self, event_manager, remove_types=None):
         """ Create a tag manager for one tabular file.
 
         Parameters:
             event_manager (EventManager): an event manager for the tabular file.
             remove_types (list or None): List of type tags (such as condition-variable) to remove.
+                If None, defaults to empty list.
 
         """
+        if remove_types is None:
+            remove_types = []
 
         self.event_manager = event_manager
         self.remove_types = remove_types

@@ -178,7 +178,7 @@ class UnitClassEntry(HedSchemaEntry):
             unit_entry.unit_class_entry = self
         derivative_units = {}
         for unit_entry in self.units.values():
-            derivative_units.update({key: unit_entry for key in unit_entry.derivative_units.keys()})
+            derivative_units.update(dict.fromkeys(unit_entry.derivative_units.keys(), unit_entry))
 
         self.derivative_units = derivative_units
 
@@ -275,7 +275,7 @@ class HedTagEntry(HedSchemaEntry):
         self.short_tag_name = None
         self.takes_value_child_entry = None  # this is a child takes value tag, if one exists
         self._parent_tag = None
-        self.tag_terms = tuple()
+        self.tag_terms = ()
         # During setup, it's better to have attributes shadow inherited before getting its own copy later.
         self.inherited_attributes = self.attributes
         # Descendent tags below this one

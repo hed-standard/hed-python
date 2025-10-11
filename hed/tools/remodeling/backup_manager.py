@@ -142,15 +142,17 @@ class BackupManager:
         file_comp = io_util.get_path_components(self.data_root, file_name) + [os.path.basename(file_name)]
         return '/'.join(file_comp)
 
-    def restore_backup(self, backup_name=DEFAULT_BACKUP_NAME, task_names=[], verbose=True):
+    def restore_backup(self, backup_name=DEFAULT_BACKUP_NAME, task_names=None, verbose=True):
         """ Restore the files from backup_name to the main directory.
 
         Parameters:
             backup_name (str):  Name of the backup to restore.
-            task_names (list):  A list of task names to restore.
+            task_names (list or None):  A list of task names to restore. If None, defaults to empty list (all tasks).
             verbose (bool):  If True, print out the file names being restored.
 
         """
+        if task_names is None:
+            task_names = []
         if verbose:
             print(f"Restoring from backup {backup_name}")
         backup_files = self.get_backup_files(backup_name)
@@ -219,8 +221,8 @@ class BackupManager:
                                f"does not exist so backup invalid", "")
         with open(backup_dict_path, 'r') as fp:
             backup_dict = json.load(fp)
-        backup_paths = set([os.path.realpath(os.path.join(backup_root_path, backup_key))
-                            for backup_key in backup_dict.keys()])
+        backup_paths = {os.path.realpath(os.path.join(backup_root_path, backup_key))
+                            for backup_key in backup_dict.keys()}
         file_paths = set(io_util.get_file_list(backup_root_path))
         files_not_in_backup = list(file_paths.difference(backup_paths))
         backups_not_in_directory = list(backup_paths.difference(file_paths))

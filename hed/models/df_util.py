@@ -300,7 +300,7 @@ def _filter_by_index_list(original_data, indexed_dict):
         raise TypeError("Input must be a pandas Series or DataFrame")
 
     new_series = pd.Series([""] * len(data_series), dtype=str)
-    for onset, indices in indexed_dict.items():
+    for _onset, indices in indexed_dict.items():
         if indices:
             first_index = indices[0]
             new_series[first_index] = ",".join([str(data_series[i]) for i in indices])

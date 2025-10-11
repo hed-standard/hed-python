@@ -52,7 +52,7 @@ def df_to_hed(dataframe, description_tag=True) -> dict:
     if missing_cols:
         raise HedFileError("RequiredColumnsMissing", f"Columns {str(missing_cols)} are missing from dataframe", "")
     hed_dict = {}
-    for index, row in df.iterrows():
+    for _index, row in df.iterrows():
         if row['HED'] == 'n/a' and row['description'] == 'n/a':
             continue
         if row['column_value'] == 'n/a':

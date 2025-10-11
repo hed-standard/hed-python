@@ -112,9 +112,9 @@ valid_header_attributes = {
 }
 
 character_types = {
-    "ascii": set([chr(x) for x in range(0, 127)]),
+    "ascii": {chr(x) for x in range(0, 127)},
     "nonascii": "nonascii",  # Special case for all other printable unicode characters
-    "printable": set([chr(x) for x in range(32, 127)]),
+    "printable": {chr(x) for x in range(32, 127)},
     "lowercase": set("abcdefghijklmnopqrstuvwxyz"),
     "uppercase": set("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
     "digits": set("0123456789"),

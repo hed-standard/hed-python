@@ -483,7 +483,7 @@ def missing_event_type(string, line):
            actual_code=TagQualityErrors.IMPROPER_EVENT_GROUPS)
 def improper_event_groups(event_types, string, line):
     return f"The HED string '{string}' at line {line} has multiple events [{event_types}] but is improperly " + \
-    f"parenthesized so the other tags cannot be uniquely associated with an event."
+    "parenthesized so the other tags cannot be uniquely associated with an event."
 
 
 @hed_error(TagQualityErrors.MISSING_TASK_ROLE, default_severity=ErrorSeverity.WARNING,
@@ -502,11 +502,11 @@ def ambiguous_tag_grouping(tag_list, string, line):
            actual_code=TagQualityErrors.MISSING_SENSORY_PRESENTATION)
 def missing_sensory_presentation(string, line):
     return f"The HED string '{string}' at line {line} is a Sensory-event but does not have a sensory presentation " + \
-    f"modality tag such as Visual-presentation or Auditory-presentation."
+    "modality tag such as Visual-presentation or Auditory-presentation."
 
 
 @hed_error(TagQualityErrors.MISSING_ACTION_TAG, default_severity=ErrorSeverity.WARNING,
            actual_code=TagQualityErrors.MISSING_ACTION_TAG)
 def missing_action_tag(string, line):
     return f"The HED string '{string}' at line {line} is an Agent-action event but does not any Action tags " + \
-    f"such as Move or Perform."
+    "such as Move or Perform."

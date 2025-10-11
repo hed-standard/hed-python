@@ -104,7 +104,6 @@ class Test(unittest.TestCase):
         self.assertIsInstance(tag_man2, HedTagManager)
 
     def test_get_hed_objs(self):
-        event_man = EventManager(self.input_data, self.schema)
         tag_man = HedTagManager(EventManager(self.input_data, self.schema))
         self.assertIsInstance(tag_man, HedTagManager)
         hed_objs = tag_man.get_hed_objs()

@@ -65,7 +65,7 @@ class BidsSidecarFile(BidsFile):
             else:
                 self._contents = Sidecar(io.StringIO(json.dumps(content_info)), name=name)
             self.has_hed = self.is_hed(self.contents.loaded_dict)
-        except Exception as e:
+        except Exception:
             self._contents = None
             self.has_hed = False
 
@@ -86,7 +86,7 @@ class BidsSidecarFile(BidsFile):
         json_keys = json_dict.keys()
         if 'HED' in json_keys or 'HED_assembled' in json_keys:
             return True
-        for key, value in json_dict.items():
+        for _key, value in json_dict.items():
             if not isinstance(value, dict):
                 continue
             val_keys = value.keys()

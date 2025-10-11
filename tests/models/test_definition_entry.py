@@ -10,7 +10,6 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/')
-        hed_xml_file = os.path.join(cls.base_data_dir, "schema_tests/HED8.0.0t.xml")
         hed_schema = load_schema_version("8.4.0")
         cls.contents1 = HedString("(Sensory-event)", hed_schema)
         cls.contents2 = HedString("(Agent-action)", hed_schema)
