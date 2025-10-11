@@ -7,7 +7,7 @@ from hed.tools.bids import bids_util
 from hed.tools.util import io_util
 
 # Sentinel value for default arguments (avoids mutable default bug)
-_UNSET = object()
+_SENTINEL = object()
 
 
 class BidsDataset:
@@ -20,7 +20,7 @@ class BidsDataset:
 
     """
 
-    def __init__(self, root_path, schema=None, suffixes=_UNSET, exclude_dirs=_UNSET):
+    def __init__(self, root_path, schema=None, suffixes=_SENTINEL, exclude_dirs=_SENTINEL):
         """ Constructor for a BIDS dataset.
 
         Parameters:
@@ -34,9 +34,9 @@ class BidsDataset:
                 If None or empty list, no directories are excluded.
 
         """
-        if suffixes is _UNSET:
+        if suffixes is _SENTINEL:
             suffixes = ['events', 'participants']
-        if exclude_dirs is _UNSET:
+        if exclude_dirs is _SENTINEL:
             exclude_dirs = ['sourcedata', 'derivatives', 'code', 'stimuli']
         logger = logging.getLogger('hed.bids_dataset')
         logger.debug(f"Initializing BidsDataset for path: {root_path}")
