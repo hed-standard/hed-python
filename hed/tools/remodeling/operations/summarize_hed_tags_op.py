@@ -307,7 +307,7 @@ class HedTagSummary(BaseSummary):
         """
 
         all_counts = HedTagCounts('Dataset')
-        for key, counts in self.summary_dict.items():
+        for _key, counts in self.summary_dict.items():
             all_counts.merge_tag_dicts(counts.tag_dict)
             for file_name in counts.files.keys():
                 all_counts.files[file_name] = ""

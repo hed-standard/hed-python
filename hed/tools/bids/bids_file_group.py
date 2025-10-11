@@ -177,7 +177,7 @@ class BidsFileGroup:
 
         """
         self.sidecar_dir_dict = {}
-        for root, dirs, files in os.walk(root_path, topdown=True):
+        for root, _dirs, files in os.walk(root_path, topdown=True):
             sidecar_list = []
             for r_file in files:
                 file_path = os.path.join(os.path.realpath(root), r_file)

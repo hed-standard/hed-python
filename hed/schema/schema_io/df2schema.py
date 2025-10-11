@@ -60,7 +60,7 @@ class SchemaLoaderDF(SchemaLoader):
 
     def _get_header_attributes(self, file_data):
         header_attributes = {}
-        for row_number, row in file_data[constants.STRUCT_KEY].iterrows():
+        for _row_number, row in file_data[constants.STRUCT_KEY].iterrows():
             cls = row[constants.subclass_of]
             attributes = row[constants.attributes]
             if cls == "HedHeader" and attributes:
@@ -88,12 +88,12 @@ class SchemaLoaderDF(SchemaLoader):
                                f"parameter on this exception for more details.", self.name,
                                issues=self.fatal_errors)
         extras =  {key: self.input_data[key] for key in constants.DF_EXTRAS if key in self.input_data}
-        for key, item in extras.items():
+        for key, _item in extras.items():
             self._schema.extras[key] = df_util.merge_dataframes(extras[key], self._schema.extras.get(key, None), key)
 
     def _get_prologue_epilogue(self, file_data):
         prologue, epilogue = "", ""
-        for row_number, row in file_data[constants.STRUCT_KEY].iterrows():
+        for _row_number, row in file_data[constants.STRUCT_KEY].iterrows():
             cls = row[constants.subclass_of]
             description = row[constants.dcdescription]
             if cls == "HedPrologue" and description:

@@ -193,7 +193,7 @@ def assign_hed_ids_section(df, unused_tag_ids):
     unused_tag_ids -= get_all_ids(df)
     sorted_unused_ids = sorted(unused_tag_ids, reverse=True)
 
-    for row_number, row in df.iterrows():
+    for _row_number, row in df.iterrows():
         hed_id = row[constants.hed_id]
         # we already verified existing ones
         if hed_id:
@@ -211,7 +211,7 @@ def merge_dfs(dest_df, source_df):
     """
     # todo: vectorize this at some point
     save_df1_columns = dest_df.columns.copy()
-    for index, row in source_df.iterrows():
+    for _index, row in source_df.iterrows():
         # Find matching index in df1 based on 'rdfs:label'
         match_index = dest_df[dest_df['rdfs:label'] == row['rdfs:label']].index
         if not match_index.empty:
@@ -287,7 +287,7 @@ def convert_df_to_omn(dataframes):
     annotation_props = _get_annotation_prop_ids(schema)
     full_text = ""
     omn_data = {}
-    for suffix, dataframe in dataframes_u.items():
+    for suffix, _dataframe in dataframes_u.items():
         if suffix in constants.DF_EXTRAS:
             output_text = _convert_extra_df_to_omn(dataframes_u[suffix], suffix)
         else:
@@ -316,7 +316,7 @@ def _convert_df_to_omn(df, annotation_properties=("",), annotation_terms=None):
 
     """
     output_text = ""
-    for index, row in df.iterrows():
+    for _index, row in df.iterrows():
         prop_type = _get_property_type(row)
         hed_id = row[constants.hed_id]
         output_text += f"{prop_type}: hed:{hed_id}\n"
@@ -365,7 +365,7 @@ def _convert_extra_df_to_omn(df, suffix):
 
     """
     output_text = ""
-    for index, row in df.iterrows():
+    for _index, row in df.iterrows():
         renamed_row = row.rename(index=constants.EXTRAS_CONVERSIONS)
         if suffix == constants.PREFIXES_KEY:
             output_text += f"Prefix: {renamed_row[constants.Prefix]} <{renamed_row[constants.namespace]}>"

@@ -154,7 +154,7 @@ class TabularSummary:
         """
         self.total_files = self.total_files + tab_sum.total_files
         self.total_events = self.total_events + tab_sum.total_events
-        for file, key in tab_sum.files.items():
+        for file, _key in tab_sum.files.items():
             self.files[file] = ''
         self._update_dict_skip(tab_sum)
         self._update_dict_value(tab_sum)

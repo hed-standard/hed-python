@@ -69,7 +69,7 @@ class Dispatcher:
 
         summary_list = []
         time_stamp = '_' + io_util.get_timestamp()
-        for context_name, context_item in self.summary_dicts.items():
+        for _context_name, context_item in self.summary_dicts.items():
             file_base = context_item.op.summary_filename
             if self.data_root:
                 file_base = io_util.extract_suffix_path(self.data_root, file_base)
@@ -184,7 +184,7 @@ class Dispatcher:
         if not summary_dir:
             summary_dir = self.get_summary_save_dir()
         os.makedirs(summary_dir, exist_ok=True)
-        for summary_name, summary_item in self.summary_dicts.items():
+        for _summary_name, summary_item in self.summary_dicts.items():
             summary_item.save(summary_dir, save_formats, individual_summaries=individual_summaries, task_name=task_name)
 
     @staticmethod
@@ -199,7 +199,7 @@ class Dispatcher:
         """
 
         operations = []
-        for index, item in enumerate(operation_list):
+        for _index, item in enumerate(operation_list):
             new_operation = valid_operations[item["operation"]](item["parameters"])
             operations.append(new_operation)
         return operations

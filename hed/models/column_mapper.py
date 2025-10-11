@@ -236,7 +236,7 @@ class ColumnMapper:
         basic_final_map = {}
         unhandled_cols = []
         if column_map:
-            for column_number, column_name in column_map.items():
+            for _column_number, column_name in column_map.items():
                 if column_name is None:
                     continue
                 if column_name in column_data:

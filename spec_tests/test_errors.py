@@ -20,8 +20,6 @@ skip_tests = {
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
     "invalid-character-name-value-class-deprecated": "Removing support for 8.2.0 or earlier name classes"
 }
-runAll = True
-runOnly = {}
 
 class MyTestCase(unittest.TestCase):
     @classmethod

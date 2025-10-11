@@ -76,7 +76,7 @@ class EventsSummary:
                 continue
             all_tags = hed_obj.get_all_tags()
             found = False
-            for key, tags in group_dict.items():
+            for key, _tags in group_dict.items():
                 if self.match_tags(all_tags, key):
                     group_dict[key] = self.update_tags(group_dict[key], all_tags)
                     found = True

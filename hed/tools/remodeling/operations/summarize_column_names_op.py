@@ -139,7 +139,7 @@ class ColumnNamesSummary(BaseSummary):
 
         """
         all_sum = ColumnNameSummary(name='Dataset')
-        for key, counts in self.summary_dict.items():
+        for _key, counts in self.summary_dict.items():
             for name, pos in counts.file_dict.items():
                 all_sum.update(name, counts.unique_headers[pos])
         return all_sum

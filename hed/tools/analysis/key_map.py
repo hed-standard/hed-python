@@ -54,7 +54,7 @@ class KeyMap:
 
     def __str__(self):
         temp_list = [f"{self.name} counts for key [{str(self.key_cols)}]:"]
-        for index, row in self.col_map.iterrows():
+        for _index, row in self.col_map.iterrows():
             key_hash = data_util.get_row_hash(row, self.columns)
             temp_list.append(f"{str(list(row.values))}:\t{self.count_dict[key_hash]}")
         return "\n".join(temp_list)
@@ -206,7 +206,7 @@ class KeyMap:
 
         row_list = []
         next_pos = len(self.col_map)
-        for index, row in base_df.iterrows():
+        for _index, row in base_df.iterrows():
             key, pos_update = self._handle_update(row, row_list, next_pos)
             next_pos += pos_update
         if row_list:

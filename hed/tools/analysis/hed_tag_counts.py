@@ -173,7 +173,7 @@ class HedTagCounts:
 
         """
         template_dict = {}
-        for key, key_list in tags.items():
+        for _key, key_list in tags.items():
             for element in key_list:
                 template_dict[element.casefold()] = []
         return template_dict

@@ -41,7 +41,7 @@ class TestWordCloudFunctions(unittest.TestCase):
                 font_path = os.path.realpath(font_candidate)
                 try:
                     # Test if the font can actually be loaded
-                    wc_test = tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path=font_path)
+                    tag_word_cloud.create_wordcloud(word_dict, width=width, height=height, font_path=font_path)
                     # If successful, use this font for the actual test
                     break
                 except (OSError, Exception):

@@ -173,7 +173,7 @@ class EventsToSidecarSummary(BaseSummary):
         """
 
         all_sum = TabularSummary(name='Dataset')
-        for key, tab_sum in self.summary_dict.items():
+        for _key, tab_sum in self.summary_dict.items():
             all_sum.update_summary(tab_sum)
         return all_sum
 

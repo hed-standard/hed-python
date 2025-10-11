@@ -78,7 +78,7 @@ class EventManager:
     def _extract_duration_events(self, hed, event_index):
         groups = hed.find_top_level_tags(anchor_tags={DefTagNames.DURATION_KEY})
         to_remove = []
-        for duration_tag, group in groups:
+        for _duration_tag, group in groups:
             start_time = self.onsets[event_index]
             new_event = TemporalEvent(group, event_index, start_time)
             end_time = new_event.end_time
@@ -156,7 +156,7 @@ class EventManager:
         """
         new_base = ["" for _ in range(len(self.hed_strings))]
         new_contexts = ["" for _ in range(len(self.hed_strings))]
-        for index, item in enumerate(self.hed_strings):
+        for index, _item in enumerate(self.hed_strings):
             new_base[index] = self._filter_hed(self.base[index], remove_types=remove_types,
                                                remove_defs=remove_defs, remove_group=True)
             new_contexts[index] = self._filter_hed(self.contexts[index], remove_types=remove_types,

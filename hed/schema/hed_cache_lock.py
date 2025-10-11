@@ -8,7 +8,7 @@ TIMESTAMP_FILENAME = "last_update.txt"
 CACHE_TIME_THRESHOLD = 300 * 6
 
 
-class CacheException(Exception):
+class CacheError(Exception):
     """Exception for cache locking or threshold errors."""
     pass
 
@@ -38,12 +38,12 @@ class CacheLock:
         self.current_timestamp = time.time()
         time_since_update = self.current_timestamp - last_timestamp
         if time_since_update < self.time_threshold:
-            raise CacheException(f"Last updated {time_since_update} seconds ago.  Threshold is {self.time_threshold}")
+            raise CacheError(f"Last updated {time_since_update} seconds ago.  Threshold is {self.time_threshold}")
 
         try:
             self.cache_lock = portalocker.Lock(self.cache_lock_filename, timeout=1)
         except portalocker.exceptions.LockException:
-            raise CacheException(f"Could not lock cache using {self.cache_lock_filename}")
+            raise CacheError(f"Could not lock cache using {self.cache_lock_filename}")
         pass
 
     def __exit__(self, exc_type, exc_value, traceback):

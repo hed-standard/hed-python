@@ -184,7 +184,7 @@ def get_value_dict(tsv_path, key_col='file_basename', value_col='sampling_rate')
 
     value_dict = {}
     df = get_new_dataframe(tsv_path)
-    for index, row in df.iterrows():
+    for _index, row in df.iterrows():
         if row[key_col] in value_dict:
             raise HedFileError("DuplicateKeyInValueDict", "The key column must have unique values", "")
         value_dict[row[key_col]] = row[value_col]

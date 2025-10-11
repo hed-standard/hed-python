@@ -64,7 +64,7 @@ class HedType:
     def get_type_def_names(self):
         """ Return the type defs names """
         tag_list = []
-        for variable, factor in self._type_map.items():
+        for _variable, factor in self._type_map.items():
             tag_list = tag_list + list(factor.levels.keys())
         return list(set(tag_list))
 
@@ -93,7 +93,7 @@ class HedType:
         if type_values is None:
             type_values = self.get_type_value_names()
         df_list = []
-        for index, type_value in enumerate(type_values):
+        for _index, type_value in enumerate(type_values):
             var_sum = self._type_map.get(type_value, None)
             if not var_sum:
                 continue

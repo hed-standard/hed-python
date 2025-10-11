@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
         df = pd.DataFrame(self.sample_data, columns=self.sample_columns)
         self.assertTrue(list(df_new.columns) == list(df.columns),
                         "merge_consecutive should not change the number of columns")
-        for index, row in df_new.iterrows():
+        for index, _row in df_new.iterrows():
             if not math.isclose(df_new.loc[index, "onset"], df_new.loc[index, "onset"]):
                 self.fail(f"merge_consecutive result has wrong onset at {index}: {df_new.loc[index, 'onset']} " +
                           "instead of{df_results.loc[index, 'onset']}")
@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
         # Test that df has not been changed by the op
         self.assertTrue(list(df.columns) == list(df_test.columns),
                         "merge_consecutive should not change the input df columns when no extras and not ignored")
-        for index, row in df.iterrows():
+        for index, _row in df.iterrows():
             if not math.isclose(df.loc[index, "onset"], df_test.loc[index, "onset"]):
                 self.fail("merge_consecutive should not change onset after op, but onset does not agree at" +
                           f"at {index}: {df.loc[index, 'onset']} instead of {df_test.loc[index, 'onset']}")

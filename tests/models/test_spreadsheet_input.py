@@ -67,13 +67,13 @@ class Test(unittest.TestCase):
                                  "../data/validator_tests/bids_events.json")
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate(self.hed_schema)), 0)
-        #input_file = TabularInput(events_path, sidecar=sidecar)
+        input_file = TabularInput(events_path, sidecar=sidecar)
 
         with open(events_path) as file:
             events_file_as_string = io.StringIO(file.read())
         input_file_from_string = TabularInput(file=events_file_as_string, sidecar=sidecar)
 
-        #self.assertTrue(input_file._dataframe.equals(input_file_from_string._dataframe))
+        self.assertTrue(input_file._dataframe.equals(input_file_from_string._dataframe))
 
     def test_bad_file_inputs(self):
         self.assertRaises(HedFileError, TabularInput, None)

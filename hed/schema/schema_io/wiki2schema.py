@@ -115,7 +115,7 @@ class SchemaLoaderWiki(SchemaLoader):
         for extra_key in extra_keys:
             lines_for_section = wiki_lines_by_section[extra_key]
             data = []
-            for line_number, line in lines_for_section:
+            for _line_number, line in lines_for_section:
                 data.append(self.parse_star_string(line.strip()))
             if not data:
                 continue
@@ -142,14 +142,14 @@ class SchemaLoaderWiki(SchemaLoader):
             lines (int, str): Lines for the header section.
 
         """
-        for line_number, line in lines:
+        for _line_number, line in lines:
             if line.strip():
                 msg = f"Extra content [{line}] between HED line and other sections"
                 raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.name)
 
     def _read_text_block(self, lines):
         text = ""
-        for line_number, line in lines:
+        for _line_number, line in lines:
             text += line
         # We expect one blank line(plus the normal line break).  Any additional lines should be preserved.
         if text.endswith("\n\n"):

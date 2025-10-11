@@ -172,8 +172,6 @@ class Test(unittest.TestCase):
         self.assertEqual(len(events.sidecar_dict), 3, "BidsDataset should have one participants.json file")
         self.assertEqual(len(bids.file_groups), 1, "BidsDataset should have 7 file groups")
         json1 = os.path.realpath(os.path.join(self.inherit_path, 'task-FacePerception_events.json'))
-        json2 = os.path.realpath(os.path.join(self.inherit_path, 'sub-002', 'sub-002_task-FacePerception_events.tsv'))
-        json3 = os.path.realpath(os.path.join(self.inherit_path, 'sub-003', 'sub-003_task-FacePerception_events.json'))
         tsv1 = os.path.realpath(os.path.join(self.inherit_path, 'sub-002', 'sub-002_task-FacePerception_run-1_events.tsv'))
         tsv2 = os.path.realpath(os.path.join(self.inherit_path, 'sub-003', 'eeg', 'sub-003_task-FacePerception_run-1_events.tsv'))
         sidecar1 = events.sidecar_dict.get(json1)

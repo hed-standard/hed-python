@@ -163,7 +163,7 @@ class HedTypeSummary(BaseSummary):
 
         """
         all_counts = HedTypeCounts('Dataset', self.type_tag)
-        for key, counts in self.summary_dict.items():
+        for _key, counts in self.summary_dict.items():
             all_counts.update(counts)
         return all_counts
 

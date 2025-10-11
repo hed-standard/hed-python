@@ -145,7 +145,7 @@ class DefExpandGatherer:
         """
         hed_str = HedString(string, self.hed_schema)
         hed_str.sort()
-        for def_tag, def_expand_group, def_group in hed_str.find_def_tags(recursive=True):
+        for def_tag, def_expand_group, _def_group in hed_str.find_def_tags(recursive=True):
             if def_tag == def_expand_group:
                 continue
 

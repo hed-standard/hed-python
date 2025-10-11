@@ -137,7 +137,7 @@ class TestUpdateDataframes(unittest.TestCase):
         schema_83 = load_schema_version("8.3.0")
         # Add a test column and ensure it stays around
         fixed_value = "test_column_value"
-        for key, df in schema_dataframes.items():
+        for _key, df in schema_dataframes.items():
             df['test_column'] = fixed_value
 
         updated_dataframes = update_dataframes_from_schema(schema_dataframes, schema_83)

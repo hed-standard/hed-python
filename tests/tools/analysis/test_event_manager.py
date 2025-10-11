@@ -114,7 +114,6 @@ class Test(unittest.TestCase):
             "HED": ["Age/100,Condition-variable/Temp", "Def/Con1", "Def/Con2", "n/a", "Green", "n/a", "Female", "n/a"],
         }
         tab = TabularInput(pd.DataFrame(tsv), sidecar=self.sidecar2)
-        defs = self.sidecar2.get_def_dict(self.schema)
         manager1 = EventManager(tab, self.schema)
         hed1, base1, context1 = manager1.unfold_context()
         hed2, base2, context2 = manager1.unfold_context(remove_types=["Condition-variable"])

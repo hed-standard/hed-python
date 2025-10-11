@@ -58,7 +58,7 @@ class TestHedSchema(unittest.TestCase):
         }
 
     def test_invalid_schema(self):
-        for filename, error in self.files_and_errors.items():
+        for filename, _error in self.files_and_errors.items():
             full_filename = self.full_base_folder + filename
             with self.assertRaises(HedFileError) as context:
                 load_schema(full_filename)

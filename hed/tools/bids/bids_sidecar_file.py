@@ -86,7 +86,7 @@ class BidsSidecarFile(BidsFile):
         json_keys = json_dict.keys()
         if 'HED' in json_keys or 'HED_assembled' in json_keys:
             return True
-        for key, value in json_dict.items():
+        for _key, value in json_dict.items():
             if not isinstance(value, dict):
                 continue
             val_keys = value.keys()
