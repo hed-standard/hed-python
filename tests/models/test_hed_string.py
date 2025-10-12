@@ -97,16 +97,6 @@ class HedTagLists(TestHedStrings):
         tags_as_strings = [str(tag) for tag in string_obj.children]
         self.assertCountEqual(tags_as_strings, ["[test_ref]", "Sensory-event", "Participant", "([test_ref2],Event)"])
 
-    # Potentially restore some similar behavior later if desired.
-    # We no longer automatically remove things like quotes.
-    # def test_double_quotes(self):
-    #     double_quote_string = 'Event/Category/Experimental stimulus,"Item/Object/Vehicle/Train",' \
-    #                           'Attribute/Visual/Color/Purple '
-    #     normal_string = 'Event/Category/Experimental stimulus,Item/Object/Vehicle/Train,Attribute/Visual/Color/Purple'
-    #     double_quote_result = HedString.split_into_groups(double_quote_string)
-    #     normal_result = HedString.split_into_groups(normal_string)
-    #     self.assertEqual(double_quote_result, normal_result)
-
     def test_blanks(self):
         test_strings = {
             "doubleTilde": "/Item/Object/Vehicle/Car~~/Attribute/Object control/Perturb",

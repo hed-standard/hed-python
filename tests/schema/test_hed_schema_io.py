@@ -17,46 +17,6 @@ import shutil
 # todo: speed up these tests
 class TestHedSchema(unittest.TestCase):
 
-    # def test_load_invalid_schema(self):
-    #     # Handle missing or invalid files.
-    #     invalid_xml_file = "invalidxmlfile.xml"
-    #     hed_schema = None
-    #     try:
-    #         hed_schema = load_schema(invalid_xml_file)
-    #     except HedFileError:
-    #         pass
-    #
-    #     self.assertFalse(hed_schema)
-    #
-    #     hed_schema = None
-    #     try:
-    #         hed_schema = load_schema(None)
-    #     except HedFileError:
-    #         pass
-    #     self.assertFalse(hed_schema)
-    #
-    #     hed_schema = None
-    #     try:
-    #         hed_schema = load_schema("")
-    #     except HedFileError:
-    #         pass
-    #     self.assertFalse(hed_schema)
-    #
-    # def test_load_schema_version_tags(self):
-    #     schema = load_schema_version(xml_version="st:8.0.0")
-    #     schema2 = load_schema_version(xml_version="8.0.0")
-    #     self.assertNotEqual(schema, schema2)
-    #     schema2.set_schema_prefix("st")
-    #     self.assertEqual(schema, schema2)
-    #
-    #     score_lib = load_schema_version(xml_version="score_1.0.0")
-    #     self.assertEqual(score_lib._namespace, "")
-    #     self.assertTrue(score_lib.get_tag_entry("Modulator"))
-    #
-    #     score_lib = load_schema_version(xml_version="sc:score_1.0.0")
-    #     self.assertEqual(score_lib._namespace, "sc:")
-    #     self.assertTrue(score_lib.get_tag_entry("Modulator", schema_namespace="sc:"))
-
     def test_load_schema_invalid_parameters(self):
         bad_filename = "this_is_not_a_real_file.xml"
         with self.assertRaises(HedFileError):
@@ -286,17 +246,6 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3._namespace, "", "load_schema_version has the right version with namespace")
         self.assertEqual(len(issues), 11)
-
-    # This could be turned on after 2.0.0 and 1.0.0 added to local schema_data(this version will hit the internet)
-    # Also change the 2 below to a 0
-    # def test_load_schema_version_merged2(self):
-    #     ver4 = ["lang_1.0.0", "score_2.0.0"]
-    #     schemas3 = load_schema_version(ver4)
-    #     issues = schemas3.check_compliance()
-    #     self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
-    #     self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
-    #     self.assertEqual(schemas3._namespace, "", "load_schema_version has the right version with namespace")
-    #     self.assertEqual(len(issues), 2)
 
     def test_load_schema_version_merged_duplicates(self):
         ver4 = ["score_1.1.0", "testscoredupe_1.1.0"]
@@ -620,82 +569,3 @@ class TestParseVersionList(unittest.TestCase):
             parse_version_list(["test:score", "ol:otherlib", "test:testlib", "abc:anotherlib"]),
             {"test": "test:score,testlib", "ol": "ol:otherlib", "abc": "abc:anotherlib"},
         )
-
-
-# class TestOwlBase(unittest.TestCase):
-#     @classmethod
-#     def setUpClass(cls):
-#         cls.base_schema = schema.load_schema_version("8.3.0")
-#
-#     @with_temp_file(".owl")
-#     def test_schema2xml(self, filename):
-#         self.base_schema.save_as_owl(filename)
-#         loaded_schema = schema.load_schema(filename)
-#
-#         self.assertEqual(loaded_schema, self.base_schema)
-#
-#         self.base_schema.save_as_owl(filename, save_merged=True)
-#         loaded_schema = schema.load_schema(filename)
-#
-#         self.assertEqual(loaded_schema, self.base_schema)
-#
-#     @with_temp_file(".ttl")
-#     def test_schema2turtle(self, filename):
-#         self.base_schema.save_as_owl(filename)
-#         loaded_schema = schema.load_schema(filename)
-#
-#         self.assertEqual(loaded_schema, self.base_schema)
-#
-#         self.base_schema.save_as_owl(filename, save_merged=True)
-#         loaded_schema = schema.load_schema(filename)
-#
-#         self.assertEqual(loaded_schema, self.base_schema)
-#
-#     @with_temp_file(".json-ld")
-#     def test_schema2jsonld(self, filename):
-#         self.base_schema.save_as_owl(filename)
-#         loaded_schema = schema.load_schema(filename)
-#
-#         self.assertEqual(loaded_schema, self.base_schema)
-#
-#         self.base_schema.save_as_owl(filename, save_merged=True)
-#         loaded_schema = schema.load_schema(filename)
-#
-#         self.assertEqual(loaded_schema, self.base_schema)
-#
-#     def test_schema2owlstring(self):
-#         owl_string = self.base_schema.get_as_owl_string(file_format="turtle")
-#         loaded_schema = schema.from_string(owl_string, schema_format="turtle")
-#
-#         self.assertEqual(loaded_schema, self.base_schema)
-#
-#         owl_string = self.base_schema.get_as_owl_string(save_merged=True, file_format="turtle")
-#         loaded_schema = schema.from_string(owl_string, schema_format="turtle")
-#
-#         self.assertEqual(loaded_schema, self.base_schema)
-#
-#     def test_schema2bad_filename(self):
-#         with self.assertRaises(OSError):
-#             self.base_schema.save_as_owl("", file_format="xml")
-#         with self.assertRaises(OSError):
-#             self.base_schema.save_as_owl("/////////", file_format="xml")
-#
-#     def test_schema2bad_filename_rdf_format(self):
-#         with self.assertRaises(rdflib.plugin.PluginException):
-#             self.base_schema.save_as_owl("valid_filename.invalid_extension")
-#         with self.assertRaises(rdflib.plugin.PluginException):
-#             self.base_schema.save_as_owl("")
-#         with self.assertRaises(rdflib.plugin.PluginException):
-#             self.base_schema.save_as_owl("", file_format="unknown")
-#
-#
-# class TestOwlLibRooted(TestOwlBase):
-#     @classmethod
-#     def setUpClass(cls):
-#         cls.base_schema = schema.load_schema_version("testlib_2.0.0")
-#
-#
-# class TestOwlLib(TestOwlBase):
-#     @classmethod
-#     def setUpClass(cls):
-#         cls.base_schema = schema.load_schema_version("score_1.1.0")
