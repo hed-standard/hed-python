@@ -1,4 +1,4 @@
-Release 0.7.1 October 11, 2025
+Release 0.7.1 October 13, 2025
 - Added official support for Python 3.13 (tested in CI workflows).
 - Applied Black code formatter to entire codebase for consistent code style (148 files reformatted).
 - Added Black to development dependencies (`pip install -e .[dev]`) and GitHub Actions CI workflow.

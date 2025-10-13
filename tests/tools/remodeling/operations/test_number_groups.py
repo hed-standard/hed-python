@@ -152,4 +152,3 @@ class Test(unittest.TestCase):
     # test working
     def test_number_groups_new_column(self):
         pass
-  

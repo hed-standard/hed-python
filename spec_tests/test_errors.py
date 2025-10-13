@@ -42,8 +42,9 @@ class MyTestCase(unittest.TestCase):
         else:
             # Get all .json files except backup files
             cls.test_files = [
-                os.path.join(test_dir, f) for f in os.listdir(test_dir) 
-                if os.path.isfile(os.path.join(test_dir, f)) and f.endswith('.json') and not f.endswith('.backup')
+                os.path.join(test_dir, f)
+                for f in os.listdir(test_dir)
+                if os.path.isfile(os.path.join(test_dir, f)) and f.endswith(".json") and not f.endswith(".backup")
             ]
             cls.skip_tests = False
 
@@ -58,9 +59,9 @@ class MyTestCase(unittest.TestCase):
     def run_single_test(self, test_file, test_name=None, test_type=None):
         with open(test_file, "r") as fp:
             test_info = json.load(fp)
-        
+
         file_basename = os.path.basename(test_file)
-        
+
         for info in test_info:
             error_code = info["error_code"]
             all_codes = [error_code] + info.get("alt_codes", [])
@@ -73,12 +74,12 @@ class MyTestCase(unittest.TestCase):
                 continue
             if test_name is not None and name != test_name:
                 continue
-            
+
             description = info["description"]
             schema = info["schema"]
             check_for_warnings = info.get("warning", False)
             error_handler = ErrorHandler(check_for_warnings)
-            
+
             if schema:
                 try:
                     schema = load_schema_version(schema)
@@ -93,7 +94,7 @@ class MyTestCase(unittest.TestCase):
                     print(f"   Schema: {schema}")
                     print(f"   Error: {str(e)}")
                     continue
-                    
+
                 definitions = info.get("definitions", None)
                 def_dict = DefinitionDict(definitions, schema)
                 if def_dict.issues:
@@ -104,7 +105,7 @@ class MyTestCase(unittest.TestCase):
 
             else:
                 def_dict = DefinitionDict()
-                
+
             for section_name, section in info["tests"].items():
                 if test_type is not None and test_type != section_name:
                     continue
@@ -130,7 +131,7 @@ class MyTestCase(unittest.TestCase):
     def report_result(self, expected_result, issues, error_code, all_codes, description, name, test, test_type):
         # Filter out pre-release warnings, we don't care about them.
         issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
-        
+
         if expected_result == "fails":
             if not issues:
                 # Test should have failed but passed - this is a problem
@@ -150,7 +151,7 @@ class MyTestCase(unittest.TestCase):
                 # Test failed as expected, check if it's the right error code
                 if any(issue["code"] in all_codes for issue in issues):
                     return  # Correct error code found, test passes
-                
+
                 # Wrong error code
                 print("\n" + "=" * 80)
                 print(f"❌ TEST FAILURE: Wrong error code returned")
@@ -183,7 +184,7 @@ class MyTestCase(unittest.TestCase):
                 print(get_printable_issue_string(issues))
                 print("=" * 80 + "\n")
                 self.fail_count.append(name)
-    
+
     def _format_test_data(self, test):
         """Format test data for readable output"""
         if isinstance(test, str):
@@ -306,7 +307,7 @@ class MyTestCase(unittest.TestCase):
         print("\n" + "=" * 80)
         print("Running HED Specification Error Tests")
         print("=" * 80)
-        
+
         count = 1
         for test_file in self.test_files:
             filename = os.path.basename(test_file)
@@ -324,9 +325,8 @@ class MyTestCase(unittest.TestCase):
             for i, failed_test in enumerate(self.fail_count, 1):
                 print(f"  {i}. {failed_test}")
         print("=" * 80 + "\n")
-        
-        self.assertEqual(len(self.fail_count), 0, 
-                        f"\n{len(self.fail_count)} test(s) failed. See detailed output above.")
+
+        self.assertEqual(len(self.fail_count), 0, f"\n{len(self.fail_count)} test(s) failed. See detailed output above.")
 
     # def test_debug(self):
     #     test_file = os.path.realpath('./temp7.json')

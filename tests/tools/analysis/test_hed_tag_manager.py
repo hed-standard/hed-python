@@ -126,6 +126,7 @@ class Test(unittest.TestCase):
         hed_obj = tag_man.get_hed_obj(hed_str, remove_types=False)
         self.assertIsNotNone(hed_obj)
         from hed.models.hed_string import HedString
+
         self.assertIsInstance(hed_obj, HedString)
         self.assertIn("Red", str(hed_obj))
         self.assertIn("Blue", str(hed_obj))
@@ -179,10 +180,7 @@ class Test(unittest.TestCase):
 
     def test_get_hed_obj_remove_multiple_type_tags(self):
         """Test removing multiple different type tags in complex structure."""
-        tag_man = HedTagManager(
-            EventManager(self.input_data, self.schema), 
-            remove_types=["Condition-variable", "Task"]
-        )
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema), remove_types=["Condition-variable", "Task"])
         hed_str = "Red, (Condition-variable/Var1, Blue), Task/Memory, (Green, Task/Visual, Yellow)"
         hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True, remove_group=False)
         self.assertNotIn("Condition-variable", str(hed_obj))
@@ -194,10 +192,7 @@ class Test(unittest.TestCase):
 
     def test_get_hed_obj_remove_multiple_types_with_remove_group(self):
         """Test removing multiple type tags with remove_group=True."""
-        tag_man = HedTagManager(
-            EventManager(self.input_data, self.schema), 
-            remove_types=["Condition-variable", "Task"]
-        )
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema), remove_types=["Condition-variable", "Task"])
         hed_str = "Red, (Condition-variable/Var1, Blue), Task/Memory, (Green, Task/Visual, Yellow)"
         hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True, remove_group=True)
         self.assertNotIn("Condition-variable", str(hed_obj))
