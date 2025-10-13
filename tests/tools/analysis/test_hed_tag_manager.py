@@ -72,12 +72,6 @@ class Test(unittest.TestCase):
         cls.schema = schema
         cls.def_dict = def_dict
 
-    # def test_constructor(self):
-    #     type_var = HedType(self.event_man1, 'test-it')
-    #     self.assertIsInstance(type_var, HedType, "Constructor should create a HedType from an event manager")
-    #     self.assertEqual(len(type_var._type_map), 8,
-    #                      "Constructor ConditionVariables should have the right length")
-
     def test_constructor_from_tabular_input(self):
         event_man = EventManager(self.input_data, self.schema)
         tag_man1 = HedTagManager(EventManager(self.input_data, self.schema))
@@ -117,77 +111,127 @@ class Test(unittest.TestCase):
         self.assertIsInstance(hed_objs, list)
         self.assertEqual(len(hed_objs), len(tag_man.event_manager.onsets))
 
-    # def test_constructor_variable_caps(self):
-    #     sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
-    #     input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
-    #     event_man = EventManager(input_data, self.schema)
-    #     var_manager = HedType(event_man, 'run-01')
-    #     self.assertIsInstance(var_manager, HedType, "Constructor should create a HedTypeManager variable caps")
-    #
-    # def test_constructor_multiple_values(self):
-    #     type_var = HedType(self.event_man2, 'test-it')
-    #     self.assertIsInstance(type_var, HedType, "Constructor should create a HedType from an event manager")
-    #     self.assertEqual(len(type_var._type_map), 3,
-    #                      "Constructor should have right number of type_variables if multiple")
-    #
-    # def test_constructor_unmatched(self):
-    #     with self.assertRaises(KeyError) as context:
-    #         event_man = EventManager(self.input_data3, self.schema, extra_defs=self.def_dict)
-    #         HedType(event_man, 'run-01')
-    #     self.assertEqual(context.exception.args[0], 'cond3')
-    #
-    # def test_get_variable_factors(self):
-    #     sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
-    #     input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
-    #     event_man = EventManager(input_data, self.schema)
-    #     var_manager = HedType(event_man, 'run-01')
-    #     df_new1 = var_manager.get_type_factors()
-    #     self.assertIsInstance(df_new1, DataFrame)
-    #     self.assertEqual(len(df_new1), 200)
-    #     self.assertEqual(len(df_new1.columns), 7)
-    #     df_new2 = var_manager.get_type_factors(type_values=["face-type"])
-    #     self.assertEqual(len(df_new2), 200)
-    #     self.assertEqual(len(df_new2.columns), 3)
-    #     df_new3 = var_manager.get_type_factors(type_values=["junk"])
-    #     self.assertIsNone(df_new3)
-    #
-    # def test_str(self):
-    #     sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
-    #     input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
-    #     event_man = EventManager(input_data, self.schema)
-    #     var_manager = HedType(event_man, 'run-01')
-    #     new_str = str(var_manager)
-    #     self.assertIsInstance(new_str, str)
-    #
-    # def test_summarize_variables(self):
-    #     sidecar1 = Sidecar(self.sidecar_path, name='face_sub1_json')
-    #     input_data = TabularInput(self.events_path, sidecar1, name="face_sub1_events")
-    #     event_man = EventManager(input_data, self.schema)
-    #     var_manager = HedType(event_man, 'run-01')
-    #     summary = var_manager.get_summary()
-    #     self.assertIsInstance(summary, dict, "get_summary produces a dictionary if not json")
-    #     self.assertEqual(len(summary), 3, "Summarize_variables has right number of condition type_variables")
-    #     self.assertIn("key-assignment", summary, "get_summary has a correct key")
-    #
-    # def test_extract_definition_variables(self):
-    #     var_manager = HedType(self.event_man1, 'run-01')
-    #     var_levels = var_manager._type_map['var3'].levels
-    #     self.assertNotIn('cond3/7', var_levels,
-    #                      "_extract_definition_variables before extraction def/cond3/7 not in levels")
-    #     tag = HedTag("Def/Cond3/7", hed_schema=self.schema)
-    #     var_manager._extract_definition_variables(tag, 5)
-    #     self.assertIn('cond3/7', var_levels,
-    #                   "_extract_definition_variables after extraction def/cond3/7 not in levels")
-    #
-    # def test_get_variable_names(self):
-    #     conditions1 = HedType(self.event_man1, 'run-01')
-    #     list1 = conditions1.get_type_value_names()
-    #     self.assertEqual(len(list1), 8, "get_variable_tags list should have the right length")
-    #
-    # def test_get_variable_def_names(self):
-    #     conditions1 = HedType(self.event_man1, 'run-01')
-    #     list1 = conditions1.get_type_def_names()
-    #     self.assertEqual(len(list1), 5, "get_type_def_names list should have the right length")
+    def test_get_hed_obj_empty_string(self):
+        """Test that get_hed_obj returns None for empty or None input."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema))
+        result1 = tag_man.get_hed_obj("")
+        self.assertIsNone(result1, "get_hed_obj should return None for empty string")
+        result2 = tag_man.get_hed_obj(None)
+        self.assertIsNone(result2, "get_hed_obj should return None for None")
+
+    def test_get_hed_obj_basic(self):
+        """Test basic functionality of get_hed_obj without removing types."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema))
+        hed_str = "Red, Blue, (Green, Yellow)"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=False)
+        self.assertIsNotNone(hed_obj)
+        from hed.models.hed_string import HedString
+
+        self.assertIsInstance(hed_obj, HedString)
+        self.assertIn("Red", str(hed_obj))
+        self.assertIn("Blue", str(hed_obj))
+        self.assertIn("Green", str(hed_obj))
+
+    def test_get_hed_obj_remove_types_simple(self):
+        """Test that remove_types=True removes specified type tags."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema), remove_types=["Condition-variable"])
+        hed_str = "Red, Condition-variable/TestVar, Blue"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True)
+        self.assertNotIn("Condition-variable", str(hed_obj))
+        self.assertIn("Red", str(hed_obj))
+        self.assertIn("Blue", str(hed_obj))
+
+    def test_get_hed_obj_remove_types_multiple_instances(self):
+        """Test removing multiple instances of the same type tag."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema), remove_types=["Condition-variable"])
+        hed_str = "Condition-variable/Var1, Red, Condition-variable/Var2, Blue, Condition-variable/Var3"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True)
+        self.assertNotIn("Condition-variable", str(hed_obj))
+        self.assertNotIn("Var1", str(hed_obj))
+        self.assertNotIn("Var2", str(hed_obj))
+        self.assertNotIn("Var3", str(hed_obj))
+        self.assertIn("Red", str(hed_obj))
+        self.assertIn("Blue", str(hed_obj))
+
+    def test_get_hed_obj_remove_types_nested_groups(self):
+        """Test removing type tags from nested groups."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema), remove_types=["Condition-variable"])
+        hed_str = "Red, (Blue, (Condition-variable/TestVar, Green, (Yellow, Condition-variable/Nested)))"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True, remove_group=False)
+        self.assertNotIn("Condition-variable", str(hed_obj))
+        self.assertNotIn("TestVar", str(hed_obj))
+        self.assertNotIn("Nested", str(hed_obj))
+        # Other tags should remain
+        self.assertIn("Red", str(hed_obj))
+        self.assertIn("Blue", str(hed_obj))
+        self.assertIn("Green", str(hed_obj))
+        self.assertIn("Yellow", str(hed_obj))
+
+    def test_get_hed_obj_remove_group_with_nested_groups(self):
+        """Test that remove_group=True removes entire groups even when nested."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema), remove_types=["Condition-variable"])
+        hed_str = "Red, (Condition-variable/TestVar, Green, Yellow), Blue"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True, remove_group=True)
+        self.assertNotIn("Condition-variable", str(hed_obj))
+        self.assertNotIn("Green", str(hed_obj))
+        self.assertNotIn("Yellow", str(hed_obj))
+        self.assertIn("Red", str(hed_obj))
+        self.assertIn("Blue", str(hed_obj))
+
+    def test_get_hed_obj_remove_multiple_type_tags(self):
+        """Test removing multiple different type tags in complex structure."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema), remove_types=["Condition-variable", "Task"])
+        hed_str = "Red, (Condition-variable/Var1, Blue), Task/Memory, (Green, Task/Visual, Yellow)"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True, remove_group=False)
+        self.assertNotIn("Condition-variable", str(hed_obj))
+        self.assertNotIn("Task", str(hed_obj))
+        self.assertIn("Red", str(hed_obj))
+        self.assertIn("Blue", str(hed_obj))
+        self.assertIn("Green", str(hed_obj))
+        self.assertIn("Yellow", str(hed_obj))
+
+    def test_get_hed_obj_remove_multiple_types_with_remove_group(self):
+        """Test removing multiple type tags with remove_group=True."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema), remove_types=["Condition-variable", "Task"])
+        hed_str = "Red, (Condition-variable/Var1, Blue), Task/Memory, (Green, Task/Visual, Yellow)"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True, remove_group=True)
+        self.assertNotIn("Condition-variable", str(hed_obj))
+        self.assertNotIn("Task", str(hed_obj))
+        self.assertNotIn("Blue", str(hed_obj))  # Group with Condition-variable removed
+        self.assertNotIn("Green", str(hed_obj))  # Group with Task removed
+        self.assertNotIn("Yellow", str(hed_obj))  # Group with Task removed
+        self.assertIn("Red", str(hed_obj))
+
+    def test_get_hed_obj_remove_types_mixed_with_definitions(self):
+        """Test removing type tags while preserving definitions in complex structure."""
+        tag_man = HedTagManager(self.event_man1, remove_types=["Condition-variable"])
+        hed_str = "Def/Cond1, (Red, Condition-variable/External), Blue, Condition-variable/Another"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True)
+        self.assertIn("Def/Cond1", str(hed_obj))
+        self.assertNotIn("Condition-variable/External", str(hed_obj))
+        self.assertNotIn("Condition-variable/Another", str(hed_obj))
+        self.assertIn("Red", str(hed_obj))
+        self.assertIn("Blue", str(hed_obj))
+
+    def test_get_hed_obj_remove_types_all_content_removed(self):
+        """Test when all content consists of removable type tags."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema), remove_types=["Condition-variable"])
+        hed_str = "Condition-variable/Var1, Condition-variable/Var2"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True)
+        # Should have an empty or minimal string
+        self.assertNotIn("Condition-variable", str(hed_obj))
+        self.assertNotIn("Var1", str(hed_obj))
+        self.assertNotIn("Var2", str(hed_obj))
+
+    def test_get_hed_obj_no_remove_types_specified(self):
+        """Test that remove_types=True has no effect when manager has no remove_types."""
+        tag_man = HedTagManager(EventManager(self.input_data, self.schema))
+        hed_str = "Red, Condition-variable/TestVar, Blue"
+        hed_obj = tag_man.get_hed_obj(hed_str, remove_types=True)
+        # Since no remove_types were specified in the manager, nothing should be removed
+        self.assertIn("Condition-variable", str(hed_obj))
+        self.assertIn("Red", str(hed_obj))
+        self.assertIn("Blue", str(hed_obj))
 
 
 if __name__ == "__main__":

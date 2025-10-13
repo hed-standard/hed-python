@@ -40,8 +40,11 @@ class MyTestCase(unittest.TestCase):
                 print(f"WARNING: Test directory not found: {test_dir}")
                 print("To run spec error tests, copy hed-specification repository content to spec_tests/hed-specification/")
         else:
+            # Get all .json files except backup files
             cls.test_files = [
-                os.path.join(test_dir, f) for f in os.listdir(test_dir) if os.path.isfile(os.path.join(test_dir, f))
+                os.path.join(test_dir, f)
+                for f in os.listdir(test_dir)
+                if os.path.isfile(os.path.join(test_dir, f)) and f.endswith(".json") and not f.endswith(".backup")
             ]
             cls.skip_tests = False
 
@@ -56,23 +59,27 @@ class MyTestCase(unittest.TestCase):
     def run_single_test(self, test_file, test_name=None, test_type=None):
         with open(test_file, "r") as fp:
             test_info = json.load(fp)
+
+        file_basename = os.path.basename(test_file)
+
         for info in test_info:
             error_code = info["error_code"]
             all_codes = [error_code] + info.get("alt_codes", [])
             if error_code in skip_tests:
-                print(f"Skipping {error_code} test because: {skip_tests[error_code]}")
+                print(f"  ⊘ Skipping {error_code} test: {skip_tests[error_code]}")
                 continue
             name = info.get("name", "")
             if name in skip_tests:
-                print(f"Skipping {name} test because: {skip_tests[name]}")
+                print(f"  ⊘ Skipping '{name}' test: {skip_tests[name]}")
                 continue
             if test_name is not None and name != test_name:
-                print(f"Skipping {name} test because it is not the one specified")
                 continue
+
             description = info["description"]
             schema = info["schema"]
             check_for_warnings = info.get("warning", False)
             error_handler = ErrorHandler(check_for_warnings)
+
             if schema:
                 try:
                     schema = load_schema_version(schema)
@@ -81,14 +88,24 @@ class MyTestCase(unittest.TestCase):
                     if not issues:
                         issues += [{"code": e.code, "message": e.message}]
                     self.report_result("fails", issues, error_code, all_codes, description, name, "dummy", "Schema")
-                    # self.fail_count.append(name)
                     continue
+                except Exception as e:
+                    print(f"\n⚠️  Error loading schema for test '{name}' in {file_basename}")
+                    print(f"   Schema: {schema}")
+                    print(f"   Error: {str(e)}")
+                    continue
+
                 definitions = info.get("definitions", None)
                 def_dict = DefinitionDict(definitions, schema)
+                if def_dict.issues:
+                    print(f"\n⚠️  Definition issues in test '{name}' in {file_basename}")
+                    print(f"   Definitions: {definitions}")
+                    print(f"   Issues: {get_printable_issue_string(def_dict.issues)}")
                 self.assertFalse(def_dict.issues)
 
             else:
                 def_dict = DefinitionDict()
+
             for section_name, section in info["tests"].items():
                 if test_type is not None and test_type != section_name:
                     continue
@@ -114,25 +131,75 @@ class MyTestCase(unittest.TestCase):
     def report_result(self, expected_result, issues, error_code, all_codes, description, name, test, test_type):
         # Filter out pre-release warnings, we don't care about them.
         issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
+
         if expected_result == "fails":
             if not issues:
-                print(f"{error_code}: {description}")
-                print(f"Passed '{test_type}' (which should fail) '{name}': {test}")
-                print(get_printable_issue_string(issues))
+                # Test should have failed but passed - this is a problem
+                print("\n" + "=" * 80)
+                print(f"❌ TEST FAILURE: Test passed but should have failed")
+                print("=" * 80)
+                print(f"Error Code:    {error_code}")
+                print(f"Test Name:     {name}")
+                print(f"Test Type:     {test_type}")
+                print(f"Description:   {description}")
+                print(f"Expected Error Codes: {all_codes}")
+                print(f"\nTest Data:\n{self._format_test_data(test)}")
+                print(f"\nResult: Test produced NO errors (expected one of: {all_codes})")
+                print("=" * 80 + "\n")
                 self.fail_count.append(name)
             else:
+                # Test failed as expected, check if it's the right error code
                 if any(issue["code"] in all_codes for issue in issues):
-                    return
-                print(f"{error_code}: {description} all codes:[{str(all_codes)}]")
-                print(f"Failed '{test_type}' (unexpected errors found) '{name}': {test}")
+                    return  # Correct error code found, test passes
+
+                # Wrong error code
+                print("\n" + "=" * 80)
+                print(f"❌ TEST FAILURE: Wrong error code returned")
+                print("=" * 80)
+                print(f"Error Code:    {error_code}")
+                print(f"Test Name:     {name}")
+                print(f"Test Type:     {test_type}")
+                print(f"Description:   {description}")
+                print(f"Expected Error Codes: {all_codes}")
+                print(f"\nTest Data:\n{self._format_test_data(test)}")
+                print(f"\nActual Error Codes Found:")
+                for issue in issues:
+                    print(f"  - {issue['code']}")
+                print(f"\nDetailed Issues:")
                 print(get_printable_issue_string(issues))
+                print("=" * 80 + "\n")
                 self.fail_count.append(name)
         else:
+            # Test should pass
             if issues:
-                print(f"{error_code}: {description}")
-                print(f"Failed '{test_type}' test '{name}': {test}")
+                print("\n" + "=" * 80)
+                print(f"❌ TEST FAILURE: Test failed but should have passed")
+                print("=" * 80)
+                print(f"Error Code:    {error_code}")
+                print(f"Test Name:     {name}")
+                print(f"Test Type:     {test_type}")
+                print(f"Description:   {description}")
+                print(f"\nTest Data:\n{self._format_test_data(test)}")
+                print(f"\nUnexpected Issues Found:")
                 print(get_printable_issue_string(issues))
+                print("=" * 80 + "\n")
                 self.fail_count.append(name)
+
+    def _format_test_data(self, test):
+        """Format test data for readable output"""
+        if isinstance(test, str):
+            return f"  {test}"
+        elif isinstance(test, dict):
+            return json.dumps(test, indent=2)
+        elif isinstance(test, list):
+            if len(test) > 0 and isinstance(test[0], str):
+                # Schema test - format as multiline
+                return "\n".join(f"  {line}" for line in test)
+            else:
+                # Event test or other list
+                return json.dumps(test, indent=2)
+        else:
+            return str(test)
 
     def _run_single_string_test(self, info, schema, def_dict, error_code, all_codes, description, name, error_handler):
         string_validator = HedValidator(hed_schema=schema, def_dicts=def_dict)
@@ -237,14 +304,29 @@ class MyTestCase(unittest.TestCase):
         if hasattr(self, "skip_tests") and self.skip_tests:
             self.skipTest("hed-specification directory not found. Copy submodule content to run this test.")
 
+        print("\n" + "=" * 80)
+        print("Running HED Specification Error Tests")
+        print("=" * 80)
+
         count = 1
         for test_file in self.test_files:
+            filename = os.path.basename(test_file)
+            print(f"Processing {count}/{len(self.test_files)}: {filename}")
             self.run_single_test(test_file)
             count = count + 1
 
-        print(f"{len(self.fail_count)} tests got an unexpected result")
-        print("\n".join(self.fail_count))
-        self.assertEqual(len(self.fail_count), 0)
+        print("\n" + "=" * 80)
+        print("TEST SUMMARY")
+        print("=" * 80)
+        if len(self.fail_count) == 0:
+            print("✅ All tests passed!")
+        else:
+            print(f"❌ {len(self.fail_count)} test(s) failed:")
+            for i, failed_test in enumerate(self.fail_count, 1):
+                print(f"  {i}. {failed_test}")
+        print("=" * 80 + "\n")
+
+        self.assertEqual(len(self.fail_count), 0, f"\n{len(self.fail_count)} test(s) failed. See detailed output above.")
 
     # def test_debug(self):
     #     test_file = os.path.realpath('./temp7.json')

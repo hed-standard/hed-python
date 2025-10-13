@@ -55,7 +55,7 @@ Add a new entry at the top of `CHANGELOG.md` with:
 
 **Example:**
 ```markdown
-Release 0.7.1 October 11, 2025
+Release 0.7.1 October 13, 2025
 - Applied Black code formatter to entire codebase for consistent code style
 - Added Black to development dependencies and CI workflow
 - Enhanced CONTRIBUTING.md with code formatting guidelines
