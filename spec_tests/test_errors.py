@@ -136,7 +136,7 @@ class MyTestCase(unittest.TestCase):
             if not issues:
                 # Test should have failed but passed - this is a problem
                 print("\n" + "=" * 80)
-                print(f"❌ TEST FAILURE: Test passed but should have failed")
+                print("❌ TEST FAILURE: Test passed but should have failed")
                 print("=" * 80)
                 print(f"Error Code:    {error_code}")
                 print(f"Test Name:     {name}")
@@ -154,7 +154,7 @@ class MyTestCase(unittest.TestCase):
 
                 # Wrong error code
                 print("\n" + "=" * 80)
-                print(f"❌ TEST FAILURE: Wrong error code returned")
+                print("❌ TEST FAILURE: Wrong error code returned")
                 print("=" * 80)
                 print(f"Error Code:    {error_code}")
                 print(f"Test Name:     {name}")
@@ -162,10 +162,10 @@ class MyTestCase(unittest.TestCase):
                 print(f"Description:   {description}")
                 print(f"Expected Error Codes: {all_codes}")
                 print(f"\nTest Data:\n{self._format_test_data(test)}")
-                print(f"\nActual Error Codes Found:")
+                print("\nActual Error Codes Found:")
                 for issue in issues:
                     print(f"  - {issue['code']}")
-                print(f"\nDetailed Issues:")
+                print("\nDetailed Issues:")
                 print(get_printable_issue_string(issues))
                 print("=" * 80 + "\n")
                 self.fail_count.append(name)
@@ -173,14 +173,14 @@ class MyTestCase(unittest.TestCase):
             # Test should pass
             if issues:
                 print("\n" + "=" * 80)
-                print(f"❌ TEST FAILURE: Test failed but should have passed")
+                print("❌ TEST FAILURE: Test failed but should have passed")
                 print("=" * 80)
                 print(f"Error Code:    {error_code}")
                 print(f"Test Name:     {name}")
                 print(f"Test Type:     {test_type}")
                 print(f"Description:   {description}")
                 print(f"\nTest Data:\n{self._format_test_data(test)}")
-                print(f"\nUnexpected Issues Found:")
+                print("\nUnexpected Issues Found:")
                 print(get_printable_issue_string(issues))
                 print("=" * 80 + "\n")
                 self.fail_count.append(name)
