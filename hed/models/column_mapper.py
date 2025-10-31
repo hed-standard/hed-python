@@ -314,7 +314,8 @@ class ColumnMapper:
             return column_lists, list_names
         # Filter out empty lists from the above
         column_lists, list_names = zip(
-            *[(col_list, list_name) for col_list, list_name in zip(column_lists, list_names) if col_list]
+            *[(col_list, list_name) for col_list, list_name in zip(column_lists, list_names, strict=False) if col_list],
+            strict=False,
         )
 
         return column_lists, list_names
@@ -322,7 +323,7 @@ class ColumnMapper:
     def _check_for_duplicates_and_required(self, list_names, column_lists) -> list[dict]:
         """Check for duplicates and required columns in the given lists."""
         issues = []
-        for list_name, col_list in zip(list_names, column_lists):
+        for list_name, col_list in zip(list_names, column_lists, strict=False):
             # Convert all known strings to ints, then check for duplicates
             converted_list = [item if isinstance(item, int) else self._reverse_column_map.get(item, item) for item in col_list]
 

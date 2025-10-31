@@ -105,7 +105,7 @@ class SchemaValidator:
         issues = []
         libraries = self.hed_schema.library.split(",")
         versions = self.hed_schema.version_number.split(",")
-        for library, version in zip(libraries, versions):
+        for library, version in zip(libraries, versions, strict=False):
             all_known_versions = hed_cache.get_hed_versions(library_name=library)
             if "," not in library and not all_known_versions or Version(all_known_versions[0]) < Version(version):
                 issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED, version, all_known_versions)

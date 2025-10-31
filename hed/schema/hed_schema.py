@@ -79,7 +79,7 @@ class HedSchema(HedSchemaBase):
         namespace = self._namespace
         combined_versions = [
             f"{namespace}{version}" if not library else f"{namespace}{library}_{version}"
-            for library, version in zip(libraries, versions)
+            for library, version in zip(libraries, versions, strict=False)
         ]
 
         return ",".join(combined_versions)

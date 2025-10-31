@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
         ]
         error_counts = [1, 1, 3, 2, 1]
 
-        for string, error_count in zip(hed_strings, error_counts):
+        for string, error_count in zip(hed_strings, error_counts, strict=False):
             issues = SidecarValidator._find_non_matching_braces(string)
 
             self.assertEqual(len(issues), error_count)

@@ -11,14 +11,14 @@ class Test(unittest.TestCase):
         cls.hed_schema = load_schema_version("8.1.0")
 
     def validate_term_base(self, input_text, expected_issues):
-        for text, issues in zip(input_text, expected_issues):
+        for text, issues in zip(input_text, expected_issues, strict=False):
             entry = HedTagEntry(name=text, section=None)
             entry.short_tag_name = text
             test_issues = util.validate_schema_tag_new(entry)
             self.assertCountEqual(issues, test_issues)
 
     def validate_desc_base(self, input_descriptions, expected_issues):
-        for description, issues in zip(input_descriptions, expected_issues):
+        for description, issues in zip(input_descriptions, expected_issues, strict=False):
             entry = HedSchemaEntry(name="dummy", section=None)
             entry.description = description
             test_issues = util.validate_schema_description_new(entry)

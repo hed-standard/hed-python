@@ -26,7 +26,7 @@ class HedIDValidator:
 
         prev_versions = {}
         self.library_data = {}
-        for version, library in zip(versions, libraries):
+        for version, library in zip(versions, libraries, strict=False):
             prev_version = self._get_previous_version(version, library)
             if prev_version:
                 prev_versions[library] = prev_version

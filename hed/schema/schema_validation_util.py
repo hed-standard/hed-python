@@ -94,7 +94,7 @@ def schema_version_for_library(hed_schema, library_name) -> Union[str, None]:
         library_name = ""
     names = hed_schema.library.split(",")
     versions = hed_schema.version_number.split(",")
-    for name, version in zip(names, versions):
+    for name, version in zip(names, versions, strict=False):
         if name == library_name:
             return version
 

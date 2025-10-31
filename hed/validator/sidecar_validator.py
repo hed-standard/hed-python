@@ -99,7 +99,7 @@ class SidecarValidator:
                         refs_strings["HED"] = ["n/a"]
                     for combination in itertools.product(*[refs_strings[key] for key in refs]):
                         new_issues = []
-                        ref_dict = dict(zip(refs, combination))
+                        ref_dict = dict(zip(refs, combination, strict=False))
                         modified_string = hed_string
                         for ref in refs:
                             modified_string = df_util.replace_ref(modified_string, f"{{{ref}}}", ref_dict[ref])
