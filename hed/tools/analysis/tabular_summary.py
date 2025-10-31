@@ -198,6 +198,9 @@ class TabularSummary:
         self.total_files = self.total_files + 1
         self.total_events = self.total_events + len(df.index)
         for col_name, col_values in df.items():
+            # Always skip HED columns
+            if col_name in ["HED", "HED_assembled"]:
+                continue
             if self.skip_cols and col_name in self.skip_cols:
                 continue
             if col_name in self.value_info.keys():
