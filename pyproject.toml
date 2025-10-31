@@ -23,7 +23,6 @@ license = {text = "MIT"}
 keywords = ["HED", "hierarchical event descriptors", "validation", "neuroscience", "BIDS", "events", "metadata", "annotation"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -37,7 +36,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 dependencies = [
     "defusedxml",
@@ -114,8 +113,8 @@ skip = '*.git,*.pdf,*.svg,versioneer.py,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.
 ignore-words-list = 'te,parms,assertIn'
 
 [tool.ruff]
-# Target Python 3.9+
-target-version = "py39"
+# Target Python 3.10+
+target-version = "py310"
 line-length = 127
 
 # Exclude common directories
@@ -156,7 +155,7 @@ ignore = [
     "SIM103", # needless-bool (return bool vs if/else return True/False)
     "SIM110", # reimplemented-builtin (any/all reimplementation)
     "SIM101", # duplicate-isinstance-call
-    # Python 3.10+ features (we support 3.9)
+    # Python 3.10+ features
     "UP007",  # Use X | Y for Union types (requires 3.10+)
     "UP008",  # Use super() without parameters (we're okay with explicit)
     "UP031",  # Use format strings over %-formatting (legacy code compatibility)
@@ -177,7 +176,7 @@ known-first-party = ["hed"]
 
 [tool.black]
 line-length = 127
-target-version = ["py39", "py310", "py311", "py312", "py313"]
+target-version = ["py310", "py311", "py312", "py313"]
 exclude = '''
 /(
     \.git

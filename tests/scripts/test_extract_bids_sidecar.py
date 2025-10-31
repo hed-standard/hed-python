@@ -48,7 +48,7 @@ class TestExtractBidsSidecar(unittest.TestCase):
             self.assertNotIn("duration", template)
 
             # Each entry should have HED and Description
-            for col_name, col_data in template.items():
+            for _col_name, col_data in template.items():
                 self.assertIn("HED", col_data)
                 self.assertIn("Description", col_data)
 

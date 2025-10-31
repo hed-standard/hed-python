@@ -21,7 +21,6 @@ import logging
 import sys
 from hed import _version as vr
 from hed.tools import BidsDataset
-from hed.tools.analysis.tabular_summary import TabularSummary
 
 
 def get_parser():
@@ -116,7 +115,7 @@ def extract_template(args):
     try:
         logger.info("Creating BIDS dataset object...")
         bids = BidsDataset(args.data_path, suffixes=[args.suffix], exclude_dirs=args.exclude_dirs)
-        logger.info(f"BIDS dataset created")
+        logger.info("BIDS dataset created")
         logger.info(f"Found file groups: {list(bids.file_groups.keys())}")
 
         # Get the file group for the specified suffix

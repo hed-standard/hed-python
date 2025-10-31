@@ -1,7 +1,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8056010.svg)](https://doi.org/10.5281/zenodo.8056010)
 [![Maintainability](https://qlty.sh/gh/hed-standard/projects/hed-python/maintainability.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
 [![Code Coverage](https://qlty.sh/gh/hed-standard/projects/hed-python/coverage.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
-![Python3](https://img.shields.io/badge/python->=3.9-yellow.svg)
+![Python3](https://img.shields.io/badge/python->=3.10-yellow.svg)
 ![PyPI - Status](https://img.shields.io/pypi/v/hedtools)
 [![Documentation](https://img.shields.io/badge/docs-hedtags.org-blue.svg)](https://www.hedtags.org/hed-python)
 
@@ -31,7 +31,7 @@ A development version is available at: [https://hedtools.org/hed_dev](https://he
 
 ### Python Installation
 
-**Requirements:** Python 3.9 or higher
+**Requirements:** Python 3.10 or higher
 
 Install from PyPI:
 ```bash
