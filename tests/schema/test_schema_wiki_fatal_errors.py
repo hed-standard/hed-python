@@ -68,7 +68,7 @@ class TestHedSchema(unittest.TestCase):
             # Verify basic properties of exception
             expected_line_numbers = self.expected_line_numbers.get(filename, [])
             if expected_line_numbers:
-                for issue, expected in zip(context.exception.issues, expected_line_numbers):
+                for issue, expected in zip(context.exception.issues, expected_line_numbers, strict=False):
                     self.assertEqual(issue[ErrorContext.ROW], expected)
             issues = context.exception.issues
 
@@ -90,7 +90,7 @@ class TestHedSchema(unittest.TestCase):
             # Verify basic properties of exception
             expected_line_numbers = self.expected_line_numbers.get(filename, [])
             if expected_line_numbers:
-                for issue, expected in zip(context.exception.issues, expected_line_numbers):
+                for issue, expected in zip(context.exception.issues, expected_line_numbers, strict=False):
                     self.assertEqual(issue[ErrorContext.ROW], expected)
 
             error_handler = ErrorHandler()

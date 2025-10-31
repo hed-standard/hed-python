@@ -197,7 +197,8 @@ def _handle_curly_braces_refs(df, refs, column_names):
             # df[column_name] = pd.Series(x.replace(column_name_brackets, y) for x, y
             #                             in zip(df[column_name], saved_columns[replacing_name]))
             new_df[column_name] = pd.Series(
-                replace_ref(x, f"{{{replacing_name}}}", y) for x, y in zip(new_df[column_name], saved_columns[replacing_name])
+                replace_ref(x, f"{{{replacing_name}}}", y)
+                for x, y in zip(new_df[column_name], saved_columns[replacing_name], strict=False)
             )
     # Handle the special case of {HED} when the tsv file has no {HED} column
     if "HED" in refs and "HED" not in column_names:

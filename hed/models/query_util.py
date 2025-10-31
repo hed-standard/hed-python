@@ -35,7 +35,7 @@ class SearchResult:
         if len(self.tags) != len(other.tags):
             return False
 
-        return all(tag is tag2 for tag, tag2 in zip(self.tags, other.tags))
+        return all(tag is tag2 for tag, tag2 in zip(self.tags, other.tags, strict=False))
 
     def __str__(self):
         return str(self.group) + " Tags: " + "---".join([str(tag) for tag in self.tags])

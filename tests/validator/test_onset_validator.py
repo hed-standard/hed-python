@@ -48,7 +48,7 @@ class Test(TestHedBase):
             onset_validator = OnsetValidator()
             def_validator = DefValidator(self.def_dict_both)
 
-        for string, expected_params, context in zip(test_strings, test_issues, test_context):
+        for string, expected_params, context in zip(test_strings, test_issues, test_context, strict=False):
             test_string = HedString(string, self.hed_schema)
             error_handler = ErrorHandler()
             error_handler.push_error_context(ErrorContext.HED_STRING, test_string)

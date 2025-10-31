@@ -132,7 +132,7 @@ class Test(unittest.TestCase):
 
         reloaded_sidecar = Sidecar(save_filename)
 
-        for data1, data2 in zip(sidecar, reloaded_sidecar):
+        for data1, data2 in zip(sidecar, reloaded_sidecar, strict=False):
             self.assertEqual(data1.source_dict, data2.source_dict)
 
     def test_save_load2(self):
@@ -141,7 +141,7 @@ class Test(unittest.TestCase):
 
         reloaded_sidecar = Sidecar(io.StringIO(json_string))
 
-        for data1, data2 in zip(sidecar, reloaded_sidecar):
+        for data1, data2 in zip(sidecar, reloaded_sidecar, strict=False):
             self.assertEqual(data1.source_dict, data2.source_dict)
 
     def test_merged_sidecar(self):
