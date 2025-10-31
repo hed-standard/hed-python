@@ -195,7 +195,7 @@ class ExpressionNegation(Expression):
 
         # Todo: this may need more thought with respects to wildcards and negation
         # negated_groups = [group for group in hed_group.get_all_groups() if group not in groups]
-        # This simpler version works on python >= 3.9
+        # This simpler version works on python >= 3.10
         # negated_groups = [SearchResult(group, []) for group in hed_group.get_all_groups() if group not in groups]
         # Python 3.7/8 compatible version.
         negated_groups = [

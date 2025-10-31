@@ -20,12 +20,12 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == 'push' && "${{ github.ref }}" == 'refs/heads/main' ]]; then
             # Push to main branch
-            echo 'matrix=["3.9", "3.10", "3.11", "3.12", "3.13"]' >> $GITHUB_OUTPUT
+            echo 'matrix=["3.10", "3.11", "3.12", "3.13"]' >> $GITHUB_OUTPUT
           elif [[ "${{ github.event_name }}" == 'pull_request' && "${{ github.event.pull_request.base.ref }}" == 'main' ]]; then
             # PR to main branch
-            echo 'matrix=["3.9", "3.10", "3.11", "3.12", "3.13"]' >> $GITHUB_OUTPUT
+            echo 'matrix=[ "3.10", "3.11", "3.12", "3.13"]' >> $GITHUB_OUTPUT
           else
-            echo 'matrix=["3.9", "3.13"]' >> $GITHUB_OUTPUT
+            echo 'matrix=["3.10", "3.13"]' >> $GITHUB_OUTPUT
           fi
 
   build:
@@ -60,7 +60,7 @@ jobs:
           pip install -r docs/requirements.txt
           pip install -e .[test]
 
-      # Run spec tests without coverage for non Python 3.9
+      # Run spec tests without coverage for non Python 3.10
       - name: Run spec_test
         env:
           GITHUB_TOKEN: ${{ github.token }}

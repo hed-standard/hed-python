@@ -233,7 +233,7 @@ def get_library_name_and_id(schema):
     return name.capitalize(), starting_id
 
 
-# todo: Replace this once we no longer support < python 3.9
+# todo: Replace this once we no longer support < python 3.10
 def remove_prefix(text, prefix):
     if text and text.startswith(prefix):
         return text[len(prefix) :]

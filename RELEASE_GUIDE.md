@@ -11,7 +11,7 @@ Before starting the release process, ensure you have:
 - [ ] Write access to the hed-python repository
 - [ ] PyPI account with maintainer access to the `hedtools` package
 - [ ] Git configured with your credentials
-- [ ] Python 3.9+ installed
+- [ ] Python 3.10+ installed
 - [ ] Virtual environment activated (if using one)
 - [ ] All intended changes merged to the `main` branch
 
