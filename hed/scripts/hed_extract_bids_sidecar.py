@@ -98,10 +98,10 @@ def get_parser():
 
 def extract_template(args):
     """Extract sidecar template from the BIDS dataset.
-    
+
     Parameters:
         args: Parsed command line arguments
-        
+
     Returns:
         dict: Sidecar template dictionary
     """
@@ -124,32 +124,32 @@ def extract_template(args):
         if not file_group:
             logger.warning(f"No file group found for suffix '{args.suffix}'")
             return {}
-        
+
         logger.debug(f"File group '{args.suffix}' has {len(file_group.datafile_dict)} data files")
-        
+
         # Combine default skip columns with user-specified ones
         # Default skips: onset, duration, sample (timing/indexing columns)
         default_skip = ["onset", "duration", "sample"]
         skip_cols = default_skip.copy()
         if args.skip_columns:
             skip_cols.extend(args.skip_columns)
-        
+
         logger.debug(f"Skip columns: {skip_cols}")
-        
+
         # Create TabularSummary using the summarize method of BidsFileGroup
         logger.info("Creating tabular summary...")
         summary = file_group.summarize(value_cols=args.value_columns, skip_cols=skip_cols)
-        
+
         logger.info(f"Processed {summary.total_files} files")
         logger.info(f"Total events: {summary.total_events}")
-        
+
         # Extract the sidecar template
         logger.info("Extracting sidecar template...")
         template = summary.extract_sidecar_template()
         logger.info(f"Template extracted with {len(template)} columns")
-        
+
         return template
-        
+
     except Exception as e:
         logger.error(f"Error during template extraction: {e}")
         logger.debug("Full exception details:", exc_info=True)
@@ -158,18 +158,15 @@ def extract_template(args):
 
 def format_output(template, args):
     """Format the template as JSON output.
-    
+
     Parameters:
         template (dict): The sidecar template dictionary
         args: Parsed command line arguments
-        
+
     Returns:
         str: JSON-formatted output
     """
-    output_dict = {
-        "sidecar_template": template,
-        "hedtools_version": str(vr.get_versions())
-    }
+    output_dict = {"sidecar_template": template, "hedtools_version": str(vr.get_versions())}
     return json.dumps(output_dict, indent=4)
 
 
@@ -180,7 +177,7 @@ def main(arg_list=None):
 
     # Parse the arguments
     args = parser.parse_args(arg_list)
-    
+
     # Setup logging configuration
     log_level = args.log_level.upper() if args.log_level else "WARNING"
     if args.verbose:
@@ -228,7 +225,7 @@ def main(arg_list=None):
 
     # Format output as JSON
     output = format_output(template, args)
-    
+
     # Write to file or print to stdout
     if args.output_file:
         logger.info(f"Writing output to: {args.output_file}")
@@ -236,7 +233,7 @@ def main(arg_list=None):
             fp.write(output)
     else:
         print(output)
-    
+
     logger.info("Extraction completed successfully")
     return 0
 
