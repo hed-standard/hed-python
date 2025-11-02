@@ -1,6 +1,0 @@
-hedId	rdfs:label	Type	omn:Domain	omn:Range	Properties	dc:description
-HED_0010504	annotation	AnnotationProperty	HedElement	string	elementDomain, stringRange	A annotation link to an item in another ontology or item.
-HED_0010500	hedId	AnnotationProperty	HedElement	string	elementDomain, stringRange	The unique identifier of this element in the HED namespace.
-HED_0010501	requireChild	AnnotationProperty	HedTag	boolean	tagDomain, boolRange	This tag must have a descendent.
-HED_0010502	rooted	AnnotationProperty	HedTag	HedTag	tagDomain, tagRange	This top-level library schema node should have a parent which is the indicated node in the partnered standard schema.
-HED_0010503	takesValue	AnnotationProperty	HedTag	boolean	tagDomain, boolRange	This tag is a hashtag placeholder that is expected to be replaced with a user-defined value.
