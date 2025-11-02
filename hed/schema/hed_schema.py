@@ -19,6 +19,7 @@ from hed.schema.schema_io import schema_util, df_util
 from hed.schema.schema_io.schema2xml import Schema2XML
 from hed.schema.schema_io.schema2wiki import Schema2Wiki
 from hed.schema.schema_io.schema2df import Schema2DF
+from hed.schema.schema_io.schema2json import Schema2JSON
 
 from hed.schema.hed_schema_section import (
     HedSchemaSection,
@@ -312,6 +313,22 @@ class HedSchema(HedSchemaBase):
         xml_tree = Schema2XML().process_schema(self, save_merged)
         return schema_util.xml_element_2_str(xml_tree)
 
+    def get_as_json_string(self, save_merged=True) -> str:
+        """Return the schema as a JSON string.
+
+        Parameters:
+            save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
+                                If it is not a "withStandard" schema, this setting has no effect.
+
+        Returns:
+            str: The schema as a JSON string.
+
+        """
+        from hed.schema.schema_io.schema2json import Schema2JSON
+        converter = Schema2JSON()
+        converter.process_schema(self, save_merged)
+        return converter.to_json_string()
+
     def get_as_dataframes(self, save_merged=False) -> dict[DataFrame]:
         """Get a dict of dataframes representing this file
 
@@ -356,6 +373,22 @@ class HedSchema(HedSchemaBase):
         with open(filename, mode="w", encoding="utf-8") as opened_file:
             xml_string = schema_util.xml_element_2_str(xml_tree)
             opened_file.write(xml_string)
+
+    def save_as_json(self, filename, save_merged=True):
+        """Save as JSON to a file.
+
+        Parameters:
+            filename (str): Save location.
+            save_merged (bool): If true, this will save the schema as a merged schema if it is a "withStandard" schema.
+                                If it is not a "withStandard" schema, this setting has no effect.
+
+        Raises:
+            OSError: File cannot be saved for some reason.
+        """
+        converter = Schema2JSON()
+        converter.process_schema(self, save_merged)
+        with open(filename, mode="w", encoding="utf-8") as opened_file:
+            opened_file.write(converter.to_json_string(indent=2))
 
     def save_as_dataframes(self, base_filename, save_merged=False):
         """Save as dataframes to a folder of files.

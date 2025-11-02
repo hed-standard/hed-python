@@ -1,0 +1,17 @@
+prefix	id	iri	description
+dc:	contributor	http://purl.org/dc/elements/1.1/contributor	An entity responsible for making contributions to the resource.
+dc:	creator	http://purl.org/dc/elements/1.1/creator	An entity primarily responsible for making the resource.
+dc:	date	http://purl.org/dc/elements/1.1/date	A point or period of time associated with an event in the lifecycle of the resource.
+dc:	description	http://purl.org/dc/elements/1.1/description	An account of the resource.
+dc:	format	http://purl.org/dc/elements/1.1/format	The file format
+dc:	identifier	http://purl.org/dc/elements/1.1/identifier	An unambiguous reference to the resource within a given context.
+dc:	language	http://purl.org/dc/elements/1.1/language	A language of the resource.
+dc:	publisher	http://purl.org/dc/elements/1.1/publisher	An entity responsible for making the resource available.
+dc:	relation	http://purl.org/dc/elements/1.1/relation	A related resource.
+dc:	source	http://purl.org/dc/elements/1.1/source	A related resource from which the described resource is derived.
+dc:	subject	http://purl.org/dc/elements/1.1/subject	The topic of the resource.
+dc:	title	http://purl.org/dc/elements/1.1/title	A name given to the resource.
+dc:	type	http://purl.org/dc/elements/1.1/type	The nature or genre of the resource.
+foaf:	homepage	http://xmlns.com/foaf/0.1/homepage	A homepage for some thing.
+obogo:	has_dbxref	http://www.geneontology.org/formats/oboInOwl#hasDbXref	Property indicating that an ontology term has a cross-reference to a database.
+terms:	license	http://purl.org/dc/terms/license	A legal document giving official permission to do something with the resource.

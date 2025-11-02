@@ -1,0 +1,15 @@
+hedId	rdfs:label	Type	omn:Domain	omn:Range	Properties	dc:description
+HED_0010304	allowedCharacter	DataProperty	HedUnit or HedUnitModifier or HedValueClass	string	unitDomain, unitModifierDomain, valueClassDomain, stringRange	A special character that is allowed in expressing the value of a placeholder of a specified value class. Allowed characters may be listed individual, named individually, or named as a group as specified in Section 2.2 Character sets and restrictions of the HED specification.
+HED_0010305	conversionFactor	DataProperty	HedUnit or HedUnitModifier	float	unitDomain, unitModifierDomain, numericRange	The factor to multiply these units or unit modifiers by to convert to default units.
+HED_0010306	deprecatedFrom	DataProperty	HedElement	string	elementDomain, stringRange	The latest schema version in which the element was not deprecated.
+HED_0010307	extensionAllowed	DataProperty	HedTag	boolean	tagDomain, boolRange	Users can add unlimited levels of child nodes under this tag. This tag is propagated to child nodes except for hashtag placeholders.
+HED_0010309	inLibrary	DataProperty	HedElement	string	elementDomain, stringRange	The named library schema that this schema element is from. This attribute is added by tools when a library schema is merged into its partnered standard schema.
+HED_0010310	reserved	DataProperty	HedTag	boolean	tagDomain, boolRange	This tag has special meaning and requires special handling by tools.
+HED_0010311	SIUnit	DataProperty	HedUnit	boolean	unitDomain, boolRange	This unit element is an SI unit and can be modified by multiple and sub-multiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.
+HED_0010312	SIUnitModifier	DataProperty	HedUnitModifier	boolean	unitModifierDomain, boolRange	This SI unit modifier represents a multiple or sub-multiple of a base unit rather than a unit symbol.
+HED_0010313	SIUnitSymbolModifier	DataProperty	HedUnitModifier	boolean	unitModifierDomain, boolRange	This SI unit modifier represents a multiple or sub-multiple of a unit symbol rather than a base symbol.
+HED_0010314	tagGroup	DataProperty	HedTag	boolean	tagDomain, boolRange	This tag can only appear inside a tag group.
+HED_0010315	topLevelTagGroup	DataProperty	HedTag	boolean	tagDomain, boolRange	This tag (or its descendants) can only appear in a top-level tag group. There are additional tag-specific restrictions on what other tags can appear in the group with this tag.
+HED_0010316	unique	DataProperty	HedTag	boolean	tagDomain, boolRange	Only one of this tag or its descendants can be used in the event-level HED string.
+HED_0010317	unitPrefix	DataProperty	HedUnit	boolean	unitDomain, boolRange	This unit is a prefix unit (e.g., dollar sign in the currency units).
+HED_0010318	unitSymbol	DataProperty	HedUnit	boolean	unitDomain, boolRange	This tag is an abbreviation or symbol representing a type of unit. Unit symbols represent both the singular and the plural and thus cannot be pluralized.

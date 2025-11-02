@@ -1,0 +1,1407 @@
+HED version="8.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd"
+
+'''Prologue'''
+The HED standard schema is a hierarchically-organized vocabulary for annotating events and experimental structure. HED annotations consist of comma-separated tags drawn from this vocabulary. This vocabulary can be augmented by terms drawn from specialized library schema. 
+
+Each term in this vocabulary has a human-readable description and may include additional attributes that give additional properties or that specify how tools should treat the tag during analysis. The meaning of these attributes is described in the Additional schema properties section.
+
+!# start schema
+
+'''Event''' <nowiki>{suggestedTag=Task-property, hedId=HED_0012001} [Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.]</nowiki>
+* Sensory-event <nowiki>{suggestedTag=Task-event-role, suggestedTag=Sensory-presentation, hedId=HED_0012002} [Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.]</nowiki>
+* Agent-action <nowiki>{suggestedTag=Task-event-role, suggestedTag=Agent, hedId=HED_0012003} [Any action engaged in by an agent (see the Agent subtree for agent categories). A participant response to an experiment stimulus should include the tag Agent-property/Agent-task-role/Experiment-participant.]</nowiki>
+* Data-feature <nowiki>{suggestedTag=Data-property, hedId=HED_0012004} [An event marking the occurrence of a data feature such as an interictal spike or alpha burst that is often added post hoc to the data record.]</nowiki>
+* Experiment-control <nowiki>{hedId=HED_0012005} [An event pertaining to the physical control of the experiment during its operation.]</nowiki>
+* Experiment-procedure <nowiki>{hedId=HED_0012006} [An event indicating an experimental procedure, as in performing a saliva swab during the experiment or administering a survey.]</nowiki>
+* Experiment-structure <nowiki>{hedId=HED_0012007} [An event specifying a change-point of the structure of experiment. This event is typically used to indicate a change in experimental conditions or tasks.]</nowiki>
+* Measurement-event <nowiki>{suggestedTag=Data-property, hedId=HED_0012008} [A discrete measure returned by an instrument.]</nowiki>
+
+'''Agent''' <nowiki>{suggestedTag=Agent-property, hedId=HED_0012009} [Someone or something that takes an active role or produces a specified effect.The role or effect may be implicit. Being alive or performing an activity such as a computation may qualify something to be an agent. An agent may also be something that simulates something else.]</nowiki>
+* Animal-agent <nowiki>{hedId=HED_0012010} [An agent that is an animal.]</nowiki>
+* Avatar-agent <nowiki>{hedId=HED_0012011} [An agent associated with an icon or avatar representing another agent.]</nowiki>
+* Controller-agent <nowiki>{hedId=HED_0012012} [Experiment control software or hardware.]</nowiki>
+* Human-agent <nowiki>{hedId=HED_0012013} [A person who takes an active role or produces a specified effect.]</nowiki>
+* Robotic-agent <nowiki>{hedId=HED_0012014} [An agent mechanical device capable of performing a variety of often complex tasks on command or by being programmed in advance.]</nowiki>
+* Software-agent <nowiki>{hedId=HED_0012015} [An agent computer program that interacts with the participant in an active role such as an AI advisor.]</nowiki>
+
+'''Action''' <nowiki>{extensionAllowed, hedId=HED_0012016} [Do something.]</nowiki>
+* Communicate <nowiki>{hedId=HED_0012017} [Action conveying knowledge of or about something.]</nowiki>
+** Communicate-gesturally <nowiki>{relatedTag=Move-face, relatedTag=Move-upper-extremity, hedId=HED_0012018} [Communicate non-verbally using visible bodily actions, either in place of speech or together and in parallel with spoken words. Gestures include movement of the hands, face, or other parts of the body.]</nowiki>
+*** Clap-hands <nowiki>{hedId=HED_0012019} [Strike the palms of against one another resoundingly, and usually repeatedly, especially to express approval.]</nowiki>
+*** Clear-throat <nowiki>{relatedTag=Move-face, relatedTag=Move-head, hedId=HED_0012020} [Cough slightly so as to speak more clearly, attract attention, or to express hesitancy before saying something awkward.]</nowiki>
+*** Frown <nowiki>{relatedTag=Move-face, hedId=HED_0012021} [Express disapproval, displeasure, or concentration, typically by turning down the corners of the mouth.]</nowiki>
+*** Grimace <nowiki>{relatedTag=Move-face, hedId=HED_0012022} [Make a twisted expression, typically expressing disgust, pain, or wry amusement.]</nowiki>
+*** Nod-head <nowiki>{relatedTag=Move-head, hedId=HED_0012023} [Tilt head in alternating up and down arcs along the sagittal plane. It is most commonly, but not universally, used to indicate agreement, acceptance, or acknowledgement.]</nowiki>
+*** Pump-fist <nowiki>{relatedTag=Move-upper-extremity, hedId=HED_0012024} [Raise with fist clenched in triumph or affirmation.]</nowiki>
+*** Raise-eyebrows <nowiki>{relatedTag=Move-face, relatedTag=Move-eyes, hedId=HED_0012025} [Move eyebrows upward.]</nowiki>
+*** Shake-fist <nowiki>{relatedTag=Move-upper-extremity, hedId=HED_0012026} [Clench hand into a fist and shake to demonstrate anger.]</nowiki>
+*** Shake-head <nowiki>{relatedTag=Move-head, hedId=HED_0012027} [Turn head from side to side as a way of showing disagreement or refusal.]</nowiki>
+*** Shhh <nowiki>{relatedTag=Move-upper-extremity, hedId=HED_0012028} [Place finger over lips and possibly uttering the syllable shhh to indicate the need to be quiet.]</nowiki>
+*** Shrug <nowiki>{relatedTag=Move-upper-extremity, relatedTag=Move-torso, hedId=HED_0012029} [Lift shoulders up towards head to indicate a lack of knowledge about a particular topic.]</nowiki>
+*** Smile <nowiki>{relatedTag=Move-face, hedId=HED_0012030} [Form facial features into a pleased, kind, or amused expression, typically with the corners of the mouth turned up and the front teeth exposed.]</nowiki>
+*** Spread-hands <nowiki>{relatedTag=Move-upper-extremity, hedId=HED_0012031} [Spread hands apart to indicate ignorance.]</nowiki>
+*** Thumb-up <nowiki>{relatedTag=Move-upper-extremity, hedId=HED_0012032} [Extend the thumb upward to indicate approval.]</nowiki>
+*** Thumbs-down <nowiki>{relatedTag=Move-upper-extremity, hedId=HED_0012033} [Extend the thumb downward to indicate disapproval.]</nowiki>
+*** Wave <nowiki>{relatedTag=Move-upper-extremity, hedId=HED_0012034} [Raise hand and move left and right, as a greeting or sign of departure.]</nowiki>
+*** Widen-eyes <nowiki>{relatedTag=Move-face, relatedTag=Move-eyes, hedId=HED_0012035} [Open eyes and possibly with eyebrows lifted especially to express surprise or fear.]</nowiki>
+*** Wink <nowiki>{relatedTag=Move-face, relatedTag=Move-eyes, hedId=HED_0012036} [Close and open one eye quickly, typically to indicate that something is a joke or a secret or as a signal of affection or greeting.]</nowiki>
+** Communicate-musically <nowiki>{hedId=HED_0012037} [Communicate using music.]</nowiki>
+*** Hum <nowiki>{hedId=HED_0012038} [Make a low, steady continuous sound like that of a bee. Sing with the lips closed and without uttering speech.]</nowiki>
+*** Play-instrument <nowiki>{hedId=HED_0012039} [Make musical sounds using an instrument.]</nowiki>
+*** Sing <nowiki>{hedId=HED_0012040} [Produce musical tones by means of the voice.]</nowiki>
+*** Vocalize <nowiki>{hedId=HED_0012041} [Utter vocal sounds.]</nowiki>
+*** Whistle <nowiki>{hedId=HED_0012042} [Produce a shrill clear sound by forcing breath out or air in through the puckered lips.]</nowiki>
+** Communicate-vocally <nowiki>{hedId=HED_0012043} [Communicate using mouth or vocal cords.]</nowiki>
+*** Cry <nowiki>{hedId=HED_0012044} [Shed tears associated with emotions, usually sadness but also joy or frustration.]</nowiki>
+*** Groan <nowiki>{hedId=HED_0012045} [Make a deep inarticulate sound in response to pain or despair.]</nowiki>
+*** Laugh <nowiki>{hedId=HED_0012046} [Make the spontaneous sounds and movements of the face and body that are the instinctive expressions of lively amusement and sometimes also of contempt or derision.]</nowiki>
+*** Scream <nowiki>{hedId=HED_0012047} [Make loud, vociferous cries or yells to express pain, excitement, or fear.]</nowiki>
+*** Shout <nowiki>{hedId=HED_0012048} [Say something very loudly.]</nowiki>
+*** Sigh <nowiki>{hedId=HED_0012049} [Emit a long, deep, audible breath expressing sadness, relief, tiredness, or a similar feeling.]</nowiki>
+*** Speak <nowiki>{hedId=HED_0012050} [Communicate using spoken language.]</nowiki>
+*** Whisper <nowiki>{hedId=HED_0012051} [Speak very softly using breath without vocal cords.]</nowiki>
+* Move <nowiki>{hedId=HED_0012052} [Move in a specified direction or manner. Change position or posture.]</nowiki>
+** Breathe <nowiki>{hedId=HED_0012053} [Inhale or exhale during respiration.]</nowiki>
+*** Blow <nowiki>{hedId=HED_0012054} [Expel air through pursed lips.]</nowiki>
+*** Cough <nowiki>{hedId=HED_0012055} [Suddenly and audibly expel air from the lungs through a partially closed glottis, preceded by inhalation.]</nowiki>
+*** Exhale <nowiki>{hedId=HED_0012056} [Blow out or expel breath.]</nowiki>
+*** Hiccup <nowiki>{hedId=HED_0012057} [Involuntarily spasm the diaphragm and respiratory organs, with a sudden closure of the glottis and a characteristic sound like that of a cough.]</nowiki>
+*** Hold-breath <nowiki>{hedId=HED_0012058} [Interrupt normal breathing by ceasing to inhale or exhale.]</nowiki>
+*** Inhale <nowiki>{hedId=HED_0012059} [Draw in with the breath through the nose or mouth.]</nowiki>
+*** Sneeze <nowiki>{hedId=HED_0012060} [Suddenly and violently expel breath through the nose and mouth.]</nowiki>
+*** Sniff <nowiki>{hedId=HED_0012061} [Draw in air audibly through the nose to detect a smell, to stop it from running, or to express contempt.]</nowiki>
+** Move-body <nowiki>{hedId=HED_0012062} [Move entire body.]</nowiki>
+*** Bend <nowiki>{hedId=HED_0012063} [Move body in a bowed or curved manner.]</nowiki>
+*** Dance <nowiki>{hedId=HED_0012064} [Perform a purposefully selected sequences of human movement often with aesthetic or symbolic value. Move rhythmically to music, typically following a set sequence of steps.]</nowiki>
+*** Fall-down <nowiki>{hedId=HED_0012065} [Lose balance and collapse.]</nowiki>
+*** Flex <nowiki>{hedId=HED_0012066} [Cause a muscle to stand out by contracting or tensing it. Bend a limb or joint.]</nowiki>
+*** Jerk <nowiki>{hedId=HED_0012067} [Make a quick, sharp, sudden movement.]</nowiki>
+*** Lie-down <nowiki>{hedId=HED_0012068} [Move to a horizontal or resting position.]</nowiki>
+*** Recover-balance <nowiki>{hedId=HED_0012069} [Return to a stable, upright body position.]</nowiki>
+*** Shudder <nowiki>{hedId=HED_0012070} [Tremble convulsively, sometimes as a result of fear or revulsion.]</nowiki>
+*** Sit-down <nowiki>{hedId=HED_0012071} [Move from a standing to a sitting position.]</nowiki>
+*** Sit-up <nowiki>{hedId=HED_0012072} [Move from lying down to a sitting position.]</nowiki>
+*** Stand-up <nowiki>{hedId=HED_0012073} [Move from a sitting to a standing position.]</nowiki>
+*** Stretch <nowiki>{hedId=HED_0012074} [Straighten or extend body or a part of body to its full length, typically so as to tighten muscles or in order to reach something.]</nowiki>
+*** Stumble <nowiki>{hedId=HED_0012075} [Trip or momentarily lose balance and almost fall.]</nowiki>
+*** Turn <nowiki>{hedId=HED_0012076} [Change or cause to change direction.]</nowiki>
+** Move-body-part <nowiki>{hedId=HED_0012077} [Move one part of a body.]</nowiki>
+*** Move-eyes <nowiki>{hedId=HED_0012078} [Move eyes.]</nowiki>
+**** Blink <nowiki>{hedId=HED_0012079} [Shut and open the eyes quickly.]</nowiki>
+**** Close-eyes <nowiki>{hedId=HED_0012080} [Lower and keep eyelids in a closed position.]</nowiki>
+**** Fixate <nowiki>{hedId=HED_0012081} [Direct eyes to a specific point or target.]</nowiki>
+**** Inhibit-blinks <nowiki>{hedId=HED_0012082} [Purposely prevent blinking.]</nowiki>
+**** Open-eyes <nowiki>{hedId=HED_0012083} [Raise eyelids to expose pupil.]</nowiki>
+**** Saccade <nowiki>{hedId=HED_0012084} [Move eyes rapidly between fixation points.]</nowiki>
+**** Squint <nowiki>{hedId=HED_0012085} [Squeeze one or both eyes partly closed in an attempt to see more clearly or as a reaction to strong light.]</nowiki>
+**** Stare <nowiki>{hedId=HED_0012086} [Look fixedly or vacantly at someone or something with eyes wide open.]</nowiki>
+*** Move-face <nowiki>{hedId=HED_0012087} [Move the face or jaw.]</nowiki>
+**** Bite <nowiki>{hedId=HED_0012088} [Seize with teeth or jaws an object or organism so as to grip or break the surface covering.]</nowiki>
+**** Burp <nowiki>{hedId=HED_0012089} [Noisily release air from the stomach through the mouth. Belch.]</nowiki>
+**** Chew <nowiki>{hedId=HED_0012090} [Repeatedly grinding, tearing, and or crushing with teeth or jaws.]</nowiki>
+**** Gurgle <nowiki>{hedId=HED_0012091} [Make a hollow bubbling sound like that made by water running out of a bottle.]</nowiki>
+**** Swallow <nowiki>{hedId=HED_0012092} [Cause or allow something, especially food or drink to pass down the throat.]</nowiki>
+***** Gulp <nowiki>{hedId=HED_0012093} [Swallow quickly or in large mouthfuls, often audibly, sometimes to indicate apprehension.]</nowiki>
+**** Yawn <nowiki>{hedId=HED_0012094} [Take a deep involuntary inhalation with the mouth open often as a sign of drowsiness or boredom.]</nowiki>
+*** Move-head <nowiki>{hedId=HED_0012095} [Move head.]</nowiki>
+**** Lift-head <nowiki>{hedId=HED_0012096} [Tilt head back lifting chin.]</nowiki>
+**** Lower-head <nowiki>{hedId=HED_0012097} [Move head downward so that eyes are in a lower position.]</nowiki>
+**** Turn-head <nowiki>{hedId=HED_0012098} [Rotate head horizontally to look in a different direction.]</nowiki>
+*** Move-lower-extremity <nowiki>{hedId=HED_0012099} [Move leg and/or foot.]</nowiki>
+**** Curl-toes <nowiki>{hedId=HED_0012100} [Bend toes sometimes to grip.]</nowiki>
+**** Hop <nowiki>{hedId=HED_0012101} [Jump on one foot.]</nowiki>
+**** Jog <nowiki>{hedId=HED_0012102} [Run at a trot to exercise.]</nowiki>
+**** Jump <nowiki>{hedId=HED_0012103} [Move off the ground or other surface through sudden muscular effort in the legs.]</nowiki>
+**** Kick <nowiki>{hedId=HED_0012104} [Strike out or flail with the foot or feet.Strike using the leg, in unison usually with an area of the knee or lower using the foot.]</nowiki>
+**** Pedal <nowiki>{hedId=HED_0012105} [Move by working the pedals of a bicycle or other machine.]</nowiki>
+**** Press-foot <nowiki>{hedId=HED_0012106} [Move by pressing foot.]</nowiki>
+**** Run <nowiki>{hedId=HED_0012107} [Travel on foot at a fast pace.]</nowiki>
+**** Step <nowiki>{hedId=HED_0012108} [Put one leg in front of the other and shift weight onto it.]</nowiki>
+***** Heel-strike <nowiki>{hedId=HED_0012109} [Strike the ground with the heel during a step.]</nowiki>
+***** Toe-off <nowiki>{hedId=HED_0012110} [Push with toe as part of a stride.]</nowiki>
+**** Trot <nowiki>{hedId=HED_0012111} [Run at a moderate pace, typically with short steps.]</nowiki>
+**** Walk <nowiki>{hedId=HED_0012112} [Move at a regular pace by lifting and setting down each foot in turn never having both feet off the ground at once.]</nowiki>
+*** Move-torso <nowiki>{hedId=HED_0012113} [Move body trunk.]</nowiki>
+*** Move-upper-extremity <nowiki>{hedId=HED_0012114} [Move arm, shoulder, and/or hand.]</nowiki>
+**** Drop <nowiki>{hedId=HED_0012115} [Let or cause to fall vertically.]</nowiki>
+**** Grab <nowiki>{hedId=HED_0012116} [Seize suddenly or quickly. Snatch or clutch.]</nowiki>
+**** Grasp <nowiki>{hedId=HED_0012117} [Seize and hold firmly.]</nowiki>
+**** Hold-down <nowiki>{hedId=HED_0012118} [Prevent someone or something from moving by holding them firmly.]</nowiki>
+**** Lift <nowiki>{hedId=HED_0012119} [Raising something to higher position.]</nowiki>
+**** Make-fist <nowiki>{hedId=HED_0012120} [Close hand tightly with the fingers bent against the palm.]</nowiki>
+**** Point <nowiki>{hedId=HED_0012121} [Draw attention to something by extending a finger or arm.]</nowiki>
+**** Press <nowiki>{relatedTag=Push, hedId=HED_0012122} [Apply pressure to something to flatten, shape, smooth or depress it. This action tag should be used to indicate key presses and mouse clicks.]</nowiki>
+**** Push <nowiki>{relatedTag=Press, hedId=HED_0012123} [Apply force in order to move something away. Use Press to indicate a key press or mouse click.]</nowiki>
+**** Reach <nowiki>{hedId=HED_0012124} [Stretch out your arm in order to get or touch something.]</nowiki>
+**** Release <nowiki>{hedId=HED_0012125} [Make available or set free.]</nowiki>
+**** Retract <nowiki>{hedId=HED_0012126} [Draw or pull back.]</nowiki>
+**** Scratch <nowiki>{hedId=HED_0012127} [Drag claws or nails over a surface or on skin.]</nowiki>
+**** Snap-fingers <nowiki>{hedId=HED_0012128} [Make a noise by pushing second finger hard against thumb and then releasing it suddenly so that it hits the base of the thumb.]</nowiki>
+**** Touch <nowiki>{hedId=HED_0012129} [Come into or be in contact with.]</nowiki>
+* Perceive <nowiki>{hedId=HED_0012130} [Produce an internal, conscious image through stimulating a sensory system.]</nowiki>
+** Hear <nowiki>{hedId=HED_0012131} [Give attention to a sound.]</nowiki>
+** See <nowiki>{hedId=HED_0012132} [Direct gaze toward someone or something or in a specified direction.]</nowiki>
+** Sense-by-touch <nowiki>{hedId=HED_0012133} [Sense something through receptors in the skin.]</nowiki>
+** Smell <nowiki>{hedId=HED_0012134} [Inhale in order to ascertain an odor or scent.]</nowiki>
+** Taste <nowiki>{hedId=HED_0012135} [Sense a flavor in the mouth and throat on contact with a substance.]</nowiki>
+* Perform <nowiki>{hedId=HED_0012136} [Carry out or accomplish an action, task, or function.]</nowiki>
+** Close <nowiki>{hedId=HED_0012137} [Act as to blocked against entry or passage.]</nowiki>
+** Collide-with <nowiki>{hedId=HED_0012138} [Hit with force when moving.]</nowiki>
+** Halt <nowiki>{hedId=HED_0012139} [Bring or come to an abrupt stop.]</nowiki>
+** Modify <nowiki>{hedId=HED_0012140} [Change something.]</nowiki>
+** Open <nowiki>{hedId=HED_0012141} [Widen an aperture, door, or gap, especially one allowing access to something.]</nowiki>
+** Operate <nowiki>{hedId=HED_0012142} [Control the functioning of a machine, process, or system.]</nowiki>
+** Play <nowiki>{hedId=HED_0012143} [Engage in activity for enjoyment and recreation rather than a serious or practical purpose.]</nowiki>
+** Read <nowiki>{hedId=HED_0012144} [Interpret something that is written or printed.]</nowiki>
+** Repeat <nowiki>{hedId=HED_0012145} [Make do or perform again.]</nowiki>
+** Rest <nowiki>{hedId=HED_0012146} [Be inactive in order to regain strength, health, or energy.]</nowiki>
+** Ride <nowiki>{hedId=HED_0012147} [Ride on an animal or in a vehicle. Ride conveys some notion that another agent has partial or total control of the motion.]</nowiki>
+** Write <nowiki>{hedId=HED_0012148} [Communicate or express by means of letters or symbols written or imprinted on a surface.]</nowiki>
+* Think <nowiki>{hedId=HED_0012149} [Direct the mind toward someone or something or use the mind actively to form connected ideas.]</nowiki>
+** Allow <nowiki>{hedId=HED_0012150} [Allow access to something such as allowing a car to pass.]</nowiki>
+** Attend-to <nowiki>{hedId=HED_0012151} [Focus mental experience on specific targets.]</nowiki>
+** Count <nowiki>{hedId=HED_0012152} [Tally items either silently or aloud.]</nowiki>
+** Deny <nowiki>{hedId=HED_0012153} [Refuse to give or grant something requested or desired by someone.]</nowiki>
+** Detect <nowiki>{hedId=HED_0012154} [Discover or identify the presence or existence of something.]</nowiki>
+** Discriminate <nowiki>{hedId=HED_0012155} [Recognize a distinction.]</nowiki>
+** Encode <nowiki>{hedId=HED_0012156} [Convert information or an instruction into a particular form.]</nowiki>
+** Evade <nowiki>{hedId=HED_0012157} [Escape or avoid, especially by cleverness or trickery.]</nowiki>
+** Generate <nowiki>{hedId=HED_0012158} [Cause something, especially an emotion or situation to arise or come about.]</nowiki>
+** Identify <nowiki>{hedId=HED_0012159} [Establish or indicate who or what someone or something is.]</nowiki>
+** Imagine <nowiki>{hedId=HED_0012160} [Form a mental image or concept of something.]</nowiki>
+** Judge <nowiki>{hedId=HED_0012161} [Evaluate evidence to make a decision or form a belief.]</nowiki>
+** Learn <nowiki>{hedId=HED_0012162} [Adaptively change behavior as the result of experience.]</nowiki>
+** Memorize <nowiki>{hedId=HED_0012163} [Adaptively change behavior as the result of experience.]</nowiki>
+** Plan <nowiki>{hedId=HED_0012164} [Think about the activities required to achieve a desired goal.]</nowiki>
+** Predict <nowiki>{hedId=HED_0012165} [Say or estimate that something will happen or will be a consequence of something without having exact information.]</nowiki>
+** Recall <nowiki>{hedId=HED_0012166} [Remember information by mental effort.]</nowiki>
+** Recognize <nowiki>{hedId=HED_0012167} [Identify someone or something from having encountered them before.]</nowiki>
+** Respond <nowiki>{hedId=HED_0012168} [React to something such as a treatment or a stimulus.]</nowiki>
+** Switch-attention <nowiki>{hedId=HED_0012169} [Transfer attention from one focus to another.]</nowiki>
+** Track <nowiki>{hedId=HED_0012170} [Follow a person, animal, or object through space or time.]</nowiki>
+
+'''Item''' <nowiki>{extensionAllowed, hedId=HED_0012171} [An independently existing thing (living or nonliving).]</nowiki>
+* Biological-item <nowiki>{hedId=HED_0012172} [An entity that is biological, that is related to living organisms.]</nowiki>
+** Anatomical-item <nowiki>{hedId=HED_0012173} [A biological structure, system, fluid or other substance excluding single molecular entities.]</nowiki>
+*** Body <nowiki>{hedId=HED_0012174} [The biological structure representing an organism.]</nowiki>
+*** Body-part <nowiki>{hedId=HED_0012175} [Any part of an organism.]</nowiki>
+**** Head <nowiki>{hedId=HED_0012176} [The upper part of the human body, or the front or upper part of the body of an animal, typically separated from the rest of the body by a neck, and containing the brain, mouth, and sense organs.]</nowiki>
+**** Head-part <nowiki>{hedId=HED_0013200} [A part of the head.]</nowiki>
+***** Brain <nowiki>{hedId=HED_0012177} [Organ inside the head that is made up of nerve cells and controls the body.]</nowiki>
+***** Brain-region <nowiki>{hedId=HED_0013201} [A region of the brain.]</nowiki>
+****** Cerebellum <nowiki>{hedId=HED_0013202} [A major structure of the brain located near the brainstem. It plays a key role in motor control, coordination, precision, with contributions to different cognitive functions.]</nowiki>
+****** Frontal-lobe <nowiki>{hedId=HED_0012178}</nowiki>
+****** Occipital-lobe <nowiki>{hedId=HED_0012179}</nowiki>
+****** Parietal-lobe <nowiki>{hedId=HED_0012180}</nowiki>
+****** Temporal-lobe <nowiki>{hedId=HED_0012181}</nowiki>
+***** Ear <nowiki>{hedId=HED_0012182} [A sense organ needed for the detection of sound and for establishing balance.]</nowiki>
+***** Face <nowiki>{hedId=HED_0012183} [The anterior portion of the head extending from the forehead to the chin and ear to ear. The facial structures contain the eyes, nose and mouth, cheeks and jaws.]</nowiki>
+***** Face-part <nowiki>{hedId=HED_0013203} [A part of the face.]</nowiki>
+****** Cheek <nowiki>{hedId=HED_0012184} [The fleshy part of the face bounded by the eyes, nose, ear, and jawline.]</nowiki>
+****** Chin <nowiki>{hedId=HED_0012185} [The part of the face below the lower lip and including the protruding part of the lower jaw.]</nowiki>
+****** Eye <nowiki>{hedId=HED_0012186} [The organ of sight or vision.]</nowiki>
+****** Eyebrow <nowiki>{hedId=HED_0012187} [The arched strip of hair on the bony ridge above each eye socket.]</nowiki>
+****** Eyelid <nowiki>{hedId=HED_0012188} [The folds of the skin that cover the eye when closed.]</nowiki>
+****** Forehead <nowiki>{hedId=HED_0012189} [The part of the face between the eyebrows and the normal hairline.]</nowiki>
+****** Lip <nowiki>{hedId=HED_0012190} [Fleshy fold which surrounds the opening of the mouth.]</nowiki>
+****** Mouth <nowiki>{hedId=HED_0012191} [The proximal portion of the digestive tract, containing the oral cavity and bounded by the oral opening.]</nowiki>
+****** Mouth-part <nowiki>{hedId=HED_0013204} [A part of the mouth.]</nowiki>
+******* Teeth <nowiki>{hedId=HED_0012193} [The hard bone-like structures in the jaws. A collection of teeth arranged in some pattern in the mouth or other part of the body.]</nowiki>
+******* Tongue <nowiki>{hedId=HED_0013205} [A muscular organ in the mouth with significant role in mastication, swallowing, speech, and taste.]</nowiki>
+****** Nose <nowiki>{hedId=HED_0012192} [A structure of special sense serving as an organ of the sense of smell and as an entrance to the respiratory tract.]</nowiki>
+***** Hair <nowiki>{hedId=HED_0012194} [The filamentous outgrowth of the epidermis.]</nowiki>
+**** Lower-extremity <nowiki>{hedId=HED_0012195} [Refers to the whole inferior limb (leg and/or foot).]</nowiki>
+**** Lower-extremity-part <nowiki>{hedId=HED_0013206} [A part of the lower extremity.]</nowiki>
+***** Ankle <nowiki>{hedId=HED_0012196} [A gliding joint between the distal ends of the tibia and fibula and the proximal end of the talus.]</nowiki>
+***** Foot <nowiki>{hedId=HED_0012198} [The structure found below the ankle joint required for locomotion.]</nowiki>
+***** Foot-part <nowiki>{hedId=HED_0013207} [A part of the foot.]</nowiki>
+****** Heel <nowiki>{hedId=HED_0012200} [The back of the foot below the ankle.]</nowiki>
+****** Instep <nowiki>{hedId=HED_0012201} [The part of the foot between the ball and the heel on the inner side.]</nowiki>
+****** Toe <nowiki>{hedId=HED_0013208} [A digit of the foot.]</nowiki>
+******* Big-toe <nowiki>{hedId=HED_0012199} [The largest toe on the inner side of the foot.]</nowiki>
+******* Little-toe <nowiki>{hedId=HED_0012202} [The smallest toe located on the outer side of the foot.]</nowiki>
+****** Toes <nowiki>{relatedTag=Toe, hedId=HED_0012203} [The terminal digits of the foot. Used to describe collective attributes of all toes, such as bending all toes]</nowiki>
+***** Knee <nowiki>{hedId=HED_0012204} [A joint connecting the lower part of the femur with the upper part of the tibia.]</nowiki>
+***** Lower-leg <nowiki>{hedId=HED_0013209} [The part of the leg between the knee and the ankle.]</nowiki>
+***** Lower-leg-part <nowiki>{hedId=HED_0013210} [A part of the lower leg.]</nowiki>
+****** Calf <nowiki>{hedId=HED_0012197} [The fleshy part at the back of the leg below the knee.]</nowiki>
+****** Shin <nowiki>{hedId=HED_0012205} [Front part of the leg below the knee.]</nowiki>
+***** Upper-leg <nowiki>{hedId=HED_0013211} [The part of the leg between the hip and the knee.]</nowiki>
+***** Upper-leg-part <nowiki>{hedId=HED_0013212} [A part of the upper leg.]</nowiki>
+****** Thigh <nowiki>{hedId=HED_0012206} [Upper part of the leg between hip and knee.]</nowiki>
+**** Neck <nowiki>{hedId=HED_0013213} [The part of the body connecting the head to the torso, containing the cervical spine and vital pathways of nerves, blood vessels, and the airway.]</nowiki>
+**** Torso <nowiki>{hedId=HED_0012207} [The body excluding the head and neck and limbs.]</nowiki>
+**** Torso-part <nowiki>{hedId=HED_0013214} [A part of the torso.]</nowiki>
+***** Abdomen <nowiki>{hedId=HED_0013215} [The part of the body between the thorax and the pelvis.]</nowiki>
+***** Navel <nowiki>{hedId=HED_0013216} [The central mark on the abdomen created by the detachment of the umbilical cord after birth.]</nowiki>
+***** Pelvis <nowiki>{hedId=HED_0013217} [The bony structure at the base of the spine supporting the legs.]</nowiki>
+***** Pelvis-part <nowiki>{hedId=HED_0013218} [A part of the pelvis.]</nowiki>
+****** Buttocks <nowiki>{hedId=HED_0012208} [The round fleshy parts that form the lower rear area of a human trunk.]</nowiki>
+****** Genitalia <nowiki>{hedId=HED_0013219} [The external organs of reproduction and urination, located in the pelvic region. This includes both male and female genital structures.]</nowiki>
+****** Gentalia <nowiki>{deprecatedFrom=8.1.0, hedId=HED_0012209} [The external organs of reproduction. Deprecated due to spelling error. Use Genitalia.]</nowiki>
+****** Hip <nowiki>{hedId=HED_0012210} [The lateral prominence of the pelvis from the waist to the thigh.]</nowiki>
+***** Torso-back <nowiki>{hedId=HED_0012211} [The rear surface of the human body from the shoulders to the hips.]</nowiki>
+***** Torso-chest <nowiki>{hedId=HED_0012212} [The anterior side of the thorax from the neck to the abdomen.]</nowiki>
+***** Viscera <nowiki>{hedId=HED_0012213} [Internal organs of the body.]</nowiki>
+***** Waist <nowiki>{hedId=HED_0012214} [The abdominal circumference at the navel.]</nowiki>
+**** Upper-extremity <nowiki>{hedId=HED_0012215} [Refers to the whole superior limb (shoulder, arm, elbow, wrist, hand).]</nowiki>
+**** Upper-extremity-part <nowiki>{hedId=HED_0013220} [A part of the upper extremity.]</nowiki>
+***** Elbow <nowiki>{hedId=HED_0012216} [A type of hinge joint located between the forearm and upper arm.]</nowiki>
+***** Forearm <nowiki>{hedId=HED_0012217} [Lower part of the arm between the elbow and wrist.]</nowiki>
+***** Forearm-part <nowiki>{hedId=HED_0013221} [A part of the forearm.]</nowiki>
+***** Hand <nowiki>{hedId=HED_0012218} [The distal portion of the upper extremity. It consists of the carpus, metacarpus, and digits.]</nowiki>
+***** Hand-part <nowiki>{hedId=HED_0013222} [A part of the hand.]</nowiki>
+****** Finger <nowiki>{hedId=HED_0012219} [Any of the digits of the hand.]</nowiki>
+******* Index-finger <nowiki>{hedId=HED_0012220} [The second finger from the radial side of the hand, next to the thumb.]</nowiki>
+******* Little-finger <nowiki>{hedId=HED_0012221} [The fifth and smallest finger from the radial side of the hand.]</nowiki>
+******* Middle-finger <nowiki>{hedId=HED_0012222} [The middle or third finger from the radial side of the hand.]</nowiki>
+******* Ring-finger <nowiki>{hedId=HED_0012223} [The fourth finger from the radial side of the hand.]</nowiki>
+******* Thumb <nowiki>{hedId=HED_0012224} [The thick and short hand digit which is next to the index finger in humans.]</nowiki>
+****** Fingers <nowiki>{relatedTag=Finger, hedId=HED_0013223} [The terminal digits of the hand. Used to describe collective attributes of all fingers, such as bending all fingers]</nowiki>
+****** Knuckles <nowiki>{hedId=HED_0012225} [A part of a finger at a joint where the bone is near the surface, especially where the finger joins the hand.]</nowiki>
+****** Palm <nowiki>{hedId=HED_0012226} [The part of the inner surface of the hand that extends from the wrist to the bases of the fingers.]</nowiki>
+***** Shoulder <nowiki>{hedId=HED_0012227} [Joint attaching upper arm to trunk.]</nowiki>
+***** Upper-arm <nowiki>{hedId=HED_0012228} [Portion of arm between shoulder and elbow.]</nowiki>
+***** Upper-arm-part <nowiki>{hedId=HED_0013224} [A part of the upper arm.]</nowiki>
+***** Wrist <nowiki>{hedId=HED_0012229} [A joint between the distal end of the radius and the proximal row of carpal bones.]</nowiki>
+** Organism <nowiki>{hedId=HED_0012230} [A living entity, more specifically a biological entity that consists of one or more cells and is capable of genomic replication (independently or not).]</nowiki>
+*** Animal <nowiki>{hedId=HED_0012231} [A living organism that has membranous cell walls, requires oxygen and organic foods, and is capable of voluntary movement.]</nowiki>
+*** Human <nowiki>{hedId=HED_0012232} [The bipedal primate mammal Homo sapiens.]</nowiki>
+*** Plant <nowiki>{hedId=HED_0012233} [Any living organism that typically synthesizes its food from inorganic substances and possesses cellulose cell walls.]</nowiki>
+* Language-item <nowiki>{suggestedTag=Sensory-presentation, hedId=HED_0012234} [An entity related to a systematic means of communicating by the use of sounds, symbols, or gestures.]</nowiki>
+** Character <nowiki>{hedId=HED_0012235} [A mark or symbol used in writing.]</nowiki>
+** Clause <nowiki>{hedId=HED_0012236} [A unit of grammatical organization next below the sentence in rank, usually consisting of a subject and predicate.]</nowiki>
+** Glyph <nowiki>{hedId=HED_0012237} [A hieroglyphic character, symbol, or pictograph.]</nowiki>
+** Nonword <nowiki>{hedId=HED_0012238} [An unpronounceable group of letters or speech sounds that is surrounded by white space when written, is not accepted as a word by native speakers.]</nowiki>
+** Paragraph <nowiki>{hedId=HED_0012239} [A distinct section of a piece of writing, usually dealing with a single theme.]</nowiki>
+** Phoneme <nowiki>{hedId=HED_0012240} [Any of the minimally distinct units of sound in a specified language that distinguish one word from another.]</nowiki>
+** Phrase <nowiki>{hedId=HED_0012241} [A phrase is a group of words functioning as a single unit in the syntax of a sentence.]</nowiki>
+** Pseudoword <nowiki>{hedId=HED_0012242} [A pronounceable group of letters or speech sounds that looks or sounds like a word but that is not accepted as such by native speakers.]</nowiki>
+** Sentence <nowiki>{hedId=HED_0012243} [A set of words that is complete in itself, conveying a statement, question, exclamation, or command and typically containing an explicit or implied subject and a predicate containing a finite verb.]</nowiki>
+** Syllable <nowiki>{hedId=HED_0012244} [A unit of pronunciation having a vowel or consonant sound, with or without surrounding consonants, forming the whole or a part of a word.]</nowiki>
+** Textblock <nowiki>{hedId=HED_0012245} [A block of text.]</nowiki>
+** Word <nowiki>{hedId=HED_0012246} [A single distinct meaningful element of speech or writing, used with others (or sometimes alone) to form a sentence and typically surrounded by white space when written or printed.]</nowiki>
+* Object <nowiki>{suggestedTag=Sensory-presentation, hedId=HED_0012247} [Something perceptible by one or more of the senses, especially by vision or touch. A material thing.]</nowiki>
+** Geometric-object <nowiki>{hedId=HED_0012248} [An object or a representation that has structure and topology in space.]</nowiki>
+*** 2D-shape <nowiki>{hedId=HED_0012249} [A planar, two-dimensional shape.]</nowiki>
+**** Arrow <nowiki>{hedId=HED_0012250} [A shape with a pointed end indicating direction.]</nowiki>
+**** Clockface <nowiki>{hedId=HED_0012251} [The dial face of a clock. A location identifier based on clock-face-position numbering or anatomic subregion.]</nowiki>
+**** Cross <nowiki>{hedId=HED_0012252} [A figure or mark formed by two intersecting lines crossing at their midpoints.]</nowiki>
+**** Dash <nowiki>{hedId=HED_0012253} [A horizontal stroke in writing or printing to mark a pause or break in sense or to represent omitted letters or words.]</nowiki>
+**** Ellipse <nowiki>{hedId=HED_0012254} [A closed plane curve resulting from the intersection of a circular cone and a plane cutting completely through it, especially a plane not parallel to the base.]</nowiki>
+***** Circle <nowiki>{hedId=HED_0012255} [A ring-shaped structure with every point equidistant from the center.]</nowiki>
+**** Rectangle <nowiki>{hedId=HED_0012256} [A parallelogram with four right angles.]</nowiki>
+***** Square <nowiki>{hedId=HED_0012257} [A square is a special rectangle with four equal sides.]</nowiki>
+**** Single-point <nowiki>{hedId=HED_0012258} [A point is a geometric entity that is located in a zero-dimensional spatial region and whose position is defined by its coordinates in some coordinate system.]</nowiki>
+**** Star <nowiki>{hedId=HED_0012259} [A conventional or stylized representation of a star, typically one having five or more points.]</nowiki>
+**** Triangle <nowiki>{hedId=HED_0012260} [A three-sided polygon.]</nowiki>
+*** 3D-shape <nowiki>{hedId=HED_0012261} [A geometric three-dimensional shape.]</nowiki>
+**** Box <nowiki>{hedId=HED_0012262} [A square or rectangular vessel, usually made of cardboard or plastic.]</nowiki>
+***** Cube <nowiki>{hedId=HED_0012263} [A solid or semi-solid in the shape of a three dimensional square.]</nowiki>
+**** Cone <nowiki>{hedId=HED_0012264} [A shape whose base is a circle and whose sides taper up to a point.]</nowiki>
+**** Cylinder <nowiki>{hedId=HED_0012265} [A surface formed by circles of a given radius that are contained in a plane perpendicular to a given axis, whose centers align on the axis.]</nowiki>
+**** Ellipsoid <nowiki>{hedId=HED_0012266} [A closed plane curve resulting from the intersection of a circular cone and a plane cutting completely through it, especially a plane not parallel to the base.]</nowiki>
+***** Sphere <nowiki>{hedId=HED_0012267} [A solid or hollow three-dimensional object bounded by a closed surface such that every point on the surface is equidistant from the center.]</nowiki>
+**** Pyramid <nowiki>{hedId=HED_0012268} [A polyhedron of which one face is a polygon of any number of sides, and the other faces are triangles with a common vertex.]</nowiki>
+*** Pattern <nowiki>{hedId=HED_0012269} [An arrangement of objects, facts, behaviors, or other things which have scientific, mathematical, geometric, statistical, or other meaning.]</nowiki>
+**** Dots <nowiki>{hedId=HED_0012270} [A small round mark or spot.]</nowiki>
+**** LED-pattern <nowiki>{hedId=HED_0012271} [A pattern created by lighting selected members of a fixed light emitting diode array.]</nowiki>
+** Ingestible-object <nowiki>{hedId=HED_0012272} [Something that can be taken into the body by the mouth for digestion or absorption.]</nowiki>
+** Man-made-object <nowiki>{hedId=HED_0012273} [Something constructed by human means.]</nowiki>
+*** Building <nowiki>{hedId=HED_0012274} [A structure that has a roof and walls and stands more or less permanently in one place.]</nowiki>
+**** Attic <nowiki>{hedId=HED_0012275} [A room or a space immediately below the roof of a building.]</nowiki>
+**** Basement <nowiki>{hedId=HED_0012276} [The part of a building that is wholly or partly below ground level.]</nowiki>
+**** Entrance <nowiki>{hedId=HED_0012277} [The means or place of entry.]</nowiki>
+**** Roof <nowiki>{hedId=HED_0012278} [A roof is the covering on the uppermost part of a building which provides protection from animals and weather, notably rain, but also heat, wind and sunlight.]</nowiki>
+**** Room <nowiki>{hedId=HED_0012279} [An area within a building enclosed by walls and floor and ceiling.]</nowiki>
+*** Clothing <nowiki>{hedId=HED_0012280} [A covering designed to be worn on the body.]</nowiki>
+*** Device <nowiki>{hedId=HED_0012281} [An object contrived for a specific purpose.]</nowiki>
+**** Assistive-device <nowiki>{hedId=HED_0012282} [A device that help an individual accomplish a task.]</nowiki>
+***** Glasses <nowiki>{hedId=HED_0012283} [Frames with lenses worn in front of the eye for vision correction, eye protection, or protection from UV rays.]</nowiki>
+***** Writing-device <nowiki>{hedId=HED_0012284} [A device used for writing.]</nowiki>
+****** Pen <nowiki>{hedId=HED_0012285} [A common writing instrument used to apply ink to a surface for writing or drawing.]</nowiki>
+****** Pencil <nowiki>{hedId=HED_0012286} [An implement for writing or drawing that is constructed of a narrow solid pigment core in a protective casing that prevents the core from being broken or marking the hand.]</nowiki>
+**** Computing-device <nowiki>{hedId=HED_0012287} [An electronic device which take inputs and processes results from the inputs.]</nowiki>
+***** Cellphone <nowiki>{hedId=HED_0012288} [A telephone with access to a cellular radio system so it can be used over a wide area, without a physical connection to a network.]</nowiki>
+***** Desktop-computer <nowiki>{hedId=HED_0012289} [A computer suitable for use at an ordinary desk.]</nowiki>
+***** Laptop-computer <nowiki>{hedId=HED_0012290} [A computer that is portable and suitable for use while traveling.]</nowiki>
+***** Tablet-computer <nowiki>{hedId=HED_0012291} [A small portable computer that accepts input directly on to its screen rather than via a keyboard or mouse.]</nowiki>
+**** Engine <nowiki>{hedId=HED_0012292} [A motor is a machine designed to convert one or more forms of energy into mechanical energy.]</nowiki>
+**** IO-device <nowiki>{hedId=HED_0012293} [Hardware used by a human (or other system) to communicate with a computer.]</nowiki>
+***** Input-device <nowiki>{hedId=HED_0012294} [A piece of equipment used to provide data and control signals to an information processing system such as a computer or information appliance.]</nowiki>
+****** Computer-mouse <nowiki>{hedId=HED_0012295} [A hand-held pointing device that detects two-dimensional motion relative to a surface.]</nowiki>
+******* Mouse-button <nowiki>{hedId=HED_0012296} [An electric switch on a computer mouse which can be pressed or clicked to select or interact with an element of a graphical user interface.]</nowiki>
+******* Scroll-wheel <nowiki>{hedId=HED_0012297} [A scroll wheel or mouse wheel is a wheel used for scrolling made of hard plastic with a rubbery surface usually located between the left and right mouse buttons and is positioned perpendicular to the mouse surface.]</nowiki>
+****** Joystick <nowiki>{hedId=HED_0012298} [A control device that uses a movable handle to create two-axis input for a computer device.]</nowiki>
+****** Keyboard <nowiki>{hedId=HED_0012299} [A device consisting of mechanical keys that are pressed to create input to a computer.]</nowiki>
+******* Keyboard-key <nowiki>{hedId=HED_0012300} [A button on a keyboard usually representing letters, numbers, functions, or symbols.]</nowiki>
+********  <nowiki># {takesValue, hedId=HED_0012301} [Value of a keyboard key.]</nowiki>
+****** Keypad <nowiki>{hedId=HED_0012302} [A device consisting of keys, usually in a block arrangement, that provides limited input to a system.]</nowiki>
+******* Keypad-key <nowiki>{hedId=HED_0012303} [A key on a separate section of a computer keyboard that groups together numeric keys and those for mathematical or other special functions in an arrangement like that of a calculator.]</nowiki>
+********  <nowiki># {takesValue, hedId=HED_0012304} [Value of keypad key.]</nowiki>
+****** Microphone <nowiki>{hedId=HED_0012305} [A device designed to convert sound to an electrical signal.]</nowiki>
+****** Push-button <nowiki>{hedId=HED_0012306} [A switch designed to be operated by pressing a button.]</nowiki>
+***** Output-device <nowiki>{hedId=HED_0012307} [Any piece of computer hardware equipment which converts information into human understandable form.]</nowiki>
+****** Auditory-device <nowiki>{hedId=HED_0012308} [A device designed to produce sound.]</nowiki>
+******* Headphones <nowiki>{hedId=HED_0012309} [An instrument that consists of a pair of small loudspeakers, or less commonly a single speaker, held close to ears and connected to a signal source such as an audio amplifier, radio, CD player or portable media player.]</nowiki>
+******* Loudspeaker <nowiki>{hedId=HED_0012310} [A device designed to convert electrical signals to sounds that can be heard.]</nowiki>
+****** Display-device <nowiki>{hedId=HED_0012311} [An output device for presentation of information in visual or tactile form the latter used for example in tactile electronic displays for blind people.]</nowiki>
+******* Computer-screen <nowiki>{hedId=HED_0012312} [An electronic device designed as a display or a physical device designed to be a protective mesh work.]</nowiki>
+******** Screen-window <nowiki>{hedId=HED_0012313} [A part of a computer screen that contains a display different from the rest of the screen. A window is a graphical control element consisting of a visual area containing some of the graphical user interface of the program it belongs to and is framed by a window decoration.]</nowiki>
+******* Head-mounted-display <nowiki>{hedId=HED_0012314} [An instrument that functions as a display device, worn on the head or as part of a helmet, that has a small display optic in front of one (monocular HMD) or each eye (binocular HMD).]</nowiki>
+******* LED-display <nowiki>{hedId=HED_0012315} [A LED display is a flat panel display that uses an array of light-emitting diodes as pixels for a video display.]</nowiki>
+***** Recording-device <nowiki>{hedId=HED_0012316} [A device that copies information in a signal into a persistent information bearer.]</nowiki>
+****** EEG-recorder <nowiki>{hedId=HED_0012317} [A device for recording electric currents in the brain using electrodes applied to the scalp, to the surface of the brain, or placed within the substance of the brain.]</nowiki>
+****** EMG-recorder <nowiki>{hedId=HED_0013225} [A device for recording electrical activity of muscles using electrodes on the body surface or within the muscular mass.]</nowiki>
+****** File-storage <nowiki>{hedId=HED_0012318} [A device for recording digital information to a permanent media.]</nowiki>
+****** MEG-recorder <nowiki>{hedId=HED_0012319} [A device for measuring the magnetic fields produced by electrical activity in the brain, usually conducted externally.]</nowiki>
+****** Motion-capture <nowiki>{hedId=HED_0012320} [A device for recording the movement of objects or people.]</nowiki>
+****** Tape-recorder <nowiki>{hedId=HED_0012321} [A device for recording and reproduction usually using magnetic tape for storage that can be saved and played back.]</nowiki>
+***** Touchscreen <nowiki>{hedId=HED_0012322} [A control component that operates an electronic device by pressing the display on the screen.]</nowiki>
+**** Machine <nowiki>{hedId=HED_0012323} [A human-made device that uses power to apply forces and control movement to perform an action.]</nowiki>
+**** Measurement-device <nowiki>{hedId=HED_0012324} [A device that measures something.]</nowiki>
+***** Clock <nowiki>{hedId=HED_0012325} [A device designed to indicate the time of day or to measure the time duration of an event or action.]</nowiki>
+**** Robot <nowiki>{hedId=HED_0012327} [A mechanical device that sometimes resembles a living animal and is capable of performing a variety of often complex human tasks on command or by being programmed in advance.]</nowiki>
+**** Tool <nowiki>{hedId=HED_0012328} [A component that is not part of a device but is designed to support its assembly or operation.]</nowiki>
+*** Document <nowiki>{hedId=HED_0012329} [A physical object, or electronic counterpart, that is characterized by containing writing which is meant to be human-readable.]</nowiki>
+**** Book <nowiki>{hedId=HED_0012330} [A volume made up of pages fastened along one edge and enclosed between protective covers.]</nowiki>
+**** Letter <nowiki>{hedId=HED_0012331} [A written message addressed to a person or organization.]</nowiki>
+**** Note <nowiki>{hedId=HED_0012332} [A brief written record.]</nowiki>
+**** Notebook <nowiki>{hedId=HED_0012333} [A book for notes or memoranda.]</nowiki>
+**** Questionnaire <nowiki>{hedId=HED_0012334} [A document consisting of questions and possibly responses, depending on whether it has been filled out.]</nowiki>
+*** Furnishing <nowiki>{hedId=HED_0012335} [Furniture, fittings, and other decorative accessories, such as curtains and carpets, for a house or room.]</nowiki>
+*** Manufactured-material <nowiki>{hedId=HED_0012336} [Substances created or extracted from raw materials.]</nowiki>
+**** Ceramic <nowiki>{hedId=HED_0012337} [A hard, brittle, heat-resistant and corrosion-resistant material made by shaping and then firing a nonmetallic mineral, such as clay, at a high temperature.]</nowiki>
+**** Glass <nowiki>{hedId=HED_0012338} [A brittle transparent solid with irregular atomic structure.]</nowiki>
+**** Paper <nowiki>{hedId=HED_0012339} [A thin sheet material produced by mechanically or chemically processing cellulose fibres derived from wood, rags, grasses or other vegetable sources in water.]</nowiki>
+**** Plastic <nowiki>{hedId=HED_0012340} [Various high-molecular-weight thermoplastic or thermo-setting polymers that are capable of being molded, extruded, drawn, or otherwise shaped and then hardened into a form.]</nowiki>
+**** Steel <nowiki>{hedId=HED_0012341} [An alloy made up of iron with typically a few tenths of a percent of carbon to improve its strength and fracture resistance compared to iron.]</nowiki>
+*** Media <nowiki>{hedId=HED_0012342} [Media are audio/visual/audiovisual modes of communicating information for mass consumption.]</nowiki>
+**** Media-clip <nowiki>{hedId=HED_0012343} [A short segment of media.]</nowiki>
+***** Audio-clip <nowiki>{hedId=HED_0012344} [A short segment of audio.]</nowiki>
+***** Audiovisual-clip <nowiki>{hedId=HED_0012345} [A short media segment containing both audio and video.]</nowiki>
+***** Video-clip <nowiki>{hedId=HED_0012346} [A short segment of video.]</nowiki>
+**** Visualization <nowiki>{hedId=HED_0012347} [An planned process that creates images, diagrams or animations from the input data.]</nowiki>
+***** Animation <nowiki>{hedId=HED_0012348} [A form of graphical illustration that changes with time to give a sense of motion or represent dynamic changes in the portrayal.]</nowiki>
+***** Art-installation <nowiki>{hedId=HED_0012349} [A large-scale, mixed-media constructions, often designed for a specific place or for a temporary period of time.]</nowiki>
+***** Braille <nowiki>{hedId=HED_0012350} [A display using a system of raised dots that can be read with the fingers by people who are blind.]</nowiki>
+***** Image <nowiki>{hedId=HED_0012351} [Any record of an imaging event whether physical or electronic.]</nowiki>
+****** Cartoon <nowiki>{hedId=HED_0012352} [A type of illustration, sometimes animated, typically in a non-realistic or semi-realistic style. The specific meaning has evolved over time, but the modern usage usually refers to either an image or series of images intended for satire, caricature, or humor. A motion picture that relies on a sequence of illustrations for its animation.]</nowiki>
+****** Drawing <nowiki>{hedId=HED_0012353} [A representation of an object or outlining a figure, plan, or sketch by means of lines.]</nowiki>
+****** Icon <nowiki>{hedId=HED_0012354} [A sign (such as a word or graphic symbol) whose form suggests its meaning.]</nowiki>
+****** Painting <nowiki>{hedId=HED_0012355} [A work produced through the art of painting.]</nowiki>
+****** Photograph <nowiki>{hedId=HED_0012356} [An image recorded by a camera.]</nowiki>
+***** Movie <nowiki>{hedId=HED_0012357} [A sequence of images displayed in succession giving the illusion of continuous movement.]</nowiki>
+***** Outline-visualization <nowiki>{hedId=HED_0012358} [A visualization consisting of a line or set of lines enclosing or indicating the shape of an object in a sketch or diagram.]</nowiki>
+***** Point-light-visualization <nowiki>{hedId=HED_0012359} [A display in which action is depicted using a few points of light, often generated from discrete sensors in motion capture.]</nowiki>
+***** Sculpture <nowiki>{hedId=HED_0012360} [A two- or three-dimensional representative or abstract forms, especially by carving stone or wood or by casting metal or plaster.]</nowiki>
+***** Stick-figure-visualization <nowiki>{hedId=HED_0012361} [A drawing showing the head of a human being or animal as a circle and all other parts as straight lines.]</nowiki>
+*** Navigational-object <nowiki>{hedId=HED_0012362} [An object whose purpose is to assist directed movement from one location to another.]</nowiki>
+**** Path <nowiki>{hedId=HED_0012363} [A trodden way. A way or track laid down for walking or made by continual treading.]</nowiki>
+**** Road <nowiki>{hedId=HED_0012364} [An open way for the passage of vehicles, persons, or animals on land.]</nowiki>
+***** Lane <nowiki>{hedId=HED_0012365} [A defined path with physical dimensions through which an object or substance may traverse.]</nowiki>
+**** Runway <nowiki>{hedId=HED_0012366} [A paved strip of ground on a landing field for the landing and takeoff of aircraft.]</nowiki>
+*** Vehicle <nowiki>{hedId=HED_0012367} [A mobile machine which transports people or cargo.]</nowiki>
+**** Aircraft <nowiki>{hedId=HED_0012368} [A vehicle which is able to travel through air in an atmosphere.]</nowiki>
+**** Bicycle <nowiki>{hedId=HED_0012369} [A human-powered, pedal-driven, single-track vehicle, having two wheels attached to a frame, one behind the other.]</nowiki>
+**** Boat <nowiki>{hedId=HED_0012370} [A watercraft of any size which is able to float or plane on water.]</nowiki>
+**** Car <nowiki>{hedId=HED_0012371} [A wheeled motor vehicle used primarily for the transportation of human passengers.]</nowiki>
+**** Cart <nowiki>{hedId=HED_0012372} [A cart is a vehicle which has two wheels and is designed to transport human passengers or cargo.]</nowiki>
+**** Tractor <nowiki>{hedId=HED_0012373} [A mobile machine specifically designed to deliver a high tractive effort at slow speeds, and mainly used for the purposes of hauling a trailer or machinery used in agriculture or construction.]</nowiki>
+**** Train <nowiki>{hedId=HED_0012374} [A connected line of railroad cars with or without a locomotive.]</nowiki>
+**** Truck <nowiki>{hedId=HED_0012375} [A motor vehicle which, as its primary function, transports cargo rather than human passengers.]</nowiki>
+** Natural-object <nowiki>{hedId=HED_0012376} [Something that exists in or is produced by nature, and is not artificial or man-made.]</nowiki>
+*** Mineral <nowiki>{hedId=HED_0012377} [A solid, homogeneous, inorganic substance occurring in nature and having a definite chemical composition.]</nowiki>
+*** Natural-feature <nowiki>{hedId=HED_0012378} [A feature that occurs in nature. A prominent or identifiable aspect, region, or site of interest.]</nowiki>
+**** Field <nowiki>{hedId=HED_0012379} [An unbroken expanse as of ice or grassland.]</nowiki>
+**** Hill <nowiki>{hedId=HED_0012380} [A rounded elevation of limited extent rising above the surrounding land with local relief of less than 300m.]</nowiki>
+**** Mountain <nowiki>{hedId=HED_0012381} [A landform that extends above the surrounding terrain in a limited area.]</nowiki>
+**** River <nowiki>{hedId=HED_0012382} [A natural freshwater surface stream of considerable volume and a permanent or seasonal flow, moving in a definite channel toward a sea, lake, or another river.]</nowiki>
+**** Waterfall <nowiki>{hedId=HED_0012383} [A sudden descent of water over a step or ledge in the bed of a river.]</nowiki>
+* Sound <nowiki>{hedId=HED_0012384} [Mechanical vibrations transmitted by an elastic medium. Something that can be heard.]</nowiki>
+** Environmental-sound <nowiki>{hedId=HED_0012385} [Sounds occurring in the environment. An accumulation of noise pollution that occurs outside. This noise can be caused by transport, industrial, and recreational activities.]</nowiki>
+*** Crowd-sound <nowiki>{hedId=HED_0012386} [Noise produced by a mixture of sounds from a large group of people.]</nowiki>
+*** Signal-noise <nowiki>{hedId=HED_0012387} [Any part of a signal that is not the true or original signal but is introduced by the communication mechanism.]</nowiki>
+** Musical-sound <nowiki>{hedId=HED_0012388} [Sound produced by continuous and regular vibrations, as opposed to noise.]</nowiki>
+*** Instrument-sound <nowiki>{hedId=HED_0012389} [Sound produced by a musical instrument.]</nowiki>
+*** Tone <nowiki>{hedId=HED_0012390} [A musical note, warble, or other sound used as a particular signal on a telephone or answering machine.]</nowiki>
+*** Vocalized-sound <nowiki>{hedId=HED_0012391} [Musical sound produced by vocal cords in a biological agent.]</nowiki>
+** Named-animal-sound <nowiki>{hedId=HED_0012392} [A sound recognizable as being associated with particular animals.]</nowiki>
+*** Barking <nowiki>{hedId=HED_0012393} [Sharp explosive cries like sounds made by certain animals, especially a dog, fox, or seal.]</nowiki>
+*** Bleating <nowiki>{hedId=HED_0012394} [Wavering cries like sounds made by a sheep, goat, or calf.]</nowiki>
+*** Chirping <nowiki>{hedId=HED_0012395} [Short, sharp, high-pitched noises like sounds made by small birds or an insects.]</nowiki>
+*** Crowing <nowiki>{hedId=HED_0012396} [Loud shrill sounds characteristic of roosters.]</nowiki>
+*** Growling <nowiki>{hedId=HED_0012397} [Low guttural sounds like those that made in the throat by a hostile dog or other animal.]</nowiki>
+*** Meowing <nowiki>{hedId=HED_0012398} [Vocalizations like those made by as those cats. These sounds have diverse tones and are sometimes chattered, murmured or whispered. The purpose can be assertive.]</nowiki>
+*** Mooing <nowiki>{hedId=HED_0012399} [Deep vocal sounds like those made by a cow.]</nowiki>
+*** Purring <nowiki>{hedId=HED_0012400} [Low continuous vibratory sound such as those made by cats. The sound expresses contentment.]</nowiki>
+*** Roaring <nowiki>{hedId=HED_0012401} [Loud, deep, or harsh prolonged sounds such as those made by big cats and bears for long-distance communication and intimidation.]</nowiki>
+*** Squawking <nowiki>{hedId=HED_0012402} [Loud, harsh noises such as those made by geese.]</nowiki>
+** Named-object-sound <nowiki>{hedId=HED_0012403} [A sound identifiable as coming from a particular type of object.]</nowiki>
+*** Alarm-sound <nowiki>{hedId=HED_0012404} [A loud signal often loud continuous ringing to alert people to a problem or condition that requires urgent attention.]</nowiki>
+*** Beep <nowiki>{hedId=HED_0012405} [A short, single tone, that is typically high-pitched and generally made by a computer or other machine.]</nowiki>
+*** Buzz <nowiki>{hedId=HED_0012406} [A persistent vibratory sound often made by a buzzer device and used to indicate something incorrect.]</nowiki>
+*** Click <nowiki>{hedId=HED_0012407} [The sound made by a mechanical cash register, often to designate a reward.]</nowiki>
+*** Ding <nowiki>{hedId=HED_0012408} [A short ringing sound such as that made by a bell, often to indicate a correct response or the expiration of time.]</nowiki>
+*** Horn-blow <nowiki>{hedId=HED_0012409} [A loud sound made by forcing air through a sound device that funnels air to create the sound, often used to sound an alert.]</nowiki>
+*** Ka-ching <nowiki>{hedId=HED_0012410} [The sound made by a mechanical cash register, often to designate a reward.]</nowiki>
+*** Siren <nowiki>{hedId=HED_0012411} [A loud, continuous sound often varying in frequency designed to indicate an emergency.]</nowiki>
+
+'''Property''' <nowiki>{extensionAllowed, hedId=HED_0012412} [Something that pertains to a thing. A characteristic of some entity. A quality or feature regarded as a characteristic or inherent part of someone or something. HED attributes are adjectives or adverbs.]</nowiki>
+* Agent-property <nowiki>{hedId=HED_0012413} [Something that pertains to or describes an agent.]</nowiki>
+** Agent-state <nowiki>{hedId=HED_0012414} [The state of the agent.]</nowiki>
+*** Agent-cognitive-state <nowiki>{hedId=HED_0012415} [The state of the cognitive processes or state of mind of the agent.]</nowiki>
+**** Alert <nowiki>{hedId=HED_0012416} [Condition of heightened watchfulness or preparation for action.]</nowiki>
+**** Anesthetized <nowiki>{hedId=HED_0012417} [Having lost sensation to pain or having senses dulled due to the effects of an anesthetic.]</nowiki>
+**** Asleep <nowiki>{hedId=HED_0012418} [Having entered a periodic, readily reversible state of reduced awareness and metabolic activity, usually accompanied by physical relaxation and brain activity.]</nowiki>
+**** Attentive <nowiki>{hedId=HED_0012419} [Concentrating and focusing mental energy on the task or surroundings.]</nowiki>
+**** Awake <nowiki>{hedId=HED_0012420} [In a non sleeping state.]</nowiki>
+**** Brain-dead <nowiki>{hedId=HED_0012421} [Characterized by the irreversible absence of cortical and brain stem functioning.]</nowiki>
+**** Comatose <nowiki>{hedId=HED_0012422} [In a state of profound unconsciousness associated with markedly depressed cerebral activity.]</nowiki>
+**** Distracted <nowiki>{hedId=HED_0012423} [Lacking in concentration because of being preoccupied.]</nowiki>
+**** Drowsy <nowiki>{hedId=HED_0012424} [In a state of near-sleep, a strong desire for sleep, or sleeping for unusually long periods.]</nowiki>
+**** Intoxicated <nowiki>{hedId=HED_0012425} [In a state with disturbed psychophysiological functions and responses as a result of administration or ingestion of a psychoactive substance.]</nowiki>
+**** Locked-in <nowiki>{hedId=HED_0012426} [In a state of complete paralysis of all voluntary muscles except for the ones that control the movements of the eyes.]</nowiki>
+**** Passive <nowiki>{hedId=HED_0012427} [Not responding or initiating an action in response to a stimulus.]</nowiki>
+**** Resting <nowiki>{hedId=HED_0012428} [A state in which the agent is not exhibiting any physical exertion.]</nowiki>
+**** Vegetative <nowiki>{hedId=HED_0012429} [A state of wakefulness and conscience, but (in contrast to coma) with involuntary opening of the eyes and movements (such as teeth grinding, yawning, or thrashing of the extremities).]</nowiki>
+*** Agent-emotional-state <nowiki>{hedId=HED_0012430} [The status of the general temperament and outlook of an agent.]</nowiki>
+**** Angry <nowiki>{hedId=HED_0012431} [Experiencing emotions characterized by marked annoyance or hostility.]</nowiki>
+**** Aroused <nowiki>{hedId=HED_0012432} [In a state reactive to stimuli leading to increased heart rate and blood pressure, sensory alertness, mobility and readiness to respond.]</nowiki>
+**** Awed <nowiki>{hedId=HED_0012433} [Filled with wonder. Feeling grand, sublime or powerful emotions characterized by a combination of joy, fear, admiration, reverence, and/or respect.]</nowiki>
+**** Compassionate <nowiki>{hedId=HED_0012434} [Feeling or showing sympathy and concern for others often evoked for a person who is in distress and associated with altruistic motivation.]</nowiki>
+**** Content <nowiki>{hedId=HED_0012435} [Feeling satisfaction with things as they are.]</nowiki>
+**** Disgusted <nowiki>{hedId=HED_0012436} [Feeling revulsion or profound disapproval aroused by something unpleasant or offensive.]</nowiki>
+**** Emotionally-neutral <nowiki>{hedId=HED_0012437} [Feeling neither satisfied nor dissatisfied.]</nowiki>
+**** Empathetic <nowiki>{hedId=HED_0012438} [Understanding and sharing the feelings of another. Being aware of, being sensitive to, and vicariously experiencing the feelings, thoughts, and experience of another.]</nowiki>
+**** Excited <nowiki>{hedId=HED_0012439} [Feeling great enthusiasm and eagerness.]</nowiki>
+**** Fearful <nowiki>{hedId=HED_0012440} [Feeling apprehension that one may be in danger.]</nowiki>
+**** Frustrated <nowiki>{hedId=HED_0012441} [Feeling annoyed as a result of being blocked, thwarted, disappointed or defeated.]</nowiki>
+**** Grieving <nowiki>{hedId=HED_0012442} [Feeling sorrow in response to loss, whether physical or abstract.]</nowiki>
+**** Happy <nowiki>{hedId=HED_0012443} [Feeling pleased and content.]</nowiki>
+**** Jealous <nowiki>{hedId=HED_0012444} [Feeling threatened by a rival in a relationship with another individual, in particular an intimate partner, usually involves feelings of threat, fear, suspicion, distrust, anxiety, anger, betrayal, and rejection.]</nowiki>
+**** Joyful <nowiki>{hedId=HED_0012445} [Feeling delight or intense happiness.]</nowiki>
+**** Loving <nowiki>{hedId=HED_0012446} [Feeling a strong positive emotion of affection and attraction.]</nowiki>
+**** Relieved <nowiki>{hedId=HED_0012447} [No longer feeling pain, distress,anxiety, or reassured.]</nowiki>
+**** Sad <nowiki>{hedId=HED_0012448} [Feeling grief or unhappiness.]</nowiki>
+**** Stressed <nowiki>{hedId=HED_0012449} [Experiencing mental or emotional strain or tension.]</nowiki>
+*** Agent-physiological-state <nowiki>{hedId=HED_0012450} [Having to do with the mechanical, physical, or biochemical function of an agent.]</nowiki>
+**** Catamenial <nowiki>{hedId=HED_0013226} [Related to menstruation.]</nowiki>
+**** Fever <nowiki>{relatedTag=Sick, hedId=HED_0013227} [Body temperature above the normal range.]</nowiki>
+**** Healthy <nowiki>{relatedTag=Sick, hedId=HED_0012451} [Having no significant health-related issues.]</nowiki>
+**** Hungry <nowiki>{relatedTag=Sated, relatedTag=Thirsty, hedId=HED_0012452} [Being in a state of craving or desiring food.]</nowiki>
+**** Rested <nowiki>{relatedTag=Tired, hedId=HED_0012453} [Feeling refreshed and relaxed.]</nowiki>
+**** Sated <nowiki>{relatedTag=Hungry, hedId=HED_0012454} [Feeling full.]</nowiki>
+**** Sick <nowiki>{relatedTag=Healthy, hedId=HED_0012455} [Being in a state of ill health, bodily malfunction, or discomfort.]</nowiki>
+**** Thirsty <nowiki>{relatedTag=Hungry, hedId=HED_0012456} [Feeling a need to drink.]</nowiki>
+**** Tired <nowiki>{relatedTag=Rested, hedId=HED_0012457} [Feeling in need of sleep or rest.]</nowiki>
+*** Agent-postural-state <nowiki>{hedId=HED_0012458} [Pertaining to the position in which agent holds their body.]</nowiki>
+**** Crouching <nowiki>{hedId=HED_0012459} [Adopting a position where the knees are bent and the upper body is brought forward and down, sometimes to avoid detection or to defend oneself.]</nowiki>
+**** Eyes-closed <nowiki>{hedId=HED_0012460} [Keeping eyes closed with no blinking.]</nowiki>
+**** Eyes-open <nowiki>{hedId=HED_0012461} [Keeping eyes open with occasional blinking.]</nowiki>
+**** Kneeling <nowiki>{hedId=HED_0012462} [Positioned where one or both knees are on the ground.]</nowiki>
+**** On-treadmill <nowiki>{hedId=HED_0012463} [Ambulation on an exercise apparatus with an endless moving belt to support moving in place.]</nowiki>
+**** Prone <nowiki>{hedId=HED_0012464} [Positioned in a recumbent body position whereby the person lies on its stomach and faces downward.]</nowiki>
+**** Seated-with-chin-rest <nowiki>{hedId=HED_0012465} [Using a device that supports the chin and head.]</nowiki>
+**** Sitting <nowiki>{hedId=HED_0012466} [In a seated position.]</nowiki>
+**** Standing <nowiki>{hedId=HED_0012467} [Assuming or maintaining an erect upright position.]</nowiki>
+** Agent-task-role <nowiki>{hedId=HED_0012468} [The function or part that is ascribed to an agent in performing the task.]</nowiki>
+*** Experiment-actor <nowiki>{hedId=HED_0012469} [An agent who plays a predetermined role to create the experiment scenario.]</nowiki>
+*** Experiment-controller <nowiki>{hedId=HED_0012470} [An agent exerting control over some aspect of the experiment.]</nowiki>
+*** Experiment-participant <nowiki>{hedId=HED_0012471} [Someone who takes part in an activity related to an experiment.]</nowiki>
+*** Experimenter <nowiki>{hedId=HED_0012472} [Person who is the owner of the experiment and has its responsibility.]</nowiki>
+** Agent-trait <nowiki>{hedId=HED_0012473} [A genetically, environmentally, or socially determined characteristic of an agent.]</nowiki>
+*** Age <nowiki>{hedId=HED_0012474} [Length of time elapsed time since birth of the agent.]</nowiki>
+****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012475}</nowiki>
+*** Agent-experience-level <nowiki>{hedId=HED_0012476} [Amount of skill or knowledge that the agent has as pertains to the task.]</nowiki>
+**** Expert-level <nowiki>{relatedTag=Intermediate-experience-level, relatedTag=Novice-level, hedId=HED_0012477} [Having comprehensive and authoritative knowledge of or skill in a particular area related to the task.]</nowiki>
+**** Intermediate-experience-level <nowiki>{relatedTag=Expert-level, relatedTag=Novice-level, hedId=HED_0012478} [Having a moderate amount of knowledge or skill related to the task.]</nowiki>
+**** Novice-level <nowiki>{relatedTag=Expert-level, relatedTag=Intermediate-experience-level, hedId=HED_0012479} [Being inexperienced in a field or situation related to the task.]</nowiki>
+*** Ethnicity <nowiki>{hedId=HED_0012480} [Belong to a social group that has a common national or cultural tradition. Use with Label to avoid extension.]</nowiki>
+*** Gender <nowiki>{hedId=HED_0012481} [Characteristics that are socially constructed, including norms, behaviors, and roles based on sex.]</nowiki>
+*** Handedness <nowiki>{hedId=HED_0012482} [Individual preference for use of a hand, known as the dominant hand.]</nowiki>
+**** Ambidextrous <nowiki>{hedId=HED_0012483} [Having no overall dominance in the use of right or left hand or foot in the performance of tasks that require one hand or foot.]</nowiki>
+**** Left-handed <nowiki>{hedId=HED_0012484} [Preference for using the left hand or foot for tasks requiring the use of a single hand or foot.]</nowiki>
+**** Right-handed <nowiki>{hedId=HED_0012485} [Preference for using the right hand or foot for tasks requiring the use of a single hand or foot.]</nowiki>
+*** Race <nowiki>{hedId=HED_0012486} [Belonging to a group sharing physical or social qualities as defined within a specified society. Use with Label to avoid extension.]</nowiki>
+*** Sex <nowiki>{hedId=HED_0012487} [Physical properties or qualities by which male is distinguished from female.]</nowiki>
+**** Female <nowiki>{hedId=HED_0012488} [Biological sex of an individual with female sexual organs such ova.]</nowiki>
+**** Intersex <nowiki>{hedId=HED_0012489} [Having genitalia and/or secondary sexual characteristics of indeterminate sex.]</nowiki>
+**** Male <nowiki>{hedId=HED_0012490} [Biological sex of an individual with male sexual organs producing sperm.]</nowiki>
+**** Other-sex <nowiki>{hedId=HED_0012491} [A non-specific designation of sexual traits.]</nowiki>
+* Data-property <nowiki>{extensionAllowed, hedId=HED_0012492} [Something that pertains to data or information.]</nowiki>
+** Data-artifact <nowiki>{hedId=HED_0012493} [An anomalous, interfering, or distorting signal originating from a source other than the item being studied.]</nowiki>
+*** Biological-artifact <nowiki>{hedId=HED_0012494} [A data artifact arising from a biological entity being measured.]</nowiki>
+**** Chewing-artifact <nowiki>{hedId=HED_0012495} [Artifact from moving the jaw in a chewing motion.]</nowiki>
+**** ECG-artifact <nowiki>{hedId=HED_0012496} [An electrical artifact from the far-field potential from pulsation of the heart, time locked to QRS complex.]</nowiki>
+**** EMG-artifact <nowiki>{hedId=HED_0012497} [Artifact from muscle activity and myogenic potentials at the measurements site. In EEG, myogenic potentials are the most common artifacts. Frontalis and temporalis muscles (e.g. clenching of jaw muscles) are common causes. Generally, the potentials generated in the muscles are of shorter duration than those generated in the brain. The frequency components are usually beyond 30-50 Hz, and the bursts are arrhythmic.]</nowiki>
+**** Eye-artifact <nowiki>{hedId=HED_0012498} [Ocular movements and blinks can result in artifacts in different types of data. In electrophysiology data, these can result transients and offsets the signal.]</nowiki>
+***** Eye-blink-artifact <nowiki>{hedId=HED_0012499} [Artifact from eye blinking. In EEG, Fp1/Fp2 electrodes become electro-positive with eye closure because the cornea is positively charged causing a negative deflection in Fp1/Fp2. If the eye blink is unilateral, consider prosthetic eye.]</nowiki>
+***** Eye-movement-artifact <nowiki>{hedId=HED_0012500} [Eye movements can cause artifacts on recordings. The charge of the eye can especially cause artifacts in electrophysiology data.]</nowiki>
+****** Horizontal-eye-movement-artifact <nowiki>{hedId=HED_0012501} [Artifact from moving eyes left-to-right and right-to-left. In EEG, there is an upward deflection in the Fp2-F8 derivation, when the eyes move to the right side. In this case F8 becomes more positive and therefore. When the eyes move to the left, F7 becomes more positive and there is an upward deflection in the Fp1-F7 derivation.]</nowiki>
+****** Nystagmus-artifact <nowiki>{hedId=HED_0012502} [Artifact from nystagmus (a vision condition in which the eyes make repetitive, uncontrolled movements).]</nowiki>
+****** Slow-eye-movement-artifact <nowiki>{hedId=HED_0012503} [Artifacts originating from slow, rolling eye-movements, seen during drowsiness.]</nowiki>
+****** Vertical-eye-movement-artifact <nowiki>{hedId=HED_0012504} [Artifact from moving eyes up and down. In EEG, this causes positive potentials (50-100 micro V) with bi-frontal distribution, maximum at Fp1 and Fp2, when the eyeball rotates upward. The downward rotation of the eyeball is associated with the negative deflection. The time course of the deflections is similar to the time course of the eyeball movement.]</nowiki>
+**** Movement-artifact <nowiki>{hedId=HED_0012505} [Artifact in the measured data generated by motion of the subject.]</nowiki>
+**** Pulse-artifact <nowiki>{hedId=HED_0012506} [A mechanical artifact from a pulsating blood vessel near a measurement site, cardio-ballistic artifact.]</nowiki>
+**** Respiration-artifact <nowiki>{hedId=HED_0012507} [Artifact from breathing.]</nowiki>
+**** Rocking-patting-artifact <nowiki>{hedId=HED_0012508} [Quasi-rhythmical artifacts in recordings most commonly seen in infants. Typically caused by a caregiver rocking or patting the infant.]</nowiki>
+**** Sucking-artifact <nowiki>{hedId=HED_0012509} [Artifact from sucking, typically seen in very young cases.]</nowiki>
+**** Sweat-artifact <nowiki>{hedId=HED_0012510} [Artifact from sweating. In EEG, this is a low amplitude undulating waveform that is usually greater than 2 seconds and may appear to be an unstable baseline.]</nowiki>
+**** Tongue-movement-artifact <nowiki>{hedId=HED_0012511} [Artifact from tongue movement (Glossokinetic). The tongue functions as a dipole, with the tip negative with respect to the base. In EEG, the artifact produced by the tongue has a broad potential field that drops from frontal to occipital areas, although it is less steep than that produced by eye movement artifacts. The amplitude of the potentials is greater inferiorly than in parasagittal regions; the frequency is variable but usually in the delta range. Chewing and sucking can produce similar artifacts.]</nowiki>
+*** Nonbiological-artifact <nowiki>{hedId=HED_0012512} [A data artifact arising from a non-biological source.]</nowiki>
+**** Artificial-ventilation-artifact <nowiki>{hedId=HED_0012513} [Artifact stemming from mechanical ventilation. These can occur at the same rate as the ventilator, but also have other patterns.]</nowiki>
+**** Dialysis-artifact <nowiki>{hedId=HED_0012514} [Artifacts seen in recordings during continuous renal replacement therapy (dialysis).]</nowiki>
+**** Electrode-movement-artifact <nowiki>{hedId=HED_0012515} [Artifact from electrode movement.]</nowiki>
+**** Electrode-pops-artifact <nowiki>{hedId=HED_0012516} [Brief artifact with a steep rise and slow fall of an electrophysiological signal, most often caused by a loose electrode.]</nowiki>
+**** Induction-artifact <nowiki>{hedId=HED_0012517} [Artifacts induced by nearby equipment. In EEG, these are usually of high frequency.]</nowiki>
+**** Line-noise-artifact <nowiki>{hedId=HED_0012518} [Power line noise at 50 Hz or 60 Hz.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits, hedId=HED_0012519}</nowiki>
+**** Salt-bridge-artifact <nowiki>{hedId=HED_0012520} [Artifact from salt-bridge between EEG electrodes.]</nowiki>
+** Data-marker <nowiki>{hedId=HED_0012521} [An indicator placed to mark something.]</nowiki>
+*** Data-break-marker <nowiki>{hedId=HED_0012522} [An indicator place to indicate a gap in the data.]</nowiki>
+*** Temporal-marker <nowiki>{hedId=HED_0012523} [An indicator placed at a particular time in the data.]</nowiki>
+**** Inset <nowiki>{topLevelTagGroup, reserved, relatedTag=Onset, relatedTag=Offset, hedId=HED_0012524} [Marks an intermediate point in an ongoing event of temporal extent.]</nowiki>
+**** Offset <nowiki>{topLevelTagGroup, reserved, relatedTag=Onset, relatedTag=Inset, hedId=HED_0012525} [Marks the end of an event of temporal extent.]</nowiki>
+**** Onset <nowiki>{topLevelTagGroup, reserved, relatedTag=Inset, relatedTag=Offset, hedId=HED_0012526} [Marks the start of an ongoing event of temporal extent.]</nowiki>
+**** Pause <nowiki>{hedId=HED_0012527} [Indicates the temporary interruption of the operation of a process and subsequently a wait for a signal to continue.]</nowiki>
+**** Time-out <nowiki>{hedId=HED_0012528} [A cancellation or cessation that automatically occurs when a predefined interval of time has passed without a certain event occurring.]</nowiki>
+**** Time-sync <nowiki>{hedId=HED_0012529} [A synchronization signal whose purpose is to help synchronize different signals or processes. Often used to indicate a marker inserted into the recorded data to allow post hoc synchronization of concurrently recorded data streams.]</nowiki>
+** Data-resolution <nowiki>{hedId=HED_0012530} [Smallest change in a quality being measured by an sensor that causes a perceptible change.]</nowiki>
+*** Printer-resolution <nowiki>{hedId=HED_0012531} [Resolution of a printer, usually expressed as the number of dots-per-inch for a printer.]</nowiki>
+****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012532}</nowiki>
+*** Screen-resolution <nowiki>{hedId=HED_0012533} [Resolution of a screen, usually expressed as the of pixels in a dimension for a digital display device.]</nowiki>
+****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012534}</nowiki>
+*** Sensory-resolution <nowiki>{hedId=HED_0012535} [Resolution of measurements by a sensing device.]</nowiki>
+****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012536}</nowiki>
+*** Spatial-resolution <nowiki>{hedId=HED_0012537} [Linear spacing of a spatial measurement.]</nowiki>
+****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012538}</nowiki>
+*** Spectral-resolution <nowiki>{hedId=HED_0012539} [Measures the ability of a sensor to resolve features in the electromagnetic spectrum.]</nowiki>
+****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012540}</nowiki>
+*** Temporal-resolution <nowiki>{hedId=HED_0012541} [Measures the ability of a sensor to resolve features in time.]</nowiki>
+****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012542}</nowiki>
+** Data-source-type <nowiki>{hedId=HED_0012543} [The type of place, person, or thing from which the data comes or can be obtained.]</nowiki>
+*** Computed-feature <nowiki>{hedId=HED_0012544} [A feature computed from the data by a tool. This tag should be grouped with a label of the form Toolname_propertyName.]</nowiki>
+*** Computed-prediction <nowiki>{hedId=HED_0012545} [A computed extrapolation of known data.]</nowiki>
+*** Expert-annotation <nowiki>{hedId=HED_0012546} [An explanatory or critical comment or other in-context information provided by an authority.]</nowiki>
+*** Instrument-measurement <nowiki>{hedId=HED_0012547} [Information obtained from a device that is used to measure material properties or make other observations.]</nowiki>
+*** Observation <nowiki>{hedId=HED_0012548} [Active acquisition of information from a primary source. Should be grouped with a label of the form AgentID_featureName.]</nowiki>
+** Data-value <nowiki>{hedId=HED_0012549} [Designation of the type of a data item.]</nowiki>
+*** Categorical-value <nowiki>{hedId=HED_0012550} [Indicates that something can take on a limited and usually fixed number of possible values.]</nowiki>
+**** Categorical-class-value <nowiki>{hedId=HED_0012551} [Categorical values that fall into discrete classes such as true or false. The grouping is absolute in the sense that it is the same for all participants.]</nowiki>
+***** All <nowiki>{relatedTag=Some, relatedTag=None, hedId=HED_0012552} [To a complete degree or to the full or entire extent.]</nowiki>
+***** Correct <nowiki>{relatedTag=Wrong, hedId=HED_0012553} [Free from error. Especially conforming to fact or truth.]</nowiki>
+***** Explicit <nowiki>{relatedTag=Implicit, hedId=HED_0012554} [Stated clearly and in detail, leaving no room for confusion or doubt.]</nowiki>
+***** False <nowiki>{relatedTag=True, hedId=HED_0012555} [Not in accordance with facts, reality or definitive criteria.]</nowiki>
+***** Implicit <nowiki>{relatedTag=Explicit, hedId=HED_0012556} [Implied though not plainly expressed.]</nowiki>
+***** Invalid <nowiki>{relatedTag=Valid, hedId=HED_0012557} [Not allowed or not conforming to the correct format or specifications.]</nowiki>
+***** None <nowiki>{relatedTag=All, relatedTag=Some, hedId=HED_0012558} [No person or thing, nobody, not any.]</nowiki>
+***** Some <nowiki>{relatedTag=All, relatedTag=None, hedId=HED_0012559} [At least a small amount or number of, but not a large amount of, or often.]</nowiki>
+***** True <nowiki>{relatedTag=False, hedId=HED_0012560} [Conforming to facts, reality or definitive criteria.]</nowiki>
+***** Unknown <nowiki>{relatedTag=Invalid, hedId=HED_0012561} [The information has not been provided.]</nowiki>
+***** Valid <nowiki>{relatedTag=Invalid, hedId=HED_0012562} [Allowable, usable, or acceptable.]</nowiki>
+***** Wrong <nowiki>{relatedTag=Correct, hedId=HED_0012563} [Inaccurate or not correct.]</nowiki>
+**** Categorical-judgment-value <nowiki>{hedId=HED_0012564} [Categorical values that are based on the judgment or perception of the participant such familiar and famous.]</nowiki>
+***** Abnormal <nowiki>{relatedTag=Normal, hedId=HED_0012565} [Deviating in any way from the state, position, structure, condition, behavior, or rule which is considered a norm.]</nowiki>
+***** Asymmetrical <nowiki>{relatedTag=Symmetrical, hedId=HED_0012566} [Lacking symmetry or having parts that fail to correspond to one another in shape, size, or arrangement.]</nowiki>
+***** Audible <nowiki>{relatedTag=Inaudible, hedId=HED_0012567} [A sound that can be perceived by the participant.]</nowiki>
+***** Complex <nowiki>{relatedTag=Simple, hedId=HED_0012568} [Hard, involved or complicated, elaborate, having many parts.]</nowiki>
+***** Congruent <nowiki>{relatedTag=Incongruent, hedId=HED_0012569} [Concordance of multiple evidence lines. In agreement or harmony.]</nowiki>
+***** Constrained <nowiki>{relatedTag=Unconstrained, hedId=HED_0012570} [Keeping something within particular limits or bounds.]</nowiki>
+***** Disordered <nowiki>{relatedTag=Ordered, hedId=HED_0012571} [Not neatly arranged. Confused and untidy. A structural quality in which the parts of an object are non-rigid.]</nowiki>
+***** Familiar <nowiki>{relatedTag=Unfamiliar, relatedTag=Famous, hedId=HED_0012572} [Recognized, familiar, or within the scope of knowledge.]</nowiki>
+***** Famous <nowiki>{relatedTag=Familiar, relatedTag=Unfamiliar, hedId=HED_0012573} [A person who has a high degree of recognition by the general population for his or her success or accomplishments. A famous person.]</nowiki>
+***** Inaudible <nowiki>{relatedTag=Audible, hedId=HED_0012574} [A sound below the threshold of perception of the participant.]</nowiki>
+***** Incongruent <nowiki>{relatedTag=Congruent, hedId=HED_0012575} [Not in agreement or harmony.]</nowiki>
+***** Involuntary <nowiki>{relatedTag=Voluntary, hedId=HED_0012576} [An action that is not made by choice. In the body, involuntary actions (such as blushing) occur automatically, and cannot be controlled by choice.]</nowiki>
+***** Masked <nowiki>{relatedTag=Unmasked, hedId=HED_0012577} [Information exists but is not provided or is partially obscured due to security,privacy, or other concerns.]</nowiki>
+***** Normal <nowiki>{relatedTag=Abnormal, hedId=HED_0012578} [Being approximately average or within certain limits. Conforming with or constituting a norm or standard or level or type or social norm.]</nowiki>
+***** Ordered <nowiki>{relatedTag=Disordered, hedId=HED_0012579} [Conforming to a logical or comprehensible arrangement of separate elements.]</nowiki>
+***** Simple <nowiki>{relatedTag=Complex, hedId=HED_0012580} [Easily understood or presenting no difficulties.]</nowiki>
+***** Symmetrical <nowiki>{relatedTag=Asymmetrical, hedId=HED_0012581} [Made up of exactly similar parts facing each other or around an axis. Showing aspects of symmetry.]</nowiki>
+***** Unconstrained <nowiki>{relatedTag=Constrained, hedId=HED_0012582} [Moving without restriction.]</nowiki>
+***** Unfamiliar <nowiki>{relatedTag=Familiar, relatedTag=Famous, hedId=HED_0012583} [Not having knowledge or experience of.]</nowiki>
+***** Unmasked <nowiki>{relatedTag=Masked, hedId=HED_0012584} [Information is revealed.]</nowiki>
+***** Voluntary <nowiki>{relatedTag=Involuntary, hedId=HED_0012585} [Using free will or design; not forced or compelled; controlled by individual volition.]</nowiki>
+**** Categorical-level-value <nowiki>{hedId=HED_0012586} [Categorical values based on dividing a continuous variable into levels such as high and low.]</nowiki>
+***** Cold <nowiki>{relatedTag=Hot, hedId=HED_0012587} [Having an absence of heat.]</nowiki>
+***** Deep <nowiki>{relatedTag=Shallow, hedId=HED_0012588} [Extending relatively far inward or downward.]</nowiki>
+***** High <nowiki>{relatedTag=Low, relatedTag=Medium, hedId=HED_0012589} [Having a greater than normal degree, intensity, or amount.]</nowiki>
+***** Hot <nowiki>{relatedTag=Cold, hedId=HED_0012590} [Having an excess of heat.]</nowiki>
+***** Large <nowiki>{relatedTag=Small, hedId=HED_0012591} [Having a great extent such as in physical dimensions, period of time, amplitude or frequency.]</nowiki>
+***** Liminal <nowiki>{relatedTag=Subliminal, relatedTag=Supraliminal, hedId=HED_0012592} [Situated at a sensory threshold that is barely perceptible or capable of eliciting a response.]</nowiki>
+***** Loud <nowiki>{relatedTag=Quiet, hedId=HED_0012593} [Having a perceived high intensity of sound.]</nowiki>
+***** Low <nowiki>{relatedTag=High, hedId=HED_0012594} [Less than normal in degree, intensity or amount.]</nowiki>
+***** Medium <nowiki>{relatedTag=Low, relatedTag=High, hedId=HED_0012595} [Mid-way between small and large in number, quantity, magnitude or extent.]</nowiki>
+***** Negative <nowiki>{relatedTag=Positive, hedId=HED_0012596} [Involving disadvantage or harm.]</nowiki>
+***** Positive <nowiki>{relatedTag=Negative, hedId=HED_0012597} [Involving advantage or good.]</nowiki>
+***** Quiet <nowiki>{relatedTag=Loud, hedId=HED_0012598} [Characterizing a perceived low intensity of sound.]</nowiki>
+***** Rough <nowiki>{relatedTag=Smooth, hedId=HED_0012599} [Having a surface with perceptible bumps, ridges, or irregularities.]</nowiki>
+***** Shallow <nowiki>{relatedTag=Deep, hedId=HED_0012600} [Having a depth which is relatively low.]</nowiki>
+***** Small <nowiki>{relatedTag=Large, hedId=HED_0012601} [Having a small extent such as in physical dimensions, period of time, amplitude or frequency.]</nowiki>
+***** Smooth <nowiki>{relatedTag=Rough, hedId=HED_0012602} [Having a surface free from bumps, ridges, or irregularities.]</nowiki>
+***** Subliminal <nowiki>{relatedTag=Liminal, relatedTag=Supraliminal, hedId=HED_0012603} [Situated below a sensory threshold that is imperceptible or not capable of eliciting a response.]</nowiki>
+***** Supraliminal <nowiki>{relatedTag=Liminal, relatedTag=Subliminal, hedId=HED_0012604} [Situated above a sensory threshold that is perceptible or capable of eliciting a response.]</nowiki>
+***** Thick <nowiki>{relatedTag=Thin, hedId=HED_0012605} [Wide in width, extent or cross-section.]</nowiki>
+***** Thin <nowiki>{relatedTag=Thick, hedId=HED_0012606} [Narrow in width, extent or cross-section.]</nowiki>
+**** Categorical-location-value <nowiki>{hedId=HED_0012607} [Value indicating the location of something, primarily as an identifier rather than an expression of where the item is relative to something else.]</nowiki>
+***** Anterior <nowiki>{hedId=HED_0012608} [Relating to an item on the front of an agent body (from the point of view of the agent) or on the front of an object from the point of view of an agent. This pertains to the identity of an agent or a thing.]</nowiki>
+***** Lateral <nowiki>{hedId=HED_0012609} [Identifying the portion of an object away from the midline, particularly applied to the (anterior-posterior, superior-inferior) surface of a brain.]</nowiki>
+***** Left <nowiki>{hedId=HED_0012610} [Relating to an item on the left side of an agent body (from the point of view of the agent) or the left side of an object from the point of view of an agent. This pertains to the identity of an agent or a thing, for example (Left, Hand) as an identifier for the left hand. HED spatial relations should be used for relative positions such as (Hand, (Left-side-of, Keyboard)), which denotes the hand placed on the left side of the keyboard, which could be either the identified left hand or right hand.]</nowiki>
+***** Medial <nowiki>{hedId=HED_0012611} [Identifying the portion of an object towards the center, particularly applied to the (anterior-posterior, superior-inferior) surface of a brain.]</nowiki>
+***** Posterior <nowiki>{hedId=HED_0012612} [Relating to an item on the back of an agent body (from the point of view of the agent) or on the back of an object from the point of view of an agent. This pertains to the identity of an agent or a thing.]</nowiki>
+***** Right <nowiki>{hedId=HED_0012613} [Relating to an item on the right side of an agent body (from the point of view of the agent) or the right side of an object from the point of view of an agent. This pertains to the identity of an agent or a thing, for example (Right, Hand) as an identifier for the right hand. HED spatial relations should be used for relative positions such as (Hand, (Right-side-of, Keyboard)), which denotes the hand placed on the right side of the keyboard, which could be either the identified left hand or right hand.]</nowiki>
+**** Categorical-orientation-value <nowiki>{hedId=HED_0012614} [Value indicating the orientation or direction of something.]</nowiki>
+***** Backward <nowiki>{relatedTag=Forward, hedId=HED_0012615} [Directed behind or to the rear.]</nowiki>
+***** Downward <nowiki>{relatedTag=Leftward, relatedTag=Rightward, relatedTag=Upward, hedId=HED_0012616} [Moving or leading toward a lower place or level.]</nowiki>
+***** Forward <nowiki>{relatedTag=Backward, hedId=HED_0012617} [At or near or directed toward the front.]</nowiki>
+***** Horizontally-oriented <nowiki>{relatedTag=Vertically-oriented, hedId=HED_0012618} [Oriented parallel to or in the plane of the horizon.]</nowiki>
+***** Leftward <nowiki>{relatedTag=Downward, relatedTag=Rightward, relatedTag=Upward, hedId=HED_0012619} [Going toward or facing the left.]</nowiki>
+***** Oblique <nowiki>{relatedTag=Rotated, hedId=HED_0012620} [Slanting or inclined in direction, course, or position that is neither parallel nor perpendicular nor right-angular.]</nowiki>
+***** Rightward <nowiki>{relatedTag=Downward, relatedTag=Leftward, relatedTag=Upward, hedId=HED_0012621} [Going toward or situated on the right.]</nowiki>
+***** Rotated <nowiki>{hedId=HED_0012622} [Positioned offset around an axis or center.]</nowiki>
+***** Upward <nowiki>{relatedTag=Downward, relatedTag=Leftward, relatedTag=Rightward, hedId=HED_0012623} [Moving, pointing, or leading to a higher place, point, or level.]</nowiki>
+***** Vertically-oriented <nowiki>{relatedTag=Horizontally-oriented, hedId=HED_0012624} [Oriented perpendicular to the plane of the horizon.]</nowiki>
+*** Physical-value <nowiki>{hedId=HED_0012625} [The value of some physical property of something.]</nowiki>
+**** Temperature <nowiki>{hedId=HED_0012626} [A measure of hot or cold based on the average kinetic energy of the atoms or molecules in the system.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, unitClass=temperatureUnits, hedId=HED_0012627}</nowiki>
+**** Weight <nowiki>{hedId=HED_0012628} [The relative mass or the quantity of matter contained by something.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, unitClass=weightUnits, hedId=HED_0012629}</nowiki>
+*** Quantitative-value <nowiki>{hedId=HED_0012630} [Something capable of being estimated or expressed with numeric values.]</nowiki>
+**** Fraction <nowiki>{hedId=HED_0012631} [A numerical value between 0 and 1.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012632}</nowiki>
+**** Item-count <nowiki>{hedId=HED_0012633} [The integer count of something which is usually grouped with the entity it is counting. (Item-count/3, A) indicates that 3 of A have occurred up to this point.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012634}</nowiki>
+**** Item-index <nowiki>{hedId=HED_0012635} [The index of an item in a collection, sequence or other structure. (A (Item-index/3, B)) means that A is item number 3 in B.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012636}</nowiki>
+**** Item-interval <nowiki>{hedId=HED_0012637} [An integer indicating how many items or entities have passed since the last one of these. An item interval of 0 indicates the current item.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012638}</nowiki>
+**** Percentage <nowiki>{hedId=HED_0012639} [A fraction or ratio with 100 understood as the denominator.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012640}</nowiki>
+**** Ratio <nowiki>{hedId=HED_0012641} [A quotient of quantities of the same kind for different components within the same system.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012642}</nowiki>
+*** Spatiotemporal-value <nowiki>{hedId=HED_0012643} [A property relating to space and/or time.]</nowiki>
+**** Rate-of-change <nowiki>{hedId=HED_0012644} [The amount of change accumulated per unit time.]</nowiki>
+***** Acceleration <nowiki>{hedId=HED_0012645} [Magnitude of the rate of change in either speed or direction. The direction of change should be given separately.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=accelerationUnits, hedId=HED_0012646}</nowiki>
+***** Frequency <nowiki>{hedId=HED_0012647} [Frequency is the number of occurrences of a repeating event per unit time.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits, hedId=HED_0012648}</nowiki>
+***** Jerk-rate <nowiki>{hedId=HED_0012649} [Magnitude of the rate at which the acceleration of an object changes with respect to time. The direction of change should be given separately.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=jerkUnits, hedId=HED_0012650}</nowiki>
+***** Refresh-rate <nowiki>{hedId=HED_0012651} [The frequency with which the image on a computer monitor or similar electronic display screen is refreshed, usually expressed in hertz.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012652}</nowiki>
+***** Sampling-rate <nowiki>{hedId=HED_0012653} [The number of digital samples taken or recorded per unit of time.]</nowiki>
+******  <nowiki># {takesValue, unitClass=frequencyUnits, hedId=HED_0012654}</nowiki>
+***** Speed <nowiki>{hedId=HED_0012655} [A scalar measure of the rate of movement of the object expressed either as the distance traveled divided by the time taken (average speed) or the rate of change of position with respect to time at a particular point (instantaneous speed). The direction of change should be given separately.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=speedUnits, hedId=HED_0012656}</nowiki>
+***** Temporal-rate <nowiki>{hedId=HED_0012657} [The number of items per unit of time.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits, hedId=HED_0012658}</nowiki>
+**** Spatial-value <nowiki>{hedId=HED_0012659} [Value of an item involving space.]</nowiki>
+***** Angle <nowiki>{hedId=HED_0012660} [The amount of inclination of one line to another or the plane of one object to another.]</nowiki>
+******  <nowiki># {takesValue, unitClass=angleUnits, valueClass=numericClass, hedId=HED_0012661}</nowiki>
+***** Distance <nowiki>{hedId=HED_0012662} [A measure of the space separating two objects or points.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012663}</nowiki>
+***** Position <nowiki>{hedId=HED_0012664} [A reference to the alignment of an object, a particular situation or view of a situation, or the location of an object. Coordinates with respect a specified frame of reference or the default Screen-frame if no frame is given.]</nowiki>
+****** Clock-face <nowiki>{deprecatedFrom=8.2.0, hedId=HED_0012326} [A location identifier based on clock-face numbering or anatomic subregion. Replaced by Clock-face-position.]</nowiki>
+*******  <nowiki># {deprecatedFrom=8.2.0, takesValue, valueClass=numericClass, hedId=HED_0013228}</nowiki>
+****** Clock-face-position <nowiki>{hedId=HED_0013229} [A location identifier based on clock-face numbering or anatomic subregion. As an object, just use the tag Clock.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0013230}</nowiki>
+****** X-position <nowiki>{hedId=HED_0012665} [The position along the x-axis of the frame of reference.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012666}</nowiki>
+****** Y-position <nowiki>{hedId=HED_0012667} [The position along the y-axis of the frame of reference.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012668}</nowiki>
+****** Z-position <nowiki>{hedId=HED_0012669} [The position along the z-axis of the frame of reference.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012670}</nowiki>
+***** Size <nowiki>{hedId=HED_0012671} [The physical magnitude of something.]</nowiki>
+****** Area <nowiki>{hedId=HED_0012672} [The extent of a 2-dimensional surface enclosed within a boundary.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=areaUnits, hedId=HED_0012673}</nowiki>
+****** Depth <nowiki>{hedId=HED_0012674} [The distance from the surface of something especially from the perspective of looking from the front.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012675}</nowiki>
+****** Height <nowiki>{hedId=HED_0012676} [The vertical measurement or distance from the base to the top of an object.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012677}</nowiki>
+****** Length <nowiki>{hedId=HED_0012678} [The linear extent in space from one end of something to the other end, or the extent of something from beginning to end.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012679}</nowiki>
+****** Perimeter <nowiki>{hedId=HED_0012680} [The minimum length of paths enclosing a 2D shape.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012681}</nowiki>
+****** Radius <nowiki>{hedId=HED_0012682} [The distance of the line from the center of a circle or a sphere to its perimeter or outer surface, respectively.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012683}</nowiki>
+****** Volume <nowiki>{hedId=HED_0012684} [The amount of three dimensional space occupied by an object or the capacity of a space or container.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=volumeUnits, hedId=HED_0012685}</nowiki>
+****** Width <nowiki>{hedId=HED_0012686} [The extent or measurement of something from side to side.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, unitClass=physicalLengthUnits, hedId=HED_0012687}</nowiki>
+**** Temporal-value <nowiki>{hedId=HED_0012688} [A characteristic of or relating to time or limited by time.]</nowiki>
+***** Delay <nowiki>{topLevelTagGroup, reserved, requireChild, relatedTag=Duration, hedId=HED_0012689} [The time at which an event start time is delayed from the current onset time. This tag defines the start time of an event of temporal extent and may be used with the Duration tag.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits, hedId=HED_0012690}</nowiki>
+***** Duration <nowiki>{topLevelTagGroup, reserved, requireChild, relatedTag=Delay, hedId=HED_0012691} [The period of time during which an event occurs. This tag defines the end time of an event of temporal extent and may be used with the Delay tag.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits, hedId=HED_0012692}</nowiki>
+***** Time-interval <nowiki>{hedId=HED_0012693} [The period of time separating two instances, events, or occurrences.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits, hedId=HED_0012694}</nowiki>
+***** Time-value <nowiki>{hedId=HED_0012695} [A value with units of time. Usually grouped with tags identifying what the value represents.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits, hedId=HED_0012696}</nowiki>
+*** Statistical-value <nowiki>{extensionAllowed, hedId=HED_0012697} [A value based on or employing the principles of statistics.]</nowiki>
+**** Data-maximum <nowiki>{hedId=HED_0012698} [The largest possible quantity or degree.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012699}</nowiki>
+**** Data-mean <nowiki>{hedId=HED_0012700} [The sum of a set of values divided by the number of values in the set.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012701}</nowiki>
+**** Data-median <nowiki>{hedId=HED_0012702} [The value which has an equal number of values greater and less than it.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012703}</nowiki>
+**** Data-minimum <nowiki>{hedId=HED_0012704} [The smallest possible quantity.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012705}</nowiki>
+**** Probability <nowiki>{hedId=HED_0012706} [A measure of the expectation of the occurrence of a particular event.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012707}</nowiki>
+**** Standard-deviation <nowiki>{hedId=HED_0012708} [A measure of the range of values in a set of numbers. Standard deviation is a statistic used as a measure of the dispersion or variation in a distribution, equal to the square root of the arithmetic mean of the squares of the deviations from the arithmetic mean.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012709}</nowiki>
+**** Statistical-accuracy <nowiki>{hedId=HED_0012710} [A measure of closeness to true value expressed as a number between 0 and 1.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012711}</nowiki>
+**** Statistical-precision <nowiki>{hedId=HED_0012712} [A quantitative representation of the degree of accuracy necessary for or associated with a particular action.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012713}</nowiki>
+**** Statistical-recall <nowiki>{hedId=HED_0012714} [Sensitivity is a measurement datum qualifying a binary classification test and is computed by subtracting the false negative rate to the integral numeral 1.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012715}</nowiki>
+**** Statistical-uncertainty <nowiki>{hedId=HED_0012716} [A measure of the inherent variability of repeated observation measurements of a quantity including quantities evaluated by statistical methods and by other means.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0012717}</nowiki>
+** Data-variability-attribute <nowiki>{hedId=HED_0012718} [An attribute describing how something changes or varies.]</nowiki>
+*** Abrupt <nowiki>{hedId=HED_0012719} [Marked by sudden change.]</nowiki>
+*** Constant <nowiki>{hedId=HED_0012720} [Continually recurring or continuing without interruption. Not changing in time or space.]</nowiki>
+*** Continuous <nowiki>{relatedTag=Discrete, relatedTag=Discontinuous, hedId=HED_0012721} [Uninterrupted in time, sequence, substance, or extent.]</nowiki>
+*** Decreasing <nowiki>{relatedTag=Increasing, hedId=HED_0012722} [Becoming smaller or fewer in size, amount, intensity, or degree.]</nowiki>
+*** Deterministic <nowiki>{relatedTag=Random, relatedTag=Stochastic, hedId=HED_0012723} [No randomness is involved in the development of the future states of the element.]</nowiki>
+*** Discontinuous <nowiki>{relatedTag=Continuous, hedId=HED_0012724} [Having a gap in time, sequence, substance, or extent.]</nowiki>
+*** Discrete <nowiki>{relatedTag=Continuous, relatedTag=Discontinuous, hedId=HED_0012725} [Constituting a separate entities or parts.]</nowiki>
+*** Estimated-value <nowiki>{hedId=HED_0012726} [Something that has been calculated or measured approximately.]</nowiki>
+*** Exact-value <nowiki>{hedId=HED_0012727} [A value that is viewed to the true value according to some standard.]</nowiki>
+*** Flickering <nowiki>{hedId=HED_0012728} [Moving irregularly or unsteadily or burning or shining fitfully or with a fluctuating light.]</nowiki>
+*** Fractal <nowiki>{hedId=HED_0012729} [Having extremely irregular curves or shapes for which any suitably chosen part is similar in shape to a given larger or smaller part when magnified or reduced to the same size.]</nowiki>
+*** Increasing <nowiki>{relatedTag=Decreasing, hedId=HED_0012730} [Becoming greater in size, amount, or degree.]</nowiki>
+*** Random <nowiki>{relatedTag=Deterministic, relatedTag=Stochastic, hedId=HED_0012731} [Governed by or depending on chance. Lacking any definite plan or order or purpose.]</nowiki>
+*** Repetitive <nowiki>{hedId=HED_0012732} [A recurring action that is often non-purposeful.]</nowiki>
+*** Stochastic <nowiki>{relatedTag=Deterministic, relatedTag=Random, hedId=HED_0012733} [Uses a random probability distribution or pattern that may be analyzed statistically but may not be predicted precisely to determine future states.]</nowiki>
+*** Varying <nowiki>{hedId=HED_0012734} [Differing in size, amount, degree, or nature.]</nowiki>
+* Environmental-property <nowiki>{hedId=HED_0012735} [Relating to or arising from the surroundings of an agent.]</nowiki>
+** Augmented-reality <nowiki>{hedId=HED_0012736} [Using technology that enhances real-world experiences with computer-derived digital overlays to change some aspects of perception of the natural environment. The digital content is shown to the user through a smart device or glasses and responds to changes in the environment.]</nowiki>
+** Indoors <nowiki>{hedId=HED_0012737} [Located inside a building or enclosure.]</nowiki>
+** Motion-platform <nowiki>{hedId=HED_0012738} [A mechanism that creates the feelings of being in a real motion environment.]</nowiki>
+** Outdoors <nowiki>{hedId=HED_0012739} [Any area outside a building or shelter.]</nowiki>
+** Real-world <nowiki>{hedId=HED_0012740} [Located in a place that exists in real space and time under realistic conditions.]</nowiki>
+** Rural <nowiki>{hedId=HED_0012741} [Of or pertaining to the country as opposed to the city.]</nowiki>
+** Terrain <nowiki>{hedId=HED_0012742} [Characterization of the physical features of a tract of land.]</nowiki>
+*** Composite-terrain <nowiki>{hedId=HED_0012743} [Tracts of land characterized by a mixture of physical features.]</nowiki>
+*** Dirt-terrain <nowiki>{hedId=HED_0012744} [Tracts of land characterized by a soil surface and lack of vegetation.]</nowiki>
+*** Grassy-terrain <nowiki>{hedId=HED_0012745} [Tracts of land covered by grass.]</nowiki>
+*** Gravel-terrain <nowiki>{hedId=HED_0012746} [Tracts of land covered by a surface consisting a loose aggregation of small water-worn or pounded stones.]</nowiki>
+*** Leaf-covered-terrain <nowiki>{hedId=HED_0012747} [Tracts of land covered by leaves and composited organic material.]</nowiki>
+*** Muddy-terrain <nowiki>{hedId=HED_0012748} [Tracts of land covered by a liquid or semi-liquid mixture of water and some combination of soil, silt, and clay.]</nowiki>
+*** Paved-terrain <nowiki>{hedId=HED_0012749} [Tracts of land covered with concrete, asphalt, stones, or bricks.]</nowiki>
+*** Rocky-terrain <nowiki>{hedId=HED_0012750} [Tracts of land consisting or full of rock or rocks.]</nowiki>
+*** Sloped-terrain <nowiki>{hedId=HED_0012751} [Tracts of land arranged in a sloping or inclined position.]</nowiki>
+*** Uneven-terrain <nowiki>{hedId=HED_0012752} [Tracts of land that are not level, smooth, or regular.]</nowiki>
+** Urban <nowiki>{hedId=HED_0012753} [Relating to, located in, or characteristic of a city or densely populated area.]</nowiki>
+** Virtual-world <nowiki>{hedId=HED_0012754} [Using technology that creates immersive, computer-generated experiences that a person can interact with and navigate through. The digital content is generally delivered to the user through some type of headset and responds to changes in head position or through interaction with other types of sensors. Existing in a virtual setting such as a simulation or game environment.]</nowiki>
+* Informational-property <nowiki>{extensionAllowed, hedId=HED_0012755} [Something that pertains to a task.]</nowiki>
+** Description <nowiki>{hedId=HED_0012756} [An explanation of what the tag group it is in means. If the description is at the top-level of an event string, the description applies to the event.]</nowiki>
+***  <nowiki># {takesValue, valueClass=textClass, hedId=HED_0012757}</nowiki>
+** ID <nowiki>{hedId=HED_0012758} [An alphanumeric name that identifies either a unique object or a unique class of objects. Here the object or class may be an idea, physical countable object (or class), or physical uncountable substance (or class).]</nowiki>
+***  <nowiki># {takesValue, valueClass=textClass, hedId=HED_0012759}</nowiki>
+** Label <nowiki>{hedId=HED_0012760} [A string of 20 or fewer characters identifying something. Labels usually refer to general classes of things while IDs refer to specific instances. A term that is associated with some entity. A brief description given for purposes of identification. An identifying or descriptive marker that is attached to an object.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012761}</nowiki>
+** Metadata <nowiki>{hedId=HED_0012762} [Data about data. Information that describes another set of data.]</nowiki>
+*** Creation-date <nowiki>{hedId=HED_0012763} [The date on which the creation of this item began.]</nowiki>
+****  <nowiki># {takesValue, valueClass=dateTimeClass, hedId=HED_0012764}</nowiki>
+*** Experimental-note <nowiki>{hedId=HED_0012765} [A brief written record about the experiment.]</nowiki>
+****  <nowiki># {takesValue, valueClass=textClass, hedId=HED_0012766}</nowiki>
+*** Library-name <nowiki>{hedId=HED_0012767} [Official name of a HED library.]</nowiki>
+****  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012768}</nowiki>
+*** Metadata-identifier <nowiki>{hedId=HED_0012769} [Identifier (usually unique) from another metadata source.]</nowiki>
+**** CogAtlas <nowiki>{hedId=HED_0012770} [The Cognitive Atlas ID number of something.]</nowiki>
+*****  <nowiki># {takesValue, hedId=HED_0012771}</nowiki>
+**** CogPo <nowiki>{hedId=HED_0012772} [The CogPO ID number of something.]</nowiki>
+*****  <nowiki># {takesValue, hedId=HED_0012773}</nowiki>
+**** DOI <nowiki>{hedId=HED_0012774} [Digital object identifier for an object.]</nowiki>
+*****  <nowiki># {takesValue, hedId=HED_0012775}</nowiki>
+**** OBO-identifier <nowiki>{hedId=HED_0012776} [The identifier of a term in some Open Biology Ontology (OBO) ontology.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012777}</nowiki>
+**** Species-identifier <nowiki>{hedId=HED_0012778} [A binomial species name from the NCBI Taxonomy, for example, homo sapiens, mus musculus, or rattus norvegicus.]</nowiki>
+*****  <nowiki># {takesValue, hedId=HED_0012779}</nowiki>
+**** Subject-identifier <nowiki>{hedId=HED_0012780} [A sequence of characters used to identify, name, or characterize a trial or study subject.]</nowiki>
+*****  <nowiki># {takesValue, hedId=HED_0012781}</nowiki>
+**** UUID <nowiki>{hedId=HED_0012782} [A unique universal identifier.]</nowiki>
+*****  <nowiki># {takesValue, hedId=HED_0012783}</nowiki>
+**** Version-identifier <nowiki>{hedId=HED_0012784} [An alphanumeric character string that identifies a form or variant of a type or original.]</nowiki>
+*****  <nowiki># {takesValue, hedId=HED_0012785} [Usually is a semantic version.]</nowiki>
+*** Modified-date <nowiki>{hedId=HED_0012786} [The date on which the item was modified (usually the last-modified data unless a complete record of dated modifications is kept.]</nowiki>
+****  <nowiki># {takesValue, valueClass=dateTimeClass, hedId=HED_0012787}</nowiki>
+*** Pathname <nowiki>{hedId=HED_0012788} [The specification of a node (file or directory) in a hierarchical file system, usually specified by listing the nodes top-down.]</nowiki>
+****  <nowiki># {takesValue, hedId=HED_0012789}</nowiki>
+*** URL <nowiki>{hedId=HED_0012790} [A valid URL.]</nowiki>
+****  <nowiki># {takesValue, hedId=HED_0012791}</nowiki>
+** Parameter <nowiki>{hedId=HED_0012792} [Something user-defined for this experiment.]</nowiki>
+*** Parameter-label <nowiki>{hedId=HED_0012793} [The name of the parameter.]</nowiki>
+****  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012794}</nowiki>
+*** Parameter-value <nowiki>{hedId=HED_0012795} [The value of the parameter.]</nowiki>
+****  <nowiki># {takesValue, valueClass=textClass, hedId=HED_0012796}</nowiki>
+* Organizational-property <nowiki>{hedId=HED_0012797} [Relating to an organization or the action of organizing something.]</nowiki>
+** Collection <nowiki>{reserved, hedId=HED_0012798} [A tag designating a grouping of items such as in a set or list.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012799} [Name of the collection.]</nowiki>
+** Condition-variable <nowiki>{reserved, hedId=HED_0012800} [An aspect of the experiment or task that is to be varied during the experiment. Task-conditions are sometimes called independent variables or contrasts.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012801} [Name of the condition variable.]</nowiki>
+** Control-variable <nowiki>{reserved, hedId=HED_0012802} [An aspect of the experiment that is fixed throughout the study and usually is explicitly controlled.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012803} [Name of the control variable.]</nowiki>
+** Def <nowiki>{requireChild, reserved, hedId=HED_0012804} [A HED-specific utility tag used with a defined name to represent the tags associated with that definition.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012805} [Name of the definition.]</nowiki>
+** Def-expand <nowiki>{requireChild, reserved, tagGroup, hedId=HED_0012806} [A HED specific utility tag that is grouped with an expanded definition. The child value of the Def-expand is the name of the expanded definition.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012807}</nowiki>
+** Definition <nowiki>{requireChild, reserved, topLevelTagGroup, hedId=HED_0012808} [A HED-specific utility tag whose child value is the name of the concept and the tag group associated with the tag is an English language explanation of a concept.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012809} [Name of the definition.]</nowiki>
+** Event-context <nowiki>{reserved, topLevelTagGroup, unique, hedId=HED_0012810} [A special HED tag inserted as part of a top-level tag group to contain information about the interrelated conditions under which the event occurs. The event context includes information about other events that are ongoing when this event happens.]</nowiki>
+** Event-stream <nowiki>{reserved, hedId=HED_0012811} [A special HED tag indicating that this event is a member of an ordered succession of events.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012812} [Name of the event stream.]</nowiki>
+** Experimental-intertrial <nowiki>{reserved, hedId=HED_0012813} [A tag used to indicate a part of the experiment between trials usually where nothing is happening.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012814} [Optional label for the intertrial block.]</nowiki>
+** Experimental-trial <nowiki>{reserved, hedId=HED_0012815} [Designates a run or execution of an activity, for example, one execution of a script. A tag used to indicate a particular organizational part in the experimental design often containing a stimulus-response pair or stimulus-response-feedback triad.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012816} [Optional label for the trial (often a numerical string).]</nowiki>
+** Indicator-variable <nowiki>{reserved, hedId=HED_0012817} [An aspect of the experiment or task that is measured as task conditions are varied during the experiment. Experiment indicators are sometimes called dependent variables.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012818} [Name of the indicator variable.]</nowiki>
+** Recording <nowiki>{reserved, hedId=HED_0012819} [A tag designating the data recording. Recording tags are usually have temporal scope which is the entire recording.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012820} [Optional label for the recording.]</nowiki>
+** Task <nowiki>{reserved, hedId=HED_0012821} [An assigned piece of work, usually with a time allotment. A tag used to indicate a linkage the structured activities performed as part of the experiment.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012822} [Optional label for the task block.]</nowiki>
+** Time-block <nowiki>{reserved, hedId=HED_0012823} [A tag used to indicate a contiguous time block in the experiment during which something is fixed or noted.]</nowiki>
+***  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012824} [Optional label for the task block.]</nowiki>
+* Sensory-property <nowiki>{hedId=HED_0012825} [Relating to sensation or the physical senses.]</nowiki>
+** Sensory-attribute <nowiki>{hedId=HED_0012826} [A sensory characteristic associated with another entity.]</nowiki>
+*** Auditory-attribute <nowiki>{hedId=HED_0012827} [Pertaining to the sense of hearing.]</nowiki>
+**** Loudness <nowiki>{hedId=HED_0012828} [Perceived intensity of a sound.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, valueClass=nameClass, hedId=HED_0012829}</nowiki>
+**** Pitch <nowiki>{hedId=HED_0012830} [A perceptual property that allows the user to order sounds on a frequency scale.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits, hedId=HED_0012831}</nowiki>
+**** Sound-envelope <nowiki>{hedId=HED_0012832} [Description of how a sound changes over time.]</nowiki>
+***** Sound-envelope-attack <nowiki>{hedId=HED_0012833} [The time taken for initial run-up of level from nil to peak usually beginning when the key on a musical instrument is pressed.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits, hedId=HED_0012834}</nowiki>
+***** Sound-envelope-decay <nowiki>{hedId=HED_0012835} [The time taken for the subsequent run down from the attack level to the designated sustain level.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits, hedId=HED_0012836}</nowiki>
+***** Sound-envelope-release <nowiki>{hedId=HED_0012837} [The time taken for the level to decay from the sustain level to zero after the key is released.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits, hedId=HED_0012838}</nowiki>
+***** Sound-envelope-sustain <nowiki>{hedId=HED_0012839} [The time taken for the main sequence of the sound duration, until the key is released.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=timeUnits, hedId=HED_0012840}</nowiki>
+**** Sound-volume <nowiki>{hedId=HED_0012841} [The sound pressure level (SPL) usually the ratio to a reference signal estimated as the lower bound of hearing.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, unitClass=intensityUnits, hedId=HED_0012842}</nowiki>
+**** Timbre <nowiki>{hedId=HED_0012843} [The perceived sound quality of a singing voice or musical instrument.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=nameClass, hedId=HED_0012844}</nowiki>
+*** Gustatory-attribute <nowiki>{hedId=HED_0012845} [Pertaining to the sense of taste.]</nowiki>
+**** Bitter <nowiki>{hedId=HED_0012846} [Having a sharp, pungent taste.]</nowiki>
+**** Salty <nowiki>{hedId=HED_0012847} [Tasting of or like salt.]</nowiki>
+**** Savory <nowiki>{hedId=HED_0012848} [Belonging to a taste that is salty or spicy rather than sweet.]</nowiki>
+**** Sour <nowiki>{hedId=HED_0012849} [Having a sharp, acidic taste.]</nowiki>
+**** Sweet <nowiki>{hedId=HED_0012850} [Having or resembling the taste of sugar.]</nowiki>
+*** Olfactory-attribute <nowiki>{hedId=HED_0012851} [Having a smell.]</nowiki>
+*** Somatic-attribute <nowiki>{hedId=HED_0012852} [Pertaining to the feelings in the body or of the nervous system.]</nowiki>
+**** Pain <nowiki>{hedId=HED_0012853} [The sensation of discomfort, distress, or agony, resulting from the stimulation of specialized nerve endings.]</nowiki>
+**** Stress <nowiki>{hedId=HED_0012854} [The negative mental, emotional, and physical reactions that occur when environmental stressors are perceived as exceeding the adaptive capacities of the individual.]</nowiki>
+*** Tactile-attribute <nowiki>{hedId=HED_0012855} [Pertaining to the sense of touch.]</nowiki>
+**** Tactile-pressure <nowiki>{hedId=HED_0012856} [Having a feeling of heaviness.]</nowiki>
+**** Tactile-temperature <nowiki>{hedId=HED_0012857} [Having a feeling of hotness or coldness.]</nowiki>
+**** Tactile-texture <nowiki>{hedId=HED_0012858} [Having a feeling of roughness.]</nowiki>
+**** Tactile-vibration <nowiki>{hedId=HED_0012859} [Having a feeling of mechanical oscillation.]</nowiki>
+*** Vestibular-attribute <nowiki>{hedId=HED_0012860} [Pertaining to the sense of balance or body position.]</nowiki>
+*** Visual-attribute <nowiki>{hedId=HED_0012861} [Pertaining to the sense of sight.]</nowiki>
+**** Color <nowiki>{hedId=HED_0012862} [The appearance of objects (or light sources) described in terms of perception of their hue and lightness (or brightness) and saturation.]</nowiki>
+***** CSS-color <nowiki>{hedId=HED_0012863} [One of 140 colors supported by all browsers. For more details such as the color RGB or HEX values,check:https://www.w3schools.com/colors/colors_groups.asp.]</nowiki>
+****** Blue-color <nowiki>{hedId=HED_0012864} [CSS color group.]</nowiki>
+******* Blue <nowiki>{hedId=HED_0012865} [CSS-color 0x0000FF.]</nowiki>
+******* CadetBlue <nowiki>{hedId=HED_0012866} [CSS-color 0x5F9EA0.]</nowiki>
+******* CornflowerBlue <nowiki>{hedId=HED_0012867} [CSS-color 0x6495ED.]</nowiki>
+******* DarkBlue <nowiki>{hedId=HED_0012868} [CSS-color 0x00008B.]</nowiki>
+******* DeepSkyBlue <nowiki>{hedId=HED_0012869} [CSS-color 0x00BFFF.]</nowiki>
+******* DodgerBlue <nowiki>{hedId=HED_0012870} [CSS-color 0x1E90FF.]</nowiki>
+******* LightBlue <nowiki>{hedId=HED_0012871} [CSS-color 0xADD8E6.]</nowiki>
+******* LightSkyBlue <nowiki>{hedId=HED_0012872} [CSS-color 0x87CEFA.]</nowiki>
+******* LightSteelBlue <nowiki>{hedId=HED_0012873} [CSS-color 0xB0C4DE.]</nowiki>
+******* MediumBlue <nowiki>{hedId=HED_0012874} [CSS-color 0x0000CD.]</nowiki>
+******* MidnightBlue <nowiki>{hedId=HED_0012875} [CSS-color 0x191970.]</nowiki>
+******* Navy <nowiki>{hedId=HED_0012876} [CSS-color 0x000080.]</nowiki>
+******* PowderBlue <nowiki>{hedId=HED_0012877} [CSS-color 0xB0E0E6.]</nowiki>
+******* RoyalBlue <nowiki>{hedId=HED_0012878} [CSS-color 0x4169E1.]</nowiki>
+******* SkyBlue <nowiki>{hedId=HED_0012879} [CSS-color 0x87CEEB.]</nowiki>
+******* SteelBlue <nowiki>{hedId=HED_0012880} [CSS-color 0x4682B4.]</nowiki>
+****** Brown-color <nowiki>{hedId=HED_0012881} [CSS color group.]</nowiki>
+******* Bisque <nowiki>{hedId=HED_0012882} [CSS-color 0xFFE4C4.]</nowiki>
+******* BlanchedAlmond <nowiki>{hedId=HED_0012883} [CSS-color 0xFFEBCD.]</nowiki>
+******* Brown <nowiki>{hedId=HED_0012884} [CSS-color 0xA52A2A.]</nowiki>
+******* BurlyWood <nowiki>{hedId=HED_0012885} [CSS-color 0xDEB887.]</nowiki>
+******* Chocolate <nowiki>{hedId=HED_0012886} [CSS-color 0xD2691E.]</nowiki>
+******* Cornsilk <nowiki>{hedId=HED_0012887} [CSS-color 0xFFF8DC.]</nowiki>
+******* DarkGoldenRod <nowiki>{hedId=HED_0012888} [CSS-color 0xB8860B.]</nowiki>
+******* GoldenRod <nowiki>{hedId=HED_0012889} [CSS-color 0xDAA520.]</nowiki>
+******* Maroon <nowiki>{hedId=HED_0012890} [CSS-color 0x800000.]</nowiki>
+******* NavajoWhite <nowiki>{hedId=HED_0012891} [CSS-color 0xFFDEAD.]</nowiki>
+******* Olive <nowiki>{hedId=HED_0012892} [CSS-color 0x808000.]</nowiki>
+******* Peru <nowiki>{hedId=HED_0012893} [CSS-color 0xCD853F.]</nowiki>
+******* RosyBrown <nowiki>{hedId=HED_0012894} [CSS-color 0xBC8F8F.]</nowiki>
+******* SaddleBrown <nowiki>{hedId=HED_0012895} [CSS-color 0x8B4513.]</nowiki>
+******* SandyBrown <nowiki>{hedId=HED_0012896} [CSS-color 0xF4A460.]</nowiki>
+******* Sienna <nowiki>{hedId=HED_0012897} [CSS-color 0xA0522D.]</nowiki>
+******* Tan <nowiki>{hedId=HED_0012898} [CSS-color 0xD2B48C.]</nowiki>
+******* Wheat <nowiki>{hedId=HED_0012899} [CSS-color 0xF5DEB3.]</nowiki>
+****** Cyan-color <nowiki>{hedId=HED_0012900} [CSS color group.]</nowiki>
+******* Aqua <nowiki>{hedId=HED_0012901} [CSS-color 0x00FFFF.]</nowiki>
+******* Aquamarine <nowiki>{hedId=HED_0012902} [CSS-color 0x7FFFD4.]</nowiki>
+******* Cyan <nowiki>{hedId=HED_0012903} [CSS-color 0x00FFFF.]</nowiki>
+******* DarkTurquoise <nowiki>{hedId=HED_0012904} [CSS-color 0x00CED1.]</nowiki>
+******* LightCyan <nowiki>{hedId=HED_0012905} [CSS-color 0xE0FFFF.]</nowiki>
+******* MediumTurquoise <nowiki>{hedId=HED_0012906} [CSS-color 0x48D1CC.]</nowiki>
+******* PaleTurquoise <nowiki>{hedId=HED_0012907} [CSS-color 0xAFEEEE.]</nowiki>
+******* Turquoise <nowiki>{hedId=HED_0012908} [CSS-color 0x40E0D0.]</nowiki>
+****** Gray-color <nowiki>{hedId=HED_0012909} [CSS color group.]</nowiki>
+******* Black <nowiki>{hedId=HED_0012910} [CSS-color 0x000000.]</nowiki>
+******* DarkGray <nowiki>{hedId=HED_0012911} [CSS-color 0xA9A9A9.]</nowiki>
+******* DarkSlateGray <nowiki>{hedId=HED_0012912} [CSS-color 0x2F4F4F.]</nowiki>
+******* DimGray <nowiki>{hedId=HED_0012913} [CSS-color 0x696969.]</nowiki>
+******* Gainsboro <nowiki>{hedId=HED_0012914} [CSS-color 0xDCDCDC.]</nowiki>
+******* Gray <nowiki>{hedId=HED_0012915} [CSS-color 0x808080.]</nowiki>
+******* LightGray <nowiki>{hedId=HED_0012916} [CSS-color 0xD3D3D3.]</nowiki>
+******* LightSlateGray <nowiki>{hedId=HED_0012917} [CSS-color 0x778899.]</nowiki>
+******* Silver <nowiki>{hedId=HED_0012918} [CSS-color 0xC0C0C0.]</nowiki>
+******* SlateGray <nowiki>{hedId=HED_0012919} [CSS-color 0x708090.]</nowiki>
+****** Green-color <nowiki>{hedId=HED_0012920} [CSS color group.]</nowiki>
+******* Chartreuse <nowiki>{hedId=HED_0012921} [CSS-color 0x7FFF00.]</nowiki>
+******* DarkCyan <nowiki>{hedId=HED_0012922} [CSS-color 0x008B8B.]</nowiki>
+******* DarkGreen <nowiki>{hedId=HED_0012923} [CSS-color 0x006400.]</nowiki>
+******* DarkOliveGreen <nowiki>{hedId=HED_0012924} [CSS-color 0x556B2F.]</nowiki>
+******* DarkSeaGreen <nowiki>{hedId=HED_0012925} [CSS-color 0x8FBC8F.]</nowiki>
+******* ForestGreen <nowiki>{hedId=HED_0012926} [CSS-color 0x228B22.]</nowiki>
+******* Green <nowiki>{hedId=HED_0012927} [CSS-color 0x008000.]</nowiki>
+******* GreenYellow <nowiki>{hedId=HED_0012928} [CSS-color 0xADFF2F.]</nowiki>
+******* LawnGreen <nowiki>{hedId=HED_0012929} [CSS-color 0x7CFC00.]</nowiki>
+******* LightGreen <nowiki>{hedId=HED_0012930} [CSS-color 0x90EE90.]</nowiki>
+******* LightSeaGreen <nowiki>{hedId=HED_0012931} [CSS-color 0x20B2AA.]</nowiki>
+******* Lime <nowiki>{hedId=HED_0012932} [CSS-color 0x00FF00.]</nowiki>
+******* LimeGreen <nowiki>{hedId=HED_0012933} [CSS-color 0x32CD32.]</nowiki>
+******* MediumAquaMarine <nowiki>{hedId=HED_0012934} [CSS-color 0x66CDAA.]</nowiki>
+******* MediumSeaGreen <nowiki>{hedId=HED_0012935} [CSS-color 0x3CB371.]</nowiki>
+******* MediumSpringGreen <nowiki>{hedId=HED_0012936} [CSS-color 0x00FA9A.]</nowiki>
+******* OliveDrab <nowiki>{hedId=HED_0012937} [CSS-color 0x6B8E23.]</nowiki>
+******* PaleGreen <nowiki>{hedId=HED_0012938} [CSS-color 0x98FB98.]</nowiki>
+******* SeaGreen <nowiki>{hedId=HED_0012939} [CSS-color 0x2E8B57.]</nowiki>
+******* SpringGreen <nowiki>{hedId=HED_0012940} [CSS-color 0x00FF7F.]</nowiki>
+******* Teal <nowiki>{hedId=HED_0012941} [CSS-color 0x008080.]</nowiki>
+******* YellowGreen <nowiki>{hedId=HED_0012942} [CSS-color 0x9ACD32.]</nowiki>
+****** Orange-color <nowiki>{hedId=HED_0012943} [CSS color group.]</nowiki>
+******* Coral <nowiki>{hedId=HED_0012944} [CSS-color 0xFF7F50.]</nowiki>
+******* DarkOrange <nowiki>{hedId=HED_0012945} [CSS-color 0xFF8C00.]</nowiki>
+******* Orange <nowiki>{hedId=HED_0012946} [CSS-color 0xFFA500.]</nowiki>
+******* OrangeRed <nowiki>{hedId=HED_0012947} [CSS-color 0xFF4500.]</nowiki>
+******* Tomato <nowiki>{hedId=HED_0012948} [CSS-color 0xFF6347.]</nowiki>
+****** Pink-color <nowiki>{hedId=HED_0012949} [CSS color group.]</nowiki>
+******* DeepPink <nowiki>{hedId=HED_0012950} [CSS-color 0xFF1493.]</nowiki>
+******* HotPink <nowiki>{hedId=HED_0012951} [CSS-color 0xFF69B4.]</nowiki>
+******* LightPink <nowiki>{hedId=HED_0012952} [CSS-color 0xFFB6C1.]</nowiki>
+******* MediumVioletRed <nowiki>{hedId=HED_0012953} [CSS-color 0xC71585.]</nowiki>
+******* PaleVioletRed <nowiki>{hedId=HED_0012954} [CSS-color 0xDB7093.]</nowiki>
+******* Pink <nowiki>{hedId=HED_0012955} [CSS-color 0xFFC0CB.]</nowiki>
+****** Purple-color <nowiki>{hedId=HED_0012956} [CSS color group.]</nowiki>
+******* BlueViolet <nowiki>{hedId=HED_0012957} [CSS-color 0x8A2BE2.]</nowiki>
+******* DarkMagenta <nowiki>{hedId=HED_0012958} [CSS-color 0x8B008B.]</nowiki>
+******* DarkOrchid <nowiki>{hedId=HED_0012959} [CSS-color 0x9932CC.]</nowiki>
+******* DarkSlateBlue <nowiki>{hedId=HED_0012960} [CSS-color 0x483D8B.]</nowiki>
+******* DarkViolet <nowiki>{hedId=HED_0012961} [CSS-color 0x9400D3.]</nowiki>
+******* Fuchsia <nowiki>{hedId=HED_0012962} [CSS-color 0xFF00FF.]</nowiki>
+******* Indigo <nowiki>{hedId=HED_0012963} [CSS-color 0x4B0082.]</nowiki>
+******* Lavender <nowiki>{hedId=HED_0012964} [CSS-color 0xE6E6FA.]</nowiki>
+******* Magenta <nowiki>{hedId=HED_0012965} [CSS-color 0xFF00FF.]</nowiki>
+******* MediumOrchid <nowiki>{hedId=HED_0012966} [CSS-color 0xBA55D3.]</nowiki>
+******* MediumPurple <nowiki>{hedId=HED_0012967} [CSS-color 0x9370DB.]</nowiki>
+******* MediumSlateBlue <nowiki>{hedId=HED_0012968} [CSS-color 0x7B68EE.]</nowiki>
+******* Orchid <nowiki>{hedId=HED_0012969} [CSS-color 0xDA70D6.]</nowiki>
+******* Plum <nowiki>{hedId=HED_0012970} [CSS-color 0xDDA0DD.]</nowiki>
+******* Purple <nowiki>{hedId=HED_0012971} [CSS-color 0x800080.]</nowiki>
+******* RebeccaPurple <nowiki>{hedId=HED_0012972} [CSS-color 0x663399.]</nowiki>
+******* SlateBlue <nowiki>{hedId=HED_0012973} [CSS-color 0x6A5ACD.]</nowiki>
+******* Thistle <nowiki>{hedId=HED_0012974} [CSS-color 0xD8BFD8.]</nowiki>
+******* Violet <nowiki>{hedId=HED_0012975} [CSS-color 0xEE82EE.]</nowiki>
+****** Red-color <nowiki>{hedId=HED_0012976} [CSS color group.]</nowiki>
+******* Crimson <nowiki>{hedId=HED_0012977} [CSS-color 0xDC143C.]</nowiki>
+******* DarkRed <nowiki>{hedId=HED_0012978} [CSS-color 0x8B0000.]</nowiki>
+******* DarkSalmon <nowiki>{hedId=HED_0012979} [CSS-color 0xE9967A.]</nowiki>
+******* FireBrick <nowiki>{hedId=HED_0012980} [CSS-color 0xB22222.]</nowiki>
+******* IndianRed <nowiki>{hedId=HED_0012981} [CSS-color 0xCD5C5C.]</nowiki>
+******* LightCoral <nowiki>{hedId=HED_0012982} [CSS-color 0xF08080.]</nowiki>
+******* LightSalmon <nowiki>{hedId=HED_0012983} [CSS-color 0xFFA07A.]</nowiki>
+******* Red <nowiki>{hedId=HED_0012984} [CSS-color 0xFF0000.]</nowiki>
+******* Salmon <nowiki>{hedId=HED_0012985} [CSS-color 0xFA8072.]</nowiki>
+****** White-color <nowiki>{hedId=HED_0012986} [CSS color group.]</nowiki>
+******* AliceBlue <nowiki>{hedId=HED_0012987} [CSS-color 0xF0F8FF.]</nowiki>
+******* AntiqueWhite <nowiki>{hedId=HED_0012988} [CSS-color 0xFAEBD7.]</nowiki>
+******* Azure <nowiki>{hedId=HED_0012989} [CSS-color 0xF0FFFF.]</nowiki>
+******* Beige <nowiki>{hedId=HED_0012990} [CSS-color 0xF5F5DC.]</nowiki>
+******* FloralWhite <nowiki>{hedId=HED_0012991} [CSS-color 0xFFFAF0.]</nowiki>
+******* GhostWhite <nowiki>{hedId=HED_0012992} [CSS-color 0xF8F8FF.]</nowiki>
+******* HoneyDew <nowiki>{hedId=HED_0012993} [CSS-color 0xF0FFF0.]</nowiki>
+******* Ivory <nowiki>{hedId=HED_0012994} [CSS-color 0xFFFFF0.]</nowiki>
+******* LavenderBlush <nowiki>{hedId=HED_0012995} [CSS-color 0xFFF0F5.]</nowiki>
+******* Linen <nowiki>{hedId=HED_0012996} [CSS-color 0xFAF0E6.]</nowiki>
+******* MintCream <nowiki>{hedId=HED_0012997} [CSS-color 0xF5FFFA.]</nowiki>
+******* MistyRose <nowiki>{hedId=HED_0012998} [CSS-color 0xFFE4E1.]</nowiki>
+******* OldLace <nowiki>{hedId=HED_0012999} [CSS-color 0xFDF5E6.]</nowiki>
+******* SeaShell <nowiki>{hedId=HED_0013000} [CSS-color 0xFFF5EE.]</nowiki>
+******* Snow <nowiki>{hedId=HED_0013001} [CSS-color 0xFFFAFA.]</nowiki>
+******* White <nowiki>{hedId=HED_0013002} [CSS-color 0xFFFFFF.]</nowiki>
+******* WhiteSmoke <nowiki>{hedId=HED_0013003} [CSS-color 0xF5F5F5.]</nowiki>
+****** Yellow-color <nowiki>{hedId=HED_0013004} [CSS color group.]</nowiki>
+******* DarkKhaki <nowiki>{hedId=HED_0013005} [CSS-color 0xBDB76B.]</nowiki>
+******* Gold <nowiki>{hedId=HED_0013006} [CSS-color 0xFFD700.]</nowiki>
+******* Khaki <nowiki>{hedId=HED_0013007} [CSS-color 0xF0E68C.]</nowiki>
+******* LemonChiffon <nowiki>{hedId=HED_0013008} [CSS-color 0xFFFACD.]</nowiki>
+******* LightGoldenRodYellow <nowiki>{hedId=HED_0013009} [CSS-color 0xFAFAD2.]</nowiki>
+******* LightYellow <nowiki>{hedId=HED_0013010} [CSS-color 0xFFFFE0.]</nowiki>
+******* Moccasin <nowiki>{hedId=HED_0013011} [CSS-color 0xFFE4B5.]</nowiki>
+******* PaleGoldenRod <nowiki>{hedId=HED_0013012} [CSS-color 0xEEE8AA.]</nowiki>
+******* PapayaWhip <nowiki>{hedId=HED_0013013} [CSS-color 0xFFEFD5.]</nowiki>
+******* PeachPuff <nowiki>{hedId=HED_0013014} [CSS-color 0xFFDAB9.]</nowiki>
+******* Yellow <nowiki>{hedId=HED_0013015} [CSS-color 0xFFFF00.]</nowiki>
+***** Color-shade <nowiki>{hedId=HED_0013016} [A slight degree of difference between colors, especially with regard to how light or dark it is or as distinguished from one nearly like it.]</nowiki>
+****** Dark-shade <nowiki>{hedId=HED_0013017} [A color tone not reflecting much light.]</nowiki>
+****** Light-shade <nowiki>{hedId=HED_0013018} [A color tone reflecting more light.]</nowiki>
+***** Grayscale <nowiki>{hedId=HED_0013019} [Using a color map composed of shades of gray, varying from black at the weakest intensity to white at the strongest.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0013020} [White intensity between 0 and 1.]</nowiki>
+***** HSV-color <nowiki>{hedId=HED_0013021} [A color representation that models how colors appear under light.]</nowiki>
+****** HSV-value <nowiki>{hedId=HED_0013022} [An attribute of a visual sensation according to which an area appears to emit more or less light.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0013023}</nowiki>
+****** Hue <nowiki>{hedId=HED_0013024} [Attribute of a visual sensation according to which an area appears to be similar to one of the perceived colors.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0013025} [Angular value between 0 and 360.]</nowiki>
+****** Saturation <nowiki>{hedId=HED_0013026} [Colorfulness of a stimulus relative to its own brightness.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0013027} [B value of RGB between 0 and 1.]</nowiki>
+***** RGB-color <nowiki>{hedId=HED_0013028} [A color from the RGB schema.]</nowiki>
+****** RGB-blue <nowiki>{hedId=HED_0013029} [The blue component.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0013030} [B value of RGB between 0 and 1.]</nowiki>
+****** RGB-green <nowiki>{hedId=HED_0013031} [The green component.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0013032} [G value of RGB between 0 and 1.]</nowiki>
+****** RGB-red <nowiki>{hedId=HED_0013033} [The red component.]</nowiki>
+*******  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0013034} [R value of RGB between 0 and 1.]</nowiki>
+**** Luminance <nowiki>{hedId=HED_0013035} [A quality that exists by virtue of the luminous intensity per unit area projected in a given direction.]</nowiki>
+**** Luminance-contrast <nowiki>{suggestedTag=Percentage, suggestedTag=Ratio, hedId=HED_0013036} [The difference in luminance in specific portions of a scene or image.]</nowiki>
+*****  <nowiki># {takesValue, valueClass=numericClass, hedId=HED_0013037} [A non-negative value, usually in the range 0 to 1 or alternative 0 to 100, if representing a percentage.]</nowiki>
+**** Opacity <nowiki>{hedId=HED_0013038} [A measure of impenetrability to light.]</nowiki>
+** Sensory-presentation <nowiki>{hedId=HED_0013039} [The entity has a sensory manifestation.]</nowiki>
+*** Auditory-presentation <nowiki>{hedId=HED_0013040} [The sense of hearing is used in the presentation to the user.]</nowiki>
+**** Loudspeaker-separation <nowiki>{suggestedTag=Distance, hedId=HED_0013041} [The distance between two loudspeakers. Grouped with the Distance tag.]</nowiki>
+**** Monophonic <nowiki>{hedId=HED_0013042} [Relating to sound transmission, recording, or reproduction involving a single transmission path.]</nowiki>
+**** Silent <nowiki>{hedId=HED_0013043} [The absence of ambient audible sound or the state of having ceased to produce sounds.]</nowiki>
+**** Stereophonic <nowiki>{hedId=HED_0013044} [Relating to, or constituting sound reproduction involving the use of separated microphones and two transmission channels to achieve the sound separation of a live hearing.]</nowiki>
+*** Gustatory-presentation <nowiki>{hedId=HED_0013045} [The sense of taste used in the presentation to the user.]</nowiki>
+*** Olfactory-presentation <nowiki>{hedId=HED_0013046} [The sense of smell used in the presentation to the user.]</nowiki>
+*** Somatic-presentation <nowiki>{hedId=HED_0013047} [The nervous system is used in the presentation to the user.]</nowiki>
+*** Tactile-presentation <nowiki>{hedId=HED_0013048} [The sense of touch used in the presentation to the user.]</nowiki>
+*** Vestibular-presentation <nowiki>{hedId=HED_0013049} [The sense balance used in the presentation to the user.]</nowiki>
+*** Visual-presentation <nowiki>{hedId=HED_0013050} [The sense of sight used in the presentation to the user.]</nowiki>
+**** 2D-view <nowiki>{hedId=HED_0013051} [A view showing only two dimensions.]</nowiki>
+**** 3D-view <nowiki>{hedId=HED_0013052} [A view showing three dimensions.]</nowiki>
+**** Background-view <nowiki>{hedId=HED_0013053} [Parts of the view that are farthest from the viewer and usually the not part of the visual focus.]</nowiki>
+**** Bistable-view <nowiki>{hedId=HED_0013054} [Something having two stable visual forms that have two distinguishable stable forms as in optical illusions.]</nowiki>
+**** Foreground-view <nowiki>{hedId=HED_0013055} [Parts of the view that are closest to the viewer and usually the most important part of the visual focus.]</nowiki>
+**** Foveal-view <nowiki>{hedId=HED_0013056} [Visual presentation directly on the fovea. A view projected on the small depression in the retina containing only cones and where vision is most acute.]</nowiki>
+**** Map-view <nowiki>{hedId=HED_0013057} [A diagrammatic representation of an area of land or sea showing physical features, cities, roads.]</nowiki>
+***** Aerial-view <nowiki>{hedId=HED_0013058} [Elevated view of an object from above, with a perspective as though the observer were a bird.]</nowiki>
+***** Satellite-view <nowiki>{hedId=HED_0013059} [A representation as captured by technology such as a satellite.]</nowiki>
+***** Street-view <nowiki>{hedId=HED_0013060} [A 360-degrees panoramic view from a position on the ground.]</nowiki>
+**** Peripheral-view <nowiki>{hedId=HED_0013061} [Indirect vision as it occurs outside the point of fixation.]</nowiki>
+* Task-property <nowiki>{extensionAllowed, hedId=HED_0013062} [Something that pertains to a task.]</nowiki>
+** Task-action-type <nowiki>{hedId=HED_0013063} [How an agent action should be interpreted in terms of the task specification.]</nowiki>
+*** Appropriate-action <nowiki>{relatedTag=Inappropriate-action, hedId=HED_0013064} [An action suitable or proper in the circumstances.]</nowiki>
+*** Correct-action <nowiki>{relatedTag=Incorrect-action, relatedTag=Indeterminate-action, hedId=HED_0013065} [An action that was a correct response in the context of the task.]</nowiki>
+*** Correction <nowiki>{hedId=HED_0013066} [An action offering an improvement to replace a mistake or error.]</nowiki>
+*** Done-indication <nowiki>{relatedTag=Ready-indication, hedId=HED_0013067} [An action that indicates that the participant has completed this step in the task.]</nowiki>
+*** Imagined-action <nowiki>{hedId=HED_0013068} [Form a mental image or concept of something. This is used to identity something that only happened in the imagination of the participant as in imagined movements in motor imagery paradigms.]</nowiki>
+*** Inappropriate-action <nowiki>{relatedTag=Appropriate-action, hedId=HED_0013069} [An action not in keeping with what is correct or proper for the task.]</nowiki>
+*** Incorrect-action <nowiki>{relatedTag=Correct-action, relatedTag=Indeterminate-action, hedId=HED_0013070} [An action considered wrong or incorrect in the context of the task.]</nowiki>
+*** Indeterminate-action <nowiki>{relatedTag=Correct-action, relatedTag=Incorrect-action, relatedTag=Miss, relatedTag=Near-miss, hedId=HED_0013071} [An action that cannot be distinguished between two or more possibilities in the current context. This tag might be applied when an outside evaluator or a classification algorithm cannot determine a definitive result.]</nowiki>
+*** Miss <nowiki>{relatedTag=Near-miss, hedId=HED_0013072} [An action considered to be a failure in the context of the task. For example, if the agent is supposed to try to hit a target and misses.]</nowiki>
+*** Near-miss <nowiki>{relatedTag=Miss, hedId=HED_0013073} [An action barely satisfied the requirements of the task. In a driving experiment for example this could pertain to a narrowly avoided collision or other accident.]</nowiki>
+*** Omitted-action <nowiki>{hedId=HED_0013074} [An expected response was skipped.]</nowiki>
+*** Ready-indication <nowiki>{relatedTag=Done-indication, hedId=HED_0013075} [An action that indicates that the participant is ready to perform the next step in the task.]</nowiki>
+** Task-attentional-demand <nowiki>{hedId=HED_0013076} [Strategy for allocating attention toward goal-relevant information.]</nowiki>
+*** Bottom-up-attention <nowiki>{relatedTag=Top-down-attention, hedId=HED_0013077} [Attentional guidance purely by externally driven factors to stimuli that are salient because of their inherent properties relative to the background. Sometimes this is referred to as stimulus driven.]</nowiki>
+*** Covert-attention <nowiki>{relatedTag=Overt-attention, hedId=HED_0013078} [Paying attention without moving the eyes.]</nowiki>
+*** Divided-attention <nowiki>{relatedTag=Focused-attention, hedId=HED_0013079} [Integrating parallel multiple stimuli. Behavior involving responding simultaneously to multiple tasks or multiple task demands.]</nowiki>
+*** Focused-attention <nowiki>{relatedTag=Divided-attention, hedId=HED_0013080} [Responding discretely to specific visual, auditory, or tactile stimuli.]</nowiki>
+*** Orienting-attention <nowiki>{hedId=HED_0013081} [Directing attention to a target stimulus.]</nowiki>
+*** Overt-attention <nowiki>{relatedTag=Covert-attention, hedId=HED_0013082} [Selectively processing one location over others by moving the eyes to point at that location.]</nowiki>
+*** Selective-attention <nowiki>{hedId=HED_0013083} [Maintaining a behavioral or cognitive set in the face of distracting or competing stimuli. Ability to pay attention to a limited array of all available sensory information.]</nowiki>
+*** Sustained-attention <nowiki>{hedId=HED_0013084} [Maintaining a consistent behavioral response during continuous and repetitive activity.]</nowiki>
+*** Switched-attention <nowiki>{hedId=HED_0013085} [Having to switch attention between two or more modalities of presentation.]</nowiki>
+*** Top-down-attention <nowiki>{relatedTag=Bottom-up-attention, hedId=HED_0013086} [Voluntary allocation of attention to certain features. Sometimes this is referred to goal-oriented attention.]</nowiki>
+** Task-effect-evidence <nowiki>{hedId=HED_0013087} [The evidence supporting the conclusion that the event had the specified effect.]</nowiki>
+*** Behavioral-evidence <nowiki>{hedId=HED_0013088} [An indication or conclusion based on the behavior of an agent.]</nowiki>
+*** Computational-evidence <nowiki>{hedId=HED_0013089} [A type of evidence in which data are produced, and/or generated, and/or analyzed on a computer.]</nowiki>
+*** External-evidence <nowiki>{hedId=HED_0013090} [A phenomenon that follows and is caused by some previous phenomenon.]</nowiki>
+*** Intended-effect <nowiki>{hedId=HED_0013091} [A phenomenon that is intended to follow and be caused by some previous phenomenon.]</nowiki>
+** Task-event-role <nowiki>{hedId=HED_0013092} [The purpose of an event with respect to the task.]</nowiki>
+*** Experimental-stimulus <nowiki>{hedId=HED_0013093} [Part of something designed to elicit a response in the experiment.]</nowiki>
+*** Incidental <nowiki>{hedId=HED_0013094} [A sensory or other type of event that is unrelated to the task or experiment.]</nowiki>
+*** Instructional <nowiki>{hedId=HED_0013095} [Usually associated with a sensory event intended to give instructions to the participant about the task or behavior.]</nowiki>
+*** Mishap <nowiki>{hedId=HED_0013096} [Unplanned disruption such as an equipment or experiment control abnormality or experimenter error.]</nowiki>
+*** Participant-response <nowiki>{hedId=HED_0013097} [Something related to a participant actions in performing the task.]</nowiki>
+*** Task-activity <nowiki>{hedId=HED_0013098} [Something that is part of the overall task or is necessary to the overall experiment but is not directly part of a stimulus-response cycle. Examples would be taking a survey or provided providing a silva sample.]</nowiki>
+*** Warning <nowiki>{hedId=HED_0013099} [Something that should warn the participant that the parameters of the task have been or are about to be exceeded such as a warning message about getting too close to the shoulder of the road in a driving task.]</nowiki>
+** Task-relationship <nowiki>{hedId=HED_0013100} [Specifying organizational importance of sub-tasks.]</nowiki>
+*** Background-subtask <nowiki>{hedId=HED_0013101} [A part of the task which should be performed in the background as for example inhibiting blinks due to instruction while performing the primary task.]</nowiki>
+*** Primary-subtask <nowiki>{hedId=HED_0013102} [A part of the task which should be the primary focus of the participant.]</nowiki>
+** Task-stimulus-role <nowiki>{hedId=HED_0013103} [The role the stimulus plays in the task.]</nowiki>
+*** Cue <nowiki>{hedId=HED_0013104} [A signal for an action, a pattern of stimuli indicating a particular response.]</nowiki>
+*** Distractor <nowiki>{hedId=HED_0013105} [A person or thing that distracts or a plausible but incorrect option in a multiple-choice question. In psychological studies this is sometimes referred to as a foil.]</nowiki>
+*** Expected <nowiki>{relatedTag=Unexpected, suggestedTag=Target, hedId=HED_0013106} [Considered likely, probable or anticipated. Something of low information value as in frequent non-targets in an RSVP paradigm.]</nowiki>
+*** Extraneous <nowiki>{hedId=HED_0013107} [Irrelevant or unrelated to the subject being dealt with.]</nowiki>
+*** Feedback <nowiki>{hedId=HED_0013108} [An evaluative response to an inquiry, process, event, or activity.]</nowiki>
+*** Go-signal <nowiki>{relatedTag=Stop-signal, hedId=HED_0013109} [An indicator to proceed with a planned action.]</nowiki>
+*** Meaningful <nowiki>{hedId=HED_0013110} [Conveying significant or relevant information.]</nowiki>
+*** Newly-learned <nowiki>{hedId=HED_0013111} [Representing recently acquired information or understanding.]</nowiki>
+*** Non-informative <nowiki>{hedId=HED_0013112} [Something that is not useful in forming an opinion or judging an outcome.]</nowiki>
+*** Non-target <nowiki>{relatedTag=Target, hedId=HED_0013113} [Something other than that done or looked for. Also tag Expected if the Non-target is frequent.]</nowiki>
+*** Not-meaningful <nowiki>{hedId=HED_0013114} [Not having a serious, important, or useful quality or purpose.]</nowiki>
+*** Novel <nowiki>{hedId=HED_0013115} [Having no previous example or precedent or parallel.]</nowiki>
+*** Oddball <nowiki>{relatedTag=Unexpected, suggestedTag=Target, hedId=HED_0013116} [Something unusual, or infrequent.]</nowiki>
+*** Penalty <nowiki>{hedId=HED_0013117} [A disadvantage, loss, or hardship due to some action.]</nowiki>
+*** Planned <nowiki>{relatedTag=Unplanned, hedId=HED_0013118} [Something that was decided on or arranged in advance.]</nowiki>
+*** Priming <nowiki>{hedId=HED_0013119} [An implicit memory effect in which exposure to a stimulus influences response to a later stimulus.]</nowiki>
+*** Query <nowiki>{hedId=HED_0013120} [A sentence of inquiry that asks for a reply.]</nowiki>
+*** Reward <nowiki>{hedId=HED_0013121} [A positive reinforcement for a desired action, behavior or response.]</nowiki>
+*** Stop-signal <nowiki>{relatedTag=Go-signal, hedId=HED_0013122} [An indicator that the agent should stop the current activity.]</nowiki>
+*** Target <nowiki>{hedId=HED_0013123} [Something fixed as a goal, destination, or point of examination.]</nowiki>
+*** Threat <nowiki>{hedId=HED_0013124} [An indicator that signifies hostility and predicts an increased probability of attack.]</nowiki>
+*** Timed <nowiki>{hedId=HED_0013125} [Something planned or scheduled to be done at a particular time or lasting for a specified amount of time.]</nowiki>
+*** Unexpected <nowiki>{relatedTag=Expected, hedId=HED_0013126} [Something that is not anticipated.]</nowiki>
+*** Unplanned <nowiki>{relatedTag=Planned, hedId=HED_0013127} [Something that has not been planned as part of the task.]</nowiki>
+
+'''Relation''' <nowiki>{extensionAllowed, hedId=HED_0013128} [Concerns the way in which two or more people or things are connected.]</nowiki>
+* Comparative-relation <nowiki>{hedId=HED_0013129} [Something considered in comparison to something else. The first entity is the focus.]</nowiki>
+** Approximately-equal-to <nowiki>{hedId=HED_0013130} [(A, (Approximately-equal-to, B)) indicates that A and B have almost the same value. Here A and B could refer to sizes, orders, positions or other quantities.]</nowiki>
+** Equal-to <nowiki>{hedId=HED_0013131} [(A, (Equal-to, B)) indicates that the size or order of A is the same as that of B.]</nowiki>
+** Greater-than <nowiki>{hedId=HED_0013132} [(A, (Greater-than, B)) indicates that the relative size or order of A is bigger than that of B.]</nowiki>
+** Greater-than-or-equal-to <nowiki>{hedId=HED_0013133} [(A, (Greater-than-or-equal-to, B)) indicates that the relative size or order of A is bigger than or the same as that of B.]</nowiki>
+** Less-than <nowiki>{hedId=HED_0013134} [(A, (Less-than, B)) indicates that A is smaller than B. Here A and B could refer to sizes, orders, positions or other quantities.]</nowiki>
+** Less-than-or-equal-to <nowiki>{hedId=HED_0013135} [(A, (Less-than-or-equal-to, B)) indicates that the relative size or order of A is smaller than or equal to B.]</nowiki>
+** Not-equal-to <nowiki>{hedId=HED_0013136} [(A, (Not-equal-to, B)) indicates that the size or order of A is not the same as that of B.]</nowiki>
+* Connective-relation <nowiki>{hedId=HED_0013137} [Indicates two entities are related in some way. The first entity is the focus.]</nowiki>
+** Belongs-to <nowiki>{hedId=HED_0013138} [(A, (Belongs-to, B)) indicates that A is a member of B.]</nowiki>
+** Connected-to <nowiki>{hedId=HED_0013139} [(A, (Connected-to, B)) indicates that A is related to B in some respect, usually through a direct link.]</nowiki>
+** Contained-in <nowiki>{hedId=HED_0013140} [(A, (Contained-in, B)) indicates that A is completely inside of B.]</nowiki>
+** Described-by <nowiki>{hedId=HED_0013141} [(A, (Described-by, B)) indicates that B provides information about A.]</nowiki>
+** From-to <nowiki>{hedId=HED_0013142} [(A, (From-to, B)) indicates a directional relation from A to B. A is considered the source.]</nowiki>
+** Group-of <nowiki>{hedId=HED_0013143} [(A, (Group-of, B)) indicates A is a group of items of type B.]</nowiki>
+** Implied-by <nowiki>{hedId=HED_0013144} [(A, (Implied-by, B)) indicates B is suggested by A.]</nowiki>
+** Includes <nowiki>{hedId=HED_0013145} [(A, (Includes, B)) indicates that A has B as a member or part.]</nowiki>
+** Interacts-with <nowiki>{hedId=HED_0013146} [(A, (Interacts-with, B)) indicates A and B interact, possibly reciprocally.]</nowiki>
+** Member-of <nowiki>{hedId=HED_0013147} [(A, (Member-of, B)) indicates A is a member of group B.]</nowiki>
+** Part-of <nowiki>{hedId=HED_0013148} [(A, (Part-of, B)) indicates A is a part of the whole B.]</nowiki>
+** Performed-by <nowiki>{hedId=HED_0013149} [(A, (Performed-by, B)) indicates that the action or procedure A was carried out by agent B.]</nowiki>
+** Performed-using <nowiki>{hedId=HED_0013150} [(A, (Performed-using, B)) indicates that the action or procedure A was accomplished using B.]</nowiki>
+** Related-to <nowiki>{hedId=HED_0013151} [(A, (Related-to, B)) indicates A has some relationship to B.]</nowiki>
+** Unrelated-to <nowiki>{hedId=HED_0013152} [(A, (Unrelated-to, B)) indicates that A is not related to B.For example, A is not related to Task.]</nowiki>
+* Directional-relation <nowiki>{hedId=HED_0013153} [A relationship indicating direction of change of one entity relative to another. The first entity is the focus.]</nowiki>
+** Away-from <nowiki>{hedId=HED_0013154} [(A, (Away-from, B)) indicates that A is going or has moved away from B. The meaning depends on A and B.]</nowiki>
+** Towards <nowiki>{hedId=HED_0013155} [(A, (Towards, B)) indicates that A is going to or has moved to B. The meaning depends on A and B.]</nowiki>
+* Logical-relation <nowiki>{hedId=HED_0013156} [Indicating a logical relationship between entities. The first entity is usually the focus.]</nowiki>
+** And <nowiki>{hedId=HED_0013157} [(A, (And, B)) means A and B are both in effect.]</nowiki>
+** Or <nowiki>{hedId=HED_0013158} [(A, (Or, B)) means at least one of A and B are in effect.]</nowiki>
+* Spatial-relation <nowiki>{hedId=HED_0013159} [Indicating a relationship about position between entities.]</nowiki>
+** Above <nowiki>{hedId=HED_0013160} [(A, (Above, B)) means A is in a place or position that is higher than B.]</nowiki>
+** Across-from <nowiki>{hedId=HED_0013161} [(A, (Across-from, B)) means A is on the opposite side of something from B.]</nowiki>
+** Adjacent-to <nowiki>{hedId=HED_0013162} [(A, (Adjacent-to, B)) indicates that A is next to B in time or space.]</nowiki>
+** Ahead-of <nowiki>{hedId=HED_0013163} [(A, (Ahead-of, B)) indicates that A is further forward in time or space in B.]</nowiki>
+** Around <nowiki>{hedId=HED_0013164} [(A, (Around, B)) means A is in or near the present place or situation of B.]</nowiki>
+** Behind <nowiki>{hedId=HED_0013165} [(A, (Behind, B)) means A is at or to the far side of B, typically so as to be hidden by it.]</nowiki>
+** Below <nowiki>{hedId=HED_0013166} [(A, (Below, B)) means A is in a place or position that is lower than the position of B.]</nowiki>
+** Between <nowiki>{hedId=HED_0013167} [(A, (Between, (B, C))) means A is in the space or interval separating B and C.]</nowiki>
+** Bilateral-to <nowiki>{hedId=HED_0013168} [(A, (Bilateral, B)) means A is on both sides of B or affects both sides of B.]</nowiki>
+** Bottom-edge-of <nowiki>{relatedTag=Left-edge-of, relatedTag=Right-edge-of, relatedTag=Top-edge-of, hedId=HED_0013169} [(A, (Bottom-edge-of, B)) means A is on the bottom most part or or near the boundary of B.]</nowiki>
+** Boundary-of <nowiki>{hedId=HED_0013170} [(A, (Boundary-of, B)) means A is on or part of the edge or boundary of B.]</nowiki>
+** Center-of <nowiki>{hedId=HED_0013171} [(A, (Center-of, B)) means A is at a point or or in an area that is approximately central within B.]</nowiki>
+** Close-to <nowiki>{hedId=HED_0013172} [(A, (Close-to, B)) means A is at a small distance from or is located near in space to B.]</nowiki>
+** Far-from <nowiki>{hedId=HED_0013173} [(A, (Far-from, B)) means A is at a large distance from or is not located near in space to B.]</nowiki>
+** In-front-of <nowiki>{hedId=HED_0013174} [(A, (In-front-of, B)) means A is in a position just ahead or at the front part of B, potentially partially blocking B from view.]</nowiki>
+** Left-edge-of <nowiki>{relatedTag=Bottom-edge-of, relatedTag=Right-edge-of, relatedTag=Top-edge-of, hedId=HED_0013175} [(A, (Left-edge-of, B)) means A is located on the left side of B on or near the boundary of B.]</nowiki>
+** Left-side-of <nowiki>{relatedTag=Right-side-of, hedId=HED_0013176} [(A, (Left-side-of, B)) means A is located on the left side of B usually as part of B.]</nowiki>
+** Lower-center-of <nowiki>{relatedTag=Center-of, relatedTag=Lower-left-of, relatedTag=Lower-right-of, relatedTag=Upper-center-of, relatedTag=Upper-right-of, hedId=HED_0013177} [(A, (Lower-center-of, B)) means A is situated on the lower center part of B (due south). This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Lower-left-of <nowiki>{relatedTag=Center-of, relatedTag=Lower-center-of, relatedTag=Lower-right-of, relatedTag=Upper-center-of, relatedTag=Upper-left-of, relatedTag=Upper-right-of, hedId=HED_0013178} [(A, (Lower-left-of, B)) means A is situated on the lower left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Lower-right-of <nowiki>{relatedTag=Center-of, relatedTag=Lower-center-of, relatedTag=Lower-left-of, relatedTag=Upper-left-of, relatedTag=Upper-center-of, relatedTag=Upper-left-of, relatedTag=Lower-right-of, hedId=HED_0013179} [(A, (Lower-right-of, B)) means A is situated on the lower right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Outside-of <nowiki>{hedId=HED_0013180} [(A, (Outside-of, B)) means A is located in the space around but not including B.]</nowiki>
+** Over <nowiki>{hedId=HED_0013181} [(A, (Over, B)) means A above is above B so as to cover or protect or A extends over the a general area as from a from a vantage point.]</nowiki>
+** Right-edge-of <nowiki>{relatedTag=Bottom-edge-of, relatedTag=Left-edge-of, relatedTag=Top-edge-of, hedId=HED_0013182} [(A, (Right-edge-of, B)) means A is located on the right side of B on or near the boundary of B.]</nowiki>
+** Right-side-of <nowiki>{relatedTag=Left-side-of, hedId=HED_0013183} [(A, (Right-side-of, B)) means A is located on the right side of B usually as part of B.]</nowiki>
+** To-left-of <nowiki>{hedId=HED_0013184} [(A, (To-left-of, B)) means A is located on or directed toward the side to the west of B when B is facing north. This term is used when A is not part of B.]</nowiki>
+** To-right-of <nowiki>{hedId=HED_0013185} [(A, (To-right-of, B)) means A is located on or directed toward the side to the east of B when B is facing north. This term is used when A is not part of B.]</nowiki>
+** Top-edge-of <nowiki>{relatedTag=Left-edge-of, relatedTag=Right-edge-of, relatedTag=Bottom-edge-of, hedId=HED_0013186} [(A, (Top-edge-of, B)) means A is on the uppermost part or or near the boundary of B.]</nowiki>
+** Top-of <nowiki>{hedId=HED_0013187} [(A, (Top-of, B)) means A is on the uppermost part, side, or surface of B.]</nowiki>
+** Underneath <nowiki>{hedId=HED_0013188} [(A, (Underneath, B)) means A is situated directly below and may be concealed by B.]</nowiki>
+** Upper-center-of <nowiki>{relatedTag=Center-of, relatedTag=Lower-center-of, relatedTag=Lower-left-of, relatedTag=Lower-right-of, relatedTag=Upper-center-of, relatedTag=Upper-right-of, hedId=HED_0013189} [(A, (Upper-center-of, B)) means A is situated on the upper center part of B (due north). This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Upper-left-of <nowiki>{relatedTag=Center-of, relatedTag=Lower-center-of, relatedTag=Lower-left-of, relatedTag=Lower-right-of, relatedTag=Upper-center-of, relatedTag=Upper-right-of, hedId=HED_0013190} [(A, (Upper-left-of, B)) means A is situated on the upper left part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Upper-right-of <nowiki>{relatedTag=Center-of, relatedTag=Lower-center-of, relatedTag=Lower-left-of, relatedTag=Upper-left-of, relatedTag=Upper-center-of, relatedTag=Lower-right-of, hedId=HED_0013191} [(A, (Upper-right-of, B)) means A is situated on the upper right part of B. This relation is often used to specify qualitative information about screen position.]</nowiki>
+** Within <nowiki>{hedId=HED_0013192} [(A, (Within, B)) means A is on the inside of or contained in B.]</nowiki>
+* Temporal-relation <nowiki>{hedId=HED_0013193} [A relationship that includes a temporal or time-based component.]</nowiki>
+** After <nowiki>{hedId=HED_0013194} [(A, (After, B)) means A happens at a time subsequent to a reference time related to B.]</nowiki>
+** Asynchronous-with <nowiki>{hedId=HED_0013195} [(A, (Asynchronous-with, B)) means A happens at times not occurring at the same time or having the same period or phase as B.]</nowiki>
+** Before <nowiki>{hedId=HED_0013196} [(A, (Before, B)) means A happens at a time earlier in time or order than B.]</nowiki>
+** During <nowiki>{hedId=HED_0013197} [(A, (During, B)) means A happens at some point in a given period of time in which B is ongoing.]</nowiki>
+** Synchronous-with <nowiki>{hedId=HED_0013198} [(A, (Synchronous-with, B)) means A happens at occurs at the same time or rate as B.]</nowiki>
+** Waiting-for <nowiki>{hedId=HED_0013199} [(A, (Waiting-for, B)) means A pauses for something to happen in B.]</nowiki>
+
+
+!# end schema
+
+'''Unit classes'''
+* accelerationUnits <nowiki>{defaultUnits=m-per-s^2, hedId=HED_0011500}</nowiki>
+** m-per-s^2 <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, allowedCharacter=caret, hedId=HED_0011600}</nowiki>
+* angleUnits <nowiki>{defaultUnits=radian, hedId=HED_0011501}</nowiki>
+** radian <nowiki>{SIUnit, conversionFactor=1.0, hedId=HED_0011601}</nowiki>
+** rad <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, hedId=HED_0011602}</nowiki>
+** degree <nowiki>{conversionFactor=0.0174533, hedId=HED_0011603}</nowiki>
+* areaUnits <nowiki>{defaultUnits=m^2, hedId=HED_0011502}</nowiki>
+** m^2 <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, allowedCharacter=caret, hedId=HED_0011604}</nowiki>
+* currencyUnits <nowiki>{defaultUnits=$, hedId=HED_0011503} [Units indicating the worth of something.]</nowiki>
+** dollar <nowiki>{conversionFactor=1.0, hedId=HED_0011605}</nowiki>
+** $ <nowiki>{unitPrefix, unitSymbol, conversionFactor=1.0, allowedCharacter=dollar, hedId=HED_0011606}</nowiki>
+** euro <nowiki>{hedId=HED_0011607} [The official currency of a large subset of member countries of the European Union.]</nowiki>
+** point <nowiki>{hedId=HED_0011608} [An arbitrary unit of value, usually an integer indicating reward or penalty.]</nowiki>
+* electricPotentialUnits <nowiki>{defaultUnits=uV, hedId=HED_0011504}</nowiki>
+** V <nowiki>{SIUnit, unitSymbol, conversionFactor=0.000001, hedId=HED_0011609}</nowiki>
+** uV <nowiki>{conversionFactor=1.0, hedId=HED_0011644} [Added as a direct unit because it is the default unit.]</nowiki>
+** volt <nowiki>{SIUnit, conversionFactor=0.000001, hedId=HED_0011610}</nowiki>
+* frequencyUnits <nowiki>{defaultUnits=Hz, hedId=HED_0011505}</nowiki>
+** hertz <nowiki>{SIUnit, conversionFactor=1.0, hedId=HED_0011611}</nowiki>
+** Hz <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, hedId=HED_0011612}</nowiki>
+* intensityUnits <nowiki>{defaultUnits=dB, hedId=HED_0011506}</nowiki>
+** dB <nowiki>{unitSymbol, conversionFactor=1.0, hedId=HED_0011613} [Intensity expressed as ratio to a threshold. May be used for sound intensity.]</nowiki>
+** candela <nowiki>{SIUnit, hedId=HED_0011614} [Units used to express light intensity.]</nowiki>
+** cd <nowiki>{SIUnit, unitSymbol, hedId=HED_0011615} [Units used to express light intensity.]</nowiki>
+* jerkUnits <nowiki>{defaultUnits=m-per-s^3, hedId=HED_0011507}</nowiki>
+** m-per-s^3 <nowiki>{unitSymbol, conversionFactor=1.0, allowedCharacter=caret, hedId=HED_0011616}</nowiki>
+* magneticFieldUnits <nowiki>{defaultUnits=T, hedId=HED_0011508}</nowiki>
+** tesla <nowiki>{SIUnit, conversionFactor=10e-15, hedId=HED_0011617}</nowiki>
+** T <nowiki>{SIUnit, unitSymbol, conversionFactor=10e-15, hedId=HED_0011618}</nowiki>
+* memorySizeUnits <nowiki>{defaultUnits=B, hedId=HED_0011509}</nowiki>
+** byte <nowiki>{SIUnit, conversionFactor=1.0, hedId=HED_0011619}</nowiki>
+** B <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, hedId=HED_0011620}</nowiki>
+* physicalLengthUnits <nowiki>{defaultUnits=m, hedId=HED_0011510}</nowiki>
+** foot <nowiki>{conversionFactor=0.3048, hedId=HED_0011621}</nowiki>
+** inch <nowiki>{conversionFactor=0.0254, hedId=HED_0011622}</nowiki>
+** meter <nowiki>{SIUnit, conversionFactor=1.0, hedId=HED_0011623}</nowiki>
+** metre <nowiki>{SIUnit, conversionFactor=1.0, hedId=HED_0011624}</nowiki>
+** m <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, hedId=HED_0011625}</nowiki>
+** mile <nowiki>{conversionFactor=1609.34, hedId=HED_0011626}</nowiki>
+* speedUnits <nowiki>{defaultUnits=m-per-s, hedId=HED_0011511}</nowiki>
+** m-per-s <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, hedId=HED_0011627}</nowiki>
+** mph <nowiki>{unitSymbol, conversionFactor=0.44704, hedId=HED_0011628}</nowiki>
+** kph <nowiki>{unitSymbol, conversionFactor=0.277778, hedId=HED_0011629}</nowiki>
+* temperatureUnits <nowiki>{defaultUnits=degree-Celsius, hedId=HED_0011512}</nowiki>
+** degree-Celsius <nowiki>{SIUnit, conversionFactor=1.0, hedId=HED_0011630}</nowiki>
+** degree Celsius <nowiki>{deprecatedFrom=8.2.0, SIUnit, conversionFactor=1.0, hedId=HED_0011631} [Units are not allowed to have spaces. Use degree-Celsius or oC instead.]</nowiki>
+** oC <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, hedId=HED_0011632}</nowiki>
+* timeUnits <nowiki>{defaultUnits=s, hedId=HED_0011513}</nowiki>
+** second <nowiki>{SIUnit, conversionFactor=1.0, hedId=HED_0011633}</nowiki>
+** s <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, hedId=HED_0011634}</nowiki>
+** day <nowiki>{conversionFactor=86400, hedId=HED_0011635}</nowiki>
+** month <nowiki>{hedId=HED_0011645}</nowiki>
+** minute <nowiki>{conversionFactor=60, hedId=HED_0011636}</nowiki>
+** hour <nowiki>{conversionFactor=3600, hedId=HED_0011637} [Should be in 24-hour format.]</nowiki>
+** year <nowiki>{hedId=HED_0011638} [Years do not have a constant conversion factor to seconds.]</nowiki>
+* volumeUnits <nowiki>{defaultUnits=m^3, hedId=HED_0011514}</nowiki>
+** m^3 <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, allowedCharacter=caret, hedId=HED_0011639}</nowiki>
+* weightUnits <nowiki>{defaultUnits=g, hedId=HED_0011515}</nowiki>
+** g <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, hedId=HED_0011640}</nowiki>
+** gram <nowiki>{SIUnit, conversionFactor=1.0, hedId=HED_0011641}</nowiki>
+** pound <nowiki>{conversionFactor=453.592, hedId=HED_0011642}</nowiki>
+** lb <nowiki>{conversionFactor=453.592, hedId=HED_0011643}</nowiki>
+
+'''Unit modifiers'''
+* deca <nowiki>{SIUnitModifier, conversionFactor=10.0, hedId=HED_0011400} [SI unit multiple representing 10e1.]</nowiki>
+* da <nowiki>{SIUnitSymbolModifier, conversionFactor=10.0, hedId=HED_0011401} [SI unit multiple representing 10e1.]</nowiki>
+* hecto <nowiki>{SIUnitModifier, conversionFactor=100.0, hedId=HED_0011402} [SI unit multiple representing 10e2.]</nowiki>
+* h <nowiki>{SIUnitSymbolModifier, conversionFactor=100.0, hedId=HED_0011403} [SI unit multiple representing 10e2.]</nowiki>
+* kilo <nowiki>{SIUnitModifier, conversionFactor=1000.0, hedId=HED_0011404} [SI unit multiple representing 10e3.]</nowiki>
+* k <nowiki>{SIUnitSymbolModifier, conversionFactor=1000.0, hedId=HED_0011405} [SI unit multiple representing 10e3.]</nowiki>
+* mega <nowiki>{SIUnitModifier, conversionFactor=10e6, hedId=HED_0011406} [SI unit multiple representing 10e6.]</nowiki>
+* M <nowiki>{SIUnitSymbolModifier, conversionFactor=10e6, hedId=HED_0011407} [SI unit multiple representing 10e6.]</nowiki>
+* giga <nowiki>{SIUnitModifier, conversionFactor=10e9, hedId=HED_0011408} [SI unit multiple representing 10e9.]</nowiki>
+* G <nowiki>{SIUnitSymbolModifier, conversionFactor=10e9, hedId=HED_0011409} [SI unit multiple representing 10e9.]</nowiki>
+* tera <nowiki>{SIUnitModifier, conversionFactor=10e12, hedId=HED_0011410} [SI unit multiple representing 10e12.]</nowiki>
+* T <nowiki>{SIUnitSymbolModifier, conversionFactor=10e12, hedId=HED_0011411} [SI unit multiple representing 10e12.]</nowiki>
+* peta <nowiki>{SIUnitModifier, conversionFactor=10e15, hedId=HED_0011412} [SI unit multiple representing 10e15.]</nowiki>
+* P <nowiki>{SIUnitSymbolModifier, conversionFactor=10e15, hedId=HED_0011413} [SI unit multiple representing 10e15.]</nowiki>
+* exa <nowiki>{SIUnitModifier, conversionFactor=10e18, hedId=HED_0011414} [SI unit multiple representing 10e18.]</nowiki>
+* E <nowiki>{SIUnitSymbolModifier, conversionFactor=10e18, hedId=HED_0011415} [SI unit multiple representing 10e18.]</nowiki>
+* zetta <nowiki>{SIUnitModifier, conversionFactor=10e21, hedId=HED_0011416} [SI unit multiple representing 10e21.]</nowiki>
+* Z <nowiki>{SIUnitSymbolModifier, conversionFactor=10e21, hedId=HED_0011417} [SI unit multiple representing 10e21.]</nowiki>
+* yotta <nowiki>{SIUnitModifier, conversionFactor=10e24, hedId=HED_0011418} [SI unit multiple representing 10e24.]</nowiki>
+* Y <nowiki>{SIUnitSymbolModifier, conversionFactor=10e24, hedId=HED_0011419} [SI unit multiple representing 10e24.]</nowiki>
+* deci <nowiki>{SIUnitModifier, conversionFactor=0.1, hedId=HED_0011420} [SI unit submultiple representing 10e-1.]</nowiki>
+* d <nowiki>{SIUnitSymbolModifier, conversionFactor=0.1, hedId=HED_0011421} [SI unit submultiple representing 10e-1.]</nowiki>
+* centi <nowiki>{SIUnitModifier, conversionFactor=0.01, hedId=HED_0011422} [SI unit submultiple representing 10e-2.]</nowiki>
+* c <nowiki>{SIUnitSymbolModifier, conversionFactor=0.01, hedId=HED_0011423} [SI unit submultiple representing 10e-2.]</nowiki>
+* milli <nowiki>{SIUnitModifier, conversionFactor=0.001, hedId=HED_0011424} [SI unit submultiple representing 10e-3.]</nowiki>
+* m <nowiki>{SIUnitSymbolModifier, conversionFactor=0.001, hedId=HED_0011425} [SI unit submultiple representing 10e-3.]</nowiki>
+* micro <nowiki>{SIUnitModifier, conversionFactor=10e-6, hedId=HED_0011426} [SI unit submultiple representing 10e-6.]</nowiki>
+* u <nowiki>{SIUnitSymbolModifier, conversionFactor=10e-6, hedId=HED_0011427} [SI unit submultiple representing 10e-6.]</nowiki>
+* nano <nowiki>{SIUnitModifier, conversionFactor=10e-9, hedId=HED_0011428} [SI unit submultiple representing 10e-9.]</nowiki>
+* n <nowiki>{SIUnitSymbolModifier, conversionFactor=10e-9, hedId=HED_0011429} [SI unit submultiple representing 10e-9.]</nowiki>
+* pico <nowiki>{SIUnitModifier, conversionFactor=10e-12, hedId=HED_0011430} [SI unit submultiple representing 10e-12.]</nowiki>
+* p <nowiki>{SIUnitSymbolModifier, conversionFactor=10e-12, hedId=HED_0011431} [SI unit submultiple representing 10e-12.]</nowiki>
+* femto <nowiki>{SIUnitModifier, conversionFactor=10e-15, hedId=HED_0011432} [SI unit submultiple representing 10e-15.]</nowiki>
+* f <nowiki>{SIUnitSymbolModifier, conversionFactor=10e-15, hedId=HED_0011433} [SI unit submultiple representing 10e-15.]</nowiki>
+* atto <nowiki>{SIUnitModifier, conversionFactor=10e-18, hedId=HED_0011434} [SI unit submultiple representing 10e-18.]</nowiki>
+* a <nowiki>{SIUnitSymbolModifier, conversionFactor=10e-18, hedId=HED_0011435} [SI unit submultiple representing 10e-18.]</nowiki>
+* zepto <nowiki>{SIUnitModifier, conversionFactor=10e-21, hedId=HED_0011436} [SI unit submultiple representing 10e-21.]</nowiki>
+* z <nowiki>{SIUnitSymbolModifier, conversionFactor=10e-21, hedId=HED_0011437} [SI unit submultiple representing 10e-21.]</nowiki>
+* yocto <nowiki>{SIUnitModifier, conversionFactor=10e-24, hedId=HED_0011438} [SI unit submultiple representing 10e-24.]</nowiki>
+* y <nowiki>{SIUnitSymbolModifier, conversionFactor=10e-24, hedId=HED_0011439} [SI unit submultiple representing 10e-24.]</nowiki>
+
+'''Value classes'''
+* dateTimeClass <nowiki>{allowedCharacter=digits, allowedCharacter=T, allowedCharacter=hyphen, allowedCharacter=colon, hedId=HED_0011301} [Date-times should conform to ISO8601 date-time format YYYY-MM-DDThh:mm:ss.000000Z (year, month, day, hour (24h), minute, second, optional fractional seconds, and optional UTC time indicator. Any variation on the full form is allowed.]</nowiki>
+* nameClass <nowiki>{allowedCharacter=letters, allowedCharacter=digits, allowedCharacter=underscore, allowedCharacter=hyphen, hedId=HED_0011302} [Value class designating values that have the characteristics of node names. The allowed characters are alphanumeric, hyphen, and underscore.]</nowiki>
+* numericClass <nowiki>{allowedCharacter=digits, allowedCharacter=E, allowedCharacter=e, allowedCharacter=plus, allowedCharacter=hyphen, allowedCharacter=period, hedId=HED_0011303} [Value must be a valid numerical value.]</nowiki>
+* posixPath <nowiki>{allowedCharacter=digits, allowedCharacter=letters, allowedCharacter=slash, allowedCharacter=colon, hedId=HED_0011304} [Posix path specification.]</nowiki>
+* textClass <nowiki>{allowedCharacter=text, hedId=HED_0011305} [Values that have the characteristics of text such as in descriptions. The text characters include printable characters (32 <= ASCII< 127) excluding comma, square bracket and curly braces as well as non ASCII (ASCII codes > 127).]</nowiki>
+
+'''Schema attributes'''
+* hedId <nowiki>{elementDomain, stringRange, hedId=HED_0010500, annotationProperty} [The unique identifier of this element in the HED namespace.]</nowiki>
+* requireChild <nowiki>{tagDomain, boolRange, hedId=HED_0010501, annotationProperty} [This tag must have a descendent.]</nowiki>
+* rooted <nowiki>{tagDomain, tagRange, hedId=HED_0010502, annotationProperty} [This top-level library schema node should have a parent which is the indicated node in the partnered standard schema.]</nowiki>
+* takesValue <nowiki>{tagDomain, boolRange, hedId=HED_0010503, annotationProperty} [This tag is a hashtag placeholder that is expected to be replaced with a user-defined value.]</nowiki>
+* defaultUnits <nowiki>{unitClassDomain, unitRange, hedId=HED_0010104} [The default units to use if the placeholder has a unit class but the substituted value has no units.]</nowiki>
+* isPartOf <nowiki>{tagDomain, tagRange, hedId=HED_0010109} [This tag is part of the indicated tag -- as in the nose is part of the face.]</nowiki>
+* relatedTag <nowiki>{tagDomain, tagRange, hedId=HED_0010105} [A HED tag that is closely related to this tag. This attribute is used by tagging tools.]</nowiki>
+* suggestedTag <nowiki>{tagDomain, tagRange, hedId=HED_0010106} [A tag that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.]</nowiki>
+* unitClass <nowiki>{tagDomain, unitClassRange, hedId=HED_0010107} [The unit class that the value of a placeholder node can belong to.]</nowiki>
+* valueClass <nowiki>{tagDomain, valueClassRange, hedId=HED_0010108} [Type of value taken on by the value of a placeholder node.]</nowiki>
+* allowedCharacter <nowiki>{unitDomain, unitModifierDomain, valueClassDomain, stringRange, hedId=HED_0010304} [A special character that is allowed in expressing the value of a placeholder of a specified value class. Allowed characters may be listed individual, named individually, or named as a group as specified in Section 2.2 Character sets and restrictions of the HED specification.]</nowiki>
+* conversionFactor <nowiki>{unitDomain, unitModifierDomain, numericRange, hedId=HED_0010305} [The factor to multiply these units or unit modifiers by to convert to default units.]</nowiki>
+* deprecatedFrom <nowiki>{elementDomain, stringRange, hedId=HED_0010306} [The latest schema version in which the element was not deprecated.]</nowiki>
+* extensionAllowed <nowiki>{tagDomain, boolRange, hedId=HED_0010307} [Users can add unlimited levels of child nodes under this tag. This tag is propagated to child nodes except for hashtag placeholders.]</nowiki>
+* inLibrary <nowiki>{elementDomain, stringRange, hedId=HED_0010309} [The named library schema that this schema element is from. This attribute is added by tools when a library schema is merged into its partnered standard schema.]</nowiki>
+* reserved <nowiki>{tagDomain, boolRange, hedId=HED_0010310} [This tag has special meaning and requires special handling by tools.]</nowiki>
+* SIUnit <nowiki>{unitDomain, boolRange, hedId=HED_0010311} [This unit element is an SI unit and can be modified by multiple and sub-multiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.]</nowiki>
+* SIUnitModifier <nowiki>{unitModifierDomain, boolRange, hedId=HED_0010312} [This SI unit modifier represents a multiple or sub-multiple of a base unit rather than a unit symbol.]</nowiki>
+* SIUnitSymbolModifier <nowiki>{unitModifierDomain, boolRange, hedId=HED_0010313} [This SI unit modifier represents a multiple or sub-multiple of a unit symbol rather than a base symbol.]</nowiki>
+* tagGroup <nowiki>{tagDomain, boolRange, hedId=HED_0010314} [This tag can only appear inside a tag group.]</nowiki>
+* topLevelTagGroup <nowiki>{tagDomain, boolRange, hedId=HED_0010315} [This tag (or its descendants) can only appear in a top-level tag group. There are additional tag-specific restrictions on what other tags can appear in the group with this tag.]</nowiki>
+* unique <nowiki>{tagDomain, boolRange, hedId=HED_0010316} [Only one of this tag or its descendants can be used in the event-level HED string.]</nowiki>
+* unitPrefix <nowiki>{unitDomain, boolRange, hedId=HED_0010317} [This unit is a prefix unit (e.g., dollar sign in the currency units).]</nowiki>
+* unitSymbol <nowiki>{unitDomain, boolRange, hedId=HED_0010318} [This tag is an abbreviation or symbol representing a type of unit. Unit symbols represent both the singular and the plural and thus cannot be pluralized.]</nowiki>
+
+'''Properties'''
+* annotationProperty <nowiki>{hedId=HED_0010701} [The value is not inherited by child nodes.]</nowiki>
+* boolRange <nowiki>{hedId=HED_0010702} [This schema attribute's value can be true or false. This property was formerly named boolProperty.]</nowiki>
+* elementDomain <nowiki>{hedId=HED_0010703} [This schema attribute can apply to any type of element class (i.e., tag, unit, unit class, unit modifier, or value class). This property was formerly named elementProperty.]</nowiki>
+* tagDomain <nowiki>{hedId=HED_0010704} [This schema attribute can apply to node (tag-term) elements. This was added so attributes could apply to multiple types of elements. This property was formerly named nodeProperty.]</nowiki>
+* tagRange <nowiki>{hedId=HED_0010705} [This schema attribute's value can be a node. This property was formerly named nodeProperty.]</nowiki>
+* numericRange <nowiki>{hedId=HED_0010706} [This schema attribute's value can be numeric.]</nowiki>
+* stringRange <nowiki>{hedId=HED_0010707} [This schema attribute's value can be a string.]</nowiki>
+* unitClassDomain <nowiki>{hedId=HED_0010708} [This schema attribute can apply to unit classes. This property was formerly named unitClassProperty.]</nowiki>
+* unitClassRange <nowiki>{hedId=HED_0010709} [This schema attribute's value can be a unit class.]</nowiki>
+* unitModifierDomain <nowiki>{hedId=HED_0010710} [This schema attribute can apply to unit modifiers. This property was formerly named unitModifierProperty.]</nowiki>
+* unitDomain <nowiki>{hedId=HED_0010711} [This schema attribute can apply to units. This property was formerly named unitProperty.]</nowiki>
+* unitRange <nowiki>{hedId=HED_0010712} [This schema attribute's value can be units.]</nowiki>
+* valueClassDomain <nowiki>{hedId=HED_0010713} [This schema attribute can apply to value classes. This property was formerly named valueClassProperty.]</nowiki>
+* valueClassRange <nowiki>{hedId=HED_0010714} [This schema attribute's value can be a value class.]</nowiki>
+
+'''Epilogue'''
+This schema is released under the Creative Commons Attribution 4.0 International and is a product of the HED Working Group. The DOI for the latest version of the HED standard schema is 10.5281/zenodo.7876037.
+
+!# end hed
