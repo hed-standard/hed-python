@@ -7,15 +7,20 @@ from hed.schema.schema_comparer import SchemaComparer
 
 if __name__ == "__main__":
     basename = 'h:\\HED8.4.0_test'
-    schema = load_schema_version("8.4.0")
+    schema = load_schema("hed/schema/schema_data/HED8.4.0.xml")  # Use local file, not cached version
     schema.save_as_json(add_extension(basename, ".json"))
     schema1 = load_schema(add_extension(basename, ".json"))
-    print(f"Schemas equal: {schema == schema1}")
     
-    if schema != schema1:
-        print("\nDifferences:")
-        comparer = SchemaComparer(schema, schema1)
-        print(comparer.compare_differences())
+    # Use SchemaComparer for accurate comparison
+    comparer = SchemaComparer(schema, schema1)
+    differences = comparer.compare_differences()
+    
+    if differences:
+        print(f"Schemas have differences")
+        print(differences)
+    else:
+        print("Schemas match exactly!")
+
 # def get_schema_issues(full_path):
 #     base_schema = ModuleNotFoundError
 #     validation_issues = []
