@@ -511,4 +511,6 @@ class SchemaLoaderJSON(SchemaLoader):
                         df_constants.description: external_data.get(json_constants.DESCRIPTION_KEY, ""),
                     }
                 )
-        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(externals_list, columns=df_constants.external_annotation_columns)
+        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(
+            externals_list, columns=df_constants.external_annotation_columns
+        )
