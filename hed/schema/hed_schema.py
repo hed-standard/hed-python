@@ -325,6 +325,7 @@ class HedSchema(HedSchemaBase):
 
         """
         from hed.schema.schema_io.schema2json import Schema2JSON
+
         converter = Schema2JSON()
         converter.process_schema(self, save_merged)
         return converter.to_json_string()

@@ -59,6 +59,7 @@ def convert_and_update(filenames, set_ids):
         schema_reloaded = from_dataframes(result)
         schema_reloaded.save_as_mediawiki(basename + ".mediawiki")
         schema_reloaded.save_as_xml(basename + ".xml")
+        schema_reloaded.save_as_json(basename + ".json")
 
         save_dataframes(source_df_filename, result)
         updated.append(basename)

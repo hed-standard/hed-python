@@ -35,7 +35,7 @@ class SchemaLoaderJSON(SchemaLoader):
         """Parses a JSON file and returns the dictionary."""
         try:
             if self.filename:
-                with open(self.filename, 'r', encoding='utf-8') as f:
+                with open(self.filename, "r", encoding="utf-8") as f:
                     data = json.load(f)
             else:
                 data = json.loads(self.schema_as_string)
@@ -62,23 +62,23 @@ class SchemaLoaderJSON(SchemaLoader):
             json_constants.PROLOGUE_KEY,
             json_constants.EPILOGUE_KEY,
         }
-        
+
         # Collect all top-level keys that aren't section keys as header attributes
         # This includes version, library, withStandard, unmerged, xmlns:xsi, xsi:noNamespaceSchemaLocation, etc.
         header_attrs = {}
         for key, value in json_data.items():
             if key not in section_keys:
                 header_attrs[key] = value
-        
+
         return header_attrs
 
     def _parse_data(self):
         """Loads the schema data from the JSON dictionary."""
         self._json_data = self.input_data
-        
+
         # Initialize unit entries dictionary for use by unit classes
         self._unit_entries = {}
-        
+
         # Parse in the defined order
         # Units must be parsed before UnitClasses since unit classes reference units
         parse_order = {
@@ -90,14 +90,14 @@ class SchemaLoaderJSON(SchemaLoader):
             HedSectionKey.ValueClasses: self._populate_value_classes,
             HedSectionKey.Tags: self._populate_tags,
         }
-        
+
         # Load prologue and epilogue
         self._schema.prologue = self._json_data.get(json_constants.PROLOGUE_KEY, "")
         self._schema.epilogue = self._json_data.get(json_constants.EPILOGUE_KEY, "")
-        
+
         # Load extras
         self._load_extras()
-        
+
         # Parse each section - initialize attributes before loading each section
         # This follows the same pattern as MediaWiki/XML loaders
         for section_key, parse_func in parse_order.items():
@@ -108,10 +108,10 @@ class SchemaLoaderJSON(SchemaLoader):
         """Populate the properties section."""
         if json_constants.PROPERTIES_KEY not in self._json_data:
             return
-        
+
         self._schema._initialize_attributes(HedSectionKey.Properties)
         properties = self._json_data[json_constants.PROPERTIES_KEY]
-        
+
         for prop_name, prop_data in properties.items():
             entry = self._create_property_entry(prop_name, prop_data)
             self._add_to_dict_base(entry, HedSectionKey.Properties)
@@ -127,27 +127,27 @@ class SchemaLoaderJSON(SchemaLoader):
             HedSchemaEntry: The created entry
         """
         entry = self._schema._create_tag_entry(prop_name, HedSectionKey.Properties)
-        
+
         if json_constants.DESCRIPTION_KEY in prop_data:
             desc = prop_data[json_constants.DESCRIPTION_KEY]
             # Convert empty string back to None to match XML/MediaWiki behavior
             entry.description = desc if desc else None
-        
+
         # Add any other attributes from the data
         for key, value in prop_data.items():
             if key != json_constants.DESCRIPTION_KEY:
                 entry._set_attribute_value(key, value)
-        
+
         return entry
 
     def _populate_schema_attributes(self):
         """Populate the schema attributes section."""
         if json_constants.SCHEMA_ATTRIBUTES_KEY not in self._json_data:
             return
-        
+
         self._schema._initialize_attributes(HedSectionKey.Attributes)
         attributes = self._json_data[json_constants.SCHEMA_ATTRIBUTES_KEY]
-        
+
         for attr_name, attr_data in attributes.items():
             entry = self._create_schema_attribute_entry(attr_name, attr_data)
             self._add_to_dict_base(entry, HedSectionKey.Attributes)
@@ -163,25 +163,25 @@ class SchemaLoaderJSON(SchemaLoader):
             HedSchemaEntry: The created entry
         """
         entry = self._schema._create_tag_entry(attr_name, HedSectionKey.Attributes)
-        
+
         if json_constants.DESCRIPTION_KEY in attr_data:
             entry.description = attr_data[json_constants.DESCRIPTION_KEY]
-        
+
         # Add domain and range properties
         for key, value in attr_data.items():
             if key != json_constants.DESCRIPTION_KEY:
                 entry._set_attribute_value(key, value)
-        
+
         return entry
 
     def _populate_unit_modifiers(self):
         """Populate the unit modifiers section."""
         if json_constants.UNIT_MODIFIERS_KEY not in self._json_data:
             return
-        
+
         self._schema._initialize_attributes(HedSectionKey.UnitModifiers)
         unit_modifiers = self._json_data[json_constants.UNIT_MODIFIERS_KEY]
-        
+
         for modifier_name, modifier_data in unit_modifiers.items():
             entry = self._create_unit_modifier_entry(modifier_name, modifier_data)
             self._add_to_dict_base(entry, HedSectionKey.UnitModifiers)
@@ -197,24 +197,24 @@ class SchemaLoaderJSON(SchemaLoader):
             HedSchemaEntry: The created entry
         """
         entry = self._schema._create_tag_entry(modifier_name, HedSectionKey.UnitModifiers)
-        
+
         if json_constants.DESCRIPTION_KEY in modifier_data:
             entry.description = modifier_data[json_constants.DESCRIPTION_KEY]
-        
+
         # Add other attributes (conversion factor, SI unit modifier, etc.)
         for key, value in modifier_data.items():
             if key != json_constants.DESCRIPTION_KEY:
                 entry._set_attribute_value(key, value)
-        
+
         return entry
 
     def _populate_units(self):
         """Populate the units section from top-level units dictionary."""
         if json_constants.UNITS_KEY not in self._json_data:
             return
-        
+
         units = self._json_data[json_constants.UNITS_KEY]
-        
+
         # Populate the unit entries dictionary for use by unit classes
         for unit_name, unit_data in units.items():
             entry = self._create_unit_entry(unit_name, unit_data)
@@ -232,24 +232,24 @@ class SchemaLoaderJSON(SchemaLoader):
             HedSchemaEntry: The created entry
         """
         entry = self._schema._create_tag_entry(unit_name, HedSectionKey.Units)
-        
+
         if json_constants.DESCRIPTION_KEY in unit_data:
             entry.description = unit_data[json_constants.DESCRIPTION_KEY]
-        
+
         # Add all attributes
         for key, value in unit_data.items():
             if key != json_constants.DESCRIPTION_KEY:
                 entry._set_attribute_value(key, value)
-        
+
         return entry
 
     def _populate_unit_classes(self):
         """Populate the unit classes section."""
         if json_constants.UNIT_CLASSES_KEY not in self._json_data:
             return
-        
+
         unit_classes = self._json_data[json_constants.UNIT_CLASSES_KEY]
-        
+
         for class_name, class_data in unit_classes.items():
             entry = self._create_unit_class_entry(class_name, class_data)
             self._add_to_dict_base(entry, HedSectionKey.UnitClasses)
@@ -265,10 +265,10 @@ class SchemaLoaderJSON(SchemaLoader):
             HedSchemaEntry: The created entry
         """
         entry = self._schema._create_tag_entry(class_name, HedSectionKey.UnitClasses)
-        
+
         if json_constants.DESCRIPTION_KEY in class_data:
             entry.description = class_data[json_constants.DESCRIPTION_KEY]
-        
+
         # Add units from the units list - look them up in the pre-loaded _unit_entries
         if json_constants.UNITS_LIST_KEY in class_data:
             unit_names = class_data[json_constants.UNITS_LIST_KEY]
@@ -291,27 +291,29 @@ class SchemaLoaderJSON(SchemaLoader):
                                 unit_entry._set_attribute_value(attr_key, attr_value)
                     entry.add_unit(unit_entry)
                     self._unit_entries[unit_name] = unit_entry
-        
+
         # Add default units
         if json_constants.DEFAULT_UNITS_KEY in class_data:
             entry._set_attribute_value(HedKey.DefaultUnits, class_data[json_constants.DEFAULT_UNITS_KEY])
-        
+
         # Add any other attributes (exclude unit data if present)
         unit_names_set = set(class_data.get(json_constants.UNITS_LIST_KEY, []))
         for key, value in class_data.items():
-            if key not in [json_constants.DESCRIPTION_KEY, json_constants.UNITS_LIST_KEY, 
-                          json_constants.DEFAULT_UNITS_KEY] and key not in unit_names_set:
+            if (
+                key not in [json_constants.DESCRIPTION_KEY, json_constants.UNITS_LIST_KEY, json_constants.DEFAULT_UNITS_KEY]
+                and key not in unit_names_set
+            ):
                 entry._set_attribute_value(key, value)
-        
+
         return entry
 
     def _populate_value_classes(self):
         """Populate the value classes section."""
         if json_constants.VALUE_CLASSES_KEY not in self._json_data:
             return
-        
+
         value_classes = self._json_data[json_constants.VALUE_CLASSES_KEY]
-        
+
         for class_name, class_data in value_classes.items():
             entry = self._create_value_class_entry(class_name, class_data)
             self._add_to_dict_base(entry, HedSectionKey.ValueClasses)
@@ -327,43 +329,43 @@ class SchemaLoaderJSON(SchemaLoader):
             HedSchemaEntry: The created entry
         """
         entry = self._schema._create_tag_entry(class_name, HedSectionKey.ValueClasses)
-        
+
         if json_constants.DESCRIPTION_KEY in class_data:
             entry.description = class_data[json_constants.DESCRIPTION_KEY]
-        
+
         # Add allowed characters (join multiple values with commas)
         if json_constants.ALLOWED_CHARACTERS_KEY in class_data:
             char_types = class_data[json_constants.ALLOWED_CHARACTERS_KEY]
             if isinstance(char_types, list):
-                allowed_char_value = ','.join(char_types)
+                allowed_char_value = ",".join(char_types)
             else:
                 allowed_char_value = char_types
             entry._set_attribute_value(HedKey.AllowedCharacter, allowed_char_value)
-        
+
         # Add any other attributes
         for key, value in class_data.items():
             if key not in [json_constants.DESCRIPTION_KEY, json_constants.ALLOWED_CHARACTERS_KEY]:
                 entry._set_attribute_value(key, value)
-        
+
         return entry
 
     def _populate_tags(self):
         """Populate the tags section by building the hierarchy."""
         if json_constants.TAGS_KEY not in self._json_data:
             return
-        
+
         tags_data = self._json_data[json_constants.TAGS_KEY]
-        
+
         # Tags are keyed by short_form in JSON
         # If a tag has a placeholder key, we need to create both the base tag and the /#placeholder
         for short_form, tag_data in tags_data.items():
             long_form = tag_data.get(json_constants.LONG_FORM_KEY, short_form)
             has_placeholder = json_constants.PLACEHOLDER_KEY in tag_data
-            
+
             # Create the base tag entry
             entry = self._create_tag_entry(long_form, tag_data, is_takes_value_placeholder=False)
             self._add_to_dict_base(entry, HedSectionKey.Tags)
-            
+
             # If this tag has a placeholder, create the placeholder tag
             if has_placeholder:
                 placeholder_name = long_form + "/#"
@@ -384,24 +386,24 @@ class SchemaLoaderJSON(SchemaLoader):
         # Use the long_form (full path) as the entry name - this is critical!
         # The schema internals rely on the full path for proper hierarchy
         entry = self._schema._create_tag_entry(long_form, HedSectionKey.Tags)
-        
+
         # Set description (only on base tag, not placeholder)
         if not is_takes_value_placeholder and json_constants.DESCRIPTION_KEY in tag_data:
             entry.description = tag_data[json_constants.DESCRIPTION_KEY]
-        
+
         # Set attributes based on whether this is a placeholder or base tag
         if is_takes_value_placeholder:
             # For placeholder tags, get attributes from the placeholder key
             if json_constants.PLACEHOLDER_KEY in tag_data:
                 placeholder_attrs = tag_data[json_constants.PLACEHOLDER_KEY]
-                
+
                 # Set placeholder description if present
-                if 'description' in placeholder_attrs:
-                    entry.description = placeholder_attrs['description']
-                
+                if "description" in placeholder_attrs:
+                    entry.description = placeholder_attrs["description"]
+
                 # Set other attributes
                 for attr_name, attr_value in placeholder_attrs.items():
-                    if attr_name != 'description':  # Skip description, already handled
+                    if attr_name != "description":  # Skip description, already handled
                         self._set_tag_attribute(entry, attr_name, attr_value)
         else:
             # For base tags, set attributes from the attributes key
@@ -409,7 +411,7 @@ class SchemaLoaderJSON(SchemaLoader):
                 attributes = tag_data[json_constants.ATTRIBUTES_KEY]
                 for attr_name, attr_value in attributes.items():
                     self._set_tag_attribute(entry, attr_name, attr_value)
-        
+
         return entry
 
     def _set_tag_attribute(self, entry, attr_name, attr_value):
@@ -422,31 +424,31 @@ class SchemaLoaderJSON(SchemaLoader):
         """
         # Map JSON attribute names to HedKey constants
         attr_map = {
-            'extensionAllowed': HedKey.ExtensionAllowed,
-            'takesValue': HedKey.TakesValue,
-            'requireChild': HedKey.RequireChild,
-            'unique': HedKey.Unique,
-            'reserved': HedKey.Reserved,
-            'tagGroup': HedKey.TagGroup,
-            'topLevelTagGroup': HedKey.TopLevelTagGroup,
-            'recommended': HedKey.Recommended,
-            'required': HedKey.Required,
-            'suggestedTag': HedKey.SuggestedTag,
-            'relatedTag': HedKey.RelatedTag,
-            'valueClass': HedKey.ValueClass,
-            'unitClass': HedKey.UnitClass,
-            'defaultUnits': HedKey.DefaultUnits,
-            'hedId': HedKey.HedID,
-            'rooted': HedKey.Rooted,
-            'deprecatedFrom': HedKey.DeprecatedFrom,
+            "extensionAllowed": HedKey.ExtensionAllowed,
+            "takesValue": HedKey.TakesValue,
+            "requireChild": HedKey.RequireChild,
+            "unique": HedKey.Unique,
+            "reserved": HedKey.Reserved,
+            "tagGroup": HedKey.TagGroup,
+            "topLevelTagGroup": HedKey.TopLevelTagGroup,
+            "recommended": HedKey.Recommended,
+            "required": HedKey.Required,
+            "suggestedTag": HedKey.SuggestedTag,
+            "relatedTag": HedKey.RelatedTag,
+            "valueClass": HedKey.ValueClass,
+            "unitClass": HedKey.UnitClass,
+            "defaultUnits": HedKey.DefaultUnits,
+            "hedId": HedKey.HedID,
+            "rooted": HedKey.Rooted,
+            "deprecatedFrom": HedKey.DeprecatedFrom,
         }
-        
+
         hed_key = attr_map.get(attr_name)
         if not hed_key:
             # Unknown attribute, store as-is
             entry._set_attribute_value(attr_name, attr_value)
             return
-        
+
         # Handle boolean attributes
         if isinstance(attr_value, bool):
             if attr_value:  # Only set if True
@@ -454,7 +456,7 @@ class SchemaLoaderJSON(SchemaLoader):
         # Handle list attributes (join with commas)
         elif isinstance(attr_value, list):
             if attr_value:  # Skip empty lists
-                value_str = ','.join(str(v) for v in attr_value if v)
+                value_str = ",".join(str(v) for v in attr_value if v)
                 if value_str:
                     entry._set_attribute_value(hed_key, value_str)
         # Handle single value attributes
@@ -465,45 +467,48 @@ class SchemaLoaderJSON(SchemaLoader):
         """Load extra sections like sources, prefixes, and external annotations."""
         from hed.schema.schema_io import df_constants
         import pandas as pd
-        
+
         self._schema.extras = {}
-        
-        # Load sources
+
+        # Load sources - always create DataFrame even if empty to match XML/MediaWiki behavior
+        sources_list = []
         if json_constants.SOURCES_KEY in self._json_data:
             sources_data = self._json_data[json_constants.SOURCES_KEY]
-            sources_list = []
             for source_data in sources_data:
-                sources_list.append({
-                    df_constants.source: source_data.get('name', ''),
-                    df_constants.link: source_data.get('link', ''),
-                    df_constants.description: source_data.get(json_constants.DESCRIPTION_KEY, ''),
-                })
-            if sources_list:
-                self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(sources_list)
-        
-        # Load prefixes
+                sources_list.append(
+                    {
+                        df_constants.source: source_data.get("name", ""),
+                        df_constants.link: source_data.get("link", ""),
+                        df_constants.description: source_data.get(json_constants.DESCRIPTION_KEY, ""),
+                    }
+                )
+        self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(sources_list, columns=df_constants.source_columns)
+
+        # Load prefixes - always create DataFrame even if empty
+        prefixes_list = []
         if json_constants.PREFIXES_KEY in self._json_data:
             prefixes_data = self._json_data[json_constants.PREFIXES_KEY]
-            prefixes_list = []
             for prefix_data in prefixes_data:
-                prefixes_list.append({
-                    df_constants.prefix: prefix_data.get('name', ''),
-                    df_constants.namespace: prefix_data.get('namespace', ''),
-                    df_constants.description: prefix_data.get(json_constants.DESCRIPTION_KEY, ''),
-                })
-            if prefixes_list:
-                self._schema.extras[df_constants.PREFIXES_KEY] = pd.DataFrame(prefixes_list)
-        
-        # Load external annotations
+                prefixes_list.append(
+                    {
+                        df_constants.prefix: prefix_data.get("name", ""),
+                        df_constants.namespace: prefix_data.get("namespace", ""),
+                        df_constants.description: prefix_data.get(json_constants.DESCRIPTION_KEY, ""),
+                    }
+                )
+        self._schema.extras[df_constants.PREFIXES_KEY] = pd.DataFrame(prefixes_list, columns=df_constants.prefix_columns)
+
+        # Load external annotations - always create DataFrame even if empty
+        externals_list = []
         if json_constants.EXTERNAL_ANNOTATIONS_KEY in self._json_data:
             externals_data = self._json_data[json_constants.EXTERNAL_ANNOTATIONS_KEY]
-            externals_list = []
             for external_data in externals_data:
-                externals_list.append({
-                    df_constants.prefix: external_data.get('name', ''),
-                    df_constants.id: external_data.get('id', ''),
-                    df_constants.iri: external_data.get('iri', ''),
-                    df_constants.description: external_data.get(json_constants.DESCRIPTION_KEY, ''),
-                })
-            if externals_list:
-                self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(externals_list)
+                externals_list.append(
+                    {
+                        df_constants.prefix: external_data.get("name", ""),
+                        df_constants.id: external_data.get("id", ""),
+                        df_constants.iri: external_data.get("iri", ""),
+                        df_constants.description: external_data.get(json_constants.DESCRIPTION_KEY, ""),
+                    }
+                )
+        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(externals_list, columns=df_constants.external_annotation_columns)

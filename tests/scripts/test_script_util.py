@@ -122,7 +122,7 @@ class TestValidateAllSchemaFormats(unittest.TestCase):
         cls.basename = "test_schema"
 
     def test_error_no_error(self):
-        """Test the function with correctly saved schemas in all three formats."""
+        """Test the function with correctly saved schemas in all four formats."""
         # Load specific schema versions and save them correctly
         schema = load_schema_version("8.4.0")
         schema.save_as_xml(os.path.join(self.base_path, self.basename + ".xml"))
@@ -132,6 +132,7 @@ class TestValidateAllSchemaFormats(unittest.TestCase):
         self.assertTrue(issues)
         self.assertEqual(issues[0], "Error loading schema: No such file or directory")
         schema.save_as_mediawiki(os.path.join(self.base_path, self.basename + ".mediawiki"))
+        schema.save_as_json(os.path.join(self.base_path, self.basename + ".json"))
 
         with contextlib.redirect_stdout(None):
             self.assertEqual(validate_all_schema_formats(os.path.join(self.base_path, self.basename)), [])

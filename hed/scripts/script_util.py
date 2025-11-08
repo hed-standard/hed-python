@@ -4,7 +4,7 @@ from hed.schema import from_string, load_schema, from_dataframes
 from hed.errors import get_printable_issue_string, HedFileError, SchemaWarnings
 from hed.schema.schema_comparer import SchemaComparer
 
-all_extensions = [".tsv", ".mediawiki", ".xml"]
+all_extensions = [".tsv", ".mediawiki", ".xml", ".json"]
 
 
 def validate_schema_object(base_schema, schema_name):
