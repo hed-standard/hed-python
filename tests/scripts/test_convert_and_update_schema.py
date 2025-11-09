@@ -56,11 +56,12 @@ class TestConvertAndUpdate(unittest.TestCase):
         self.assertEqual(schema, schema_reload2)
 
     def test_schema_adding_tag(self):
-        schema = load_schema_version("8.3.0")
+        schema = load_schema_version("8.4.0")
         basename = os.path.join(self.base_path, "test_schema_edited")
         schema.save_as_mediawiki(add_extension(basename, ".mediawiki"))
         schema.save_as_xml(add_extension(basename, ".xml"))
         schema.save_as_dataframes(add_extension(basename, ".tsv"))
+        schema.save_as_json(add_extension(basename, ".json"))
 
         schema_edited = copy.deepcopy(schema)
         test_tag_name = "NewTagWithoutID"

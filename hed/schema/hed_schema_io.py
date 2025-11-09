@@ -9,6 +9,7 @@ from hed.schema.hed_schema import HedSchema
 from hed.schema.schema_io.xml2schema import SchemaLoaderXML
 from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
 from hed.schema.schema_io.df2schema import SchemaLoaderDF
+from hed.schema.schema_io.json2schema import SchemaLoaderJSON
 from hed.schema import hed_cache
 
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -94,6 +95,8 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> "Hed
         hed_schema = SchemaLoaderXML.load(hed_path, schema=schema, name=name)
     elif hed_path.lower().endswith(".mediawiki"):
         hed_schema = SchemaLoaderWiki.load(hed_path, schema=schema, name=name)
+    elif hed_path.lower().endswith(".json"):
+        hed_schema = SchemaLoaderJSON.load(hed_path, schema=schema, name=name)
     elif hed_path.lower().endswith(".tsv") or os.path.isdir(hed_path):
         if schema is not None:
             raise HedFileError(
@@ -145,6 +148,8 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string, schema=schema, name=name)
     elif schema_format.endswith(".mediawiki"):
         hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string, schema=schema, name=name)
+    elif schema_format.endswith(".json"):
+        hed_schema = SchemaLoaderJSON.load(schema_as_string=schema_string, schema=schema, name=name)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, f"Unknown schema extension {schema_format}", filename=name)
 

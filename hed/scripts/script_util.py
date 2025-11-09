@@ -4,7 +4,7 @@ from hed.schema import from_string, load_schema, from_dataframes
 from hed.errors import get_printable_issue_string, HedFileError, SchemaWarnings
 from hed.schema.schema_comparer import SchemaComparer
 
-all_extensions = [".tsv", ".mediawiki", ".xml"]
+all_extensions = [".tsv", ".mediawiki", ".xml", ".json"]
 
 
 def validate_schema_object(base_schema, schema_name):
@@ -26,6 +26,11 @@ def validate_schema_object(base_schema, schema_name):
         reloaded_schema = from_string(xml_string, schema_format=".xml")
 
         validation_issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "xml")
+
+        json_string = base_schema.get_as_json_string(save_merged=True)
+        reloaded_schema = from_string(json_string, schema_format=".json")
+
+        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "json")
 
         tsv_dataframes = base_schema.get_as_dataframes(save_merged=True)
         reloaded_schema = from_dataframes(tsv_dataframes)
@@ -130,15 +135,15 @@ def sort_base_schemas(filenames, add_all_extensions=False):
 
 
 def validate_all_schema_formats(basename):
-    """Validate all 3 versions of the given schema.
+    """Validate all 4 versions of the given schema.
 
     Parameters:
-         basename(str): a schema to check all 3 formats are identical of.
+         basename(str): a schema to check all 4 formats are identical of.
 
     Returns:
         issue_list(list): A non-empty list if there are any issues.
     """
-    # Note if more than one is changed, it intentionally checks all 3 even if one wasn't changed.
+    # Note if more than one is changed, it intentionally checks all 4 even if one wasn't changed.
     # todo: this needs to be updated to handle capital letters in the extension.
     paths = [add_extension(basename, extension) for extension in all_extensions]
     try:
