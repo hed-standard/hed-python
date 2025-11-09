@@ -358,14 +358,14 @@ class Schema2JSON(Schema2Base):
         # Helper to check if attribute is explicitly set (not inherited)
         def has_explicit_attribute(attr_key):
             return attr_key in tag_entry.attributes
-        
+
         # Helper to get boolean attribute value (preserving string "True"/"true" if present)
         def get_bool_attribute(attr_key):
             if attr_key not in tag_entry.attributes:
                 return False
             value = tag_entry.attributes[attr_key]
             # If it's stored as string "True" or "true", keep it as string for XML compatibility
-            if isinstance(value, str) and value.lower() in ('true', 'false'):
+            if isinstance(value, str) and value.lower() in ("true", "false"):
                 return value
             # Otherwise return as boolean
             return bool(value)
@@ -471,7 +471,7 @@ class Schema2JSON(Schema2Base):
         if placeholder_entry.has_attribute(HedKey.TakesValue):
             value = placeholder_entry.attributes[HedKey.TakesValue]
             # If it's stored as string "True" or "true", keep it as string for XML compatibility
-            if isinstance(value, str) and value.lower() in ('true', 'false'):
+            if isinstance(value, str) and value.lower() in ("true", "false"):
                 placeholder_attrs["takesValue"] = value
             else:
                 placeholder_attrs["takesValue"] = True
@@ -626,7 +626,13 @@ class Schema2JSON(Schema2Base):
             entry_data["SIUnitSymbolModifier"] = si_symbol
 
         # Add any other attributes that aren't in the known list
-        known_modifier_attrs = {HedKey.ConversionFactor, HedKey.SIUnitModifier, HedKey.SIUnitSymbolModifier, HedKey.HedID, HedKey.InLibrary}
+        known_modifier_attrs = {
+            HedKey.ConversionFactor,
+            HedKey.SIUnitModifier,
+            HedKey.SIUnitSymbolModifier,
+            HedKey.HedID,
+            HedKey.InLibrary,
+        }
         for attr_name, attr_value in entry.attributes.items():
             if attr_name not in known_modifier_attrs and not self._attribute_disallowed(attr_name):
                 # Convert comma-separated strings to lists for multi-value attributes

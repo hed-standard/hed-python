@@ -75,12 +75,12 @@ class SchemaLoaderJSON(SchemaLoader):
     @staticmethod
     def _convert_to_internal_format(value):
         """Convert JSON values to internal schema format.
-        
+
         Multi-value attributes are stored as arrays in JSON but as comma-separated strings internally.
-        
+
         Parameters:
             value: The value to convert (could be array, string, bool, etc.)
-            
+
         Returns:
             The converted value
         """
@@ -311,7 +311,9 @@ class SchemaLoaderJSON(SchemaLoader):
 
         # Add default units
         if json_constants.DEFAULT_UNITS_KEY in class_data:
-            entry._set_attribute_value(HedKey.DefaultUnits, self._convert_to_internal_format(class_data[json_constants.DEFAULT_UNITS_KEY]))
+            entry._set_attribute_value(
+                HedKey.DefaultUnits, self._convert_to_internal_format(class_data[json_constants.DEFAULT_UNITS_KEY])
+            )
 
         # Add any other attributes (exclude unit data if present)
         unit_names_set = set(class_data.get(json_constants.UNITS_LIST_KEY, []))
