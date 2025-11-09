@@ -72,6 +72,23 @@ class SchemaLoaderJSON(SchemaLoader):
 
         return header_attrs
 
+    @staticmethod
+    def _convert_to_internal_format(value):
+        """Convert JSON values to internal schema format.
+
+        Multi-value attributes are stored as arrays in JSON but as comma-separated strings internally.
+
+        Parameters:
+            value: The value to convert (could be array, string, bool, etc.)
+
+        Returns:
+            The converted value
+        """
+        # Convert arrays to comma-separated strings
+        if isinstance(value, list):
+            return ",".join(str(v) for v in value)
+        return value
+
     def _parse_data(self):
         """Loads the schema data from the JSON dictionary."""
         self._json_data = self.input_data
@@ -136,7 +153,7 @@ class SchemaLoaderJSON(SchemaLoader):
         # Add any other attributes from the data
         for key, value in prop_data.items():
             if key != json_constants.DESCRIPTION_KEY:
-                entry._set_attribute_value(key, value)
+                entry._set_attribute_value(key, self._convert_to_internal_format(value))
 
         return entry
 
@@ -170,7 +187,7 @@ class SchemaLoaderJSON(SchemaLoader):
         # Add domain and range properties
         for key, value in attr_data.items():
             if key != json_constants.DESCRIPTION_KEY:
-                entry._set_attribute_value(key, value)
+                entry._set_attribute_value(key, self._convert_to_internal_format(value))
 
         return entry
 
@@ -204,7 +221,7 @@ class SchemaLoaderJSON(SchemaLoader):
         # Add other attributes (conversion factor, SI unit modifier, etc.)
         for key, value in modifier_data.items():
             if key != json_constants.DESCRIPTION_KEY:
-                entry._set_attribute_value(key, value)
+                entry._set_attribute_value(key, self._convert_to_internal_format(value))
 
         return entry
 
@@ -239,7 +256,7 @@ class SchemaLoaderJSON(SchemaLoader):
         # Add all attributes
         for key, value in unit_data.items():
             if key != json_constants.DESCRIPTION_KEY:
-                entry._set_attribute_value(key, value)
+                entry._set_attribute_value(key, self._convert_to_internal_format(value))
 
         return entry
 
@@ -288,13 +305,15 @@ class SchemaLoaderJSON(SchemaLoader):
                             unit_entry.description = unit_data[json_constants.DESCRIPTION_KEY]
                         for attr_key, attr_value in unit_data.items():
                             if attr_key != json_constants.DESCRIPTION_KEY:
-                                unit_entry._set_attribute_value(attr_key, attr_value)
+                                unit_entry._set_attribute_value(attr_key, self._convert_to_internal_format(attr_value))
                     entry.add_unit(unit_entry)
                     self._unit_entries[unit_name] = unit_entry
 
         # Add default units
         if json_constants.DEFAULT_UNITS_KEY in class_data:
-            entry._set_attribute_value(HedKey.DefaultUnits, class_data[json_constants.DEFAULT_UNITS_KEY])
+            entry._set_attribute_value(
+                HedKey.DefaultUnits, self._convert_to_internal_format(class_data[json_constants.DEFAULT_UNITS_KEY])
+            )
 
         # Add any other attributes (exclude unit data if present)
         unit_names_set = set(class_data.get(json_constants.UNITS_LIST_KEY, []))
@@ -303,7 +322,7 @@ class SchemaLoaderJSON(SchemaLoader):
                 key not in [json_constants.DESCRIPTION_KEY, json_constants.UNITS_LIST_KEY, json_constants.DEFAULT_UNITS_KEY]
                 and key not in unit_names_set
             ):
-                entry._set_attribute_value(key, value)
+                entry._set_attribute_value(key, self._convert_to_internal_format(value))
 
         return entry
 
@@ -345,7 +364,7 @@ class SchemaLoaderJSON(SchemaLoader):
         # Add any other attributes
         for key, value in class_data.items():
             if key not in [json_constants.DESCRIPTION_KEY, json_constants.ALLOWED_CHARACTERS_KEY]:
-                entry._set_attribute_value(key, value)
+                entry._set_attribute_value(key, self._convert_to_internal_format(value))
 
         return entry
 
@@ -445,8 +464,8 @@ class SchemaLoaderJSON(SchemaLoader):
 
         hed_key = attr_map.get(attr_name)
         if not hed_key:
-            # Unknown attribute, store as-is
-            entry._set_attribute_value(attr_name, attr_value)
+            # Unknown attribute, store with conversion (arrays to comma-separated strings)
+            entry._set_attribute_value(attr_name, self._convert_to_internal_format(attr_value))
             return
 
         # Handle boolean attributes

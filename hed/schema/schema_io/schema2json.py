@@ -193,9 +193,15 @@ class Schema2JSON(Schema2Base):
 
                 # Add unit-specific attributes
                 for attr_name, attr_value in unit_entry.attributes.items():
+                    # Skip attributes that should be disallowed (like inLibrary when saving unmerged)
+                    if self._attribute_disallowed(attr_name):
+                        continue
                     # Convert boolean attributes
                     if isinstance(attr_value, bool) or attr_value in (True, False, "true", "false"):
                         unit_data[attr_name] = bool(attr_value)
+                    # Convert comma-separated strings to lists for multi-value attributes
+                    elif isinstance(attr_value, str) and "," in attr_value:
+                        unit_data[attr_name] = [v.strip() for v in attr_value.split(",") if v.strip()]
                     else:
                         unit_data[attr_name] = attr_value
 
@@ -353,19 +359,30 @@ class Schema2JSON(Schema2Base):
         def has_explicit_attribute(attr_key):
             return attr_key in tag_entry.attributes
 
+        # Helper to get boolean attribute value (preserving string "True"/"true" if present)
+        def get_bool_attribute(attr_key):
+            if attr_key not in tag_entry.attributes:
+                return False
+            value = tag_entry.attributes[attr_key]
+            # If it's stored as string "True" or "true", keep it as string for XML compatibility
+            if isinstance(value, str) and value.lower() in ("true", "false"):
+                return value
+            # Otherwise return as boolean
+            return bool(value)
+
         # Check if this tag has a placeholder child - if so, takesValue belongs to the child
         has_placeholder_child = tag_entry.takes_value_child_entry is not None
         include_takes_value = not (exclude_takes_value_if_placeholder and has_placeholder_child)
 
         attributes = {
-            "extensionAllowed": has_explicit_attribute(HedKey.ExtensionAllowed),
-            "requireChild": has_explicit_attribute(HedKey.RequireChild),
-            "unique": has_explicit_attribute(HedKey.Unique),
-            "reserved": has_explicit_attribute(HedKey.Reserved),
-            "tagGroup": has_explicit_attribute(HedKey.TagGroup),
-            "topLevelTagGroup": has_explicit_attribute(HedKey.TopLevelTagGroup),
-            "recommended": has_explicit_attribute(HedKey.Recommended),
-            "required": has_explicit_attribute(HedKey.Required),
+            "extensionAllowed": get_bool_attribute(HedKey.ExtensionAllowed),
+            "requireChild": get_bool_attribute(HedKey.RequireChild),
+            "unique": get_bool_attribute(HedKey.Unique),
+            "reserved": get_bool_attribute(HedKey.Reserved),
+            "tagGroup": get_bool_attribute(HedKey.TagGroup),
+            "topLevelTagGroup": get_bool_attribute(HedKey.TopLevelTagGroup),
+            "recommended": get_bool_attribute(HedKey.Recommended),
+            "required": get_bool_attribute(HedKey.Required),
             "suggestedTag": get_list_value(HedKey.SuggestedTag),
             "relatedTag": get_list_value(HedKey.RelatedTag),
             "valueClass": get_list_value(HedKey.ValueClass),
@@ -375,7 +392,7 @@ class Schema2JSON(Schema2Base):
 
         # Only include takesValue if appropriate (not on parent when there's a placeholder child)
         if include_takes_value:
-            attributes["takesValue"] = has_explicit_attribute(HedKey.TakesValue)
+            attributes["takesValue"] = get_bool_attribute(HedKey.TakesValue)
 
         # Add hedId if present
         hed_id = tag_entry.attributes.get(HedKey.HedID)
@@ -391,6 +408,11 @@ class Schema2JSON(Schema2Base):
         deprecated = tag_entry.attributes.get(HedKey.DeprecatedFrom)
         if deprecated:
             attributes["deprecatedFrom"] = deprecated
+
+        # Add inLibrary if present and not disallowed (depends on save_merged setting)
+        in_library = tag_entry.attributes.get(HedKey.InLibrary)
+        if in_library and not self._attribute_disallowed(HedKey.InLibrary):
+            attributes["inLibrary"] = in_library
 
         # Add any other custom attributes not in our known list (e.g., 'annotation')
         known_attrs = {
@@ -411,10 +433,15 @@ class Schema2JSON(Schema2Base):
             HedKey.HedID,
             HedKey.Rooted,
             HedKey.DeprecatedFrom,
+            HedKey.InLibrary,
         }
         for attr_name, attr_value in tag_entry.attributes.items():
-            if attr_name not in known_attrs:
-                attributes[attr_name] = attr_value
+            if attr_name not in known_attrs and not self._attribute_disallowed(attr_name):
+                # Convert comma-separated strings to lists for multi-value attributes
+                if isinstance(attr_value, str) and "," in attr_value:
+                    attributes[attr_name] = [v.strip() for v in attr_value.split(",") if v.strip()]
+                else:
+                    attributes[attr_name] = attr_value
 
         return attributes
 
@@ -440,9 +467,14 @@ class Schema2JSON(Schema2Base):
 
         placeholder_attrs = {}
 
-        # Get takesValue - this is the key attribute for placeholders
+        # Get takesValue - preserve string "true"/"True" if that's how it's stored
         if placeholder_entry.has_attribute(HedKey.TakesValue):
-            placeholder_attrs["takesValue"] = True
+            value = placeholder_entry.attributes[HedKey.TakesValue]
+            # If it's stored as string "True" or "true", keep it as string for XML compatibility
+            if isinstance(value, str) and value.lower() in ("true", "false"):
+                placeholder_attrs["takesValue"] = value
+            else:
+                placeholder_attrs["takesValue"] = True
 
         # Get unitClass and valueClass
         unit_class = get_list_value(HedKey.UnitClass)
@@ -462,6 +494,28 @@ class Schema2JSON(Schema2Base):
         deprecated = placeholder_entry.has_attribute(HedKey.DeprecatedFrom, return_value=True)
         if deprecated:
             placeholder_attrs["deprecatedFrom"] = deprecated
+
+        # Get inLibrary if present and not disallowed
+        in_library = placeholder_entry.has_attribute(HedKey.InLibrary, return_value=True)
+        if in_library and not self._attribute_disallowed(HedKey.InLibrary):
+            placeholder_attrs["inLibrary"] = in_library
+
+        # Add any other custom attributes not in our known list (e.g., 'annotation')
+        known_attrs = {
+            HedKey.TakesValue,
+            HedKey.UnitClass,
+            HedKey.ValueClass,
+            HedKey.HedID,
+            HedKey.DeprecatedFrom,
+            HedKey.InLibrary,
+        }
+        for attr_name, attr_value in placeholder_entry.attributes.items():
+            if attr_name not in known_attrs and not self._attribute_disallowed(attr_name):
+                # Convert comma-separated strings to lists for multi-value attributes
+                if isinstance(attr_value, str) and "," in attr_value:
+                    placeholder_attrs[attr_name] = [v.strip() for v in attr_value.split(",") if v.strip()]
+                else:
+                    placeholder_attrs[attr_name] = attr_value
 
         return placeholder_attrs
 
@@ -484,6 +538,11 @@ class Schema2JSON(Schema2Base):
         hed_id = entry.has_attribute(HedKey.HedID, return_value=True)
         if hed_id:
             entry_data["hedId"] = hed_id
+
+        # Add inLibrary if present and not disallowed (depends on save_merged setting)
+        in_library = entry.has_attribute(HedKey.InLibrary, return_value=True)
+        if in_library and not self._attribute_disallowed(HedKey.InLibrary):
+            entry_data["inLibrary"] = in_library
 
         # Add attributes based on entry type
         if entry.section_key == HedSectionKey.UnitClasses:
@@ -534,6 +593,16 @@ class Schema2JSON(Schema2Base):
                 allowed_chars = [v.strip() for v in allowed_chars_value.split(",") if v.strip()]
             entry_data[json_constants.ALLOWED_CHARACTERS_KEY] = allowed_chars
 
+        # Add any other attributes that aren't in the known list
+        known_value_class_attrs = {HedKey.AllowedCharacter, HedKey.HedID, HedKey.InLibrary}
+        for attr_name, attr_value in entry.attributes.items():
+            if attr_name not in known_value_class_attrs and not self._attribute_disallowed(attr_name):
+                # Convert comma-separated strings to lists for multi-value attributes
+                if isinstance(attr_value, str) and "," in attr_value:
+                    entry_data[attr_name] = [v.strip() for v in attr_value.split(",") if v.strip()]
+                else:
+                    entry_data[attr_name] = attr_value
+
     def _add_unit_modifier_data(self, entry, entry_data):
         """Add unit modifier specific data.
 
@@ -556,6 +625,22 @@ class Schema2JSON(Schema2Base):
         if si_symbol:
             entry_data["SIUnitSymbolModifier"] = si_symbol
 
+        # Add any other attributes that aren't in the known list
+        known_modifier_attrs = {
+            HedKey.ConversionFactor,
+            HedKey.SIUnitModifier,
+            HedKey.SIUnitSymbolModifier,
+            HedKey.HedID,
+            HedKey.InLibrary,
+        }
+        for attr_name, attr_value in entry.attributes.items():
+            if attr_name not in known_modifier_attrs and not self._attribute_disallowed(attr_name):
+                # Convert comma-separated strings to lists for multi-value attributes
+                if isinstance(attr_value, str) and "," in attr_value:
+                    entry_data[attr_name] = [v.strip() for v in attr_value.split(",") if v.strip()]
+                else:
+                    entry_data[attr_name] = attr_value
+
     def _add_schema_attribute_data(self, entry, entry_data):
         """Add schema attribute/property specific data.
 
@@ -563,11 +648,16 @@ class Schema2JSON(Schema2Base):
             entry (HedSchemaEntry): The attribute/property entry
             entry_data (dict): The data dictionary to populate
         """
-        # Add all attributes from the entry
+        # Add all attributes from the entry (except description which is already added, and disallowed ones)
         for attr_name in entry.attributes:
-            if attr_name not in [json_constants.DESCRIPTION_KEY]:
-                value = entry.attributes[attr_name]
-                entry_data[attr_name] = value
+            if attr_name not in [json_constants.DESCRIPTION_KEY, HedKey.HedID, HedKey.InLibrary]:
+                if not self._attribute_disallowed(attr_name):
+                    value = entry.attributes[attr_name]
+                    # Convert comma-separated strings to lists for multi-value attributes
+                    if isinstance(value, str) and "," in value:
+                        entry_data[attr_name] = [v.strip() for v in value.split(",") if v.strip()]
+                    else:
+                        entry_data[attr_name] = value
 
     def to_json_string(self, indent=2):
         """Convert the output to a JSON string.
