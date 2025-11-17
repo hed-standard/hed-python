@@ -8,6 +8,18 @@ all_extensions = [".tsv", ".mediawiki", ".xml", ".json"]
 
 
 def validate_schema_object(base_schema, schema_name):
+    """Validate a schema object by checking compliance and roundtrip conversion.
+
+    Tests the schema for compliance issues and validates that it can be successfully
+    converted to and reloaded from all four formats (MediaWiki, XML, JSON, TSV).
+
+    Parameters:
+        base_schema (HedSchema): The schema object to validate.
+        schema_name (str): The name/path of the schema for error reporting.
+
+    Returns:
+        list: A list of validation issue strings. Empty if no issues found.
+    """
     validation_issues = []
     try:
         issues = base_schema.check_compliance()
@@ -47,13 +59,16 @@ def validate_schema_object(base_schema, schema_name):
 
 
 def validate_schema(file_path):
-    """Validates the given schema, ensuring it can save/load as well as validates.
+    """Validate a schema file, ensuring it can save/load and passes validation.
+
+    Loads the schema from file, checks the file extension is lowercase,
+    and validates the schema object for compliance and roundtrip conversion.
 
     Parameters:
-        file_path(str): the specific schema file to validate
+        file_path (str): The path to the schema file to validate.
 
     Returns:
-        validation_issues(list): A list of issues found
+        list: A list of validation issue strings. Empty if no issues found.
     """
 
     _, extension = os.path.splitext(file_path)
@@ -75,7 +90,18 @@ def validate_schema(file_path):
 
 
 def add_extension(basename, extension):
-    """Generate the final name for a given extension.  Only .tsv varies notably."""
+    """Generate the final filename for a given extension.
+
+    TSV files are placed in a 'hedtsv' subdirectory, while other formats
+    simply append the extension to the basename.
+
+    Parameters:
+        basename (str): The base path/name of the schema file without extension.
+        extension (str): The file extension including the dot (e.g., '.xml', '.tsv').
+
+    Returns:
+        str: The complete file path with extension applied.
+    """
     if extension == ".tsv":
         parent_path, basename = os.path.split(basename)
         return os.path.join(parent_path, "hedtsv", basename)
@@ -83,23 +109,28 @@ def add_extension(basename, extension):
 
 
 def sort_base_schemas(filenames, add_all_extensions=False):
-    """Sort and group the changed files based on basename
+    """Sort and group changed schema files by their basename.
 
-        Example input: ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.xml"]
+    Groups schema files by their base name, tracking which formats (extensions)
+    have been modified. Handles special TSV directory structure (hedtsv subfolder).
 
-        Example output:
+    Example input:
+        ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.xml"]
+
+    Example output:
         {
-        "test_schema": {".mediawiki", ".tsv"},
-        other_schema": {".xml"}
+            "test_schema": {".mediawiki", ".tsv"},
+            "other_schema": {".xml"}
         }
 
     Parameters:
-        filenames(list or container): The changed filenames
-        add_all_extensions(bool): If True, always return all 3 filenames for any schemas found.
+        filenames (list or container): The changed filenames to process.
+        add_all_extensions (bool): If True, always return all 4 extensions for any schemas found.
+            Default is False.
 
     Returns:
-        sorted_files(dict): A dictionary where keys are the basename, and the values are a set of extensions modified
-                            Can include tsv, mediawiki, and xml.
+        dict: A dictionary where keys are the basename (str), and values are sets of
+            extensions modified. Can include .tsv, .mediawiki, .xml, and .json.
     """
     schema_files = defaultdict(set)
     for file_path in filenames:
@@ -135,13 +166,17 @@ def sort_base_schemas(filenames, add_all_extensions=False):
 
 
 def validate_all_schema_formats(basename):
-    """Validate all 4 versions of the given schema.
+    """Validate that all 4 format versions of a schema are identical.
+
+    Loads the schema from all four formats (MediaWiki, XML, JSON, TSV) and
+    verifies they are equivalent. Used when multiple formats are modified
+    simultaneously to ensure consistency.
 
     Parameters:
-         basename(str): a schema to check all 4 formats are identical of.
+        basename (str): The base path/name of the schema (without extension) to check.
 
     Returns:
-        issue_list(list): A non-empty list if there are any issues.
+        list: A list of issue strings if formats differ or loading fails. Empty if all identical.
     """
     # Note if more than one is changed, it intentionally checks all 4 even if one wasn't changed.
     # todo: this needs to be updated to handle capital letters in the extension.
@@ -162,15 +197,17 @@ def validate_all_schema_formats(basename):
 
 
 def validate_all_schemas(schema_files):
-    """Validates all the schema files/formats in the schema dict
+    """Validate all schema files and formats in the schema dictionary.
 
-       If multiple formats were edited, ensures all 3 formats exist and match.
+    Validates each schema file individually and, if multiple formats were edited
+    for a prerelease schema, ensures all formats exist and are identical.
 
     Parameters:
-        schema_files(dict of sets): basename:[extensions] dictionary for all files changed
+        schema_files (dict): Dictionary mapping basenames (str) to sets of extensions (str)
+            representing all files changed.
 
     Returns:
-        issues(list of str): Any issues found validating or loading schemas.
+        list: A list of all validation issues found across all schemas.
     """
     all_issues = []
     for basename, extensions in schema_files.items():
@@ -193,16 +230,21 @@ def validate_all_schemas(schema_files):
 
 
 def get_schema_filename(schema_name, schema_version):
-    """Returns the assembled name of a schema given the name and version
+    """Assemble the standard filename for a schema given its name and version.
 
-        e.g. "standard" and "8.3.0" returns "HED8.3.0"
+    Constructs the conventional HED schema filename without extension or folder path.
+    Standard schema uses "HED" prefix, library schemas use "HED_name_" prefix.
+
+    Example:
+        get_schema_filename("standard", "8.3.0") returns "HED8.3.0"
+        get_schema_filename("score", "1.0.0") returns "HED_score_1.0.0"
 
     Parameters:
-        schema_name(str): The name of the schema we're interested in.  "standard" for the standard schema
-        schema_version(str): The semantic version number
+        schema_name (str): The name of the schema. Use "standard" or "" for the standard schema.
+        schema_version (str): The semantic version number (e.g., "8.3.0").
 
     Returns:
-        schema_filename(str): the assembled filename, without extension or folder.
+        str: The assembled filename without extension or folder path.
     """
     schema_name = schema_name.lower()
     if schema_name == "standard" or schema_name == "":
@@ -212,15 +254,18 @@ def get_schema_filename(schema_name, schema_version):
 
 
 def get_prerelease_path(repo_path, schema_name, schema_version):
-    """Returns the location of the given pre-release schema in the repo
+    """Get the full path to a prerelease schema's TSV directory in the repository.
+
+    Constructs the standard repository path for prerelease schema TSV files,
+    following the hed-schemas repository structure.
 
     Parameters:
-        repo_path(str): the location of the hed-schemas folder relative to this one.  Should point into the folder.
-        schema_name(str): The name of the schema we're interested in.  "standard" for the standard schema
-        schema_version(str): The semantic version number
+        repo_path (str): The path to the hed-schemas folder. Should point into the repository.
+        schema_name (str): The name of the schema. Use "standard" or "" for the standard schema.
+        schema_version (str): The semantic version number (e.g., "8.3.0").
 
     Returns:
-        schema_path(str): The fully assembled location of this schema tsv version.
+        str: The fully assembled path to the schema's TSV directory.
     """
     schema_name = schema_name.lower()
     if schema_name == "" or schema_name == "standard":
@@ -236,6 +281,20 @@ def get_prerelease_path(repo_path, schema_name, schema_version):
 
 
 def _get_schema_comparison(schema, schema_reload, file_path, file_format):
+    """Compare two schema objects and generate error message if they differ.
+
+    Private helper function for validating schema roundtrip conversion.
+    Uses SchemaComparer to identify differences when schemas don't match.
+
+    Parameters:
+        schema (HedSchema): The original schema object.
+        schema_reload (HedSchema): The reloaded schema object to compare against.
+        file_path (str): The file path being validated (for error messages).
+        file_format (str): The format being tested (e.g., "xml", "mediawiki").
+
+    Returns:
+        list: A list containing an error message if schemas differ, empty list if identical.
+    """
     if schema_reload != schema:
         error_text = (
             f"Failed to reload {file_path} as {file_format}.  "
