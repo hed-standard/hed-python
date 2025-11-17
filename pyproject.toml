@@ -191,5 +191,6 @@ exclude = '''
   | hed/_version\.py
   | spec_tests/hed-examples
   | spec_tests/hed-specification
+  | status
 )/
 '''
