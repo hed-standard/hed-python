@@ -405,8 +405,8 @@ def extract_sidecar_cmd(
     if verbose:
         args.append("-v")
     if exclude_dirs:
-        for d in exclude_dirs:
-            args.extend(["-x", d])
+        args.append("-x")
+        args.extend(exclude_dirs)
 
     extract_main(args)
 
