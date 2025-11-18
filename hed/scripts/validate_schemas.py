@@ -6,7 +6,7 @@ import argparse
 
 def get_parser():
     """Create the argument parser for validate_schemas.
-    
+
     Returns:
         argparse.ArgumentParser: The argument parser.
     """
@@ -15,9 +15,7 @@ def get_parser():
     parser.add_argument(
         "--add-all-extensions", action="store_true", help="Always verify all versions of the same schema are equal."
     )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable verbose output."
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output.")
     return parser
 
 
@@ -32,10 +30,10 @@ def main():
         if args.verbose:
             print(get_printable_issue_string(issues, title="Schema Validation Issues:"))
         return 1
-    
+
     if args.verbose:
         print("All schemas validated successfully.")
-    
+
     return 0
 
 

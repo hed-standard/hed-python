@@ -48,7 +48,13 @@ def schema():
 @click.option("-ec", "--error-count", "error_limit", type=int, default=None, help="Limit errors of each code type to report.")
 @click.option("-ef", "--errors-by-file", is_flag=True, help="Apply error limit by file rather than overall.")
 @click.option("-f", "--format", type=click.Choice(["text", "json", "json_pp"]), default="text", help="Output format.")
-@click.option("-l", "--log-level", type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]), default="WARNING", help="Log level.")
+@click.option(
+    "-l",
+    "--log-level",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
+    default="WARNING",
+    help="Log level.",
+)
 @click.option("-lf", "--log-file", "log_file", type=click.Path(), default=None, help="File path for saving log output.")
 @click.option("-lq", "--log-quiet", is_flag=True, help="Suppress log output to stderr (only if --log-file is used).")
 @click.option("-o", "--output-file", "output_file", type=click.Path(), default="", help="Output file for validation results.")
@@ -63,8 +69,21 @@ def schema():
     default=["sourcedata", "derivatives", "code", "stimuli"],
     help="Directory names to exclude from search.",
 )
-def validate_bids_cmd(data_path, error_limit, errors_by_file, format, log_level, log_file, log_quiet, 
-                      output_file, print_output, suffixes, verbose, check_for_warnings, exclude_dirs):
+def validate_bids_cmd(
+    data_path,
+    error_limit,
+    errors_by_file,
+    format,
+    log_level,
+    log_file,
+    log_quiet,
+    output_file,
+    print_output,
+    suffixes,
+    verbose,
+    check_for_warnings,
+    exclude_dirs,
+):
     """Validate HED annotations in a BIDS dataset.
 
     DATA_PATH: Full path to the root directory of the BIDS dataset.
@@ -123,9 +142,7 @@ def validate_bids_cmd(data_path, error_limit, errors_by_file, format, log_level,
 @click.option("-ns", "--no-summaries", is_flag=True, help="Summaries are not saved.")
 @click.option("-nu", "--no-update", is_flag=True, help="Files are not saved.")
 @click.option("-hv", "--hed-versions", multiple=True, default=[], help="HED schema versions for annotation.")
-@click.option(
-    "-s", "--save-formats", multiple=True, default=[".json", ".txt"], help="Format for saving summaries."
-)
+@click.option("-s", "--save-formats", multiple=True, default=[".json", ".txt"], help="Format for saving summaries.")
 @click.option("-t", "--task-names", multiple=True, default=[], help="Task names to process.")
 @click.option("-v", "--verbose", is_flag=True, help="Output informational messages.")
 @click.option("-w", "--work-dir", default="", help="Path to directory for saving.")
