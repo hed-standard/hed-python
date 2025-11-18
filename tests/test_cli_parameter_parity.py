@@ -165,14 +165,14 @@ class TestCLIParameterParity(unittest.TestCase):
         # Check optional parameters from original parser exist in CLI
         original_dests = set(original_opts["optional"].keys())
         cli_dests = set(cli_opts["optional"].keys())
-        
+
         for orig_dest in original_dests:
             self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
 
         # Check flags from original parser exist in CLI
         original_flags = {flag[0] for flag in original_opts["flags"]}
         cli_flags = {flag[0] for flag in cli_opts["flags"]}
-        
+
         for orig_flag in original_flags:
             self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
@@ -197,14 +197,14 @@ class TestCLIParameterParity(unittest.TestCase):
         # Check optional parameters from original parser exist in CLI
         original_dests = set(original_opts["optional"].keys())
         cli_dests = set(cli_opts["optional"].keys())
-        
+
         for orig_dest in original_dests:
             self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
 
         # Check flags from original parser exist in CLI
         original_flags = {flag[0] for flag in original_opts["flags"]}
         cli_flags = {flag[0] for flag in cli_opts["flags"]}
-        
+
         for orig_flag in original_flags:
             self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
@@ -229,14 +229,14 @@ class TestCLIParameterParity(unittest.TestCase):
         # Check optional parameters from original parser exist in CLI
         original_dests = set(original_opts["optional"].keys())
         cli_dests = set(cli_opts["optional"].keys())
-        
+
         for orig_dest in original_dests:
             self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
 
         # Check flags from original parser exist in CLI
         original_flags = {flag[0] for flag in original_opts["flags"]}
         cli_flags = {flag[0] for flag in cli_opts["flags"]}
-        
+
         for orig_flag in original_flags:
             self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
@@ -260,14 +260,14 @@ class TestCLIParameterParity(unittest.TestCase):
         # Check optional parameters from original parser exist in CLI
         original_dests = set(original_opts["optional"].keys())
         cli_dests = set(cli_opts["optional"].keys())
-        
+
         for orig_dest in original_dests:
             self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
 
         # Check flags from original parser exist in CLI
         original_flags = {flag[0] for flag in original_opts["flags"]}
         cli_flags = {flag[0] for flag in cli_opts["flags"]}
-        
+
         for orig_flag in original_flags:
             self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
@@ -292,7 +292,7 @@ class TestCLIParameterParity(unittest.TestCase):
         # Check flags from original parser exist in CLI
         original_flags = {flag[0] for flag in original_opts["flags"]}
         cli_flags = {flag[0] for flag in cli_opts["flags"]}
-        
+
         for orig_flag in original_flags:
             self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
