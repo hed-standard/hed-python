@@ -3,7 +3,7 @@
 [![Code Coverage](https://qlty.sh/gh/hed-standard/projects/hed-python/coverage.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
 ![Python3](https://img.shields.io/badge/python->=3.10-yellow.svg)
 ![PyPI - Status](https://img.shields.io/pypi/v/hedtools)
-[![Documentation](https://img.shields.io/badge/docs-hedtags.org-blue.svg)](https://www.hedtags.org/hed-python)
+[![Documentation](https://img.shields.io/badge/docs-hed--python-blue.svg)](https://www.hedtags.org/hed-python)
 
 # HEDTools - Python
 
@@ -14,22 +14,25 @@
 HED (Hierarchical Event Descriptors) is a framework for systematically describing both laboratory and real-world events as well as other experimental metadata. HED tags are comma-separated path strings that provide a standardized vocabulary for annotating events and experimental conditions.
 
 **Key Features:**
-- ✅ Validate HED annotations against schema specifications
-- 📊 Analyze and summarize HED-tagged datasets
-- 🔄 Transform and remodel event data
-- 📁 Full BIDS (Brain Imaging Data Structure) dataset support
-- 🌐 Platform-independent and data-neutral
-- 🔧 Command-line tools and Python API
+- Validate HED annotations against schema specifications
+- Analyze and summarize HED-tagged datasets
+- Transform and remodel event data
+- Full HED support in BIDS (Brain Imaging Data Structure)
+- HED support in NWB (Neurodata Without Borders) when used the [ndx-hed](https://github.com/hed-standard/ndx-hed) extension.
+- Platform-independent and data-neutral
+- Command-line tools and Python API
 
-## Quick Start
+## Quick start
 
-### Online Tools (No Installation Required)
+### Online tools (no installation required)
 
-For simple validation or transformation tasks, use the online tools at [https://hedtools.org](https://hedtools.org) - no installation needed!
+For simple validation or transformation tasks, use the online tools at [https://hedtools.org/hed](https://hedtools.org/hed) - no installation needed!
+
+Browser-based validation (no data upload) is available at [https://www.hedtags.org/hed-javascript](https://www.hedtags.org/hed-javascript)
 
 A development version is available at: [https://hedtools.org/hed_dev](https://hedtools.org/hed_dev)
 
-### Python Installation
+### Python installation
 
 **Requirements:** Python 3.10 or higher
 
@@ -43,39 +46,53 @@ Or install from GitHub (latest):
 pip install git+https://github.com/hed-standard/hed-python/@main
 ```
 
-### Basic Usage
+### Basic usage
 
 ```python
-from hed import HedString, load_schema
+from hed import HedString, load_schema_version
 
 # Load the latest HED schema
-schema = load_schema()
+schema = load_schema_version("8.4.0")
 
 # Create and validate a HED string
 hed_string = HedString("Sensory-event, Visual-presentation, (Onset, (Red, Square))")
 issues = hed_string.validate(schema)
 
 if issues:
-    print("Validation issues found:")
-    for issue in issues:
-        print(f"  - {issue}")
+    print(get_printable_issue_string(issues, title="Validation issues found"))
 else:
-    print("✓ HED string is valid!")
+    print("HED string is valid!")
 ```
 
-### Command-Line Tools
+### Command-line tools
 
-HEDTools includes several command-line utilities:
+HEDTools provides a unified command-line interface with git-like subcommands:
 
 ```bash
-# Validate a BIDS dataset
-validate_bids /path/to/bids/dataset
+# Main command (new unified interface)
+hedpy --help
 
-# Run remodeling operations on event files
-run_remodel /path/to/remodel_config.json /path/to/data
+# Validate a BIDS dataset
+hedpy validate-bids /path/to/bids/dataset
+
+# Extract sidecar template from BIDS dataset
+hedpy extract-sidecar /path/to/dataset --suffix events
 
 # Validate HED schemas
+hedpy schema validate /path/to/schema.xml
+
+# Convert schema between formats (XML, MediaWiki, TSV, JSON)
+hedpy schema convert /path/to/schema.xml
+
+# Run remodeling operations on event files
+hedpy remodel run /path/to/data /path/to/remodel_config.json
+```
+
+**Legacy commands** (deprecated, use `hedpy` instead):
+```bash
+validate_bids /path/to/dataset
 hed_validate_schemas /path/to/schema.xml
+run_remodel /path/to/data /path/to/config.json
 ```
 
 For more examples, see the [user guide](https://www.hedtags.org/hed-python/user_guide.html).
@@ -84,24 +101,28 @@ For more examples, see the [user guide](https://www.hedtags.org/hed-python/user_
 
 📖 **Full Documentation:** [https://www.hedtags.org/hed-python](https://www.hedtags.org/hed-python)
 
-- [User Guide](https://www.hedtags.org/hed-python/user_guide.html) - Comprehensive usage instructions
+- [User Guide](https://www.hedtags.org/hed-python/user_guide.html) - Usage instructions
 - [API Reference](https://www.hedtags.org/hed-python/api/index.html) - Detailed API documentation  
-- [HED Specification](https://hed-specification.readthedocs.io/) - Full HED standard specification
+- [HED Specification](https://www.hedtags.org/hed-specification) - Full HED standard specification
 
-### Building Documentation Locally
+### Building docs locally
 
 ```bash
 # Install documentation dependencies
-pip install -r docs/requirements.txt
+pip install -e .[docs]
 
 # Build the documentation
-mkdocs build
+cd docs
+sphinx-build -b html . _build/html
 
-# Serve locally with live reload at http://localhost:8000
-mkdocs serve
+# Or use the make command (if available)
+make html
+
+# View the built documentation
+# Open docs/_build/html/index.html in your browser
 ```
 
-### Code Formatting with Black
+### Formatting with Black
 
 This project uses [Black](https://black.readthedocs.io/) for consistent code formatting.
 
@@ -140,27 +161,23 @@ The HED ecosystem consists of several interconnected repositories:
 |------------|-------------|
 | [hed-python](https://github.com/hed-standard/hed-python) | Python validation and analysis tools (this repo) |
 | [hed-web](https://github.com/hed-standard/hed-web) | Web interface and deployable Docker services |
-| [hed-examples](https://github.com/hed-standard/hed-examples) | Example code in Python and MATLAB + HED resources |
+| [hed-resources](https://github.com/hed-standard/hed-resources) | Example code in Python and MATLAB + HED resources |
 | [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents |
-| [hed-schemas](https://github.com/hed-standard/hed-schemas) | Official HED schema repository |
+| [hed-schemas](https://github.com/hed-standard/hed-schemas) | Official HED schema repository | 
+| [ndx-hed](https://github.com/hed-standard/ndx-hed) | HED support for NWB |  
+| [hed-javascript](https://github.com/hed-standard/hed-javascript) | HED in BIDS |
 
-### Branch Strategy
-
-| Branch | Purpose | Synchronized With |
-|--------|---------|-------------------|
-| `stable` | Officially released on PyPI as tagged versions | `stable@hed-web`, `stable@hed-specification`, `stable@hed-examples` |
-| `main` | Latest stable development version | `latest@hed-web`, `latest@hed-specification`, `latest@hed-examples` |
 
 ## Contributing
 
 We welcome contributions! Here's how you can help:
 
-1. **Report Issues:** Use [GitHub Issues](https://github.com/hed-standard/hed-python/issues) for bug reports and feature requests
-2. **Submit Pull Requests:** PRs should target the `main` branch
-3. **Improve Documentation:** Help us make HED easier to use
-4. **Share Examples:** Contribute example code and use cases
+1. **Report issues:** Use [GitHub Issues](https://github.com/hed-standard/hed-python/issues) for bug reports and feature requests
+2. **Submit pull requests (PRs):** PRs should target the `main` branch
+3. **Improve documentation:** Help us make HED easier to use
+4. **Share examples:** Contribute example code and use cases
 
-**Development Setup:**
+**Development setup:**
 ```bash
 # Clone the repository
 git clone https://github.com/hed-standard/hed-python.git
@@ -181,7 +198,7 @@ For detailed contribution guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.
 
 ## Configuration
 
-### Schema Caching
+### Schema caching
 
 By default, HED schemas are cached in `~/.hedtools/` (location varies by OS).
 
@@ -199,7 +216,7 @@ If you use HEDTools in your research, please cite:
 
 ```bibtex
 @software{hedtools,
-  author = {Robbins, Kay and others},
+  author = {Ian Callanan, Robbins, Kay and others},
   title = {HEDTools: Python tools for HED},
   year = {2024},
   publisher = {GitHub},
@@ -214,7 +231,7 @@ HEDTools is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Support
 
-- 📖 [Documentation](https://www.hedtags.org/hed-python)
-- 💬 [GitHub Issues](https://github.com/hed-standard/hed-python/issues)
-- 🌐 [HED Homepage](https://www.hedtags.org)
-- 📧 Contact: Kay.Robbins@utsa.edu
+- [Documentation](https://www.hedtags.org/hed-python)
+- [GitHub Issues](https://github.com/hed-standard/hed-python/issues)
+- [HED Homepage](https://www.hedtags.org)
+- Contact: hed-maintainers@gmail.com

@@ -1,5 +1,17 @@
 ```markdown
-Release 0.8.0 November 17, 2025
+Release 0.8.0 November 18, 2025
+- **Unified CLI Interface**: Added `hedpy` command-line tool with git-like subcommand structure.
+  - Main command: `hedpy` with subcommands for all HED operations.
+  - Subcommands organized by category: `hedpy validate-bids`, `hedpy remodel run`, `hedpy schema validate`, etc.
+  - Prevents CLI namespace collisions with other tools (e.g., `validate_bids` → `hedpy validate-bids`).
+  - Legacy commands still available for backward compatibility but deprecated.
+  - Built with `click` framework for better CLI user experience.
+  - Added comprehensive help text: `hedpy --help`, `hedpy COMMAND --help`.
+  - **CLI Parameter Fidelity**: All CLI wrapper commands now correctly match original script parameters (38+ parameter fixes across 7 commands).
+    - Fixed `validate-bids`: Added missing suffixes, output format, error control, and print options.
+    - Fixed `remodel` commands: Corrected argument names, added missing parameters, fixed option conflicts.
+    - Fixed `schema` commands: Corrected positional vs option argument structures for add-ids and create-ontology.
+    - Added comprehensive test suite (`tests/test_cli_parameter_parity.py`) to verify CLI parameters match original parsers.
 - **JSON Schema Format Support**: Added comprehensive JSON format support for HED schemas alongside existing XML, MediaWiki, and TSV formats.
   - Implemented `SchemaLoaderJSON` class for loading JSON schemas (`hed/schema/schema_io/json2schema.py`).
   - Implemented `Schema2JSON` class for exporting schemas to JSON (`hed/schema/schema_io/schema2json.py`).
@@ -14,10 +26,10 @@ Release 0.8.0 November 17, 2025
   - Comprehensive logging support with file output and verbosity control.
   - Integrated with BidsDataset and TabularSummary classes for robust extraction.
 - **Schema Validation Enhancements**: Extended schema validation to include JSON format in roundtrip testing.
-  - Updated `script_util.py` to validate all 4 schema formats (XML, MediaWiki, TSV, JSON).
+  - Updated `hed_script_util.py` to validate all 4 schema formats (XML, MediaWiki, TSV, JSON).
   - Updated schema conversion script to automatically generate JSON format alongside other formats.
 - **Python Version Requirements**: Minimum Python version raised to 3.10 (dropped 3.9 support).
-- **Documentation Improvements**: Added comprehensive Google-style docstrings to all functions in `script_util.py`.
+- **Documentation Improvements**: Added comprehensive Google-style docstrings to all functions in `hed_script_util.py`.
 - **Configuration Updates**: 
   - Added `status` directory to Black exclude list in `pyproject.toml` for development scripts.
   - Updated matplotlib dependency to 3.10.7.

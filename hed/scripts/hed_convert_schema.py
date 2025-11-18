@@ -1,4 +1,4 @@
-from hed.scripts.script_util import sort_base_schemas, validate_all_schemas, add_extension
+from hed.scripts.hed_script_util import sort_base_schemas, validate_all_schemas, add_extension
 from hed.schema.schema_io import load_dataframes, save_dataframes
 from hed.schema.schema_io.ontology_util import update_dataframes_from_schema
 from hed.schema.hed_schema_io import load_schema, from_dataframes

@@ -1,10 +1,10 @@
-from hed.scripts.script_util import get_prerelease_path
-from hed.scripts.convert_and_update_schema import convert_and_update
+from hed.scripts.hed_script_util import get_prerelease_path
+from hed.scripts.hed_convert_schema import convert_and_update
 import argparse
 from hed.schema.schema_io.df_util import convert_filenames_to_dict
 
 
-# Slightly tweaked version of convert_and_update_schema.py with a new main function to allow different parameters.
+# Slightly tweaked version of hed_convert_schema.py with a new main function to allow different parameters.
 def main():
     parser = argparse.ArgumentParser(description="Add hed ids to a specific schema.")
     parser.add_argument("repo_path", help="The location of the hed-schemas directory")

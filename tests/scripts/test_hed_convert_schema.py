@@ -4,8 +4,8 @@ import copy
 import os
 from hed import load_schema, load_schema_version
 from hed.schema import HedSectionKey, HedKey
-from hed.scripts.script_util import add_extension
-from hed.scripts.convert_and_update_schema import convert_and_update
+from hed.scripts.hed_script_util import add_extension
+from hed.scripts.hed_convert_schema import convert_and_update
 import contextlib
 
 
