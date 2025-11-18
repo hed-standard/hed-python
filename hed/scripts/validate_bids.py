@@ -39,10 +39,9 @@ def get_parser():
     )
     parser.add_argument(
         "-ef",
-        "--errors_by_file",
+        "--errors-by-file",
+        action="store_true",
         dest="errors_by_file",
-        type=bool,
-        default=False,
         help="Apply error limit by file rather than overall for text output.",
     )
     parser.add_argument(
