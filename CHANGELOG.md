@@ -1,3 +1,28 @@
+```markdown
+Release 0.8.0 November 17, 2025
+- **JSON Schema Format Support**: Added comprehensive JSON format support for HED schemas alongside existing XML, MediaWiki, and TSV formats.
+  - Implemented `SchemaLoaderJSON` class for loading JSON schemas (`hed/schema/schema_io/json2schema.py`).
+  - Implemented `Schema2JSON` class for exporting schemas to JSON (`hed/schema/schema_io/schema2json.py`).
+  - Added JSON constants and key mappings (`hed/schema/schema_io/json_constants.py`).
+  - Added `save_as_json()` and `get_as_json_string()` methods to HedSchema class.
+  - JSON format uses flat tag structure with hierarchy metadata for easier programmatic access.
+  - Separate units section in JSON format for improved AI/tool accessibility.
+  - Placeholder structure for takes-value tags with proper attribute inheritance.
+  - Full roundtrip validation ensures JSON format produces identical validation results to XML/MediaWiki.
+- **New BIDS Sidecar Extraction Tool**: Added `hed_extract_bids_sidecar` command-line script for extracting sidecar templates from BIDS datasets.
+  - Configurable value columns and skip columns for flexible template generation.
+  - Comprehensive logging support with file output and verbosity control.
+  - Integrated with BidsDataset and TabularSummary classes for robust extraction.
+- **Schema Validation Enhancements**: Extended schema validation to include JSON format in roundtrip testing.
+  - Updated `script_util.py` to validate all 4 schema formats (XML, MediaWiki, TSV, JSON).
+  - Updated schema conversion script to automatically generate JSON format alongside other formats.
+- **Python Version Requirements**: Minimum Python version raised to 3.10 (dropped 3.9 support).
+- **Documentation Improvements**: Added comprehensive Google-style docstrings to all functions in `script_util.py`.
+- **Configuration Updates**: 
+  - Added `status` directory to Black exclude list in `pyproject.toml` for development scripts.
+  - Updated matplotlib dependency to 3.10.7.
+- **Specification Tests**: Updated hed-specification submodule to latest version for improved test coverage.
+
 Release 0.7.1 October 13, 2025
 - Added official support for Python 3.13 (tested in CI workflows).
 - Applied Black code formatter to entire codebase for consistent code style (148 files reformatted).
