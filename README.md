@@ -165,7 +165,7 @@ The HED ecosystem consists of several interconnected repositories:
 | [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents |
 | [hed-schemas](https://github.com/hed-standard/hed-schemas) | Official HED schema repository | 
 | [ndx-hed](https://github.com/hed-standard/ndx-hed) | HED support for NWB |  
-| [hed-javascript](https://github.com/hed-standard/hed-javascript) | HED in BIDS |
+| [hed-javascript](https://github.com/hed-standard/hed-javascript) | JavaScript HEd validation tools |
 
 
 ## Contributing

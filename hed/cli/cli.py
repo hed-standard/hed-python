@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 HED Command Line Interface
@@ -95,7 +96,7 @@ def validate_bids_cmd(
     if error_limit is not None:
         args.extend(["-ec", str(error_limit)])
     if errors_by_file:
-        args.extend(["-ef", "True"])
+        args.append("-ef")
     if format:
         args.extend(["-f", format])
     if log_level:

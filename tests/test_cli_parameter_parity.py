@@ -155,19 +155,26 @@ class TestCLIParameterParity(unittest.TestCase):
 
         cli_opts = self._get_click_options(backup_command)
 
-        # Check positional (data_dir)
-        self.assertEqual(len(cli_opts["positional"]), 1, "Should have 1 positional argument (data_dir)")
-        self.assertEqual(cli_opts["positional"][0], "data_dir", "Positional argument should be data_dir")
+        # Check positional count matches
+        self.assertEqual(
+            len(cli_opts["positional"]),
+            len(original_opts["positional"]),
+            f"Positional argument count mismatch: CLI has {len(cli_opts['positional'])}, original has {len(original_opts['positional'])}",
+        )
 
-        # Check key parameters exist
+        # Check optional parameters from original parser exist in CLI
+        original_dests = set(original_opts["optional"].keys())
         cli_dests = set(cli_opts["optional"].keys())
-        required_params = ["backup_dir", "backup_name", "suffixes", "task_names", "exclude_dirs"]
-        for param in required_params:
-            self.assertIn(param, cli_dests, f"Parameter '{param}' not found in backup CLI command")
+        
+        for orig_dest in original_dests:
+            self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
 
-        # Check verbose flag
+        # Check flags from original parser exist in CLI
+        original_flags = {flag[0] for flag in original_opts["flags"]}
         cli_flags = {flag[0] for flag in cli_opts["flags"]}
-        self.assertIn("verbose", cli_flags, "verbose flag not found in backup CLI command")
+        
+        for orig_flag in original_flags:
+            self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
     def test_remodel_restore_parameters(self):
         """Test remodel restore CLI parameters match run_remodel_restore.py parser."""
@@ -180,14 +187,26 @@ class TestCLIParameterParity(unittest.TestCase):
 
         cli_opts = self._get_click_options(restore_command)
 
-        # Check positional
-        self.assertEqual(cli_opts["positional"][0], "data_dir", "Positional argument should be data_dir")
+        # Check positional count matches
+        self.assertEqual(
+            len(cli_opts["positional"]),
+            len(original_opts["positional"]),
+            f"Positional argument count mismatch: CLI has {len(cli_opts['positional'])}, original has {len(original_opts['positional'])}",
+        )
 
-        # Check key parameters
+        # Check optional parameters from original parser exist in CLI
+        original_dests = set(original_opts["optional"].keys())
         cli_dests = set(cli_opts["optional"].keys())
-        required_params = ["backup_dir", "backup_name", "task_names"]
-        for param in required_params:
-            self.assertIn(param, cli_dests, f"Parameter '{param}' not found in restore CLI command")
+        
+        for orig_dest in original_dests:
+            self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
+
+        # Check flags from original parser exist in CLI
+        original_flags = {flag[0] for flag in original_opts["flags"]}
+        cli_flags = {flag[0] for flag in cli_opts["flags"]}
+        
+        for orig_flag in original_flags:
+            self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
     def test_remodel_run_parameters(self):
         """Test remodel run CLI parameters match run_remodel.py parser."""
@@ -200,36 +219,26 @@ class TestCLIParameterParity(unittest.TestCase):
 
         cli_opts = self._get_click_options(run_command)
 
-        # Check positional arguments (data_dir and model_path)
+        # Check positional count matches
         self.assertEqual(
-            len(cli_opts["positional"]), 2, f"Should have 2 positional arguments, got {len(cli_opts['positional'])}"
+            len(cli_opts["positional"]),
+            len(original_opts["positional"]),
+            f"Positional argument count mismatch: CLI has {len(cli_opts['positional'])}, original has {len(original_opts['positional'])}",
         )
-        self.assertEqual(cli_opts["positional"][0], "data_dir", "First positional should be data_dir")
-        self.assertEqual(cli_opts["positional"][1], "model_path", "Second positional should be model_path")
 
-        # Check key optional parameters exist
+        # Check optional parameters from original parser exist in CLI
+        original_dests = set(original_opts["optional"].keys())
         cli_dests = set(cli_opts["optional"].keys())
-        required_params = [
-            "backup_dir",
-            "backup_name",
-            "suffixes",
-            "individual_summaries",
-            "json_sidecar",
-            "log_dir",
-            "hed_versions",
-            "save_formats",
-            "task_names",
-            "work_dir",
-            "exclude_dirs",
-        ]
-        for param in required_params:
-            self.assertIn(param, cli_dests, f"Parameter '{param}' not found in remodel run CLI command")
+        
+        for orig_dest in original_dests:
+            self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
 
-        # Check flags
+        # Check flags from original parser exist in CLI
+        original_flags = {flag[0] for flag in original_opts["flags"]}
         cli_flags = {flag[0] for flag in cli_opts["flags"]}
-        required_flags = ["use_bids", "no_backup", "no_summaries", "no_update", "verbose"]
-        for flag in required_flags:
-            self.assertIn(flag, cli_flags, f"Flag '{flag}' not found in remodel run CLI command")
+        
+        for orig_flag in original_flags:
+            self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
     def test_extract_sidecar_parameters(self):
         """Test extract-sidecar CLI parameters match hed_extract_bids_sidecar.py parser."""
@@ -241,14 +250,26 @@ class TestCLIParameterParity(unittest.TestCase):
 
         cli_opts = self._get_click_options(extract_command)
 
-        # Check positional
-        self.assertEqual(cli_opts["positional"][0], "data_path", "Positional should be data_path")
+        # Check positional count matches
+        self.assertEqual(
+            len(cli_opts["positional"]),
+            len(original_opts["positional"]),
+            f"Positional argument count mismatch: CLI has {len(cli_opts['positional'])}, original has {len(original_opts['positional'])}",
+        )
 
-        # Check key parameters
+        # Check optional parameters from original parser exist in CLI
+        original_dests = set(original_opts["optional"].keys())
         cli_dests = set(cli_opts["optional"].keys())
-        required_params = ["suffix", "value_columns", "skip_columns", "log_level", "log_file", "output_file", "exclude_dirs"]
-        for param in required_params:
-            self.assertIn(param, cli_dests, f"Parameter '{param}' not found in extract-sidecar CLI command")
+        
+        for orig_dest in original_dests:
+            self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
+
+        # Check flags from original parser exist in CLI
+        original_flags = {flag[0] for flag in original_opts["flags"]}
+        cli_flags = {flag[0] for flag in cli_opts["flags"]}
+        
+        for orig_flag in original_flags:
+            self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
     def test_schema_validate_parameters(self):
         """Test schema validate CLI parameters match validate_schemas.py parser."""
@@ -261,13 +282,19 @@ class TestCLIParameterParity(unittest.TestCase):
 
         cli_opts = self._get_click_options(validate_command)
 
-        # Check that schema_path positional exists
-        self.assertIn("schema_path", cli_opts["positional"], "schema_path positional argument not found")
+        # Check positional count matches (both should have 1)
+        self.assertEqual(
+            len(cli_opts["positional"]),
+            len(original_opts["positional"]),
+            f"Positional argument count mismatch: CLI has {len(cli_opts['positional'])}, original has {len(original_opts['positional'])}",
+        )
 
-        # Check flags
+        # Check flags from original parser exist in CLI
+        original_flags = {flag[0] for flag in original_opts["flags"]}
         cli_flags = {flag[0] for flag in cli_opts["flags"]}
-        self.assertIn("add_all_extensions", cli_flags, "add_all_extensions flag not found")
-        self.assertIn("verbose", cli_flags, "verbose flag not found")
+        
+        for orig_flag in original_flags:
+            self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
 
     def test_schema_add_ids_parameters(self):
         """Test schema add-ids uses positional arguments."""
