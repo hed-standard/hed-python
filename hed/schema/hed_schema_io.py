@@ -340,7 +340,7 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
         - The prefix is invalid
     """
     if not xml_version:
-        xml_version = "8.3.0"
+        xml_version = "8.4.0"
 
     # Parse library name from version string before validation
     library_name = ""
