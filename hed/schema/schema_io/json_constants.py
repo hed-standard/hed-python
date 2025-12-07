@@ -29,6 +29,7 @@ DESCRIPTION_KEY = "description"
 PARENT_KEY = "parent"
 CHILDREN_KEY = "children"
 ATTRIBUTES_KEY = "attributes"
+EXPLICIT_ATTRIBUTES_KEY = "explicitAttributes"  # Attributes explicitly set on this tag (not inherited)
 PLACEHOLDER_KEY = "placeholder"  # Optional key for tags that take values
 
 # Unit class keys

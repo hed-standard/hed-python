@@ -11,7 +11,7 @@ copyright = "2024, HED Standard"
 author = "HED Standard"
 
 # The full version, including alpha/beta/rc tags
-release = "0.6.0"
+release = "0.8.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -34,6 +34,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "furo"
 html_static_path = ["_static"]
+html_css_files = ["custom.css"]
+html_js_files = ["gh_icon_fix.js"]
+
+# Add logo
+html_logo = "assets/images/croppedWideLogo.png"
 
 # Furo theme options
 html_theme_options = {
@@ -52,6 +57,19 @@ html_theme_options = {
 }
 
 html_title = "HED Python Tools"
+
+# Configure sidebar to show logo, search, navigation, and quick links
+html_sidebars = {
+    "**": [
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/scroll-start.html",
+        "sidebar/navigation.html",
+        "quicklinks.html",
+        "sidebar/ethical-ads.html",
+        "sidebar/scroll-end.html",
+    ]
+}
 
 # -- Extension configuration -------------------------------------------------
 

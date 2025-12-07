@@ -312,17 +312,21 @@ class Schema2JSON(Schema2Base):
                 existing_entry[json_constants.PARENT_KEY] = tag_entry.parent.short_tag_name if tag_entry.parent else None
                 existing_entry[json_constants.CHILDREN_KEY] = children_names
                 # Set base tag attributes - include ALL attributes on the base tag
-                existing_entry[json_constants.ATTRIBUTES_KEY] = self._get_tag_attributes(tag_entry)
+                all_attrs, explicit_attrs = self._get_tag_attributes(tag_entry)
+                existing_entry[json_constants.ATTRIBUTES_KEY] = all_attrs
+                existing_entry[json_constants.EXPLICIT_ATTRIBUTES_KEY] = explicit_attrs
                 return existing_entry
             else:
                 # New entry
+                all_attrs, explicit_attrs = self._get_tag_attributes(tag_entry)
                 tag_data = {
                     json_constants.SHORT_FORM_KEY: tag_entry.short_tag_name,
                     json_constants.LONG_FORM_KEY: tag_entry.name,
                     json_constants.DESCRIPTION_KEY: tag_entry.description,  # Use None directly, not ""
                     json_constants.PARENT_KEY: tag_entry.parent.short_tag_name if tag_entry.parent else None,
                     json_constants.CHILDREN_KEY: children_names,
-                    json_constants.ATTRIBUTES_KEY: self._get_tag_attributes(tag_entry),
+                    json_constants.ATTRIBUTES_KEY: all_attrs,
+                    json_constants.EXPLICIT_ATTRIBUTES_KEY: explicit_attrs,
                 }
 
                 # Add placeholder key if this tag has a takes-value child
@@ -334,7 +338,7 @@ class Schema2JSON(Schema2Base):
                 return tag_data
 
     def _get_tag_attributes(self, tag_entry, exclude_takes_value_if_placeholder=True):
-        """Extract tag attributes into a dictionary.
+        """Extract tag attributes into dictionaries.
 
         Parameters:
             tag_entry (HedTagEntry): The tag entry
@@ -342,12 +346,14 @@ class Schema2JSON(Schema2Base):
                                                        don't include takesValue in parent attributes
 
         Returns:
-            dict: Attributes dictionary
+            tuple: (all_attributes_dict, explicit_attributes_dict)
+                - all_attributes: All effective attributes (explicit + inherited)
+                - explicit_attributes: Only attributes explicitly set on this tag
         """
 
-        # Helper to get list values
-        def get_list_value(attr_key):
-            value = tag_entry.attributes.get(attr_key)
+        # Helper to get list values from a source dict
+        def get_list_value(attr_key, source_dict):
+            value = source_dict.get(attr_key)
             if value is None:
                 return []
             if isinstance(value, list):
@@ -355,64 +361,91 @@ class Schema2JSON(Schema2Base):
             # Comma-separated string
             return [v.strip() for v in value.split(",") if v.strip()]
 
-        # Helper to check if attribute is explicitly set (not inherited)
-        def has_explicit_attribute(attr_key):
-            return attr_key in tag_entry.attributes
-
-        # Helper to get boolean attribute value (preserving string "True"/"true" if present)
-        def get_bool_attribute(attr_key):
-            if attr_key not in tag_entry.attributes:
+        # Helper to get boolean attribute value from a source dict
+        def get_bool_attribute(attr_key, source_dict):
+            if attr_key not in source_dict:
                 return False
-            value = tag_entry.attributes[attr_key]
+            value = source_dict[attr_key]
             # If it's stored as string "True" or "true", keep it as string for XML compatibility
             if isinstance(value, str) and value.lower() in ("true", "false"):
                 return value
             # Otherwise return as boolean
             return bool(value)
 
+        # Helper to build attributes dict, omitting false booleans and empty values
+        def build_attributes_dict(source_dict, include_takes_value):
+            attrs = {}
+
+            # Boolean attributes - only include if true
+            bool_attrs = [
+                ("extensionAllowed", HedKey.ExtensionAllowed),
+                ("requireChild", HedKey.RequireChild),
+                ("unique", HedKey.Unique),
+                ("reserved", HedKey.Reserved),
+                ("tagGroup", HedKey.TagGroup),
+                ("topLevelTagGroup", HedKey.TopLevelTagGroup),
+                ("recommended", HedKey.Recommended),
+                ("required", HedKey.Required),
+            ]
+
+            for json_name, hed_key in bool_attrs:
+                value = get_bool_attribute(hed_key, source_dict)
+                if value:  # Only include if true
+                    attrs[json_name] = value
+
+            # takesValue - only if appropriate
+            if include_takes_value:
+                value = get_bool_attribute(HedKey.TakesValue, source_dict)
+                if value:
+                    attrs["takesValue"] = value
+
+            # List attributes - always include (even if empty)
+            attrs["suggestedTag"] = get_list_value(HedKey.SuggestedTag, source_dict)
+            attrs["relatedTag"] = get_list_value(HedKey.RelatedTag, source_dict)
+            attrs["valueClass"] = get_list_value(HedKey.ValueClass, source_dict)
+            attrs["unitClass"] = get_list_value(HedKey.UnitClass, source_dict)
+
+            # Single value attributes
+            default_units = source_dict.get(HedKey.DefaultUnits)
+            if default_units:
+                attrs["defaultUnits"] = default_units
+
+            return attrs
+
         # Check if this tag has a placeholder child - if so, takesValue belongs to the child
         has_placeholder_child = tag_entry.takes_value_child_entry is not None
         include_takes_value = not (exclude_takes_value_if_placeholder and has_placeholder_child)
 
-        attributes = {
-            "extensionAllowed": get_bool_attribute(HedKey.ExtensionAllowed),
-            "requireChild": get_bool_attribute(HedKey.RequireChild),
-            "unique": get_bool_attribute(HedKey.Unique),
-            "reserved": get_bool_attribute(HedKey.Reserved),
-            "tagGroup": get_bool_attribute(HedKey.TagGroup),
-            "topLevelTagGroup": get_bool_attribute(HedKey.TopLevelTagGroup),
-            "recommended": get_bool_attribute(HedKey.Recommended),
-            "required": get_bool_attribute(HedKey.Required),
-            "suggestedTag": get_list_value(HedKey.SuggestedTag),
-            "relatedTag": get_list_value(HedKey.RelatedTag),
-            "valueClass": get_list_value(HedKey.ValueClass),
-            "unitClass": get_list_value(HedKey.UnitClass),
-            "defaultUnits": tag_entry.attributes.get(HedKey.DefaultUnits),
-        }
+        # Build attributes dict from inherited_attributes (all effective values)
+        all_attributes = build_attributes_dict(tag_entry.inherited_attributes, include_takes_value)
 
-        # Only include takesValue if appropriate (not on parent when there's a placeholder child)
-        if include_takes_value:
-            attributes["takesValue"] = get_bool_attribute(HedKey.TakesValue)
+        # Build explicit attributes dict from attributes (only explicit values)
+        explicit_attributes = build_attributes_dict(tag_entry.attributes, include_takes_value)
 
+        # Add annotation attributes (non-inheritable) - these are always explicit
         # Add hedId if present
         hed_id = tag_entry.attributes.get(HedKey.HedID)
         if hed_id:
-            attributes["hedId"] = hed_id
+            all_attributes["hedId"] = hed_id
+            explicit_attributes["hedId"] = hed_id
 
         # Add rooted if present
         rooted = tag_entry.attributes.get(HedKey.Rooted)
         if rooted:
-            attributes["rooted"] = rooted
+            all_attributes["rooted"] = rooted
+            explicit_attributes["rooted"] = rooted
 
         # Add deprecatedFrom if present
         deprecated = tag_entry.attributes.get(HedKey.DeprecatedFrom)
         if deprecated:
-            attributes["deprecatedFrom"] = deprecated
+            all_attributes["deprecatedFrom"] = deprecated
+            explicit_attributes["deprecatedFrom"] = deprecated
 
         # Add inLibrary if present and not disallowed (depends on save_merged setting)
         in_library = tag_entry.attributes.get(HedKey.InLibrary)
         if in_library and not self._attribute_disallowed(HedKey.InLibrary):
-            attributes["inLibrary"] = in_library
+            all_attributes["inLibrary"] = in_library
+            explicit_attributes["inLibrary"] = in_library
 
         # Add any other custom attributes not in our known list (e.g., 'annotation')
         known_attrs = {
@@ -435,15 +468,25 @@ class Schema2JSON(Schema2Base):
             HedKey.DeprecatedFrom,
             HedKey.InLibrary,
         }
+        # Add custom attributes from inherited_attributes to all_attributes
+        for attr_name, attr_value in tag_entry.inherited_attributes.items():
+            if attr_name not in known_attrs and not self._attribute_disallowed(attr_name):
+                # Convert comma-separated strings to lists for multi-value attributes
+                if isinstance(attr_value, str) and "," in attr_value:
+                    all_attributes[attr_name] = [v.strip() for v in attr_value.split(",") if v.strip()]
+                else:
+                    all_attributes[attr_name] = attr_value
+
+        # Add custom attributes from explicit attributes to explicit_attributes
         for attr_name, attr_value in tag_entry.attributes.items():
             if attr_name not in known_attrs and not self._attribute_disallowed(attr_name):
                 # Convert comma-separated strings to lists for multi-value attributes
                 if isinstance(attr_value, str) and "," in attr_value:
-                    attributes[attr_name] = [v.strip() for v in attr_value.split(",") if v.strip()]
+                    explicit_attributes[attr_name] = [v.strip() for v in attr_value.split(",") if v.strip()]
                 else:
-                    attributes[attr_name] = attr_value
+                    explicit_attributes[attr_name] = attr_value
 
-        return attributes
+        return all_attributes, explicit_attributes
 
     def _get_placeholder_attributes(self, placeholder_entry):
         """Extract placeholder-specific attributes (unitClass, valueClass, hedId, deprecatedFrom).
