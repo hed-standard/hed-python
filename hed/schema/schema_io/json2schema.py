@@ -425,11 +425,15 @@ class SchemaLoaderJSON(SchemaLoader):
                     if attr_name != "description":  # Skip description, already handled
                         self._set_tag_attribute(entry, attr_name, attr_value)
         else:
-            # For base tags, set attributes from the attributes key
-            if json_constants.ATTRIBUTES_KEY in tag_data:
-                attributes = tag_data[json_constants.ATTRIBUTES_KEY]
-                for attr_name, attr_value in attributes.items():
-                    self._set_tag_attribute(entry, attr_name, attr_value)
+            # For base tags, prefer explicitAttributes if present (new format)
+            # Otherwise fall back to attributes (old format for backwards compatibility)
+            attrs_to_set = tag_data.get(json_constants.EXPLICIT_ATTRIBUTES_KEY)
+            if attrs_to_set is None:
+                # Old format without explicitAttributes - use attributes
+                attrs_to_set = tag_data.get(json_constants.ATTRIBUTES_KEY, {})
+
+            for attr_name, attr_value in attrs_to_set.items():
+                self._set_tag_attribute(entry, attr_name, attr_value)
 
         return entry
 

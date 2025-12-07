@@ -17,8 +17,8 @@ class HedTagCount:
         self.tag = hed_tag.short_base_tag
         self.tag_terms = hed_tag.tag_terms
         self.events = 1
-        self.files = {file_name: ""}
-        self.value_dict = {}
+        self.files = {file_name: ""}  # Keys are file names, values are unused
+        self.value_dict = {}  # Keys are the values of the tag and values are counts. None is key for no value.
         self.set_value(hed_tag)
 
     def set_value(self, hed_tag):
@@ -80,7 +80,7 @@ class HedTagCounts:
     """
 
     def __init__(self, name, total_events=0):
-        self.tag_dict = {}
+        self.tag_dict = {}  # Keys are tag (str), values are HedTagCount
         self.name = name
         self.files = {}
         self.total_events = total_events

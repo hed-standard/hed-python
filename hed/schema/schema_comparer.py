@@ -49,12 +49,32 @@ class SchemaComparer:
     DF_EXTRAS = {SOURCES, PREFIXES, ANNOTATION_PROPERTY_EXTERNAL}
 
     def __init__(self, schema1, schema2):
-        """Initialize the SchemaComparer with two schemas."""
+        """Initialize the SchemaComparer with two schemas.
+
+        Parameters:
+            schema1 (HedSchema): The first schema to compare (typically older version).
+            schema2 (HedSchema): The second schema to compare (typically newer version).
+        """
         self.schema1 = schema1
         self.schema2 = schema2
 
     def find_matching_tags(self, sections=(HedSectionKey.Tags,), return_string=True):
-        """Compare the tags in the two schemas."""
+        """Find tags with matching names in both schemas.
+
+        This method identifies all entries that exist in both schemas with the same name,
+        regardless of whether their attributes differ.
+
+        Parameters:
+            sections (tuple): Tuple of HedSectionKey values indicating which sections to compare.
+                            Default is (HedSectionKey.Tags,).
+            return_string (bool): If True, return formatted string. If False, return dictionary.
+                                 Default is True.
+
+        Returns:
+            str or dict: If return_string is True, returns formatted string listing matching tags.
+                        If False, returns dictionary mapping section keys to dictionaries of
+                        matching tag entries.
+        """
         matches, _, _, unequal_entries = self.compare_schemas(sections=sections)
         header_summary = self._get_tag_name_summary((matches, unequal_entries))
 
@@ -69,7 +89,25 @@ class SchemaComparer:
         return matches
 
     def compare_schemas(self, attribute_filter=HedKey.InLibrary, sections=(HedSectionKey.Tags,)):
-        """Compare the two schemas section by section."""
+        """Compare two schemas section by section, categorizing entries by match status.
+
+        This is the core comparison method that categorizes all schema entries into four groups:
+        matches (identical entries), entries only in schema1, entries only in schema2, and
+        entries with the same name but different attributes.
+
+        Parameters:
+            attribute_filter (HedKey or None): If provided, only entries with this attribute are compared.
+                                              Set to None to compare all entries. Default is HedKey.InLibrary.
+            sections (tuple or None): Tuple of HedSectionKey values to compare. If None, compares all
+                                     sections including miscellaneous metadata. Default is (HedSectionKey.Tags,).
+
+        Returns:
+            tuple: Four dictionaries (matches, not_in_schema1, not_in_schema2, unequal_entries):
+                - matches: Entries identical in both schemas
+                - not_in_schema1: Entries only in schema2
+                - not_in_schema2: Entries only in schema1
+                - unequal_entries: Entries with same name but different attributes
+        """
         matches, not_in_schema2, not_in_schema1, unequal_entries = {}, {}, {}, {}
 
         # Handle miscellaneous sections
@@ -113,7 +151,20 @@ class SchemaComparer:
         return matches, not_in_schema1, not_in_schema2, unequal_entries
 
     def gather_schema_changes(self, attribute_filter=None):
-        """Generate a changelog by comparing the two schemas."""
+        """Generate a structured changelog by comparing the two schemas.
+
+        This method performs a comprehensive comparison and produces a categorized change dictionary
+        suitable for version control and documentation. Changes are classified by severity
+        (Major, Minor, Patch, Unknown) and organized by schema section.
+
+        Parameters:
+            attribute_filter (HedKey or None): If provided, only entries with this attribute are compared.
+                                              Set to None to compare all entries. Default is None.
+
+        Returns:
+            dict: Dictionary mapping section keys to lists of change dictionaries. Each change
+                 dictionary contains 'change_type', 'change' (description), and 'tag' (affected entry).
+        """
         _, not_in_1, not_in_2, unequal_entries = self.compare_schemas(attribute_filter=attribute_filter, sections=None)
         change_dict = defaultdict(list)
         self._add_removed_items(change_dict, not_in_2)
@@ -124,7 +175,20 @@ class SchemaComparer:
         return {key: change_dict[key] for key in self.SECTION_ENTRY_NAMES if key in change_dict}
 
     def pretty_print_change_dict(self, change_dict, title="Schema changes", use_markdown=True):
-        """Format the change dictionary into a string."""
+        """Format a change dictionary into a human-readable string.
+
+        Converts the structured change dictionary from gather_schema_changes into a formatted
+        text report suitable for display or documentation.
+
+        Parameters:
+            change_dict (dict): Dictionary of changes as returned by gather_schema_changes.
+            title (str): Title for the change report. Default is "Schema changes".
+            use_markdown (bool): If True, use markdown formatting (bold headers, bullet points).
+                                If False, use plain text with tabs. Default is True.
+
+        Returns:
+            str: Formatted string representation of the changes.
+        """
         final_strings = []
         line_prefix = " - " if use_markdown else "\t"
         if change_dict:
@@ -141,7 +205,20 @@ class SchemaComparer:
         return "\n".join(final_strings)
 
     def compare_differences(self, attribute_filter=None, title=""):
-        """Compare the tags and extras in the two schemas, reporting all differences."""
+        """Compare two schemas and return a formatted report of all differences.
+
+        This is a convenience method that combines gather_schema_changes and pretty_print_change_dict
+        to produce a complete, human-readable comparison report.
+
+        Parameters:
+            attribute_filter (HedKey or None): If provided, only entries with this attribute are compared.
+                                              Set to None to compare all entries. Default is None.
+            title (str): Custom title for the report. If empty, generates title from schema names.
+                        Default is empty string.
+
+        Returns:
+            str: Formatted markdown string describing all differences between the schemas.
+        """
         changelog = self.gather_schema_changes(attribute_filter=attribute_filter)
         if not title:
             title = f"Differences between {self.schema1.name} and {self.schema2.name}"
@@ -149,7 +226,14 @@ class SchemaComparer:
 
     # Private helper methods
     def _pretty_print_header(self, summary_dict):
-        """Format a summary dictionary of tag names by section into a string."""
+        """Format a summary dictionary of tag names by section into a string.
+
+        Parameters:
+            summary_dict (dict): Dictionary mapping section keys to lists of tag names.
+
+        Returns:
+            str: Formatted string with section headers and comma-separated tag names.
+        """
         output_string = ""
         first_entry = True
         for section_key, tag_names in summary_dict.items():
@@ -166,7 +250,14 @@ class SchemaComparer:
 
     @staticmethod
     def _get_tag_name_summary(tag_dicts):
-        """Combine dictionaries into a summary of tag names by section."""
+        """Combine multiple tag dictionaries into a unified summary organized by section.
+
+        Parameters:
+            tag_dicts (tuple or list): Collection of dictionaries mapping section keys to tag entries.
+
+        Returns:
+            dict: Dictionary mapping section keys to lists of all tag names from all input dictionaries.
+        """
         out_dict = {section_key: [] for section_key in HedSectionKey}
         for tag_dict in tag_dicts:
             for section_key, section in tag_dict.items():
@@ -174,7 +265,12 @@ class SchemaComparer:
         return out_dict
 
     def _add_removed_items(self, change_dict, not_in_2):
-        """Add removed items to the change dictionary."""
+        """Add entries for items removed from schema2 to the change dictionary.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+            not_in_2 (dict): Dictionary of entries present in schema1 but not in schema2.
+        """
         for section_key, section in not_in_2.items():
             for tag, _ in section.items():
                 type_name = self.SECTION_ENTRY_NAMES_PLURAL[section_key]
@@ -185,13 +281,27 @@ class SchemaComparer:
 
     @staticmethod
     def _add_added_items(change_dict, not_in_1):
-        """Add added items to the change dictionary."""
+        """Add entries for items added to schema2 to the change dictionary.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+            not_in_1 (dict): Dictionary of entries present in schema2 but not in schema1.
+        """
         for section_key, section in not_in_1.items():
             for tag, _ in section.items():
                 change_dict[section_key].append({"change_type": "Minor", "change": f"Item {tag} added", "tag": tag})
 
     def _add_unequal_entries(self, change_dict, unequal_entries):
-        """Add unequal entries to the change dictionary."""
+        """Add entries for items with differing attributes to the change dictionary.
+
+        Handles entries that exist in both schemas but have different attributes, descriptions,
+        or other properties. Routes to specialized handlers for different section types.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+            unequal_entries (dict): Dictionary mapping section keys to tuples of (entry1, entry2) for
+                                   entries with the same name but different attributes.
+        """
         for section_key, changes in unequal_entries.items():
             if section_key == self.MISC_SECTION:
                 self._add_misc_section_changes(change_dict, section_key, changes)
@@ -211,7 +321,15 @@ class SchemaComparer:
 
     @staticmethod
     def _add_misc_section_changes(change_dict, section_key, changes):
-        """Add changes for the misc section to the change dictionary."""
+        """Add changes for miscellaneous metadata sections to the change dictionary.
+
+        Handles changes to schema metadata like prologue, epilogue, and header attributes.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+            section_key (str): The section identifier (typically MISC_SECTION).
+            changes (dict): Dictionary mapping metadata field names to (old_value, new_value) tuples.
+        """
         for misc_section, (value1, value2) in changes.items():
             change_type = "Patch" if "prologue" in misc_section or "epilogue" in misc_section else "Patch"
             change_desc = (
@@ -222,12 +340,46 @@ class SchemaComparer:
             change_dict[section_key].append({"change_type": change_type, "change": change_desc, "tag": misc_section})
 
     def _add_extras_section_changes(self, change_dict, section_key, changes):
-        """Add changes for extras sections (dataframes) to the change dictionary."""
-        pass  # Placeholder for extras section changes logic.
+        """Add changes for extras sections (dataframes) to the change dictionary.
+
+        Handles changes to dataframe-based extras like Sources, Prefixes, and AnnotationPropertyExternal.
+        Note: Extras sections are actually handled by _add_extras_changes which directly compares
+        the dataframes from schema.extras. This method handles any extras-related entries that
+        might appear in the unequal_entries from compare_schemas.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+            section_key (str): The section identifier (e.g., SOURCES, PREFIXES).
+            changes (dict): Dictionary mapping entry names to (entry1, entry2) tuples.
+        """
+        # Extras sections (Sources, Prefixes, AnnotationPropertyExternal) are stored as dataframes
+        # in schema.extras rather than as schema entries, so they're handled separately
+        # by _add_extras_changes. If we somehow get extras entries here, treat them generically.
+        for name, (entry1, entry2) in changes.items():
+            # Compare the entries as generic schema entries
+            if hasattr(entry1, "attributes") and hasattr(entry2, "attributes"):
+                if entry1.attributes != entry2.attributes:
+                    change_dict[section_key].append(
+                        {"change_type": "Patch", "change": f"{name} attributes modified", "tag": name}
+                    )
+            if hasattr(entry1, "description") and hasattr(entry2, "description"):
+                if entry1.description != entry2.description:
+                    change_dict[section_key].append(
+                        {"change_type": "Patch", "change": f"{name} description modified", "tag": name}
+                    )
 
     @staticmethod
     def _add_unit_classes_changes(change_dict, section_key, entry1, entry2):
-        """Add changes for unit classes to the change dictionary."""
+        """Add changes in unit class definitions to the change dictionary.
+
+        Compares the units contained in two unit class entries and records additions/removals.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+            section_key (HedSectionKey): The section identifier (should be HedSectionKey.UnitClasses).
+            entry1 (HedSchemaEntry): Unit class entry from schema1.
+            entry2 (HedSchemaEntry): Unit class entry from schema2 with the same name.
+        """
         for unit in entry1.units:
             if unit not in entry2.units:
                 change_dict[section_key].append(
@@ -240,7 +392,17 @@ class SchemaComparer:
                 )
 
     def _add_tag_changes(self, change_dict, section_key, entry1, entry2):
-        """Add changes for tags to the change dictionary."""
+        """Add changes in tag definitions to the change dictionary.
+
+        Compares unit classes, value classes, position in hierarchy, and suggested/related tags
+        for two tag entries with the same name.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+            section_key (HedSectionKey): The section identifier (should be HedSectionKey.Tags).
+            entry1 (HedTagEntry): Tag entry from schema1.
+            entry2 (HedTagEntry): Tag entry from schema2 with the same short name.
+        """
         for unit_class in entry1.unit_classes:
             if unit_class not in entry2.unit_classes:
                 change_dict[section_key].append(
@@ -290,7 +452,17 @@ class SchemaComparer:
 
     @staticmethod
     def _add_suggested_tag_changes(change_dict, entry1, entry2, attribute, label):
-        """Add changes for suggested or related tags to the change dictionary."""
+        """Add changes for suggested or related tag attributes to the change dictionary.
+
+        Compares multi-value tag attributes (like suggestedTag or relatedTag) between two entries.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+            entry1 (HedTagEntry): Tag entry from schema1.
+            entry2 (HedTagEntry): Tag entry from schema2 with the same short name.
+            attribute (HedKey): The attribute to compare (e.g., HedKey.SuggestedTag).
+            label (str): Human-readable label for the attribute (e.g., "Suggested tag").
+        """
         related_tag1 = ", ".join(sorted(entry1.inherited_attributes.get(attribute, "").split(",")))
         related_tag2 = ", ".join(sorted(entry2.inherited_attributes.get(attribute, "").split(",")))
         if related_tag1 != related_tag2:
@@ -307,7 +479,18 @@ class SchemaComparer:
             )
 
     def _check_other_attributes(self, change_dict, section_key, entry1, entry2):
-        """Compare non-specialized attributes and add differences to the change dictionary."""
+        """Compare general attributes not handled by specialized methods.
+
+        Checks all attributes except those already handled by specialized comparison methods
+        (suggestedTag, relatedTag, unitClass, valueClass). Distinguishes between directly
+        set attributes and inherited attributes for tags.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+            section_key (HedSectionKey): The section identifier.
+            entry1 (HedSchemaEntry): Entry from schema1.
+            entry2 (HedSchemaEntry): Entry from schema2 with the same name.
+        """
         already_checked_attributes = [HedKey.RelatedTag, HedKey.SuggestedTag, HedKey.ValueClass, HedKey.UnitClass]
         unique_keys = set(entry1.attributes.keys()).union(entry2.attributes.keys())
         if section_key == HedSectionKey.Tags:
@@ -354,7 +537,15 @@ class SchemaComparer:
                 )
 
     def _add_extras_changes(self, change_dict):
-        """Compare the extras (dataframes) in two schemas and add differences to the change dictionary."""
+        """Compare extras dataframes between schemas and record differences.
+
+        Extras include Sources, Prefixes, and AnnotationPropertyExternal sections stored as
+        pandas DataFrames. Compares row-by-row using key columns to identify additions,
+        removals, and modifications.
+
+        Parameters:
+            change_dict (defaultdict): Change dictionary to append to.
+        """
         from hed.schema.schema_io.df_constants import UNIQUE_EXTRAS_KEYS
 
         extras1 = getattr(self.schema1, "extras", {}) or {}
@@ -422,7 +613,20 @@ class SchemaComparer:
 
     @staticmethod
     def _compare_dataframes(df1, df2, key_cols):
-        """Compare two dataframes by key columns and report row/column differences."""
+        """Compare two dataframes row-by-row using key columns.
+
+        Identifies rows that exist only in one dataframe, duplicate keys, and rows with
+        differing column values.
+
+        Parameters:
+            df1 (pd.DataFrame): First dataframe to compare.
+            df2 (pd.DataFrame): Second dataframe to compare.
+            key_cols (list): List of column names to use as unique identifiers for rows.
+
+        Returns:
+            list: List of difference dictionaries, each containing 'row' (key value),
+                 'cols' (list of differing columns), and 'message' (description of difference).
+        """
         results = []
 
         df1_indexed = df1.set_index(key_cols)
