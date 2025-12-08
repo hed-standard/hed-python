@@ -399,11 +399,22 @@ class Schema2JSON(Schema2Base):
                 if value:
                     attrs["takesValue"] = value
 
-            # List attributes - always include (even if empty)
-            attrs["suggestedTag"] = get_list_value(HedKey.SuggestedTag, source_dict)
-            attrs["relatedTag"] = get_list_value(HedKey.RelatedTag, source_dict)
-            attrs["valueClass"] = get_list_value(HedKey.ValueClass, source_dict)
-            attrs["unitClass"] = get_list_value(HedKey.UnitClass, source_dict)
+            # List attributes - only include if non-empty
+            suggested_tag = get_list_value(HedKey.SuggestedTag, source_dict)
+            if suggested_tag:
+                attrs["suggestedTag"] = suggested_tag
+
+            related_tag = get_list_value(HedKey.RelatedTag, source_dict)
+            if related_tag:
+                attrs["relatedTag"] = related_tag
+
+            value_class = get_list_value(HedKey.ValueClass, source_dict)
+            if value_class:
+                attrs["valueClass"] = value_class
+
+            unit_class = get_list_value(HedKey.UnitClass, source_dict)
+            if unit_class:
+                attrs["unitClass"] = unit_class
 
             # Single value attributes
             default_units = source_dict.get(HedKey.DefaultUnits)
