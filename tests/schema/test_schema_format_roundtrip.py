@@ -253,6 +253,119 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         # Version number might be different for unmerged (without library prefix)
         self.assertEqual(schema.with_standard, schema_unmerged.with_standard)
 
+    def test_json_empty_list_attributes_omitted(self):
+        """Test that empty list attributes (suggestedTag, relatedTag, etc.) are omitted from JSON."""
+        import json
+
+        schema = load_schema_version("8.4.0")
+        json_path = os.path.join(self.temp_dir, "empty_lists.json")
+        schema.save_as_json(json_path)
+
+        # Read the JSON file and check for empty list attributes
+        with open(json_path, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+
+        # Check ALL tags for empty lists
+        tags_with_empty_lists = []
+
+        for tag_name, tag_data in json_data.get("tags", {}).items():
+            # Check attributes dict
+            attrs = tag_data.get("attributes", {})
+            for list_attr in ["suggestedTag", "relatedTag", "valueClass", "unitClass"]:
+                if list_attr in attrs and attrs[list_attr] == []:
+                    tags_with_empty_lists.append(f"{tag_name}.attributes.{list_attr}")
+
+            # Check explicitAttributes dict
+            explicit_attrs = tag_data.get("explicitAttributes", {})
+            for list_attr in ["suggestedTag", "relatedTag", "valueClass", "unitClass"]:
+                if list_attr in explicit_attrs and explicit_attrs[list_attr] == []:
+                    tags_with_empty_lists.append(f"{tag_name}.explicitAttributes.{list_attr}")
+
+        self.assertEqual(
+            len(tags_with_empty_lists),
+            0,
+            f"Found {len(tags_with_empty_lists)} empty list attributes: {tags_with_empty_lists[:5]}",
+        )
+
+        # Verify that tags WITH these attributes have non-empty lists
+        if "Sensory-event" in json_data.get("tags", {}):
+            sensory_attrs = json_data["tags"]["Sensory-event"].get("attributes", {})
+            if "suggestedTag" in sensory_attrs:
+                self.assertTrue(
+                    len(sensory_attrs["suggestedTag"]) > 0, "Sensory-event suggestedTag should be non-empty if present"
+                )
+
+    def test_extras_sections_roundtrip(self):
+        """Test that extras sections (Sources, Prefixes, AnnotationPropertyExternal) roundtrip correctly."""
+        schema = load_schema_version("8.4.0")
+
+        # Check that original has extras
+        orig_extras = getattr(schema, "extras", {}) or {}
+        self.assertGreater(len(orig_extras), 0, "Schema should have extras sections")
+
+        # Save and reload
+        json_path = os.path.join(self.temp_dir, "with_extras.json")
+        schema.save_as_json(json_path)
+        reloaded = load_schema(json_path)
+
+        # Check reloaded has extras
+        reloaded_extras = getattr(reloaded, "extras", {}) or {}
+
+        # Compare each extras section
+        self.assertEqual(set(orig_extras.keys()), set(reloaded_extras.keys()), "Extras sections should match")
+
+        for key in orig_extras.keys():
+            orig_df = orig_extras[key]
+            reloaded_df = reloaded_extras[key]
+            self.assertTrue(orig_df.equals(reloaded_df), f"Extras section '{key}' should match after roundtrip")
+
+    def test_library_schema_extras_roundtrip(self):
+        """Test that library schema extras (external annotations, etc.) roundtrip correctly."""
+        schema = load_schema_version("score_2.1.0")
+
+        # Check that library schema has extras
+        orig_extras = getattr(schema, "extras", {}) or {}
+        self.assertGreater(len(orig_extras), 0, "Library schema should have extras sections")
+
+        # Check for external annotations specifically
+        self.assertIn("AnnotationPropertyExternal", orig_extras, "Library schema should have external annotations")
+
+        # Save and reload
+        json_path = os.path.join(self.temp_dir, "library_with_extras.json")
+        schema.save_as_json(json_path, save_merged=False)
+        reloaded = load_schema(json_path)
+
+        # Check reloaded has all extras
+        reloaded_extras = getattr(reloaded, "extras", {}) or {}
+        self.assertEqual(set(orig_extras.keys()), set(reloaded_extras.keys()), "Library schema extras sections should match")
+
+        # Verify each extras dataframe matches
+        for key in orig_extras.keys():
+            orig_df = orig_extras[key]
+            reloaded_df = reloaded_extras[key]
+            self.assertTrue(orig_df.equals(reloaded_df), f"Library schema extras '{key}' should match after roundtrip")
+
+    def test_library_schema_score(self):
+        """Test score library schema roundtrip specifically."""
+        schema = load_schema_version("score_2.1.0")
+
+        # Test unmerged format
+        json_path = os.path.join(self.temp_dir, "score_unmerged.json")
+        schema.save_as_json(json_path, save_merged=False)
+        reloaded = load_schema(json_path)
+
+        # Verify library attributes
+        self.assertEqual(schema.library, reloaded.library)
+        self.assertEqual(schema.version, reloaded.version)
+        self.assertEqual(schema.with_standard, reloaded.with_standard)
+
+        # Verify tag counts match
+        self.assertEqual(len(schema.tags.all_entries), len(reloaded.tags.all_entries))
+
+        # Verify prologue and epilogue
+        self.assertEqual(schema.prologue, reloaded.prologue)
+        self.assertEqual(schema.epilogue, reloaded.epilogue)
+
 
 if __name__ == "__main__":
     unittest.main()

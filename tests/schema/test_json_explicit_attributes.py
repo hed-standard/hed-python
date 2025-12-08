@@ -154,14 +154,25 @@ class TestJSONExplicitAttributes(unittest.TestCase):
         self.assertIn("Sensory-presentation", lang["explicitAttributes"]["suggestedTag"])
 
     def test_empty_lists_omitted(self):
-        """Test that empty lists are represented as empty arrays, not omitted."""
+        """Test that empty lists are omitted from JSON output (not written as empty arrays)."""
         json_data = self._get_json_output()
         tags = json_data["tags"]
 
-        # Most tags should have relatedTag as empty list
+        # Tags without relatedTag/valueClass/unitClass should not have these keys at all
         event = tags["Event"]
-        self.assertIn("relatedTag", event["attributes"])
-        self.assertEqual(event["attributes"]["relatedTag"], [])
+        # Event has suggestedTag, so it should be present
+        self.assertIn("suggestedTag", event["attributes"])
+        # But if Event doesn't have relatedTag, it should be omitted entirely
+        if "relatedTag" in event["attributes"]:
+            # If present, it must be non-empty
+            self.assertNotEqual(
+                event["attributes"]["relatedTag"], [], "relatedTag should be omitted entirely, not present as empty list"
+            )
+
+        # Check that tags without certain attributes don't have empty lists
+        item = tags.get("Item", {})
+        if "relatedTag" in item.get("attributes", {}):
+            self.assertNotEqual(item["attributes"]["relatedTag"], [], "Empty relatedTag should be omitted, not present as []")
 
 
 class TestJSONBackwardsCompatibility(unittest.TestCase):
