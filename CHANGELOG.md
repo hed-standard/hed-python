@@ -1,5 +1,5 @@
 ```markdown
-Release 0.8.1 December 8, 2025
+Release 0.8.1 December 9, 2025
 
 The primary purpose of this release was to correct the JSON format for HED schemas so that it would accurately distinguish between inherited and non-inherited attributes. The documentation layout was also improved with quick links.
 
