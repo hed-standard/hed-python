@@ -1,4 +1,56 @@
 ```markdown
+Release 0.8.1 December 8, 2025
+
+The primary purpose of this release was to correct the JSON format for HED schemas so that it would accurately distinguish between inherited and non-inherited attributes. The documentation layout was also improved with quick links.
+
+
+## Highlights
+
+- HED schema JSON export is now cleaner: empty list attributes are omitted instead of written as empty arrays, with stronger tests around inheritance and round-trip behavior.
+- Default HED XML schema version bumped to **8.4.0**, so helper functions pick up the latest standard without extra configuration.
+- Sphinx docs get a polished Furo theme setup, project logo, sidebar quick links, dark-mode fixes, and a proper GitHub repo icon.  
+- CI updated to use `actions/checkout@v6` via Dependabot
+
+## What’s Changed
+
+### Schema & JSON I/O
+
+- **Omit empty list attributes in schema JSON** Updated `build_attributes_dict` in `schema2json.py` so list-valued attributes like `suggestedTag`, `relatedTag`, `valueClass`, and `unitClass` are only written when non-empty, instead of always being present as `[]`. This produces a more compact JSON representation and avoids ambiguous “empty list means nothing” cases. 
+
+- **Stronger JSON format tests** Refined tests in `test_json_explicit_attributes.py` and `test_schema_format_roundtrip.py` to assert that:
+  - Tags without `relatedTag` / `valueClass` / `unitClass` simply do not have those keys in `attributes`.  
+  - Any list attributes that *are* present must be non-empty.  
+  - A full 8.4.0 schema is saved as JSON and scanned to ensure no empty list attributes sneak into the output. 
+
+- **Schema comparison & round-trip robustness** Extended round-trip tests for JSON schema export/import so that schema comparison is aligned with the new “omit empty lists” behavior and no longer relies on placeholder empty arrays.
+
+- **Default XML schema → 8.4.0** Updated the default XML schema version used by helper utilities to `8.4.0` (from 8.3.0). This ensures `load_schema_version()` and similar functions resolve to the current standard HED schema by default.
+
+
+### Documentation & Site
+
+- **Furo theme configuration and versioning** Updated `docs/conf.py` to:
+  - Set `release = "0.8.0"` for the docs.  
+  - Use the Furo theme with `html_static_path = ["_static"]`.  
+  - Register extra assets: `custom.css` and `gh_icon_fix.js`.  
+  - Attach a project logo via `html_logo`.
+
+- **Sidebar quick links** Added a new `quicklinks.html` sidebar template and wired it into `html_sidebars` so all pages include a “Quick links” section pointing to HED homepage, resources, schema browser, specification, and online tools.
+
+- **Dark-mode & header polish** Extended `custom.css` and the new `gh_icon_fix.js` helper to:
+  - Make the sidebar search box readable in dark mode (background, placeholder, and icon colors).  
+  - Hide the raw “view source” / “edit this page” links in the header.  
+  - Replace them with a single GitHub icon button that points to the repo root and works in both light and dark themes.
+
+- **Minor formatting clean-ups**  
+  Small documentation/test formatting adjustments, including updating tests to load schema version 8.4.0 and aligning text with the new JSON behavior.
+
+### CI / Tooling
+
+- **GitHub Actions: `actions/checkout` v6**  
+  Dependabot PR **#1155** updates all workflows to use `actions/checkout@v6` instead of v5, pulling in the latest upstream improvements (including Node.js 24 support and updated credential handling).
+
+
 Release 0.8.0 November 18, 2025
 - **Unified CLI Interface**: Added `hedpy` command-line tool with git-like subcommand structure.
   - Main command: `hedpy` with subcommands for all HED operations.
