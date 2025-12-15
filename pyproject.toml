@@ -121,7 +121,6 @@ namespaces = false
 
 [tool.setuptools.package-data]
 hed = ["schema/schema_data/*.xml", "resources/*.png", "validator/data/*"]
-"" = ["examples/*.ipynb", "examples/*.md"]
 
 [tool.codespell]
 skip = '*.git,*.pdf,*.svg,versioneer.py,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests,,*.xml,*.mediawiki,*.omn,*.toml'
