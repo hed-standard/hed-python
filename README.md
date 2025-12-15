@@ -97,6 +97,36 @@ run_remodel /path/to/data /path/to/config.json
 
 For more examples, see the [user guide](https://www.hedtags.org/hed-python/user_guide.html).
 
+### Jupyter notebook examples
+
+**Note:** Example notebooks are available in the [GitHub repository](https://github.com/hed-standard/hed-python/tree/main/examples) only, not in the PyPI package.
+
+The [`examples/`](examples/) directory contains Jupyter notebooks demonstrating common HED workflows with BIDS datasets:
+
+- **validate_bids_dataset.ipynb** - Validate HED annotations in a BIDS dataset
+- **summarize_events.ipynb** - Summarize event file contents and value counts
+- **sidecar_to_spreadsheet.ipynb** - Convert JSON sidecars to spreadsheet format
+- **merge_spreadsheet_into_sidecar.ipynb** - Merge spreadsheet annotations into JSON sidecars
+- **extract_json_template.ipynb** - Generate JSON sidecar templates from event files
+- **find_event_combinations.ipynb** - Find unique combinations of event values
+- **validate_bids_dataset_with_libraries.ipynb** - Validate with HED library schemas
+
+To use these notebooks:
+
+```bash
+# Clone the repository to get the examples
+git clone https://github.com/hed-standard/hed-python.git
+cd hed-python
+
+# Install HEDTools with Jupyter support
+pip install -e .[examples]
+
+# Launch Jupyter
+jupyter notebook examples/
+```
+
+See [`examples/README.md`](examples/README.md) for more details.
+
 ## Documentation
 
 📖 **Full Documentation:** [https://www.hedtags.org/hed-python](https://www.hedtags.org/hed-python)
@@ -183,7 +213,11 @@ We welcome contributions! Here's how you can help:
 git clone https://github.com/hed-standard/hed-python.git
 cd hed-python
 
-# Install in development mode with dependencies
+# Install in development mode with all dependencies (including Jupyter)
+pip install -e .[examples]
+pip install -r requirements-dev.txt
+
+# Or just core development dependencies
 pip install -e .
 pip install -r requirements.txt
 
@@ -192,6 +226,9 @@ python -m unittest discover tests
 
 # Run specific test file
 python -m unittest tests/path/to/test_file.py
+
+# Test notebooks (requires Jupyter dependencies)
+python -m unittest tests.test_notebooks
 ```
 
 For detailed contribution guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.md) (coming soon).

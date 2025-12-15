@@ -82,6 +82,13 @@ docs = [
 test = [
     "coverage>=7.0.0",
 ]
+examples = [
+    "jupyter>=1.0.0",
+    "notebook>=7.0.0",
+    "nbformat>=5.9.0",
+    "nbconvert>=7.0.0",
+    "ipykernel>=6.25.0",
+]
 
 [project.scripts]
 # Main unified CLI
@@ -114,6 +121,7 @@ namespaces = false
 
 [tool.setuptools.package-data]
 hed = ["schema/schema_data/*.xml", "resources/*.png", "validator/data/*"]
+"" = ["examples/*.ipynb", "examples/*.md"]
 
 [tool.codespell]
 skip = '*.git,*.pdf,*.svg,versioneer.py,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests,,*.xml,*.mediawiki,*.omn,*.toml'
