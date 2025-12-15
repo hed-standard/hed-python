@@ -1,3 +1,4 @@
+click>=8.0.0
 defusedxml>=0.7.1
 inflect>=7.5.0
 jsonschema>=4.23.0

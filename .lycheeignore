@@ -1,0 +1,42 @@
+<!-- This file lists all links/regex to be ignored by lychee in the link checker -->
+# ScienceDirect links (require authentication/cookies)
+https://www.sciencedirect.com/science/article/pii/S1053811921010387
+https://www.sciencedirect.com/science/article/pii/S0010945221001106
+https://www.sciencedirect.com/science/article/pii/S1388245717309069
+
+# Springer links (503 Service Unavailable errors, but links work in browsers)
+^https?://link\.springer\.com/
+
+# INCF links (certificate/network issues)
+^https?://.*\.incf\.org/
+^https?://incf\.org/
+
+# DOI links that return 403 but work in browsers
+^https?://doi\.org/10\.1111/epi\.18113
+
+# NPM package links (blocks automated requests)
+^https?://.*\.npmjs\.com/package/hed-validator
+
+# MathWorks links (blocks automated requests)  
+^https?://.*\.mathworks\.com/
+
+# Brain Meeting poster links (expired/removed)
+^https?://brainmeeting.*\.ipostersessions\.com/
+^https?://globalbrainconsortium\.org/documents/GBC_March-2023_Agenda_Annual_Meeting\.pdf
+
+# CANCTA network links (authentication/access issues)
+^https?://.*\.cancta\.net/
+^https?://cancta\.net/
+
+# GitHub discussions (programmatic access blocked)
+^https?://github\.com/hed-standard/hed-python/discussions
+
+# HED tools services (programmatic access blocked)
+^https?://hedtools\.org/hed/services_submit
+
+# Neuroinformatics registration (certificate issues)
+^https?://neuroinformatics\.incf\.org/
+
+# Internal anchor links (false positives from lychee)
+(_anchor|-anchor)
+

@@ -12,7 +12,6 @@ These tests require the optional 'examples' dependencies:
 import os
 import unittest
 from pathlib import Path
-import json
 import tempfile
 import shutil
 
@@ -357,7 +356,7 @@ class TestNotebookExecution(unittest.TestCase):
 
             with self.subTest(notebook=notebook_name):
                 with open(notebook_path, "r", encoding="utf-8") as f:
-                    nb = self.nbformat.read(f, as_version=4)
+                    self.nbformat.read(f, as_version=4)
 
                 # Create executor (doesn't actually execute)
                 ep = self.ExecutePreprocessor(timeout=60, kernel_name="python3")
