@@ -139,7 +139,7 @@ class IndividualHedTagsShort(TestHed):
             "correctUnit": "Duration/3 s",
             "incorrectUnit": "Duration/3 cm",
             "incorrectSiUsage": "Duration/3 decaday",
-            "incorrectPluralUnit": "Frequency/3 hertzs",
+            "incorrectPluralUnit": "Frequency/3 hertzs",  # codespell:ignore hertzs
             "incorrectSymbolCapitalizedUnit": "Frequency/3 hz",
             "incorrectSymbolCapitalizedUnitModifier": "Frequency/3 KHz",
             "notRequiredNumber": "Statistical-accuracy/0.5",

@@ -176,7 +176,7 @@ class IndividualHedTagsShort(TestHed3):
             "correctNonSymbolCapitalizedUnit": "tl:Duration/3 MilliSeconds",
             "correctSymbolCapitalizedUnit": "tl:Frequency/3 kHz",
             "incorrectUnit": "tl:Duration/3 cm",
-            "incorrectPluralUnit": "tl:Frequency/3 hertzs",
+            "incorrectPluralUnit": "tl:Frequency/3 hertzs", # codespell:ignore hertzs
             "incorrectSymbolCapitalizedUnit": "tl:Frequency/3 hz",
             "incorrectSymbolCapitalizedUnitModifier": "tl:Frequency/3 KHz",
             "notRequiredNumber": "tl:Statistical-accuracy/0.5",
