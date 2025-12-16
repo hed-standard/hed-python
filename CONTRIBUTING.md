@@ -39,18 +39,21 @@ This project adheres to a code of conduct that we expect all contributors to fol
 ### Setting Up Your Development Environment
 
 1. **Fork and clone the repository:**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/hed-python.git
    cd hed-python
    ```
 
 2. **Create a virtual environment (recommended):**
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 3. **Install in development mode:**
+
    ```bash
    pip install -e .
    pip install -r requirements.txt
@@ -59,6 +62,7 @@ This project adheres to a code of conduct that we expect all contributors to fol
    ```
 
 4. **Run tests to verify setup:**
+
    ```bash
    python -m unittest discover tests
    ```
@@ -77,31 +81,35 @@ This project adheres to a code of conduct that we expect all contributors to fol
 We use several tools to maintain code quality:
 
 - **black:** For automatic code formatting
+
   ```bash
   # Check if code is formatted correctly
   black --check .
-  
+
   # Automatically format all code
   black .
-  
+
   # Format specific files or directories
   black hed/ tests/
-  
+
   # Windows: Use --workers 1 if you encounter file I/O errors
   black --workers 1 .
   ```
 
 - **ruff:** For linting, style checking, and import sorting
+
   ```bash
   ruff check hed/ tests/
   ```
-  
+
   To automatically fix issues:
+
   ```bash
   ruff check --fix hed/ tests/
   ```
 
 - **codespell:** For spell checking
+
   ```bash
   codespell
   ```
@@ -113,6 +121,7 @@ We use several tools to maintain code quality:
 - Provide examples for complex functionality
 
 Example docstring:
+
 ```python
 def validate_hed_string(hed_string, schema)->list[dict]:
     """Validate a HED string against a schema.
@@ -149,6 +158,7 @@ def validate_hed_string(hed_string, schema)->list[dict]:
 - Include edge cases
 
 Example test:
+
 ```python
 import unittest
 from hed import HedString, load_schema
@@ -175,16 +185,19 @@ if __name__ == '__main__':
 ### Running Tests
 
 Run all tests:
+
 ```bash
 python -m unittest discover tests
 ```
 
 Run specific test file:
+
 ```bash
 python -m unittest tests/models/test_hed_string.py
 ```
 
 Run specific test case:
+
 ```bash
 python -m unittest tests.models.test_hed_string.TestHedString.test_constructor
 ```
@@ -194,17 +207,20 @@ python -m unittest tests.models.test_hed_string.TestHedString.test_constructor
 ### Before Submitting
 
 1. **Update your branch:**
+
    ```bash
    git fetch origin
    git rebase origin/main
    ```
 
 2. **Run all tests:**
+
    ```bash
    python -m unittest discover tests
    ```
 
 3. **Check code style:**
+
    ```bash
    ruff check hed/ tests/
    ```
@@ -214,6 +230,7 @@ python -m unittest tests.models.test_hed_string.TestHedString.test_constructor
 ### Submitting a Pull Request
 
 1. **Create a feature branch:**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -221,20 +238,23 @@ python -m unittest tests.models.test_hed_string.TestHedString.test_constructor
 2. **Make your changes** with clear, focused commits
 
 3. **Write descriptive commit messages:**
+
    ```
    Add validation for temporal extent
-   
+
    - Implement temporal extent validation logic
    - Add unit tests for temporal validation
    - Update documentation with temporal examples
    ```
 
 4. **Push to your fork:**
+
    ```bash
    git push origin feature/your-feature-name
    ```
 
 5. **Open a Pull Request** on GitHub:
+
    - Target the `main` branch
    - Fill out the PR template completely
    - Link related issues
@@ -267,7 +287,8 @@ Create an issue with:
 7. **Error messages** or stack traces
 
 Example:
-```markdown
+
+````markdown
 ## Bug: Schema validation fails with custom schema
 
 **Environment:**
@@ -296,7 +317,7 @@ issues = hed.validate(schema)  # KeyError here
 KeyError: 'Event'
   at line 123 in validator.py
 \```
-```
+````
 
 ## Suggesting Enhancements
 

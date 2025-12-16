@@ -22,6 +22,7 @@ Before starting the release process, ensure you have:
 #### 1.1 Ensure Working Tree is Clean
 
 **Windows (PowerShell):**
+
 ```powershell
 # Check git status
 git status
@@ -32,6 +33,7 @@ git commit -m "Pre-release cleanup"
 ```
 
 **Linux/macOS (Bash):**
+
 ```bash
 # Check git status
 git status
@@ -44,6 +46,7 @@ git commit -m "Pre-release cleanup"
 #### 1.2 Update CHANGELOG.md
 
 Add a new entry at the top of `CHANGELOG.md` with:
+
 - Release version number (e.g., "Release 0.7.1")
 - Release date
 - Bullet points describing:
@@ -54,6 +57,7 @@ Add a new entry at the top of `CHANGELOG.md` with:
   - Breaking changes (if any)
 
 **Example:**
+
 ```markdown
 Release 0.7.1 October 13, 2025
 - Applied Black code formatter to entire codebase for consistent code style
@@ -67,6 +71,7 @@ Release 0.7.1 October 13, 2025
 Before releasing, ensure all code quality checks pass:
 
 **All Platforms:**
+
 ```bash
 # Run code formatter check
 black --check .
@@ -87,6 +92,7 @@ Fix any issues before proceeding.
 #### 1.4 Commit CHANGELOG Updates
 
 **All Platforms:**
+
 ```bash
 git add CHANGELOG.md
 git commit -m "Update CHANGELOG for version 0.7.1"
@@ -97,6 +103,7 @@ git commit -m "Update CHANGELOG for version 0.7.1"
 If you're working on a feature branch:
 
 **All Platforms:**
+
 ```bash
 # Update your local main branch
 git checkout main
@@ -117,12 +124,14 @@ The project uses [versioneer](https://github.com/python-versioneer/python-versio
 #### 2.1 Create Annotated Tag
 
 **All Platforms:**
+
 ```bash
 # Create an annotated tag with the version number
 git tag -a 0.7.0 -m "Release version 0.7.0"
 ```
 
-**Important:** 
+**Important:**
+
 - Use semantic versioning: MAJOR.MINOR.PATCH
 - Do NOT use a prefix (e.g., use `0.7.0`, not `v0.7.0`)
 - The tag name must match the version you want to release
@@ -130,6 +139,7 @@ git tag -a 0.7.0 -m "Release version 0.7.0"
 #### 2.2 Push the Tag
 
 **All Platforms:**
+
 ```bash
 # Push the tag to the remote repository
 git push origin 0.7.0
@@ -138,6 +148,7 @@ git push origin 0.7.0
 #### 2.3 Verify Version
 
 **All Platforms:**
+
 ```bash
 # Check that the version is correctly detected
 python -c "import hed; print(hed.__version__)"
@@ -148,6 +159,7 @@ Expected output: `0.7.0`
 If you see something like `0+untagged.xxx.gxxxxxxx`, the tag wasn't properly created or you need to pull the tags:
 
 **All Platforms:**
+
 ```bash
 git fetch --tags
 ```
@@ -157,12 +169,14 @@ git fetch --tags
 #### 3.1 Clean Previous Builds
 
 **Windows (PowerShell):**
+
 ```powershell
 # Remove old build artifacts
 Remove-Item -Recurse -Force dist, build, *.egg-info -ErrorAction SilentlyContinue
 ```
 
 **Linux/macOS (Bash):**
+
 ```bash
 # Remove old build artifacts
 rm -rf dist build *.egg-info
@@ -171,6 +185,7 @@ rm -rf dist build *.egg-info
 #### 3.2 Install/Upgrade Build Tools
 
 **All Platforms:**
+
 ```bash
 python -m pip install --upgrade build twine
 ```
@@ -178,18 +193,21 @@ python -m pip install --upgrade build twine
 #### 3.3 Build the Packages
 
 **All Platforms:**
+
 ```bash
 # Build both wheel and source distributions
 python -m build
 ```
 
 This creates:
+
 - `dist/hedtools-0.7.0-py3-none-any.whl` (wheel distribution)
 - `dist/hedtools-0.7.0.tar.gz` (source distribution)
 
 #### 3.4 Verify Build Contents
 
 **Windows (PowerShell):**
+
 ```powershell
 # List contents of the wheel
 python -m zipfile -l dist/hedtools-0.7.0-py3-none-any.whl
@@ -199,6 +217,7 @@ tar -tzf dist/hedtools-0.7.0.tar.gz
 ```
 
 **Linux/macOS (Bash):**
+
 ```bash
 # List contents of the wheel
 unzip -l dist/hedtools-0.7.0-py3-none-any.whl
@@ -212,6 +231,7 @@ tar -tzf dist/hedtools-0.7.0.tar.gz
 #### 4.1 Create Test Environment
 
 **Windows (PowerShell):**
+
 ```powershell
 # Create a fresh virtual environment for testing
 python -m venv test_env
@@ -219,6 +239,7 @@ python -m venv test_env
 ```
 
 **Linux/macOS (Bash):**
+
 ```bash
 # Create a fresh virtual environment for testing
 python -m venv test_env
@@ -228,6 +249,7 @@ source test_env/bin/activate
 #### 4.2 Install from Wheel
 
 **All Platforms:**
+
 ```bash
 # Install the built wheel
 pip install dist/hedtools-0.7.0-py3-none-any.whl
@@ -236,6 +258,7 @@ pip install dist/hedtools-0.7.0-py3-none-any.whl
 #### 4.3 Run Tests
 
 **Windows (PowerShell):**
+
 ```powershell
 # Navigate back to the repository
 cd h:\Repos\hed-python
@@ -245,6 +268,7 @@ python -m unittest discover tests -v
 ```
 
 **Linux/macOS (Bash):**
+
 ```bash
 # Navigate back to the repository
 cd ~/path/to/hed-python
@@ -256,6 +280,7 @@ python -m unittest discover tests -v
 #### 4.4 Verify Installation
 
 **All Platforms:**
+
 ```bash
 # Check version
 python -c "import hed; print(hed.__version__)"
@@ -267,12 +292,14 @@ python -c "from hed import load_schema_version; schema = load_schema_version('8.
 #### 4.5 Clean Up Test Environment
 
 **Windows (PowerShell):**
+
 ```powershell
 deactivate
 Remove-Item -Recurse -Force test_env
 ```
 
 **Linux/macOS (Bash):**
+
 ```bash
 deactivate
 rm -rf test_env
@@ -283,6 +310,7 @@ rm -rf test_env
 #### 5.1 Check Distribution with Twine
 
 **All Platforms:**
+
 ```bash
 # Validate the distribution packages
 python -m twine check dist/*
@@ -293,6 +321,7 @@ Expected output: `Checking dist/hedtools-0.7.0.tar.gz: PASSED` (and same for .wh
 #### 5.2 Upload to Test PyPI (Optional but Recommended)
 
 **All Platforms:**
+
 ```bash
 # Upload to TestPyPI first
 python -m twine upload --repository testpypi dist/*
@@ -301,6 +330,7 @@ python -m twine upload --repository testpypi dist/*
 You'll be prompted for your TestPyPI credentials.
 
 **Test installation from TestPyPI:**
+
 ```bash
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ hedtools==0.7.0
 ```
@@ -308,6 +338,7 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 #### 5.3 Upload to Production PyPI
 
 **All Platforms:**
+
 ```bash
 # Upload to the real PyPI
 python -m twine upload dist/*
@@ -318,6 +349,7 @@ You'll be prompted for your PyPI credentials (or use an API token).
 **Alternative with API Token:**
 
 *Windows (PowerShell):*
+
 ```powershell
 # Set your PyPI API token as an environment variable
 $env:TWINE_USERNAME = "__token__"
@@ -328,6 +360,7 @@ python -m twine upload dist/*
 ```
 
 *Linux/macOS (Bash):*
+
 ```bash
 # Set your PyPI API token as an environment variable
 export TWINE_USERNAME="__token__"
@@ -340,6 +373,7 @@ python -m twine upload dist/*
 #### 5.4 Verify on PyPI
 
 Visit https://pypi.org/project/hedtools/ and verify:
+
 - [ ] Version 0.7.0 is listed
 - [ ] README renders correctly
 - [ ] All metadata is correct
@@ -360,6 +394,7 @@ Fill in the release form:
 - **Description:** Copy the relevant section from CHANGELOG.md
 
 **Example description:**
+
 ```markdown
 ## What's New in 0.7.0
 
@@ -397,6 +432,7 @@ Click **Publish release**
 In a fresh environment:
 
 **All Platforms:**
+
 ```bash
 pip install --upgrade hedtools
 python -c "import hed; print(hed.__version__)"
@@ -407,11 +443,13 @@ Expected output: `0.7.0`
 #### 7.2 Verify Documentation
 
 Check that documentation sites are updated (may take some time):
+
 - https://www.hedtags.org/hed-python/
 
 #### 7.3 Announce the Release
 
 Consider announcing the release:
+
 - [ ] GitHub Discussions
 - [ ] HED mailing list
 - [ ] Community forums
@@ -424,6 +462,7 @@ Consider announcing the release:
 **Problem:** `python -c "import hed; print(hed.__version__)"` shows wrong version
 
 **Solution:**
+
 ```bash
 # Fetch all tags
 git fetch --tags
@@ -440,6 +479,7 @@ python -c "import hed._version; print(hed._version.get_versions())"
 **Problem:** Missing dependencies during build
 
 **Solution:**
+
 ```bash
 # Ensure build tools are installed
 pip install --upgrade pip setuptools wheel build
@@ -453,6 +493,7 @@ python -m build
 **Problem:** Invalid credentials or API token
 
 **Solution:**
+
 - Create a new API token at https://pypi.org/manage/account/token/
 - Scope it to the `hedtools` project only
 - Use `__token__` as username and the token as password
@@ -462,6 +503,7 @@ python -m build
 **Problem:** You need to delete and recreate a tag
 
 **Solution:**
+
 ```bash
 # Delete local tag
 git tag -d 0.7.0
@@ -493,6 +535,7 @@ HED-Python follows [Semantic Versioning](https://semver.org/):
 ## Quick Reference Commands
 
 **Windows (PowerShell):**
+
 ```powershell
 # Complete release workflow
 git status                                    # Check working tree
@@ -508,6 +551,7 @@ python -m twine upload dist/*                 # Upload
 ```
 
 **Linux/macOS (Bash):**
+
 ```bash
 # Complete release workflow
 git status                                    # Check working tree
@@ -533,6 +577,7 @@ python -m twine upload dist/*                 # Upload
 ## Contacts
 
 For questions about the release process:
+
 - **Maintainer:** Kay Robbins (Kay.Robbins@utsa.edu)
 - **Repository:** https://github.com/hed-standard/hed-python
 - **Issues:** https://github.com/hed-standard/hed-python/issues

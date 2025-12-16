@@ -1,0 +1,40 @@
+# Lychee link checker configuration
+# This file configures how lychee validates links in the repository
+#
+# For more information about lychee configuration, see:
+# https://github.com/lycheeverse/lychee#configuration
+#
+# This configuration addresses false positive errors from the link checker:
+# - 403 Forbidden: Some sites (npmjs.com, mathworks.com, doi.org) block automated 
+#   requests but work fine in browsers
+# - 429 Too Many Requests: Rate limiting doesn't mean the link is broken
+# - See .lycheeignore for sites/patterns that are completely excluded
+
+# Accept these HTTP status codes as valid
+# 200: OK (standard success)
+# 204: No Content (valid response with no body)
+# 206: Partial Content (valid for range requests)
+# 403: Forbidden (some sites block automated requests but links work in browsers)
+# 429: Too Many Requests (rate limiting, link may be valid)
+accept = [200, 204, 206, 403, 429]
+
+# Timeout for requests (in seconds)
+timeout = 30
+
+# Maximum number of retries per link
+max_retries = 3
+
+# Maximum number of concurrent network requests
+max_concurrency = 8
+
+# User agent string to use for requests
+# Some sites require a browser-like user agent to avoid blocking
+user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0"
+
+# Exclude patterns - regex patterns to exclude from checking
+# These are Sphinx theme template files with Jinja2 variables that shouldn't be checked
+exclude_path = [
+    "webpack-macros\\.html$",
+    "sbt-webpack-macros\\.html$",
+    ".*-macros\\.html$"
+]

@@ -1,0 +1,45 @@
+---
+name: Lychee link checker
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run weekly on Sundays at 3 AM UTC to catch broken links
+    - cron: '0 3 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  link-checker:
+    name: Lychee link checker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r docs/requirements.txt
+          pip install -e .
+
+      - name: Build documentation with Sphinx
+        run: |
+          cd docs
+          sphinx-build -b html . _build/html
+
+      - name: Link Checker on built documentation
+        id: lychee
+        uses: lycheeverse/lychee-action@v2.7.0
+        with:
+          # Check the built HTML files recursively (includes internal links)
+          args: --config lychee.toml --verbose --no-progress --max-redirects 10 'docs/_build/html/**/*.html'
+          fail: true

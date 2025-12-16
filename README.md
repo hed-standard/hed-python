@@ -1,9 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8056010.svg)](https://doi.org/10.5281/zenodo.8056010)
-[![Maintainability](https://qlty.sh/gh/hed-standard/projects/hed-python/maintainability.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
-[![Code Coverage](https://qlty.sh/gh/hed-standard/projects/hed-python/coverage.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
-![Python3](https://img.shields.io/badge/python->=3.10-yellow.svg)
-![PyPI - Status](https://img.shields.io/pypi/v/hedtools)
-[![Documentation](https://img.shields.io/badge/docs-hed--python-blue.svg)](https://www.hedtags.org/hed-python)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8056010.svg)](https://doi.org/10.5281/zenodo.8056010) [![Maintainability](https://qlty.sh/gh/hed-standard/projects/hed-python/maintainability.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python) [![Code Coverage](https://qlty.sh/gh/hed-standard/projects/hed-python/coverage.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python) ![Python3](https://img.shields.io/badge/python-%3E=3.10-yellow.svg) ![PyPI - Status](https://img.shields.io/pypi/v/hedtools) [![Documentation](https://img.shields.io/badge/docs-hed--python-blue.svg)](https://www.hedtags.org/hed-python)
 
 # HEDTools - Python
 
@@ -14,6 +9,7 @@
 HED (Hierarchical Event Descriptors) is a framework for systematically describing both laboratory and real-world events as well as other experimental metadata. HED tags are comma-separated path strings that provide a standardized vocabulary for annotating events and experimental conditions.
 
 **Key Features:**
+
 - Validate HED annotations against schema specifications
 - Analyze and summarize HED-tagged datasets
 - Transform and remodel event data
@@ -37,11 +33,13 @@ A development version is available at: [https://hedtools.org/hed_dev](https://he
 **Requirements:** Python 3.10 or higher
 
 Install from PyPI:
+
 ```bash
 pip install hedtools
 ```
 
 Or install from GitHub (latest):
+
 ```bash
 pip install git+https://github.com/hed-standard/hed-python/@main
 ```
@@ -89,6 +87,7 @@ hedpy remodel run /path/to/data /path/to/remodel_config.json
 ```
 
 **Legacy commands** (deprecated, use `hedpy` instead):
+
 ```bash
 validate_bids /path/to/dataset
 hed_validate_schemas /path/to/schema.xml
@@ -132,7 +131,7 @@ See [`examples/README.md`](examples/README.md) for more details.
 📖 **Full Documentation:** [https://www.hedtags.org/hed-python](https://www.hedtags.org/hed-python)
 
 - [User Guide](https://www.hedtags.org/hed-python/user_guide.html) - Usage instructions
-- [API Reference](https://www.hedtags.org/hed-python/api/index.html) - Detailed API documentation  
+- [API Reference](https://www.hedtags.org/hed-python/api/index.html) - Detailed API documentation
 - [HED Specification](https://www.hedtags.org/hed-specification) - Full HED standard specification
 
 ### Building docs locally
@@ -172,6 +171,7 @@ black tests/
 ```
 
 **Windows Users:** If you encounter "I/O operation on closed file" errors, use the `--workers 1` flag:
+
 ```bash
 black --workers 1 --check .
 black --workers 1 .
@@ -187,16 +187,15 @@ black --workers 1 .
 
 The HED ecosystem consists of several interconnected repositories:
 
-| Repository | Description |
-|------------|-------------|
-| [hed-python](https://github.com/hed-standard/hed-python) | Python validation and analysis tools (this repo) |
-| [hed-web](https://github.com/hed-standard/hed-web) | Web interface and deployable Docker services |
-| [hed-resources](https://github.com/hed-standard/hed-resources) | Example code in Python and MATLAB + HED resources |
-| [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents |
-| [hed-schemas](https://github.com/hed-standard/hed-schemas) | Official HED schema repository | 
-| [ndx-hed](https://github.com/hed-standard/ndx-hed) | HED support for NWB |  
-| [hed-javascript](https://github.com/hed-standard/hed-javascript) | JavaScript HED validation tools |
-
+| Repository                                                             | Description                                       |
+| ---------------------------------------------------------------------- | ------------------------------------------------- |
+| [hed-python](https://github.com/hed-standard/hed-python)               | Python validation and analysis tools (this repo)  |
+| [hed-web](https://github.com/hed-standard/hed-web)                     | Web interface and deployable Docker services      |
+| [hed-resources](https://github.com/hed-standard/hed-resources)         | Example code in Python and MATLAB + HED resources |
+| [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents              |
+| [hed-schemas](https://github.com/hed-standard/hed-schemas)             | Official HED schema repository                    |
+| [ndx-hed](https://github.com/hed-standard/ndx-hed)                     | HED support for NWB                               |
+| [hed-javascript](https://github.com/hed-standard/hed-javascript)       | JavaScript HED validation tools                   |
 
 ## Contributing
 
@@ -208,6 +207,7 @@ We welcome contributions! Here's how you can help:
 4. **Share examples:** Contribute example code and use cases
 
 **Development setup:**
+
 ```bash
 # Clone the repository
 git clone https://github.com/hed-standard/hed-python.git
