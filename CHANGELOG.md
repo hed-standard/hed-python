@@ -1,4 +1,4 @@
-```markdown
+````markdown
 Release 0.8.1 December 9, 2025
 
 The primary purpose of this release was to correct the JSON format for HED schemas so that it would accurately distinguish between inherited and non-inherited attributes. The documentation layout was also improved with quick links.
@@ -175,4 +175,5 @@ Release 0.2.0 February 14, 2023
 - First pass at search and summarization.
 
 Release 0.1.0  June 20, 2022
-- First release on PyPI
+- First release on PyPI```
+````
