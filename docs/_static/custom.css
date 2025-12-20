@@ -1,4 +1,18 @@
-/* Custom styles for HED Python Tools Documentation - Furo Theme */
+/* Custom styles for HED Python tools Documentation - Furo Theme */
+
+/* Project name styling below logo */
+.sidebar-brand-text {
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    color: #0969da !important;
+    margin-top: 0.5rem !important;
+    text-align: center !important;
+}
+
+html[data-theme="dark"] .sidebar-brand-text,
+body[data-theme="dark"] .sidebar-brand-text {
+    color: #58a6ff !important;
+}
 
 /* Quick Links sidebar styling - darker gray box with proper padding */
 .sidebar-quicklinks {

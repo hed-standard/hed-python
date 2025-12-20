@@ -3,7 +3,7 @@
 HED Command Line Interface
 
 A unified command-line interface for HED (Hierarchical Event Descriptors) tools.
-Provides a git-like interface with subcommands for validation, remodeling, and schema management.
+Provides a git-like interface with subcommands for validation and schema management.
 """
 
 import click
@@ -16,19 +16,9 @@ def cli():
     """HED (Hierarchical Event Descriptors) command-line tools.
 
     This tool provides various commands for working with HED annotations,
-    including validation, remodeling, and schema management.
+    including validation and schema management.
 
     Use 'hedpy COMMAND --help' for more information on a specific command.
-    """
-    pass
-
-
-@cli.group()
-def remodel():
-    """Remodel and transform HED-annotated datasets.
-
-    Commands for running remodeling operations on BIDS datasets
-    with HED annotations.
     """
     pass
 
@@ -122,162 +112,6 @@ def validate_bids_cmd(
     validate_bids_main(args)
 
 
-@remodel.command(name="run")
-@click.argument("data_dir", type=click.Path(exists=True))
-@click.argument("model_path", type=click.Path(exists=True))
-@click.option("-bd", "--backup-dir", default="", help="Directory for the backup being created.")
-@click.option("-bn", "--backup-name", default="", help="Name of the default backup for remodeling.")
-@click.option("-b", "--bids-format", "use_bids", is_flag=True, help="Dataset is in BIDS format with sidecars.")
-@click.option("-fs", "--file-suffix", "suffixes", multiple=True, default=["events"], help="File suffixes to process.")
-@click.option(
-    "-i",
-    "--individual-summaries",
-    type=click.Choice(["separate", "consolidated", "none"]),
-    default="separate",
-    help="Controls individual file summaries.",
-)
-@click.option("-j", "--json-sidecar", default=None, help="Path to JSON sidecar with HED information.")
-@click.option("-ld", "--log-dir", default="", help="Directory for storing log entries for errors.")
-@click.option("-nb", "--no-backup", is_flag=True, help="Operations run directly on files with no backup.")
-@click.option("-ns", "--no-summaries", is_flag=True, help="Summaries are not saved.")
-@click.option("-nu", "--no-update", is_flag=True, help="Files are not saved.")
-@click.option("-hv", "--hed-versions", multiple=True, default=[], help="HED schema versions for annotation.")
-@click.option("-s", "--save-formats", multiple=True, default=[".json", ".txt"], help="Format for saving summaries.")
-@click.option("-t", "--task-names", multiple=True, default=[], help="Task names to process.")
-@click.option("-v", "--verbose", is_flag=True, help="Output informational messages.")
-@click.option("-w", "--work-dir", default="", help="Path to directory for saving.")
-@click.option("-x", "--exclude-dirs", multiple=True, default=[], help="Directory names to exclude.")
-def remodel_run_cmd(
-    data_dir,
-    model_path,
-    backup_dir,
-    backup_name,
-    use_bids,
-    suffixes,
-    individual_summaries,
-    json_sidecar,
-    log_dir,
-    no_backup,
-    no_summaries,
-    no_update,
-    hed_versions,
-    save_formats,
-    task_names,
-    verbose,
-    work_dir,
-    exclude_dirs,
-):
-    """Run remodeling operations on a dataset.
-
-    DATA_DIR: Root directory of the dataset to remodel.
-    MODEL_PATH: Path to JSON file with remodeling instructions.
-    """
-    from hed.tools.remodeling.cli.run_remodel import main as run_remodel_main
-
-    args = [data_dir, model_path]
-    if backup_dir:
-        args.extend(["-bd", backup_dir])
-    if backup_name:
-        args.extend(["-bn", backup_name])
-    if use_bids:
-        args.append("-b")
-    if suffixes:
-        args.append("-fs")
-        args.extend(suffixes)
-    if individual_summaries:
-        args.extend(["-i", individual_summaries])
-    if json_sidecar:
-        args.extend(["-j", json_sidecar])
-    if log_dir:
-        args.extend(["-ld", log_dir])
-    if no_backup:
-        args.append("-nb")
-    if no_summaries:
-        args.append("-ns")
-    if no_update:
-        args.append("-nu")
-    if hed_versions:
-        args.append("-hv")
-        args.extend(hed_versions)
-    if save_formats:
-        args.append("-s")
-        args.extend(save_formats)
-    if task_names:
-        args.append("-t")
-        args.extend(task_names)
-    if verbose:
-        args.append("-v")
-    if work_dir:
-        args.extend(["-w", work_dir])
-    if exclude_dirs:
-        args.append("-x")
-        args.extend(exclude_dirs)
-
-    run_remodel_main(args)
-
-
-@remodel.command(name="backup")
-@click.argument("data_dir", type=click.Path(exists=True))
-@click.option("-bd", "--backup-dir", default="", help="Directory for the backup being created.")
-@click.option("-bn", "--backup-name", default="", help="Name for this backup.")
-@click.option("-fs", "--file-suffix", "suffixes", multiple=True, default=["events"], help="File suffixes to backup.")
-@click.option("-t", "--task-names", multiple=True, default=[], help="Task names to backup.")
-@click.option("-v", "--verbose", is_flag=True, help="Enable verbose output.")
-@click.option("-x", "--exclude-dirs", multiple=True, default=["derivatives"], help="Directories to exclude.")
-def remodel_backup_cmd(data_dir, backup_dir, backup_name, suffixes, task_names, verbose, exclude_dirs):
-    """Create a backup of dataset files before remodeling.
-
-    DATA_DIR: Root directory of the dataset to backup.
-    """
-    from hed.tools.remodeling.cli.run_remodel_backup import main as backup_main
-
-    args = [data_dir]
-    if backup_dir:
-        args.extend(["-bd", backup_dir])
-    if backup_name:
-        args.extend(["-bn", backup_name])
-    if suffixes:
-        args.append("-fs")
-        args.extend(suffixes)
-    if task_names:
-        args.append("-t")
-        args.extend(task_names)
-    if verbose:
-        args.append("-v")
-    if exclude_dirs:
-        args.append("-x")
-        args.extend(exclude_dirs)
-
-    backup_main(args)
-
-
-@remodel.command(name="restore")
-@click.argument("data_dir", type=click.Path(exists=True))
-@click.option("-bd", "--backup-dir", default="", help="Directory containing the backup.")
-@click.option("-bn", "--backup-name", default="", help="Name of backup to restore.")
-@click.option("-t", "--task-names", multiple=True, default=[], help="Task names to restore.")
-@click.option("-v", "--verbose", is_flag=True, help="Enable verbose output.")
-def remodel_restore(data_dir, backup_dir, backup_name, task_names, verbose):
-    """Restore dataset files from a backup.
-
-    DATA_DIR: Root directory of the dataset to restore.
-    """
-    from hed.tools.remodeling.cli.run_remodel_restore import main as restore_main
-
-    args = [data_dir]
-    if backup_dir:
-        args.extend(["-bd", backup_dir])
-    if backup_name:
-        args.extend(["-bn", backup_name])
-    if task_names:
-        args.append("-t")
-        args.extend(task_names)
-    if verbose:
-        args.append("-v")
-
-    restore_main(args)
-
-
 @schema.command(name="validate")
 @click.argument("schema_path", type=click.Path(exists=True), nargs=-1, required=True)
 @click.option("--add-all-extensions", is_flag=True, help="Always verify all versions of the same schema are equal.")
@@ -302,7 +136,7 @@ def schema_validate_cmd(schema_path, add_all_extensions, verbose):
 @click.argument("schema_path", type=click.Path(exists=True), nargs=-1, required=True)
 @click.option("--set-ids", is_flag=True, help="Set/update HED IDs in the schema.")
 def schema_convert_cmd(schema_path, set_ids):
-    """Convert HED schema between formats (TSV, XML, MediaWiki, JSON).
+    """Convert HED schema between formats (TSV, XML, MEDIAWIKI, JSON).
 
     SCHEMA_PATH: Path(s) to schema file(s) to convert.
     """

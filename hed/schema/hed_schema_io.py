@@ -118,9 +118,9 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
     """Create a schema from the given string.
 
     Parameters:
-        schema_string (str): An XML or mediawiki file as a single long string
+        schema_string (str): An XML or MEDIAWIKI file as a single long string
         schema_format (str):         The schema format of the source schema string.
-            Allowed normal values: .mediawiki, .xml
+            Allowed normal values: .mediawiki, .xml, .json
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
         schema (HedSchema or None): A HED schema to merge this new file into
                                    It must be a with-standard schema with the same value.

@@ -269,22 +269,336 @@ See the [examples README](https://github.com/hed-standard/hed-python/tree/main/e
 
 ## Command-line tools
 
-HEDTools provides command-line scripts for common operations. These are installed with the package:
+HEDTools provides a unified command-line interface (CLI) using a **git-style command structure**. The main command is `hedpy`, which provides subcommands for validation and schema management.
 
-### Validate BIDS dataset
+### Available commands
+
+| Command                        | Description                                                 |
+| ------------------------------ | ----------------------------------------------------------- |
+| `hedpy validate-bids`          | Validate HED annotations in BIDS datasets                   |
+| `hedpy extract-sidecar`        | Extract JSON sidecar template from BIDS event files         |
+| **Schema Management**          |                                                             |
+| `hedpy schema validate`        | Validate HED schema files                                   |
+| `hedpy schema convert`         | Convert schemas between formats (XML, MEDIAWIKI, TSV, JSON) |
+| `hedpy schema add-ids`         | Add unique HED IDs to schema terms                          |
+| `hedpy schema create-ontology` | Generate OWL ontology files from HED schemas                |
+
+### Installation and basic usage
+
+The CLI is installed automatically with the hedtools package:
 
 ```bash
-# Basic validation
-python -m hed.scripts.validate_bids /path/to/bids/dataset
-
-# Include warnings
-python -m hed.scripts.validate_bids /path/to/bids/dataset --check-warnings
-
-# Use specific schema version
-python -m hed.scripts.validate_bids /path/to/bids/dataset --schema-version 8.4.0
+pip install hedtools
 ```
 
-Use `--help` with any script to see all available options.
+Get help on available commands:
+
+```bash
+# General help
+hedpy --help
+
+# Help for a specific command
+hedpy validate-bids --help
+
+# Help for command groups
+hedpy schema --help
+```
+
+Get version information:
+
+```bash
+hedpy --version
+```
+
+______________________________________________________________________
+
+### BIDS validation
+
+Validate HED annotations in BIDS datasets using `hedpy validate-bids`.
+
+#### Basic validation
+
+```bash
+# Validate a BIDS dataset
+hedpy validate-bids /path/to/bids/dataset
+
+# Include warnings in addition to errors
+hedpy validate-bids /path/to/bids/dataset -w
+
+# Enable verbose output
+hedpy validate-bids /path/to/bids/dataset -v
+```
+
+#### Output options
+
+```bash
+# Save results to a file
+hedpy validate-bids /path/to/bids/dataset -o validation_results.txt
+
+# Output in JSON format
+hedpy validate-bids /path/to/bids/dataset -f json -o results.json
+
+# Pretty-printed JSON
+hedpy validate-bids /path/to/bids/dataset -f json_pp -o results.json
+
+# Print to stdout AND save to file
+hedpy validate-bids /path/to/bids/dataset -o results.txt -p
+```
+
+#### Filtering validation
+
+```bash
+# Validate specific file types (default: events, participants)
+hedpy validate-bids /path/to/bids/dataset -s events -s participants -s sessions
+
+# Exclude certain directories (default: sourcedata, derivatives, code, stimuli)
+hedpy validate-bids /path/to/bids/dataset -x derivatives -x sourcedata -x mydata
+
+# Limit number of errors reported per error type
+hedpy validate-bids /path/to/bids/dataset -ec 5
+
+# Apply error limit per file instead of overall
+hedpy validate-bids /path/to/bids/dataset -ec 5 -ef
+```
+
+#### Logging options
+
+```bash
+# Set log level
+hedpy validate-bids /path/to/bids/dataset -l DEBUG
+
+# Save logs to file
+hedpy validate-bids /path/to/bids/dataset -lf validation.log
+
+# Save logs to file without stderr output
+hedpy validate-bids /path/to/bids/dataset -lf validation.log -lq
+```
+
+#### Complete example
+
+```bash
+# Comprehensive validation with all options
+hedpy validate-bids /path/to/bids/dataset \
+  -w \
+  -v \
+  -f json_pp \
+  -o validation_results.json \
+  -s events \
+  -x derivatives \
+  -ec 10 \
+  -lf validation.log
+```
+
+______________________________________________________________________
+
+### Sidecar template extraction
+
+Extract a JSON sidecar template from BIDS event files using `hedpy extract-sidecar`.
+
+#### Basic extraction
+
+```bash
+# Extract template for events files
+hedpy extract-sidecar /path/to/bids/dataset -s events
+
+# Save to specific file
+hedpy extract-sidecar /path/to/bids/dataset -s events -o task_events.json
+```
+
+#### Column handling
+
+```bash
+# Specify value columns (columns with unique values needing # placeholders)
+hedpy extract-sidecar /path/to/bids/dataset -s events \
+  -vc response_time -vc accuracy -vc subject_id
+
+# Skip specific columns (default: onset, duration, sample)
+hedpy extract-sidecar /path/to/bids/dataset -s events \
+  -sc onset -sc duration -sc trial_type
+
+# Exclude certain directories
+hedpy extract-sidecar /path/to/bids/dataset -s events \
+  -x derivatives -x pilot_data
+```
+
+#### Complete example
+
+```bash
+# Extract events template with custom column handling
+hedpy extract-sidecar /path/to/bids/dataset \
+  -s events \
+  -vc response_time \
+  -vc reaction_time \
+  -sc onset -sc duration \
+  -o events_template.json \
+  -v
+```
+
+______________________________________________________________________
+
+### Schema management
+
+The `hedpy schema` command group provides tools for validating, converting, and managing HED schemas.
+
+#### Schema validation
+
+Validate HED schema files:
+
+```bash
+# Validate a single schema
+hedpy schema validate /path/to/schema.xml
+
+# Validate multiple schemas
+hedpy schema validate schema1.xml schema2.xml schema3.xml
+
+# Validate with verbose output
+hedpy schema validate /path/to/schema.xml -v
+
+# Verify all format versions are equivalent
+hedpy schema validate /path/to/schema.xml --add-all-extensions
+```
+
+#### Schema format conversion
+
+Convert schemas between formats (XML, MEDIAWIKI, TSV, JSON):
+
+```bash
+# Convert schema (format auto-detected from extension)
+hedpy schema convert schema.xml  # Creates schema.mediawiki, schema.tsv, etc.
+
+# Convert multiple schemas
+hedpy schema convert schema1.xml schema2.xml
+
+# Convert and set/update HED IDs
+hedpy schema convert schema.xml --set-ids
+```
+
+**Supported formats:**
+
+- `.xml` - XML format (standard)
+- `.mediawiki` - MEDIAWIKI format
+- `.tsv` - TSV (tab-separated value) format
+- `.json` - JSON format
+
+#### Add HED IDs to schema
+
+Add unique HED IDs to schema terms:
+
+```bash
+# Add IDs to a standard schema
+hedpy schema add-ids /path/to/hed-schemas standard 8.4.0
+
+# Add IDs to a library schema
+hedpy schema add-ids /path/to/hed-schemas score 2.1.0
+```
+
+**Requirements:**
+
+- Path must be to a hed-schemas repository clone
+- Schema name and version must match directory structure
+- Modifies the schema in-place
+
+#### Create ontology from schema
+
+Generate OWL ontology files from HED schemas:
+
+```bash
+# Create ontology for a schema
+hedpy schema create-ontology /path/to/hed-schemas standard 8.4.0
+
+# Specify output directory
+hedpy schema create-ontology /path/to/hed-schemas standard 8.4.0 \
+  --dest /path/to/output
+
+# Create ontology for library schema
+hedpy schema create-ontology /path/to/hed-schemas score 2.1.0 \
+  --dest ./ontologies
+```
+
+______________________________________________________________________
+
+### Legacy script access
+
+For backward compatibility, you can still access scripts directly using Python module syntax:
+
+```bash
+# Validation
+python -m hed.scripts.validate_bids /path/to/dataset --check-warnings
+
+# Sidecar extraction
+python -m hed.scripts.hed_extract_bids_sidecar /path/to/dataset -s events
+
+# Schema validation
+python -m hed.scripts.validate_schemas schema.xml
+```
+
+**However, the `hedpy` CLI is the recommended interface** as it provides a more consistent and discoverable command structure.
+
+______________________________________________________________________
+
+### Common workflows
+
+#### Workflow 1: First-time BIDS dataset validation
+
+```bash
+# Step 1: Extract sidecar template
+hedpy extract-sidecar /path/to/dataset -s events -o events.json
+
+# Step 2: Edit events.json to add HED tags
+# (manual editing step)
+
+# Step 3: Validate with warnings
+hedpy validate-bids /path/to/dataset -w -v -o validation.txt
+
+# Step 4: Fix issues and re-validate
+hedpy validate-bids /path/to/dataset -w
+```
+
+#### Workflow 2: Schema development and testing
+
+```bash
+# Step 1: Validate schema
+hedpy schema validate my_schema.xml -v
+
+# Step 2: Convert to all formats
+hedpy schema convert my_schema.xml
+
+# Step 3: Verify all formats are equivalent
+hedpy schema validate my_schema.xml --add-all-extensions
+
+# Step 4: Add HED IDs
+hedpy schema add-ids /path/to/hed-schemas my_library 1.0.0
+
+# Step 5: Generate ontology
+hedpy schema create-ontology /path/to/hed-schemas my_library 1.0.0
+```
+
+______________________________________________________________________
+
+### Tips and best practices
+
+1. **Use verbose mode (`-v`)** during development to see detailed progress
+2. **Save output to files (`-o`)** for documentation and tracking
+3. **Use JSON output format (`-f json_pp`)** for programmatic processing
+4. **Leverage tab completion** in your shell for command discovery
+5. **Use `--help` liberally** to explore options for each command
+6. **Test on small datasets first** before processing large corpora
+
+### Getting help
+
+Each command provides detailed help:
+
+```bash
+# Top-level help
+hedpy --help
+
+# Command-specific help
+hedpy validate-bids --help
+hedpy schema validate --help
+
+# Command group help
+hedpy schema --help
+```
 
 ## Best practices
 

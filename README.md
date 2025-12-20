@@ -79,11 +79,9 @@ hedpy extract-sidecar /path/to/dataset --suffix events
 # Validate HED schemas
 hedpy schema validate /path/to/schema.xml
 
-# Convert schema between formats (XML, MediaWiki, TSV, JSON)
+# Convert schema between formats (XML, MEDIAWIKI, TSV, JSON)
 hedpy schema convert /path/to/schema.xml
 
-# Run remodeling operations on event files
-hedpy remodel run /path/to/data /path/to/remodel_config.json
 ```
 
 **Legacy commands** (deprecated, use `hedpy` instead):

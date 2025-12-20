@@ -116,7 +116,7 @@ class SchemaLoaderJSON(SchemaLoader):
         self._load_extras()
 
         # Parse each section - initialize attributes before loading each section
-        # This follows the same pattern as MediaWiki/XML loaders
+        # This follows the same pattern as MEDIAWIKI/XML loaders
         for section_key, parse_func in parse_order.items():
             self._schema._initialize_attributes(section_key)
             parse_func()
@@ -147,7 +147,7 @@ class SchemaLoaderJSON(SchemaLoader):
 
         if json_constants.DESCRIPTION_KEY in prop_data:
             desc = prop_data[json_constants.DESCRIPTION_KEY]
-            # Convert empty string back to None to match XML/MediaWiki behavior
+            # Convert empty string back to None to match XML/MEDIAWIKI behavior
             entry.description = desc if desc else None
 
         # Add any other attributes from the data
@@ -493,7 +493,7 @@ class SchemaLoaderJSON(SchemaLoader):
 
         self._schema.extras = {}
 
-        # Load sources - always create DataFrame even if empty to match XML/MediaWiki behavior
+        # Load sources - always create DataFrame even if empty to match XML/MEDIAWIKI behavior
         sources_list = []
         if json_constants.SOURCES_KEY in self._json_data:
             sources_data = self._json_data[json_constants.SOURCES_KEY]

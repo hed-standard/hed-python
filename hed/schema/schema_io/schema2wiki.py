@@ -1,4 +1,4 @@
-"""Allows output of HedSchema objects as .mediawiki format"""
+"""Allows output of HedSchema objects as MEDIAWIKI format"""
 
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.schema_io import wiki_constants, df_constants

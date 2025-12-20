@@ -11,7 +11,7 @@ def validate_schema_object(base_schema, schema_name):
     """Validate a schema object by checking compliance and roundtrip conversion.
 
     Tests the schema for compliance issues and validates that it can be successfully
-    converted to and reloaded from all four formats (MediaWiki, XML, JSON, TSV).
+    converted to and reloaded from all four formats (MEDIAWIKI, XML, JSON, TSV).
 
     Parameters:
         base_schema (HedSchema): The schema object to validate.
@@ -168,7 +168,7 @@ def sort_base_schemas(filenames, add_all_extensions=False):
 def validate_all_schema_formats(basename):
     """Validate that all 4 format versions of a schema are identical.
 
-    Loads the schema from all four formats (MediaWiki, XML, JSON, TSV) and
+    Loads the schema from all four formats (MEDIAWIKI, XML, JSON, TSV) and
     verifies they are equivalent. Used when multiple formats are modified
     simultaneously to ensure consistency.
 

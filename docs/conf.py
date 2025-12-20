@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "HED Python Tools"
+project = "HED Python tools"
 copyright = "2024, HED Standard"
 author = "HED Standard"
 
@@ -56,7 +56,7 @@ html_theme_options = {
     "source_directory": "docs/",
 }
 
-html_title = "HED Python Tools"
+html_title = "HED Python tools"
 
 # Configure sidebar to show logo, search, navigation, and quick links
 html_sidebars = {

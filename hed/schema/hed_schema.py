@@ -54,7 +54,7 @@ class HedSchema(HedSchemaBase):
         self._namespace = ""
 
         self._sections = self._create_empty_sections()
-        self.source_format = None  # The type of file this was loaded from(mediawiki, xml, or owl - None if mixed)
+        self.source_format = None  # The type of file this was loaded from(MEDIAWIKI, XML, or JSON - None if mixed)
 
     # ===============================================
     # Basic schema properties
@@ -286,14 +286,14 @@ class HedSchema(HedSchemaBase):
     #     pass
 
     def get_as_mediawiki_string(self, save_merged=False) -> str:
-        """Return the schema to a mediawiki string.
+        """Return the schema to a MEDIAWIKI string.
 
         Parameters:
             save_merged (bool): If True, this will save the schema as a merged schema if it is a "withStandard" schema.
                                 If it is not a "withStandard" schema, this setting has no effect.
 
         Returns:
-            str: The schema as a string in mediawiki format.
+            str: The schema as a string in MEDIAWIKI format.
 
         """
         output_strings = Schema2Wiki().process_schema(self, save_merged)
@@ -343,7 +343,7 @@ class HedSchema(HedSchemaBase):
         return output_dfs
 
     def save_as_mediawiki(self, filename, save_merged=False):
-        """Save as mediawiki to a file.
+        """Save as MEDIAWIKI to a file.
 
         Parameters:
             filename (str): Save location.

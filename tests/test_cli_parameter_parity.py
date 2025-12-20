@@ -8,9 +8,6 @@ from hed.cli.cli import cli
 from hed.scripts.validate_bids import get_parser as get_validate_bids_parser
 from hed.scripts.hed_extract_bids_sidecar import get_parser as get_extract_sidecar_parser
 from hed.scripts.validate_schemas import get_parser as get_validate_schemas_parser
-from hed.tools.remodeling.cli.run_remodel import get_parser as get_remodel_parser
-from hed.tools.remodeling.cli.run_remodel_backup import get_parser as get_backup_parser
-from hed.tools.remodeling.cli.run_remodel_restore import get_parser as get_restore_parser
 
 
 class TestCLIParameterParity(unittest.TestCase):
@@ -141,105 +138,6 @@ class TestCLIParameterParity(unittest.TestCase):
             if flag in original_flags:
                 self.assertIn(flag, cli_flags, f"Flag '{flag}' from original parser not found in CLI")
 
-    def test_remodel_backup_parameters(self):
-        """Test remodel backup CLI parameters match run_remodel_backup.py parser."""
-        original_parser = get_backup_parser()
-        original_opts = self._get_parser_options(original_parser)
-
-        # Get remodel group, then backup command
-        remodel_group = cli.commands.get("remodel")
-        self.assertIsNotNone(remodel_group, "remodel group not found")
-
-        backup_command = remodel_group.commands.get("backup")
-        self.assertIsNotNone(backup_command, "backup command not found in remodel group")
-
-        cli_opts = self._get_click_options(backup_command)
-
-        # Check positional count matches
-        self.assertEqual(
-            len(cli_opts["positional"]),
-            len(original_opts["positional"]),
-            f"Positional argument count mismatch: CLI has {len(cli_opts['positional'])}, original has {len(original_opts['positional'])}",
-        )
-
-        # Check optional parameters from original parser exist in CLI
-        original_dests = set(original_opts["optional"].keys())
-        cli_dests = set(cli_opts["optional"].keys())
-
-        for orig_dest in original_dests:
-            self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
-
-        # Check flags from original parser exist in CLI
-        original_flags = {flag[0] for flag in original_opts["flags"]}
-        cli_flags = {flag[0] for flag in cli_opts["flags"]}
-
-        for orig_flag in original_flags:
-            self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
-
-    def test_remodel_restore_parameters(self):
-        """Test remodel restore CLI parameters match run_remodel_restore.py parser."""
-        original_parser = get_restore_parser()
-        original_opts = self._get_parser_options(original_parser)
-
-        remodel_group = cli.commands.get("remodel")
-        restore_command = remodel_group.commands.get("restore")
-        self.assertIsNotNone(restore_command, "restore command not found")
-
-        cli_opts = self._get_click_options(restore_command)
-
-        # Check positional count matches
-        self.assertEqual(
-            len(cli_opts["positional"]),
-            len(original_opts["positional"]),
-            f"Positional argument count mismatch: CLI has {len(cli_opts['positional'])}, original has {len(original_opts['positional'])}",
-        )
-
-        # Check optional parameters from original parser exist in CLI
-        original_dests = set(original_opts["optional"].keys())
-        cli_dests = set(cli_opts["optional"].keys())
-
-        for orig_dest in original_dests:
-            self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
-
-        # Check flags from original parser exist in CLI
-        original_flags = {flag[0] for flag in original_opts["flags"]}
-        cli_flags = {flag[0] for flag in cli_opts["flags"]}
-
-        for orig_flag in original_flags:
-            self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
-
-    def test_remodel_run_parameters(self):
-        """Test remodel run CLI parameters match run_remodel.py parser."""
-        original_parser = get_remodel_parser()
-        original_opts = self._get_parser_options(original_parser)
-
-        remodel_group = cli.commands.get("remodel")
-        run_command = remodel_group.commands.get("run")
-        self.assertIsNotNone(run_command, "run command not found")
-
-        cli_opts = self._get_click_options(run_command)
-
-        # Check positional count matches
-        self.assertEqual(
-            len(cli_opts["positional"]),
-            len(original_opts["positional"]),
-            f"Positional argument count mismatch: CLI has {len(cli_opts['positional'])}, original has {len(original_opts['positional'])}",
-        )
-
-        # Check optional parameters from original parser exist in CLI
-        original_dests = set(original_opts["optional"].keys())
-        cli_dests = set(cli_opts["optional"].keys())
-
-        for orig_dest in original_dests:
-            self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
-
-        # Check flags from original parser exist in CLI
-        original_flags = {flag[0] for flag in original_opts["flags"]}
-        cli_flags = {flag[0] for flag in cli_opts["flags"]}
-
-        for orig_flag in original_flags:
-            self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
-
     def test_extract_sidecar_parameters(self):
         """Test extract-sidecar CLI parameters match hed_extract_bids_sidecar.py parser."""
         original_parser = get_extract_sidecar_parser()
@@ -336,9 +234,6 @@ class TestCLIParameterParity(unittest.TestCase):
         # Legacy commands from pyproject.toml
         legacy_to_cli = {
             "validate_bids": "validate-bids",
-            "run_remodel": "remodel run",
-            "run_remodel_backup": "remodel backup",
-            "run_remodel_restore": "remodel restore",
             "hed_extract_bids_sidecar": "extract-sidecar",
             "hed_validate_schemas": "schema validate",
             "hed_update_schemas": "schema convert",
