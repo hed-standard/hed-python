@@ -1,7 +1,7 @@
 """
 Unit tests for schema format I/O roundtrip validation.
 
-Tests that schemas can be loaded, saved in all 4 formats (XML, MediaWiki, TSV, JSON),
+Tests that schemas can be loaded, saved in all 4 formats (XML, MEDIAWIKI, TSV, JSON),
 and reloaded with perfect fidelity for both standard and library schemas.
 """
 
@@ -13,7 +13,7 @@ from hed.schema import load_schema_version, load_schema
 
 
 class TestSchemaFormatRoundtrip(unittest.TestCase):
-    """Test that all 4 schema formats (XML, MediaWiki, TSV, JSON) roundtrip correctly."""
+    """Test that all 4 schema formats (XML, MEDIAWIKI, TSV, JSON) roundtrip correctly."""
 
     @classmethod
     def setUpClass(cls):
@@ -50,7 +50,7 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
 
         # Verify files were created
         self.assertTrue(os.path.exists(xml_path), f"XML file not created: {xml_path}")
-        self.assertTrue(os.path.exists(mediawiki_path), f"MediaWiki file not created: {mediawiki_path}")
+        self.assertTrue(os.path.exists(mediawiki_path), f"MEDIAWIKI file not created: {mediawiki_path}")
         self.assertTrue(os.path.exists(json_path), f"JSON file not created: {json_path}")
         tsv_tag_file = os.path.join(tsv_dir, f"{basename}_Tag.tsv")
         self.assertTrue(os.path.exists(tsv_tag_file), f"TSV Tag file not created: {tsv_tag_file}")
@@ -64,14 +64,14 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         # Compare all schemas to original
         self.assertEqual(schema, schema_from_xml, f"XML roundtrip failed for {schema_name} (save_merged={save_merged})")
         self.assertEqual(
-            schema, schema_from_mediawiki, f"MediaWiki roundtrip failed for {schema_name} (save_merged={save_merged})"
+            schema, schema_from_mediawiki, f"MEDIAWIKI roundtrip failed for {schema_name} (save_merged={save_merged})"
         )
         self.assertEqual(schema, schema_from_tsv, f"TSV roundtrip failed for {schema_name} (save_merged={save_merged})")
         self.assertEqual(schema, schema_from_json, f"JSON roundtrip failed for {schema_name} (save_merged={save_merged})")
 
         # Compare all formats to each other
         self.assertEqual(
-            schema_from_xml, schema_from_mediawiki, f"XML vs MediaWiki mismatch for {schema_name} (save_merged={save_merged})"
+            schema_from_xml, schema_from_mediawiki, f"XML vs MEDIAWI mismatch for {schema_name} (save_merged={save_merged})"
         )
         self.assertEqual(
             schema_from_xml, schema_from_tsv, f"XML vs TSV mismatch for {schema_name} (save_merged={save_merged})"
@@ -127,7 +127,7 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         # Load all formats
         schemas = {
             "XML": load_schema(xml_path),
-            "MediaWiki": load_schema(mediawiki_path),
+            "MEDIAWIKI": load_schema(mediawiki_path),
             "TSV": load_schema(tsv_dir),
             "JSON": load_schema(json_path),
         }
@@ -160,7 +160,7 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         # Load all formats
         schemas = {
             "XML": load_schema(xml_path),
-            "MediaWiki": load_schema(mediawiki_path),
+            "MEDIAWIKI": load_schema(mediawiki_path),
             "TSV": load_schema(tsv_dir),
             "JSON": load_schema(json_path),
         }
@@ -193,7 +193,7 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         # Load all formats
         schemas = {
             "XML": load_schema(xml_path),
-            "MediaWiki": load_schema(mediawiki_path),
+            "MEDIAWIKI": load_schema(mediawiki_path),
             "TSV": load_schema(tsv_dir),
             "JSON": load_schema(json_path),
         }

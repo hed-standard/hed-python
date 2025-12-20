@@ -1,4 +1,4 @@
-"""Baseclass for mediawiki/xml writers"""
+"""Baseclass for MEDIAWIKI/XML/JSON/TSV writers"""
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
@@ -15,7 +15,7 @@ class Schema2Base:
         self._schema = None
 
     def process_schema(self, hed_schema, save_merged=False):
-        """Takes a HedSchema object and returns it in the inherited form(mediawiki, xml, etc)
+        """Takes a HedSchema object and returns it in the inherited form(MEDIAWIKI, XML, etc)
 
         Parameters:
             hed_schema (HedSchema): The schema to be processed.

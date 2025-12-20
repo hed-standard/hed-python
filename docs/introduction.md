@@ -24,12 +24,12 @@ The **hedtools** Python package (`hed-python` repository) provides:
 ### Related tools and resources
 
 - **[HED homepage](https://www.hedtags.org)**: Overview and links for HED
-- **[HED Schemas](https://github.com/hed-standard/hed-schemas)**: Standardized vocabularies in XML/MediaWiki/OWL formats
-- **[HED Specification](https://www.hedtags.org/hed-specification/)**: Formal specification defining HED annotation rules
-- **[HED Online Tools](https://hedtools.org/hed)**: Web-based interface requiring no programming
-- **[HED Examples](https://github.com/hed-standard/hed-examples)**: Example datasets annotated with HED
-- **[HED Resources](https://www.hedtags.org/hed-resources)**: Comprehensive tutorials and documentation
-- **[HED MATLAB Tools](https://www.hedtags.org/hed-resources/HedMatlabTools.html)**: MATLAB wrapper for Python tools
+- **[HED schemas](https://github.com/hed-standard/hed-schemas)**: Standardized vocabularies in XML/MEDIAWIKI/TSV/JSON formats
+- **[HED specification](https://www.hedtags.org/hed-specification/)**: Formal specification defining HED annotation rules
+- **[HED online tools](https://hedtools.org/hed)**: Web-based interface requiring no programming
+- **[HED examples](https://github.com/hed-standard/hed-examples)**: Example datasets annotated with HED
+- **[HED resources](https://www.hedtags.org/hed-resources)**: Comprehensive tutorials and documentation
+- **[HED MATLAB tools](https://www.hedtags.org/hed-resources/HedMatlabTools.html)**: MATLAB wrapper for Python tools
 
 ## Installation
 

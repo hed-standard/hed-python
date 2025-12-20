@@ -98,9 +98,6 @@ examples = [
 hedpy = "hed.cli.cli:main"
 
 # Legacy commands (deprecated - use 'hedpy' instead)
-run_remodel = "hed.tools.remodeling.cli.run_remodel:main"
-run_remodel_backup = "hed.tools.remodeling.cli.run_remodel_backup:main"
-run_remodel_restore = "hed.tools.remodeling.cli.run_remodel_restore:main"
 validate_bids = "hed.scripts.validate_bids:main"
 hed_extract_bids_sidecar = "hed.scripts.hed_extract_bids_sidecar:main"
 hed_validate_schemas = "hed.scripts.validate_schemas:main"

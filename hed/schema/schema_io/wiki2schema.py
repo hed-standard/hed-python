@@ -39,7 +39,7 @@ required_keys = [wiki_constants.SectionStarts[sec] for sec in required_sections]
 
 
 class SchemaLoaderWiki(SchemaLoader):
-    """Load MediaWiki schemas from filenames or strings.
+    """Load MEDIAWIKI schemas from filenames or strings.
 
     Expected usage is SchemaLoaderWiki.load(filename)
 
@@ -269,7 +269,7 @@ class SchemaLoaderWiki(SchemaLoader):
         self._read_section(lines, HedSectionKey.Attributes)
 
     def _get_header_attributes_internal(self, version_line):
-        """Extracts all valid attributes like version from the HED line in .mediawiki format.
+        """Extracts all valid attributes like version from the HED line in MEDIAWIKI format.
 
         Parameters:
             version_line (str): The line in the wiki file that contains the version or other attributes.
@@ -292,7 +292,7 @@ class SchemaLoaderWiki(SchemaLoader):
         return attributes
 
     def _get_header_attributes_internal_old(self, version_line):
-        """Extract all valid attributes like version from the HED line in .mediawiki format.
+        """Extract all valid attributes like version from the HED line in MEDIAWIKI format.
 
         Parameters:
             version_line (str): The line in the wiki file that contains the version or other attributes.
