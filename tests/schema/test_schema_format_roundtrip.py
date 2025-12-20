@@ -71,7 +71,7 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
 
         # Compare all formats to each other
         self.assertEqual(
-            schema_from_xml, schema_from_mediawiki, f"XML vs MEDIAWI mismatch for {schema_name} (save_merged={save_merged})"
+            schema_from_xml, schema_from_mediawiki, f"XML vs MEDIAWIKI mismatch for {schema_name} (save_merged={save_merged})"
         )
         self.assertEqual(
             schema_from_xml, schema_from_tsv, f"XML vs TSV mismatch for {schema_name} (save_merged={save_merged})"
