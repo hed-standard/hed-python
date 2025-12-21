@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
     def test_gathered_defs(self):
         # todo: probably remove this test?
         # todo: add unit tests for definitions in tsv file
-        defs = DefinitionDict.get_as_strings(self.tabular_file._sidecar.extract_definitions(hed_schema=self.hed_schema))
+        defs = DefinitionDict.get_as_strings(self.tabular_file._sidecar._extract_definitions(hed_schema=self.hed_schema))
         expected_defs = {
             "jsonfiledef": "(Acceleration/#,Item/JsonDef1)",
             "jsonfiledef2": "(Age/#,Item/JsonDef2)",

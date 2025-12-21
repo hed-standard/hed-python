@@ -7,9 +7,9 @@ Welcome to the HED Python tools documentation. This package provides comprehensi
    :maxdepth: 2
    :caption: Contents:
 
-   introduction
-   user_guide
-   api/index
+   Introduction <introduction>
+   User guide <user_guide>
+   API reference <api/index>
 
 Indices and tables
 ==================

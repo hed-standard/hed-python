@@ -1,14 +1,15 @@
-# User guide for hedtools
+# The HEDTools user guide
 
 This guide provides step-by-step instructions for using the HED Python tools for validation, BIDS integration, and analysis.
 
 ## Quick links
 
 - 📚 [API Reference](api/index.html)
-- 📓 [Jupyter notebook examples](https://github.com/hed-standard/hed-python/tree/main/examples)
+- 📓 [Jupyter notebooks](https://github.com/hed-standard/hed-python/tree/main/examples)
 - 🐛 [GitHub issues](https://github.com/hed-standard/hed-python/issues)
-- 📖 [HED Specification](https://www.hedtags.org/)
-- 🌐 [Online Tools](https://hedtools.org/hed)
+- 🎓 [HED resources](https://www.hedtags.org/hed-resources)
+- 📖 [HED specification](https://www.hedtags.org/hed-specification)
+- 🌐 [Online tools](https://hedtools.org/hed)
 
 ## Table of contents
 
@@ -17,7 +18,7 @@ This guide provides step-by-step instructions for using the HED Python tools for
 3. [Validating HED strings](#validating-hed-strings)
 4. [Working with BIDS datasets](#working-with-bids-datasets)
 5. [Working with sidecars](#working-with-sidecars)
-6. [Jupyter notebooks for BIDS](#jupyter-notebooks-for-bids)
+6. [Jupyter notebooks](#jupyter-notebooks)
 7. [Command-line tools](#command-line-tools)
 8. [Best practices](#best-practices)
 9. [Troubleshooting](#troubleshooting)
@@ -71,28 +72,28 @@ from hed import load_schema, load_schema_version
 # Load a specific version (auto-cached in ~/.hedtools/)
 schema = load_schema_version("8.4.0")
 
-# Load from a local file
+# Load from a local file (in this case XML -- use directory path for TSV)
 schema = load_schema("path/to/schema.xml")
 
-# Load from URL
-schema = load_schema("https://example.com/schema.xml")
+# Load from URL (this URL is the raw content of a HED standard prerelease)
+schema = load_schema("https://raw.githubusercontent.com/hed-standard/hed-schemas/refs/heads/main/standard_schema/prerelease/HED8.5.0.json")
 ```
 
-**Note:** Schemas are automatically downloaded and cached in `~/.hedtools/` for offline use.
+**Note:** The released schemas are automatically downloaded and cached in `~/.hedtools/` for offline use.
 
 ### Working with library schemas
 
-HED supports library schemas that extend the base vocabulary. Starting with HED 8.3.0, library schemas are typically "partnered" with a specific standard schema version.
+HED supports library schemas that extend the base vocabulary.
 
 ```python
 from hed import load_schema_version
+
 
 # Load base schema with a library
 schema = load_schema_version("score_2.1.0")
 
 # For multiple libraries
 schema = load_schema_version(["score_2.1.0", "lang_1.1.0"])
-
 ```
 
 Note: It is now standard for a library schema to be partnered with a standard schema. In general, you should not use an earlier, non-partnered versions of a library schema.
@@ -106,6 +107,7 @@ The HED string must be created with a schema, and validation is performed on the
 ```python
 from hed import HedString, load_schema_version
 
+
 schema = load_schema_version("8.4.0")
 hed_string = HedString("Red, Blue, Green", schema)
 issues = hed_string.validate()
@@ -115,7 +117,8 @@ issues = hed_string.validate()
 ### Batch validation
 
 ```python
-from hed import HedString, load_schema_version
+from hed import HedString, load_schema_version, get_printable_issue_string
+
 
 schema = load_schema_version("8.4.0")
 
@@ -124,12 +127,12 @@ hed_strings = [
     "Invalid-tag, Another-invalid",
     "(Red, Square)"
 ]
-
+issues = []
 for i, hed_str in enumerate(hed_strings, 1):
     hed_string = HedString(hed_str, schema)
-    issues = hed_string.validate()
-    if issues:
-        print(f"String {i} has {len(issues)} issues")
+    issues += hed_string.validate()
+if issues:
+    print(get_printable_issue_string(issues))
 ```
 
 ## Working with BIDS datasets
@@ -138,6 +141,7 @@ for i, hed_str in enumerate(hed_strings, 1):
 
 ```python
 from hed.tools import BidsDataset
+
 
 # Load BIDS dataset (automatically loads schema from dataset_description.json)
 dataset = BidsDataset("path/to/bids/dataset")
@@ -154,10 +158,13 @@ else:
 issues = dataset.validate(check_for_warnings=True)
 ```
 
+Since a BIDS dataset includes the HED version in its `dataset_description.json`, a HED version is not necessary for validation. The `BidsDataset` only holds information about the relevant `.tsv` and `.json` files, not the imaging data. The constructor has a number of parameters that restrict which of these files are considered. The relevant JSON files are all read in, but the `.tsv` content is only loaded when needed.
+
 ### Working with individual event files
 
 ```python
 from hed import TabularInput, load_schema_version
+
 
 # Load schema
 schema = load_schema_version("8.4.0")
@@ -182,6 +189,7 @@ def_dict = tabular.get_def_dict(schema)
 ```python
 from hed import Sidecar, load_schema_version
 
+
 schema = load_schema_version("8.4.0")
 
 # Load a JSON sidecar
@@ -189,9 +197,6 @@ sidecar = Sidecar("task-rest_events.json")
 
 # Validate the sidecar
 issues = sidecar.validate(schema)
-
-# Get the definition dictionary from the sidecar
-def_dict = sidecar.get_def_dict(schema)
 ```
 
 ### Extracting definitions
@@ -199,11 +204,12 @@ def_dict = sidecar.get_def_dict(schema)
 ```python
 from hed import Sidecar, load_schema_version
 
+
 schema = load_schema_version("8.4.0")
 sidecar = Sidecar("task-rest_events.json")
 
-# Extract all definitions from the sidecar
-def_dict = sidecar.extract_definitions(schema)
+# Get all definitions from the sidecar
+def_dict = sidecar.get_def_dict(schema)
 ```
 
 ### Saving sidecars
@@ -213,29 +219,29 @@ from hed import Sidecar
 
 sidecar = Sidecar("task-rest_events.json")
 
-# Save as JSON file
+# Save as formatted JSON file
 sidecar.save_as_json("output_sidecar.json")
 
-# Get as JSON string
+# Get as a formatted JSON string
 json_string = sidecar.get_as_json_string()
 ```
 
-## Jupyter notebooks for BIDS
+## Jupyter notebooks
 
-The `examples/` directory in the [GitHub repository](https://github.com/hed-standard/hed-python/tree/main/examples) contains Jupyter notebooks for BIDS annotation workflows. These notebooks are **not included in the PyPI package**.
+The [**examples**](https://github.com/hed-standard/hed-python/tree/main/examples) directory in the GitHub [**hed-python**](https://github.com/hed-standard/hed-python) repository contains Jupyter notebooks for BIDS annotation workflows. These notebooks are **not included in the PyPI package**.
 
 ### Available notebooks
 
-| Notebook                                                                                                                                               | Purpose                                               |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
-| [extract_json_template.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/extract_json_template.ipynb)                               | Create JSON sidecar template from all event files     |
-| [find_event_combinations.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/find_event_combinations.ipynb)                           | Extract unique combinations of column values          |
-| [merge_spreadsheet_into_sidecar.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/merge_spreadsheet_into_sidecar.ipynb)             | Merge edited spreadsheet back into JSON sidecar       |
-| [sidecar_to_spreadsheet.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/sidecar_to_spreadsheet.ipynb)                             | Convert JSON sidecar to spreadsheet for editing       |
-| [summarize_events.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/summarize_events.ipynb)                                         | Summarize event file contents and value distributions |
-| [validate_bids_dataset.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/validate_bids_dataset.ipynb)                               | Validate HED annotations in a BIDS dataset            |
-| [validate_bids_dataset_with_libraries.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/validate_bids_dataset_with_libraries.ipynb) | Validate with HED library schemas                     |
-| [validate_bids_datasets.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/validate_bids_datasets.ipynb)                             | Batch validate multiple BIDS datasets                 |
+| Notebook                                                                                                                                               | Purpose                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| [extract_json_template.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/extract_json_template.ipynb)                               | Create JSON sidecar template from all event files                  |
+| [find_event_combinations.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/find_event_combinations.ipynb)                           | Extract unique combinations of column values                       |
+| [merge_spreadsheet_into_sidecar.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/merge_spreadsheet_into_sidecar.ipynb)             | Merge edited spreadsheet of HED annotations back into JSON sidecar |
+| [sidecar_to_spreadsheet.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/sidecar_to_spreadsheet.ipynb)                             | Convert JSON sidecar to spreadsheet for editing                    |
+| [summarize_events.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/summarize_events.ipynb)                                         | Summarize event file contents and value distributions              |
+| [validate_bids_dataset.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/validate_bids_dataset.ipynb)                               | Validate HED annotations in a BIDS dataset                         |
+| [validate_bids_dataset_with_libraries.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/validate_bids_dataset_with_libraries.ipynb) | Validate with HED library schemas                                  |
+| [validate_bids_datasets.ipynb](https://github.com/hed-standard/hed-python/blob/main/examples/validate_bids_datasets.ipynb)                             | Batch validate multiple BIDS datasets                              |
 
 ### Getting the notebooks
 
@@ -260,12 +266,12 @@ pip install hedtools jupyter notebook
 
 1. **Summarize events** - Understand your event file structure
 2. **Extract template** - Create initial JSON sidecar template
-3. **Convert to spreadsheet** (optional) - Convert to spreadsheet format for easier editing
+3. **Convert to spreadsheet** (optional) - Convert JSON HED to spreadsheet format for easier editing
 4. **Edit annotations** - Add HED tags to your sidecar or spreadsheet
 5. **Merge back** (if using spreadsheet) - Convert spreadsheet back to JSON
 6. **Validate** - Check for errors and iterate until valid
 
-See the [examples README](https://github.com/hed-standard/hed-python/tree/main/examples) for detailed documentation of each notebook.
+See the examples [**README**](https://github.com/hed-standard/hed-python/tree/main/examples) for detailed documentation of each notebook.
 
 ## Command-line tools
 
@@ -275,9 +281,10 @@ HEDTools provides a unified command-line interface (CLI) using a **git-style com
 
 | Command                        | Description                                                 |
 | ------------------------------ | ----------------------------------------------------------- |
+| **Annotation management**      |                                                             |
 | `hedpy validate-bids`          | Validate HED annotations in BIDS datasets                   |
-| `hedpy extract-sidecar`        | Extract JSON sidecar template from BIDS event files         |
-| **Schema Management**          |                                                             |
+| `hedpy extract-sidecar`        | Extract JSON sidecar template from tabular (`.tsv`) files   |
+| **Schema management**          |                                                             |
 | `hedpy schema validate`        | Validate HED schema files                                   |
 | `hedpy schema convert`         | Convert schemas between formats (XML, MEDIAWIKI, TSV, JSON) |
 | `hedpy schema add-ids`         | Add unique HED IDs to schema terms                          |
@@ -335,15 +342,21 @@ hedpy validate-bids /path/to/bids/dataset -v
 # Save results to a file
 hedpy validate-bids /path/to/bids/dataset -o validation_results.txt
 
-# Output in JSON format
+# Output in compact JSON format (array of issues only)
 hedpy validate-bids /path/to/bids/dataset -f json -o results.json
 
-# Pretty-printed JSON
+# Pretty-printed JSON with version metadata (recommended for saving)
 hedpy validate-bids /path/to/bids/dataset -f json_pp -o results.json
 
 # Print to stdout AND save to file
 hedpy validate-bids /path/to/bids/dataset -o results.txt -p
 ```
+
+**Output format differences:**
+
+- `text`: Human-readable format with issue counts and descriptions (default)
+- `json`: Compact JSON array of issues only, suitable for piping or programmatic processing
+- `json_pp`: Pretty-printed JSON object with `issues` array and `hedtools_version` metadata, with proper indentation for readability
 
 #### Filtering validation
 
@@ -408,7 +421,7 @@ hedpy extract-sidecar /path/to/bids/dataset -s events -o task_events.json
 #### Column handling
 
 ```bash
-# Specify value columns (columns with unique values needing # placeholders)
+# Specify value columns (use single annotation for column with # placeholder)
 hedpy extract-sidecar /path/to/bids/dataset -s events \
   -vc response_time -vc accuracy -vc subject_id
 
@@ -436,9 +449,9 @@ hedpy extract-sidecar /path/to/bids/dataset \
 
 ______________________________________________________________________
 
-### Schema management
+### Schema development
 
-The `hedpy schema` command group provides tools for validating, converting, and managing HED schemas.
+The `hedpy schema` command group provides tools for validating, converting, and managing HED schemas during development.
 
 #### Schema validation
 
@@ -449,12 +462,13 @@ Validate HED schema files:
 hedpy schema validate /path/to/schema.xml
 
 # Validate multiple schemas
-hedpy schema validate schema1.xml schema2.xml schema3.xml
+hedpy schema validate schema1.json schema2.xml schema3.mediawiki
 
 # Validate with verbose output
 hedpy schema validate /path/to/schema.xml -v
 
-# Verify all format versions are equivalent
+# Validate all format versions (.xml, .mediawiki, .tsv, .json) of the schema
+# This forces validation of all 4 formats and checks equivalence for prerelease schemas
 hedpy schema validate /path/to/schema.xml --add-all-extensions
 ```
 
@@ -468,9 +482,6 @@ hedpy schema convert schema.xml  # Creates schema.mediawiki, schema.tsv, etc.
 
 # Convert multiple schemas
 hedpy schema convert schema1.xml schema2.xml
-
-# Convert and set/update HED IDs
-hedpy schema convert schema.xml --set-ids
 ```
 
 **Supported formats:**
@@ -480,40 +491,57 @@ hedpy schema convert schema.xml --set-ids
 - `.tsv` - TSV (tab-separated value) format
 - `.json` - JSON format
 
-#### Add HED IDs to schema
+______________________________________________________________________
 
-Add unique HED IDs to schema terms:
+### Schema release
+
+Once a schema has been developed and tested, these commands prepare it for official release. These operations are performed by the HED maintainers on schemas in the **prerelease directory** of the hed-schemas repository before moving them to the stable release directory.
+
+#### Add HED IDs
+
+HED IDs are unique identifiers assigned to each schema term, enabling stable references across schema versions and format conversions. These IDs must be added before releasing a schema.
 
 ```bash
-# Add IDs to a standard schema
-hedpy schema add-ids /path/to/hed-schemas standard 8.4.0
+# Add IDs to a standard schema prerelease
+hedpy schema add-ids /path/to/hed-schemas standard 8.5.0
 
-# Add IDs to a library schema
-hedpy schema add-ids /path/to/hed-schemas score 2.1.0
+# Add IDs to a library schema prerelease
+hedpy schema add-ids /path/to/hed-schemas score 2.2.0
 ```
 
 **Requirements:**
 
 - Path must be to a hed-schemas repository clone
 - Schema name and version must match directory structure
-- Modifies the schema in-place
+- **Only works on schemas in a prerelease directory**
+- Modifies all schema formats (XML, MEDIAWIKI, TSV, JSON) in-place
+- Should be run after all schema content changes are finalized
 
-#### Create ontology from schema
+#### Create ontology
 
-Generate OWL ontology files from HED schemas:
+Generate OWL (Web Ontology Language) ontology files from HED schemas for semantic web applications and ontology-based tools.
 
 ```bash
-# Create ontology for a schema
+# Create ontology for a standard schema
 hedpy schema create-ontology /path/to/hed-schemas standard 8.4.0
 
-# Specify output directory
-hedpy schema create-ontology /path/to/hed-schemas standard 8.4.0 \
+# Create ontology for a library schema with custom output location
+hedpy schema create-ontology /path/to/hed-schemas score 2.1.0 \
   --dest /path/to/output
 
-# Create ontology for library schema
-hedpy schema create-ontology /path/to/hed-schemas score 2.1.0 \
+# Create ontology with all outputs in specific directory
+hedpy schema create-ontology /path/to/hed-schemas lang 1.1.0 \
   --dest ./ontologies
 ```
+
+**Best practices:**
+
+1. Validate schema thoroughly before adding IDs
+2. Convert to all formats and verify equivalence
+3. Add HED IDs only once - they should remain stable
+4. Generate ontology after IDs are added
+5. Verify that the created ontology is valid using [**Protégé**](https://protege.stanford.edu/)
+6. Commit changes to version control before moving to stable release
 
 ______________________________________________________________________
 
@@ -538,7 +566,23 @@ ______________________________________________________________________
 
 ### Common workflows
 
-#### Workflow 1: First-time BIDS dataset validation
+#### Workflow 1: Getting help
+
+Each command provides help at several levels
+
+```bash
+# Top-level help
+hedpy --help
+
+# Command-specific help
+hedpy validate-bids --help
+hedpy schema validate --help
+
+# Command group help
+hedpy schema --help
+```
+
+#### Workflow 2: First-time BIDS dataset validation
 
 ```bash
 # Step 1: Extract sidecar template
@@ -554,7 +598,7 @@ hedpy validate-bids /path/to/dataset -w -v -o validation.txt
 hedpy validate-bids /path/to/dataset -w
 ```
 
-#### Workflow 2: Schema development and testing
+#### Workflow 3: Schema development and testing
 
 ```bash
 # Step 1: Validate schema
@@ -563,82 +607,58 @@ hedpy schema validate my_schema.xml -v
 # Step 2: Convert to all formats
 hedpy schema convert my_schema.xml
 
-# Step 3: Verify all formats are equivalent
+# Step 3: Validate all formats are equivalent (for prerelease schemas)
 hedpy schema validate my_schema.xml --add-all-extensions
+```
 
-# Step 4: Add HED IDs
+#### Workflow 4: Preparing for schema release
+
+```bash
+# Step 1: Add HED IDs
 hedpy schema add-ids /path/to/hed-schemas my_library 1.0.0
 
-# Step 5: Generate ontology
+# Step 2: Generate ontology
 hedpy schema create-ontology /path/to/hed-schemas my_library 1.0.0
 ```
 
 ______________________________________________________________________
 
-### Tips and best practices
+### Debugging tips
 
 1. **Use verbose mode (`-v`)** during development to see detailed progress
 2. **Save output to files (`-o`)** for documentation and tracking
-3. **Use JSON output format (`-f json_pp`)** for programmatic processing
+3. **Choose the right output format**:
+   - Use `json_pp` for human-readable saved results with version tracking
+   - Use `json` for compact output when piping to other tools
+   - Use `text` (default) for quick reviews with error counts
 4. **Leverage tab completion** in your shell for command discovery
 5. **Use `--help` liberally** to explore options for each command
 6. **Test on small datasets first** before processing large corpora
-
-### Getting help
-
-Each command provides detailed help:
-
-```bash
-# Top-level help
-hedpy --help
-
-# Command-specific help
-hedpy validate-bids --help
-hedpy schema validate --help
-
-# Command group help
-hedpy schema --help
-```
 
 ## Best practices
 
 ### Schema management
 
-1. **Always use specific schema versions** for reproducibility:
-
-   ```python
-   # Good: Explicit version
-   schema = load_schema_version("8.4.0")
-
-   # Avoid: Unspecified version may change over time
-   schema = load_schema()  # Loads latest, which changes
-   ```
-
-2. **Cache schemas** - Load once and reuse:
-
-   ```python
-   schema = load_schema_version("8.4.0")  # Cached automatically
-
-   for file in event_files:
-       tabular = TabularInput(file, sidecar=sidecar)
-       issues = tabular.validate(schema)  # Reuses cached schema
-   ```
-
-3. **Don't modify schemas** - they're immutable and shared
+1. **Don't modify released schemas** - they're immutable and shared
+2. **Check and recheck prerelease schema validity** - once released it's permanent
+3. **Compare the schema with previous version** - make sure that changes are not breaking (major semantic version change)
 
 ### Validation workflow
 
 1. **Validate early and often** during annotation development
 2. **Fix errors before warnings** - errors indicate invalid HED
 3. **Validate sidecars first** before validating full dataset
-4. **Use the online tools** at [hedtools.org](https://hedtools.org) for quick checks
+4. **Use the online tools** at [hedtools.org/hed](https://hedtools.org/hed) for quick checks
 
-### BIDS annotation strategy
+### Annotation strategy (BIDS)
 
 1. **Create a single root-level `events.json`** sidecar when possible
 2. **Use `#` placeholders** for value columns with continuous data
 3. **Skip BIDS-predefined columns** like `onset`, `duration`, `sample`
-4. **Document your annotations** using descriptions in the sidecar
+4. **Use the latest versions of the schemas** later versions have improved linkage
+5. **Document your annotations** using descriptions in the sidecar
+
+If you are annotating an NWB dataset, the instructions are somewhat similar but haven't been finalized.
 
 ### Code organization
 
@@ -689,8 +709,7 @@ print(get_cache_directory())
 
 1. Check HED syntax - ensure proper comma separation and parentheses
 2. Verify the tag exists in your schema version
-3. HED tags are case-sensitive - check capitalization
-4. Validate incrementally - test small pieces first
+3. Validate incrementally - test small pieces first
 
 #### File format issues
 
@@ -718,9 +737,8 @@ print(get_cache_directory())
 
 #### Before opening an issue
 
-1. Check the [HED Specification](https://www.hedtags.org/)
-2. Try the [online tools](https://hedtools.org) to isolate the problem
-3. Search [existing issues](https://github.com/hed-standard/hed-python/issues)
+1. Try the [online tools](https://hedtools.org) to isolate the problem
+2. Search [existing issues](https://github.com/hed-standard/hed-python/issues)
 
 #### Opening an issue
 
@@ -735,8 +753,7 @@ Include:
 
 #### Additional resources
 
-- **HED Specification**: [www.hedtags.org](https://www.hedtags.org/)
-- **HED Resources**: [www.hed-resources.org](https://www.hed-resources.org)
-- **HED Online Tools**: [hedtools.org](https://hedtools.org)
-- **GitHub Discussions**: [hed-python discussions](https://github.com/hed-standard/hed-python/discussions)
-- **Example Datasets**: [hed-examples](https://github.com/hed-standard/hed-examples)
+- **HED specification**: [www.hedtags.org/hed-specification](https://www.hedtags.org/hed-specification)
+- **HED resources**: [www.hedtags.org](https://www.hedtags.org/hed-resources)
+- **HED online tools**: [hedtools.org/hed](https://hedtools.org/hed)
+- **Example datasets**: [hed-examples](https://github.com/hed-standard/hed-examples/datasets)

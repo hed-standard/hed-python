@@ -113,7 +113,7 @@ class Test(unittest.TestCase):
     def test_duplicate_def(self):
         sidecar = self.json_def_sidecar
         # If external defs are the same, no error
-        duplicate_dict = sidecar.extract_definitions(hed_schema=self.hed_schema)
+        duplicate_dict = sidecar._extract_definitions(hed_schema=self.hed_schema)
         issues = sidecar.validate(self.hed_schema, extra_def_dicts=duplicate_dict, error_handler=ErrorHandler(False))
         self.assertEqual(len(issues), 2)
         errors = [issue for issue in issues if issue["severity"] < ErrorSeverity.WARNING]

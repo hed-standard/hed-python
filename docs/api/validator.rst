@@ -3,7 +3,7 @@ Validator
 
 Validation tools for HED data structures and annotations.
 
-Core Validator Classes
+Core validator classes
 ----------------------
 
 HedValidator
@@ -14,7 +14,7 @@ HedValidator
    :undoc-members:
    :show-inheritance:
 
-Specialized Validators
+Specialized validators
 ----------------------
 
 SidecarValidator
@@ -49,7 +49,7 @@ OnsetValidator
    :undoc-members:
    :show-inheritance:
 
-Validation Utilities
+Validation utilities
 --------------------
 
 ReservedChecker

@@ -83,7 +83,7 @@ class Sidecar:
             DefinitionDict:  A single definition dict representing all the data(and extra def dicts).
         """
         if self._def_dict is None and hed_schema:
-            self._def_dict = self.extract_definitions(hed_schema)
+            self._def_dict = self._extract_definitions(hed_schema)
         def_dicts = []
         if self.def_dict:
             def_dicts.append(self.def_dict)
@@ -190,7 +190,7 @@ class Sidecar:
         except (json.decoder.JSONDecodeError, AttributeError) as e:
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), self.name) from e
 
-    def extract_definitions(self, hed_schema, error_handler=None) -> "DefinitionDict":
+    def _extract_definitions(self, hed_schema, error_handler=None) -> "DefinitionDict":
         """Gather and validate definitions in metadata.
 
         Parameters:

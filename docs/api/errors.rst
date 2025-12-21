@@ -3,7 +3,7 @@ Errors
 
 Error handling and reporting classes for HED validation and processing.
 
-Error Types and Constants
+Error types and constants
 -------------------------
 
 HedExceptions
@@ -22,7 +22,7 @@ HedFileError
    :undoc-members:
    :show-inheritance:
 
-Error Reporting
+Error reporting
 ---------------
 
 ErrorHandler
@@ -33,7 +33,7 @@ ErrorHandler
    :undoc-members:
    :show-inheritance:
 
-Error Functions
+Error functions
 ~~~~~~~~~~~~~~~
 
 .. autofunction:: hed.errors.error_reporter.get_printable_issue_string
@@ -42,7 +42,7 @@ Error Functions
 
 .. autofunction:: hed.errors.error_reporter.replace_tag_references
 
-Error Types
+Error types
 -----------
 
 ValidationErrors
