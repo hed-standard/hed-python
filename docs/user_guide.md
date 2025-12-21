@@ -7,7 +7,7 @@ This guide provides step-by-step instructions for using the HED Python tools for
 - 📚 [API Reference](api/index.html)
 - 📓 [Jupyter notebooks](https://github.com/hed-standard/hed-python/tree/main/examples)
 - 🐛 [GitHub issues](https://github.com/hed-standard/hed-python/issues)
-- 🎓  [HED resources](https://www.hedtags.org/hed-resources)
+- 🎓 [HED resources](https://www.hedtags.org/hed-resources)
 - 📖 [HED specification](https://www.hedtags.org/hed-specification)
 - 🌐 [Online tools](https://hedtools.org/hed)
 
