@@ -157,4 +157,4 @@ issues = sidecar.validate(schema)
 - Explore the [**User guide**](user_guide.md) for detailed workflows
 - Try the [**Jupyter notebooks**](https://github.com/hed-standard/hed-python/tree/main/examples) for interactive examples
 - Check the [**API reference**](api/index.html) for complete function documentation
-- Validate your data using the HED online [**online tools**](https://hedtools.org/hed) or the HED [**browser-based tools**](https://www.hedtags.org/hed-javascript)
+- Validate your data using the HED [**online tools**](https://hedtools.org/hed) or the HED [**browser-based tools**](https://www.hedtags.org/hed-javascript)

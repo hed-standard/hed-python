@@ -648,7 +648,7 @@ ______________________________________________________________________
 1. **Validate early and often** during annotation development
 2. **Fix errors before warnings** - errors indicate invalid HED
 3. **Validate sidecars first** before validating full dataset
-4. **Use the online tools** at [hedtools.org](https://hedtools.org) for quick checks
+4. **Use the online tools** at [hedtools.org/hed](https://hedtools.org/hed) for quick checks
 
 ### Annotation strategy (BIDS)
 
