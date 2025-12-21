@@ -658,7 +658,7 @@ ______________________________________________________________________
 4. **Use the latest versions of the schemas** later versions have improved linkage
 5. **Document your annotations** using descriptions in the sidecar
 
-If you are annotated an NWB dataset, the instructions are somewhat similar but haven't been finalized.
+If you are annotating an NWB dataset, the instructions are somewhat similar but haven't been finalized.
 
 ### Code organization
 
