@@ -124,5 +124,5 @@ Convenience notebook for batch validation across multiple BIDS datasets.
 - **BIDS structure required**: These notebooks expect standard BIDS directory structure
 - **Inheritance handling**: Automatically processes BIDS sidecar inheritance
 - **Exclude directories**: Always exclude `derivatives`, `code`, `stimuli`, `sourcedata`
-- **Skip solumns**: Typically skip `onset`, `duration`, `sample` (BIDS-predefined)
+- **Skip columns**: Typically skip `onset`, `duration`, `sample` (BIDS-predefined)
 - **Value columns**: Columns with continuous data (annotated with `#` placeholder)
