@@ -186,15 +186,15 @@ black --workers 1 .
 
 The HED ecosystem consists of several interconnected repositories:
 
-| Repository                                                             | Description                                       |
-| ---------------------------------------------------------------------- | ------------------------------------------------- |
-| [hed-python](https://github.com/hed-standard/hed-python)               | Python validation and analysis tools (this repo)  |
-| [hed-web](https://github.com/hed-standard/hed-web)                     | Web interface and deployable Docker services      |
-| [hed-resources](https://github.com/hed-standard/hed-resources)         | Tutorials and other HED resources |
-| [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents              |
-| [hed-schemas](https://github.com/hed-standard/hed-schemas)             | Official HED schema repository                    |
-| [ndx-hed](https://github.com/hed-standard/ndx-hed)                     | HED support for NWB                               |
-| [hed-javascript](https://github.com/hed-standard/hed-javascript)       | JavaScript HED validation tools                   |
+| Repository                                                             | Description                                      |
+| ---------------------------------------------------------------------- | ------------------------------------------------ |
+| [hed-python](https://github.com/hed-standard/hed-python)               | Python validation and analysis tools (this repo) |
+| [hed-web](https://github.com/hed-standard/hed-web)                     | Web interface and deployable Docker services     |
+| [hed-resources](https://github.com/hed-standard/hed-resources)         | Tutorials and other HED resources                |
+| [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents             |
+| [hed-schemas](https://github.com/hed-standard/hed-schemas)             | Official HED schema repository                   |
+| [ndx-hed](https://github.com/hed-standard/ndx-hed)                     | HED support for NWB                              |
+| [hed-javascript](https://github.com/hed-standard/hed-javascript)       | JavaScript HED validation tools                  |
 
 ## Contributing
 
