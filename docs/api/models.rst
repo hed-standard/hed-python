@@ -3,7 +3,7 @@ Models
 
 Core data models for working with HED data structures.
 
-Core Models
+Core models
 -----------
 
 The fundamental data structures for HED annotations and tags.
@@ -40,7 +40,7 @@ DefinitionDict
    :undoc-members:
    :show-inheritance:
 
-Input Models
+Input models
 ------------
 
 Models for handling different types of input data.

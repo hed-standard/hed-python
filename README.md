@@ -26,7 +26,7 @@ For simple validation or transformation tasks, use the online tools at [https://
 
 Browser-based validation (no data upload) is available at [https://www.hedtags.org/hed-javascript](https://www.hedtags.org/hed-javascript)
 
-A development version is available at: [https://hedtools.org/hed_dev](https://hedtools.org/hed_dev)
+A development version of the online tools is available at: [https://hedtools.org/hed_dev](https://hedtools.org/hed_dev)
 
 ### Python installation
 
@@ -49,12 +49,13 @@ pip install git+https://github.com/hed-standard/hed-python/@main
 ```python
 from hed import HedString, load_schema_version
 
+
 # Load the latest HED schema
 schema = load_schema_version("8.4.0")
 
 # Create and validate a HED string
-hed_string = HedString("Sensory-event, Visual-presentation, (Onset, (Red, Square))")
-issues = hed_string.validate(schema)
+hed_string = HedString("Sensory-event, Visual-presentation, (Onset, (Red, Square))", schema)
+issues = hed_string.validate()
 
 if issues:
     print(get_printable_issue_string(issues, title="Validation issues found"))
@@ -128,9 +129,9 @@ See [`examples/README.md`](examples/README.md) for more details.
 
 📖 **Full Documentation:** [https://www.hedtags.org/hed-python](https://www.hedtags.org/hed-python)
 
-- [User Guide](https://www.hedtags.org/hed-python/user_guide.html) - Usage instructions
-- [API Reference](https://www.hedtags.org/hed-python/api/index.html) - Detailed API documentation
-- [HED Specification](https://www.hedtags.org/hed-specification) - Full HED standard specification
+- [User guide](https://www.hedtags.org/hed-python/user_guide.html) - Usage instructions
+- [API reference](https://www.hedtags.org/hed-python/api/index.html) - Detailed API documentation
+- [HED specification](https://www.hedtags.org/hed-specification) - Full HED standard specification
 
 ### Building docs locally
 
@@ -179,9 +180,9 @@ black --workers 1 .
 
 **Exclusions:** Black automatically excludes `.venv/`, `__pycache__/`, auto-generated files (`hed/_version.py`), and external repos (`spec_tests/hed-examples/`, `spec_tests/hed-specification/`).
 
-**CI Integration:** All code is automatically checked for Black formatting in GitHub Actions. Run `black .` before committing to ensure your code passes CI checks.
+**CI integration:** All code is automatically checked for Black formatting in GitHub Actions. Run `black .` before committing to ensure your code passes CI checks.
 
-## Related Repositories
+## Related repositories
 
 The HED ecosystem consists of several interconnected repositories:
 
@@ -189,7 +190,7 @@ The HED ecosystem consists of several interconnected repositories:
 | ---------------------------------------------------------------------- | ------------------------------------------------- |
 | [hed-python](https://github.com/hed-standard/hed-python)               | Python validation and analysis tools (this repo)  |
 | [hed-web](https://github.com/hed-standard/hed-web)                     | Web interface and deployable Docker services      |
-| [hed-resources](https://github.com/hed-standard/hed-resources)         | Example code in Python and MATLAB + HED resources |
+| [hed-resources](https://github.com/hed-standard/hed-resources)         | Tutorials and other HED resources |
 | [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents              |
 | [hed-schemas](https://github.com/hed-standard/hed-schemas)             | Official HED schema repository                    |
 | [ndx-hed](https://github.com/hed-standard/ndx-hed)                     | HED support for NWB                               |
@@ -200,7 +201,7 @@ The HED ecosystem consists of several interconnected repositories:
 We welcome contributions! Here's how you can help:
 
 1. **Report issues:** Use [GitHub Issues](https://github.com/hed-standard/hed-python/issues) for bug reports and feature requests
-2. **Submit pull requests (PRs):** PRs should target the `main` branch
+2. **Submit pull requests (PRs):** PRs should be from a non-main fork and target the `main` branch
 3. **Improve documentation:** Help us make HED easier to use
 4. **Share examples:** Contribute example code and use cases
 
@@ -229,7 +230,7 @@ python -m unittest tests/path/to/test_file.py
 python -m unittest tests.test_notebooks
 ```
 
-For detailed contribution guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.md) (coming soon).
+For detailed contribution guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Configuration
 
@@ -267,6 +268,6 @@ HEDTools is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 ## Support
 
 - [Documentation](https://www.hedtags.org/hed-python)
-- [GitHub Issues](https://github.com/hed-standard/hed-python/issues)
+- [GitHub issues](https://github.com/hed-standard/hed-python/issues)
 - [HED Homepage](https://www.hedtags.org)
-- Contact: hed-maintainers@gmail.com
+- Contact: [hed-maintainers@gmail.com](mailto:hed-maintainers@gmail.com)

@@ -49,7 +49,9 @@ def get_parser():
         "--format",
         choices=["text", "json", "json_pp"],
         default="text",
-        help="Output format: 'text' (default) or 'json' ('json_pp' for pretty-printed json)",
+        help="Output format: 'text' (human-readable with counts), "
+        "'json' (compact JSON array of issues), or "
+        "'json_pp' (pretty-printed JSON with version metadata and indented formatting)",
     )
     parser.add_argument(
         "-l",
@@ -137,7 +139,7 @@ def format_validation_results(issue_list, args, ErrorHandler):
     elif args.format == "json":
         output = json.dumps(issue_list)
     elif args.format == "text":
-        output = f"Using HEDTOOLS version: {str(vr.get_versions())}\n"
+        output = f"Using HEDTools version: {str(vr.get_versions())}\n"
         output += f"Number of issues: {len(issue_list)}\n"
         if args.error_limit:
             [issue_list, code_counts] = ErrorHandler.filter_issues_by_count(
@@ -230,7 +232,7 @@ def main(arg_list=None):
 def validate_dataset(args):
     logger = logging.getLogger("validate_bids")
     logger.info(f"Data directory: {args.data_path}")
-    logger.info(f"HED tools version: {str(vr.get_versions())}")
+    logger.info(f"HEDTools version: {str(vr.get_versions())}")
     logger.debug(f"Exclude directories: {args.exclude_dirs}")
     logger.debug(f"File suffixes: {args.suffixes}")
     logger.debug(f"Check for warnings: {args.check_for_warnings}")

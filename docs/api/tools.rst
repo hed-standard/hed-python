@@ -3,7 +3,7 @@ Tools
 
 Utility functions and data processing tools for HED operations.
 
-Analysis Tools
+Analysis tools
 --------------
 
 EventManager
@@ -54,7 +54,7 @@ FileDictionary
    :undoc-members:
    :show-inheritance:
 
-BIDS Tools
+BIDS tools
 ----------
 
 BidsDataset
@@ -97,7 +97,7 @@ BidsTabularFile
    :undoc-members:
    :show-inheritance:
 
-BIDS Utilities
+BIDS utilities
 ~~~~~~~~~~~~~~
 
 .. automodule:: hed.tools.bids.bids_util

@@ -1,4 +1,4 @@
-# Introduction to hedtools
+# Introduction to HEDTools
 
 ## What is HED?
 
@@ -8,16 +8,16 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 - **Standardized infrastructure** enabling automated analysis and interpretation
 - **Integration** with major neuroimaging standards (BIDS and NWB)
 
-For more information, visit the [HED project homepage](https://www.hedtags.org).
+For more information, visit the HED project [homepage](https://www.hedtags.org) and the [resources page](https://www.hedtags.org/hed-resources). The [table-remodeler](https://www.hedtags.org/table-remodeler) tools are now in a separate repository.
 
-## What is hedtools?
+## What is HEDTools?
 
 The **hedtools** Python package (`hed-python` repository) provides:
 
 - **Core validation** of HED annotations against schema specifications
 - **BIDS integration** for neuroimaging dataset processing
 - **Analysis tools** for event summarization, temporal processing, and tag analysis
-- **Transformation utilities** for converting between formats (JSON ↔ spreadsheet)
+- **HED schema tools** for validating, comparing and converting HED schemas
 - **Command-line interface** for scripting and automation
 - **Jupyter notebooks** for interactive analysis workflows
 
@@ -29,11 +29,12 @@ The **hedtools** Python package (`hed-python` repository) provides:
 - **[HED online tools](https://hedtools.org/hed)**: Web-based interface requiring no programming
 - **[HED examples](https://github.com/hed-standard/hed-examples)**: Example datasets annotated with HED
 - **[HED resources](https://www.hedtags.org/hed-resources)**: Comprehensive tutorials and documentation
-- **[HED MATLAB tools](https://www.hedtags.org/hed-resources/HedMatlabTools.html)**: MATLAB wrapper for Python tools
+- **[HED MATLAB tools](https://www.hedtags.org/hed-matlab)**: MATLAB wrapper for Python tools
+- **[Table remodeler](https://www.hedtags.org/table-remodeler)**: table analysis and transformations -- formerly part of hedtools
 
 ## Installation
 
-### From PyPI (Recommended)
+### From PyPI (recommended)
 
 Install the latest stable release:
 
@@ -43,7 +44,7 @@ pip install hedtools
 
 **Note**: The PyPI package includes the core hedtools library but **not the example Jupyter notebooks**. To access the notebooks, see the options below.
 
-### For Jupyter Notebook Examples
+### For Jupyter notebook examples
 
 The example notebooks are only available in the GitHub repository. Choose one of these options:
 
@@ -65,9 +66,9 @@ cd examples
 pip install hedtools jupyter notebook
 ```
 
-See [examples/README.md](../examples/README.md) for detailed notebook documentation.
+See [examples/README.md](https://github.com/hed-standard/hed-python/tree/main/examples) for detailed notebook documentation.
 
-### From GitHub (Latest Development Version)
+### From GitHub (latest development version)
 
 ```bash
 pip install git+https://github.com/hed-standard/hed-python/@main
@@ -93,16 +94,17 @@ pip install -e .
 
 ### Documentation resources
 
-- **[User Guide](user_guide.md)**: Step-by-step instructions and examples
+- **[User guide](user_guide.md)**: Step-by-step instructions and examples
 - **[API reference](api/index.html)**: Detailed function and class documentation
 - **[HED specification](https://hed-specification.readthedocs.io/)**: Formal annotation rules
 - **[HED resources](https://www.hedtags.org/hed-resources)**: HED tutorials and guides
 
 ### Support
 
-- **Issues and bugs**: [Open an issue](https://github.com/hed-standard/hed-python/issues) on GitHub
+- **Issues and bugs**: Open an [**issue**](https://github.com/hed-standard/hed-python/issues) on GitHub
 - **Questions**: Use GitHub issues
 - **Online validation**: Try [HED online tools](https://hedtools.org/hed) for web-based access
+- **Contact**: Email [hed.maintainers@gmail.com](mailto:hed.maintainers@gmail.com)
 
 ## Quick start
 
@@ -112,11 +114,11 @@ pip install -e .
 from hed import HedString, load_schema, get_printable_issue_string
 
 # Load the latest HED schema
-schema = load_schema()
+schema = load_schema('8.4.0')
 
 # Create and validate a HED string
 hed_string = HedString("Sensory-event, Visual-presentation, (Onset, (Red, Square))", schema)
-issues = hed_string.validate(schema)
+issues = hed_string.validate()
 
 if issues:
     print(get_printable_issue_string(issues, "Validation issues found:"))
@@ -134,7 +136,7 @@ dataset = BidsDataset("path/to/bids/dataset")  # the description has schema vers
 issues = dataset.validate()
 
 if issues:
-    print(f"Found {len(issues)} validation issues")
+    print(get_printable_issue_string(issues, "Validation issues found:"))
 else:
     print("✓ Dataset HED annotations are valid!")
 ```
@@ -152,7 +154,7 @@ issues = sidecar.validate(schema)
 
 ## Next steps
 
-- **Explore the [User Guide](user_guide.md)** for detailed workflows
-- **Try the [Jupyter notebooks](../examples/README.md)** for interactive examples
-- **Check the [API Reference](api/index.html)** for complete function documentation
-- **Validate your data** using the [HED online tools](https://hedtools.org/hed) or the [HED browser-based tools](https://www.hedtags.org/hed-javascript)
+- Explore the [**User guide**](user_guide.md) for detailed workflows
+- Try the [**Jupyter notebooks**](https://github.com/hed-standard/hed-python/tree/main/examples) for interactive examples
+- Check the [**API reference**](api/index.html) for complete function documentation
+- Validate your data using the HED online [**online tools**](https://hedtools.org/hed) or the HED [**browser-based tools**](https://www.hedtags.org/hed-javascript)
