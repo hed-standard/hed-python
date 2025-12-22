@@ -131,5 +131,5 @@ are inserted into the template, rather than concatenated:
 "(Experiment-participant, ID/sub-001),Age/3,Male,Healthy,Rested,Novide-level"
 ```
 
-See [Assembly and curly braces](https://www.hed-resources.org/en/latest/HedAnnotationQuickstart.html#assembly-and-curly-braces)
-in the [HED annotation quickstart](https://www.hed-resources.org/en/latest/HedAnnotationQuickstart.html#) for more information.
+See [Assembly and curly braces](https:/www.hedtags.org/hed-resources/HedAnnotationQuickstart.html#assembly-and-curly-braces)
+in the [HED annotation quickstart](https:/www.hedtags.org/hed-resources/HedAnnotationQuickstart.html) for more information.

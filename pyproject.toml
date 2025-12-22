@@ -63,7 +63,7 @@ dependencies = [
 "Repository" = "https://github.com/hed-standard/hed-python/"
 "Bug Tracker" = "https://github.com/hed-standard/hed-python/issues"
 "Changelog" = "https://github.com/hed-standard/hed-python/blob/main/CHANGELOG.md"
-"HED Resources" = "https://www.hed-resources.org"
+"HED Resources" = "https://www.hedtags.org/hed-resources/"
 
 [project.optional-dependencies]
 dev = [
