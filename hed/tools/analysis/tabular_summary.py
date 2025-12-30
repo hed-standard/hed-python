@@ -10,19 +10,22 @@ from hed.tools.analysis import annotation_util
 class TabularSummary:
     """Summarize the contents of columnar files."""
 
-    def __init__(self, value_cols=None, skip_cols=None, name=""):
+    def __init__(self, value_cols=None, skip_cols=None, name="", categorical_limit=None):
         """Constructor for a BIDS tabular file summary.
 
         Parameters:
             value_cols (list, None):  List of columns to be treated as value columns.
             skip_cols (list, None):   List of columns to be skipped.
             name (str):               Name associated with the dictionary.
+            categorical_limit (int, None):  Maximum number of unique values to store for categorical columns.
 
         """
 
         self.name = name
         self.categorical_info = {}
         self.value_info = {}
+        self.categorical_counts = {}
+        self.categorical_limit = categorical_limit
         if value_cols and skip_cols and set(value_cols).intersection(skip_cols):
             raise HedFileError(
                 "ValueSkipOverlap", f"Value columns {str(value_cols)} and skip columns {str(skip_cols)} cannot overlap", ""
@@ -47,7 +50,10 @@ class TabularSummary:
         for key in sorted_keys:
             value_dict = self.categorical_info[key]
             sorted_v_keys = sorted(value_dict)
-            summary_list.append(f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values):")
+            counts = self.categorical_counts.get(key, [0, 0])
+            summary_list.append(
+                f"{indent * 2}{key} ({len(sorted_v_keys)} distinct values, {counts[0]} total values in {counts[1]} files):"
+            )
             for v_key in sorted_v_keys:
                 summary_list.append(f"{indent * 3}{v_key}: {value_dict[v_key]}")
 
@@ -101,9 +107,11 @@ class TabularSummary:
             "Total events": self.total_events,
             "Total files": self.total_files,
             "Categorical columns": categorical_cols,
+            "Categorical counts": self.categorical_counts,
             "Value columns": value_cols,
             "Skip columns": self.skip_cols,
             "Files": self.files,
+            "Limit on categorical values": str(self.categorical_limit),
         }
         if as_json:
             return json.dumps(summary, indent=4)
@@ -131,7 +139,7 @@ class TabularSummary:
         return counts
 
     def update(self, data, name=None):
-        """Update the counts based on data.
+        """Update the counts based on data (DataFrame, filename, or list of filenames).
 
         Parameters:
             data (DataFrame, str, or list):    DataFrame containing data to update.
@@ -166,19 +174,26 @@ class TabularSummary:
         self._update_dict_value(tab_sum)
         self._update_dict_categorical(tab_sum)
 
-    def _update_categorical(self, tab_name, values):
+    def _update_categorical(self, tab_name, values, cat_counts):
         """Update the categorical information for this summary.
 
         Parameters:
             tab_name (str): Name of a key indicating a categorical column.
             values (dict): A dictionary whose keys are unique categorical values.
+            cat_counts(list): A list with two elements: total count of values and number of entries.
 
         """
         if tab_name not in self.categorical_info:
             self.categorical_info[tab_name] = {}
-
+        if tab_name not in self.categorical_counts:
+            self.categorical_counts[tab_name] = [cat_counts[0], cat_counts[1]]
+        else:
+            self.categorical_counts[tab_name][0] += cat_counts[0]
+            self.categorical_counts[tab_name][1] += cat_counts[1]
         total_values = self.categorical_info[tab_name]
         for name, value in values.items():
+            if self.categorical_limit is not None and len(total_values) >= self.categorical_limit:
+                break
             value_list = total_values.get(name, [0, 0])
             if not isinstance(value, list):
                 value = [value, 1]
@@ -207,9 +222,15 @@ class TabularSummary:
                 self.value_info[col_name][0] = self.value_info[col_name][0] + len(col_values)
                 self.value_info[col_name][1] = self.value_info[col_name][1] + 1
             else:
+                cat_counts = self.categorical_counts.get(col_name, [0, 0])
+                cat_counts[0] += len(col_values)
+                cat_counts[1] += 1
+                self.categorical_counts[col_name] = cat_counts
+                if self.categorical_limit is not None and len(col_values) > self.categorical_limit:
+                    continue
                 col_values = col_values.astype(str)
                 values = col_values.value_counts(ascending=True)
-                self._update_categorical(col_name, values)
+                self._update_categorical(col_name, values, cat_counts)
 
     def _update_dict_categorical(self, col_dict):
         """Update this summary with the categorical information in the dictionary from another summary.
@@ -228,7 +249,7 @@ class TabularSummary:
             elif col in self.skip_cols:
                 continue
             else:
-                self._update_categorical(col, col_dict.categorical_info[col])
+                self._update_categorical(col, col_dict.categorical_info[col], col_dict.categorical_counts.get(col, [0, 0]))
 
     def _update_dict_skip(self, col_dict):
         """Update this summary with the skip column information from another summary.
@@ -289,13 +310,14 @@ class TabularSummary:
         new_tab = TabularSummary(
             value_cols=summary_info.get("Value columns", {}).keys(),
             skip_cols=summary_info.get("Skip columns", []),
-            name=summary_info.get("Summary name", ""),
+            name=summary_info.get("Name", ""),
         )
-        new_tab.value_info = summary_info.get("Value_columns", {})
+        new_tab.value_info = summary_info.get("Value columns", {})
         new_tab.total_files = summary_info.get("Total files", 0)
         new_tab.total_events = summary_info.get("Total events", 0)
         new_tab.skip_cols = summary_info.get("Skip columns", [])
         new_tab.categorical_info = summary_info.get("Categorical columns", {})
+        new_tab.categorical_counts = summary_info.get("Categorical counts", {})
         new_tab.files = summary_info.get("Files", {})
         return new_tab
 

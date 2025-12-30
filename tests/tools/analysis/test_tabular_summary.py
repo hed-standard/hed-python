@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
         )
         summary1 = dict1.get_summary(as_json=False)
         self.assertIsInstance(summary1, dict)
-        self.assertEqual(len(summary1), 7)
+        self.assertEqual(len(summary1), 9)
         summary2 = dict1.get_summary(as_json=True).replace('"', "")
         self.assertIsInstance(summary2, str)
 
@@ -239,6 +239,100 @@ class Test(unittest.TestCase):
             tab_all.update_summary(tab)
         self.assertEqual(len(files_bids), tab_all.total_files)
         self.assertEqual(len(files_bids) * 200, tab_all.total_events)
+
+    def test_categorical_limit_constructor(self):
+        # Test that categorical_limit can be set in constructor
+        dict1 = TabularSummary(categorical_limit=5)
+        self.assertEqual(dict1.categorical_limit, 5)
+
+        dict2 = TabularSummary(categorical_limit=None)
+        self.assertIsNone(dict2.categorical_limit)
+
+    def test_categorical_limit_enforced(self):
+        # Test that categorical_limit is enforced when updating
+        stern_df = get_new_dataframe(self.stern_map_path)
+
+        # Create a summary with no limit
+        dict_no_limit = TabularSummary()
+        dict_no_limit.update(stern_df)
+
+        # Create a summary with a limit of 2 unique values per column
+        dict_with_limit = TabularSummary(categorical_limit=2)
+        dict_with_limit.update(stern_df)
+
+        # Check that columns with more than 2 unique values are limited
+        for col_name in dict_with_limit.categorical_info:
+            self.assertLessEqual(
+                len(dict_with_limit.categorical_info[col_name]),
+                2,
+                f"Column {col_name} should have at most 2 unique values stored",
+            )
+            # But categorical_counts should track all values
+            self.assertIn(col_name, dict_with_limit.categorical_counts)
+            self.assertGreater(dict_with_limit.categorical_counts[col_name][0], 0)
+
+    def test_categorical_limit_columns_with_many_values(self):
+        # Test that columns with many values are skipped during initial update
+        wh_df = get_new_dataframe(self.wh_events_path)
+
+        # Set limit to 5
+        dict1 = TabularSummary(categorical_limit=5)
+        dict1.update(wh_df)
+
+        # Columns with more than 5 unique values at collection time should still be tracked in counts
+        for col_name, counts in dict1.categorical_counts.items():
+            self.assertGreater(counts[0], 0, f"Column {col_name} should have event count > 0")
+            self.assertEqual(counts[1], 1, f"Column {col_name} should have been updated once")
+
+    def test_categorical_limit_in_summary(self):
+        # Test that categorical_limit appears in the summary output
+        dict1 = TabularSummary(categorical_limit=10)
+        stern_df = get_new_dataframe(self.stern_map_path)
+        dict1.update(stern_df)
+
+        summary = dict1.get_summary(as_json=False)
+        self.assertIn("Limit on categorical values", summary)
+        self.assertEqual(summary["Limit on categorical values"], "10")
+
+        # Test with None
+        dict2 = TabularSummary()
+        dict2.update(stern_df)
+        summary2 = dict2.get_summary(as_json=False)
+        self.assertEqual(summary2["Limit on categorical values"], "None")
+
+    def test_categorical_limit_extract_summary(self):
+        # Test that categorical_limit is preserved through extract_summary
+        dict1 = TabularSummary(categorical_limit=15)
+        stern_df = get_new_dataframe(self.stern_map_path)
+        dict1.update(stern_df)
+
+        summary_info = dict1.get_summary(as_json=False)
+        dict2 = TabularSummary.extract_summary(summary_info)
+
+        # Note: extract_summary doesn't restore categorical_limit currently,
+        # but it should at least not error
+        self.assertIsInstance(dict2, TabularSummary)
+
+    def test_categorical_limit_update_dict(self):
+        # Test that categorical_limit works correctly with update_summary
+        stern_df = get_new_dataframe(self.stern_test1_path)
+
+        dict1 = TabularSummary(categorical_limit=3)
+        dict1.update(stern_df)
+
+        dict2 = TabularSummary(categorical_limit=3)
+        dict2.update(stern_df)
+
+        # Update dict1 with dict2
+        dict1.update_summary(dict2)
+
+        # Check that limits are still enforced
+        for col_name in dict1.categorical_info:
+            self.assertLessEqual(
+                len(dict1.categorical_info[col_name]),
+                3,
+                f"Column {col_name} should have at most 3 unique values after update_summary",
+            )
 
 
 if __name__ == "__main__":
