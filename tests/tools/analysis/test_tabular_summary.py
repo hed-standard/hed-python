@@ -291,14 +291,14 @@ class Test(unittest.TestCase):
         dict1.update(stern_df)
 
         summary = dict1.get_summary(as_json=False)
-        self.assertIn("Limit on categorical values", summary)
-        self.assertEqual(summary["Limit on categorical values"], "10")
+        self.assertIn("Categorical limit", summary)
+        self.assertEqual(summary["Categorical limit"], "10")
 
         # Test with None
         dict2 = TabularSummary()
         dict2.update(stern_df)
         summary2 = dict2.get_summary(as_json=False)
-        self.assertEqual(summary2["Limit on categorical values"], "None")
+        self.assertEqual(summary2["Categorical limit"], "None")
 
     def test_categorical_limit_extract_summary(self):
         # Test that categorical_limit is preserved through extract_summary

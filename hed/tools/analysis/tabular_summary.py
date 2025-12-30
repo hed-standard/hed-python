@@ -111,7 +111,7 @@ class TabularSummary:
             "Value columns": value_cols,
             "Skip columns": self.skip_cols,
             "Files": self.files,
-            "Limit on categorical values": str(self.categorical_limit),
+            "Categorical limit": str(self.categorical_limit),
         }
         if as_json:
             return json.dumps(summary, indent=4)
@@ -180,7 +180,7 @@ class TabularSummary:
         Parameters:
             tab_name (str): Name of a key indicating a categorical column.
             values (dict): A dictionary whose keys are unique categorical values.
-            cat_counts(list): A list with two elements: total count of values and number of entries.
+            cat_counts (list): A list with two elements: total count of values and number of entries.
 
         """
         if tab_name not in self.categorical_info:
@@ -311,6 +311,7 @@ class TabularSummary:
             value_cols=summary_info.get("Value columns", {}).keys(),
             skip_cols=summary_info.get("Skip columns", []),
             name=summary_info.get("Name", ""),
+            categorical_limit=summary_info.get("Categorical limit", None),
         )
         new_tab.value_info = summary_info.get("Value columns", {})
         new_tab.total_files = summary_info.get("Total files", 0)
