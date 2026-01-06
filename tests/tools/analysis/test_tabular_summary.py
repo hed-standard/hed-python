@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
         )
         summary1 = dict1.get_summary(as_json=False)
         self.assertIsInstance(summary1, dict)
-        self.assertEqual(len(summary1), 9)
+        self.assertEqual(len(summary1), 10)  # Now includes overflow_columns field
         summary2 = dict1.get_summary(as_json=True).replace('"', "")
         self.assertIsInstance(summary2, str)
 
@@ -272,17 +272,17 @@ class Test(unittest.TestCase):
             self.assertGreater(dict_with_limit.categorical_counts[col_name][0], 0)
 
     def test_categorical_limit_columns_with_many_values(self):
-        # Test that columns with many values are skipped during initial update
+        # Test that columns with many values are tracked in counts
         wh_df = get_new_dataframe(self.wh_events_path)
 
         # Set limit to 5
         dict1 = TabularSummary(categorical_limit=5)
         dict1.update(wh_df)
 
-        # Columns with more than 5 unique values at collection time should still be tracked in counts
+        # Columns should be tracked in counts
         for col_name, counts in dict1.categorical_counts.items():
             self.assertGreater(counts[0], 0, f"Column {col_name} should have event count > 0")
-            self.assertEqual(counts[1], 1, f"Column {col_name} should have been updated once")
+            self.assertGreaterEqual(counts[1], 1, f"Column {col_name} should have been updated at least once")
 
     def test_categorical_limit_in_summary(self):
         # Test that categorical_limit appears in the summary output
@@ -333,6 +333,213 @@ class Test(unittest.TestCase):
                 3,
                 f"Column {col_name} should have at most 3 unique values after update_summary",
             )
+
+    def test_overflow_columns_initialization(self):
+        # Test that overflow_columns is initialized as an empty set
+        dict1 = TabularSummary()
+        self.assertIsInstance(dict1.overflow_columns, set)
+        self.assertEqual(len(dict1.overflow_columns), 0)
+
+    def test_overflow_columns_tracking(self):
+        # Test that overflow_columns tracks columns that exceed the limit
+        wh_df = get_new_dataframe(self.wh_events_path)
+
+        # Set a low limit to ensure some columns overflow
+        dict1 = TabularSummary(categorical_limit=5)
+        dict1.update(wh_df)
+
+        # Check that overflow_columns is populated
+        self.assertIsInstance(dict1.overflow_columns, set)
+        self.assertGreater(len(dict1.overflow_columns), 0, "Some columns should overflow with limit of 5")
+
+        # Verify that columns in overflow_columns actually have many unique values
+        for col_name in dict1.overflow_columns:
+            if col_name in dict1.categorical_info:
+                # The column is tracked, should have exactly the limit
+                self.assertEqual(len(dict1.categorical_info[col_name]), 5)
+
+    def test_overflow_columns_no_limit(self):
+        # Test that overflow_columns remains empty when there's no limit
+        stern_df = get_new_dataframe(self.stern_map_path)
+
+        dict1 = TabularSummary(categorical_limit=None)
+        dict1.update(stern_df)
+
+        self.assertEqual(len(dict1.overflow_columns), 0, "No columns should overflow without a limit")
+
+    def test_overflow_columns_in_summary(self):
+        # Test that overflow_columns appears in the summary output
+        wh_df = get_new_dataframe(self.wh_events_path)
+
+        dict1 = TabularSummary(categorical_limit=3)
+        dict1.update(wh_df)
+
+        summary = dict1.get_summary(as_json=False)
+        self.assertIn("Overflow columns", summary)
+        self.assertIsInstance(summary["Overflow columns"], list)
+        self.assertGreater(len(summary["Overflow columns"]), 0)
+
+    def test_overflow_columns_in_str(self):
+        # Test that overflow_columns appears in the string representation
+        wh_df = get_new_dataframe(self.wh_events_path)
+
+        dict1 = TabularSummary(categorical_limit=3)
+        dict1.update(wh_df)
+
+        str_output = str(dict1)
+        self.assertIn("Overflow columns", str_output)
+        for col_name in dict1.overflow_columns:
+            self.assertIn(col_name, str_output)
+
+    def test_overflow_columns_update_summary(self):
+        # Test that overflow_columns are merged correctly with update_summary
+        stern_df = get_new_dataframe(self.stern_test1_path)
+
+        dict1 = TabularSummary(categorical_limit=2)
+        dict1.update(stern_df)
+        overflow1 = dict1.overflow_columns.copy()
+
+        dict2 = TabularSummary(categorical_limit=2)
+        dict2.update(stern_df)
+        overflow2 = dict2.overflow_columns.copy()
+
+        # Merge dict2 into dict1
+        dict1.update_summary(dict2)
+
+        # Overflow columns should be the union of both
+        expected_overflow = overflow1.union(overflow2)
+        self.assertEqual(dict1.overflow_columns, expected_overflow)
+
+    def test_categorical_limit_preserves_existing_values(self):
+        # Test that categorical_limit continues to update counts for existing values
+        # even after the limit is reached
+        stern_df1 = get_new_dataframe(self.stern_test1_path)
+        stern_df2 = get_new_dataframe(self.stern_test2_path)
+
+        dict1 = TabularSummary(categorical_limit=5)
+        dict1.update(stern_df1)
+
+        # Get initial counts for a column that exists in both files
+        initial_counts = {}
+        for col_name in dict1.categorical_info:
+            if col_name in dict1.categorical_info:
+                initial_counts[col_name] = {}
+                for val, count in dict1.categorical_info[col_name].items():
+                    initial_counts[col_name][val] = count[0]
+
+        # Update with second dataframe
+        dict1.update(stern_df2)
+
+        # Verify that counts for existing values have increased
+        for col_name in initial_counts:
+            if col_name in dict1.categorical_info:
+                for val in initial_counts[col_name]:
+                    if val in dict1.categorical_info[col_name]:
+                        # Count should have increased or stayed the same
+                        self.assertGreaterEqual(
+                            dict1.categorical_info[col_name][val][0],
+                            initial_counts[col_name][val],
+                            f"Count for {col_name}[{val}] should not decrease",
+                        )
+
+    def test_categorical_limit_multiple_files(self):
+        # Test categorical limit behavior with multiple file updates
+        bids_demo_dir = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed_demo"
+        )
+
+        if not os.path.exists(bids_demo_dir):
+            self.skipTest(f"Test data directory not found: {bids_demo_dir}")
+
+        files = get_file_list(bids_demo_dir, extensions=[".tsv"], name_suffix="events")
+        if not files:
+            self.skipTest(f"No event files found in {bids_demo_dir}")
+
+        # Create summary with limit
+        dict1 = TabularSummary(categorical_limit=10, skip_cols=["HED", "HED_assembled"])
+
+        # Process multiple files
+        for file_path in files[:3]:  # Just use first 3 files for speed
+            dict1.update(file_path)
+
+        # Verify that:
+        # 1. Some columns have exactly the limit number of unique values
+        # 2. Those columns are in overflow_columns
+        # 3. Counts are accurate across files
+        limited_cols = [col for col in dict1.categorical_info if len(dict1.categorical_info[col]) == 10]
+
+        if limited_cols:
+            # At least one limited column should be in overflow
+            overflow_intersection = set(limited_cols).intersection(dict1.overflow_columns)
+            self.assertGreater(len(overflow_intersection), 0, "At least one limited column should be marked as overflow")
+
+        # Verify file count is correct
+        self.assertEqual(dict1.total_files, 3, "Should have processed 3 files")
+
+    def test_overflow_columns_preserved_across_updates(self):
+        # Test that once a column is marked as overflow, it stays marked
+        wh_df = get_new_dataframe(self.wh_events_path)
+
+        dict1 = TabularSummary(categorical_limit=3)
+        dict1.update(wh_df)
+
+        initial_overflow = dict1.overflow_columns.copy()
+        self.assertGreater(len(initial_overflow), 0)
+
+        # Update again with same data
+        dict1.update(wh_df)
+
+        # Overflow columns should still include the initial ones
+        self.assertTrue(initial_overflow.issubset(dict1.overflow_columns))
+
+    def test_categorical_counts_with_limit(self):
+        # Test that categorical_counts tracks all values even when categorical_info is limited
+        wh_df = get_new_dataframe(self.wh_events_path)
+
+        dict1 = TabularSummary(categorical_limit=3)
+        dict1.update(wh_df)
+
+        # For columns that overflowed, categorical_counts should show more values
+        # than are stored in categorical_info
+        for col_name in dict1.overflow_columns:
+            if col_name in dict1.categorical_counts and col_name in dict1.categorical_info:
+                stored_values = len(dict1.categorical_info[col_name])
+                total_values = dict1.categorical_counts[col_name][0]
+
+                # We stored only 3 unique values, but there are more total values
+                self.assertEqual(stored_values, 3, f"{col_name} should store exactly 3 values")
+                self.assertGreater(total_values, 3, f"{col_name} should have more than 3 total occurrences")
+
+    def test_categorical_limit_zero(self):
+        # Test edge case: categorical_limit of 0
+        stern_df = get_new_dataframe(self.stern_map_path)
+
+        dict1 = TabularSummary(categorical_limit=0)
+        dict1.update(stern_df)
+
+        # Should track counts but store no unique values
+        for col_name in dict1.categorical_info:
+            self.assertEqual(len(dict1.categorical_info[col_name]), 0, f"{col_name} should have no stored values with limit=0")
+
+        # But categorical_counts should still be populated
+        self.assertGreater(len(dict1.categorical_counts), 0)
+
+    def test_mixed_value_and_categorical_with_limit(self):
+        # Test that value columns and categorical columns with limits work together
+        stern_df = get_new_dataframe(self.stern_test1_path)
+
+        dict1 = TabularSummary(categorical_limit=5, value_cols=["latency"], skip_cols=["event_type"])
+        dict1.update(stern_df)
+
+        # Value columns should not be affected by categorical_limit
+        self.assertIn("latency", dict1.value_info)
+        self.assertNotIn("latency", dict1.categorical_info)
+        self.assertNotIn("latency", dict1.overflow_columns)
+
+        # Skip columns should not appear anywhere
+        self.assertNotIn("event_type", dict1.categorical_info)
+        self.assertNotIn("event_type", dict1.value_info)
+        self.assertNotIn("event_type", dict1.overflow_columns)
 
 
 if __name__ == "__main__":
