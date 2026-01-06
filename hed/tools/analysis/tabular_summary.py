@@ -17,7 +17,7 @@ class TabularSummary:
             value_cols (list, None):  List of columns to be treated as value columns.
             skip_cols (list, None):   List of columns to be skipped.
             name (str):               Name associated with the dictionary.
-            categorical_limit (int, None):  Maximum number of unique values to store for categorical columns.
+            categorical_limit (int, None):  Maximum number of unique values to store for a categorical column.
 
         """
 
@@ -25,6 +25,7 @@ class TabularSummary:
         self.categorical_info = {}
         self.value_info = {}
         self.categorical_counts = {}
+        self.overflow_columns = set()
         self.categorical_limit = categorical_limit
         if value_cols and skip_cols and set(value_cols).intersection(skip_cols):
             raise HedFileError(
@@ -45,6 +46,9 @@ class TabularSummary:
         """Return a str version of this summary."""
         indent = "   "
         summary_list = [f"Summary for column dictionary {self.name}:"]
+        if self.overflow_columns:
+            sorted_overflow = sorted(self.overflow_columns)
+            summary_list.append(f"{indent}Overflow columns ({len(sorted_overflow)}): {', '.join(sorted_overflow)}")
         sorted_keys = sorted(self.categorical_info.keys())
         summary_list.append(f"{indent}Categorical columns ({len(sorted_keys)}):")
         for key in sorted_keys:
@@ -106,6 +110,7 @@ class TabularSummary:
             "Name": self.name,
             "Total events": self.total_events,
             "Total files": self.total_files,
+            "Overflow columns": sorted(self.overflow_columns),
             "Categorical columns": categorical_cols,
             "Categorical counts": self.categorical_counts,
             "Value columns": value_cols,
@@ -170,6 +175,7 @@ class TabularSummary:
         self.total_events = self.total_events + tab_sum.total_events
         for file, _key in tab_sum.files.items():
             self.files[file] = ""
+        self.overflow_columns.update(tab_sum.overflow_columns)
         self._update_dict_skip(tab_sum)
         self._update_dict_value(tab_sum)
         self._update_dict_categorical(tab_sum)
@@ -192,12 +198,20 @@ class TabularSummary:
             self.categorical_counts[tab_name][1] += cat_counts[1]
         total_values = self.categorical_info[tab_name]
         for name, value in values.items():
-            if self.categorical_limit is not None and len(total_values) >= self.categorical_limit:
-                break
-            value_list = total_values.get(name, [0, 0])
-            if not isinstance(value, list):
-                value = [value, 1]
-            total_values[name] = [value_list[0] + value[0], value_list[1] + value[1]]
+            # If value already exists, always update its count
+            if name in total_values:
+                value_list = total_values[name]
+                if not isinstance(value, list):
+                    value = [value, 1]
+                total_values[name] = [value_list[0] + value[0], value_list[1] + value[1]]
+            # Only add new values if we haven't reached the limit
+            elif self.categorical_limit is None or len(total_values) < self.categorical_limit:
+                if not isinstance(value, list):
+                    value = [value, 1]
+                total_values[name] = [value[0], value[1]]
+            else:
+                # Mark this column as having overflowed
+                self.overflow_columns.add(tab_name)
 
     def _update_dataframe(self, data, name):
         """Update the information based on columnar data.
@@ -226,8 +240,6 @@ class TabularSummary:
                 cat_counts[0] += len(col_values)
                 cat_counts[1] += 1
                 self.categorical_counts[col_name] = cat_counts
-                if self.categorical_limit is not None and len(col_values) > self.categorical_limit:
-                    continue
                 col_values = col_values.astype(str)
                 values = col_values.value_counts(ascending=True)
                 self._update_categorical(col_name, values, cat_counts)

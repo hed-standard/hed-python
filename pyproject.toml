@@ -75,12 +75,12 @@ dev = [
     "mdformat-tables>=0.4.0",
 ]
 docs = [
-    "sphinx>=7.0.0",
-    "furo>=2023.9.10",
+    "sphinx>=7.1.0,<8.2.0",
+    "furo>=2024.1.29",
     "sphinx-copybutton>=0.5.2",
     "myst-parser>=2.0.0",
     "sphinx-autodoc-typehints>=1.24.0",
-    "linkify-it-py>=2.0.0",
+    "linkify-it-py>=2.0.3",
 ]
 test = [
     "coverage>=7.0.0",

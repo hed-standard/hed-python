@@ -215,9 +215,9 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
     """Return paths satisfying various conditions.
 
     Parameters:
-        root_path (str):              Full path of the directory tree to be traversed (no ending slash).
-        name_prefix (list, str, None):      An optional prefix for the base filename.
-        name_suffix (list, str, None):  An optional suffix for the base filename.
+        root_path (str): Full path of the directory tree to be traversed (no ending slash).
+        name_prefix (list, str, None): An optional prefix for the base filename.
+        name_suffix (list, str, None): An optional suffix for the base filename.
         extensions (list, None):      A list of extensions to be selected.
         exclude_dirs (list, None):    A list of paths to be excluded.
 
