@@ -7,6 +7,7 @@ from click.testing import CliRunner
 from hed.cli.cli import cli
 from hed.scripts.validate_bids import get_parser as get_validate_bids_parser
 from hed.scripts.hed_extract_bids_sidecar import get_parser as get_extract_sidecar_parser
+from hed.scripts.extract_tabular_summary import get_parser as get_extract_summary_parser
 from hed.scripts.validate_schemas import get_parser as get_validate_schemas_parser
 
 
@@ -86,19 +87,17 @@ class TestCLIParameterParity(unittest.TestCase):
         return {"positional": positional, "optional": optional, "flags": flags}
 
     def test_validate_bids_parameters(self):
-        """Test validate-bids CLI parameters match validate_bids.py parser."""
+        """Test validate bids-dataset CLI parameters match validate_bids.py parser."""
         # Get original parser
         original_parser = get_validate_bids_parser()
         original_opts = self._get_parser_options(original_parser)
 
-        # Get CLI command
-        cli_command = None
-        for cmd_name, cmd in cli.commands.items():
-            if cmd_name == "validate-bids":
-                cli_command = cmd
-                break
+        # Get CLI command - now it's validate bids-dataset
+        validate_group = cli.commands.get("validate")
+        self.assertIsNotNone(validate_group, "validate command group not found")
+        cli_command = validate_group.commands.get("bids-dataset")
 
-        self.assertIsNotNone(cli_command, "validate-bids command not found in CLI")
+        self.assertIsNotNone(cli_command, "validate bids-dataset command not found in CLI")
         cli_opts = self._get_click_options(cli_command)
 
         # Check positional arguments
@@ -138,13 +137,48 @@ class TestCLIParameterParity(unittest.TestCase):
             if flag in original_flags:
                 self.assertIn(flag, cli_flags, f"Flag '{flag}' from original parser not found in CLI")
 
-    def test_extract_sidecar_parameters(self):
-        """Test extract-sidecar CLI parameters match hed_extract_bids_sidecar.py parser."""
+    def test_extract_bids_sidecar_parameters(self):
+        """Test extract bids-sidecar CLI parameters match hed_extract_bids_sidecar.py parser."""
         original_parser = get_extract_sidecar_parser()
         original_opts = self._get_parser_options(original_parser)
 
-        extract_command = cli.commands.get("extract-sidecar")
-        self.assertIsNotNone(extract_command, "extract-sidecar command not found")
+        extract_group = cli.commands.get("extract")
+        self.assertIsNotNone(extract_group, "extract command group not found")
+        extract_command = extract_group.commands.get("bids-sidecar")
+        self.assertIsNotNone(extract_command, "extract bids-sidecar command not found")
+
+        cli_opts = self._get_click_options(extract_command)
+
+        # Check positional count matches
+        self.assertEqual(
+            len(cli_opts["positional"]),
+            len(original_opts["positional"]),
+            f"Positional argument count mismatch: CLI has {len(cli_opts['positional'])}, original has {len(original_opts['positional'])}",
+        )
+
+        # Check optional parameters from original parser exist in CLI
+        original_dests = set(original_opts["optional"].keys())
+        cli_dests = set(cli_opts["optional"].keys())
+
+        for orig_dest in original_dests:
+            self.assertIn(orig_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI")
+
+        # Check flags from original parser exist in CLI
+        original_flags = {flag[0] for flag in original_opts["flags"]}
+        cli_flags = {flag[0] for flag in cli_opts["flags"]}
+
+        for orig_flag in original_flags:
+            self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
+
+    def test_extract_tabular_summary_parameters(self):
+        """Test extract tabular-summary CLI parameters match extract_tabular_summary.py parser."""
+        original_parser = get_extract_summary_parser()
+        original_opts = self._get_parser_options(original_parser)
+
+        extract_group = cli.commands.get("extract")
+        self.assertIsNotNone(extract_group, "extract command group not found")
+        extract_command = extract_group.commands.get("tabular-summary")
+        self.assertIsNotNone(extract_command, "extract tabular-summary command not found")
 
         cli_opts = self._get_click_options(extract_command)
 
@@ -233,8 +267,8 @@ class TestCLIParameterParity(unittest.TestCase):
         """Test that all legacy script entry points have CLI equivalents."""
         # Legacy commands from pyproject.toml
         legacy_to_cli = {
-            "validate_bids": "validate-bids",
-            "hed_extract_bids_sidecar": "extract-sidecar",
+            "validate_bids": "validate bids-dataset",
+            "hed_extract_bids_sidecar": "extract bids-sidecar",
             "hed_validate_schemas": "schema validate",
             "hed_update_schemas": "schema convert",
             "hed_add_ids": "schema add-ids",

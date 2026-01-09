@@ -282,8 +282,8 @@ HEDTools provides a unified command-line interface (CLI) using a **git-style com
 | Command                        | Description                                                 |
 | ------------------------------ | ----------------------------------------------------------- |
 | **Annotation management**      |                                                             |
-| `hedpy validate-bids`          | Validate HED annotations in BIDS datasets                   |
-| `hedpy extract-sidecar`        | Extract JSON sidecar template from tabular (`.tsv`) files   |
+| `hedpy validate bids-dataset`  | Validate HED annotations in BIDS datasets                   |
+| `hedpy extract bids-sidecar`   | Extract JSON sidecar template from tabular (`.tsv`) files   |
 | **Schema management**          |                                                             |
 | `hedpy schema validate`        | Validate HED schema files                                   |
 | `hedpy schema convert`         | Convert schemas between formats (XML, MEDIAWIKI, TSV, JSON) |
@@ -305,7 +305,7 @@ Get help on available commands:
 hedpy --help
 
 # Help for a specific command
-hedpy validate-bids --help
+hedpy validate bids-dataset --help
 
 # Help for command groups
 hedpy schema --help
@@ -321,35 +321,35 @@ ______________________________________________________________________
 
 ### BIDS validation
 
-Validate HED annotations in BIDS datasets using `hedpy validate-bids`.
+Validate HED annotations in BIDS datasets using `hedpy validate bids-dataset`.
 
 #### Basic validation
 
 ```bash
 # Validate a BIDS dataset
-hedpy validate-bids /path/to/bids/dataset
+hedpy validate bids-dataset /path/to/bids/dataset
 
 # Include warnings in addition to errors
-hedpy validate-bids /path/to/bids/dataset -w
+hedpy validate bids-dataset /path/to/bids/dataset -w
 
 # Enable verbose output
-hedpy validate-bids /path/to/bids/dataset -v
+hedpy validate bids-dataset /path/to/bids/dataset -v
 ```
 
 #### Output options
 
 ```bash
 # Save results to a file
-hedpy validate-bids /path/to/bids/dataset -o validation_results.txt
+hedpy validate bids-dataset /path/to/bids/dataset -o validation_results.txt
 
 # Output in compact JSON format (array of issues only)
-hedpy validate-bids /path/to/bids/dataset -f json -o results.json
+hedpy validate bids-dataset /path/to/bids/dataset -f json -o results.json
 
 # Pretty-printed JSON with version metadata (recommended for saving)
-hedpy validate-bids /path/to/bids/dataset -f json_pp -o results.json
+hedpy validate bids-dataset /path/to/bids/dataset -f json_pp -o results.json
 
 # Print to stdout AND save to file
-hedpy validate-bids /path/to/bids/dataset -o results.txt -p
+hedpy validate bids-dataset /path/to/bids/dataset -o results.txt -p
 ```
 
 **Output format differences:**
@@ -362,43 +362,43 @@ hedpy validate-bids /path/to/bids/dataset -o results.txt -p
 
 ```bash
 # Validate specific file types (default: events, participants)
-hedpy validate-bids /path/to/bids/dataset -s events -s participants -s sessions
+hedpy validate bids-dataset /path/to/bids/dataset -s events -s participants -s sessions
 
 # Exclude certain directories (default: sourcedata, derivatives, code, stimuli)
-hedpy validate-bids /path/to/bids/dataset -x derivatives -x sourcedata -x mydata
+hedpy validate bids-dataset /path/to/bids/dataset -x derivatives -x sourcedata -x mydata
 
 # Limit number of errors reported per error type
-hedpy validate-bids /path/to/bids/dataset -ec 5
+hedpy validate bids-dataset /path/to/bids/dataset -el 5
 
 # Apply error limit per file instead of overall
-hedpy validate-bids /path/to/bids/dataset -ec 5 -ef
+hedpy validate bids-dataset /path/to/bids/dataset -el 5 -ef
 ```
 
 #### Logging options
 
 ```bash
 # Set log level
-hedpy validate-bids /path/to/bids/dataset -l DEBUG
+hedpy validate bids-dataset /path/to/bids/dataset -l DEBUG
 
 # Save logs to file
-hedpy validate-bids /path/to/bids/dataset -lf validation.log
+hedpy validate bids-dataset /path/to/bids/dataset -lf validation.log
 
 # Save logs to file without stderr output
-hedpy validate-bids /path/to/bids/dataset -lf validation.log -lq
+hedpy validate bids-dataset /path/to/bids/dataset -lf validation.log -lq
 ```
 
 #### Complete example
 
 ```bash
 # Comprehensive validation with all options
-hedpy validate-bids /path/to/bids/dataset \
+hedpy validate bids-dataset /path/to/bids/dataset \
   -w \
   -v \
   -f json_pp \
   -o validation_results.json \
   -s events \
   -x derivatives \
-  -ec 10 \
+  -el 10 \
   -lf validation.log
 ```
 
@@ -406,31 +406,31 @@ ______________________________________________________________________
 
 ### Sidecar template extraction
 
-Extract a JSON sidecar template from BIDS event files using `hedpy extract-sidecar`.
+Extract a JSON sidecar template from BIDS event files using `hedpy extract bids-sidecar`.
 
 #### Basic extraction
 
 ```bash
 # Extract template for events files
-hedpy extract-sidecar /path/to/bids/dataset -s events
+hedpy extract bids-sidecar /path/to/bids/dataset -s events
 
 # Save to specific file
-hedpy extract-sidecar /path/to/bids/dataset -s events -o task_events.json
+hedpy extract bids-sidecar /path/to/bids/dataset -s events -o task_events.json
 ```
 
 #### Column handling
 
 ```bash
 # Specify value columns (use single annotation for column with # placeholder)
-hedpy extract-sidecar /path/to/bids/dataset -s events \
+hedpy extract bids-sidecar /path/to/bids/dataset -s events \
   -vc response_time -vc accuracy -vc subject_id
 
 # Skip specific columns (default: onset, duration, sample)
-hedpy extract-sidecar /path/to/bids/dataset -s events \
+hedpy extract bids-sidecar /path/to/bids/dataset -s events \
   -sc onset -sc duration -sc trial_type
 
 # Exclude certain directories
-hedpy extract-sidecar /path/to/bids/dataset -s events \
+hedpy extract bids-sidecar /path/to/bids/dataset -s events \
   -x derivatives -x pilot_data
 ```
 
@@ -438,7 +438,7 @@ hedpy extract-sidecar /path/to/bids/dataset -s events \
 
 ```bash
 # Extract events template with custom column handling
-hedpy extract-sidecar /path/to/bids/dataset \
+hedpy extract bids-sidecar /path/to/bids/dataset \
   -s events \
   -vc response_time \
   -vc reaction_time \
@@ -575,7 +575,7 @@ Each command provides help at several levels
 hedpy --help
 
 # Command-specific help
-hedpy validate-bids --help
+hedpy validate bids-dataset --help
 hedpy schema validate --help
 
 # Command group help
@@ -586,16 +586,16 @@ hedpy schema --help
 
 ```bash
 # Step 1: Extract sidecar template
-hedpy extract-sidecar /path/to/dataset -s events -o events.json
+hedpy extract bids-sidecar /path/to/dataset -s events -o events.json
 
 # Step 2: Edit events.json to add HED tags
 # (manual editing step)
 
 # Step 3: Validate with warnings
-hedpy validate-bids /path/to/dataset -w -v -o validation.txt
+hedpy validate bids-dataset /path/to/dataset -w -v -o validation.txt
 
 # Step 4: Fix issues and re-validate
-hedpy validate-bids /path/to/dataset -w
+hedpy validate bids-dataset /path/to/dataset -w
 ```
 
 #### Workflow 3: Schema development and testing
