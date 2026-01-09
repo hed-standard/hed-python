@@ -1,9 +1,4 @@
-![PyPI - Status](https://img.shields.io/pypi/v/hedtools)
-![Python3](https://img.shields.io/badge/python-%3E=3.10-yellow.svg)
-[![Maintainability](https://qlty.sh/gh/hed-standard/projects/hed-python/maintainability.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
-[![Code Coverage](https://qlty.sh/gh/hed-standard/projects/hed-python/coverage.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8056010.svg)](https://doi.org/10.5281/zenodo.8056010)
-[![Docs](https://img.shields.io/badge/docs-hed--python-blue.svg)](https://www.hedtags.org/hed-python)
+![PyPI - Status](https://img.shields.io/pypi/v/hedtools) ![Python3](https://img.shields.io/badge/python-%3E=3.10-yellow.svg) [![Maintainability](https://qlty.sh/gh/hed-standard/projects/hed-python/maintainability.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python) [![Code Coverage](https://qlty.sh/gh/hed-standard/projects/hed-python/coverage.svg)](https://qlty.sh/gh/hed-standard/projects/hed-python) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8056010.svg)](https://doi.org/10.5281/zenodo.8056010) [![Docs](https://img.shields.io/badge/docs-hed--python-blue.svg)](https://www.hedtags.org/hed-python)
 
 # HEDTools - Python
 
