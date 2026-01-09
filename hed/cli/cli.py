@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-HED Command Line Interface
+HED Command Line Interface.
 
 A unified command-line interface for HED (Hierarchical Event Descriptors) tools.
 Provides a git-like interface with subcommands for validation and schema management.
@@ -22,7 +22,7 @@ METAVAR_N = "N"
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 @click.version_option(version=str(vr.get_versions()["version"]), prog_name="hedpy")
 def cli():
-    """HED (Hierarchical Event Descriptors) command-line tools
+    """HED (Hierarchical Event Descriptors) command-line tools.
 
     This tool provides various commands for working with HED annotations,
     including validation and schema management.
@@ -38,16 +38,16 @@ def cli():
 def schema():
     """HED schema management and validation tools
 
-    Commands for validating, updating, and managing HED schemas
+    Commands for validating, updating, and managing HED schemas.
     """
     pass
 
 
 @cli.group()
 def validate():
-    """HED validation tools
+    """HED validation tools.
 
-    Commands for validating HED annotations in datasets, files, and strings
+    Commands for validating HED annotations in datasets, files, and strings.
     """
     pass
 
@@ -203,7 +203,7 @@ def validate_bids_cmd(
 ):
     """Validate HED annotations in a BIDS dataset.
 
-    DATA_PATH: Full path to the root directory of the BIDS dataset
+    DATA_PATH: Full path to the root directory of the BIDS dataset.
     """
     from hed.scripts.validate_bids import main as validate_bids_main
 
@@ -265,7 +265,7 @@ def schema_validate_cmd(schema_path, add_all_extensions, verbose):
 
     \b
     Arguments:
-        SCHEMA_PATH: Path(s) to schema file(s) to validate
+        SCHEMA_PATH: Path(s) to schema file(s) to validate.
     """
     from hed.scripts.validate_schemas import main as validate_schemas_main
 
@@ -342,40 +342,6 @@ def schema_add_ids_cmd(repo_path, schema_name, schema_version):
     add_ids_main(args)
 
 
-@schema.command(name="create-ontology")
-@click.argument("repo_path", type=click.Path(exists=True))
-@click.argument("schema_name")
-@click.argument("schema_version")
-@click.option("--dest", type=click.Path(), help="Output directory for ontology files")
-def schema_create_ontology_cmd(repo_path, schema_name, schema_version, dest):
-    """Create an ontology from a HED schema.
-
-    This command generates OWL ontology files from HED schema, enabling
-    integration with semantic web tools and ontology reasoners.
-
-    \b
-    Examples:
-        # Create ontology from standard schema
-        hedpy schema create-ontology /path/to/hed-schemas standard 8.3.0
-
-        # Create ontology with custom output directory
-        hedpy schema create-ontology /path/to/hed-schemas standard 8.3.0 --dest /output/path
-
-    \b
-    Arguments:
-        REPO_PATH: Path to hed-schemas repository
-        SCHEMA_NAME: Schema name (e.g., 'standard')
-        SCHEMA_VERSION: Schema version (e.g., '8.3.0')
-    """
-    from hed.scripts.create_ontology import main as create_ontology_main
-
-    args = [repo_path, schema_name, schema_version]
-    if dest:
-        args.extend(["--dest", dest])
-
-    create_ontology_main(args)
-
-
 @cli.group()
 def extract():
     """HED extraction and analysis tools.
@@ -422,7 +388,7 @@ Examples:
     default="events",
     show_default="events",
     metavar=METAVAR_NAME,
-    help="Suffix for base filename(s) (e.g., '-s events to match files ending with events.tsv",
+    help="Suffix for base filename(s) (e.g., '-s participants' to match files ending with participants.tsv",
 )
 @optgroup.option(
     "-x",
@@ -493,7 +459,7 @@ def extract_bids_sidecar_cmd(
 ):
     """Extract a sidecar template from a BIDS dataset.
 
-    DATA_PATH: Root directory of the BIDS dataset
+    DATA_PATH: Root directory of the BIDS dataset.
     """
     from hed.scripts.hed_extract_bids_sidecar import main as extract_main
 
@@ -561,7 +527,7 @@ Examples:
     "--prefix",
     "name_prefix",
     metavar=METAVAR_PREFIX,
-    help="Prefix for base filename (e.g., -s sub- to match 'sub-01_events.tsv')",
+    help="Prefix for base filename (e.g., -p sub- to match 'sub-01_events.tsv')",
 )
 @optgroup.option(
     "-s",
@@ -674,7 +640,7 @@ def extract_tabular_summary_cmd(
 ):
     """Extract tabular summary from TSV files.
 
-    DATA_PATH: Root directory containing TSV files to process
+    DATA_PATH: Root directory containing TSV files to process.
     """
     from hed.scripts.extract_tabular_summary import main as extract_summary_main
 
