@@ -244,25 +244,6 @@ class TestCLIParameterParity(unittest.TestCase):
         self.assertEqual(cli_opts["positional"][1], "schema_name", "Second positional should be schema_name")
         self.assertEqual(cli_opts["positional"][2], "schema_version", "Third positional should be schema_version")
 
-    def test_schema_create_ontology_parameters(self):
-        """Test schema create-ontology uses positional arguments."""
-        schema_group = cli.commands.get("schema")
-        ontology_command = schema_group.commands.get("create-ontology")
-        self.assertIsNotNone(ontology_command, "create-ontology command not found")
-
-        cli_opts = self._get_click_options(ontology_command)
-
-        # Should have 3 positional arguments
-        self.assertEqual(
-            len(cli_opts["positional"]), 3, f"Should have 3 positional arguments, got {len(cli_opts['positional'])}"
-        )
-        self.assertEqual(cli_opts["positional"][0], "repo_path", "First positional should be repo_path")
-        self.assertEqual(cli_opts["positional"][1], "schema_name", "Second positional should be schema_name")
-        self.assertEqual(cli_opts["positional"][2], "schema_version", "Third positional should be schema_version")
-
-        # Check --dest option exists
-        self.assertIn("dest", cli_opts["optional"], "--dest option not found")
-
     def test_all_legacy_commands_have_cli_equivalents(self):
         """Test that all legacy script entry points have CLI equivalents."""
         # Legacy commands from pyproject.toml
@@ -272,7 +253,6 @@ class TestCLIParameterParity(unittest.TestCase):
             "hed_validate_schemas": "schema validate",
             "hed_update_schemas": "schema convert",
             "hed_add_ids": "schema add-ids",
-            "hed_create_ontology": "schema create-ontology",
         }
 
         for legacy, cli_path in legacy_to_cli.items():

@@ -288,7 +288,6 @@ HEDTools provides a unified command-line interface (CLI) using a **git-style com
 | `hedpy schema validate`        | Validate HED schema files                                   |
 | `hedpy schema convert`         | Convert schemas between formats (XML, MEDIAWIKI, TSV, JSON) |
 | `hedpy schema add-ids`         | Add unique HED IDs to schema terms                          |
-| `hedpy schema create-ontology` | Generate OWL ontology files from HED schemas                |
 
 ### Installation and basic usage
 
@@ -517,23 +516,6 @@ hedpy schema add-ids /path/to/hed-schemas score 2.2.0
 - Modifies all schema formats (XML, MEDIAWIKI, TSV, JSON) in-place
 - Should be run after all schema content changes are finalized
 
-#### Create ontology
-
-Generate OWL (Web Ontology Language) ontology files from HED schemas for semantic web applications and ontology-based tools.
-
-```bash
-# Create ontology for a standard schema
-hedpy schema create-ontology /path/to/hed-schemas standard 8.4.0
-
-# Create ontology for a library schema with custom output location
-hedpy schema create-ontology /path/to/hed-schemas score 2.1.0 \
-  --dest /path/to/output
-
-# Create ontology with all outputs in specific directory
-hedpy schema create-ontology /path/to/hed-schemas lang 1.1.0 \
-  --dest ./ontologies
-```
-
 **Best practices:**
 
 1. Validate schema thoroughly before adding IDs
@@ -614,11 +596,8 @@ hedpy schema validate my_schema.xml --add-all-extensions
 #### Workflow 4: Preparing for schema release
 
 ```bash
-# Step 1: Add HED IDs
+# Add HED IDs
 hedpy schema add-ids /path/to/hed-schemas my_library 1.0.0
-
-# Step 2: Generate ontology
-hedpy schema create-ontology /path/to/hed-schemas my_library 1.0.0
 ```
 
 ______________________________________________________________________
