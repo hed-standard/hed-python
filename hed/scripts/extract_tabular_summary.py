@@ -57,110 +57,128 @@ def get_parser():
         description="Extract tabular summary from a collection of tabular files.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
+        add_help=False,
+    )
+
+    # Add custom help option with consistent formatting
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="help",
+        help="Show this help message and exit",
     )
 
     # Required arguments
-    parser.add_argument("data_path", help="Full path of root directory containing TSV files to process.")
+    parser.add_argument("data_path", help="Full path of root directory containing TSV files to process")
 
-    # File selection arguments
-    parser.add_argument(
+    # File selection options
+    file_group = parser.add_argument_group("File selection options")
+    file_group.add_argument(
         "-p",
         "--prefix",
         dest="name_prefix",
         default=None,
-        help="Optional prefix for base filename (e.g., 'sub-' to match 'sub-01_events.tsv').",
+        help="Prefix for base filename (e.g., 'sub-' to match 'sub-01_events.tsv')",
     )
-    parser.add_argument(
+    file_group.add_argument(
         "-s",
         "--suffix",
         dest="name_suffix",
         default="events",
-        help="Suffix for base filename (e.g., 'events' to match files ending with '_events.tsv'). "
-        "Use '*' to match all TSV files regardless of suffix. Default: events",
+        help="Suffix for base filename (e.g., 'events' to match files ending with '_events.tsv'); "
+        "use '*' to match all TSV files regardless of suffix (default: %(default)s)",
     )
-    parser.add_argument(
-        "-x", "--exclude-dirs", nargs="*", default=[], dest="exclude_dirs", help="Directory names to exclude from file search."
+    file_group.add_argument(
+        "-x",
+        "--exclude-dirs",
+        nargs="*",
+        default=[],
+        dest="exclude_dirs",
+        help="Directory names to exclude from file search (default: none)",
     )
-    parser.add_argument(
+    file_group.add_argument(
         "-fl",
         "--filter",
         dest="filename_filter",
         default=None,
-        help="Optional string to filter filenames. Only files containing this string in their name will be processed.",
+        help="Optional string to filter filenames; only files containing this string in their name will be processed",
     )
 
-    # Column processing arguments
-    parser.add_argument(
+    # Column processing options
+    column_group = parser.add_argument_group("Column processing options")
+    column_group.add_argument(
         "-vc",
         "--value-columns",
         dest="value_columns",
         nargs="*",
         default=None,
-        help="List of column names to treat as value columns (numeric/continuous data).",
+        help="List of column names to treat as value columns (numeric/continuous data)",
     )
-    parser.add_argument(
+    column_group.add_argument(
         "-sc",
         "--skip-columns",
         dest="skip_columns",
         nargs="*",
         default=None,
-        help="List of column names to skip in the extraction.",
+        help="List of column names to skip in the extraction",
     )
-    parser.add_argument(
+    column_group.add_argument(
         "-cl",
         "--categorical-limit",
         dest="categorical_limit",
         type=int,
         default=None,
-        help="Maximum number of unique values to store for a categorical column. "
-        "If a column has more unique values, it will be truncated. Default: None (no limit).",
+        help="Maximum number of unique values to store for a categorical column; "
+        "if a column has more unique values, it will be truncated (default: None, no limit)",
     )
 
-    # Output arguments
-    parser.add_argument(
+    # Output options
+    output_group = parser.add_argument_group("Output options")
+    output_group.add_argument(
         "-o",
         "--output-file",
         dest="output_file",
         default="",
-        help="Full path of output file for the tabular summary (JSON format). "
-        "If not specified, output written to standard out.",
+        help="Full path of output file for the tabular summary (JSON format); "
+        "if not specified, output written to standard out",
     )
-    parser.add_argument(
+    output_group.add_argument(
         "-f",
         "--format",
         dest="output_format",
         choices=["json", "text"],
         default="json",
-        help="Output format: 'json' for JSON structure or 'text' for human-readable summary. Default: json",
+        help="Output format: 'json' for JSON structure or 'text' for human-readable summary (default: %(default)s)",
     )
 
-    # Logging arguments
-    parser.add_argument(
+    # Logging options
+    logging_group = parser.add_argument_group("Logging options")
+    logging_group.add_argument(
         "-l",
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         default="WARNING",
-        help="Log level (case insensitive). Default: WARNING",
+        help="Log level (case insensitive, default: %(default)s)",
     )
-    parser.add_argument(
+    logging_group.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show progress messages during processing (equivalent to --log-level INFO)",
+    )
+    logging_group.add_argument(
         "-lf",
         "--log-file",
         dest="log_file",
         default=None,
-        help="Full path to save log output to file. If not specified, logs go to stderr.",
+        help="Full path to save log output to file; if not specified, logs go to stderr",
     )
-    parser.add_argument(
+    logging_group.add_argument(
         "-lq",
         "--log-quiet",
         action="store_true",
         dest="log_quiet",
-        help="If present, suppress log output to stderr (only applies if --log-file is used).",
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="If present, output informative messages as computation progresses (equivalent to --log-level INFO).",
+        help="Suppress log output to stderr (only applies if --log-file is used)",
     )
 
     return parser

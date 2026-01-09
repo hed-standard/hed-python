@@ -10,9 +10,23 @@ Logging Options:
 - --log-quiet: When using --log-file, suppress stderr output (file only)
 
 Examples:
-  extract_bids_sidecar /path/to/dataset --suffix events
-  extract_bids_sidecar /path/to/dataset --suffix events --verbose
-  extract_bids_sidecar /path/to/dataset --suffix events --log-file log.txt --log-quiet
+    # Extract from event files (default suffix='events')
+    hed_extract_bids_sidecar /path/to/dataset
+
+    # Extract from event files with verbose progress output
+    hed_extract_bids_sidecar /path/to/dataset --verbose
+
+    # Extract from participant files instead of events
+    hed_extract_bids_sidecar /path/to/dataset --suffix participants
+
+    # Save output to a file instead of stdout
+    hed_extract_bids_sidecar /path/to/dataset --output_file template.json
+
+    # Exclude specific columns from the template
+    hed_extract_bids_sidecar /path/to/dataset --skip-columns onset duration response_time
+
+    # Save logs to file and suppress console output
+    hed_extract_bids_sidecar /path/to/dataset --log-file extraction.log --log-quiet
 """
 
 import argparse
@@ -25,72 +39,99 @@ from hed.tools import BidsDataset
 
 def get_parser():
     """Create the argument parser for extract_bids_sidecar."""
-    parser = argparse.ArgumentParser(description="Extract sidecar template from a BIDS dataset.")
-    parser.add_argument("data_path", help="Full path of BIDS dataset root directory.")
+    parser = argparse.ArgumentParser(
+        description="Extract sidecar template from a BIDS dataset.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+        add_help=False,
+    )
+
+    # Add custom help option with consistent formatting
     parser.add_argument(
+        "-h",
+        "--help",
+        action="help",
+        help="Show this help message and exit",
+    )
+
+    # Required arguments
+    parser.add_argument("data_path", help="Full path of BIDS dataset root directory")
+
+    # File selection options
+    file_group = parser.add_argument_group("File selection options")
+    file_group.add_argument(
         "-s",
         "--suffix",
         dest="suffix",
-        required=True,
-        help="Suffix (without underscore) of tsv files to process (e.g., 'events', 'participants').",
+        default="events",
+        help="Suffix (without underscore) of filenames for TSV files to process (e.g., 'events', 'participants', default: %(default)s)",
     )
-    parser.add_argument(
-        "-vc",
-        "--value-columns",
-        dest="value_columns",
-        nargs="*",
-        default=None,
-        help="List of column names to treat as value columns.",
-    )
-    parser.add_argument(
-        "-sc",
-        "--skip-columns",
-        dest="skip_columns",
-        nargs="*",
-        default=["onset", "duration", "sample"],
-        help="List of column names to skip in the extraction.",
-    )
-    parser.add_argument(
-        "-l",
-        "--log-level",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        default="WARNING",
-        help="Log level (case insensitive). Default: WARNING",
-    )
-    parser.add_argument(
-        "-lf",
-        "--log-file",
-        dest="log_file",
-        default=None,
-        help="Full path to save log output to file. If not specified, logs go to stderr.",
-    )
-    parser.add_argument(
-        "-lq",
-        "--log-quiet",
-        action="store_true",
-        dest="log_quiet",
-        help="If present, suppress log output to stderr (only applies if --log-file is used).",
-    )
-    parser.add_argument(
-        "-o",
-        "--output_file",
-        dest="output_file",
-        default="",
-        help="Full path of output file for the sidecar template -- otherwise output written to standard out.",
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="If present, output informative messages as computation progresses (equivalent to --log-level INFO).",
-    )
-    parser.add_argument(
+    file_group.add_argument(
         "-x",
         "--exclude-dirs",
         nargs="*",
         default=["sourcedata", "derivatives", "code", "stimuli"],
         dest="exclude_dirs",
-        help="Directories name to exclude in search for files to process.",
+        help="Directory names (relative to data_path) to exclude in search for files to process (default: sourcedata derivatives code stimuli)",
+    )
+
+    # Column processing options
+    column_group = parser.add_argument_group("Column processing options")
+    column_group.add_argument(
+        "-vc",
+        "--value-columns",
+        dest="value_columns",
+        nargs="*",
+        default=None,
+        help="List of column names to treat as value columns",
+    )
+    column_group.add_argument(
+        "-sc",
+        "--skip-columns",
+        dest="skip_columns",
+        nargs="*",
+        default=["onset", "duration", "sample"],
+        help="List of column names to skip in the extraction (default: onset duration sample)",
+    )
+
+    # Output options
+    output_group = parser.add_argument_group("Output options")
+    output_group.add_argument(
+        "-o",
+        "--output_file",
+        dest="output_file",
+        default="",
+        help="Optional full path of output file for the sidecar template; otherwise output written to standard out",
+    )
+
+    # Logging options
+    logging_group = parser.add_argument_group("Logging options")
+    logging_group.add_argument(
+        "-l",
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="WARNING",
+        help="Log level (case insensitive, default: %(default)s)",
+    )
+    logging_group.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show progress messages during processing (equivalent to --log-level INFO)",
+    )
+    logging_group.add_argument(
+        "-lf",
+        "--log-file",
+        dest="log_file",
+        default=None,
+        help="Full path to save log output to file; if not specified, logs go to stderr",
+    )
+    logging_group.add_argument(
+        "-lq",
+        "--log-quiet",
+        action="store_true",
+        dest="log_quiet",
+        help="Suppress log output to stderr (only applies if --log-file is used)",
     )
     return parser
 
