@@ -279,15 +279,15 @@ HEDTools provides a unified command-line interface (CLI) using a **git-style com
 
 ### Available commands
 
-| Command                        | Description                                                 |
-| ------------------------------ | ----------------------------------------------------------- |
-| **Annotation management**      |                                                             |
-| `hedpy validate bids-dataset`  | Validate HED annotations in BIDS datasets                   |
-| `hedpy extract bids-sidecar`   | Extract JSON sidecar template from tabular (`.tsv`) files   |
-| **Schema management**          |                                                             |
-| `hedpy schema validate`        | Validate HED schema files                                   |
-| `hedpy schema convert`         | Convert schemas between formats (XML, MEDIAWIKI, TSV, JSON) |
-| `hedpy schema add-ids`         | Add unique HED IDs to schema terms                          |
+| Command                       | Description                                                 |
+| ----------------------------- | ----------------------------------------------------------- |
+| **Annotation management**     |                                                             |
+| `hedpy validate bids-dataset` | Validate HED annotations in BIDS datasets                   |
+| `hedpy extract bids-sidecar`  | Extract JSON sidecar template from tabular (`.tsv`) files   |
+| **Schema management**         |                                                             |
+| `hedpy schema validate`       | Validate HED schema files                                   |
+| `hedpy schema convert`        | Convert schemas between formats (XML, MEDIAWIKI, TSV, JSON) |
+| `hedpy schema add-ids`        | Add unique HED IDs to schema terms                          |
 
 ### Installation and basic usage
 
