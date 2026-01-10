@@ -99,6 +99,7 @@ hedpy = "hed.cli.cli:main"
 
 # Legacy commands (deprecated - use 'hedpy' instead)
 validate_bids = "hed.scripts.validate_bids:main"
+validate_hed_string = "hed.scripts.validate_hed_string:main"
 hed_extract_bids_sidecar = "hed.scripts.hed_extract_bids_sidecar:main"
 hed_validate_schemas = "hed.scripts.validate_schemas:main"
 hed_update_schemas = "hed.scripts.hed_convert_schema:main"
