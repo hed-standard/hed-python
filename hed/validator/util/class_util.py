@@ -48,7 +48,9 @@ class UnitValueValidator:
 
         return validator_dict
 
-    def check_tag_unit_class_units_are_valid(self, original_tag, validate_text, report_as=None, error_code=None) -> list[dict]:
+    def check_tag_unit_class_units_are_valid(
+        self, original_tag, validate_text, report_as=None, error_code=None, allow_placeholders=True
+    ) -> list[dict]:
         """Report incorrect unit class or units.
 
         Parameters:
@@ -56,29 +58,38 @@ class UnitValueValidator:
             validate_text (str): The text to validate.
             report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
             error_code (str): Override error codes.
+            allow_placeholders (bool): Whether placeholders are allowed (affects value class validation for "#")
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
         """
+        if not original_tag.is_unit_class_tag():
+            return []
+
         validation_issues = []
-        if original_tag.is_unit_class_tag():
+        # Check the units first
+        stripped_value, units = original_tag.get_stripped_unit_value(validate_text)
+        if not stripped_value:
+            # stripped_value is None only when invalid units are present
+            validation_issues += self._report_bad_units(original_tag, report_as)
+            return validation_issues
 
-            # Check the units first
-            stripped_value, units = original_tag.get_stripped_unit_value(validate_text)
-            if not stripped_value:
-                validation_issues += self._report_bad_units(original_tag, report_as)
-                return validation_issues
+        # If value is a placeholder (#) and placeholders are allowed, it's valid
+        # Invalid units would have been caught above (stripped_value would be None)
+        if stripped_value == "#" and allow_placeholders:
+            return validation_issues
 
-            # Check the value classes
-            validation_issues += self._check_value_class(original_tag, stripped_value, report_as)
-            if validation_issues:
-                return validation_issues
+        # Check the value classes
+        # If placeholders are NOT allowed, "#" will fail value class validation (e.g., not a valid number)
+        validation_issues += self._check_value_class(original_tag, stripped_value, report_as)
+        if validation_issues:
+            return validation_issues
 
-            # We don't want to give this overall error twice
-            if error_code and validation_issues and not any(error_code == issue["code"] for issue in validation_issues):
-                new_issue = validation_issues[0].copy()
-                new_issue["code"] = error_code
-                validation_issues += [new_issue]
+        # We don't want to give this overall error twice
+        if error_code and validation_issues and not any(error_code == issue["code"] for issue in validation_issues):
+            new_issue = validation_issues[0].copy()
+            new_issue["code"] = error_code
+            validation_issues += [new_issue]
 
         return validation_issues
 
