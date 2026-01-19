@@ -82,10 +82,8 @@ class UnitValueValidator:
         # Check the value classes
         # If placeholders are NOT allowed, "#" will fail value class validation (e.g., not a valid number)
         validation_issues += self._check_value_class(original_tag, stripped_value, report_as)
-        if validation_issues:
-            return validation_issues
 
-        # We don't want to give this overall error twice
+        # Override error code if specified (for def/def-expand tags)
         if error_code and validation_issues and not any(error_code == issue["code"] for issue in validation_issues):
             new_issue = validation_issues[0].copy()
             new_issue["code"] = error_code

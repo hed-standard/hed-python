@@ -100,9 +100,7 @@ def main(arg_list=None):
 
     try:
         # Load schema (handle single version or list of versions)
-        schema_versions = args.schema_version if isinstance(args.schema_version, list) else [args.schema_version]
-        if len(schema_versions) == 1:
-            schema_versions = schema_versions[0]
+        schema_versions = args.schema_version[0] if len(args.schema_version) == 1 else args.schema_version
         logging.info(f"Loading HED schema version(s) {schema_versions}")
         schema = load_schema_version(schema_versions)
 
