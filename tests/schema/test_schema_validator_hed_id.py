@@ -6,7 +6,6 @@ from hed.schema import hed_schema_constants
 from hed import load_schema_version
 from hed.schema import HedKey
 
-
 # tests needed:
 # 1. Verify HED id(HARDEST, MAY SKIP)
 # 4. Json tests

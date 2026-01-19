@@ -4,7 +4,6 @@ import time
 import os
 import portalocker
 
-
 TIMESTAMP_FILENAME = "last_update.txt"
 CACHE_TIME_THRESHOLD = 300 * 6
 

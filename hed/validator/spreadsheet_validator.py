@@ -16,7 +16,6 @@ from hed.validator.hed_validator import HedValidator
 from hed.models import df_util
 from hed.models.model_constants import DefTagNames
 
-
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 

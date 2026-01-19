@@ -322,8 +322,7 @@ class TestTagLevels3(TestHed3):
             "tl:Purple-color/Purple,tl:Event/Sensory-event)",
             "noDuplicate": "tl:Event/Sensory-event," "tl:Item/Object/Man-made-object/VehicleTrain," "tl:Purple-color/Purple",
             "legalDuplicate": "tl:Item/Object/Man-made-object/VehicleTrain,\
-            (tl:Item/Object/Man-made-object/VehicleTrain,"
-            "tl:Event/Sensory-event)",
+            (tl:Item/Object/Man-made-object/VehicleTrain," "tl:Event/Sensory-event)",
         }
         expected_results = {"topLevelDuplicate": False, "groupDuplicate": False, "legalDuplicate": True, "noDuplicate": True}
         expected_issues = {

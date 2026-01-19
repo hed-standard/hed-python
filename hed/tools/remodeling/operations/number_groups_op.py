@@ -2,7 +2,6 @@
 
 from hed.tools.remodeling.operations.base_op import BaseOp
 
-
 # TODO: This class is under development
 
 

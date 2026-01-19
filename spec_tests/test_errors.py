@@ -13,7 +13,6 @@ import json
 from hed import HedFileError
 from hed.errors import ErrorHandler, get_printable_issue_string, SchemaWarnings
 
-
 skip_tests = {
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
     # "curly-braces-has-no-hed": "Need to fix issue #1006",
