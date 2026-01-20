@@ -177,7 +177,9 @@ class HedValidator:
 
         return validation_issues
 
-    def validate_units(self, original_tag, validate_text=None, report_as=None, error_code=None, index_offset=0) -> list[dict]:
+    def validate_units(
+        self, original_tag, validate_text=None, report_as=None, error_code=None, index_offset=0, allow_placeholders=True
+    ) -> list[dict]:
         """Validate units and value classes
 
         Parameters:
@@ -187,6 +189,7 @@ class HedValidator:
                                Mostly for definitions that expand.
             error_code (str): The code to override the error as.  Again mostly for def/def-expand tags.
             index_offset (int): Offset into the extension validate_text starts at
+            allow_placeholders (bool): Whether placeholders are allowed (affects value class validation for "#")
 
         Returns:
             list[dict]: Issues found from units
@@ -194,11 +197,11 @@ class HedValidator:
         if validate_text is None:
             validate_text = original_tag.extension
         issues = []
-        if validate_text == "#":
+        if validate_text == "#" and allow_placeholders:
             return []
         if original_tag.is_unit_class_tag():
             issues += self._unit_validator.check_tag_unit_class_units_are_valid(
-                original_tag, validate_text, report_as=report_as, error_code=error_code
+                original_tag, validate_text, report_as=report_as, error_code=error_code, allow_placeholders=allow_placeholders
             )
         elif original_tag.is_value_class_tag():
             issues += self._unit_validator.check_tag_value_class_valid(original_tag, validate_text, report_as=report_as)
@@ -240,8 +243,13 @@ class HedValidator:
                         hed_tag, self, allow_placeholders=allow_placeholders
                     )
                 elif (hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY) and hed_tag.extension.endswith("/#"):
-                    validation_issues += self.validate_units(hed_tag, hed_tag.extension[:-2])
+                    validation_issues += self.validate_units(
+                        hed_tag, hed_tag.extension[:-2], allow_placeholders=allow_placeholders
+                    )
+                elif allow_placeholders and hed_tag.is_unit_class_tag() and hed_tag.extension.startswith("# "):
+                    # If placeholder is followed by units (e.g., "# m-per-s^2"), validate the units
+                    validation_issues += self.validate_units(hed_tag, allow_placeholders=allow_placeholders)
                 elif not (allow_placeholders and "#" in hed_tag.extension):
-                    validation_issues += self.validate_units(hed_tag)
+                    validation_issues += self.validate_units(hed_tag, allow_placeholders=allow_placeholders)
 
         return validation_issues

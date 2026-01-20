@@ -1,6 +1,8 @@
 import unittest
 
 from hed.errors.error_types import ValidationErrors, DefinitionErrors
+from hed.errors import ErrorHandler, ErrorContext
+from hed.models.hed_string import HedString
 from tests.validator.test_tag_validator_base import TestValidatorBase
 from hed.schema.hed_schema_io import load_schema_version
 from functools import partial
@@ -270,7 +272,7 @@ class IndividualHedTagsShort(TestHed):
 
     def test_invalid_placeholder_in_normal_string(self):
         test_strings = {
-            "invalidPlaceholder": "Duration/# ms",
+            "invalidPlaceholder": "Item/#",
             "invalidMiscPoundSign": "Du#ation/20 ms",
             "invalidAfterBaseTag": "Action/Invalid#/InvalidExtension",
         }
@@ -283,17 +285,9 @@ class IndividualHedTagsShort(TestHed):
             "invalidPlaceholder": self.format_error(
                 ValidationErrors.INVALID_TAG_CHARACTER,
                 tag=0,
-                index_in_tag=9,
-                index_in_tag_end=10,
+                index_in_tag=5,
+                index_in_tag_end=6,
                 actual_error=ValidationErrors.PLACEHOLDER_INVALID,
-            )
-            + self.format_error(
-                ValidationErrors.INVALID_VALUE_CLASS_VALUE,
-                tag=0,
-                index_in_tag=0,
-                index_in_tag_end=13,
-                value_class="numericClass",
-                actual_error=ValidationErrors.VALUE_INVALID,
             ),
             "invalidMiscPoundSign": self.format_error(
                 ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=8
@@ -307,6 +301,108 @@ class IndividualHedTagsShort(TestHed):
             ),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
+    def test_valid_placeholder_with_units(self):
+        self.maxDiff = None  # Show full diff for debugging
+        test_strings = {
+            "placeholderWithValidUnits": "Acceleration/# m-per-s^2",
+            "placeholderWithInvalidUnits": "Acceleration/# badUnits",
+            "placeholderAlone": "Acceleration/#",
+        }
+
+        # Test with allow_placeholders=True
+        expected_results_allowed = {
+            "placeholderWithValidUnits": True,
+            "placeholderWithInvalidUnits": False,
+            "placeholderAlone": True,
+        }
+        legal_acceleration_units = ["m-per-s^2"]
+        expected_issues_allowed = {
+            "placeholderWithValidUnits": [],
+            "placeholderWithInvalidUnits": self.format_error(
+                ValidationErrors.UNITS_INVALID, tag=0, units=legal_acceleration_units
+            ),
+            "placeholderAlone": [],
+        }
+
+        validator = self.semantic_hed_input_reader
+        for test_key in test_strings:
+            hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
+            test_issues = hed_string_obj._calculate_to_canonical_forms(validator._hed_schema)
+            if not test_issues:
+                test_issues = validator._validate_individual_tags_in_hed_string(hed_string_obj, allow_placeholders=True)
+
+            error_handler = ErrorHandler(check_for_warnings=False)
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
+            expected_params = expected_issues_allowed[test_key]
+            expected_issue = self.format_errors_fully(error_handler, hed_string=hed_string_obj, params=expected_params)
+            error_handler.add_context_and_filter(test_issues)
+            test_result = not test_issues
+            expected_result = expected_results_allowed[test_key]
+            self.assertEqual(test_result, expected_result, test_strings[test_key])
+            self.assertCountEqual(test_issues, expected_issue, test_strings[test_key])
+
+        # Test with allow_placeholders=False - all should fail
+        expected_results_disallowed = {
+            "placeholderWithValidUnits": False,
+            "placeholderWithInvalidUnits": False,
+            "placeholderAlone": False,
+        }
+        legal_acceleration_units = ["m-per-s^2"]
+        expected_issues_disallowed = {
+            "placeholderWithValidUnits": self.format_error(
+                ValidationErrors.INVALID_TAG_CHARACTER,
+                tag=0,
+                index_in_tag=13,
+                index_in_tag_end=14,
+                actual_error=ValidationErrors.PLACEHOLDER_INVALID,
+            )
+            + self.format_error(
+                ValidationErrors.INVALID_VALUE_CLASS_VALUE,
+                tag=0,
+                index_in_tag=0,
+                index_in_tag_end=24,
+                value_class="numericClass",
+            ),
+            "placeholderWithInvalidUnits": self.format_error(
+                ValidationErrors.INVALID_TAG_CHARACTER,
+                tag=0,
+                index_in_tag=13,
+                index_in_tag_end=14,
+                actual_error=ValidationErrors.PLACEHOLDER_INVALID,
+            )
+            + self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_acceleration_units),
+            "placeholderAlone": self.format_error(
+                ValidationErrors.INVALID_TAG_CHARACTER,
+                tag=0,
+                index_in_tag=13,
+                index_in_tag_end=14,
+                actual_error=ValidationErrors.PLACEHOLDER_INVALID,
+            )
+            + self.format_error(
+                ValidationErrors.INVALID_VALUE_CLASS_VALUE,
+                tag=0,
+                index_in_tag=0,
+                index_in_tag_end=14,
+                value_class="numericClass",
+            ),
+        }
+
+        for test_key in test_strings:
+            hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
+            test_issues = hed_string_obj._calculate_to_canonical_forms(validator._hed_schema)
+            if not test_issues:
+                test_issues = validator._validate_individual_tags_in_hed_string(hed_string_obj, allow_placeholders=False)
+
+            error_handler = ErrorHandler(check_for_warnings=False)
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
+            expected_params = expected_issues_disallowed[test_key]
+            expected_issue = self.format_errors_fully(error_handler, hed_string=hed_string_obj, params=expected_params)
+            error_handler.add_context_and_filter(test_issues)
+            test_result = not test_issues
+            expected_result = expected_results_disallowed[test_key]
+            self.assertEqual(test_result, expected_result, f"{test_strings[test_key]} (placeholders disallowed)")
+            self.assertCountEqual(test_issues, expected_issue, f"{test_strings[test_key]} (placeholders disallowed)")
 
     def test_span_reporting(self):
         test_strings = {

@@ -40,11 +40,11 @@ Examples:
 """
 
 import argparse
-import json
 import logging
 import sys
 from hed import _version as vr
-from hed.errors import get_printable_issue_string, ErrorHandler
+from hed.errors import ErrorHandler
+from hed.scripts.script_utils import setup_logging, format_validation_results
 from hed.tools import BidsDataset
 
 
@@ -169,39 +169,13 @@ def get_parser():
         dest="log_quiet",
         help="Suppress log output to stderr; only applicable when --log-file is used (logs go only to file)",
     )
+    logging_group.add_argument(
+        "--no-log",
+        action="store_true",
+        dest="no_log",
+        help="Disable all logging output",
+    )
     return parser
-
-
-def format_validation_results(issue_list, args, ErrorHandler):
-    """Generate and output validation results based on format and options.
-
-    Parameters:
-        issue_list (list): List of validation issues found
-        args: Parsed command line arguments containing format and output options
-        ErrorHandler: Error handling class for filtering issues
-
-    Returns:
-        str: Formatted validation results as a string in the requested format (text, json, or json_pp)
-    """
-    # Output based on format
-    output = ""
-    if args.format == "json_pp":
-        output = json.dumps({"issues": issue_list, "hedtools_version": str(vr.get_versions())}, indent=4)
-    elif args.format == "json":
-        output = json.dumps(issue_list)
-    elif args.format == "text":
-        output = f"Using HEDTools version: {str(vr.get_versions())}\n"
-        output += f"Number of issues: {len(issue_list)}\n"
-        if args.error_limit:
-            [issue_list, code_counts] = ErrorHandler.filter_issues_by_count(
-                issue_list, args.error_limit, by_file=args.errors_by_file
-            )
-            output += "  ".join(f"{code}:{count}" for code, count in code_counts.items()) + "\n"
-            output += f"Number of issues after filtering: {len(issue_list)}\n"
-        if issue_list:
-            output += get_printable_issue_string(issue_list, "HED validation errors: ", skip_filename=False)
-
-    return output
 
 
 def format_final_report(issue_list):
@@ -228,42 +202,12 @@ def main(arg_list=None):
     # Parse the arguments
     args = parser.parse_args(arg_list)
     print(f"{str(args)}")
-    # Setup logging configuration
-    log_level = args.log_level.upper() if args.log_level else "INFO"
-    if args.verbose:
-        log_level = "INFO"
 
-    # Configure logging format
-    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    date_format = "%Y-%m-%d %H:%M:%S"
-
-    # Clear any existing handlers from root logger
-    root_logger = logging.getLogger()
-    for handler in root_logger.handlers[:]:
-        root_logger.removeHandler(handler)
-
-    # Set the root logger level - this is crucial for filtering
-    root_logger.setLevel(getattr(logging, log_level))
-
-    # Create and configure handlers
-    formatter = logging.Formatter(log_format, datefmt=date_format)
-
-    # File handler if log file specified
-    if args.log_file:
-        file_handler = logging.FileHandler(args.log_file, mode="w", encoding="utf-8")
-        file_handler.setLevel(getattr(logging, log_level))
-        file_handler.setFormatter(formatter)
-        root_logger.addHandler(file_handler)
-
-    # Console handler (stderr) unless explicitly quieted and file logging is used
-    if not args.log_quiet or not args.log_file:
-        console_handler = logging.StreamHandler(sys.stderr)
-        console_handler.setLevel(getattr(logging, log_level))
-        console_handler.setFormatter(formatter)
-        root_logger.addHandler(console_handler)
+    # Set up logging
+    setup_logging(args.log_level, args.log_file, args.log_quiet, args.verbose, args.no_log)
 
     logger = logging.getLogger("validate_bids")
-    logger.info(f"Starting BIDS validation with log level: {log_level}")
+    logger.info(f"Starting BIDS validation with log level: {args.log_level}")
     if args.log_file:
         logger.info(f"Log output will be saved to: {args.log_file}")
 
@@ -310,7 +254,13 @@ def validate_dataset(args):
 
     # Generate and output the results if there is to be output
     if args.output_file or args.print_output:
-        output = format_validation_results(issue_list, args, ErrorHandler)
+        output = format_validation_results(
+            issue_list,
+            output_format=args.format,
+            title_message="HED validation errors:",
+            error_limit=args.error_limit,
+            errors_by_file=args.errors_by_file,
+        )
     else:
         output = ""
 

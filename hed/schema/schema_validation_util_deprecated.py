@@ -3,7 +3,6 @@
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import SchemaWarnings
 
-
 ALLOWED_TAG_CHARS = "-"
 ALLOWED_DESC_CHARS = "-_:;,./()+ ^"
 

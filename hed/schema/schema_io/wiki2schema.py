@@ -13,7 +13,6 @@ from hed.schema.schema_io.base2schema import SchemaLoader
 from hed.schema.schema_io.wiki_constants import HedWikiSection, WIKI_EXTRA_DICT
 from hed.schema.schema_io import text_util
 
-
 extend_here_line = "extend here"
 invalid_characters_to_strip = ["&#8203;"]
 tag_name_expression = r"(\*+|\'{3})(.*?)(\'{3})?\s*([\[\{]|$)+"

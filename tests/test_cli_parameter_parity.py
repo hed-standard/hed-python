@@ -6,6 +6,7 @@ from click.testing import CliRunner
 
 from hed.cli.cli import cli
 from hed.scripts.validate_bids import get_parser as get_validate_bids_parser
+from hed.scripts.validate_hed_string import get_parser as get_validate_hed_string_parser
 from hed.scripts.hed_extract_bids_sidecar import get_parser as get_extract_sidecar_parser
 from hed.scripts.extract_tabular_summary import get_parser as get_extract_summary_parser
 from hed.scripts.validate_schemas import get_parser as get_validate_schemas_parser
@@ -227,6 +228,40 @@ class TestCLIParameterParity(unittest.TestCase):
 
         for orig_flag in original_flags:
             self.assertIn(orig_flag, cli_flags, f"Flag '{orig_flag}' from original parser not found in CLI")
+
+    def test_validate_hed_string_parameters(self):
+        """Test validate hed-string CLI parameters match validate_hed_string.py parser."""
+        # Get original parser
+        original_parser = get_validate_hed_string_parser()
+        self._get_parser_options(original_parser)
+
+        # Get CLI command
+        validate_group = cli.commands.get("validate")
+        self.assertIsNotNone(validate_group, "validate command group not found")
+        cli_command = validate_group.commands.get("hed-string")
+
+        self.assertIsNotNone(cli_command, "validate hed-string command not found in CLI")
+        cli_opts = self._get_click_options(cli_command)
+
+        # Check positional arguments (should have hed_string)
+        self.assertEqual(
+            len(cli_opts["positional"]), 1, f"Should have 1 positional argument, got {len(cli_opts['positional'])}"
+        )
+        self.assertEqual(cli_opts["positional"][0], "hed_string", "Positional should be hed_string")
+
+        # Check that key optional parameters exist
+        required_params = ["schema_version", "definitions", "format", "output_file", "log_level", "log_file"]
+        cli_dests = set(cli_opts["optional"].keys())
+
+        for param in required_params:
+            self.assertIn(param, cli_dests, f"Parameter '{param}' not found in CLI")
+
+        # Check flags
+        required_flags = {"check_for_warnings", "log_quiet", "no_log", "verbose"}
+        cli_flags = {flag[0] for flag in cli_opts["flags"]}
+
+        for flag in required_flags:
+            self.assertIn(flag, cli_flags, f"Flag '{flag}' not found in CLI")
 
     def test_schema_add_ids_parameters(self):
         """Test schema add-ids uses positional arguments."""

@@ -70,7 +70,7 @@ dependencies = [
 dev = [
     "ruff>=0.8.0",
     "codespell>=2.2.0",
-    "black>=24.0.0",
+    "black>=26.1.0",
     "mdformat>=0.7.0",
     "mdformat-myst>=0.1.5",
 ]
@@ -99,6 +99,7 @@ hedpy = "hed.cli.cli:main"
 
 # Legacy commands (deprecated - use 'hedpy' instead)
 validate_bids = "hed.scripts.validate_bids:main"
+validate_hed_string = "hed.scripts.validate_hed_string:main"
 hed_extract_bids_sidecar = "hed.scripts.hed_extract_bids_sidecar:main"
 hed_validate_schemas = "hed.scripts.validate_schemas:main"
 hed_update_schemas = "hed.scripts.hed_convert_schema:main"
@@ -190,7 +191,7 @@ known-first-party = ["hed"]
 
 [tool.black]
 line-length = 127
-target-version = ["py310", "py311", "py312", "py313"]
+target-version = ["py310", "py311", "py312", "py313", "py314"]
 exclude = '''
 /(
     \.git
@@ -204,6 +205,6 @@ exclude = '''
   | hed/_version\.py
   | spec_tests/hed-examples
   | spec_tests/hed-specification
-  | status
+  | .status
 )/
 '''
