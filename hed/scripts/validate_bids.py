@@ -201,12 +201,12 @@ def main(arg_list=None):
 
     # Parse the arguments
     args = parser.parse_args(arg_list)
-    print(f"{str(args)}")
 
     # Set up logging
     setup_logging(args.log_level, args.log_file, args.log_quiet, args.verbose, args.no_log)
 
     logger = logging.getLogger("validate_bids")
+    logger.debug("Parsed arguments: %s", args)
     logger.info(f"Starting BIDS validation with log level: {args.log_level}")
     if args.log_file:
         logger.info(f"Log output will be saved to: {args.log_file}")

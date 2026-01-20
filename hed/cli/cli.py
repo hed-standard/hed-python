@@ -191,7 +191,9 @@ Examples:
     is_flag=True,
     help="Disable all logging output",
 )
+@click.pass_context
 def validate_bids_cmd(
+    ctx,
     data_path,
     error_limit,
     errors_by_file,
@@ -244,7 +246,8 @@ def validate_bids_cmd(
         args.append("-x")
         args.extend(exclude_dirs)
 
-    validate_bids_main(args)
+    result = validate_bids_main(args)
+    ctx.exit(result if result is not None else 0)
 
 
 @validate.command(
@@ -354,7 +357,9 @@ Examples:
     is_flag=True,
     help="Disable all logging output",
 )
+@click.pass_context
 def validate_hed_string_cmd(
+    ctx,
     hed_string,
     schema_version,
     definitions,
@@ -395,14 +400,16 @@ def validate_hed_string_cmd(
     if verbose:
         args.append("-v")
 
-    validate_string_main(args)
+    result = validate_string_main(args)
+    ctx.exit(result if result is not None else 0)
 
 
 @schema.command(name="validate")
 @click.argument("schema_path", type=click.Path(exists=True), nargs=-1, required=True)
 @click.option("--add-all-extensions", is_flag=True, help="Always verify all versions of the same schema are equal")
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose output")
-def schema_validate_cmd(schema_path, add_all_extensions, verbose):
+@click.pass_context
+def schema_validate_cmd(ctx, schema_path, add_all_extensions, verbose):
     """Validate HED schema files.
 
     This command validates HED schema files for correctness, checking structure,
@@ -434,13 +441,15 @@ def schema_validate_cmd(schema_path, add_all_extensions, verbose):
     if verbose:
         args.append("-v")
 
-    validate_schemas_main(args)
+    result = validate_schemas_main(args)
+    ctx.exit(result if result is not None else 0)
 
 
 @schema.command(name="convert")
 @click.argument("schema_path", type=click.Path(exists=True), nargs=-1, required=True)
 @click.option("--set-ids", is_flag=True, help="Set/update HED IDs in the schema")
-def schema_convert_cmd(schema_path, set_ids):
+@click.pass_context
+def schema_convert_cmd(ctx, schema_path, set_ids):
     """Convert HED schema between formats (TSV, XML, MEDIAWIKI, JSON).
 
     This command converts HED schema files between different formats while
@@ -467,14 +476,16 @@ def schema_convert_cmd(schema_path, set_ids):
     if set_ids:
         args.append("--set-ids")
 
-    convert_main(args)
+    result = convert_main(args)
+    ctx.exit(result if result is not None else 0)
 
 
 @schema.command(name="add-ids")
 @click.argument("repo_path", type=click.Path(exists=True))
 @click.argument("schema_name")
 @click.argument("schema_version")
-def schema_add_ids_cmd(repo_path, schema_name, schema_version):
+@click.pass_context
+def schema_add_ids_cmd(ctx, repo_path, schema_name, schema_version):
     """Add HED IDs to a schema.
 
     This command adds unique HED IDs to schema elements that don't have them,
@@ -498,7 +509,8 @@ def schema_add_ids_cmd(repo_path, schema_name, schema_version):
 
     args = [repo_path, schema_name, schema_version]
 
-    add_ids_main(args)
+    result = add_ids_main(args)
+    ctx.exit(result if result is not None else 0)
 
 
 @cli.group()
@@ -613,8 +625,19 @@ Examples:
     is_flag=True,
     help="Suppress log output to stderr; only applicable when --log-file is used (logs go only to file)",
 )
+@click.pass_context
 def extract_bids_sidecar_cmd(
-    data_path, suffix, value_columns, skip_columns, log_level, log_file, log_quiet, output_file, verbose, exclude_dirs
+    ctx,
+    data_path,
+    suffix,
+    value_columns,
+    skip_columns,
+    log_level,
+    log_file,
+    log_quiet,
+    output_file,
+    verbose,
+    exclude_dirs,
 ):
     """Extract a sidecar template from a BIDS dataset.
 
@@ -643,7 +666,8 @@ def extract_bids_sidecar_cmd(
         args.append("-x")
         args.extend(exclude_dirs)
 
-    extract_main(args)
+    result = extract_main(args)
+    ctx.exit(result if result is not None else 0)
 
 
 @extract.command(
@@ -781,7 +805,9 @@ Examples:
     is_flag=True,
     help="Suppress log output to stderr; only applicable when --log-file is used (logs go only to file)",
 )
+@click.pass_context
 def extract_tabular_summary_cmd(
+    ctx,
     data_path,
     name_prefix,
     name_suffix,
@@ -834,7 +860,8 @@ def extract_tabular_summary_cmd(
     if verbose:
         args.append("-v")
 
-    extract_summary_main(args)
+    result = extract_summary_main(args)
+    ctx.exit(result if result is not None else 0)
 
 
 def main():
