@@ -283,6 +283,9 @@ HEDTools provides a unified command-line interface (CLI) using a **git-style com
 | ----------------------------- | ----------------------------------------------------------- |
 | **Annotation management**     |                                                             |
 | `hedpy validate bids-dataset` | Validate HED annotations in BIDS datasets                   |
+| `hedpy validate string`       | Validate HED annotations in a string                        |
+| `hedpy validate sidecar`      | Validate HED annotations in a JSON sidecar                  |
+| `hedpy validate tabular`      | Validate HED annotations in a tabular file (TSV)            |
 | `hedpy extract bids-sidecar`  | Extract JSON sidecar template from tabular (`.tsv`) files   |
 | **Schema management**         |                                                             |
 | `hedpy schema validate`       | Validate HED schema files                                   |
@@ -399,6 +402,62 @@ hedpy validate bids-dataset /path/to/bids/dataset \
   -x derivatives \
   -el 10 \
   -lf validation.log
+```
+
+______________________________________________________________________
+
+### String validation
+
+Validate a HED string using `hedpy validate string`.
+
+```bash
+# Basic validation
+hedpy validate string "Event, Action" -sv 8.3.0
+
+# With definitions
+hedpy validate string "Event, Def/MyDef" \
+  -sv 8.4.0 \
+  -d "(Definition/MyDef, (Action, Move))"
+
+# Check for warnings
+hedpy validate string "Event, Action/Button-press" -sv 8.4.0 -w
+```
+
+______________________________________________________________________
+
+### Sidecar validation
+
+Validate a HED JSON sidecar using `hedpy validate sidecar`.
+
+```bash
+# Basic validation
+hedpy validate sidecar task-rest_events.json -sv 8.3.0
+
+# With multiple schemas
+hedpy validate sidecar task-rest_events.json -sv 8.3.0 -sv score_1.1.0
+
+# Check for warnings and save to file
+hedpy validate sidecar task-rest_events.json -sv 8.4.0 -w -o results.txt
+```
+
+______________________________________________________________________
+
+### Tabular validation
+
+Validate a HED tabular file (TSV) using `hedpy validate tabular`.
+
+```bash
+# Basic validation
+hedpy validate tabular events.tsv -sv 8.3.0
+
+# With a sidecar
+hedpy validate tabular events.tsv -s sidecar.json -sv 8.3.0
+
+# Limit errors
+hedpy validate tabular events.tsv -sv 8.3.0 -el 5
+
+# Check for warnings and output JSON
+hedpy validate tabular events.tsv -sv 8.3.0 -w -f json -o results.json
 ```
 
 ______________________________________________________________________
@@ -534,6 +593,9 @@ For backward compatibility, you can still access scripts directly using Python m
 ```bash
 # Validation
 python -m hed.scripts.validate_bids /path/to/dataset --check-warnings
+python -m hed.scripts.validate_hed_string "Event, Action" -sv 8.3.0
+python -m hed.scripts.validate_hed_sidecar sidecar.json -sv 8.3.0
+python -m hed.scripts.validate_hed_tabular events.tsv -sv 8.3.0
 
 # Sidecar extraction
 python -m hed.scripts.hed_extract_bids_sidecar /path/to/dataset -s events
