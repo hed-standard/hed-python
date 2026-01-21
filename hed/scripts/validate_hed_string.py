@@ -98,6 +98,15 @@ def main(arg_list=None):
 
     import logging
 
+    logger = logging.getLogger("validate_hed_string")
+    effective_level_name = logging.getLevelName(logger.getEffectiveLevel())
+    logger.info(
+        "Starting HED string validation with effective log level: %s (requested: %s, verbose=%s)",
+        effective_level_name,
+        args.log_level,
+        "on" if args.verbose else "off",
+    )
+
     try:
         # Load schema (handle single version or list of versions)
         schema_versions = args.schema_version[0] if len(args.schema_version) == 1 else args.schema_version

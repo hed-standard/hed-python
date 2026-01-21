@@ -45,6 +45,7 @@ from pathlib import Path
 from hed import _version as vr
 from hed.tools.util.io_util import get_file_list
 from hed.tools.analysis.tabular_summary import TabularSummary
+from hed.scripts.script_utils import setup_logging
 
 
 def get_parser():
@@ -338,57 +339,6 @@ def format_output(summary, args):
         return json.dumps(output_dict, indent=4)
 
 
-def setup_logging(args):
-    """Configure logging based on command line arguments.
-
-    Parameters:
-        args (argparse.Namespace): Parsed command line arguments.
-
-    Returns:
-        logging.Logger: Configured logger instance.
-    """
-    # Determine log level
-    log_level = args.log_level.upper() if args.log_level else "WARNING"
-    if args.verbose:
-        log_level = "INFO"
-
-    # Configure logging format
-    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    date_format = "%Y-%m-%d %H:%M:%S"
-
-    # Clear any existing handlers from root logger
-    root_logger = logging.getLogger()
-    for handler in root_logger.handlers[:]:
-        root_logger.removeHandler(handler)
-
-    # Set the root logger level
-    root_logger.setLevel(getattr(logging, log_level))
-
-    # Create formatter
-    formatter = logging.Formatter(log_format, datefmt=date_format)
-
-    # File handler if log file specified
-    if args.log_file:
-        file_handler = logging.FileHandler(args.log_file, mode="w", encoding="utf-8")
-        file_handler.setLevel(getattr(logging, log_level))
-        file_handler.setFormatter(formatter)
-        root_logger.addHandler(file_handler)
-
-    # Console handler (stderr) unless explicitly quieted and file logging is used
-    if not args.log_quiet or not args.log_file:
-        console_handler = logging.StreamHandler(sys.stderr)
-        console_handler.setLevel(getattr(logging, log_level))
-        console_handler.setFormatter(formatter)
-        root_logger.addHandler(console_handler)
-
-    logger = logging.getLogger("extract_tabular_summary")
-    logger.info(f"Starting tabular summary extraction with log level: {log_level}")
-    if args.log_file:
-        logger.info(f"Log output will be saved to: {args.log_file}")
-
-    return logger
-
-
 def main(arg_list=None):
     """Main entry point for the script.
 
@@ -406,7 +356,15 @@ def main(arg_list=None):
     args = parser.parse_args(arg_list)
 
     # Setup logging
-    logger = setup_logging(args)
+    setup_logging(args.log_level, args.log_file, args.log_quiet, args.verbose, False)
+    logger = logging.getLogger("extract_tabular_summary")
+    effective_level = logging.getLevelName(logger.getEffectiveLevel())
+    logger.info(
+        f"Starting tabular summary extraction with effective log level: {effective_level} "
+        f"(requested: {args.log_level}, verbose={'on' if args.verbose else 'off'})"
+    )
+    if args.log_file:
+        logger.info(f"Log output will be saved to: {args.log_file}")
 
     try:
         # Extract the summary

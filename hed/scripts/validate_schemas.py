@@ -19,9 +19,9 @@ def get_parser():
     return parser
 
 
-def main():
+def main(arg_list=None):
     parser = get_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(arg_list)
 
     schema_files = sort_base_schemas(args.schema_files, args.add_all_extensions)
     issues = validate_all_schemas(schema_files)
