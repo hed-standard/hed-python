@@ -207,7 +207,13 @@ def main(arg_list=None):
 
     logger = logging.getLogger("validate_bids")
     logger.debug("Parsed arguments: %s", args)
-    logger.info(f"Starting BIDS validation with log level: {args.log_level}")
+    effective_level_name = logging.getLevelName(logger.getEffectiveLevel())
+    logger.info(
+        "Starting BIDS validation with effective log level: %s (requested: %s, verbose=%s)",
+        effective_level_name,
+        args.log_level,
+        "on" if args.verbose else "off",
+    )
     if args.log_file:
         logger.info(f"Log output will be saved to: {args.log_file}")
 

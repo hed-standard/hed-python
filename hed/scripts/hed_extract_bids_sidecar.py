@@ -32,6 +32,7 @@ Examples:
 import argparse
 import json
 import logging
+import sys
 from hed import _version as vr
 from hed.tools import BidsDataset
 from hed.scripts.script_utils import setup_logging
@@ -222,7 +223,11 @@ def main(arg_list=None):
     setup_logging(args.log_level, args.log_file, args.log_quiet, args.verbose, False)
 
     logger = logging.getLogger("extract_bids_sidecar")
-    logger.info(f"Starting BIDS sidecar extraction with log level: {args.log_level}")
+    effective_level = logging.getLevelName(logger.getEffectiveLevel())
+    logger.info(
+        f"Starting BIDS sidecar extraction with effective log level: {effective_level} "
+        f"(requested: {args.log_level}, verbose={'on' if args.verbose else 'off'})"
+    )
     if args.log_file:
         logger.info(f"Log output will be saved to: {args.log_file}")
 

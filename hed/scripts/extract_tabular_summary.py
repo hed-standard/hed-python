@@ -358,7 +358,11 @@ def main(arg_list=None):
     # Setup logging
     setup_logging(args.log_level, args.log_file, args.log_quiet, args.verbose, False)
     logger = logging.getLogger("extract_tabular_summary")
-    logger.info(f"Starting tabular summary extraction with log level: {args.log_level}")
+    effective_level = logging.getLevelName(logger.getEffectiveLevel())
+    logger.info(
+        f"Starting tabular summary extraction with effective log level: {effective_level} "
+        f"(requested: {args.log_level}, verbose={'on' if args.verbose else 'off'})"
+    )
     if args.log_file:
         logger.info(f"Log output will be saved to: {args.log_file}")
 
