@@ -1,0 +1,111 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-relatedTag-invalid",
+    "warning": true,
+    "description": "A related tag points to an unknown tag",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Referencing non-existent tags in relatedTag attributes",
+      "Incorrect tag path specifications in relatedTag",
+      "Circular relatedTag references",
+      "Misspelled tag names in relatedTag attributes",
+      "Using deprecated tags in relatedTag references"
+    ],
+    "explanation": "RelatedTag attributes must reference valid, existing tags in the schema. Invalid references cause schema validation failures and break tag relationship mappings.",
+    "correction_strategy": "Use valid tag references in relatedTag attributes",
+    "correction_examples": [
+      {
+        "wrong": "relatedTag=\"NonExistent/Tag\"",
+        "correct": "relatedTag=\"Event/Sensory-event\"",
+        "explanation": "Replaced non-existent tag with valid schema tag"
+      }
+    ],
+    "correction_patterns": [
+      "Verify tag exists in current schema",
+      "Use complete tag paths for relatedTag references",
+      "Check tag spelling and case sensitivity",
+      "Avoid circular tag references"
+    ],
+    "fix_instructions": [
+      "1. Verify referenced tags exist in schema",
+      "2. Check tag path spelling and format",
+      "3. Remove or update invalid tag references",
+      "4. Test tag relationship functionality"
+    ],
+    "validation_hints": [
+      "Cross-reference with available schema tags",
+      "Verify complete tag paths",
+      "Check for circular references"
+    ],
+    "specification_reference": "3.1.2.8. Tag relationships and relatedTag attributes",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "TAG_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {relatedTag=invalid}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {relatedTag=Event, relatedTag=invalid}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {relatedTag=Event}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {relatedTag=Event}",
+            "* ExtendedTag {relatedTag=Tag-with-unknown, relatedTag=Event}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

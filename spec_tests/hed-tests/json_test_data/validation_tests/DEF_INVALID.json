@@ -1,0 +1,441 @@
+[
+    {
+        "error_code": "DEF_INVALID",
+        "alt_codes": [],
+        "name": "def-invalid-name",
+        "description": "A `Def` tag's name does not correspond to a definition.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "semantic",
+        "common_causes": [
+            "Using a Def tag name that doesn't match any available definition",
+            "Misspelling definition names in Def tags",
+            "Referencing definitions that were removed or renamed",
+            "Using outdated definition names from previous schema versions",
+            "Missing definition parameters when required"
+        ],
+        "explanation": "Def tags must reference definitions that actually exist in the current schema or have been previously declared. The definition name in the Def tag must exactly match a declared definition name.",
+        "correction_strategy": "Use only valid definition names that match existing definitions",
+        "correction_examples": [
+            {
+                "wrong": "Def/Apple2, Green",
+                "correct": "Def/Acc/4.5, Green",
+                "explanation": "Replaced non-existent definition 'Apple2' with valid definition 'Acc'"
+            },
+            {
+                "wrong": "Def/Acc2/4.5",
+                "correct": "Def/Acc/4.5",
+                "explanation": "Fixed definition name typo from 'Acc2' to 'Acc'"
+            },
+            {
+                "wrong": "Def/Acc",
+                "correct": "Def/Acc/4.5",
+                "explanation": "Added required parameter for parameterized definition"
+            }
+        ],
+        "correction_patterns": [
+            "Cross-reference definition names with available definitions list",
+            "Check spelling of definition names carefully",
+            "Ensure required parameters are provided for parameterized definitions",
+            "Verify definition scope and availability in current context"
+        ],
+        "fix_instructions": [
+            "1. Check the list of available definitions in the current schema",
+            "2. Verify the Def tag name matches an existing definition exactly",
+            "3. Ensure proper case sensitivity in definition names",
+            "4. Add required parameters for parameterized definitions",
+            "5. Remove or replace invalid definition references"
+        ],
+        "validation_hints": [
+            "Cross-reference with available definitions list",
+            "Check definition parameter requirements",
+            "Verify spelling matches definition exactly",
+            "Ensure definition scope availability"
+        ],
+        "specification_reference": "3.2.8.2. The Def and Def-expand tags",
+        "related_errors": ["DEF_EXPAND_INVALID", "DEFINITION_INVALID", "PLACEHOLDER_INVALID"],
+        "definitions": ["(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))", "(Definition/MyColor, (Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Def/Apple2, Green",
+                    "Def/Acc2/4.5",
+                    "Def/Acc"
+                ],
+                "passes": [
+                    "Def/Acc/4.5"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Def/Apple2, Green",
+                                "ball": "Def/Acc2/4.5, Def/Acc/3.2"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                      {
+                        "event_code": {
+                            "HED": {
+                                "face": "Def/Acc/4.5"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Def/Apple2, Green"],
+                        [ 5.5, 0, "Def/Acc2/4.5"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Def/Acc/4.5"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Def/Apple2, Green",
+                                    "ball": "Def/Acc2/4.5, Def/Acc/3.2"
+                                }
+                            }
+                        },
+                        "events": 
+                            [
+                                ["onset", "duration", "event_code", "HED"],
+                                [ 4.5, 0, "ball", "Def/Apple2, Green"],
+                                [ 5.5, 0, "face", "Def/Acc2/4.5"]
+                            ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Def/Acc/4.5",
+                                    "ball": "Item"
+                                }
+                            }
+                        },
+                        "events": 
+                            [
+                                ["onset", "duration", "event_code","HED"],
+                                [ 4.5, 0, "face", "Blue"],
+                                [ 5.0, 0, "ball", "Green, Def/MyColor"]
+                            ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEF_INVALID",
+        "alt_codes": [],
+        "name": "def-invalid-missing-placeholder",
+        "description": "A `Def` tag is missing an expected placeholder value or has an unexpected placeholder value.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "placeholder",
+        "common_causes": [
+            "Using Def with value but definition lacks placeholder",
+            "Missing # in definition name when content expects it",
+            "Forgetting to add placeholder to definition",
+            "Mismatch between definition and usage expectations",
+            "Incomplete definition creation"
+        ],
+        "explanation": "When a definition is used with values (Def/Name/value), the definition must include a placeholder (#) to specify where the value should be substituted.",
+        "correction_strategy": "Add placeholder to definition or remove value from usage",
+        "correction_examples": [
+            {
+                "wrong": "Definition: (Definition/Event, (Action)) Usage: Def/Event/5",
+                "correct": "Definition: (Definition/Event/#, (Action/#)) Usage: Def/Event/5",
+                "explanation": "Added placeholder to definition to support value usage"
+            },
+            {
+                "wrong": "Def/Action/Start without placeholder in definition",
+                "correct": "Def/Action (without value) or add placeholder to definition",
+                "explanation": "Either remove value or add placeholder support"
+            }
+        ],
+        "correction_patterns": [
+            "Add # to definition name when used with values",
+            "Include placeholder in definition content",
+            "Match definition structure to usage pattern",
+            "Remove values from usage if definition doesn't support them"
+        ],
+        "fix_instructions": [
+            "1. Identify definitions used with values",
+            "2. Check if definition includes placeholder",
+            "3. Add # to definition name and content",
+            "4. Or remove values from Def usage",
+            "5. Verify definition-usage consistency"
+        ],
+        "validation_hints": [
+            "Definitions used with Def/Name/value need placeholders",
+            "Add # to definition name and appropriate content location",
+            "Check definition-usage pattern matching",
+            "Verify placeholder substitution works"
+        ],
+        "specification_reference": "3.2.8.1. Definition placeholder requirements",
+        "related_errors": [
+            "PLACEHOLDER_INVALID",
+            "DEF_INVALID",
+            "VALUE_INVALID"
+        ],
+        "definitions":["(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))", "(Definition/MyColor, (Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Def/Acc, (Def/Acc/4.5, Red)",
+                    "Def/MyColor/Blue"
+                ],
+                "passes": [
+                     "Def/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                   {
+                        "event_code": {
+                            "HED": {
+                                "face": "Def/Acc, (Def/Acc/4.5, Red)",
+                                "ball": "(Def/MyColor/Blue, Green)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Def/Acc/4.5, Red",
+                                "ball": "(Acceleration/4.5 m-per-s^2, Red), Def/MyColor"
+                            }
+                        }
+                    }                    
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Def/Acc, (Def/Acc/4.5, Red)"],
+                        [ 5.4, 0, "Def/MyColor/Blue, Green"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0,  "Def/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Def/Acc, (Def/Acc/4.5, Red)",
+                                    "ball": "(Def/MyColor/Blue, Green)"
+                                }
+                            }
+                        },
+                        "events":
+                            [
+                                ["onset", "duration", "event_code", "HED"],
+                                [ 4.5, 0, "ball", "Def/Acc, (Def/Acc/4.5, Red)"],
+                                [ 5.4, 0, "n/a", "Def/MyColor/Blue, Green"],
+                                [ 6.4, 0, "face", "n/a"]
+                            ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Def/Acc/4.5, Red",
+                                    "ball": "(Acceleration/4.5 m-per-s^2, Red), Def/MyColor"
+                                }
+                            }
+                        },
+                        "events":
+                                [
+                                    ["onset", "duration", "event_code", "HED"],
+                                    [ 4.5, 0,  "face", "Def/Acc/5.5, (Acceleration/4.5 m-per-s^2, Red)"],
+                                    [ 6.5, 0,  "ball", "n/a"]
+                                ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEF_INVALID",
+        "alt_codes": ["VALUE_INVALID", "UNITS_INVALID"],
+        "name": "def-invalid-bad-placeholder-value",
+        "description": "A `Def` has a placeholder value of incorrect format or units for definition.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "value",
+        "common_causes": [
+            "Invalid data type for placeholder value",
+            "Non-numeric values where numbers expected",
+            "Invalid string values for placeholder",
+            "Incorrect value format for definition requirements",
+            "Type mismatch between value and definition expectations"
+        ],
+        "explanation": "Placeholder values in Def tags must match the data type and format expected by the definition. Invalid values break proper definition expansion.",
+        "correction_strategy": "Use appropriate value types for placeholder",
+        "correction_examples": [
+            {
+                "wrong": "Def/Acc/baloney (non-numeric for acceleration)",
+                "correct": "Def/Acc/5.0 (numeric value)",
+                "explanation": "Used numeric value for acceleration definition"
+            },
+            {
+                "wrong": "Def/Label/123 (numeric for text label)",
+                "correct": "Def/Label/Description (text value)",
+                "explanation": "Used text value for label definition"
+            }
+        ],
+        "correction_patterns": [
+            "Use numeric values for numeric placeholders",
+            "Use text values for text placeholders",
+            "Match value type to definition expectations",
+            "Verify value format requirements"
+        ],
+        "fix_instructions": [
+            "1. Check definition to understand expected value type",
+            "2. Verify current placeholder value type",
+            "3. Replace with appropriate value type",
+            "4. Test definition expansion works correctly",
+            "5. Verify value meets definition constraints"
+        ],
+        "validation_hints": [
+            "Check if definition expects numeric or text values",
+            "Verify value type matches definition requirements",
+            "Test placeholder substitution results",
+            "Ensure value format is appropriate"
+        ],
+        "specification_reference": "3.2.8.1. Def placeholder value requirements",
+        "related_errors": [
+            "VALUE_INVALID",
+            "DEF_INVALID",
+            "PLACEHOLDER_INVALID"
+        ],
+        "definitions": ["(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))", "(Definition/MyColor, (Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Def/Acc/baloney, (Def/Acc/4.5, Red)",
+                    "Def/Acc/3 m",
+                    "Def/Acc/4m-per-s^2",
+                    "Def/MyColor/Redish"
+                ],
+                "passes": [
+                    "Def/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Def/Acc/baloney, (Def/Acc/4.5, Red)",
+                                "ball": "Def/Acc/3 m",
+                                "square": "Def/Acc/4m-per-s^2",
+                                "triangle": "Def/MyColor/Redish"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def/Acc/4.5, Red)",
+                                "ball": "Def/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Def/Acc/baloney, (Def/Acc/4.5, Red)"],
+                        [ 5.0, 0, "Def/3 m"],
+                        [ 6.3, 0, "Def/Acc/4m-per-s^2"],
+                        [ 7.2, 0, "Def/MyColor/Redish"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Def/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Def/Acc/baloney, (Def/Acc/4.5 m-per-s^2, Red)",
+                                    "ball": "Def/Acc/3 m",
+                                    "square": "Def/Acc/4m-per-s^2",
+                                    "triangle": "Def/MyColor/Redish"
+                                }
+                            }
+                        },
+                        "events":
+                            [
+                                ["onset", "duration", "event_code", "HED"],
+                                [ 4.5, 0, "ball", "Def/Acc/baloney, (Def/Acc/4.5, Red)"],
+                                [ 5.0, 0, "face", "Def/Acc/3 m"],
+                                [ 6.3, 0, "n/a", "Def/Acc/4m-per-s^2"],
+                                [ 7.2, 0, "square", "Def/MyColor/Redish"]
+                                
+                            ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar":  {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/Acc/4.5, Red)",
+                                    "ball": "Def/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)"
+                                }
+                            }
+                        },
+                        "events": 
+                            [
+                                ["onset", "duration", "event_code","HED"],
+                                [ 4.5, 0, "face", "Blue"],
+                                [ 5.0, 0, "ball", "Green, Def/MyColor"]
+                            ]
+                    }
+                ]
+            }
+        }
+    }
+]    

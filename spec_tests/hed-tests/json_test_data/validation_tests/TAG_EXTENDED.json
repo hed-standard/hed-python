@@ -1,0 +1,202 @@
+[
+    {
+        "error_code": "TAG_EXTENDED",
+        "alt_codes": [],
+        "name": "tag-extended-extension",
+        "description": "A tag represents an extension from the schema.",
+        "warning": true,
+        "schema": "8.4.0",
+        "error_category": "semantic",
+        "common_causes": [
+            "Creating new tags not in schema",
+            "Misspelling existing tags",
+            "Using concepts not yet in schema",
+            "Extending schema for domain-specific needs",
+            "Working with older schema versions"
+        ],
+        "explanation": "Tag extensions allow adding new terms to extend the schema vocabulary. While valid, extensions should be used sparingly and only when necessary concepts don't exist in the current schema. Consider proposing additions to the official schema.",
+        "correction_strategy": "Verify extension is necessary or use existing schema tags",
+        "correction_examples": [
+            {
+                "wrong": "Item/MyCustomDevice",
+                "correct": "Item/Object/Device",
+                "explanation": "Used existing schema tag instead of extension"
+            },
+            {
+                "wrong": "Sensory-event/CustomModality",
+                "correct": "Sensory-event/Auditory",
+                "explanation": "Found appropriate existing modality"
+            }
+        ],
+        "correction_patterns": [
+            "Search schema thoroughly for existing alternatives",
+            "Consider more general existing tags",
+            "Verify extension is semantically necessary",
+            "Ensure parent tag allows extensions",
+            "Consider proposing schema addition"
+        ],
+        "fix_instructions": [
+            "1. Check if concept exists in current schema",
+            "2. Search for similar or more general terms",
+            "3. If extension needed, verify it's semantically appropriate",
+            "4. Ensure parent tag has extensionAllowed attribute",
+            "5. Consider proposing addition to official schema"
+        ],
+        "validation_hints": [
+            "This is a warning, not an error",
+            "Extensions are valid but discouraged",
+            "Consider schema completeness before extending",
+            "Document extensions for team consistency"
+        ],
+        "specification_reference": "3.2.5. Tag extensions",
+        "related_errors": [
+            "TAG_EXTENSION_INVALID",
+            "TAG_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Red-color/Red/Big-red, Blue/Nice-blue),(Green, (Yellow))",
+                    "Sensory-presentation/Visual-presentation/Nice-yellow",
+                    "Red-color/Red/Redish",
+                    "Red-color/Red/Redish/More-redish",
+                    "((Green/Greenish))",
+                    "Red/1red",
+                    "Red/Red--2red"
+                ],
+                "passes": [
+                    "Red-color/Red"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red-color/Red/Big-red, Blue/Nice-blue),(Green, (Yellow))",
+                                "ball": "Sensory-presentation/Visual-presentation/Nice-yellow",
+                                "square": "((Green/Greenish))",
+                                "triangle": "Red/1red",
+                                "catwalk": "Red/Red--2red"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red-color/Red"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Red-color/Red/Big-red, Blue/Nice-blue),(Green, (Yellow))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "Sensory-presentation/Visual-presentation/Nice-yellow"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red-color/Red"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red-color/Red/Big-red/Bigger-red, Blue/Nice-blue),(Green, (Yellow))",
+                                    "ball": "Sensory-presentation/Visual-presentation/Nice-yellow"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

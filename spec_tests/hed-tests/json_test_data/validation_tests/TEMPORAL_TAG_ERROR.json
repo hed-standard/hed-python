@@ -1,0 +1,2553 @@
+[
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "temporal-tag-error-not-tag-group",
+        "description": "An Onset or Offset tag does not appear in a tag group.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Onset/Offset tags not enclosed in parentheses",
+            "Missing required Def tag with temporal tags",
+            "Temporal tags in nested groups instead of top-level",
+            "Incorrect pairing of Onset and Offset",
+            "Misunderstanding temporal tag requirements"
+        ],
+        "explanation": "Temporal tags (Onset, Offset, Inset, Duration, Delay) have strict structural requirements. They must appear in top-level tag groups with specific companions and follow precise timing relationships.",
+        "correction_strategy": "Ensure temporal tags follow required structural patterns",
+        "correction_examples": [
+            {
+                "wrong": "Onset, Red",
+                "correct": "(Onset, (Def/MyEvent, (Red)))",
+                "explanation": "Enclosed Onset in group with required definition"
+            },
+            {
+                "wrong": "Offset, Def/Acc/5.4",
+                "correct": "(Offset, (Def/Acc/5.4))",
+                "explanation": "Properly grouped Offset with definition"
+            },
+            {
+                "wrong": "(Duration/5 s, Red, Blue)",
+                "correct": "(Duration/5 s, (Red, Blue))",
+                "explanation": "Moved content into required inner group"
+            }
+        ],
+        "correction_patterns": [
+            "Enclose temporal tags in top-level parentheses",
+            "Include required Def tag or Def-expand group",
+            "Ensure proper Onset/Offset pairing and timing",
+            "Group additional content in inner groups",
+            "Verify temporal relationships are logical"
+        ],
+        "fix_instructions": [
+            "1. Identify temporal tags requiring grouping",
+            "2. Enclose in top-level parentheses",
+            "3. Add required Def tag or Def-expand group",
+            "4. Verify proper temporal tag relationships",
+            "5. Check for appropriate inner group structure"
+        ],
+        "validation_hints": [
+            "Ensure Onset comes before corresponding Offset",
+            "Verify temporal tags are at top level",
+            "Check for required definition companions",
+            "Validate temporal sequence logic"
+        ],
+        "specification_reference": "3.2.8.3. Onset, Offset, and Inset",
+        "related_errors": [
+            "TAG_GROUP_ERROR",
+            "DEFINITION_INVALID",
+            "DEF_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Onset, Red",
+                    "Offset, Def/Acc/5.4"
+                ],
+                "passes": [
+                    "(Onset, Def/Acc/5.4)"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Onset, Def/Acc/5.4)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Onset, Red"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "Onset, Def/MyColor"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Onset, (Def-expand/MyColor, (Label/Pie)), (Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Onset, Def/Acc/5.4)"
+                        ],
+                        [
+                            6.3,
+                            0,
+                            "(Offset, Def/Acc/5.4)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Onset, Red",
+                                    "ball": "(Onset, Def/Acc/5.4)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "ball",
+                                "Onset, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Onset, Def/Acc/5.4)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "n/a",
+                                "(Onset, Def/Acc/5.4)"
+                            ],
+                            [
+                                6.3,
+                                0,
+                                "n/a",
+                                "(Offset, Def/Acc/5.4)"
+                            ],
+                            [
+                                8.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                9.0,
+                                0,
+                                "n/a",
+                                "Green, ((Def-expand/MyColor, (Label/Pie)), Onset)"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "temporal-tag-error-nested-group",
+        "description": "An Onset or Offset tag appears in a nested tag group (not a top-level tag group).",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Temporal tags incorrectly nested within other groups",
+            "Double parentheses around temporal tag groups",
+            "Misunderstanding that temporal tags must be at top level",
+            "Incorrectly grouping temporal content"
+        ],
+        "explanation": "Temporal tags must appear at the top level of tag groups, not nested within other groups. This ensures proper temporal relationship parsing.",
+        "correction_strategy": "Move temporal tags to top-level groups",
+        "correction_examples": [
+            {
+                "wrong": "((Onset, Def/MyColor), Red)",
+                "correct": "(Onset, Def/MyColor), Red",
+                "explanation": "Removed extra parentheses to make Onset top-level"
+            },
+            {
+                "wrong": "Red, ((Offset, Def/Response))",
+                "correct": "Red, (Offset, Def/Response)",
+                "explanation": "Moved Offset to proper top-level group"
+            }
+        ],
+        "correction_patterns": [
+            "Remove extra nesting parentheses around temporal tags",
+            "Ensure temporal tags are direct children of top-level groups",
+            "Separate temporal groups from content groups"
+        ],
+        "fix_instructions": [
+            "1. Identify nested temporal tags",
+            "2. Remove extra parentheses layers",
+            "3. Ensure temporal tags are at top level",
+            "4. Verify proper group structure"
+        ],
+        "validation_hints": [
+            "Check for double parentheses around temporal tags",
+            "Ensure temporal tags are not inside content groups",
+            "Verify proper separation of temporal and content elements"
+        ],
+        "specification_reference": "3.2.8.3. Temporal tag group structure",
+        "related_errors": ["TAG_GROUP_ERROR", "PARENTHESES_MISMATCH"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "((Onset, Def/MyColor), Red)"
+                ],
+                "passes": [
+                    "(Onset, Def/MyColor), Red"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "((Onset, Def/MyColor), Red)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Onset, Def/MyColor), Red"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "((Onset, Def/MyColor), Red)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Onset, Def/MyColor), Red"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "((Onset, Def/MyColor), Red)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "n/a",
+                                "((Onset, Def/MyColor), Red)"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "face",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Onset, Def/MyColor), Red"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "n/a",
+                                "(Onset, Def/MyColor), Red"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "temporal-tag-error-wrong-number-of-defs",
+        "description": "An Onset or Offset tag is not grouped with exactly one Def-expand tag group or a Def tag.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "content",
+        "common_causes": [
+            "Multiple Def tags in a single temporal group",
+            "Missing required Def tag with temporal tag",
+            "Confusion about definition requirements for temporal tags",
+            "Incorrectly combining multiple definitions"
+        ],
+        "explanation": "Each temporal tag group should contain exactly one definition or def-expand group. Multiple definitions create ambiguity about the temporal event.",
+        "correction_strategy": "Use exactly one definition per temporal tag group",
+        "correction_examples": [
+            {
+                "wrong": "(Onset, Def/Event1, Def/Event2)",
+                "correct": "(Onset, Def/Event1)",
+                "explanation": "Removed extra definition to have exactly one"
+            },
+            {
+                "wrong": "(Offset, Red, Blue)",
+                "correct": "(Offset, (Def/MyEvent, (Red, Blue)))",
+                "explanation": "Added required definition for temporal tag"
+            }
+        ],
+        "correction_patterns": [
+            "Use exactly one Def tag per temporal group",
+            "Add missing definitions for temporal tags",
+            "Remove extra definitions from temporal groups"
+        ],
+        "fix_instructions": [
+            "1. Count definitions in temporal groups",
+            "2. Remove extra definitions or add missing ones",
+            "3. Ensure each temporal group has exactly one definition",
+            "4. Verify definition content is appropriate"
+        ],
+        "validation_hints": [
+            "Count Def tags in each temporal group",
+            "Ensure temporal events have clear definitions",
+            "Check for missing or duplicate definitions"
+        ],
+        "specification_reference": "3.2.8.3. Temporal tag definition requirements",
+        "related_errors": ["DEFINITION_INVALID", "DEF_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Onset, (Red))"
+                ],
+                "passes": [
+                    "(Onset, Def/MyColor, (Red))",
+                    "(Onset, (Def-expand/MyColor, (Label/Pie)), (Red))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Onset, (Red))",
+                                "ball": "(Onset, Def/MyColor, Def/Acc/4.3)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Onset, Def/MyColor, (Red))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Onset, (Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Onset, Def/MyColor, Def/Acc/4.32)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Onset, Def/MyColor, (Red))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Onset, (Red))",
+                                    "ball": "(Onset, Def/MyColor, Def/Acc/4.3)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Green, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "n/a",
+                                "(Onset, (Yellow))"
+                            ],
+                            [
+                                6.0,
+                                0,
+                                "ball",
+                                "n/a"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Onset, Def/MyColor, (Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "n/a",
+                                "(Onset, Def/MyColor, (Blue))"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "temporal-tag-error-onset-has-more-groups",
+        "description": "An Onset group has more than one additional tag group.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Extra groups added to Onset beyond required definition",
+            "Misunderstanding Onset group structure requirements",
+            "Incorrectly nesting additional content in Onset group",
+            "Confusion about what belongs in temporal groups"
+        ],
+        "explanation": "Onset groups should contain only the temporal tag and its required definition group. Additional groups create structural violations.",
+        "correction_strategy": "Remove extra groups from Onset or restructure properly",
+        "correction_examples": [
+            {
+                "wrong": "(Onset, Def/Event, (Red), (Blue))",
+                "correct": "(Onset, (Def/Event, (Red, Blue)))",
+                "explanation": "Combined extra groups into single definition content group"
+            },
+            {
+                "wrong": "(Onset, Def/Action, (Extra, Group))",
+                "correct": "(Onset, Def/Action), (Extra, Group)",
+                "explanation": "Moved extra group outside Onset to top level"
+            }
+        ],
+        "correction_patterns": [
+            "Combine extra groups into definition content",
+            "Move unrelated groups outside temporal groups",
+            "Ensure Onset contains only required elements"
+        ],
+        "fix_instructions": [
+            "1. Identify extra groups in Onset",
+            "2. Determine if they belong to the definition or are separate",
+            "3. Combine into definition content or move to top level",
+            "4. Verify Onset group structure compliance"
+        ],
+        "validation_hints": [
+            "Check Onset groups for extra nested groups",
+            "Ensure proper definition content grouping",
+            "Verify temporal group simplicity"
+        ],
+        "specification_reference": "3.2.8.3. Onset group structure",
+        "related_errors": ["TAG_GROUP_ERROR", "DEFINITION_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Onset, Def/MyColor, (Red), (Blue))",
+                    "((Def-expand/MyColor, (Label/Pie)), (Green), (Red), Onset)"
+                ],
+                "passes": [
+                    "(Onset, Def/MyColor)",
+                    "((Def-expand/MyColor, (Label/Pie)), (Red), Onset)"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Onset, Def/MyColor, (Red), (Blue))",
+                                "ball": "((Def-expand/MyColor, (Label/Pie)), (Green), (Yellow), Onset)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Onset, Def/MyColor)",
+                                "ball": "((Def-expand/MyColor, (Label/Pie)), (Green, (Yellow)), Onset)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Onset, Def/MyColor, (Red), (Blue))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "((Def-expand/MyColor, (Label/Pie)), (Green), ((Yellow)), Onset)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Onset, Def/MyColor)"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "((Def-expand/MyColor, (Label/Pie)), (Green, (Yellow)), Onset)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "((Def-expand/MyColor, (Label/Pie)), (Green), ((Yellow)), Onset)",
+                                    "ball": "(Onset, Def/MyColor, (Red), (Blue))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ],
+                            [
+                                6.0,
+                                0,
+                                "n/a",
+                                "(Def/MyColor, (Red), (Blue), Onset)"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Onset, Def/MyColor)",
+                                    "ball": "((Def-expand/MyColor, (Label/Pie)), (Green, (Yellow)), Onset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "n/a",
+                                "((Def-expand/MyColor, (Label/Pie)), (Green, (Yellow)), Onset)"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "temporal-tag-error-offset-has-groups",
+        "description": "An Offset appears with one or more tags or additional tag groups.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Adding extra content to Offset groups",
+            "Misunderstanding that Offset should be standalone",
+            "Including tags that belong outside the Offset group",
+            "Confusion about Offset group structure"
+        ],
+        "explanation": "Offset tags should appear alone in their groups without additional tags or nested groups. Extra content violates temporal structure requirements.",
+        "correction_strategy": "Remove extra content from Offset groups",
+        "correction_examples": [
+            {
+                "wrong": "(Offset, Red, Blue)",
+                "correct": "(Offset)",
+                "explanation": "Removed extra tags from Offset group"
+            },
+            {
+                "wrong": "(Offset, (Extra, Group))",
+                "correct": "(Offset), (Extra, Group)",
+                "explanation": "Moved extra group outside Offset to top level"
+            }
+        ],
+        "correction_patterns": [
+            "Keep Offset groups simple and standalone",
+            "Move extra content outside Offset groups",
+            "Ensure Offset appears alone"
+        ],
+        "fix_instructions": [
+            "1. Identify extra content in Offset groups",
+            "2. Remove or move extra tags/groups to appropriate locations",
+            "3. Ensure Offset stands alone in its group",
+            "4. Verify proper temporal structure"
+        ],
+        "validation_hints": [
+            "Check Offset groups for extra content",
+            "Ensure Offset appears without companions",
+            "Verify proper temporal sequence"
+        ],
+        "specification_reference": "3.2.8.3. Offset group structure",
+        "related_errors": ["TAG_GROUP_ERROR", "TEMPORAL_TAG_ERROR"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Onset, Def/MyColor)",
+                                "ball": "((Def-expand/MyColor, (Label/Pie)), Onset)",
+                                "square": "(Offset, Def/MyColor, (Red))",
+                                "circle": "((Def-expand/MyColor, (Label/Pie)), Offset, Blue)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Onset, Def/MyColor)",
+                                "ball": "((Def-expand/MyColor, (Label/Pie)), Onset)",
+                                "square": "(Offset, Def/MyColor)",
+                                "circle": "((Def-expand/MyColor, (Label/Pie)), Offset)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Onset, Def/MyColor)"
+                        ],
+                        [
+                            4.8,
+                            0,
+                            "(Offset, Def/MyColor, (Red))"
+                        ],
+                        [
+                            4.9,
+                            0,
+                            "(Onset, Def/MyColor, (Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "((Def-expand/MyColor, (Label/Pie)), (Green), Offset)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Onset, Def/MyColor)"
+                        ],
+                        [
+                            4.8,
+                            0,
+                            "(Offset, Def/MyColor)"
+                        ],
+                        [
+                            4.9,
+                            0,
+                            "(Onset, Def/MyColor, (Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "((Def-expand/MyColor, (Label/Pie)), Offset)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Onset, Def/MyColor)",
+                                    "ball": "((Def-expand/MyColor, (Label/Pie)), Onset)",
+                                    "square": "(Offset, Def/MyColor, (Red))",
+                                    "circle": "((Def-expand/MyColor, (Label/Pie)), Offset, Blue)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "n/a"
+                            ],
+                            [
+                                4.8,
+                                0,
+                                "square",
+                                "n/a"
+                            ],
+                            [
+                                4.9,
+                                0,
+                                "ball",
+                                "Green"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "((Def-expand/MyColor, (Label/Pie)), Offset, Blue)",
+                                "Orange"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Onset, Def/MyColor)",
+                                    "ball": "((Def-expand/MyColor, (Label/Pie)), Onset)",
+                                    "square": "(Offset, Def/MyColor)",
+                                    "circle": "((Def-expand/MyColor, (Label/Pie)), Offset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "n/a"
+                            ],
+                            [
+                                4.8,
+                                0,
+                                "square",
+                                "n/a"
+                            ],
+                            [
+                                4.9,
+                                0,
+                                "ball",
+                                "Green"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "circle",
+                                "Orange"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [],
+        "name": "temporal-tag-error-offset-with-no-onset",
+        "description": "An Offset tag associated with a given definition appears after a previous Offset tag without the appearance of an intervening Onset of the same name.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "temporal_logic",
+        "common_causes": [
+            "Using Offset without corresponding Onset in temporal sequence",
+            "Missing Onset event that should precede Offset",
+            "Incorrect temporal event pairing",
+            "Misunderstanding Onset/Offset relationship requirements"
+        ],
+        "explanation": "Offset tags must have corresponding Onset tags to establish proper temporal relationships. An Offset without an Onset creates an incomplete temporal sequence.",
+        "correction_strategy": "Add corresponding Onset tag or remove orphaned Offset",
+        "correction_examples": [
+            {
+                "wrong": "(Offset)",
+                "correct": "(Onset, Def/MyEvent), (Offset)",
+                "explanation": "Added corresponding Onset to complete temporal pair"
+            },
+            {
+                "wrong": "Red, (Offset), Blue",
+                "correct": "(Onset, Def/MyEvent), Red, (Offset), Blue",
+                "explanation": "Added Onset before the temporal sequence"
+            }
+        ],
+        "correction_patterns": [
+            "Add missing Onset before Offset",
+            "Ensure proper Onset/Offset pairing",
+            "Verify temporal sequence completeness"
+        ],
+        "fix_instructions": [
+            "1. Identify orphaned Offset tags",
+            "2. Add corresponding Onset with appropriate definition",
+            "3. Ensure proper temporal sequence order",
+            "4. Verify temporal relationships are complete"
+        ],
+        "validation_hints": [
+            "Check for Offset tags without preceding Onset",
+            "Verify temporal event pairing",
+            "Ensure logical temporal sequence"
+        ],
+        "specification_reference": "3.2.8.3. Onset/Offset pairing requirements",
+        "related_errors": ["TEMPORAL_TAG_ERROR", "TAG_GROUP_ERROR"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/MyColor, Offset)"
+                        ],
+                        [
+                            6.5,
+                            0,
+                            "Red, (Def/MyColor, Offset)"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def/MyColor, Offset)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/MyColor, Onset)"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def/MyColor, Offset)"
+                        ],
+                        [
+                            6.5,
+                            0,
+                            "Red"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, Onset)",
+                                    "ball": "(Def/MyColor, Offset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "ball",
+                                "Red, Blue"
+                            ],
+                            [
+                                4.8,
+                                0,
+                                "ball",
+                                "Red, Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "face",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, Onset)",
+                                    "ball": "(Def/MyColor, Offset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "temporal-tag-error-extra tags",
+        "description": "An Onset tag group with has tags besides the anchor Def or Def-expand that are not in a tag group.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Adding loose tags to temporal groups without proper grouping",
+            "Misunderstanding temporal group content structure",
+            "Incorrectly placing tags alongside definitions",
+            "Confusion about what content belongs in temporal groups"
+        ],
+        "explanation": "Temporal groups should contain only the temporal tag and its definition group. Extra tags must be properly grouped within the definition content.",
+        "correction_strategy": "Group extra tags properly within definition content",
+        "correction_examples": [
+            {
+                "wrong": "(Def/MyColor, Blue, Green, Onset)",
+                "correct": "(Onset, (Def/MyColor, (Blue, Green)))",
+                "explanation": "Grouped extra tags within definition content and reordered properly"
+            },
+            {
+                "wrong": "(Onset, Def/Action, Red, Blue)",
+                "correct": "(Onset, (Def/Action, (Red, Blue)))",
+                "explanation": "Grouped loose tags within definition content"
+            }
+        ],
+        "correction_patterns": [
+            "Group extra tags within definition content",
+            "Ensure proper temporal tag ordering",
+            "Remove loose tags from temporal groups"
+        ],
+        "fix_instructions": [
+            "1. Identify loose tags in temporal groups",
+            "2. Group them within the definition content",
+            "3. Ensure proper temporal tag structure",
+            "4. Verify temporal group compliance"
+        ],
+        "validation_hints": [
+            "Check for ungrouped tags in temporal groups",
+            "Ensure definition content is properly grouped",
+            "Verify temporal tag order and structure"
+        ],
+        "specification_reference": "3.2.8.3. Temporal group content structure",
+        "related_errors": ["TAG_GROUP_ERROR", "DEFINITION_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def/MyColor, Blue, Green, Onset)"
+                ],
+                "passes": [
+                    "(Def/MyColor, (Blue), Onset)"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def/MyColor, Blue, Green, Onset)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def/MyColor, (Blue), Onset)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/MyColor, Blue, (Green), Onset)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/MyColor, (Blue), Onset)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, Blue, Green, Onset)",
+                                    "ball": "Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "((Blue, Green), Def/MyColor, Onset)",
+                                    "ball": "(Def/Acc/7, Onset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [],
+        "name": "temporal-tag-error-duplicated-onset-or-offset",
+        "description": "An Onset or an Offset with a given Def or Def-expand anchor appears in the same event marker with another Onset or Offset that uses the same anchor.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "temporal_logic",
+        "common_causes": [
+            "Duplicate Onset or Offset tags for the same definition",
+            "Multiple temporal markers for the same event",
+            "Copy-paste errors creating duplicate temporal tags",
+            "Misunderstanding that each definition should have unique temporal markers"
+        ],
+        "explanation": "Each definition should have at most one Onset and one Offset per event. Duplicate temporal tags for the same definition create ambiguous temporal sequences.",
+        "correction_strategy": "Remove duplicate temporal tags or use different definitions",
+        "correction_examples": [
+            {
+                "wrong": "(Onset, Def/Event), (Onset, Def/Event)",
+                "correct": "(Onset, Def/Event)",
+                "explanation": "Removed duplicate Onset for same definition"
+            },
+            {
+                "wrong": "(Offset, Def/Action), (Offset, Def/Action)",
+                "correct": "(Offset, Def/Action)",
+                "explanation": "Kept only one Offset for the definition"
+            }
+        ],
+        "correction_patterns": [
+            "Remove duplicate temporal tags for same definition",
+            "Use different definitions for multiple temporal events",
+            "Ensure unique temporal markers per definition"
+        ],
+        "fix_instructions": [
+            "1. Identify duplicate temporal tags with same definition",
+            "2. Remove extra temporal tags",
+            "3. Consider using different definitions if multiple events needed",
+            "4. Verify temporal sequence uniqueness"
+        ],
+        "validation_hints": [
+            "Check for repeated Onset/Offset with same Def",
+            "Ensure temporal uniqueness per definition",
+            "Verify proper event separation"
+        ],
+        "specification_reference": "3.2.8.3. Temporal tag uniqueness",
+        "related_errors": ["TEMPORAL_TAG_ERROR", "DEFINITION_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, (Green), Onset)",
+                                    "ball": "Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "(Def/MyColor, (Blue), Onset)"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    },
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, (Green), Onset)",
+                                    "ball": "(Def/MyColor, Onset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "(Def/MyColor, Offset)"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "(Def/MyColor, Offset)"
+                            ]
+                        ]
+                    },
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, (Green), Onset)",
+                                    "ball": "(Def/MyColor, Onset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "(Def/MyColor, Offset)"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "(Def/MyColor, Offset)"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "((Blue, Green), Def/MyColor, Onset)",
+                                    "ball": "(Def/MyColor, Onset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [],
+        "name": "temporal-tag-error-inset-outside-its-event",
+        "description": "An Inset tag is not grouped with a Def or Def-expand of an ongoing Onset.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "temporal_logic",
+        "common_causes": [
+            "Inset tag appearing without corresponding Onset event",
+            "Inset referencing different definition than its Onset",
+            "Temporal sequence violation with Inset placement",
+            "Misunderstanding Inset relationship to Onset events"
+        ],
+        "explanation": "Inset tags must occur within the temporal window of an ongoing Onset event and must reference the same definition as that Onset.",
+        "correction_strategy": "Ensure Inset appears within corresponding Onset temporal window",
+        "correction_examples": [
+            {
+                "wrong": "(Inset, Def/Event), (Onset, Def/Action)",
+                "correct": "(Onset, Def/Event), (Inset, Def/Event)",
+                "explanation": "Made Inset reference same definition as preceding Onset"
+            },
+            {
+                "wrong": "(Offset, Def/Event), (Inset, Def/Event)",
+                "correct": "(Onset, Def/Event), (Inset, Def/Event), (Offset, Def/Event)",
+                "explanation": "Added missing Onset before Inset"
+            }
+        ],
+        "correction_patterns": [
+            "Ensure Inset follows corresponding Onset",
+            "Match Inset definition with Onset definition",
+            "Verify temporal sequence order"
+        ],
+        "fix_instructions": [
+            "1. Identify Inset tags and their definitions",
+            "2. Find corresponding Onset with same definition",
+            "3. Ensure Inset appears after Onset but before Offset",
+            "4. Verify proper temporal window relationship"
+        ],
+        "validation_hints": [
+            "Check Inset appears within Onset temporal window",
+            "Verify Inset and Onset use same definition",
+            "Ensure proper temporal sequence order"
+        ],
+        "specification_reference": "3.2.8.3. Inset temporal relationships",
+        "related_errors": ["TEMPORAL_TAG_ERROR", "DEFINITION_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Inset, (Red))"
+                        ],
+                        [
+                            6.5,
+                            0,
+                            "Red, (Def/MyColor, Offset)"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def/MyColor, Offset)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/MyColor, Onset)"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def/MyColor, Offset)"
+                        ],
+                        [
+                            6.5,
+                            0,
+                            "Red"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, Onset)",
+                                    "ball": "(Def/MyColor, Offset)",
+                                    "snack": "(Def/MyColor, Inset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "snack",
+                                "Red, Blue"
+                            ],
+                            [
+                                4.8,
+                                0,
+                                "face",
+                                "Red, Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "face",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, Onset)",
+                                    "ball": "(Def/MyColor, Offset)",
+                                    "snack": "(Def/MyColor, Inset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                4.8,
+                                0,
+                                "snack",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "temporal-tag-error-inset-group-has-extras",
+        "description": "An Inset group has tags or groups in addition to its defining Def or Def-expand.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "temporal",
+        "common_causes": [
+            "Extra content tags added to Inset groups",
+            "Misunderstanding that Inset should be minimal",
+            "Incorrect grouping of content with Inset",
+            "Over-specification of Inset temporal boundaries",
+            "Adding unnecessary tags to Inset structure"
+        ],
+        "explanation": "Inset tags should only include their defining Def or Def-expand tag. Additional content violates the minimal boundary specification for Insets.",
+        "correction_strategy": "Remove extra content from Inset groups",
+        "correction_examples": [
+            {
+                "wrong": "(Def/MyColor, Blue, Inset)",
+                "correct": "(Def/MyColor, Inset)",
+                "explanation": "Removed extra content tag from Inset group"
+            },
+            {
+                "wrong": "(Def/MyColor, (Blue), Inset)",
+                "correct": "(Def/MyColor, Inset)",
+                "explanation": "Eliminated additional grouped content"
+            }
+        ],
+        "correction_patterns": [
+            "Keep only definition with Inset tag",
+            "Remove all additional content from Inset groups",
+            "Maintain minimal Inset boundary specification",
+            "Follow temporal minimalism requirements"
+        ],
+        "fix_instructions": [
+            "1. Identify Inset groups with extra content",
+            "2. Remove all tags except definition and Inset",
+            "3. Ensure minimal Inset structure",
+            "4. Verify temporal boundary requirements",
+            "5. Check Inset group minimalism rules"
+        ],
+        "validation_hints": [
+            "Inset should only have definition plus Inset tag",
+            "Remove any additional content from Inset groups",
+            "Check minimal temporal boundary rules",
+            "Verify Inset group simplicity"
+        ],
+        "specification_reference": "3.2.8.3. Inset minimal boundary requirements",
+        "related_errors": [
+            "TEMPORAL_TAG_ERROR",
+            "TAG_GROUP_ERROR",
+            "TAG_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            2.5,
+                            0,
+                            "Red, (Def/MyColor, Onset)"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/MyColor, Blue, Inset)"
+                        ],
+                        [
+                            6.5,
+                            0,
+                            "Red, (Def/MyColor, Onset)"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def/MyColor, Offset)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/MyColor, (Blue), Onset)"
+                        ],
+                        [
+                            4.8,
+                            0,
+                            "(Def/MyColor, (Green), Inset)"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def/MyColor, Offset)"
+                        ],
+                        [
+                            6.5,
+                            0,
+                            "Red"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, Onset)",
+                                    "ball": "(Def/MyColor, Offset)",
+                                    "snack": "(Def/MyColor, Inset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "snack",
+                                "Red, Blue"
+                            ],
+                            [
+                                4.8,
+                                0,
+                                "face",
+                                "Red, Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "face",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, Onset)",
+                                    "ball": "(Def/MyColor, Offset)",
+                                    "snack": "(Def/MyColor, Inset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                4.7,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                4.8,
+                                0,
+                                "snack",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "temporal-tag-error-duration-group",
+        "description": "A Duration or Delay has extra tags or groups.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Adding extra content to Duration or Delay groups",
+            "Misunderstanding that Duration/Delay should be standalone",
+            "Including descriptive content that belongs elsewhere",
+            "Confusion about temporal tag group structure"
+        ],
+        "explanation": "Duration and Delay tags should appear alone in their groups with only their time values. Extra content violates temporal structure requirements.",
+        "correction_strategy": "Remove extra content from Duration/Delay groups",
+        "correction_examples": [
+            {
+                "wrong": "(Duration/3.0 s, (Green), (Blue))",
+                "correct": "(Duration/3.0 s), (Green), (Blue)",
+                "explanation": "Moved extra content outside Duration group"
+            },
+            {
+                "wrong": "(Delay/2.0 s, Red, Blue)",
+                "correct": "(Delay/2.0 s), Red, Blue",
+                "explanation": "Separated Delay from descriptive content"
+            }
+        ],
+        "correction_patterns": [
+            "Keep Duration/Delay groups simple and standalone",
+            "Move extra content outside temporal groups",
+            "Ensure temporal tags contain only time values"
+        ],
+        "fix_instructions": [
+            "1. Identify extra content in Duration/Delay groups",
+            "2. Move extra tags/groups to appropriate locations",
+            "3. Ensure Duration/Delay stand alone with time values only",
+            "4. Verify proper temporal structure"
+        ],
+        "validation_hints": [
+            "Check Duration/Delay groups for extra content",
+            "Ensure temporal tags appear with time values only",
+            "Verify proper separation of temporal and descriptive content"
+        ],
+        "specification_reference": "3.2.8.3. Duration and Delay group structure",
+        "related_errors": ["TAG_GROUP_ERROR", "TEMPORAL_TAG_ERROR"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Duration/3.0 s, Delay/2.0 s, (Green), (Blue))",
+                    "(Duration/3.0 s, (Green), (Blue))",
+                    "(Delay/3.0 s, (Green), (Blue))"
+                ],
+                "passes": [
+                    "(Duration/3.0 s, Delay/2.0 s, (Blue))",
+                    "(Duration/3.0 s, (Blue))",
+                    "(Delay/3.0 s, (Blue))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "(Duration/3.0 s, Delay/2.0 s)"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Duration/3.0 s, Delay/2.0 s, Event)"
+                        ],
+                        [
+                            6.0,
+                            0,
+                            "(Duration/3.0 s, Delay/2.0 s, (Green), (Blue))"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "((Blue), Duration/3.0 s)"
+                        ],
+                        [
+                            4.8,
+                            0,
+                            "((Green), Delay/2.0 s)"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "((Green), Duration/3.0 s, Delay/2.0 s)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Duration/3.0 s, (Event))",
+                                    "ball": "(Delay/3.0 s, (Event))",
+                                    "snack": "(Duration/3.0 s, Delay/2.0 s, (Event))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                4.7,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                4.8,
+                                0,
+                                "snack",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "temporal-tag-error-tag-appears-where-not-allowed",
+        "description": "A temporal tag appears appears in a tsv with no onset column",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "context",
+        "common_causes": [
+            "Temporal tags used in inappropriate file formats",
+            "Missing onset column for temporal tag usage",
+            "Temporal tags in non-temporal contexts",
+            "Misunderstanding temporal tag file requirements",
+            "Incorrect file format for temporal annotations"
+        ],
+        "explanation": "Temporal tags (Onset, Offset, Inset) require proper temporal context with onset timing information. They cannot be used in files without temporal structure.",
+        "correction_strategy": "Use temporal tags only in appropriate temporal contexts",
+        "correction_examples": [
+            {
+                "wrong": "Using Onset, Def/MyColor in non-temporal file",
+                "correct": "Use in file with onset column or remove temporal tags",
+                "explanation": "Temporal tags require temporal file structure"
+            },
+            {
+                "wrong": "Def/MyColor, Inset without onset timing",
+                "correct": "Remove temporal tags or add proper temporal structure",
+                "explanation": "Eliminated temporal tags from inappropriate context"
+            }
+        ],
+        "correction_patterns": [
+            "Remove temporal tags from non-temporal files",
+            "Add proper temporal structure (onset column)",
+            "Use appropriate file format for temporal annotations",
+            "Verify temporal context requirements"
+        ],
+        "fix_instructions": [
+            "1. Check if file format supports temporal tags",
+            "2. Add onset column if temporal tags needed",
+            "3. Remove temporal tags if inappropriate context",
+            "4. Verify file structure requirements",
+            "5. Use correct format for temporal annotations"
+        ],
+        "validation_hints": [
+            "Temporal tags need onset timing context",
+            "Check file format temporal support",
+            "Verify proper temporal structure",
+            "Remove temporal tags from inappropriate files"
+        ],
+        "specification_reference": "3.2.8.3. Temporal tag context requirements",
+        "related_errors": [
+            "TEMPORAL_TAG_ERROR",
+            "SIDECAR_INVALID",
+            "TAG_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            0,
+                            "(Duration/5 s, (Red))"
+                        ],
+                        [
+                            0,
+                            "Red, (Def/MyColor, Onset)"
+                        ],
+                        [
+                            0,
+                            "(Def/MyColor, Yellow, Inset)"
+                        ],
+                        [
+                            0,
+                            "Red, (Def/MyColor, Onset)"
+                        ],
+                        [
+                            0,
+                            "(Def/MyColor, Offset)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            0,
+                            "(Def/MyColor, (Blue))"
+                        ],
+                        [
+                            0,
+                            "(Def/MyColor, (Green))"
+                        ],
+                        [
+                            0,
+                            "(Def/MyColor)"
+                        ],
+                        [
+                            0,
+                            "Red"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor, Onset)",
+                                    "ball": "(Def/MyColor, Offset)",
+                                    "snack": "(Def/MyColor, Inset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                "n/a",
+                                "(Duration/5.0, (Red))"
+                            ],
+                            [
+                                "face",
+                                "Def/MyColor, Red, Blue"
+                            ],
+                            [
+                                "ball",
+                                "Def/MyColor, Red, Blue"
+                            ],
+                            [
+                                "snack",
+                                "Green"
+                            ]
+                        ]
+                    },
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Duration/5.0, (Red))",
+                                    "ball": "(Delay/4.0, (Green))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                "face",
+                                "Def/MyColor, Red, Blue"
+                            ],
+                            [
+                                "ball",
+                                "Def/MyColor, Red, Blue"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor)",
+                                    "ball": "(Def/MyColor)",
+                                    "snack": "(Def/MyColor)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                "snack",
+                                "Blue"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TEMPORAL_TAG_ERROR",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "na-in-onset column",
+        "description": "n/a is in the onset column.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "data_format",
+        "common_causes": [
+            "Using n/a in onset column where temporal value expected",
+            "Missing onset time data marked as n/a",
+            "Incorrect data formatting in temporal columns",
+            "Confusion about required vs optional temporal data"
+        ],
+        "explanation": "Onset columns should contain valid temporal values or be empty. Using 'n/a' in onset columns creates temporal sequence errors.",
+        "correction_strategy": "Replace n/a with valid onset time or leave empty",
+        "correction_examples": [
+            {
+                "wrong": "onset: n/a",
+                "correct": "onset: 4.5",
+                "explanation": "Provided actual onset time value"
+            },
+            {
+                "wrong": "onset: n/a",
+                "correct": "onset: (empty)",
+                "explanation": "Left onset empty if no temporal relationship"
+            }
+        ],
+        "correction_patterns": [
+            "Provide actual onset times when temporal relationship exists",
+            "Leave onset empty rather than using n/a",
+            "Ensure temporal data consistency"
+        ],
+        "fix_instructions": [
+            "1. Identify n/a values in onset columns",
+            "2. Determine if onset time is available",
+            "3. Replace with actual time or leave empty",
+            "4. Verify temporal sequence consistency"
+        ],
+        "validation_hints": [
+            "Check onset columns for n/a values",
+            "Ensure temporal data is properly formatted",
+            "Verify onset times align with event structure"
+        ],
+        "specification_reference": "3.4. Temporal data formatting requirements",
+        "related_errors": ["TEMPORAL_TAG_ERROR", "SIDECAR_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5",
+                                    "ball": "Black, White"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "face",
+                                "Def/MyColor, Red, Blue"
+                            ],
+                            [
+                                "n/a",
+                                0,
+                                "ball",
+                                "(Onset, Def/MyColor, (Red))"
+                            ]
+                        ]
+                    },
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Orange",
+                                    "ball": "(Delay/4.0, (Green))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "face",
+                                "Def/MyColor, Red, Blue"
+                            ],
+                            [
+                                "n/a",
+                                0,
+                                "ball",
+                                "Item"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5",
+                                    "ball": "(Black, White)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                5.0,
+                                "face",
+                                "Red, Blue"
+                            ],
+                            [
+                                "n/a",
+                                0,
+                                "ball",
+                                "(Duration/5.0, (Red))"
+                            ]
+                        ]
+                    },
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5",
+                                    "ball": "(Black, White)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "face",
+                                "Red, Blue"
+                            ],
+                            [
+                                "n/a",
+                                0,
+                                "ball",
+                                "(Duration/5.0, (Red))"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

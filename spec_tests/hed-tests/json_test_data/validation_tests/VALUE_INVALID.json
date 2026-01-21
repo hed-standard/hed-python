@@ -1,0 +1,637 @@
+[
+    {
+        "error_code": "VALUE_INVALID",
+        "alt_codes": [
+            "CHARACTER_INVALID",
+            "TAG_INVALID"
+        ],
+        "name": "value-invalid-#-substitution",
+        "description": "The value substituted for a placeholder (`#`) is not valid.",
+        "warning": false,
+        "schema": "8.3.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Using incorrect data types for tag values (e.g., text where numbers expected)",
+            "Missing or incorrect units for numerical values",
+            "Invalid characters in tag values",
+            "Values that don't match the tag's value class requirements",
+            "Incorrect spacing between values and units"
+        ],
+        "explanation": "HED tags with placeholders (#) require values that match specific value classes (e.g., numeric, text, dateTime). The value must be compatible with the tag's requirements, including proper units, format, and character restrictions.",
+        "correction_strategy": "Provide values that match the tag's value class requirements",
+        "correction_examples": [
+            {
+                "wrong": "Def/Acc/MyMy",
+                "correct": "Def/Acc/3.4",
+                "explanation": "Replaced invalid text with valid numeric value for acceleration"
+            },
+            {
+                "wrong": "Distance/4mxxx",
+                "correct": "Distance/4 m",
+                "explanation": "Corrected units format with proper spacing and valid unit"
+            },
+            {
+                "wrong": "Item-count/abc",
+                "correct": "Item-count/5",
+                "explanation": "Replaced text with valid integer for count"
+            }
+        ],
+        "correction_patterns": [
+            "Use numeric values for tags requiring numbers",
+            "Include proper units with correct spacing (value + space + unit)",
+            "Ensure text values use only allowed characters",
+            "Match value format to tag's value class requirements",
+            "Use valid units from the schema's unit classes"
+        ],
+        "fix_instructions": [
+            "1. Identify the tag's value class requirements from the schema",
+            "2. Check if the value matches the expected data type",
+            "3. For numeric values: ensure proper number format",
+            "4. For values with units: verify unit validity and spacing",
+            "5. For text values: check character restrictions"
+        ],
+        "validation_hints": [
+            "Consult schema documentation for tag value requirements",
+            "Verify units are from valid unit classes",
+            "Check that numeric values use proper decimal notation",
+            "Ensure single space between value and unit",
+            "Confirm text values don't contain forbidden characters"
+        ],
+        "specification_reference": "3.2.4. Tags that take values",
+        "related_errors": [
+            "UNITS_INVALID",
+            "CHARACTER_INVALID",
+            "PLACEHOLDER_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Def/Acc/MyMy",
+                                "ball": "Distance/4mxxx"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Def/Acc/3.4",
+                                "ball": "Distance/4 m"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "response": {
+                                "HED": "Item-count/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "response",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                4,
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "response": {
+                                "HED": "Item-count/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "response",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                5,
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                2,
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "VALUE_INVALID",
+        "alt_codes": [
+            "CHARACTER_INVALID"
+        ],
+        "name": "value-invalid-incompatible-value-class",
+        "description": "A tag placeholder value is incompatible with the specified value class.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Using characters invalid for specific value classes (e.g., letters in numeric values)",
+            "Providing values that don't match the expected data type",
+            "Using incompatible units or formats for specific tags",
+            "Violating name class restrictions for placeholder substitutions"
+        ],
+        "explanation": "HED tags with placeholders have specific value class requirements. The substituted value must be compatible with the tag's defined value class restrictions.",
+        "correction_strategy": "Ensure placeholder values match the required value class format",
+        "correction_examples": [
+            {
+                "wrong": "Statistical-accuracy/1max1",
+                "correct": "Statistical-accuracy/0.95",
+                "explanation": "Replaced invalid character sequence with proper numeric value"
+            },
+            {
+                "wrong": "Duration/abc",
+                "correct": "Duration/3.5",
+                "explanation": "Replaced text with numeric value for numeric value class"
+            }
+        ],
+        "correction_patterns": [
+            "Use only numeric values for numeric value classes",
+            "Match the expected data type and format",
+            "Remove invalid characters for the specific value class",
+            "Verify units are appropriate for the tag context"
+        ],
+        "fix_instructions": [
+            "1. Identify the tag's value class requirements",
+            "2. Check if the provided value matches the expected format",
+            "3. Replace invalid characters or format",
+            "4. Ensure numeric values use proper format (decimals, scientific notation)",
+            "5. Verify units match the tag's unit class if applicable"
+        ],
+        "validation_hints": [
+            "Check HED schema for tag value class definitions",
+            "Verify numeric values use appropriate format",
+            "Ensure text values only contain allowed characters",
+            "Confirm units are valid for the specific tag"
+        ],
+        "specification_reference": "2.2. Value classes and validation",
+        "related_errors": ["CHARACTER_INVALID", "UNITS_INVALID", "PLACEHOLDER_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Statistical-accuracy/1max1"
+                ],
+                "passes": [
+                    "Statistical-accuracy/0.677"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Statistical-accuracy/1max1"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Statistical-accuracy/0.677"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Statistical-accuracy/1max1"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Statistical-accuracy/0.677"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Statistical-accuracy/1max1"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "VALUE_INVALID",
+        "alt_codes": [
+            "CHARACTER_INVALID",
+            "TAG_INVALID",
+            "UNITS_INVALID"
+        ],
+        "name": "value-invalid-blank-missing-before-units",
+        "description": "The units are not separated from the value by a single blank.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Missing space between numeric value and units",
+            "Multiple spaces between value and units instead of single space",
+            "No separator between value and units",
+            "Incorrect formatting of unit expressions"
+        ],
+        "explanation": "HED requires exactly one space to separate numeric values from their units. This ensures consistent parsing and interpretation of quantitative data.",
+        "correction_strategy": "Insert exactly one space between value and units",
+        "correction_examples": [
+            {
+                "wrong": "Acceleration/5m-per-s^2",
+                "correct": "Acceleration/5 m-per-s^2",
+                "explanation": "Added required space between value and units"
+            },
+            {
+                "wrong": "Duration/3.5ms",
+                "correct": "Duration/3.5 ms",
+                "explanation": "Added space between value and millisecond units"
+            }
+        ],
+        "correction_patterns": [
+            "Insert single space between number and unit",
+            "Remove extra spaces to ensure only one space exists",
+            "Verify unit format follows HED specifications"
+        ],
+        "fix_instructions": [
+            "1. Locate numeric values with units",
+            "2. Ensure exactly one space separates value from units",
+            "3. Remove any extra spaces",
+            "4. Verify units are properly formatted",
+            "5. Check that units are valid for the tag"
+        ],
+        "validation_hints": [
+            "Look for patterns like 'number+units' without spaces",
+            "Verify single space separation (not multiple spaces)",
+            "Ensure units match HED unit specifications",
+            "Check that the complete value+unit expression is valid"
+        ],
+        "specification_reference": "2.3.1. Units and unit classes",
+        "related_errors": ["UNITS_INVALID", "CHARACTER_INVALID", "TAG_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Acceleration/5m-per-s^2"
+                ],
+                "passes": [
+                    "Acceleration/5 m-per-s^2"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Acceleration/5m-per-s^2"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Acceleration/5 m-per-s^2"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Acceleration/5m-per-s^2"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Acceleration/5 m-per-s^2"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/banana",
+                                    "ball": "Def/Acc/apple3, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "VALUE_INVALID",
+        "alt_codes": [
+            "UNITS_INVALID"
+        ],
+        "name": "invalid-character-numeric-class",
+        "description": "An invalid character was used in an 8.3.0 or greater style numeric value class.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Including non-numeric characters in numeric values (letters, symbols)",
+            "Using currency symbols or percentage signs in numeric fields",
+            "Typos that introduce invalid characters into numbers",
+            "Copy-paste errors that include formatting characters"
+        ],
+        "explanation": "Numeric value classes in HED 8.3.0+ require strict numeric formatting. Only digits, decimal points, scientific notation, and proper unit separators are allowed.",
+        "correction_strategy": "Remove invalid characters and use proper numeric formatting",
+        "correction_examples": [
+            {
+                "wrong": "Weight/3.0$ kg",
+                "correct": "Weight/3.0 kg",
+                "explanation": "Removed currency symbol from numeric value"
+            },
+            {
+                "wrong": "Weight/abc kg",
+                "correct": "Weight/3.0 kg",
+                "explanation": "Replaced text with proper numeric value"
+            },
+            {
+                "wrong": "Weight/3.0% kg",
+                "correct": "Weight/3.0 kg",
+                "explanation": "Removed percentage symbol from numeric value"
+            }
+        ],
+        "correction_patterns": [
+            "Remove non-numeric characters from numeric values",
+            "Use only digits, decimal points, and scientific notation",
+            "Ensure proper space separation between value and units",
+            "Replace text or symbols with valid numeric representations"
+        ],
+        "fix_instructions": [
+            "1. Identify non-numeric characters in numeric value fields",
+            "2. Remove symbols, letters, and formatting characters",
+            "3. Ensure value uses standard numeric format",
+            "4. Verify decimal places and scientific notation are correct",
+            "5. Maintain proper space separation with units"
+        ],
+        "validation_hints": [
+            "Numeric values should contain only digits, decimal points, and +/- signs",
+            "Scientific notation (e.g., 1.23e-4) is acceptable",
+            "Units must be separated from values by exactly one space",
+            "No currency symbols, percentages, or letters in numeric fields"
+        ],
+        "specification_reference": "2.2. Numeric value classes in HED 8.3.0+",
+        "related_errors": ["CHARACTER_INVALID", "UNITS_INVALID"],
+        "definitions": [],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Weight/3.0$ kg",
+                    "Weight/3.0db kg",
+                    "Weight/3.0& kg",
+                    "Weight/abc kg",
+                    "Weight/*3.0 kg",
+                    "Weight/3.0% kg",
+                    "Weight/3.0^ kg",
+                    "Weight/3.0? kg"
+                ],
+                "passes": [
+                    "Weight/3.0e10 kg",
+                    "Weight/3e10 kg",
+                    "Weight/3.0 kg",
+                    "Weight/3000 kg",
+                    "Weight/3e10 kg",
+                    "Weight/3.5e10 kg",
+                    "Weight/2.998e8 g",
+                    "Weight/6.022e23 g",
+                    "Weight/7.0e-10 g",
+                    "Weight/1.6e-35 kg"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "show": "Weight/3.0a"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": "Weight/# g"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [],
+                "passes": []
+            }
+        }
+    }
+]

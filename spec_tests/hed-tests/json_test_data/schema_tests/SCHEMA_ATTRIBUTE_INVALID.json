@@ -1,0 +1,126 @@
+[
+    {
+        "error_code": "SCHEMA_ATTRIBUTE_INVALID",
+        "name": "attribute-invalid-unknown",
+        "warning": true,
+        "description": "A schema attribute issue, saying there is an unknown one.",
+        "schema": "",
+        "error_category": "schema_development",
+        "common_causes": [
+            "Using undefined schema attributes",
+            "Applying attributes to wrong element types",
+            "Typos in attribute names",
+            "Using attributes from different schema versions",
+            "Incorrect attribute property assignments"
+        ],
+        "explanation": "Schema attributes must be defined in the schema attributes section before use, and must be applied to the correct element types (tags, units, value classes, etc.). Each attribute has specific properties that determine where it can be used.",
+        "correction_strategy": "Define missing attributes or fix attribute usage",
+        "correction_examples": [
+            {
+                "wrong": "'''Tag-with-unknown''' {unknownAttribute}",
+                "correct": "'''Tag-with-unknown''' {extensionAllowed}",
+                "explanation": "Replaced undefined attribute with valid schema attribute"
+            },
+            {
+                "wrong": "* mod1 {unitAttribute}[Wrong attribute type]",
+                "correct": "* mod1 {unitModifierProperty}",
+                "explanation": "Used correct property type for unit modifier"
+            }
+        ],
+        "correction_patterns": [
+            "Define all schema attributes in the Schema attributes section",
+            "Ensure attribute properties match element types",
+            "Use correct property types: nodeClassProperty, unitProperty, etc.",
+            "Check attribute names for typos",
+            "Verify attribute compatibility with schema version"
+        ],
+        "fix_instructions": [
+            "1. Check if the attribute is defined in Schema attributes section",
+            "2. Verify the attribute property type matches the element",
+            "3. Correct spelling of attribute names",
+            "4. Add missing attribute definitions if needed",
+            "5. Ensure proper property assignment"
+        ],
+        "validation_hints": [
+            "Review schema attributes section for all used attributes",
+            "Check property types match element usage",
+            "Verify attribute names are spelled correctly",
+            "Ensure attributes exist in current schema version"
+        ],
+        "specification_reference": "A.1.4. Schema attributes",
+        "related_errors": [
+            "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+            "SCHEMA_SECTION_MISSING"
+        ],
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag-with-unknown''' {unknownAttribute}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag-with-unknown''' {unitAttribute}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes''' <nowiki>{unitProperty}</nowiki>",
+                        "* unitAttribute <nowiki>{unitProperty}</nowiki>",
+                        "'''Properties''' <nowiki></nowiki>",
+                        "* unitProperty <nowiki></nowiki>",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag'''",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers''' <nowiki></nowiki>",
+                        "* mod1 <nowiki>{unitAttribute}[Wrong attribute type]</nowiki>",
+                        "'''Value classes'''",
+                        "'''Schema attributes''' <nowiki>{unitProperty}</nowiki>",
+                        "* unitAttribute <nowiki>{unitProperty}</nowiki>",
+                        "'''Properties''' <nowiki></nowiki>",
+                        "* unitProperty <nowiki></nowiki>",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag-with-unknown''' {suggestedTag=Event}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    }
+]

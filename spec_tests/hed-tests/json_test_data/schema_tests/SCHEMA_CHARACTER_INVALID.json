@@ -1,0 +1,497 @@
+[
+  {
+    "error_code": "SCHEMA_CHARACTER_INVALID",
+    "name": "schema-character-invalid-prologue",
+    "warning": true,
+    "description": "Invalid character in prologue or epilogue.",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Including tab characters or other control characters in schema text",
+      "Using non-printable characters in prologue or epilogue sections",
+      "Copy-paste errors that introduce invisible characters",
+      "Encoding issues when saving schema files",
+      "Invalid characters in schema tag names or descriptions"
+    ],
+    "explanation": "Schema files must use only valid characters as defined in the HED specification. Control characters and non-printable characters can cause parsing errors and schema validation failures.",
+    "correction_strategy": "Remove or replace invalid characters with valid alternatives",
+    "correction_examples": [
+      {
+        "wrong": "'''Prologue'''\n\t",
+        "correct": "'''Prologue'''",
+        "explanation": "Removed tab character from prologue section"
+      },
+      {
+        "wrong": "Tag-name\u0000",
+        "correct": "Tag-name",
+        "explanation": "Removed null character from tag name"
+      }
+    ],
+    "correction_patterns": [
+      "Remove tab characters and control characters",
+      "Replace non-printable characters with spaces or remove them",
+      "Ensure proper text encoding (UTF-8)",
+      "Check for invisible characters in copy-paste operations"
+    ],
+    "fix_instructions": [
+      "1. Scan schema file for control characters and non-printable characters",
+      "2. Remove or replace invalid characters",
+      "3. Verify text encoding is UTF-8",
+      "4. Check prologue and epilogue sections specifically",
+      "5. Validate schema parses correctly after character cleanup"
+    ],
+    "validation_hints": [
+      "Use text editor that shows invisible characters",
+      "Check file encoding and ensure UTF-8",
+      "Look for parsing errors in prologue/epilogue sections",
+      "Verify no control characters remain in schema text"
+    ],
+    "specification_reference": "2.2. Character sets and schema formatting",
+    "related_errors": ["SCHEMA_LOAD_FAILED", "CHARACTER_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "\t",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "InvalidCharAfterThis\b",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "This is a valid prologue.",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "This is a valid prologue.\n",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_CHARACTER_INVALID",
+    "name": "schema-character-invalid-tag",
+    "warning": true,
+    "description": "Invalid character in a tag term.",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag$'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag('''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_CHARACTER_INVALID",
+    "name": "schema-character-invalid-other-term",
+    "warning": true,
+    "description": "Invalid character in a tag term.",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* unitClassNew$",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* unitClassNew",
+            "** unitInvalid$",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "* newModifier$",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "* invalidValue$Class",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* newAttribute$new",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "* newProperty\tmore",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+    {
+    "error_code": "SCHEMA_CHARACTER_INVALID",
+    "name": "schema-character-invalid-utf8-other-term",
+    "warning": true,
+    "description": "UTF8 characters (valid) in term.",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension&",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTagÄ'''",
+            "* ExtensionÄ",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''ÄBaseTag'''",
+            "* ÄExtension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_CHARACTER_INVALID",
+    "name": "schema-character-allowed-character-unit",
+    "warning": true,
+    "description": "Allowed character properly works on units.",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* unitClassNew",
+            "** $",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* unitClassNew",
+            "** $ {allowedCharacter=dollar}",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* allowedCharacter {unitDomain}",
+            "'''Properties'''",
+            "* unitDomain",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* unitClassNew {defaultUnit=$}",
+            "** $ {allowedCharacter=dollar}",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* allowedCharacter {unitDomain}",
+            "* defaultUnit {unitClassDomain}",
+            "'''Properties'''",
+            "* unitDomain",
+            "* unitClassDomain",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_CHARACTER_INVALID",
+    "name": "schema-character-invalid-description",
+    "warning": true,
+    "description": "Description does not contain banned characters.",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* unitClassNew [Description goes here with invalid \t character]",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag''' [Description goes here with invalid { character }]",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* unitClassNew ",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"8.3.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* unitClassNew [Description goes here with valid characters]",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

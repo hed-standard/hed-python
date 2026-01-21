@@ -1,0 +1,1455 @@
+[
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [
+            "TAG_GROUP_ERROR",
+            "TAG_INVALID"
+        ],
+        "name": "definition-invalid-tag-group",
+        "description": "A Definition tag does not appear in a tag group at the top level in an annotation.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Definition tag not enclosed in parentheses",
+            "Definition appearing in nested groups instead of top-level",
+            "Multiple definitions in the same group",
+            "Definition mixed with other content improperly",
+            "Using curly braces in definitions"
+        ],
+        "explanation": "Definitions must appear in their own top-level tag group containing only the Definition tag and a single inner group with the definition's content. They cannot be nested or mixed with other tags at the top level.",
+        "correction_strategy": "Ensure definitions are properly structured in top-level groups",
+        "correction_examples": [
+            {
+                "wrong": "Definition/Apple, (Blue)",
+                "correct": "(Definition/Apple, (Blue))",
+                "explanation": "Enclosed definition in required parentheses"
+            },
+            {
+                "wrong": "(Definition/Apple, (Blue)), ((Definition/Blech, (Red)))",
+                "correct": "(Definition/Apple, (Blue)), (Definition/Blech, (Red))",
+                "explanation": "Removed extra nesting from second definition"
+            },
+            {
+                "wrong": "(Definition/Test, Red, (Blue))",
+                "correct": "(Definition/Test, (Red, Blue))",
+                "explanation": "Moved all content into the single inner group"
+            }
+        ],
+        "correction_patterns": [
+            "Enclose Definition tag and content in top-level parentheses",
+            "Ensure only Definition tag and one inner group in definition group",
+            "Remove extra nesting levels",
+            "Separate multiple definitions into different top-level groups",
+            "Replace curly braces with proper HED syntax"
+        ],
+        "fix_instructions": [
+            "1. Identify Definition tags in the annotation",
+            "2. Ensure each Definition is in its own top-level group",
+            "3. Verify group contains only Definition tag and one inner group",
+            "4. Check that Definition doesn't appear in nested groups",
+            "5. Separate multiple definitions appropriately"
+        ],
+        "validation_hints": [
+            "Count parentheses levels to ensure proper nesting",
+            "Verify no extra tags alongside Definition in same group",
+            "Check that definitions appear only at top level",
+            "Ensure inner content is properly grouped"
+        ],
+        "specification_reference": "3.2.8.1. The Definition tag",
+        "related_errors": [
+            "TAG_GROUP_ERROR",
+            "PARENTHESES_MISMATCH",
+            "DEF_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Definition/Apple, (Blue)), ((Definition/Blech, (Red)))",
+                    "Definition/Blech, (Red)"
+                ],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple, (Blue)), ((Definition/Blech, (Red)))",
+                                "def2": "Definition/Blech, (Red)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Blech, (Red))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, (Blue)), ((Definition/Blech, (Red)))",
+                                    "def2": "Definition/Blech, (Red)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/MyColor, Def/Apple"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, (Blue))",
+                                    "def2": "(Definition/Blech, (Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/MyColor, Def/Apple"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [
+            "TAG_EMPTY"
+        ],
+        "name": "definition-invalid-empty-inner-group",
+        "description": "A definition's enclosing tag group has an empty inner group (i.e., the definition's contents).",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "content",
+        "common_causes": [
+            "Empty parentheses in definition content",
+            "Missing definition body content",
+            "Syntax errors creating empty groups",
+            "Incomplete definition specification"
+        ],
+        "explanation": "Definitions must contain meaningful content within their inner groups. Empty inner groups indicate incomplete or malformed definitions.",
+        "correction_strategy": "Add proper content to definition inner groups",
+        "correction_examples": [
+            {
+                "wrong": "(Definition/MyEvent, ())",
+                "correct": "(Definition/MyEvent, (Red, Blue))",
+                "explanation": "Added actual content to empty definition group"
+            },
+            {
+                "wrong": "(Definition/Action/#, (,))",
+                "correct": "(Definition/Action/#, (Motion/# m-per-s^2))",
+                "explanation": "Replaced malformed content with proper definition"
+            }
+        ],
+        "correction_patterns": [
+            "Add meaningful tags to definition content",
+            "Remove empty parentheses groups",
+            "Ensure definition content is complete"
+        ],
+        "fix_instructions": [
+            "1. Identify empty inner groups in definitions",
+            "2. Add appropriate content tags",
+            "3. Verify definition completeness",
+            "4. Remove empty or malformed groups"
+        ],
+        "validation_hints": [
+            "Check for empty parentheses in definitions",
+            "Ensure definition content is meaningful",
+            "Verify no missing content"
+        ],
+        "specification_reference": "3.2.8.1. Definition content requirements",
+        "related_errors": ["TAG_EMPTY", "PARENTHESES_MISMATCH"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def2": "(Definition/Blech/#, ())"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def2": "(Definition/Blech/#, ())"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/MyColor, Def/Apple"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple)",
+                                    "def2": "(Definition/Blech, (Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/MyColor, Def/Apple"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "definition-invalid-multiple-definition-tags",
+        "description": "A definition's enclosing tag group contains more than a `Definition` tag and an inner group.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Adding extra Definition tags in the same group",
+            "Misunderstanding that definitions should contain only one Definition tag",
+            "Attempting to define multiple things in one group",
+            "Confusion about definition group structure"
+        ],
+        "explanation": "Each definition group should contain exactly one Definition tag and its content group. Multiple Definition tags in the same group create structural ambiguity.",
+        "correction_strategy": "Use separate definition groups for each Definition tag",
+        "correction_examples": [
+            {
+                "wrong": "(Definition/Event1, Definition/Event2, (Red, Blue))",
+                "correct": "(Definition/Event1, (Red)), (Definition/Event2, (Blue))",
+                "explanation": "Separated multiple definitions into individual groups"
+            },
+            {
+                "wrong": "(Definition/Action, Definition/Response, (Movement))",
+                "correct": "(Definition/Action, (Movement)), (Definition/Response, (Movement))",
+                "explanation": "Created separate definition groups with appropriate content"
+            }
+        ],
+        "correction_patterns": [
+            "Create separate groups for each Definition tag",
+            "Ensure each definition has its own content group",
+            "Remove extra Definition tags from single groups"
+        ],
+        "fix_instructions": [
+            "1. Identify groups with multiple Definition tags",
+            "2. Separate each Definition into its own group",
+            "3. Distribute content appropriately between definitions",
+            "4. Verify each definition group structure"
+        ],
+        "validation_hints": [
+            "Count Definition tags per group",
+            "Ensure one Definition per group maximum",
+            "Check definition content distribution"
+        ],
+        "specification_reference": "3.2.8.1. Definition group structure",
+        "related_errors": ["TAG_GROUP_ERROR", "DEFINITION_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple, Definition/Banana, (Blue))",
+                                "def2": "(Definition/Blech, (Red), Definition/Banana1)",
+                                "def3": "(Definition/Blech1, (Red), Blue)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple, (Blue))",
+                                "def2": "((Red), Definition/Blech)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, Definition/Banana, (Blue))",
+                                    "def2": "(Definition/Blech, (Red), Definition/Banana1)",
+                                    "def3": "(Definition/Blech1, (Red), Blue)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Apple, Def/Banana"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, (Blue))",
+                                    "def2": "((Red), Definition/Blech)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Blech, Def/Apple"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "definition-invalid-inner-group-defs",
+        "description": "A definition's inner tag group contains `Definition`, `Def` or `Def-expand` tags.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Nested Definition tags within definition content",
+            "Including Def or Def-expand tags inside definition inner groups",
+            "Attempting to define definitions within definitions",
+            "Confusion about definition content structure"
+        ],
+        "explanation": "Definition inner groups should contain only the content being defined, not other definition-related tags. Nested definitions create circular reference issues.",
+        "correction_strategy": "Remove definition-related tags from inner groups or restructure",
+        "correction_examples": [
+            {
+                "wrong": "(Definition/Event, (Red, Definition/Action, Blue))",
+                "correct": "(Definition/Event, (Red, Blue)), (Definition/Action, (Movement))",
+                "explanation": "Moved nested Definition to separate top-level definition"
+            },
+            {
+                "wrong": "(Definition/Response, (Def/Action, Green))",
+                "correct": "(Definition/Response, (Green))",
+                "explanation": "Removed Def tag from definition content"
+            }
+        ],
+        "correction_patterns": [
+            "Move nested definitions to top level",
+            "Remove Def/Def-expand tags from definition content",
+            "Keep definition content simple and non-recursive"
+        ],
+        "fix_instructions": [
+            "1. Identify definition-related tags in inner groups",
+            "2. Remove or move them to appropriate locations",
+            "3. Ensure definition content contains only descriptive tags",
+            "4. Verify no circular references exist"
+        ],
+        "validation_hints": [
+            "Check inner groups for Definition/Def/Def-expand tags",
+            "Ensure definition content is purely descriptive",
+            "Verify no recursive definition structures"
+        ],
+        "specification_reference": "3.2.8.1. Definition content restrictions",
+        "related_errors": ["TAG_GROUP_ERROR", "DEFINITION_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple, (Definition/Banana, Blue))",
+                                "def2": "(Definition/Blech, (Red, Def/Apple))"
+                            }
+                        }
+                    }
+                ],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Label/a"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, (Definition/Banana, (Blue)))",
+                                    "def2": "(Definition/Blech, ((Red), Def/MyColor))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Apple, Def/Banana"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, (Blue))",
+                                    "def2": "((Red), Definition/Blech)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Blech, Def/Apple"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [],
+        "name": "definition-invalid-bad-number-of-placeholders",
+        "description": "A definition that includes a placeholder (`#`) does not have exactly two `#` characters.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "placeholder",
+        "common_causes": [
+            "Unequal number of placeholders in definition and content",
+            "Missing placeholder in definition name or content",
+            "Extra placeholders beyond the required pair",
+            "Misunderstanding placeholder pairing requirements",
+            "Incomplete placeholder implementation"
+        ],
+        "explanation": "Definitions with placeholders must have exactly two # characters: one in the definition name and one in the content. This creates a proper placeholder substitution pattern.",
+        "correction_strategy": "Ensure exactly two # characters in definition",
+        "correction_examples": [
+            {
+                "wrong": "(Definition/Apple/#, (Label/#, Description/#))",
+                "correct": "(Definition/Apple/#, (Label/#))",
+                "explanation": "Removed extra placeholder to have exactly two"
+            },
+            {
+                "wrong": "(Definition/Blech/#, (Red))",
+                "correct": "(Definition/Blech/#, (Red, Label/#))",
+                "explanation": "Added missing placeholder in content"
+            }
+        ],
+        "correction_patterns": [
+            "Count # characters and ensure exactly two total",
+            "Add missing # in content if definition name has #",
+            "Remove extra # characters beyond the required pair",
+            "Verify placeholder pairing consistency"
+        ],
+        "fix_instructions": [
+            "1. Count total # characters in definition",
+            "2. Ensure definition name has # if using placeholders",
+            "3. Add exactly one # in definition content",
+            "4. Remove any extra # characters",
+            "5. Verify placeholder substitution pattern"
+        ],
+        "validation_hints": [
+            "Count # characters - should be exactly 2",
+            "One # in definition name, one # in content",
+            "Remove extra placeholders",
+            "Add missing placeholder pairs"
+        ],
+        "specification_reference": "3.2.8.1. Definition placeholder requirements",
+        "related_errors": [
+            "PLACEHOLDER_INVALID",
+            "DEFINITION_INVALID",
+            "TAG_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple/#, (Label/#, Description/#))",
+                                "def2": "(Definition/Blech/#, (Red))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple/#, (Label/#))",
+                                "def2": "(Definition/Blech/#, (Red, Label/#))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple/#, (Label/#, Description/#))",
+                                    "def2": "(Definition/Blech/#, (Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Apple/3, Def/Blech/might"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple/#, (Label/#))",
+                                    "def2": "(Definition/Blech/#, (Red, Label/#))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Blech/5, Def/Apple/4"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [
+            "TAG_INVALID",
+            "PLACEHOLDER_INVALID"
+        ],
+        "name": "definition-invalid-placeholder-incorrect-of-positions",
+        "description": "A definition has placeholders (`#`) in incorrect positions.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "placeholder",
+        "common_causes": [
+            "Placeholder in content without corresponding definition placeholder",
+            "Standalone # character not properly positioned",
+            "Mismatched placeholder positions in definition structure",
+            "Incorrect placeholder syntax usage",
+            "Misunderstanding of placeholder positioning rules"
+        ],
+        "explanation": "Placeholders must be properly positioned: in definition names they appear as suffix (/Name/#), in content they replace specific values. Incorrect positioning breaks substitution logic.",
+        "correction_strategy": "Position placeholders correctly in definition structure",
+        "correction_examples": [
+            {
+                "wrong": "(Definition/Apple, (Label/#))",
+                "correct": "(Definition/Apple/#, (Label/#))",
+                "explanation": "Added placeholder to definition name to match content"
+            },
+            {
+                "wrong": "(Definition/Blech/#, (Red, #))",
+                "correct": "(Definition/Blech/#, (Red, Label/#))",
+                "explanation": "Placed placeholder in proper tag position"
+            }
+        ],
+        "correction_patterns": [
+            "Add # to definition name when content has placeholders",
+            "Replace standalone # with proper tag/# format",
+            "Ensure placeholders appear in valid tag positions",
+            "Match definition name and content placeholder usage"
+        ],
+        "fix_instructions": [
+            "1. Check if content has # but definition name lacks #",
+            "2. Add # suffix to definition name if needed",
+            "3. Replace standalone # with proper tag/# format",
+            "4. Verify placeholder positioning rules",
+            "5. Test placeholder substitution logic"
+        ],
+        "validation_hints": [
+            "Definition names with placeholders end in /#",
+            "Content placeholders appear in tag/# format",
+            "No standalone # characters",
+            "Match definition and content placeholder usage"
+        ],
+        "specification_reference": "3.2.8.1. Placeholder positioning requirements",
+        "related_errors": [
+            "PLACEHOLDER_INVALID",
+            "TAG_INVALID",
+            "DEFINITION_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple, (Label/#))",
+                                "def2": "(Definition/Blech/#, (Red, #))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple, (Label/Blue))",
+                                "def2": "(Definition/Blech/#, (Label/#, Red))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, (Label/#))",
+                                    "def2": "(Definition/Blech/#, (Red, #))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Apple, Def/Blech/might"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple/#, (Label/#))",
+                                    "def2": "(Definition/Blech/#, (Red, Label/#))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Blech/5, Def/Apple/4"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [
+            "TAG_INVALID",
+            "PLACEHOLDER_INVALID"
+        ],
+        "name": "definition-invalid-placeholder-conflict",
+        "description": "Definitions of the same name appear with and without a `#`.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "consistency",
+        "common_causes": [
+            "Mixing placeholder and non-placeholder versions of same definition",
+            "Inconsistent definition naming across files",
+            "Confusion about when to use placeholders",
+            "Copy-paste errors with different placeholder usage",
+            "Misunderstanding definition uniqueness requirements"
+        ],
+        "explanation": "Each definition name must be used consistently either with or without placeholders. Mixed usage creates ambiguity about which definition applies and breaks substitution logic.",
+        "correction_strategy": "Use consistent placeholder approach for each definition name",
+        "correction_examples": [
+            {
+                "wrong": "(Definition/Apple, (Label/#)) and (Definition/Apple/#, (Red, #))",
+                "correct": "(Definition/Apple/#, (Label/#)) and (Definition/Other/#, (Red, #))",
+                "explanation": "Made placeholder usage consistent or used different names"
+            },
+            {
+                "wrong": "Definition/Event with and without # in same file",
+                "correct": "Definition/Event consistently without # or Definition/Event/# consistently with #",
+                "explanation": "Chose one approach and applied consistently"
+            }
+        ],
+        "correction_patterns": [
+            "Choose placeholder or non-placeholder approach per definition",
+            "Rename definitions to avoid conflicts",
+            "Update all instances to use consistent placeholder usage",
+            "Verify definition name uniqueness"
+        ],
+        "fix_instructions": [
+            "1. Identify conflicting definition names",
+            "2. Decide on placeholder vs non-placeholder approach",
+            "3. Update all instances to use consistent approach",
+            "4. Or rename one definition to avoid conflict",
+            "5. Verify definition consistency across files"
+        ],
+        "validation_hints": [
+            "Each definition name must be consistently used",
+            "Check for same name with/without # conflicts",
+            "Verify placeholder usage consistency",
+            "Ensure definition name uniqueness"
+        ],
+        "specification_reference": "3.2.8.1. Definition consistency requirements",
+        "related_errors": [
+            "DEFINITION_INVALID",
+            "PLACEHOLDER_INVALID",
+            "TAG_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple, (Label/#))",
+                                "def2": "(Definition/Apple/#, (Red, #))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Blech/#, (Label/#))",
+                                "def2": "(Definition/Apple, (Red))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, (Label/#))",
+                                    "def2": "(Definition/Apple/#, (Red, #))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Apple/3, Def/Apple"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple/#, (Label/#))",
+                                    "def2": "(Definition/Blech, (Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Blech, Def/Apple/4"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [],
+        "name": "definition-invalid-multiple-definitions",
+        "description": "Multiple `Definition` tags with same name are encountered.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "uniqueness",
+        "common_causes": [
+            "Duplicate definition names across different definition groups",
+            "Copy-paste errors creating multiple definitions with same name",
+            "Misunderstanding that definition names must be unique",
+            "Attempting to override or extend existing definitions",
+            "Inconsistent definition management across files"
+        ],
+        "explanation": "Each definition name must be unique within the annotation context. Multiple definitions with the same name create ambiguity about which definition to use for expansion.",
+        "correction_strategy": "Ensure unique names for all definitions",
+        "correction_examples": [
+            {
+                "wrong": "(Definition/Apple/#, (Label/#)) and (Definition/Apple/#, (Color/#))",
+                "correct": "(Definition/Apple/#, (Label/#)) and (Definition/AppleColor/#, (Color/#))",
+                "explanation": "Renamed second definition to make it unique"
+            },
+            {
+                "wrong": "Multiple Definition/Event with different content",
+                "correct": "Definition/Event1, Definition/Event2 with distinct names",
+                "explanation": "Used numbered or descriptive suffixes for uniqueness"
+            }
+        ],
+        "correction_patterns": [
+            "Rename duplicate definitions with descriptive suffixes",
+            "Use numbered variations (Event1, Event2)",
+            "Combine definitions if content is compatible",
+            "Remove truly duplicate definitions"
+        ],
+        "fix_instructions": [
+            "1. Identify definitions with identical names",
+            "2. Examine content to determine if truly different",
+            "3. Rename definitions with descriptive unique names",
+            "4. Update all references to use new names",
+            "5. Verify definition name uniqueness"
+        ],
+        "validation_hints": [
+            "Scan for duplicate definition names",
+            "Ensure each definition has unique name",
+            "Check references match renamed definitions",
+            "Verify no name conflicts across files"
+        ],
+        "specification_reference": "3.2.8.1. Definition uniqueness requirements",
+        "related_errors": [
+            "DEFINITION_INVALID",
+            "DEF_INVALID",
+            "TAG_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple/#, (Label/#, Description/#))",
+                                "def2": "(Definition/Apple/#, (Label/#))",
+                                "def3": "(Definition/MyColor, (Blue))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple/#, (Label/ThisIsALabel, Description/#))",
+                                "def2": "(Definition/Apple2/#, (Label/#))",
+                                "def3": "(Definition/MyColor2, (Blue))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple/#, (Label/#, Description/#))",
+                                    "def2": "(Definition/Apple/#, (Label/#))",
+                                    "def3": "(Definition/MyColor, (Blue))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Apple/3, Def/Blech/might"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "Def/MyColor"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple/#, (Label/#))",
+                                    "def2": "(Definition/Blech/#, (Red, Label/#))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Blech/5, Def/Apple/4"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [
+            "TAG_GROUP_ERROR"
+        ],
+        "name": "definition-invalid-content-has-top-level-tag",
+        "description": "A tag with a required or unique attribute appears in a definition.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "content",
+        "common_causes": [
+            "Using top-level or unique tags within definition content",
+            "Including Event-context or other required tags in definitions",
+            "Misunderstanding that definitions should contain reusable content",
+            "Adding context-specific tags to generic definitions",
+            "Confusion about what content is appropriate in definitions"
+        ],
+        "explanation": "Definition content should contain reusable, generic tags without required or unique attributes. Top-level tags violate definition reusability principles.",
+        "correction_strategy": "Remove required/unique tags from definition content",
+        "correction_examples": [
+            {
+                "wrong": "(Definition/Apple, (Event-context, Red))",
+                "correct": "(Definition/Apple, (Red))",
+                "explanation": "Removed Event-context which is a required/unique tag"
+            },
+            {
+                "wrong": "(Definition/Action, (Task-context, Movement))",
+                "correct": "(Definition/Action, (Movement))",
+                "explanation": "Kept only generic content without context requirements"
+            }
+        ],
+        "correction_patterns": [
+            "Remove Event-context and similar required tags",
+            "Keep only generic, reusable content in definitions",
+            "Avoid context-specific or unique tags in definitions",
+            "Focus on core descriptive content"
+        ],
+        "fix_instructions": [
+            "1. Identify required/unique tags in definition content",
+            "2. Remove Event-context and similar tags",
+            "3. Keep only generic, reusable tags",
+            "4. Verify definition contains appropriate content",
+            "5. Test definition reusability"
+        ],
+        "validation_hints": [
+            "Check for Event-context in definitions",
+            "Remove required or unique attribute tags",
+            "Keep definition content generic and reusable",
+            "Verify appropriate definition content"
+        ],
+        "specification_reference": "3.2.8.1. Definition content restrictions",
+        "related_errors": [
+            "TAG_GROUP_ERROR",
+            "TAG_INVALID",
+            "DEFINITION_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple, (Event-context, Red))",
+                                "def2": "(Definition/Banana/#, (Label/#))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "def1": "(Definition/Apple, (Red))",
+                                "def2": "(Definition/Banana/#, (Label/#))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, (Event-context, Red))",
+                                    "def2": "(Definition/Banana/#, (Label/#))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Apple, Def/Banana/might"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple, (Red))",
+                                    "def2": "(Definition/Banana/#, (Label/#))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Apple, Def/Banana/might"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEFINITION_INVALID",
+        "alt_codes": [
+            "TAG_INVALID"
+        ],
+        "name": "definition-not-allowed-here",
+        "description": "A definition appears in an unexpected place such as an events file or sidecar.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "context",
+        "common_causes": [
+            "Placing definitions in event annotations instead of definition section",
+            "Including definitions in regular HED strings",
+            "Misunderstanding that definitions belong in specific sections",
+            "Confusion about definition vs definition usage (Def/Name)",
+            "Incorrect file structure for definition placement"
+        ],
+        "explanation": "Definitions should only appear in designated definition sections or files, not mixed with regular event annotations. Use Def/Name to reference definitions, not Definition tags.",
+        "correction_strategy": "Move definitions to appropriate sections or use Def references",
+        "correction_examples": [
+            {
+                "wrong": "Red, Blue, (Definition/myDef, (Label/Red, Blue))",
+                "correct": "Red, Blue, Def/myDef",
+                "explanation": "Replaced definition declaration with definition reference"
+            },
+            {
+                "wrong": "Event HED with embedded definition",
+                "correct": "Move definition to defs section, use Def/Name in events",
+                "explanation": "Separated definition declaration from usage"
+            }
+        ],
+        "correction_patterns": [
+            "Move Definition tags to defs section of sidecar",
+            "Replace Definition with Def/Name in event annotations",
+            "Separate definition declaration from usage",
+            "Use proper file structure for definitions"
+        ],
+        "fix_instructions": [
+            "1. Identify misplaced Definition tags",
+            "2. Move definitions to appropriate defs section",
+            "3. Replace Definition usage with Def/Name references",
+            "4. Verify proper file structure",
+            "5. Test definition references work correctly"
+        ],
+        "validation_hints": [
+            "Definitions belong in defs sections only",
+            "Use Def/Name to reference definitions",
+            "Check file structure for proper definition placement",
+            "Separate definition declaration from usage"
+        ],
+        "specification_reference": "3.2.8.1. Definition placement requirements",
+        "related_errors": [
+            "TAG_INVALID",
+            "SIDECAR_INVALID",
+            "DEF_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Item, (Label/Pie)))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Red, Blue, (Definition/myDef, (Label/Red, Blue))"
+                ],
+                "passes": [
+                    "Red, Blue"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red, Blue, (Definition/myDef, (Label/Red, Blue))",
+                                "ball": "Def/Acc/4.5"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "defs": {
+                            "HED": {
+                                "face": "(Definition/myDef, (Label/Red, Blue)), (Definition/myDef2, (Label/Red, Blue))",
+                                "ball": "(Definition/myDef1, (Label/Red, Blue))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Definition/myDef, (Label/Red, Green))"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red, Blue, Def/MyColor"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Red, Blue, (Definition/myDef, (Label/Red, Blue))",
+                                    "ball": "Def/Acc/4.5"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/myDef, Red"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "defs": {
+                                "HED": {
+                                    "def1": "(Definition/Apple/#, (Label/#))",
+                                    "def2": "(Definition/Blech/#, (Red, Label/#))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Def/Blech/5, Def/Apple/4"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

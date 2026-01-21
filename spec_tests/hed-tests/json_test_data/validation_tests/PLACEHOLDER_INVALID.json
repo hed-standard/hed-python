@@ -1,0 +1,673 @@
+[
+    {
+        "error_code": "PLACEHOLDER_INVALID",
+        "alt_codes": [
+            "VALUE_INVALID"
+        ],
+        "name": "placeholder-invalid-misplaced",
+        "description": "A `#` appears in a place that it should not (such as in the `HED` column of an event file outside a definition).",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Using # in event files instead of actual values",
+            "Incorrect placeholder usage in sidecars",
+            "Multiple # symbols in same HED string",
+            "# not directly following a slash",
+            "Using # with tags that don't support placeholders"
+        ],
+        "explanation": "Placeholders (#) are only valid in specific contexts: sidecar templates for value columns, and definition templates. They cannot appear in event files or be used incorrectly in tag structures.",
+        "correction_strategy": "Replace placeholders with actual values or fix placement",
+        "correction_examples": [
+            {
+                "wrong": "Label/#",
+                "correct": "Label/SomeActualLabel",
+                "explanation": "Replaced placeholder with actual value in event context"
+            },
+            {
+                "wrong": "Def/Acc/#",
+                "correct": "Def/Acc/3.5",
+                "explanation": "Replaced placeholder with actual numeric value"
+            },
+            {
+                "wrong": "Distance/# meters",
+                "correct": "Distance/#",
+                "explanation": "Moved placeholder to correct position after slash"
+            }
+        ],
+        "correction_patterns": [
+            "Replace # with actual values in event files",
+            "Ensure # appears directly after slash in valid contexts",
+            "Use only one # per HED string in sidecars",
+            "Verify parent tag supports placeholders",
+            "Remove # from categorical column sidecars"
+        ],
+        "fix_instructions": [
+            "1. Identify context where # appears",
+            "2. If in event file: replace with actual value",
+            "3. If in sidecar: verify correct usage pattern",
+            "4. Ensure # follows proper positioning rules",
+            "5. Check parent tag supports placeholders"
+        ],
+        "validation_hints": [
+            "Verify # only in appropriate contexts",
+            "Check # positioning after slashes",
+            "Ensure single # per string in value templates",
+            "Confirm parent tag has placeholder child capability"
+        ],
+        "specification_reference": "3.2.4. Tags that take values",
+        "related_errors": [
+            "VALUE_INVALID",
+            "SIDECAR_INVALID",
+            "TAG_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Label/#",
+                    "Def/Acc/#"
+                ],
+                "passes": [
+                    "Label/This-label"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Label/#",
+                                "ball": "Def/Acc/#2"
+                            }
+                        }
+                    }
+                ],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Label/#"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "Def/Acc/#"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Label/This-label"
+                        ],
+                        [
+                            6.0,
+                            0,
+                            "(Def/Acc/3.5)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/banana",
+                                    "ball": "Def/Acc/apple3, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/Acc/#"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Label/#"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "PLACEHOLDER_INVALID",
+        "alt_codes": [],
+        "name": "placeholder-invalid-#-in-categorical-column",
+        "description": "A JSON sidecar has a placeholder (`#`) in the HED dictionary for a categorical column.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "context",
+        "common_causes": [
+            "Using placeholders in categorical (non-value) columns",
+            "Misunderstanding that # is only for value columns",
+            "Copy-paste errors from value column definitions",
+            "Confusion about when to use placeholders",
+            "Incorrect sidecar column type specification"
+        ],
+        "explanation": "Placeholders (#) are only valid for value columns where the placeholder gets replaced with actual values from the data. Categorical columns should not contain placeholders.",
+        "correction_strategy": "Remove placeholders from categorical column HED strings",
+        "correction_examples": [
+            {
+                "wrong": "event_code: { 'face': 'Label/#', 'ball': 'Def/Acc/#' }",
+                "correct": "event_code: { 'face': 'Label/Face', 'ball': 'Sensory-event' }",
+                "explanation": "Replaced placeholders with specific values for categorical column"
+            },
+            {
+                "wrong": "Categorical column with HED 'Parameter-value/#'",
+                "correct": "Categorical column with HED 'Parameter-value/Default'",
+                "explanation": "Used specific value instead of placeholder"
+            }
+        ],
+        "correction_patterns": [
+            "Replace # with specific appropriate values",
+            "Use descriptive labels instead of placeholders",
+            "Ensure categorical columns have fixed HED content",
+            "Verify column type matches HED specification"
+        ],
+        "fix_instructions": [
+            "1. Identify categorical columns with placeholders",
+            "2. Determine appropriate fixed values for each category",
+            "3. Replace # with specific descriptive values",
+            "4. Verify column type is categorical in specification",
+            "5. Test with sample data to ensure proper annotation"
+        ],
+        "validation_hints": [
+            "Categorical columns should not have # placeholders",
+            "Use specific values for each category",
+            "Check column type specification",
+            "Verify HED content is appropriate for categorical data"
+        ],
+        "specification_reference": "3.2.9. Categorical vs value columns in sidecars",
+        "related_errors": [
+            "PLACEHOLDER_INVALID",
+            "SIDECAR_INVALID",
+            "VALUE_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Label/#",
+                                "ball": "Def/Acc/#"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Label/This-label",
+                                "ball": "(Def/Acc/3.5)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Label/#",
+                                    "ball": "Def/Acc/#"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "PLACEHOLDER_INVALID",
+        "alt_codes": [],
+        "name": "placeholder-invalid-json-value-column",
+        "description": "A JSON sidecar does not have exactly one placeholder (`#`) in each HED string representing a value column.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "count",
+        "common_causes": [
+            "Multiple placeholders in single value column HED string",
+            "Missing placeholders in value column specifications",
+            "Incorrect placeholder count for value substitution",
+            "Misunderstanding value column placeholder requirements",
+            "Copy-paste errors creating multiple placeholders"
+        ],
+        "explanation": "Value columns in JSON sidecars must have exactly one placeholder (#) in their HED string. Multiple or missing placeholders break proper value substitution.",
+        "correction_strategy": "Ensure exactly one placeholder per value column",
+        "correction_examples": [
+            {
+                "wrong": "trial: 'Def/Acc/#, Label/#'",
+                "correct": "trial: 'Def/Acc/#'",
+                "explanation": "Removed extra placeholder to have exactly one"
+            },
+            {
+                "wrong": "memory: 'Blue, Red, Label/#' (with multiple #)",
+                "correct": "memory: 'Blue, Red, Label/#' (with exactly one #)",
+                "explanation": "Ensured single placeholder for value substitution"
+            }
+        ],
+        "correction_patterns": [
+            "Count # symbols and ensure exactly one per value column",
+            "Remove extra placeholders from value column HED",
+            "Add missing placeholder if none exists",
+            "Separate multiple value needs into different columns"
+        ],
+        "fix_instructions": [
+            "1. Identify value columns in sidecar",
+            "2. Count placeholders in each value column HED string",
+            "3. Remove extra placeholders or add missing ones",
+            "4. Ensure exactly one # per value column",
+            "5. Verify value substitution works correctly"
+        ],
+        "validation_hints": [
+            "Value columns need exactly one # placeholder",
+            "Count # symbols in value column HED strings",
+            "Check for missing or extra placeholders",
+            "Verify proper value substitution behavior"
+        ],
+        "specification_reference": "3.2.9. Value column placeholder requirements",
+        "related_errors": [
+            "PLACEHOLDER_INVALID",
+            "SIDECAR_INVALID",
+            "VALUE_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "trial": {
+                            "HED": "Def/Acc/#, Label/#"
+                        },
+                        "memory": {
+                            "HED": "Blue, Red, Label/#"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "trial": {
+                            "HED": "Def/Acc/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "trial": {
+                                "HED": "Def/Acc/#, Label/#"
+                            },
+                            "memory": {
+                                "HED": "Blue, Red, Label/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "trial",
+                                "memory",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "3",
+                                "4",
+                                "Green, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "2",
+                                "6",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "trial": {
+                                "HED": "Def/Acc/#, Label/Trial"
+                            },
+                            "memory": {
+                                "HED": "Blue, Red, Label/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "trial",
+                                "memory",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "5",
+                                "4",
+                                "Green"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "3",
+                                "2",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "PLACEHOLDER_INVALID",
+        "alt_codes": [
+            "TAG_EXTENSION_INVALID",
+            "VALUE_INVALID"
+        ],
+        "name": "placeholder-invalid-json-#-misplaced",
+        "description": "A placeholder (`#`) is used in JSON sidecar or definition, but its parent in the schema does not have a placeholder child.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "schema",
+        "common_causes": [
+            "Using placeholders on tags that don't support them",
+            "Misunderstanding which tags can take value extensions",
+            "Schema version mismatches affecting placeholder support",
+            "Incorrect assumption about tag extensibility",
+            "Using deprecated or unsupported placeholder positions"
+        ],
+        "explanation": "Placeholders can only be used with tags that explicitly support value extensions in the schema. Not all tags can take placeholder values.",
+        "correction_strategy": "Use placeholders only with schema-supported tags",
+        "correction_examples": [
+            {
+                "wrong": "Sensory-event/#",
+                "correct": "Sensory-event, Label/#",
+                "explanation": "Moved placeholder to supported tag (Label supports #)"
+            },
+            {
+                "wrong": "Blue/#",
+                "correct": "Blue, Parameter-value/#",
+                "explanation": "Used appropriate tag that supports placeholders"
+            }
+        ],
+        "correction_patterns": [
+            "Check schema for placeholder-supporting tags",
+            "Use Label/# for text values",
+            "Use Parameter-value/# for numeric values",
+            "Replace unsupported placeholders with supported alternatives"
+        ],
+        "fix_instructions": [
+            "1. Identify tags with unsupported placeholders",
+            "2. Check schema for placeholder-supporting alternatives",
+            "3. Replace with appropriate schema-supported tags",
+            "4. Verify placeholder usage matches schema requirements",
+            "5. Test with schema validation"
+        ],
+        "validation_hints": [
+            "Check schema for tags that support placeholders",
+            "Use Label/# for text, Parameter-value/# for numbers",
+            "Verify tag extensibility in current schema version",
+            "Look for 'takes value' attributes in schema"
+        ],
+        "specification_reference": "Schema extensibility and placeholder support",
+        "related_errors": [
+            "TAG_EXTENSION_INVALID",
+            "VALUE_INVALID",
+            "PLACEHOLDER_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "trial": {
+                            "HED": "Sensory-event/#"
+                        },
+                        "defs": {
+                            "def1": "(Definition/Blech/#, (Red, Blue/#))"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "trial": {
+                            "HED": "Label/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "trial": {
+                                "HED": "Sensory-event/#"
+                            },
+                            "defs": {
+                                "def1": "(Definition/Blech/#, (Red, Blue/#))"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "trial",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "3",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "2",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "trial": {
+                                "HED": "Sensory-event, Label/#"
+                            },
+                            "defs": {
+                                "def1": "(Definition/Blech/#, (Red, Label/#))"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "trial",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "3",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "2",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

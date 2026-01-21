@@ -1,0 +1,1219 @@
+[
+    {
+        "error_code": "DEF_EXPAND_INVALID",
+        "alt_codes": [],
+        "name": "def-expand-invalid-name-not-definition",
+        "description": "A `Def-expand` tag's name does not correspond to a definition.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "semantic",
+        "common_causes": [
+            "Referencing undefined definition names",
+            "Misspelling definition names in Def-expand",
+            "Using Def-expand before defining the definition",
+            "Mismatch between placeholder values and definition requirements",
+            "Incorrect structure of Def-expand groups"
+        ],
+        "explanation": "Def-expand tags must reference existing definitions and provide the correct structure and placeholder values. The name must exactly match a previously defined Definition, and any placeholders must be filled with appropriate values.",
+        "correction_strategy": "Ensure Def-expand references valid definitions with correct structure",
+        "correction_examples": [
+            {
+                "wrong": "(Def-expand/MyColor2, (Label/Pie))",
+                "correct": "(Def-expand/MyColor, (Label/Pie))",
+                "explanation": "Corrected definition name to match existing Definition/MyColor"
+            },
+            {
+                "wrong": "(Def-expand/Acc, (Acceleration/5 m-per-s^2, Red))",
+                "correct": "(Def-expand/Acc/5, (Acceleration/5 m-per-s^2, Red))",
+                "explanation": "Added required placeholder value for parameterized definition"
+            }
+        ],
+        "correction_patterns": [
+            "Verify definition name exists and is spelled correctly",
+            "Provide placeholder values for parameterized definitions",
+            "Ensure expanded content matches definition structure",
+            "Check that definition is available in current scope",
+            "Verify proper tag group structure for Def-expand"
+        ],
+        "fix_instructions": [
+            "1. Check that referenced definition exists",
+            "2. Verify spelling of definition name",
+            "3. Provide required placeholder values if definition is parameterized",
+            "4. Ensure expanded content matches definition exactly",
+            "5. Verify proper group structure"
+        ],
+        "validation_hints": [
+            "Cross-reference with available definitions",
+            "Check definition parameter requirements",
+            "Verify expanded content structure",
+            "Ensure proper tag group formatting"
+        ],
+        "specification_reference": "3.2.8.2. The Def and Def-expand tags",
+        "related_errors": [
+            "DEF_INVALID",
+            "DEFINITION_INVALID",
+            "TAG_GROUP_ERROR"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def-expand/MyColor2, (Label/Pie))"
+                ],
+                "passes": [
+                    "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc2/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                "ball": "(Def-expand/MyColor2, (Label/Pie))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                "ball": "(Def-expand/MyColor, (Label/Pie))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc2/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def-expand/MyColor2, (Label/Pie))"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def-expand/MyColor, (Label/Pie))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc2/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                    "ball": "(Def-expand/MyColor2, (Label/Pie))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "(Def-expand/Junk, (Label/Red))"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                    "ball": "(Def-expand/MyColor, (Label/Pie))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "(Def-expand/MyColor, (Label/Pie))"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEF_EXPAND_INVALID",
+        "alt_codes": [
+            "VALUE_INVALID"
+        ],
+        "name": "def-expand-invalid-missing-placeholder",
+        "description": "A `Def-expand` is missing an expected placeholder value or has an unexpected placeholder value.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "content",
+        "common_causes": [
+            "Missing required placeholder values in Def-expand",
+            "Providing placeholder values when definition doesn't expect them",
+            "Mismatch between definition placeholder count and Def-expand values",
+            "Confusion about which definitions require placeholders"
+        ],
+        "explanation": "Def-expand tags must provide exactly the placeholder values expected by their referenced definition. Mismatched placeholder counts create expansion errors.",
+        "correction_strategy": "Match Def-expand placeholder values to definition requirements",
+        "correction_examples": [
+            {
+                "wrong": "(Def-expand/Acc, (Acceleration, Red))",
+                "correct": "(Def-expand/Acc/5.0, (Acceleration/5.0 m-per-s^2, Red))",
+                "explanation": "Added missing placeholder value for definition requiring one"
+            },
+            {
+                "wrong": "(Def-expand/MyColor/Blue, (Label/Pie))",
+                "correct": "(Def-expand/MyColor, (Label/Pie))",
+                "explanation": "Removed unexpected placeholder for definition not requiring one"
+            }
+        ],
+        "correction_patterns": [
+            "Check definition for placeholder requirements",
+            "Provide values for all required placeholders",
+            "Remove values for definitions without placeholders"
+        ],
+        "fix_instructions": [
+            "1. Check the referenced definition for placeholder count",
+            "2. Provide exactly the required number of placeholder values",
+            "3. Remove extra values or add missing values as needed",
+            "4. Verify placeholder value types match definition expectations"
+        ],
+        "validation_hints": [
+            "Count # symbols in definition to determine placeholder needs",
+            "Verify Def-expand provides correct number of values",
+            "Check placeholder value types are compatible"
+        ],
+        "specification_reference": "3.2.8.2. Def-expand placeholder requirements",
+        "related_errors": ["VALUE_INVALID", "DEFINITION_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def-expand/Acc, (Acceleration, Red))",
+                    "(Def-expand/MyColor/Blue, (Label/Pie))"
+                ],
+                "passes": [
+                    "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc, (Acceleration, Red))",
+                                "ball": "(Def-expand/Acc/4.5, (Acceleration, Red))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc, (Acceleration, Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration, Red))"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc, (Acceleration, Red))",
+                                    "ball": "(Def-expand/Acc/4.5, (Acceleration, Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "ball"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                    "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ],
+                            [
+                                5.2,
+                                0,
+                                "ball",
+                                "(Def-expand/MyColor, (Label/Pie))"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEF_EXPAND_INVALID",
+        "alt_codes": [
+            "VALUE_INVALID",
+            "UNITS_INVALID"
+        ],
+        "name": "def-expand-invalid-bad-placeholder-value-or-units",
+        "description": "A `Def-expand` has an incorrect type of placeholder value.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "value",
+        "common_causes": [
+            "Placeholder values with incorrect data types",
+            "Missing or incorrect units in placeholder substitutions",
+            "Non-numeric values where numbers are expected",
+            "Improper unit formatting in expanded definitions",
+            "Mismatched value types between definition and expansion"
+        ],
+        "explanation": "Def-expand placeholder values must match the expected data type and unit format specified in the definition. Type mismatches create invalid tag structures.",
+        "correction_strategy": "Ensure placeholder values match definition requirements",
+        "correction_examples": [
+            {
+                "wrong": "(Def-expand/Acc/Make-me, (Acceleration/Make-me, Red))",
+                "correct": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                "explanation": "Replaced invalid string with proper numeric value"
+            },
+            {
+                "wrong": "(Def-expand/Acc/4.5, (Acceleration/4.5 m, Red))",
+                "correct": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                "explanation": "Corrected units to match definition requirements"
+            }
+        ],
+        "correction_patterns": [
+            "Use numeric values for numeric placeholders",
+            "Include proper units with space before unit",
+            "Match value type to definition expectations",
+            "Verify unit format consistency"
+        ],
+        "fix_instructions": [
+            "1. Check definition for expected value type",
+            "2. Replace invalid values with proper type",
+            "3. Ensure units match definition format exactly",
+            "4. Add space between value and units",
+            "5. Verify placeholder consistency"
+        ],
+        "validation_hints": [
+            "Numeric placeholders need numeric values",
+            "Units must match definition format exactly",
+            "Check for proper spacing in unit formatting",
+            "Verify value type compatibility"
+        ],
+        "specification_reference": "3.2.8.2. Def-expand value type requirements",
+        "related_errors": [
+            "VALUE_INVALID",
+            "UNITS_INVALID",
+            "DEF_EXPAND_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def-expand/Acc/Make-me, (Acceleration/Make-me, Red))",
+                    "(Def-expand/Acc/4.5, (Acceleration/4.5 m, Red))",
+                    "(Def-expand/Acc/4.5, (Acceleration/4.5m-per-s^2, Red))"
+                ],
+                "passes": [
+                    "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/Make-me, (Acceleration/Make-me, Red))",
+                                "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m, Red))",
+                                "square": "(Def-expand/Acc/4.5, (Acceleration/4.5m-per-s^2, Red))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/Make-me, (Acceleration/Make-me, Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m, Red))"
+                        ],
+                        [
+                            6.3,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5m-per-s^2, Red))"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/Make-me, (Acceleration/Make-me, Red))",
+                                    "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m, Red))",
+                                    "square": "(Def-expand/Acc/4.5, (Acceleration/4.5m-per-s^2, Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "(Def-expand/Acc/Make-me, (Acceleration/Make-me, Red))"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "ball",
+                                "(Def-expand/Acc/4.5, (Acceleration/4.5 m, Red))"
+                            ],
+                            [
+                                6.3,
+                                0,
+                                "square",
+                                "(Def-expand/Acc/4.5, (Acceleration/4.5m-per-s^2, Red))"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                    "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "(Def-expand/Acc/5.5, (Acceleration/5.5 m-per-s^2, Red))"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "ball",
+                                "(Def-expand/Acc/5.5, (Acceleration/5.5 m-per-s^2, Red))"
+                            ],
+                            [
+                                6.5,
+                                0,
+                                "n/a",
+                                "n/a"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEF_EXPAND_INVALID",
+        "alt_codes": [],
+        "name": "def-expand-invalid-tags-not-in-definition",
+        "description": "The tags within a Def-expand do not match the corresponding definition.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "content",
+        "common_causes": [
+            "Expanded content doesn't match definition template",
+            "Incorrect tag values in expansion",
+            "Modified content that deviates from definition",
+            "Wrong placeholder value propagation",
+            "Misunderstanding of definition expansion rules"
+        ],
+        "explanation": "Def-expand content must exactly match the definition template with proper placeholder substitution. Any deviation from the defined structure creates invalid expansions.",
+        "correction_strategy": "Ensure expanded content matches definition exactly",
+        "correction_examples": [
+            {
+                "wrong": "(Def-expand/Acc/4.5, (Acceleration/6, Red))",
+                "correct": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                "explanation": "Corrected placeholder substitution and added missing units"
+            },
+            {
+                "wrong": "(Def-expand/MyColor, (Label/Cake))",
+                "correct": "(Def-expand/MyColor, (Label/Pie))",
+                "explanation": "Matched content to exact definition specification"
+            }
+        ],
+        "correction_patterns": [
+            "Copy definition structure exactly",
+            "Substitute placeholders consistently",
+            "Maintain all required tags from definition",
+            "Verify content matches definition template"
+        ],
+        "fix_instructions": [
+            "1. Reference the exact definition structure",
+            "2. Copy all tags from definition",
+            "3. Substitute placeholder values correctly",
+            "4. Verify no extra or missing tags",
+            "5. Check content matches definition exactly"
+        ],
+        "validation_hints": [
+            "Compare expansion to definition structure",
+            "Check placeholder substitution accuracy",
+            "Verify all definition tags are present",
+            "Ensure no unauthorized modifications"
+        ],
+        "specification_reference": "3.2.8.2. Def-expand content matching requirements",
+        "related_errors": [
+            "DEF_EXPAND_INVALID",
+            "DEFINITION_INVALID",
+            "VALUE_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def-expand/Acc/4.5, (Acceleration/6, Red))",
+                    "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Blue))",
+                    "(Def-expand/MyColor, (Label/Cake))"
+                ],
+                "passes": [
+                    "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/4.5, (Acceleration/6, Red))",
+                                "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Blue))",
+                                "square": "(Def-expand/MyColor, (Label/Cake))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/6, Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Blue))"
+                        ],
+                        [
+                            6.3,
+                            0,
+                            "(Def-expand/MyColor, (Label/Cake))"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/4.5, (Acceleration/6, Red))",
+                                    "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Blue))",
+                                    "square": "(Def-expand/MyColor, (Label/Cake))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "(Def-expand/Acc/4.5, (Acceleration/6, Red))"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "ball",
+                                "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Blue))"
+                            ],
+                            [
+                                6.3,
+                                0,
+                                "square",
+                                "(Def-expand/MyColor, (Label/Cake))"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                    "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "(Def-expand/Acc/6.5, (Acceleration/6.5 m-per-s^2, Red))"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "ball",
+                                "(Def-expand/Acc/8.5, (Acceleration/8.5 m-per-s^2, Red))"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEF_EXPAND_INVALID",
+        "alt_codes": [],
+        "name": "def-expand-missing-inner-group",
+        "description": "A Def-expand is missing its inner group containing the definition.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Incomplete Def-expand structure missing content group",
+            "Forgetting to include definition expansion content",
+            "Misunderstanding Def-expand syntax requirements",
+            "Copy-paste errors omitting definition content",
+            "Confusion about Def-expand vs Def usage"
+        ],
+        "explanation": "Def-expand must include both the definition reference and the complete expanded content in parentheses. Missing content groups make the expansion incomplete and invalid.",
+        "correction_strategy": "Add required inner group with definition content",
+        "correction_examples": [
+            {
+                "wrong": "(Def-expand/Acc/5.4)",
+                "correct": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))",
+                "explanation": "Added missing inner group with complete definition expansion"
+            },
+            {
+                "wrong": "Def-expand/MyColor without content",
+                "correct": "(Def-expand/MyColor, (Item, (Label/Pie)))",
+                "explanation": "Included full definition content structure"
+            }
+        ],
+        "correction_patterns": [
+            "Add parentheses around complete definition content",
+            "Include all tags from referenced definition",
+            "Ensure proper expansion structure",
+            "Verify content group completeness"
+        ],
+        "fix_instructions": [
+            "1. Identify incomplete Def-expand structures",
+            "2. Reference the corresponding definition",
+            "3. Add parentheses with complete expansion",
+            "4. Include all definition content",
+            "5. Verify proper Def-expand syntax"
+        ],
+        "validation_hints": [
+            "Def-expand must have definition reference and content",
+            "Check for missing parentheses around content",
+            "Verify complete definition expansion",
+            "Ensure all definition tags are included"
+        ],
+        "specification_reference": "3.2.8.2. Def-expand structure requirements",
+        "related_errors": [
+            "DEF_EXPAND_INVALID",
+            "PARENTHESES_MISMATCH",
+            "TAG_GROUP_ERROR"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Item, (Label/Pie)))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def-expand/Acc/5.4)"
+                ],
+                "passes": [
+                    "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Orange",
+                                "ball": "(Def-expand/Acc/4.5)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))",
+                                "ball": "Red"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            5.4,
+                            0,
+                            "(Def-expand/Acc/5.4 )"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/4.5)",
+                                    "ball": "Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "ball",
+                                "(Def-expand/Acc/4.5)"
+                            ],
+                            [
+                                5.4,
+                                0,
+                                "n/a",
+                                "Green"
+                            ],
+                            [
+                                6.4,
+                                0,
+                                "face",
+                                "n/a"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))",
+                                    "ball": "(Acceleration/4.5, Blue), Def/MyColor"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "n/a"
+                            ],
+                            [
+                                6.5,
+                                0,
+                                "ball",
+                                "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "DEF_EXPAND_INVALID",
+        "alt_codes": [
+            "DEFINITION_INVALID"
+        ],
+        "name": "def-expand-has-extras",
+        "description": "A Def-expand has extra tags or groups.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Adding extra tags beyond definition expansion",
+            "Including additional content groups with Def-expand",
+            "Misunderstanding that Def-expand should be self-contained",
+            "Mixing regular tags with definition expansion",
+            "Incorrect grouping with extra elements"
+        ],
+        "explanation": "Def-expand should contain only the definition reference and its expanded content. Additional tags or groups violate the self-contained expansion principle.",
+        "correction_strategy": "Remove extra content from Def-expand groups",
+        "correction_examples": [
+            {
+                "wrong": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), Blue)",
+                "correct": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))",
+                "explanation": "Removed extra tag to keep only definition expansion"
+            },
+            {
+                "wrong": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), (Blue, Green), Black)",
+                "correct": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))",
+                "explanation": "Eliminated all extra groups and tags"
+            }
+        ],
+        "correction_patterns": [
+            "Keep only definition reference and expansion content",
+            "Remove extra tags from Def-expand groups",
+            "Eliminate additional content groups",
+            "Maintain self-contained expansion structure"
+        ],
+        "fix_instructions": [
+            "1. Identify extra content in Def-expand groups",
+            "2. Remove additional tags beyond definition",
+            "3. Eliminate extra groups or parentheses",
+            "4. Keep only definition reference and expansion",
+            "5. Verify clean Def-expand structure"
+        ],
+        "validation_hints": [
+            "Def-expand should have exactly two parts: reference and content",
+            "Remove any extra tags or groups",
+            "Check for proper self-contained structure",
+            "Verify no additional elements"
+        ],
+        "specification_reference": "3.2.8.2. Def-expand self-containment requirements",
+        "related_errors": [
+            "DEFINITION_INVALID",
+            "TAG_GROUP_ERROR",
+            "DEF_EXPAND_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Item, (Label/Pie)))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), Blue)",
+                    "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), (Blue, Green), Black)"
+                ],
+                "passes": [
+                    "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), Blue)",
+                                "ball": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), (Blue, Green), Black)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))",
+                                "ball": "Red"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), Blue)"
+                        ],
+                        [
+                            5.4,
+                            0,
+                            "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), (Blue, Green), Black)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), Blue)",
+                                    "ball": "Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "ball",
+                                "Def/Acc, (Def-expand/Acc/4.5)"
+                            ],
+                            [
+                                5.4,
+                                0,
+                                "n/a",
+                                "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red), Blue)"
+                            ],
+                            [
+                                6.4,
+                                0,
+                                "face",
+                                "n/a"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))",
+                                    "ball": "(Acceleration/4.5 m-per-s^2, Blue), Def/MyColor"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "n/a"
+                            ],
+                            [
+                                6.5,
+                                0,
+                                "ball",
+                                "(Def-expand/Acc/5.4, (Acceleration/5.4 m-per-s^2, Red))"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

@@ -1,0 +1,257 @@
+[
+  {
+    "error_code": "SCHEMA_LOAD_FAILED",
+    "name": "different-standard-schemas-in-same-merge-group",
+    "description": "Schemas in a merge group must be associated with the same standard schema.",
+    "schema": [
+      "8.1.0",
+      "testlib_2.0.0"
+    ],
+    "error_category": "schema_development",
+    "common_causes": [
+      "Attempting to merge schemas with different standard schema versions",
+      "Incompatible library schema combinations",
+      "Version mismatch between standard and library schemas",
+      "Invalid schema merge group configuration",
+      "Missing version compatibility information"
+    ],
+    "explanation": "When merging multiple schemas, all schemas in the merge group must be compatible with the same standard schema version. Version mismatches prevent proper schema integration and validation.",
+    "correction_strategy": "Ensure all schemas in merge group use compatible standard schema versions",
+    "correction_examples": [
+      {
+        "wrong": "Standard: 8.1.0, Library: testlib_2.0.0 (requires 8.2.0)",
+        "correct": "Standard: 8.2.0, Library: testlib_2.0.0",
+        "explanation": "Updated standard schema to match library requirements"
+      },
+      {
+        "wrong": "Merging schemas with standards 8.1.0 and 8.3.0",
+        "correct": "All schemas use standard 8.3.0",
+        "explanation": "Unified all schemas to use same standard version"
+      }
+    ],
+    "correction_patterns": [
+      "Check schema version compatibility requirements",
+      "Update standard schema to compatible version",
+      "Verify library schema standard requirements",
+      "Ensure merge group uses consistent versioning"
+    ],
+    "fix_instructions": [
+      "1. Identify the standard schema versions required by each schema in merge group",
+      "2. Find a compatible standard schema version that works for all",
+      "3. Update schema references to use the common standard version",
+      "4. Verify all schemas load successfully with the unified version",
+      "5. Test merged schema functionality"
+    ],
+    "validation_hints": [
+      "Check schema version compatibility matrices",
+      "Verify library schema withStandard attributes",
+      "Test schema loading before attempting merge",
+      "Ensure all required schemas are accessible"
+    ],
+    "specification_reference": "3.1.3. Schema merging and compatibility",
+    "related_errors": ["SCHEMA_LIBRARY_INVALID", "SCHEMA_VERSION_INVALID"],
+    "definitions": [
+    ],
+    "tests": {
+      "string_tests": {
+        "fails": [
+          "Red",
+          "Blue"
+        ],
+        "passes": [
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_LOAD_FAILED",
+    "name": "extra-standard-schemas-in-same-merge-group",
+    "description": "Standard schema in same group as its partners is okay.",
+    "schema": [
+      "8.2.0",
+      "testlib_2.0.0",
+      "testlib_3.0.0",
+      "sc:8.1.0"
+    ],
+    "definitions": [
+    ],
+    "tests": {
+      "string_tests": {
+        "fails": [
+        ],
+        "passes": [
+          "Red",
+          "Blue"
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_LOAD_FAILED",
+    "name": "incompatible-merge-schemas ",
+    "description": "Schemas in a merge group must be associated with the same standard schema].",
+    "schema":  [
+      "score_2.0.0",
+      "lang_1.1.0"
+    ],
+    "definitions": [
+    ],
+    "tests": {
+      "string_tests": {
+        "fails": [
+          "Red",
+          "Blue"
+        ],
+        "passes": [ ]
+      }
+    }
+  },
+  {
+    "error_code": "TAG_NAMESPACE_PREFIX_INVALID",
+    "alt_codes": [],
+    "name": "tag-with-namespace-has-no-schema",
+    "description": "A tag starting with name: does not have an associated schema.",
+    "warning": false,
+    "schema": [
+      "8.3.0",
+      "sc:score_1.0.0"
+    ],
+    "definitions": [
+      "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+      "(Definition/MyColor, (Label/Pie))"
+    ],
+    "tests": {
+      "string_tests": {
+        "fails": [
+          "ts:Red, Blue",
+          "(ts:Red, (sc:Sleep-modulator))"
+        ],
+        "passes": [
+          "sc:Sleep-modulator"
+        ]
+      },
+      "sidecar_tests": {
+        "fails": [
+          {
+            "event_code": {
+              "HED": {
+                "face": "ts:Red, Blue",
+                "ball": "(ts:Red, (sc:Sleep-modulator))"
+              }
+            }
+          }
+        ],
+        "passes": [
+          {
+            "event_code": {
+              "HED": {
+                "face": "sc:Sleep-modulator"
+              }
+            }
+          }
+        ]
+      },
+      "event_tests": {
+        "fails": [
+          [
+            [
+              "onset",
+              "duration",
+              "HED"
+            ],
+            [
+              4.5,
+              0,
+              "ts:Red, Blue"
+            ],
+            [
+              5.5,
+              0,
+              "(ts:Red, (sc:Sleep-modulator))"
+            ]
+          ]
+        ],
+        "passes": [
+          [
+            [
+              "onset",
+              "duration",
+              "HED"
+            ],
+            [
+              4.5,
+              0,
+              "sc:Sleep-modulator"
+            ]
+          ]
+        ]
+      },
+      "combo_tests": {
+        "fails": [
+          {
+            "sidecar": {
+              "event_code": {
+                "HED": {
+                  "face": "ts:Red, Blue",
+                  "ball": "(ts:Red, (sc:Sleep-modulator))"
+                }
+              }
+            },
+            "events": [
+              [
+                "onset",
+                "duration",
+                "event_code",
+                "HED"
+              ],
+              [
+                4.5,
+                0,
+                "face",
+                "Red, Def/MyColor"
+              ],
+              [
+                5.0,
+                0,
+                "ball",
+                "Green"
+              ]
+            ]
+          }
+        ],
+        "passes": [
+          {
+            "sidecar": {
+              "event_code": {
+                "HED": {
+                  "face": "Acceleration/5 m-per-s^2",
+                  "ball": "Def/Acc/7, Blue, sc:Sleep-modulator"
+                }
+              }
+            },
+            "events": [
+              [
+                "onset",
+                "duration",
+                "event_code",
+                "HED"
+              ],
+              [
+                4.5,
+                0,
+                "face",
+                "Blue, sc:Sleep-modulator"
+              ],
+              [
+                5.0,
+                0,
+                "ball",
+                "Green, Def/MyColor"
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

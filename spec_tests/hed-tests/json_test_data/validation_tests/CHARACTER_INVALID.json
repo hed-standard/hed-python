@@ -1,0 +1,472 @@
+[
+    {
+        "error_code": "CHARACTER_INVALID",
+        "alt_codes": ["TAG_INVALID", "UNITS_INVALID", "VALUE_INVALID"],
+        "name": "character-invalid-non-printing-appears",
+        "description": "The HED string contains a UTF-8 character.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Copy-pasting text from documents with invisible control characters",
+            "Including non-printable characters like backspace (\\b), tab, newline in tag values",
+            "Control characters with codes <= 31 or 127-159",
+            "Using curly braces {} within tag names or values (not column references)",
+            "Character encoding issues when importing from other tools"
+        ],
+        "explanation": "HED has strict character restrictions that are part of its specification. The name classes in the HED schemas encapsulate these restrictions.",
+        "correction_strategy": "Remove or replace forbidden characters with allowed alternatives",
+        "correction_examples": [
+            {
+                "wrong": "Item/Bl\b",
+                "correct": "Item/Bl",
+                "explanation": "Removed backspace control character (\\b)"
+            },
+            {
+                "wrong": "Item/{abc}",
+                "correct": "Item/abc",
+                "explanation": "Removed curly braces (only allowed in sidecars)"
+            },
+            {
+                "wrong": "Label/[value]",
+                "correct": "Label/value",
+                "explanation": "Removed square brackets"
+            },
+            {
+                "wrong": "Label/A test",
+                "correct": "Label/A-test",
+                "explanation": "Label has the name class property so it can only contain letters, numbers, hyphens, and underscores. Use the Parameter-value tag instead of Label if you have values with other characters. Parameter-value has text name class which has the fewest restrictions on values."
+            }
+        ],
+        "correction_patterns": [
+            "Remove control characters (codes <= 31 or 127-159)",
+            "Replace square brackets [] with parentheses () or remove",
+            "Replace tildes ~ with commas for grouping",
+            "Remove double quotes or replace with single quotes in descriptions",
+            "Remove curly braces {} unless in sidecar column references",
+            "Replace tags with restrictive name classes such as Label with less restrictive tags such as Parameter-value when necessary"
+        ],
+        "fix_instructions": [
+            "1. Scan the HED string for forbidden characters",
+            "2. Identify the type of forbidden character",
+            "3. Remove or replace with appropriate alternatives",
+            "4. For control characters: simply remove them",
+            "5. For brackets/braces: use appropriate HED syntax instead"
+        ],
+        "validation_hints": [
+            "Check for invisible characters by examining string length vs visible content",
+            "Verify UTF-8 encoding compliance (HED 8.3.0+)",
+            "Ensure no square brackets, tildes, or double quotes remain",
+            "Confirm curly braces only appear in sidecar column references"
+        ],
+        "specification_reference": "2.2. Character sets and restrictions",
+        "related_errors": ["TAG_INVALID", "SIDECAR_BRACES_INVALID", "VALUE_INVALID"],
+        "definitions": ["(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))", "(Definition/MyColor, (Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Item/Bl\b",
+                    "Item/ABC\u009E"
+                ],
+                "passes": [
+                    "Red, Blue, Description/Red",
+                    "Description/This is a ʰ good character"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "show": "Red, Item/Bl\b"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "show": "Red,  Label/a-ʰ-good"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Item/Bl\b"]
+                    ],
+                   [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Item/{abc}"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/Temp, Label/a-ʰ-good"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar":  {
+                            "event_code": {
+                                "HED": {
+                                    "show": "Red, Item/Bl\b",
+                                    "ball": "Def/Acc/4.5"
+                                }
+                            }
+                        },
+                        "events": 
+                            [
+                                ["onset", "duration", "event_code", "HED"],
+                                [ 4.5, 0, "show", "Description/a ʰ good"],
+                                [ 5.0, 0, "ball", "Blue"]
+                            ]
+                    }
+                ],
+                "passes": [
+                    {
+                         "sidecar":  {
+                            "event_code": {
+                                "HED": {
+                                    "show": "Red, Label/a, Description/a ʰ good"
+                                }
+                            }
+                        },
+                        "events": 
+                            [
+                                ["onset", "duration", "event_code", "HED"],
+                                [ 4.5, 0, "show", "Description/goodness"]
+                            ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "CHARACTER_INVALID",
+        "alt_codes": ["TAG_INVALID", "UNITS_INVALID", "VALUE_INVALID"],
+        "name": "curly-braces-not-in-sidecar",
+        "description": "The curly brace notation is used outside a sidecar.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Using curly braces {} in HED strings outside of sidecar column references",
+            "Mistaking column reference syntax for general HED grouping syntax",
+            "Copy-pasting sidecar HED content directly into event HED strings"
+        ],
+        "explanation": "Curly braces {} are reserved syntax for column references in sidecars only. They cannot be used in direct HED strings or event annotations.",
+        "correction_strategy": "Remove curly braces or replace with appropriate HED grouping syntax",
+        "correction_examples": [
+            {
+                "wrong": "{col_1}, Red",
+                "correct": "Red",
+                "explanation": "Removed invalid curly brace column reference from direct HED string"
+            },
+            {
+                "wrong": "Action/{response}",
+                "correct": "Action/Response",
+                "explanation": "Replace curly brace placeholder with actual tag value"
+            }
+        ],
+        "correction_patterns": [
+            "Remove {column_name} references from direct HED strings",
+            "Use parentheses () for grouping instead of curly braces",
+            "Replace placeholder syntax with actual tag values"
+        ],
+        "fix_instructions": [
+            "1. Identify curly brace usage in HED strings",
+            "2. Determine if it's intended as a column reference or grouping",
+            "3. For column references: move to sidecar or replace with actual values",
+            "4. For grouping: use parentheses instead",
+            "5. Remove any remaining curly braces"
+        ],
+        "validation_hints": [
+            "Curly braces are only valid in sidecar HED column definitions",
+            "Use parentheses for grouping tags together",
+            "Column references must reference actual sidecar columns"
+        ],
+        "specification_reference": "3.4. Sidecar files and column references",
+        "related_errors": ["SIDECAR_BRACES_INVALID", "TAG_INVALID"],
+        "definitions": ["(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))", "(Definition/MyColor, (Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": ["{col_1}, Red"],
+                "passes": ["Red, Blue, Description/Red"]
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Statistical-accuracy/0.677, {response}"
+                            }
+                        },
+                        "response": {
+                            "HED": "Label/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "{who_knows}, Red"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/Temp"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [],
+                "passes": []
+            }
+        }
+    },
+    {
+        "error_code": "CHARACTER_INVALID",
+        "alt_codes": ["TAG_INVALID", "VALUE_INVALID"],
+        "name": "invalid-character-name-value-class",
+        "description": "An invalid character was used in an 8.3.0 or greater style name value class.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Using special characters (*$%[]) in tags with restrictive name classes",
+            "Including spaces in label values without using Parameter-value",
+            "Using symbols not allowed by specific tag name class restrictions",
+            "Attempting to use characters valid in text class with more restrictive classes"
+        ],
+        "explanation": "Different HED tags have different name class restrictions. Label tags can only contain letters, numbers, hyphens and underscores, while Parameter-value has fewer restrictions.",
+        "correction_strategy": "Replace restricted tags with less restrictive ones or fix the character usage",
+        "correction_examples": [
+            {
+                "wrong": "Label/30$",
+                "correct": "Parameter-value/30$",
+                "explanation": "Use Parameter-value for values with special characters"
+            },
+            {
+                "wrong": "Parameter-label/[",
+                "correct": "Parameter-label/bracket",
+                "explanation": "Replace invalid character with descriptive text"
+            },
+            {
+                "wrong": "Label/30db kg",
+                "correct": "Label/30db-kg",
+                "explanation": "Replace spaces with hyphens in Label values"
+            }
+        ],
+        "correction_patterns": [
+            "Replace Label with Parameter-value for values containing special characters",
+            "Use hyphens instead of spaces in restrictive name classes",
+            "Remove or replace invalid characters (*$%[]) with valid alternatives"
+        ],
+        "fix_instructions": [
+            "1. Identify the tag with invalid characters",
+            "2. Check the tag's name class restrictions",
+            "3. Either replace invalid characters or use a less restrictive tag",
+            "4. For Label: use only letters, numbers, hyphens, underscores",
+            "5. For complex values: consider using Parameter-value instead"
+        ],
+        "validation_hints": [
+            "Label tags have strict character restrictions",
+            "Parameter-value allows most characters including spaces and symbols",
+            "Check HED schema for specific tag name class properties"
+        ],
+        "specification_reference": "2.2. Character sets and name classes",
+        "related_errors": ["TAG_INVALID", "VALUE_INVALID"],
+        "definitions": ["(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))", "(Definition/MyColor, (Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Parameter-label/[",
+                    "Parameter-label/Taco*",
+                    "Label/30$",
+                    "Label/30db kg",
+                    "Item/new*"
+                ],
+                "passes": [
+                    "Parameter-label/Words",
+                    "Label/30e10",
+                    "Label/3e10asdf"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "show": "Parameter-label/["
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": "Parameter-label/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/%max1"]
+                    ],
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/$30"]
+                    ],
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/30db kg"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/3e10asdf"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                 "fails": [
+                    {
+                        "sidecar": {
+                            "response": {
+                                "HED": "Label/#"
+                            }
+                        },
+                        "events": [
+                            ["onset", "duration", "response"],
+                            [4.5, 0.0, "A test"]
+                        ]
+                    }
+                ],
+                "passes": []
+            }
+        }
+    },
+    {
+        "error_code": "CHARACTER_INVALID",
+        "alt_codes": ["TAG_INVALID", "VALUE_INVALID"],
+        "name": "invalid-character-name-value-class-early-schema",
+        "description": "An invalid character was as a value in a placeholder or as a tag extension.",
+        "warning": false,
+        "schema": "8.2.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Using special characters in older HED schema versions with stricter character restrictions",
+            "Including characters not supported in early HED 8.x versions",
+            "Using modern character sets with legacy schema versions"
+        ],
+        "explanation": "Earlier HED schema versions (before 8.3.0) had more restrictive character sets and didn't support some modern characters.",
+        "correction_strategy": "Upgrade to newer schema version or use only characters supported in the target schema version",
+        "correction_examples": [
+            {
+                "wrong": "Label/30$ (in schema 8.2.0)",
+                "correct": "Parameter-value/30$ (upgrade to 8.3.0+) or Label/30-dollars",
+                "explanation": "Either upgrade schema or use text description instead of symbol"
+            },
+            {
+                "wrong": "Parameter-label/[ (in schema 8.2.0)",
+                "correct": "Parameter-label/bracket",
+                "explanation": "Replace special character with descriptive text"
+            }
+        ],
+        "correction_patterns": [
+            "Upgrade to HED schema version 8.3.0 or later for better character support",
+            "Replace special characters with descriptive text alternatives",
+            "Use basic ASCII characters for maximum compatibility"
+        ],
+        "fix_instructions": [
+            "1. Check the HED schema version being used",
+            "2. Identify characters not supported in that version",
+            "3. Either upgrade to a newer schema version or replace unsupported characters",
+            "4. Use descriptive text instead of symbols when possible",
+            "5. Test with the target schema version"
+        ],
+        "validation_hints": [
+            "Early HED versions had stricter character restrictions",
+            "Consider upgrading to HED 8.3.0+ for better character support",
+            "Use only basic ASCII characters for maximum compatibility"
+        ],
+        "specification_reference": "2.2. Character sets and schema versioning",
+        "related_errors": ["TAG_INVALID", "VALUE_INVALID", "SCHEMA_VERSION_INVALID"],
+        "definitions": ["(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))", "(Definition/MyColor, (Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Parameter-label/[",
+                    "Parameter-label/Taco*",
+                    "Label/30$",
+                    "Label/30db kg"
+                ],
+                "passes": [
+                    "Parameter-label/Words",
+                    "Label/30e10",
+                    "Label/3e10asdf"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "show": "Parameter-label/["
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": "Parameter-label/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/%max1"]
+                    ],
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/$30"]
+                    ],
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/30db kg"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label/3e10asdf"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                 "fails": [],
+                "passes": []
+            }
+        }
+    }
+]

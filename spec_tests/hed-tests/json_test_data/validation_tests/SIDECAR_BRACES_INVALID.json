@@ -1,0 +1,960 @@
+[
+    {
+        "error_code": "SIDECAR_BRACES_INVALID",
+        "alt_codes": [
+            "CHARACTER_INVALID",
+            "SIDECAR_INVALID"
+        ],
+        "name": "sidecar-braces-contents-invalid",
+        "description": "The item in curly braces is not the word HED or a column name with HED annotations in the sidecar.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Referencing non-existent columns in curly braces",
+            "Using non-HED column names in braces",
+            "Nested or unmatched curly braces",
+            "Column reference without HED annotations",
+            "Incorrect brace syntax in sidecars"
+        ],
+        "explanation": "Curly braces in sidecars are reserved for column references. Only 'HED' or names of columns that have HED annotations can appear in braces. Braces must be properly matched and cannot be nested.",
+        "correction_strategy": "Fix column references and brace usage in sidecars",
+        "correction_examples": [
+            {
+                "wrong": "Red, {nonexistent_column}",
+                "correct": "Red, {event_type}",
+                "explanation": "Referenced existing HED-annotated column"
+            },
+            {
+                "wrong": "Label/{invalid{{nested}}}",
+                "correct": "Label/{event_type}",
+                "explanation": "Removed nested braces and used valid column reference"
+            },
+            {
+                "wrong": "{column_without_hed}",
+                "correct": "Sensory-event",
+                "explanation": "Replaced invalid column reference with direct HED tag"
+            }
+        ],
+        "correction_patterns": [
+            "Ensure referenced columns exist in the data",
+            "Verify referenced columns have HED annotations",
+            "Remove nested or unmatched braces",
+            "Use only 'HED' or valid column names in braces",
+            "Replace invalid references with direct HED tags"
+        ],
+        "fix_instructions": [
+            "1. Identify all column references in curly braces",
+            "2. Verify each referenced column exists",
+            "3. Ensure referenced columns have HED annotations",
+            "4. Fix brace matching and nesting issues",
+            "5. Replace invalid references with appropriate alternatives"
+        ],
+        "validation_hints": [
+            "Check that all braced columns exist in sidecar",
+            "Verify referenced columns have HED sections",
+            "Ensure proper brace matching",
+            "No nested braces allowed"
+        ],
+        "specification_reference": "3.2.9. Sidecars",
+        "related_errors": [
+            "SIDECAR_INVALID",
+            "SIDECAR_KEY_MISSING"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "{response_time}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_time": {
+                            "Description": "Has description but no HED"
+                        }
+                    },
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "{response_time}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_action": {
+                            "Description": "Does not correspond to curly braces"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "{response_time}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_time": {
+                            "Description": "Has description with HED",
+                            "HED": "Label/#"
+                        }
+                    },
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "{HED}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_action": {
+                            "Description": "Does not correspond to curly braces"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, Blue), (Green, (Yellow)), ({HED})",
+                                    "ball": "{response_time}, (Def/Acc/3.5)"
+                                }
+                            },
+                            "response_time": {
+                                "Description": "Has description with HED",
+                                "HED": "Label/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED",
+                                "response_time"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue",
+                                0
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor",
+                                1
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "face",
+                                "",
+                                2
+                            ],
+                            [
+                                5.7,
+                                0,
+                                "face",
+                                "n/a",
+                                3
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SIDECAR_BRACES_INVALID",
+        "alt_codes": [
+            "VALUE_INVALID",
+            "CHARACTER_INVALID",
+            "UNITS_INVALID",
+            "DEF_INVALID"
+        ],
+        "name": "sidecar-braces-invalid-spot",
+        "description": "A curly brace reference must only appear where a tag could.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Curly braces embedded within tag values",
+            "Column references in inappropriate tag positions",
+            "Braces inside unit values or tag modifiers",
+            "Misunderstanding where column substitution is allowed",
+            "Incorrect placement of dynamic content references"
+        ],
+        "explanation": "Curly braces for column references can only appear where complete tags would be valid, not embedded within tag values, units, or other tag components.",
+        "correction_strategy": "Move curly braces to valid tag positions",
+        "correction_examples": [
+            {
+                "wrong": "Label/{response_time}",
+                "correct": "{response_time}, Label/Description",
+                "explanation": "Moved column reference to separate tag position"
+            },
+            {
+                "wrong": "Acceleration/{speed} m-per-s^2",
+                "correct": "{speed}, Acceleration/5.0 m-per-s^2",
+                "explanation": "Separated column reference from tag value"
+            }
+        ],
+        "correction_patterns": [
+            "Use curly braces as complete tag substitutes",
+            "Move column references outside of tag values",
+            "Separate dynamic content from static tag components",
+            "Place braces where full tags would be appropriate"
+        ],
+        "fix_instructions": [
+            "1. Identify embedded curly brace references",
+            "2. Extract column references to separate tag positions",
+            "3. Ensure braces represent complete tag substitutions",
+            "4. Verify proper tag structure around references",
+            "5. Test column substitution works correctly"
+        ],
+        "validation_hints": [
+            "Curly braces must replace entire tags, not parts",
+            "Column references cannot be embedded in values",
+            "Check that braces are in valid tag positions",
+            "Verify proper separation of dynamic and static content"
+        ],
+        "specification_reference": "3.2.9. Sidecar column reference positioning",
+        "related_errors": [
+            "VALUE_INVALID",
+            "CHARACTER_INVALID",
+            "UNITS_INVALID",
+            "DEF_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "(Label/{response_time})"
+                            }
+                        },
+                        "response_time": {
+                            "Description": "Has description with HED",
+                            "HED": "Label/#"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "{response_time}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_time": {
+                            "Description": "Has description with HED",
+                            "HED": "Label/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [],
+                "passes": []
+            }
+        }
+    },
+    {
+        "error_code": "SIDECAR_BRACES_INVALID",
+        "alt_codes": [],
+        "name": "sidecar-braces-circular-reference",
+        "description": "The item in curly braces has a HED annotation that contains curly braces.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "reference",
+        "common_causes": [
+            "Column A references column B which references column A",
+            "Chain of column references that forms a loop",
+            "Complex multi-level circular dependencies",
+            "Inadvertent recursive column referencing",
+            "Mismanagement of column interdependencies"
+        ],
+        "explanation": "Column references cannot form circular dependencies where column A references column B, and column B (directly or indirectly) references column A. This creates infinite substitution loops.",
+        "correction_strategy": "Break circular reference chains",
+        "correction_examples": [
+            {
+                "wrong": "Column A: {column_b}, Column B: {column_a}",
+                "correct": "Column A: {column_b}, Column B: Sensory-event",
+                "explanation": "Replaced circular reference with direct HED content"
+            },
+            {
+                "wrong": "Chain: A → B → C → A",
+                "correct": "Chain: A → B → C (direct content)",
+                "explanation": "Broke circular chain by making C have direct content"
+            }
+        ],
+        "correction_patterns": [
+            "Replace one reference in the chain with direct HED content",
+            "Restructure column dependencies to be acyclic",
+            "Use base columns that don't reference others",
+            "Create hierarchical rather than circular structures"
+        ],
+        "fix_instructions": [
+            "1. Map all column reference relationships",
+            "2. Identify circular dependency chains",
+            "3. Choose one column in each cycle to modify",
+            "4. Replace circular reference with direct HED content",
+            "5. Verify all references resolve without loops"
+        ],
+        "validation_hints": [
+            "Trace column references to detect cycles",
+            "Ensure at least one column in chain has direct content",
+            "Check for indirect circular dependencies",
+            "Verify reference graph is acyclic"
+        ],
+        "specification_reference": "3.2.9. Sidecar column reference constraints",
+        "related_errors": [
+            "SIDECAR_BRACES_INVALID",
+            "SIDECAR_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow)), {HED}",
+                                "ball": "{response_time}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_time": {
+                            "HED": "Label/#, {event_code}"
+                        }
+                    },
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow)), {HED}",
+                                "ball": "{response_time}, (Def/Acc/3.5)",
+                                "dog": "Orange, {event_type}"
+                            }
+                        },
+                        "response_time": {
+                            "HED": "Label/#"
+                        },
+                        "event_type": {
+                            "HED": {
+                                "banana": "Blue, {response_time}",
+                                "apple": "Green"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "{response_time}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_time": {
+                            "Description": "Has description with HED",
+                            "HED": "Label/#"
+                        },
+                        "response_count": {
+                            "Description": "A count used to test curly braces in value columns.",
+                            "HED": "(Item-count/#, {response_time})"
+                        }
+                    },
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "{HED}, (Def/Acc/3.5, {response_action})"
+                            }
+                        },
+                        "response_action": {
+                            "Description": "Does not correspond to curly braces",
+                            "HED": "Label/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, Blue), (Green, (Yellow)), ({HED})",
+                                    "ball": "{response_time}, (Def/Acc/3.5)"
+                                }
+                            },
+                            "response_time": {
+                                "Description": "Has description with HED",
+                                "HED": "Parameter-value/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "response_time",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                3.4,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                6.8,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ],
+                            [
+                                5.2,
+                                0,
+                                "n/a",
+                                "face",
+                                ""
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "any",
+                                "face",
+                                "n/a"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SIDECAR_BRACES_INVALID",
+        "alt_codes": [],
+        "name": "sidecar-braces-self-reference",
+        "description": "The item in curly braces has a HED annotation that contains itself.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "reference",
+        "common_causes": [
+            "Column referencing itself directly in HED annotation",
+            "Copy-paste errors creating self-references",
+            "Misunderstanding of column reference scope",
+            "Attempting to create recursive definitions",
+            "Incorrect use of column names in their own definitions"
+        ],
+        "explanation": "A column cannot reference itself in its HED annotation as this creates infinite recursion during substitution. Self-references must be avoided to ensure proper expansion.",
+        "correction_strategy": "Remove self-references from column definitions",
+        "correction_examples": [
+            {
+                "wrong": "response_time: 'Parameter-value/#, {response_time}'",
+                "correct": "response_time: 'Parameter-value/#'",
+                "explanation": "Removed self-reference to break infinite recursion"
+            },
+            {
+                "wrong": "event_type: '{event_type}, Action'",
+                "correct": "event_type: 'Sensory-event, Action'",
+                "explanation": "Replaced self-reference with direct HED content"
+            }
+        ],
+        "correction_patterns": [
+            "Remove self-referencing column names from HED annotations",
+            "Replace self-references with direct HED content",
+            "Use other columns or direct tags instead of self-reference",
+            "Ensure column definitions are self-contained"
+        ],
+        "fix_instructions": [
+            "1. Identify columns that reference themselves",
+            "2. Remove self-referencing curly braces",
+            "3. Replace with appropriate direct HED content",
+            "4. Verify column definitions don't create recursion",
+            "5. Test substitution works without infinite loops"
+        ],
+        "validation_hints": [
+            "Check for column names in their own HED annotations",
+            "Ensure no {column_name} in column_name's definition",
+            "Verify column definitions are self-contained",
+            "Look for direct self-referencing patterns"
+        ],
+        "specification_reference": "3.2.9. Sidecar self-reference restrictions",
+        "related_errors": [
+            "SIDECAR_BRACES_INVALID",
+            "SIDECAR_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow)), {HED}",
+                                "ball": "{HED}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_time": {
+                            "HED": "Parameter-value/#, {response_time}"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "{response_time}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_time": {
+                            "Description": "Has description with HED",
+                            "HED": "Parameter-value/#"
+                        },
+                        "response_count": {
+                            "Description": "A count used to test curly braces in value columns.",
+                            "HED": "(Item-count/#, {response_time})"
+                        }
+                    },
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "{HED}",
+                                "ball": "Red"
+                            }
+                        }
+                    },
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "{HED}, (Def/Acc/3.5, {response_action})"
+                            }
+                        },
+                        "response_action": {
+                            "Description": "Does not correspond to curly braces",
+                            "HED": "Parameter-value/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, Blue), (Green, (Yellow)), ({HED})",
+                                    "ball": "{HED}, (Def/Acc/3.5)"
+                                }
+                            },
+                            "response_time": {
+                                "Description": "Has description with HED",
+                                "HED": "Parameter-value/#, {response_time}"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "response_time",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                3.4,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                6.8,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ],
+                            [
+                                5.2,
+                                0,
+                                "n/a",
+                                "face",
+                                ""
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "any",
+                                "face",
+                                "n/a"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, Blue), (Green, (Yellow)), ({HED})",
+                                    "ball": "{response_time}, (Def/Acc/3.5)"
+                                }
+                            },
+                            "response_time": {
+                                "Description": "Has description with HED",
+                                "HED": "Parameter-value/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "response_time",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                3.4,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                6.8,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ],
+                            [
+                                5.2,
+                                0,
+                                "n/a",
+                                "face",
+                                ""
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "7,3",
+                                "face",
+                                "n/a"
+                            ]
+                        ]
+                    },
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "{HED}",
+                                    "ball": "Red"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "response_time",
+                                "event_code"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                3.4,
+                                "face"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                6.8,
+                                "ball"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SIDECAR_BRACES_INVALID",
+        "alt_codes": [
+            "CHARACTER_INVALID",
+            "VALUE_INVALID",
+            "UNITS_INVALID"
+        ],
+        "name": "sidecar-braces-appear-as-value-rather-than-tag",
+        "description": "The curly braces are in a value rather than as a separate tag substitute.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Embedding column references within tag values",
+            "Using braces as part of tag content rather than tag replacement",
+            "Misunderstanding column substitution scope",
+            "Treating braces as string interpolation rather than tag substitution",
+            "Incorrect syntax for dynamic content integration"
+        ],
+        "explanation": "Curly braces must replace entire tags, not be embedded within tag values. Column references should substitute complete HED tags, not parts of tag values.",
+        "correction_strategy": "Use curly braces as complete tag substitutes",
+        "correction_examples": [
+            {
+                "wrong": "Label/{response_time}, Black",
+                "correct": "{response_time}, Label/Description, Black",
+                "explanation": "Moved column reference to replace entire tag"
+            },
+            {
+                "wrong": "Parameter-value/{measurement}",
+                "correct": "{measurement}, Parameter-value/Default",
+                "explanation": "Separated column reference from tag value"
+            }
+        ],
+        "correction_patterns": [
+            "Extract column references from tag values",
+            "Use braces to replace complete tags",
+            "Separate dynamic references from static tag content",
+            "Place column references as independent tag elements"
+        ],
+        "fix_instructions": [
+            "1. Identify column references embedded in tag values",
+            "2. Extract braces to separate tag positions",
+            "3. Ensure braces replace complete tags",
+            "4. Add default static content if needed",
+            "5. Verify proper tag structure and substitution"
+        ],
+        "validation_hints": [
+            "Column references should not be embedded in values",
+            "Braces must replace entire tags, not tag parts",
+            "Check for proper separation of dynamic and static content",
+            "Verify tag structure remains valid after substitution"
+        ],
+        "specification_reference": "3.2.9. Sidecar column substitution syntax",
+        "related_errors": [
+            "CHARACTER_INVALID",
+            "VALUE_INVALID",
+            "UNITS_INVALID",
+            "SIDECAR_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "Label/{response_time}, Black"
+                            }
+                        },
+                        "response_time": {
+                            "Description": "Has description but no HED",
+                            "HED": "Orange"
+                        }
+                    },
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "Label/{response_time}, Black"
+                            }
+                        },
+                        "response_time": {
+                            "Description": "Has description but no HED",
+                            "HED": "Label/#"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue), ({response_time}, (Green, (Yellow)))",
+                                "ball": "{response_time}, (Def/Acc/3.5)"
+                            }
+                        },
+                        "response_time": {
+                            "Description": "Has description with HED",
+                            "HED": "Label/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, Blue), (Green, (Yellow)), ({HED})",
+                                    "ball": "Label/{response_time}, (Def/Acc/3.5)"
+                                }
+                            },
+                            "response_time": {
+                                "Description": "Has description with HED",
+                                "HED": "Orange"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ],
+                            [
+                                5.2,
+                                0,
+                                "face",
+                                ""
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "face",
+                                "n/a"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, Blue), (Green, (Yellow)), ({HED})",
+                                    "ball": "{response_time}, (Def/Acc/3.5)"
+                                }
+                            },
+                            "response_time": {
+                                "Description": "Has description with HED",
+                                "HED": "Label/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED",
+                                "response_time"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue",
+                                1
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor",
+                                1
+                            ],
+                            [
+                                5.2,
+                                0,
+                                "face",
+                                "",
+                                1
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "face",
+                                "n/a",
+                                1
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

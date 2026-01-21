@@ -1,0 +1,196 @@
+[
+    {
+        "error_code": "SCHEMA_SECTION_MISSING",
+        "name": "schema-section-missing",
+        "warning": true,
+        "description": "A schema attribute issue, saying there is an unknown one.",
+        "schema": "",
+        "error_category": "schema_development",
+        "common_causes": [
+            "Missing required schema sections",
+            "Sections not in correct order",
+            "Incorrect section markers or delimiters",
+            "Incomplete schema template usage",
+            "Copy-paste errors in schema creation"
+        ],
+        "explanation": "HED schemas must contain all required sections in the correct order: Prologue, Schema, Unit classes, Unit modifiers, Value classes, Schema attributes, Properties, and Epilogue. Missing or misplaced sections prevent proper schema validation.",
+        "correction_strategy": "Add missing sections in correct order with proper delimiters",
+        "correction_examples": [
+            {
+                "wrong": "Missing '''Unit classes''' section",
+                "correct": "Add '''Unit classes''' after schema section",
+                "explanation": "Added required section with proper MediaWiki formatting"
+            },
+            {
+                "wrong": "Sections in wrong order",
+                "correct": "Reorder to: Prologue, Schema, Unit classes, Unit modifiers, Value classes, Schema attributes, Properties, Epilogue",
+                "explanation": "Arranged sections in required sequence"
+            }
+        ],
+        "correction_patterns": [
+            "Include all required sections even if empty",
+            "Use proper section delimiters (''' for MediaWiki)",
+            "Follow exact section ordering requirements",
+            "Check section names match required format",
+            "Ensure proper start/end schema markers"
+        ],
+        "fix_instructions": [
+            "1. Check for all required sections",
+            "2. Verify sections are in correct order",
+            "3. Add missing sections with proper delimiters",
+            "4. Ensure section names match requirements exactly",
+            "5. Validate schema structure completeness"
+        ],
+        "validation_hints": [
+            "Empty sections are allowed but must be present",
+            "Section order is strictly enforced",
+            "Use exact section names and formatting",
+            "Check both start and end markers"
+        ],
+        "specification_reference": "3.1.2. Schema layout overview",
+        "related_errors": [
+            "SCHEMA_HEADER_INVALID",
+            "WIKI_SEPARATOR_INVALID"
+        ],
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\"",
+                        "!# start schema",
+                        "'''Tag'''",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "'''Tag'''",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag'''",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag'''",
+                        "!# end schema",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag'''",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag'''",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag'''",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag'''",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag'''",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"testlib\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Tag''' {suggestedTag=Tag}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    }
+]

@@ -1,0 +1,186 @@
+[
+    {
+        "error_code": "TAG_NOT_UNIQUE",
+        "alt_codes": [],
+        "name": "tag-not-unique",
+        "description": "A tag with unique attribute appears more than once in an event-level HED string.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "semantic",
+        "common_causes": [
+            "Using unique tags multiple times in same event",
+            "Duplicate unique tags in different tag groups",
+            "Not understanding unique tag constraints",
+            "Copy-paste errors with unique tags",
+            "Conflicting annotations from different sources"
+        ],
+        "explanation": "Tags marked with the 'unique' schema attribute can only appear once per event-level annotation. This ensures that certain concepts (like experimental context) are not contradictory or duplicated within a single event.",
+        "correction_strategy": "Remove duplicate instances of unique tags or merge into single occurrence",
+        "correction_examples": [
+            {
+                "wrong": "(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))",
+                "correct": "(Event-context, (Red, Blue, Green, Yellow))",
+                "explanation": "Merged duplicate Event-context tags into single occurrence"
+            },
+            {
+                "wrong": "Task-context/Face-viewing, Task-context/Word-reading",
+                "correct": "Task-context/Face-viewing",
+                "explanation": "Removed duplicate task context, keeping most relevant one"
+            }
+        ],
+        "correction_patterns": [
+            "Merge content of duplicate unique tags when semantically appropriate",
+            "Remove redundant instances keeping most complete one",
+            "Choose most specific or relevant unique tag when merging not possible",
+            "Reorganize annotation structure to avoid unique tag conflicts",
+            "Review annotation logic to ensure single clear context"
+        ],
+        "fix_instructions": [
+            "1. Identify the unique tag appearing multiple times",
+            "2. Determine if content can be merged semantically",
+            "3. Combine compatible content into single tag occurrence",
+            "4. Remove redundant instances",
+            "5. Verify event context remains clear and unambiguous"
+        ],
+        "validation_hints": [
+            "Check schema for unique attribute on tags",
+            "Scan entire event annotation for duplicate unique tags",
+            "Verify merged content maintains semantic coherence",
+            "Ensure single clear context per event"
+        ],
+        "specification_reference": "3.2.10.2. Event-level processing",
+        "related_errors": [
+            "TAG_EXPRESSION_REPEATED",
+            "TAG_GROUP_ERROR"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))"
+                ],
+                "passes": [
+                    "(Event-context, (Red, Blue))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Event-context, (Red, Blue))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Event-context, (Red, Blue))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Event-context, (Red, Blue))",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "(Event-context, (Red, Blue))"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

@@ -1,0 +1,394 @@
+[
+    {
+        "error_code": "UNITS_INVALID",
+        "alt_codes": [],
+        "name": "units-invalid-for-unit-class",
+        "description": "A tag has a value with units that are invalid or not of the correct unit class for the tag.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Using units not defined in schema",
+            "Wrong unit class for the tag",
+            "Incorrect unit abbreviations",
+            "Missing space between value and unit",
+            "Applying unit modifiers to non-SI units"
+        ],
+        "explanation": "HED tags requiring units must use valid units from the appropriate unit class. Units must be spelled correctly, properly spaced from values, and compatible with the tag's requirements.",
+        "correction_strategy": "Use valid units from correct unit classes",
+        "correction_examples": [
+            {
+                "wrong": "Acceleration/3 s",
+                "correct": "Acceleration/3 m-per-s^2",
+                "explanation": "Used correct acceleration unit instead of time unit"
+            },
+            {
+                "wrong": "Weight/3 ms",
+                "correct": "Weight/3 kg",
+                "explanation": "Used correct weight unit instead of time unit"
+            },
+            {
+                "wrong": "Frequency/50Hz",
+                "correct": "Frequency/50 Hz",
+                "explanation": "Added required space between value and unit"
+            }
+        ],
+        "correction_patterns": [
+            "Check schema for valid units in tag's unit class",
+            "Ensure proper spacing (value + space + unit)",
+            "Use standard SI units when possible",
+            "Apply unit modifiers only to SI units",
+            "Match unit class to tag requirements"
+        ],
+        "fix_instructions": [
+            "1. Identify the tag's required unit class from schema",
+            "2. Check if current unit exists in that unit class",
+            "3. Replace with valid unit if needed",
+            "4. Ensure proper spacing between value and unit",
+            "5. Verify unit modifiers are used correctly"
+        ],
+        "validation_hints": [
+            "Consult schema unit classes for valid units",
+            "Check spacing between numbers and units",
+            "Verify unit class matches tag requirements",
+            "Ensure unit modifiers only with SI units"
+        ],
+        "specification_reference": "3.2.4. Tags that take values",
+        "related_errors": [
+            "VALUE_INVALID",
+            "TAG_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Acceleration/3 s",
+                    "Weight/3 ms"
+                ],
+                "passes": [
+                    "Distance/4 km"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Acceleration/3 s",
+                                "ball": "Weight/3 ms"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Distance/4 km",
+                                "ball": "Angle/4 degrees"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Acceleration/3 s"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "Weight/3 ms"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Distance/4 km"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "Angle/4 degrees"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/3 s",
+                                    "ball": "Weight/3 ms"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "UNITS_INVALID",
+        "alt_codes": [],
+        "name": "units-invalid-si-units",
+        "description": "A unit modifier is applied to units that are not SI units.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "validation",
+        "common_causes": [
+            "Applying SI prefixes (k, m, etc.) to non-SI units",
+            "Using modifiers like 'kilo' with imperial units",
+            "Confusion about which units support SI prefixes",
+            "Attempting to modify units that don't allow modification"
+        ],
+        "explanation": "SI unit modifiers (like kilo-, milli-, micro-) can only be applied to SI base units. Applying them to non-SI units like feet creates invalid unit combinations.",
+        "correction_strategy": "Use SI units with modifiers or remove modifiers from non-SI units",
+        "correction_examples": [
+            {
+                "wrong": "Distance/3 kfeet",
+                "correct": "Distance/3 km",
+                "explanation": "Changed to SI unit (kilometer) instead of modifying non-SI unit"
+            },
+            {
+                "wrong": "Weight/5 kpounds",
+                "correct": "Weight/2.27 kg",
+                "explanation": "Converted to proper SI unit with conversion"
+            },
+            {
+                "wrong": "Distance/3 kmeters",
+                "correct": "Distance/3 km",
+                "explanation": "Used proper SI abbreviation for kilometers"
+            }
+        ],
+        "correction_patterns": [
+            "Convert to proper SI units with modifiers",
+            "Remove invalid modifiers from non-SI units",
+            "Use standard SI prefix abbreviations"
+        ],
+        "fix_instructions": [
+            "1. Identify units with invalid modifiers",
+            "2. Check if unit is SI-compatible",
+            "3. Either convert to SI unit or remove modifier",
+            "4. Use standard prefix abbreviations (k, m, μ, etc.)"
+        ],
+        "validation_hints": [
+            "Check if unit accepts SI prefixes",
+            "Verify modifier applies to SI base unit",
+            "Ensure proper prefix abbreviation format"
+        ],
+        "specification_reference": "3.1.2.2. SI units and modifiers",
+        "related_errors": ["VALUE_INVALID", "UNITS_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Distance/3 kfeet",
+                    "Distance/3 kmeters"
+                ],
+                "passes": [
+                    "Distance/3 kilometres"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Distance/3 kfeet",
+                                "ball": "Distance/3 kmeters"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Distance/3 kilometres"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Distance/3 kfeet"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "Distance/3 kmeters"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Distance/3 kilometres"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Distance/3 kfeet",
+                                    "ball": "Distance/3 kmeters"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

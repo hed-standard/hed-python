@@ -1,0 +1,610 @@
+[
+    {
+        "error_code": "TAG_EMPTY",
+        "alt_codes": [],
+        "name": "tag-empty-extra-commas-or-parentheses",
+        "description": "A HED string has extra commas or parentheses separated by only white space.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Extra commas at beginning or end of strings",
+            "Double commas creating empty slots",
+            "Empty parentheses ()",
+            "Whitespace-only content between commas",
+            "Copy-paste errors leaving trailing commas"
+        ],
+        "explanation": "HED requires all tags to have content. Empty tags occur when commas appear without content between them, or when parentheses contain only whitespace. These create parsing ambiguities.",
+        "correction_strategy": "Remove extra commas and empty parentheses",
+        "correction_examples": [
+            {
+                "wrong": "Red, , , Green",
+                "correct": "Red, Green",
+                "explanation": "Removed empty tags created by extra commas"
+            },
+            {
+                "wrong": "(, Red, Green), Blue",
+                "correct": "(Red, Green), Blue",
+                "explanation": "Removed leading comma in group"
+            },
+            {
+                "wrong": "Red, (), Blue",
+                "correct": "Red, Blue",
+                "explanation": "Removed empty parentheses"
+            }
+        ],
+        "correction_patterns": [
+            "Remove double commas (,,)",
+            "Remove trailing commas at end of strings",
+            "Remove leading commas at start of strings",
+            "Remove empty parentheses ()",
+            "Remove whitespace-only content between delimiters"
+        ],
+        "fix_instructions": [
+            "1. Scan for consecutive commas without content",
+            "2. Remove extra commas at string boundaries",
+            "3. Remove empty parentheses",
+            "4. Verify remaining structure is valid"
+        ],
+        "validation_hints": [
+            "Check for ',,' patterns",
+            "Verify no trailing or leading commas",
+            "Ensure all parentheses contain content",
+            "Confirm no whitespace-only tags"
+        ],
+        "specification_reference": "3.2.7.3. Empty tags and groups",
+        "related_errors": [
+            "COMMA_MISSING",
+            "PARENTHESES_MISMATCH"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Red, , , Green",
+                    "(, Red, Green), Blue",
+                    "(Red, , Green), Blue",
+                    "(Red, Green,), Blue",
+                    "(Red, Green), Blue,"
+                ],
+                "passes": [
+                    "(Red, Blue), Green"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "square": "Red, , , Green",
+                                "test": "(, Red, Green), Blue",
+                                "pine": "(Red, , Green), Blue",
+                                "apple": "(Red, Green,), Blue"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red, Blue",
+                                "ball": "Def/Acc/4.5, Def/Acc/3.2"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "Red, , , Green"
+                        ],
+                        [
+                            7.5,
+                            0,
+                            "(, Red, Green), Blue"
+                        ],
+                        [
+                            8.2,
+                            0,
+                            "(Red, , Green), Blue"
+                        ],
+                        [
+                            9.1,
+                            0,
+                            "(Red, Green,), Blue"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red, (Blue, Green)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "square": "Red, , , Green",
+                                    "test": "(, Red, Green), Blue",
+                                    "pine": "(Red, , Green), Blue",
+                                    "apple": "(Red, Green,), Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "test",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "apple",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Red, Green",
+                                    "ball": "Def/Acc/4.5, Def/Acc/3.2"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TAG_EMPTY",
+        "alt_codes": [],
+        "name": "tag-empty-begin-end-comma",
+        "description": "A HED string begins or ends with a comma (ignoring white space).",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Extra comma at beginning or end of HED string",
+            "Copy-paste errors adding trailing/leading commas",
+            "Incomplete tag removal leaving orphaned commas",
+            "Formatting errors in HED string construction"
+        ],
+        "explanation": "HED strings should not begin or end with commas. Leading/trailing commas indicate structural errors or incomplete content.",
+        "correction_strategy": "Remove leading and trailing commas from HED strings",
+        "correction_examples": [
+            {
+                "wrong": ",Red, Blue",
+                "correct": "Red, Blue",
+                "explanation": "Removed leading comma"
+            },
+            {
+                "wrong": "Red, Blue,",
+                "correct": "Red, Blue",
+                "explanation": "Removed trailing comma"
+            },
+            {
+                "wrong": ",Red, Blue,",
+                "correct": "Red, Blue",
+                "explanation": "Removed both leading and trailing commas"
+            }
+        ],
+        "correction_patterns": [
+            "Trim leading commas from start of strings",
+            "Remove trailing commas from end of strings",
+            "Clean up formatting after tag removal"
+        ],
+        "fix_instructions": [
+            "1. Check beginning of HED string for comma",
+            "2. Check end of HED string for comma",
+            "3. Remove any leading/trailing commas",
+            "4. Verify string structure is valid"
+        ],
+        "validation_hints": [
+            "Scan for commas at string boundaries",
+            "Check for empty elements after comma removal",
+            "Verify proper tag separation after cleanup"
+        ],
+        "specification_reference": "3.2.7. HED string syntax rules",
+        "related_errors": ["COMMA_MISSING", "TAG_EMPTY"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    ",  Blue,Def/Acc/3.2 m-per-s^2",
+                    "(Blue, Green),Yellow,",
+                    ",,(Blue, Green),Yellow,"
+                ],
+                "passes": [
+                    "(Red, Blue), Green"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": ",  Blue,Def/Acc/3.2",
+                                "ball": "(Blue, Green),Yellow,",
+                                "square": ",,(Blue, Green),Yellow,"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red, Blue",
+                                "ball": "Def/Acc/4.5, Def/Acc/3.2"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            ",  (Blue, Green),Yellow,"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            ",,(Blue, Green),Yellow,"
+                        ],
+                        [
+                            6.5,
+                            0,
+                            ",  Blue,Def/Acc/3.2"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red, (Blue, Green)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": ",  Blue,Def/Acc/3.2",
+                                    "ball": "(Blue, Green),Yellow,",
+                                    "square": ",,(Blue, Green),Yellow,"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TAG_EMPTY",
+        "alt_codes": [],
+        "name": "tag-empty-empty-parentheses",
+        "description": "A tag group is empty (i.e., empty parentheses are not allowed).",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Empty parentheses () in HED strings",
+            "Tag removal leaving empty groups behind",
+            "Copy-paste errors creating empty groups",
+            "Incomplete tag group construction"
+        ],
+        "explanation": "HED does not allow empty parentheses as they serve no semantic purpose and create parsing ambiguities. All groups must contain meaningful content.",
+        "correction_strategy": "Remove empty parentheses or add appropriate content",
+        "correction_examples": [
+            {
+                "wrong": "(Red, (), (Blue), ((Green)))",
+                "correct": "(Red, (Blue), ((Green)))",
+                "explanation": "Removed empty parentheses group"
+            },
+            {
+                "wrong": "(((   ))), Red",
+                "correct": "Red",
+                "explanation": "Removed nested empty parentheses"
+            },
+            {
+                "wrong": "Red, (), Blue",
+                "correct": "Red, Blue",
+                "explanation": "Removed empty group between tags"
+            }
+        ],
+        "correction_patterns": [
+            "Remove all empty parentheses groups",
+            "Clean up after tag removal operations",
+            "Ensure all groups contain meaningful content"
+        ],
+        "fix_instructions": [
+            "1. Scan for empty parentheses ()",
+            "2. Remove empty groups entirely",
+            "3. Check for nested empty groups",
+            "4. Verify remaining structure is valid"
+        ],
+        "validation_hints": [
+            "Look for () patterns in HED strings",
+            "Check for whitespace-only groups",
+            "Verify all groups have content"
+        ],
+        "specification_reference": "3.2.7.1. Tag group requirements",
+        "related_errors": ["TAG_EMPTY", "PARENTHESES_MISMATCH"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Red, (), (Blue), ((Green)))",
+                    "(((   ))), Red"
+                ],
+                "passes": [
+                    "(Red, (  Blue    ), ((Green)))",
+                    "(((Def/Acc/3.5)))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, (), (Blue), ((Green)))",
+                                "ball": "(((   ))), Red"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, (  Blue    ), ((Green)))",
+                                "ball": "(((Def/Acc/3.5)))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Red, (), (Blue), ((Green)))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(((   ))), Red"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Red, (  Blue    ), ((Green)))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(((Def/Acc/3.5)))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, (), (Blue), ((Green)))",
+                                    "ball": "(((   ))), Red"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, (  Blue    ), ((Green)))",
+                                    "ball": "(((Def/Acc/3.5)))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

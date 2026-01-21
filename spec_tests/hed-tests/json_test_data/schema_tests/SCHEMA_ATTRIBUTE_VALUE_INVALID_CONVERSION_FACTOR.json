@@ -1,0 +1,218 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-conversion-factor-invalid",
+    "warning": true,
+    "description": "A schema unit has an invalid conversion factor",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Invalid numeric format in conversionFactor attribute",
+      "Non-numeric values in conversion factor specifications",
+      "Missing or zero conversion factors where required",
+      "Incorrect scientific notation in conversion factors",
+      "Using text instead of numeric values for conversions"
+    ],
+    "explanation": "Conversion factors must be valid numeric values that specify how to convert between different units. Invalid conversion factors prevent proper unit validation and conversion.",
+    "correction_strategy": "Use valid numeric values for conversion factors",
+    "correction_examples": [
+      {
+        "wrong": "conversionFactor=\"invalid\"",
+        "correct": "conversionFactor=\"1000\"",
+        "explanation": "Replaced invalid text with proper numeric conversion factor"
+      },
+      {
+        "wrong": "conversionFactor=\"1.0e+abc\"",
+        "correct": "conversionFactor=\"1.0e+3\"",
+        "explanation": "Fixed invalid scientific notation format"
+      }
+    ],
+    "correction_patterns": [
+      "Use valid numeric values (integers or decimals)",
+      "Ensure proper scientific notation format",
+      "Remove non-numeric characters from conversion factors",
+      "Verify conversion factors are positive and non-zero"
+    ],
+    "fix_instructions": [
+      "1. Identify invalid conversion factor values",
+      "2. Replace with proper numeric formats",
+      "3. Verify conversion factors are logical for the units",
+      "4. Test unit conversion functionality"
+    ],
+    "validation_hints": [
+      "Check numeric format of conversion factors",
+      "Verify conversion factors are positive numbers",
+      "Test unit conversion calculations",
+      "Ensure scientific notation is properly formatted"
+    ],
+    "specification_reference": "3.1.2.4. Unit classes and conversion factors",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "SCHEMA_ATTRIBUTE_VALUE_INVALID", "UNITS_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "* testUnitClass ",
+            "** testUnit1{SIUnit, conversionFactor=-1.0}",
+            "** testUnit2",
+            "** testUnit3",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "* testUnitClass ",
+            "** testUnit1{SIUnit, conversionFactor=word}",
+            "** testUnit2",
+            "** testUnit3",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "* testUnitClass ",
+            "** testUnit1{SIUnit, conversionFactor=None}",
+            "** testUnit2",
+            "** testUnit3",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "* testUnitClass ",
+            "** testUnit1{SIUnit, conversionFactor}",
+            "** testUnit2",
+            "** testUnit3",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "* testUnitClass {defaultUnits=testUnit1}",
+            "** testUnit1",
+            "** testUnit2",
+            "** testUnit3",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "WIKI_DELIMITERS_INVALID",
+    "name": "attribute-conversion-format",
+    "warning": true,
+    "description": "A schema unit has an invalid conversion factor due to bad formatting",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Missing conversionFactor value after attribute name",
+      "Incomplete conversionFactor specification",
+      "Malformed attribute syntax in schema definition",
+      "Missing equals sign or value in conversionFactor attribute"
+    ],
+    "explanation": "Conversion factor attributes must include both the attribute name and a valid numeric value. Missing values or incomplete syntax cause schema parsing failures.",
+    "correction_strategy": "Complete the conversionFactor attribute with proper value",
+    "correction_examples": [
+      {
+        "wrong": "conversionFactor}",
+        "correct": "conversionFactor=1000}",
+        "explanation": "Added missing value to conversionFactor attribute"
+      },
+      {
+        "wrong": "conversionFactor",
+        "correct": "conversionFactor=1.0",
+        "explanation": "Added equals sign and value to complete attribute"
+      }
+    ],
+    "correction_patterns": [
+      "Ensure conversionFactor includes =value",
+      "Use proper attribute=value syntax",
+      "Complete incomplete attribute specifications",
+      "Check for missing closing braces"
+    ],
+    "fix_instructions": [
+      "1. Identify incomplete conversionFactor attributes",
+      "2. Add missing equals sign and numeric value",
+      "3. Verify proper attribute syntax",
+      "4. Test schema parsing after completion"
+    ],
+    "validation_hints": [
+      "Check for complete attribute=value pairs",
+      "Verify proper brace closure",
+      "Ensure numeric values are provided"
+    ],
+    "specification_reference": "3.1.2.4. Unit class conversion factor syntax",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "SCHEMA_ATTRIBUTE_VALUE_INVALID", "SCHEMA_LOAD_FAILED"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "* testUnitClass ",
+            "** testUnit1{SIUnit, conversionFactor=}",
+            "** testUnit2",
+            "** testUnit3",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+        ]
+      }
+    }
+  }
+]

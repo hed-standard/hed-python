@@ -1,0 +1,423 @@
+[
+    {
+        "error_code": "TAG_EXTENSION_INVALID",
+        "alt_codes": [],
+        "name": "tag-extension-invalid-duplicate",
+        "description": "A tag extension term is already in the schema.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "semantic",
+        "common_causes": [
+            "The extending tag already exists in schema",
+            "Attempting to extend with a term that duplicates existing schema tags",
+            "Misunderstanding extension vs. existing tag usage",
+            "Not checking schema before creating extensions",
+            "Using extensions when appropriate schema tags already exist"
+        ],
+        "explanation": "Tag extensions allow adding new terms to the schema hierarchy, but extension terms cannot duplicate existing schema tags. Extensions should only be used when the needed concept doesn't exist in the schema.",
+        "correction_strategy": "Use existing schema tags instead of creating duplicate extensions",
+        "correction_examples": [
+            {
+                "wrong": "Red-color/Red/DarkRed",
+                "correct": "Red-color/Red",
+                "explanation": "Used existing schema tag instead of creating extension"
+            },
+            {
+                "wrong": "Sensory-presentation/Red/Redish",
+                "correct": "Sensory-presentation/Red-color",
+                "explanation": "Used proper schema hierarchy instead of invalid extension"
+            }
+        ],
+        "correction_patterns": [
+            "Check if desired concept already exists in schema",
+            "Use existing schema tags instead of extensions when possible",
+            "Search schema thoroughly before creating extensions",
+            "Use schema browser to verify tag availability"
+        ],
+        "fix_instructions": [
+            "1. Check if the extension concept already exists in schema",
+            "2. Use existing schema tag if available",
+            "3. If extension needed, verify parent tag allows extensions",
+            "4. Ensure extension follows naming conventions",
+            "5. Consider proposing schema addition instead of extension"
+        ],
+        "validation_hints": [
+            "Search schema for existing tags before extending",
+            "Verify extensionAllowed attribute on parent tags",
+            "Check extension naming follows schema conventions",
+            "Consider semantic appropriateness of extensions"
+        ],
+        "specification_reference": "3.2.5. Tag extensions",
+        "related_errors": [
+            "TAG_EXTENDED",
+            "TAG_INVALID",
+            "CHARACTER_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Red-color/Red/DarkRed, Sensory-presentation/Red",
+                    "Sensory-presentation/Red/Redish"
+                ],
+                "passes": [
+                    "Red-color/Red/Redish",
+                    "((Green/Greenish))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red-color/Red/DarkRed, Sensory-presentation/Red",
+                                "ball": "Sensory-presentation/Red/Redish"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red-color/Red/Redish",
+                                "ball": "((Green/Greenish))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red-color/Red/DarkRed, Sensory-presentation/Red"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "Sensory-presentation/Red/Redish"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red-color/Red"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "((Green))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Red-color/Red/DarkRed, Sensory-presentation/Red",
+                                    "ball": "Sensory-presentation/Red/Redish"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Red-color/Red",
+                                    "ball": "Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TAG_EXTENSION_INVALID",
+        "alt_codes": [
+            "CHARACTER_INVALID",
+            "PLACEHOLDER_INVALID"
+        ],
+        "name": "tag-extension-invalid-bad-node-name",
+        "description": "A tag extension term does not comply with rules for schema nodes.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "semantic",
+        "common_causes": [
+            "Creating extensions that violate naming rules",
+            "Using invalid characters in extensions (e.g., $, #, special symbols)",
+            "Including numbers inappropriately in extension names",
+            "Using characters not allowed in HED tag names",
+            "Violating schema node naming conventions"
+        ],
+        "explanation": "Tag extensions must follow the same naming rules as regular schema tags. Invalid characters or naming patterns make extensions unparsable and violate HED syntax rules.",
+        "correction_strategy": "Use only valid characters and naming patterns in tag extensions",
+        "correction_examples": [
+            {
+                "wrong": "Red/Red$2",
+                "correct": "Red/Red-variant",
+                "explanation": "Removed invalid $ character and used proper naming"
+            },
+            {
+                "wrong": "Red/R#d",
+                "correct": "Red/Red-type",
+                "explanation": "Removed invalid # character and used descriptive name"
+            }
+        ],
+        "correction_patterns": [
+            "Use only letters, numbers, hyphens, and underscores in extension names",
+            "Avoid special characters like $, #, @, %, etc.",
+            "Follow CamelCase or kebab-case naming conventions",
+            "Ensure extension names are descriptive and meaningful",
+            "Check schema naming rules before creating extensions"
+        ],
+        "fix_instructions": [
+            "1. Identify invalid characters in extension name",
+            "2. Replace invalid characters with valid alternatives",
+            "3. Ensure name follows schema naming conventions",
+            "4. Verify extension name is descriptive and meaningful",
+            "5. Test extension parsing and validation"
+        ],
+        "validation_hints": [
+            "Check extension names against character restrictions",
+            "Verify extension follows schema naming patterns",
+            "Ensure extension can be parsed correctly",
+            "Test extension in HED validation tools"
+        ],
+        "specification_reference": "3.2.2. Tag forms and naming conventions",
+        "related_errors": [
+            "CHARACTER_INVALID",
+            "TAG_INVALID",
+            "PLACEHOLDER_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Red/Red$2",
+                    "Red/R#d"
+                ],
+                "passes": [
+                    "Red-color/Red",
+                    "((Green))",
+                    "Red"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red/Red$2",
+                                "ball": "Red/R#d"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red-color/Red/Redish",
+                                "ball": "Red-color/Red/Redish/More-redish",
+                                "square": "((Green/Greenish))",
+                                "triangle": "Red/1red",
+                                "catwalk": "Red/Red--2red"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red/Red$2"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "Red/R#d"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red-color/Red/Redish"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "Red-color/Red/Redish/More-redish"
+                        ],
+                        [
+                            6.5,
+                            0,
+                            "((Green/Greenish))"
+                        ],
+                        [
+                            7.5,
+                            0,
+                            "Red/1red"
+                        ],
+                        [
+                            8.2,
+                            0,
+                            "Red/Red--2red"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Red/Red$2",
+                                    "ball": "Red/R#d"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Red/Redish-like",
+                                    "ball": "Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

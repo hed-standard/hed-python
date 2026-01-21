@@ -1,0 +1,84 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-invalid-value-class",
+    "warning": true,
+    "description": "A schema value class issue, saying there is an unknown one.",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Referencing non-existent value classes in valueClass attributes",
+      "Misspelled value class names",
+      "Using deprecated or removed value classes",
+      "Incorrect value class name format",
+      "Missing value class definitions in schema"
+    ],
+    "explanation": "ValueClass attributes must reference valid value classes defined in the schema. Invalid value class references cause validation failures and prevent proper value validation.",
+    "correction_strategy": "Use valid value class names that exist in the schema",
+    "correction_examples": [
+      {
+        "wrong": "valueClass=\"unknownValueClass\"",
+        "correct": "valueClass=\"numericClass\"",
+        "explanation": "Replaced unknown value class with valid one"
+      }
+    ],
+    "correction_patterns": [
+      "Verify value class exists in schema",
+      "Check value class name spelling and case",
+      "Use defined value class names only",
+      "Remove references to non-existent value classes"
+    ],
+    "fix_instructions": [
+      "1. Check available value classes in schema",
+      "2. Verify value class name spelling",
+      "3. Replace invalid value class references",
+      "4. Test value validation functionality"
+    ],
+    "validation_hints": [
+      "Cross-reference with schema value class definitions",
+      "Check value class name case sensitivity",
+      "Verify value class exists before referencing"
+    ],
+    "specification_reference": "3.1.2.11. Value classes and valueClass attributes",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "VALUE_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown'''",
+            "* # {valueClass=unknown}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown'''",
+            "* # {valueClass=numericClass}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

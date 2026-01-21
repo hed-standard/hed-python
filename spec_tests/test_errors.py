@@ -24,30 +24,49 @@ skip_tests = {
 class MyTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        test_dir = os.path.realpath(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-specification/tests/json_tests")
+        # New directory structure: hed-tests/json_test_data/
+        test_base_dir = os.path.realpath(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-tests/json_test_data")
         )
-        cls.test_dir = test_dir
+        schema_test_dir = os.path.join(test_base_dir, "schema_tests")
+        validation_test_dir = os.path.join(test_base_dir, "validation_tests")
+        
+        cls.test_base_dir = test_base_dir
         cls.fail_count = []
         cls.current_test_file = None
         cls.test_counter = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
 
-        # Check if the required directory exists
-        if not os.path.exists(test_dir):
+        # Check if the required directories exist
+        if not os.path.exists(test_base_dir):
             cls.test_files = []
             cls.skip_tests = True
             # Only print warning if not in CI environment to avoid interference
             if not os.environ.get("GITHUB_ACTIONS"):
-                print(f"WARNING: Test directory not found: {test_dir}")
-                print("To run spec error tests, copy hed-specification repository content to spec_tests/hed-specification/")
+                print(f"WARNING: Test directory not found: {test_base_dir}")
+                print("To run spec error tests, copy hed-tests repository content to spec_tests/hed-tests/")
         else:
-            # Get all .json files except backup files
-            cls.test_files = [
-                os.path.join(test_dir, f)
-                for f in os.listdir(test_dir)
-                if os.path.isfile(os.path.join(test_dir, f)) and f.endswith(".json") and not f.endswith(".backup")
-            ]
-            cls.skip_tests = False
+            # Get all .json files from both schema_tests and validation_tests directories
+            cls.test_files = []
+            
+            if os.path.exists(schema_test_dir):
+                schema_files = [
+                    os.path.join(schema_test_dir, f)
+                    for f in os.listdir(schema_test_dir)
+                    if os.path.isfile(os.path.join(schema_test_dir, f)) and f.endswith(".json") and not f.endswith(".backup")
+                ]
+                cls.test_files.extend(schema_files)
+            
+            if os.path.exists(validation_test_dir):
+                validation_files = [
+                    os.path.join(validation_test_dir, f)
+                    for f in os.listdir(validation_test_dir)
+                    if os.path.isfile(os.path.join(validation_test_dir, f)) and f.endswith(".json") and not f.endswith(".backup")
+                ]
+                cls.test_files.extend(validation_files)
+            
+            cls.skip_tests = len(cls.test_files) == 0
+            if cls.skip_tests and not os.environ.get("GITHUB_ACTIONS"):
+                print(f"WARNING: No test files found in {test_base_dir}")
 
         cls.default_sidecar = Sidecar(
             os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_sidecar.json"))
@@ -450,7 +469,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_errors(self):
         if hasattr(self, "skip_tests") and self.skip_tests:
-            self.skipTest("hed-specification directory not found. Copy submodule content to run this test.")
+            self.skipTest("hed-tests directory not found. Copy hed-tests repository content to run this test.")
 
         print("\n" + "=" * 80)
         print("Running HED Specification Error Tests")

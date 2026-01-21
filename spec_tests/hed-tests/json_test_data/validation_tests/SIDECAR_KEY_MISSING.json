@@ -1,0 +1,287 @@
+[
+    {
+        "error_code": "SIDECAR_KEY_MISSING",
+        "alt_codes": [],
+        "name": "sidecar-key-missing",
+        "description": "A value in a categorical column does not have an expected entry in a sidecar.",
+        "warning": true,
+        "schema": "8.4.0",
+        "error_category": "validation",
+        "common_causes": [
+            "New categorical values not added to sidecar",
+            "Misspelled values in data vs sidecar",
+            "Column reference to non-existent column",
+            "Incomplete sidecar annotations",
+            "Data changes without sidecar updates"
+        ],
+        "explanation": "Sidecars should provide HED annotations for all categorical values that appear in the data. Missing entries suggest incomplete annotation or data inconsistencies.",
+        "correction_strategy": "Add missing sidecar entries or fix value mismatches",
+        "correction_examples": [
+            {
+                "wrong": "Data has 'target' but sidecar only has 'face' and 'house'",
+                "correct": "Add 'target': {'HED': 'Sensory-event/Visual'} to sidecar",
+                "explanation": "Added missing categorical value annotation"
+            },
+            {
+                "wrong": "Sidecar references {missing_column}",
+                "correct": "Reference existing column or remove reference",
+                "explanation": "Fixed column reference"
+            }
+        ],
+        "correction_patterns": [
+            "Add HED annotations for all categorical values in data",
+            "Check spelling consistency between data and sidecar",
+            "Remove references to non-existent columns",
+            "Update sidecar when data values change",
+            "Verify column names match exactly"
+        ],
+        "fix_instructions": [
+            "1. Identify missing categorical values",
+            "2. Add appropriate HED annotations for missing values",
+            "3. Check spelling consistency",
+            "4. Verify column references exist",
+            "5. Update sidecar completeness"
+        ],
+        "validation_hints": [
+            "This is typically a warning, not an error",
+            "Check all categorical values have sidecar entries",
+            "Verify column references are valid",
+            "Ensure sidecar completeness"
+        ],
+        "specification_reference": "3.2.9. Sidecars",
+        "related_errors": [
+            "SIDECAR_INVALID",
+            "SIDECAR_BRACES_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5",
+                                    "ball": "Black, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "square",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SIDECAR_KEY_MISSING",
+        "alt_codes": [],
+        "name": "sidecar-refers-to-missing-tsv-hed-column",
+        "description": "(Warning) A sidecar uses a {HED} column which does not appear in the corresponding tsv file.",
+        "warning": true,
+        "schema": "8.4.0",
+        "error_category": "reference",
+        "common_causes": [
+            "Sidecar references HED column not present in TSV",
+            "Column name mismatch between sidecar and data",
+            "TSV file missing expected HED column",
+            "Outdated sidecar referencing removed columns",
+            "Copy-paste errors in column references"
+        ],
+        "explanation": "Sidecars use {HED} placeholders to reference HED columns in TSV files. The referenced column must exist in the actual data file for proper validation and processing.",
+        "correction_strategy": "Add missing HED column to TSV or remove reference from sidecar",
+        "correction_examples": [
+            {
+                "wrong": "Sidecar has {HED} but TSV has no HED column",
+                "correct": "Add HED column to TSV or remove {HED} reference",
+                "explanation": "Ensured column reference consistency"
+            },
+            {
+                "wrong": "Reference to {missing_column}",
+                "correct": "Reference to existing column or remove reference",
+                "explanation": "Fixed column reference"
+            }
+        ],
+        "correction_patterns": [
+            "Add missing HED column to TSV file",
+            "Remove {HED} references from sidecar if not needed",
+            "Verify column names match exactly",
+            "Update sidecar when TSV structure changes",
+            "Check case sensitivity in column names"
+        ],
+        "fix_instructions": [
+            "1. Check if HED column exists in TSV file",
+            "2. Add missing HED column if needed",
+            "3. Remove {HED} reference if column not required",
+            "4. Verify column name spelling and case",
+            "5. Update sidecar to match TSV structure"
+        ],
+        "validation_hints": [
+            "This is typically a warning, not a critical error",
+            "Check TSV headers for HED column presence",
+            "Verify column reference accuracy",
+            "Consider if HED column is actually needed"
+        ],
+        "specification_reference": "3.2.9. Sidecars and HED column references",
+        "related_errors": [
+            "SIDECAR_INVALID",
+            "SIDECAR_KEY_MISSING",
+            "SIDECAR_BRACES_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "{HED}",
+                                "ball": "Red"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "{HED}",
+                                    "ball": "Red"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "{HED}",
+                                    "ball": "Red"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Green"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Black"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

@@ -1,0 +1,493 @@
+[
+    {
+        "error_code": "SCHEMA_LIBRARY_INVALID",
+        "name": "library-invalid-bad-name",
+        "warning": true,
+        "description": "A schema library issue, indicating the name is invalid.",
+        "schema": "",
+        "error_category": "schema_development",
+        "common_causes": [
+            "Library name contains invalid characters (non-alphabetic)",
+            "Library name not in lowercase",
+            "Missing withStandard attribute when library attribute present",
+            "Invalid withStandard version specification",
+            "Incorrect rooted attribute usage",
+            "Mismatched library schema structure"
+        ],
+        "explanation": "Library schemas have specific naming and structural requirements. Library names must be alphabetic and lowercase, must specify compatible standard schema versions, and follow strict rules for rooted elements and attribute usage.",
+        "correction_strategy": "Fix library naming and structural requirements",
+        "correction_examples": [
+            {
+                "wrong": "library=\"score_invalidchar\"",
+                "correct": "library=\"score\"",
+                "explanation": "Removed invalid characters from library name"
+            },
+            {
+                "wrong": "library=\"SCORE\"",
+                "correct": "library=\"score\"",
+                "explanation": "Converted to lowercase as required"
+            },
+            {
+                "wrong": "library=\"score\"",
+                "correct": "library=\"score\" withStandard=\"8.2.0\"",
+                "explanation": "Added required withStandard attribute"
+            }
+        ],
+        "correction_patterns": [
+            "Use only lowercase alphabetic characters in library names",
+            "Include withStandard attribute with library attribute",
+            "Ensure rooted attribute only in unmerged libraries",
+            "Match rooted elements to standard schema",
+            "Remove inLibrary from unmerged schemas"
+        ],
+        "fix_instructions": [
+            "1. Check library name follows naming rules (lowercase, alphabetic)",
+            "2. Ensure withStandard attribute present with valid version",
+            "3. Verify rooted attribute usage matches requirements",
+            "4. Check library structure matches partnered standard",
+            "5. Remove inappropriate attributes for library type"
+        ],
+        "validation_hints": [
+            "Verify library name is lowercase and alphabetic only",
+            "Check withStandard version exists and is compatible",
+            "Ensure rooted elements match standard schema",
+            "Validate library-specific attribute usage"
+        ],
+        "specification_reference": "7. Library schemas",
+        "related_errors": [
+            "SCHEMA_HEADER_INVALID",
+            "SCHEMA_ATTRIBUTE_INVALID"
+        ],
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score_invalidchar\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\" library=\"score1\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\" library=\"Score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SCHEMA_LIBRARY_INVALID",
+        "name": "library-invalid-bad_with-standard",
+        "warning": true,
+        "description": "A schema library issue, the with-standard attribute is present without the library attribute.",
+        "schema": "",
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\" withStandard=\"8.2.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SCHEMA_LIBRARY_INVALID",
+        "name": "library-invalid-bad_with-standard-version",
+        "warning": true,
+        "description": "A schema library issue, indicating it references a version of the standard that can't be found.",
+        "schema": "",
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.9.9\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"7.9.9\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SCHEMA_LIBRARY_INVALID",
+        "name": "library-invalid-rooted-present",
+        "warning": true,
+        "description": "A schema library issue, indicating the rooted property appears in a file it shouldn't.",
+        "schema": "",
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Event''' {rooted=Event}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''Event''' {rooted=Property}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "* rooted <nowiki>{nodeProperty} </nowiki>",
+                        "'''Properties'''",
+                        "* nodeProperty",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''NewThing''' {rooted=Event}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SCHEMA_LIBRARY_INVALID",
+        "name": "library-invalid-rooted-not-top-level",
+        "warning": true,
+        "description": "A schema library issue, indicating a node is being rooted that is not a top level node.",
+        "schema": "",
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''NewNode'''",
+                        "* NewExtension {rooted=Event}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''NewNode''' {rooted=Event}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SCHEMA_LIBRARY_INVALID",
+        "name": "library-invalid-rooted-not-in-base",
+        "warning": true,
+        "description": "A schema library issue, rooted tag does not exist.",
+        "schema": "",
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''DummyTag'''",
+                        "'''NewTag'''{rooted=DummyTag}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ],
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''DummyTag'''{rooted=NotRealTag}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''NewTag''' {rooted=Event}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SCHEMA_LIBRARY_INVALID",
+        "name": "library-invalid-rooted-in-library-present",
+        "warning": true,
+        "description": "A schema library issue, indicating the InLibrary attribute appears when it shouldn't.",
+        "schema": "",
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''NewTag''' {rooted=Event}",
+                        "* ExtendedEvent {inLibrary=score}",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''NewTag''' {rooted=Event}",
+                        "* ExtendedEvent",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SCHEMA_LIBRARY_INVALID",
+        "name": "library-invalid-rooted-in-duplicate-other",
+        "warning": true,
+        "description": "A schema library issue, indicating the InLibrary attribute appears when it shouldn't.",
+        "schema": "",
+        "definitions": [],
+        "tests": {
+            "schema_tests": {
+                "fails": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''NewTag''' {rooted=Event}",
+                        "* ExtendedEvent",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "* weightUnits",
+                        "** g <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0}</nowiki>",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ],
+                "passes": [
+                    [
+                        "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+                        "'''Prologue'''",
+                        "!# start schema",
+                        "'''NewTag''' {rooted=Event}",
+                        "* ExtendedEvent",
+                        "!# end schema",
+                        "'''Unit classes'''",
+                        "* weightUnits",
+                        "** testNewUnit <nowiki>{conversionFactor=10.0}</nowiki>",
+                        "'''Unit modifiers'''",
+                        "'''Value classes'''",
+                        "'''Schema attributes'''",
+                        "'''Properties'''",
+                        "'''Epilogue'''",
+                        "!# end hed"
+                    ]
+                ]
+            }
+        }
+    }
+]

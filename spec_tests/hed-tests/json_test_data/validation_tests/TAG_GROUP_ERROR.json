@@ -1,0 +1,860 @@
+[
+    {
+        "error_code": "TAG_GROUP_ERROR",
+        "alt_codes": [
+            "TEMPORAL_TAG_ERROR",
+            "TAG_INVALID",
+            "DEFINITION_INVALID"
+        ],
+        "name": "tag-group-error-missing",
+        "description": "A tag has tagGroup or topLevelTagGroup attribute, but is not enclosed in parentheses.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Tags requiring groups not enclosed in parentheses",
+            "topLevelTagGroup tags not at top level",
+            "Multiple topLevelTagGroup tags in same group",
+            "Temporal tags not properly grouped",
+            "Definition tags not in required group structure"
+        ],
+        "explanation": "Certain HED tags have schema attributes requiring them to appear in tag groups. Tags with 'tagGroup' must be in parentheses, 'topLevelTagGroup' tags must be in top-level groups, and only specific combinations are allowed.",
+        "correction_strategy": "Ensure required tags are properly grouped according to their attributes",
+        "correction_examples": [
+            {
+                "wrong": "Definition/Blech, (Red)",
+                "correct": "(Definition/Blech, (Red))",
+                "explanation": "Enclosed Definition tag in required parentheses"
+            },
+            {
+                "wrong": "Onset",
+                "correct": "(Onset, (Def/SomeDef))",
+                "explanation": "Put Onset in group with required definition"
+            },
+            {
+                "wrong": "Duration/5 s, Delay/2 s, Onset",
+                "correct": "(Duration/5 s, Delay/2 s), (Onset, (Def/SomeDef))",
+                "explanation": "Properly grouped temporal tags according to their requirements"
+            }
+        ],
+        "correction_patterns": [
+            "Enclose tagGroup tags in parentheses",
+            "Ensure topLevelTagGroup tags are at top level",
+            "Limit to one topLevelTagGroup per group (except Duration+Delay)",
+            "Group temporal tags with required companions",
+            "Structure Definition tags properly"
+        ],
+        "fix_instructions": [
+            "1. Identify tags with grouping requirements from schema",
+            "2. Check if tag is properly enclosed in parentheses",
+            "3. Verify top-level tags are at correct level",
+            "4. Ensure proper companions for temporal tags",
+            "5. Check for multiple topLevelTagGroup violations"
+        ],
+        "validation_hints": [
+            "Consult schema for tag grouping attributes",
+            "Check parentheses around required tags",
+            "Verify top-level tag positioning",
+            "Ensure temporal tag companions are present"
+        ],
+        "specification_reference": "3.2.7.2. Tag group attributes",
+        "related_errors": [
+            "TEMPORAL_TAG_ERROR",
+            "DEFINITION_INVALID",
+            "PARENTHESES_MISMATCH"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Definition/Blech, (Red)",
+                    "Def-expand/Acc/4.5 m-per-s^2, (Acceleration/4.5, Red)",
+                    "Onset",
+                    "Duration/3.0 s",
+                    "Delay/3.0 s"
+                ],
+                "passes": [
+                    "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                    "((Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)), Onset)",
+                    "(Duration/3.0 s, (Event))",
+                    "(Duration/3.0 s, Delay/2.0 s, (Event))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)",
+                                "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)), Onset"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))",
+                                "ball": "((Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)), Onset)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)), Onset"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "((Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)), Onset)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)",
+                                    "ball": "(Def-expand/Acc/4.5, (Acceleration/4.5 m-per-s^2, Red)), Onset"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TAG_GROUP_ERROR",
+        "alt_codes": [
+            "TEMPORAL_TAG_ERROR"
+        ],
+        "name": "tag-group-error-not-top-level",
+        "description": "A tag with the topLevelTagGroup does not appear at a HED tag group at the top level in an assembled HED annotation.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Top-level tags nested too deeply in groups",
+            "Temporal tags incorrectly grouped below top level",
+            "Extra parentheses around top-level tags",
+            "Misunderstanding of top-level tag requirements",
+            "Incorrect nesting of temporal or context tags"
+        ],
+        "explanation": "Tags with topLevelTagGroup attribute (like Duration, Onset, Offset, Event-context) must appear at the top level of tag groups, not nested within other groups.",
+        "correction_strategy": "Move top-level tags to proper group depth",
+        "correction_examples": [
+            {
+                "wrong": "((Duration/5 s, (Red)))",
+                "correct": "(Duration/5 s, (Red))",
+                "explanation": "Removed extra parentheses to make Duration top-level"
+            },
+            {
+                "wrong": "((Def/Acc/3.0, Onset))",
+                "correct": "(Def/Acc/3.0, Onset)",
+                "explanation": "Moved Onset to top-level of group"
+            }
+        ],
+        "correction_patterns": [
+            "Remove extra parentheses around top-level tags",
+            "Ensure temporal tags are at top group level",
+            "Move Event-context to top-level position",
+            "Verify proper tag group hierarchy"
+        ],
+        "fix_instructions": [
+            "1. Identify tags with topLevelTagGroup attribute",
+            "2. Check their current nesting level",
+            "3. Remove extra parentheses to make them top-level",
+            "4. Verify proper group structure",
+            "5. Test tag hierarchy compliance"
+        ],
+        "validation_hints": [
+            "Check nesting depth of temporal tags",
+            "Ensure Event-context is at top level",
+            "Look for extra parentheses around top-level tags",
+            "Verify proper tag group hierarchy"
+        ],
+        "specification_reference": "3.2.8. Top-level tag group requirements",
+        "related_errors": [
+            "TEMPORAL_TAG_ERROR",
+            "PARENTHESES_MISMATCH",
+            "TAG_GROUP_ERROR"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "event_code",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "face",
+                            "Red, Def/MyColor, ((Duration/5 s, (Red)))"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "ball",
+                            "Green"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "event_code",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "face",
+                            "Red, Def/MyColor, (Duration/5 s, (Red))"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "ball",
+                            "Green"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/banana",
+                                    "ball": "((Def/Acc/3.0, Onset))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "(Def/Acc/3.0, Onset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TAG_GROUP_ERROR",
+        "alt_codes": [
+            "TEMPORAL_TAG_ERROR"
+        ],
+        "name": "tag-group-error-deferred-in-splice",
+        "description": "A tag with the topLevelTagGroup does not appear at a HED tag group at the top level in an assembled HED annotation.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Top-level tags nested in column splice operations",
+            "Deferred evaluation causing incorrect tag positioning",
+            "Column references creating improper nesting",
+            "Sidecar substitution breaking top-level requirements",
+            "Complex column dependencies affecting tag hierarchy"
+        ],
+        "explanation": "When columns are spliced together in sidecar processing, tags with topLevelTagGroup attribute must still end up at the top level of the final assembled annotation.",
+        "correction_strategy": "Restructure sidecar to maintain top-level positioning",
+        "correction_examples": [
+            {
+                "wrong": "duration: 'Duration/#, (Red, Blue)' in splice context",
+                "correct": "duration: 'Parameter-value/#' with proper grouping",
+                "explanation": "Prevented Duration from being nested during splice"
+            },
+            {
+                "wrong": "Column causing ((Duration/5 s, content))",
+                "correct": "Column structured for (Duration/5 s, content)",
+                "explanation": "Maintained top-level Duration positioning"
+            }
+        ],
+        "correction_patterns": [
+            "Restructure column HED to avoid nesting top-level tags",
+            "Use proper grouping in sidecar column definitions",
+            "Ensure column substitution maintains tag hierarchy",
+            "Verify final assembled annotation structure"
+        ],
+        "fix_instructions": [
+            "1. Identify problematic column splice operations",
+            "2. Examine how columns combine in final annotation",
+            "3. Restructure sidecar to prevent top-level tag nesting",
+            "4. Test assembled annotation structure",
+            "5. Verify top-level tag positioning"
+        ],
+        "validation_hints": [
+            "Check final assembled annotation structure",
+            "Trace column substitution effects on nesting",
+            "Verify top-level tags remain at top level",
+            "Test sidecar processing results"
+        ],
+        "specification_reference": "3.2.9. Sidecar processing and tag hierarchy",
+        "related_errors": [
+            "TEMPORAL_TAG_ERROR",
+            "SIDECAR_INVALID",
+            "TAG_GROUP_ERROR"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "duration": {
+                            "HED": "Duration/#, (Red, Blue)"
+                        },
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue)",
+                                "ball": "Black"
+                            }
+                        },
+                        "ball_type": {
+                            "Description": "Has description with HED",
+                            "HED": "Label/#"
+                        }
+                    },
+                    {
+                        "duration": {
+                            "HED": "Duration/#, (Red, Blue)"
+                        },
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue)",
+                                "ball": "{ball_type}, Black"
+                            }
+                        },
+                        "ball_type": {
+                            "Description": "Has description with HED",
+                            "HED": "Label/#"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "duration": {
+                            "HED": "Parameter-value/#"
+                        },
+                        "event_code": {
+                            "HED": {
+                                "face": "({duration}, ((Red, Blue), {ball_type}))",
+                                "ball": "{ball_type}, Black"
+                            }
+                        },
+                        "ball_type": {
+                            "Description": "Has description with HED",
+                            "HED": "Label/#"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "event_code",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "face",
+                            "Red, Def/MyColor, ((Duration/5 s, (Red)))"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "ball",
+                            "Green"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "event_code",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "face",
+                            "Red, Def/MyColor, (Duration/5 s, (Red))"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "ball",
+                            "Green"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "duration": {
+                                "HED": "Duration/#, (Red, Blue)"
+                            },
+                            "event_code": {
+                                "HED": {
+                                    "face": "{duration}, ((Red, Blue), {ball_type})",
+                                    "ball": "{ball_type}, Black"
+                                }
+                            },
+                            "ball_type": {
+                                "Description": "Has description with HED",
+                                "HED": "Label/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "duration": {
+                                "HED": "Duration/#"
+                            },
+                            "event_code": {
+                                "HED": {
+                                    "face": "({duration}, ((Red, Blue), {ball_type}))",
+                                    "ball": "{ball_type}, Black"
+                                }
+                            },
+                            "ball_type": {
+                                "Description": "Has description with HED",
+                                "HED": "Label/#"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TAG_GROUP_ERROR",
+        "alt_codes": [
+            "TEMPORAL_TAG_ERROR"
+        ],
+        "name": "multiple-top-level-tags-in-same-group",
+        "description": "Multiple tags with the topLevelTagGroup attribute appear in the same top-level tag group. (Delay and Duration are allowed to be in the same topLevelTagGroup).",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "cardinality",
+        "common_causes": [
+            "Multiple context tags in single group",
+            "Combining incompatible temporal tags",
+            "Multiple top-level tags where only one allowed",
+            "Misunderstanding top-level tag exclusivity rules",
+            "Incorrect grouping of Event-context with temporal tags"
+        ],
+        "explanation": "Most top-level tags are mutually exclusive within a group. Only Delay and Duration can coexist in the same top-level group. Other combinations violate cardinality constraints.",
+        "correction_strategy": "Separate incompatible top-level tags into different groups",
+        "correction_examples": [
+            {
+                "wrong": "(Def/MyColor, Onset, Event-context)",
+                "correct": "(Def/MyColor, Onset), (Event-context, (Label/Description))",
+                "explanation": "Separated Onset and Event-context into different groups"
+            },
+            {
+                "wrong": "(Event-context, Duration/3.0 s, Offset)",
+                "correct": "(Event-context, (Label/Context)), (Duration/3.0 s, Offset)",
+                "explanation": "Moved Event-context to separate group from temporal tags"
+            }
+        ],
+        "correction_patterns": [
+            "Separate Event-context from temporal tags",
+            "Allow only Delay/Duration combinations",
+            "Create separate groups for incompatible top-level tags",
+            "Verify top-level tag cardinality rules"
+        ],
+        "fix_instructions": [
+            "1. Identify groups with multiple top-level tags",
+            "2. Check if combination is allowed (only Delay+Duration)",
+            "3. Separate incompatible tags into different groups",
+            "4. Verify proper group structure",
+            "5. Test cardinality compliance"
+        ],
+        "validation_hints": [
+            "Only one top-level tag per group (except Delay+Duration)",
+            "Separate Event-context from temporal tags",
+            "Check for multiple temporal tags in same group",
+            "Verify cardinality constraints"
+        ],
+        "specification_reference": "3.2.8. Top-level tag cardinality constraints",
+        "related_errors": [
+            "TEMPORAL_TAG_ERROR",
+            "TAG_GROUP_ERROR",
+            "DEFINITION_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def/MyColor, Onset, Event-context)",
+                    "(Event-context, Red, Offset)",
+                    "(Event-context, Duration/3.0 s, Offset)",
+                    "(Delay/3.0 s, Duration/2.0 s, Offset)"
+                ],
+                "passes": [
+                    "(Def/MyColor, Onset)",
+                    "((Event), Duration/3.0 s, Delay/2.0 s)"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Acceleration/banana",
+                                "ball": "(Def/Acc/3.0, Onset, Event-context)"
+                            }
+                        }
+                    },
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Acceleration/5.0",
+                                "ball": "Red"
+                            }
+                        },
+                        "val_col": {
+                            "HED": "Time-interval/# s, (Duration/5.0 s, ({event_code}), Duration/6.0)"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Acceleration/5.0)",
+                                "ball": "(Delay/5.0 s, (Acceleration/5.0))"
+                            }
+                        },
+                        "val_col": {
+                            "HED": "Time-interval/# s, (Duration/5.0 s, (Red)), {event_code}"
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red, (Event-context, Def/MyColor, Onset)"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "Green"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red, (Event-context, (Def/MyColor))"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "Green"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/banana",
+                                    "ball": "(Def/Acc/3.0, Onset, Event-context)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, (Def/MyColor, Event-context, Event-context)"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5",
+                                    "ball": "(Def/Acc/3.02, Onset)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue, (Event-context, (Label/Red))"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]
