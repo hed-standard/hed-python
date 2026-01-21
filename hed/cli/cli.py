@@ -251,7 +251,7 @@ def validate_bids_cmd(
 
 
 @validate.command(
-    name="hed-string",
+    name="string",
     epilog="""
 This command validates a HED annotation string against a specified HED schema
 version. It can optionally process definitions and check for warnings in addition
@@ -260,25 +260,25 @@ to errors. Multiple schema versions can be specified for validation with library
 \b
 Examples:
     # Basic validation of a HED string
-    hedpy validate hed-string "Event, (Sensory-event, (Visual-presentation, (Computer-screen, Face)))" -sv 8.3.0
+    hedpy validate string "Event, (Sensory-event, (Visual-presentation, (Computer-screen, Face)))" -sv 8.3.0
 
     # Validate with definitions
-    hedpy validate hed-string "Event, Def/MyDef" -sv 8.4.0 -d "(Definition/MyDef, (Action, Move))"
+    hedpy validate string "Event, Def/MyDef" -sv 8.4.0 -d "(Definition/MyDef, (Action, Move))"
 
     # Validate with multiple schemas (base + library)
-    hedpy validate hed-string "Event, Action" -sv 8.3.0 -sv score_1.1.0
+    hedpy validate string "Event, Action" -sv 8.3.0 -sv score_1.1.0
 
     # Check for warnings as well as errors
-    hedpy validate hed-string "Event, Action/Button-press" -sv 8.4.0 --check-for-warnings
+    hedpy validate string "Event, Action/Button-press" -sv 8.4.0 --check-for-warnings
 
     # Save validation results to a file
-    hedpy validate hed-string "Event" -sv 8.4.0 -o validation_results.txt
+    hedpy validate string "Event" -sv 8.4.0 -o validation_results.txt
 
     # Output results in JSON format
-    hedpy validate hed-string "Event, Action" -sv 8.4.0 -f json
+    hedpy validate string "Event, Action" -sv 8.4.0 -f json
 
     # Verbose output with informational messages
-    hedpy validate hed-string "Event, (Action, Move)" -sv 8.4.0 --verbose
+    hedpy validate string "Event, (Action, Move)" -sv 8.4.0 --verbose
 """,
 )
 @click.argument("hed_string")
@@ -401,6 +401,140 @@ def validate_hed_string_cmd(
         args.append("-v")
 
     result = validate_string_main(args)
+    ctx.exit(result if result is not None else 0)
+
+
+@validate.command(
+    name="sidecar",
+    epilog="""
+This command validates a BIDS JSON sidecar file against a specified HED schema
+version.
+
+\b
+Examples:
+    # Basic HED validation of a BIDS sidecar
+    hedpy validate sidecar path/to/sidecar.json -sv 8.3.0
+
+    # Validate with multiple schemas (base + library)
+    hedpy validate sidecar path/to/sidecar.json -sv 8.3.0 -sv score_1.1.0
+
+    # Check for warnings as well as errors
+    hedpy validate sidecar path/to/sidecar.json -sv 8.4.0 --check-for-warnings
+
+    # Save validation results to a file
+    hedpy validate sidecar path/to/sidecar.json -sv 8.4.0 -o validation_results.txt
+""",
+)
+@click.argument("sidecar_file", type=click.Path(exists=True))
+# Validation options
+@optgroup.group("Validation options")
+@optgroup.option(
+    "-sv",
+    "--schema-version",
+    required=True,
+    multiple=True,
+    metavar="VERSION",
+    help="HED schema version(s) to validate against (e.g., '8.4.0'). Can be specified multiple times for multiple schemas (e.g., -sv lang_1.1.0 -sv score_2.1.0)",
+)
+@optgroup.option(
+    "-w",
+    "--check-for-warnings",
+    is_flag=True,
+    help="Check for warnings as well as errors",
+)
+# Output options
+@optgroup.group("Output options")
+@optgroup.option(
+    "-f",
+    "--format",
+    type=click.Choice(["text", "json"]),
+    default="text",
+    show_default="text",
+    help="Output format for validation results (text: human-readable; json: structured format for programmatic use)",
+)
+@optgroup.option(
+    "-o",
+    "--output-file",
+    type=click.Path(),
+    default="",
+    metavar=METAVAR_FILE,
+    help="Path for output file to hold validation results; if not specified, output to stdout",
+)
+# Logging options
+@optgroup.group("Logging options")
+@optgroup.option(
+    "-l",
+    "--log-level",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
+    default="WARNING",
+    show_default="WARNING",
+    help="Log level for diagnostic messages",
+)
+@optgroup.option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    help="Output informational messages (equivalent to --log-level INFO)",
+)
+@optgroup.option(
+    "-lf",
+    "--log-file",
+    type=click.Path(),
+    metavar=METAVAR_FILE,
+    help="File path for saving log output; logs still go to stderr unless --log-quiet is also used",
+)
+@optgroup.option(
+    "-lq",
+    "--log-quiet",
+    is_flag=True,
+    help="Suppress log output to stderr; only applicable when --log-file is used (logs go only to file)",
+)
+@optgroup.option(
+    "--no-log",
+    is_flag=True,
+    help="Disable all logging output",
+)
+@click.pass_context
+def validate_sidecar_cmd(
+    ctx,
+    sidecar_file,
+    schema_version,
+    check_for_warnings,
+    format,
+    output_file,
+    log_level,
+    log_file,
+    log_quiet,
+    no_log,
+    verbose,
+):
+    """Validate HED in a BIDS sidecar file.
+
+    SIDECAR_FILE: The path to the BIDS sidecar file to validate.
+    """
+    from hed.scripts.validate_hed_sidecar import main as validate_sidecar_main
+
+    args = [sidecar_file]
+    for version in schema_version:
+        args.extend(["-sv", version])
+    if check_for_warnings:
+        args.append("-w")
+    if format:
+        args.extend(["-f", format])
+    if output_file:
+        args.extend(["-o", output_file])
+    if log_level:
+        args.extend(["-l", log_level])
+    if log_file:
+        args.extend(["-lf", log_file])
+    if log_quiet:
+        args.append("-lq")
+    if no_log:
+        args.append("--no-log")
+    if verbose:
+        args.append("-v")
+
+    result = validate_sidecar_main(args)
     ctx.exit(result if result is not None else 0)
 
 
