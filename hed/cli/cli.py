@@ -538,6 +538,175 @@ def validate_sidecar_cmd(
     ctx.exit(result if result is not None else 0)
 
 
+@validate.command(
+    name="tabular",
+    epilog="""
+This command validates HED in a tabular file (TSV) against a specified HED schema
+version. It can optionally include a sidecar file and check for warnings.
+
+\b
+Examples:
+    # Basic validation of a TSV file
+    hedpy validate tabular events.tsv -sv 8.3.0
+
+    # Validate with a sidecar
+    hedpy validate tabular events.tsv -s sidecar.json -sv 8.3.0
+
+    # Validate with multiple schemas (base + library)
+    hedpy validate tabular events.tsv -s sidecar.json -sv 8.3.0 -sv score_1.1.0
+
+    # Check for warnings as well as errors
+    hedpy validate tabular events.tsv -sv 8.4.0 --check-for-warnings
+
+    # Limit reported errors
+    hedpy validate tabular events.tsv -sv 8.4.0 -el 5
+
+    # Save validation results to a file
+    hedpy validate tabular events.tsv -sv 8.4.0 -o validation_results.txt
+""",
+)
+@click.argument("tabular_file", type=click.Path(exists=True))
+# Validation options
+@optgroup.group("Validation options")
+@optgroup.option(
+    "-sv",
+    "--schema-version",
+    required=True,
+    multiple=True,
+    metavar="VERSION",
+    help="HED schema version(s) to validate against (e.g., '8.4.0'). Can be specified multiple times for multiple schemas (e.g., -sv lang_1.1.0 -sv score_2.1.0)",
+)
+@optgroup.option(
+    "-s",
+    "--sidecar",
+    type=click.Path(exists=True),
+    metavar=METAVAR_FILE,
+    help="BIDS JSON sidecar file to use during validation",
+)
+@optgroup.option(
+    "-w",
+    "--check-for-warnings",
+    is_flag=True,
+    help="Check for warnings as well as errors",
+)
+@optgroup.option(
+    "-el",
+    "--error-limit",
+    type=int,
+    metavar=METAVAR_N,
+    help="Limit number of errors reported per code (default: No limit)",
+)
+@optgroup.option(
+    "-ef",
+    "--errors-by-file",
+    is_flag=True,
+    help="If using --error-limit, apply the limit per-file rather than globally",
+)
+# Output options
+@optgroup.group("Output options")
+@optgroup.option(
+    "-f",
+    "--format",
+    type=click.Choice(["text", "json"]),
+    default="text",
+    show_default="text",
+    help="Output format for validation results (text: human-readable; json: structured format for programmatic use)",
+)
+@optgroup.option(
+    "-o",
+    "--output-file",
+    type=click.Path(),
+    default="",
+    metavar=METAVAR_FILE,
+    help="Path for output file to hold validation results; if not specified, output to stdout",
+)
+# Logging options
+@optgroup.group("Logging options")
+@optgroup.option(
+    "-l",
+    "--log-level",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
+    default="WARNING",
+    show_default="WARNING",
+    help="Log level for diagnostic messages",
+)
+@optgroup.option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    help="Output informational messages (equivalent to --log-level INFO)",
+)
+@optgroup.option(
+    "-lf",
+    "--log-file",
+    type=click.Path(),
+    metavar=METAVAR_FILE,
+    help="File path for saving log output; logs still go to stderr unless --log-quiet is also used",
+)
+@optgroup.option(
+    "-lq",
+    "--log-quiet",
+    is_flag=True,
+    help="Suppress log output to stderr; only applicable when --log-file is used (logs go only to file)",
+)
+@optgroup.option(
+    "--no-log",
+    is_flag=True,
+    help="Disable all logging output",
+)
+@click.pass_context
+def validate_tabular_cmd(
+    ctx,
+    tabular_file,
+    schema_version,
+    sidecar,
+    check_for_warnings,
+    error_limit,
+    errors_by_file,
+    format,
+    output_file,
+    log_level,
+    log_file,
+    log_quiet,
+    no_log,
+    verbose,
+):
+    """Validate HED in a tabular file.
+
+    TABULAR_FILE: The path to the tabular file (e.g., TSV) to validate.
+    """
+    from hed.scripts.validate_hed_tabular import main as validate_tabular_main
+
+    args = [tabular_file]
+    for version in schema_version:
+        args.extend(["-sv", version])
+    if sidecar:
+        args.extend(["-s", sidecar])
+    if check_for_warnings:
+        args.append("-w")
+    if error_limit is not None:
+        args.extend(["-el", str(error_limit)])
+    if errors_by_file:
+        args.append("-ef")
+    if format:
+        args.extend(["-f", format])
+    if output_file:
+        args.extend(["-o", output_file])
+    if log_level:
+        args.extend(["-l", log_level])
+    if log_file:
+        args.extend(["-lf", log_file])
+    if log_quiet:
+        args.append("-lq")
+    if no_log:
+        args.append("--no-log")
+    if verbose:
+        args.append("-v")
+
+    result = validate_tabular_main(args)
+    ctx.exit(result if result is not None else 0)
+
+
 @schema.command(name="validate")
 @click.argument("schema_path", type=click.Path(exists=True), nargs=-1, required=True)
 @click.option("--add-all-extensions", is_flag=True, help="Always verify all versions of the same schema are equal")

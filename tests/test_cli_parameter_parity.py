@@ -11,6 +11,7 @@ from hed.scripts.hed_extract_bids_sidecar import get_parser as get_extract_sidec
 from hed.scripts.extract_tabular_summary import get_parser as get_extract_summary_parser
 from hed.scripts.validate_schemas import get_parser as get_validate_schemas_parser
 from hed.scripts.validate_hed_sidecar import get_parser as get_validate_sidecar_parser
+from hed.scripts.validate_hed_tabular import get_parser as get_validate_tabular_parser
 
 
 class TestCLIParameterParity(unittest.TestCase):
@@ -293,6 +294,51 @@ class TestCLIParameterParity(unittest.TestCase):
 
         # Check flags
         required_flags = {"check_for_warnings", "log_quiet", "no_log", "verbose"}
+        cli_flags = {flag[0] for flag in cli_opts["flags"]}
+
+        for flag in required_flags:
+            self.assertIn(flag, cli_flags, f"Flag '{flag}' not found in CLI")
+
+    def test_validate_tabular_parameters(self):
+        """Test validate tabular CLI parameters match validate_hed_tabular.py parser."""
+        # Get original parser
+        original_parser = get_validate_tabular_parser()
+        self._get_parser_options(original_parser)
+
+        # Get CLI command
+        validate_group = cli.commands.get("validate")
+        self.assertIsNotNone(validate_group, "validate command group not found")
+        cli_command = validate_group.commands.get("tabular")
+
+        self.assertIsNotNone(cli_command, "validate tabular command not found in CLI")
+        cli_opts = self._get_click_options(cli_command)
+
+        # Check positional arguments (should have tabular_file)
+        self.assertEqual(
+            len(cli_opts["positional"]), 1, f"Should have 1 positional argument, got {len(cli_opts['positional'])}"
+        )
+        self.assertEqual(cli_opts["positional"][0], "tabular_file", "Positional should be tabular_file")
+
+        # Check that key optional parameters exist
+        required_params = [
+            "schema_version",
+            "sidecar_file",
+            "error_limit",
+            "format",
+            "output_file",
+            "log_level",
+            "log_file",
+        ]
+        # Mapping for naming differences
+        dest_map = {"sidecar_file": "sidecar"}
+        cli_dests = set(cli_opts["optional"].keys())
+
+        for param in required_params:
+            search_param = dest_map.get(param, param)
+            self.assertIn(search_param, cli_dests, f"Parameter '{param}' not found in CLI as '{search_param}'")
+
+        # Check flags
+        required_flags = {"check_for_warnings", "errors_by_file", "log_quiet", "no_log", "verbose"}
         cli_flags = {flag[0] for flag in cli_opts["flags"]}
 
         for flag in required_flags:
