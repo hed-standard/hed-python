@@ -1,0 +1,273 @@
+[
+    {
+        "error_code": "TAG_NAMESPACE_PREFIX_INVALID",
+        "alt_codes": [],
+        "name": "tag-namespace_prefix-invalid-characters",
+        "description": "A tag prefix has invalid characters.",
+        "warning": false,
+        "schema": ["8.3.0", "sc:score_1.0.0"],
+        "error_category": "syntax",
+        "common_causes": [
+            "Invalid characters in namespace prefix",
+            "Incorrect namespace prefix format",
+            "Using undefined namespace prefixes",
+            "Mixing library schemas incorrectly",
+            "Misunderstanding namespace syntax"
+        ],
+        "explanation": "Namespace prefixes allow using multiple HED schemas (standard + library schemas) in the same annotation. Prefixes must follow naming rules and correspond to valid schema namespaces.",
+        "correction_strategy": "Use valid namespace prefixes with correct syntax",
+        "correction_examples": [
+            {
+                "wrong": "sc2:Sleep-modulator",
+                "correct": "sc:Sleep-modulator",
+                "explanation": "Used valid library schema prefix without invalid characters"
+            },
+            {
+                "wrong": "sca:Sleep-modulator",
+                "correct": "sc:Sleep-modulator",
+                "explanation": "Corrected to match loaded schema namespace prefix"
+            }
+        ],
+        "correction_patterns": [
+            "Use only valid characters in namespace prefixes",
+            "Ensure prefix corresponds to loaded schema",
+            "Follow namespace prefix naming conventions",
+            "Check library schema availability",
+            "Use proper prefix:tag syntax"
+        ],
+        "fix_instructions": [
+            "1. Check namespace prefix follows naming rules",
+            "2. Verify prefix corresponds to available schema",
+            "3. Fix invalid characters in prefix",
+            "4. Ensure proper prefix:tag syntax",
+            "5. Validate library schema is properly loaded"
+        ],
+        "validation_hints": [
+            "Check schema loading includes referenced libraries",
+            "Verify prefix naming follows conventions",
+            "Ensure colon separator is used correctly",
+            "Confirm library schema availability"
+        ],
+        "specification_reference": "3.2.6. Tag namespace prefixes",
+        "related_errors": ["SCHEMA_LOAD_FAILED", "TAG_INVALID"],
+        "definitions": ["(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))", "(Definition/MyColor, (Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "sc2:Sleep-modulator, Red",
+                    "sca:Sleep-modulator, Red"
+                ],
+                "passes": [
+                    "Blue",
+                    "sc:Sleep-modulator, Red"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "sc1:Sleep-modulator, Red",
+                                "ball": "(Def/MyColor, Onset)(Def/Acc/3.5)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                     {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue),   (Green, (Yellow))",
+                                "ball": "(Def/MyColor, Onset),(Def/Acc/3.5)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "sc1:Sleep-modulator, Red"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [4.5, 0, "(Red, Blue),   (Green, (Yellow))"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar":  {
+                            "event_code": {
+                                "HED": {
+                                    "face": "sc1:Sleep-modulator, Red",
+                                    "ball": "(Def/MyColor, Onset)(Def/Acc/3.5)"
+                                }
+                            }
+                        },
+                        "events":
+                            [
+                                ["onset", "duration", "event_code","HED"],
+                                [ 4.5, 0, "face", "Red, Def/MyColor"],
+                                [ 5.0, 0, "ball", "Green"]
+                            ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                             "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2, sc:Sleep-modulator",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events":
+                            [
+                                ["onset", "duration", "event_code","HED"],
+                                [ 4.5, 0, "face", "Blue"],
+                                [ 5.0, 0, "ball", "Green, Def/MyColor"]
+                            ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TAG_NAMESPACE_PREFIX_INVALID",
+        "alt_codes": [],
+        "name": "tag-namespace_prefix-with-colon-values",
+        "description": "A tag prefix has invalid characters.",
+        "warning": false,
+        "schema": ["ts:8.3.0"],
+        "error_category": "validation",
+        "common_causes": [
+            "Missing namespace prefix for schema-specific tags",
+            "Using tags without proper namespace qualification",
+            "Confusion about when namespace prefixes are required",
+            "Incorrect tag format for multi-schema contexts"
+        ],
+        "explanation": "When using multiple schemas or library schemas, tags must be properly prefixed with their namespace to avoid ambiguity.",
+        "correction_strategy": "Add appropriate namespace prefix to tags",
+        "correction_examples": [
+            {
+                "wrong": "Creation-date/2009-04-09T12:04:14",
+                "correct": "ts:Creation-date/2009-04-09T12:04:14",
+                "explanation": "Added required 'ts:' namespace prefix for test schema tag"
+            },
+            {
+                "wrong": "Label/TestValue",
+                "correct": "ts:Label/TestValue",
+                "explanation": "Added namespace prefix for library schema tag"
+            }
+        ],
+        "correction_patterns": [
+            "Add namespace prefix (e.g., 'ts:') to schema-specific tags",
+            "Check schema requirements for namespace usage",
+            "Ensure consistent namespace prefixing"
+        ],
+        "fix_instructions": [
+            "1. Identify tags that require namespace prefixes",
+            "2. Determine the correct namespace for each tag",
+            "3. Add prefix in format 'namespace:TagName'",
+            "4. Verify all schema-specific tags are properly prefixed"
+        ],
+        "validation_hints": [
+            "Check schema documentation for namespace requirements",
+            "Ensure all library tags have appropriate prefixes",
+            "Verify namespace consistency across HED strings"
+        ],
+        "specification_reference": "3.3. Library schemas and namespaces",
+        "related_errors": ["TAG_INVALID", "SCHEMA_LIBRARY_INVALID"],
+        "definitions": ["(ts:Definition/Acc/#, (ts:Acceleration/# m-per-s^2, ts:Red))", "(ts:Definition/MyColor, (ts:Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Creation-date/2009-04-09T12:04:14"
+                ],
+                "passes": [
+                    "ts:Creation-date/2009-04-09T12:04:14"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Creation-date/2009-04-09T12:04:14",
+                                "ball": "Red"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                     {
+                        "event_code": {
+                            "HED": {
+                                "face": "ts:Creation-date/2009-04-09T12:04:14",
+                                "ball": "ts:Blue"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Creation-date/2009-04-09T12:04:14"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [4.5, 0, "ts:Creation-date/2009-04-09T12:04:14"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar":  {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Creation-date/2009-04-09T12:04:14",
+                                    "ball": "Blue"
+                                }
+                            }
+                        },
+                        "events":
+                            [
+                                ["onset", "duration", "event_code","HED"],
+                                [ 4.5, 0, "ball", "Creation-date/2009-04-09T12:04:14"],
+                                [ 5.0, 0, "ball", "Green"]
+                            ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                             "event_code": {
+                                "HED": {
+                                    "face": "ts:Creation-date/2009-04-09T12:04:14",
+                                    "ball": "ts:Def/Acc/7, ts:Blue"
+                                }
+                            }
+                        },
+                        "events":
+                            [
+                                ["onset", "duration", "event_code","HED"],
+                                [ 4.5, 0, "face", "ts:Blue"],
+                                [ 5.0, 0, "ball", "ts:Green, ts:Def/MyColor"]
+                            ]
+                    }
+                ]
+            }
+        }
+    }
+]

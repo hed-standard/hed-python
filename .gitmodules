@@ -1,6 +1,6 @@
-[submodule "spec_tests/hed-specification"]
-	path = spec_tests/hed-specification
-	url = https://github.com/hed-standard/hed-specification/
+[submodule "spec_tests/hed-tests"]
+	path = spec_tests/hed-tests
+	url = https://github.com/hed-standard/hed-tests/
 	branch = main
 
 [submodule "spec_tests/hed-examples"]

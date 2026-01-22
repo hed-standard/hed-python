@@ -1,0 +1,240 @@
+[
+  {
+    "error_code": "SCHEMA_DUPLICATE_NODE",
+    "name": "attribute-duplicate-node",
+    "warning": true,
+    "description": "A schema attribute issue, saying there is a duplicate node.",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Defining the same tag or attribute multiple times in schema",
+      "Copy-paste errors leading to duplicate entries",
+      "Conflicting tag definitions in merged schemas",
+      "Case-insensitive duplicate tag names",
+      "Duplicate attribute definitions within same tag"
+    ],
+    "explanation": "Schema nodes (tags, attributes, etc.) must be unique within their scope. Duplicate nodes create ambiguity and can cause validation errors or unexpected behavior.",
+    "correction_strategy": "Remove duplicate entries and ensure unique node definitions",
+    "correction_examples": [
+      {
+        "wrong": "* Tag1\n* Tag1",
+        "correct": "* Tag1",
+        "explanation": "Removed duplicate tag definition"
+      },
+      {
+        "wrong": "* Tag {attribute1, attribute1}",
+        "correct": "* Tag {attribute1}",
+        "explanation": "Removed duplicate attribute from tag definition"
+      }
+    ],
+    "correction_patterns": [
+      "Remove exact duplicate entries",
+      "Merge conflicting definitions if appropriate",
+      "Check for case-insensitive duplicates",
+      "Verify uniqueness within tag hierarchies"
+    ],
+    "fix_instructions": [
+      "1. Identify duplicate node definitions in schema",
+      "2. Determine which definition to keep",
+      "3. Remove or merge duplicate entries",
+      "4. Check for case-insensitive conflicts",
+      "5. Validate schema structure after cleanup"
+    ],
+    "validation_hints": [
+      "Search for exact name matches in schema",
+      "Check case-insensitive duplicates",
+      "Verify tag hierarchy uniqueness",
+      "Test schema loading after duplicate removal"
+    ],
+    "specification_reference": "3.1.2. Schema structure and uniqueness",
+    "related_errors": ["SCHEMA_LOAD_FAILED", "SCHEMA_ATTRIBUTE_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "* Tag",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers''' <nowiki></nowiki>",
+            "* mod1 <nowiki></nowiki>",
+            "'''Value classes'''",
+            "'''Schema attributes''' <nowiki></nowiki>",
+            "* unitAttribute <nowiki></nowiki>",
+            "'''Properties''' <nowiki></nowiki>",
+            "* unitProperty <nowiki></nowiki>",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers''' <nowiki></nowiki>",
+            "* mod1 <nowiki></nowiki>",
+            "* mod1 <nowiki></nowiki>",
+            "'''Value classes'''",
+            "'''Schema attributes''' <nowiki></nowiki>",
+            "* unitAttribute <nowiki></nowiki>",
+            "'''Properties''' <nowiki></nowiki>",
+            "* unitProperty <nowiki></nowiki>",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "!# end schema",
+            "'''Unit classes''' <nowiki></nowiki>",
+            "* unitClass1 <nowiki></nowiki>",
+            "** unit1 <nowiki></nowiki>",
+            "** unit1 <nowiki></nowiki>",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes''' <nowiki></nowiki>",
+            "* unitAttribute <nowiki></nowiki>",
+            "'''Properties''' <nowiki></nowiki>",
+            "* unitProperty <nowiki></nowiki>",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "!# end schema",
+            "'''Unit classes''' <nowiki></nowiki>",
+            "* unitClass1 <nowiki></nowiki>",
+            "** unit1 <nowiki></nowiki>",
+            "* unitClass2 <nowiki></nowiki>",
+            "** unit1 <nowiki></nowiki>",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes''' <nowiki></nowiki>",
+            "* unitAttribute <nowiki></nowiki>",
+            "'''Properties''' <nowiki></nowiki>",
+            "* unitProperty <nowiki></nowiki>",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes''' <nowiki></nowiki>",
+            "* unitAttribute <nowiki></nowiki>",
+            "* unitAttribute <nowiki></nowiki>",
+            "'''Properties''' <nowiki></nowiki>",
+            "* unitProperty <nowiki></nowiki>",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes''' <nowiki></nowiki>",
+            "* unitAttribute <nowiki></nowiki>",
+            "'''Properties''' <nowiki></nowiki>",
+            "* unitProperty <nowiki></nowiki>",
+            "* unitProperty <nowiki></nowiki>",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {suggestedTag=Event}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+    {
+    "error_code": "SCHEMA_DUPLICATE_NODE",
+    "name": "attribute-duplicate-node-unit",
+    "warning": true,
+    "description": "A schema attribute issue, saying there is an unknown one.",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "!# end schema",
+            "'''Unit classes''' <nowiki></nowiki>",
+            "* unitClass1 <nowiki></nowiki>",
+            "** volt {SIUnit} <nowiki></nowiki>",
+            "** Volt {SIUnit} <nowiki></nowiki>",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes''' <nowiki></nowiki>",
+            "* unitSymbol {unitProperty}<nowiki></nowiki>",
+            "* SIUnit {unitProperty}<nowiki></nowiki>",
+            "'''Properties''' <nowiki></nowiki>",
+            "* unitProperty <nowiki></nowiki>",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "!# end schema",
+            "'''Unit classes''' <nowiki></nowiki>",
+            "* unitClass1 <nowiki></nowiki>",
+            "** v {unitSymbol} <nowiki></nowiki>",
+            "** V {unitSymbol} <nowiki></nowiki>",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes''' <nowiki></nowiki>",
+            "* unitSymbol {unitProperty}<nowiki></nowiki>",
+            "* SIUnit {unitProperty}<nowiki></nowiki>",
+            "'''Properties''' <nowiki></nowiki>",
+            "* unitProperty <nowiki></nowiki>",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

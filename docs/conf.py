@@ -38,7 +38,7 @@ html_css_files = ["custom.css"]
 html_js_files = ["gh_icon_fix.js"]
 
 # Add logo
-html_logo = "source/_static/images/croppedWideLogo.png"
+html_logo = "_static/images/croppedWideLogo.png"
 
 # Furo theme options
 html_theme_options = {

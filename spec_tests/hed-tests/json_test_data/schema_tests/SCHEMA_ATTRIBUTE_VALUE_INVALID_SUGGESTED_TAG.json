@@ -1,0 +1,111 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-suggestedTag-invalid",
+    "warning": true,
+    "description": "A suggested tag points to an unknown tag",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Referencing non-existent tags in suggestedTag attributes",
+      "Incorrect tag path specifications in suggestedTag",
+      "Misspelled tag names in suggestedTag attributes",
+      "Using deprecated tags in suggestedTag references",
+      "Self-referencing suggestedTag attributes"
+    ],
+    "explanation": "SuggestedTag attributes must reference valid, existing tags in the schema. Invalid references cause schema validation failures and break tag suggestion functionality.",
+    "correction_strategy": "Use valid tag references in suggestedTag attributes",
+    "correction_examples": [
+      {
+        "wrong": "suggestedTag=\"InvalidTag\"",
+        "correct": "suggestedTag=\"Event\"",
+        "explanation": "Replaced invalid tag with valid schema tag"
+      }
+    ],
+    "correction_patterns": [
+      "Verify tag exists in current schema",
+      "Use complete tag paths for suggestedTag references",
+      "Check tag spelling and case sensitivity",
+      "Avoid self-references in suggestedTag"
+    ],
+    "fix_instructions": [
+      "1. Verify referenced tags exist in schema",
+      "2. Check tag path spelling and format",
+      "3. Remove or update invalid tag references",
+      "4. Test tag suggestion functionality"
+    ],
+    "validation_hints": [
+      "Cross-reference with available schema tags",
+      "Verify complete tag paths",
+      "Check that suggestedTag doesn't reference itself"
+    ],
+    "specification_reference": "3.1.2.9. Tag suggestions and suggestedTag attributes",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "TAG_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {suggestedTag=invalid}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {suggestedTag=Event, suggestedTag=invalid}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {suggestedTag=Event}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {suggestedTag=Event}",
+            "* ExtendedTag {suggestedTag=Tag-with-unknown, suggestedTag=Event}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

@@ -1,0 +1,85 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-invalid-in-library",
+    "warning": true,
+    "description": "A schema unit has an invalid in library attribute(most other library errors are SCHEMA_LIBRARY_INVALID",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Using inLibrary attribute in non-library schema contexts",
+      "Invalid library name specification in inLibrary attribute",
+      "Referencing non-existent library schemas",
+      "Incorrect inLibrary attribute syntax or format",
+      "Missing library schema dependencies for inLibrary references"
+    ],
+    "explanation": "The inLibrary attribute specifies which library schema contains an element. Invalid inLibrary specifications cause schema loading failures and prevent proper library schema integration.",
+    "correction_strategy": "Use valid library names and proper inLibrary attribute syntax",
+    "correction_examples": [
+      {
+        "wrong": "inLibrary=\"nonexistent\"",
+        "correct": "inLibrary=\"score\"",
+        "explanation": "Referenced valid existing library schema"
+      }
+    ],
+    "correction_patterns": [
+      "Reference only existing library schemas",
+      "Use correct case-sensitive library names",
+      "Verify library schema availability"
+    ],
+    "fix_instructions": [
+      "1. Verify referenced library schema exists",
+      "2. Check library name spelling and case",
+      "3. Ensure library schema is available for loading",
+      "4. Remove inLibrary attributes where inappropriate"
+    ],
+    "validation_hints": [
+      "Check available library schema names",
+      "Verify library schema loading prerequisites",
+      "Ensure case-sensitive name matching"
+    ],
+    "specification_reference": "3.1.3. Library schemas and inLibrary attributes",
+    "related_errors": ["SCHEMA_LIBRARY_INVALID", "SCHEMA_LOAD_FAILED"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" library=\"right\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag''' {inLibrary=wrong}",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* inLibrary {elementProperty}",
+            "'''Properties'''",
+            "* elementProperty",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"right\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag''' {inLibrary=right}",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* inLibrary {elementProperty}",
+            "'''Properties'''",
+            "* elementProperty",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

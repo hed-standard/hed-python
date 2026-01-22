@@ -1,0 +1,254 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-invalid-hed-id-changed",
+    "warning": true,
+    "description": "A schema value class issue, saying there is an unknown one.",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Using non-unique HED IDs that conflict with existing IDs",
+      "Invalid HED ID format (non-numeric or incorrect structure)",
+      "Missing HED IDs where required",
+      "Changing HED IDs that should remain stable",
+      "Duplicate HED IDs across different schema elements"
+    ],
+    "explanation": "HED IDs must be unique numeric identifiers that follow specific format requirements and remain stable across schema versions. Invalid or changed HED IDs cause schema validation failures.",
+    "correction_strategy": "Use stable, properly formatted HED IDs according to specification",
+    "correction_examples": [
+      {
+        "wrong": "hedId=\"invalid\"",
+        "correct": "hedId=\"HED_0012345\"",
+        "explanation": "Replaced invalid ID with proper HED ID format"
+      }
+    ],
+    "correction_patterns": [
+      "Maintain HED ID stability across versions",
+      "Use proper HED ID format",
+      "Ensure HED IDs are unique"
+    ],
+    "fix_instructions": [
+      "1. Check HED ID format compliance",
+      "2. Verify HED ID stability requirements",
+      "3. Replace invalid HED IDs with proper format",
+      "4. Ensure uniqueness across schema"
+    ],
+    "validation_hints": [
+      "Check HED ID format matches specification",
+      "Verify HED ID stability across versions",
+      "Ensure no duplicate HED IDs exist"
+    ],
+    "specification_reference": "3.1.2.6. HED IDs and stability requirements",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "SCHEMA_DUPLICATE_NODE"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"8.4.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Event'''{hedId=HED_0015001}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* hedId {elementDomain}",
+            "'''Properties'''",
+            "* elementDomain",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"8.4.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Event'''{hedId=HED_0012001}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* hedId {elementDomain}",
+            "'''Properties'''",
+            "* elementDomain",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-invalid-hed-id-out-range",
+    "warning": true,
+    "description": "A schema value class issue, saying there is an unknown one.",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Using HED IDs outside the allocated ranges",
+      "Creating HED IDs in reserved number ranges",
+      "Using experimental or unofficial HED ID ranges",
+      "Assigning HED IDs without proper allocation"
+    ],
+    "explanation": "HED IDs must be within specific allocated ranges to ensure compatibility and prevent conflicts. Using out-of-range IDs causes schema validation failures.",
+    "correction_strategy": "Use HED IDs within the allocated range for your schema",
+    "correction_examples": [
+      {
+        "wrong": "hedId=HED_0055000",
+        "correct": "hedId=HED_0015001",
+        "explanation": "Changed out-of-range ID to allocated range"
+      }
+    ],
+    "correction_patterns": [
+      "Check HED ID range allocations",
+      "Use proper HED ID ranges for schema type",
+      "Avoid reserved or experimental ranges"
+    ],
+    "fix_instructions": [
+      "1. Check HED ID range allocation guidelines",
+      "2. Identify proper range for your schema",
+      "3. Replace out-of-range HED IDs",
+      "4. Verify all HED IDs are within allocated ranges"
+    ],
+    "validation_hints": [
+      "Check HED ID range documentation",
+      "Verify HED ID is within allocated bounds",
+      "Ensure proper schema-specific ranges"
+    ],
+    "specification_reference": "3.1.2.6. HED ID ranges and allocation",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "SCHEMA_ATTRIBUTE_VALUE_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"8.4.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''NewTagWithNewID'''{hedId=HED_0055000}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* hedId {elementDomain}",
+            "'''Properties'''",
+            "* elementDomain",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"8.4.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''NewTagWithNewID'''{hedId=HED_0015001}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* hedId {elementDomain}",
+            "'''Properties'''",
+            "* elementDomain",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-invalid-hed-id-invalid",
+    "warning": true,
+    "description": "A schema value class issue, saying there is an unknown one.",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Using non-numeric characters in HED ID values",
+      "Invalid HED ID format (not following HED_NNNNNNN pattern)",
+      "Using placeholder or invalid characters like 'XXXXXXX'",
+      "Malformed HED ID syntax"
+    ],
+    "explanation": "HED IDs must follow the exact format 'HED_' followed by a 7-digit number. Invalid characters or formats cause schema parsing failures.",
+    "correction_strategy": "Use proper HED ID format with numeric values only",
+    "correction_examples": [
+      {
+        "wrong": "hedId=HED_XXXXXXX",
+        "correct": "hedId=HED_0015001",
+        "explanation": "Replaced invalid characters with proper numeric ID"
+      },
+      {
+        "wrong": "hedId=HED_ABC1234",
+        "correct": "hedId=HED_0015002",
+        "explanation": "Replaced alphabetic characters with numbers"
+      }
+    ],
+    "correction_patterns": [
+      "Use HED_NNNNNNN format exactly",
+      "Replace invalid characters with numbers",
+      "Ensure 7-digit numeric portion"
+    ],
+    "fix_instructions": [
+      "1. Identify HED IDs with invalid format",
+      "2. Replace with proper HED_NNNNNNN format",
+      "3. Use allocated numeric ranges",
+      "4. Verify format compliance"
+    ],
+    "validation_hints": [
+      "Check for HED_NNNNNNN format",
+      "Verify only numeric characters after HED_",
+      "Ensure exactly 7 digits"
+    ],
+    "specification_reference": "3.1.2.6. HED ID format requirements",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "SCHEMA_ATTRIBUTE_VALUE_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"8.4.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''NewTagWithNewID'''{hedId=HED_XXXXXXX}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* hedId {elementDomain}",
+            "'''Properties'''",
+            "* elementDomain",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"8.4.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''NewTagWithNewID'''{hedId=HED_0015001}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* hedId {elementDomain}",
+            "'''Properties'''",
+            "* elementDomain",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

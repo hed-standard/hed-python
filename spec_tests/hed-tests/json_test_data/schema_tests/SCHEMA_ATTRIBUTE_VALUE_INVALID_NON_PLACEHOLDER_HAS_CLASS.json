@@ -1,0 +1,116 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-on-nonplaceholder-invalid",
+    "warning": true,
+    "description": "A non placeholder tag has takes value, unit class, or value class",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Adding valueClass or unitClass attributes to non-placeholder tags",
+      "Misunderstanding placeholder vs. non-placeholder tag attributes",
+      "Copy-paste errors from placeholder tag definitions",
+      "Incorrect schema attribute assignments",
+      "Using takesValue attribute on inappropriate tags"
+    ],
+    "explanation": "Only placeholder tags (#) should have valueClass, unitClass, or takesValue attributes. Non-placeholder tags with these attributes violate schema structure rules.",
+    "correction_strategy": "Remove value/unit class attributes from non-placeholder tags",
+    "correction_examples": [
+      {
+        "wrong": "* RegularTag {valueClass=numericClass}",
+        "correct": "* RegularTag",
+        "explanation": "Removed valueClass from non-placeholder tag"
+      },
+      {
+        "wrong": "* Tag {takesValue=true}",
+        "correct": "* Tag",
+        "explanation": "Removed takesValue from non-placeholder tag"
+      }
+    ],
+    "correction_patterns": [
+      "Remove valueClass attributes from non-placeholder tags",
+      "Remove unitClass attributes from non-placeholder tags",
+      "Remove takesValue attributes from non-placeholder tags",
+      "Keep class attributes only on placeholder tags"
+    ],
+    "fix_instructions": [
+      "1. Identify non-placeholder tags with class or value attributes",
+      "2. Remove valueClass, unitClass, or takesValue attributes",
+      "3. Verify only placeholder tags have these attributes",
+      "4. Check schema validation after cleanup"
+    ],
+    "validation_hints": [
+      "Check that only # tags have valueClass/unitClass/takesValue",
+      "Verify schema structure follows placeholder rules",
+      "Ensure attribute usage matches tag type"
+    ],
+    "specification_reference": "3.1.2.7. Placeholder tags and class attributes",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "PLACEHOLDER_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag''' {takesValue}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag''' {valueClass=numericClass}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag''' {unitClass=timeUnits}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag''' {relatedTag=Event}",
+            "* # {takesValue, unitClass=timeUnits, valueClass=numericClass}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

@@ -1,0 +1,87 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-default-unit-invalid",
+    "warning": true,
+    "description": "A schema unit class has an invalid default value",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Specifying default units that don't exist in the unit class",
+      "Referencing undefined or misspelled unit names",
+      "Using default units incompatible with the unit class",
+      "Missing unit class definition for default unit",
+      "Invalid unit name format in default unit specification"
+    ],
+    "explanation": "Default units must reference valid units defined within the associated unit class. Invalid default unit references cause validation errors and prevent proper unit handling.",
+    "correction_strategy": "Use valid unit names that exist in the corresponding unit class",
+    "correction_examples": [
+      {
+        "wrong": "defaultUnits=\"invalidUnit\"",
+        "correct": "defaultUnits=\"m\"",
+        "explanation": "Replaced invalid unit with valid meter unit"
+      }
+    ],
+    "correction_patterns": [
+      "Verify unit exists in the associated unit class",
+      "Use correct unit symbols or names",
+      "Check unit class definitions for available units"
+    ],
+    "fix_instructions": [
+      "1. Check the unit class for available units",
+      "2. Verify default unit name spelling and format",
+      "3. Ensure unit exists in the specified unit class",
+      "4. Update default unit to valid unit reference"
+    ],
+    "validation_hints": [
+      "Cross-reference with unit class definitions",
+      "Check unit name spelling and case sensitivity",
+      "Verify unit symbols match schema specification"
+    ],
+    "specification_reference": "3.1.2.5. Unit classes and default units",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "UNITS_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' [Unit classes and the units for the nodes.]",
+            "* testUnitClass {defaultUnits=testUnit0}",
+            "** testUnit1",
+            "** testUnit2",
+            "** testUnit3",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' [Unit classes and the units for the nodes.]",
+            "* testUnitClass {defaultUnits=testUnit1}",
+            "** testUnit1",
+            "** testUnit2",
+            "** testUnit3",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

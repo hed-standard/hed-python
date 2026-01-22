@@ -1,0 +1,545 @@
+[
+    {
+        "error_code": "TAG_INVALID",
+        "alt_codes": ["PLACEHOLDER_INVALID"],
+        "name": "tag-invalid-in-schema",
+        "description": "The tag is not valid in the schema it is associated with.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "semantic",
+        "common_causes": [
+            "Misspelling tag names",
+            "Using tags that don't exist in the specified schema version",
+            "Creating extensions without proper parent tags",
+            "Using placeholder (#) in wrong context",
+            "Including extra whitespace or incorrect formatting"
+        ],
+        "explanation": "HED tags must exist in the specified schema or be valid extensions of existing tags. Invalid tags often result from spelling errors, using outdated tag names, or attempting to extend non-extensible tags.",
+        "correction_strategy": "Use valid schema tags or create proper extensions",
+        "correction_examples": [
+            {
+                "wrong": "ReallyInvalid/Extension",
+                "correct": "Item/Object/Man-made-object/Device",
+                "explanation": "Replaced non-existent tag with valid schema tag"
+            },
+            {
+                "wrong": "Label #",
+                "correct": "Label/SomeLabel",
+                "explanation": "Replaced invalid placeholder usage with proper tag value"
+            },
+            {
+                "wrong": "Sensory-event/Baloney",
+                "correct": "Sensory-event/Auditory",
+                "explanation": "Replaced invalid extension with valid schema tag"
+            }
+        ],
+        "correction_patterns": [
+            "Check spelling against current schema version",
+            "Use schema browser to find correct tag paths",
+            "Replace invalid extensions with valid schema tags",
+            "Remove extra whitespace and fix formatting",
+            "Use proper tag hierarchy (parent/child relationships)"
+        ],
+        "fix_instructions": [
+            "1. Verify tag exists in the specified schema version",
+            "2. Check for spelling errors in tag names",
+            "3. Ensure proper tag hierarchy and path",
+            "4. Remove invalid characters or formatting",
+            "5. Replace with valid schema tags or proper extensions"
+        ],
+        "validation_hints": [
+            "Use HED schema browser to verify tag existence",
+            "Check that tag follows proper naming conventions",
+            "Ensure tag hierarchy is maintained",
+            "Verify schema version compatibility"
+        ],
+        "specification_reference": "3.2.2. Tag forms",
+        "related_errors": ["TAG_EXTENSION_INVALID", "PLACEHOLDER_INVALID", "CHARACTER_INVALID"],
+        "definitions": ["(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))", "(Definition/MyColor, (Label/Pie))"],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Label #",
+                    "ReallyInvalid/Extension",
+                    "ReallyInvalid"
+                ],
+                "passes": [
+                    "Brown-color/Brown"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Label #",
+                                "ball": "ReallyInvalid/Extension",
+                                "square": "ReallyInvalid"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                     {
+                        "event_code": {
+                            "HED": {
+                                "face": "Brown-color/Brown"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [ 4.5, 0, "Label #"],
+                        [ 5.5, 0, "Property/Sensory-event"],
+                        [ 5.5, 0, "Sensory-event/Baloney"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [4.5, 0, "Brown-color/Brown"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar":  {
+                            "event_code": {
+                                "HED": {
+                                    "face": "ReallyInvalid",
+                                    "ball": "Property/Sensory-event",
+                                    "square": "Sensory-event/Baloney"
+                                }
+                            }
+                        },
+                        "events": 
+                            [
+                                ["onset", "duration", "event_code","HED"],
+                                [ 4.5, 0, "face", "Red, Def/MyColor"],
+                                [ 5.0, 0, "ball", "Green"]
+                            ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                             "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue/Apples"
+                                }
+                            }
+                        },
+                        "events": 
+                            [
+                                ["onset", "duration", "event_code","HED"],
+                                [ 4.5, 0, "face", "Blue"],
+                                [ 5.0, 0, "ball", "Green, Def/MyColor"]
+                            ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TAG_INVALID",
+        "alt_codes": [],
+        "name": "tag-has-extra-white space",
+        "description": "A HED tag has extra internal whitespace, including directly before or after slashes.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Extra spaces within tag names",
+            "Spaces before or after forward slashes",
+            "Copy-paste errors introducing whitespace",
+            "Formatting inconsistencies in tag construction",
+            "Manual typing errors with extra spaces"
+        ],
+        "explanation": "HED tags must follow strict formatting rules without extra internal whitespace. Spaces before/after slashes or within tag names break tag parsing and schema validation.",
+        "correction_strategy": "Remove all extra whitespace from tag names",
+        "correction_examples": [
+            {
+                "wrong": "Sensory- event",
+                "correct": "Sensory-event",
+                "explanation": "Removed space before 'event'"
+            },
+            {
+                "wrong": "Event /Sensory-event",
+                "correct": "Event/Sensory-event",
+                "explanation": "Removed space before forward slash"
+            },
+            {
+                "wrong": "Event/ Sensory-event",
+                "correct": "Event/Sensory-event",
+                "explanation": "Removed space after forward slash"
+            }
+        ],
+        "correction_patterns": [
+            "Remove spaces within tag names",
+            "Remove spaces before forward slashes",
+            "Remove spaces after forward slashes",
+            "Maintain proper hyphenation without spaces"
+        ],
+        "fix_instructions": [
+            "1. Identify tags with internal whitespace",
+            "2. Remove spaces before/after slashes",
+            "3. Remove extra spaces within tag names",
+            "4. Verify proper tag formatting",
+            "5. Test tag validation with schema"
+        ],
+        "validation_hints": [
+            "Tags should have no internal spaces",
+            "No spaces around forward slashes",
+            "Check for trailing/leading spaces in tag names",
+            "Verify proper hyphenation formatting"
+        ],
+        "specification_reference": "3.2.7.1. Tag formatting requirements",
+        "related_errors": [
+            "CHARACTER_INVALID",
+            "TAG_INVALID",
+            "COMMA_MISSING"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Sensory- event,Green",
+                    "Sensory -event,Blue",
+                    "Event /Sensory-event, Black",
+                    "Event/ Sensory-event,White"
+                ],
+                "passes": [
+                    "Sensory-event, Green"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "square": "Sensory- event,Green",
+                                "test": "Sensory -event,Blue",
+                                "pine": "Event /Sensory-event, Black",
+                                "apple": "Event/ Sensory-event,White"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Sensory-event, Green",
+                                "ball": "Def/Acc/4.5, Def/Acc/3.2"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "Sensory- event,Green"
+                        ],
+                        [
+                            7.5,
+                            0,
+                            "Sensory -event,Blue"
+                        ],
+                        [
+                            8.2,
+                            0,
+                            "Event /Sensory-event, Black"
+                        ],
+                        [
+                            9.1,
+                            0,
+                            "Event/ Sensory-event,White"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Sensory-event, Green"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "square": "Sensory- event,Green",
+                                    "test": "Sensory -event,Blue",
+                                    "pine": "Event /Sensory-event, Black",
+                                    "apple": "Event/ Sensory-event,White"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "test",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "apple",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": " Red, Green",
+                                    "ball": "Def/Acc/4.5, Def/Acc/3.2"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "TAG_INVALID",
+        "alt_codes": [],
+        "name": "tag-has-leading-trailing-or-consecutive-slashes",
+        "description": "A HED tag has leading, trailing or consecutive slashes.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Leading slashes at beginning of tags",
+            "Trailing slashes at end of tags",
+            "Double slashes within tag paths",
+            "Copy-paste errors introducing extra slashes",
+            "Incorrect path construction in tag hierarchies"
+        ],
+        "explanation": "HED tags must use forward slashes only to separate hierarchy levels. Leading, trailing, or consecutive slashes break tag parsing and create invalid tag structures.",
+        "correction_strategy": "Remove improper slashes and fix tag hierarchy",
+        "correction_examples": [
+            {
+                "wrong": "/Event",
+                "correct": "Event",
+                "explanation": "Removed leading slash"
+            },
+            {
+                "wrong": "Red/",
+                "correct": "Red",
+                "explanation": "Removed trailing slash"
+            },
+            {
+                "wrong": "Event//Sensory-event",
+                "correct": "Event/Sensory-event",
+                "explanation": "Removed consecutive slashes"
+            },
+            {
+                "wrong": "Body-part/Head-part//Brain",
+                "correct": "Body-part/Head-part/Brain",
+                "explanation": "Fixed double slash in hierarchy"
+            }
+        ],
+        "correction_patterns": [
+            "Remove leading slashes from tag beginnings",
+            "Remove trailing slashes from tag endings",
+            "Replace consecutive slashes with single slashes",
+            "Verify proper hierarchy separation"
+        ],
+        "fix_instructions": [
+            "1. Identify tags with improper slashes",
+            "2. Remove leading slashes at tag start",
+            "3. Remove trailing slashes at tag end",
+            "4. Replace consecutive slashes with single slashes",
+            "5. Verify proper tag hierarchy structure"
+        ],
+        "validation_hints": [
+            "Tags should not start or end with slashes",
+            "Use single slashes to separate hierarchy levels",
+            "Check for double slashes within tag paths",
+            "Verify proper tag structure and hierarchy"
+        ],
+        "specification_reference": "3.2.7.1. Tag slash usage requirements",
+        "related_errors": [
+            "CHARACTER_INVALID",
+            "TAG_INVALID",
+            "TAG_EXTENSION_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "/Event",
+                    "Red/",
+                    "Event//Sensory-event",
+                    "//Event",
+                    "Body-part/Head-part//Brain",
+                     "Def/Acc/4.5//",
+                    "Def/Acc/4.5/",
+                    "/ /Def/Acc/4.5 ms/"
+                ],
+                "passes": [
+                    "Body-part/Head-part/Brain",
+                    "Label/Red, Informational-property/Label/Blue"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face":  "Event//Sensory-event",
+                                "ball":   "/Event",
+                                "square": "Red/",
+                                "test":  "/ /Def/Acc/4.5/"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face":  "Body-part/Head-part/Brain",
+                                "ball": "Def/Acc/4.5, Def/Acc/3.2"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [ "onset", "duration", "HED"],
+                        [ 4.5, 0, "/Event,"],
+                        [5.5, 0, "Body-part/Head-part//Brain"],
+                        [6.5, 0, "Event/Sensory-event/"],
+                        [ 7.2, 0, "/ /Def/Acc/4.5/"]
+                    ]
+                ],
+                "passes": [
+                    [
+                        ["onset", "duration", "HED"],
+                        [4.5, 0, "Event/Sensory-event"]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Event//Sensory-event",
+                                    "ball":  "//Event",
+                                    "square":  "Body-part/Head-part//Brain",
+                                    "test":  "/ /Def/Acc/4.5"
+                                }
+                            }
+                        },
+                        "events": [
+                            ["onset", "duration", "event_code", "HED"],
+                            [4.5, 0, "face", "Red/, Def/MyColor"],
+                            [5.0, 0, "ball", "Green"],
+                            [ 7.2, 0, "n/a", "/ /Def/Acc/4.5"]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Event/Sensory-event"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

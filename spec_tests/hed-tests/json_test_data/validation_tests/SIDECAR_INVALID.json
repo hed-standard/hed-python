@@ -1,0 +1,343 @@
+[
+    {
+        "error_code": "SIDECAR_INVALID",
+        "alt_codes": [],
+        "name": "sidecar-invalid-key-at-wrong-level",
+        "description": "The HED key is not a second-level dictionary key.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "HED key at wrong nesting level in sidecar",
+            "Providing annotations for 'n/a' values",
+            "Referencing columns in curly braces that have no HED",
+            "Incorrect JSON structure for sidecars",
+            "Missing or malformed column references"
+        ],
+        "explanation": "Sidecars must follow specific JSON structure with HED annotations at the correct nesting level. The 'HED' key must be properly positioned, and all referenced columns must have appropriate annotations.",
+        "correction_strategy": "Fix sidecar structure and key positioning",
+        "correction_examples": [
+            {
+                "wrong": "{'HED': 'Red, Blue'}",
+                "correct": "{'column_name': {'HED': 'Red, Blue'}}",
+                "explanation": "Moved HED key to correct second level under column"
+            },
+            {
+                "wrong": "{'event': {'HED': {'n/a': 'Red'}}}",
+                "correct": "{'event': {'HED': {'face': 'Red'}}}",
+                "explanation": "Removed annotation for 'n/a' value"
+            }
+        ],
+        "correction_patterns": [
+            "Ensure HED key is at second level: column -> HED -> values",
+            "Remove annotations for 'n/a' values",
+            "Verify all referenced columns exist and have HED",
+            "Check JSON structure follows sidecar requirements",
+            "Ensure proper nesting of categorical value annotations"
+        ],
+        "fix_instructions": [
+            "1. Check HED key nesting level in JSON structure",
+            "2. Move HED key to correct position if needed",
+            "3. Remove any 'n/a' annotations",
+            "4. Verify column references are valid",
+            "5. Ensure JSON structure matches sidecar requirements"
+        ],
+        "validation_hints": [
+            "Verify HED appears under column names",
+            "Check no annotations for 'n/a' values",
+            "Ensure referenced columns exist",
+            "Validate JSON structure syntax"
+        ],
+        "specification_reference": "3.2.9. Sidecars",
+        "related_errors": [
+            "SIDECAR_KEY_MISSING",
+            "SIDECAR_BRACES_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "temp": {
+                                "HED": {
+                                    "face": "(Red, Blue), (Green, (Yellow))",
+                                    "ball": "(Def/MyColor, Onset), (Def/Acc/3.5)"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "HED": {
+                            "face": "(Red, Blue), (Green, (Yellow))",
+                            "ball": "(Def/MyColor, Onset), (Def/Acc/3.5)"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue),   (Green, (Yellow))",
+                                "ball": "(Def/MyColor, Onset),(Def/Acc/3.5)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "temp": {
+                                    "HED": {
+                                        "face": "(Red, Blue), (Green, (Yellow))",
+                                        "ball": "(Def/MyColor, Onset), (Def/Acc/3.5)"
+                                    }
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    },
+                    {
+                        "sidecar": {
+                            "HED": {
+                                "face": "(Red, Blue), (Green, (Yellow))",
+                                "ball": "(Def/MyColor, Onset), (Def/Acc/3.5)"
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "SIDECAR_INVALID",
+        "alt_codes": [],
+        "name": "sidecar-invalid-na-annotated",
+        "description": "An annotation entry is provided for `n/a`.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Providing HED annotations for n/a values",
+            "Misunderstanding that n/a should not have annotations",
+            "Including n/a in annotated categorical columns",
+            "Confusion about when annotations are appropriate"
+        ],
+        "explanation": "The value 'n/a' indicates missing or not applicable data and should not have HED annotations. Annotating n/a creates logical inconsistencies.",
+        "correction_strategy": "Remove HED annotations for n/a values",
+        "correction_examples": [
+            {
+                "wrong": "sidecar: {'n/a': {'HED': 'Red, Blue'}}",
+                "correct": "sidecar: {'value1': {'HED': 'Red, Blue'}}",
+                "explanation": "Removed annotation for n/a value"
+            },
+            {
+                "wrong": "event_type: {'n/a': 'Label/NoEvent', 'face': 'Label/Face'}",
+                "correct": "event_type: {'face': 'Label/Face'}",
+                "explanation": "Removed n/a from annotated categorical values"
+            }
+        ],
+        "correction_patterns": [
+            "Remove all HED annotations for n/a values",
+            "Exclude n/a from categorical annotation lists",
+            "Ensure only valid values have annotations"
+        ],
+        "fix_instructions": [
+            "1. Identify n/a entries in sidecar annotations",
+            "2. Remove HED content for n/a values",
+            "3. Keep n/a as unannotated missing value indicator",
+            "4. Verify only meaningful values have annotations"
+        ],
+        "validation_hints": [
+            "Check sidecar for n/a annotation entries",
+            "Ensure n/a values are treated as missing data",
+            "Verify annotation consistency"
+        ],
+        "specification_reference": "3.4. Sidecar annotation rules",
+        "related_errors": ["SIDECAR_KEY_MISSING", "TAG_INVALID"],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue),(Green, (Yellow))",
+                                "n/a": "(Def/MyColor, Onset), (Def/Acc/3.5)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue),   (Green, (Yellow))",
+                                "ball": "(Def/MyColor, Onset),(Def/Acc/3.5)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [],
+                "passes": []
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, Blue),(Green, (Yellow))",
+                                    "n/a": "(Def/MyColor, Onset), (Def/Acc/3.5)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "n/a",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

@@ -1,0 +1,197 @@
+[
+    {
+        "error_code": "ELEMENT_DEPRECATED",
+        "alt_codes": [],
+        "name": "tag-deprecated",
+        "description": "A tag is deprecated",
+        "warning": true,
+        "schema": "8.2.0",
+        "error_category": "semantic",
+        "common_causes": [
+            "Using tags from older schema versions",
+            "Not updating annotations after schema upgrades",
+            "Copying examples with deprecated elements",
+            "Using deprecated units or value classes",
+            "Unaware of deprecation status"
+        ],
+        "explanation": "Deprecated elements have been marked for removal in future schema versions. While they may still work, they should be replaced with recommended alternatives to ensure future compatibility.",
+        "correction_strategy": "Replace deprecated elements with recommended alternatives",
+        "correction_examples": [
+            {
+                "wrong": "Gentalia",
+                "correct": "Property/Physical-property/Spatial-property/Position",
+                "explanation": "Replaced deprecated tag with current equivalent"
+            },
+            {
+                "wrong": "Sensory-event/Visual/Color",
+                "correct": "Sensory-event/Visual",
+                "explanation": "Used current tag hierarchy"
+            }
+        ],
+        "correction_patterns": [
+            "Check deprecation notice for recommended replacement",
+            "Update to current schema tag hierarchy",
+            "Replace deprecated units with current equivalents",
+            "Use updated value classes",
+            "Consult schema documentation for alternatives"
+        ],
+        "fix_instructions": [
+            "1. Identify the deprecated element",
+            "2. Check schema documentation for replacement",
+            "3. Replace with recommended alternative",
+            "4. Verify functionality is preserved",
+            "5. Update any related annotations"
+        ],
+        "validation_hints": [
+            "Check schema documentation for deprecation notices",
+            "Verify replacement maintains semantic meaning",
+            "Test with current schema version",
+            "Update related annotations consistently"
+        ],
+        "specification_reference": "A.1.4. Schema attributes",
+        "related_errors": [
+            "TAG_INVALID",
+            "SCHEMA_DEPRECATION_ERROR"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Def/MyColor, Green, Gentalia",
+                    "Gentalia"
+                ],
+                "passes": [
+                    "Torso"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Def/MyColor, Green, Gentalia",
+                                "ball": "Green, Blue"
+                            }
+                        },
+                        "other_code": {
+                            "HED": "Label/#, Gentalia"
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Torso"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Gentalia, Green"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "n/a"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Torso"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Gentalia",
+                                    "ball": "Green"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "ball",
+                                "Blue"
+                            ],
+                            [
+                                5.5,
+                                0,
+                                "face",
+                                "Red"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Torso",
+                                    "ball": "Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

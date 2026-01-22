@@ -1,0 +1,84 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-invalid-unit-class",
+    "warning": true,
+    "description": "A schema unit class issue, saying there is an unknown one.",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Referencing non-existent unit classes in unitClass attributes",
+      "Misspelled unit class names",
+      "Using deprecated or removed unit classes",
+      "Incorrect unit class name format",
+      "Missing unit class definitions in schema"
+    ],
+    "explanation": "UnitClass attributes must reference valid unit classes defined in the schema. Invalid unit class references cause validation failures and prevent proper unit validation.",
+    "correction_strategy": "Use valid unit class names that exist in the schema",
+    "correction_examples": [
+      {
+        "wrong": "unitClass=\"unknownUnitClass\"",
+        "correct": "unitClass=\"accelerationUnits\"",
+        "explanation": "Replaced unknown unit class with valid one"
+      }
+    ],
+    "correction_patterns": [
+      "Verify unit class exists in schema",
+      "Check unit class name spelling and case",
+      "Use defined unit class names only",
+      "Remove references to non-existent unit classes"
+    ],
+    "fix_instructions": [
+      "1. Check available unit classes in schema",
+      "2. Verify unit class name spelling",
+      "3. Replace invalid unit class references",
+      "4. Test unit validation functionality"
+    ],
+    "validation_hints": [
+      "Cross-reference with schema unit class definitions",
+      "Check unit class name case sensitivity",
+      "Verify unit class exists before referencing"
+    ],
+    "specification_reference": "3.1.2.10. Unit classes and unitClass attributes",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "UNITS_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown'''",
+            "* # {unitClass=unknown}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown'''",
+            "* # {unitClass=timeUnits}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

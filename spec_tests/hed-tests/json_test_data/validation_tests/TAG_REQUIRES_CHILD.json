@@ -1,0 +1,202 @@
+[
+    {
+        "error_code": "TAG_REQUIRES_CHILD",
+        "alt_codes": [],
+        "name": "tag-requires-child-missing",
+        "description": "A tag has the requireChild schema attribute but does not have a child.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "structure",
+        "common_causes": [
+            "Using parent tags without required children",
+            "Incomplete tag paths",
+            "Missing value or extension for placeholder tags",
+            "Forgetting required specificity",
+            "Using abstract concepts without concrete instances"
+        ],
+        "explanation": "Some tags in the schema are marked with 'requireChild' attribute, meaning they must be followed by a more specific child tag or value. These tags represent abstract concepts that need concrete specification.",
+        "correction_strategy": "Add required child tags or values to complete the specification",
+        "correction_examples": [
+            {
+                "wrong": "Item",
+                "correct": "Item/Object",
+                "explanation": "Added required child to specify type of item"
+            },
+            {
+                "wrong": "Property/Physical-property",
+                "correct": "Property/Physical-property/Color",
+                "explanation": "Extended to required child property"
+            },
+            {
+                "wrong": "Label",
+                "correct": "Label/ButtonPress",
+                "explanation": "Added specific label value"
+            }
+        ],
+        "correction_patterns": [
+            "Extend parent tag with appropriate child",
+            "Add specific values for placeholder tags",
+            "Use concrete rather than abstract concepts",
+            "Follow schema hierarchy to required specificity",
+            "Provide values for tags requiring them"
+        ],
+        "fix_instructions": [
+            "1. Identify the tag with requireChild attribute",
+            "2. Check schema for appropriate child options",
+            "3. Add specific child tag or value",
+            "4. Ensure semantic appropriateness",
+            "5. Verify complete tag path is valid"
+        ],
+        "validation_hints": [
+            "Check schema for requireChild attribute",
+            "Verify child tag exists in schema",
+            "Ensure semantic relationship is appropriate",
+            "Confirm complete tag path validity"
+        ],
+        "specification_reference": "3.2.4. Tags that take values",
+        "related_errors": [
+            "TAG_INVALID",
+            "PLACEHOLDER_INVALID",
+            "VALUE_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Blue, Def)",
+                    "Def, Red"
+                ],
+                "passes": [
+                    "(Blue, Def/MyColor, (Red))",
+                    "Label/Redish, Def/MyColor, Red"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Blue, Def)",
+                                "ball": "Label, Red"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Blue, Def/MyColor, (Red))",
+                                "ball": "Label/Redish, Red"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Blue, Def)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Blue, Def/MyColor, (Red))"
+                        ],
+                        [
+                            5.0,
+                            0,
+                            "Label/Redish, Red"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Blue, Def)",
+                                    "ball": "Label, Red"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Label/Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

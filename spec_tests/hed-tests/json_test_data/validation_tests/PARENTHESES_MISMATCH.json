@@ -1,0 +1,403 @@
+[
+    {
+        "error_code": "PARENTHESES_MISMATCH",
+        "alt_codes": [],
+        "name": "parentheses-mismatch-unmatched-parentheses",
+        "description": "A HED string does not have the same number of open and closed parentheses.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Missing opening or closing parentheses",
+            "Copy-paste errors that cut off parts of tag groups",
+            "Incorrect nesting when creating complex tag groups",
+            "Typing errors when manually creating nested groups"
+        ],
+        "explanation": "HED tag groups must be properly balanced with matching opening and closing parentheses. Unmatched parentheses prevent the parser from correctly identifying the structure of tag groups and their relationships.",
+        "correction_strategy": "Balance parentheses by adding missing ones or removing extra ones",
+        "correction_examples": [
+            {
+                "wrong": "(Red, (Blue, Green), Yellow))",
+                "correct": "(Red, (Blue, Green), Yellow)",
+                "explanation": "Removed extra closing parenthesis"
+            },
+            {
+                "wrong": "((Red, ((Blue, Green), Yellow))",
+                "correct": "((Red, ((Blue, Green), Yellow)))",
+                "explanation": "Added missing closing parenthesis"
+            },
+            {
+                "wrong": "((Red, ((Blue), Green)), (Yellow)",
+                "correct": "((Red, ((Blue), Green)), (Yellow))",
+                "explanation": "Added missing closing parenthesis for the last group"
+            }
+        ],
+        "correction_patterns": [
+            "Count opening '(' and closing ')' parentheses - they must be equal",
+            "Ensure each '(' has a corresponding ')'",
+            "Check nesting levels are properly closed",
+            "Verify tag groups are completely enclosed"
+        ],
+        "fix_instructions": [
+            "1. Count all opening parentheses '('",
+            "2. Count all closing parentheses ')'",
+            "3. If counts don't match, identify where parentheses are missing",
+            "4. Add missing parentheses in the correct positions",
+            "5. Verify proper nesting structure"
+        ],
+        "validation_hints": [
+            "Use a text editor with parentheses matching to visualize structure",
+            "Check that each tag group has clear boundaries",
+            "Ensure nested groups are properly contained",
+            "Verify the corrected string has equal opening and closing parentheses"
+        ],
+        "specification_reference": "3.2.7.1. Parentheses and order",
+        "related_errors": [
+            "COMMA_MISSING",
+            "TAG_GROUP_ERROR",
+            "TAG_EMPTY"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def/MyColor, (Blue, (Yellow)), Red))",
+                    "((Red, ((Blue, Green), Yellow))",
+                    "((Red, ((Blue), Green)), (Yellow)"
+                ],
+                "passes": [
+                    "(Def/Acc/5.3, (Red))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def/MyColor, (Blue, (Yellow)), Red))",
+                                "ball": "(Red, ((Blue, Green), Yellow))",
+                                "square": "(Red, ((Blue), Green)), (Yellow)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def/Acc/5.3, (Red))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/MyColor, (Blue, (Yellow)), Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Red, ((Blue, Green), Yellow))"
+                        ],
+                        [
+                            6.3,
+                            0,
+                            "(Red, ((Blue), Green)), (Yellow)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/Acc/5.3, (Red))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5",
+                                    "ball": "Def/Acc/6, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "(Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Acceleration/5 m-per-s^2",
+                                    "ball": "Def/Acc/7, Blue"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "PARENTHESES_MISMATCH",
+        "alt_codes": [],
+        "name": "parentheses-mismatch-incorrect-nesting",
+        "description": "The open and closed parentheses are not correctly nested in the HED string.",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Incorrect interleaving of tag groups",
+            "Copy-paste errors that disrupt nesting structure",
+            "Manual editing that breaks proper group boundaries",
+            "Misunderstanding of nested group requirements"
+        ],
+        "explanation": "While parentheses counts may be balanced, their nesting order must be correct. Proper nesting means each opening parenthesis is matched with the closest unopened closing parenthesis.",
+        "correction_strategy": "Reorganize parentheses to follow proper nesting rules",
+        "correction_examples": [
+            {
+                "wrong": "(Red, (Blue), (Green))",
+                "correct": "(Red, (Blue), (Green))",
+                "explanation": "Corrected improper interleaving to proper nested structure"
+            },
+            {
+                "wrong": ")(Red, Blue)(",
+                "correct": "(Red, Blue)",
+                "explanation": "Fixed reversed opening and closing parentheses"
+            }
+        ],
+        "correction_patterns": [
+            "Ensure opening parentheses come before their matching closing ones",
+            "Verify that nested groups are completely contained within outer groups",
+            "Check that parentheses don't cross group boundaries",
+            "Maintain proper sequence: ( content )"
+        ],
+        "fix_instructions": [
+            "1. Identify improperly nested sections",
+            "2. Reorganize parentheses to follow proper nesting order",
+            "3. Ensure each group is completely contained",
+            "4. Verify no crossing of group boundaries",
+            "5. Test with nested structure validation"
+        ],
+        "validation_hints": [
+            "Use editor with bracket matching visualization",
+            "Check that each opening has a proper closing",
+            "Verify nested groups don't overlap boundaries",
+            "Ensure proper sequential ordering"
+        ],
+        "specification_reference": "3.2.2. Tag group structure",
+        "related_errors": [
+            "PARENTHESES_MISMATCH",
+            "TAG_GROUP_ERROR",
+            "CHARACTER_INVALID"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Def/MyColor)), (Blue, (Yellow)), (Red)",
+                    ")(Def/MyColor)), (Blue, (Yellow)), (Red))"
+                ],
+                "passes": [
+                    "(Def/Acc/5.3, (Red))",
+                    "(((((Def/Acc/5.3, (Red))))))"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def/MyColor)), (Blue, (Yellow)), (Red)",
+                                "ball": ")(Def/MyColor)), (Blue, (Yellow)), (Red))"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Def/Acc/5.3, (Red))",
+                                "ball": "(((((Def/Acc/5.3, (Red))))))"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/MyColor)), (Blue, (Yellow)), (Red)"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            ")(Def/MyColor)), (Blue, (Yellow)), (Red))"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Def/Acc/5.3, (Red))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(((((Def/Acc/5.3, (Red))))))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/MyColor)), (Blue, (Yellow)), (Red)",
+                                    "ball": ")(Def/MyColor)), (Blue, (Yellow)), (Red))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "),Red, (((Def/MyColor)))"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "(Green"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Def/Acc/5.3, (Red))",
+                                    "ball": "(((((Def/Acc/5.3, (Red))))))"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, ((Def/MyColor))"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

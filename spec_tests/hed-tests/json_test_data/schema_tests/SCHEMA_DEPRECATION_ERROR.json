@@ -1,0 +1,684 @@
+[
+  {
+    "error_code": "SCHEMA_DEPRECATION_ERROR",
+    "name": "schema-deprecated-attribute-invalid",
+    "warning": true,
+    "description": "A schema attribute issue, saying there is an unhandled deprecated attribute.",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Using deprecated attributes that are no longer supported",
+      "Incorrect deprecation attribute syntax or values",
+      "Missing or malformed deprecatedFrom attribute",
+      "Invalid version specification in deprecation",
+      "Attempting to deprecate non-existent elements"
+    ],
+    "explanation": "Schema deprecation attributes must follow specific format and reference valid schema versions. Incorrect deprecation handling can cause schema validation failures.",
+    "correction_strategy": "Fix deprecation attribute syntax and ensure proper version references",
+    "correction_examples": [
+      {
+        "wrong": "* Tag {deprecated}",
+        "correct": "* Tag {deprecatedFrom=\"8.2.0\"}",
+        "explanation": "Added proper deprecation version specification"
+      },
+      {
+        "wrong": "* Tag {deprecatedFrom=\"invalid\"}",
+        "correct": "* Tag {deprecatedFrom=\"8.1.0\"}",
+        "explanation": "Used valid version format for deprecation"
+      }
+    ],
+    "correction_patterns": [
+      "Use proper deprecatedFrom attribute with valid version",
+      "Remove invalid deprecation attributes",
+      "Ensure deprecation version exists in schema history",
+      "Follow semantic versioning for deprecation references"
+    ],
+    "fix_instructions": [
+      "1. Identify invalid deprecation attributes",
+      "2. Check deprecation version format and validity",
+      "3. Update or remove incorrect deprecation attributes",
+      "4. Verify deprecation references point to valid versions",
+      "5. Test schema validation after deprecation fixes"
+    ],
+    "validation_hints": [
+      "Check deprecation attribute syntax",
+      "Verify version references are valid",
+      "Ensure deprecation follows schema evolution rules",
+      "Test with different schema version combinations"
+    ],
+    "specification_reference": "3.1.4. Schema versioning and deprecation",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "SCHEMA_VERSION_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension {deprecatedFrom=0.5.0}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension {deprecatedFrom=1.0.0}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension {deprecatedFrom=1.0.0}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_DEPRECATION_ERROR",
+    "name": "schema-deprecated-invalid-child",
+    "warning": true,
+    "description": "A schema deprecation issue, saying there is an invalid child of a deprecated node",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag''' {deprecatedFrom=1.0.0}",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* testUnitClass {deprecatedFrom=1.0.0}",
+            "** testUnit",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag''' {deprecatedFrom=1.0.0}",
+            "* Extension {deprecatedFrom=1.0.0}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+    {
+    "error_code": "SCHEMA_DEPRECATION_ERROR",
+    "name": "schema-deprecated-default-unit",
+    "warning": true,
+    "description": "A schema deprecation issue, deprecated default units",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* testUnitClass {defaultUnits=testUnit}",
+            "** testUnit {deprecatedFrom=1.0.0}",
+            "** testUnit2",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* testUnitClass {defaultUnits=testUnit2}",
+            "** testUnit {deprecatedFrom=1.0.0}",
+            "** testUnit2",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* testUnitClass {defaultUnits=testUnit, deprecatedFrom=1.0.0}",
+            "** testUnit {deprecatedFrom=1.0.0}",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_DEPRECATION_ERROR",
+    "name": "schema-deprecated-unit-class",
+    "warning": true,
+    "description": "A schema deprecation issue, deprecated value or unit class",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "** #{takesValue, unitClass=testUnitClass}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* testUnitClass{deprecatedFrom=1.0.0}",
+            "** testUnit{deprecatedFrom=1.0.0}",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "** #{takesValue, unitClass=testUnitClass, deprecatedFrom=1.0.0}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* testUnitClass{deprecatedFrom=1.0.0}",
+            "** testUnit{deprecatedFrom=1.0.0}",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+    {
+    "error_code": "SCHEMA_DEPRECATION_ERROR",
+    "name": "schema-deprecated-value-class",
+    "warning": true,
+    "description": "A schema deprecation issue, deprecated value or unit class",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "** #{takesValue, valueClass=testValueClass}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "* testValueClass{deprecatedFrom=1.0.0}",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension",
+            "** #{takesValue, valueClass=testValueClass, deprecatedFrom=1.0.0}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "* testValueClass{deprecatedFrom=1.0.0}",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_DEPRECATION_ERROR",
+    "name": "schema-deprecated-invalid-suggested-related-tag",
+    "warning": true,
+    "description": "A schema deprecation issue, saying a related or suggested tag points to a deprecated tag",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Tag1 {deprecatedFrom=1.0.0}",
+            "* Tag2",
+            "* Tag3{suggestedTag=Tag1}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Tag1 {deprecatedFrom=1.0.0}",
+            "* Tag2",
+            "* Tag3{relatedTag=Tag1}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Tag1 {deprecatedFrom=1.0.0}",
+            "* Tag2",
+            "* Tag3{suggestedTag=Tag2}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Tag1 {deprecatedFrom=1.0.0}",
+            "* Tag2",
+            "* Tag3{relatedTag=Tag2}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Tag1 {deprecatedFrom=1.0.0}",
+            "* Tag2",
+            "* Tag3{suggestedTag=Tag1, deprecatedFrom=1.0.0}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Tag1 {deprecatedFrom=1.0.0}",
+            "* Tag2",
+            "* Tag3{relatedTag=Tag1, deprecatedFrom=1.0.0}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_DEPRECATION_ERROR",
+    "name": "schema-deprecated-deprecated-attribute",
+    "warning": true,
+    "description": "A schema deprecation issue, an attribute of an element is deprecated",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension{deprecatedAttribute}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* deprecatedUnitClass{deprecatedAttribute}",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* deprecatedUnitClass",
+            "** deprecatedUnit{deprecatedAttribute}",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "* deprecatedUnitModifier {deprecatedAttribute}",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "* deprecatedValueClass {deprecatedAttribute}",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "* Extension{deprecatedAttribute, deprecatedFrom=1.0.0}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* deprecatedUnitClass{deprecatedAttribute, deprecatedFrom=1.0.0}",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* deprecatedUnitClass",
+            "** deprecatedUnit{deprecatedAttribute, deprecatedFrom=1.0.0}",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "* deprecatedUnitModifier {deprecatedAttribute, deprecatedFrom=1.0.0}",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "* deprecatedValueClass {deprecatedAttribute, deprecatedFrom=1.0.0}",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedFrom=1.0.0, elementProperty}",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_DEPRECATION_ERROR",
+    "name": "schema-deprecated-deprecated-property",
+    "warning": true,
+    "description": "A schema deprecation issue, a property of an attribute is is deprecated",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedProperty}",
+            "'''Properties'''",
+            "* deprecatedProperty {deprecatedFrom=1.0.0}",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.1.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''BaseTag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* deprecatedAttribute {deprecatedProperty, deprecatedFrom=1.0.0}",
+            "'''Properties'''",
+            "* deprecatedProperty {deprecatedFrom=1.0.0}",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

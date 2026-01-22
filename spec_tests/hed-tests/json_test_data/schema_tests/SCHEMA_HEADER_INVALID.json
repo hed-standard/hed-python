@@ -1,0 +1,134 @@
+[
+  {
+    "error_code": "SCHEMA_HEADER_INVALID",
+    "name": "schema-header-malformed-attribute",
+    "warning": true,
+    "description": "A schema attribute issue, saying there is an unknown one.",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Using unknown or invalid attributes in schema header",
+      "Misspelling required header attributes",
+      "Missing required header attributes for library schemas",
+      "Invalid version format specification",
+      "Incorrect library schema attribute combinations"
+    ],
+    "explanation": "Schema headers must contain only valid attributes as defined in the HED specification. Unknown attributes indicate potential schema structure problems or specification violations.",
+    "correction_strategy": "Remove unknown attributes and ensure proper header format",
+    "correction_examples": [
+      {
+        "wrong": "HED version=\"1.0.0\" unknownAttribute=other",
+        "correct": "HED version=\"1.0.0\"",
+        "explanation": "Removed unknown attribute from header"
+      },
+      {
+        "wrong": "HED version=\"1.0.0\" library=\"test\" missingStandard=\"8.2.0\"",
+        "correct": "HED version=\"1.0.0\" library=\"test\" withStandard=\"8.2.0\"",
+        "explanation": "Fixed attribute name from 'missingStandard' to 'withStandard'"
+      }
+    ],
+    "correction_patterns": [
+      "Remove unrecognized header attributes",
+      "Use semantic versioning format",
+      "Check library schema attribute requirements",
+      "Verify header syntax matches format specification",
+      "Ensure version compatibility"
+    ],
+    "fix_instructions": [
+      "1. Identify unknown or invalid attributes in header",
+      "2. Remove unrecognized attributes",
+      "3. Verify required attributes are present",
+      "4. Check attribute value formats",
+      "5. Ensure library schema requirements are met"
+    ],
+    "validation_hints": [
+      "Check against valid HED header attribute list",
+      "Verify attribute spelling and case sensitivity",
+      "Ensure library schemas include required attributes",
+      "Validate version format compliance"
+    ],
+    "specification_reference": "3.1.2.1. The header",
+    "related_errors": ["SCHEMA_VERSION_INVALID", "SCHEMA_LIBRARY_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" unknownAttribute=other",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {suggestedTag=Event}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  },
+  {
+    "error_code": "SCHEMA_HEADER_INVALID",
+    "name": "schema-header-unknown-attribute",
+    "warning": true,
+    "description": "A schema attribute issue, saying there is an unknown one.",
+    "schema": "",
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" unknownAttribute=\"other\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag'''",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-unknown''' {suggestedTag=Event}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]

@@ -1,0 +1,392 @@
+[
+    {
+        "error_code": "COMMA_MISSING",
+        "alt_codes": [],
+        "name": "comma-missing-tag-groups",
+        "description": "Two tag groups are not separated by commas: (A, B)(C, D).",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Forgetting to add comma between tag groups",
+            "Copy-paste errors when combining multiple tag groups",
+            "Misunderstanding of tag group separation syntax"
+        ],
+        "explanation": "HED requires that all tag groups and tags be separated by commas. When two parenthesized tag groups appear consecutively without a comma, the parser cannot determine where one group ends and the next begins.",
+        "correction_strategy": "Add commas between all tag groups and tags",
+        "correction_examples": [
+            {
+                "wrong": "(Red, Blue)(Green, Yellow)",
+                "correct": "(Red, Blue), (Green, Yellow), (((Black)))",
+                "explanation": "Added comma between the two tag groups"
+            },
+            {
+                "wrong": "Red(Def/Acc/3.5)",
+                "correct": "Red, (Def/Acc/3.5)",
+                "explanation": "Added comma between tag group and a tag"
+            }
+        ],
+        "correction_patterns": [
+            "Insert comma between ')(' patterns",
+            "Insert comma between tag and '('  or ')' if tag is not inside the parentheses",
+            "Ensure all top-level elements are comma-separated"
+        ],
+        "fix_instructions": [
+            "1. Ensure each element (whether tag or group) is separated from other elements by commas"
+        ],
+        "validation_hints": [
+            "Count opening and closing parentheses to ensure they match",
+            "Verify no ')(' patterns exist without commas",
+            "Check that the corrected string parses without syntax errors"
+        ],
+        "specification_reference": "3.2.7.1. Parentheses and order",
+        "related_errors": [
+            "PARENTHESES_MISMATCH",
+            "TAG_EMPTY"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "(Red, Blue)(Green, (Yellow))",
+                    "(Def/MyColor, Onset)(Def/Acc/3.5)"
+                ],
+                "passes": [
+                    "(Red, Blue),   (Green, (Yellow))",
+                    "(Def/MyColor, Onset),(Def/Acc/3.5)"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue)(Green, (Yellow))",
+                                "ball": "(Def/MyColor, Onset)(Def/Acc/3.5)"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "(Red, Blue),   (Green, (      Yellow))",
+                                "ball": "(Def/MyColor, Onset),(Def/Acc/3.5)"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Red, Blue)(Green, (Yellow))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def/MyColor, Onset)(Def/Acc/3.5)"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "(Red, Blue),   (Green, (Yellow))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def/MyColor, Onset),(Def/Acc/3.5)"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, Blue)(Green, (Yellow))",
+                                    "ball": "(Def/MyColor, Onset)(Def/Acc/3.5)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ],
+                            [
+                                6.0,
+                                0,
+                                "n/a",
+                                "(Blue, Green)(Blue, Red)"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "(Red, Blue),   (Green, (      Yellow))",
+                                    "ball": "(Def/MyColor, Onset),(Def/Acc/3.5)"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "(Green, Def/MyColor),(Red)"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "error_code": "COMMA_MISSING",
+        "alt_codes": [],
+        "name": "comma-missing-tag-and-group",
+        "description": "A tag and a tag group are not separated by commas: A(B,D).",
+        "warning": false,
+        "schema": "8.4.0",
+        "error_category": "syntax",
+        "common_causes": [
+            "Forgetting to add comma between a tag and a tag group",
+            "Typing errors when combining tags and groups",
+            "Misunderstanding that commas are required between all top-level elements"
+        ],
+        "explanation": "HED requires commas separating all elements, including between individual tags and tag groups. When a tag appears directly before a tag group without a comma, it creates parsing ambiguity.",
+        "correction_strategy": "Add comma between tag and tag group",
+        "correction_examples": [
+            {
+                "wrong": "Red(Green, Yellow)",
+                "correct": "Red, (Green, Yellow)",
+                "explanation": "Added comma between the tag 'Red' and the tag group"
+            },
+            {
+                "wrong": "(Def/MyColor, Onset)Def/Acc/3.5",
+                "correct": "(Def/MyColor, Onset), Def/Acc/3.5",
+                "explanation": "Added comma between the tag group and the following tag"
+            }
+        ],
+        "correction_patterns": [
+            "Insert comma between tag and '(' when tag is at top level",
+            "Insert comma between ')' and tag when both are at top level",
+            "Ensure all top-level elements are comma-separated"
+        ],
+        "fix_instructions": [
+            "1. Identify tags that appear before '(' without commas",
+            "2. Identify tags that appear after ')' without commas",
+            "3. Insert commas between these elements",
+            "4. Verify proper spacing around commas"
+        ],
+        "validation_hints": [
+            "Check for patterns like 'tag(' or ')tag'",
+            "Ensure commas separate all top-level elements",
+            "Verify the string parses correctly after correction"
+        ],
+        "specification_reference": "3.2.7.1. Parentheses and order",
+        "related_errors": [
+            "PARENTHESES_MISMATCH",
+            "TAG_EMPTY"
+        ],
+        "definitions": [
+            "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))",
+            "(Definition/MyColor, (Label/Pie))"
+        ],
+        "tests": {
+            "string_tests": {
+                "fails": [
+                    "Red, Blue(Green, (Yellow))",
+                    "(Def/MyColor, Onset)Def/Acc/3.5"
+                ],
+                "passes": [
+                    "Red,   (Green, (Yellow))",
+                    "(Def/MyColor, Onset),Def/Acc/3.5"
+                ]
+            },
+            "sidecar_tests": {
+                "fails": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red(Green, (Yellow))",
+                                "ball": "(Def/MyColor, Onset)Def/Acc/3.5"
+                            }
+                        }
+                    }
+                ],
+                "passes": [
+                    {
+                        "event_code": {
+                            "HED": {
+                                "face": "Red,   (Green, (Yellow))",
+                                "ball": "(Def/MyColor, Onset),Def/Acc/3.5"
+                            }
+                        }
+                    }
+                ]
+            },
+            "event_tests": {
+                "fails": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red(Green, (Yellow))"
+                        ],
+                        [
+                            5.5,
+                            0,
+                            "(Def/MyColor, Onset)Def/Acc/3.5"
+                        ]
+                    ]
+                ],
+                "passes": [
+                    [
+                        [
+                            "onset",
+                            "duration",
+                            "HED"
+                        ],
+                        [
+                            4.5,
+                            0,
+                            "Red,  (Green, (Yellow))"
+                        ]
+                    ]
+                ]
+            },
+            "combo_tests": {
+                "fails": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Red(Green, (Yellow))",
+                                    "ball": "(Def/MyColor, Onset)Def/Acc/3.5"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Red, Def/MyColor"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green"
+                            ],
+                            [
+                                6.0,
+                                0,
+                                "n/a",
+                                "(Green,   Yellow)Red"
+                            ]
+                        ]
+                    }
+                ],
+                "passes": [
+                    {
+                        "sidecar": {
+                            "event_code": {
+                                "HED": {
+                                    "face": "Red,   (Green, (Yellow))",
+                                    "ball": "(Def/MyColor, Onset),Def/Acc/3.5"
+                                }
+                            }
+                        },
+                        "events": [
+                            [
+                                "onset",
+                                "duration",
+                                "event_code",
+                                "HED"
+                            ],
+                            [
+                                4.5,
+                                0,
+                                "face",
+                                "Blue"
+                            ],
+                            [
+                                5.0,
+                                0,
+                                "ball",
+                                "Green, Def/MyColor"
+                            ]
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+]

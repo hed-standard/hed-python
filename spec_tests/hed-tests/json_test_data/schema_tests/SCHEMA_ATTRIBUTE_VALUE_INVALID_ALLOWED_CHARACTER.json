@@ -1,0 +1,95 @@
+[
+  {
+    "error_code": "SCHEMA_ATTRIBUTE_VALUE_INVALID",
+    "name": "attribute-invalid-allowed-character",
+    "warning": true,
+    "description": "A schema unit has an invalid conversion factor",
+    "schema": "",
+    "error_category": "schema_development",
+    "common_causes": [
+      "Using invalid characters in allowedCharacter attribute values",
+      "Incorrect character specification format",
+      "Including forbidden characters in allowed character sets",
+      "Malformed character range specifications",
+      "Using deprecated character specification syntax"
+    ],
+    "explanation": "The allowedCharacter attribute defines valid characters for specific schema elements. Invalid character specifications can cause parsing errors and validation failures.",
+    "correction_strategy": "Use valid character specifications according to HED schema format",
+    "correction_examples": [
+      {
+        "wrong": "allowedCharacter=\"[invalid]\"",
+        "correct": "allowedCharacter=\"letters,digits\"",
+        "explanation": "Replaced invalid character specification with valid format"
+      }
+    ],
+    "correction_patterns": [
+      "Use standard character class names (letters, digits, etc.)",
+      "Avoid invalid character specifications",
+      "Follow HED character specification format"
+    ],
+    "fix_instructions": [
+      "1. Identify invalid allowedCharacter specifications",
+      "2. Replace with valid character class names",
+      "3. Verify character specification syntax",
+      "4. Test schema validation with corrected attributes"
+    ],
+    "validation_hints": [
+      "Check character specification format",
+      "Verify against HED allowed character classes",
+      "Test schema loading after character corrections"
+    ],
+    "specification_reference": "3.1.2.3. Schema attributes and character specifications",
+    "related_errors": ["SCHEMA_ATTRIBUTE_INVALID", "CHARACTER_INVALID"],
+    "definitions": [],
+    "tests": {
+      "schema_tests": {
+        "fails": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "* testValueClass {allowedCharacter=?d}",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ],
+        "passes": [
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "* testValueClass {allowedCharacter=?, allowedCharacter=letters}",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ],
+          [
+            "HED version=\"1.0.0\" library=\"score\" withStandard=\"8.2.0\" unmerged=\"True\"",
+            "'''Prologue'''",
+            "!# start schema",
+            "!# end schema",
+            "'''Unit classes''' ",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "* testValueClass {allowedCharacter=letters}",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed"
+          ]
+        ]
+      }
+    }
+  }
+]
