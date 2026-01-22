@@ -1,4 +1,266 @@
 ````markdown
+Release 0.9.0 January 22, 2026
+
+The main purpose of this release is to clean up the CLI for the hedtools and to improve the documentation in preparation for release of 1.0.0, which will be a breaking release.
+
+## Major changes
+
+### Command-line interface (CLI) overhaul
+
+**Complete CLI redesign with Git-Style commands**
+- Introduced unified `hedpy` command-line interface with git-style subcommand structure
+- Replaced legacy standalone scripts with organized command groups:  `validate`, `schema`, `extract`
+- Added comprehensive help system with detailed command documentation
+- Implemented click-option-group for organized command options
+
+**New commands:**
+- `hedpy validate bids-dataset` - BIDS dataset validation
+- `hedpy validate string` - HED string validation  
+- `hedpy validate sidecar` - JSON sidecar validation
+- `hedpy validate tabular` - TSV file validation
+- `hedpy schema validate` - Schema file validation
+- `hedpy schema convert` - Schema format conversion
+- `hedpy schema add-ids` - HED ID management
+- `hedpy extract bids-sidecar` - Sidecar template extraction
+- `hedpy extract tabular-summary` - Tabular file summarization
+
+**Enhanced output options:**
+- Multiple output formats: text, json, json_pp (pretty-printed JSON with metadata)
+- Configurable error limiting per error type
+- File-based and per-error error counting options
+- Comprehensive logging configuration with file output support
+
+### Documentation improvements
+
+**Major documentation restructuring**
+- Complete rewrite of user guide with comprehensive examples and workflows
+- Added detailed Jupyter notebook documentation section
+- Created extensive CLI documentation with command examples
+- Improved API reference organization with clearer section headers
+- Enhanced introduction page with quick start examples
+- Added troubleshooting section with common issues and solutions
+- Updated the RELEASE_GUIDE to better reflect current release process
+
+**New documentation features:**
+- Sidebar quick links for easy navigation
+- Custom CSS styling for improved readability
+- Dark mode support with proper color theming
+- Brand customization with project logo and name
+- Better code block formatting and syntax highlighting
+- Comprehensive examples for all major workflows
+
+### Jupyter notebook examples
+
+**New example notebooks (examples/ directory)**
+- `extract_json_template.ipynb` - Generate JSON sidecar templates
+- `find_event_combinations.ipynb` - Find unique value combinations
+- `merge_spreadsheet_into_sidecar.ipynb` - Merge edited annotations
+- `sidecar_to_spreadsheet.ipynb` - Convert JSON to spreadsheet format
+- `summarize_events.ipynb` - Summarize event file contents
+- `validate_bids_dataset.ipynb` - Validate BIDS datasets
+- `validate_bids_dataset_with_libraries.ipynb` - Validate with library schemas
+- `validate_bids_datasets.ipynb` - Batch validate multiple datasets
+- `validate_bids_dataset_nondefault. ipynb` - Non-standard validation scenarios
+
+**Notebook infrastructure:**
+- Added comprehensive README for notebooks with usage instructions
+- Created optional dependencies group for Jupyter support
+- Added notebook testing framework for validation
+
+### Core functionality enhancements
+
+**Validation improvements:**
+- Enhanced placeholder validation with units (e.g., "# m-per-s^2")
+- Fixed unit class validation for placeholders with units
+- Improved error reporting with better categorization
+- Added support for --no-log option to disable all logging
+
+**TabularSummary Enhancements:**
+- Added categorical limit feature to prevent memory issues with high-cardinality columns
+- Implemented overflow column tracking for truncated summaries
+- Added categorical counts metadata (total values and file counts)
+- Improved summary statistics and reporting
+
+**Schema processing:**
+- Enhanced schema validation error messages with specification links
+- Fixed schema attribute inheritance handling
+- Improved JSON schema format support
+- Updated conversion factor validation
+
+### Script and utility improvements
+
+**New scripts:**
+- `hed/scripts/validate_hed_string.py` - Standalone HED string validation
+- `hed/scripts/validate_hed_sidecar.py` - Standalone sidecar validation
+- `hed/scripts/validate_hed_tabular.py` - Standalone tabular file validation
+- `hed/scripts/extract_tabular_summary.py` - Non-BIDS tabular summarization
+- `hed/scripts/script_utils.py` - Shared utility functions for scripts
+
+**Script uilities:**
+- Centralized logging setup across all scripts
+- Standardized validation result formatting
+- Consistent error handling and reporting
+- Improved argument parsing with organized option groups
+
+### Dependencies and requirements
+
+**Updated Dependencies:**
+- Added `click-option-group>=0.5.0` for CLI option organization
+- Updated `wordcloud` from 1.9.4 to 1.9.5
+- Updated `black` to >=26.1.0 with Jupyter support
+- Added `mdformat>=0.7.0` and `mdformat-myst>=0.1.5` for markdown formatting
+- Updated Sphinx and documentation dependencies
+
+**New Optional Dependency Groups:**
+- `examples` - Jupyter notebook support (jupyter, notebook, nbformat, ipykernel)
+- Updated `docs` group with version constraints
+- Enhanced `dev` group with markdown formatting tools
+
+### Testing enhancements
+
+**Schema test data:**
+- Added extensive JSON test data for schema validation
+- New test files for schema attribute validation
+- Tests for conversion factors, HED IDs, unit classes, value classes
+- Tests for character validation and deprecation handling
+- Tests for library schema attributes
+
+**Test organization:**
+- Improved test structure with categorized error cases
+- Added common causes and correction strategies to test metadata
+- Enhanced test documentation with specification references
+- Moved JSON test references from the hed-specification repository to the hed-tests repository
+
+### Documentation files
+
+**Updated documentation:**
+- Comprehensive CHANGELOG.md updates
+- Enhanced CONTRIBUTING.md with detailed workflows
+- Improved README. md with better examples and structure
+- Updated RELEASE_GUIDE.md with detailed release procedures
+
+**Configuration files:**
+- Added `.lycheeignore` for link checker exclusions
+- Added `lychee.toml` for link validation configuration
+- Enhanced `.gitignore` with additional patterns
+- Updated workflow configurations for GitHub Actions
+
+## GitHub actions and CI/CD
+
+### Workflow updates
+
+**Enhanced CI pipeline:**
+- Updated cache actions from v4 to v5 across all workflows
+- Changed default branch references from `develop` to `main`
+- Renamed and reorganized workflow files (. yml → .yaml)
+- Improved Sphinx documentation build workflow
+
+**New workflows:**
+- `links. yaml` - Lychee link checker for documentation (weekly schedule)
+- `mdformat.yaml` - Markdown formatting validation
+- `notebook_tests.yaml` - Jupyter notebook validation
+- `ruff.yaml` - Python linting with Ruff
+
+**Workflow improvements:**
+- Updated codespell workflow to use main branch
+- Enhanced documentation deployment workflow
+- Added proper artifact handling for GitHub Pages
+- Improved test isolation and parallel execution
+
+## File organization and structure
+
+### Repository structure changes
+
+**Removed:**
+- Removed `spec_tests/hed-specification` submodule (replaced with hed-tests)
+- Removed remodeling CLI commands (moved to separate repository)
+
+**Added:**
+- New `examples/` directory with Jupyter notebooks and README
+- New `hed/scripts/script_utils.py` for shared utilities
+- New validation scripts for string, sidecar, and tabular files
+- New extract script for non-BIDS tabular summaries
+
+**Updated:**
+- Moved documentation assets from `docs/assets/` to `docs/_static/`
+- Enhanced documentation structure with better organization
+- Improved test data organization in spec_tests/
+
+### Code quality and formatting
+
+**Black formatting:**
+- Applied Black code formatter across entire codebase
+- Updated Black configuration for Python 3.14 support
+- Enhanced exclusion patterns for auto-generated files
+
+**Ruff linting:**
+- Added comprehensive Ruff configuration
+- Implemented linting rules for code quality
+- Added automated linting in CI pipeline
+
+**Markdown formatting:**
+- Added mdformat for consistent markdown styling
+- Configured myst-parser support
+- Automated markdown checking in CI
+
+## Bug fixes and minor improvements
+
+### Schema handling
+- Fixed MediaWiki → MEDIAWIKI naming consistency
+- Improved schema format detection and conversion
+- Enhanced schema attribute validation
+- Fixed inheritance handling for schema attributes
+
+### Validation
+- Fixed unit validation for placeholders with units
+- Improved error message clarity and documentation links
+- Fixed definition extraction from sidecars
+- Enhanced sidecar validation error reporting
+
+### Error reporting
+- Updated documentation link format in error messages
+- Improved error categorization and grouping
+- Added error iteration utility (`iter_errors`)
+- Enhanced printable issue formatting
+
+### Miscellaneous
+- Fixed various typos and formatting issues
+- Improved code comments and docstrings
+- Enhanced type hints and error handling
+- Cleaned up deprecated code patterns
+
+## Breaking changes
+
+**CLI command changes:**
+- Legacy commands are now deprecated (still work but show warnings)
+- Recommended migration to new `hedpy` command structure
+- Some command-line argument names have changed for consistency
+
+**Python version:**
+- Minimum Python version remains 3.10
+- Added support for Python 3.14
+
+## Migration guide
+
+### CLI Migration
+```bash
+# Old (deprecated)
+validate_bids /path/to/dataset
+
+# New (recommended)
+hedpy validate bids-dataset /path/to/dataset
+```
+
+### Script Imports
+```python
+# Validation functions remain unchanged
+from hed import HedString, load_schema_version, BidsDataset
+
+# New utility imports available
+from hed.errors import iter_errors
+from hed.scripts.script_utils import format_validation_results
+```
+
 Release 0.8.1 December 9, 2025
 
 The primary purpose of this release was to correct the JSON format for HED schemas so that it would accurately distinguish between inherited and non-inherited attributes. The documentation layout was also improved with quick links.
