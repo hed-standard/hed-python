@@ -25,12 +25,10 @@ class MyTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # New directory structure: hed-tests/json_test_data/
-        test_base_dir = os.path.realpath(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-tests/json_test_data")
-        )
+        test_base_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-tests/json_test_data"))
         schema_test_dir = os.path.join(test_base_dir, "schema_tests")
         validation_test_dir = os.path.join(test_base_dir, "validation_tests")
-        
+
         cls.test_base_dir = test_base_dir
         cls.fail_count = []
         cls.current_test_file = None
@@ -47,7 +45,7 @@ class MyTestCase(unittest.TestCase):
         else:
             # Get all .json files from both schema_tests and validation_tests directories
             cls.test_files = []
-            
+
             if os.path.exists(schema_test_dir):
                 schema_files = [
                     os.path.join(schema_test_dir, f)
@@ -55,15 +53,17 @@ class MyTestCase(unittest.TestCase):
                     if os.path.isfile(os.path.join(schema_test_dir, f)) and f.endswith(".json") and not f.endswith(".backup")
                 ]
                 cls.test_files.extend(schema_files)
-            
+
             if os.path.exists(validation_test_dir):
                 validation_files = [
                     os.path.join(validation_test_dir, f)
                     for f in os.listdir(validation_test_dir)
-                    if os.path.isfile(os.path.join(validation_test_dir, f)) and f.endswith(".json") and not f.endswith(".backup")
+                    if os.path.isfile(os.path.join(validation_test_dir, f))
+                    and f.endswith(".json")
+                    and not f.endswith(".backup")
                 ]
                 cls.test_files.extend(validation_files)
-            
+
             cls.skip_tests = len(cls.test_files) == 0
             if cls.skip_tests and not os.environ.get("GITHUB_ACTIONS"):
                 print(f"WARNING: No test files found in {test_base_dir}")
