@@ -1,25 +1,44 @@
-# HED-Python Release Guide
+# Python HEDTools release guide
 
 This document provides step-by-step instructions for releasing a new version of hedtools to PyPI.
 
-**Platform Support:** This guide includes commands for both Windows (PowerShell) and Linux/macOS (Bash).
+**Platform support:** This guide includes commands for both Windows (PowerShell) and Linux/macOS (Bash).
 
 ## Prerequisites
 
 Before starting the release process, ensure you have:
 
-- [ ] Write access to the hed-python repository
+- [ ] Write access to the hed-python repository (maintainer/collaborator)
 - [ ] PyPI account with maintainer access to the `hedtools` package
 - [ ] Git configured with your credentials
 - [ ] Python 3.10+ installed
 - [ ] Virtual environment activated (if using one)
-- [ ] All intended changes merged to the `main` branch
+- [ ] Your fork of hed-python set up as `origin` remote
+- [ ] hed-standard/hed-python set up as `upstream` remote
+- [ ] All intended changes merged to the `main` branch of upstream
 
-## Release Checklist
+**Git remote setup:**
 
-### 1. Pre-Release Preparation
+If you haven't set up your remotes, run:
 
-#### 1.1 Ensure Working Tree is Clean
+```bash
+# Check your current remotes
+git remote -v
+
+# If needed, add upstream (assuming origin is your fork)
+git remote add upstream https://github.com/hed-standard/hed-python.git
+```
+
+Your setup should look like:
+
+- `origin` → your fork (e.g., `yourusername/hed-python`)
+- `upstream` → `hed-standard/hed-python`
+
+## Release checklist
+
+### 1. Pre-release preparation
+
+#### 1.1 Ensure working tree is clean
 
 **Windows (PowerShell):**
 
@@ -47,7 +66,7 @@ git commit -m "Pre-release cleanup"
 
 Add a new entry at the top of `CHANGELOG.md` with:
 
-- Release version number (e.g., "Release 0.7.1")
+- Release version number (e.g., "Release 0.9.1")
 - Release date
 - Bullet points describing:
   - New features
@@ -56,21 +75,23 @@ Add a new entry at the top of `CHANGELOG.md` with:
   - Documentation improvements
   - Breaking changes (if any)
 
+\*\*Recommend asking coPilot to produce a draft change log reflecting changes between the last release and the current commit on the main branch.
+
 **Example:**
 
 ```markdown
-Release 0.7.1 October 13, 2025
+Release 0.9.1 October 13, 2025
 - Applied Black code formatter to entire codebase for consistent code style
 - Added Black to development dependencies and CI workflow
 - Enhanced CONTRIBUTING.md with code formatting guidelines
 - Updated README.md with Black usage instructions
 ```
 
-#### 1.3 Run Code Quality Checks
+#### 1.3 Run code quality checks
 
 Before releasing, ensure all code quality checks pass:
 
-**All Platforms:**
+**All platforms:**
 
 ```bash
 # Run code formatter check
@@ -85,67 +106,146 @@ codespell
 
 # Run all tests
 python -m unittest discover tests -v
+
+# Run spec tests
+python -m unittest discover spec_tests -v
 ```
 
 Fix any issues before proceeding.
 
-#### 1.4 Commit CHANGELOG Updates
+#### 1.4 Commit CHANGELOG updates
 
 **All Platforms:**
 
 ```bash
 git add CHANGELOG.md
-git commit -m "Update CHANGELOG for version 0.7.1"
+git commit -m "Update CHANGELOG for version 0.9.1"
 ```
 
-#### 1.5 Merge to Main Branch
+#### 1.5 Push CHANGELOG to your fork and create pull request
 
-If you're working on a feature branch:
+Push your changes to your fork and create a pull request to upstream:
 
 **All Platforms:**
 
 ```bash
-# Update your local main branch
-git checkout main
-git pull origin main
+# Push to your fork (origin)
+git push origin your-feature-branch
 
-# Merge your feature branch
-git merge your-feature-branch
-
-# Resolve any conflicts if they arise
-# Then push to origin
+# OR if you're working directly on main in your fork:
 git push origin main
 ```
 
-### 2. Version Tagging
+**Create pull request:**
 
-The project uses [versioneer](https://github.com/python-versioneer/python-versioneer) for version management, which automatically derives the version from git tags.
+1. Go to your fork on GitHub: `https://github.com/yourusername/hed-python`
+2. Click **"Contribute"** → **"Open pull request"**
+3. Target: `hed-standard/hed-python` (base: `main`)
+4. Source: Your fork and branch
+5. Title: "Update CHANGELOG for version 0.9.1" (or similar)
+6. Create and merge the pull request
 
-#### 2.1 Create Annotated Tag
+**Important:** Ensure the CHANGELOG updates are merged into the upstream `main` branch (hed-standard/hed-python) before proceeding.
+
+### 2. Create GitHub release
+
+The project uses [versioneer](https://github.com/python-versioneer/python-versioneer) for version management, which automatically derives the version from git tags. We'll create the release tag and release directly on GitHub.
+
+#### 2.1 Navigate to create release
+
+Go to: https://github.com/hed-standard/hed-python/releases/new
+
+#### 2.2 Create release tag and release
+
+Fill in the release form:
+
+1. **Choose a tag:** Type a new tag: `0.9.0`
+
+   - **Target:** main branch
+   - Use semantic versioning: MAJOR.MINOR.PATCH
+   - Do NOT use a prefix (e.g., use `0.9.0`, not `v0.9.0`)
+
+2. **Release title:** `Release 0.9.0`
+
+3. **Description:** Paste the detailed changelog information generated by Copilot
+
+**Example description:**
+
+```markdown
+## What's New in 0.9.0
+
+### Features
+- Added comprehensive logging infrastructure with configurable log levels and file output
+- Enhanced validate_bids script with improved error reporting and filtering capabilities
+- Added error code counting and filtering by count/file in ErrorHandler
+
+### Documentation
+- Added comprehensive CONTRIBUTING.md with development guidelines
+- Significantly enhanced README.md with better documentation structure
+- Improved user guide documentation
+
+### Bug Fixes
+- Fixed Windows path handling in tests
+- Fixed typos and improved code documentation
+
+### Full Changelog
+See [CHANGELOG.md](https://github.com/hed-standard/hed-python/blob/main/CHANGELOG.md)
+```
+
+4. **Set as latest release:** Check this box
+
+5. Click **Publish release**
+
+#### 2.3 Verify GitHub release
+
+Verify the release on GitHub:
+
+- [ ] Release appears at https://github.com/hed-standard/hed-python/releases
+- [ ] Tag `0.9.0` was created
+- [ ] Release notes display correctly
+- [ ] Target is set to main branch
+
+### 3. Verify Zenodo release
+
+Zenodo automatically creates a DOI and archives the release when a GitHub release is published. This happens through the GitHub-Zenodo integration.
+
+#### 3.1 Check Zenodo release
+
+**Wait a few minutes** after creating the GitHub release for Zenodo to process it.
+
+1. Go to: https://zenodo.org/records/17866854 (or the latest Zenodo record for hed-python)
+2. Verify that a new version appears for your release
+3. Check that the DOI is generated
+4. Confirm the metadata is correct (title, authors, description)
+
+**Note:** If the Zenodo release doesn't appear after 10-15 minutes, check the GitHub-Zenodo integration settings or contact a repository maintainer.
+
+### 4. Pull release tag to local repository
+
+Now that the release is created on GitHub and verified on Zenodo, pull the tag to your local repository.
+
+#### 4.1 Update local repository from upstream
 
 **All Platforms:**
 
 ```bash
-# Create an annotated tag with the version number
-git tag -a 0.7.0 -m "Release version 0.7.0"
+# Switch to main branch
+git checkout main
+
+# Pull the latest changes from upstream (hed-standard/hed-python)
+git pull upstream main
+
+# Fetch all tags from upstream
+git fetch upstream --tags
+
+# Verify the tag exists locally
+git tag -l 0.9.0
+
+# Optional: Update your fork's main branch
+git push origin main
 ```
 
-**Important:**
-
-- Use semantic versioning: MAJOR.MINOR.PATCH
-- Do NOT use a prefix (e.g., use `0.7.0`, not `v0.7.0`)
-- The tag name must match the version you want to release
-
-#### 2.2 Push the Tag
-
-**All Platforms:**
-
-```bash
-# Push the tag to the remote repository
-git push origin 0.7.0
-```
-
-#### 2.3 Verify Version
+#### 4.2 Verify version
 
 **All Platforms:**
 
@@ -154,19 +254,17 @@ git push origin 0.7.0
 python -c "import hed; print(hed.__version__)"
 ```
 
-Expected output: `0.7.0`
+Expected output: `0.9.0`
 
-If you see something like `0+untagged.xxx.gxxxxxxx`, the tag wasn't properly created or you need to pull the tags:
+If you see something like `0+untagged.xxx.gxxxxxxx`, ensure:
 
-**All Platforms:**
+- You're on the main branch
+- The tag was properly fetched: `git fetch --tags`
+- The tag exists: `git tag -l`
 
-```bash
-git fetch --tags
-```
+### 5. Build distribution packages
 
-### 3. Build Distribution Packages
-
-#### 3.1 Clean Previous Builds
+#### 5.1 Clean previous builds
 
 **Windows (PowerShell):**
 
@@ -182,7 +280,7 @@ Remove-Item -Recurse -Force dist, build, *.egg-info -ErrorAction SilentlyContinu
 rm -rf dist build *.egg-info
 ```
 
-#### 3.2 Install/Upgrade Build Tools
+#### 5.2 Install/upgrade build tools
 
 **All Platforms:**
 
@@ -190,7 +288,7 @@ rm -rf dist build *.egg-info
 python -m pip install --upgrade build twine
 ```
 
-#### 3.3 Build the Packages
+#### 5.3 Build the packages
 
 **All Platforms:**
 
@@ -201,34 +299,34 @@ python -m build
 
 This creates:
 
-- `dist/hedtools-0.7.0-py3-none-any.whl` (wheel distribution)
-- `dist/hedtools-0.7.0.tar.gz` (source distribution)
+- `dist/hedtools-0.9.0-py3-none-any.whl` (wheel distribution)
+- `dist/hedtools-0.9.0.tar.gz` (source distribution)
 
-#### 3.4 Verify Build Contents
+#### 5.4 Verify build contents
 
 **Windows (PowerShell):**
 
 ```powershell
 # List contents of the wheel
-python -m zipfile -l dist/hedtools-0.7.0-py3-none-any.whl
+python -m zipfile -l dist/hedtools-0.9.0-py3-none-any.whl
 
 # Check the source distribution (requires tar in PATH)
-tar -tzf dist/hedtools-0.7.0.tar.gz
+tar -tzf dist/hedtools-0.9.0.tar.gz
 ```
 
 **Linux/macOS (Bash):**
 
 ```bash
 # List contents of the wheel
-unzip -l dist/hedtools-0.7.0-py3-none-any.whl
+unzip -l dist/hedtools-0.9.0-py3-none-any.whl
 
 # Check the source distribution
-tar -tzf dist/hedtools-0.7.0.tar.gz
+tar -tzf dist/hedtools-0.9.0.tar.gz
 ```
 
-### 4. Test the Distribution (Recommended)
+### 6. Test the distribution (recommended)
 
-#### 4.1 Create Test Environment
+#### 6.1 Create test environment
 
 **Windows (PowerShell):**
 
@@ -246,16 +344,16 @@ python -m venv test_env
 source test_env/bin/activate
 ```
 
-#### 4.2 Install from Wheel
+#### 6.2 Install from wheel
 
 **All Platforms:**
 
 ```bash
 # Install the built wheel
-pip install dist/hedtools-0.7.0-py3-none-any.whl
+pip install dist/hedtools-0.9.0-py3-none-any.whl
 ```
 
-#### 4.3 Run Tests
+#### 6.3 Run tests
 
 **Windows (PowerShell):**
 
@@ -277,7 +375,7 @@ cd ~/path/to/hed-python
 python -m unittest discover tests -v
 ```
 
-#### 4.4 Verify Installation
+#### 6.4 Verify installation
 
 **All Platforms:**
 
@@ -289,7 +387,7 @@ python -c "import hed; print(hed.__version__)"
 python -c "from hed import load_schema_version; schema = load_schema_version('8.3.0'); print('Success!')"
 ```
 
-#### 4.5 Clean Up Test Environment
+#### 6.5 Clean up test environment
 
 **Windows (PowerShell):**
 
@@ -305,9 +403,9 @@ deactivate
 rm -rf test_env
 ```
 
-### 5. Upload to PyPI
+### 7. Upload to PyPI
 
-#### 5.1 Check Distribution with Twine
+#### 7.1 Check distribution with twine
 
 **All Platforms:**
 
@@ -316,9 +414,9 @@ rm -rf test_env
 python -m twine check dist/*
 ```
 
-Expected output: `Checking dist/hedtools-0.7.0.tar.gz: PASSED` (and same for .whl)
+Expected output: `Checking dist/hedtools-0.9.0.tar.gz: PASSED` (and same for .whl)
 
-#### 5.2 Upload to Test PyPI (Optional but Recommended)
+#### 7.2 Upload to test PyPI (optional but recommended)
 
 **All Platforms:**
 
@@ -332,10 +430,10 @@ You'll be prompted for your TestPyPI credentials.
 **Test installation from TestPyPI:**
 
 ```bash
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ hedtools==0.7.0
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ hedtools==0.9.0
 ```
 
-#### 5.3 Upload to Production PyPI
+#### 7.3 Upload to production PyPI
 
 **All Platforms:**
 
@@ -370,64 +468,34 @@ export TWINE_PASSWORD="pypi-your-api-token-here"
 python -m twine upload dist/*
 ```
 
-#### 5.4 Verify on PyPI
+#### 7.4 Verify on PyPI
 
 Visit https://pypi.org/project/hedtools/ and verify:
 
-- [ ] Version 0.7.0 is listed
+- [ ] Version 0.9.0 is listed
 - [ ] README renders correctly
 - [ ] All metadata is correct
 - [ ] Download links work
 
-### 6. Create GitHub Release
+### 8. Attach build artifacts to GitHub release (optional)
 
-#### 6.1 Navigate to Releases
+You may want to attach the distribution files to the GitHub release for convenience.
 
-Go to: https://github.com/hed-standard/hed-python/releases/new
+#### 8.1 Navigate to release
 
-#### 6.2 Create Release
+Go to: https://github.com/hed-standard/hed-python/releases/tag/0.9.0
 
-Fill in the release form:
+#### 8.2 Edit release and attach files
 
-- **Choose a tag:** Select `0.7.0` from the dropdown
-- **Release title:** `Release 0.7.0`
-- **Description:** Copy the relevant section from CHANGELOG.md
+- Click **Edit release**
+- Drag and drop or upload:
+  - `dist/hedtools-0.9.0-py3-none-any.whl`
+  - `dist/hedtools-0.9.0.tar.gz`
+- Click **Update release**
 
-**Example description:**
+### 9. Post-release verification
 
-```markdown
-## What's New in 0.7.0
-
-### Features
-- Added comprehensive logging infrastructure with configurable log levels and file output
-- Enhanced validate_bids script with improved error reporting and filtering capabilities
-- Added error code counting and filtering by count/file in ErrorHandler
-
-### Documentation
-- Added comprehensive CONTRIBUTING.md with development guidelines
-- Significantly enhanced README.md with better documentation structure
-- Improved user guide documentation
-
-### Bug Fixes
-- Fixed Windows path handling in tests
-- Fixed typos and improved code documentation
-
-### Full Changelog
-See [CHANGELOG.md](https://github.com/hed-standard/hed-python/blob/main/CHANGELOG.md)
-```
-
-#### 6.3 Attach Build Artifacts
-
-- Upload `dist/hedtools-0.7.0-py3-none-any.whl`
-- Upload `dist/hedtools-0.7.0.tar.gz`
-
-#### 6.4 Publish Release
-
-Click **Publish release**
-
-### 7. Post-Release Verification
-
-#### 7.1 Test Installation from PyPI
+#### 9.1 Test installation from PyPI
 
 In a fresh environment:
 
@@ -438,15 +506,15 @@ pip install --upgrade hedtools
 python -c "import hed; print(hed.__version__)"
 ```
 
-Expected output: `0.7.0`
+Expected output: `0.9.0`
 
-#### 7.2 Verify Documentation
+#### 9.2 Verify documentation
 
 Check that documentation sites are updated (may take some time):
 
 - https://www.hedtags.org/hed-python/
 
-#### 7.3 Announce the Release
+#### 9.3 Announce the release
 
 Consider announcing the release:
 
@@ -455,7 +523,7 @@ Consider announcing the release:
 - [ ] Community forums
 - [ ] Social media (if applicable)
 
-### 8. Troubleshooting
+### 10. Troubleshooting
 
 #### Issue: Wrong version number after tagging
 
@@ -464,8 +532,8 @@ Consider announcing the release:
 **Solution:**
 
 ```bash
-# Fetch all tags
-git fetch --tags
+# Fetch all tags from upstream (not from your fork)
+git fetch upstream --tags
 
 # Verify tag exists
 git tag -l
@@ -504,19 +572,27 @@ python -m build
 
 **Solution:**
 
+**Note:** Tags are created on upstream (hed-standard/hed-python) via GitHub releases. If you need to delete a tag:
+
 ```bash
 # Delete local tag
-git tag -d 0.7.0
-
-# Delete remote tag (CAUTION: only if not yet released!)
-git push origin :refs/tags/0.7.0
-
-# Recreate the tag
-git tag -a 0.7.0 -m "Release version 0.7.0"
-git push origin 0.7.0
+git tag -d 0.9.0
 ```
 
-**WARNING:** Only delete remote tags if the release hasn't been published yet!
+**To delete from upstream (requires maintainer access):**
+
+1. Go to https://github.com/hed-standard/hed-python/releases
+2. Delete the release associated with the tag
+3. Delete the tag: Settings → (or use GitHub API/CLI)
+
+OR use git (if you have push access to upstream):
+
+```bash
+# Delete remote tag from upstream (CAUTION: only if not yet released!)
+git push upstream :refs/tags/0.9.0
+```
+
+**WARNING:** Only delete remote tags if the release hasn't been published to PyPI yet!
 
 ## Version Numbering Guidelines
 
@@ -529,37 +605,95 @@ HED-Python follows [Semantic Versioning](https://semver.org/):
 ### When to increment:
 
 - **MAJOR:** Breaking changes, API redesign, major architectural changes
-- **MINOR:** New features, new functions/classes, enhancements (this release: 0.7.0)
-- **PATCH:** Bug fixes, documentation fixes, small improvements (0.7.1)
+- **MINOR:** New features, new functions/classes, enhancements (this release: 0.9.0)
+- **PATCH:** Bug fixes, documentation fixes, small improvements (0.9.1)
 
 ## Quick Reference Commands
+
+**New workflow summary:**
+
+1. Update CHANGELOG and push to your fork (origin)
+2. Create PR to upstream and merge to hed-standard/hed-python main
+3. Create release tag and release on upstream GitHub (hed-standard/hed-python)
+4. Verify Zenodo release (automatic, linked to GitHub)
+5. Pull tag from upstream to local repository
+6. Build distributions and upload to PyPI
+
+**Important:**
+
+- `origin` = your fork
+- `upstream` = hed-standard/hed-python
 
 **Windows (PowerShell):**
 
 ```powershell
-# Complete release workflow
+# Step 1: Update and push CHANGELOG to your fork
 git status                                    # Check working tree
 git add CHANGELOG.md                          # Stage changelog
-git commit -m "Update CHANGELOG for v0.7.0"   # Commit
-git push origin main                          # Push to main
-git tag -a 0.7.0 -m "Release version 0.7.0"   # Create tag
-git push origin 0.7.0                         # Push tag
+git commit -m "Update CHANGELOG for v0.9.0"   # Commit
+git push origin your-branch                   # Push to your fork
+
+# Step 2: Create PR on GitHub (via web interface)
+# - Go to your fork on GitHub
+# - Create PR to hed-standard/hed-python main
+# - Merge the PR
+
+# Step 3: Create release on upstream GitHub (via web interface)
+# - Go to https://github.com/hed-standard/hed-python/releases/new
+# - Create tag 0.9.0 targeting main
+# - Add release notes (paste Copilot-generated changelog)
+# - Publish release
+
+# Step 4: Verify Zenodo release (via web interface)
+# - Wait a few minutes for Zenodo to process the GitHub release
+# - Go to https://zenodo.org/records/17866854
+# - Verify new version appears with DOI
+
+# Step 5: Pull tag from upstream to local
+git checkout main                             # Switch to main
+git pull upstream main                        # Pull from upstream
+git fetch upstream --tags                     # Fetch tags from upstream
+python -c "import hed; print(hed.__version__)" # Verify version
+
+# Step 6: Build and upload to PyPI
 Remove-Item -Recurse -Force dist, build, *.egg-info -ErrorAction SilentlyContinue
 python -m build                               # Build
 python -m twine check dist/*                  # Verify
-python -m twine upload dist/*                 # Upload
+python -m twine upload dist/*                 # Upload to PyPI
 ```
 
 **Linux/macOS (Bash):**
 
 ```bash
-# Complete release workflow
+# Step 1: Update and push CHANGELOG to your fork
 git status                                    # Check working tree
 git add CHANGELOG.md                          # Stage changelog
-git commit -m "Update CHANGELOG for 0.7.0"    # Commit
-git push origin main                          # Push to main
-git tag -a 0.7.0 -m "Release version 0.7.0"   # Create tag
-git push origin 0.7.0                         # Push tag
+git commit -m "Update CHANGELOG for 0.9.0"    # Commit
+git push origin your-branch                   # Push to your fork
+
+# Step 2: Create PR on GitHub (via web interface)
+# - Go to your fork on GitHub
+# - Create PR to hed-standard/hed-python main
+# - Merge the PR
+
+# Step 3: Create release on upstream GitHub (via web interface)
+# - Go to https://github.com/hed-standard/hed-python/releases/new
+# - Create tag 0.9.0 targeting main
+# - Add release notes (paste Copilot-generated changelog)
+# - Publish release
+
+# Step 4: Verify Zenodo release (via web interface)
+# - Wait a few minutes for Zenodo to process the GitHub release
+# - Go to https://zenodo.org/records/17866854
+# - Verify new version appears with DOI
+
+# Step 5: Pull tag from upstream to local
+git checkout main                             # Switch to main
+git pull upstream main                        # Pull from upstream
+git fetch upstream --tags                     # Fetch tags from upstream
+python -c "import hed; print(hed.__version__)" # Verify version
+
+# Step 6: Build and upload to PyPI
 rm -rf dist build *.egg-info                  # Clean old builds
 python -m build                               # Build
 python -m twine check dist/*                  # Verify
