@@ -75,7 +75,7 @@ Add a new entry at the top of `CHANGELOG.md` with:
   - Documentation improvements
   - Breaking changes (if any)
 
-\*\*Recommend asking coPilot to produce a draft change log reflecting changes between the last release and the current commit on the main branch.
+**Recommend asking coPilot to produce a draft change log reflecting changes between the last release and the current commit on the main branch.**
 
 **Example:**
 
@@ -213,7 +213,7 @@ Zenodo automatically creates a DOI and archives the release when a GitHub releas
 
 **Wait a few minutes** after creating the GitHub release for Zenodo to process it.
 
-1. Go to: https://zenodo.org/records/17866854 (or the latest Zenodo record for hed-python)
+1. Go to: https://zenodo.org/records/8056010 (or the latest Zenodo record for hed-python)
 2. Verify that a new version appears for your release
 3. Check that the DOI is generated
 4. Confirm the metadata is correct (title, authors, description)

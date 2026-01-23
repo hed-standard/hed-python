@@ -40,7 +40,6 @@ from .remodeling.operations.summarize_column_names_op import SummarizeColumnName
 from .remodeling.operations.summarize_column_values_op import SummarizeColumnValuesOp
 from .remodeling.operations.summarize_hed_type_op import SummarizeHedTypeOp
 
-from .util.hed_logger import HedLogger
 from .util.data_util import get_new_dataframe, get_value_dict, replace_values, reorder_columns
 from .util.io_util import check_filename, clean_filename, extract_suffix_path, get_file_list, make_path
 from .util.io_util import get_path_components

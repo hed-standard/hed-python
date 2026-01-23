@@ -105,18 +105,14 @@ class FileDictionary:
         diffs = set(self._file_dict.keys()).symmetric_difference(set(other_dict.file_dict.keys()))
         return list(diffs)
 
-    def output_files(self, title=None, logger=None):
+    def output_files(self, title=None):
         """Return a string with the output of the list.
 
         Parameters:
             title (None, str):    Optional title.
-            logger (HedLogger):   Optional HED logger for recording.
 
         Returns:
             str: The dictionary in string form.
-
-        Notes:
-            - The logger is updated if available.
 
         """
         output_list = []
@@ -125,8 +121,6 @@ class FileDictionary:
         for key, _value in self._file_dict.items():
             basename = os.path.basename(self.get_file_path(key))
             output_list.append(f"{key}: {basename}")
-            if logger:
-                logger.add(key, f"{self.name}: {basename}")
         return "\n".join(output_list)
 
     @staticmethod
