@@ -149,7 +149,7 @@
     {
         "error_code": "TAG_INVALID",
         "alt_codes": [],
-        "name": "tag-has-extra-white space",
+        "name": "tag-has-extra-whitespace",
         "description": "A HED tag has extra internal whitespace, including directly before or after slashes.",
         "warning": false,
         "schema": "8.4.0",
