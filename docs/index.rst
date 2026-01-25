@@ -1,21 +1,6 @@
 Python HEDTools
 ===============
 
-
-.. sidebar:: Quick links
-   
-   * `HED homepage <https://www.hedtags.org/>`_ 
-
-   * `HED vocabularies <https://www.hedtags.org/hed-schema-browser>`_
-
-   * `HED online tools <https://hedtools.org/hed/>`_
-
-   * `HED browser tools <https://www.hedtags.org/hed-javascript>`_
-
-   * `HED organization  <https://github.com/hed-standard/>`_  
-
-   * `HED specification <https://www.hedtags.org/hed-specification>`_ 
-
 Welcome to the Python HEDTools documentation! This package provides comprehensive tools for working with **Hierarchical Event Descriptors (HED)** - a standardized framework for annotating events and experimental metadata in neuroscience and beyond.
 
 What is HED?
@@ -41,7 +26,7 @@ Getting started
 .. toctree::
    :maxdepth: 2
 
-   Introduction <introduction>
+   Overview <overview>
 
 Programming with HEDTools
 -------------------------
@@ -49,20 +34,18 @@ Programming with HEDTools
 .. toctree::
    :maxdepth: 2
 
-   User guide <user_guide>
+   Guide <user_guide>
 
-API documentation
------------------
+Python HEDTools API
+-------------------
 
 .. toctree::
    :maxdepth: 2
 
-   API reference <api/index>
+   API <api/index>
 
 
-Indices and tables
-==================
+Index
+=====
 
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

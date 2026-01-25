@@ -481,7 +481,7 @@ The primary purpose of this release was to correct the JSON format for HED schem
 
 # Release 0.1.0 June 20, 2022
 
-- First release on PyPI\`\`\`
+- First release on PyPI
 
 ```
 ```

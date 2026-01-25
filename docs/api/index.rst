@@ -1,5 +1,5 @@
-API reference
-=============
+Python HEDTools API
+===================
 
 This section contains the complete API reference for HED Python tools.
 

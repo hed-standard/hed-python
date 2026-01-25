@@ -1,4 +1,4 @@
-# The HEDTools user guide
+# Python HEDTools guide
 
 This guide provides step-by-step instructions for using the HED Python tools for validation, BIDS integration, and analysis.
 
@@ -9,7 +9,7 @@ This guide provides step-by-step instructions for using the HED Python tools for
 - 🐛 [GitHub issues](https://github.com/hed-standard/hed-python/issues)
 - 🎓 [HED resources](https://www.hedtags.org/hed-resources)
 - 📖 [HED specification](https://www.hedtags.org/hed-specification)
-- 🌐 [Online tools](https://hedtools.org/hed)
+- 🌐 [Web tools](https://hedtools.org/hed)
 
 ## Table of contents
 
@@ -228,7 +228,7 @@ json_string = sidecar.get_as_json_string()
 
 ## Jupyter notebooks
 
-The [**examples**](https://github.com/hed-standard/hed-python/tree/main/examples) directory in the GitHub [**hed-python**](https://github.com/hed-standard/hed-python) repository contains Jupyter notebooks for BIDS annotation workflows. These notebooks are **not included in the PyPI package**.
+The [examples](https://github.com/hed-standard/hed-python/tree/main/examples) directory in the GitHub [hed-python](https://github.com/hed-standard/hed-python) repository contains Jupyter notebooks for BIDS annotation workflows. These notebooks are **not included in the PyPI package**.
 
 ### Available notebooks
 
@@ -271,7 +271,7 @@ pip install hedtools jupyter notebook
 5. **Merge back** (if using spreadsheet) - Convert spreadsheet back to JSON
 6. **Validate** - Check for errors and iterate until valid
 
-See the examples [**README**](https://github.com/hed-standard/hed-python/tree/main/examples) for detailed documentation of each notebook.
+See the examples [README](https://github.com/hed-standard/hed-python/tree/main/examples) for detailed documentation of each notebook.
 
 ## Command-line tools
 
@@ -581,7 +581,7 @@ hedpy schema add-ids /path/to/hed-schemas score 2.2.0
 2. Convert to all formats and verify equivalence
 3. Add HED IDs only once - they should remain stable
 4. Generate ontology after IDs are added
-5. Verify that the created ontology is valid using [**Protégé**](https://protege.stanford.edu/)
+5. Verify that the created ontology is valid using [Protégé](https://protege.stanford.edu/)
 6. Commit changes to version control before moving to stable release
 
 ______________________________________________________________________

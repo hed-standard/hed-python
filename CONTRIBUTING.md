@@ -334,7 +334,8 @@ Create an issue with:
 ## Questions?
 
 - **Documentation:** [https://www.hedtags.org/hed-python](https://www.hedtags.org/hed-python)
+- **Discussions:** [HED Organization Discussions](https://github.com/orgs/hed-standard/discussions) - Ask questions, share ideas, and discuss HED-related topics
 - **Issues:** [GitHub Issues](https://github.com/hed-standard/hed-python/issues)
-- **Email:** Kay.Robbins@utsa.edu
+- **Email:** [hed.maintainers@gmail.com](mailto:hed.maintainers@gmail.com)
 
 Thank you for contributing to HEDTools! 🎉
