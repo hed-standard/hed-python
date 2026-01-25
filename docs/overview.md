@@ -104,7 +104,7 @@ pip install -e .
 ### Support
 
 - **Issues and bugs**: Open an [issue](https://github.com/hed-standard/hed-python/issues) on GitHub
-- **Questions and ideas**: Contribute to the [HED organization discussions](https://github.com/orgs/hedstandard/discussions)
+- **Questions and ideas**: Contribute to the [HED organization discussions](https://github.com/orgs/hed-standard/discussions)
 - **Online validation**: Try [HED online tools](https://hedtools.org/hed) for web-based access
 - **Contact**: Email [hed.maintainers@gmail.com](mailto:hed.maintainers@gmail.com)
 
