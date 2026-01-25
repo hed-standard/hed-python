@@ -1,4 +1,4 @@
-# Introduction to HEDTools
+# Python HEDTools overview
 
 ## What is HED?
 
@@ -16,8 +16,10 @@ The **hedtools** Python package (`hed-python` repository) provides:
 
 - **Core validation** of HED annotations against schema specifications
 - **BIDS integration** for neuroimaging dataset processing
+- **NWB support** for reading and writing HED annotations in NWB files using [ndx-hed](https://www.hedtags.org/ndx-hed)
 - **Analysis tools** for event summarization, temporal processing, and tag analysis
 - **HED schema tools** for validating, comparing and converting HED schemas
+- **Multiple formats** support for JSON sidecars, TSV files, Excel spreadsheets
 - **Command-line interface** for scripting and automation
 - **Jupyter notebooks** for interactive analysis workflows
 
@@ -101,8 +103,8 @@ pip install -e .
 
 ### Support
 
-- **Issues and bugs**: Open an [**issue**](https://github.com/hed-standard/hed-python/issues) on GitHub
-- **Questions**: Use GitHub issues
+- **Issues and bugs**: Open an [issue](https://github.com/hed-standard/hed-python/issues) on GitHub
+- **Questions and ideas**: Contribute to the [HED organization discussions](https://github.com/orgs/hedstandard/discussions)
 - **Online validation**: Try [HED online tools](https://hedtools.org/hed) for web-based access
 - **Contact**: Email [hed.maintainers@gmail.com](mailto:hed.maintainers@gmail.com)
 
@@ -154,7 +156,7 @@ issues = sidecar.validate(schema)
 
 ## Next steps
 
-- Explore the [**User guide**](user_guide.md) for detailed workflows
-- Try the [**Jupyter notebooks**](https://github.com/hed-standard/hed-python/tree/main/examples) for interactive examples
-- Check the [**API reference**](api/index.html) for complete function documentation
-- Validate your data using the HED [**online tools**](https://hedtools.org/hed) or the HED [**browser-based tools**](https://www.hedtags.org/hed-javascript)
+- Explore the [User guide](user_guide.md) for detailed workflows
+- Try the [Jupyter notebooks](https://github.com/hed-standard/hed-python/tree/main/examples) for interactive examples
+- Check the [Python HEDTools API](api/index.html) for complete function documentation
+- Validate your data using the HED [online tools](https://hedtools.org/hed) or the HED [browser-based tools](https://www.hedtags.org/hed-javascript)

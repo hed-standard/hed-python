@@ -6,4 +6,4 @@
 [submodule "spec_tests/hed-examples"]
 	path = spec_tests/hed-examples
 	url = https://github.com/hed-standard/hed-examples/
-	branch = develop
+	branch = main
