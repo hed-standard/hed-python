@@ -1,10 +1,16 @@
 # Jupyter notebooks for annotation
 
+```{index} Jupyter notebooks, annotation workflows, examples
+```
+
 This directory contains Jupyter notebooks that provide interactive workflows for annotation, validation, and analysis.
 
 **📖 For detailed documentation, see the [Jupyter notebooks section](../docs/user_guide.md#jupyter-notebooks)**
 
 ## Available Notebooks
+
+```{index} notebooks list, extract template, validate dataset, sidecar conversion
+```
 
 | Notebook                                                                                 | Purpose                                                      |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
@@ -18,6 +24,9 @@ This directory contains Jupyter notebooks that provide interactive workflows for
 | [validate_bids_datasets.ipynb](validate_bids_datasets.ipynb)                             | Batch validate multiple BIDS datasets                        |
 
 ## Quick Start
+
+```{index} quick start; notebooks, installation; notebooks
+```
 
 ### Prerequisites
 
@@ -51,6 +60,9 @@ jupyter notebook
 
 ## Typical Annotation Workflow
 
+```{index} annotation workflow, BIDS annotation, workflow steps
+```
+
 A recommended workflow for annotating a new BIDS dataset:
 
 1. **📊 Summarize events** → Understand your event structure
@@ -62,7 +74,13 @@ A recommended workflow for annotating a new BIDS dataset:
 
 ## Notebook descriptions
 
+```{index} notebook descriptions, templates, validation, spreadsheet conversion
+```
+
 ### Extract JSON template
+
+```{index} extract template, JSON template, sidecar template
+```
 
 Creates a JSON sidecar template based on all unique values found across all event files in your BIDS dataset.
 
@@ -70,11 +88,17 @@ Creates a JSON sidecar template based on all unique values found across all even
 
 ### Find event combinations
 
+```{index} event combinations, column relationships
+```
+
 Extracts all unique combinations of values across specified columns, useful for understanding column relationships or creating recoding mappings.
 
 **Key parameters**: `dataset_path`, `key_columns`, `output_path`
 
 ### Merge spreadsheet into sidecar
+
+```{index} merge spreadsheet, spreadsheet to JSON, annotation merging
+```
 
 Merges a 4-column spreadsheet (with edited HED annotations) back into a BIDS JSON sidecar file (which could be empty).
 
@@ -82,17 +106,26 @@ Merges a 4-column spreadsheet (with edited HED annotations) back into a BIDS JSO
 
 ### Sidecar to Spreadsheet
 
+```{index} sidecar to spreadsheet, JSON to spreadsheet, 4-column format
+```
+
 Converts the HED content of a JSON sidecar into a 4-column spreadsheet for easier viewing and editing.
 
 **Output format**: `column_name | column_value | description | HED`
 
 ### Summarize events
 
+```{index} summarize events, event analysis, value distributions
+```
+
 Provides an overview of event file structure, column names, and value distributions across the entire dataset.
 
 **Key parameters**: `dataset_path`, `exclude_dirs`, `skip_columns`, `value_columns`
 
 ### Validate BIDS dataset
+
+```{index} validate BIDS, dataset validation, HED validation
+```
 
 Validates all HED annotations in a BIDS dataset against the specified schema.
 

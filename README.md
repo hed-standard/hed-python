@@ -2,9 +2,15 @@
 
 # HEDTools - Python
 
+```{index} HEDTools, Python tools, validation, analysis
+```
+
 > Python tools for validation, analysis, and transformation of HED (Hierarchical Event Descriptors) tagged datasets.
 
 ## Overview
+
+```{index} HED, Hierarchical Event Descriptors, BIDS, NWB
+```
 
 HED (Hierarchical Event Descriptors) is a framework for systematically describing both laboratory and real-world events as well as other experimental metadata. HED tags are comma-separated path strings that provide a standardized vocabulary for annotating events and experimental conditions.
 
@@ -20,7 +26,13 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 
 ## Quick start
 
+```{index} quick start, getting started, installation
+```
+
 ### Online tools (no installation required)
+
+```{index} online tools, web tools, hedtools.org
+```
 
 For simple validation or transformation tasks, use the online tools at [https://hedtools.org/hed](https://hedtools.org/hed) - no installation needed!
 
@@ -29,6 +41,9 @@ Browser-based validation (no data upload) is available at [https://www.hedtags.o
 A development version of the online tools is available at: [https://hedtools.org/hed_dev](https://hedtools.org/hed_dev)
 
 ### Python installation
+
+```{index} installation; Python, pip install, PyPI
+```
 
 **Requirements:** Python 3.10 or higher
 
@@ -45,6 +60,9 @@ pip install git+https://github.com/hed-standard/hed-python/@main
 ```
 
 ### Basic usage
+
+```{index} usage examples, HedString, load_schema_version, validation example
+```
 
 ```python
 from hed import HedString, load_schema_version
@@ -64,6 +82,9 @@ else:
 ```
 
 ### Command-line tools
+
+```{index} command-line tools, CLI, hedpy, validate-bids, extract-sidecar
+```
 
 HEDTools provides a unified command-line interface with git-like subcommands:
 
@@ -97,6 +118,9 @@ For more examples, see the [user guide](https://www.hedtags.org/hed-python/user_
 
 ### Jupyter notebook examples
 
+```{index} Jupyter notebooks, examples, interactive workflows
+```
+
 **Note:** Example notebooks are available in the [GitHub repository](https://github.com/hed-standard/hed-python/tree/main/examples) only, not in the PyPI package.
 
 The [`examples/`](examples/) directory contains Jupyter notebooks demonstrating common HED workflows with BIDS datasets:
@@ -127,6 +151,9 @@ See [`examples/README.md`](examples/README.md) for more details.
 
 ## Documentation
 
+```{index} documentation, user guide, API reference, Sphinx
+```
+
 📖 **Full Documentation:** [https://www.hedtags.org/hed-python](https://www.hedtags.org/hed-python)
 
 - [User guide](https://www.hedtags.org/hed-python/user_guide.html) - Usage instructions
@@ -134,6 +161,9 @@ See [`examples/README.md`](examples/README.md) for more details.
 - [HED specification](https://www.hedtags.org/hed-specification) - Full HED standard specification
 
 ### Building docs locally
+
+```{index} building documentation, sphinx-build
+```
 
 ```bash
 # Install documentation dependencies
@@ -151,6 +181,9 @@ make html
 ```
 
 ### Formatting with Black
+
+```{index} Black, code formatting, style guide
+```
 
 This project uses [Black](https://black.readthedocs.io/) for consistent code formatting.
 
@@ -184,6 +217,9 @@ black --workers 1 .
 
 ## Related repositories
 
+```{index} HED ecosystem, repositories, hed-schemas, hed-specification
+```
+
 The HED ecosystem consists of several interconnected repositories:
 
 | Repository                                                             | Description                                      |
@@ -197,6 +233,9 @@ The HED ecosystem consists of several interconnected repositories:
 | [hed-javascript](https://github.com/hed-standard/hed-javascript)       | JavaScript HED validation tools                  |
 
 ## Contributing
+
+```{index} contributing, development setup, pull requests
+```
 
 We welcome contributions! Here's how you can help:
 
@@ -234,7 +273,13 @@ For detailed contribution guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.
 
 ## Configuration
 
+```{index} configuration, schema caching, cache directory
+```
+
 ### Schema caching
+
+~~~{index} schema; caching, ~/.hedtools
+~~~
 
 By default, HED schemas are cached in `~/.hedtools/` (location varies by OS).
 

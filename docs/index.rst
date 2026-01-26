@@ -45,7 +45,7 @@ Python HEDTools API
    API <api/index>
 
 
-Index
-=====
+Python HEDtools index
+----------------------
 
 * :ref:`genindex`

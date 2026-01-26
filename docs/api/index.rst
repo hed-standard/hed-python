@@ -1,7 +1,7 @@
 Python HEDTools API
 ===================
 
-This section contains the complete API reference for HED Python tools.
+This section contains the complete API reference for Python HEDTools.
 
 .. toctree::
    :maxdepth: 2
@@ -15,7 +15,7 @@ This section contains the complete API reference for HED Python tools.
 Core modules overview
 ---------------------
 
-The HED Python tools package is organized into several key modules:
+The Python HEDTools package is organized into several key modules:
 
 * **Models**: Core data structures for HED annotations and tags
 * **Schema**: HED schema management and validation

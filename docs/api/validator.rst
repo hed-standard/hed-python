@@ -1,5 +1,5 @@
-Validator
-=========
+Python HEDTools validator
+=========================
 
 Validation tools for HED data structures and annotations.
 
