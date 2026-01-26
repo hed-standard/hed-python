@@ -1,6 +1,12 @@
 # Python HEDTools overview
 
+```{index} single: HED; overview
+```
+
 ## What is HED?
+
+```{index} HED, Hierarchical Event Descriptors, controlled vocabulary, BIDS, NWB
+```
 
 HED (Hierarchical Event Descriptors) is a framework for systematically describing events and experimental metadata in machine-actionable form. HED provides:
 
@@ -10,7 +16,10 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 
 For more information, visit the HED project [homepage](https://www.hedtags.org) and the [resources page](https://www.hedtags.org/hed-resources). The [table-remodeler](https://www.hedtags.org/table-remodeler) tools are now in a separate repository.
 
-## What is HEDTools?
+## What are Pythong HEDTools?
+
+```{index} hedtools, validation, BIDS integration, NWB support
+```
 
 The **hedtools** Python package (`hed-python` repository) provides:
 
@@ -35,6 +44,9 @@ The **hedtools** Python package (`hed-python` repository) provides:
 - **[Table remodeler](https://www.hedtags.org/table-remodeler)**: table analysis and transformations -- formerly part of hedtools
 
 ## Installation
+
+```{index} installation, pip, PyPI
+```
 
 ### From PyPI (recommended)
 
@@ -112,6 +124,9 @@ pip install -e .
 
 ### Basic validation example
 
+```{index} validation; HED string, HedString
+```
+
 ```python
 from hed import HedString, load_schema, get_printable_issue_string
 
@@ -130,6 +145,9 @@ else:
 
 ### BIDS dataset validation
 
+```{index} BIDS; validation, BidsDataset
+```
+
 ```python
 from hed.tools import BidsDataset
 
@@ -144,6 +162,9 @@ else:
 ```
 
 ### Working with sidecars
+
+```{index} sidecar, JSON sidecar, Sidecar class
+```
 
 ```python
 from hed import Sidecar, load_schema_version

@@ -1,5 +1,8 @@
 # Python HEDTools guide
 
+```{index} user guide, tutorial, getting started
+```
+
 This guide provides step-by-step instructions for using the HED Python tools for validation, BIDS integration, and analysis.
 
 ## Quick links
@@ -63,6 +66,9 @@ else:
 
 ## Working with HED schemas
 
+```{index} schema; loading, schema; validation, load_schema, load_schema_version
+```
+
 ### Loading schemas
 
 ```python
@@ -83,6 +89,9 @@ schema = load_schema("https://raw.githubusercontent.com/hed-standard/hed-schemas
 
 ### Working with library schemas
 
+```{index} schema; library, library schema, score library, lang library
+```
+
 HED supports library schemas that extend the base vocabulary.
 
 ```python
@@ -99,6 +108,9 @@ schema = load_schema_version(["score_2.1.0", "lang_1.1.0"])
 Note: It is now standard for a library schema to be partnered with a standard schema. In general, you should not use an earlier, non-partnered versions of a library schema.
 
 ## Validating HED strings
+
+```{index} validation; HED strings, HedString class, validate method
+```
 
 ### Basic validation
 
@@ -137,6 +149,9 @@ if issues:
 
 ## Working with BIDS datasets
 
+```{index} BIDS; dataset validation, BidsDataset class, dataset_description.json
+```
+
 ### Dataset-level validation
 
 ```python
@@ -162,6 +177,9 @@ Since a BIDS dataset includes the HED version in its `dataset_description.json`,
 
 ### Working with individual event files
 
+```{index} TabularInput, event files, tsv files
+```
+
 ```python
 from hed import TabularInput, load_schema_version
 
@@ -184,6 +202,9 @@ def_dict = tabular.get_def_dict(schema)
 
 ## Working with sidecars
 
+```{index} Sidecar class, JSON sidecar, sidecar validation
+```
+
 ### Loading and validating sidecars
 
 ```python
@@ -200,6 +221,9 @@ issues = sidecar.validate(schema)
 ```
 
 ### Extracting definitions
+
+```{index} definitions, DefinitionDict, get_def_dict
+```
 
 ```python
 from hed import Sidecar, load_schema_version
@@ -227,6 +251,9 @@ json_string = sidecar.get_as_json_string()
 ```
 
 ## Jupyter notebooks
+
+```{index} Jupyter notebooks, examples, workflows
+```
 
 The [examples](https://github.com/hed-standard/hed-python/tree/main/examples) directory in the GitHub [hed-python](https://github.com/hed-standard/hed-python) repository contains Jupyter notebooks for BIDS annotation workflows. These notebooks are **not included in the PyPI package**.
 
@@ -274,6 +301,9 @@ pip install hedtools jupyter notebook
 See the examples [README](https://github.com/hed-standard/hed-python/tree/main/examples) for detailed documentation of each notebook.
 
 ## Command-line tools
+
+```{index} CLI, command-line interface, hedpy, scripts
+```
 
 HEDTools provides a unified command-line interface (CLI) using a **git-style command structure**. The main command is `hedpy`, which provides subcommands for validation and schema management.
 
@@ -509,6 +539,9 @@ ______________________________________________________________________
 
 ### Schema development
 
+```{index} schema; development, schema; conversion, schema; validation, hedpy schema
+```
+
 The `hedpy schema` command group provides tools for validating, converting, and managing HED schemas during development.
 
 #### Schema validation
@@ -556,6 +589,9 @@ ______________________________________________________________________
 Once a schema has been developed and tested, these commands prepare it for official release. These operations are performed by the HED maintainers on schemas in the **prerelease directory** of the hed-schemas repository before moving them to the stable release directory.
 
 #### Add HED IDs
+
+```{index} HED IDs, schema; IDs, schema; release
+```
 
 HED IDs are unique identifiers assigned to each schema term, enabling stable references across schema versions and format conversions. These IDs must be added before releasing a schema.
 
@@ -678,6 +714,9 @@ ______________________________________________________________________
 
 ## Best practices
 
+```{index} best practices, schema management, validation workflow
+```
+
 ### Schema management
 
 1. **Don't modify released schemas** - they're immutable and shared
@@ -723,6 +762,9 @@ If you are annotating an NWB dataset, the instructions are somewhat similar but 
    ```
 
 ## Troubleshooting
+
+```{index} troubleshooting, errors, debugging
+```
 
 ### Common issues
 

@@ -1,5 +1,5 @@
-Schema
-======
+Python HEDTools schema
+======================
 
 HED schema management and validation tools.
 
