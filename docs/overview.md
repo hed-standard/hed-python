@@ -16,7 +16,7 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 
 For more information, visit the HED project [homepage](https://www.hedtags.org) and the [resources page](https://www.hedtags.org/hed-resources). The [table-remodeler](https://www.hedtags.org/table-remodeler) tools are now in a separate repository.
 
-## What are Pythong HEDTools?
+## What are Python HEDTools?
 
 ```{index} hedtools, validation, BIDS integration, NWB support
 ```
