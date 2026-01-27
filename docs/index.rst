@@ -1,3 +1,7 @@
+.. meta::
+   :description: Python tools for HED (Hierarchical Event Descriptors) validation, analysis, and BIDS integration in neuroscience
+   :keywords: HED, hierarchical event descriptors, Python, validation, BIDS, neuroscience, event annotation, metadata, analysis tools
+
 Python HEDTools
 ===============
 

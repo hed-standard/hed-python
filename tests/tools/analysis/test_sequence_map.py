@@ -6,7 +6,7 @@ from hed.tools.analysis.sequence_map import SequenceMap
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/remodel_tests')
+        # curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../data/other_tests')
         base_path = ""
         cls.events_path = os.path.realpath(
             base_path + "/sub-01/ses-01/eeg/sub-01_ses-01_task-DriveRandomSound_run-1_events.tsv"
