@@ -1,3 +1,12 @@
+```{meta}
+---
+description: Complete user guide for Python HEDTools - validation, BIDS 
+  integration, analysis, and command-line tools for HED annotations
+keywords: HED tutorial, Python guide, validation examples, BIDS datasets, 
+  sidecar files, command-line interface, Jupyter notebooks
+---
+```
+
 # Python HEDTools guide
 
 ```{index} user guide, tutorial, getting started

@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/remodel_tests")
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/other_tests")
         cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(curation_base_dir, "sternberg_with_quotes_events.tsv")

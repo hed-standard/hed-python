@@ -18,11 +18,12 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 
 - Validate HED annotations against schema specifications
 - Analyze and summarize HED-tagged datasets
-- Transform and remodel event data
 - Full HED support in BIDS (Brain Imaging Data Structure)
 - HED support in NWB (Neurodata Without Borders) when used the [ndx-hed](https://github.com/hed-standard/ndx-hed) extension.
 - Platform-independent and data-neutral
 - Command-line tools and Python API
+
+**Note:** Table remodeling tools have been moved to a separate package. See [table-remodeler](https://pypi.org/project/table-remodeler/) on PyPI or visit [https://www.hedtags.org/table-remodeler](https://www.hedtags.org/table-remodeler) for more information.
 
 ## Quick start
 
@@ -58,6 +59,38 @@ Or install from GitHub (latest):
 ```bash
 pip install git+https://github.com/hed-standard/hed-python/@main
 ```
+
+### Development installation
+
+```{index} development installation, editable install, optional dependencies
+```
+
+For development work or to access optional features, install from the cloned repository:
+
+```bash
+# Clone the repository
+git clone https://github.com/hed-standard/hed-python.git
+cd hed-python
+
+# Install in editable mode with base dependencies
+pip install -e .
+
+# Install with optional dependency groups
+pip install -e ".[dev]"       # Development tools (ruff, black, codespell)
+pip install -e ".[docs]"      # Documentation tools (sphinx, furo)
+pip install -e ".[test]"      # Testing tools (coverage)
+pip install -e ".[examples]"  # Jupyter notebook support
+
+# Install all optional dependencies
+pip install -e ".[dev,docs,test,examples]"
+```
+
+**Optional dependency groups:**
+
+- `dev` - Code quality tools: ruff (linter), black (formatter), codespell, mdformat
+- `docs` - Documentation generation: sphinx, furo theme, myst-parser
+- `test` - Code coverage reporting: coverage
+- `examples` - Jupyter notebook support: jupyter, notebook, ipykernel
 
 ### Basic usage
 
@@ -111,8 +144,9 @@ hedpy schema convert /path/to/schema.xml
 ```bash
 validate_bids /path/to/dataset
 hed_validate_schemas /path/to/schema.xml
-run_remodel /path/to/data /path/to/config.json
 ```
+
+**Note:** The `run_remodel` command has been removed. Table remodeling functionality is now available in the separate [table-remodeler](https://pypi.org/project/table-remodeler/) package.
 
 For more examples, see the [user guide](https://www.hedtags.org/hed-python/user_guide.html).
 
@@ -172,13 +206,9 @@ pip install -e .[docs]
 # Build the documentation
 cd docs
 sphinx-build -b html . _build/html
-
-# Or use the make command (if available)
-make html
-
-# View the built documentation
-# Open docs/_build/html/index.html in your browser
 ```
+
+To iew the built documentation open `docs/_build/html/index.html` in your browser
 
 ### Formatting with Black
 
@@ -229,6 +259,7 @@ The HED ecosystem consists of several interconnected repositories:
 | [hed-resources](https://github.com/hed-standard/hed-resources)         | Tutorials and other HED resources                |
 | [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents             |
 | [hed-schemas](https://github.com/hed-standard/hed-schemas)             | Official HED schema repository                   |
+| [table-remodeler](https://github.com/hed-standard/table-remodeler)     | Table transformation and remodeling tools        |
 | [ndx-hed](https://github.com/hed-standard/ndx-hed)                     | HED support for NWB                              |
 | [hed-javascript](https://github.com/hed-standard/hed-javascript)       | JavaScript HED validation tools                  |
 

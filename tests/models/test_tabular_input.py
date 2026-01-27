@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
         )
         sidecar2_path = os.path.realpath(
             os.path.join(
-                os.path.dirname(os.path.realpath(__file__)), "../data/remodel_tests/task-FacePerceptionSmall_events.json"
+                os.path.dirname(os.path.realpath(__file__)), "../data/other_tests/task-FacePerceptionSmall_events.json"
             )
         )
         cls.hed_schema = schema.load_schema(schema_path)
