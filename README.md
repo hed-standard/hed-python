@@ -2,15 +2,9 @@
 
 # HEDTools - Python
 
-```{index} HEDTools, Python tools, validation, analysis
-```
-
 > Python tools for validation, analysis, and transformation of HED (Hierarchical Event Descriptors) tagged datasets.
 
 ## Overview
-
-```{index} HED, Hierarchical Event Descriptors, BIDS, NWB
-```
 
 HED (Hierarchical Event Descriptors) is a framework for systematically describing both laboratory and real-world events as well as other experimental metadata. HED tags are comma-separated path strings that provide a standardized vocabulary for annotating events and experimental conditions.
 
@@ -27,13 +21,7 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 
 ## Quick start
 
-```{index} quick start, getting started, installation
-```
-
 ### Online tools (no installation required)
-
-```{index} online tools, web tools, hedtools.org
-```
 
 For simple validation or transformation tasks, use the online tools at [https://hedtools.org/hed](https://hedtools.org/hed) - no installation needed!
 
@@ -42,9 +30,6 @@ Browser-based validation (no data upload) is available at [https://www.hedtags.o
 A development version of the online tools is available at: [https://hedtools.org/hed_dev](https://hedtools.org/hed_dev)
 
 ### Python installation
-
-```{index} installation; Python, pip install, PyPI
-```
 
 **Requirements:** Python 3.10 or higher
 
@@ -94,9 +79,6 @@ pip install -e ".[dev,docs,test,examples]"
 
 ### Basic usage
 
-```{index} usage examples, HedString, load_schema_version, validation example
-```
-
 ```python
 from hed import HedString, load_schema_version
 
@@ -115,9 +97,6 @@ else:
 ```
 
 ### Command-line tools
-
-```{index} command-line tools, CLI, hedpy, validate-bids, extract-sidecar
-```
 
 HEDTools provides a unified command-line interface with git-like subcommands:
 
@@ -148,12 +127,11 @@ hed_validate_schemas /path/to/schema.xml
 
 **Note:** The `run_remodel` command has been removed. Table remodeling functionality is now available in the separate [table-remodeler](https://pypi.org/project/table-remodeler/) package.
 
+**Note:** The visualization tools such as the word cloud visualization have been moved to a separate [hed-vis](https://pypi.org/project/hedvis/) project.
+
 For more examples, see the [user guide](https://www.hedtags.org/hed-python/user_guide.html).
 
 ### Jupyter notebook examples
-
-```{index} Jupyter notebooks, examples, interactive workflows
-```
 
 **Note:** Example notebooks are available in the [GitHub repository](https://github.com/hed-standard/hed-python/tree/main/examples) only, not in the PyPI package.
 
@@ -185,9 +163,6 @@ See [`examples/README.md`](examples/README.md) for more details.
 
 ## Documentation
 
-```{index} documentation, user guide, API reference, Sphinx
-```
-
 📖 **Full Documentation:** [https://www.hedtags.org/hed-python](https://www.hedtags.org/hed-python)
 
 - [User guide](https://www.hedtags.org/hed-python/user_guide.html) - Usage instructions
@@ -195,9 +170,6 @@ See [`examples/README.md`](examples/README.md) for more details.
 - [HED specification](https://www.hedtags.org/hed-specification) - Full HED standard specification
 
 ### Building docs locally
-
-```{index} building documentation, sphinx-build
-```
 
 ```bash
 # Install documentation dependencies
@@ -211,9 +183,6 @@ sphinx-build -b html . _build/html
 To iew the built documentation open `docs/_build/html/index.html` in your browser
 
 ### Formatting with Black
-
-```{index} Black, code formatting, style guide
-```
 
 This project uses [Black](https://black.readthedocs.io/) for consistent code formatting.
 
@@ -247,9 +216,6 @@ black --workers 1 .
 
 ## Related repositories
 
-```{index} HED ecosystem, repositories, hed-schemas, hed-specification
-```
-
 The HED ecosystem consists of several interconnected repositories:
 
 | Repository                                                             | Description                                      |
@@ -264,9 +230,6 @@ The HED ecosystem consists of several interconnected repositories:
 | [hed-javascript](https://github.com/hed-standard/hed-javascript)       | JavaScript HED validation tools                  |
 
 ## Contributing
-
-```{index} contributing, development setup, pull requests
-```
 
 We welcome contributions! Here's how you can help:
 
@@ -304,13 +267,7 @@ For detailed contribution guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.
 
 ## Configuration
 
-```{index} configuration, schema caching, cache directory
-```
-
 ### Schema caching
-
-~~~{index} schema; caching, ~/.hedtools
-~~~
 
 By default, HED schemas are cached in `~/.hedtools/` (location varies by OS).
 
@@ -343,7 +300,8 @@ HEDTools is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Support
 
-- [Documentation](https://www.hedtags.org/hed-python)
-- [GitHub issues](https://github.com/hed-standard/hed-python/issues)
-- [HED Homepage](https://www.hedtags.org)
+- HED documentation: [www.hedtags.org/hed-resources](https:/www.hedtags.org/hed-resources)
+- HED homepage: [www.hedtags.org](https://www.hedtags.org)
+- GitHub issues: [https://github.com/hed-standard/hed-python/issues](https://github.com/hed-standard/hed-python/issues)
+- Questions or ideas: [HED discussions](https://github.com/orgs/hed-standard/discussions)
 - Contact: [hed-maintainers@gmail.com](mailto:hed-maintainers@gmail.com)
