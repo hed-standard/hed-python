@@ -42,7 +42,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from hed import _version as vr
+from hed import __version__
 from hed.tools.util.io_util import get_file_list
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.scripts.script_utils import setup_logging
@@ -200,7 +200,7 @@ def extract_summary(args):
     """
     logger = logging.getLogger("extract_tabular_summary")
     logger.info(f"Data directory: {args.data_path}")
-    logger.info(f"HED tools version: {str(vr.get_versions())}")
+    logger.info(f"HED tools version: {__version__}")
     logger.debug(f"Name prefix: {args.name_prefix}")
     logger.debug(f"Name suffix: {args.name_suffix}")
     logger.debug(f"Exclude directories: {args.exclude_dirs}")
@@ -325,7 +325,7 @@ def format_output(summary, args):
         summary_dict = summary.get_summary(as_json=False)
         output_dict = {
             "tabular_summary": summary_dict,
-            "hedtools_version": str(vr.get_versions()),
+            "hedtools_version": __version__,
             "parameters": {
                 "data_path": args.data_path,
                 "name_prefix": args.name_prefix,

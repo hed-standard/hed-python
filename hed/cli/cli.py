@@ -8,7 +8,7 @@ Provides a git-like interface with subcommands for validation and schema managem
 
 import click
 from click_option_group import optgroup
-from hed import _version as vr
+from hed import __version__
 
 # Consistent metavar definitions used across all commands
 METAVAR_PATH = "PATH"
@@ -20,7 +20,7 @@ METAVAR_N = "N"
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
-@click.version_option(version=str(vr.get_versions()["version"]), prog_name="hedpy")
+@click.version_option(version=__version__, prog_name="hedpy")
 def cli():
     """HED (Hierarchical Event Descriptors) command-line tools.
 

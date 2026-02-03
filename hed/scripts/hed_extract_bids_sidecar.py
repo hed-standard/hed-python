@@ -33,7 +33,7 @@ import argparse
 import json
 import logging
 import sys
-from hed import _version as vr
+from hed import __version__
 from hed.tools import BidsDataset
 from hed.scripts.script_utils import setup_logging
 
@@ -148,7 +148,7 @@ def extract_template(args):
     """
     logger = logging.getLogger("extract_bids_sidecar")
     logger.info(f"Data directory: {args.data_path}")
-    logger.info(f"HED tools version: {str(vr.get_versions())}")
+    logger.info(f"HED tools version: {__version__}")
     logger.debug(f"Exclude directories: {args.exclude_dirs}")
     logger.debug(f"File suffix: {args.suffix}")
     logger.debug(f"Value columns: {args.value_columns}")
@@ -207,7 +207,7 @@ def format_output(template, args):
     Returns:
         str: JSON-formatted output
     """
-    output_dict = {"sidecar_template": template, "hedtools_version": str(vr.get_versions())}
+    output_dict = {"sidecar_template": template, "hedtools_version": __version__}
     return json.dumps(output_dict, indent=4)
 
 

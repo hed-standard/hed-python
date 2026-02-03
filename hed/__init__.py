@@ -15,7 +15,13 @@ from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
 from hed.schema.hed_schema_io import load_schema, load_schema_version
 
+try:
+    from hed._version import __version__
+except ImportError:
+    # Version file not generated yet (editable install without build)
+    from importlib.metadata import version, PackageNotFoundError
 
-from . import _version
-
-__version__ = _version.get_versions()["version"]
+    try:
+        __version__ = version("hedtools")
+    except PackageNotFoundError:
+        __version__ = "unknown"
