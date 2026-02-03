@@ -300,7 +300,7 @@ HEDTools is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Support
 
-- HED documentation: [www.hedtags.org/hed-resources](https:/www.hedtags.org/hed-resources)
+- HED documentation: [www.hedtags.org/hed-resources](https://www.hedtags.org/hed-resources)
 - HED homepage: [www.hedtags.org](https://www.hedtags.org)
 - GitHub issues: [https://github.com/hed-standard/hed-python/issues](https://github.com/hed-standard/hed-python/issues)
 - Questions or ideas: [HED discussions](https://github.com/orgs/hed-standard/discussions)
