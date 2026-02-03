@@ -1,7 +1,7 @@
-# dummy setup file for versioneer
+# setup.py is only needed for editable installs (pip install -e .)
+# All configuration is in pyproject.toml
 
-import versioneer
 from setuptools import setup
 
 if __name__ == "__main__":
-    setup(version=versioneer.get_version(), cmdclass=versioneer.get_cmdclass())
+    setup()

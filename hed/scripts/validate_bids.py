@@ -42,7 +42,7 @@ Examples:
 import argparse
 import logging
 import sys
-from hed import _version as vr
+from hed import __version__
 from hed.errors import ErrorHandler
 from hed.scripts.script_utils import setup_logging, format_validation_results
 from hed.tools import BidsDataset
@@ -233,7 +233,7 @@ def main(arg_list=None):
 def validate_dataset(args):
     logger = logging.getLogger("validate_bids")
     logger.info(f"Data directory: {args.data_path}")
-    logger.info(f"HEDTools version: {str(vr.get_versions())}")
+    logger.info(f"HEDTools version: {__version__}")
     logger.debug(f"Exclude directories: {args.exclude_dirs}")
     logger.debug(f"File suffixes: {args.suffixes}")
     logger.debug(f"Check for warnings: {args.check_for_warnings}")

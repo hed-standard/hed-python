@@ -149,7 +149,7 @@ git push origin main
 
 ### 2. Create GitHub release
 
-The project uses [versioneer](https://github.com/python-versioneer/python-versioneer) for version management, which automatically derives the version from git tags. We'll create the release tag and release directly on GitHub.
+The project uses [setuptools-scm](https://github.com/pypa/setuptools_scm) for version management, which automatically derives the version from git tags. We'll create the release tag and release directly on GitHub.
 
 #### 2.1 Navigate to create release
 
@@ -538,8 +538,8 @@ git fetch upstream --tags
 # Verify tag exists
 git tag -l
 
-# Check versioneer can find it
-python -c "import hed._version; print(hed._version.get_versions())"
+# Check setuptools-scm can find the version
+python -m setuptools_scm
 ```
 
 #### Issue: Build fails with "No module named X"
@@ -703,7 +703,7 @@ python -m twine upload dist/*                 # Upload
 ## Additional Resources
 
 - [Python Packaging Guide](https://packaging.python.org/)
-- [Versioneer Documentation](https://github.com/python-versioneer/python-versioneer)
+- [setuptools-scm Documentation](https://github.com/pypa/setuptools_scm)
 - [PyPI Help](https://pypi.org/help/)
 - [Semantic Versioning](https://semver.org/)
 - [HED Documentation](https://www.hedtags.org/)

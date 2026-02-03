@@ -1,3 +1,2 @@
-include versioneer.py
 include hed/_version.py
 include requirements.txt

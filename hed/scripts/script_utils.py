@@ -8,7 +8,7 @@ including logging configuration and argument handling.
 import json
 import logging
 import sys
-from hed import _version as vr
+from hed import __version__
 from hed.errors import get_printable_issue_string, ErrorHandler, iter_errors
 
 
@@ -78,7 +78,7 @@ def format_validation_results(
         # Pretty-printed JSON with version metadata
         # Convert issues to JSON-serializable format
         serializable_issues = list(iter_errors(issue_list))
-        return json.dumps({"issues": serializable_issues, "hedtools_version": str(vr.get_versions())}, indent=4)
+        return json.dumps({"issues": serializable_issues, "hedtools_version": __version__}, indent=4)
 
     elif output_format == "json":
         # Compact JSON array of issues
@@ -88,7 +88,7 @@ def format_validation_results(
 
     elif output_format == "text":
         # Human-readable text format with counts and optional filtering
-        output = f"Using HEDTools version: {str(vr.get_versions())}\n"
+        output = f"Using HEDTools version: {__version__}\n"
         output += f"Number of issues: {len(issue_list)}\n"
 
         # Apply error limiting if requested

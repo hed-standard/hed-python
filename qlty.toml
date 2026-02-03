@@ -53,7 +53,7 @@ paths = [
     "**/templates/",
     "**/conf.py",
     "**/deprecated/",
-    "**/versioneer.py",
+
     "**/_version.py"
 ]
 
