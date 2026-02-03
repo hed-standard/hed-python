@@ -46,16 +46,14 @@ dependencies = [
     "et-xmlfile",
     "inflect",
     "jsonschema",
-    "matplotlib>=3.9.0",
     "numpy",
     "openpyxl",
-    "pandas",
+    "pandas>=2.2.3,<3.0.0",
     "portalocker",
     "python-dateutil",
     "pytz",
     "semantic-version",
-    "six",
-    "wordcloud==1.9.5"
+    "six"
 ]
 
 [project.urls]
