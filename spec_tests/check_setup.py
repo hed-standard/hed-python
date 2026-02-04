@@ -51,9 +51,8 @@ def main():
 
     # Required directories and their purposes
     required_dirs = [
-        ("hed-specification", "HED specification repository"),
-        ("hed-specification/tests", "HED specification test directory"),
-        ("hed-specification/tests/json_tests", "JSON test files for error testing"),
+        ("hed-tests", "HED tests repository"),
+        ("hed-tests/json_test_data", "JSON test data directory"),
         ("hed-examples", "HED examples repository"),
         ("hed-examples/datasets", "BIDS datasets for validation testing"),
     ]
@@ -87,9 +86,11 @@ def main():
         print("Tests that require missing content will be skipped gracefully.")
         print("\nCurrently available: test_hed_cache.py (works without submodules)")
         print("Currently skipped: test_errors.py, validate_bids.py (need submodule content)")
-        print("\nTo set up full spec_tests:")
-        print("1. Copy the hed-specification repository content to spec_tests/hed-specification/")
-        print("2. Copy the hed-examples repository content to spec_tests/hed-examples/")
+        print("\nTo set up full spec_tests using submodules:")
+        print("  git submodule update --init --recursive")
+        print("\nAlternatively, manually clone:")
+        print("1. Clone hed-tests repository to spec_tests/hed-tests/")
+        print("2. Clone hed-examples repository to spec_tests/hed-examples/")
 
     print("\nTo run available tests now:")
     print(f"  cd {os.path.dirname(spec_tests_dir)}")
