@@ -286,8 +286,7 @@ The [examples](https://github.com/hed-standard/hed-python/tree/main/examples) di
 ```bash
 git clone https://github.com/hed-standard/hed-python.git
 cd hed-python
-pip install -r requirements.txt
-pip install jupyter notebook
+pip install -e .[examples]
 ```
 
 **Option 2: Download just the examples**

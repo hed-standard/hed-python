@@ -245,13 +245,11 @@ We welcome contributions! Here's how you can help:
 git clone https://github.com/hed-standard/hed-python.git
 cd hed-python
 
-# Install in development mode with all dependencies (including Jupyter)
-pip install -e .[examples]
-pip install -r requirements-dev.txt
+# Install in development mode with all dependencies
+pip install -e .[dev,test,docs,examples]
 
-# Or just core development dependencies
-pip install -e .
-pip install -r requirements.txt
+# Or just core + test dependencies
+pip install -e .[test]
 
 # Run tests
 python -m unittest discover tests
@@ -259,7 +257,7 @@ python -m unittest discover tests
 # Run specific test file
 python -m unittest tests/path/to/test_file.py
 
-# Test notebooks (requires Jupyter dependencies)
+# Test notebooks (requires examples dependencies)
 python -m unittest tests.test_notebooks
 ```
 

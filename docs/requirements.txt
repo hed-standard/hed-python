@@ -1,6 +1,0 @@
-sphinx>=7.1.0,<10.0
-furo>=2024.1.29
-sphinx-copybutton>=0.5.2
-myst-parser>=3.0.0
-sphinx-autodoc-typehints>=1.24.0
-linkify-it-py>=2.0.3

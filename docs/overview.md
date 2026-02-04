@@ -76,8 +76,7 @@ The example notebooks are only available in the GitHub repository. Choose one of
 ```bash
 git clone https://github.com/hed-standard/hed-python.git
 cd hed-python
-pip install -r requirements.txt
-pip install jupyter notebook
+pip install -e .[examples]
 # Notebooks are in: examples/
 ```
 

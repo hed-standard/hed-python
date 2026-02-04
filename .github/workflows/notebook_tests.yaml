@@ -40,10 +40,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -e .
-          # Install Jupyter dependencies for running notebooks
-          pip install jupyter notebook nbformat nbconvert ipykernel
+          pip install -e .[examples]
 
       - name: Test notebook structure and imports
         run: |
