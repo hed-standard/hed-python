@@ -55,10 +55,7 @@ This project adheres to a code of conduct that we expect all contributors to fol
 3. **Install in development mode:**
 
    ```bash
-   pip install -e .
-   pip install -r requirements.txt
-   pip install -r docs/requirements.txt
-   pip install -e .[dev]  # Install development tools (black, ruff, codespell)
+   pip install -e .[dev,test,docs,examples]
    ```
 
 4. **Run tests to verify setup:**
