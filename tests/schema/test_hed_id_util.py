@@ -2,12 +2,11 @@ import unittest
 import pandas as pd
 
 from hed import HedFileError
-from hed.schema.schema_io import ontology_util, df_util, df_constants as constants
-from hed.schema.schema_io.ontology_util import (
+from hed.schema.schema_io import hed_id_util, df_util, df_constants as constants
+from hed.schema.schema_io.hed_id_util import (
     _verify_hedid_matches,
     assign_hed_ids_section,
     get_all_ids,
-    convert_df_to_omn,
     update_dataframes_from_schema,
 )
 from hed.schema.schema_io.df_util import get_library_name_and_id
@@ -41,19 +40,19 @@ class TestLibraryFunctions(unittest.TestCase):
         self.assertEqual(first_id, df_util.UNKNOWN_LIBRARY_VALUE)
 
     def test_get_hedid_range_normal_case(self):
-        id_set = ontology_util._get_hedid_range("score", constants.DATA_KEY)
+        id_set = hed_id_util._get_hedid_range("score", constants.DATA_KEY)
         self.assertTrue(40401 in id_set)
         self.assertEqual(len(id_set), 200)  # Check the range size
 
     def test_get_hedid_range_boundary(self):
         # Test boundary condition where end range is -1
-        id_set = ontology_util._get_hedid_range("score", constants.TAG_KEY)
+        id_set = hed_id_util._get_hedid_range("score", constants.TAG_KEY)
         self.assertTrue(42001 in id_set)
         self.assertEqual(len(id_set), 18000 - 1)  # From 42001 to 60000
 
     def test_get_hedid_range_error(self):
         with self.assertRaises(NotImplementedError):
-            ontology_util._get_hedid_range("lang", constants.STRUCT_KEY)
+            hed_id_util._get_hedid_range("lang", constants.STRUCT_KEY)
 
 
 class TestVerifyHedIdMatches(unittest.TestCase):
@@ -62,36 +61,36 @@ class TestVerifyHedIdMatches(unittest.TestCase):
 
     def test_no_hedid(self):
         df = pd.DataFrame([{"rdfs:label": "Event", "hedId": ""}, {"rdfs:label": "Age-#", "hedId": ""}])
-        errors = _verify_hedid_matches(self.schema_82.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
+        errors = _verify_hedid_matches(self.schema_82.tags, df, hed_id_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 0)
 
     def test_id_matches(self):
         df = pd.DataFrame([{"rdfs:label": "Event", "hedId": "HED_0012001"}, {"rdfs:label": "Age-#", "hedId": "HED_0012475"}])
-        errors = _verify_hedid_matches(hed_schema_global.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
+        errors = _verify_hedid_matches(hed_schema_global.tags, df, hed_id_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 0)
 
     def test_label_mismatch_id(self):
         df = pd.DataFrame([{"rdfs:label": "Event", "hedId": "HED_0012005"}, {"rdfs:label": "Age-#", "hedId": "HED_0012007"}])
 
-        errors = _verify_hedid_matches(hed_schema_global.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
+        errors = _verify_hedid_matches(hed_schema_global.tags, df, hed_id_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 2)
 
     def test_label_no_entry(self):
         df = pd.DataFrame([{"rdfs:label": "NotARealEvent", "hedId": "does_not_matter"}])
 
-        errors = _verify_hedid_matches(hed_schema_global.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
+        errors = _verify_hedid_matches(hed_schema_global.tags, df, hed_id_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 1)
 
     def test_out_of_range(self):
         df = pd.DataFrame([{"rdfs:label": "Event", "hedId": "HED_0000000"}])
 
-        errors = _verify_hedid_matches(self.schema_82.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
+        errors = _verify_hedid_matches(self.schema_82.tags, df, hed_id_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 1)
 
     def test_not_int(self):
         df = pd.DataFrame([{"rdfs:label": "Event", "hedId": "HED_AAAAAAA"}])
 
-        errors = _verify_hedid_matches(self.schema_82.tags, df, ontology_util._get_hedid_range("", constants.TAG_KEY))
+        errors = _verify_hedid_matches(self.schema_82.tags, df, hed_id_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 1)
 
     def test_get_all_ids_exists(self):
@@ -152,24 +151,5 @@ class TestUpdateDataframes(unittest.TestCase):
             self.assertEqual(len(e.issues), 115)
 
 
-class TestConvertOmn(unittest.TestCase):
-    def test_convert_df_to_omn(self):
-        dataframes = hed_schema_global.get_as_dataframes()
-        omn_version, _ = convert_df_to_omn(dataframes)
-
-        # make these more robust, for now just verify it's somewhere in the result
-        for df_name, df in dataframes.items():
-            if df_name == constants.STRUCT_KEY or "rdfs:label" not in df.columns:
-                continue  # Not implemented yet
-            for label in df["rdfs:label"]:
-                # Verify that the label is somewhere in the OMN text
-                error = f"Label '{label}' from dataframe '{df_name}' was not found in the OMN output."
-                label_key = f'rdfs:label "{label}"'
-                self.assertIn(label_key, omn_version, error)
-
-            for hed_id in df[constants.hed_id]:
-                if df_name == constants.STRUCT_KEY:
-                    continue  # Not implemented yet
-                base_id = f": hed:{hed_id}"
-                error = f"HedId '{base_id}' from dataframe '{df_name}' was not found in the OMN output."
-                self.assertIn(base_id, omn_version, error)
+if __name__ == "__main__":
+    unittest.main()

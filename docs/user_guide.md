@@ -625,9 +625,9 @@ hedpy schema add-ids /path/to/hed-schemas score 2.2.0
 1. Validate schema thoroughly before adding IDs
 2. Convert to all formats and verify equivalence
 3. Add HED IDs only once - they should remain stable
-4. Generate ontology after IDs are added
-5. Verify that the created ontology is valid using [Protégé](https://protege.stanford.edu/)
-6. Commit changes to version control before moving to stable release
+4. Commit changes to version control before moving to stable release
+
+**Note:** Ontology generation (OMN/OWL format) has been moved to the separate [hed-ontology](https://github.com/hed-standard/hed-ontology) repository.
 
 ______________________________________________________________________
 
