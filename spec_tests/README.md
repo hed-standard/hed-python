@@ -10,9 +10,8 @@ To run spec_tests locally, you need to have the following directory structure:
 
 ```
 spec_tests/
-├── hed-specification/
-│   └── tests/
-│       └── json_tests/          # JSON test files for error validation
+├── hed-tests/
+│   └── json_test_data/          # JSON test files from hed-tests repository
 ├── hed-examples/
 │   └── datasets/                # BIDS datasets for validation testing  
 ├── test_sidecar.json           # Already present
@@ -23,9 +22,24 @@ spec_tests/
 
 ## Setup Instructions
 
-1. **Copy Submodule Content**: 
-   - Copy the content of the `hed-specification` repository to `spec_tests/hed-specification/`
-   - Copy the content of the `hed-examples` repository to `spec_tests/hed-examples/`
+### Option 1: Using Git Submodules (Recommended)
+
+1. **Initialize Submodules**: 
+   ```powershell
+   git submodule update --init --recursive
+   ```
+   This will automatically clone the `hed-tests` and `hed-examples` repositories into the correct locations.
+
+2. **Update Submodules** (when needed):
+   ```powershell
+   git submodule update --remote
+   ```
+
+### Option 2: Manual Setup (Alternative)
+
+1. **Clone Required Repositories**: 
+   - Clone the `hed-tests` repository to `spec_tests/hed-tests/`
+   - Clone the `hed-examples` repository to `spec_tests/hed-examples/`
 
 2. **Verify Setup**: 
    - Run `python spec_tests/check_setup.py` to verify all required directories exist
@@ -60,7 +74,10 @@ python -m unittest spec_tests.test_hed_cache -v
 
 - The `test_hed_cache.py` tests should work immediately as they don't require the submodule content
 - The `test_errors.py` and `validate_bids.py` tests require the submodule content to be present
-- On GitHub Actions, the submodules are automatically checked out, but locally you need to copy the content manually
+- On GitHub Actions, the submodules are automatically checked out via the workflow configuration
+- Locally, initialize submodules using `git submodule update --init --recursive`
+- The `spec_tests/hed-tests/` directory is gitignored to prevent committing submodule content directly
+- Use `git submodule update --remote` to pull the latest changes from the submodule repositories
 
 ## Troubleshooting
 
