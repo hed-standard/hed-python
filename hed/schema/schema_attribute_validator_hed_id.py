@@ -1,4 +1,4 @@
-from hed.schema.schema_io.ontology_util import get_library_data
+from hed.schema.hed_cache import get_library_data
 from hed.schema.schema_io.df_util import remove_prefix
 from semantic_version import Version
 from hed.schema.hed_schema_io import load_schema_version
