@@ -233,13 +233,6 @@ def get_library_name_and_id(schema):
     return name.capitalize(), starting_id
 
 
-# todo: Replace this once we no longer support < python 3.10
-def remove_prefix(text, prefix):
-    if text and text.startswith(prefix):
-        return text[len(prefix) :]
-    return text
-
-
 def calculate_attribute_type(attribute_entry):
     """Returns the type of this attribute(annotation, object, data)
 
