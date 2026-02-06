@@ -5,18 +5,19 @@
 Python HEDTools
 ===============
 
-Welcome to the Python HEDTools documentation! This package provides comprehensive tools for working with **Hierarchical Event Descriptors (HED)** - a standardized framework for annotating events and experimental metadata in neuroscience and beyond.
-
-What is HED?
-------------
-
-HED is a standardized vocabulary and annotation framework designed to systematically describe events experimental data, particularly neuroimaging and behavioral data. It's integrated into major neuroimaging standards:
+Welcome to the Python HEDTools documentation!
+This package provides comprehensive tools for working with
+**Hierarchical Event Descriptors (HED)** - a standardized framework
+for annotating events and experimental metadata in neuroscience and beyond.
+HED is integrated into major neuroimaging standards:
 
 * `BIDS <https://bids.neuroimaging.io/>`_ (Brain Imaging Data Structure)
 * `NWB <https://www.nwb.org/>`_ (Neurodata Without Borders)
 
-Key features
-------------
+and this package enables you to validate, analyze, and manipulate HED annotations in various formats.
+
+Pythn HEDTools features
+-----------------------
 
 * **Validation**: Verify HED annotations against official schemas
 * **Analysis**: Search, filter, and summarize HED-annotated data

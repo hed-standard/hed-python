@@ -569,3 +569,74 @@ class TestParseVersionList(unittest.TestCase):
             parse_version_list(["test:score", "ol:otherlib", "test:testlib", "abc:anotherlib"]),
             {"test": "test:score,testlib", "ol": "ol:otherlib", "abc": "abc:anotherlib"},
         )
+
+
+class TestPrereleaseParameter(unittest.TestCase):
+    """Test the check_prerelease parameter functionality."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up test fixtures."""
+        cls.schema_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/")
+
+    def test_check_prerelease_parameter_exists(self):
+        """Test that check_prerelease parameter is accepted by load_schema_version."""
+        # This should not raise an error about unexpected keyword argument
+        try:
+            # Try to load a nonexistent version with check_prerelease parameter
+            load_schema_version("99.99.99", xml_folder=self.schema_dir, check_prerelease=True)
+        except HedFileError:
+            # Expected - version doesn't exist, but parameter was accepted
+            pass
+        except TypeError as e:
+            self.fail(f"check_prerelease parameter not accepted: {e}")
+
+    def test_check_prerelease_default_false(self):
+        """Test that check_prerelease defaults to False for backward compatibility."""
+        # Load a regular schema without the parameter (should work)
+        schema = load_schema_version("8.2.0", xml_folder=self.schema_dir)
+        self.assertIsInstance(schema, HedSchema, "Should load regular schema without check_prerelease")
+        self.assertEqual(schema.version_number, "8.2.0", "Should have correct version")
+
+    def test_check_prerelease_false_explicit(self):
+        """Test that check_prerelease=False works explicitly."""
+        # Load a regular schema with check_prerelease explicitly set to False
+        schema = load_schema_version("8.2.0", xml_folder=self.schema_dir, check_prerelease=False)
+        self.assertIsInstance(schema, HedSchema, "Regular schema should load with check_prerelease=False")
+        self.assertEqual(schema.version_number, "8.2.0", "Should have correct version")
+
+    def test_check_prerelease_with_namespace(self):
+        """Test that check_prerelease parameter works with namespace."""
+        # Load regular schema with namespace and check_prerelease=False
+        schema = load_schema_version("test:8.2.0", xml_folder=self.schema_dir, check_prerelease=False)
+        self.assertIsInstance(schema, HedSchema, "Should load with namespace")
+        self.assertEqual(schema._namespace, "test:", "Should have correct namespace")
+        self.assertEqual(schema.version_number, "8.2.0", "Should have correct version")
+
+    def test_nonexistent_version_error_message(self):
+        """Test that error messages are consistent with/without check_prerelease."""
+        # Both should give similar error messages for nonexistent versions
+        with self.assertRaises(HedFileError) as context1:
+            load_schema_version("99.99.99", xml_folder=self.schema_dir, check_prerelease=False)
+
+        with self.assertRaises(HedFileError) as context2:
+            load_schema_version("99.99.99", xml_folder=self.schema_dir, check_prerelease=True)
+
+        # Both should mention "not found"
+        self.assertIn("not found", str(context1.exception).lower())
+        self.assertIn("not found", str(context2.exception).lower())
+
+    def test_check_prerelease_parameter_in_signature(self):
+        """Test that check_prerelease is properly defined in function signature."""
+        import inspect
+
+        sig = inspect.signature(load_schema_version)
+        self.assertIn("check_prerelease", sig.parameters, "check_prerelease should be in function signature")
+        self.assertEqual(sig.parameters["check_prerelease"].default, False, "check_prerelease should default to False")
+
+    def test_check_prerelease_with_regular_schema(self):
+        """Test that regular schemas load correctly with check_prerelease=True."""
+        # This tests the bug fix: regular schemas should still be found when check_prerelease=True
+        schema = load_schema_version("8.2.0", xml_folder=self.schema_dir, check_prerelease=True)
+        self.assertIsInstance(schema, HedSchema, "Regular schema should load with check_prerelease=True")
+        self.assertEqual(schema.version_number, "8.2.0", "Should have correct version")
