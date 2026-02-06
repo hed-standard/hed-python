@@ -16,8 +16,8 @@ HED is integrated into major neuroimaging standards:
 
 and this package enables you to validate, analyze, and manipulate HED annotations in various formats.
 
-Pythn HEDTools features
------------------------
+Python HEDTools features
+------------------------
 
 * **Validation**: Verify HED annotations against official schemas
 * **Analysis**: Search, filter, and summarize HED-annotated data

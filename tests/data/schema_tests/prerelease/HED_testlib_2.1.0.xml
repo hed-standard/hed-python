@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<HED library="testlib" version="2.1.0" withStandard="8.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd">
+   <prologue>Test prerelease library schema for testing mixed regular and prerelease loading.</prologue>
+   <schema>
+      <node>
+         <name>Prerelease-item</name>
+         <description>A test item only in prerelease version.</description>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+</HED>

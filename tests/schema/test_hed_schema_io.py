@@ -640,3 +640,35 @@ class TestPrereleaseParameter(unittest.TestCase):
         schema = load_schema_version("8.2.0", xml_folder=self.schema_dir, check_prerelease=True)
         self.assertIsInstance(schema, HedSchema, "Regular schema should load with check_prerelease=True")
         self.assertEqual(schema.version_number, "8.2.0", "Should have correct version")
+
+    def test_load_actual_prerelease_schema(self):
+        """Test loading an actual prerelease schema from prerelease directory."""
+        # Load a schema that exists in the prerelease directory
+        schema = load_schema_version("8.3.0", xml_folder=self.schema_dir, check_prerelease=True)
+        self.assertIsInstance(schema, HedSchema, "Should load prerelease schema")
+        self.assertEqual(schema.version_number, "8.3.0", "Should have correct prerelease version")
+        self.assertIn("event", schema.tags.all_names, "Prerelease schema should have tags")
+
+    def test_prerelease_not_found_without_flag(self):
+        """Test that prerelease schema is not found without check_prerelease=True."""
+        # Schema exists in prerelease directory but should not be found
+        with self.assertRaises(HedFileError) as context:
+            load_schema_version("8.3.0", xml_folder=self.schema_dir, check_prerelease=False)
+        self.assertIn("not found", str(context.exception).lower())
+
+    def test_load_prerelease_library(self):
+        """Test loading a prerelease library schema."""
+        schema = load_schema_version("testlib_2.1.0", xml_folder=self.schema_dir, check_prerelease=True)
+        self.assertIsInstance(schema, HedSchema, "Should load prerelease library")
+        self.assertEqual(schema.version_number, "2.1.0", "Should have correct version")
+        self.assertEqual(schema.library, "testlib", "Should have correct library name")
+        self.assertIn("prerelease-item", schema.tags.all_names, "Should have prerelease library tags")
+
+    def test_mixed_regular_and_prerelease_schemas(self):
+        """Test loading a mix of regular and prerelease schemas with different namespaces."""
+        # Load regular schema and prerelease library with different namespaces
+        schemas = load_schema_version(["base:8.2.0", "test:testlib_2.1.0"], xml_folder=self.schema_dir, check_prerelease=True)
+        self.assertIsInstance(schemas, HedSchemaGroup, "Should load as HedSchemaGroup")
+        self.assertEqual(len(schemas._schemas), 2, "Should have two schemas")
+        self.assertIn("base:", schemas._schemas, "Should have base namespace")
+        self.assertIn("test:", schemas._schemas, "Should have test namespace")

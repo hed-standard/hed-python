@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<HED version="8.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/hed-standard/hed-specification/raw/master/hedxml/HED8.0.0.xsd">
+   <prologue>Test prerelease schema for unit testing prerelease functionality.</prologue>
+   <schema>
+      <node>
+         <name>Event</name>
+         <description>Something that happens at a given time and place.</description>
+      </node>
+      <node>
+         <name>Property</name>
+         <description>A characteristic of something.</description>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+</HED>
