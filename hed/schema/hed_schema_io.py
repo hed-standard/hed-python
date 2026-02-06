@@ -22,7 +22,7 @@ from urllib.error import URLError
 MAX_MEMORY_CACHE = 40
 
 
-def load_schema_version(xml_version=None, xml_folder=None) -> Union["HedSchema", "HedSchemaGroup"]:
+def load_schema_version(xml_version=None, xml_folder=None, check_prerelease=False) -> Union["HedSchema", "HedSchemaGroup"]:
     """Return a HedSchema or HedSchemaGroup extracted from xml_version
 
     Parameters:
@@ -31,6 +31,7 @@ def load_schema_version(xml_version=None, xml_folder=None) -> Union["HedSchema",
                                            based on the output of HedSchema.get_formatted_version
                                            Basic format: `[schema_namespace:][library_name_]X.Y.Z`.
         xml_folder (str): Path to a folder containing schema.
+        check_prerelease (bool): If True, check the prerelease directory for schemas.
 
     Returns:
         Union[HedSchema, HedSchemaGroup]: The schema or schema group extracted.
@@ -49,14 +50,17 @@ def load_schema_version(xml_version=None, xml_folder=None) -> Union["HedSchema",
             raise HedFileError(HedExceptions.CANNOT_PARSE_JSON, str(e), xml_version) from e
     if xml_version and isinstance(xml_version, list):
         xml_versions = parse_version_list(xml_version)
-        schemas = [_load_schema_version(xml_version=version, xml_folder=xml_folder) for version in xml_versions.values()]
+        schemas = [
+            _load_schema_version(xml_version=version, xml_folder=xml_folder, check_prerelease=check_prerelease)
+            for version in xml_versions.values()
+        ]
         if len(schemas) == 1:
             return schemas[0]
 
         name = ",".join([schema.version for schema in schemas])
         return HedSchemaGroup(schemas, name=name)
     else:
-        return _load_schema_version(xml_version=xml_version, xml_folder=xml_folder)
+        return _load_schema_version(xml_version=xml_version, xml_folder=xml_folder, check_prerelease=check_prerelease)
 
 
 def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> "HedSchema":
@@ -246,7 +250,7 @@ def parse_version_list(xml_version_list) -> dict:
 
 
 @functools.lru_cache(maxsize=MAX_MEMORY_CACHE)
-def _load_schema_version(xml_version=None, xml_folder=None):
+def _load_schema_version(xml_version=None, xml_folder=None, check_prerelease=False):
     """Return specified version
 
     Parameters:
@@ -256,6 +260,7 @@ def _load_schema_version(xml_version=None, xml_folder=None):
                            The schema namespace must be the same and not repeated if loading multiple merged schemas.
 
         xml_folder (str): Path to a folder containing schema.
+        check_prerelease (bool): If True, check the prerelease directory for schemas.
 
     Returns:
         Union[HedSchema, HedSchemaGroup]: The requested HedSchema object.
@@ -279,14 +284,18 @@ def _load_schema_version(xml_version=None, xml_folder=None):
     else:
         xml_versions = [""]
 
-    first_schema = _load_schema_version_sub(xml_versions[0], schema_namespace, xml_folder=xml_folder, name=name)
+    first_schema = _load_schema_version_sub(
+        xml_versions[0], schema_namespace, xml_folder=xml_folder, check_prerelease=check_prerelease, name=name
+    )
     filenames = [os.path.basename(first_schema.filename)]
 
     # Collect all duplicate issues for proper error reporting
     all_duplicate_issues = []
 
     for version in xml_versions[1:]:
-        _load_schema_version_sub(version, schema_namespace, xml_folder=xml_folder, schema=first_schema, name=name)
+        _load_schema_version_sub(
+            version, schema_namespace, xml_folder=xml_folder, check_prerelease=check_prerelease, schema=first_schema, name=name
+        )
 
         # Collect duplicate errors when merging schemas in the same namespace
         current_filename = os.path.basename(first_schema.filename)
@@ -319,13 +328,14 @@ def _load_schema_version(xml_version=None, xml_folder=None):
     return first_schema
 
 
-def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, schema=None, name=""):
+def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, check_prerelease=False, schema=None, name=""):
     """Return specified version(single version only for this one)
 
     Parameters:
         xml_version (str): HED version format string. Expected format: '[library_name_]X.Y.Z'
         schema_namespace (str): The prefix this will have
         xml_folder (str): Path to a folder containing schema
+        check_prerelease (bool): If True, check the prerelease directory for schemas
         schema (HedSchema or None): A HED schema to merge this new file into.
         name (str): User supplied identifier for this schema
 
@@ -358,14 +368,16 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
         )
 
     hed_file_path = hed_cache.get_hed_version_path(
-        version_to_validate, library_name=library_name, local_hed_directory=xml_folder
+        version_to_validate, library_name=library_name, local_hed_directory=xml_folder, check_prerelease=check_prerelease
     )
 
     if hed_file_path:
         hed_schema = load_schema(hed_file_path, schema_namespace=schema_namespace, schema=schema, name=name)
     else:
         library_string = f"for library '{library_name}'" if library_name else ""
-        known_versions = hed_cache.get_hed_versions(xml_folder, library_name=library_name if library_name else "all")
+        known_versions = hed_cache.get_hed_versions(
+            xml_folder, library_name=library_name if library_name else "all", check_prerelease=check_prerelease
+        )
         raise HedFileError(
             HedExceptions.FILE_NOT_FOUND,
             f"HED version {library_string}: '{version_to_validate}' not found. Check {hed_cache.get_cache_directory(xml_folder)} for cache or https://github.com/hed-standard/hed-schemas/tree/main/library_schemas. "

@@ -154,7 +154,16 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
     if not hed_versions or not xml_version:
         return None
     if xml_version in hed_versions:
-        return _create_xml_filename(xml_version, library_name, local_hed_directory, check_prerelease)
+        # Check regular directory first
+        regular_path = _create_xml_filename(xml_version, library_name, local_hed_directory, False)
+        if os.path.exists(regular_path):
+            return regular_path
+
+        # If check_prerelease is True, also check prerelease directory
+        if check_prerelease:
+            prerelease_path = _create_xml_filename(xml_version, library_name, local_hed_directory, True)
+            if os.path.exists(prerelease_path):
+                return prerelease_path
     return None
 
 
