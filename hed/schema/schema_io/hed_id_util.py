@@ -66,7 +66,7 @@ def get_all_ids(df):
         Union[Set, None]: None if this has no HED column, otherwise all unique numbers as a set.
     """
     if constants.hed_id in df.columns:
-        modified_df = df[constants.hed_id].apply(lambda x: x.removeprefix("HED_") if x else x)
+        modified_df = df[constants.hed_id].apply(lambda x: x.removeprefix("HED_") if isinstance(x, str) else x)
         modified_df = pd.to_numeric(modified_df, errors="coerce").dropna().astype(int)
         return set(modified_df.unique())
     return None
