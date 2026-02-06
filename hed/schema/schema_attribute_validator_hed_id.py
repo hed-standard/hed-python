@@ -1,5 +1,4 @@
 from hed.schema.hed_cache import get_library_data
-from hed.schema.schema_io.df_util import remove_prefix
 from semantic_version import Version
 from hed.schema.hed_schema_io import load_schema_version
 from hed.schema.hed_cache import get_hed_versions
@@ -87,13 +86,13 @@ class HedIDValidator:
 
         if old_id:
             try:
-                old_id = int(remove_prefix(old_id, "HED_"))
+                old_id = int(old_id.removeprefix("HED_"))
             except ValueError:
                 # Just silently ignore invalid old_id values(this shouldn't happen)
                 pass
         if new_id:
             try:
-                new_id = int(remove_prefix(new_id, "HED_"))
+                new_id = int(new_id.removeprefix("HED_"))
             except ValueError:
                 return ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, tag_entry.name, new_id)
         # Nothing to verify

@@ -9,7 +9,6 @@ import pandas as pd
 from hed.schema.schema_io import schema_util
 from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_constants import HedKey
-from hed.schema.schema_io.df_util import remove_prefix
 from hed.schema.hed_cache import get_library_data
 from hed.schema.schema_io import df_constants as constants
 
@@ -67,7 +66,7 @@ def get_all_ids(df):
         Union[Set, None]: None if this has no HED column, otherwise all unique numbers as a set.
     """
     if constants.hed_id in df.columns:
-        modified_df = df[constants.hed_id].apply(lambda x: remove_prefix(x, "HED_"))
+        modified_df = df[constants.hed_id].apply(lambda x: x.removeprefix("HED_") if isinstance(x, str) else x)
         modified_df = pd.to_numeric(modified_df, errors="coerce").dropna().astype(int)
         return set(modified_df.unique())
     return None
@@ -171,7 +170,7 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
                     row_number, row, f"'{label}' has an improperly formatted hedID in dataframe."
                 )
                 continue
-            id_value = remove_prefix(df_id, "HED_")
+            id_value = df_id.removeprefix("HED_")
             try:
                 id_int = int(id_value)
                 if id_int not in unused_tag_ids:

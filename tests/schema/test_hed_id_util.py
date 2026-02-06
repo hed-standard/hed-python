@@ -111,6 +111,32 @@ class TestVerifyHedIdMatches(unittest.TestCase):
         result = get_all_ids(df)
         self.assertEqual(result, {1, 3})  # Should ignore non-numeric and malformed IDs
 
+    def test_get_all_ids_with_nan(self):
+        # Test when hedId column contains NaN values (pandas null)
+        df = pd.DataFrame({"hedId": ["HED_0000001", pd.NA, "HED_0000003", None]})
+        result = get_all_ids(df)
+        self.assertEqual(result, {1, 3})  # Should handle NaN/None gracefully
+
+    def test_get_all_ids_with_numeric_types(self):
+        # Test when hedId column contains numeric types (edge case)
+        # pd.to_numeric will convert these numeric values as-is
+        df = pd.DataFrame({"hedId": ["HED_0000001", 123, "HED_0000003", 456]})
+        result = get_all_ids(df)
+        # Should extract from valid string entries with HED_ prefix AND numeric values
+        self.assertEqual(result, {1, 3, 123, 456})
+
+    def test_get_all_ids_empty_strings(self):
+        # Test when hedId column contains empty strings
+        df = pd.DataFrame({"hedId": ["HED_0000001", "", "HED_0000003", ""]})
+        result = get_all_ids(df)
+        self.assertEqual(result, {1, 3})
+
+    def test_get_all_ids_with_none(self):
+        # Test when hedId column contains None values
+        df = pd.DataFrame({"hedId": ["HED_0000001", None, "HED_0000003", None]})
+        result = get_all_ids(df)
+        self.assertEqual(result, {1, 3})
+
     def test_assign_hed_ids_section(self):
         df = pd.DataFrame(
             {

@@ -4,7 +4,6 @@ from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io.df_util import (
     create_empty_dataframes,
     get_library_name_and_id,
-    remove_prefix,
     calculate_attribute_type,
 )
 from hed.schema.schema_io.schema2base import Schema2Base
@@ -49,7 +48,7 @@ class Schema2DF(Schema2Base):
             - The full formatted hed_id.
         """
         prefix, obj_id = get_library_name_and_id(self._schema)
-        name = f"{prefix}{remove_prefix(object_name, 'Hed')}"
+        name = f"{prefix}{object_name.removeprefix('Hed')}"
         full_hed_id = self._get_object_id(object_name, obj_id, include_prefix)
         return name, full_hed_id
 
