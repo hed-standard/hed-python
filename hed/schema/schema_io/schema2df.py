@@ -202,18 +202,6 @@ class Schema2DF(Schema2Base):
             df_key = constants.DATA_KEY
             property_type = "DataProperty"
 
-        {
-            "HedTag": self._get_object_id("HedTag", include_prefix=True),
-            "HedUnit": self._get_object_id("HedUnit", include_prefix=True),
-            "HedUnitClass": self._get_object_id("HedUnitClass", include_prefix=True),
-            "HedUnitModifier": self._get_object_id("HedUnitModifier", include_prefix=True),
-            "HedValueClass": self._get_object_id("HedValueClass", include_prefix=True),
-            "HedElement": self._get_object_id("HedElement", include_prefix=True),
-            "string": "xsd:string",
-            "boolean": "xsd:boolean",
-            "float": "xsd:float",
-        }
-
         tag_id = entry.attributes.get(HedKey.HedID, "")
         new_row = {
             constants.hed_id: f"{tag_id}",
