@@ -215,7 +215,6 @@ class SchemaLoaderDF(SchemaLoader):
         self._read_attribute_section(self.input_data[constants.DATA_KEY])
 
     def _read_attribute_section(self, df, annotation_property=False, section_key=HedSectionKey.Attributes):
-        # todo: this needs to ALSO check range/domain(and verify they match)
         for row_number, row in df.iterrows():
             new_entry = self._create_entry(row_number, row, section_key)
             if annotation_property:
