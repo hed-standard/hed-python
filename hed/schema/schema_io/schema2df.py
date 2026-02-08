@@ -202,53 +202,11 @@ class Schema2DF(Schema2Base):
             df_key = constants.DATA_KEY
             property_type = "DataProperty"
 
-        hed_id_mapping = {
-            "HedTag": self._get_object_id("HedTag", include_prefix=True),
-            "HedUnit": self._get_object_id("HedUnit", include_prefix=True),
-            "HedUnitClass": self._get_object_id("HedUnitClass", include_prefix=True),
-            "HedUnitModifier": self._get_object_id("HedUnitModifier", include_prefix=True),
-            "HedValueClass": self._get_object_id("HedValueClass", include_prefix=True),
-            "HedElement": self._get_object_id("HedElement", include_prefix=True),
-            "string": "xsd:string",
-            "boolean": "xsd:boolean",
-            "float": "xsd:float",
-        }
-
-        domain_attributes = {
-            HedKey.TagDomain: "HedTag",
-            HedKey.UnitDomain: "HedUnit",
-            HedKey.UnitClassDomain: "HedUnitClass",
-            HedKey.UnitModifierDomain: "HedUnitModifier",
-            HedKey.ValueClassDomain: "HedValueClass",
-            HedKey.ElementDomain: "HedElement",
-        }
-        range_attributes = {
-            HedKey.StringRange: "string",
-            HedKey.TagRange: "HedTag",
-            HedKey.NumericRange: "float",
-            HedKey.BoolRange: "boolean",
-            HedKey.UnitRange: "HedUnit",
-            HedKey.UnitClassRange: "HedUnitClass",
-            HedKey.ValueClassRange: "HedValueClass",
-        }
-
-        domain_keys = [key for key in entry.attributes if key in domain_attributes]
-        range_keys = [key for key in entry.attributes if key in range_attributes]
-
-        if self._get_as_ids:
-            domain_string = " or ".join(hed_id_mapping[domain_attributes[key]] for key in domain_keys)
-            range_string = " or ".join(hed_id_mapping[range_attributes[key]] for key in range_keys)
-        else:
-            domain_string = " or ".join(domain_attributes[key] for key in domain_keys)
-            range_string = " or ".join(range_attributes[key] for key in range_keys)
-
         tag_id = entry.attributes.get(HedKey.HedID, "")
         new_row = {
             constants.hed_id: f"{tag_id}",
             constants.name: entry.name,
             constants.property_type: property_type,
-            constants.property_domain: domain_string,
-            constants.property_range: range_string,
             constants.properties: self._format_tag_attributes(entry.attributes) if include_props else "",
             constants.dcdescription: entry.description,
         }
