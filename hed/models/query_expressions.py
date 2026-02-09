@@ -105,7 +105,7 @@ class ExpressionAnd(Expression):
             for other_group in groups2:
                 if group.group is other_group.group:
                     # At this point any shared tags between the two groups invalidates it.
-                    if any(tag is tag2 and tag is not None for tag in group.tags for tag2 in other_group.tags):
+                    if any(tag is tag2 and tag is not None for tag in group.children for tag2 in other_group.children):
                         continue
                     # Merge the two groups tags into one new result, now that we've verified they're unique
                     merged_result = group.merge_and_result(other_group)
@@ -223,7 +223,7 @@ class ExpressionExactMatch(Expression):
     def _filter_exact_matches(search_results):
         filtered_list = []
         for group in search_results:
-            if len(group.group.children) == len(group.tags):
+            if len(group.group.children) == len(group.children):
                 filtered_list.append(group)
 
         return filtered_list

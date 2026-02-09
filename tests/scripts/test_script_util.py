@@ -28,8 +28,19 @@ class TestAddExtension(unittest.TestCase):
 
     def test_none_extension(self):
         """Test behavior with None as extension."""
-        with self.assertRaises(TypeError):
+        with self.assertRaises(AttributeError):
             add_extension("filename", None)
+
+    def test_case_insensitive_extension(self):
+        """Test that extensions are handled case-insensitively."""
+        # TSV in various cases should all be treated as .tsv
+        self.assertEqual(add_extension("filename", ".TSV"), os.path.normpath("hedtsv/filename"))
+        self.assertEqual(add_extension("filename", ".Tsv"), os.path.normpath("hedtsv/filename"))
+        self.assertEqual(add_extension("filename", ".tSv"), os.path.normpath("hedtsv/filename"))
+
+        # Other extensions should also work case-insensitively
+        self.assertEqual(add_extension("filename", ".XML"), "filename.xml")
+        self.assertEqual(add_extension("filename", ".Xml"), "filename.xml")
 
 
 class TestSortBaseSchemas(unittest.TestCase):
@@ -110,6 +121,30 @@ class TestSortBaseSchemas(unittest.TestCase):
         with contextlib.redirect_stdout(None):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
+
+    def test_case_insensitive_extensions(self):
+        """Test that file extensions are handled case-insensitively."""
+        # Create test files with uppercase extensions using different base names to avoid conflicts
+        uppercase_files = [
+            "case_test_schema.MEDIAWIKI",
+            "case_other_schema.XML",
+        ]
+        for filename in uppercase_files:
+            with open(filename, "w") as f:
+                f.write("")  # Create empty file
+
+        try:
+            filenames = ["case_test_schema.MEDIAWIKI", "case_other_schema.XML"]
+            # Should normalize extensions to lowercase
+            expected = {"case_test_schema": {".mediawiki"}, "case_other_schema": {".xml"}}
+            with contextlib.redirect_stdout(None):
+                result = sort_base_schemas(filenames)
+            self.assertEqual(dict(result), expected)
+        finally:
+            # Clean up
+            for filename in uppercase_files:
+                if os.path.exists(filename):
+                    os.remove(filename)
 
 
 class TestValidateAllSchemaFormats(unittest.TestCase):

@@ -102,6 +102,7 @@ def add_extension(basename, extension):
     Returns:
         str: The complete file path with extension applied.
     """
+    extension = extension.lower()
     if extension == ".tsv":
         parent_path, basename = os.path.split(basename)
         return os.path.join(parent_path, "hedtsv", basename)
@@ -138,6 +139,7 @@ def sort_base_schemas(filenames, add_all_extensions=False):
             print(f"Ignoring deleted file {file_path}.")
             continue
         basename, extension = os.path.splitext(file_path)
+        extension = extension.lower()
         if extension == ".xml" or extension == ".mediawiki":
             schema_files[basename].add(extension)
             continue
@@ -179,7 +181,6 @@ def validate_all_schema_formats(basename):
         list: A list of issue strings if formats differ or loading fails. Empty if all identical.
     """
     # Note if more than one is changed, it intentionally checks all 4 even if one wasn't changed.
-    # todo: this needs to be updated to handle capital letters in the extension.
     paths = [add_extension(basename, extension) for extension in all_extensions]
     try:
         schemas = [load_schema(path) for path in paths]

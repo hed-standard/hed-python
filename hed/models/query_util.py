@@ -4,41 +4,40 @@
 class SearchResult:
     """Holder for and manipulation of search results."""
 
-    def __init__(self, group, tag):
+    def __init__(self, group, children):
         self.group = group
-        # todo: rename tag: children
-        if not isinstance(tag, list):
-            new_tags = [tag]
+        if not isinstance(children, list):
+            new_children = [children]
         else:
-            new_tags = tag.copy()
-        self.tags = new_tags
+            new_children = children.copy()
+        self.children = new_children
 
     def merge_and_result(self, other):
         """Returns a new result, with the combined tags/groups from this and other."""
         # Returns a new
-        new_tags = self.tags.copy()
-        for tag in other.tags:
-            if any(tag is this_tag for this_tag in self.tags):
+        new_children = self.children.copy()
+        for child in other.children:
+            if any(child is this_child for this_child in self.children):
                 continue
-            new_tags.append(tag)
-        new_tags.sort(key=lambda x: str(x))
+            new_children.append(child)
+        new_children.sort(key=lambda x: str(x))
 
         if self.group != other.group:
             raise ValueError("Internal error")
-        return SearchResult(self.group, new_tags)
+        return SearchResult(self.group, new_children)
 
     def has_same_tags(self, other):
         """Checks if these two results have the same tags/groups by identity(not equality)"""
         if self.group != other.group:
             return False
 
-        if len(self.tags) != len(other.tags):
+        if len(self.children) != len(other.children):
             return False
 
-        return all(tag is tag2 for tag, tag2 in zip(self.tags, other.tags, strict=False))
+        return all(child is child2 for child, child2 in zip(self.children, other.children, strict=False))
 
     def __str__(self):
-        return str(self.group) + " Tags: " + "---".join([str(tag) for tag in self.tags])
+        return str(self.group) + " Tags: " + "---".join([str(child) for child in self.children])
 
 
 class Token:
