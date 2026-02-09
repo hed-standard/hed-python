@@ -25,16 +25,8 @@ Python HEDTools features
 * **NWB support**: Read and write HED annotations in NWB files using `ndx-hed <https://www.hedtags.org/ndx-hed>`_
 * **Multiple formats**: Work with JSON sidecars, TSV files, Excel spreadsheets
 
-Getting started
----------------
-
-.. toctree::
-   :maxdepth: 2
-
-   Overview <overview>
-
-Programming with HEDTools
--------------------------
+User guide
+----------
 
 .. toctree::
    :maxdepth: 2
