@@ -1,0 +1,29 @@
+{% extends "!base.html" %}
+
+{%- block scripts %}
+  {{ super() }}
+  
+  <!-- OSA Chat Widget (HED Assistant) -->
+  <script src="https://osa-demo.pages.dev/osa-chat-widget.js"
+          crossorigin="anonymous"></script>
+  <script>
+    if (window.OSAChatWidget) {
+      OSAChatWidget.setConfig({
+        communityId: 'hed',
+        title: 'HED Assistant',
+        initialMessage: 'Hi! I can help with using the Python HEDTools. What would you like to know?',
+        placeholder: 'Ask about HED...',
+        suggestedQuestions: [
+          'How do I install the Python HEDTools?',
+          'How do I validate a HED string using the Python HEDTools?',
+          'How do I run the HEDTools hedpy command line tool?',
+          'What tools are available?'
+        ],
+        widgetInstructions: 'User is on the Python HEDTools documentation most likely looking for how to use these tools',
+        showExperimentalBadge: true,
+        allowPageContext: true,
+        pageContextDefaultEnabled: true
+      });
+    }
+  </script>
+{%- endblock scripts %}
