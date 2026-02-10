@@ -113,7 +113,7 @@ class ExpressionAnd(Expression):
                     dont_add = False
                     # This is trash and slow
                     for finalized_value in return_list:
-                        if merged_result.has_same_tags(finalized_value):
+                        if merged_result.has_same_children(finalized_value):
                             dont_add = True
                             break
                     if dont_add:
@@ -171,7 +171,7 @@ class ExpressionOr(Expression):
         duplicates = []
         for group in groups1:
             for other_group in groups2:
-                if group.has_same_tags(other_group):
+                if group.has_same_children(other_group):
                     duplicates.append(group)
 
         groups1 = [group for group in groups1 if not any(other_group is group for other_group in duplicates)]

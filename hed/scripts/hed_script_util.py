@@ -95,9 +95,15 @@ def add_extension(basename, extension):
     TSV files are placed in a 'hedtsv' subdirectory, while other formats
     simply append the extension to the basename.
 
+    Note: This function preserves the case of the extension to maintain
+    compatibility with case-sensitive filesystems. Extensions should only
+    be normalized (lowercased) for comparison purposes, not for file path
+    construction.
+
     Parameters:
         basename (str): The base path/name of the schema file without extension.
         extension (str): The file extension including the dot (e.g., '.xml', '.tsv').
+            Case is preserved as-is.
 
     Returns:
         str: The complete file path with extension applied.
@@ -107,8 +113,9 @@ def add_extension(basename, extension):
     """
     if not isinstance(extension, str):
         raise TypeError(f"extension must be a string, got {type(extension).__name__}")
-    extension = extension.lower()
-    if extension == ".tsv":
+    # Normalize only for comparison, not for path construction
+    extension_lower = extension.lower()
+    if extension_lower == ".tsv":
         parent_path, basename = os.path.split(basename)
         return os.path.join(parent_path, "hedtsv", basename)
     return basename + extension
@@ -120,13 +127,17 @@ def sort_base_schemas(filenames, add_all_extensions=False):
     Groups schema files by their base name, tracking which formats (extensions)
     have been modified. Handles special TSV directory structure (hedtsv subfolder).
 
+    Returns a nested dict that maps basename -> normalized_extension -> actual_filepath.
+    This preserves the original file casing for case-sensitive filesystems while
+    still allowing normalized extension comparisons.
+
     Example input:
-        ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.xml"]
+        ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.XML"]
 
     Example output:
         {
-            "test_schema": {".mediawiki", ".tsv"},
-            "other_schema": {".xml"}
+            "test_schema": {".mediawiki": "test_schema.mediawiki", ".tsv": "hedtsv/.../test_schema_Tag.tsv"},
+            "other_schema": {".xml": "other_schema.XML"}
         }
 
     Parameters:
@@ -135,20 +146,21 @@ def sort_base_schemas(filenames, add_all_extensions=False):
             Default is False.
 
     Returns:
-        dict: A dictionary where keys are the basename (str), and values are sets of
-            extensions modified. Can include .tsv, .mediawiki, .xml, and .json.
+        dict: A nested dictionary where keys are basenames (str), values are dicts mapping
+            normalized extensions (str, lowercase) to actual file paths (str, preserving case).
+            Can include .tsv, .mediawiki, .xml, and .json as keys.
     """
-    schema_files = defaultdict(set)
+    schema_files = defaultdict(dict)
     for file_path in filenames:
         if not os.path.exists(file_path):
             print(f"Ignoring deleted file {file_path}.")
             continue
         basename, extension = os.path.splitext(file_path)
-        extension = extension.lower()
-        if extension == ".xml" or extension == ".mediawiki":
-            schema_files[basename].add(extension)
+        extension_lower = extension.lower()  # Normalize for comparison only
+        if extension_lower == ".xml" or extension_lower == ".mediawiki":
+            schema_files[basename][extension_lower] = file_path
             continue
-        elif extension == ".tsv":
+        elif extension_lower == ".tsv":
             tsv_basename = basename.rpartition("_")[0]
             full_parent_path, real_basename = os.path.split(tsv_basename)
             full_parent_path, real_basename2 = os.path.split(full_parent_path)
@@ -160,14 +172,17 @@ def sort_base_schemas(filenames, add_all_extensions=False):
                 print(f"Ignoring file {file_path}.  .tsv files must be in a subfolder with the same name.")
                 continue
             real_name = os.path.join(real_parent_path, real_basename)
-            schema_files[real_name].add(extension)
+            schema_files[real_name][extension_lower] = file_path
         else:
             print(f"Ignoring file {file_path}")
 
     if add_all_extensions:
         for schema_name in schema_files:
             for extension in all_extensions:
-                schema_files[schema_name].add(extension)
+                # Only add if not already present - don't overwrite actual paths
+                if extension not in schema_files[schema_name]:
+                    # Construct path for missing extensions - use the add_extension logic
+                    schema_files[schema_name][extension] = add_extension(schema_name, extension)
 
     return schema_files
 
@@ -209,24 +224,25 @@ def validate_all_schemas(schema_files):
     for a prerelease schema, ensures all formats exist and are identical.
 
     Parameters:
-        schema_files (dict): Dictionary mapping basenames (str) to sets of extensions (str)
-            representing all files changed.
+        schema_files (dict): Dictionary mapping basenames (str) to dicts of
+            {normalized_extension (str) -> actual_filepath (str)} representing
+            all files changed.
 
     Returns:
         list: A list of all validation issues found across all schemas.
     """
     all_issues = []
-    for basename, extensions in schema_files.items():
+    for basename, extension_paths in schema_files.items():
         single_schema_issues = []
-        for extension in extensions:
-            full_path = add_extension(basename, extension)
-            single_schema_issues += validate_schema(full_path)
+        for _extension, file_path in extension_paths.items():
+            # Use the actual file path to preserve case on case-sensitive filesystems
+            single_schema_issues += validate_schema(file_path)
 
-        if len(extensions) > 1 and not single_schema_issues and "prerelease" in basename:
+        if len(extension_paths) > 1 and not single_schema_issues and "prerelease" in basename:
             single_schema_issues += validate_all_schema_formats(basename)
 
         print(f"Validating: {basename}...")
-        print(f"Extensions: {extensions}")
+        print(f"Extensions: {set(extension_paths.keys())}")
         if single_schema_issues:
             for issue in single_schema_issues:
                 print(issue)

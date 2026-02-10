@@ -2,14 +2,28 @@
 
 
 class SearchResult:
-    """Holder for and manipulation of search results."""
+    """Holder for and manipulation of search results.
+
+    Represents a query match result consisting of:
+    - group: The containing HedGroup where matches were found
+    - children: The specific matched elements (tags/groups) within that group
+                (NOT all children of the group - only those that satisfied the query)
+
+    Example: When searching for "Red" in the HED string "(Red, Blue, Green)":
+        - group = the containing group (Red, Blue, Green)
+        - children = [Red] (only the matched tag)
+    """
 
     def __init__(self, group, children):
         """Initialize a search result.
 
         Parameters:
             group (HedGroup): The group where the children were found.
-            children (HedTag, HedGroup, or list): The matched child elements (tags or groups).
+            children (HedTag, HedGroup, or list): The matched child elements (tags or groups)
+                that satisfied the query condition. Can be:
+                - Single tag/group that matched
+                - List of tags/groups that matched
+                - Empty list (for negation or when group matched but no specific children)
         """
         self.group = group
         if not isinstance(children, list):
@@ -41,7 +55,7 @@ class SearchResult:
             raise ValueError("Internal error")
         return SearchResult(self.group, new_children)
 
-    def has_same_tags(self, other):
+    def has_same_children(self, other):
         """Checks if these two results have the same children by identity (not equality).
 
         Parameters:
@@ -57,6 +71,9 @@ class SearchResult:
             return False
 
         return all(child is child2 for child, child2 in zip(self.children, other.children, strict=False))
+
+    # Backward compatibility alias
+    has_same_tags = has_same_children
 
     def __str__(self):
         return str(self.group) + " Children: " + "---".join([str(child) for child in self.children])

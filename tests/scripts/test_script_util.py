@@ -2,7 +2,13 @@ import unittest
 import os
 import shutil
 from hed import load_schema_version
-from hed.scripts.hed_script_util import add_extension, sort_base_schemas, validate_all_schema_formats, validate_schema
+from hed.scripts.hed_script_util import (
+    add_extension,
+    sort_base_schemas,
+    validate_all_schema_formats,
+    validate_schema,
+    validate_all_schemas,
+)
 import contextlib
 
 
@@ -44,15 +50,16 @@ class TestAddExtension(unittest.TestCase):
             add_extension("filename", [".xml"])
 
     def test_case_insensitive_extension(self):
-        """Test that extensions are handled case-insensitively."""
-        # TSV in various cases should all be treated as .tsv
+        """Test that TSV extensions are detected case-insensitively, but casing is preserved."""
+        # TSV in various cases should all go to hedtsv/ subfolder
         self.assertEqual(add_extension("filename", ".TSV"), os.path.normpath("hedtsv/filename"))
         self.assertEqual(add_extension("filename", ".Tsv"), os.path.normpath("hedtsv/filename"))
         self.assertEqual(add_extension("filename", ".tSv"), os.path.normpath("hedtsv/filename"))
 
-        # Other extensions should also work case-insensitively
-        self.assertEqual(add_extension("filename", ".XML"), "filename.xml")
-        self.assertEqual(add_extension("filename", ".Xml"), "filename.xml")
+        # Other extensions preserve their original casing (important for case-sensitive filesystems)
+        self.assertEqual(add_extension("filename", ".XML"), "filename.XML")
+        self.assertEqual(add_extension("filename", ".Xml"), "filename.Xml")
+        self.assertEqual(add_extension("filename", ".xml"), "filename.xml")
 
 
 class TestSortBaseSchemas(unittest.TestCase):
@@ -90,7 +97,13 @@ class TestSortBaseSchemas(unittest.TestCase):
 
     def test_mixed_file_types(self):
         filenames = ["test_schema.mediawiki", os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"), "other_schema.xml"]
-        expected = {"test_schema": {".mediawiki", ".tsv"}, "other_schema": {".xml"}}
+        expected = {
+            "test_schema": {
+                ".mediawiki": "test_schema.mediawiki",
+                ".tsv": os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
+            },
+            "other_schema": {".xml": "other_schema.xml"},
+        }
         with contextlib.redirect_stdout(None):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
@@ -101,7 +114,7 @@ class TestSortBaseSchemas(unittest.TestCase):
             os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
             os.path.normpath("hedtsv/wrong_folder/wrong_name_Tag.tsv"),  # Should be ignored
         ]
-        expected = {"test_schema": {".tsv"}}
+        expected = {"test_schema": {".tsv": os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv")}}
         with contextlib.redirect_stdout(None):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
@@ -112,7 +125,11 @@ class TestSortBaseSchemas(unittest.TestCase):
             os.path.normpath("prerelease/hedtsv/test_schema/test_schema_Tag.tsv"),
             os.path.normpath("prerelease/hedtsv/wrong_folder/wrong_name_Tag.tsv"),  # Should be ignored
         ]
-        expected = {os.path.normpath("prerelease/test_schema"): {".tsv"}}
+        expected = {
+            os.path.normpath("prerelease/test_schema"): {
+                ".tsv": os.path.normpath("prerelease/hedtsv/test_schema/test_schema_Tag.tsv")
+            }
+        }
         with contextlib.redirect_stdout(None):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
@@ -122,7 +139,7 @@ class TestSortBaseSchemas(unittest.TestCase):
             "test_schema.mediawiki",
             os.path.normpath("not_hedtsv/test_schema/test_schema_Tag.tsv"),  # Should be ignored
         ]
-        expected = {"test_schema": {".mediawiki"}}
+        expected = {"test_schema": {".mediawiki": "test_schema.mediawiki"}}
         with contextlib.redirect_stdout(None):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
@@ -135,7 +152,7 @@ class TestSortBaseSchemas(unittest.TestCase):
         self.assertEqual(dict(result), expected)
 
     def test_case_insensitive_extensions(self):
-        """Test that file extensions are handled case-insensitively."""
+        """Test that file extensions are handled case-insensitively for grouping."""
         # Create test files with uppercase extensions using different base names to avoid conflicts
         uppercase_files = [
             "case_test_schema.MEDIAWIKI",
@@ -147,8 +164,11 @@ class TestSortBaseSchemas(unittest.TestCase):
 
         try:
             filenames = ["case_test_schema.MEDIAWIKI", "case_other_schema.XML"]
-            # Should normalize extensions to lowercase
-            expected = {"case_test_schema": {".mediawiki"}, "case_other_schema": {".xml"}}
+            # Should normalize extensions to lowercase for keys, but preserve original paths
+            expected = {
+                "case_test_schema": {".mediawiki": "case_test_schema.MEDIAWIKI"},
+                "case_other_schema": {".xml": "case_other_schema.XML"},
+            }
             with contextlib.redirect_stdout(None):
                 result = sort_base_schemas(filenames)
             self.assertEqual(dict(result), expected)
@@ -211,3 +231,36 @@ class TestValidateSchema(unittest.TestCase):
             self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.tsv")[0])
             self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.xml")[0])
             self.assertNotIn("Only fully lowercase extensions ", validate_schema("does_not_matter.mediawiki")[0])
+
+    def test_uppercase_extension_policy_enforcement(self):
+        """Test that uppercase extensions are detected and rejected by validation (case-sensitive filesystem support)."""
+        # This test verifies the complete workflow:
+        # 1. sort_base_schemas can detect/group files with uppercase extensions
+        # 2. validate_all_schemas properly rejects them per repository policy
+        # 3. No FileNotFoundError on case-sensitive filesystems
+
+        uppercase_file = "policy_test.XML"
+        try:
+            # Create a file with uppercase extension
+            with open(uppercase_file, "w") as f:
+                f.write("")  # Empty file for testing
+
+            # Step 1: sort_base_schemas should find and group the file
+            schema_files = sort_base_schemas([uppercase_file])
+            self.assertIn("policy_test", schema_files)
+            self.assertIn(".xml", schema_files["policy_test"])
+            self.assertEqual(schema_files["policy_test"][".xml"], uppercase_file)
+
+            # Step 2: validate_all_schemas should use actual path and reject per policy
+            with contextlib.redirect_stdout(None):
+                issues = validate_all_schemas(schema_files)
+
+            # Should get policy violation, not FileNotFoundError
+            self.assertTrue(len(issues) > 0)
+            self.assertIn("Only fully lowercase extensions", issues[0])
+            self.assertIn("policy_test.XML", issues[0])
+
+        finally:
+            # Clean up
+            if os.path.exists(uppercase_file):
+                os.remove(uppercase_file)

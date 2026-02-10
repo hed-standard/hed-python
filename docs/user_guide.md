@@ -18,16 +18,15 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 ## Table of contents
 
 01. [What is HED?](#what-is-hed)
-02. [What are Python HEDTools?](#what-are-python-hedtools)
-03. [Getting started](#getting-started)
-04. [Working with HED schemas](#working-with-hed-schemas)
-05. [Validating HED strings](#validating-hed-strings)
-06. [Working with BIDS datasets](#working-with-bids-datasets)
-07. [Working with sidecars](#working-with-sidecars)
-08. [Jupyter notebooks](#jupyter-notebooks)
-09. [Command-line tools](#command-line-tools)
-10. [Best practices](#best-practices)
-11. [Troubleshooting](#troubleshooting)
+02. [Getting started](#getting-started)
+03. [Working with HED schemas](#working-with-hed-schemas)
+04. [Validating HED strings](#validating-hed-strings)
+05. [Working with BIDS datasets](#working-with-bids-datasets)
+06. [Working with sidecars](#working-with-sidecars)
+07. [Jupyter notebooks](#jupyter-notebooks)
+08. [Command-line tools](#command-line-tools)
+09. [Best practices](#best-practices)
+10. [Troubleshooting](#troubleshooting)
 
 ## Getting started
 
