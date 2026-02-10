@@ -172,7 +172,10 @@ def sort_base_schemas(filenames, add_all_extensions=False):
                 print(f"Ignoring file {file_path}.  .tsv files must be in a subfolder with the same name.")
                 continue
             real_name = os.path.join(real_parent_path, real_basename)
-            schema_files[real_name][extension_lower] = file_path
+            # For TSV files, store the directory path (not individual file path)
+            # because load_schema expects the directory containing all TSV files
+            tsv_dir_path = add_extension(real_name, ".tsv")
+            schema_files[real_name][extension_lower] = tsv_dir_path
         else:
             print(f"Ignoring file {file_path}")
 
