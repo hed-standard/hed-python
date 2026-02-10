@@ -869,7 +869,7 @@ print(get_cache_directory())
 #### Documentation resources
 
 - **[API reference](api/index.html)**: Detailed function and class documentation
-- **[HED specification](https://www.hedtags.org/hed-speciification)**: Formal annotation rules
+- **[HED specification](https://www.hedtags.org/hed-specification)**: Formal annotation rules
 - **[HED resources](https://www.hedtags.org/hed-resources)**: HED tutorials and guides
 - **[HED online tools](https://hedtools.org/hed)**: Web-based interface requiring no programming
 - **[Example datasets](https://github.com/hed-standard/hed-examples)**: HED-annotated example datasets

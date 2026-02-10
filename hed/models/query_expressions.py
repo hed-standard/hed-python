@@ -98,16 +98,16 @@ class ExpressionAnd(Expression):
             groups2(list): a list of search results
 
         Returns:
-            list: Groups in both lists narrowed down results to where none of the tags overlap.
+            list: Groups in both lists narrowed down to results where none of the children overlap.
         """
         return_list = []
         for group in groups1:
             for other_group in groups2:
                 if group.group is other_group.group:
-                    # At this point any shared tags between the two groups invalidates it.
+                    # At this point any shared children between the two groups invalidates it.
                     if any(tag is tag2 and tag is not None for tag in group.children for tag2 in other_group.children):
                         continue
-                    # Merge the two groups tags into one new result, now that we've verified they're unique
+                    # Merge the two groups' children into one new result, now that we've verified they're unique
                     merged_result = group.merge_and_result(other_group)
 
                     dont_add = False
@@ -164,7 +164,7 @@ class ExpressionWildcardNew(Expression):
 class ExpressionOr(Expression):
     def handle_expr(self, hed_group, exact=False):
         groups1 = self.left.handle_expr(hed_group, exact=exact)
-        # Don't early out as we need to gather all groups in case tags appear more than once etc
+        # Don't early out as we need to gather all groups in case children appear more than once etc
         groups2 = self.right.handle_expr(hed_group, exact=exact)
         # todo: optimize this eventually
         # Filter out duplicates

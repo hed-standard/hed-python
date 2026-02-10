@@ -101,7 +101,12 @@ def add_extension(basename, extension):
 
     Returns:
         str: The complete file path with extension applied.
+
+    Raises:
+        TypeError: If extension is not a string.
     """
+    if not isinstance(extension, str):
+        raise TypeError(f"extension must be a string, got {type(extension).__name__}")
     extension = extension.lower()
     if extension == ".tsv":
         parent_path, basename = os.path.split(basename)

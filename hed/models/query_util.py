@@ -5,6 +5,12 @@ class SearchResult:
     """Holder for and manipulation of search results."""
 
     def __init__(self, group, children):
+        """Initialize a search result.
+
+        Parameters:
+            group (HedGroup): The group where the children were found.
+            children (HedTag, HedGroup, or list): The matched child elements (tags or groups).
+        """
         self.group = group
         if not isinstance(children, list):
             new_children = [children]
@@ -13,21 +19,37 @@ class SearchResult:
         self.children = new_children
 
     def merge_and_result(self, other):
-        """Returns a new result, with the combined tags/groups from this and other."""
-        # Returns a new
+        """Returns a new result with the combined children from this and other.
+
+        Parameters:
+            other (SearchResult): Another search result to merge with this one.
+
+        Returns:
+            SearchResult: A new SearchResult containing unique children from both results.
+
+        Raises:
+            ValueError: If the groups are not the same.
+        """
         new_children = self.children.copy()
         for child in other.children:
             if any(child is this_child for this_child in self.children):
                 continue
             new_children.append(child)
-        new_children.sort(key=lambda x: str(x))
+        new_children.sort(key=str)
 
         if self.group != other.group:
             raise ValueError("Internal error")
         return SearchResult(self.group, new_children)
 
     def has_same_tags(self, other):
-        """Checks if these two results have the same tags/groups by identity(not equality)"""
+        """Checks if these two results have the same children by identity (not equality).
+
+        Parameters:
+            other (SearchResult): Another search result to compare with this one.
+
+        Returns:
+            bool: True if both results have the same group and identical children.
+        """
         if self.group != other.group:
             return False
 
@@ -37,7 +59,7 @@ class SearchResult:
         return all(child is child2 for child, child2 in zip(self.children, other.children, strict=False))
 
     def __str__(self):
-        return str(self.group) + " Tags: " + "---".join([str(child) for child in self.children])
+        return str(self.group) + " Children: " + "---".join([str(child) for child in self.children])
 
 
 class Token:
@@ -58,6 +80,11 @@ class Token:
     NotInLine = 13  # Not currently a token. In development and may become one.
 
     def __init__(self, text):
+        """Initialize a token for query parsing.
+
+        Parameters:
+            text (str): The text representation of the token.
+        """
         tokens = {
             ",": Token.And,
             "&&": Token.And,

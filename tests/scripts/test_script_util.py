@@ -28,8 +28,20 @@ class TestAddExtension(unittest.TestCase):
 
     def test_none_extension(self):
         """Test behavior with None as extension."""
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             add_extension("filename", None)
+
+    def test_invalid_extension_type(self):
+        """Test that non-string extensions raise clear TypeError."""
+        with self.assertRaises(TypeError) as cm:
+            add_extension("filename", None)
+        self.assertIn("extension must be a string", str(cm.exception))
+
+        with self.assertRaises(TypeError):
+            add_extension("filename", 123)
+
+        with self.assertRaises(TypeError):
+            add_extension("filename", [".xml"])
 
     def test_case_insensitive_extension(self):
         """Test that extensions are handled case-insensitively."""
