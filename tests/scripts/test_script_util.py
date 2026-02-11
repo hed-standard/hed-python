@@ -125,11 +125,7 @@ class TestSortBaseSchemas(unittest.TestCase):
             os.path.normpath("prerelease/hedtsv/test_schema/test_schema_Tag.tsv"),
             os.path.normpath("prerelease/hedtsv/wrong_folder/wrong_name_Tag.tsv"),  # Should be ignored
         ]
-        expected = {
-            os.path.normpath("prerelease/test_schema"): {
-                ".tsv": os.path.normpath("prerelease/hedtsv/test_schema")
-            }
-        }
+        expected = {os.path.normpath("prerelease/test_schema"): {".tsv": os.path.normpath("prerelease/hedtsv/test_schema")}}
         with contextlib.redirect_stdout(None):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
