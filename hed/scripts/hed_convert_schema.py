@@ -29,20 +29,21 @@ def convert_and_update(filenames, set_ids):
 
     updated = []
     # If we are here, we have validated the schemas(and if there's more than one version changed, that they're the same)
-    for basename, extensions in schema_files.items():
+    for basename, extension_paths in schema_files.items():
         # Skip any with multiple extensions or not in pre-release
         if "prerelease" not in basename:
             print(f"Skipping updates on {basename}, not in a prerelease folder.")
             continue
-        source_filename = add_extension(basename, list(extensions)[0])  # Load any changed schema version, they're all the same
+        # Use the actual file paths to preserve case on case-sensitive filesystems
+        source_filename = list(extension_paths.values())[0]  # Load any changed schema version, they're all the same
 
-        # todo: more properly decide how we want to handle non lowercase extensions.
-        tsv_extension = ".tsv"
-        for extension in extensions:
-            if extension.lower() == ".tsv":
-                tsv_extension = extension
-
-        source_df_filename = add_extension(basename, tsv_extension)
+        # Find TSV file path if it exists
+        tsv_path = extension_paths.get(".tsv")
+        if tsv_path:
+            source_df_filename = tsv_path
+        else:
+            # Construct TSV path if not found (unlikely in normal workflow)
+            source_df_filename = add_extension(basename, ".tsv")
         schema = load_schema(source_filename)
         print(f"Trying to convert/update file {source_filename}")
         source_dataframes = load_dataframes(source_df_filename)

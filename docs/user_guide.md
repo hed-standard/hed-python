@@ -3,53 +3,92 @@
 description: Complete user guide for Python HEDTools - validation, BIDS 
   integration, analysis, and command-line tools for HED annotations
 keywords: HED tutorial, Python guide, validation examples, BIDS datasets, 
-  sidecar files, command-line interface, Jupyter notebooks
+  sidecar files, command-line interface, Jupyter notebooks, HED overview, event 
+  descriptors, neuroscience, schema
 ---
 ```
 
 # Python HEDTools guide
 
-```{index} user guide, tutorial, getting started
+```{index} user guide, tutorial, getting started, HED, Hierarchical Event Descriptors
 ```
 
-This guide provides step-by-step instructions for using the HED Python tools for validation, BIDS integration, and analysis.
-
-## Quick links
-
-- 📚 [API Reference](api/index.html)
-- 📓 [Jupyter notebooks](https://github.com/hed-standard/hed-python/tree/main/examples)
-- 🐛 [GitHub issues](https://github.com/hed-standard/hed-python/issues)
-- 🎓 [HED resources](https://www.hedtags.org/hed-resources)
-- 📖 [HED specification](https://www.hedtags.org/hed-specification)
-- 🌐 [Web tools](https://hedtools.org/hed)
+HED (Hierarchical Event Descriptors) is a framework for systematically describing events and experimental metadata in machine-actionable form. This guide provides comprehensive documentation for using the HED Python tools for validation, BIDS integration, and analysis.
 
 ## Table of contents
 
-1. [Getting started](#getting-started)
-2. [Working with HED schemas](#working-with-hed-schemas)
-3. [Validating HED strings](#validating-hed-strings)
-4. [Working with BIDS datasets](#working-with-bids-datasets)
-5. [Working with sidecars](#working-with-sidecars)
-6. [Jupyter notebooks](#jupyter-notebooks)
-7. [Command-line tools](#command-line-tools)
-8. [Best practices](#best-practices)
-9. [Troubleshooting](#troubleshooting)
+01. [What is HED?](#what-is-hed)
+02. [Getting started](#getting-started)
+03. [Working with HED schemas](#working-with-hed-schemas)
+04. [Validating HED strings](#validating-hed-strings)
+05. [Working with BIDS datasets](#working-with-bids-datasets)
+06. [Working with sidecars](#working-with-sidecars)
+07. [Jupyter notebooks](#jupyter-notebooks)
+08. [Command-line tools](#command-line-tools)
+09. [Best practices](#best-practices)
+10. [Troubleshooting](#troubleshooting)
 
 ## Getting started
 
+```{index} installation, pip, PyPI
+```
+
 ### Installation
 
-Install HEDTools from PyPI:
+#### From PyPI (recommended)
+
+Install the latest stable release:
 
 ```bash
 pip install hedtools
 ```
 
-For the latest development version from GitHub:
+**Note**: The PyPI package includes the core hedtools library but **not the example Jupyter notebooks**. To access the notebooks, see the options below.
+
+#### For Jupyter notebook examples
+
+The example notebooks are only available in the GitHub repository. Choose one of these options:
+
+**Option 1: Clone the full repository**
+
+```bash
+git clone https://github.com/hed-standard/hed-python.git
+cd hed-python
+pip install -e .[examples]
+# Notebooks are in: examples/
+```
+
+**Option 2: Download just the examples directory**
+
+```bash
+svn export https://github.com/hed-standard/hed-python/trunk/examples
+cd examples
+pip install hedtools jupyter notebook
+```
+
+See [examples/README.md](https://github.com/hed-standard/hed-python/tree/main/examples) for detailed notebook documentation.
+
+#### From GitHub (latest development version)
 
 ```bash
 pip install git+https://github.com/hed-standard/hed-python/@main
 ```
+
+#### For development
+
+Clone the repository and install in editable mode:
+
+```bash
+git clone https://github.com/hed-standard/hed-python.git
+cd hed-python
+pip install -e .
+```
+
+#### Python requirements
+
+- **Python 3.10 or later** is required
+- Core dependencies: pandas, numpy, defusedxml, openpyxl
+- Jupyter support: Install with `pip install jupyter notebook`
 
 ### Basic example
 
@@ -826,6 +865,21 @@ print(get_cache_directory())
 
 ### Getting help
 
+#### Documentation resources
+
+- **[API reference](api/index.html)**: Detailed function and class documentation
+- **[HED specification](https://www.hedtags.org/hed-specification)**: Formal annotation rules
+- **[HED resources](https://www.hedtags.org/hed-resources)**: HED tutorials and guides
+- **[HED online tools](https://hedtools.org/hed)**: Web-based interface requiring no programming
+- **[Example datasets](https://github.com/hed-standard/hed-examples)**: HED-annotated example datasets
+
+#### Support
+
+- **Issues and bugs**: Open an [issue](https://github.com/hed-standard/hed-python/issues) on GitHub
+- **Questions and ideas**: Contribute to the [HED organization discussions](https://github.com/orgs/hed-standard/discussions)
+- **Online validation**: Try [HED online tools](https://hedtools.org/hed) for web-based access
+- **Contact**: Email [hed.maintainers@gmail.com](mailto:hed.maintainers@gmail.com)
+
 #### Before opening an issue
 
 1. Try the [online tools](https://hedtools.org) to isolate the problem
@@ -841,10 +895,3 @@ Include:
 - Minimal code example that reproduces the problem
 - Full error traceback
 - Expected vs actual behavior
-
-#### Additional resources
-
-- **HED specification**: [www.hedtags.org/hed-specification](https://www.hedtags.org/hed-specification)
-- **HED resources**: [www.hedtags.org](https://www.hedtags.org/hed-resources)
-- **HED online tools**: [hedtools.org/hed](https://hedtools.org/hed)
-- **Example datasets**: [hed-examples](https://github.com/hed-standard/hed-examples/datasets)
