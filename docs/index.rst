@@ -14,8 +14,7 @@ HED is integrated into major neuroimaging standards:
 * `BIDS <https://bids.neuroimaging.io/>`_ (Brain Imaging Data Structure)
 * `NWB <https://www.nwb.org/>`_ (Neurodata Without Borders)
 
-and this package enables you to validate, analyze, and manipulate HED annotations in various formats.
-Package features include:
+This package enables you to validate, analyze, and manipulate HED annotations in various formats:
 
 * **Validation**: Verify HED annotations against official schemas
 * **Analysis**: Search, filter, and summarize HED-annotated data
@@ -26,7 +25,7 @@ Package features include:
 .. toctree::
    :maxdepth: 2
 
-   Guide <user_guide>
+   User guide <user_guide>
    API <api/index>
 
 * :ref:`genindex`

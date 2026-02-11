@@ -113,8 +113,8 @@ namespaces = false
 hed = ["schema/schema_data/*.xml", "resources/*.png", "validator/data/*"]
 
 [tool.codespell]
-skip = '*.git,*.pdf,*.svg,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests,,*.xml,*.mediawiki,*.omn,*.toml'
-ignore-words-list = 'te,parms,assertIn'
+skip = '*.git,*.pdf,*.svg,deprecated,venv*,*.tsv,*.yaml,*.yml,*.json,*.rdf,*.jsonld,spec_tests,*.xml,*.mediawiki,*.omn,*.toml'
+ignore-words-list = 'te,parms,assertIn,covert,hed,recuse,disjointness'
 
 [tool.ruff]
 # Target Python 3.10+
