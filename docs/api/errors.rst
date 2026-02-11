@@ -1,4 +1,4 @@
-Python HEDTools error handling
+Error handling
 ==============================
 
 Error handling and reporting classes for HED validation and processing.
