@@ -2,35 +2,35 @@
 
 {%- block scripts %}
   {{ super() }}
-  
+
   <!-- OSA Chat Widget (HED Assistant)
        Privacy Note: This widget sends page content to an external AI service when
        allowPageContext is enabled. The widget provides contextual help for HEDTools documentation.
        Data sent: Page text content, user questions
        Service: OSA Chat Widget (osa-demo.pages.dev)
   -->
-  <script src="https://osa-demo.pages.dev/osa-chat-widget.js"
-          crossorigin="anonymous"
-          defer></script>
-  <script defer>
-    // Initialize widget after script loads (defer ensures non-blocking)
-    if (window.OSAChatWidget) {
-      OSAChatWidget.setConfig({
-        communityId: 'hed',
-        title: 'HED Assistant',
-        initialMessage: 'Hi! I can help with using the Python HEDTools. What would you like to know?',
-        placeholder: 'Ask about HED...',
-        suggestedQuestions: [
-          'How do I install the Python HEDTools?',
-          'How do I validate a HED string using the Python HEDTools?',
-          'How do I run the HEDTools hedpy command line tool?',
-          'What tools are available?'
-        ],
-        widgetInstructions: 'User is on the Python HEDTools documentation most likely looking for how to use these tools',
-        showExperimentalBadge: true,
-        allowPageContext: true,
-        pageContextDefaultEnabled: true
-      });
-    }
+  <script>
+    // Define config before the widget script loads
+    window.osaChatConfig = {
+      communityId: 'hed',
+      title: 'HED Assistant',
+      initialMessage: 'Questions about HED or Python HEDTools? Ask me!',
+      placeholder: 'Questions about Python HEDTools?',
+      suggestedQuestions: [
+        'How do I install the Python HEDTools?',
+        'How do I validate a HED string using the Python HEDTools?',
+        'How do I run the HEDTools hedpy command line tool?',
+        'What tools are available?'
+      ],
+      widgetInstructions: 'User is on the Python HEDTools documentation most likely looking for how to use these tools',
+      showExperimentalBadge: true,
+      allowPageContext: true,
+      pageContextDefaultEnabled: true
+    };
   </script>
+  <script src="https://osa-demo.pages.dev/osa-chat-widget.js"
+        crossorigin="anonymous"
+        defer
+        onload="window.OSAChatWidget && window.OSAChatWidget.setConfig(window.osaChatConfig)"></script>
 {%- endblock scripts %}
+
