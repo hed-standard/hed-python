@@ -15,9 +15,7 @@ HED is integrated into major neuroimaging standards:
 * `NWB <https://www.nwb.org/>`_ (Neurodata Without Borders)
 
 and this package enables you to validate, analyze, and manipulate HED annotations in various formats.
-
-Python HEDTools features
-------------------------
+Package features include:
 
 * **Validation**: Verify HED annotations against official schemas
 * **Analysis**: Search, filter, and summarize HED-annotated data
@@ -25,24 +23,10 @@ Python HEDTools features
 * **NWB support**: Read and write HED annotations in NWB files using `ndx-hed <https://www.hedtags.org/ndx-hed>`_
 * **Multiple formats**: Work with JSON sidecars, TSV files, Excel spreadsheets
 
-User guide
-----------
-
 .. toctree::
    :maxdepth: 2
 
    Guide <user_guide>
-
-Python HEDTools API
--------------------
-
-.. toctree::
-   :maxdepth: 2
-
    API <api/index>
-
-
-Python HEDtools index
-----------------------
 
 * :ref:`genindex`

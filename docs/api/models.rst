@@ -1,4 +1,4 @@
-Python HEDTools models
+Models
 =============================
 
 Core data models for working with HED data structures.

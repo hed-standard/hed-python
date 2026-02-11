@@ -1,4 +1,4 @@
-Python HEDTools tools
+Tools
 =============================
 
 Utility functions and data processing tools for HED operations.
