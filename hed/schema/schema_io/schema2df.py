@@ -4,10 +4,8 @@ from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io.df_util import (
     create_empty_dataframes,
     get_library_name_and_id,
-    calculate_attribute_type,
 )
 from hed.schema.schema_io.schema2base import Schema2Base
-from hed.schema.schema_io import text_util
 import pandas as pd
 import hed.schema.schema_io.df_constants as constants
 from hed.schema.hed_schema_entry import HedTagEntry
@@ -24,15 +22,9 @@ section_key_to_df = {
 
 
 class Schema2DF(Schema2Base):
-    def __init__(self, get_as_ids=False):
-        """Constructor for schema to dataframe converter
-
-        Parameters:
-            get_as_ids(bool): If true, return the hedId rather than name in most places
-                              This is mostly relevant for creating an ontology.
-        """
+    def __init__(self):
+        """Constructor for schema to dataframe converter"""
         super().__init__()
-        self._get_as_ids = get_as_ids
         self._suffix_rows = {v: [] for v in constants.DF_SUFFIXES}
 
     def _get_object_name_and_id(self, object_name, include_prefix=False):
@@ -73,7 +65,6 @@ class Schema2DF(Schema2Base):
             constants.attributes: attributes,
             constants.subclass_of: base_object,
             constants.dcdescription: description.replace("\n", "\\n"),
-            # constants.equivalent_to: self._get_header_equivalent_to(attributes, base_object)
         }
         self.output[constants.STRUCT_KEY].loc[len(self.output[constants.STRUCT_KEY])] = new_row
 
@@ -113,7 +104,8 @@ class Schema2DF(Schema2Base):
         pass
 
     def _end_tag_section(self):
-        self.output[constants.TAG_KEY] = pd.DataFrame(self._suffix_rows[constants.TAG_KEY], dtype=str)
+        if self._suffix_rows[constants.TAG_KEY]:
+            self.output[constants.TAG_KEY] = pd.DataFrame(self._suffix_rows[constants.TAG_KEY], dtype=str)
 
     def _end_units_section(self):
         if self._suffix_rows[constants.UNIT_KEY]:
@@ -142,11 +134,7 @@ class Schema2DF(Schema2Base):
             constants.attributes: self._format_tag_attributes(tag_entry.attributes),
             constants.dcdescription: tag_entry.description,
         }
-        if self._get_as_ids:
-            new_row[constants.equivalent_to] = self._get_tag_equivalent_to(tag_entry)
 
-        # constants.equivalent_to: self._get_tag_equivalent_to(tag_entry),
-        # Todo: do other sections like this as well for efficiency
         self._suffix_rows[constants.TAG_KEY].append(new_row)
 
     def _write_entry(self, entry, parent_node, include_props=True):
@@ -177,16 +165,12 @@ class Schema2DF(Schema2Base):
             constants.attributes: self._format_tag_attributes(entry.attributes),
             constants.dcdescription: entry.description,
         }
-        if self._get_as_ids:
-            new_row[constants.equivalent_to] = self._get_tag_equivalent_to(entry)
+
         # Handle the special case of units, which have the extra unit class
         if hasattr(entry, "unit_class_entry"):
             class_entry_name = entry.unit_class_entry.name
-            if self._get_as_ids:
-                class_entry_name = f"{entry.unit_class_entry.attributes.get(constants.hed_id)}"
             new_row[constants.has_unit_class] = class_entry_name
         self._suffix_rows[df_key].append(new_row)
-        pass
 
     def _write_attribute_entry(self, entry, include_props):
         df_key = constants.OBJECT_KEY
@@ -230,8 +214,6 @@ class Schema2DF(Schema2Base):
             constants.dcdescription: entry.description,
         }
         self._suffix_rows[constants.ATTRIBUTE_PROPERTY_KEY].append(new_row)
-        pass
-        # df.loc[len(df)] = new_row
 
     def _attribute_disallowed(self, attribute):
         if super()._attribute_disallowed(attribute):
@@ -239,152 +221,10 @@ class Schema2DF(Schema2Base):
         # strip out hedID in dataframe format
         return attribute in [HedKey.HedID, HedKey.AnnotationProperty]
 
-    def _get_header_equivalent_to(self, attributes_string, subclass_of):
-        attribute_strings = []
-
-        attributes, _ = text_util._parse_header_attributes_line(attributes_string)
-        schema_name, schema_id = self._get_object_name_and_id("HedSchema", include_prefix=True)
-
-        if self._get_as_ids:
-            attribute_strings.append(f"(hed:HED_0000102 some {schema_id})")
-        else:
-            attribute_strings.append(f"(inHedSchema some {schema_name})")
-
-        for attribute, value in attributes.items():
-            if attribute not in constants.valid_omn_attributes:
-                continue
-
-            if self._get_as_ids:
-                attribute = f"hed:{constants.valid_omn_attributes[attribute]}"
-            attribute_strings.append(f'({attribute} value "{value}")')
-
-        if self._get_as_ids:
-            # we just want the ID for normal HED objects, not schema specific
-            subclass_of = self._get_object_id(subclass_of, base_id=0, include_prefix=True)
-
-        # If they match, we want to leave equivalent_to blank
-        final_out = " and ".join([subclass_of] + attribute_strings)
-        if final_out == subclass_of:
-            return ""
-        return final_out
-
-    def _get_tag_equivalent_to(self, tag_entry):
-        subclass = self._get_subclass_of(tag_entry)
-        attribute_strings = []
-
-        attribute_strings.extend(self._process_attributes(tag_entry))
-        attribute_strings.extend(self._process_unit_class_entry(tag_entry))
-        attribute_strings.extend(self._process_schema_parent(tag_entry))
-
-        final_out = " and ".join([subclass] + attribute_strings)
-        if final_out == subclass:
-            return ""
-        return final_out
-
-    def _process_attributes(self, tag_entry):
-        attribute_strings = []
-        attribute_types = {"object": "some", "data": "value"}
-        range_types = {
-            HedKey.TagRange: HedSectionKey.Tags,
-            HedKey.UnitRange: HedSectionKey.Units,
-            HedKey.UnitClassRange: HedSectionKey.UnitClasses,
-            HedKey.ValueClassRange: HedSectionKey.ValueClasses,
-            HedKey.NumericRange: HedKey.NumericRange,
-        }
-
-        for attribute, value in tag_entry.attributes.items():
-            attribute_entry = self._schema.attributes.get(attribute)
-            attribute_type = calculate_attribute_type(attribute_entry)
-
-            if self._attribute_disallowed(attribute) or attribute_type == "annotation":
-                continue
-
-            values = self._prepare_values(attribute_entry, value, range_types)
-
-            for v in values:
-                if self._get_as_ids:
-                    attribute = f"hed:{attribute_entry.attributes[HedKey.HedID]}"
-                attribute_strings.append(f"({attribute} {attribute_types[attribute_type]} {v})")
-
-        return attribute_strings
-
-    def _prepare_values(self, attribute_entry, value, range_types):
-        if isinstance(value, str):
-            values = value.split(",")
-            values = [v.strip() for v in values]
-
-            found_range = self._find_range(attribute_entry, range_types)
-            if self._get_as_ids and found_range and found_range != HedKey.NumericRange:
-                section = self._schema[found_range]
-                if any(section.get(v) is None for v in values):
-                    raise ValueError(f"Cannot find schema entry for {values}")
-                for v in values:
-                    test_id = section.get(v).attributes.get(HedKey.HedID)
-                    if not test_id:
-                        raise ValueError(f"Schema entry {v} has no hedId.")
-                values = [f"hed:{section.get(v).attributes[HedKey.HedID]}" for v in values]
-            elif not found_range:
-                values = [f'"{v}"' for v in values]
-        else:
-            if value is True:
-                value = "true"
-            values = [value]
-
-        return values
-
-    def _find_range(self, attribute_entry, range_types):
-        for range_type in range_types:
-            if range_type in attribute_entry.attributes:
-                return range_types[range_type]
-        return None
-
-    def _process_unit_class_entry(self, tag_entry):
-        """Extract a list of unit class equivalent_to strings from a unit class entry.
-
-        Parameters:
-            tag_entry (HedUnitClassEntry): The unit class entry to process.
-
-        Returns:
-            list: A list of strings representing the equivalent_to for the unit class.
-        """
-        attribute_strings = []
-
-        if hasattr(tag_entry, "unit_class_entry"):
-            class_entry_name = tag_entry.unit_class_entry.name
-            if self._get_as_ids:
-                class_entry_name = f"hed:{tag_entry.unit_class_entry.attributes.get(constants.hed_id)}"
-
-            if self._get_as_ids:
-                attribute_strings.append(f"(hed:HED_0000103 some {class_entry_name})")
-            else:
-                attribute_strings.append(f"({constants.has_unit_class} some {class_entry_name})")
-
-        return attribute_strings
-
-    def _process_schema_parent(self, tag_entry):
-        attribute_strings = []
-
-        if hasattr(tag_entry, "parent") and not tag_entry.parent:
-            schema_name, schema_id = self._get_object_name_and_id("HedSchema", include_prefix=True)
-            if self._get_as_ids:
-                attribute_strings.append(f"(hed:HED_0000102 some {schema_id})")
-            else:
-                attribute_strings.append(f"(inHedSchema some {schema_name})")
-
-        return attribute_strings
-
     def _get_subclass_of(self, tag_entry):
         # Special case for HedTag
         if isinstance(tag_entry, HedTagEntry):
-            if self._get_as_ids:
-                parent_entry = tag_entry.parent
-                if parent_entry:
-                    return f"hed:{parent_entry.attributes[HedKey.HedID]}"
-
-                # HedTag always returns as base object
-                return "hed:HED_0000005"
-            else:
-                return tag_entry.parent.short_tag_name if tag_entry.parent else "HedTag"
+            return tag_entry.parent.short_tag_name if tag_entry.parent else "HedTag"
 
         base_objects = {
             HedSectionKey.Units: "HedUnit",
@@ -392,8 +232,5 @@ class Schema2DF(Schema2Base):
             HedSectionKey.UnitModifiers: "HedUnitModifier",
             HedSectionKey.ValueClasses: "HedValueClass",
         }
-        name, obj_id = self._get_object_name_and_id(base_objects[tag_entry.section_key], include_prefix=True)
-
-        if self._get_as_ids:
-            return obj_id
+        name, obj_id = self._get_object_name_and_id(base_objects[tag_entry.section_key], include_prefix=False)
         return name
