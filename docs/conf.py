@@ -66,7 +66,6 @@ html_sidebars = {
         "sidebar/scroll-start.html",
         "sidebar/navigation.html",
         "quicklinks.html",
-        "sidebar/ethical-ads.html",
         "sidebar/scroll-end.html",
     ]
 }

@@ -25,13 +25,13 @@ spec_tests/
 ### Option 1: Using Git Submodules (Recommended)
 
 1. **Initialize Submodules**: 
-   ```powershell
+   ```bash
    git submodule update --init --recursive
    ```
    This will automatically clone the `hed-tests` and `hed-examples` repositories into the correct locations.
 
 2. **Update Submodules** (when needed):
-   ```powershell
+   ```bash
    git submodule update --remote
    ```
 
@@ -47,7 +47,7 @@ spec_tests/
 ## Running Spec Tests
 
 ### From Command Line:
-```powershell
+```bash
 # Run all spec tests
 python -m unittest discover spec_tests -v
 

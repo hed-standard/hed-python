@@ -13,9 +13,7 @@ keywords: HED tutorial, Python guide, validation examples, BIDS datasets,
 ```{index} user guide, tutorial, getting started, HED, Hierarchical Event Descriptors
 ```
 
-HED (Hierarchical Event Descriptors) is a framework for systematically describing events and experimental metadata in machine-actionable form. This guide provides comprehensive documentation for using the HED Python tools for validation, BIDS integration, and analysis.
-
-## Table of contents
+HED (Hierarchical Event Descriptors) is a framework for systematically describing events and experimental metadata in machine-actionable form. This guide provides comprehensive documentation for using the HED Python tools for validation, BIDS integration, and analysis:
 
 01. [What is HED?](#what-is-hed)
 02. [Getting started](#getting-started)

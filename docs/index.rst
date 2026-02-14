@@ -14,7 +14,8 @@ HED is integrated into major neuroimaging standards:
 * `BIDS <https://bids.neuroimaging.io/>`_ (Brain Imaging Data Structure)
 * `NWB <https://www.nwb.org/>`_ (Neurodata Without Borders)
 
-This package enables you to validate, analyze, and manipulate HED annotations in various formats:
+This package enables you to validate, analyze, and manipulate HED annotations
+in various formats:
 
 * **Validation**: Verify HED annotations against official schemas
 * **Analysis**: Search, filter, and summarize HED-annotated data
