@@ -1,5 +1,4 @@
 from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema import hed_schema_constants
 
 KEY_COLUMN_NAME = "rdfs.label"
 
@@ -71,7 +70,6 @@ name = "rdfs:label"
 subclass_of = "omn:SubClassOf"
 attributes = "Attributes"
 dcdescription = "dc:description"
-equivalent_to = "omn:EquivalentTo"
 has_unit_class = "hasUnitClass"
 prefix = "prefix"  # for the prefixes section, this is the column name in the prefixes dataframe
 namespace = "namespace"  # for the prefixes section, this is the column name in the prefixes dataframe
@@ -105,6 +103,21 @@ other_columns = [hed_id, name, subclass_of, attributes, dcdescription]
 property_type = "Type"
 properties = "Properties"
 
+# Map of column names(suffix keys) to valid attribute names
+attribute_key_names = {
+    TAG_KEY: tag_columns,
+    VALUE_CLASS_KEY: other_columns,
+    UNIT_CLASS_KEY: other_columns,
+    UNIT_KEY: unit_columns,
+    UNIT_MODIFIER_KEY: other_columns,
+    ANNOTATION_KEY: attribute_columns,
+    DATA_KEY: attribute_columns,
+    OBJECT_KEY: attribute_columns,
+    ATTRIBUTE_PROPERTY_KEY: property_columns,
+    PREFIXES_KEY: prefix_columns,
+    EXTERNAL_ANNOTATION_KEY: external_annotation_columns,
+    SOURCES_KEY: source_columns,
+}
 
 # HED_00X__YY where X is the library starting index, and Y is the entity number below.
 struct_base_ids = {
@@ -120,14 +133,6 @@ struct_base_ids = {
     "HedHeader": 10,
     "HedPrologue": 11,
     "HedEpilogue": 12,
-}
-
-# todo: this should be retrieved directly from the appropriate spreadsheet
-valid_omn_attributes = {
-    hed_schema_constants.VERSION_ATTRIBUTE: "HED_0000300",
-    hed_schema_constants.LIBRARY_ATTRIBUTE: "HED_0000301",
-    hed_schema_constants.WITH_STANDARD_ATTRIBUTE: "HED_0000302",
-    hed_schema_constants.UNMERGED_ATTRIBUTE: "HED_0000303",
 }
 
 # Extra spreadsheet columns
