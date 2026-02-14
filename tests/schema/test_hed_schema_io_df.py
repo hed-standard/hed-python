@@ -397,7 +397,8 @@ class TestHedSchemaDF(unittest.TestCase):
             with open(tag_lf, "rb") as f:
                 lf_content = f.read()
 
-            crlf_content = lf_content.replace(b"\n", b"\r\n")
+            # Normalize to LF first, then convert to CRLF to avoid double carriage returns
+            crlf_content = lf_content.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
 
             # Write CRLF version
             os.makedirs(os.path.dirname(crlf_path), exist_ok=True)
@@ -421,8 +422,9 @@ class TestHedSchemaDF(unittest.TestCase):
                 if os.path.exists(src):
                     with open(src, "rb") as f:
                         content = f.read()
+                    # Normalize to LF first, then convert to CRLF to avoid double carriage returns
                     with open(dst, "wb") as f:
-                        f.write(content.replace(b"\n", b"\r\n"))
+                        f.write(content.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
 
             # Both should load successfully
             lf_schema = load_schema(lf_path)
