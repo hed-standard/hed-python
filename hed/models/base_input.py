@@ -262,7 +262,9 @@ class BaseInput:
             OSError: If the file cannot be opened.
         """
         dataframe = self._dataframe
-        csv_string_if_filename_none = dataframe.to_csv(file, sep="\t", index=False, header=self._has_column_names)
+        csv_string_if_filename_none = dataframe.to_csv(
+            file, sep="\t", index=False, header=self._has_column_names, lineterminator="\n"
+        )
         return csv_string_if_filename_none
 
     @property

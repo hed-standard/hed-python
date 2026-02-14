@@ -89,7 +89,8 @@ def xml_element_2_str(elem):
     """
     rough_string = ElementTree.tostring(elem, method="xml")
     parsed = minidom.parseString(rough_string)
-    return parsed.toprettyxml(indent="   ")
+    xml_string = parsed.toprettyxml(indent="   ", newl="\n")
+    return xml_string
 
 
 def schema_version_greater_equal(hed_schema, target_version):

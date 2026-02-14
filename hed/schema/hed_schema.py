@@ -354,7 +354,7 @@ class HedSchema(HedSchemaBase):
             OSError: File cannot be saved for some reason.
         """
         output_strings = Schema2Wiki().process_schema(self, save_merged)
-        with open(filename, mode="w", encoding="utf-8") as opened_file:
+        with open(filename, mode="w", encoding="utf-8", newline="") as opened_file:
             for string in output_strings:
                 opened_file.write(string)
                 opened_file.write("\n")
@@ -371,7 +371,7 @@ class HedSchema(HedSchemaBase):
             OSError: File cannot be saved for some reason.
         """
         xml_tree = Schema2XML().process_schema(self, save_merged)
-        with open(filename, mode="w", encoding="utf-8") as opened_file:
+        with open(filename, mode="w", encoding="utf-8", newline="") as opened_file:
             xml_string = schema_util.xml_element_2_str(xml_tree)
             opened_file.write(xml_string)
 
@@ -388,7 +388,7 @@ class HedSchema(HedSchemaBase):
         """
         converter = Schema2JSON()
         converter.process_schema(self, save_merged)
-        with open(filename, mode="w", encoding="utf-8") as opened_file:
+        with open(filename, mode="w", encoding="utf-8", newline="") as opened_file:
             opened_file.write(converter.to_json_string(indent=2))
 
     def save_as_dataframes(self, base_filename, save_merged=False):
