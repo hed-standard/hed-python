@@ -113,7 +113,7 @@ def save_dataframes(base_filename, dataframe_dict):
     os.makedirs(base_dir, exist_ok=True)
     for suffix, dataframe in dataframe_dict.items():
         filename = f"{base}_{suffix}.tsv"
-        with open(filename, mode="w", encoding="utf-8") as opened_file:
+        with open(filename, mode="w", encoding="utf-8", newline="") as opened_file:
             dataframe.to_csv(opened_file, sep="\t", index=False, header=True, quoting=csv.QUOTE_NONE, lineterminator="\n")
 
 
