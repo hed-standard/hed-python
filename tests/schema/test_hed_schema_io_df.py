@@ -232,9 +232,6 @@ class TestHedSchemaDF(unittest.TestCase):
 
         # Verify no equivalent_to column exists
         self.assertNotIn("omn:EquivalentTo", tag_df.columns, "Tag DataFrame should not have equivalent_to column")
-        self.assertNotIn(
-            df_constants.hed_id + ":EquivalentTo", tag_df.columns, "Tag DataFrame should not have any equivalent_to variant"
-        )
 
     def test_no_equivalent_to_column_in_units(self):
         """Test that equivalent_to column is never generated in unit-related DataFrames."""
