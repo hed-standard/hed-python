@@ -48,15 +48,13 @@ class Schema2XML(Schema2Base):
         if sources is None or sources.empty:
             return
 
-        # Filter for unmerged library schemas - only output library entries
+        # Filter for unmerged library schemas - only output library entries if tracking is available
         if not self._save_merged and hed_schema.library and hed_schema.with_standard:
             if df_constants.in_library in sources.columns:
                 sources = sources[sources[df_constants.in_library].notna()].copy()
                 if sources.empty:
                     return
-            else:
-                # No in_library tracking, skip output for safety
-                return
+            # Otherwise fall back to writing all rows (assume all are library entries)
 
         sources_node = SubElement(self.hed_node, xml_constants.SCHEMA_SOURCE_SECTION_ELEMENT)
         for _, row in sources.iterrows():
@@ -81,15 +79,13 @@ class Schema2XML(Schema2Base):
         if prefixes is None or prefixes.empty:
             return
 
-        # Filter for unmerged library schemas - only output library entries
+        # Filter for unmerged library schemas - only output library entries if tracking is available
         if not self._save_merged and hed_schema.library and hed_schema.with_standard:
             if df_constants.in_library in prefixes.columns:
                 prefixes = prefixes[prefixes[df_constants.in_library].notna()].copy()
                 if prefixes.empty:
                     return
-            else:
-                # No in_library tracking, skip output for safety
-                return
+            # Otherwise fall back to writing all rows (assume all are library entries)
 
         prefixes_node = SubElement(self.hed_node, xml_constants.SCHEMA_PREFIX_SECTION_ELEMENT)
         for _, row in prefixes.iterrows():
@@ -113,15 +109,13 @@ class Schema2XML(Schema2Base):
         if externals is None or externals.empty:
             return
 
-        # Filter for unmerged library schemas - only output library entries
+        # Filter for unmerged library schemas - only output library entries if tracking is available
         if not self._save_merged and hed_schema.library and hed_schema.with_standard:
             if df_constants.in_library in externals.columns:
                 externals = externals[externals[df_constants.in_library].notna()].copy()
                 if externals.empty:
                     return
-            else:
-                # No in_library tracking, skip output for safety
-                return
+            # Otherwise fall back to writing all rows (assume all are library entries)
 
         externals_node = SubElement(self.hed_node, xml_constants.SCHEMA_EXTERNAL_SECTION_ELEMENT)
         for _, row in externals.iterrows():

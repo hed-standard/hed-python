@@ -1,0 +1,78 @@
+<?xml version="1.0" ?>
+<HED version="4.0.0" library="testlib" withStandard="8.4.0" unmerged="True">
+   <prologue>This schema is designed to be lazy partnered with prerelease 8.4.0.</prologue>
+   <schema>
+      <node>
+         <name>Test-some</name>
+         <description>Unknown stuff.</description>
+         <node>
+            <name>Unknown1</name>
+            <description>Unknown1 stuff</description>
+         </node>
+      </node>
+      <node>
+         <name>Fruit</name>
+         <description>Fruit stuff.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Plant</value>
+         </attribute>
+         <node>
+            <name>Apple</name>
+            <description>Apple stuff</description>
+            <attribute>
+               <name>annotation</name>
+               <value>foodonto:has_botanical_name</value>
+            </attribute>
+            <node>
+               <name>Honey-crisp</name>
+               <description>Type of apple</description>
+            </node>
+         </node>
+      </node>
+      <node>
+         <name>Vegetable</name>
+         <description>Vegetable stuff.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Plant</value>
+         </attribute>
+         <node>
+            <name>Carrot</name>
+            <description>Carrot stuff</description>
+            <attribute>
+               <name>annotation</name>
+               <value>foodonto:has_botanical_name</value>
+            </attribute>
+         </node>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+   <epilogue>A final section.</epilogue>
+   <schemaSources>
+      <schemaSource>
+         <name>FoodDB</name>
+         <link>https://fooddb.example.org</link>
+         <description>Botanical and nutritional database for fruits and vegetables.</description>
+      </schemaSource>
+   </schemaSources>
+   <schemaPrefixes>
+      <schemaPrefix>
+         <name>foodonto:</name>
+         <namespace>http://purl.obolibrary.org/obo/foodon.owl</namespace>
+         <description>Food Ontology (FOODON)</description>
+      </schemaPrefix>
+   </schemaPrefixes>
+   <externalAnnotations>
+      <externalAnnotation>
+         <name>foodonto:</name>
+         <id>has_botanical_name</id>
+         <iri>http://purl.obolibrary.org/obo/FOODON_00001234</iri>
+         <description>The botanical or scientific name of a food item.</description>
+      </externalAnnotation>
+   </externalAnnotations>
+</HED>

@@ -25,9 +25,7 @@ class TestSchemaExtrasXMLRoundtrip(unittest.TestCase):
         cls.temp_dir = tempfile.mkdtemp(prefix="hed_extras_test_")
 
         # Path to testlib 4.0.0 which has all three extras sections
-        cls.testlib_4_path = os.path.join(
-            os.path.dirname(__file__), "../../.status/HED_testlib_4.0.0_converted/HED_testlib_4.0.0.xml"
-        )
+        cls.testlib_4_path = os.path.join(os.path.dirname(__file__), "../data/schema_tests/test_merge/HED_testlib_4.0.0.xml")
 
         # Normalize path
         cls.testlib_4_path = os.path.normpath(cls.testlib_4_path)
@@ -40,9 +38,6 @@ class TestSchemaExtrasXMLRoundtrip(unittest.TestCase):
 
     def test_read_unmerged_library_extras_has_in_library_column(self):
         """Test that reading unmerged library schema adds in_library column to extras."""
-        if not os.path.exists(self.testlib_4_path):
-            self.skipTest(f"Test file not found: {self.testlib_4_path}")
-
         schema = load_schema(self.testlib_4_path)
 
         # Verify schema properties
@@ -81,10 +76,10 @@ class TestSchemaExtrasXMLRoundtrip(unittest.TestCase):
         )
 
     def test_read_merged_schema_has_mixed_in_library(self):
-        """Test that merged library schema has entries from both standard and library with proper in_library tracking."""
-        if not os.path.exists(self.testlib_4_path):
-            self.skipTest(f"Test file not found: {self.testlib_4_path}")
+        """Test that merged library schema properly tracks library entries with in_library column.
 
+        Note: Standard schema 8.4.0 may not have extras sections, so we only verify library entries exist.
+        """
         # Load as merged (this happens automatically because withStandard is set)
         schema = load_schema(self.testlib_4_path)
 
@@ -115,9 +110,6 @@ class TestSchemaExtrasXMLRoundtrip(unittest.TestCase):
 
     def test_write_unmerged_only_outputs_library_extras(self):
         """Test that saving unmerged only outputs extras with in_library column (merged schema saved as unmerged)."""
-        if not os.path.exists(self.testlib_4_path):
-            self.skipTest(f"Test file not found: {self.testlib_4_path}")
-
         # Load schema - it will auto-merge with standard 8.4.0
         merged_schema = load_schema(self.testlib_4_path)
 
@@ -157,8 +149,6 @@ class TestSchemaExtrasXMLRoundtrip(unittest.TestCase):
 
     def test_write_merged_outputs_all_extras(self):
         """Test that saving merged outputs all extras (library and standard)."""
-        if not os.path.exists(self.testlib_4_path):
-            self.skipTest(f"Test file not found: {self.testlib_4_path}")
         # Load schema - auto-merges with standard 8.4.0
         merged_schema = load_schema(self.testlib_4_path)
 
@@ -227,9 +217,6 @@ class TestSchemaExtrasXMLRoundtrip(unittest.TestCase):
 
     def test_roundtrip_unmerged_preserves_library_extras(self):
         """Test round-trip with unmerged: read merged -> save unmerged -> read -> save unmerged -> verify identical."""
-        if not os.path.exists(self.testlib_4_path):
-            self.skipTest(f"Test file not found: {self.testlib_4_path}")
-
         # Load original (auto-merges with standard)
         schema1 = load_schema(self.testlib_4_path)
 
@@ -270,9 +257,6 @@ class TestSchemaExtrasXMLRoundtrip(unittest.TestCase):
 
     def test_roundtrip_merged_preserves_all_extras(self):
         """Test round-trip with merged: read -> save merged -> read -> save merged -> verify identical."""
-        if not os.path.exists(self.testlib_4_path):
-            self.skipTest(f"Test file not found: {self.testlib_4_path}")
-
         # Load original (auto-merges)
         schema1 = load_schema(self.testlib_4_path)
 
@@ -323,9 +307,6 @@ class TestSchemaExtrasXMLRoundtrip(unittest.TestCase):
 
     def test_in_library_column_not_in_xml_output(self):
         """Test that in_library column is not serialized to XML output, but inLibrary attributes are correctly written."""
-        if not os.path.exists(self.testlib_4_path):
-            self.skipTest(f"Test file not found: {self.testlib_4_path}")
-
         schema = load_schema(self.testlib_4_path)
 
         # Check that extras have the in_library column
