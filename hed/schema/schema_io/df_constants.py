@@ -80,6 +80,7 @@ link = "link"
 type = "Type"
 properties = "Properties"  # for the schema properties, this is the column name in the properties dataframe
 description = "description"
+in_library = "in_library"  # for extras sections, tracks which library an entry came from (internal metadata, not serialized)
 
 struct_columns = [hed_id, name, attributes, subclass_of, dcdescription]
 tag_columns = [hed_id, name, level, subclass_of, attributes, dcdescription]

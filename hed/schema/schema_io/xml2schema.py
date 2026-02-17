@@ -94,6 +94,23 @@ class SchemaLoaderXML(SchemaLoader):
             return epilogue_elements[0].text
         return ""
 
+    def _get_in_library_attribute(self, element):
+        """Parse inLibrary attribute from an extras element if present.
+
+        Parameters:
+            element: XML element to parse
+
+        Returns:
+            str or None: Library name if inLibrary attribute found, None otherwise
+        """
+        for attr_element in element.findall(xml_constants.ATTRIBUTE_ELEMENT):
+            name_elem = attr_element.find(xml_constants.NAME_ELEMENT)
+            if name_elem is not None and name_elem.text == HedKey.InLibrary:
+                value_elem = attr_element.find(xml_constants.VALUE_ELEMENT)
+                if value_elem is not None:
+                    return value_elem.text
+        return None
+
     def _read_extras(self):
         self._schema.extras = {}
         self._read_sources()
@@ -107,10 +124,29 @@ class SchemaLoaderXML(SchemaLoader):
             source_name = self._get_element_value(source_element, xml_constants.NAME_ELEMENT)
             source_link = self._get_element_value(source_element, xml_constants.LINK_ELEMENT)
             description = self._get_element_value(source_element, xml_constants.DESCRIPTION_ELEMENT)
+
+            # Parse inLibrary attribute from element if present (for merged XML)
+            in_library_value = self._get_in_library_attribute(source_element)
+            # If not found in XML but this is an unmerged library schema, use self.library
+            if in_library_value is None and self.library and not self._loading_merged:
+                in_library_value = self.library
+
             data.append(
-                {df_constants.source: source_name, df_constants.link: source_link, df_constants.description: description}
+                {
+                    df_constants.source: source_name,
+                    df_constants.link: source_link,
+                    df_constants.description: description,
+                    df_constants.in_library: in_library_value,
+                }
             )
-        self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(data, columns=df_constants.source_columns)
+        library_df = pd.DataFrame(data)
+
+        # Merge with existing schema extras if present (from withStandard base schema)
+        standard_df = self._schema.extras.get(df_constants.SOURCES_KEY, None)
+        if standard_df is not None and not standard_df.empty:
+            self._schema.extras[df_constants.SOURCES_KEY] = pd.concat([standard_df, library_df], ignore_index=True)
+        else:
+            self._schema.extras[df_constants.SOURCES_KEY] = library_df
 
     def _read_prefixes(self):
         prefix_elements = self._get_elements_by_name(xml_constants.SCHEMA_PREFIX_DEF_ELEMENT)
@@ -119,14 +155,29 @@ class SchemaLoaderXML(SchemaLoader):
             prefix_name = self._get_element_value(prefix_element, xml_constants.NAME_ELEMENT)
             prefix_namespace = self._get_element_value(prefix_element, xml_constants.NAMESPACE_ELEMENT)
             prefix_description = self._get_element_value(prefix_element, xml_constants.DESCRIPTION_ELEMENT)
+
+            # Parse inLibrary attribute from element if present (for merged XML)
+            in_library_value = self._get_in_library_attribute(prefix_element)
+            # If not found in XML but this is an unmerged library schema, use self.library
+            if in_library_value is None and self.library and not self._loading_merged:
+                in_library_value = self.library
+
             data.append(
                 {
                     df_constants.prefix: prefix_name,
                     df_constants.namespace: prefix_namespace,
                     df_constants.description: prefix_description,
+                    df_constants.in_library: in_library_value,
                 }
             )
-        self._schema.extras[df_constants.PREFIXES_KEY] = pd.DataFrame(data, columns=df_constants.prefix_columns)
+        library_df = pd.DataFrame(data)
+
+        # Merge with existing schema extras if present (from withStandard base schema)
+        standard_df = self._schema.extras.get(df_constants.PREFIXES_KEY, None)
+        if standard_df is not None and not standard_df.empty:
+            self._schema.extras[df_constants.PREFIXES_KEY] = pd.concat([standard_df, library_df], ignore_index=True)
+        else:
+            self._schema.extras[df_constants.PREFIXES_KEY] = library_df
 
     def _read_external_annotations(self):
         external_elements = self._get_elements_by_name(xml_constants.SCHEMA_EXTERNAL_DEF_ELEMENT)
@@ -136,17 +187,30 @@ class SchemaLoaderXML(SchemaLoader):
             external_id = self._get_element_value(external_element, xml_constants.ID_ELEMENT)
             external_iri = self._get_element_value(external_element, xml_constants.IRI_ELEMENT)
             external_description = self._get_element_value(external_element, xml_constants.DESCRIPTION_ELEMENT)
+
+            # Parse inLibrary attribute from element if present (for merged XML)
+            in_library_value = self._get_in_library_attribute(external_element)
+            # If not found in XML but this is an unmerged library schema, use self.library
+            if in_library_value is None and self.library and not self._loading_merged:
+                in_library_value = self.library
+
             data.append(
                 {
                     df_constants.prefix: external_name,
                     df_constants.id: external_id,
                     df_constants.iri: external_iri,
                     df_constants.description: external_description,
+                    df_constants.in_library: in_library_value,
                 }
             )
-        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(
-            data, columns=df_constants.external_annotation_columns
-        )
+        library_df = pd.DataFrame(data)
+
+        # Merge with existing schema extras if present (from withStandard base schema)
+        standard_df = self._schema.extras.get(df_constants.EXTERNAL_ANNOTATION_KEY, None)
+        if standard_df is not None and not standard_df.empty:
+            self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.concat([standard_df, library_df], ignore_index=True)
+        else:
+            self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = library_df
 
     def _add_tags_recursive(self, new_tags, parent_tags):
         for tag_element in new_tags:

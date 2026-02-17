@@ -10,6 +10,7 @@ import os
 import tempfile
 import shutil
 from hed.schema import load_schema_version, load_schema
+from hed.schema.schema_io import df_constants
 
 
 class TestSchemaFormatRoundtrip(unittest.TestCase):
@@ -317,7 +318,10 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         for key in orig_extras.keys():
             orig_df = orig_extras[key]
             reloaded_df = reloaded_extras[key]
-            self.assertTrue(orig_df.equals(reloaded_df), f"Extras section '{key}' should match after roundtrip")
+            # Drop in_library column if present (internal metadata not relevant for comparison)
+            orig_compare = orig_df.drop(columns=[df_constants.in_library], errors="ignore")
+            reloaded_compare = reloaded_df.drop(columns=[df_constants.in_library], errors="ignore")
+            self.assertTrue(orig_compare.equals(reloaded_compare), f"Extras section '{key}' should match after roundtrip")
 
     def test_library_schema_extras_roundtrip(self):
         """Test that library schema extras (external annotations, etc.) roundtrip correctly."""
@@ -343,7 +347,12 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         for key in orig_extras.keys():
             orig_df = orig_extras[key]
             reloaded_df = reloaded_extras[key]
-            self.assertTrue(orig_df.equals(reloaded_df), f"Library schema extras '{key}' should match after roundtrip")
+            # Drop in_library column if present (internal metadata not relevant for comparison)
+            orig_compare = orig_df.drop(columns=[df_constants.in_library], errors="ignore")
+            reloaded_compare = reloaded_df.drop(columns=[df_constants.in_library], errors="ignore")
+            self.assertTrue(
+                orig_compare.equals(reloaded_compare), f"Library schema extras '{key}' should match after roundtrip"
+            )
 
     def test_library_schema_score(self):
         """Test score library schema roundtrip specifically."""

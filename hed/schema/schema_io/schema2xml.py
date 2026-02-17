@@ -1,7 +1,8 @@
 """Allows output of HedSchema objects as .xml format"""
 
 from xml.etree.ElementTree import Element, SubElement
-from hed.schema.hed_schema_constants import HedSectionKey
+import pandas as pd
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io import xml_constants, df_constants as df_constants
 from hed.schema.schema_io.schema2base import Schema2Base
 
@@ -44,8 +45,17 @@ class Schema2XML(Schema2Base):
 
     def _output_sources(self, hed_schema):
         sources = hed_schema.get_extras(df_constants.SOURCES_KEY)
-        if sources is None:
+        if sources is None or sources.empty:
             return
+
+        # Filter for unmerged library schemas - only output library entries if tracking is available
+        if not self._save_merged and hed_schema.library and hed_schema.with_standard:
+            if df_constants.in_library in sources.columns:
+                sources = sources[sources[df_constants.in_library].notna()].copy()
+                if sources.empty:
+                    return
+            # Otherwise fall back to writing all rows (assume all are library entries)
+
         sources_node = SubElement(self.hed_node, xml_constants.SCHEMA_SOURCE_SECTION_ELEMENT)
         for _, row in sources.iterrows():
             source_node = SubElement(sources_node, xml_constants.SCHEMA_SOURCE_DEF_ELEMENT)
@@ -56,10 +66,27 @@ class Schema2XML(Schema2Base):
             description = SubElement(source_node, xml_constants.DESCRIPTION_ELEMENT)
             description.text = row[df_constants.description]
 
+            # Add inLibrary attribute in merged saves if present
+            if self._save_merged and df_constants.in_library in row.index and pd.notna(row[df_constants.in_library]):
+                attribute_node = SubElement(source_node, xml_constants.ATTRIBUTE_ELEMENT)
+                name_node = SubElement(attribute_node, xml_constants.NAME_ELEMENT)
+                name_node.text = HedKey.InLibrary
+                value_node = SubElement(attribute_node, xml_constants.VALUE_ELEMENT)
+                value_node.text = row[df_constants.in_library]
+
     def _output_prefixes(self, hed_schema):
         prefixes = hed_schema.get_extras(df_constants.PREFIXES_KEY)
-        if prefixes is None:
+        if prefixes is None or prefixes.empty:
             return
+
+        # Filter for unmerged library schemas - only output library entries if tracking is available
+        if not self._save_merged and hed_schema.library and hed_schema.with_standard:
+            if df_constants.in_library in prefixes.columns:
+                prefixes = prefixes[prefixes[df_constants.in_library].notna()].copy()
+                if prefixes.empty:
+                    return
+            # Otherwise fall back to writing all rows (assume all are library entries)
+
         prefixes_node = SubElement(self.hed_node, xml_constants.SCHEMA_PREFIX_SECTION_ELEMENT)
         for _, row in prefixes.iterrows():
             prefix_node = SubElement(prefixes_node, xml_constants.SCHEMA_PREFIX_DEF_ELEMENT)
@@ -69,11 +96,27 @@ class Schema2XML(Schema2Base):
             prefix_namespace.text = row[df_constants.namespace]
             prefix_description = SubElement(prefix_node, xml_constants.DESCRIPTION_ELEMENT)
             prefix_description.text = row[df_constants.description]
+            # Add inLibrary attribute in merged saves if present
+            if self._save_merged and df_constants.in_library in row.index and pd.notna(row[df_constants.in_library]):
+                attribute_node = SubElement(prefix_node, xml_constants.ATTRIBUTE_ELEMENT)
+                name_node = SubElement(attribute_node, xml_constants.NAME_ELEMENT)
+                name_node.text = HedKey.InLibrary
+                value_node = SubElement(attribute_node, xml_constants.VALUE_ELEMENT)
+                value_node.text = row[df_constants.in_library]
 
     def _output_external_annotations(self, hed_schema):
         externals = hed_schema.get_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
-        if externals is None:
+        if externals is None or externals.empty:
             return
+
+        # Filter for unmerged library schemas - only output library entries if tracking is available
+        if not self._save_merged and hed_schema.library and hed_schema.with_standard:
+            if df_constants.in_library in externals.columns:
+                externals = externals[externals[df_constants.in_library].notna()].copy()
+                if externals.empty:
+                    return
+            # Otherwise fall back to writing all rows (assume all are library entries)
+
         externals_node = SubElement(self.hed_node, xml_constants.SCHEMA_EXTERNAL_SECTION_ELEMENT)
         for _, row in externals.iterrows():
             external_node = SubElement(externals_node, xml_constants.SCHEMA_EXTERNAL_DEF_ELEMENT)
@@ -85,6 +128,14 @@ class Schema2XML(Schema2Base):
             external_iri.text = row[df_constants.iri]
             external_description = SubElement(external_node, xml_constants.DESCRIPTION_ELEMENT)
             external_description.text = row[df_constants.description]
+
+            # Add inLibrary attribute in merged saves if present
+            if self._save_merged and df_constants.in_library in row.index and pd.notna(row[df_constants.in_library]):
+                attribute_node = SubElement(external_node, xml_constants.ATTRIBUTE_ELEMENT)
+                name_node = SubElement(attribute_node, xml_constants.NAME_ELEMENT)
+                name_node.text = HedKey.InLibrary
+                value_node = SubElement(attribute_node, xml_constants.VALUE_ELEMENT)
+                value_node.text = row[df_constants.in_library]
 
     def _output_epilogue(self, epilogue):
         if epilogue:
