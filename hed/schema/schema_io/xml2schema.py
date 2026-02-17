@@ -110,7 +110,21 @@ class SchemaLoaderXML(SchemaLoader):
             data.append(
                 {df_constants.source: source_name, df_constants.link: source_link, df_constants.description: description}
             )
-        self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(data, columns=df_constants.source_columns)
+        library_df = pd.DataFrame(data, columns=df_constants.source_columns)
+
+        # Add in_library column if this is a library schema
+        if self.library:
+            library_df[df_constants.in_library] = self.library
+
+        # Merge with standard schema extras if applicable
+        if self.appending_to_schema:
+            standard_df = self._schema.extras.get(df_constants.SOURCES_KEY, None)
+            if standard_df is not None and not standard_df.empty:
+                self._schema.extras[df_constants.SOURCES_KEY] = pd.concat([standard_df, library_df], ignore_index=True)
+            else:
+                self._schema.extras[df_constants.SOURCES_KEY] = library_df
+        else:
+            self._schema.extras[df_constants.SOURCES_KEY] = library_df
 
     def _read_prefixes(self):
         prefix_elements = self._get_elements_by_name(xml_constants.SCHEMA_PREFIX_DEF_ELEMENT)
@@ -126,7 +140,21 @@ class SchemaLoaderXML(SchemaLoader):
                     df_constants.description: prefix_description,
                 }
             )
-        self._schema.extras[df_constants.PREFIXES_KEY] = pd.DataFrame(data, columns=df_constants.prefix_columns)
+        library_df = pd.DataFrame(data, columns=df_constants.prefix_columns)
+
+        # Add in_library column if this is a library schema
+        if self.library:
+            library_df[df_constants.in_library] = self.library
+
+        # Merge with standard schema extras if applicable
+        if self.appending_to_schema:
+            standard_df = self._schema.extras.get(df_constants.PREFIXES_KEY, None)
+            if standard_df is not None and not standard_df.empty:
+                self._schema.extras[df_constants.PREFIXES_KEY] = pd.concat([standard_df, library_df], ignore_index=True)
+            else:
+                self._schema.extras[df_constants.PREFIXES_KEY] = library_df
+        else:
+            self._schema.extras[df_constants.PREFIXES_KEY] = library_df
 
     def _read_external_annotations(self):
         external_elements = self._get_elements_by_name(xml_constants.SCHEMA_EXTERNAL_DEF_ELEMENT)
@@ -144,9 +172,23 @@ class SchemaLoaderXML(SchemaLoader):
                     df_constants.description: external_description,
                 }
             )
-        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(
-            data, columns=df_constants.external_annotation_columns
-        )
+        library_df = pd.DataFrame(data, columns=df_constants.external_annotation_columns)
+
+        # Add in_library column if this is a library schema
+        if self.library:
+            library_df[df_constants.in_library] = self.library
+
+        # Merge with standard schema extras if applicable
+        if self.appending_to_schema:
+            standard_df = self._schema.extras.get(df_constants.EXTERNAL_ANNOTATION_KEY, None)
+            if standard_df is not None and not standard_df.empty:
+                self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.concat(
+                    [standard_df, library_df], ignore_index=True
+                )
+            else:
+                self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = library_df
+        else:
+            self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = library_df
 
     def _add_tags_recursive(self, new_tags, parent_tags):
         for tag_element in new_tags:

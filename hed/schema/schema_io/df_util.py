@@ -26,13 +26,30 @@ def merge_dataframes(df1, df2, key):
     """
     if df2 is None or df2.empty:
         return df1
-    if set(df1.columns) != set(df2.columns):
-        raise HedFileError(
-            HedExceptions.BAD_COLUMN_NAMES,
-            f"Both dataframes corresponding to {key} to be merged must have the same columns.  "
-            f"df1 columns: {list(df1.columns)} df2 columns: {list(df2.columns)}",
-            "",
-        )
+
+    # Handle in_library column mismatch (one has it, the other doesn't)
+    # This can happen when merging extras from different schema formats
+    df1_cols = set(df1.columns)
+    df2_cols = set(df2.columns)
+
+    if df1_cols != df2_cols:
+        in_lib = constants.in_library
+        # If only difference is in_library column, add it to the one missing it
+        if in_lib in df1_cols and in_lib not in df2_cols and df1_cols - {in_lib} == df2_cols:
+            df2 = df2.copy()
+            df2[in_lib] = None
+        elif in_lib in df2_cols and in_lib not in df1_cols and df2_cols - {in_lib} == df1_cols:
+            df1 = df1.copy()
+            df1[in_lib] = None
+        elif df1_cols != df2_cols:
+            # Still different columns after handling in_library - this is an error
+            raise HedFileError(
+                HedExceptions.BAD_COLUMN_NAMES,
+                f"Both dataframes corresponding to {key} to be merged must have the same columns.  "
+                f"df1 columns: {list(df1.columns)} df2 columns: {list(df2.columns)}",
+                "",
+            )
+
     combined = pd.concat([df1, df2], ignore_index=True)
     combined = combined.sort_values(by=list(combined.columns))
     combined = combined.drop_duplicates()
