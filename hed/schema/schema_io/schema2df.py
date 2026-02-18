@@ -89,7 +89,21 @@ class Schema2DF(Schema2Base):
 
         """
         for key, df in hed_schema.extras.items():
-            self.output[key] = df.copy()
+            output_df = df.copy()
+
+            # Filter for unmerged library schemas - only output library entries if tracking is available
+            if not self._save_merged and hed_schema.library and hed_schema.with_standard:
+                if constants.in_library in output_df.columns:
+                    output_df = output_df[
+                        output_df[constants.in_library].notna() & (output_df[constants.in_library] != "")
+                    ].copy()
+                # Otherwise fall back to writing all rows (assume all are library entries)
+
+            # Always exclude in_library column from TSV output (internal metadata, not serialized)
+            if constants.in_library in output_df.columns:
+                output_df = output_df.drop(columns=[constants.in_library])
+
+            self.output[key] = output_df
 
     def _output_epilogue(self, epilogue):
         base_object = "HedEpilogue"
