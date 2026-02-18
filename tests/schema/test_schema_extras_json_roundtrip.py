@@ -4,7 +4,8 @@ Unit tests for schema extras sections JSON I/O with in_library tracking.
 Tests that extras (Sources, Prefixes, AnnotationPropertyExternal) are correctly:
 1. Read from JSON with in_library column added for library schemas
 2. Merged correctly when loading withStandard schemas
-3. Written to JSON with proper filtering for unmerged/merged saves4. Round-trip correctly (read -> write -> read)
+3. Written to JSON with proper filtering for unmerged/merged saves
+4. Round-trip correctly (read -> write -> read)
 """
 
 import unittest
