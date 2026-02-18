@@ -120,13 +120,31 @@ class SchemaLoaderWiki(SchemaLoader):
             lines_for_section = wiki_lines_by_section[extra_key]
             data = []
             for _line_number, line in lines_for_section:
-                data.append(self.parse_star_string(line.strip()))
+                parsed_data = self.parse_star_string(line.strip())
+
+                # Handle inLibrary attribute parsing
+                in_library_value = parsed_data.pop(df_constants.in_library, None)
+                # If not found in MediaWiki but this is an unmerged library schema, use self.library
+                if in_library_value is None and self.library and not self._loading_merged:
+                    in_library_value = self.library
+                parsed_data[df_constants.in_library] = in_library_value
+
+                data.append(parsed_data)
             if not data:
                 continue
             df = pd.DataFrame(data).fillna("").astype(str)
+            # Convert in_library None values to empty strings for consistency
+            if df_constants.in_library in df.columns:
+                df[df_constants.in_library] = df[df_constants.in_library].replace("None", "")
             stripped_key = extra_key.strip("'")
             stripped_key = WIKI_EXTRA_DICT.get(stripped_key, stripped_key)
-            self._schema.extras[stripped_key] = df
+
+            # Merge with existing schema extras if present (from withStandard base schema)
+            standard_df = self._schema.extras.get(stripped_key, None)
+            if standard_df is not None and not standard_df.empty:
+                self._schema.extras[stripped_key] = pd.concat([standard_df, df], ignore_index=True)
+            else:
+                self._schema.extras[stripped_key] = df
 
     @staticmethod
     def parse_star_string(s):
