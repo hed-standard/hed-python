@@ -1,7 +1,7 @@
 """Allows output of HedSchema objects as MEDIAWIKI format"""
 
 import pandas as pd
-from hed.schema.hed_schema_constants import HedSectionKey
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io import wiki_constants, df_constants
 from hed.schema.schema_io.schema2base import Schema2Base
 
@@ -83,7 +83,7 @@ class Schema2Wiki(Schema2Base):
                 if col == df_constants.in_library:
                     # For merged saves, include inLibrary in the output
                     if self._save_merged and pd.notna(row[col]) and row[col] != "":
-                        column_strings.append(f"{col}={row[col]}")
+                        column_strings.append(f"{HedKey.InLibrary}={row[col]}")
                     # For unmerged saves, skip writing in_library
                 else:
                     column_strings.append(f"{col}={row[col]}")

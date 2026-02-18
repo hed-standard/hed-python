@@ -280,10 +280,11 @@ class TestSchemaExtrasWikiRoundtrip(unittest.TestCase):
 
             # If there are library entries, they should have inLibrary=testlib
             if "*" in sources_section and "=" in sources_section:
-                # At least one library entry should have inLibrary
-                pass
-                # This might be okay if all entries are standard entries
-                # So we won't fail if inLibrary is missing, but we'll check it's there when expected
+                self.assertIn(
+                    "inLibrary=",
+                    sources_section,
+                    "Expected at least one Sources entry to contain an inLibrary= attribute in merged output",
+                )
 
 
 if __name__ == "__main__":

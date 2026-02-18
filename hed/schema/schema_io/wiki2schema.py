@@ -123,7 +123,11 @@ class SchemaLoaderWiki(SchemaLoader):
                 parsed_data = self.parse_star_string(line.strip())
 
                 # Handle inLibrary attribute parsing
-                in_library_value = parsed_data.pop(df_constants.in_library, None)
+                # MediaWiki uses "inLibrary" but we store as "in_library" in dataframe
+                in_library_value = parsed_data.pop(HedKey.InLibrary, None)
+                if in_library_value is None:
+                    # Also check for lowercase version in case it was stored that way
+                    in_library_value = parsed_data.pop(df_constants.in_library, None)
                 # If not found in MediaWiki but this is an unmerged library schema, use self.library
                 if in_library_value is None and self.library and not self._loading_merged:
                     in_library_value = self.library
