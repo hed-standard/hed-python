@@ -127,8 +127,8 @@ class SchemaLoaderXML(SchemaLoader):
 
             # Parse inLibrary attribute from element if present (for merged XML)
             in_library_value = self._get_in_library_attribute(source_element)
-            # If not found in XML but this is an unmerged library schema, use self.library
-            if in_library_value is None and self.library and not self._loading_merged:
+            # If not found in XML but this is a library schema, use self.library
+            if in_library_value is None and self.library:
                 in_library_value = self.library
 
             data.append(
@@ -158,8 +158,8 @@ class SchemaLoaderXML(SchemaLoader):
 
             # Parse inLibrary attribute from element if present (for merged XML)
             in_library_value = self._get_in_library_attribute(prefix_element)
-            # If not found in XML but this is an unmerged library schema, use self.library
-            if in_library_value is None and self.library and not self._loading_merged:
+            # If not found in XML but this is a library schema, use self.library
+            if in_library_value is None and self.library:
                 in_library_value = self.library
 
             data.append(
@@ -190,8 +190,8 @@ class SchemaLoaderXML(SchemaLoader):
 
             # Parse inLibrary attribute from element if present (for merged XML)
             in_library_value = self._get_in_library_attribute(external_element)
-            # If not found in XML but this is an unmerged library schema, use self.library
-            if in_library_value is None and self.library and not self._loading_merged:
+            # If not found in XML but this is a library schema, use self.library
+            if in_library_value is None and self.library:
                 in_library_value = self.library
 
             data.append(

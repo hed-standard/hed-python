@@ -128,8 +128,8 @@ class SchemaLoaderWiki(SchemaLoader):
                 if in_library_value is None:
                     # Also check for lowercase version in case it was stored that way
                     in_library_value = parsed_data.pop(df_constants.in_library, None)
-                # If not found in MediaWiki but this is an unmerged library schema, use self.library
-                if in_library_value is None and self.library and not self._loading_merged:
+                # If not found in MediaWiki but this is a library schema, use self.library
+                if in_library_value is None and self.library:
                     in_library_value = self.library
                 parsed_data[df_constants.in_library] = in_library_value
 
