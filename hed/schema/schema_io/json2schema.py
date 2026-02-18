@@ -498,42 +498,103 @@ class SchemaLoaderJSON(SchemaLoader):
         if json_constants.SOURCES_KEY in self._json_data:
             sources_data = self._json_data[json_constants.SOURCES_KEY]
             for source_data in sources_data:
+                # Parse inLibrary attribute from JSON if present (for merged JSON)
+                in_library_value = source_data.get(HedKey.InLibrary, None)
+                # If not found in JSON but this is a library schema, use self.library
+                if in_library_value is None and self.library:
+                    in_library_value = self.library
+
                 sources_list.append(
                     {
                         df_constants.source: source_data.get("name", ""),
                         df_constants.link: source_data.get("link", ""),
                         df_constants.description: source_data.get(json_constants.DESCRIPTION_KEY, ""),
+                        df_constants.in_library: in_library_value,
                     }
                 )
-        self._schema.extras[df_constants.SOURCES_KEY] = pd.DataFrame(sources_list, columns=df_constants.source_columns)
+        # Create DataFrame - if empty, use column specification to match XML/MEDIAWIKI behavior
+        if sources_list:
+            library_df = pd.DataFrame(sources_list).fillna("").astype(str)
+        else:
+            library_df = pd.DataFrame([], columns=df_constants.source_columns)
+        # Convert in_library None values to empty strings for consistency
+        if df_constants.in_library in library_df.columns:
+            library_df[df_constants.in_library] = library_df[df_constants.in_library].replace("None", "")
+
+        # Merge with existing schema extras if present (from withStandard base schema)
+        standard_df = self._schema.extras.get(df_constants.SOURCES_KEY, None)
+        if standard_df is not None and not standard_df.empty:
+            self._schema.extras[df_constants.SOURCES_KEY] = pd.concat([standard_df, library_df], ignore_index=True)
+        else:
+            self._schema.extras[df_constants.SOURCES_KEY] = library_df
 
         # Load prefixes - always create DataFrame even if empty
         prefixes_list = []
         if json_constants.PREFIXES_KEY in self._json_data:
             prefixes_data = self._json_data[json_constants.PREFIXES_KEY]
             for prefix_data in prefixes_data:
+                # Parse inLibrary attribute from JSON if present (for merged JSON)
+                in_library_value = prefix_data.get(HedKey.InLibrary, None)
+                # If not found in JSON but this is a library schema, use self.library
+                if in_library_value is None and self.library:
+                    in_library_value = self.library
+
                 prefixes_list.append(
                     {
                         df_constants.prefix: prefix_data.get("name", ""),
                         df_constants.namespace: prefix_data.get("namespace", ""),
                         df_constants.description: prefix_data.get(json_constants.DESCRIPTION_KEY, ""),
+                        df_constants.in_library: in_library_value,
                     }
                 )
-        self._schema.extras[df_constants.PREFIXES_KEY] = pd.DataFrame(prefixes_list, columns=df_constants.prefix_columns)
+        # Create DataFrame - if empty, use column specification to match XML/MEDIAWIKI behavior
+        if prefixes_list:
+            library_df = pd.DataFrame(prefixes_list).fillna("").astype(str)
+        else:
+            library_df = pd.DataFrame([], columns=df_constants.prefix_columns)
+        # Convert in_library None values to empty strings for consistency
+        if df_constants.in_library in library_df.columns:
+            library_df[df_constants.in_library] = library_df[df_constants.in_library].replace("None", "")
+
+        # Merge with existing schema extras if present (from withStandard base schema)
+        standard_df = self._schema.extras.get(df_constants.PREFIXES_KEY, None)
+        if standard_df is not None and not standard_df.empty:
+            self._schema.extras[df_constants.PREFIXES_KEY] = pd.concat([standard_df, library_df], ignore_index=True)
+        else:
+            self._schema.extras[df_constants.PREFIXES_KEY] = library_df
 
         # Load external annotations - always create DataFrame even if empty
         externals_list = []
         if json_constants.EXTERNAL_ANNOTATIONS_KEY in self._json_data:
             externals_data = self._json_data[json_constants.EXTERNAL_ANNOTATIONS_KEY]
             for external_data in externals_data:
+                # Parse inLibrary attribute from JSON if present (for merged JSON)
+                in_library_value = external_data.get(HedKey.InLibrary, None)
+                # If not found in JSON but this is a library schema, use self.library
+                if in_library_value is None and self.library:
+                    in_library_value = self.library
+
                 externals_list.append(
                     {
                         df_constants.prefix: external_data.get("name", ""),
                         df_constants.id: external_data.get("id", ""),
                         df_constants.iri: external_data.get("iri", ""),
                         df_constants.description: external_data.get(json_constants.DESCRIPTION_KEY, ""),
+                        df_constants.in_library: in_library_value,
                     }
                 )
-        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.DataFrame(
-            externals_list, columns=df_constants.external_annotation_columns
-        )
+        # Create DataFrame - if empty, use column specification to match XML/MEDIAWIKI behavior
+        if externals_list:
+            library_df = pd.DataFrame(externals_list).fillna("").astype(str)
+        else:
+            library_df = pd.DataFrame([], columns=df_constants.external_annotation_columns)
+        # Convert in_library None values to empty strings for consistency
+        if df_constants.in_library in library_df.columns:
+            library_df[df_constants.in_library] = library_df[df_constants.in_library].replace("None", "")
+
+        # Merge with existing schema extras if present (from withStandard base schema)
+        standard_df = self._schema.extras.get(df_constants.EXTERNAL_ANNOTATION_KEY, None)
+        if standard_df is not None and not standard_df.empty:
+            self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.concat([standard_df, library_df], ignore_index=True)
+        else:
+            self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = library_df
