@@ -1,6 +1,7 @@
 """Allows output of HedSchema objects as MEDIAWIKI format"""
 
-from hed.schema.hed_schema_constants import HedSectionKey
+import pandas as pd
+from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io import wiki_constants, df_constants
 from hed.schema.schema_io.schema2base import Schema2Base
 
@@ -60,14 +61,33 @@ class Schema2Wiki(Schema2Base):
         """
         # In the base class, we do nothing, but subclasses can override this method.
         extra = hed_schema.get_extras(section_key)
-        if extra is None:
+        if extra is None or extra.empty:
             return
+
+        # Filter for unmerged library schemas - only output library entries if tracking is available
+        if not self._save_merged and hed_schema.library and hed_schema.with_standard:
+            if df_constants.in_library in extra.columns:
+                extra = extra[extra[df_constants.in_library].notna() & (extra[df_constants.in_library] != "")].copy()
+                if extra.empty:
+                    return
+            # Otherwise fall back to writing all rows (assume all are library entries)
+
         self._add_blank_line()
         self.current_tag_string = wiki_key
         self._flush_current_tag()
         for _, row in extra.iterrows():
             self.current_tag_string += "*"
-            self.current_tag_extra = ",".join(f"{col}={row[col]}" for col in extra.columns)
+            # Build column string, excluding in_library column for output
+            column_strings = []
+            for col in extra.columns:
+                if col == df_constants.in_library:
+                    # For merged saves, include inLibrary in the output
+                    if self._save_merged and pd.notna(row[col]) and row[col] != "":
+                        column_strings.append(f"{HedKey.InLibrary}={row[col]}")
+                    # For unmerged saves, skip writing in_library
+                else:
+                    column_strings.append(f"{col}={row[col]}")
+            self.current_tag_extra = ",".join(column_strings)
             self._flush_current_tag()
 
     def _output_epilogue(self, epilogue):
