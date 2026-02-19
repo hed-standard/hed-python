@@ -39,7 +39,7 @@ Install from PyPI:
 pip install hedtools
 ```
 
-Or install from GitHub (latest):
+or install from GitHub (latest):
 
 ```bash
 pip install git+https://github.com/hed-standard/hed-python/@main
