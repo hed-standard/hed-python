@@ -90,16 +90,51 @@ class SchemaLoaderDF(SchemaLoader):
             )
         extras = {key: self.input_data[key] for key in constants.DF_EXTRAS if key in self.input_data}
         for key, _item in extras.items():
-            # Add in_library column for library schemas
-            library_df = extras[key]
-            if self.library and not library_df.empty:
-                # Add in_library column if not already present
-                if constants.in_library not in library_df.columns:
-                    library_df = library_df.copy()
-                    library_df[constants.in_library] = self.library
-                    extras[key] = library_df
+            # Merge first WITHOUT adding in_library to allow proper deduplication
+            existing_extras = self._schema.extras.get(key, None)
 
-            self._schema.extras[key] = df_util.merge_dataframes(extras[key], self._schema.extras.get(key, None), key)
+            # For merged library schemas with withStandard, we need to load the standard schema's extras
+            # to correctly reconstruct in_library provenance (since TSV doesn't encode it)
+            if self.library and self._schema.with_standard and (existing_extras is None or existing_extras.empty):
+                from hed.schema.hed_schema_io import load_schema_version
+
+                try:
+                    standard_schema = load_schema_version(self._schema.with_standard)
+                    existing_extras = standard_schema.get_extras(key)
+                except Exception:
+                    # If we can't load standard schema, continue without it
+                    existing_extras = None
+
+            merged_df = df_util.merge_dataframes(extras[key], existing_extras, key)
+
+            # For library schemas, mark only library-specific entries (not in standard schema)
+            # Note: This only works for unmerged TSVs that partner with a standard schema.
+            # For merged TSVs, we cannot determine provenance since TSV doesn't encode in_library.
+            if self.library and merged_df is not None and not merged_df.empty:
+                # Add in_library column if not present
+                if constants.in_library not in merged_df.columns:
+                    merged_df[constants.in_library] = None
+
+                # If we have existing standard extras, only mark rows NOT present in standard
+                # This handles unmerged library TSVs that partner with a standard schema
+                if existing_extras is not None and not existing_extras.empty and key in constants.UNIQUE_EXTRAS_KEYS:
+                    unique_keys = constants.UNIQUE_EXTRAS_KEYS[key]
+                    # Find rows in merged that are NOT in existing standard extras
+                    # by checking if their unique key values don't match any standard rows
+                    for idx, row in merged_df.iterrows():
+                        # Check if this row's unique key values exist in standard extras
+                        mask = pd.Series([True] * len(existing_extras))
+                        for col in unique_keys:
+                            if col in existing_extras.columns:
+                                mask = mask & (existing_extras[col] == row[col])
+
+                        # If no match in standard extras, it's library-specific
+                        if not existing_extras[mask].shape[0]:
+                            merged_df.at[idx, constants.in_library] = self.library
+                # For merged TSVs (existing_extras is None), we cannot determine provenance
+                # Leave in_library as None for all rows - this is lossy but unavoidable
+
+            self._schema.extras[key] = merged_df
 
     def _get_prologue_epilogue(self, file_data):
         prologue, epilogue = "", ""

@@ -148,11 +148,11 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         # Replace carriage returns with new lines since this might not be done by the caller
         schema_string = schema_string.replace("\r\n", "\n")
 
-    if schema_format.endswith(".xml"):
+    if schema_format.lower().endswith(".xml"):
         hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string, schema=schema, name=name)
-    elif schema_format.endswith(".mediawiki"):
+    elif schema_format.lower().endswith(".mediawiki"):
         hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string, schema=schema, name=name)
-    elif schema_format.endswith(".json"):
+    elif schema_format.lower().endswith(".json"):
         hed_schema = SchemaLoaderJSON.load(schema_as_string=schema_string, schema=schema, name=name)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, f"Unknown schema extension {schema_format}", filename=name)

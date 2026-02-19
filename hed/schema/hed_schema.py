@@ -406,9 +406,14 @@ class HedSchema(HedSchemaBase):
         Raises:
             OSError: File cannot be saved for some reason.
         """
+        from hed.schema.schema_io import df_constants
+
         output_dfs = Schema2DF().process_schema(self, save_merged)
+        # Don't overwrite extras that Schema2DF already processed (they've been cleaned/filtered)
         if hasattr(self, "extras") and self.extras:
-            output_dfs.update(self.extras)
+            for key, value in self.extras.items():
+                if key not in df_constants.DF_EXTRAS:
+                    output_dfs[key] = value
         df_util.save_dataframes(base_filename, output_dfs)
 
     def set_schema_prefix(self, schema_namespace):

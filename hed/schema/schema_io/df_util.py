@@ -149,7 +149,7 @@ def convert_filenames_to_dict(filenames):
     result_filenames = {}
     dataframe_names = constants.DF_SUFFIXES
     if isinstance(filenames, str):
-        if filenames.endswith(".tsv"):
+        if filenames.lower().endswith(".tsv"):
             base, base_ext = os.path.splitext(filenames)
         else:
             # Load as foldername/foldername_suffix.tsv

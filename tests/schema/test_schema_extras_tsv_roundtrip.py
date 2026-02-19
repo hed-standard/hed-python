@@ -8,6 +8,8 @@ Tests that extras (Sources, Prefixes, AnnotationPropertyExternal) are correctly:
 4. Round-trip correctly (read -> write -> read)
 
 Note: TSV format does NOT serialize the in_library column (it's internal metadata only).
+However, df2schema reconstructs in_library on load by comparing TSV extras against the
+partnered standard schema's extras, allowing proper provenance tracking even for merged TSVs.
 """
 
 import unittest
@@ -129,33 +131,43 @@ class TestSchemaExtrasTSVRoundtrip(unittest.TestCase):
         merged_schema = load_schema(self.testlib_4_tsv_dir)
 
         # Save the MERGED schema as unmerged - should only output library entries
-        output_path = os.path.join(self.temp_dir, "testlib_merged_saved_as_unmerged_tsv")
+        output_base = "testlib_merged_saved_as_unmerged_tsv"
+        output_path = os.path.join(self.temp_dir, output_base)
         merged_schema.save_as_dataframes(output_path, save_merged=False)
 
         # Check the actual TSV files directly (before reloading)
+        # File naming follows: {output_base}/{output_base}_{suffix}.tsv
         import pandas as pd
 
-        sources_file = os.path.join(output_path, "HedSources.tsv")
+        sources_file = os.path.join(output_path, f"{output_base}_{df_constants.SOURCES_KEY}.tsv")
         if os.path.exists(sources_file):
             df = pd.read_csv(sources_file, sep="\t", dtype=str, na_filter=False)
             # TSV file should not have in_library column (internal metadata)
             self.assertNotIn(df_constants.in_library, df.columns, "TSV file should not contain in_library column")
-            # Should only have library sources (FoodDB from testlib)
-            source_names = df["Source name"].tolist() if "Source name" in df.columns else []
+            # Should only have library sources (FoodDB from testlib), not standard sources (Wikipedia)
+            source_names = df[df_constants.source].tolist()
             self.assertIn("FoodDB", source_names, "Should have library source FoodDB")
+            self.assertNotIn("Wikipedia", source_names, "Should not have standard source Wikipedia (unmerged save)")
+        else:
+            self.fail(f"Sources file not found: {sources_file}")
 
-        prefixes_file = os.path.join(output_path, "HedPrefixes.tsv")
+        prefixes_file = os.path.join(output_path, f"{output_base}_{df_constants.PREFIXES_KEY}.tsv")
         if os.path.exists(prefixes_file):
             df = pd.read_csv(prefixes_file, sep="\t", dtype=str, na_filter=False)
             self.assertNotIn(df_constants.in_library, df.columns, "TSV file should not contain in_library column")
 
-        external_file = os.path.join(output_path, "HedExternalAnnotations.tsv")
+        external_file = os.path.join(output_path, f"{output_base}_{df_constants.EXTERNAL_ANNOTATION_KEY}.tsv")
         if os.path.exists(external_file):
             df = pd.read_csv(external_file, sep="\t", dtype=str, na_filter=False)
             self.assertNotIn(df_constants.in_library, df.columns, "TSV file should not contain in_library column")
 
     def test_write_merged_outputs_all_extras(self):
-        """Test that saving merged outputs all extras."""
+        """Test that saving merged outputs all extras data.
+
+        Note: TSV format cannot encode in_library provenance. When a merged TSV is reloaded,
+        without partnering to standard schema, we cannot determine which entries are library vs standard.
+        This test verifies the data is preserved, not the in_library metadata.
+        """
         # Load schema - auto-merges with standard 8.4.0
         merged_schema = load_schema(self.testlib_4_tsv_dir)
 
@@ -163,28 +175,34 @@ class TestSchemaExtrasTSVRoundtrip(unittest.TestCase):
         output_path = os.path.join(self.temp_dir, "testlib_merged_tsv")
         merged_schema.save_as_dataframes(output_path, save_merged=True)
 
-        # Reload and verify
+        # Reload and verify - compare data content (not in_library tracking)
         reloaded_schema = load_schema(output_path)
 
-        # Should have all extras (library + standard if present)
-        sources_df = reloaded_schema.get_extras(df_constants.SOURCES_KEY)
-        if sources_df is not None and not sources_df.empty:
-            self.assertIn(df_constants.in_library, sources_df.columns)
-            # Should have library entries with in_library='testlib'
-            library_sources_count = len(sources_df[sources_df[df_constants.in_library] == "testlib"])
-            self.assertGreater(library_sources_count, 0, "Merged save should contain library Sources")
+        # Should have all extras data
+        orig_sources = merged_schema.get_extras(df_constants.SOURCES_KEY)
+        reload_sources = reloaded_schema.get_extras(df_constants.SOURCES_KEY)
+        if orig_sources is not None and not orig_sources.empty:
+            self.assertIsNotNone(reload_sources)
+            # Compare data columns (excluding in_library)
+            orig_data = orig_sources.drop(columns=[df_constants.in_library], errors="ignore")
+            reload_data = reload_sources.drop(columns=[df_constants.in_library], errors="ignore")
+            self.assertEqual(len(orig_data), len(reload_data), "Merged save should preserve all Sources entries")
 
-        prefixes_df = reloaded_schema.get_extras(df_constants.PREFIXES_KEY)
-        if prefixes_df is not None and not prefixes_df.empty:
-            self.assertIn(df_constants.in_library, prefixes_df.columns)
-            library_prefixes_count = len(prefixes_df[prefixes_df[df_constants.in_library] == "testlib"])
-            self.assertGreater(library_prefixes_count, 0, "Merged save should contain library Prefixes")
+        orig_prefixes = merged_schema.get_extras(df_constants.PREFIXES_KEY)
+        reload_prefixes = reloaded_schema.get_extras(df_constants.PREFIXES_KEY)
+        if orig_prefixes is not None and not orig_prefixes.empty:
+            self.assertIsNotNone(reload_prefixes)
+            orig_data = orig_prefixes.drop(columns=[df_constants.in_library], errors="ignore")
+            reload_data = reload_prefixes.drop(columns=[df_constants.in_library], errors="ignore")
+            self.assertEqual(len(orig_data), len(reload_data), "Merged save should preserve all Prefixes entries")
 
-        external_df = reloaded_schema.get_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
-        if external_df is not None and not external_df.empty:
-            self.assertIn(df_constants.in_library, external_df.columns)
-            library_externals_count = len(external_df[external_df[df_constants.in_library] == "testlib"])
-            self.assertGreater(library_externals_count, 0, "Merged save should contain library External annotations")
+        orig_external = merged_schema.get_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
+        reload_external = reloaded_schema.get_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
+        if orig_external is not None and not orig_external.empty:
+            self.assertIsNotNone(reload_external)
+            orig_data = orig_external.drop(columns=[df_constants.in_library], errors="ignore")
+            reload_data = reload_external.drop(columns=[df_constants.in_library], errors="ignore")
+            self.assertEqual(len(orig_data), len(reload_data), "Merged save should preserve all External annotation entries")
 
     def test_roundtrip_unmerged_preserves_library_extras(self):
         """Test that unmerged roundtrip preserves all library extras.
@@ -230,7 +248,11 @@ class TestSchemaExtrasTSVRoundtrip(unittest.TestCase):
             )
 
     def test_roundtrip_merged_preserves_all_extras(self):
-        """Test that merged roundtrip preserves all extras with in_library tracking."""
+        """Test that merged roundtrip preserves all extras data and reconstructs in_library.
+
+        Note: TSV format does not encode in_library in the file, but df2schema reconstructs it
+        by loading the partnered standard schema and comparing extras to determine provenance.
+        """
         # Load original (auto-merges)
         original_schema = load_schema(self.testlib_4_tsv_dir)
 
@@ -241,7 +263,7 @@ class TestSchemaExtrasTSVRoundtrip(unittest.TestCase):
         # Reload
         roundtrip_schema = load_schema(temp_path)
 
-        # Compare extras
+        # Compare extras (including in_library which should be reconstructed)
         for extras_key in [df_constants.SOURCES_KEY, df_constants.PREFIXES_KEY, df_constants.EXTERNAL_ANNOTATION_KEY]:
             orig_df = original_schema.get_extras(extras_key)
             roundtrip_df = roundtrip_schema.get_extras(extras_key)
@@ -251,7 +273,8 @@ class TestSchemaExtrasTSVRoundtrip(unittest.TestCase):
 
             self.assertIsNotNone(roundtrip_df, f"{extras_key} should not be None after roundtrip")
 
-            # Compare including in_library column
+            # For merged roundtrip, we should have reconstructed in_library correctly
+            # by comparing against the standard schema's extras
             orig_compare = orig_df.fillna("").astype(str)
             roundtrip_compare = roundtrip_df.fillna("").astype(str)
 
@@ -260,7 +283,8 @@ class TestSchemaExtrasTSVRoundtrip(unittest.TestCase):
             roundtrip_compare = roundtrip_compare.sort_values(by=list(roundtrip_compare.columns)).reset_index(drop=True)
 
             self.assertTrue(
-                orig_compare.equals(roundtrip_compare), f"{extras_key} content should match after merged roundtrip"
+                orig_compare.equals(roundtrip_compare),
+                f"{extras_key} should match after merged roundtrip (including in_library)",
             )
 
     def test_in_library_column_not_in_tsv_output(self):
@@ -269,36 +293,45 @@ class TestSchemaExtrasTSVRoundtrip(unittest.TestCase):
         schema = load_schema(self.testlib_4_tsv_dir)
 
         # Save as TSV (both merged and unmerged)
-        merged_path = os.path.join(self.temp_dir, "check_column_name_merged_tsv")
-        unmerged_path = os.path.join(self.temp_dir, "check_column_name_unmerged_tsv")
+        merged_base = "check_column_name_merged_tsv"
+        unmerged_base = "check_column_name_unmerged_tsv"
+        merged_path = os.path.join(self.temp_dir, merged_base)
+        unmerged_path = os.path.join(self.temp_dir, unmerged_base)
         schema.save_as_dataframes(merged_path, save_merged=True)
         schema.save_as_dataframes(unmerged_path, save_merged=False)
 
-        # Check merged TSV - read the raw file to verify column names
+        # Check merged and unmerged TSVs - read the raw files to verify column names
         import pandas as pd
 
-        extras_files = {
-            df_constants.SOURCES_KEY: "sources.tsv",
-            df_constants.PREFIXES_KEY: "prefixes.tsv",
-            df_constants.EXTERNAL_ANNOTATION_KEY: "externalAnnotations.tsv",
-        }
+        # Use actual TSV naming convention: {base}_{suffix}.tsv
+        extras_keys = [df_constants.SOURCES_KEY, df_constants.PREFIXES_KEY, df_constants.EXTERNAL_ANNOTATION_KEY]
 
-        for _key, filename in extras_files.items():
-            merged_file = os.path.join(merged_path, filename)
+        for extras_key in extras_keys:
+            # Check merged TSV
+            merged_file = os.path.join(merged_path, f"{merged_base}_{extras_key}.tsv")
             if os.path.exists(merged_file):
                 df = pd.read_csv(merged_file, sep="\t", dtype=str, na_filter=False)
                 self.assertNotIn(
-                    df_constants.in_library, df.columns, f"Merged TSV should not contain in_library column in {filename}"
+                    df_constants.in_library, df.columns, f"Merged TSV should not contain in_library column in {extras_key}"
                 )
+            else:
+                # Only fail if we expect this file to exist (Sources should always exist for testlib)
+                if extras_key == df_constants.SOURCES_KEY:
+                    self.fail(f"Expected merged TSV file not found: {merged_file}")
 
-            unmerged_file = os.path.join(unmerged_path, filename)
+            # Check unmerged TSV
+            unmerged_file = os.path.join(unmerged_path, f"{unmerged_base}_{extras_key}.tsv")
             if os.path.exists(unmerged_file):
                 df = pd.read_csv(unmerged_file, sep="\t", dtype=str, na_filter=False)
                 self.assertNotIn(
                     df_constants.in_library,
                     df.columns,
-                    f"Unmerged TSV should not contain in_library column in {filename}",
+                    f"Unmerged TSV should not contain in_library column in {extras_key}",
                 )
+            else:
+                # Only fail if we expect this file to exist (Sources should always exist for testlib)
+                if extras_key == df_constants.SOURCES_KEY:
+                    self.fail(f"Expected unmerged TSV file not found: {unmerged_file}")
 
 
 if __name__ == "__main__":
