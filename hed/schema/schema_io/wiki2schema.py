@@ -122,16 +122,21 @@ class SchemaLoaderWiki(SchemaLoader):
             for _line_number, line in lines_for_section:
                 parsed_data = self.parse_star_string(line.strip())
 
-                # Handle inLibrary attribute parsing
+                # Handle inLibrary attribute parsing (only for library schemas with withStandard)
                 # MediaWiki uses "inLibrary" but we store as "in_library" in dataframe
-                in_library_value = parsed_data.pop(HedKey.InLibrary, None)
-                if in_library_value is None:
-                    # Also check for lowercase version in case it was stored that way
-                    in_library_value = parsed_data.pop(df_constants.in_library, None)
-                # If not found in MediaWiki but this is a library schema, use self.library
-                if in_library_value is None and self.library:
-                    in_library_value = self.library
-                parsed_data[df_constants.in_library] = in_library_value
+                if self.library and self._schema.with_standard:
+                    in_library_value = parsed_data.pop(HedKey.InLibrary, None)
+                    if in_library_value is None:
+                        # Also check for lowercase version in case it was stored that way
+                        in_library_value = parsed_data.pop(df_constants.in_library, None)
+                    # If not found in MediaWiki but this is a library schema, use self.library
+                    if in_library_value is None:
+                        in_library_value = self.library
+                    parsed_data[df_constants.in_library] = in_library_value
+                else:
+                    # For standard schemas or standalone libraries, remove inLibrary if present
+                    parsed_data.pop(HedKey.InLibrary, None)
+                    parsed_data.pop(df_constants.in_library, None)
 
                 data.append(parsed_data)
             if not data:

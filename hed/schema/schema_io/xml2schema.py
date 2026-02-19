@@ -125,20 +125,21 @@ class SchemaLoaderXML(SchemaLoader):
             source_link = self._get_element_value(source_element, xml_constants.LINK_ELEMENT)
             description = self._get_element_value(source_element, xml_constants.DESCRIPTION_ELEMENT)
 
-            # Parse inLibrary attribute from element if present (for merged XML)
-            in_library_value = self._get_in_library_attribute(source_element)
-            # If not found in XML but this is a library schema, use self.library
-            if in_library_value is None and self.library:
-                in_library_value = self.library
+            # Only add in_library for library schemas with withStandard
+            source_dict = {
+                df_constants.source: source_name,
+                df_constants.link: source_link,
+                df_constants.description: description,
+            }
+            if self.library and self._schema.with_standard:
+                # Parse inLibrary attribute from element if present (for merged XML)
+                in_library_value = self._get_in_library_attribute(source_element)
+                # If not found in XML but this is a library schema, use self.library
+                if in_library_value is None:
+                    in_library_value = self.library
+                source_dict[df_constants.in_library] = in_library_value
 
-            data.append(
-                {
-                    df_constants.source: source_name,
-                    df_constants.link: source_link,
-                    df_constants.description: description,
-                    df_constants.in_library: in_library_value,
-                }
-            )
+            data.append(source_dict)
         library_df = pd.DataFrame(data)
 
         # Merge with existing schema extras if present (from withStandard base schema)
@@ -156,20 +157,21 @@ class SchemaLoaderXML(SchemaLoader):
             prefix_namespace = self._get_element_value(prefix_element, xml_constants.NAMESPACE_ELEMENT)
             prefix_description = self._get_element_value(prefix_element, xml_constants.DESCRIPTION_ELEMENT)
 
-            # Parse inLibrary attribute from element if present (for merged XML)
-            in_library_value = self._get_in_library_attribute(prefix_element)
-            # If not found in XML but this is a library schema, use self.library
-            if in_library_value is None and self.library:
-                in_library_value = self.library
+            # Only add in_library for library schemas with withStandard
+            prefix_dict = {
+                df_constants.prefix: prefix_name,
+                df_constants.namespace: prefix_namespace,
+                df_constants.description: prefix_description,
+            }
+            if self.library and self._schema.with_standard:
+                # Parse inLibrary attribute from element if present (for merged XML)
+                in_library_value = self._get_in_library_attribute(prefix_element)
+                # If not found in XML but this is a library schema, use self.library
+                if in_library_value is None:
+                    in_library_value = self.library
+                prefix_dict[df_constants.in_library] = in_library_value
 
-            data.append(
-                {
-                    df_constants.prefix: prefix_name,
-                    df_constants.namespace: prefix_namespace,
-                    df_constants.description: prefix_description,
-                    df_constants.in_library: in_library_value,
-                }
-            )
+            data.append(prefix_dict)
         library_df = pd.DataFrame(data)
 
         # Merge with existing schema extras if present (from withStandard base schema)
@@ -188,21 +190,22 @@ class SchemaLoaderXML(SchemaLoader):
             external_iri = self._get_element_value(external_element, xml_constants.IRI_ELEMENT)
             external_description = self._get_element_value(external_element, xml_constants.DESCRIPTION_ELEMENT)
 
-            # Parse inLibrary attribute from element if present (for merged XML)
-            in_library_value = self._get_in_library_attribute(external_element)
-            # If not found in XML but this is a library schema, use self.library
-            if in_library_value is None and self.library:
-                in_library_value = self.library
+            # Only add in_library for library schemas with withStandard
+            external_dict = {
+                df_constants.prefix: external_name,
+                df_constants.id: external_id,
+                df_constants.iri: external_iri,
+                df_constants.description: external_description,
+            }
+            if self.library and self._schema.with_standard:
+                # Parse inLibrary attribute from element if present (for merged XML)
+                in_library_value = self._get_in_library_attribute(external_element)
+                # If not found in XML but this is a library schema, use self.library
+                if in_library_value is None:
+                    in_library_value = self.library
+                external_dict[df_constants.in_library] = in_library_value
 
-            data.append(
-                {
-                    df_constants.prefix: external_name,
-                    df_constants.id: external_id,
-                    df_constants.iri: external_iri,
-                    df_constants.description: external_description,
-                    df_constants.in_library: in_library_value,
-                }
-            )
+            data.append(external_dict)
         library_df = pd.DataFrame(data)
 
         # Merge with existing schema extras if present (from withStandard base schema)

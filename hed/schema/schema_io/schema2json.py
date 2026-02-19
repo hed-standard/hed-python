@@ -387,6 +387,104 @@ class Schema2JSON(Schema2Base):
                 tags_section[tag_entry.short_tag_name] = tag_data
                 return tag_data
 
+    @staticmethod
+    def _get_list_value(attr_key, source_dict):
+        """Get list value from a source dict, handling comma-separated strings.
+
+        Parameters:
+            attr_key: The attribute key to get
+            source_dict (dict): The dictionary to get from
+
+        Returns:
+            list: The value as a list
+        """
+        value = source_dict.get(attr_key)
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return value
+        # Comma-separated string
+        return [v.strip() for v in value.split(",") if v.strip()]
+
+    @staticmethod
+    def _get_bool_attribute(attr_key, source_dict):
+        """Get boolean attribute value from a source dict.
+
+        Parameters:
+            attr_key: The attribute key to get
+            source_dict (dict): The dictionary to get from
+
+        Returns:
+            bool or str: Boolean value or string "true"/"false" for XML compatibility
+        """
+        if attr_key not in source_dict:
+            return False
+        value = source_dict[attr_key]
+        # If it's stored as string "True" or "true", keep it as string for XML compatibility
+        if isinstance(value, str) and value.lower() in ("true", "false"):
+            return value
+        # Otherwise return as boolean
+        return bool(value)
+
+    def _build_attributes_dict(self, source_dict, include_takes_value):
+        """Build attributes dict, omitting false booleans and empty values.
+
+        Parameters:
+            source_dict (dict): Source dictionary with attributes
+            include_takes_value (bool): Whether to include takesValue attribute
+
+        Returns:
+            dict: Filtered attributes dictionary
+        """
+        attrs = {}
+
+        # Boolean attributes - only include if true
+        bool_attrs = [
+            ("extensionAllowed", HedKey.ExtensionAllowed),
+            ("requireChild", HedKey.RequireChild),
+            ("unique", HedKey.Unique),
+            ("reserved", HedKey.Reserved),
+            ("tagGroup", HedKey.TagGroup),
+            ("topLevelTagGroup", HedKey.TopLevelTagGroup),
+            ("recommended", HedKey.Recommended),
+            ("required", HedKey.Required),
+        ]
+
+        for json_name, hed_key in bool_attrs:
+            value = self._get_bool_attribute(hed_key, source_dict)
+            if value:  # Only include if true
+                attrs[json_name] = value
+
+        # takesValue - only if appropriate
+        if include_takes_value:
+            value = self._get_bool_attribute(HedKey.TakesValue, source_dict)
+            if value:
+                attrs["takesValue"] = value
+
+        # List attributes - only include if non-empty
+        suggested_tag = self._get_list_value(HedKey.SuggestedTag, source_dict)
+        if suggested_tag:
+            attrs["suggestedTag"] = suggested_tag
+
+        related_tag = self._get_list_value(HedKey.RelatedTag, source_dict)
+        if related_tag:
+            attrs["relatedTag"] = related_tag
+
+        value_class = self._get_list_value(HedKey.ValueClass, source_dict)
+        if value_class:
+            attrs["valueClass"] = value_class
+
+        unit_class = self._get_list_value(HedKey.UnitClass, source_dict)
+        if unit_class:
+            attrs["unitClass"] = unit_class
+
+        # Single value attributes
+        default_units = source_dict.get(HedKey.DefaultUnits)
+        if default_units:
+            attrs["defaultUnits"] = default_units
+
+        return attrs
+
     def _get_tag_attributes(self, tag_entry, exclude_takes_value_if_placeholder=True):
         """Extract tag attributes into dictionaries.
 
@@ -400,88 +498,15 @@ class Schema2JSON(Schema2Base):
                 - all_attributes: All effective attributes (explicit + inherited)
                 - explicit_attributes: Only attributes explicitly set on this tag
         """
-
-        # Helper to get list values from a source dict
-        def get_list_value(attr_key, source_dict):
-            value = source_dict.get(attr_key)
-            if value is None:
-                return []
-            if isinstance(value, list):
-                return value
-            # Comma-separated string
-            return [v.strip() for v in value.split(",") if v.strip()]
-
-        # Helper to get boolean attribute value from a source dict
-        def get_bool_attribute(attr_key, source_dict):
-            if attr_key not in source_dict:
-                return False
-            value = source_dict[attr_key]
-            # If it's stored as string "True" or "true", keep it as string for XML compatibility
-            if isinstance(value, str) and value.lower() in ("true", "false"):
-                return value
-            # Otherwise return as boolean
-            return bool(value)
-
-        # Helper to build attributes dict, omitting false booleans and empty values
-        def build_attributes_dict(source_dict, include_takes_value):
-            attrs = {}
-
-            # Boolean attributes - only include if true
-            bool_attrs = [
-                ("extensionAllowed", HedKey.ExtensionAllowed),
-                ("requireChild", HedKey.RequireChild),
-                ("unique", HedKey.Unique),
-                ("reserved", HedKey.Reserved),
-                ("tagGroup", HedKey.TagGroup),
-                ("topLevelTagGroup", HedKey.TopLevelTagGroup),
-                ("recommended", HedKey.Recommended),
-                ("required", HedKey.Required),
-            ]
-
-            for json_name, hed_key in bool_attrs:
-                value = get_bool_attribute(hed_key, source_dict)
-                if value:  # Only include if true
-                    attrs[json_name] = value
-
-            # takesValue - only if appropriate
-            if include_takes_value:
-                value = get_bool_attribute(HedKey.TakesValue, source_dict)
-                if value:
-                    attrs["takesValue"] = value
-
-            # List attributes - only include if non-empty
-            suggested_tag = get_list_value(HedKey.SuggestedTag, source_dict)
-            if suggested_tag:
-                attrs["suggestedTag"] = suggested_tag
-
-            related_tag = get_list_value(HedKey.RelatedTag, source_dict)
-            if related_tag:
-                attrs["relatedTag"] = related_tag
-
-            value_class = get_list_value(HedKey.ValueClass, source_dict)
-            if value_class:
-                attrs["valueClass"] = value_class
-
-            unit_class = get_list_value(HedKey.UnitClass, source_dict)
-            if unit_class:
-                attrs["unitClass"] = unit_class
-
-            # Single value attributes
-            default_units = source_dict.get(HedKey.DefaultUnits)
-            if default_units:
-                attrs["defaultUnits"] = default_units
-
-            return attrs
-
         # Check if this tag has a placeholder child - if so, takesValue belongs to the child
         has_placeholder_child = tag_entry.takes_value_child_entry is not None
         include_takes_value = not (exclude_takes_value_if_placeholder and has_placeholder_child)
 
         # Build attributes dict from inherited_attributes (all effective values)
-        all_attributes = build_attributes_dict(tag_entry.inherited_attributes, include_takes_value)
+        all_attributes = self._build_attributes_dict(tag_entry.inherited_attributes, include_takes_value)
 
         # Build explicit attributes dict from attributes (only explicit values)
-        explicit_attributes = build_attributes_dict(tag_entry.attributes, include_takes_value)
+        explicit_attributes = self._build_attributes_dict(tag_entry.attributes, include_takes_value)
 
         # Add annotation attributes (non-inheritable) - these are always explicit
         # Add hedId if present
@@ -558,17 +583,6 @@ class Schema2JSON(Schema2Base):
         Returns:
             dict: Placeholder attributes dictionary
         """
-
-        # Helper to get list values
-        def get_list_value(attr_key):
-            value = placeholder_entry.attributes.get(attr_key)
-            if value is None:
-                return []
-            if isinstance(value, list):
-                return value
-            # Comma-separated string
-            return [v.strip() for v in value.split(",") if v.strip()]
-
         placeholder_attrs = {}
 
         # Get takesValue - preserve string "true"/"True" if that's how it's stored
@@ -581,11 +595,11 @@ class Schema2JSON(Schema2Base):
                 placeholder_attrs["takesValue"] = True
 
         # Get unitClass and valueClass
-        unit_class = get_list_value(HedKey.UnitClass)
+        unit_class = self._get_list_value(HedKey.UnitClass, placeholder_entry.attributes)
         if unit_class:
             placeholder_attrs["unitClass"] = unit_class
 
-        value_class = get_list_value(HedKey.ValueClass)
+        value_class = self._get_list_value(HedKey.ValueClass, placeholder_entry.attributes)
         if value_class:
             placeholder_attrs["valueClass"] = value_class
 

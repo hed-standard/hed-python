@@ -89,28 +89,21 @@ class SchemaLoaderDF(SchemaLoader):
                 issues=self.fatal_errors,
             )
         extras = {key: self.input_data[key] for key in constants.DF_EXTRAS if key in self.input_data}
+
         for key, _item in extras.items():
             # Merge first WITHOUT adding in_library to allow proper deduplication
             existing_extras = self._schema.extras.get(key, None)
 
-            # For merged library schemas with withStandard, we need to load the standard schema's extras
-            # to correctly reconstruct in_library provenance (since TSV doesn't encode it)
-            if self.library and self._schema.with_standard and (existing_extras is None or existing_extras.empty):
-                from hed.schema.hed_schema_io import load_schema_version
-
-                try:
-                    standard_schema = load_schema_version(self._schema.with_standard)
-                    existing_extras = standard_schema.get_extras(key)
-                except Exception:
-                    # If we can't load standard schema, continue without it
-                    existing_extras = None
+            # For merged library schemas with withStandard, load standard schema's extras if not already present
+            # Use self._standard_schema loaded by base2schema (avoids repeated schema loads)
+            if self._standard_schema and (existing_extras is None or existing_extras.empty):
+                existing_extras = self._standard_schema.get_extras(key)
 
             merged_df = df_util.merge_dataframes(extras[key], existing_extras, key)
 
-            # For library schemas, mark only library-specific entries (not in standard schema)
-            # Note: This only works for unmerged TSVs that partner with a standard schema.
-            # For merged TSVs, we cannot determine provenance since TSV doesn't encode in_library.
-            if self.library and merged_df is not None and not merged_df.empty:
+            # For library schemas partnered with standard (withStandard), mark library-specific entries
+            # in_library is only relevant for library schemas that partner with a standard schema
+            if self.library and self._schema.with_standard and merged_df is not None and not merged_df.empty:
                 # Add in_library column if not present
                 if constants.in_library not in merged_df.columns:
                     merged_df[constants.in_library] = None
@@ -119,20 +112,21 @@ class SchemaLoaderDF(SchemaLoader):
                 # This handles unmerged library TSVs that partner with a standard schema
                 if existing_extras is not None and not existing_extras.empty and key in constants.UNIQUE_EXTRAS_KEYS:
                     unique_keys = constants.UNIQUE_EXTRAS_KEYS[key]
-                    # Find rows in merged that are NOT in existing standard extras
-                    # by checking if their unique key values don't match any standard rows
-                    for idx, row in merged_df.iterrows():
-                        # Check if this row's unique key values exist in standard extras
-                        mask = pd.Series([True] * len(existing_extras))
-                        for col in unique_keys:
-                            if col in existing_extras.columns:
-                                mask = mask & (existing_extras[col] == row[col])
 
-                        # If no match in standard extras, it's library-specific
-                        if not existing_extras[mask].shape[0]:
-                            merged_df.at[idx, constants.in_library] = self.library
-                # For merged TSVs (existing_extras is None), we cannot determine provenance
-                # Leave in_library as None for all rows - this is lossy but unavoidable
+                    # Use pandas merge with indicator to identify library-specific rows
+                    # Rows with 'left_only' are in merged_df but NOT in existing_extras (standard)
+                    temp_merged = merged_df.reset_index(drop=True)
+                    indicator_df = temp_merged.merge(
+                        existing_extras[unique_keys].drop_duplicates(), on=unique_keys, how="left", indicator="_in_standard"
+                    )
+                    # Convert mask to boolean array and use with original index
+                    library_positions = (indicator_df["_in_standard"] == "left_only").values
+                    merged_df.loc[merged_df.index[library_positions], constants.in_library] = self.library
+                else:
+                    # If standard extras don't exist/empty (e.g., standard <= 8.3.0 has no extras section),
+                    # treat ALL loaded TSV extras as library-specific to prevent them being dropped
+                    # when saving unmerged TSVs (Schema2DF filters to non-empty in_library)
+                    merged_df[constants.in_library] = self.library
 
             self._schema.extras[key] = merged_df
 

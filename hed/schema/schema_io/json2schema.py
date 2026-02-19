@@ -498,20 +498,21 @@ class SchemaLoaderJSON(SchemaLoader):
         if json_constants.SOURCES_KEY in self._json_data:
             sources_data = self._json_data[json_constants.SOURCES_KEY]
             for source_data in sources_data:
-                # Parse inLibrary attribute from JSON if present (for merged JSON)
-                in_library_value = source_data.get(HedKey.InLibrary, None)
-                # If not found in JSON but this is a library schema, use self.library
-                if in_library_value is None and self.library:
-                    in_library_value = self.library
+                # Only add in_library for library schemas with withStandard
+                source_dict = {
+                    df_constants.source: source_data.get("name", ""),
+                    df_constants.link: source_data.get("link", ""),
+                    df_constants.description: source_data.get(json_constants.DESCRIPTION_KEY, ""),
+                }
+                if self.library and self._schema.with_standard:
+                    # Parse inLibrary attribute from JSON if present (for merged JSON)
+                    in_library_value = source_data.get(HedKey.InLibrary, None)
+                    # If not found in JSON but this is a library schema, use self.library
+                    if in_library_value is None:
+                        in_library_value = self.library
+                    source_dict[df_constants.in_library] = in_library_value
 
-                sources_list.append(
-                    {
-                        df_constants.source: source_data.get("name", ""),
-                        df_constants.link: source_data.get("link", ""),
-                        df_constants.description: source_data.get(json_constants.DESCRIPTION_KEY, ""),
-                        df_constants.in_library: in_library_value,
-                    }
-                )
+                sources_list.append(source_dict)
         # Create DataFrame - if empty, use column specification to match XML/MEDIAWIKI behavior
         if sources_list:
             library_df = pd.DataFrame(sources_list).fillna("").astype(str)
@@ -533,20 +534,21 @@ class SchemaLoaderJSON(SchemaLoader):
         if json_constants.PREFIXES_KEY in self._json_data:
             prefixes_data = self._json_data[json_constants.PREFIXES_KEY]
             for prefix_data in prefixes_data:
-                # Parse inLibrary attribute from JSON if present (for merged JSON)
-                in_library_value = prefix_data.get(HedKey.InLibrary, None)
-                # If not found in JSON but this is a library schema, use self.library
-                if in_library_value is None and self.library:
-                    in_library_value = self.library
+                # Only add in_library for library schemas with withStandard
+                prefix_dict = {
+                    df_constants.prefix: prefix_data.get("name", ""),
+                    df_constants.namespace: prefix_data.get("namespace", ""),
+                    df_constants.description: prefix_data.get(json_constants.DESCRIPTION_KEY, ""),
+                }
+                if self.library and self._schema.with_standard:
+                    # Parse inLibrary attribute from JSON if present (for merged JSON)
+                    in_library_value = prefix_data.get(HedKey.InLibrary, None)
+                    # If not found in JSON but this is a library schema, use self.library
+                    if in_library_value is None:
+                        in_library_value = self.library
+                    prefix_dict[df_constants.in_library] = in_library_value
 
-                prefixes_list.append(
-                    {
-                        df_constants.prefix: prefix_data.get("name", ""),
-                        df_constants.namespace: prefix_data.get("namespace", ""),
-                        df_constants.description: prefix_data.get(json_constants.DESCRIPTION_KEY, ""),
-                        df_constants.in_library: in_library_value,
-                    }
-                )
+                prefixes_list.append(prefix_dict)
         # Create DataFrame - if empty, use column specification to match XML/MEDIAWIKI behavior
         if prefixes_list:
             library_df = pd.DataFrame(prefixes_list).fillna("").astype(str)
@@ -568,21 +570,22 @@ class SchemaLoaderJSON(SchemaLoader):
         if json_constants.EXTERNAL_ANNOTATIONS_KEY in self._json_data:
             externals_data = self._json_data[json_constants.EXTERNAL_ANNOTATIONS_KEY]
             for external_data in externals_data:
-                # Parse inLibrary attribute from JSON if present (for merged JSON)
-                in_library_value = external_data.get(HedKey.InLibrary, None)
-                # If not found in JSON but this is a library schema, use self.library
-                if in_library_value is None and self.library:
-                    in_library_value = self.library
+                # Only add in_library for library schemas with withStandard
+                external_dict = {
+                    df_constants.prefix: external_data.get("name", ""),
+                    df_constants.id: external_data.get("id", ""),
+                    df_constants.iri: external_data.get("iri", ""),
+                    df_constants.description: external_data.get(json_constants.DESCRIPTION_KEY, ""),
+                }
+                if self.library and self._schema.with_standard:
+                    # Parse inLibrary attribute from JSON if present (for merged JSON)
+                    in_library_value = external_data.get(HedKey.InLibrary, None)
+                    # If not found in JSON but this is a library schema, use self.library
+                    if in_library_value is None:
+                        in_library_value = self.library
+                    external_dict[df_constants.in_library] = in_library_value
 
-                externals_list.append(
-                    {
-                        df_constants.prefix: external_data.get("name", ""),
-                        df_constants.id: external_data.get("id", ""),
-                        df_constants.iri: external_data.get("iri", ""),
-                        df_constants.description: external_data.get(json_constants.DESCRIPTION_KEY, ""),
-                        df_constants.in_library: in_library_value,
-                    }
-                )
+                externals_list.append(external_dict)
         # Create DataFrame - if empty, use column specification to match XML/MEDIAWIKI behavior
         if externals_list:
             library_df = pd.DataFrame(externals_list).fillna("").astype(str)
