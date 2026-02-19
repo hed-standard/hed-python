@@ -69,6 +69,7 @@ class SchemaLoaderDF(SchemaLoader):
         return header_attributes
 
     def _parse_data(self):
+        """Parses the schema data from self.input_data (a pandas DataFrame)."""
         self._schema.prologue, self._schema.epilogue = self._get_prologue_epilogue(self.input_data)
         self._schema._initialize_attributes(HedSectionKey.Properties)
         self._read_attribute_section(self.input_data[constants.ATTRIBUTE_PROPERTY_KEY], section_key=HedSectionKey.Properties)

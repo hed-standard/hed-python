@@ -1,5 +1,3 @@
-import copy
-
 from hed.schema.schema_io import schema_util
 from hed.errors.exceptions import HedFileError, HedExceptions
 
@@ -79,7 +77,7 @@ class SchemaLoader(ABC):
         self._schema.filename = filename
         self._schema.header_attributes = hed_attributes
         self._loading_merged = False
-        self._standard_schema = None  # Cache for partnered standard schema (used during loading)
+        self._standard_schema = None  # For unmerged library schemas with withStandard
         self.fatal_errors = []
 
     @property
@@ -113,9 +111,12 @@ class SchemaLoader(ABC):
             schema(HedSchema): The new schema
         """
         self._loading_merged = True
-        # Load the standard schema for all partnered schemas (used for comparison/merging)
-        if not self.appending_to_schema and self._schema.with_standard:
+
+        # For unmerged library schemas, load and merge with the standard schema
+        if not self.appending_to_schema and self._schema.with_standard and not self._schema.merged:
             from hed.schema.hed_schema_io import load_schema_version
+            from hed.errors.exceptions import HedFileError, HedExceptions
+            import copy
 
             try:
                 self._standard_schema = load_schema_version(self._schema.with_standard)
@@ -126,17 +127,15 @@ class SchemaLoader(ABC):
                     filename=e.filename,
                 ) from e
 
-            # For unmerged schemas, copy standard schema as base for self._schema
-            if not self._schema.merged:
-                saved_attr = self._schema.header_attributes
-                saved_format = self._schema.source_format
-                # Copy the non-alterable cached schema
-                self._schema = copy.deepcopy(self._standard_schema)
-                self._schema.filename = self.filename
-                self._schema.name = self.name  # Manually set name here as we don't want to pass it to load_schema_version
-                self._schema.header_attributes = saved_attr
-                self._schema.source_format = saved_format
-                self._loading_merged = False  # Unmerged schemas shouldn't have InLibrary attributes in source
+            # Copy standard schema as the base, then add library-specific entries
+            saved_attr = self._schema.header_attributes
+            saved_format = self._schema.source_format
+            self._schema = copy.deepcopy(self._standard_schema)
+            self._schema.filename = self.filename
+            self._schema.name = self.name
+            self._schema.header_attributes = saved_attr
+            self._schema.source_format = saved_format
+            self._loading_merged = False  # Unmerged schemas shouldn't have InLibrary attributes in source
 
         self._parse_data()
         self._schema.finalize_dictionaries()
