@@ -1,7 +1,6 @@
 """Allows output of HedSchema objects as .json format"""
 
 import json
-import pandas as pd
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io import json_constants, df_constants
 from hed.schema.schema_io.schema2base import Schema2Base
@@ -64,14 +63,6 @@ class Schema2JSON(Schema2Base):
         if sources is None or sources.empty:
             return
 
-        # Filter for unmerged library schemas - only output library entries if tracking is available
-        if not self._save_merged and hed_schema.library and hed_schema.with_standard:
-            if df_constants.in_library in sources.columns:
-                sources = sources[sources[df_constants.in_library].notna() & (sources[df_constants.in_library] != "")].copy()
-                if sources.empty:
-                    return
-            # Otherwise fall back to writing all rows (assume all are library entries)
-
         sources_list = []
         for _, row in sources.iterrows():
             source_dict = {
@@ -79,14 +70,6 @@ class Schema2JSON(Schema2Base):
                 "link": row[df_constants.link],
                 json_constants.DESCRIPTION_KEY: row[df_constants.description],
             }
-            # Add inLibrary attribute in merged saves if present
-            if (
-                self._save_merged
-                and df_constants.in_library in row.index
-                and pd.notna(row[df_constants.in_library])
-                and row[df_constants.in_library] != ""
-            ):
-                source_dict[HedKey.InLibrary] = row[df_constants.in_library]
             sources_list.append(source_dict)
 
         self.output[json_constants.SOURCES_KEY] = sources_list
@@ -101,16 +84,6 @@ class Schema2JSON(Schema2Base):
         if prefixes is None or prefixes.empty:
             return
 
-        # Filter for unmerged library schemas - only output library entries if tracking is available
-        if not self._save_merged and hed_schema.library and hed_schema.with_standard:
-            if df_constants.in_library in prefixes.columns:
-                prefixes = prefixes[
-                    prefixes[df_constants.in_library].notna() & (prefixes[df_constants.in_library] != "")
-                ].copy()
-                if prefixes.empty:
-                    return
-            # Otherwise fall back to writing all rows (assume all are library entries)
-
         prefixes_list = []
         for _, row in prefixes.iterrows():
             prefix_dict = {
@@ -118,14 +91,6 @@ class Schema2JSON(Schema2Base):
                 "namespace": row[df_constants.namespace],
                 json_constants.DESCRIPTION_KEY: row[df_constants.description],
             }
-            # Add inLibrary attribute in merged saves if present
-            if (
-                self._save_merged
-                and df_constants.in_library in row.index
-                and pd.notna(row[df_constants.in_library])
-                and row[df_constants.in_library] != ""
-            ):
-                prefix_dict[HedKey.InLibrary] = row[df_constants.in_library]
             prefixes_list.append(prefix_dict)
 
         self.output[json_constants.PREFIXES_KEY] = prefixes_list
@@ -140,16 +105,6 @@ class Schema2JSON(Schema2Base):
         if externals is None or externals.empty:
             return
 
-        # Filter for unmerged library schemas - only output library entries if tracking is available
-        if not self._save_merged and hed_schema.library and hed_schema.with_standard:
-            if df_constants.in_library in externals.columns:
-                externals = externals[
-                    externals[df_constants.in_library].notna() & (externals[df_constants.in_library] != "")
-                ].copy()
-                if externals.empty:
-                    return
-            # Otherwise fall back to writing all rows (assume all are library entries)
-
         externals_list = []
         for _, row in externals.iterrows():
             external_dict = {
@@ -158,14 +113,6 @@ class Schema2JSON(Schema2Base):
                 "iri": row[df_constants.iri],
                 json_constants.DESCRIPTION_KEY: row[df_constants.description],
             }
-            # Add inLibrary attribute in merged saves if present
-            if (
-                self._save_merged
-                and df_constants.in_library in row.index
-                and pd.notna(row[df_constants.in_library])
-                and row[df_constants.in_library] != ""
-            ):
-                external_dict[HedKey.InLibrary] = row[df_constants.in_library]
             externals_list.append(external_dict)
 
         self.output[json_constants.EXTERNAL_ANNOTATIONS_KEY] = externals_list

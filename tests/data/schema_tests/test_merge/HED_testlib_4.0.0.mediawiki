@@ -1,0 +1,73 @@
+HED version="4.0.0" library="testlib" withStandard="8.4.0" unmerged="True"
+
+'''Prologue'''
+This schema is designed to be lazy partnered with prerelease 8.4.0.
+
+!# start schema
+
+'''Test-some''' <nowiki>[Unknown stuff.]</nowiki>
+* Unknown1 <nowiki>[Unknown1 stuff]</nowiki>
+
+'''Fruit''' <nowiki>{rooted=Plant} [Fruit stuff.]</nowiki>
+* Apple <nowiki>{annotation=foodonto:has_botanical_name} [Apple stuff]</nowiki>
+** Honey-crisp <nowiki>[Type of apple]</nowiki>
+
+'''Vegetable''' <nowiki>{rooted=Plant} [Vegetable stuff.]</nowiki>
+* Carrot <nowiki>{annotation=foodonto:has_botanical_name} [Carrot stuff]</nowiki>
+
+
+!# end schema
+
+'''Unit classes'''
+
+'''Unit modifiers'''
+
+'''Value classes'''
+
+'''Schema attributes'''
+
+'''Properties'''
+
+'''Epilogue'''
+A final section.
+
+'''Sources'''
+* <nowiki>source=FoodDB,link=https://fooddb.example.org,description=Botanical and nutritional database for fruits and vegetables.</nowiki>
+* <nowiki>source=Wikipedia,link=https://en.wikipedia.org,description=General definitions of concepts.</nowiki>
+
+'''Prefixes'''
+* <nowiki>prefix=dc:,namespace=http://purl.org/dc/elements/1.1/#,description=The Dublin Core elements</nowiki>
+* <nowiki>prefix=foaf:,namespace=http://xmlns.com/foaf/0.1/#,description=Friend-of-a-Friend http://xmlns.com/foaf/spec/</nowiki>
+* <nowiki>prefix=foodonto:,namespace=http://purl.obolibrary.org/obo/foodon.owl,description=Food Ontology (FOODON)</nowiki>
+* <nowiki>prefix=iao:,namespace=http://purl.obolibrary.org/obo/iao.owl,description=Information Artifact Ontology (IAO)</nowiki>
+* <nowiki>prefix=ncit:,namespace=http://purl.obolibrary.org/obo/ncit.owl,description=NCI Thesaurus OBO Edition</nowiki>
+* <nowiki>prefix=obogo:,namespace=http://www.geneontology.org/formats/oboInOwl,description=The OBO Format Namespace</nowiki>
+* <nowiki>prefix=owl:,namespace=http://www.w3.org/2002/07/owl,description=The OWL namespace [OWL2-OVERVIEW]</nowiki>
+* <nowiki>prefix=prov:,namespace=http://www.w3.org/ns/prov,description=The PROV namespace [PROV-DM]</nowiki>
+* <nowiki>prefix=rdf:,namespace=http://www.w3.org/1999/02/22-rdf-syntax-ns,description=The RDF namespace [RDF-CONCEPTS]</nowiki>
+* <nowiki>prefix=rdfs:,namespace=http://www.w3.org/2000/01/rdf-schema,description=The RDF Schema namespace [RDFS]</nowiki>
+* <nowiki>prefix=skos:,namespace=http://www.w3.org/2004/02/skos/core,description=SKOS (Simple Knowledge Organization System) Vocabulary</nowiki>
+* <nowiki>prefix=terms:,namespace=http://purl.org/dc/terms/#,description=The Dublin Core terms</nowiki>
+* <nowiki>prefix=xml:,namespace=http://www.w3.org/XML/1998/namespace,description=XLM Namespace [XML]</nowiki>
+* <nowiki>prefix=xsd:,namespace=http://www.w3.org/2001/XMLSchema,description=XML Schema Namespace [XMLSCHEMA11-2]</nowiki>
+
+'''External annotations'''
+* <nowiki>prefix=dc:,id=contributor,iri=http://purl.org/dc/elements/1.1/contributor,description=An entity responsible for making contributions to the resource.</nowiki>
+* <nowiki>prefix=dc:,id=creator,iri=http://purl.org/dc/elements/1.1/creator,description=An entity primarily responsible for making the resource.</nowiki>
+* <nowiki>prefix=dc:,id=date,iri=http://purl.org/dc/elements/1.1/date,description=A point or period of time associated with an event in the lifecycle of the resource.</nowiki>
+* <nowiki>prefix=dc:,id=description,iri=http://purl.org/dc/elements/1.1/description,description=An account of the resource.</nowiki>
+* <nowiki>prefix=dc:,id=format,iri=http://purl.org/dc/elements/1.1/format,description=The file format</nowiki>
+* <nowiki>prefix=dc:,id=identifier,iri=http://purl.org/dc/elements/1.1/identifier,description=An unambiguous reference to the resource within a given context.</nowiki>
+* <nowiki>prefix=dc:,id=language,iri=http://purl.org/dc/elements/1.1/language,description=A language of the resource.</nowiki>
+* <nowiki>prefix=dc:,id=publisher,iri=http://purl.org/dc/elements/1.1/publisher,description=An entity responsible for making the resource available.</nowiki>
+* <nowiki>prefix=dc:,id=relation,iri=http://purl.org/dc/elements/1.1/relation,description=A related resource.</nowiki>
+* <nowiki>prefix=dc:,id=source,iri=http://purl.org/dc/elements/1.1/source,description=A related resource from which the described resource is derived.</nowiki>
+* <nowiki>prefix=dc:,id=subject,iri=http://purl.org/dc/elements/1.1/subject,description=The topic of the resource.</nowiki>
+* <nowiki>prefix=dc:,id=title,iri=http://purl.org/dc/elements/1.1/title,description=A name given to the resource.</nowiki>
+* <nowiki>prefix=dc:,id=type,iri=http://purl.org/dc/elements/1.1/type,description=The nature or genre of the resource.</nowiki>
+* <nowiki>prefix=foaf:,id=homepage,iri=http://xmlns.com/foaf/0.1/homepage,description=A homepage for some thing.</nowiki>
+* <nowiki>prefix=foodonto:,id=has_botanical_name,iri=http://purl.obolibrary.org/obo/FOODON_00001234,description=The botanical or scientific name of a food item.</nowiki>
+* <nowiki>prefix=obogo:,id=has_dbxref,iri=http://www.geneontology.org/formats/oboInOwl#hasDbXref,description=Property indicating that an ontology term has a cross-reference to a database.</nowiki>
+* <nowiki>prefix=terms:,id=license,iri=http://purl.org/dc/terms/license,description=A legal document giving official permission to do something with the resource.</nowiki>
+
+!# end hed

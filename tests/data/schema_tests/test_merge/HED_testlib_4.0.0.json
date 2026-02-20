@@ -1,0 +1,297 @@
+{
+  "version": "4.0.0",
+  "library": "testlib",
+  "withStandard": "8.4.0",
+  "unmerged": "True",
+  "prologue": "This schema is designed to be lazy partnered with prerelease 8.4.0.",
+  "tags": {
+    "Test-some": {
+      "short_form": "Test-some",
+      "long_form": "Test-some",
+      "description": "Unknown stuff.",
+      "parent": null,
+      "children": [
+        "Unknown1"
+      ],
+      "attributes": {},
+      "explicitAttributes": {}
+    },
+    "Unknown1": {
+      "short_form": "Unknown1",
+      "long_form": "Test-some/Unknown1",
+      "description": "Unknown1 stuff",
+      "parent": "Test-some",
+      "children": [],
+      "attributes": {},
+      "explicitAttributes": {}
+    },
+    "Fruit": {
+      "short_form": "Fruit",
+      "long_form": "Item/Biological-item/Organism/Plant/Fruit",
+      "description": "Fruit stuff.",
+      "parent": "Plant",
+      "children": [
+        "Apple"
+      ],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Plant"
+      },
+      "explicitAttributes": {
+        "rooted": "Plant"
+      }
+    },
+    "Apple": {
+      "short_form": "Apple",
+      "long_form": "Item/Biological-item/Organism/Plant/Fruit/Apple",
+      "description": "Apple stuff",
+      "parent": "Fruit",
+      "children": [
+        "Honey-crisp"
+      ],
+      "attributes": {
+        "extensionAllowed": true,
+        "annotation": "foodonto:has_botanical_name"
+      },
+      "explicitAttributes": {
+        "annotation": "foodonto:has_botanical_name"
+      }
+    },
+    "Honey-crisp": {
+      "short_form": "Honey-crisp",
+      "long_form": "Item/Biological-item/Organism/Plant/Fruit/Apple/Honey-crisp",
+      "description": "Type of apple",
+      "parent": "Apple",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true
+      },
+      "explicitAttributes": {}
+    },
+    "Vegetable": {
+      "short_form": "Vegetable",
+      "long_form": "Item/Biological-item/Organism/Plant/Vegetable",
+      "description": "Vegetable stuff.",
+      "parent": "Plant",
+      "children": [
+        "Carrot"
+      ],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Plant"
+      },
+      "explicitAttributes": {
+        "rooted": "Plant"
+      }
+    },
+    "Carrot": {
+      "short_form": "Carrot",
+      "long_form": "Item/Biological-item/Organism/Plant/Vegetable/Carrot",
+      "description": "Carrot stuff",
+      "parent": "Vegetable",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "annotation": "foodonto:has_botanical_name"
+      },
+      "explicitAttributes": {
+        "annotation": "foodonto:has_botanical_name"
+      }
+    }
+  },
+  "units": {},
+  "unit_classes": {},
+  "unit_modifiers": {},
+  "value_classes": {},
+  "schema_attributes": {},
+  "properties": {},
+  "epilogue": "A final section.",
+  "sources": [
+    {
+      "name": "FoodDB",
+      "link": "https://fooddb.example.org",
+      "description": "Botanical and nutritional database for fruits and vegetables."
+    },
+    {
+      "name": "Wikipedia",
+      "link": "https://en.wikipedia.org",
+      "description": "General definitions of concepts."
+    }
+  ],
+  "prefixes": [
+    {
+      "name": "dc:",
+      "namespace": "http://purl.org/dc/elements/1.1/#",
+      "description": "The Dublin Core elements"
+    },
+    {
+      "name": "foaf:",
+      "namespace": "http://xmlns.com/foaf/0.1/#",
+      "description": "Friend-of-a-Friend http://xmlns.com/foaf/spec/"
+    },
+    {
+      "name": "foodonto:",
+      "namespace": "http://purl.obolibrary.org/obo/foodon.owl",
+      "description": "Food Ontology (FOODON)"
+    },
+    {
+      "name": "iao:",
+      "namespace": "http://purl.obolibrary.org/obo/iao.owl",
+      "description": "Information Artifact Ontology (IAO)"
+    },
+    {
+      "name": "ncit:",
+      "namespace": "http://purl.obolibrary.org/obo/ncit.owl",
+      "description": "NCI Thesaurus OBO Edition"
+    },
+    {
+      "name": "obogo:",
+      "namespace": "http://www.geneontology.org/formats/oboInOwl",
+      "description": "The OBO Format Namespace"
+    },
+    {
+      "name": "owl:",
+      "namespace": "http://www.w3.org/2002/07/owl",
+      "description": "The OWL namespace [OWL2-OVERVIEW]"
+    },
+    {
+      "name": "prov:",
+      "namespace": "http://www.w3.org/ns/prov",
+      "description": "The PROV namespace [PROV-DM]"
+    },
+    {
+      "name": "rdf:",
+      "namespace": "http://www.w3.org/1999/02/22-rdf-syntax-ns",
+      "description": "The RDF namespace [RDF-CONCEPTS]"
+    },
+    {
+      "name": "rdfs:",
+      "namespace": "http://www.w3.org/2000/01/rdf-schema",
+      "description": "The RDF Schema namespace [RDFS]"
+    },
+    {
+      "name": "skos:",
+      "namespace": "http://www.w3.org/2004/02/skos/core",
+      "description": "SKOS (Simple Knowledge Organization System) Vocabulary"
+    },
+    {
+      "name": "terms:",
+      "namespace": "http://purl.org/dc/terms/#",
+      "description": "The Dublin Core terms"
+    },
+    {
+      "name": "xml:",
+      "namespace": "http://www.w3.org/XML/1998/namespace",
+      "description": "XLM Namespace [XML]"
+    },
+    {
+      "name": "xsd:",
+      "namespace": "http://www.w3.org/2001/XMLSchema",
+      "description": "XML Schema Namespace [XMLSCHEMA11-2]"
+    }
+  ],
+  "external_annotations": [
+    {
+      "name": "dc:",
+      "id": "contributor",
+      "iri": "http://purl.org/dc/elements/1.1/contributor",
+      "description": "An entity responsible for making contributions to the resource."
+    },
+    {
+      "name": "dc:",
+      "id": "creator",
+      "iri": "http://purl.org/dc/elements/1.1/creator",
+      "description": "An entity primarily responsible for making the resource."
+    },
+    {
+      "name": "dc:",
+      "id": "date",
+      "iri": "http://purl.org/dc/elements/1.1/date",
+      "description": "A point or period of time associated with an event in the lifecycle of the resource."
+    },
+    {
+      "name": "dc:",
+      "id": "description",
+      "iri": "http://purl.org/dc/elements/1.1/description",
+      "description": "An account of the resource."
+    },
+    {
+      "name": "dc:",
+      "id": "format",
+      "iri": "http://purl.org/dc/elements/1.1/format",
+      "description": "The file format"
+    },
+    {
+      "name": "dc:",
+      "id": "identifier",
+      "iri": "http://purl.org/dc/elements/1.1/identifier",
+      "description": "An unambiguous reference to the resource within a given context."
+    },
+    {
+      "name": "dc:",
+      "id": "language",
+      "iri": "http://purl.org/dc/elements/1.1/language",
+      "description": "A language of the resource."
+    },
+    {
+      "name": "dc:",
+      "id": "publisher",
+      "iri": "http://purl.org/dc/elements/1.1/publisher",
+      "description": "An entity responsible for making the resource available."
+    },
+    {
+      "name": "dc:",
+      "id": "relation",
+      "iri": "http://purl.org/dc/elements/1.1/relation",
+      "description": "A related resource."
+    },
+    {
+      "name": "dc:",
+      "id": "source",
+      "iri": "http://purl.org/dc/elements/1.1/source",
+      "description": "A related resource from which the described resource is derived."
+    },
+    {
+      "name": "dc:",
+      "id": "subject",
+      "iri": "http://purl.org/dc/elements/1.1/subject",
+      "description": "The topic of the resource."
+    },
+    {
+      "name": "dc:",
+      "id": "title",
+      "iri": "http://purl.org/dc/elements/1.1/title",
+      "description": "A name given to the resource."
+    },
+    {
+      "name": "dc:",
+      "id": "type",
+      "iri": "http://purl.org/dc/elements/1.1/type",
+      "description": "The nature or genre of the resource."
+    },
+    {
+      "name": "foaf:",
+      "id": "homepage",
+      "iri": "http://xmlns.com/foaf/0.1/homepage",
+      "description": "A homepage for some thing."
+    },
+    {
+      "name": "foodonto:",
+      "id": "has_botanical_name",
+      "iri": "http://purl.obolibrary.org/obo/FOODON_00001234",
+      "description": "The botanical or scientific name of a food item."
+    },
+    {
+      "name": "obogo:",
+      "id": "has_dbxref",
+      "iri": "http://www.geneontology.org/formats/oboInOwl#hasDbXref",
+      "description": "Property indicating that an ontology term has a cross-reference to a database."
+    },
+    {
+      "name": "terms:",
+      "id": "license",
+      "iri": "http://purl.org/dc/terms/license",
+      "description": "A legal document giving official permission to do something with the resource."
+    }
+  ]
+}
