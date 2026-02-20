@@ -1,0 +1,6 @@
+hedId	rdfs:label	omn:SubClassOf	Attributes	dc:description
+	dateTimeClass	ScoreValueClass	allowedCharacter=digits, allowedCharacter=T, allowedCharacter=-, allowedCharacter=:	Date-times should conform to ISO8601 date-time format YYYY-MM-DDThh:mm:ss. Any variation on the full form is allowed.
+	nameClass	ScoreValueClass	allowedCharacter=letters, allowedCharacter=digits, allowedCharacter=_, allowedCharacter=-	Value class designating values that have the characteristics of node names. The allowed characters are alphanumeric, hyphen, and underbar.
+	numericClass	ScoreValueClass	allowedCharacter=digits, allowedCharacter=E, allowedCharacter=e, allowedCharacter=+, allowedCharacter=-, allowedCharacter=.	Value must be a valid numerical value.
+	posixPath	ScoreValueClass	allowedCharacter=digits, allowedCharacter=letters, allowedCharacter=/, allowedCharacter=:	Posix path specification.
+	textClass	ScoreValueClass	allowedCharacter=letters, allowedCharacter=digits, allowedCharacter=blank, allowedCharacter=+, allowedCharacter=-, allowedCharacter=:, allowedCharacter=;, allowedCharacter=., allowedCharacter=/, allowedCharacter=(, allowedCharacter=), allowedCharacter=?, allowedCharacter=*, allowedCharacter=%, allowedCharacter=$, allowedCharacter=@	Value class designating values that have the characteristics of text such as in descriptions.

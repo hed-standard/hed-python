@@ -1,0 +1,17 @@
+hedId	rdfs:label	omn:SubClassOf	Attributes	dc:description
+	accelerationUnits	ScoreUnitClass	defaultUnits=m-per-s^2	
+	angleUnits	ScoreUnitClass	defaultUnits=radian	
+	areaUnits	ScoreUnitClass	defaultUnits=m^2	
+	currencyUnits	ScoreUnitClass	defaultUnits=$	Units indicating the worth of something.
+	electricPotentialUnits	ScoreUnitClass	defaultUnits=uv	
+	frequencyUnits	ScoreUnitClass	defaultUnits=Hz	
+	intensityUnits	ScoreUnitClass	defaultUnits=dB	
+	jerkUnits	ScoreUnitClass	defaultUnits=m-per-s^3	
+	magneticFieldUnits	ScoreUnitClass	defaultUnits=fT	Units used to magnetic field intensity.
+	memorySizeUnits	ScoreUnitClass	defaultUnits=B	
+	physicalLengthUnits	ScoreUnitClass	defaultUnits=m	
+	speedUnits	ScoreUnitClass	defaultUnits=m-per-s	
+	temperatureUnits	ScoreUnitClass		
+	timeUnits	ScoreUnitClass	defaultUnits=s	
+	volumeUnits	ScoreUnitClass	defaultUnits=m^3	
+	weightUnits	ScoreUnitClass	defaultUnits=g	

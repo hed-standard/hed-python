@@ -1,1 +1,2 @@
 hedId	rdfs:label	Type	Properties	dc:description
+	myAnnotation	AnnotationProperty	elementDomain, stringRange	Special annotations.

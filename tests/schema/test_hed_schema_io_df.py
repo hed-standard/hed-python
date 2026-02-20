@@ -351,29 +351,61 @@ class TestHedSchemaDF(unittest.TestCase):
                 for value in has_unit_class_values:
                     self.assertFalse(value.startswith("hed:HED_"), f"hasUnitClass should contain names, not IDs: {value}")
 
-    def test_tsv_output_uses_lf_line_endings(self):
-        """Test that TSV output always uses LF (\\n) line endings, not CRLF (\\r\\n)."""
+    def _verify_lf_line_endings(self, file_path):
+        """
+        Helper to verify a file uses LF (\\n) line endings, not CRLF (\\r\\n).
+
+        Parameters:
+            file_path (str): Path to file to check
+        """
+        with open(file_path, "rb") as f:
+            content = f.read()
+
+        # Should not contain CRLF (b'\r\n')
+        self.assertNotIn(b"\r\n", content, f"{file_path} should not contain CRLF line endings")
+        # Should contain LF (b'\n')
+        self.assertIn(b"\n", content, f"{file_path} should contain LF line endings")
+
+    def test_all_formats_use_lf_line_endings(self):
+        """Test that all output formats (TSV, XML, MediaWiki, JSON) always use LF line endings, not CRLF."""
         from tests.schema.util_create_schemas import load_schema1
         import tempfile
 
         schema = load_schema1()
 
-        # Save to a temporary location
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_path = os.path.join(tmpdir, "test_schema.tsv")
-            schema.save_as_dataframes(output_path)
+            # Test TSV format
+            with self.subTest(format="TSV"):
+                tsv_path = os.path.join(tmpdir, "test_schema.tsv")
+                schema.save_as_dataframes(tsv_path)
+                tag_file = tsv_path.replace(".tsv", "_Tag.tsv")
+                self.assertTrue(os.path.exists(tag_file), "Tag TSV file should exist")
+                self._verify_lf_line_endings(tag_file)
 
-            # Check that the tag TSV file uses LF endings
-            tag_file = output_path.replace(".tsv", "_Tag.tsv")
-            self.assertTrue(os.path.exists(tag_file), "Tag TSV file should exist")
+            # Test XML format
+            with self.subTest(format="XML"):
+                xml_path = os.path.join(tmpdir, "test_schema.xml")
+                schema.save_as_xml(xml_path)
+                self._verify_lf_line_endings(xml_path)
 
-            # Read file in binary mode to check actual line endings
-            with open(tag_file, "rb") as f:
-                content = f.read()
+            # Test MediaWiki format
+            with self.subTest(format="MediaWiki"):
+                wiki_path = os.path.join(tmpdir, "test_schema.mediawiki")
+                schema.save_as_mediawiki(wiki_path)
+                self._verify_lf_line_endings(wiki_path)
 
-            # Check that file uses LF (\n) not CRLF (\r\n)
-            self.assertNotIn(b"\r\n", content, "File should not contain CRLF line endings")
-            self.assertIn(b"\n", content, "File should contain LF line endings")
+            # Test JSON format
+            with self.subTest(format="JSON"):
+                json_path = os.path.join(tmpdir, "test_schema.json")
+                schema.save_as_json(json_path)
+                self._verify_lf_line_endings(json_path)
+
+            # Test XML for library schema
+            with self.subTest(format="XML_library"):
+                lib_schema = load_schema_version("testlib_3.0.0")
+                lib_xml_path = os.path.join(tmpdir, "lib_schema.xml")
+                lib_schema.save_as_xml(lib_xml_path)
+                self._verify_lf_line_endings(lib_xml_path)
 
     def test_tsv_reading_handles_both_line_endings(self):
         """Test that TSV files can be read correctly with either LF or CRLF line endings."""
@@ -432,154 +464,6 @@ class TestHedSchemaDF(unittest.TestCase):
 
             # And they should be equivalent
             self.assertEqual(lf_schema, crlf_schema, "Schemas with different line endings should be equivalent")
-
-    def test_xml_output_uses_lf_line_endings(self):
-        """Test that XML schema files always use LF line endings, not CRLF."""
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            xml_path = os.path.join(tmpdir, "test_schema.xml")
-
-            # Save schema as XML
-            self.schema.save_as_xml(xml_path)
-
-            # Read file in binary mode to check actual line endings
-            with open(xml_path, "rb") as f:
-                content = f.read()
-
-            # Should not contain CRLF (b'\r\n')
-            self.assertNotIn(b"\r\n", content, "XML file should not contain CRLF line endings")
-            # Should contain LF (b'\n')
-            self.assertIn(b"\n", content, "XML file should contain LF line endings")
-
-    def test_mediawiki_output_uses_lf_line_endings(self):
-        """Test that MediaWiki schema files always use LF line endings, not CRLF."""
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            wiki_path = os.path.join(tmpdir, "test_schema.mediawiki")
-
-            # Save schema as MediaWiki
-            self.schema.save_as_mediawiki(wiki_path)
-
-            # Read file in binary mode to check actual line endings
-            with open(wiki_path, "rb") as f:
-                content = f.read()
-
-            # Should not contain CRLF (b'\r\n')
-            self.assertNotIn(b"\r\n", content, "MediaWiki file should not contain CRLF line endings")
-            # Should contain LF (b'\n')
-            self.assertIn(b"\n", content, "MediaWiki file should contain LF line endings")
-
-    def test_json_output_uses_lf_line_endings(self):
-        """Test that JSON schema files always use LF line endings, not CRLF."""
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            json_path = os.path.join(tmpdir, "test_schema.json")
-
-            # Save schema as JSON
-            self.schema.save_as_json(json_path)
-
-            # Read file in binary mode to check actual line endings
-            with open(json_path, "rb") as f:
-                content = f.read()
-
-            # Should not contain CRLF (b'\r\n')
-            self.assertNotIn(b"\r\n", content, "JSON file should not contain CRLF line endings")
-            # Should contain LF (b'\n')
-            self.assertIn(b"\n", content, "JSON file should contain LF line endings")
-
-    def test_xml_library_schema_uses_lf(self):
-        """Test that library schemas saved as XML use LF line endings."""
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Load a library schema
-            lib_schema = load_schema_version("testlib_3.0.0")
-
-            # Test both merged and unmerged saves
-            for save_merged in [True, False]:
-                xml_path = os.path.join(tmpdir, f"testlib_merged_{save_merged}.xml")
-                lib_schema.save_as_xml(xml_path, save_merged=save_merged)
-
-                with open(xml_path, "rb") as f:
-                    content = f.read()
-
-                self.assertNotIn(
-                    b"\r\n",
-                    content,
-                    f"XML library schema (save_merged={save_merged}) should not contain CRLF",
-                )
-                self.assertIn(b"\n", content, "XML file should contain LF line endings")
-
-    def test_mediawiki_library_schema_uses_lf(self):
-        """Test that library schemas saved as MediaWiki use LF line endings."""
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Load a library schema
-            lib_schema = load_schema_version("testlib_3.0.0")
-
-            # Test both merged and unmerged saves
-            for save_merged in [True, False]:
-                wiki_path = os.path.join(tmpdir, f"testlib_merged_{save_merged}.mediawiki")
-                lib_schema.save_as_mediawiki(wiki_path, save_merged=save_merged)
-
-                with open(wiki_path, "rb") as f:
-                    content = f.read()
-
-                self.assertNotIn(
-                    b"\r\n",
-                    content,
-                    f"MediaWiki library schema (save_merged={save_merged}) should not contain CRLF",
-                )
-                self.assertIn(b"\n", content, "MediaWiki file should contain LF line endings")
-
-    def test_json_library_schema_uses_lf(self):
-        """Test that library schemas saved as JSON use LF line endings."""
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Load a library schema
-            lib_schema = load_schema_version("testlib_3.0.0")
-
-            # Test both merged and unmerged saves
-            for save_merged in [True, False]:
-                json_path = os.path.join(tmpdir, f"testlib_merged_{save_merged}.json")
-                lib_schema.save_as_json(json_path, save_merged=save_merged)
-
-                with open(json_path, "rb") as f:
-                    content = f.read()
-
-                self.assertNotIn(b"\r\n", content, f"JSON library schema (save_merged={save_merged}) should not contain CRLF")
-                self.assertIn(b"\n", content, "JSON file should contain LF line endings")
-
-    def test_tsv_library_schema_uses_lf(self):
-        """Test that library schemas saved as TSV use LF line endings."""
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Load a library schema
-            lib_schema = load_schema_version("testlib_3.0.0")
-
-            # Test both merged and unmerged saves
-            for save_merged in [True, False]:
-                tsv_path = os.path.join(tmpdir, f"testlib_merged_{save_merged}.tsv")
-                lib_schema.save_as_dataframes(tsv_path, save_merged=save_merged)
-
-                # Check all TSV files
-                tag_path = tsv_path.replace(".tsv", "_Tag.tsv")
-                if os.path.exists(tag_path):
-                    with open(tag_path, "rb") as f:
-                        content = f.read()
-
-                    self.assertNotIn(
-                        b"\r\n",
-                        content,
-                        f"TSV library schema Tag file (save_merged={save_merged}) should not contain CRLF",
-                    )
-                    self.assertIn(b"\n", content, "TSV file should contain LF line endings")
 
     def test_all_formats_roundtrip_with_lf(self):
         """Test that all formats can be saved and reloaded with LF line endings preserved."""

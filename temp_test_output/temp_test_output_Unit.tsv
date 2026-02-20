@@ -1,0 +1,43 @@
+hedId	rdfs:label	omn:SubClassOf	Attributes	dc:description	hasUnitClass
+	m-per-s^2	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		accelerationUnits
+	radian	ScoreUnit	SIUnit, conversionFactor=1.0		angleUnits
+	rad	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		angleUnits
+	degree	ScoreUnit	conversionFactor=0.0174533		angleUnits
+	m^2	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		areaUnits
+	dollar	ScoreUnit	conversionFactor=1.0		currencyUnits
+	$	ScoreUnit	unitPrefix, unitSymbol, conversionFactor=1.0		currencyUnits
+	euro	ScoreUnit			currencyUnits
+	point	ScoreUnit			currencyUnits
+	v	ScoreUnit	SIUnit, unitSymbol, conversionFactor=0.000001		electricPotentialUnits
+	Volt	ScoreUnit	SIUnit, conversionFactor=0.000001		electricPotentialUnits
+	hertz	ScoreUnit	SIUnit, conversionFactor=1.0		frequencyUnits
+	Hz	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		frequencyUnits
+	dB	ScoreUnit	unitSymbol, conversionFactor=1.0	Intensity expressed as ratio to a threshold. May be used for sound intensity.	intensityUnits
+	candela	ScoreUnit	SIUnit	Units used to express light intensity.	intensityUnits
+	cd	ScoreUnit	SIUnit, unitSymbol	Units used to express light intensity.	intensityUnits
+	m-per-s^3	ScoreUnit	unitSymbol, conversionFactor=1.0		jerkUnits
+	tesla	ScoreUnit	SIUnit, conversionFactor=10^-15		magneticFieldUnits
+	T	ScoreUnit	SIUnit, unitSymbol, conversionFactor=10^-15		magneticFieldUnits
+	byte	ScoreUnit	SIUnit, conversionFactor=1.0		memorySizeUnits
+	B	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		memorySizeUnits
+	foot	ScoreUnit	conversionFactor=0.3048		physicalLengthUnits
+	inch	ScoreUnit	conversionFactor=0.0254		physicalLengthUnits
+	meter	ScoreUnit	SIUnit, conversionFactor=1.0		physicalLengthUnits
+	metre	ScoreUnit	SIUnit, conversionFactor=1.0		physicalLengthUnits
+	m	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		physicalLengthUnits
+	mile	ScoreUnit	conversionFactor=1609.34		physicalLengthUnits
+	m-per-s	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		speedUnits
+	mph	ScoreUnit	unitSymbol, conversionFactor=0.44704		speedUnits
+	kph	ScoreUnit	unitSymbol, conversionFactor=0.277778		speedUnits
+	degree Celsius	ScoreUnit	SIUnit, conversionFactor=1.0		temperatureUnits
+	oC	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		temperatureUnits
+	second	ScoreUnit	SIUnit, conversionFactor=1.0		timeUnits
+	s	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		timeUnits
+	day	ScoreUnit	conversionFactor=86400		timeUnits
+	minute	ScoreUnit	conversionFactor=60		timeUnits
+	hour	ScoreUnit	conversionFactor=3600	Should be in 24-hour format.	timeUnits
+	m^3	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		volumeUnits
+	g	ScoreUnit	SIUnit, unitSymbol, conversionFactor=1.0		weightUnits
+	gram	ScoreUnit	SIUnit, conversionFactor=1.0		weightUnits
+	pound	ScoreUnit	conversionFactor=453.592		weightUnits
+	lb	ScoreUnit	conversionFactor=453.592		weightUnits

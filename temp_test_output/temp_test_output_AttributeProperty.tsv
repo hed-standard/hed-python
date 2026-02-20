@@ -1,0 +1,9 @@
+hedId	rdfs:label	Type	dc:description
+	boolProperty	AnnotationProperty	Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.
+	elementProperty	AnnotationProperty	Indicates this schema attribute can apply to any type of element(tag term, unit class, etc).
+	isInheritedProperty	AnnotationProperty	Indicates that this attribute is inherited by child nodes. This property only applies to schema attributes for nodes.
+	nodeProperty	AnnotationProperty	Indicates this schema attribute applies to node (tag-term) elements. This was added to allow for an attribute to apply to multiple elements.
+	unitClassProperty	AnnotationProperty	Indicates that the schema attribute is meant to be applied to unit classes.
+	unitModifierProperty	AnnotationProperty	Indicates that the schema attribute is meant to be applied to unit modifier classes.
+	unitProperty	AnnotationProperty	Indicates that the schema attribute is meant to be applied to units within a unit class.
+	valueClassProperty	AnnotationProperty	Indicates that the schema attribute is meant to be applied to value classes.

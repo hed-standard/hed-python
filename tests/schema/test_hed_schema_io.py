@@ -4,7 +4,7 @@ from hed.errors import HedFileError
 from hed.errors.error_types import SchemaErrors
 from hed.schema import load_schema, HedSchemaGroup, load_schema_version, HedSchema
 from hed.schema.hed_schema_io import parse_version_list, _load_schema_version
-from tests.schema.test_schema_converters import with_temp_file, get_temp_filename
+from tests.schema.schema_test_helpers import with_temp_file, get_temp_filename
 
 import os
 from hed.errors import HedExceptions
