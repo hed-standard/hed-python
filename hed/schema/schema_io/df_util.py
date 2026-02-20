@@ -56,6 +56,32 @@ def merge_dataframes(df1, df2, key):
     return combined
 
 
+def merge_extras_dataframes(library_df, standard_df):
+    """Merge library and standard extras DataFrames by combining and deduplicating.
+
+    The library extras should contain all entries (standard + library-specific).
+    This function combines both and removes exact duplicates.
+
+    Parameters:
+        library_df (pd.DataFrame): DataFrame from library schema extras section
+        standard_df (pd.DataFrame): DataFrame from standard schema extras section
+
+    Returns:
+        pd.DataFrame: Combined DataFrame with duplicates removed and sorted
+    """
+    if standard_df is None or standard_df.empty:
+        if library_df is None or library_df.empty:
+            return pd.DataFrame()
+        return library_df.drop_duplicates().sort_values(by=list(library_df.columns)).reset_index(drop=True)
+    if library_df is None or library_df.empty:
+        return standard_df.drop_duplicates().sort_values(by=list(standard_df.columns)).reset_index(drop=True)
+
+    combined = pd.concat([standard_df, library_df], ignore_index=True)
+    combined = combined.drop_duplicates()
+    combined = combined.sort_values(by=list(combined.columns)).reset_index(drop=True)
+    return combined
+
+
 def merge_dataframe_dicts(df_dict1, df_dict2, key_column=constants.KEY_COLUMN_NAME):
     """Create a new dictionary of DataFrames where dict2 is merged into dict1.
 

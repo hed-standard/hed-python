@@ -8,7 +8,7 @@ import pandas as pd
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors import error_reporter
-from hed.schema.schema_io import wiki_constants, df_constants
+from hed.schema.schema_io import wiki_constants, df_constants, df_util
 from hed.schema.schema_io.base2schema import SchemaLoader
 from hed.schema.schema_io.wiki_constants import HedWikiSection, WIKI_EXTRA_DICT
 from hed.schema.schema_io import text_util
@@ -121,34 +121,16 @@ class SchemaLoaderWiki(SchemaLoader):
             data = []
             for _line_number, line in lines_for_section:
                 parsed_data = self.parse_star_string(line.strip())
-
-                # Handle inLibrary attribute parsing
-                # MediaWiki uses "inLibrary" but we store as "in_library" in dataframe
-                in_library_value = parsed_data.pop(HedKey.InLibrary, None)
-                if in_library_value is None:
-                    # Also check for lowercase version in case it was stored that way
-                    in_library_value = parsed_data.pop(df_constants.in_library, None)
-                # If not found in MediaWiki but this is a library schema, use self.library
-                if in_library_value is None and self.library:
-                    in_library_value = self.library
-                parsed_data[df_constants.in_library] = in_library_value
-
                 data.append(parsed_data)
             if not data:
                 continue
             df = pd.DataFrame(data).fillna("").astype(str)
-            # Convert in_library None values to empty strings for consistency
-            if df_constants.in_library in df.columns:
-                df[df_constants.in_library] = df[df_constants.in_library].replace("None", "")
             stripped_key = extra_key.strip("'")
             stripped_key = WIKI_EXTRA_DICT.get(stripped_key, stripped_key)
 
             # Merge with existing schema extras if present (from withStandard base schema)
             standard_df = self._schema.extras.get(stripped_key, None)
-            if standard_df is not None and not standard_df.empty:
-                self._schema.extras[stripped_key] = pd.concat([standard_df, df], ignore_index=True)
-            else:
-                self._schema.extras[stripped_key] = df
+            self._schema.extras[stripped_key] = df_util.merge_extras_dataframes(df, standard_df)
 
     @staticmethod
     def parse_star_string(s):
