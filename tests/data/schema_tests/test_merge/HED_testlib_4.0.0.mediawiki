@@ -7,7 +7,7 @@ This schema is designed to be lazy partnered with prerelease 8.4.0.
 
 '''Test-some''' <nowiki>[Unknown stuff.]</nowiki>
 * Unknown1 <nowiki>[Unknown1 stuff]</nowiki>
-* Unkownn2 <nowiki>{suggestedTag=Item} [Unknown2 stuff]</nowiki>
+* Unknown2 <nowiki>{suggestedTag=Item} [Unknown2 stuff]</nowiki>
 **  <nowiki># {takesValue, valueClass=digitClass, unitClass=myAngleUnits} [Try this out]</nowiki>
 
 '''Fruit''' <nowiki>{rooted=Plant} [Fruit stuff.]</nowiki>

@@ -12,7 +12,7 @@
       "parent": null,
       "children": [
         "Unknown1",
-        "Unkownn2"
+        "Unknown2"
       ],
       "attributes": {},
       "explicitAttributes": {}
@@ -26,9 +26,9 @@
       "attributes": {},
       "explicitAttributes": {}
     },
-    "Unkownn2": {
-      "short_form": "Unkownn2",
-      "long_form": "Test-some/Unkownn2",
+    "Unknown2": {
+      "short_form": "Unknown2",
+      "long_form": "Test-some/Unknown2",
       "description": "Unknown2 stuff",
       "parent": "Test-some",
       "children": [],

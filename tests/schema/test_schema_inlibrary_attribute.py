@@ -14,6 +14,7 @@ import os
 import tempfile
 import shutil
 import pandas as pd
+import xml.etree.ElementTree as ET
 from hed.schema import load_schema_version, load_schema
 
 
@@ -63,7 +64,9 @@ class TestInLibraryAttribute(unittest.TestCase):
 
         return paths
 
-    def _verify_inlibrary_in_tsv_schema_sections(self, tsv_dir, library_name, should_have_inlibrary):
+    def _verify_inlibrary_in_tsv_schema_sections(
+        self, tsv_dir, library_name, should_have_inlibrary, require_inlibrary_in_tsv=None
+    ):
         """
         Verify inLibrary presence/absence in TSV files by reading all TSV files and checking
         if inLibrary appears in any Attributes column value.
@@ -72,6 +75,9 @@ class TestInLibraryAttribute(unittest.TestCase):
             tsv_dir: Directory containing TSV files
             library_name: Name of the library (e.g., 'lang', 'score')
             should_have_inlibrary: True if inLibrary should be present, False otherwise
+            require_inlibrary_in_tsv: If True, assert inLibrary is found in TSV when should_have_inlibrary=True.
+                                      If False, don't assert (for schemas with no library-specific schema sections).
+                                      If None, defaults to False (lenient mode).
         """
         # Read all TSV files in the directory
         inlibrary_pattern = f"inLibrary={library_name}"
@@ -91,10 +97,17 @@ class TestInLibraryAttribute(unittest.TestCase):
                     break
 
         if should_have_inlibrary:
-            # Note: Some schemas (like score) may have no library-specific schema sections,
-            # only library-specific tags. So we don't assert here, just note if found.
-            # The main check is in the full string formats (XML, JSON, MediaWiki)
-            pass
+            # Default to not requiring TSV presence (lenient) unless explicitly requested
+            if require_inlibrary_in_tsv is None:
+                require_inlibrary_in_tsv = False
+
+            if require_inlibrary_in_tsv:
+                self.assertTrue(
+                    found_inlibrary,
+                    f"TSV files should contain inLibrary={library_name} in schema sections when save_merged=True",
+                )
+            # If not required, we don't assert - some schemas (like score) may have no library-specific
+            # schema sections (units/unitclasses), only library-specific tags
         else:
             self.assertFalse(found_inlibrary, f"TSV files should NOT contain inLibrary={library_name} when save_merged=False")
 
@@ -112,25 +125,47 @@ class TestInLibraryAttribute(unittest.TestCase):
             self.assertNotIn("in_library", df.columns, f"TSV {section} should NEVER have in_library column")
 
     def _verify_inlibrary_in_xml(self, xml_path, library_name, should_have_inlibrary):
-        """Verify inLibrary presence/absence in XML file."""
-        with open(xml_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        """
+        Verify inLibrary presence/absence in XML file by parsing and checking actual schema elements.
 
-        inlibrary_pattern = "<name>inLibrary</name>"
+        This checks that schema elements (tags, units, unit classes, etc.) have inLibrary attributes
+        with the correct library name, not just that the attribute is defined in the schema.
+        """
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
 
-        has_inlibrary_attr = inlibrary_pattern in content
+        # Find all schema elements that have inLibrary attribute
+        # Schema elements are: node (tags), unit, unitClass, unitModifier, valueClass
+        found_inlibrary_elements = []
+
+        for elem in root.iter():
+            # Look for elements with <attribute> children that define inLibrary
+            for attr_elem in elem.findall("attribute"):
+                name_elem = attr_elem.find("name")
+                value_elem = attr_elem.find("value")
+
+                if name_elem is not None and name_elem.text == "inLibrary":
+                    if value_elem is not None and value_elem.text == library_name:
+                        # Found an element with inLibrary set to our library name
+                        # Get the element's name for reporting
+                        name_tag = elem.find("name")
+                        element_name = name_tag.text if name_tag is not None else elem.tag
+                        found_inlibrary_elements.append((elem.tag, element_name))
 
         if should_have_inlibrary:
-            self.assertTrue(has_inlibrary_attr, "XML should contain inLibrary attributes when save_merged=True")
-            # Verify it's actually set to the correct library name
-            if has_inlibrary_attr:
-                # Count occurrences - should have many for schema sections
-                count = content.count(inlibrary_pattern)
-                self.assertGreater(
-                    count, 0, "XML should have multiple inLibrary attributes for library schema when save_merged=True"
-                )
+            self.assertGreater(
+                len(found_inlibrary_elements),
+                0,
+                f"XML should contain schema elements with inLibrary={library_name} when save_merged=True. "
+                f"Found {len(found_inlibrary_elements)} elements.",
+            )
         else:
-            self.assertFalse(has_inlibrary_attr, "XML should NOT contain inLibrary attributes when save_merged=False")
+            self.assertEqual(
+                len(found_inlibrary_elements),
+                0,
+                f"XML should NOT contain schema elements with inLibrary={library_name} when save_merged=False. "
+                f"Found: {found_inlibrary_elements[:5]}",
+            )
 
     def _verify_inlibrary_in_json(self, json_path, library_name, should_have_inlibrary):
         """Verify inLibrary presence/absence in JSON file."""
@@ -167,8 +202,12 @@ class TestInLibraryAttribute(unittest.TestCase):
                 library_name = self._get_library_name(schema)
                 paths = self._save_schema_all_formats(schema, schema_name, save_merged=True)
 
-                # Verify TSV
-                self._verify_inlibrary_in_tsv_schema_sections(paths["tsv"], library_name, should_have_inlibrary=True)
+                # Verify TSV - require inLibrary for lang (has library-specific tags),
+                # but not for score (may only have library tags, not schema sections like units)
+                require_tsv = schema_name == "lang"
+                self._verify_inlibrary_in_tsv_schema_sections(
+                    paths["tsv"], library_name, should_have_inlibrary=True, require_inlibrary_in_tsv=require_tsv
+                )
 
                 # Verify XML
                 self._verify_inlibrary_in_xml(paths["xml"], library_name, should_have_inlibrary=True)
@@ -245,7 +284,9 @@ class TestInLibraryAttribute(unittest.TestCase):
                 elif format_name == "tsv":
                     roundtrip_path = os.path.join(self.temp_dir, "lang_roundtrip2_tsv")
                     reloaded.save_as_dataframes(roundtrip_path, save_merged=True)
-                    self._verify_inlibrary_in_tsv_schema_sections(roundtrip_path, library_name, should_have_inlibrary=True)
+                    self._verify_inlibrary_in_tsv_schema_sections(
+                        roundtrip_path, library_name, should_have_inlibrary=True, require_inlibrary_in_tsv=True
+                    )
 
     def test_06_inlibrary_absent_in_roundtrip_unmerged(self):
         """Test that inLibrary attributes remain absent through save/load cycles when unmerged."""
@@ -285,9 +326,11 @@ class TestInLibraryAttribute(unittest.TestCase):
 
         library_name = self._get_library_name(self.testlib_schema)
 
-        # Test merged save
+        # Test merged save - testlib has library-specific unitclass (myAngleUnits), so require TSV presence
         paths_merged = self._save_schema_all_formats(self.testlib_schema, "testlib", save_merged=True)
-        self._verify_inlibrary_in_tsv_schema_sections(paths_merged["tsv"], library_name, should_have_inlibrary=True)
+        self._verify_inlibrary_in_tsv_schema_sections(
+            paths_merged["tsv"], library_name, should_have_inlibrary=True, require_inlibrary_in_tsv=True
+        )
         self._verify_no_inlibrary_in_tsv_extras(paths_merged["tsv"])
 
         # Test unmerged save
