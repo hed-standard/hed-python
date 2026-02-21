@@ -1,1 +1,2 @@
-hedId	rdfs:label	omn:SubClassOf	hasUnitClass	Attributes	dc:description
+hedId	rdfs:label	omn:SubClassOf	Attributes	dc:description	hasUnitClass
+	deg	TestlibUnit	SIUnit, conversionFactor=1.0		myAngleUnits

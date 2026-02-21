@@ -1,1 +1,2 @@
 hedId	rdfs:label	omn:SubClassOf	Attributes	dc:description
+	digitClass	TestlibValueClass	allowedCharacter=digits	Values that can only have digits.

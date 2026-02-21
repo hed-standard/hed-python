@@ -11,7 +11,8 @@
       "description": "Unknown stuff.",
       "parent": null,
       "children": [
-        "Unknown1"
+        "Unknown1",
+        "Unknown2"
       ],
       "attributes": {},
       "explicitAttributes": {}
@@ -24,6 +25,33 @@
       "children": [],
       "attributes": {},
       "explicitAttributes": {}
+    },
+    "Unknown2": {
+      "short_form": "Unknown2",
+      "long_form": "Test-some/Unknown2",
+      "description": "Unknown2 stuff",
+      "parent": "Test-some",
+      "children": [],
+      "attributes": {
+        "suggestedTag": [
+          "Item"
+        ]
+      },
+      "explicitAttributes": {
+        "suggestedTag": [
+          "Item"
+        ]
+      },
+      "placeholder": {
+        "description": "Try this out",
+        "takesValue": true,
+        "unitClass": [
+          "myAngleUnits"
+        ],
+        "valueClass": [
+          "digitClass"
+        ]
+      }
     },
     "Fruit": {
       "short_form": "Fruit",
@@ -99,11 +127,39 @@
       }
     }
   },
-  "units": {},
-  "unit_classes": {},
+  "units": {
+    "deg": {
+      "description": null,
+      "SIUnit": true,
+      "conversionFactor": "1.0"
+    }
+  },
+  "unit_classes": {
+    "myAngleUnits": {
+      "description": null,
+      "units": [
+        "deg"
+      ],
+      "default_units": "deg"
+    }
+  },
   "unit_modifiers": {},
-  "value_classes": {},
-  "schema_attributes": {},
+  "value_classes": {
+    "digitClass": {
+      "description": "Values that can only have digits.",
+      "allowed_characters": [
+        "digits"
+      ]
+    }
+  },
+  "schema_attributes": {
+    "myAnnotation": {
+      "description": "Special annotations.",
+      "elementDomain": true,
+      "stringRange": true,
+      "annotationProperty": true
+    }
+  },
   "properties": {},
   "epilogue": "A final section.",
   "sources": [

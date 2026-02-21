@@ -1,6 +1,8 @@
 hedId	Level	rdfs:label	omn:SubClassOf	Attributes	dc:description
 	0	Test-some	HedTag		Unknown stuff.
 	1	Unknown1	Test-some		Unknown1 stuff
+	1	Unknown2	Test-some	suggestedTag=Item	Unknown2 stuff
+	2	Unknown2-#	Unknown2	takesValue, valueClass=digitClass, unitClass=myAngleUnits	Try this out
 	0	Fruit	Plant	rooted=Plant	Fruit stuff.
 	1	Apple	Fruit	annotation=foodonto:has_botanical_name	Apple stuff
 	2	Honey-crisp	Apple		Type of apple

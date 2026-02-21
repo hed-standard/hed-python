@@ -9,6 +9,29 @@
             <name>Unknown1</name>
             <description>Unknown1 stuff</description>
          </node>
+         <node>
+            <name>Unknown2</name>
+            <description>Unknown2 stuff</description>
+            <attribute>
+               <name>suggestedTag</name>
+               <value>Item</value>
+            </attribute>
+            <node>
+               <name>#</name>
+               <description>Try this out</description>
+               <attribute>
+                  <name>takesValue</name>
+               </attribute>
+               <attribute>
+                  <name>valueClass</name>
+                  <value>digitClass</value>
+               </attribute>
+               <attribute>
+                  <name>unitClass</name>
+                  <value>myAngleUnits</value>
+               </attribute>
+            </node>
+         </node>
       </node>
       <node>
          <name>Fruit</name>
@@ -47,10 +70,51 @@
          </node>
       </node>
    </schema>
-   <unitClassDefinitions/>
+   <unitClassDefinitions>
+      <unitClassDefinition>
+         <name>myAngleUnits</name>
+         <attribute>
+            <name>defaultUnits</name>
+            <value>deg</value>
+         </attribute>
+         <unit>
+            <name>deg</name>
+            <attribute>
+               <name>SIUnit</name>
+            </attribute>
+            <attribute>
+               <name>conversionFactor</name>
+               <value>1.0</value>
+            </attribute>
+         </unit>
+      </unitClassDefinition>
+   </unitClassDefinitions>
    <unitModifierDefinitions/>
-   <valueClassDefinitions/>
-   <schemaAttributeDefinitions/>
+   <valueClassDefinitions>
+      <valueClassDefinition>
+         <name>digitClass</name>
+         <description>Values that can only have digits.</description>
+         <attribute>
+            <name>allowedCharacter</name>
+            <value>digits</value>
+         </attribute>
+      </valueClassDefinition>
+   </valueClassDefinitions>
+   <schemaAttributeDefinitions>
+      <schemaAttributeDefinition>
+         <name>myAnnotation</name>
+         <description>Special annotations.</description>
+         <property>
+            <name>elementDomain</name>
+         </property>
+         <property>
+            <name>stringRange</name>
+         </property>
+         <property>
+            <name>annotationProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+   </schemaAttributeDefinitions>
    <propertyDefinitions/>
    <epilogue>A final section.</epilogue>
    <schemaSources>

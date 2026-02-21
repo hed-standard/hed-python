@@ -1,1 +1,2 @@
 hedId	rdfs:label	omn:SubClassOf	Attributes	dc:description
+	myAngleUnits	TestlibUnitClass	defaultUnits=deg	

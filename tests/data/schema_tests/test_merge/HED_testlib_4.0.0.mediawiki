@@ -7,6 +7,8 @@ This schema is designed to be lazy partnered with prerelease 8.4.0.
 
 '''Test-some''' <nowiki>[Unknown stuff.]</nowiki>
 * Unknown1 <nowiki>[Unknown1 stuff]</nowiki>
+* Unknown2 <nowiki>{suggestedTag=Item} [Unknown2 stuff]</nowiki>
+**  <nowiki># {takesValue, valueClass=digitClass, unitClass=myAngleUnits} [Try this out]</nowiki>
 
 '''Fruit''' <nowiki>{rooted=Plant} [Fruit stuff.]</nowiki>
 * Apple <nowiki>{annotation=foodonto:has_botanical_name} [Apple stuff]</nowiki>
@@ -19,12 +21,16 @@ This schema is designed to be lazy partnered with prerelease 8.4.0.
 !# end schema
 
 '''Unit classes'''
+* myAngleUnits <nowiki>{defaultUnits=deg}</nowiki>
+** deg <nowiki>{SIUnit, conversionFactor=1.0}</nowiki>
 
 '''Unit modifiers'''
 
 '''Value classes'''
+* digitClass <nowiki>{allowedCharacter=digits} [Values that can only have digits.]</nowiki>
 
 '''Schema attributes'''
+* myAnnotation <nowiki>{elementDomain, stringRange, annotationProperty} [Special annotations.]</nowiki>
 
 '''Properties'''
 

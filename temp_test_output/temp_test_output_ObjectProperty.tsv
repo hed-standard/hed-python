@@ -1,0 +1,25 @@
+hedId	rdfs:label	Type	Properties	dc:description
+	allowedCharacter	ObjectProperty	valueClassProperty	A schema attribute of value classes specifying a special character that is allowed in expressing the value of a placeholder. Normally the allowed characters are listed individually. However, the word letters designates the upper and lower case alphabetic characters and the word digits designates the digits 0-9. The word blank designates the blank character.
+	conversionFactor	ObjectProperty	unitProperty, unitModifierProperty	The multiplicative factor to multiply these units to convert to default units.
+	deprecatedFrom	ObjectProperty	elementProperty	Indicates that this element is deprecated. The value of the attribute is the latest schema version in which the element appeared in undeprecated form.
+	defaultUnits	ObjectProperty	unitClassProperty	A schema attribute of unit classes specifying the default units to use if the placeholder has a unit class but the substituted value has no units.
+	extensionAllowed	ObjectProperty	boolProperty, nodeProperty, isInheritedProperty	A schema attribute indicating that users can add unlimited levels of child nodes under this tag. This tag is propagated to child nodes with the exception of the hashtag placeholders.
+	inLibrary	ObjectProperty	elementProperty	Indicates this schema element came from the named library schema, not the standard schema. This attribute is added by tools when a library schema is merged into its partnered standard schema.
+	recommended	ObjectProperty	boolProperty, nodeProperty	A schema attribute indicating that the event-level HED string should include this tag.
+	relatedTag	ObjectProperty	nodeProperty, isInheritedProperty	A schema attribute suggesting HED tags that are closely related to this tag. This attribute is used by tagging tools.
+	requireChild	ObjectProperty	boolProperty, nodeProperty	A schema attribute indicating that one of the node elements descendants must be included when using this tag.
+	required	ObjectProperty	boolProperty, nodeProperty	A schema attribute indicating that every event-level HED string should include this tag.
+	reserved	ObjectProperty	boolProperty, nodeProperty	A schema attribute indicating that this tag has special meaning and requires special handling by tools.
+	rooted	ObjectProperty	nodeProperty	Indicates a top-level library schema node is identical to a node of the same name in the partnered standard schema. This attribute can only appear in nodes that have the inLibrary schema attribute.
+	SIUnit	ObjectProperty	boolProperty, unitProperty	A schema attribute indicating that this unit element is an SI unit and can be modified by multiple and submultiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.
+	SIUnitModifier	ObjectProperty	boolProperty, unitModifierProperty	A schema attribute indicating that this SI unit modifier represents a multiple or submultiple of a base unit rather than a unit symbol.
+	SIUnitSymbolModifier	ObjectProperty	boolProperty, unitModifierProperty	A schema attribute indicating that this SI unit modifier represents a multiple or submultiple of a unit symbol rather than a base symbol.
+	suggestedTag	ObjectProperty	nodeProperty, isInheritedProperty	A schema attribute that indicates another tag  that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.
+	tagGroup	ObjectProperty	boolProperty, nodeProperty	A schema attribute indicating the tag can only appear inside a tag group.
+	takesValue	ObjectProperty	boolProperty, nodeProperty	A schema attribute indicating the tag is a hashtag placeholder that is expected to be replaced with a user-defined value.
+	topLevelTagGroup	ObjectProperty	boolProperty, nodeProperty	A schema attribute indicating that this tag (or its descendants) can only appear in a top-level tag group. A tag group can have at most one tag with this attribute.
+	unique	ObjectProperty	boolProperty, nodeProperty	A schema attribute indicating that only one of this tag or its descendants can be used  in the event-level HED string.
+	unitClass	ObjectProperty	nodeProperty	A schema attribute specifying which unit class this value tag belongs to.
+	unitPrefix	ObjectProperty	boolProperty, unitProperty	A schema attribute applied specifically to unit elements to designate that the unit indicator is a prefix (e.g., dollar sign in the currency units).
+	unitSymbol	ObjectProperty	boolProperty, unitProperty	A schema attribute indicating this tag is an abbreviation or symbol representing a type of unit. Unit symbols represent both the singular and the plural and thus cannot be pluralized.
+	valueClass	ObjectProperty	nodeProperty	A schema attribute specifying which value class this value tag belongs to.

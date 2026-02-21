@@ -375,6 +375,173 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         self.assertEqual(schema.prologue, reloaded.prologue)
         self.assertEqual(schema.epilogue, reloaded.epilogue)
 
+    def test_load_from_string_xml(self):
+        """Test loading schema from XML string."""
+        from hed.schema import from_string
+
+        schema = load_schema_version("8.4.0")
+
+        # Save as XML to get the string
+        xml_path = os.path.join(self.temp_dir, "string_test.xml")
+        schema.save_as_xml(xml_path)
+
+        # Read as string
+        with open(xml_path, encoding="utf-8") as f:
+            xml_string = f.read()
+
+        # Load from string
+        schema_from_string = from_string(xml_string)
+
+        # Should match original
+        self.assertEqual(schema, schema_from_string, "Loading from XML string should produce identical schema")
+
+    def test_load_from_string_mediawiki(self):
+        """Test loading schema from MediaWiki string."""
+        from hed.schema import from_string
+
+        schema = load_schema_version("8.4.0")
+
+        # Save as MediaWiki to get the string
+        wiki_path = os.path.join(self.temp_dir, "string_test.mediawiki")
+        schema.save_as_mediawiki(wiki_path)
+
+        # Read as string
+        with open(wiki_path, encoding="utf-8") as f:
+            wiki_string = f.read()
+
+        # Load from string
+        schema_from_string = from_string(wiki_string, schema_format=".mediawiki")
+
+        # Should match original
+        self.assertEqual(schema, schema_from_string, "Loading from MediaWiki string should produce identical schema")
+
+    def test_schema_compliance(self):
+        """Test schema compliance checking catches validation issues."""
+        # Load a compliant schema
+        schema = load_schema_version("8.4.0")
+        issues = schema.check_compliance()
+        self.assertEqual(len(issues), 0, "Current schemas should have no compliance issues")
+
+        # Load an older schema with known issues (HED8.0.0t has compliance problems)
+        old_schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml")
+        if os.path.exists(old_schema_path):
+            old_schema = load_schema(old_schema_path)
+            old_issues = old_schema.check_compliance()
+            self.assertGreater(len(old_issues), 0, "Old schema should have compliance issues")
+
+    def test_duplicate_detection(self):
+        """Test that duplicate units/unit classes are detected during compliance checking."""
+        # Test duplicate unit
+        dup_unit_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/duplicate_unit.xml")
+        if os.path.exists(dup_unit_path):
+            schema = load_schema(dup_unit_path)
+            issues = schema.check_compliance()
+            self.assertEqual(len(issues), 1, "Should detect exactly 1 duplicate unit issue")
+
+        # Test duplicate unit class
+        dup_unitclass_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/duplicate_unit_class.xml"
+        )
+        if os.path.exists(dup_unitclass_path):
+            schema = load_schema(dup_unitclass_path)
+            issues = schema.check_compliance()
+            self.assertEqual(len(issues), 1, "Should detect exactly 1 duplicate unit class issue")
+
+    def test_saving_with_namespace_prefix(self):
+        """Test that schemas loaded with a namespace prefix can be saved correctly."""
+        old_schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml")
+        if not os.path.exists(old_schema_path):
+            self.skipTest("Test schema file not available")
+
+        # Load schema without prefix
+        schema_no_prefix = load_schema(old_schema_path)
+
+        # Load same schema with prefix
+        schema_with_prefix = load_schema(old_schema_path, schema_namespace="tl:")
+
+        # Save the prefixed schema
+        xml_path = os.path.join(self.temp_dir, "with_prefix.xml")
+        schema_with_prefix.save_as_xml(xml_path)
+
+        # Reload - should match the non-prefixed version
+        reloaded = load_schema(xml_path)
+        self.assertEqual(reloaded, schema_no_prefix, "Schema with prefix should save and reload as equivalent")
+
+    def test_edge_case_schemas_roundtrip(self):
+        """Test that various edge-case schemas (custom properties, unknown attributes, etc.) roundtrip correctly."""
+        # Test schemas with custom properties, unknown attributes, multiple value classes, etc.
+        edge_case_schemas = [
+            "added_prop.xml",
+            "added_prop_with_usage.xml",
+            "unknown_attribute.xml",
+            "HED8.0.0_2_value_classes.xml",
+        ]
+
+        for schema_name in edge_case_schemas:
+            schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests", schema_name)
+            if not os.path.exists(schema_path):
+                continue
+
+            with self.subTest(schema=schema_name):
+                original = load_schema(schema_path)
+
+                # Test XML roundtrip
+                xml_path = os.path.join(self.temp_dir, f"edge_case_{schema_name}")
+                original.save_as_xml(xml_path)
+                xml_reloaded = load_schema(xml_path)
+                self.assertEqual(original, xml_reloaded, f"XML roundtrip failed for {schema_name}")
+
+                # Test MediaWiki roundtrip
+                wiki_path = xml_path.replace(".xml", ".mediawiki")
+                original.save_as_mediawiki(wiki_path)
+                wiki_reloaded = load_schema(wiki_path)
+                self.assertEqual(original, wiki_reloaded, f"MediaWiki roundtrip failed for {schema_name}")
+
+                # Test JSON roundtrip
+                json_path = xml_path.replace(".xml", ".json")
+                original.save_as_json(json_path)
+                json_reloaded = load_schema(json_path)
+                self.assertEqual(original, json_reloaded, f"JSON roundtrip failed for {schema_name}")
+
+    def test_prologue_preservation(self):
+        """Test that prologue/epilogue are preserved correctly across roundtrips."""
+        # Test with schemas that have different prologue formatting
+        for schema_name in [
+            "prologue_tests/test_extra_blank_line_end.xml",
+            "prologue_tests/test_extra_blank_line_middle.xml",
+            "prologue_tests/test_extra_blank_line_start.xml",
+            "prologue_tests/test_no_blank_line.xml",
+        ]:
+            schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests", schema_name)
+            if not os.path.exists(schema_path):
+                continue
+
+            with self.subTest(schema=schema_name):
+                original = load_schema(schema_path)
+                orig_prologue = original.prologue
+                orig_epilogue = original.epilogue
+
+                # Test roundtrip preserves prologue/epilogue
+                for format_ext, save_method in [
+                    (".xml", "save_as_xml"),
+                    (".mediawiki", "save_as_mediawiki"),
+                    (".json", "save_as_json"),
+                ]:
+                    save_path = os.path.join(self.temp_dir, f"prologue_test{format_ext}")
+                    getattr(original, save_method)(save_path)
+                    reloaded = load_schema(save_path)
+
+                    self.assertEqual(
+                        orig_prologue,
+                        reloaded.prologue,
+                        f"Prologue should be preserved in {format_ext} roundtrip for {schema_name}",
+                    )
+                    self.assertEqual(
+                        orig_epilogue,
+                        reloaded.epilogue,
+                        f"Epilogue should be preserved in {format_ext} roundtrip for {schema_name}",
+                    )
+
 
 if __name__ == "__main__":
     unittest.main()
