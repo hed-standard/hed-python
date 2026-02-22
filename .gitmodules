@@ -7,3 +7,6 @@
 	path = spec_tests/hed-examples
 	url = https://github.com/hed-standard/hed-examples/
 	branch = main
+[submodule "hed-schemas"]
+	path = hed-schemas
+	url = https://github.com/hed-standard/hed-schemas.git

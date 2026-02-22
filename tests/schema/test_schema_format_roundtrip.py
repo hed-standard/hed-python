@@ -475,6 +475,7 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
             "added_prop_with_usage.xml",
             "unknown_attribute.xml",
             "HED8.0.0_2_value_classes.xml",
+            "HED_testunpart_1.0.0.mediawiki",
         ]
 
         for schema_name in edge_case_schemas:
@@ -485,20 +486,29 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
             with self.subTest(schema=schema_name):
                 original = load_schema(schema_path)
 
+                # Strip extension from schema_name for base naming
+                base_name = os.path.splitext(schema_name)[0]
+
                 # Test XML roundtrip
-                xml_path = os.path.join(self.temp_dir, f"edge_case_{schema_name}")
+                xml_path = os.path.join(self.temp_dir, f"edge_case_{base_name}.xml")
                 original.save_as_xml(xml_path)
                 xml_reloaded = load_schema(xml_path)
                 self.assertEqual(original, xml_reloaded, f"XML roundtrip failed for {schema_name}")
 
                 # Test MediaWiki roundtrip
-                wiki_path = xml_path.replace(".xml", ".mediawiki")
+                wiki_path = os.path.join(self.temp_dir, f"edge_case_{base_name}.mediawiki")
                 original.save_as_mediawiki(wiki_path)
                 wiki_reloaded = load_schema(wiki_path)
                 self.assertEqual(original, wiki_reloaded, f"MediaWiki roundtrip failed for {schema_name}")
 
+                # Test TSV roundtrip
+                tsv_dir = os.path.join(self.temp_dir, "tsv", f"edge_case_{base_name}")
+                original.save_as_dataframes(tsv_dir)
+                tsv_reloaded = load_schema(tsv_dir)
+                self.assertEqual(original, tsv_reloaded, f"TSV roundtrip failed for {schema_name}")
+
                 # Test JSON roundtrip
-                json_path = xml_path.replace(".xml", ".json")
+                json_path = os.path.join(self.temp_dir, f"edge_case_{base_name}.json")
                 original.save_as_json(json_path)
                 json_reloaded = load_schema(json_path)
                 self.assertEqual(original, json_reloaded, f"JSON roundtrip failed for {schema_name}")

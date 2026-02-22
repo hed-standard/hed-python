@@ -137,6 +137,7 @@ spec_tests/hed-specification/tests
 spec_tests/hed-examples
 spec_tests/hed-tests
 spec_tests/*.json
+hed-schemas/
 
 # GitHub Copilot instructions (project-specific)
 .github/copilot-instructions.md

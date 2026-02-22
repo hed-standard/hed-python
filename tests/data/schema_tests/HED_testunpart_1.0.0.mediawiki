@@ -1,0 +1,74 @@
+HED version="1.0.0" library="testunpart"
+
+'''Prologue'''
+This schema is a standalone.
+
+!# start schema
+
+'''Test-some''' <nowiki>[Unknown stuff.]</nowiki>
+* Unknown1 <nowiki>[Unknown1 stuff]</nowiki>
+* Unknown2 <nowiki>{suggestedTag=Fruit} [Unknown2 stuff]</nowiki>
+**  <nowiki># {takesValue, valueClass=digitClass, unitClass=myAngleUnits} [Try this out]</nowiki>
+
+'''Fruit''' <nowiki>[Fruit stuff.]</nowiki>
+* Apple <nowiki>{annotation=foodonto:has_botanical_name} [Apple stuff]</nowiki>
+** Honey-crisp <nowiki>[Type of apple]</nowiki>
+
+'''Vegetable''' <nowiki>[Vegetable stuff.]</nowiki>
+* Carrot <nowiki>{annotation=foodonto:has_botanical_name} [Carrot stuff]</nowiki>
+
+
+!# end schema
+
+'''Unit classes'''
+* myAngleUnits <nowiki>{defaultUnits=deg}</nowiki>
+** deg <nowiki>{conversionFactor=1.0}</nowiki>
+
+'''Unit modifiers'''
+
+'''Value classes'''
+* digitClass <nowiki>{allowedCharacter=digits} [Values that can only have digits.]</nowiki>
+
+'''Schema attributes'''
+* myAnnotation <nowiki>{elementDomain, stringRange, annotationProperty} [Special annotations.]</nowiki>
+* annotation <nowiki>{elementDomain, stringRange, annotationProperty} [A annotation link to an item in another ontology or item.]</nowiki>
+* takesValue <nowiki>{tagDomain, boolRange, annotationProperty} [This tag is a hashtag placeholder that is expected to be replaced with a user-defined value.]</nowiki>
+* defaultUnits <nowiki>{unitClassDomain, unitRange} [The default units to use if the placeholder has a unit class but the substituted value has no units.]</nowiki>
+* suggestedTag <nowiki>{tagDomain, tagRange} [A tag that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.]</nowiki>
+* unitClass <nowiki>{tagDomain, unitClassRange} [The unit class that the value of a placeholder node can belong to.]</nowiki>
+* valueClass <nowiki>{tagDomain, valueClassRange} [Type of value taken on by the value of a placeholder node.]</nowiki>
+* allowedCharacter <nowiki>{unitDomain, unitModifierDomain, valueClassDomain, stringRange} [A special character that is allowed in expressing the value of a placeholder of a specified value class. Allowed characters may be listed individual, named individually, or named as a group as specified in Section 2.2 Character sets and restrictions of the HED specification.]</nowiki>
+* conversionFactor <nowiki>{unitDomain, unitModifierDomain, numericRange} [The factor to multiply these units or unit modifiers by to convert to default units.]</nowiki>
+* deprecatedFrom <nowiki>{elementDomain, stringRange} [The latest schema version in which the element was not deprecated.]</nowiki>
+* extensionAllowed <nowiki>{tagDomain, boolRange} [Users can add unlimited levels of child nodes under this tag. This tag is propagated to child nodes except for hashtag placeholders.]</nowiki>
+* inLibrary <nowiki>{elementDomain, stringRange} [The named library schema that this schema element is from. This attribute is added by tools when a library schema is merged into its partnered standard schema.]</nowiki>
+
+'''Properties'''
+* annotationProperty <nowiki>[The value is not inherited by child nodes.]</nowiki>
+* boolRange <nowiki>[This schema attribute's value can be true or false. This property was formerly named boolProperty.]</nowiki>
+* elementDomain <nowiki>[This schema attribute can apply to any type of element class (i.e., tag, unit, unit class, unit modifier, or value class). This property was formerly named elementProperty.]</nowiki>
+* tagDomain <nowiki>[This schema attribute can apply to node (tag-term) elements. This was added so attributes could apply to multiple types of elements. This property was formerly named nodeProperty.]</nowiki>
+* tagRange <nowiki>[This schema attribute's value can be a node. This property was formerly named nodeProperty.]</nowiki>
+* numericRange <nowiki>[This schema attribute's value can be numeric.]</nowiki>
+* stringRange <nowiki>[This schema attribute's value can be a string.]</nowiki>
+* unitClassDomain <nowiki>[This schema attribute can apply to unit classes. This property was formerly named unitClassProperty.]</nowiki>
+* unitClassRange <nowiki>[This schema attribute's value can be a unit class.]</nowiki>
+* unitModifierDomain <nowiki>[This schema attribute can apply to unit modifiers. This property was formerly named unitModifierProperty.]</nowiki>
+* unitDomain <nowiki>[This schema attribute can apply to units. This property was formerly named unitProperty.]</nowiki>
+* unitRange <nowiki>[This schema attribute's value can be units.]</nowiki>
+* valueClassDomain <nowiki>[This schema attribute can apply to value classes. This property was formerly named valueClassProperty.]</nowiki>
+* valueClassRange <nowiki>[This schema attribute's value can be a value class.]</nowiki>
+
+'''Epilogue'''
+A final section.
+
+'''Sources'''
+* <nowiki>source=FoodDB,link=https://fooddb.example.org,description=Botanical and nutritional database for fruits and vegetables.</nowiki>
+
+'''Prefixes'''
+* <nowiki>prefix=foodonto:,namespace=http://purl.obolibrary.org/obo/foodon.owl,description=Food Ontology (FOODON)</nowiki>
+
+'''External annotations'''
+* <nowiki>prefix=foodonto:,id=has_botanical_name,iri=http://purl.obolibrary.org/obo/FOODON_00001234,description=The botanical or scientific name of a food item.</nowiki>
+
+!# end hed
