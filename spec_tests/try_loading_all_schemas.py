@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Try loading all schemas from the hed-schemas submodule.
 
@@ -9,13 +9,17 @@ NOT included in automatic test discovery - run manually:
     python spec_tests/try_loading_all_schemas.py
 
 Usage:
-    python spec_tests/try_loading_all_schemas.py [--format FORMAT] [--library LIBRARY]
+    python spec_tests/try_loading_all_schemas.py [OPTIONS]
 
 Options:
-    --format {xml,mediawiki,json,tsv,all}  Test specific format only (default: all)
+    --format {xml,mediawiki,json,tsv,all}   Test specific format only (default: all)
     --library LIBRARY                       Test specific library only (default: all)
-    --standard-only                         Test only standard schemas
+    --standard-only                         Test only standard schemas (no libraries)
+    --exclude-prereleases                   Exclude prerelease schemas (releases only)
+    --prerelease-only                       Test only prerelease schemas
     --verbose                               Show detailed success messages
+
+By default, tests both release and prerelease schemas from standard and all libraries.
 """
 
 import argparse
@@ -410,8 +414,13 @@ class SchemaLoadTester:
         print()
 
 
-def main():
-    """Main entry point."""
+def parse_arguments():
+    """
+    Parse command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed arguments
+    """
     parser = argparse.ArgumentParser(description="Try loading all schemas from hed-schemas submodule")
     parser.add_argument(
         "--format",
@@ -425,7 +434,40 @@ def main():
     parser.add_argument("--prerelease-only", action="store_true", help="Test only prerelease schemas")
     parser.add_argument("--verbose", action="store_true", help="Show detailed success messages")
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def validate_arguments(args):
+    """
+    Validate command-line arguments for conflicts.
+
+    Parameters:
+        args: Parsed arguments from argparse
+
+    Raises:
+        SystemExit: If conflicting arguments are detected
+    """
+    errors = []
+
+    # Check for mutually exclusive options
+    if args.library and args.standard_only:
+        errors.append("--library and --standard-only are mutually exclusive")
+
+    if args.exclude_prereleases and args.prerelease_only:
+        errors.append("--exclude-prereleases and --prerelease-only are mutually exclusive")
+
+    if errors:
+        print("\n[ERROR] Conflicting command-line options detected:\n")
+        for error in errors:
+            print(f"  - {error}")
+        print("\nUse --help to see valid option combinations.")
+        sys.exit(2)
+
+
+def main():
+    """Main entry point."""
+    args = parse_arguments()
+    validate_arguments(args)
 
     # Determine format filter
     format_filter = None if args.format == "all" else args.format

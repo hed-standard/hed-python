@@ -13,7 +13,10 @@ spec_tests/
 ├── hed-tests/
 │   └── json_test_data/          # JSON test files from hed-tests repository
 ├── hed-examples/
-│   └── datasets/                # BIDS datasets for validation testing  
+│   └── datasets/                # BIDS datasets for validation testing
+├── hed-schemas/
+│   ├── standard_schema/         # Standard HED schemas in all formats
+│   └── library_schemas/         # HED library schemas
 ├── test_sidecar.json           # Already present
 ├── test_errors.py              # Tests HED validation against spec
 ├── test_hed_cache.py           # Tests HED schema caching
@@ -30,7 +33,7 @@ spec_tests/
    git submodule update --init --recursive
    ```
 
-   This will automatically clone the `hed-tests` and `hed-examples` repositories into the correct locations.
+   This will automatically clone the `hed-tests`, `hed-examples`, and `hed-schemas` repositories into the correct locations.
 
 2. **Update Submodules** (when needed):
 
@@ -44,6 +47,7 @@ spec_tests/
 
    - Clone the `hed-tests` repository to `spec_tests/hed-tests/`
    - Clone the `hed-examples` repository to `spec_tests/hed-examples/`
+   - Clone the `hed-schemas` repository to `spec_tests/hed-schemas/`
 
 2. **Verify Setup**:
 
@@ -154,7 +158,7 @@ This makes the script suitable for use in GitHub Actions workflows to automatica
 - The `test_errors.py` and `test_bids_datasets.py` tests require the submodule content to be present
 - On GitHub Actions, the submodules are automatically checked out via the workflow configuration
 - Locally, initialize submodules using `git submodule update --init --recursive`
-- The `spec_tests/hed-tests/` directory is gitignored to prevent committing submodule content directly
+- All three submodule directories (`hed-tests`, `hed-examples`, `hed-schemas`) are gitignored to prevent committing submodule content directly
 - Use `git submodule update --remote` to pull the latest changes from the submodule repositories
 
 ## Troubleshooting
