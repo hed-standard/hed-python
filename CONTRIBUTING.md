@@ -58,7 +58,23 @@ This project adheres to a code of conduct that we expect all contributors to fol
    pip install -e .[dev,test,docs,examples]
    ```
 
-4. **Run tests to verify setup:**
+4. **Initialize git submodules:**
+
+   HED-Python uses git submodules for test data and schemas. Initialize them with:
+
+   ```bash
+   git submodule update --init --recursive
+   ```
+
+   This will fetch:
+
+   - `spec_tests/hed-examples/` - Example datasets for specification tests
+   - `spec_tests/hed-tests/` - Official HED specification tests
+   - `spec_tests/hed-schemas/` - Official HED schema repository for testing
+
+   **Note:** The submodule contents are not stored in the hed-python repository. They are fetched on-demand and ignored by git.
+
+5. **Run tests to verify setup:**
 
    ```bash
    python -m unittest discover tests

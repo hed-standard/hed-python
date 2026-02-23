@@ -26,8 +26,8 @@ class MyTestCase(unittest.TestCase):
     def setUpClass(cls):
         # New directory structure: hed-tests/json_test_data/
         test_base_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-tests/json_test_data"))
-        schema_test_dir = os.path.join(test_base_dir, "schema_tests")
-        validation_test_dir = os.path.join(test_base_dir, "validation_tests")
+        schema_test_dir = os.path.join(test_base_dir, "schema_test_data")
+        validation_test_dir = os.path.join(test_base_dir, "validation_test_data")
 
         cls.test_base_dir = test_base_dir
         cls.fail_count = []

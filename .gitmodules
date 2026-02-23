@@ -5,5 +5,10 @@
 
 [submodule "spec_tests/hed-examples"]
 	path = spec_tests/hed-examples
-	url = https://github.com/hed-standard/hed-examples/
+	url = https://github.com/hed-standard/hed-examples.git
+	branch = main
+
+[submodule "spec_tests/hed-schemas"]
+	path = spec_tests/hed-schemas
+	url = https://github.com/hed-standard/hed-schemas.git
 	branch = main
