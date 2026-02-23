@@ -44,7 +44,7 @@ jobs:
         continue-on-error: true
         run: |
            echo "::group::Bids Results"
-           python -m unittest spec_tests/validate_bids.py
+           python -m unittest spec_tests/test_bids_datasets.py
            echo "::endgroup::"
 
       - name: Hed Cache Test

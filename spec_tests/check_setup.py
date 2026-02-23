@@ -85,7 +85,7 @@ def main():
         print("⚠️  Some directories are missing, but spec_tests can still run partially.")
         print("Tests that require missing content will be skipped gracefully.")
         print("\nCurrently available: test_hed_cache.py (works without submodules)")
-        print("Currently skipped: test_errors.py, validate_bids.py (need submodule content)")
+        print("Currently skipped: test_errors.py, test_bids_datasets.py (need submodule content)")
         print("\nTo set up full spec_tests using submodules:")
         print("  git submodule update --init --recursive")
         print("\nAlternatively, manually clone:")
