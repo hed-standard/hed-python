@@ -236,15 +236,12 @@ def load_dataframes(filenames):
                 loaded_dataframe = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
                 loaded_dataframe = loaded_dataframe.rename(columns=constants.EXTRAS_CONVERSIONS)
 
+                # For legacy schema compatibility, add missing required columns with empty values
+                # instead of raising an error. Compliance checking will validate new schemas.
                 columns_not_in_loaded = dataframes[key].columns[~dataframes[key].columns.isin(loaded_dataframe.columns)]
-                # and not dataframes[key].columns.isin(loaded_dataframe.columns).all():
                 if columns_not_in_loaded.any():
-                    raise HedFileError(
-                        HedExceptions.SCHEMA_LOAD_FAILED,
-                        f"Required column(s) {list(columns_not_in_loaded)} missing from {filename}.  "
-                        f"The required columns are {list(dataframes[key].columns)}",
-                        filename=filename,
-                    )
+                    for col in columns_not_in_loaded:
+                        loaded_dataframe[col] = ""
                 dataframes[key] = loaded_dataframe
             elif os.path.exists(filename):
                 # Handle the extra files if they are present.
