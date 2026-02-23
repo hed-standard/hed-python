@@ -21,7 +21,7 @@ spec_tests/
 ├── test_errors.py              # Tests HED validation against spec
 ├── test_hed_cache.py           # Tests HED schema caching
 ├── test_bids_datasets.py       # Tests BIDS dataset validation
-└── try_loading_all_schemas.py  # Manual script to test schema loading
+└── test_loading_schemas.py     # Tests that all schemas can be loaded
 ```
 
 ## Setup Instructions
@@ -84,40 +84,30 @@ python -m unittest spec_tests.test_hed_cache -v
    - Open the Test Explorer panel
    - Tests should be discovered in both `tests/` and `spec_tests/` directories
 
-## Schema Loading Test Script
+## Schema Loading Tests
 
-The `try_loading_all_schemas.py` script provides comprehensive testing of schema loading capabilities across all formats and versions from the `hed-schemas` submodule.
+The `test_loading_schemas.py` file tests that all schemas in the `hed-schemas` submodule load successfully. It runs automatically as part of `python -m unittest discover spec_tests`.
 
-### Usage
+The core logic lives in `hed.scripts.check_schema_loading`, which can also be run standalone via the `hed_check_schema_loading` console script (installed with hedtools):
 
 ```bash
-# Test all schemas (releases and prereleases, all formats)
-python spec_tests/try_loading_all_schemas.py
+# Run from hed-schemas repo root (e.g. in a GitHub Action)
+hed_check_schema_loading --schemas-dir .
 
-# Test only release schemas (exclude prereleases)
-python spec_tests/try_loading_all_schemas.py --exclude-prereleases
+# Or point at a local checkout
+hed_check_schema_loading --schemas-dir spec_tests/hed-schemas
 
-# Test only prerelease schemas
-python spec_tests/try_loading_all_schemas.py --prerelease-only
-
-# Test standard schemas only (no libraries)
-python spec_tests/try_loading_all_schemas.py --standard-only
-
-# Test a specific library
-python spec_tests/try_loading_all_schemas.py --library lang
-
-# Test a specific format
-python spec_tests/try_loading_all_schemas.py --format xml
-
-# Combine filters
-python spec_tests/try_loading_all_schemas.py --library lang --format xml --exclude-prereleases
-
-# Show detailed success messages
-python spec_tests/try_loading_all_schemas.py --verbose
+# Filter by format, library, or release status
+hed_check_schema_loading --schemas-dir spec_tests/hed-schemas --format xml
+hed_check_schema_loading --schemas-dir spec_tests/hed-schemas --library lang
+hed_check_schema_loading --schemas-dir spec_tests/hed-schemas --exclude-prereleases
+hed_check_schema_loading --schemas-dir spec_tests/hed-schemas --prerelease-only
+hed_check_schema_loading --schemas-dir spec_tests/hed-schemas --verbose
 ```
 
-### Command-Line Options
+### CLI Options
 
+- `--schemas-dir PATH` (required): Path to the hed-schemas repository root
 - `--format {xml,mediawiki,json,tsv,all}`: Test specific format only (default: all)
 - `--library NAME`: Test specific library only (default: all)
 - `--standard-only`: Test only standard schemas (no libraries)
@@ -125,33 +115,12 @@ python spec_tests/try_loading_all_schemas.py --verbose
 - `--prerelease-only`: Test only prerelease schemas
 - `--verbose`: Show detailed success messages for each schema
 
-### Output
-
-The script displays schemas organized by type (standard/library) and release status (release/prerelease):
-
-```
-STANDARD SCHEMAS
-XML (6): HED8.0.0.xml, HED8.1.0.xml, HED8.2.0.xml, ...
-
-LIBRARY SCHEMAS
-LANG:
-  XML (3): HED_lang_1.0.0.xml, HED_lang_1.1.0.xml, ...
-
-STANDARD PRERELEASE SCHEMAS
-XML (1): HED8.5.0.xml
-
-LIBRARY PRERELEASE SCHEMAS
-LANG:
-  XML (1): HED_lang_1.2.0.xml
-```
-
 ### Exit Codes
 
 - **0**: All schemas loaded successfully
-- **1**: One or more schemas failed to load (causes CI failure)
+- **1**: One or more schemas failed to load
+- **2**: Invalid command-line arguments
 - **130**: User interrupted (Ctrl+C)
-
-This makes the script suitable for use in GitHub Actions workflows to automatically detect schema loading issues.
 
 ## Notes
 

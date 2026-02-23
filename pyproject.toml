@@ -99,6 +99,7 @@ hed_extract_bids_sidecar = "hed.scripts.hed_extract_bids_sidecar:main"
 hed_validate_schemas = "hed.scripts.validate_schemas:main"
 hed_update_schemas = "hed.scripts.hed_convert_schema:main"
 hed_add_ids = "hed.scripts.add_hed_ids:main"
+hed_check_schema_loading = "hed.scripts.check_schema_loading:main"
 
 [tool.setuptools_scm]
 write_to = "hed/_version.py"
