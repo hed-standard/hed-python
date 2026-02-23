@@ -20,7 +20,8 @@ spec_tests/
 ├── test_sidecar.json           # Already present
 ├── test_errors.py              # Tests HED validation against spec
 ├── test_hed_cache.py           # Tests HED schema caching
-└── test_bids_datasets.py       # Tests BIDS dataset validation
+├── test_bids_datasets.py       # Tests BIDS dataset validation
+└── try_loading_all_schemas.py  # Manual script to test schema loading
 ```
 
 ## Setup Instructions
