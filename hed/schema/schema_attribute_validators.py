@@ -188,9 +188,13 @@ def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name) -> list:
     all_versions = get_hed_versions(library_name=library_name)
     if deprecated_version:
         library_version = schema_version_for_library(hed_schema, library_name)
-        # The version must exist, and be lower or equal to our current version
-        if deprecated_version not in all_versions or (
-            library_version and Version(library_version) <= Version(deprecated_version)
+        # Allow the current schema version even if it's prerelease (not yet in known versions)
+        allowed_versions = set(all_versions)
+        if library_version:
+            allowed_versions.add(library_version)
+        # The version must be a known or current version, and not be in the future
+        if deprecated_version not in allowed_versions or (
+            library_version and Version(library_version) < Version(deprecated_version)
         ):
             issues += ErrorHandler.format_error(
                 SchemaAttributeErrors.SCHEMA_DEPRECATED_INVALID, tag_entry.name, deprecated_version

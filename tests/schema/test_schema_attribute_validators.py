@@ -108,7 +108,12 @@ class Test(unittest.TestCase):
         tag_entry.attributes["deprecatedFrom"] = "8.0.0"
         self.assertFalse(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
 
+        # deprecatedFrom equal to current version is valid (deprecating in current release)
         tag_entry.attributes["deprecatedFrom"] = "8.2.0"
+        self.assertFalse(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
+
+        # deprecatedFrom in the future is invalid
+        tag_entry.attributes["deprecatedFrom"] = "8.3.0"
         self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
         del tag_entry.attributes["deprecatedFrom"]
 
@@ -129,7 +134,8 @@ class Test(unittest.TestCase):
             schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name)
         )
 
-        self.assertTrue(
+        # deprecatedFrom=8.2.0 on oC is valid (current version)
+        self.assertFalse(
             schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry.units["oC"], attribute_name)
         )
 
