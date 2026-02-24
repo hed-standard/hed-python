@@ -1,10 +1,16 @@
-"""Schema compliance checking for HED 8.3+ schemas.
+"""Schema compliance checking for HED schemas.
 
-Validates domain constraints, range constraints, and semantic rules for all
-entries in a HED schema.  The schema's own Attributes and Properties sections
-define which attributes are valid for each section (domain) and what type of
-value each attribute takes (range).  This checker is data-driven by that
-metadata rather than hard-coding parallel validator dictionaries.
+This module is designed for HED 8.3+ schemas, which carry full domain and
+range metadata on their attributes.  It can be run on any loaded schema, but
+schemas earlier than 8.3 will produce extensive known compliance errors
+because they lack the attribute metadata that 8.3 introduced.
+
+The checker validates domain constraints, range constraints, and semantic
+rules for all entries in a schema.  The schema's own Attributes and
+Properties sections define which attributes are valid for each section
+(domain) and what type of value each attribute takes (range).  This checker
+is data-driven by that metadata rather than hard-coding parallel validator
+dictionaries.
 """
 
 from functools import partial
@@ -182,7 +188,7 @@ class SchemaValidator:
         versions = self.hed_schema.version_number.split(",")
         for library, version in zip(libraries, versions, strict=False):
             all_known = hed_cache.get_hed_versions(library_name=library)
-            if "," not in library and not all_known or Version(all_known[0]) < Version(version):
+            if not all_known or Version(all_known[0]) < Version(version):
                 issues += ErrorHandler.format_error(
                     SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED,
                     version,
