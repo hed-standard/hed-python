@@ -203,7 +203,10 @@ def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name) -> list:
     if hasattr(tag_entry, "children"):
         # Fix up this error message if we ever actually issue it for units
         for child in tag_entry.children.values():
-            if not child.has_attribute(attribute_name):
+            # Check the child's own attributes, not inherited_attributes,
+            # because deprecatedFrom is inheritable and would always be found
+            # via has_attribute() on child tags of a deprecated parent.
+            if attribute_name not in child.attributes:
                 issues += ErrorHandler.format_error(
                     SchemaAttributeErrors.SCHEMA_CHILD_OF_DEPRECATED, tag_entry.name, child.name
                 )
