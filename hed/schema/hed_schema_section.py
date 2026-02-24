@@ -272,7 +272,9 @@ class HedSchemaTagSection(HedSchemaSection):
         attribute_section = hed_schema.attributes
         if hed_schema.schema_83_props:
             self.inheritable_attributes = [
-                name for name, value in attribute_section.items() if not value.has_attribute(HedKey.AnnotationProperty)
+                name
+                for name, value in attribute_section.items()
+                if not value.has_attribute(HedKey.AnnotationProperty) and name != HedKey.InLibrary
             ]
         else:
             self.inheritable_attributes = [
