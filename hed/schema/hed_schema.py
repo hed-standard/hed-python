@@ -497,9 +497,9 @@ class HedSchema(HedSchemaBase):
         Returns:
             list[dict]: A list of all warnings and errors found in the file. Each issue is a dictionary.
         """
-        from hed.schema import schema_compliance
+        from hed.schema.schema_validation import compliance
 
-        return schema_compliance.check_compliance(self, check_for_warnings, name, error_handler)
+        return compliance.check_compliance(self, check_for_warnings, name, error_handler)
 
     def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags) -> list["HedSchemaEntry"]:
         """Return tag entries with the given attribute.

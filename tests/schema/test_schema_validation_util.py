@@ -1,5 +1,5 @@
 import unittest
-import hed.schema.schema_validation_util as util
+import hed.schema.schema_validation.validation_util as util
 from hed.errors import ErrorHandler, SchemaWarnings
 from hed import load_schema_version
 from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry

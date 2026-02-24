@@ -1,7 +1,7 @@
 import unittest
 import copy
 
-from hed.schema.schema_attribute_validator_hed_id import HedIDValidator
+from hed.schema.schema_validation.hed_id_validator import HedIDValidator
 from hed.schema import hed_schema_constants
 from hed import load_schema_version
 from hed.schema import HedKey

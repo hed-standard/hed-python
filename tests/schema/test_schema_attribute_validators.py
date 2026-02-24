@@ -1,7 +1,8 @@
 import unittest
 import copy
 
-from hed.schema import schema_attribute_validators, HedSectionKey
+from hed.schema.schema_validation import attribute_validators as schema_attribute_validators
+from hed.schema import HedSectionKey
 from hed import load_schema_version
 
 

@@ -2,8 +2,8 @@ import unittest
 import os
 
 from hed import schema
-from hed.schema.schema_compliance import DOMAIN_TO_SECTION, SECTION_TO_DOMAIN, CONTENT_SECTIONS
-from hed.schema.schema_compliance_summary import ComplianceSummary
+from hed.schema.schema_validation.compliance import DOMAIN_TO_SECTION, SECTION_TO_DOMAIN, CONTENT_SECTIONS
+from hed.schema.schema_validation.compliance_summary import ComplianceSummary
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 
 
@@ -191,7 +191,7 @@ class TestDomainRangeValidation(unittest.TestCase):
 
     def test_range_validator_keys_match_schema(self):
         """The range validator dict should cover all range properties in the schema."""
-        from hed.schema.schema_compliance import SchemaValidator
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         range_keys_in_validator = set(SchemaValidator._range_validators.keys())
         range_keys = {
@@ -212,7 +212,7 @@ class TestDomainRangeValidation(unittest.TestCase):
 
     def test_build_validators_uses_range(self):
         """_build_validators should pull range validators from attribute definitions."""
-        from hed.schema.schema_compliance import SchemaValidator
+        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
 
         sv = SchemaValidator(self.schema, ErrorHandler())
@@ -223,7 +223,7 @@ class TestDomainRangeValidation(unittest.TestCase):
 
     def test_build_validators_includes_semantic(self):
         """_build_validators should include semantic validators for known attributes."""
-        from hed.schema.schema_compliance import SchemaValidator
+        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
 
         sv = SchemaValidator(self.schema, ErrorHandler())
@@ -233,7 +233,7 @@ class TestDomainRangeValidation(unittest.TestCase):
 
     def test_build_validators_includes_hedid(self):
         """_build_validators should include the HedID validator for hedId."""
-        from hed.schema.schema_compliance import SchemaValidator
+        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
 
         sv = SchemaValidator(self.schema, ErrorHandler())
@@ -243,7 +243,7 @@ class TestDomainRangeValidation(unittest.TestCase):
 
     def test_build_validators_always_checks_deprecated(self):
         """Every attribute should always get the attribute_is_deprecated check."""
-        from hed.schema.schema_compliance import SchemaValidator
+        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
 
         sv = SchemaValidator(self.schema, ErrorHandler())
