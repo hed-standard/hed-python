@@ -114,4 +114,4 @@ class TestHedSchema(unittest.TestCase):
         path = os.path.join(self.full_base_folder, "attribute_unknown1.mediawiki")
         schema = load_schema(path)
         issues = schema.check_compliance()
-        self.assertEqual(len(issues), 7)
+        self.assertEqual(len(issues), 8)

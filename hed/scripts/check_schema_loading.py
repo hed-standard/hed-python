@@ -58,7 +58,7 @@ class SchemaLoadTester:
             verbose (bool): If True, show detailed success messages.
         """
         self.verbose = verbose
-        self.results = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
+        self.results = {"total": 0, "passed": 0, "failed": 0}
         self.failures = []
 
         self.hed_schemas_root = Path(hed_schemas_root)
@@ -337,7 +337,6 @@ class SchemaLoadTester:
         print(f"Total Schemas: {self.results['total']}")
         print(f"Passed:        {self.results['passed']} ({100 * self.results['passed'] // max(1, self.results['total'])}%)")
         print(f"Failed:        {self.results['failed']}")
-        print(f"Skipped:       {self.results['skipped']}")
         print("=" * 80)
 
         if self.results["failed"] == 0:
@@ -376,7 +375,7 @@ def run_loading_check(
         verbose (bool): If True, show detailed success messages.
 
     Returns:
-        dict: Results dictionary with keys 'total', 'passed', 'failed', 'skipped',
+        dict: Results dictionary with keys 'total', 'passed', 'failed',
             and 'failures' (list of dicts with 'path' and 'error').
     """
     tester = SchemaLoadTester(hed_schemas_root, verbose=verbose)

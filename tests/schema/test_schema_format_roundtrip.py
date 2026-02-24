@@ -436,7 +436,8 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         if os.path.exists(dup_unit_path):
             schema = load_schema(dup_unit_path)
             issues = schema.check_compliance()
-            self.assertEqual(len(issues), 1, "Should detect exactly 1 duplicate unit issue")
+            dup_issues = [i for i in issues if i["code"] == "SCHEMA_DUPLICATE_NODE"]
+            self.assertEqual(len(dup_issues), 1, "Should detect exactly 1 duplicate unit issue")
 
         # Test duplicate unit class
         dup_unitclass_path = os.path.join(
@@ -445,7 +446,8 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         if os.path.exists(dup_unitclass_path):
             schema = load_schema(dup_unitclass_path)
             issues = schema.check_compliance()
-            self.assertEqual(len(issues), 1, "Should detect exactly 1 duplicate unit class issue")
+            dup_issues = [i for i in issues if i["code"] == "SCHEMA_DUPLICATE_NODE"]
+            self.assertEqual(len(dup_issues), 1, "Should detect exactly 1 duplicate unit class issue")
 
     def test_saving_with_namespace_prefix(self):
         """Test that schemas loaded with a namespace prefix can be saved correctly."""

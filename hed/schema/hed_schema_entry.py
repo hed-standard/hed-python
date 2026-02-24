@@ -172,6 +172,7 @@ class UnitClassEntry(HedSchemaEntry):
             schema (HedSchema): The object with the schema rules.
 
         """
+        super().finalize_entry(schema)
         self.units = {unit_entry.name: unit_entry for unit_entry in self._units}
         for unit_entry in self.units.values():
             unit_entry.unit_class_entry = self
@@ -227,6 +228,7 @@ class UnitEntry(HedSchemaEntry):
             schema (HedSchema): The schema rules come from.
 
         """
+        super().finalize_entry(schema)
         self.unit_modifiers = schema._get_modifiers_for_unit(self.name)
         derivative_units = {}
         if self.has_attribute(HedKey.UnitSymbol):
@@ -414,6 +416,7 @@ class HedTagEntry(HedSchemaEntry):
             schema (HedSchema): The schema that the rules come from.
 
         """
+        super().finalize_entry(schema)
         # Set the parent and child pointers.  Child is just for "takes value"
         parent_name, _, child_name = self.name.rpartition("/")
         parent_tag = None
