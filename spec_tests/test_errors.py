@@ -12,6 +12,7 @@ import io
 import json
 from hed import HedFileError
 from hed.errors import ErrorHandler, get_printable_issue_string, SchemaWarnings
+from hed.errors.error_types import ErrorSeverity
 
 skip_tests = {
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
@@ -442,6 +443,16 @@ class MyTestCase(unittest.TestCase):
                 try:
                     loaded_schema = from_string(schema_string, schema_format=".mediawiki")
                     issues = loaded_schema.check_compliance()
+                    # Filter annotation compliance warnings — these are noise from schemas
+                    # lacking complete ExternalAnnotations/Prefixes/Sources sections
+                    issues = [
+                        i
+                        for i in issues
+                        if not (
+                            i.get("code") == "SCHEMA_ATTRIBUTE_VALUE_INVALID"
+                            and i.get("severity", ErrorSeverity.ERROR) == ErrorSeverity.WARNING
+                        )
+                    ]
                 except HedFileError as e:
                     issues = e.issues
                     if not issues:

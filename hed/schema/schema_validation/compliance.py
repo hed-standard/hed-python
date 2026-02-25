@@ -15,6 +15,7 @@ dictionaries.
 
 from functools import partial
 
+import pandas as pd
 from semantic_version import Version
 
 from hed.errors.error_reporter import ErrorHandler, sort_issues
@@ -28,6 +29,7 @@ from hed.errors.error_types import (
 from hed.schema import hed_cache
 from hed.schema.schema_validation import attribute_validators
 from hed.schema.hed_schema import HedSchema, HedKey, HedSectionKey
+from hed.schema.schema_io import df_constants
 from hed.schema.schema_validation.hed_id_validator import HedIDValidator
 from hed.schema.schema_validation.compliance_summary import ComplianceSummary
 from hed.schema.schema_validation.validation_util import (
@@ -77,6 +79,8 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     issues += validator.check_invalid_characters()
     issues += validator.check_attributes()
     issues += validator.check_duplicate_names()
+    issues += validator.check_extras_columns()
+    issues += validator.check_annotation_attribute_values()
 
     error_handler.pop_error_context()
     issues = sort_issues(issues)
@@ -328,6 +332,219 @@ class SchemaValidator:
         self.summary.record_issues(len(issues))
         return issues
 
+    def check_extras_columns(self):
+        """Validate that all extras DataFrames have non-empty values in required columns.
+
+        For each extras section (Sources, Prefixes, ExternalAnnotations), checks
+        that every cell in the required columns defined in
+        ``df_constants.extras_column_dict`` has a non-empty value.
+
+        Note:
+            Missing columns are automatically added with empty strings during
+            schema loading (see ``base2schema.fix_extra``), so only value
+            presence needs to be checked here.
+        """
+        self.summary.start_check(
+            "extras_columns",
+            "Validate extras sections have non-empty values in required columns.",
+        )
+        self.summary.add_sub_check("non-empty cell values")
+
+        issues = []
+        extras = getattr(self.hed_schema, "extras", {}) or {}
+        for section_name, required_cols in df_constants.extras_column_dict.items():
+            df = extras.get(section_name)
+            if df is None or (isinstance(df, pd.DataFrame) and df.empty):
+                # Empty extras are fine — nothing to validate
+                continue
+
+            rows_checked = len(df)
+            self.summary.record_section(section_name, rows_checked)
+
+            for col in required_cols:
+                if col not in df.columns:
+                    continue
+                for row_idx in range(len(df)):
+                    val = df.iloc[row_idx][col]
+                    if pd.isna(val) or (isinstance(val, str) and not val.strip()):
+                        issues += ErrorHandler.format_error(
+                            SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE,
+                            section_name=section_name,
+                            column_name=col,
+                            row_index=row_idx,
+                        )
+
+        self.error_handler.add_context_and_filter(issues)
+        self.summary.record_issues(len(issues))
+        return issues
+
+    def check_annotation_attribute_values(self):
+        """Validate that annotation attribute values reference valid prefixes, external annotations, and sources.
+
+        For each entry that has an ``annotation`` attribute, checks that:
+
+        1. The value starts with ``prefix:id`` where ``prefix:`` is defined in
+           the Prefixes extras section and ``prefix:`` + ``id`` is a row in the
+           ExternalAnnotations extras section.
+        2. If the annotation references ``dc:source``, the remaining text after
+           ``dc:source `` must start with a name from the Sources extras section.
+        """
+        self.summary.start_check(
+            "annotation_attributes",
+            "Validate annotation attribute values reference defined prefixes, external annotations, and sources.",
+        )
+        self.summary.add_sub_check("prefix defined in Prefixes")
+        self.summary.add_sub_check("prefix:id in ExternalAnnotations")
+        self.summary.add_sub_check("dc:source references valid Sources entry")
+
+        issues = []
+
+        # Build lookup sets from extras
+        extras = getattr(self.hed_schema, "extras", {}) or {}
+        defined_prefixes = self._get_extras_column_values(extras, df_constants.PREFIXES_KEY, df_constants.prefix)
+        external_pairs = self._get_external_annotation_pairs(extras)
+        defined_sources = self._get_extras_column_values(extras, df_constants.SOURCES_KEY, df_constants.source)
+
+        # Scan all entries in all sections for the "annotation" attribute
+        entries_checked = 0
+        for section_key in HedSectionKey:
+            self.error_handler.push_error_context(ErrorContext.SCHEMA_SECTION, str(section_key))
+            for entry in self.hed_schema[section_key].values():
+                annotation_value = entry.attributes.get("annotation")
+                if not annotation_value:
+                    continue
+                entries_checked += 1
+                self.error_handler.push_error_context(ErrorContext.SCHEMA_TAG, entry.name)
+                # Annotation values can be comma-separated (multiple annotations)
+                for single_annotation in annotation_value.split(","):
+                    single_annotation = single_annotation.strip()
+                    if single_annotation:
+                        issues += self._validate_annotation_value(
+                            entry, single_annotation, defined_prefixes, external_pairs, defined_sources
+                        )
+                self.error_handler.pop_error_context()
+            self.error_handler.pop_error_context()
+
+        self.summary.record_section("annotation_entries", entries_checked)
+        self.summary.record_issues(len(issues))
+        return issues
+
+    # -----------------------------------------------------------------------
+    # Private helpers — extras / annotation validation
+    # -----------------------------------------------------------------------
+
+    @staticmethod
+    def _get_extras_column_values(extras, section_key, column_name):
+        """Return the set of values in a column of an extras DataFrame.
+
+        Parameters:
+            extras (dict): The schema extras dictionary.
+            section_key (str): Key into the extras dict (e.g. "Prefixes").
+            column_name (str): The column whose values to collect.
+
+        Returns:
+            set: The set of non-empty string values in that column.
+        """
+        df = extras.get(section_key)
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:
+            return set()
+        if column_name not in df.columns:
+            return set()
+        return {str(v).strip() for v in df[column_name] if pd.notna(v) and str(v).strip()}
+
+    @staticmethod
+    def _get_external_annotation_pairs(extras):
+        """Return a set of (prefix, id) tuples from the ExternalAnnotations DataFrame.
+
+        Parameters:
+            extras (dict): The schema extras dictionary.
+
+        Returns:
+            set: Set of (prefix_str, id_str) tuples.
+        """
+        df = extras.get(df_constants.EXTERNAL_ANNOTATION_KEY)
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:
+            return set()
+        pairs = set()
+        if df_constants.prefix in df.columns and df_constants.id in df.columns:
+            for _, row in df.iterrows():
+                p = str(row[df_constants.prefix]).strip() if pd.notna(row[df_constants.prefix]) else ""
+                i = str(row[df_constants.id]).strip() if pd.notna(row[df_constants.id]) else ""
+                if p and i:
+                    pairs.add((p, i))
+        return pairs
+
+    def _validate_annotation_value(self, entry, annotation_value, defined_prefixes, external_pairs, defined_sources):
+        """Validate a single annotation attribute value.
+
+        Parameters:
+            entry: The schema entry with the annotation attribute.
+            annotation_value (str): The annotation value string.
+            defined_prefixes (set): Valid prefixes from the Prefixes section.
+            external_pairs (set): Valid (prefix, id) pairs from ExternalAnnotations.
+            defined_sources (set): Valid source names from the Sources section.
+
+        Returns:
+            list: A list of issue dicts.
+        """
+        issues = []
+        tag_name = entry.name
+
+        # Parse prefix:id from the annotation value
+        # Expected format: "prefix:id rest_of_text" e.g. "dc:source Beniczky ea 2017 Table 2."
+        colon_pos = annotation_value.find(":")
+        if colon_pos < 1:
+            # No colon found — cannot parse prefix:id
+            issues += self.error_handler.format_error_with_context(
+                SchemaAttributeErrors.SCHEMA_ANNOTATION_PREFIX_MISSING,
+                tag_name,
+                annotation_value=annotation_value,
+                prefix="(none)",
+            )
+            return issues
+
+        ann_prefix = annotation_value[: colon_pos + 1]  # e.g. "dc:"
+        remainder = annotation_value[colon_pos + 1 :]  # e.g. "source Beniczky ea 2017 Table 2."
+
+        # Split remainder into id and rest — id is the first whitespace-delimited token
+        parts = remainder.split(None, 1)  # split on whitespace, max 1 split
+        ann_id = parts[0] if parts else remainder  # e.g. "source"
+        rest_text = parts[1] if len(parts) > 1 else ""  # e.g. "Beniczky ea 2017 Table 2."
+
+        # Check 1: prefix must be in Prefixes
+        if ann_prefix not in defined_prefixes:
+            issues += self.error_handler.format_error_with_context(
+                SchemaAttributeErrors.SCHEMA_ANNOTATION_PREFIX_MISSING,
+                tag_name,
+                annotation_value=annotation_value,
+                prefix=ann_prefix,
+            )
+
+        # Check 2: prefix:id must be in ExternalAnnotations
+        if (ann_prefix, ann_id) not in external_pairs:
+            issues += self.error_handler.format_error_with_context(
+                SchemaAttributeErrors.SCHEMA_ANNOTATION_EXTERNAL_MISSING,
+                tag_name,
+                annotation_value=annotation_value,
+                prefix=ann_prefix,
+                annotation_id=ann_id,
+            )
+
+        # Check 3: If dc:source, the rest_text must start with a defined source name
+        if ann_prefix == "dc:" and ann_id == "source" and rest_text:
+            rest_text_stripped = rest_text.strip()
+            if not any(rest_text_stripped.startswith(src) for src in defined_sources):
+                issues += self.error_handler.format_error_with_context(
+                    SchemaAttributeErrors.SCHEMA_ANNOTATION_SOURCE_MISSING,
+                    tag_name,
+                    annotation_value=annotation_value,
+                    source_text=rest_text_stripped,
+                )
+
+        for issue in issues:
+            issue["severity"] = ErrorSeverity.WARNING
+        return issues
+
     # -----------------------------------------------------------------------
     # Private helpers — attribute validation
     # -----------------------------------------------------------------------
@@ -388,8 +605,6 @@ class SchemaValidator:
         for validator in validators:
             self.error_handler.push_error_context(ErrorContext.SCHEMA_ATTRIBUTE, attribute_name)
             new_issues = validator(self.hed_schema, entry, attribute_name)
-            for issue in new_issues:
-                issue["severity"] = ErrorSeverity.WARNING
             self.error_handler.add_context_and_filter(new_issues)
             issues += new_issues
             self.error_handler.pop_error_context()

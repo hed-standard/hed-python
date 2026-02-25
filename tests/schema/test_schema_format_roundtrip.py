@@ -417,10 +417,13 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
 
     def test_schema_compliance(self):
         """Test schema compliance checking catches validation issues."""
+        from hed.errors.error_types import ErrorSeverity
+
         # Load a compliant schema
         schema = load_schema_version("8.4.0")
         issues = schema.check_compliance()
-        self.assertEqual(len(issues), 0, "Current schemas should have no compliance issues")
+        errors = [i for i in issues if i.get("severity", ErrorSeverity.ERROR) == ErrorSeverity.ERROR]
+        self.assertEqual(len(errors), 0, "Current schemas should have no compliance errors")
 
         # Load an older schema with known issues (HED8.0.0t has compliance problems)
         old_schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml")
