@@ -1,5 +1,5 @@
 import sys
-from hed.scripts.hed_script_util import validate_all_schemas, sort_base_schemas
+from hed.scripts.schema_script_util import validate_all_schemas, sort_base_schemas
 from hed.errors import get_printable_issue_string
 import argparse
 

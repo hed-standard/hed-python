@@ -13,27 +13,14 @@ keywords: HED tutorial, Python guide, validation examples, BIDS datasets,
 ```{index} user guide, tutorial, getting started, HED, Hierarchical Event Descriptors
 ```
 
-HED (Hierarchical Event Descriptors) is a framework for systematically describing events and experimental metadata in machine-actionable form. This guide provides comprehensive documentation for using the HED Python tools for validation, BIDS integration, and analysis:
+HED (Hierarchical Event Descriptors) is a framework for systematically describing events and experimental metadata in machine-actionable form. This guide provides comprehensive documentation for using the HED Python tools for validation, BIDS integration, and analysis.
 
-01. [What is HED?](#what-is-hed)
-02. [Getting started](#getting-started)
-03. [Working with HED schemas](#working-with-hed-schemas)
-04. [Validating HED strings](#validating-hed-strings)
-05. [Working with BIDS datasets](#working-with-bids-datasets)
-06. [Working with sidecars](#working-with-sidecars)
-07. [Jupyter notebooks](#jupyter-notebooks)
-08. [Command-line tools](#command-line-tools)
-09. [Best practices](#best-practices)
-10. [Troubleshooting](#troubleshooting)
-
-## Getting started
+## Installation
 
 ```{index} installation, pip, PyPI
 ```
 
-### Installation
-
-#### From PyPI (recommended)
+### From PyPI (recommended)
 
 Install the latest stable release:
 
@@ -43,7 +30,7 @@ pip install hedtools
 
 **Note**: The PyPI package includes the core hedtools library but **not the example Jupyter notebooks**. To access the notebooks, see the options below.
 
-#### For Jupyter notebook examples
+### For Jupyter notebook examples
 
 The example notebooks are only available in the GitHub repository. Choose one of these options:
 
@@ -66,7 +53,7 @@ pip install hedtools jupyter notebook
 
 See [examples/README.md](https://github.com/hed-standard/hed-python/tree/main/examples) for detailed notebook documentation.
 
-#### From GitHub (latest development version)
+### From GitHub (latest development version)
 
 ```bash
 pip install git+https://github.com/hed-standard/hed-python/@main
@@ -82,13 +69,15 @@ cd hed-python
 pip install -e .
 ```
 
-#### Python requirements
+### Python requirements
 
 - **Python 3.10 or later** is required
 - Core dependencies: pandas, numpy, defusedxml, openpyxl
 - Jupyter support: Install with `pip install jupyter notebook`
 
-### Basic example
+## Basic usage
+
+### A starter example
 
 Here's a simple example to get you started with HED validation:
 
@@ -110,12 +99,12 @@ else:
     print("✓ HED string is valid!")
 ```
 
-## Working with HED schemas
+### Loading schemas
 
 ```{index} schema; loading, schema; validation, load_schema, load_schema_version
 ```
 
-### Loading schemas
+A HED schema specifies an allowed HED vocabulary. The official HED schemas are hosted in the [hed-standard/hed-schemas](https://github.com/hed-standard/hed-schemas) GitHub repository. Most HEDTools operations require that you specify which versions of the HED schemas that you are using. You may also specify a file with your own schema for testing and development. The HEDTools assume that the HED schema that you are using has been validated.
 
 ```python
 from hed import load_schema, load_schema_version
@@ -153,12 +142,10 @@ schema = load_schema_version(["score_2.1.0", "lang_1.1.0"])
 
 Note: It is now standard for a library schema to be partnered with a standard schema. In general, you should not use an earlier, non-partnered versions of a library schema.
 
-## Validating HED strings
+### Validating HED strings
 
 ```{index} validation; HED strings, HedString class, validate method
 ```
-
-### Basic validation
 
 The HED string must be created with a schema, and validation is performed on the string object:
 
@@ -172,33 +159,10 @@ issues = hed_string.validate()
 
 ```
 
-### Batch validation
-
-```python
-from hed import HedString, load_schema_version, get_printable_issue_string
-
-
-schema = load_schema_version("8.4.0")
-
-hed_strings = [
-    "Sensory-event, Visual-presentation",
-    "Invalid-tag, Another-invalid",
-    "(Red, Square)"
-]
-issues = []
-for i, hed_str in enumerate(hed_strings, 1):
-    hed_string = HedString(hed_str, schema)
-    issues += hed_string.validate()
-if issues:
-    print(get_printable_issue_string(issues))
-```
-
-## Working with BIDS datasets
+### Validating a BIDS dataset
 
 ```{index} BIDS; dataset validation, BidsDataset class, dataset_description.json
 ```
-
-### Dataset-level validation
 
 ```python
 from hed.tools import BidsDataset
@@ -221,7 +185,7 @@ issues = dataset.validate(check_for_warnings=True)
 
 Since a BIDS dataset includes the HED version in its `dataset_description.json`, a HED version is not necessary for validation. The `BidsDataset` only holds information about the relevant `.tsv` and `.json` files, not the imaging data. The constructor has a number of parameters that restrict which of these files are considered. The relevant JSON files are all read in, but the `.tsv` content is only loaded when needed.
 
-### Working with individual event files
+### Validating a tabular file
 
 ```{index} TabularInput, event files, tsv files
 ```
@@ -246,12 +210,14 @@ issues = tabular.validate(schema)
 def_dict = tabular.get_def_dict(schema)
 ```
 
-## Working with sidecars
+### Using sidecars
 
 ```{index} Sidecar class, JSON sidecar, sidecar validation
 ```
 
-### Loading and validating sidecars
+Sidecars are JSON files that are a BIDS mechanism for containing metadata. NWB has an equivalent mechanism.
+
+#### Validating a sidecar
 
 ```python
 from hed import Sidecar, load_schema_version
@@ -266,7 +232,7 @@ sidecar = Sidecar("task-rest_events.json")
 issues = sidecar.validate(schema)
 ```
 
-### Extracting definitions
+#### Extracting definitions
 
 ```{index} definitions, DefinitionDict, get_def_dict
 ```
@@ -282,7 +248,7 @@ sidecar = Sidecar("task-rest_events.json")
 def_dict = sidecar.get_def_dict(schema)
 ```
 
-### Saving sidecars
+#### Saving sidecars
 
 ```python
 from hed import Sidecar
@@ -295,6 +261,75 @@ sidecar.save_as_json("output_sidecar.json")
 # Get as a formatted JSON string
 json_string = sidecar.get_as_json_string()
 ```
+
+### Schema validation
+
+```{index} schema validation, check_compliance, SchemaValidator, ComplianceSummary
+```
+
+HED schemas can be validated for compliance — checking that attribute domains, ranges, and semantic rules are all satisfied. There are three levels of access depending on how much control you need.
+
+#### Quick check via HedSchema
+
+The simplest approach calls `check_compliance()` directly on a loaded schema. It returns a list of issue dictionaries in the standard HED issue format, so you can use `get_printable_issue_string` just like any other HED validation result:
+
+```python
+from hed import load_schema_version
+from hed.errors import get_printable_issue_string
+
+schema = load_schema_version("8.4.0")
+issues = schema.check_compliance()
+if issues:
+    print(get_printable_issue_string(issues, title="Schema compliance issues"))
+else:
+    print("Schema is compliant")
+```
+
+Pass `check_for_warnings=False` to suppress formatting warnings and report only errors:
+
+```python
+issues = schema.check_compliance(check_for_warnings=False)
+```
+
+#### Getting a structured summary
+
+The returned list carries a `compliance_summary` attribute (`ComplianceSummary`) that provides a human-readable report of what was checked:
+
+```python
+issues = schema.check_compliance()
+print(issues.compliance_summary.get_summary())
+```
+
+The summary shows each of the five checks (prerelease version, prologue/epilogue, invalid characters, attributes, and duplicate names) with pass/fail status, entry counts, and sub-check details.
+
+#### Using SchemaValidator directly
+
+For fine-grained control you can instantiate `SchemaValidator` and run individual checks:
+
+```python
+from hed.errors.error_reporter import ErrorHandler
+from hed.schema.schema_validation.compliance import SchemaValidator
+
+schema = load_schema_version("8.4.0")
+error_handler = ErrorHandler(check_for_warnings=True)
+sv = SchemaValidator(schema, error_handler)
+
+# Run only the checks you need
+issues = sv.check_attributes()
+issues += sv.check_invalid_characters()
+```
+
+The five available checks are:
+
+| Method                          | What it validates                                        |
+| ------------------------------- | -------------------------------------------------------- |
+| `check_if_prerelease_version()` | Warns if the version is newer than all known releases    |
+| `check_prologue_epilogue()`     | Validates characters in prologue and epilogue text       |
+| `check_invalid_characters()`    | Validates entry names and descriptions for illegal chars |
+| `check_attributes()`            | Domain, range, and semantic validation of all attributes |
+| `check_duplicate_names()`       | Detects duplicate entry names within or across libraries |
+
+Each method returns a list of issue dictionaries and updates `sv.summary` (a `ComplianceSummary` instance) with what was checked.
 
 ## Jupyter notebooks
 
