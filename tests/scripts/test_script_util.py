@@ -2,7 +2,7 @@ import unittest
 import os
 import shutil
 from hed import load_schema_version
-from hed.scripts.hed_script_util import (
+from hed.scripts.schema_script_util import (
     add_extension,
     sort_base_schemas,
     validate_all_schema_formats,

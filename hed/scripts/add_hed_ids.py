@@ -1,4 +1,4 @@
-from hed.scripts.hed_script_util import get_prerelease_path
+from hed.scripts.schema_script_util import get_prerelease_path
 from hed.scripts.hed_convert_schema import convert_and_update
 import argparse
 from hed.schema.schema_io.df_util import convert_filenames_to_dict

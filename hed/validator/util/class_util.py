@@ -109,8 +109,6 @@ class UnitValueValidator:
         if indices:
             indices = [(char, index + start_index) for index, char in indices]
         return indices
-        # value_classes = original_tag.value_classes.values()
-        # allowed_characters = schema_validation_util.get_allowed_characters(original_tag.value_classes.values())
 
     def _check_value_class(self, original_tag, stripped_value, report_as):
         """Return any issues found if this is a value tag,
