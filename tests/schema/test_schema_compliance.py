@@ -42,12 +42,20 @@ class TestComplianceSummary(unittest.TestCase):
         _ = issues + []
         _ = list(issues)
 
-    def test_summary_has_all_checks(self):
-        """Summary should contain all 5 top-level checks."""
+    def test_has_all_checks(self):
+        """Summary should contain all 7 top-level checks."""
         issues = self.schema_84.check_compliance()
         summary = issues.compliance_summary
         check_names = [c["name"] for c in summary.check_results]
-        expected = ["prerelease_version", "prologue_epilogue", "invalid_characters", "attributes", "duplicate_names"]
+        expected = [
+            "prerelease_version",
+            "prologue_epilogue",
+            "invalid_characters",
+            "attributes",
+            "duplicate_names",
+            "extras_columns",
+            "annotation_attributes",
+        ]
         self.assertEqual(check_names, expected)
 
     def test_summary_descriptions_non_empty(self):
@@ -206,9 +214,20 @@ class TestDomainRangeValidation(unittest.TestCase):
         self.assertEqual(range_keys_in_validator, range_keys)
 
     def test_no_issues_on_840(self):
-        """8.4.0 should pass compliance with no issues."""
+        """8.4.0 should pass compliance with only annotation issues from base schema."""
         issues = self.schema.check_compliance()
-        self.assertEqual(len(issues), 0, f"Unexpected issues: {issues[:3]}")
+        # Base 8.4.0 has annotation entries (e.g. ncit:C25499) that are not in ExternalAnnotations
+        annotation_codes = {
+            "SCHEMA_ANNOTATION_PREFIX_MISSING",
+            "SCHEMA_ANNOTATION_EXTERNAL_MISSING",
+            "SCHEMA_ANNOTATION_SOURCE_MISSING",
+        }
+        annotation_issues = [i for i in issues if i["code"] in annotation_codes]
+        self.assertEqual(
+            len(issues),
+            len(annotation_issues),
+            f"Unexpected non-annotation issues: {[i for i in issues if i not in annotation_issues]}",
+        )
 
     def test_build_validators_uses_range(self):
         """_build_validators should pull range validators from attribute definitions."""
@@ -267,14 +286,22 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
         self.assertEqual(issues[0]["code"], "SCHEMA_PRERELEASE_VERSION_USED")
 
     def test_testlib_compliance(self):
-        """HED_testlib_4.0.0 should only have a prerelease warning."""
+        """HED_testlib_4.0.0 should have prerelease + inherited annotation issues."""
         schema_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/test_merge/HED_testlib_4.0.0.mediawiki"
         )
         hed_schema = schema.load_schema(schema_path)
         issues = hed_schema.check_compliance()
-        self.assertEqual(len(issues), 1)
-        self.assertEqual(issues[0]["code"], "SCHEMA_PRERELEASE_VERSION_USED")
+        prerelease_issues = [i for i in issues if i["code"] == "SCHEMA_PRERELEASE_VERSION_USED"]
+        self.assertEqual(len(prerelease_issues), 1)
+        # The inherited annotation issues from base 8.4.0 are also expected
+        annotation_codes = {
+            "SCHEMA_ANNOTATION_PREFIX_MISSING",
+            "SCHEMA_ANNOTATION_EXTERNAL_MISSING",
+            "SCHEMA_ANNOTATION_SOURCE_MISSING",
+        }
+        annotation_issues = [i for i in issues if i["code"] in annotation_codes]
+        self.assertEqual(len(issues), len(prerelease_issues) + len(annotation_issues))
 
     def test_testunpart_no_unknown_attributes(self):
         """After loading, no entries in testunpart should have stale _unknown_attributes."""
@@ -288,3 +315,300 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
                     entry._unknown_attributes,
                     f"{section.section_key.name}/{entry.name} has stale " f"_unknown_attributes: {entry._unknown_attributes}",
                 )
+
+
+class TestExtrasColumnsCompliance(unittest.TestCase):
+    """Tests for the check_extras_columns compliance check."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema_84 = schema.load_schema_version("8.4.0")
+        cls.testlib_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "../data/schema_tests/test_merge/HED_testlib_4.0.0.mediawiki",
+        )
+        cls.testlib_schema = schema.load_schema(cls.testlib_path)
+
+    def test_no_missing_values_840(self):
+        """8.4.0 extras should have no empty values."""
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+
+        sv = SchemaValidator(self.schema_84, ErrorHandler())
+        issues = sv.check_extras_columns()
+        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA_VALUE"]
+        self.assertEqual(len(val_issues), 0, f"Empty values: {val_issues}")
+
+    def test_no_missing_values_testlib(self):
+        """testlib 4.0.0 extras should have no empty values."""
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+
+        sv = SchemaValidator(self.testlib_schema, ErrorHandler())
+        issues = sv.check_extras_columns()
+        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA_VALUE"]
+        self.assertEqual(len(val_issues), 0, f"Empty values: {val_issues}")
+
+    def test_detects_empty_value(self):
+        """Should detect empty cells in extras DataFrames."""
+        import copy
+        import pandas as pd
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_io.df_constants import SOURCES_KEY
+
+        test_schema = copy.copy(self.schema_84)
+        test_schema.extras = dict(self.schema_84.extras)
+        test_schema.extras[SOURCES_KEY] = pd.DataFrame(
+            {
+                "source": ["TestSource", ""],
+                "link": ["https://example.com", "https://other.com"],
+                "description": ["A test source", "Missing source name"],
+            }
+        )
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_extras_columns()
+        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA_VALUE"]
+        self.assertGreater(len(val_issues), 0, "Should detect empty source name")
+
+    def test_detects_nan_value(self):
+        """Should detect NaN cells in extras DataFrames."""
+        import copy
+        import pandas as pd
+        import numpy as np
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_io.df_constants import PREFIXES_KEY
+
+        test_schema = copy.copy(self.schema_84)
+        test_schema.extras = dict(self.schema_84.extras)
+        test_schema.extras[PREFIXES_KEY] = pd.DataFrame(
+            {
+                "prefix": ["test:"],
+                "namespace": [np.nan],
+                "description": ["A test prefix"],
+            }
+        )
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_extras_columns()
+        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA_VALUE"]
+        self.assertEqual(len(val_issues), 1)
+        self.assertIn("namespace", val_issues[0]["message"])
+
+    def test_empty_extras_no_issues(self):
+        """An empty extras dict should produce no issues."""
+        import copy
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+
+        test_schema = copy.copy(self.schema_84)
+        test_schema.extras = {}
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_extras_columns()
+        self.assertEqual(len(issues), 0)
+
+    def test_summary_includes_extras_check(self):
+        """Compliance summary should include the extras_columns check."""
+        issues = self.schema_84.check_compliance()
+        check_names = [c["name"] for c in issues.compliance_summary.check_results]
+        self.assertIn("extras_columns", check_names)
+
+
+class TestAnnotationAttributeCompliance(unittest.TestCase):
+    """Tests for the check_annotation_attribute_values compliance check."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema_84 = schema.load_schema_version("8.4.0")
+        cls.testlib_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "../data/schema_tests/test_merge/HED_testlib_4.0.0.mediawiki",
+        )
+        cls.testlib_schema = schema.load_schema(cls.testlib_path)
+
+    def test_annotation_check_finds_issues_on_840(self):
+        """8.4.0 has annotation entries (ncit:C25499, rdfs:comment) not in ExternalAnnotations."""
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+
+        sv = SchemaValidator(self.schema_84, ErrorHandler())
+        issues = sv.check_annotation_attribute_values()
+        self.assertGreater(len(issues), 0, "Should find annotation issues on 8.4.0")
+        # Specifically, ncit:C25499 and rdfs:comment should be flagged as missing from ExternalAnnotations
+        external_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_EXTERNAL_MISSING"]
+        external_messages = " ".join(i.get("message", "") for i in external_issues)
+        self.assertIn("ncit:", external_messages)
+        self.assertIn("rdfs:", external_messages)
+
+    def test_annotation_prefix_check(self):
+        """Should detect when an annotation prefix is not in Prefixes."""
+        import copy
+        import pandas as pd
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_io.df_constants import PREFIXES_KEY
+
+        test_schema = copy.copy(self.schema_84)
+        test_schema.extras = dict(self.schema_84.extras)
+        # Remove all prefixes so nothing is defined
+        test_schema.extras[PREFIXES_KEY] = pd.DataFrame(columns=["prefix", "namespace", "description"])
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_annotation_attribute_values()
+        prefix_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_PREFIX_MISSING"]
+        self.assertGreater(len(prefix_issues), 0, "Should detect missing prefix when Prefixes is empty")
+
+    def test_annotation_external_check(self):
+        """Should detect when prefix:id is not in ExternalAnnotations."""
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+
+        sv = SchemaValidator(self.schema_84, ErrorHandler())
+        issues = sv.check_annotation_attribute_values()
+        external_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_EXTERNAL_MISSING"]
+        self.assertGreater(len(external_issues), 0, "8.4.0 Event has ncit:C25499 which is not in ExternalAnnotations")
+
+    def test_valid_annotations_no_issues(self):
+        """Annotations with valid prefix:id should produce no issues."""
+        import pandas as pd
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_io import df_constants
+
+        # Create a schema where all annotation values are properly defined
+        test_schema = schema.load_schema(self.testlib_path)
+        test_schema.extras = dict(test_schema.extras)
+
+        # Add ncit:C25499 and rdfs:comment to ExternalAnnotations
+        ext_df = test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY].copy()
+        new_rows = pd.DataFrame(
+            {
+                "prefix": ["ncit:", "rdfs:"],
+                "id": ["C25499", "comment"],
+                "iri": ["http://ncit/C25499", "http://rdfs/comment"],
+                "description": ["Event NCI concept", "RDF comment property"],
+            }
+        )
+        test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.concat([ext_df, new_rows], ignore_index=True)
+
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_annotation_attribute_values()
+        self.assertEqual(len(issues), 0, f"All annotations should be valid but got: {issues}")
+
+    def test_dc_source_check_valid(self):
+        """dc:source annotations with valid source names should pass."""
+        import pandas as pd
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_io import df_constants
+        from hed.schema.hed_schema_constants import HedSectionKey
+
+        test_schema = schema.load_schema(self.testlib_path)
+        test_schema.extras = dict(test_schema.extras)
+
+        # Add ncit:C25499 and rdfs:comment to ExternalAnnotations
+        ext_df = test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY].copy()
+        new_rows = pd.DataFrame(
+            {
+                "prefix": ["ncit:", "rdfs:"],
+                "id": ["C25499", "comment"],
+                "iri": ["http://ncit/C25499", "http://rdfs/comment"],
+                "description": ["Event NCI concept", "RDF comment property"],
+            }
+        )
+        test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.concat([ext_df, new_rows], ignore_index=True)
+
+        # Set annotation to dc:source Wikipedia is great
+        test_entry = test_schema[HedSectionKey.Tags]["Event"]
+        test_entry.attributes["annotation"] = "dc:source Wikipedia is great"
+
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_annotation_attribute_values()
+        source_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_SOURCE_MISSING"]
+        self.assertEqual(len(source_issues), 0, f"Wikipedia is a valid source, should not fail: {source_issues}")
+
+    def test_dc_source_check_invalid(self):
+        """dc:source annotations with invalid source names should fail."""
+        import pandas as pd
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_io import df_constants
+        from hed.schema.hed_schema_constants import HedSectionKey
+
+        test_schema = schema.load_schema(self.testlib_path)
+        test_schema.extras = dict(test_schema.extras)
+
+        # Add ncit:C25499 and rdfs:comment to ExternalAnnotations
+        ext_df = test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY].copy()
+        new_rows = pd.DataFrame(
+            {
+                "prefix": ["ncit:", "rdfs:"],
+                "id": ["C25499", "comment"],
+                "iri": ["http://ncit/C25499", "http://rdfs/comment"],
+                "description": ["Event NCI concept", "RDF comment property"],
+            }
+        )
+        test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.concat([ext_df, new_rows], ignore_index=True)
+
+        # Set annotation with invalid source
+        test_entry = test_schema[HedSectionKey.Tags]["Event"]
+        test_entry.attributes["annotation"] = "dc:source NonExistentSource some details"
+
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_annotation_attribute_values()
+        source_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_SOURCE_MISSING"]
+        self.assertEqual(len(source_issues), 1, f"Should detect invalid source name: {issues}")
+
+    def test_comma_separated_annotations(self):
+        """Comma-separated annotation values should each be checked independently."""
+        import pandas as pd
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_io import df_constants
+        from hed.schema.hed_schema_constants import HedSectionKey
+
+        test_schema = schema.load_schema(self.testlib_path)
+        test_schema.extras = dict(test_schema.extras)
+
+        # Add ncit:C25499 and rdfs:comment to ExternalAnnotations
+        ext_df = test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY].copy()
+        new_rows = pd.DataFrame(
+            {
+                "prefix": ["ncit:", "rdfs:"],
+                "id": ["C25499", "comment"],
+                "iri": ["http://ncit/C25499", "http://rdfs/comment"],
+                "description": ["Event NCI concept", "RDF comment property"],
+            }
+        )
+        test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.concat([ext_df, new_rows], ignore_index=True)
+
+        # Set two annotations — one valid, one invalid
+        test_entry = test_schema[HedSectionKey.Tags]["Event"]
+        test_entry.attributes["annotation"] = "dc:source Wikipedia is great,badprefix:unknown"
+
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_annotation_attribute_values()
+        # badprefix: is not in prefixes, badprefix:unknown not in external annotations
+        prefix_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_PREFIX_MISSING"]
+        self.assertGreater(len(prefix_issues), 0, "Should detect invalid prefix in second annotation")
+
+    def test_summary_includes_annotation_check(self):
+        """Compliance summary should include the annotation_attributes check."""
+        issues = self.schema_84.check_compliance()
+        check_names = [c["name"] for c in issues.compliance_summary.check_results]
+        self.assertIn("annotation_attributes", check_names)
+
+    def test_annotation_no_colon_detected(self):
+        """An annotation value without a colon should be flagged."""
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.hed_schema_constants import HedSectionKey
+
+        test_schema = schema.load_schema(self.testlib_path)
+        # Set annotation to a value with no colon
+        test_entry = test_schema[HedSectionKey.Tags]["Event"]
+        test_entry.attributes["annotation"] = "no_prefix_here"
+
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_annotation_attribute_values()
+        prefix_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_PREFIX_MISSING"]
+        self.assertGreater(len(prefix_issues), 0, "Should detect annotation with no prefix")

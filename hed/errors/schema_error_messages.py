@@ -186,3 +186,41 @@ def schema_error_SCHEMA_ALLOWED_CHARACTERS_INVALID(tag, invalid_character):
 @hed_error(SchemaAttributeErrors.SCHEMA_IN_LIBRARY_INVALID, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
 def schema_error_SCHEMA_IN_LIBRARY_INVALID(tag, bad_library):
     return f"Tag '{tag}' has an invalid inLibrary: '{bad_library}'.  "
+
+
+@hed_error(SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE, default_severity=ErrorSeverity.WARNING)
+def schema_error_SCHEMA_MISSING_EXTRA_VALUE(section_name, column_name, row_index):
+    return f"Extras section '{section_name}' has an empty value in column '{column_name}' " f"at row {row_index}."
+
+
+@hed_error(
+    SchemaAttributeErrors.SCHEMA_ANNOTATION_PREFIX_MISSING,
+    default_severity=ErrorSeverity.WARNING,
+)
+def schema_error_annotation_prefix_missing(tag, annotation_value, prefix):
+    return (
+        f"Tag '{tag}' has annotation '{annotation_value}' with prefix '{prefix}' "
+        f"that is not defined in the Prefixes section."
+    )
+
+
+@hed_error(
+    SchemaAttributeErrors.SCHEMA_ANNOTATION_EXTERNAL_MISSING,
+    default_severity=ErrorSeverity.WARNING,
+)
+def schema_error_annotation_external_missing(tag, annotation_value, prefix, annotation_id):
+    return (
+        f"Tag '{tag}' has annotation '{annotation_value}' with prefix:id '{prefix}{annotation_id}' "
+        f"that is not defined in the ExternalAnnotations section."
+    )
+
+
+@hed_error(
+    SchemaAttributeErrors.SCHEMA_ANNOTATION_SOURCE_MISSING,
+    default_severity=ErrorSeverity.WARNING,
+)
+def schema_error_annotation_source_missing(tag, annotation_value, source_text):
+    return (
+        f"Tag '{tag}' has annotation '{annotation_value}' referencing dc:source "
+        f"but '{source_text}' does not start with any name defined in the Sources section."
+    )

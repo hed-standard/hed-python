@@ -1,7 +1,8 @@
 import os.path
 from collections import defaultdict
 from hed.schema import from_string, load_schema, from_dataframes
-from hed.errors import get_printable_issue_string, HedFileError, SchemaWarnings
+from hed.errors import get_printable_issue_string, HedFileError
+from hed.errors.error_types import ErrorSeverity
 from hed.schema.schema_comparer import SchemaComparer
 
 all_extensions = [".tsv", ".mediawiki", ".xml", ".json"]
@@ -23,7 +24,7 @@ def validate_schema_object(base_schema, schema_name):
     validation_issues = []
     try:
         issues = base_schema.check_compliance()
-        issues = [issue for issue in issues if issue["code"] != SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED]
+        issues = [issue for issue in issues if issue.get("severity", ErrorSeverity.ERROR) == ErrorSeverity.ERROR]
         if issues:
             error_message = get_printable_issue_string(issues, title=schema_name)
             validation_issues.append(error_message)
