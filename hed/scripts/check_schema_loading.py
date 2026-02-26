@@ -382,13 +382,13 @@ def run_loading_check(
             and 'failures' (list of dicts with 'path' and 'error').
 
     Raises:
-        ValueError: If mutually exclusive flags are combined (e.g., prerelease_only and exclude_prereleases,
-            or library_filter and standard_only).
+        ValueError: If mutually exclusive flags are combined (e.g., --exclude-prereleases and
+            --prerelease-only, or --library and --standard-only).
     """
     if prerelease_only and exclude_prereleases:
-        raise ValueError("prerelease_only and exclude_prereleases are mutually exclusive")
+        raise ValueError("--exclude-prereleases and --prerelease-only are mutually exclusive")
     if library_filter and standard_only:
-        raise ValueError("library_filter and standard_only are mutually exclusive")
+        raise ValueError("--library and --standard-only are mutually exclusive")
 
     tester = SchemaLoadTester(hed_schemas_root, verbose=verbose)
 

@@ -174,7 +174,7 @@ def from_string(
     return hed_schema
 
 
-def from_dataframes(schema_data, schema_namespace=None, name=None) -> "HedSchema":
+def from_dataframes(schema_data, schema_namespace=None, name=None, check_prerelease=False) -> "HedSchema":
     """Create a schema from the given string.
 
     Parameters:
@@ -182,6 +182,7 @@ def from_dataframes(schema_data, schema_namespace=None, name=None) -> "HedSchema
                               Should have an entry for all values of DF_SUFFIXES.
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
         name (str or None): User supplied identifier for this schema
+        check_prerelease (bool): If True, allow the partnered standard schema (withStandard) to be a prerelease version.
 
     Returns:
         HedSchema:  The loaded schema.
@@ -199,7 +200,9 @@ def from_dataframes(schema_data, schema_namespace=None, name=None) -> "HedSchema
             HedExceptions.BAD_PARAMETERS, "Empty or non dict value passed to HedSchema.from_dataframes", filename=name
         )
 
-    hed_schema = SchemaLoaderDF.load_spreadsheet(schema_as_strings_or_df=schema_data, name=name)
+    hed_schema = SchemaLoaderDF.load_spreadsheet(
+        schema_as_strings_or_df=schema_data, name=name, check_prerelease=check_prerelease
+    )
 
     if schema_namespace:
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)

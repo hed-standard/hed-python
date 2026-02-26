@@ -1,12 +1,14 @@
 import unittest
+from unittest.mock import patch
 
 from hed.errors import HedFileError
 from hed.errors.error_types import SchemaErrors
 from hed.schema import load_schema, HedSchemaGroup, load_schema_version, HedSchema
-from hed.schema.hed_schema_io import parse_version_list, _load_schema_version
+from hed.schema.hed_schema_io import parse_version_list, _load_schema_version, from_string
 from tests.schema.schema_test_helpers import with_temp_file, get_temp_filename
 
 import os
+import tempfile
 from hed.errors import HedExceptions
 from hed.schema import HedKey
 from hed.schema import hed_cache
@@ -672,3 +674,199 @@ class TestPrereleaseParameter(unittest.TestCase):
         self.assertEqual(len(schemas._schemas), 2, "Should have two schemas")
         self.assertIn("base:", schemas._schemas, "Should have base namespace")
         self.assertIn("test:", schemas._schemas, "Should have test namespace")
+
+
+class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
+    """Test that check_prerelease propagates correctly through load_schema() and from_string()
+    all the way into withStandard partner resolution.
+
+    Background
+    ----------
+    A library schema with ``withStandard="X.Y.Z"`` and ``unmerged="True"`` is a *partnered*
+    schema: when it is loaded, the loader (base2schema.SchemaLoader._load) automatically calls
+    ``load_schema_version("X.Y.Z")`` to fetch the standard schema and merges the library's tags
+    on top of it.  If version X.Y.Z only exists in the *prerelease* subdirectory of the cache
+    (not in the regular cache root), that ``load_schema_version`` call will fail with
+    ``BAD_WITH_STANDARD`` unless ``check_prerelease=True`` is forwarded along the entire call
+    chain:
+
+        load_schema / from_string
+            → SchemaLoaderWiki / SchemaLoaderXML (check_prerelease stored on loader)
+                → SchemaLoader._load
+                    → load_schema_version(with_standard, check_prerelease=self.check_prerelease)
+                        → hed_cache.get_hed_version_path(..., check_prerelease=...)
+                            → looks in {cache}/prerelease/ when True
+
+    These tests exercise both the success path (flag=True → schema loads and is merged correctly)
+    and the default/False failure path (flag omitted or False → BAD_WITH_STANDARD is raised
+    before any merge happens).
+
+    Fixture design
+    --------------
+    Source files are kept as human-editable MediaWiki so they are easy to update:
+
+      tests/data/schema_tests/prerelease/HED9.9.9.mediawiki
+          A minimal standard schema at version 9.9.9.  Version 9.9.9 is deliberately
+          chosen to be impossible to appear in any real HED release, so this fixture
+          can never collide with a legitimate cached schema.  It exists *only* in the
+          prerelease subdirectory — there is no HED9.9.9.xml in the regular cache root
+          — which is exactly the condition under test.
+
+      tests/data/schema_tests/prerelease/HED_testpre_1.0.0.mediawiki
+          A minimal library schema with ``library="testpre"``, ``version="1.0.0"``,
+          ``withStandard="9.9.9"``, and ``unmerged="True"``.  Kept in the same
+          prerelease/ directory as HED9.9.9.mediawiki to make the association clear.
+          It declares one tag (Prerelease-partner-only-item) so the merged result
+          can be asserted.
+
+    Cache isolation
+    ---------------
+    The real user cache lives at ``~/.hedtools/hed_cache/`` and is controlled by
+    ``hed_cache.HED_CACHE_DIRECTORY``.  To prevent any interaction with it:
+
+    1.  ``setUpClass`` loads HED9.9.9.mediawiki, converts it to an XML string via
+        ``get_as_xml_string()`` (XML is the only format the cache scanner recognises),
+        and writes ``{tmpdir}/prerelease/HED9.9.9.xml`` into a fresh
+        ``tempfile.TemporaryDirectory``.  The ``tmpdir`` root has no HED9.9.9.xml,
+        only the ``prerelease/`` subdirectory does, which is precisely the layout that
+        requires ``check_prerelease=True`` to succeed.
+
+    2.  Each test patches ``hed_cache.HED_CACHE_DIRECTORY`` to ``_cache_dir`` (the
+        temp dir root) for the duration of that test only.  Outside the ``with``
+        block the real constant is restored automatically by ``patch.object``.
+
+    3.  ``_load_schema_version`` is an LRU-cached function.  The cache is cleared in
+        ``setUp`` and ``tearDown`` so no patched-path entries can leak into subsequent
+        tests (or be inherited from earlier ones).
+
+    4.  ``tearDownClass`` clears the LRU cache one final time and deletes the temp dir.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """Build the synthetic cache directory used by all tests in this class.
+
+        Loads HED9.9.9.mediawiki (the human-editable source), converts it to XML,
+        and writes it into {tmpdir}/prerelease/HED9.9.9.xml so that the cache
+        scanner can find it only when check_prerelease=True.
+        """
+        fixture_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests")
+
+        # Path to the library schema fixture loaded directly by filepath in each test.
+        # Kept in prerelease/ alongside HED9.9.9.mediawiki to make the association clear.
+        cls.lib_schema_path = os.path.join(fixture_dir, "prerelease", "HED_testpre_1.0.0.mediawiki")
+
+        # Convert the mediawiki standard schema to XML — the cache scanner only
+        # recognises .xml files, so this conversion is required even though the
+        # human-editable source is mediawiki.
+        standard_wiki_path = os.path.join(fixture_dir, "prerelease", "HED9.9.9.mediawiki")
+        standard_schema = load_schema(standard_wiki_path)
+        xml_string = standard_schema.get_as_xml_string()
+
+        # Create an isolated temporary directory that serves as a fake cache root.
+        # Structure written:
+        #   {tmpdir}/                   ← patched as HED_CACHE_DIRECTORY
+        #       prerelease/
+        #           HED9.9.9.xml        ← only found when check_prerelease=True
+        # Nothing is placed in {tmpdir}/ directly, so a lookup without
+        # check_prerelease finds no 9.9.9 and raises BAD_WITH_STANDARD.
+        cls._tmpdir = tempfile.TemporaryDirectory()
+        prerelease_dir = os.path.join(cls._tmpdir.name, "prerelease")
+        os.makedirs(prerelease_dir)
+        with open(os.path.join(prerelease_dir, "HED9.9.9.xml"), "w") as f:
+            f.write(xml_string)
+
+        cls._cache_dir = cls._tmpdir.name
+
+    @classmethod
+    def tearDownClass(cls):
+        """Remove the temp dir and ensure no patched cache entries remain."""
+        _load_schema_version.cache_clear()
+        cls._tmpdir.cleanup()
+
+    def setUp(self):
+        """Clear the LRU cache before each test so no result from a previous test
+        (which may have used a patched HED_CACHE_DIRECTORY) is reused."""
+        _load_schema_version.cache_clear()
+
+    def tearDown(self):
+        """Clear the LRU cache after each test so patched-path entries cannot
+        bleed into tests that run after this class."""
+        _load_schema_version.cache_clear()
+
+    # ------------------------------------------------------------------
+    # load_schema() tests
+    # ------------------------------------------------------------------
+
+    def test_load_schema_prerelease_partner_with_flag(self):
+        """load_schema(..., check_prerelease=True) successfully resolves a withStandard
+        partner that exists only in the prerelease subdirectory.
+
+        Verifies that check_prerelease=True is forwarded from load_schema all the way
+        through to hed_cache.get_hed_version_path, allowing the prerelease standard
+        schema (9.9.9) to be found, merged, and the resulting HedSchema to contain
+        both the standard tags and the library's own tag.
+        """
+        with patch.object(hed_cache, "HED_CACHE_DIRECTORY", self._cache_dir):
+            result = load_schema(self.lib_schema_path, check_prerelease=True)
+        self.assertIsInstance(result, HedSchema)
+        self.assertEqual(result.library, "testpre")
+        # The library-specific tag must be present in the merged schema.
+        self.assertIn("prerelease-partner-only-item", result.tags.all_names)
+
+    def test_load_schema_prerelease_partner_default_raises(self):
+        """load_schema(...) with the default check_prerelease=False raises BAD_WITH_STANDARD
+        when the withStandard partner exists only in the prerelease subdirectory.
+
+        This confirms the default is safe: users must explicitly opt in to prerelease
+        partner resolution; it does not happen silently.
+        """
+        with patch.object(hed_cache, "HED_CACHE_DIRECTORY", self._cache_dir):
+            with self.assertRaises(HedFileError) as ctx:
+                load_schema(self.lib_schema_path)
+        self.assertEqual(ctx.exception.code, HedExceptions.BAD_WITH_STANDARD)
+
+    def test_load_schema_prerelease_partner_explicit_false_raises(self):
+        """load_schema(..., check_prerelease=False) raises BAD_WITH_STANDARD when the
+        withStandard partner exists only in the prerelease subdirectory.
+
+        Mirrors the default test but with the flag set explicitly, confirming that
+        passing False has the same effect as omitting it.
+        """
+        with patch.object(hed_cache, "HED_CACHE_DIRECTORY", self._cache_dir):
+            with self.assertRaises(HedFileError) as ctx:
+                load_schema(self.lib_schema_path, check_prerelease=False)
+        self.assertEqual(ctx.exception.code, HedExceptions.BAD_WITH_STANDARD)
+
+    # ------------------------------------------------------------------
+    # from_string() tests
+    # ------------------------------------------------------------------
+
+    def test_from_string_prerelease_partner_with_flag(self):
+        """from_string(..., check_prerelease=True) successfully resolves a withStandard
+        partner that exists only in the prerelease subdirectory.
+
+        Reads the library schema as a string (simulating receipt from a URL or
+        in-memory source) and confirms that check_prerelease=True propagates through
+        from_string → SchemaLoaderWiki → SchemaLoader._load → load_schema_version.
+        """
+        with open(self.lib_schema_path) as f:
+            schema_str = f.read()
+        with patch.object(hed_cache, "HED_CACHE_DIRECTORY", self._cache_dir):
+            result = from_string(schema_str, schema_format=".mediawiki", check_prerelease=True)
+        self.assertIsInstance(result, HedSchema)
+        self.assertEqual(result.library, "testpre")
+
+    def test_from_string_prerelease_partner_default_raises(self):
+        """from_string(...) with default check_prerelease=False raises BAD_WITH_STANDARD
+        when the withStandard partner exists only in the prerelease subdirectory.
+
+        Confirms the same safe default behaviour as load_schema when the schema
+        content is supplied as a string rather than a filepath.
+        """
+        with open(self.lib_schema_path) as f:
+            schema_str = f.read()
+        with patch.object(hed_cache, "HED_CACHE_DIRECTORY", self._cache_dir):
+            with self.assertRaises(HedFileError) as ctx:
+                from_string(schema_str, schema_format=".mediawiki")
+        self.assertEqual(ctx.exception.code, HedExceptions.BAD_WITH_STANDARD)
