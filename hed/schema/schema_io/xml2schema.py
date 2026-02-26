@@ -21,8 +21,18 @@ class SchemaLoaderXML(SchemaLoader):
     SchemaLoaderXML(filename) will load just the header_attributes
     """
 
-    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
-        super().__init__(filename, schema_as_string, schema, file_format, name)
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name="", check_prerelease=False):
+        """Initialize the XML schema loader.
+
+        Parameters:
+            filename (str or None): A valid filepath or None
+            schema_as_string (str or None): A full schema as text or None
+            schema (HedSchema or None): A HED schema to merge this new file into
+            file_format (str or None): Not used for XML
+            name (str or None): Optional user supplied identifier, by default uses filename
+            check_prerelease (bool): If True, allow the partnered standard schema to be a prerelease version.
+        """
+        super().__init__(filename, schema_as_string, schema, file_format, name, check_prerelease)
         self._root_element = None
         self._parent_map = {}
         self._schema.source_format = ".xml"

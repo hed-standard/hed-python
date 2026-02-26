@@ -131,18 +131,19 @@ class SchemaLoadTester:
 
         return sorted(schema_files)
 
-    def try_load_schema(self, schema_path, relative_path):
+    def try_load_schema(self, schema_path, relative_path, check_prerelease=False):
         """Try to load a single schema file.
 
         Parameters:
             schema_path (Path): Path to schema file/directory.
             relative_path (Path): Relative path for display purposes.
+            check_prerelease (bool): If True, allow the partnered standard schema to be a prerelease version.
 
         Returns:
             tuple: (success: bool, error_message: str or None)
         """
         try:
-            schema = load_schema(str(schema_path))
+            schema = load_schema(str(schema_path), check_prerelease=check_prerelease)
 
             if schema is None:
                 return False, "Schema loaded as None"
@@ -156,7 +157,7 @@ class SchemaLoadTester:
             error_msg = f"{type(e).__name__}: {str(e)}"
             return False, error_msg
 
-    def _test_format_group(self, root_dir, format_name, prerelease=False, indent=""):
+    def _test_format_group(self, root_dir, format_name, prerelease=False, indent="", schema_files=None):
         """Test loading schemas for a single format in a directory.
 
         Parameters:
@@ -164,12 +165,14 @@ class SchemaLoadTester:
             format_name (str): Format to test (xml, mediawiki, json, tsv).
             prerelease (bool): If True, look in prerelease/ subdirectory.
             indent (str): Indentation prefix for output.
+            schema_files (list or None): Pre-fetched list of schema Paths. If None, fetched automatically.
 
         Returns:
             bool: True if any schemas were found and tested.
         """
-        format_dir = FORMAT_DIR_MAP.get(format_name.lower(), format_name)
-        schema_files = self.get_schema_files(root_dir, format_dir, prerelease=prerelease)
+        if schema_files is None:
+            format_dir = FORMAT_DIR_MAP.get(format_name.lower(), format_name)
+            schema_files = self.get_schema_files(root_dir, format_dir, prerelease=prerelease)
 
         if not schema_files:
             return False
@@ -181,7 +184,7 @@ class SchemaLoadTester:
             relative_path = schema_path.relative_to(self.hed_schemas_root)
             self.results["total"] += 1
 
-            success, error = self.try_load_schema(schema_path, relative_path)
+            success, error = self.try_load_schema(schema_path, relative_path, check_prerelease=prerelease)
 
             if success:
                 self.results["passed"] += 1
@@ -299,7 +302,7 @@ class SchemaLoadTester:
                     library_has_schemas = True
                     found_any = True
 
-                self._test_format_group(library_dir, format_name, prerelease=True, indent="  ")
+                self._test_format_group(library_dir, format_name, prerelease=True, indent="  ", schema_files=schema_files)
 
         if not found_any:
             print("[INFO] No prerelease schemas found")
@@ -377,7 +380,16 @@ def run_loading_check(
     Returns:
         dict: Results dictionary with keys 'total', 'passed', 'failed',
             and 'failures' (list of dicts with 'path' and 'error').
+
+    Raises:
+        ValueError: If mutually exclusive flags are combined (e.g., --exclude-prereleases and
+            --prerelease-only, or --library and --standard-only).
     """
+    if prerelease_only and exclude_prereleases:
+        raise ValueError("--exclude-prereleases and --prerelease-only are mutually exclusive")
+    if library_filter and standard_only:
+        raise ValueError("--library and --standard-only are mutually exclusive")
+
     tester = SchemaLoadTester(hed_schemas_root, verbose=verbose)
 
     print("\n" + "=" * 80)

@@ -1,0 +1,27 @@
+HED version="9.9.9"
+
+'''Prologue'''
+Minimal prerelease-only standard schema for unit testing withStandard partner
+resolution via load_schema/from_string.
+
+!# start schema
+
+'''Event''' <nowiki>[Something that happens at a given time and place.]</nowiki>
+
+'''Property''' <nowiki>[A characteristic of something.]</nowiki>
+
+!# end schema
+
+'''Unit classes'''
+
+'''Unit modifiers'''
+
+'''Value classes'''
+
+'''Schema attributes'''
+
+'''Properties'''
+
+'''Epilogue'''
+
+!# end hed

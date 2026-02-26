@@ -63,7 +63,7 @@ def load_schema_version(xml_version=None, xml_folder=None, check_prerelease=Fals
         return _load_schema_version(xml_version=xml_version, xml_folder=xml_folder, check_prerelease=check_prerelease)
 
 
-def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> "HedSchema":
+def load_schema(hed_path, schema_namespace=None, schema=None, name=None, check_prerelease=False) -> "HedSchema":
     """Load a schema from the given file or URL path.
 
     Parameters:
@@ -75,6 +75,7 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> "Hed
         schema (HedSchema or None): A HED schema to merge this new file into
                                    It must be a with-standard schema with the same value.
         name (str or None): User supplied identifier for this schema
+        check_prerelease (bool): If True, allow the partnered standard schema (withStandard) to be a prerelease version.
 
     Returns:
         HedSchema: The loaded schema.
@@ -94,13 +95,15 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> "Hed
             file_as_string = schema_util.url_to_string(hed_path)
         except URLError as e:
             raise HedFileError(HedExceptions.URL_ERROR, str(e), hed_path) from e
-        hed_schema = from_string(file_as_string, schema_format=os.path.splitext(hed_path.lower())[1], name=name)
+        hed_schema = from_string(
+            file_as_string, schema_format=os.path.splitext(hed_path.lower())[1], name=name, check_prerelease=check_prerelease
+        )
     elif hed_path.lower().endswith(".xml"):
-        hed_schema = SchemaLoaderXML.load(hed_path, schema=schema, name=name)
+        hed_schema = SchemaLoaderXML.load(hed_path, schema=schema, name=name, check_prerelease=check_prerelease)
     elif hed_path.lower().endswith(".mediawiki"):
-        hed_schema = SchemaLoaderWiki.load(hed_path, schema=schema, name=name)
+        hed_schema = SchemaLoaderWiki.load(hed_path, schema=schema, name=name, check_prerelease=check_prerelease)
     elif hed_path.lower().endswith(".json"):
-        hed_schema = SchemaLoaderJSON.load(hed_path, schema=schema, name=name)
+        hed_schema = SchemaLoaderJSON.load(hed_path, schema=schema, name=name, check_prerelease=check_prerelease)
     elif hed_path.lower().endswith(".tsv") or os.path.isdir(hed_path):
         if schema is not None:
             raise HedFileError(
@@ -108,7 +111,7 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> "Hed
                 "Cannot pass a schema to merge into spreadsheet loading currently.",
                 filename=name,
             )
-        hed_schema = SchemaLoaderDF.load_spreadsheet(filenames=hed_path, name=name)
+        hed_schema = SchemaLoaderDF.load_spreadsheet(filenames=hed_path, name=name, check_prerelease=check_prerelease)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_path)
 
@@ -118,7 +121,9 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> "Hed
     return hed_schema
 
 
-def from_string(schema_string, schema_format=".xml", schema_namespace=None, schema=None, name=None) -> "HedSchema":
+def from_string(
+    schema_string, schema_format=".xml", schema_namespace=None, schema=None, name=None, check_prerelease=False
+) -> "HedSchema":
     """Create a schema from the given string.
 
     Parameters:
@@ -129,6 +134,7 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         schema (HedSchema or None): A HED schema to merge this new file into
                                    It must be a with-standard schema with the same value.
         name (str or None): User supplied identifier for this schema
+        check_prerelease (bool): If True, allow the partnered standard schema (withStandard) to be a prerelease version.
 
     Returns:
         HedSchema: The loaded schema.
@@ -149,11 +155,17 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         schema_string = schema_string.replace("\r\n", "\n")
 
     if schema_format.endswith(".xml"):
-        hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string, schema=schema, name=name)
+        hed_schema = SchemaLoaderXML.load(
+            schema_as_string=schema_string, schema=schema, name=name, check_prerelease=check_prerelease
+        )
     elif schema_format.endswith(".mediawiki"):
-        hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string, schema=schema, name=name)
+        hed_schema = SchemaLoaderWiki.load(
+            schema_as_string=schema_string, schema=schema, name=name, check_prerelease=check_prerelease
+        )
     elif schema_format.endswith(".json"):
-        hed_schema = SchemaLoaderJSON.load(schema_as_string=schema_string, schema=schema, name=name)
+        hed_schema = SchemaLoaderJSON.load(
+            schema_as_string=schema_string, schema=schema, name=name, check_prerelease=check_prerelease
+        )
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, f"Unknown schema extension {schema_format}", filename=name)
 
@@ -162,7 +174,7 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
     return hed_schema
 
 
-def from_dataframes(schema_data, schema_namespace=None, name=None) -> "HedSchema":
+def from_dataframes(schema_data, schema_namespace=None, name=None, check_prerelease=False) -> "HedSchema":
     """Create a schema from the given string.
 
     Parameters:
@@ -170,6 +182,7 @@ def from_dataframes(schema_data, schema_namespace=None, name=None) -> "HedSchema
                               Should have an entry for all values of DF_SUFFIXES.
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
         name (str or None): User supplied identifier for this schema
+        check_prerelease (bool): If True, allow the partnered standard schema (withStandard) to be a prerelease version.
 
     Returns:
         HedSchema:  The loaded schema.
@@ -187,7 +200,9 @@ def from_dataframes(schema_data, schema_namespace=None, name=None) -> "HedSchema
             HedExceptions.BAD_PARAMETERS, "Empty or non dict value passed to HedSchema.from_dataframes", filename=name
         )
 
-    hed_schema = SchemaLoaderDF.load_spreadsheet(schema_as_strings_or_df=schema_data, name=name)
+    hed_schema = SchemaLoaderDF.load_spreadsheet(
+        schema_as_strings_or_df=schema_data, name=name, check_prerelease=check_prerelease
+    )
 
     if schema_namespace:
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)

@@ -1,0 +1,25 @@
+HED library="testpre" version="1.0.0" withStandard="9.9.9" unmerged="True"
+
+'''Prologue'''
+Library schema whose withStandard partner (9.9.9) exists only in the prerelease
+directory. Used to test check_prerelease propagation through load_schema/from_string.
+
+!# start schema
+
+'''Prerelease-partner-only-item''' <nowiki>[A test item in the testpre library schema.]</nowiki>
+
+!# end schema
+
+'''Unit classes'''
+
+'''Unit modifiers'''
+
+'''Value classes'''
+
+'''Schema attributes'''
+
+'''Properties'''
+
+'''Epilogue'''
+
+!# end hed
