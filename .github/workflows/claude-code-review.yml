@@ -10,9 +10,10 @@ on:
 
 jobs:
   claude-review:
-    # For fork PRs use pull_request_target only to avoid duplicate runs
+    # Avoid duplicate runs: use pull_request for same-repo, pull_request_target for forks
     if: |
-      !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork)
+      !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) &&
+      !(github.event_name == 'pull_request_target' && !github.event.pull_request.head.repo.fork)
     runs-on: ubuntu-latest
     permissions:
       contents: read
