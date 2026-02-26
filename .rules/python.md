@@ -27,8 +27,8 @@
 ## Import Order (ruff isort)
 
 1. Standard library
-1. Third-party packages
-1. Local `hed` package (`known-first-party = ["hed"]`)
+2. Third-party packages
+3. Local `hed` package (`known-first-party = ["hed"]`)
 
 ## Dependencies
 

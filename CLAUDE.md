@@ -2,10 +2,10 @@
 
 ## Project Context
 
-**Purpose:** Core Python library for HED (Hierarchical Event Descriptors) validation, summary, and analysis of event annotations in neuroscience datasets (BIDS compatible).
-**Package:** `hedtools` on PyPI
-**Tech Stack:** Python 3.10+, setuptools-scm, pandas, numpy, click (CLI)
-**Architecture:** Modular package with schema loading/caching, string/tag parsing, validation engine, BIDS integration, and analysis tools.
+- **Purpose:** Core Python library for HED (Hierarchical Event Descriptors) validation, summary, and analysis of event annotations in neuroscience datasets (BIDS compatible).
+- **Package:** `hedtools` on PyPI
+- **Tech Stack:** Python 3.10+, setuptools-scm, pandas, numpy, click (CLI)
+- **Architecture:** Modular package with schema loading/caching, string/tag parsing, validation engine, BIDS integration, and analysis tools.
 
 ## Environment Setup
 

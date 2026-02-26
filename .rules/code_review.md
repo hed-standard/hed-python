@@ -3,10 +3,10 @@
 ## Before Creating a PR
 
 1. All tests pass: `pytest tests/ --cov` and `pytest spec_tests/`
-1. Linting clean: `ruff check hed/ tests/`
-1. Formatting clean: `black --check hed/ tests/`
-1. Spelling clean: `codespell`
-1. New functionality has tests (real data, no mocks)
+2. Linting clean: `ruff check hed/ tests/`
+3. Formatting clean: `black --check hed/ tests/`
+4. Spelling clean: `codespell`
+5. New functionality has tests (real data, no mocks)
 
 ## PR Review with pr-review-toolkit
 
