@@ -104,7 +104,6 @@ class HedSchemaEntry:
         # todo: remove this patch and redo the code
         # This check doesn't need to be done if the schema is valid.
         if attribute not in self._section.valid_attributes:
-            # print(f"Unknown attribute {attribute}")
             if self._unknown_attributes is None:
                 self._unknown_attributes = {}
             self._unknown_attributes[attribute] = attribute_value
