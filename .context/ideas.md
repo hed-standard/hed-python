@@ -1,9 +1,11 @@
 # HED Python Design Ideas
 
 ## Purpose
+
 Capture design decisions, architectural ideas, and feature concepts before implementation.
 
 ## Architecture Decisions
+
 <!-- Document key decisions with rationale. Example:
 ### Decision: Unified CLI (hedpy)
 - Replaced 8 separate script entry points with single Click-based CLI
@@ -12,6 +14,7 @@ Capture design decisions, architectural ideas, and feature concepts before imple
 -->
 
 ## Feature Ideas
+
 <!-- Describe proposed features with user value and complexity. Example:
 ### Feature: Batch validation mode
 **User Value:** Process many files without repeated schema loading

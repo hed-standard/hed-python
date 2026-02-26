@@ -11,8 +11,11 @@
 -->
 
 ## Active Tasks
+
 <!-- Add current tasks and phases here -->
 
 ## Completed
+
 <!-- One-line summaries of finished plans, newest first -->
+
 <!-- Example: 2026-02-20 - Added CLI unified entry point (hedpy) - PR #1200 -->

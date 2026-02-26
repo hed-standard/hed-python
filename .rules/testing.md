@@ -1,6 +1,7 @@
 # Testing Standards
 
 ## Framework
+
 - **unittest** is the project standard for writing tests
 - **pytest** as the test runner (supports unittest natively)
 - Test files mirror `hed/` package structure under `tests/`
@@ -8,6 +9,7 @@
 - No conftest.py or pytest fixtures; uses unittest's `setUp`/`setUpClass`
 
 ## Test Organization (60 test files)
+
 ```
 tests/
   data/                        - Test data files (schemas, sidecars, TSVs)
@@ -28,6 +30,7 @@ tests/
 ```
 
 ## No Mocks Policy
+
 - All tests use real data: real schemas, real HED strings, real files
 - Spec tests use official HED test data via git submodules:
   - `spec_tests/hed-tests/` - Official specification test cases
@@ -36,6 +39,7 @@ tests/
 - Initialize: `git submodule update --init --recursive`
 
 ## Running Tests
+
 ```bash
 # All unit tests
 pytest tests/ --cov
@@ -57,6 +61,7 @@ pytest tests/test_notebooks.py
 ```
 
 ## Test Patterns
+
 - Use `setUpClass` to load schemas (expensive; shared across test methods)
 - Each test should be independent and isolated
 - Test both success and failure/error cases
@@ -64,6 +69,7 @@ pytest tests/test_notebooks.py
 - Spec tests use `continue-on-error` in CI but fail the workflow if any test fails
 
 ## Coverage
+
 - Branch coverage enabled (`.coveragerc`)
 - Omits: `__init__.py`, `_version.py`, venv, test directories
 - CI uploads coverage to Qlty via `ci_cov.yaml`
