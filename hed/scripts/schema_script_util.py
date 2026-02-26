@@ -30,25 +30,10 @@ def validate_schema_object(base_schema, schema_name):
             validation_issues.append(error_message)
             return validation_issues
 
-        mediawiki_string = base_schema.get_as_mediawiki_string(save_merged=True)
-        reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki")
-
-        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "mediawiki")
-
-        xml_string = base_schema.get_as_xml_string(save_merged=True)
-        reloaded_schema = from_string(xml_string, schema_format=".xml")
-
-        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "xml")
-
-        json_string = base_schema.get_as_json_string(save_merged=True)
-        reloaded_schema = from_string(json_string, schema_format=".json")
-
-        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "json")
-
-        tsv_dataframes = base_schema.get_as_dataframes(save_merged=True)
-        reloaded_schema = from_dataframes(tsv_dataframes)
-
-        validation_issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "tsv")
+        for save_merged in (True, False):
+            label = "merged" if save_merged else "unmerged"
+            tagged_name = f"{schema_name} ({label})"
+            validation_issues += _roundtrip_all_formats(base_schema, tagged_name, save_merged=save_merged)
     except HedFileError as e:
         print(f"Saving/loading error: {schema_name} {e.message}")
         error_text = e.message
@@ -304,6 +289,42 @@ def get_prerelease_path(repo_path, schema_name, schema_version):
     schema_filename = get_schema_filename(schema_name, schema_version)
 
     return os.path.join(base_path, "hedtsv", schema_filename)
+
+
+def _roundtrip_all_formats(base_schema, schema_name, save_merged=True):
+    """Roundtrip a schema through all four formats and compare to the original.
+
+    Serializes the schema to mediawiki, XML, JSON, and TSV, reloads each, and
+    verifies the reloaded schema matches the original.
+
+    Parameters:
+        base_schema (HedSchema): The schema object to roundtrip.
+        schema_name (str): Label for error reporting (should include merge context).
+        save_merged (bool): If True, save the merged (with-standard) form.
+            If False, save only the library-specific content.
+
+    Returns:
+        list: A list of validation issue strings. Empty if no issues found.
+    """
+    issues = []
+
+    mediawiki_string = base_schema.get_as_mediawiki_string(save_merged=save_merged)
+    reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki")
+    issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "mediawiki")
+
+    xml_string = base_schema.get_as_xml_string(save_merged=save_merged)
+    reloaded_schema = from_string(xml_string, schema_format=".xml")
+    issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "xml")
+
+    json_string = base_schema.get_as_json_string(save_merged=save_merged)
+    reloaded_schema = from_string(json_string, schema_format=".json")
+    issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "json")
+
+    tsv_dataframes = base_schema.get_as_dataframes(save_merged=save_merged)
+    reloaded_schema = from_dataframes(tsv_dataframes)
+    issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "tsv")
+
+    return issues
 
 
 def _get_schema_comparison(schema, schema_reload, file_path, file_format):
