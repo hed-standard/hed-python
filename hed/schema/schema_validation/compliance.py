@@ -364,15 +364,14 @@ class SchemaValidator:
             for col in required_cols:
                 if col not in df.columns:
                     continue
-                for row_idx in range(len(df)):
-                    val = df.iloc[row_idx][col]
-                    if pd.isna(val) or (isinstance(val, str) and not val.strip()):
-                        issues += ErrorHandler.format_error(
-                            SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE,
-                            section_name=section_name,
-                            column_name=col,
-                            row_index=row_idx,
-                        )
+                mask = df[col].isna() | df[col].astype(str).str.strip().eq("")
+                for row_idx in mask[mask].index:
+                    issues += ErrorHandler.format_error(
+                        SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE,
+                        section_name=section_name,
+                        column_name=col,
+                        row_index=row_idx,
+                    )
 
         self.error_handler.add_context_and_filter(issues)
         self.summary.record_issues(len(issues))
@@ -531,9 +530,9 @@ class SchemaValidator:
             )
 
         # Check 3: If dc:source, the rest_text must start with a defined source name
-        if ann_prefix == "dc:" and ann_id == "source" and rest_text:
-            rest_text_stripped = rest_text.strip()
-            if not any(rest_text_stripped.startswith(src) for src in defined_sources):
+        if ann_prefix == "dc:" and ann_id == "source":
+            rest_text_stripped = rest_text.strip() if rest_text else ""
+            if not rest_text_stripped or not any(rest_text_stripped.startswith(src) for src in defined_sources):
                 issues += self.error_handler.format_error_with_context(
                     SchemaAttributeErrors.SCHEMA_ANNOTATION_SOURCE_MISSING,
                     tag_name,

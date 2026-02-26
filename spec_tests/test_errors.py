@@ -12,7 +12,6 @@ import io
 import json
 from hed import HedFileError
 from hed.errors import ErrorHandler, get_printable_issue_string, SchemaWarnings
-from hed.errors.error_types import ErrorSeverity
 
 skip_tests = {
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
@@ -445,14 +444,12 @@ class MyTestCase(unittest.TestCase):
                     issues = loaded_schema.check_compliance()
                     # Filter annotation compliance warnings — these are noise from schemas
                     # lacking complete ExternalAnnotations/Prefixes/Sources sections
-                    issues = [
-                        i
-                        for i in issues
-                        if not (
-                            i.get("code") == "SCHEMA_ATTRIBUTE_VALUE_INVALID"
-                            and i.get("severity", ErrorSeverity.ERROR) == ErrorSeverity.WARNING
-                        )
-                    ]
+                    _ANNOTATION_CODES = {
+                        "SCHEMA_ANNOTATION_PREFIX_MISSING",
+                        "SCHEMA_ANNOTATION_EXTERNAL_MISSING",
+                        "SCHEMA_ANNOTATION_SOURCE_MISSING",
+                    }
+                    issues = [i for i in issues if i.get("code") not in _ANNOTATION_CODES]
                 except HedFileError as e:
                     issues = e.issues
                     if not issues:

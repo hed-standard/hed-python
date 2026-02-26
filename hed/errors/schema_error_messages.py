@@ -189,13 +189,12 @@ def schema_error_SCHEMA_IN_LIBRARY_INVALID(tag, bad_library):
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE, default_severity=ErrorSeverity.WARNING)
-def schema_error_missing_extra_value(section_name, column_name, row_index):
+def schema_error_SCHEMA_MISSING_EXTRA_VALUE(section_name, column_name, row_index):
     return f"Extras section '{section_name}' has an empty value in column '{column_name}' " f"at row {row_index}."
 
 
 @hed_error(
     SchemaAttributeErrors.SCHEMA_ANNOTATION_PREFIX_MISSING,
-    actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
     default_severity=ErrorSeverity.WARNING,
 )
 def schema_error_annotation_prefix_missing(tag, annotation_value, prefix):
@@ -207,7 +206,6 @@ def schema_error_annotation_prefix_missing(tag, annotation_value, prefix):
 
 @hed_error(
     SchemaAttributeErrors.SCHEMA_ANNOTATION_EXTERNAL_MISSING,
-    actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
     default_severity=ErrorSeverity.WARNING,
 )
 def schema_error_annotation_external_missing(tag, annotation_value, prefix, annotation_id):
@@ -219,7 +217,6 @@ def schema_error_annotation_external_missing(tag, annotation_value, prefix, anno
 
 @hed_error(
     SchemaAttributeErrors.SCHEMA_ANNOTATION_SOURCE_MISSING,
-    actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
     default_severity=ErrorSeverity.WARNING,
 )
 def schema_error_annotation_source_missing(tag, annotation_value, source_text):
