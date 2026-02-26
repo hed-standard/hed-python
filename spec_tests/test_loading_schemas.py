@@ -38,5 +38,19 @@ class TestSchemaLoading(unittest.TestCase):
         # Prereleases may or may not exist — no assertGreater here
 
 
+class TestRunLoadingCheckFlags(unittest.TestCase):
+    """Test that run_loading_check rejects mutually exclusive flag combinations."""
+
+    def test_prerelease_only_and_exclude_prereleases_raises(self):
+        """prerelease_only and exclude_prereleases together should raise ValueError."""
+        with self.assertRaises(ValueError):
+            run_loading_check(HED_SCHEMAS_DIR, prerelease_only=True, exclude_prereleases=True)
+
+    def test_library_filter_and_standard_only_raises(self):
+        """library_filter and standard_only together should raise ValueError."""
+        with self.assertRaises(ValueError):
+            run_loading_check(HED_SCHEMAS_DIR, library_filter="score", standard_only=True)
+
+
 if __name__ == "__main__":
     unittest.main()

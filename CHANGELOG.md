@@ -1,3 +1,18 @@
+# Unreleased
+
+## Enhancements
+
+### Prerelease library schemas can now partner with prerelease standard schemas
+
+Loading a library schema with `withStandard` pointing to a prerelease version of the standard schema (e.g. `withStandard="8.5.0"`) would fail with a `BAD_WITH_STANDARD` error because the `withStandard` partner lookup was always restricted to released schemas, with no way to opt in to prerelease partner resolution.
+
+**Changes:**
+
+- `load_schema()` and `from_string()` in `hed_schema_io.py` now accept a `check_prerelease=False` parameter. When `True`, the `withStandard` partner schema is also searched in the prerelease cache.
+- `SchemaLoader` (base class) and all subclasses (`SchemaLoaderXML`, `SchemaLoaderWiki`, `SchemaLoaderJSON`, `SchemaLoaderDF`) accept and forward `check_prerelease`.
+- `check_schema_loading.py` (`hed_check_schema_loading` script and `run_loading_check()`) now automatically passes `check_prerelease=True` when loading schemas from a prerelease directory, so `test_all_prerelease_schemas` in `spec_tests` works correctly for library prereleases partnered with a prerelease standard.
+- `run_loading_check()` now raises `ValueError` immediately for mutually exclusive flag combinations (`prerelease_only` + `exclude_prereleases`, or `library_filter` + `standard_only`), consistent with the existing CLI-level validation.
+
 # Release 0.9.0 January 22, 2026
 
 The main purpose of this release is to clean up the CLI for the hedtools and to improve the documentation in preparation for release of 1.0.0, which will be a breaking release.

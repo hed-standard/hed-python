@@ -20,7 +20,7 @@ class SchemaLoader(ABC):
     SchemaLoaderXML(filename) will load just the header_attributes
     """
 
-    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name="", check_prerelease=False):
         """Loads the given schema from one of the two parameters.
 
         Parameters:
@@ -30,6 +30,7 @@ class SchemaLoader(ABC):
                                        It must be a with-standard schema with the same value.
             file_format(str or None): The format of this file if needed(only for owl currently)
             name(str or None): Optional user supplied identifier, by default uses filename
+            check_prerelease(bool): If True, allow the partnered standard schema to be a prerelease version.
         """
         if schema_as_string and filename:
             raise HedFileError(HedExceptions.BAD_PARAMETERS, "Invalid parameters to schema creation.", filename)
@@ -38,6 +39,7 @@ class SchemaLoader(ABC):
         self.name = name if name else filename
         self.schema_as_string = schema_as_string
         self.appending_to_schema = False
+        self.check_prerelease = check_prerelease
         try:
             self.input_data = self._open_file()
         except OSError as e:
@@ -87,7 +89,7 @@ class SchemaLoader(ABC):
         return self._schema
 
     @classmethod
-    def load(cls, filename=None, schema_as_string=None, schema=None, file_format=None, name=""):
+    def load(cls, filename=None, schema_as_string=None, schema=None, file_format=None, name="", check_prerelease=False):
         """Loads and returns the schema, including partnered schema if applicable.
 
         Parameters:
@@ -98,11 +100,12 @@ class SchemaLoader(ABC):
             file_format(str or None): If this is an owl file being loaded, this is the format.
                 Allowed values include: turtle, json-ld, and owl(xml)
             name(str or None): Optional user supplied identifier, by default uses filename
+            check_prerelease(bool): If True, allow the partnered standard schema to be a prerelease version.
 
         Returns:
             HedSchema: The new schema
         """
-        loader = cls(filename, schema_as_string, schema, file_format, name)
+        loader = cls(filename, schema_as_string, schema, file_format, name, check_prerelease)
         return loader._load()
 
     def _load(self):
@@ -119,7 +122,7 @@ class SchemaLoader(ABC):
             saved_attr = self._schema.header_attributes
             saved_format = self._schema.source_format
             try:
-                base_version = load_schema_version(self._schema.with_standard)
+                base_version = load_schema_version(self._schema.with_standard, check_prerelease=self.check_prerelease)
             except HedFileError as e:
                 raise HedFileError(
                     HedExceptions.BAD_WITH_STANDARD,
