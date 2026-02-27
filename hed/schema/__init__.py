@@ -30,6 +30,7 @@ Key exports
 - :data:`HedKey` / :data:`HedSectionKey` — enumerations of schema attribute and
   section names used when querying schema entries.
 - :func:`get_hed_versions` — list versions available in the local cache.
+- :func:`get_hed_xml_version` — read the HED version string from an XML schema file on disk.
 - :func:`cache_xml_versions` — pre-populate the local cache from the HED GitHub
   releases.
 

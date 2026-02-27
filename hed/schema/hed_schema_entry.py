@@ -406,6 +406,7 @@ class HedTagEntry(HedSchemaEntry):
         self.inherited_attributes = self.attributes.copy()
         for attribute in self._section.inheritable_attributes:
             value = self._check_inherited_attribute(attribute, return_value=True)
+            # None means "not found in the hierarchy"; attribute values themselves are never None.
             if value is not None:
                 self.inherited_attributes[attribute] = value
 

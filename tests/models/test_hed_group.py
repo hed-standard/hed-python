@@ -125,12 +125,18 @@ class Test(unittest.TestCase):
             copy.copy(group)
 
     def test_deep_copy_succeeds(self):
-        """copy.deepcopy() (and .copy()) must work correctly despite _parent cycles."""
+        """copy.deepcopy() and .copy() must work correctly despite _parent back-references."""
         hed_string = HedString("(Tag1, Tag2)", self.hed_schema)
         group = hed_string.get_first_group()
+
         deep = copy.deepcopy(group)
         self.assertIsNot(deep, group)
         self.assertEqual(str(deep), str(group))
+
+        # .copy() is the documented public API for deep-copying a HedGroup
+        via_copy = group.copy()
+        self.assertIsNot(via_copy, group)
+        self.assertEqual(str(via_copy), str(group))
 
 
 if __name__ == "__main__":

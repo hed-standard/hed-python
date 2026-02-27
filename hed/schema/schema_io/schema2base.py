@@ -124,7 +124,12 @@ class Schema2Base:
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _output_extras(self, hed_schema):
-        raise NotImplementedError("This needs to be defined in the subclass")
+        """Optional hook for format-specific sections not covered by the standard traversal.
+
+        The base implementation is a deliberate no-op.  Subclasses that need to
+        emit additional content (e.g. the header-attributes sheet in TSV) override
+        this method; subclasses that have nothing extra can safely omit it.
+        """
 
     def _output_epilogue(self, epilogue):
         raise NotImplementedError("This needs to be defined in the subclass")
