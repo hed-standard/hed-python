@@ -113,6 +113,25 @@ class Test(unittest.TestCase):
         self.assertEqual(str(original_hed_string), str(hed_string))
         self.assertIsNot(sorted_hed_string, hed_string)
 
+    def test_shallow_copy_raises_copy_error(self):
+        """copy.copy() on a HedGroup must raise copy.Error, not ValueError or any other type.
+
+        Shallow copy is blocked because _parent pointers would alias the original, producing
+        an internally inconsistent object.  The correct deep-copy path is .copy().
+        """
+        hed_string = HedString("(Tag1, Tag2)", self.hed_schema)
+        group = hed_string.get_first_group()
+        with self.assertRaises(copy.Error):
+            copy.copy(group)
+
+    def test_deep_copy_succeeds(self):
+        """copy.deepcopy() (and .copy()) must work correctly despite _parent cycles."""
+        hed_string = HedString("(Tag1, Tag2)", self.hed_schema)
+        group = hed_string.get_first_group()
+        deep = copy.deepcopy(group)
+        self.assertIsNot(deep, group)
+        self.assertEqual(str(deep), str(group))
+
 
 if __name__ == "__main__":
     unittest.main()

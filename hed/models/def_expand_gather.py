@@ -32,7 +32,10 @@ class AmbiguousDef:
         def_extension = def_tag.extension.split("/")
         existing_contents = self.actual_contents.get(def_extension[1], None)
         if existing_contents and existing_contents != orig_group:
-            raise ValueError("Invalid Definition")
+            raise ValueError(
+                f"Definition '{def_extension[0]}' has conflicting contents for value '{def_extension[1]}': "
+                f"existing={existing_contents} vs new={orig_group}"
+            )
         elif existing_contents:
             return
         self.actual_contents[def_extension[1]] = orig_group.copy()
@@ -42,14 +45,20 @@ class AmbiguousDef:
             tag for tag in orig_group.get_all_tags() if tag.extension == def_extension[1] and tag.is_takes_value_tag()
         ]
         if len(matching_tags) == 0:
-            raise ValueError("Invalid Definition")
+            raise ValueError(
+                f"Definition '{def_extension[0]}': no takes-value tag with extension '{def_extension[1]}' "
+                f"found in group {orig_group}"
+            )
         matching_names = {tag.short_base_tag for tag in matching_tags}
         if self.matching_names is not None:
             self.matching_names = self.matching_names & matching_names
         else:
             self.matching_names = matching_names
         if len(self.matching_names) == 0:
-            raise ValueError("Invalid Definition")
+            raise ValueError(
+                f"Definition '{def_extension[0]}': no tag name is consistently the takes-value tag across "
+                f"all observed values — candidate names were {matching_names}"
+            )
 
     def resolve_definition(self):
         """Try to resolve the definition based on the information available.
@@ -84,7 +93,10 @@ class AmbiguousDef:
             self.resolved_definition = candidate_contents
             return True
         if len(candidate_tags) == 0 or (1 < len(candidate_tags) < len(tuple_list)):
-            raise ValueError("Invalid Definition")
+            raise ValueError(
+                f"Definition '{self.def_tag_name}': could not resolve a unique takes-value tag — "
+                f"found {len(candidate_tags)} candidate(s) across {len(tuple_list)} value(s)"
+            )
         return False
 
     def get_definition_string(self):

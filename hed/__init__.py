@@ -1,7 +1,7 @@
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 from hed.errors.error_reporter import get_printable_issue_string
-from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.errors.exceptions import HedFileError, HedExceptions, HedQueryError
 
 from hed.models.base_input import BaseInput
 from hed.models.spreadsheet_input import SpreadsheetInput

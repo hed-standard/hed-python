@@ -12,6 +12,7 @@ from hed.models.query_expressions import (
     ExpressionExactMatch,
 )
 from hed.models.query_util import Token
+from hed.errors.exceptions import HedQueryError
 
 
 class QueryHandler:
@@ -76,7 +77,7 @@ class QueryHandler:
         """Returns the current token and advances the counter"""
         self.at_token += 1
         if self.at_token >= len(self.tokens):
-            raise ValueError("Parse error in get next token")
+            raise HedQueryError("Parse error in get next token")
         return self.tokens[self.at_token]
 
     def _next_token_is(self, kinds):
@@ -94,7 +95,7 @@ class QueryHandler:
         expr = self._handle_or_op()
 
         if self.at_token + 1 != len(self.tokens):
-            raise ValueError("Parse error in search string")
+            raise HedQueryError("Parse error in search string")
 
         return expr
 
@@ -137,7 +138,7 @@ class QueryHandler:
         if next_token == Token.LogicalNegation:
             interior = self._handle_grouping_op()
             if "?" in str(interior):
-                raise ValueError(
+                raise HedQueryError(
                     "Cannot negate wildcards, or expressions that contain wildcards."
                     "Use {required_expression : optional_expression}."
                 )
@@ -152,13 +153,13 @@ class QueryHandler:
             expr = self._handle_or_op()
             next_token = self._next_token_is([Token.LogicalGroupEnd])
             if next_token != Token.LogicalGroupEnd:
-                raise ValueError("Parse error: Missing closing paren")
+                raise HedQueryError("Parse error: Missing closing paren")
         elif next_token == Token.DescendantGroup:
             interior = self._handle_or_op()
             expr = ExpressionDescendantGroup(next_token, right=interior)
             next_token = self._next_token_is([Token.DescendantGroupEnd])
             if next_token != Token.DescendantGroupEnd:
-                raise ValueError("Parse error: Missing closing square bracket")
+                raise HedQueryError("Parse error: Missing closing square bracket")
         elif next_token == Token.ExactMatch:
             interior = self._handle_or_op()
             expr = ExpressionExactMatch(next_token, right=interior)
@@ -172,14 +173,14 @@ class QueryHandler:
                     expr.left = optional_portion
                     next_token = self._next_token_is([Token.ExactMatchEnd])
                 if "~" in str(expr):
-                    raise ValueError(
+                    raise HedQueryError(
                         "Cannot use negation in exact matching groups,"
                         " as it's not clear what is being matched.\n"
                         "{thing and ~(expression)} is allowed."
                     )
 
             if next_token is None:
-                raise ValueError("Parse error: Missing closing curly bracket")
+                raise HedQueryError("Parse error: Missing closing curly bracket")
         else:
             next_token = self._get_next_token()
             if next_token and next_token.kind == Token.Wildcard:

@@ -405,8 +405,9 @@ class HedTagEntry(HedSchemaEntry):
         # Replace the list with a copy we can modify.
         self.inherited_attributes = self.attributes.copy()
         for attribute in self._section.inheritable_attributes:
-            if self._check_inherited_attribute(attribute):
-                self.inherited_attributes[attribute] = self._check_inherited_attribute(attribute, True)
+            value = self._check_inherited_attribute(attribute, return_value=True)
+            if value is not None:
+                self.inherited_attributes[attribute] = value
 
     def finalize_entry(self, schema):
         """Called once after schema loading to set state.
