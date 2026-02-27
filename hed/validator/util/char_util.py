@@ -221,15 +221,3 @@ class CharRexValidator(CharValidator):
         json_path = os.path.realpath(os.path.join(current_dir, CLASS_REX_FILENAME))
         with open(json_path, "r", encoding="utf-8") as f:
             return json.load(f)
-
-
-if __name__ == "__main__":
-    # Example input string
-    input_string = "Hello World123"
-
-    # Class name (e.g., "nameClass" or "testClass")
-    class_name = "nameClass"
-
-    # Call the function and print the result
-    # problem_indices = get_problem_chars(input_string, class_name, json_data)
-    # print(problem_indices)

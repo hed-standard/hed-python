@@ -66,3 +66,12 @@ class HedFileError(Exception):
         self.issues = issues
         if self.issues is None:
             self.issues = []
+
+
+class HedQueryError(ValueError):
+    """Exception raised when a HED query string cannot be parsed.
+
+    Inherits from :class:`ValueError` so that existing ``except ValueError`` handlers
+    continue to work, while allowing callers that need finer-grained control to
+    catch only query parse errors with ``except HedQueryError``.
+    """

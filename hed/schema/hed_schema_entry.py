@@ -104,7 +104,6 @@ class HedSchemaEntry:
         # todo: remove this patch and redo the code
         # This check doesn't need to be done if the schema is valid.
         if attribute not in self._section.valid_attributes:
-            # print(f"Unknown attribute {attribute}")
             if self._unknown_attributes is None:
                 self._unknown_attributes = {}
             self._unknown_attributes[attribute] = attribute_value
@@ -406,8 +405,10 @@ class HedTagEntry(HedSchemaEntry):
         # Replace the list with a copy we can modify.
         self.inherited_attributes = self.attributes.copy()
         for attribute in self._section.inheritable_attributes:
-            if self._check_inherited_attribute(attribute):
-                self.inherited_attributes[attribute] = self._check_inherited_attribute(attribute, True)
+            value = self._check_inherited_attribute(attribute, return_value=True)
+            # None means "not found in the hierarchy"; attribute values themselves are never None.
+            if value is not None:
+                self.inherited_attributes[attribute] = value
 
     def finalize_entry(self, schema):
         """Called once after schema loading to set state.

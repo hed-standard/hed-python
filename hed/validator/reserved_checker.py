@@ -177,9 +177,3 @@ class ReservedChecker:
         return incompatible
 
     # Additional methods for other checks should be implemented here following similar patterns.
-
-
-if __name__ == "__main__":
-    checker = ReservedChecker.get_instance()
-    print("ReservedChecker initialized successfully.")
-    print(checker.special_names)

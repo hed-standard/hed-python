@@ -5,6 +5,38 @@ from hed.errors.exceptions import HedFileError, HedExceptions
 
 
 class Schema2Base:
+    """Template base class for all HED schema serializers (mediawiki, XML, JSON, TSV).
+
+    Subclasses implement the format-specific ``_output_*`` hooks; the shared
+    traversal logic lives entirely in :meth:`process_schema`.
+
+    **Extension points** — override these abstract methods in each subclass:
+
+    * ``_initialize_output`` — reset/create the output container
+    * ``_output_header`` — write the HED header line / element
+    * ``_output_prologue`` — write the prologue block
+    * ``_output_tags`` — write the main tag hierarchy
+    * ``_output_units`` — write unit-class definitions
+    * ``_output_section`` — write a generic named section (unit modifiers, value classes, attributes, properties)
+    * ``_output_annotations`` — write annotation-class definitions
+    * ``_output_extras`` — optional hook for format-specific extra sections (default: no-op)
+    * ``_output_epilogue`` — write the epilogue block
+    * ``_output_footer`` — write any closing structure
+
+    .. note:: **Adding a new schema section type**
+
+        :meth:`process_schema` is the *single source of truth* for section traversal
+        order.  When a new :class:`~hed.schema.hed_schema_constants.HedSectionKey`
+        is added to the schema, **every** step below must be updated:
+
+        1. Add the new ``_output_*`` call to :meth:`process_schema` (this file).
+        2. Implement the hook in **all four** serializer subclasses:
+           ``schema2wiki.py``, ``schema2xml.py``, ``schema2json.py``,
+           ``schema2df.py``.
+        3. Add a matching reader branch in the corresponding ``*2schema.py``
+           loader(s) so round-trips stay symmetric.
+    """
+
     def __init__(self):
         # Placeholder output variable
         self.output = None
@@ -15,15 +47,29 @@ class Schema2Base:
         self._schema = None
 
     def process_schema(self, hed_schema, save_merged=False):
-        """Takes a HedSchema object and returns it in the inherited form(MEDIAWIKI, XML, etc)
+        """Convert a HedSchema object to the subclass's output format (mediawiki, XML, JSON, or TSV).
+
+        This method owns the **canonical section-traversal order** for all serializers.
+        Each ``_output_*`` call delegates to the format-specific subclass hook.
+
+        .. warning::
+            If a new :class:`~hed.schema.hed_schema_constants.HedSectionKey` is added
+            to the schema, a new ``_output_*`` call must be inserted here *and* the
+            matching hook must be implemented in each of the four serializer subclasses
+            (``schema2wiki``, ``schema2xml``, ``schema2json``, ``schema2df``).
 
         Parameters:
-            hed_schema (HedSchema): The schema to be processed.
-            save_merged (bool): If True, save as merged schema if has "withStandard".
+            hed_schema (HedSchema): The schema to be serialized.
+            save_merged (bool): If True, serialize as a merged (fully expanded) schema
+                when the schema has a ``withStandard`` attribute; ignored for standard
+                schemas (which are always saved fully).
 
         Returns:
-            Any: Varies based on inherited class
+            Any: Format-dependent output object (string, ElementTree, dict, or DataFrame
+                dict depending on the subclass).
 
+        Raises:
+            HedFileError: If the schema cannot be saved (e.g., merged multi-library schema).
         """
         if not hed_schema.can_save():
             raise HedFileError(
@@ -78,7 +124,12 @@ class Schema2Base:
         raise NotImplementedError("This needs to be defined in the subclass")
 
     def _output_extras(self, hed_schema):
-        raise NotImplementedError("This needs to be defined in the subclass")
+        """Optional hook for format-specific sections not covered by the standard traversal.
+
+        The base implementation is a deliberate no-op.  Subclasses that need to
+        emit additional content (e.g. the header-attributes sheet in TSV) override
+        this method; subclasses that have nothing extra can safely omit it.
+        """
 
     def _output_epilogue(self, epilogue):
         raise NotImplementedError("This needs to be defined in the subclass")

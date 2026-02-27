@@ -1,6 +1,7 @@
 import unittest
 from hed.models.hed_string import HedString
 from hed.models.query_handler import QueryHandler
+from hed.errors.exceptions import HedQueryError
 import os
 from hed import schema
 from hed import HedTag
@@ -43,6 +44,24 @@ class TestParser(unittest.TestCase):
             with self.assertRaises(ValueError) as context:
                 QueryHandler(string)
             self.assertTrue(context.exception.args[0])
+
+    def test_broken_search_strings_raise_hed_query_error(self):
+        """Parse errors must raise HedQueryError specifically, not a plain ValueError.
+
+        HedQueryError subclasses ValueError for backward compatibility, so both
+        assertRaises(HedQueryError) and assertRaises(ValueError) must hold.
+        """
+        broken_strings = ["A &&", "(A && B", "&& B", "A, ", ", A", "A)"]
+        for string in broken_strings:
+            with self.subTest(query=string):
+                # Must be the specific subclass, not a plain ValueError
+                with self.assertRaises(HedQueryError):
+                    QueryHandler(string)
+
+    def test_hed_query_error_is_value_error(self):
+        """HedQueryError must be catchable as ValueError for backward compatibility."""
+        with self.assertRaises(ValueError):
+            QueryHandler("(unclosed")
 
     def test_finding_tags(self):
         test_strings = {

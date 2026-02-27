@@ -446,39 +446,16 @@ class HedSchema(HedSchemaBase):
         if other is None:
             return False
         if self.get_save_header_attributes() != other.get_save_header_attributes():
-            # print(f"Header attributes not equal: '{self.get_save_header_attributes()}' vs '{other.get_save_header_attributes()}'")
             return False
         if self.has_duplicates() != other.has_duplicates():
-            # print(f"Duplicates: '{self.has_duplicates()}' vs '{other.has_duplicates()}'")
             return False
         if self.prologue.strip() != other.prologue.strip():
-            # print(f"PROLOGUE NOT EQUAL: '{self.prologue.strip()}' vs '{other.prologue.strip()}'")
             return False
         if self.epilogue.strip() != other.epilogue.strip():
-            # print(f"EPILOGUE NOT EQUAL: '{self.epilogue.strip()}' vs '{other.epilogue.strip()}'")
             return False
         if self._sections != other._sections:
-            # This block is useful for debugging when modifying the schema class itself.
-            # for section1, section2 in zip(self._sections.values(), other._sections.values()):
-            #     if section1 != section2:
-            #         dict1 = section1.all_names
-            #         dict2 = section2.all_names
-            #         if dict1 != dict2:
-            #             print(f"DICT {section1._section_key} NOT EQUAL")
-            #             key_union = set(list(dict1.keys()) + list(dict2.keys()))
-            #             for key in key_union:
-            #                 if key not in dict1:
-            #                     print(f"{key} not in dict1")
-            #                     continue
-            #                 if key not in dict2:
-            #                     print(f"{key} not in dict2")
-            #                     continue
-            #                 if dict1[key] != dict2[key]:
-            #                     s = f"{key} unmatched: '{str(dict1[key].name)}' vs '{str(dict2[key].name)}'"
-            #                     print(s)
             return False
         if self._namespace != other._namespace:
-            # print(f"NAMESPACE NOT EQUAL: '{self._namespace}' vs '{other._namespace}'")
             return False
         return True
 

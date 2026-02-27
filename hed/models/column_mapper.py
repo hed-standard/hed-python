@@ -9,6 +9,7 @@ from hed.models.definition_dict import DefinitionDict
 
 import copy
 from collections import Counter
+from functools import partial
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 NO_WARN_COLUMNS = ["onset", "duration"]
@@ -110,20 +111,14 @@ class ColumnMapper:
             if isinstance(assign_to_column, int):
                 if self._column_map:
                     assign_to_column = self._column_map[assign_to_column]
-                else:
-                    assign_to_column = assign_to_column
             if column.column_type == ColumnType.Ignore:
                 continue
             elif column.column_type == ColumnType.Value:
                 value_str = column.hed_dict
-                from functools import partial
-
                 final_transformers[assign_to_column] = partial(self._value_handler, value_str)
             elif column.column_type == ColumnType.Categorical:
                 need_categorical.append(column.column_name)
                 category_values = column.hed_dict
-                from functools import partial
-
                 final_transformers[assign_to_column] = partial(self._category_handler, category_values)
             else:
                 final_transformers[assign_to_column] = lambda x: x

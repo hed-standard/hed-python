@@ -34,6 +34,17 @@ class HedString(HedGroup):
             try:
                 contents = self.split_into_groups(hed_string, hed_schema, def_dict)
             except ValueError:
+                # ValueError is raised by split_into_groups for structurally malformed
+                # strings (mismatched or misordered parentheses).  Rather than raising
+                # here, we fall back to an empty parse tree so that the object can be
+                # passed to the validator, which will independently detect and report
+                # the structural error through check_count_tag_group_parentheses /
+                # check_delimiter_issues_in_hed_string on the raw string.
+                #
+                # Callers that construct HedString without running it through
+                # HedValidator will receive an empty children list with no error
+                # indication.  Always validate after construction if correctness is
+                # required.
                 contents = []
         super().__init__(hed_string, contents=contents, startpos=0, endpos=len(hed_string))
         self._schema = hed_schema

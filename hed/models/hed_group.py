@@ -133,7 +133,10 @@ class HedGroup:
             item._parent = None
 
     def __copy__(self):
-        raise ValueError("Cannot make shallow copies of HedGroups")
+        raise copy.Error(
+            "Shallow copy of HedGroup is not supported: _parent pointers would alias the original. "
+            "Use .copy() for a deep copy."
+        )
 
     def copy(self) -> "HedGroup":
         """Return a deep copy of this group.
