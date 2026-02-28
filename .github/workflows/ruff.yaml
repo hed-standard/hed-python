@@ -24,7 +24,7 @@ jobs:
           enable-cache: true
 
       - name: Create virtual environment
-        run: uv venv .venv --clear .venv
+        run: uv venv --clear .venv
 
       - name: Install Ruff
         run: uv pip install --python .venv/bin/python "ruff>=0.8.0"

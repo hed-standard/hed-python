@@ -50,7 +50,7 @@ jobs:
 
       - name: Create virtual environment
         run: |
-          uv venv .venv --clear .venv
+          uv venv --clear .venv
           echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
 
       # Install dependencies

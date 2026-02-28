@@ -28,7 +28,7 @@ jobs:
 
       - name: Create virtual environment
         run: |
-          uv venv .venv --clear .venv
+          uv venv --clear .venv
           Add-Content $env:GITHUB_PATH "$env:GITHUB_WORKSPACE\.venv\Scripts"
 
       - name: Install dependencies
