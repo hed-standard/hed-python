@@ -14,23 +14,24 @@ jobs:
   mdformat:
     name: Markdown formatting
     runs-on: ubuntu-latest
-    env:
-      UV_SYSTEM_PYTHON: "1"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
           python-version: '3.12'
           enable-cache: true
 
+      - name: Create virtual environment
+        run: uv venv .venv
+
       - name: Install dependencies
-        run: uv pip install "mdformat>=0.7.0" "mdformat-myst>=0.1.5"
-          
+        run: uv pip install --python .venv/bin/python "mdformat>=0.7.0" "mdformat-myst>=0.1.5"
+
       - name: Run mdformat (check only)
         run: |
-          mdformat --check --wrap no --number docs/
-          mdformat --check --wrap no --number *.md
+          uv run --python .venv/bin/python mdformat --check --wrap no --number docs/
+          uv run --python .venv/bin/python mdformat --check --wrap no --number *.md

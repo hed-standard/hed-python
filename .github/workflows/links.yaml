@@ -14,8 +14,6 @@ jobs:
   link-checker:
     name: Lychee link checker
     runs-on: ubuntu-latest
-    env:
-      UV_SYSTEM_PYTHON: "1"
 
     steps:
       - name: Checkout
@@ -26,6 +24,11 @@ jobs:
         with:
           python-version: '3.12'
           enable-cache: true
+
+      - name: Create virtual environment
+        run: |
+          uv venv .venv
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
         run: uv pip install -e .[docs]

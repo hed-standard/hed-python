@@ -23,8 +23,6 @@ jobs:
   test-notebooks:
     name: Test Jupyter Notebooks
     runs-on: ubuntu-latest
-    env:
-      UV_SYSTEM_PYTHON: "1"
     strategy:
       matrix:
         python-version: ["3.10", "3.13"]
@@ -39,6 +37,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
+
+      - name: Create virtual environment
+        run: |
+          uv venv .venv
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
         run: uv pip install -e .[examples]

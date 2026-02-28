@@ -14,8 +14,6 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
 
     runs-on: ${{ matrix.platform }}
-    env:
-      UV_SYSTEM_PYTHON: "1"
 
     steps:
       - uses: actions/checkout@v6
@@ -27,6 +25,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
+
+      - name: Create virtual environment
+        run: |
+          uv venv .venv
+          Add-Content $env:GITHUB_PATH "$env:GITHUB_WORKSPACE\.venv\Scripts"
 
       - name: Install dependencies
         run: uv pip install -e .[test]

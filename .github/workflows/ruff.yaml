@@ -13,8 +13,6 @@ jobs:
   ruff:
     name: Check for style errors and common problems
     runs-on: ubuntu-latest
-    env:
-      UV_SYSTEM_PYTHON: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -25,9 +23,11 @@ jobs:
           python-version: "3.12"
           enable-cache: true
 
+      - name: Create virtual environment
+        run: uv venv .venv
+
       - name: Install Ruff
-        run: uv pip install "ruff>=0.8.0"
+        run: uv pip install --python .venv/bin/python "ruff>=0.8.0"
 
       - name: Run Ruff linter
-        run: |
-          ruff check .
+        run: uv run --python .venv/bin/python ruff check .
