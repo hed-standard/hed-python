@@ -192,9 +192,9 @@ exclude = '''
   | dist
   | \.eggs
   | .*\.egg-info
-  | hed/_version\.py
+  | (\./)?hed/_version\.py
   | spec_tests/hed-examples
   | spec_tests/hed-specification
-  | .status
+  | \.status
 )/
 '''

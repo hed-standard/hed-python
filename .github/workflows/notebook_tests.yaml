@@ -44,7 +44,7 @@ jobs:
           echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
-        run: uv pip install -e .[examples]
+        run: uv pip install -e ".[examples]"
 
       - name: Test notebook structure and imports
         run: |

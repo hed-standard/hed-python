@@ -26,10 +26,12 @@ jobs:
           enable-cache: true
 
       - name: Create virtual environment
-        run: uv venv --clear .venv
+        run: |
+          uv venv --clear .venv
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
-        run: uv pip install --python .venv/bin/python codespell tomli
+        run: uv pip install codespell tomli
 
       - name: Run Codespell
-        run: uv run --python .venv/bin/python codespell .
+        run: codespell .

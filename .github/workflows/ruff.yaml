@@ -24,10 +24,12 @@ jobs:
           enable-cache: true
 
       - name: Create virtual environment
-        run: uv venv --clear .venv
+        run: |
+          uv venv --clear .venv
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
 
       - name: Install Ruff
-        run: uv pip install --python .venv/bin/python "ruff>=0.8.0"
+        run: uv pip install "ruff>=0.8.0"
 
       - name: Run Ruff linter
-        run: uv run --python .venv/bin/python ruff check .
+        run: ruff check .

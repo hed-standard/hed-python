@@ -27,12 +27,13 @@ jobs:
           enable-cache: true
 
       - name: Create virtual environment
+        shell: pwsh
         run: |
           uv venv --clear .venv
           Add-Content $env:GITHUB_PATH "$env:GITHUB_WORKSPACE\.venv\Scripts"
 
       - name: Install dependencies
-        run: uv pip install -e .[test]
+        run: uv pip install -e ".[test]"
 
       - name: Test with unittest
         env:
