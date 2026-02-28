@@ -36,6 +36,8 @@ jobs:
         python-version: ${{fromJson(needs.determine_version.outputs.matrix)}}
 
     runs-on: ${{ matrix.platform }}
+    env:
+      UV_SYSTEM_PYTHON: "1"
 
     steps:
       - uses: actions/checkout@v6
@@ -50,7 +52,7 @@ jobs:
 
       # Install dependencies
       - name: Install dependencies
-        run: uv pip install --system -e .[docs,test]
+        run: uv pip install -e .[docs,test]
 
       # Run spec tests without coverage for non Python 3.10
       - name: Run spec_test

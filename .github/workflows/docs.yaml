@@ -18,6 +18,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      UV_SYSTEM_PYTHON: "1"
     steps:
     - uses: actions/checkout@v6
       with:
@@ -30,7 +32,7 @@ jobs:
         enable-cache: true
 
     - name: Install dependencies
-      run: uv pip install --system -e .[docs]
+      run: uv pip install -e .[docs]
 
     - name: Configure Git for GitHub Pages
       run: |

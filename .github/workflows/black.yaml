@@ -12,6 +12,8 @@ permissions:
 jobs:
   black:
     runs-on: ubuntu-latest
+    env:
+      UV_SYSTEM_PYTHON: "1"
     steps:
       - uses: actions/checkout@v6
 
@@ -22,7 +24,7 @@ jobs:
           enable-cache: true
 
       - name: Install Black
-        run: uv pip install --system "black>=24.0.0"
+        run: uv pip install "black>=24.0.0"
 
       - name: Check code formatting with Black
         run: |

@@ -23,6 +23,8 @@ jobs:
   test-notebooks:
     name: Test Jupyter Notebooks
     runs-on: ubuntu-latest
+    env:
+      UV_SYSTEM_PYTHON: "1"
     strategy:
       matrix:
         python-version: ["3.10", "3.13"]
@@ -39,7 +41,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv pip install --system -e .[examples]
+        run: uv pip install -e .[examples]
 
       - name: Test notebook structure and imports
         run: |
