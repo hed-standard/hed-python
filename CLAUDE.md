@@ -76,7 +76,7 @@ hedpy schema convert --input schema.xml --output schema.json
 
 ### Git and PRs
 
-- PRs target `develop` branch
+- PRs target `main` branch
 - Atomic commits, \<50 chars, no emojis, no AI attribution
 - Run `/review-pr` before finalizing
 - Details: `.rules/git.md`

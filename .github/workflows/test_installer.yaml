@@ -24,12 +24,12 @@ jobs:
         run: mkdir workdir
 
       - name: Create virtual environment
-        run: uv venv workdir/.venv
+        run: uv venv workdir/.venv --python ${{ matrix.python-version }}
 
       - name: Install package
         run: |
           source workdir/.venv/bin/activate
-          uv pip install $GITHUB_WORKSPACE
+          uv pip install "$GITHUB_WORKSPACE"
 
       - name: Run post-installation test
         run: |
