@@ -26,7 +26,7 @@ jobs:
           enable-cache: true
 
       - name: Create virtual environment
-        run: uv venv .venv
+        run: uv venv .venv --clear .venv
 
       - name: Install dependencies
         run: uv pip install --python .venv/bin/python "mdformat>=0.7.0" "mdformat-myst>=0.1.5"

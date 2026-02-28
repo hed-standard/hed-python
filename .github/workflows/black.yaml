@@ -22,7 +22,7 @@ jobs:
           enable-cache: true
 
       - name: Create virtual environment
-        run: uv venv .venv
+        run: uv venv .venv --clear .venv
 
       - name: Install Black
         run: uv pip install --python .venv/bin/python "black>=24.0.0"
