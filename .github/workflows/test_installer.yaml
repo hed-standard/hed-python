@@ -13,32 +13,25 @@ jobs:
         python-version: ["3.10", "3.13"]
 
     steps:
-    - uses: actions/checkout@v6
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
 
-    - name: Create work directory
-      run: |
-        mkdir workdir
-        echo "WORKDIR=$(pwd)/workdir" >> $GITHUB_OUTPUT
+      - name: Create work directory
+        run: mkdir workdir
 
-    - name: Create and activate virtual environment
-      run: |
-        cd $WORKDIR
-        python -m venv .venv
-        source .venv/bin/activate
+      - name: Create virtual environment
+        run: uv venv workdir/.venv --python ${{ matrix.python-version }}
 
-    - name: Install package
-      run: |
-        cd $WORKDIR
-        source .venv/bin/activate
-        python -m pip install --upgrade pip
-        pip install $GITHUB_WORKSPACE
+      - name: Install package
+        run: |
+          source workdir/.venv/bin/activate
+          uv pip install "$GITHUB_WORKSPACE"
 
-    - name: Run post-installation test
-      run: |
-        cd $WORKDIR
-        source .venv/bin/activate
-        python -c "from hed.models.hed_string import HedString; print('Import test passed.')"
+      - name: Run post-installation test
+        run: |
+          source workdir/.venv/bin/activate
+          python -c "from hed.models.hed_string import HedString; print('Import test passed.')"
