@@ -432,7 +432,7 @@ class TestTagLevels(TestHed):
             "topLevelDuplicate": "Event/Sensory-event,Event/Sensory-event",
             "groupDuplicate": "Item/Object/Man-made-object/VehicleTrain,(Event/Sensory-event,"
             "Purple-color/Purple,Event/Sensory-event)",
-            "noDuplicate": "Event/Sensory-event," "Item/Object/Man-made-object/VehicleTrain," "Purple-color/Purple",
+            "noDuplicate": "Event/Sensory-event,Item/Object/Man-made-object/VehicleTrain,Purple-color/Purple",
             "legalDuplicate": "Item/Object/Man-made-object/VehicleTrain,(Item/Object/Man-made-object/VehicleTrain,"
             "Event/Sensory-event)",
             "duplicateGroup": "Sensory-event, (Sensory-event, Man-made-object/VehicleTrain),"
@@ -927,8 +927,8 @@ class FullHedString(TestHed):
 
     def test_no_more_than_two_tildes(self):
         test_strings = {
-            "noTildeGroup": "Event/Category/Initial context," "(Item/Object/Vehicle/Train,Event/Category/Initial context)",
-            "oneTildeGroup": "Event/Category/Initial context," "(Item/Object/Vehicle/Car ~ Attribute/Object control/Perturb)",
+            "noTildeGroup": "Event/Category/Initial context,(Item/Object/Vehicle/Train,Event/Category/Initial context)",
+            "oneTildeGroup": "Event/Category/Initial context,(Item/Object/Vehicle/Car ~ Attribute/Object control/Perturb)",
             "twoTildeGroup": "Event/Category/Initial context,"
             "(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car, Item/ID/RedCar,"
             " Attribute/Visual/Color/Red)",
@@ -995,10 +995,10 @@ class RequiredTags(TestHed):
 
     def test_multiple_copies_unique_tags(self):
         test_strings = {
-            "legal": "Event-context," "(Vehicle,Event), Animal-agent, Action",
-            "multipleDesc": "Event-context," "Event-context," "Vehicle,(Vehicle,Event-context), Animal-agent, Action",
+            "legal": "Event-context,(Vehicle,Event), Animal-agent, Action",
+            "multipleDesc": "Event-context,Event-context,Vehicle,(Vehicle,Event-context), Animal-agent, Action",
             # I think this is illegal in hed2 style schema now.
-            "multipleDescIncShort": "Event-context," "Organizational-property/Event-context, Animal-agent, Action",
+            "multipleDescIncShort": "Event-context,Organizational-property/Event-context, Animal-agent, Action",
         }
         expected_results = {"legal": True, "multipleDesc": False, "multipleDescIncShort": False}
         expected_issues = {

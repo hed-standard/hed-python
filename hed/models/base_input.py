@@ -241,9 +241,9 @@ class BaseInput:
             for row_number, text_file_row in dataframe.iterrows():
                 for column_number, _column_text in enumerate(text_file_row):
                     cell_value = dataframe.iloc[row_number, column_number]
-                    old_worksheet.cell(row_number + adj_row_for_col_names, column_number + adj_for_one_based_cols).value = (
-                        cell_value
-                    )
+                    old_worksheet.cell(
+                        row_number + adj_row_for_col_names, column_number + adj_for_one_based_cols
+                    ).value = cell_value
 
             self._loaded_workbook.save(file)
         else:

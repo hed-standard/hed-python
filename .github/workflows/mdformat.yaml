@@ -28,4 +28,4 @@ jobs:
 
       - name: Run mdformat (check only)
         run: |
-          run: uvx --with "mdformat-myst>=0.1.5" mdformat --check --wrap no --number docs/ *.md
+          run: uvx mdformat --check --wrap no --number docs/ *.md

@@ -10,7 +10,6 @@ from hed.tools.analysis.hed_type_manager import HedTypeManager
 
 
 class Test(unittest.TestCase):
-
     def setUp(self):
         schema = load_schema_version(xml_version="8.1.0")
         bids_root_path = os.path.realpath(

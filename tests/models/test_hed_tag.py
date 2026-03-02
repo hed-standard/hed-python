@@ -10,7 +10,6 @@ hed_schema_global = load_schema_version("8.4.0")
 
 
 class TestValidatorUtilityFunctions(TestHedBase):
-
     @classmethod
     def setUpClass(cls):
         cls.hed_schema = hed_schema_global

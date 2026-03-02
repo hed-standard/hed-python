@@ -13,7 +13,6 @@ import contextlib
 
 
 class TestAddExtension(unittest.TestCase):
-
     def test_regular_extension(self):
         """Test that regular extensions are added correctly."""
         self.assertEqual(add_extension("filename", ".txt"), "filename.txt")

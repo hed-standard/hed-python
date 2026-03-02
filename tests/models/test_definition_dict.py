@@ -64,9 +64,9 @@ class TestDefinitionDict(TestDefBase):
             "twoGroupTags": f"(Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2})",
             "extraValidTags": "(Definition/InvalidDefA, Red, Blue)",
             "extraOtherTags": "(Definition/InvalidDef1, Black)",
-            "duplicateDef": (f"(Definition/Def1, {self.def_contents_string}), " f"(Definition/Def1, (Green))"),
+            "duplicateDef": (f"(Definition/Def1, {self.def_contents_string}), (Definition/Def1, (Green))"),
             "duplicateDef2": (
-                f"(Definition/Def1, {self.def_contents_string}), " f"(Definition/Def1/#, {self.placeholder_def_contents})"
+                f"(Definition/Def1, {self.def_contents_string}), (Definition/Def1/#, {self.placeholder_def_contents})"
             ),
             "defTooManyPlaceholders": self.placeholder_invalid_def_string,
             "invalidPlaceholder": f"(Definition/InvalidDef1/InvalidPlaceholder, {self.def_contents_string})",

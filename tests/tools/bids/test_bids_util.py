@@ -7,7 +7,6 @@ from hed.tools.bids.bids_util import parse_bids_filename, group_by_suffix, get_s
 
 
 class TestGetSchemaFromDescription(unittest.TestCase):
-
     def setUp(self):
         """Set up temporary directory for test files"""
         self.test_dir = tempfile.mkdtemp()
@@ -99,7 +98,6 @@ class TestGroupBySuffixes(unittest.TestCase):
 
 
 class TestParseBidsFilename(unittest.TestCase):
-
     def test_standard_bids_filename(self):
         self.assertEqual(
             parse_bids_filename("sub-01_task-rest_bold.nii.gz"),
@@ -261,7 +259,6 @@ class TestParseBidsFilename(unittest.TestCase):
 
 
 class TestGetMergedSidecar(unittest.TestCase):
-
     def setUp(self):
         """Set up temporary directory structure for test files"""
         self.test_dir = tempfile.mkdtemp()
@@ -325,7 +322,6 @@ class TestGetMergedSidecar(unittest.TestCase):
 
 
 class TestGetCandidates(unittest.TestCase):
-
     def setUp(self):
         """Set up temporary directory with test files"""
         self.test_dir = tempfile.mkdtemp()
@@ -445,7 +441,6 @@ class TestMatchesCriteria(unittest.TestCase):
 
 
 class TestWalkBack(unittest.TestCase):
-
     def setUp(self):
         """Set up temporary directory structure for test files"""
         self.test_dir = tempfile.mkdtemp()

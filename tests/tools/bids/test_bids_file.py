@@ -5,7 +5,6 @@ from hed.tools.bids.bids_file import BidsFile
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         events_file = "../../data/bids_tests/eeg_ds003645s_hed/sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv"

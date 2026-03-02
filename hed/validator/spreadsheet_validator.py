@@ -267,7 +267,8 @@ class SpreadsheetValidator:
         # If there are missing references, log a single error
         if missing_refs:
             issues += error_handler.format_error_with_context(
-                ValidationErrors.TSV_COLUMN_MISSING, invalid_keys=list(missing_refs)  # Include all missing column references
+                ValidationErrors.TSV_COLUMN_MISSING,
+                invalid_keys=list(missing_refs),  # Include all missing column references
             )
 
         return issues

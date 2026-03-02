@@ -197,7 +197,7 @@ def val_error_extra_column(column_name):
 
 @hed_error(ValidationErrors.SIDECAR_AND_OTHER_COLUMNS)
 def val_error_sidecar_with_column(column_names):
-    return f"You cannot use a column name in curly braces and to designate a tag column. " f"Found {column_names}."
+    return f"You cannot use a column name in curly braces and to designate a tag column. Found {column_names}."
 
 
 @hed_error(ValidationErrors.DUPLICATE_COLUMN_IN_LIST)
@@ -216,7 +216,7 @@ def val_error_duplicate_column_between_sources(column_number, column_name, list_
             f"Each entry must be unique."
         )
     else:
-        return f"Found column number {column_number} in the following inputs: {list_names}. " f"Each entry must be unique."
+        return f"Found column number {column_number} in the following inputs: {list_names}. Each entry must be unique."
 
 
 @hed_error(ValidationErrors.HED_BLANK_COLUMN, default_severity=ErrorSeverity.WARNING)
@@ -360,8 +360,7 @@ def sidecar_na_used(column_name):
 @hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_def_tag_in_definition(tag, def_name):
     return (
-        f"Invalid tag {tag} found in definition for {def_name}. "
-        f"Def, Def-expand, and Definition tags cannot be in definitions."
+        f"Invalid tag {tag} found in definition for {def_name}. Def, Def-expand, and Definition tags cannot be in definitions."
     )
 
 

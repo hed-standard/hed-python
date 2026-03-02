@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
 
       - name: Create work directory
         run: mkdir workdir

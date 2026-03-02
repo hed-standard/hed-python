@@ -23,7 +23,7 @@ class TestSchemaLoading(unittest.TestCase):
         self.assertEqual(
             results["failed"],
             0,
-            f"{results['failed']} released schema(s) failed to load: " f"{[f['path'] for f in results['failures']]}",
+            f"{results['failed']} released schema(s) failed to load: {[f['path'] for f in results['failures']]}",
         )
         self.assertGreater(results["total"], 0, "No released schemas found to test")
 
@@ -33,7 +33,7 @@ class TestSchemaLoading(unittest.TestCase):
         self.assertEqual(
             results["failed"],
             0,
-            f"{results['failed']} prerelease schema(s) failed to load: " f"{[f['path'] for f in results['failures']]}",
+            f"{results['failed']} prerelease schema(s) failed to load: {[f['path'] for f in results['failures']]}",
         )
         # Prereleases may or may not exist — no assertGreater here
 

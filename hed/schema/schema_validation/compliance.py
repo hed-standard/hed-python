@@ -65,7 +65,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
         ValueError: If *hed_schema* is not a ``HedSchema`` instance.
     """
     if not isinstance(hed_schema, HedSchema):
-        raise ValueError("To check compliance of a HedGroupSchema, " "call self.check_compliance on the schema itself.")
+        raise ValueError("To check compliance of a HedGroupSchema, call self.check_compliance on the schema itself.")
 
     error_handler = error_handler or ErrorHandler(check_for_warnings)
     validator = SchemaValidator(hed_schema, error_handler)

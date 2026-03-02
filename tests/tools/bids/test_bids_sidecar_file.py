@@ -8,7 +8,6 @@ from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         description = "../../data/bids/eeg_ds003645s_hed/dataset_description.json"

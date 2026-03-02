@@ -17,7 +17,6 @@ from hed.tools.util.io_util import (
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.bids_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), "../../data/bids_tests/eeg_ds003645s_hed"))
@@ -193,7 +192,6 @@ class TestGetFullExtension(unittest.TestCase):
 
 
 class TestSeparateByExt(unittest.TestCase):
-
     @patch("hed.tools.util.io_util.get_full_extension")  # Replace 'your_module' with the actual module name
     def test_separate_by_ext(self, mock_get_full_extension):
         file_paths = ["file1.tsv", "file2.json", "file3.tsv", "file4.txt", "file5.json"]

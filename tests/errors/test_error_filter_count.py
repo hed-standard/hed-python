@@ -3,7 +3,6 @@ from hed.errors.error_reporter import ErrorHandler
 
 
 class TestFilterIssuesByCount(unittest.TestCase):
-
     def test_empty_issues_list(self):
         issues = []
         result, result_counts = ErrorHandler.filter_issues_by_count(issues, 2)
@@ -116,7 +115,6 @@ class TestFilterIssuesByCount(unittest.TestCase):
 
 
 class TestAggregateCodeCounts(unittest.TestCase):
-
     def test_empty_input(self):
         input_data = {}
         expected_output = {}

@@ -13,7 +13,6 @@ from hed.tools.analysis.event_manager import EventManager
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.1.0")

@@ -320,9 +320,10 @@ class TestTagLevels3(TestHed3):
             "topLevelDuplicate": "tl:Event/Sensory-event,tl:Event/Sensory-event",
             "groupDuplicate": "tl:Item/Object/Man-made-object/VehicleTrain,(tl:Event/Sensory-event,"
             "tl:Purple-color/Purple,tl:Event/Sensory-event)",
-            "noDuplicate": "tl:Event/Sensory-event," "tl:Item/Object/Man-made-object/VehicleTrain," "tl:Purple-color/Purple",
+            "noDuplicate": "tl:Event/Sensory-event,tl:Item/Object/Man-made-object/VehicleTrain,tl:Purple-color/Purple",
             "legalDuplicate": "tl:Item/Object/Man-made-object/VehicleTrain,\
-            (tl:Item/Object/Man-made-object/VehicleTrain," "tl:Event/Sensory-event)",
+            (tl:Item/Object/Man-made-object/VehicleTrain,"
+            "tl:Event/Sensory-event)",
         }
         expected_results = {"topLevelDuplicate": False, "groupDuplicate": False, "legalDuplicate": True, "noDuplicate": True}
         expected_issues = {
@@ -492,7 +493,7 @@ class RequiredTags(TestHed3):
 
     def test_multiple_copies_unique_tags(self):
         test_strings = {
-            "legal": "tl:Event-context," "(Vehicle,Event), Animal-agent, Action, tl:Animal-agent, tl:Action",
+            "legal": "tl:Event-context,(Vehicle,Event), Animal-agent, Action, tl:Animal-agent, tl:Action",
             "multipleDesc": "tl:Event-context,"
             "tl:Event-context,"
             "Vehicle,(Vehicle,tl:Event-context), Animal-agent, Action, tl:Animal-agent, tl:Action",

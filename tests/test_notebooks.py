@@ -35,7 +35,7 @@ class TestNotebooks(unittest.TestCase):
             cls.has_jupyter = True
         except ImportError:
             cls.has_jupyter = False
-            cls.skip_message = "Jupyter dependencies not installed. " "Run 'pip install -e .[examples]' to install them."
+            cls.skip_message = "Jupyter dependencies not installed. Run 'pip install -e .[examples]' to install them."
 
     def setUp(self):
         """Set up each individual test."""
@@ -280,7 +280,7 @@ class TestNotebookExecution(unittest.TestCase):
             cls.has_jupyter = True
         except ImportError:
             cls.has_jupyter = False
-            cls.skip_message = "Jupyter dependencies not installed. " "Run 'pip install -e .[examples]' to install them."
+            cls.skip_message = "Jupyter dependencies not installed. Run 'pip install -e .[examples]' to install them."
 
     def setUp(self):
         """Set up each individual test."""

@@ -46,9 +46,7 @@ class HedSchema(HedSchemaBase):
         self.filename = None
         self.prologue = ""
         self.epilogue = ""
-        self.extras = (
-            {}
-        )  # Used to store any additional data that might be needed for serialization (like OWL or other formats)
+        self.extras = {}  # Used to store any additional data that might be needed for serialization (like OWL or other formats)
 
         # This is the specified library name_prefix - tags will be {schema_namespace}:{tag_name}
         self._namespace = ""

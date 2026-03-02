@@ -17,7 +17,6 @@ from hed.tools.util import io_util
 
 # noinspection PyBroadException
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/other_tests")

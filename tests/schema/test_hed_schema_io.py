@@ -18,7 +18,6 @@ import shutil
 
 # todo: speed up these tests
 class TestHedSchema(unittest.TestCase):
-
     def test_load_schema_invalid_parameters(self):
         bad_filename = "this_is_not_a_real_file.xml"
         with self.assertRaises(HedFileError):
@@ -324,10 +323,10 @@ class TestHedSchemaMerging(unittest.TestCase):
 
                     # print(i, files[i], s1.filename)
                     # print(files[i+1], s2.filename)
-                    self.assertTrue(result, f"Saved xml {files[i]} and {files[i+1]} are not equal.")
+                    self.assertTrue(result, f"Saved xml {files[i]} and {files[i + 1]} are not equal.")
                     reload1 = load_schema(filename1)
                     reload2 = load_schema(filename2)
-                    self.assertEqual(reload1, reload2, f"Reloaded xml {files[i]} and {files[i+1]} are not equal.")
+                    self.assertEqual(reload1, reload2, f"Reloaded xml {files[i]} and {files[i + 1]} are not equal.")
                 except Exception as ex:
                     print(ex)
                     self.assertTrue(False)
@@ -341,11 +340,11 @@ class TestHedSchemaMerging(unittest.TestCase):
                     s1.save_as_mediawiki(filename1, save_merged=save_merged)
                     s2.save_as_mediawiki(filename2, save_merged=save_merged)
                     result = filecmp.cmp(filename1, filename2)
-                    self.assertTrue(result, f"Saved wiki {files[i]} and {files[i+1]} are not equal.")
+                    self.assertTrue(result, f"Saved wiki {files[i]} and {files[i + 1]} are not equal.")
 
                     reload1 = load_schema(filename1)
                     reload2 = load_schema(filename2)
-                    self.assertEqual(reload1, reload2, f"Reloaded wiki {files[i]} and {files[i+1]} are not equal.")
+                    self.assertEqual(reload1, reload2, f"Reloaded wiki {files[i]} and {files[i + 1]} are not equal.")
                 except Exception as ex:
                     print(ex)
                     self.assertTrue(False)

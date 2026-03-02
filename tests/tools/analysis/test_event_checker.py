@@ -6,7 +6,6 @@ from hed.tools.analysis.event_checker import EventChecker
 
 
 class TestEventChecker(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.hed_schema = load_schema_version("8.4.0")

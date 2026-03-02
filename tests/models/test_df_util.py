@@ -405,7 +405,6 @@ class TestConvertToForm(unittest.TestCase):
 
 
 class TestInsertColumns(unittest.TestCase):
-
     def test_insert_columns_simple(self):
         df = pd.DataFrame({"column1": ["{column2}, Event, Action"], "column2": ["Item"]})
         expected_df = pd.DataFrame({"column1": ["Item, Event, Action"]})

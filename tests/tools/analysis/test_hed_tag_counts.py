@@ -9,7 +9,6 @@ import pandas as pd
 
 # noinspection PyBroadException
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         bids_root_path = os.path.realpath(

@@ -10,7 +10,6 @@ from hed.errors.error_reporter import ErrorHandler
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         root_path = os.path.realpath(os.path.join(os.path.dirname(__file__), "../../data/bids_tests/eeg_ds003645s_hed"))

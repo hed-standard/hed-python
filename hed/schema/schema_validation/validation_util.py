@@ -73,7 +73,6 @@ def validate_schema_description_new(hed_entry) -> list[dict]:
     if hasattr(hed_entry, "short_tag_name"):
         name = hed_entry.short_tag_name
     for char, index in indexes:
-
         issues_list += ErrorHandler.format_error(
             SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, hed_entry.description, name, problem_char=char, char_index=index
         )

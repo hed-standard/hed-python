@@ -10,7 +10,6 @@ from hed.tools.analysis.hed_tag_manager import HedTagManager
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.2.0")

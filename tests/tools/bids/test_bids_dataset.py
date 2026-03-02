@@ -11,7 +11,6 @@ from hed.tools.bids.bids_tabular_file import BidsTabularFile
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed")

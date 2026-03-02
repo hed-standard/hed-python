@@ -8,7 +8,6 @@ from hed.scripts.hed_extract_bids_sidecar import main
 
 
 class TestExtractBidsSidecar(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.data_root = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/bids_tests/eeg_ds003645s_hed_demo"))

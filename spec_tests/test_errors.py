@@ -495,7 +495,7 @@ class MyTestCase(unittest.TestCase):
         print("=" * 80)
         print(f"Total Tests:   {self.test_counter['total']}")
         print(
-            f"Passed:        {self.test_counter['passed']} ({100*self.test_counter['passed']//max(1,self.test_counter['total'])}%)"
+            f"Passed:        {self.test_counter['passed']} ({100 * self.test_counter['passed'] // max(1, self.test_counter['total'])}%)"
         )
         print(f"Failed:        {self.test_counter['failed']}")
         print(f"Skipped:       {self.test_counter['skipped']}")
@@ -520,8 +520,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(
             len(self.fail_count),
             0,
-            f"\n{len(self.fail_count)} test(s) failed out of {self.test_counter['total']} total. "
-            f"See detailed output above.",
+            f"\n{len(self.fail_count)} test(s) failed out of {self.test_counter['total']} total. See detailed output above.",
         )
 
     # def test_debug(self):

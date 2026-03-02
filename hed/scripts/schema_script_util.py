@@ -89,7 +89,7 @@ def validate_schema(file_path):
 
     _, extension = os.path.splitext(file_path)
     if extension.lower() != extension:
-        return [f"Only fully lowercase extensions are allowed for schema files.  " f"Invalid extension on file: {file_path}"]
+        return [f"Only fully lowercase extensions are allowed for schema files.  Invalid extension on file: {file_path}"]
 
     validation_issues = []
     try:

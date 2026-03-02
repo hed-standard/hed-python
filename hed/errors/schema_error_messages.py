@@ -190,7 +190,7 @@ def schema_error_SCHEMA_IN_LIBRARY_INVALID(tag, bad_library):
 
 @hed_error(SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE, default_severity=ErrorSeverity.WARNING)
 def schema_error_SCHEMA_MISSING_EXTRA_VALUE(section_name, column_name, row_index):
-    return f"Extras section '{section_name}' has an empty value in column '{column_name}' " f"at row {row_index}."
+    return f"Extras section '{section_name}' has an empty value in column '{column_name}' at row {row_index}."
 
 
 @hed_error(
@@ -199,8 +199,7 @@ def schema_error_SCHEMA_MISSING_EXTRA_VALUE(section_name, column_name, row_index
 )
 def schema_error_annotation_prefix_missing(tag, annotation_value, prefix):
     return (
-        f"Tag '{tag}' has annotation '{annotation_value}' with prefix '{prefix}' "
-        f"that is not defined in the Prefixes section."
+        f"Tag '{tag}' has annotation '{annotation_value}' with prefix '{prefix}' that is not defined in the Prefixes section."
     )
 
 

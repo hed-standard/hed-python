@@ -6,7 +6,6 @@ from hed.scripts.validate_bids import main
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.data_root = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/bids_tests/eeg_ds003645s_hed_demo"))

@@ -187,7 +187,7 @@ class TestDomainRangeValidation(unittest.TestCase):
             self.assertEqual(
                 len(ranges_found),
                 1,
-                f"Attribute '{attr_name}' has {len(ranges_found)} range " f"properties (expected 1): {ranges_found}",
+                f"Attribute '{attr_name}' has {len(ranges_found)} range properties (expected 1): {ranges_found}",
             )
 
     def test_all_attributes_have_domain(self):
@@ -313,7 +313,7 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
             for entry in section.all_entries:
                 self.assertFalse(
                     entry._unknown_attributes,
-                    f"{section.section_key.name}/{entry.name} has stale " f"_unknown_attributes: {entry._unknown_attributes}",
+                    f"{section.section_key.name}/{entry.name} has stale _unknown_attributes: {entry._unknown_attributes}",
                 )
 
 

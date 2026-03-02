@@ -10,7 +10,6 @@ from hed.schema.hed_schema_io import load_schema_version
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.1.0")
