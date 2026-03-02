@@ -11,7 +11,9 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
 
         curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/other_tests")
-        bids_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed")
+        bids_base_dir = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed"
+        )
         cls.bids_base_dir = bids_base_dir
         cls.stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
@@ -58,7 +60,9 @@ class Test(unittest.TestCase):
         dict1 = TabularSummary()
         wh_df = get_new_dataframe(self.wh_events_path)
         dict1.update(wh_df)
-        self.assertEqual(len(dict1.value_info.keys()), 0, "TabularSummary value_info should be empty if no value columns")
+        self.assertEqual(
+            len(dict1.value_info.keys()), 0, "TabularSummary value_info should be empty if no value columns"
+        )
         self.assertEqual(
             len(dict1.categorical_info.keys()),
             len(wh_df.columns),
@@ -72,7 +76,9 @@ class Test(unittest.TestCase):
         dict1 = TabularSummary(value_cols=["letter"], skip_cols=["event_type"], name="Sternberg1")
         stern_df = get_new_dataframe(self.stern_map_path)
         dict1.update(stern_df)
-        self.assertEqual(len(dict1.value_info.keys()), 1, "TabularSummary value_info should be empty if no value columns")
+        self.assertEqual(
+            len(dict1.value_info.keys()), 1, "TabularSummary value_info should be empty if no value columns"
+        )
         self.assertEqual(
             len(dict1.categorical_info.keys()),
             len(stern_df.columns) - 2,
@@ -101,7 +107,9 @@ class Test(unittest.TestCase):
         dict1 = TabularSummary()
         stern_df = get_new_dataframe(self.stern_map_path)
         dict1.update(stern_df)
-        self.assertEqual(len(dict1.value_info.keys()), 0, "TabularSummary value_info should be empty if no value columns")
+        self.assertEqual(
+            len(dict1.value_info.keys()), 0, "TabularSummary value_info should be empty if no value columns"
+        )
         self.assertEqual(
             len(dict1.categorical_info.keys()),
             len(stern_df.columns),
@@ -111,7 +119,9 @@ class Test(unittest.TestCase):
         dict2 = TabularSummary(value_cols=["letter"], skip_cols=["event_type"])
         dict2.update(stern_df)
         self.assertEqual(len(dict2.value_info.keys()), 1, "TabularSummary value_info should have letter value column")
-        self.assertEqual(dict2.value_info["letter"], [len(stern_df), 1], "TabularSummary value counts should length of column")
+        self.assertEqual(
+            dict2.value_info["letter"], [len(stern_df), 1], "TabularSummary value counts should length of column"
+        )
         self.assertEqual(len(dict2.skip_cols), 1, "TabularSummary should have one skip column")
         self.assertEqual(
             len(dict2.categorical_info.keys()),
@@ -153,7 +163,9 @@ class Test(unittest.TestCase):
         dict1.update(stern_df_test1)
         value_keys = dict1.value_info.keys()
         for col in value_keys:
-            self.assertEqual(dict1.value_info[col], dict2.value_info[col], "update_summary should update values correctly")
+            self.assertEqual(
+                dict1.value_info[col], dict2.value_info[col], "update_summary should update values correctly"
+            )
 
     def test_update_dict_with_bad_value_cols(self):
         stern_df_test1 = get_new_dataframe(self.stern_test1_path)
@@ -191,7 +203,9 @@ class Test(unittest.TestCase):
         col_info = TabularSummary.get_columns_info(df)
         self.assertIsInstance(col_info, dict, "get_columns_info should return a dictionary")
         self.assertEqual(
-            len(col_info.keys()), len(df.columns), "get_columns_info should return a dictionary with a key for each column"
+            len(col_info.keys()),
+            len(df.columns),
+            "get_columns_info should return a dictionary with a key for each column",
         )
 
     def test_get_columns_info_skip_columns(self):
@@ -214,14 +228,18 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(dicts_all1, TabularSummary), "make_combined_dicts should return a TabularSummary")
         self.assertTrue(isinstance(dicts1, dict), "make_combined_dicts should also return a dictionary of file names")
         self.assertEqual(6, len(dicts1), "make_combined_dicts should return correct number of file names")
-        self.assertEqual(10, len(dicts_all1.categorical_info), "make_combined_dicts should return right number of entries")
+        self.assertEqual(
+            10, len(dicts_all1.categorical_info), "make_combined_dicts should return right number of entries"
+        )
         dicts_all2, dicts2 = TabularSummary.make_combined_dicts(
             file_dict1.file_dict, skip_cols=["onset", "duration", "sample"]
         )
         self.assertTrue(isinstance(dicts_all2, TabularSummary), "make_combined_dicts should return a TabularSummary")
         self.assertTrue(isinstance(dicts2, dict), "make_combined_dicts should also return a dictionary of file names")
         self.assertEqual(6, len(dicts2), "make_combined_dicts should return correct number of file names")
-        self.assertEqual(len(dicts_all2.categorical_info), 7, "make_combined_dicts should return right number of entries")
+        self.assertEqual(
+            len(dicts_all2.categorical_info), 7, "make_combined_dicts should return right number of entries"
+        )
 
     def test_update_summary(self):
         files_bids = get_file_list(self.bids_base_dir, extensions=[".tsv"], name_suffix="events")
@@ -471,7 +489,9 @@ class Test(unittest.TestCase):
         if limited_cols:
             # At least one limited column should be in overflow
             overflow_intersection = set(limited_cols).intersection(dict1.overflow_columns)
-            self.assertGreater(len(overflow_intersection), 0, "At least one limited column should be marked as overflow")
+            self.assertGreater(
+                len(overflow_intersection), 0, "At least one limited column should be marked as overflow"
+            )
 
         # Verify file count is correct
         self.assertEqual(dict1.total_files, 3, "Should have processed 3 files")
@@ -519,7 +539,9 @@ class Test(unittest.TestCase):
 
         # Should track counts but store no unique values
         for col_name in dict1.categorical_info:
-            self.assertEqual(len(dict1.categorical_info[col_name]), 0, f"{col_name} should have no stored values with limit=0")
+            self.assertEqual(
+                len(dict1.categorical_info[col_name]), 0, f"{col_name} should have no stored values with limit=0"
+            )
 
         # But categorical_counts should still be populated
         self.assertGreater(len(dict1.categorical_counts), 0)

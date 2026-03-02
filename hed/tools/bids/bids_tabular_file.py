@@ -30,7 +30,9 @@ class BidsTabularFile(BidsFile):
             return
 
         if self.sidecar:
-            self._contents = TabularInput(file=self.file_path, sidecar=self.sidecar, name=os.path.realpath(self.file_path))
+            self._contents = TabularInput(
+                file=self.file_path, sidecar=self.sidecar, name=os.path.realpath(self.file_path)
+            )
         else:
             self._contents = TabularInput(file=self.file_path, name=os.path.realpath(self.file_path))
         columns = self._contents.columns

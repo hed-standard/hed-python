@@ -80,7 +80,9 @@ class SidecarValidator:
                 error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
                 new_issues += hed_validator.run_basic_checks(hed_string_obj, allow_placeholders=True)
                 def_check_list = definition_checks.setdefault(column_name, [])
-                def_check_list.append(hed_string_obj.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True, include_groups=0))
+                def_check_list.append(
+                    hed_string_obj.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True, include_groups=0)
+                )
 
                 # Might refine this later - for now just skip checking placeholder counts in definition columns.
                 if not def_check_list[-1]:
@@ -158,7 +160,9 @@ class SidecarValidator:
                 if len(hed_strings) > 1:
                     error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
 
-                error_handler.push_error_context(ErrorContext.HED_STRING, HedString(hed_string, hed_schema=self._schema))
+                error_handler.push_error_context(
+                    ErrorContext.HED_STRING, HedString(hed_string, hed_schema=self._schema)
+                )
                 invalid_locations = self._find_non_matching_braces(hed_string)
                 for loc in invalid_locations:
                     bad_symbol = hed_string[loc]
@@ -253,7 +257,9 @@ class SidecarValidator:
 
         column_type = ColumnMetadata._detect_column_type(dict_for_entry=dict_for_entry, basic_validation=False)
         if column_type is None:
-            val_issues += error_handler.format_error_with_context(SidecarErrors.UNKNOWN_COLUMN_TYPE, column_name=column_name)
+            val_issues += error_handler.format_error_with_context(
+                SidecarErrors.UNKNOWN_COLUMN_TYPE, column_name=column_name
+            )
         elif column_type == ColumnType.Ignore:
             found_hed = self._check_for_key("HED", dict_for_entry)
             if found_hed:

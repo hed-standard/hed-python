@@ -74,7 +74,9 @@ class CharValidator:
         validation_issues += self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
         return validation_issues
 
-    def check_for_invalid_extension_chars(self, original_tag, validate_text, error_code=None, index_offset=0) -> list[dict]:
+    def check_for_invalid_extension_chars(
+        self, original_tag, validate_text, error_code=None, index_offset=0
+    ) -> list[dict]:
         """Report invalid characters in extension/value.
 
         Parameters:

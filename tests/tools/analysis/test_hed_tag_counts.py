@@ -60,7 +60,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(counts, HedTagCounts)
         self.assertFalse(counts.tag_dict)
         for k in range(6):
-            counts.update_tag_counts(HedString(self.input_df.iloc[k]["HED_assembled"], self.hed_schema), file_name="Base_name")
+            counts.update_tag_counts(
+                HedString(self.input_df.iloc[k]["HED_assembled"], self.hed_schema), file_name="Base_name"
+            )
         self.assertIsInstance(counts.tag_dict, dict)
         self.assertEqual(14, len(counts.tag_dict))
 

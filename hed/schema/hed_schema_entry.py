@@ -131,8 +131,12 @@ class HedSchemaEntry:
     @staticmethod
     def _compare_attributes_no_order(left, right):
         if left != right:
-            left = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in left.items()}
-            right = {name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in right.items()}
+            left = {
+                name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in left.items()
+            }
+            right = {
+                name: (set(value.split(",")) if isinstance(value, str) else value) for (name, value) in right.items()
+            }
 
         return left == right
 

@@ -157,7 +157,9 @@ def save_dataframes(base_filename, dataframe_dict):
     for suffix, dataframe in dataframe_dict.items():
         filename = f"{base}_{suffix}.tsv"
         with open(filename, mode="w", encoding="utf-8", newline="") as opened_file:
-            dataframe.to_csv(opened_file, sep="\t", index=False, header=True, quoting=csv.QUOTE_NONE, lineterminator="\n")
+            dataframe.to_csv(
+                opened_file, sep="\t", index=False, header=True, quoting=csv.QUOTE_NONE, lineterminator="\n"
+            )
 
 
 def convert_filenames_to_dict(filenames):

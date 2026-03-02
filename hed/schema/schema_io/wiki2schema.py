@@ -597,13 +597,19 @@ class SchemaLoaderWiki(SchemaLoader):
             return self._create_entry(row_number, row, HedSectionKey.Tags, long_tag_name)
 
         self._add_fatal_error(
-            row_number, row, "Schema term is empty or the line is malformed", error_code=HedExceptions.WIKI_DELIMITERS_INVALID
+            row_number,
+            row,
+            "Schema term is empty or the line is malformed",
+            error_code=HedExceptions.WIKI_DELIMITERS_INVALID,
         )
 
     def _add_to_dict(self, row_number, row, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             self._add_fatal_error(
-                row_number, row, "Library tag in unmerged schema has InLibrary attribute", HedExceptions.IN_LIBRARY_IN_UNMERGED
+                row_number,
+                row,
+                "Library tag in unmerged schema has InLibrary attribute",
+                HedExceptions.IN_LIBRARY_IN_UNMERGED,
             )
 
         return self._add_to_dict_base(entry, key_class)

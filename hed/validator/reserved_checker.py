@@ -76,7 +76,9 @@ class ReservedChecker:
         for tag in reserved_tags:
             incompatible_tag = self.get_incompatible(tag, reserved_tags)
             if incompatible_tag:
-                return ErrorHandler.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=incompatible_tag[0], group=group)
+                return ErrorHandler.format_error(
+                    ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=incompatible_tag[0], group=group
+                )
         return []
 
     def check_tag_requirements(self, group, reserved_tags):
@@ -90,7 +92,9 @@ class ReservedChecker:
         """
         [requires_defs, defs] = self.get_def_information(group, reserved_tags)
         if len(requires_defs) > 1:
-            return ErrorHandler.format_error(ValidationErrors.HED_RESERVED_TAG_REPEATED, tag=requires_defs[0], group=group)
+            return ErrorHandler.format_error(
+                ValidationErrors.HED_RESERVED_TAG_REPEATED, tag=requires_defs[0], group=group
+            )
         if len(requires_defs) == 1 and len(defs) != 1:
             return ErrorHandler.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=requires_defs[0])
 

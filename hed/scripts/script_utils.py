@@ -93,7 +93,9 @@ def format_validation_results(
 
         # Apply error limiting if requested
         if error_limit:
-            filtered_issues, code_counts = ErrorHandler.filter_issues_by_count(issue_list, error_limit, by_file=errors_by_file)
+            filtered_issues, code_counts = ErrorHandler.filter_issues_by_count(
+                issue_list, error_limit, by_file=errors_by_file
+            )
             output += "Error counts by code: "
             output += "  ".join(f"{code}:{count}" for code, count in code_counts.items()) + "\n"
             output += f"Number of issues after filtering: {len(filtered_issues)}\n"

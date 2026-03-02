@@ -121,7 +121,8 @@ class TestHedStringSplitDef(unittest.TestCase):
 
     def test_case_4(self):
         hed_string = HedString(
-            "(def/CustomTag1,(LightBlue,def/CustomTag2/123,(Wink,Communicate)))," + "Face,def/CustomTag3/abc", self.schema
+            "(def/CustomTag1,(LightBlue,def/CustomTag2/123,(Wink,Communicate)))," + "Face,def/CustomTag3/abc",
+            self.schema,
         )
         def_names = ["CustomTag1", "CustomTag2", "CustomTag3"]
         expected_string = "((LightBlue,(Wink,Communicate))),Face"

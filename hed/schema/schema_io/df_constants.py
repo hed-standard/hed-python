@@ -80,12 +80,20 @@ link = "link"
 type = "Type"
 properties = "Properties"  # for the schema properties, this is the column name in the properties dataframe
 description = "description"
-in_library = "in_library"  # for extras sections, tracks which library an entry came from (internal metadata, not serialized)
+in_library = (
+    "in_library"  # for extras sections, tracks which library an entry came from (internal metadata, not serialized)
+)
 
 struct_columns = [hed_id, name, attributes, subclass_of, dcdescription]
 tag_columns = [hed_id, name, level, subclass_of, attributes, dcdescription]
 unit_columns = [hed_id, name, subclass_of, has_unit_class, attributes, dcdescription]
-attribute_columns = [hed_id, name, type, properties, dcdescription]  # For AnnotationProperty, DataProperty, and ObjectProperty
+attribute_columns = [
+    hed_id,
+    name,
+    type,
+    properties,
+    dcdescription,
+]  # For AnnotationProperty, DataProperty, and ObjectProperty
 property_columns = [hed_id, name, type, dcdescription]
 prefix_columns = [prefix, namespace, description]
 external_annotation_columns = [prefix, id, iri, description]

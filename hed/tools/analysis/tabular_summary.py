@@ -29,7 +29,9 @@ class TabularSummary:
         self.categorical_limit = categorical_limit
         if value_cols and skip_cols and set(value_cols).intersection(skip_cols):
             raise HedFileError(
-                "ValueSkipOverlap", f"Value columns {str(value_cols)} and skip columns {str(skip_cols)} cannot overlap", ""
+                "ValueSkipOverlap",
+                f"Value columns {str(value_cols)} and skip columns {str(skip_cols)} cannot overlap",
+                "",
             )
         if value_cols:
             for value in value_cols:
@@ -257,11 +259,15 @@ class TabularSummary:
         val_cols = self.value_info.keys()
         for col in new_cat_cols:
             if col in val_cols:
-                raise HedFileError("CatColShouldBeValueCol", f"Categorical column [{str(col)}] is already a value column", "")
+                raise HedFileError(
+                    "CatColShouldBeValueCol", f"Categorical column [{str(col)}] is already a value column", ""
+                )
             elif col in self.skip_cols:
                 continue
             else:
-                self._update_categorical(col, col_dict.categorical_info[col], col_dict.categorical_counts.get(col, [0, 0]))
+                self._update_categorical(
+                    col, col_dict.categorical_info[col], col_dict.categorical_counts.get(col, [0, 0])
+                )
 
     def _update_dict_skip(self, col_dict):
         """Update this summary with the skip column information from another summary.
@@ -277,7 +283,9 @@ class TabularSummary:
         val_cols = self.value_info.keys()
         for col in col_dict.skip_cols:
             if col in cat_cols or col in val_cols:
-                raise HedFileError("SkipColInvalid", f"Skip column [{str(col)}] is already a categorical or value column", "")
+                raise HedFileError(
+                    "SkipColInvalid", f"Skip column [{str(col)}] is already a categorical or value column", ""
+                )
             elif col not in self.skip_cols:
                 self.skip_cols.append(col)
 

@@ -145,7 +145,11 @@ class TestConvertToLongTag(TestConvertTag):
         }
         expected_errors = {
             "validThenInvalid": self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=55, index_in_tag_end=60, expected_parent_tag="Event"
+                ValidationErrors.INVALID_PARENT_NODE,
+                tag=0,
+                index_in_tag=55,
+                index_in_tag_end=60,
+                expected_parent_tag="Event",
             ),
             "singleLevel": self.format_error(
                 ValidationErrors.INVALID_PARENT_NODE,
@@ -169,7 +173,11 @@ class TestConvertToLongTag(TestConvertTag):
                 expected_parent_tag="Item/Object/Geometric-object",
             ),
             "partialDuplicate": self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=17, index_in_tag_end=21, expected_parent_tag="Item"
+                ValidationErrors.INVALID_PARENT_NODE,
+                tag=0,
+                index_in_tag=17,
+                index_in_tag_end=21,
+                expected_parent_tag="Item",
             ),
         }
         self.validator(test_strings, expected_results, expected_errors)
@@ -188,12 +196,22 @@ class TestConvertToLongTag(TestConvertTag):
             "validChild": "InvalidEvent/Event",
         }
         expected_errors = {
-            "single": self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            "invalidChild": self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            "invalidChildValidParent": self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=6, index_in_tag_end=11, expected_parent_tag="Event"
+            "single": self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12
             ),
-            "validChild": self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            "invalidChild": self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12
+            ),
+            "invalidChildValidParent": self.format_error(
+                ValidationErrors.INVALID_PARENT_NODE,
+                tag=0,
+                index_in_tag=6,
+                index_in_tag_end=11,
+                expected_parent_tag="Event",
+            ),
+            "validChild": self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12
+            ),
         }
         self.validator(test_strings, expected_results, expected_errors)
 
@@ -328,7 +346,11 @@ class TestConvertToShortTag(TestConvertTag):
         }
         expected_errors = {
             "validThenInvalid": self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=61, index_in_tag_end=66, expected_parent_tag="Event"
+                ValidationErrors.INVALID_PARENT_NODE,
+                tag=0,
+                index_in_tag=61,
+                index_in_tag_end=66,
+                expected_parent_tag="Event",
             ),
             "singleLevel": self.format_error(
                 ValidationErrors.INVALID_PARENT_NODE,
@@ -352,7 +374,11 @@ class TestConvertToShortTag(TestConvertTag):
                 expected_parent_tag="Item/Object/Geometric-object",
             ),
             "duplicate": self.format_error(
-                ValidationErrors.INVALID_PARENT_NODE, tag=0, index_in_tag=29, index_in_tag_end=33, expected_parent_tag="Item"
+                ValidationErrors.INVALID_PARENT_NODE,
+                tag=0,
+                index_in_tag=29,
+                index_in_tag_end=33,
+                expected_parent_tag="Item",
             ),
         }
         self.validator(test_strings, expected_results, expected_errors)
@@ -507,8 +533,12 @@ class TestConvertHedStringToShort(TestConvertTag):
             "doubleWithValid": double + ",Car/Minivan",
         }
         expected_errors = {
-            "single": self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            "double": self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            "single": self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12
+            ),
+            "double": self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12
+            ),
             "both": self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12)
             + self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=1, index_in_tag=0, index_in_tag_end=12),
             "singleWithTwoValid": self.format_error(
@@ -626,8 +656,12 @@ class TestConvertHedStringToLong(TestConvertTag):
             "doubleWithValid": double + ",Item/Object/Man-made-object/Vehicle/Car/Minivan",
         }
         expected_errors = {
-            "single": self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
-            "double": self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12),
+            "single": self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12
+            ),
+            "double": self.format_error(
+                ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12
+            ),
             "both": self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=0, index_in_tag=0, index_in_tag_end=12)
             + self.format_error(ValidationErrors.NO_VALID_TAG_FOUND, tag=1, index_in_tag=0, index_in_tag_end=12),
             "singleWithTwoValid": self.format_error(

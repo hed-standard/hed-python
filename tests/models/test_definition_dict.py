@@ -120,7 +120,9 @@ class TestDefinitionDict(TestDefBase):
                 value_class="nameClass",
             ),
             "defInGroup": self.format_error(
-                DefinitionErrors.DEF_TAG_IN_DEFINITION, tag=HedTag("Def/OkayDef", self.hed_schema), def_name="ValidDefName"
+                DefinitionErrors.DEF_TAG_IN_DEFINITION,
+                tag=HedTag("Def/OkayDef", self.hed_schema),
+                def_name="ValidDefName",
             ),
             "defExpandInGroup": self.format_error(
                 ValidationErrors.HED_TAGS_NOT_ALLOWED,
@@ -180,7 +182,9 @@ class TestDefinitionDict(TestDefBase):
 
         # Good input string
         def_dict2 = DefinitionDict()
-        def_dict2.add_definitions("(Definition/testdefplaceholder/#,(Acceleration/#,Item/TestDef2, Red))", self.hed_schema)
+        def_dict2.add_definitions(
+            "(Definition/testdefplaceholder/#,(Acceleration/#,Item/TestDef2, Red))", self.hed_schema
+        )
         self.assertEqual(len(def_dict2.issues), 1)
         self.assertEqual(len(def_dict2.defs), 1)
 

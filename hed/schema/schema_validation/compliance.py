@@ -321,7 +321,9 @@ class SchemaValidator:
             for name, dups in self.hed_schema[section_key].duplicate_names.items():
                 libraries = {e.has_attribute(HedKey.InLibrary) for e in dups}
                 code = (
-                    SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY if len(libraries) == 2 else SchemaErrors.SCHEMA_DUPLICATE_NODE
+                    SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY
+                    if len(libraries) == 2
+                    else SchemaErrors.SCHEMA_DUPLICATE_NODE
                 )
                 issues += self.error_handler.format_error_with_context(
                     code,

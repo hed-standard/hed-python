@@ -86,7 +86,9 @@ class Test(unittest.TestCase):
             SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, "dummy", problem_char="#", char_index=0
         )
         self.assertTrue(len(error_list) == 2)
-        filtered_list = self.error_handler.filter_issues_by_severity(issues_list=error_list, severity=ErrorSeverity.ERROR)
+        filtered_list = self.error_handler.filter_issues_by_severity(
+            issues_list=error_list, severity=ErrorSeverity.ERROR
+        )
         self.assertTrue(len(filtered_list) == 1)
 
     def test_printable_issue_string(self):
@@ -126,7 +128,10 @@ class Test(unittest.TestCase):
         self.assertTrue(len(printable_issues) > len(printable_issues2))
         self.assertEqual(printable_issues2.count(my_file), 1)
         printable_issues3 = get_printable_issue_string(
-            error_list, severity=ErrorSeverity.ERROR, skip_filename=False, title="Later added custom title that is longer"
+            error_list,
+            severity=ErrorSeverity.ERROR,
+            skip_filename=False,
+            title="Later added custom title that is longer",
         )
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
         self.assertEqual(printable_issues3.count(my_file), 1)
@@ -135,11 +140,16 @@ class Test(unittest.TestCase):
         self.assertTrue(len(printable_issues) > 10)
         self.assertEqual(printable_issues.count(my_file), 1)
 
-        printable_issues2 = get_printable_issue_string_html(error_list, severity=ErrorSeverity.ERROR, skip_filename=False)
+        printable_issues2 = get_printable_issue_string_html(
+            error_list, severity=ErrorSeverity.ERROR, skip_filename=False
+        )
         self.assertTrue(len(printable_issues) > len(printable_issues2))
         self.assertEqual(printable_issues2.count(my_file), 1)
         printable_issues3 = get_printable_issue_string_html(
-            error_list, severity=ErrorSeverity.ERROR, skip_filename=False, title="Later added custom title that is longer"
+            error_list,
+            severity=ErrorSeverity.ERROR,
+            skip_filename=False,
+            title="Later added custom title that is longer",
         )
         self.assertTrue(len(printable_issues3) > len(printable_issues2))
         self.assertEqual(printable_issues3.count(my_file), 1)

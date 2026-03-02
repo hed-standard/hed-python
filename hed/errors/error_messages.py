@@ -167,7 +167,9 @@ def val_error_invalid_extension(tag):
     return f'Invalid extension on tag - "{tag}"'
 
 
-@hed_tag_error(ValidationErrors.INVALID_PARENT_NODE, has_sub_tag=True, actual_code=ValidationErrors.TAG_EXTENSION_INVALID)
+@hed_tag_error(
+    ValidationErrors.INVALID_PARENT_NODE, has_sub_tag=True, actual_code=ValidationErrors.TAG_EXTENSION_INVALID
+)
 def val_error_invalid_parent(tag, problem_tag, expected_parent_tag):
     return f"In '{tag}', '{problem_tag}' appears as '{str(expected_parent_tag)}' and cannot be used as an extension."
 
@@ -192,7 +194,9 @@ def val_error_missing_column(column_name, column_type):
 
 @hed_error(ValidationErrors.HED_UNKNOWN_COLUMN, default_severity=ErrorSeverity.WARNING)
 def val_error_extra_column(column_name):
-    return f"Column named '{column_name}' found in file, but not specified as a tag column " + "or identified in sidecars."
+    return (
+        f"Column named '{column_name}' found in file, but not specified as a tag column " + "or identified in sidecars."
+    )
 
 
 @hed_error(ValidationErrors.SIDECAR_AND_OTHER_COLUMNS)
@@ -300,7 +304,8 @@ def val_error_tag_group_tag(tag):
 def val_error_top_level_tags(tag, multiple_tags):
     tags_as_string = [str(tag) for tag in multiple_tags]
     return (
-        f"Multiple top level tags found in a single group.  First one found: {str(tag)}. " + f"Remainder:{str(tags_as_string)}"
+        f"Multiple top level tags found in a single group.  First one found: {str(tag)}. "
+        + f"Remainder:{str(tags_as_string)}"
     )
 
 
@@ -359,9 +364,7 @@ def sidecar_na_used(column_name):
 
 @hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_def_tag_in_definition(tag, def_name):
-    return (
-        f"Invalid tag {tag} found in definition for {def_name}. Def, Def-expand, and Definition tags cannot be in definitions."
-    )
+    return f"Invalid tag {tag} found in definition for {def_name}. Def, Def-expand, and Definition tags cannot be in definitions."
 
 
 @hed_error(DefinitionErrors.NO_DEFINITION_CONTENTS, actual_code=ValidationErrors.DEFINITION_INVALID)
@@ -527,7 +530,9 @@ def improper_event_groups(event_types, string, line):
 
 
 @hed_error(
-    TagQualityErrors.MISSING_TASK_ROLE, default_severity=ErrorSeverity.WARNING, actual_code=TagQualityErrors.MISSING_TASK_ROLE
+    TagQualityErrors.MISSING_TASK_ROLE,
+    default_severity=ErrorSeverity.WARNING,
+    actual_code=TagQualityErrors.MISSING_TASK_ROLE,
 )
 def missing_task_role(event_type, string, line):
     return f"The HED string '{string}' at line {line} with event {event_type} has no Task-event-role type tag."

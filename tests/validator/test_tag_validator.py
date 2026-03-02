@@ -99,7 +99,10 @@ class IndividualHedTagsShort(TestHed):
     def test_child_required(self):
         test_strings = {"hasChild": "Experimental-stimulus", "missingChild": "Label"}
         expected_results = {"hasChild": True, "missingChild": False}
-        expected_issues = {"hasChild": [], "missingChild": self.format_error(ValidationErrors.TAG_REQUIRES_CHILD, tag=0)}
+        expected_issues = {
+            "hasChild": [],
+            "missingChild": self.format_error(ValidationErrors.TAG_REQUIRES_CHILD, tag=0),
+        }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
     def test_required_units(self):
@@ -129,7 +132,9 @@ class IndividualHedTagsShort(TestHed):
             "notRequiredNoNumber": [],
             "notRequiredNumber": [],
             "notRequiredScientific": [],
-            "timeValue": self.format_error(ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None),
+            "timeValue": self.format_error(
+                ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None
+            ),
             "invalidTimeValue": self.format_error(
                 ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None
             ),
@@ -208,7 +213,9 @@ class IndividualHedTagsShort(TestHed):
             "incorrectUnit": self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_time_units),
             "incorrectSiUsage": self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_time_units),
             "incorrectPluralUnit": self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units),
-            "incorrectSymbolCapitalizedUnit": self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units),
+            "incorrectSymbolCapitalizedUnit": self.format_error(
+                ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units
+            ),
             "incorrectSymbolCapitalizedUnitModifier": self.format_error(
                 ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units
             ),
@@ -392,7 +399,9 @@ class IndividualHedTagsShort(TestHed):
             hed_string_obj = HedString(test_strings[test_key], self.hed_schema)
             test_issues = hed_string_obj._calculate_to_canonical_forms(validator._hed_schema)
             if not test_issues:
-                test_issues = validator._validate_individual_tags_in_hed_string(hed_string_obj, allow_placeholders=False)
+                test_issues = validator._validate_individual_tags_in_hed_string(
+                    hed_string_obj, allow_placeholders=False
+                )
 
             error_handler = ErrorHandler(check_for_warnings=False)
             error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
@@ -766,7 +775,9 @@ class FullHedString(TestHed):
         }
         expected_issues = {
             "missingOpeningComma": self.format_error(ValidationErrors.COMMA_MISSING, tag="Action/Reach/To touch("),
-            "missingClosingComma": self.format_error(ValidationErrors.COMMA_MISSING, tag="Participant/Effect/Body part/Arm)"),
+            "missingClosingComma": self.format_error(
+                ValidationErrors.COMMA_MISSING, tag="Participant/Effect/Body part/Arm)"
+            ),
             "extraOpeningComma": self.format_error(
                 ValidationErrors.TAG_EMPTY, source_string=test_strings["extraOpeningComma"], char_index=0
             ),
@@ -835,7 +846,12 @@ class FullHedString(TestHed):
             "openingBracket": "Attribute/Object side/Left,Participant/Effect[/Body part/Arm",
             "closingBracket": "Attribute/Object side/Left,Participant/Effect]/Body part/Arm",
         }
-        expected_results = {"openingBrace": False, "closingBrace": False, "openingBracket": False, "closingBracket": False}
+        expected_results = {
+            "openingBrace": False,
+            "closingBrace": False,
+            "openingBracket": False,
+            "closingBracket": False,
+        }
         expected_issues = {
             "openingBrace": self.format_error(
                 ValidationErrors.CHARACTER_INVALID, char_index=45, source_string=test_strings["openingBrace"]
@@ -891,7 +907,9 @@ class FullHedString(TestHed):
                 ValidationErrors.NODE_NAME_EMPTY, index_in_tag=7, index_in_tag_end=9, tag=0
             )
             + self.format_error(ValidationErrors.NODE_NAME_EMPTY, index_in_tag=13, index_in_tag_end=15, tag=0),
-            "tripleSlashes": self.format_error(ValidationErrors.NODE_NAME_EMPTY, index_in_tag=7, index_in_tag_end=10, tag=0)
+            "tripleSlashes": self.format_error(
+                ValidationErrors.NODE_NAME_EMPTY, index_in_tag=7, index_in_tag_end=10, tag=0
+            )
             + self.format_error(ValidationErrors.NODE_NAME_EMPTY, index_in_tag=14, index_in_tag_end=17, tag=0),
             "mixedSingleAndDoubleSlashes": self.format_error(
                 ValidationErrors.NODE_NAME_EMPTY, index_in_tag=7, index_in_tag_end=9, tag=0
@@ -905,7 +923,9 @@ class FullHedString(TestHed):
             "doubleSlashThenSpace": self.format_error(
                 ValidationErrors.NODE_NAME_EMPTY, index_in_tag=5, index_in_tag_end=8, tag=0
             ),
-            "sosPattern": self.format_error(ValidationErrors.NODE_NAME_EMPTY, index_in_tag=5, index_in_tag_end=14, tag=0),
+            "sosPattern": self.format_error(
+                ValidationErrors.NODE_NAME_EMPTY, index_in_tag=5, index_in_tag_end=14, tag=0
+            ),
             "alternatingSlashSpace": self.format_error(
                 ValidationErrors.NODE_NAME_EMPTY, index_in_tag=7, index_in_tag_end=11, tag=0
             )
@@ -936,7 +956,12 @@ class FullHedString(TestHed):
             "(Participant/ID 1 ~ Participant/Effect/Visual ~ Item/Object/Vehicle/Car,"
             " Item/ID/RedCar, Attribute/Visual/Color/Red ~ Attribute/Object control/Perturb)",
         }
-        expected_results = {"noTildeGroup": True, "oneTildeGroup": False, "twoTildeGroup": False, "invalidTildeGroup": False}
+        expected_results = {
+            "noTildeGroup": True,
+            "oneTildeGroup": False,
+            "twoTildeGroup": False,
+            "invalidTildeGroup": False,
+        }
         expected_issues = {
             "noTildeGroup": [],
             "oneTildeGroup": self.format_error(
@@ -985,7 +1010,9 @@ class RequiredTags(TestHed):
         }
         expected_issues = {
             "complete": [],
-            "missingAgent": self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace="Agent/Animal-agent"),
+            "missingAgent": self.format_error(
+                ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace="Agent/Animal-agent"
+            ),
             "missingAction": self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace="Action"),
             "inSubGroup": [],
             "missingAll": self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace="Action")

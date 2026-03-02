@@ -306,7 +306,9 @@ class Schema2JSON(Schema2Base):
                 existing_entry = tags_section[tag_entry.short_tag_name]
                 existing_entry[json_constants.LONG_FORM_KEY] = tag_entry.name
                 existing_entry[json_constants.DESCRIPTION_KEY] = tag_entry.description or ""
-                existing_entry[json_constants.PARENT_KEY] = tag_entry.parent.short_tag_name if tag_entry.parent else None
+                existing_entry[json_constants.PARENT_KEY] = (
+                    tag_entry.parent.short_tag_name if tag_entry.parent else None
+                )
                 existing_entry[json_constants.CHILDREN_KEY] = children_names
                 # Set base tag attributes - include ALL attributes on the base tag
                 all_attrs, explicit_attrs = self._get_tag_attributes(tag_entry)

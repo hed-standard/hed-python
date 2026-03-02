@@ -21,7 +21,8 @@ class Test(unittest.TestCase):
         defs = [
             HedString("(Definition/Cond1, (Condition-variable/Var1, Circle, Square))", hed_schema=schema),
             HedString(
-                "(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))", hed_schema=schema
+                "(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))",
+                hed_schema=schema,
             ),
             HedString(
                 "(Definition/Cond3/#, (Organizational-property/Condition-variable/Var3, Label/#, Ellipse, Cross))",
@@ -109,7 +110,9 @@ class Test(unittest.TestCase):
     def test_constructor_multiple_values(self):
         var_manager = HedType(self.event_man2, "run-01")
         self.assertIsInstance(var_manager, HedType)
-        self.assertEqual(len(var_manager._type_map), 3, "Constructor should have right number of type_variables if multiple")
+        self.assertEqual(
+            len(var_manager._type_map), 3, "Constructor should have right number of type_variables if multiple"
+        )
         var_fact1 = var_manager.get_type_value_factors("var2")
         self.assertIsInstance(var_fact1, HedTypeFactors)
         var_fact2 = var_manager.get_type_value_factors("lumber")
@@ -131,7 +134,9 @@ class Test(unittest.TestCase):
     def test_variable_summary(self):
         var_manager = HedType(self.event_man2, "run-01")
         self.assertIsInstance(var_manager, HedType)
-        self.assertEqual(len(var_manager._type_map), 3, "Constructor should have right number of type_variables if multiple")
+        self.assertEqual(
+            len(var_manager._type_map), 3, "Constructor should have right number of type_variables if multiple"
+        )
         for variable in var_manager.get_type_value_names():
             var_sum = var_manager.get_type_value_factors(variable)
             summary = var_sum.get_summary()
@@ -140,7 +145,9 @@ class Test(unittest.TestCase):
     def test_get_variable_factors(self):
         var_manager = HedType(self.event_man2, "run-01")
         self.assertIsInstance(var_manager, HedType)
-        self.assertEqual(len(var_manager._type_map), 3, "Constructor should have right number of type_variables if multiple")
+        self.assertEqual(
+            len(var_manager._type_map), 3, "Constructor should have right number of type_variables if multiple"
+        )
 
         for variable in var_manager.get_type_value_names():
             var_sum = var_manager.get_type_value_factors(variable)

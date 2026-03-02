@@ -19,11 +19,14 @@ class Test(unittest.TestCase):
         defs = [
             HedString("(Definition/Cond1, (Condition-variable/Var1, Circle, Square))", hed_schema=schema),
             HedString(
-                "(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))", hed_schema=schema
+                "(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))",
+                hed_schema=schema,
             ),
             HedString("(Definition/Cond3/#, (Condition-variable/Var3, Label/#, Ellipse, Cross))", hed_schema=schema),
             HedString("(Definition/Cond4, (Condition-variable, Rectangle, Triangle))", hed_schema=schema),
-            HedString("(Definition/Cond5, (Condition-variable/Lumber, Action, Sensory-presentation))", hed_schema=schema),
+            HedString(
+                "(Definition/Cond5, (Condition-variable/Lumber, Action, Sensory-presentation))", hed_schema=schema
+            ),
             HedString("(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Agent, Move))", hed_schema=schema),
         ]
         def_dict = DefinitionDict()
@@ -90,7 +93,9 @@ class Test(unittest.TestCase):
     def test_constructor_multiple_values(self):
         type_var = HedType(EventManager(self.input_data2, self.schema, extra_defs=self.def_dict), "test-it")
         self.assertIsInstance(type_var, HedType, "Constructor should create a HedType from an event manager")
-        self.assertEqual(len(type_var._type_map), 3, "Constructor should have right number of type_variables if multiple")
+        self.assertEqual(
+            len(type_var._type_map), 3, "Constructor should have right number of type_variables if multiple"
+        )
 
     def test_constructor_unmatched(self):
         with self.assertRaises(KeyError) as context:
@@ -130,7 +135,9 @@ class Test(unittest.TestCase):
     def test_extract_definition_variables(self):
         var_manager = HedType(EventManager(self.input_data1, self.schema, extra_defs=self.def_dict), "run-01")
         var_levels = var_manager._type_map["var3"].levels
-        self.assertNotIn("cond3/7", var_levels, "_extract_definition_variables before extraction def/cond3/7 not in levels")
+        self.assertNotIn(
+            "cond3/7", var_levels, "_extract_definition_variables before extraction def/cond3/7 not in levels"
+        )
         tag = HedTag("Def/Cond3/7", hed_schema=self.schema)
         var_manager._extract_definition_variables(tag, 5)
         self.assertIn("cond3/7", var_levels, "_extract_definition_variables after extraction def/cond3/7 not in levels")

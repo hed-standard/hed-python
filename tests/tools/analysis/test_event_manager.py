@@ -203,7 +203,10 @@ class Test(unittest.TestCase):
 
     def test_duration_context(self):
         df = pd.DataFrame(
-            {"onset": [1, 2, 3, 4, 5], "HED": ["(Duration/5.0 s, (Black))", "(Duration/2 s, (Red))", "Blue", "n/a", "Label/1"]}
+            {
+                "onset": [1, 2, 3, 4, 5],
+                "HED": ["(Duration/5.0 s, (Black))", "(Duration/2 s, (Red))", "Blue", "n/a", "Label/1"],
+            }
         )
         manager = EventManager(TabularInput(df), self.schema)
         hed, base, context = manager.unfold_context()
@@ -213,7 +216,10 @@ class Test(unittest.TestCase):
 
     def test_duration_context2(self):
         df = pd.DataFrame(
-            {"onset": [1, 2, 3, 4, 5], "HED": ["(Duration/1.0 s, (Black))", "(Duration/2 s, (Red))", "Blue", "n/a", "Label/1"]}
+            {
+                "onset": [1, 2, 3, 4, 5],
+                "HED": ["(Duration/1.0 s, (Black))", "(Duration/2 s, (Red))", "Blue", "n/a", "Label/1"],
+            }
         )
         manager = EventManager(TabularInput(df), self.schema)
         hed, base, context = manager.unfold_context()
@@ -223,7 +229,10 @@ class Test(unittest.TestCase):
 
     def test_duration_context_same_onset(self):
         df = pd.DataFrame(
-            {"onset": [1, 1, 3, 4, 5], "HED": ["(Duration/3.0 s, (Black))", "(Duration/2 s, (Red))", "Blue", "n/a", "Label/1"]}
+            {
+                "onset": [1, 1, 3, 4, 5],
+                "HED": ["(Duration/3.0 s, (Black))", "(Duration/2 s, (Red))", "Blue", "n/a", "Label/1"],
+            }
         )
         manager = EventManager(TabularInput(df), self.schema)
         hed, base, context = manager.unfold_context()

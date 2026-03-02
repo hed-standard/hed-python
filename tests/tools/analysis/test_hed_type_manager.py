@@ -25,7 +25,9 @@ class Test(unittest.TestCase):
 
     def test_constructor(self):
         var_manager = HedTypeManager(EventManager(self.input_data, self.schema))
-        self.assertIsInstance(var_manager, HedTypeManager, "Constructor should create a HedTypeManager from a tabular input")
+        self.assertIsInstance(
+            var_manager, HedTypeManager, "Constructor should create a HedTypeManager from a tabular input"
+        )
         self.assertEqual(
             len(var_manager.event_manager.hed_strings),
             len(var_manager.event_manager.onsets),
@@ -35,7 +37,9 @@ class Test(unittest.TestCase):
 
     def test_summarize(self):
         var_manager = HedTypeManager(EventManager(self.input_data, self.schema))
-        self.assertIsInstance(var_manager, HedTypeManager, "Constructor should create a HedTypeManager from a tabular input")
+        self.assertIsInstance(
+            var_manager, HedTypeManager, "Constructor should create a HedTypeManager from a tabular input"
+        )
         # ToDo: Test summarize
 
     def test_add_type_variable(self):
@@ -43,9 +47,13 @@ class Test(unittest.TestCase):
         self.assertFalse(var_manager._type_map, "constructor has empty map")
         var_manager.add_type("Condition-variable")
         self.assertEqual(len(var_manager._type_map), 1, "add_type_variable has 1 element map after one type added")
-        self.assertIn("condition-variable", var_manager._type_map, "add_type_variable converts type elements to lower case")
+        self.assertIn(
+            "condition-variable", var_manager._type_map, "add_type_variable converts type elements to lower case"
+        )
         var_manager.add_type("Condition-variable")
-        self.assertEqual(len(var_manager._type_map), 1, "add_type_variable has 1 element map after same type is added twice")
+        self.assertEqual(
+            len(var_manager._type_map), 1, "add_type_variable has 1 element map after same type is added twice"
+        )
         var_manager.add_type("task")
         self.assertEqual(len(var_manager._type_map), 2, "add_type_variable has 2 element map after two types are added")
 
@@ -89,10 +97,14 @@ class Test(unittest.TestCase):
         var_manager.add_type("Condition-variable")
         this_var = var_manager.get_type("condition-variable")
         self.assertIsInstance(this_var, HedType, "get_type returns a non-empty map when key lower case")
-        self.assertEqual(len(this_var.type_variables), 3, "get_type_variable_map map has right length when key lower case")
+        self.assertEqual(
+            len(this_var.type_variables), 3, "get_type_variable_map map has right length when key lower case"
+        )
         this_var2 = var_manager.get_type("Condition-variable")
         self.assertIsInstance(this_var2, HedType, "get_type returns a non-empty map when key upper case")
-        self.assertEqual(len(this_var2.type_variables), 3, "get_type_variable_map map has right length when key upper case")
+        self.assertEqual(
+            len(this_var2.type_variables), 3, "get_type_variable_map map has right length when key upper case"
+        )
 
     def test_get_type_variable_factor(self):
         var_manager = HedTypeManager(EventManager(self.input_data, self.schema))

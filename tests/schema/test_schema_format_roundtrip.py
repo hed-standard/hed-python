@@ -68,11 +68,15 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
             schema, schema_from_mediawiki, f"MEDIAWIKI roundtrip failed for {schema_name} (save_merged={save_merged})"
         )
         self.assertEqual(schema, schema_from_tsv, f"TSV roundtrip failed for {schema_name} (save_merged={save_merged})")
-        self.assertEqual(schema, schema_from_json, f"JSON roundtrip failed for {schema_name} (save_merged={save_merged})")
+        self.assertEqual(
+            schema, schema_from_json, f"JSON roundtrip failed for {schema_name} (save_merged={save_merged})"
+        )
 
         # Compare all formats to each other
         self.assertEqual(
-            schema_from_xml, schema_from_mediawiki, f"XML vs MEDIAWIKI mismatch for {schema_name} (save_merged={save_merged})"
+            schema_from_xml,
+            schema_from_mediawiki,
+            f"XML vs MEDIAWIKI mismatch for {schema_name} (save_merged={save_merged})",
         )
         self.assertEqual(
             schema_from_xml, schema_from_tsv, f"XML vs TSV mismatch for {schema_name} (save_merged={save_merged})"
@@ -321,7 +325,9 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
             # Drop in_library column if present (internal metadata not relevant for comparison)
             orig_compare = orig_df.drop(columns=[df_constants.in_library], errors="ignore")
             reloaded_compare = reloaded_df.drop(columns=[df_constants.in_library], errors="ignore")
-            self.assertTrue(orig_compare.equals(reloaded_compare), f"Extras section '{key}' should match after roundtrip")
+            self.assertTrue(
+                orig_compare.equals(reloaded_compare), f"Extras section '{key}' should match after roundtrip"
+            )
 
     def test_library_schema_extras_roundtrip(self):
         """Test that library schema extras (external annotations, etc.) roundtrip correctly."""
@@ -341,7 +347,9 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
 
         # Check reloaded has all extras
         reloaded_extras = getattr(reloaded, "extras", {}) or {}
-        self.assertEqual(set(orig_extras.keys()), set(reloaded_extras.keys()), "Library schema extras sections should match")
+        self.assertEqual(
+            set(orig_extras.keys()), set(reloaded_extras.keys()), "Library schema extras sections should match"
+        )
 
         # Verify each extras dataframe matches
         for key in orig_extras.keys():
@@ -426,7 +434,9 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         self.assertEqual(len(errors), 0, "Current schemas should have no compliance errors")
 
         # Load an older schema with known issues (HED8.0.0t has compliance problems)
-        old_schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml")
+        old_schema_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml"
+        )
         if os.path.exists(old_schema_path):
             old_schema = load_schema(old_schema_path)
             old_issues = old_schema.check_compliance()
@@ -435,7 +445,9 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
     def test_duplicate_detection(self):
         """Test that duplicate units/unit classes are detected during compliance checking."""
         # Test duplicate unit
-        dup_unit_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/duplicate_unit.xml")
+        dup_unit_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/duplicate_unit.xml"
+        )
         if os.path.exists(dup_unit_path):
             schema = load_schema(dup_unit_path)
             issues = schema.check_compliance()
@@ -454,7 +466,9 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
 
     def test_saving_with_namespace_prefix(self):
         """Test that schemas loaded with a namespace prefix can be saved correctly."""
-        old_schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml")
+        old_schema_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml"
+        )
         if not os.path.exists(old_schema_path):
             self.skipTest("Test schema file not available")
 

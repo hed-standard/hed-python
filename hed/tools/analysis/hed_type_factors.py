@@ -58,7 +58,9 @@ class HedTypeFactors:
         sum_factors = factors.sum(axis=1)
         if factor_encoding == "categorical" and sum_factors.max() > 1:
             raise HedFileError(
-                "MultipleFactorSameEvent", f"{self.type_value} has multiple occurrences at index {sum_factors.idxmax()}", ""
+                "MultipleFactorSameEvent",
+                f"{self.type_value} has multiple occurrences at index {sum_factors.idxmax()}",
+                "",
             )
         elif factor_encoding == "categorical":
             return self._one_hot_to_categorical(factors, levels)

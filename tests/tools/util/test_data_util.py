@@ -77,7 +77,9 @@ class Test(unittest.TestCase):
         self.assertEqual(len(df_new1), 87, "get_new_dataframe should return correct number of rows")
         self.assertEqual(len(df_new1.columns), 4, "get_new_dataframe should return correct number of rows")
         df_new.loc[0, "type"] = "Pear"
-        self.assertNotEqual(df_new.iloc[0]["type"], df_new1.iloc[0]["type"], "get_new_dataframe returns a new dataframe")
+        self.assertNotEqual(
+            df_new.iloc[0]["type"], df_new1.iloc[0]["type"], "get_new_dataframe returns a new dataframe"
+        )
 
     def test_get_key_hash(self):
         test_list = ["a", 1, "c"]
@@ -97,7 +99,9 @@ class Test(unittest.TestCase):
         for index, row in stern_df.iterrows():
             key = get_row_hash(row, key_columns)
             my_map[key] = index
-        self.assertEqual(len(my_map.keys()), len(stern_df), "get_row_hash should uniquely hash all of the keys in stern map")
+        self.assertEqual(
+            len(my_map.keys()), len(stern_df), "get_row_hash should uniquely hash all of the keys in stern map"
+        )
 
     def test_get_value_dict(self):
         conv_dict = get_value_dict(self.sampling_rate_path)
@@ -184,7 +188,9 @@ class Test(unittest.TestCase):
         self.assertFalse(missing, "separate_values should no missing columns when target columns subset of base")
         present, missing = separate_values(base_cols, base_cols)
         self.assertEqual(
-            len(present), len(base_cols), "separate_values should have target columns present when target columns equals base"
+            len(present),
+            len(base_cols),
+            "separate_values should have target columns present when target columns equals base",
         )
         self.assertFalse(missing, "separate_values should no missing columns when target columns equals base")
         present, missing = separate_values(base_cols, ["g", "h"])

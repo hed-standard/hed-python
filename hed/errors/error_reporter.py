@@ -626,7 +626,10 @@ def create_doc_link(error_code):
     Returns:
         Union[str, None]: The URL if it's a valid code.
     """
-    if error_code in known_error_codes["hed_validation_errors"] or error_code in known_error_codes["schema_validation_errors"]:
+    if (
+        error_code in known_error_codes["hed_validation_errors"]
+        or error_code in known_error_codes["schema_validation_errors"]
+    ):
         modified_error_code = error_code.replace("_", "-").lower()
         return f"https://www.hedtags.org/hed-specification/Appendix_B.html#{modified_error_code}"
     return None

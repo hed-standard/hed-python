@@ -36,7 +36,9 @@ def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name) -> list:
     """
     issues = []
     if not tag_entry.name.endswith("/#"):
-        issues += ErrorHandler.format_error(SchemaWarnings.SCHEMA_NON_PLACEHOLDER_HAS_CLASS, tag_entry.name, attribute_name)
+        issues += ErrorHandler.format_error(
+            SchemaWarnings.SCHEMA_NON_PLACEHOLDER_HAS_CLASS, tag_entry.name, attribute_name
+        )
 
     if tag_entry.parent:
         other_entries = [child for child in tag_entry.parent.children.values() if child is not tag_entry]
@@ -73,7 +75,10 @@ def attribute_is_deprecated(hed_schema, tag_entry, attribute_name) -> list:
         and not tag_entry.has_attribute(HedKey.DeprecatedFrom)
     ):
         issues += ErrorHandler.format_error(
-            SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED, tag_entry.name, attribute_entry.name, attribute_name
+            SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED,
+            tag_entry.name,
+            attribute_entry.name,
+            attribute_name,
         )
 
     return issues
@@ -139,7 +144,11 @@ def unit_exists(hed_schema, tag_entry, attribute_name) -> list:
         issues += ErrorHandler.format_error(
             SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_INVALID, tag_entry.name, unit, tag_entry.units
         )
-    elif unit_entry and unit_entry.has_attribute(HedKey.DeprecatedFrom) and not tag_entry.has_attribute(HedKey.DeprecatedFrom):
+    elif (
+        unit_entry
+        and unit_entry.has_attribute(HedKey.DeprecatedFrom)
+        and not tag_entry.has_attribute(HedKey.DeprecatedFrom)
+    ):
         issues += ErrorHandler.format_error(
             SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_DEPRECATED, tag_entry.name, unit_entry.name
         )
@@ -231,7 +240,9 @@ def conversion_factor(hed_schema, tag_entry, attribute_name) -> list:
     except (ValueError, AttributeError):
         pass
     if not isinstance(cf, float) or cf <= 0.0:
-        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE, tag_entry.name, cf)
+        issues += ErrorHandler.format_error(
+            SchemaAttributeErrors.SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE, tag_entry.name, cf
+        )
 
     return issues
 

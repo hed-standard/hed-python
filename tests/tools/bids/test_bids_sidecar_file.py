@@ -156,7 +156,9 @@ class Test(unittest.TestCase):
         dict4 = {"a": "b", "c": {"d": "HED"}}
         self.assertFalse(BidsSidecarFile.is_hed(dict4), "is_hed returns False if HED at second level is not a key")
         dict5 = {"a": "b", "c": {"d": "HED_assembled"}}
-        self.assertFalse(BidsSidecarFile.is_hed(dict5), "is_hed returns False if HED_assembled at second level is not a key")
+        self.assertFalse(
+            BidsSidecarFile.is_hed(dict5), "is_hed returns False if HED_assembled at second level is not a key"
+        )
         dict6 = {"a": "b", "c": {"HED": "a", "Levels": {"e": "f"}}}
         self.assertTrue(BidsSidecarFile.is_hed(dict6), "is_hed returns True if HED key at second level")
         dict7 = {"a": "b", "c": {"HED_assembled": "a", "Levels": {"e": "f"}}}

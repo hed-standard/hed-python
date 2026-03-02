@@ -25,7 +25,9 @@ class MyTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # New directory structure: hed-tests/json_test_data/
-        test_base_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-tests/json_test_data"))
+        test_base_dir = os.path.realpath(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-tests/json_test_data")
+        )
         schema_test_dir = os.path.join(test_base_dir, "schema_test_data")
         validation_test_dir = os.path.join(test_base_dir, "validation_test_data")
 
@@ -50,7 +52,9 @@ class MyTestCase(unittest.TestCase):
                 schema_files = [
                     os.path.join(schema_test_dir, f)
                     for f in os.listdir(schema_test_dir)
-                    if os.path.isfile(os.path.join(schema_test_dir, f)) and f.endswith(".json") and not f.endswith(".backup")
+                    if os.path.isfile(os.path.join(schema_test_dir, f))
+                    and f.endswith(".json")
+                    and not f.endswith(".backup")
                 ]
                 cls.test_files.extend(schema_files)
 
@@ -111,7 +115,16 @@ class MyTestCase(unittest.TestCase):
                     if not issues:
                         issues += [{"code": e.code, "message": e.message}]
                     self.report_result(
-                        "fails", issues, error_code, all_codes, description, name, "dummy", "Schema", file_basename, test_index
+                        "fails",
+                        issues,
+                        error_code,
+                        all_codes,
+                        description,
+                        name,
+                        "dummy",
+                        "Schema",
+                        file_basename,
+                        test_index,
                     )
                     continue
                 except Exception as e:
@@ -434,7 +447,9 @@ class MyTestCase(unittest.TestCase):
                     test_index,
                 )
 
-    def _run_single_schema_test(self, info, error_code, all_codes, description, name, error_handler, test_file, test_index):
+    def _run_single_schema_test(
+        self, info, error_code, all_codes, description, name, error_handler, test_file, test_index
+    ):
         for result, tests in info.items():
             for sub_test_index, test in enumerate(tests, 1):
                 schema_string = "\n".join(test)

@@ -33,7 +33,10 @@ class Test(unittest.TestCase):
         )
         cls.json_path = json_path
         json_sm_path = os.path.realpath(os.path.join(curation_base_dir, "task-FacePerceptionSmall_events.json"))
-        cls.sidecar1a = {"a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"}, "b": {"HED": "Purple"}}
+        cls.sidecar1a = {
+            "a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
+            "b": {"HED": "Purple"},
+        }
         cls.sidecar1b = {
             "a": {"c": {"c1": "blech3", "c2": "blech3a"}, "d": "blech4", "e": "blech5"},
             "b": {"HED": "Purple", "Description": "Its a color."},
@@ -105,14 +108,18 @@ class Test(unittest.TestCase):
         self.assertEqual(remainder3, "Junk, Bells", "extract_tags should return the right remainder when at beginning")
         self.assertIsInstance(extracted3, list, "extract_tags should return a list when at beginning")
         self.assertEqual(len(extracted3), 1, "extract_tags should return a list of the right length when at beginning")
-        self.assertEqual(extracted3[0], "Description/Pluck this leaf.", "extract_tags return right item when at beginning")
+        self.assertEqual(
+            extracted3[0], "Description/Pluck this leaf.", "extract_tags return right item when at beginning"
+        )
 
         str4 = "Junk, Bells, Description/Pluck this leaf."
         remainder4, extracted4 = annotation_util.extract_tags(str4, "Description/")
         self.assertEqual(remainder4, "Junk, Bells", "extract_tags should return the right remainder when at end")
         self.assertIsInstance(extracted4, list, "extract_tags should return a list when at beginning")
         self.assertEqual(len(extracted4), 1, "extract_tags should return a list of the right length when at end")
-        self.assertEqual(extracted4[0], "Description/Pluck this leaf.", "extract_tags return right item when at beginning")
+        self.assertEqual(
+            extracted4[0], "Description/Pluck this leaf.", "extract_tags return right item when at beginning"
+        )
 
     def extract_tag_multiple_matches(self):
         str5 = "Bear, Description/Pluck this leaf., Junk, Description/Another description."
@@ -129,7 +136,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(extracted6, list, "extract_tags should return a list when parens")
         self.assertEqual(len(extracted6), 2, "extract_tags should return a list of the right length when parens")
         self.assertEqual(extracted6[0], "Description/Pluck this leaf.", "extract_tags return right item when parens")
-        self.assertEqual(extracted6[1], "Description/Another description.", "extract_tags return right item when parens")
+        self.assertEqual(
+            extracted6[1], "Description/Another description.", "extract_tags return right item when parens"
+        )
 
     def test_extract_tag_with_parens(self):
         str7 = "Bear, ((Informational-property/Description/Pluck this leaf., Junk), Description/Another description.)"
@@ -138,9 +147,13 @@ class Test(unittest.TestCase):
         self.assertIsInstance(extracted7, list, "extract_tags should return a list when parens")
         self.assertEqual(len(extracted7), 2, "extract_tags should return a list of the right length when parens")
         self.assertEqual(
-            extracted7[0], "Informational-property/Description/Pluck this leaf.", "extract_tags return right item when parens"
+            extracted7[0],
+            "Informational-property/Description/Pluck this leaf.",
+            "extract_tags return right item when parens",
         )
-        self.assertEqual(extracted7[1], "Description/Another description.", "extract_tags return right item when parens")
+        self.assertEqual(
+            extracted7[1], "Description/Another description.", "extract_tags return right item when parens"
+        )
 
     def test_df_to_hed(self):
         df1 = annotation_util.hed_to_df(self.sidecar1a, col_names=None)
@@ -153,7 +166,10 @@ class Test(unittest.TestCase):
         self.assertEqual(len(hed2), 1, "df_to_hed ")
 
     def test_df_to_hed_wrong_format(self):
-        data = [["event_code", "baloney", "this is baloney", "junk1"], ["event_code", "sausage", "this is sausage", "junk2"]]
+        data = [
+            ["event_code", "baloney", "this is baloney", "junk1"],
+            ["event_code", "sausage", "this is sausage", "junk2"],
+        ]
         df = DataFrame(data, columns=["column_name", "column_value", "description", "blech"])
         with self.assertRaises(HedFileError) as context:
             annotation_util.df_to_hed(df)
@@ -203,11 +219,17 @@ class Test(unittest.TestCase):
         self.assertEqual(len(entry2), 2, "generate_sidecar_entry should have 2 entries when no column values")
         self.assertIn("Description", entry2, "generate_sidecar_entry should have a Description when no column values")
         self.assertIn("HED", entry2, "generate_sidecar_entry should have a Description when no column values")
-        self.assertIsInstance(entry2["HED"], str, "generate_sidecar_entry HED entry should be str when no column values")
+        self.assertIsInstance(
+            entry2["HED"], str, "generate_sidecar_entry HED entry should be str when no column values"
+        )
 
     def test_generate_sidecar_entry_non_letters(self):
-        entry1 = annotation_util.generate_sidecar_entry("my !#$-123_10", column_values=["apple 1", "@banana", "grape%cherry&"])
-        self.assertIsInstance(entry1, dict, "generate_sidecar_entry is a dictionary when column values and special chars.")
+        entry1 = annotation_util.generate_sidecar_entry(
+            "my !#$-123_10", column_values=["apple 1", "@banana", "grape%cherry&"]
+        )
+        self.assertIsInstance(
+            entry1, dict, "generate_sidecar_entry is a dictionary when column values and special chars."
+        )
         self.assertIn("HED", entry1, "generate_sidecar_entry has a HED key when column values and special chars")
         hed_entry1 = entry1["HED"]
         self.assertEqual(
@@ -216,7 +238,9 @@ class Test(unittest.TestCase):
             "generate_sidecar_entry HED entry should convert labels correctly when column values",
         )
         entry2 = annotation_util.generate_sidecar_entry("my !#$-123_10")
-        self.assertIsInstance(entry2, dict, "generate_sidecar_entry is a dictionary when no column values and special chars.")
+        self.assertIsInstance(
+            entry2, dict, "generate_sidecar_entry is a dictionary when no column values and special chars."
+        )
         self.assertEqual(
             entry2["HED"],
             "(Label/my_-123_10, ID/#)",
@@ -386,7 +410,9 @@ class Test(unittest.TestCase):
         self.assertEqual(tags[0], "n/a")
 
     def test_flatten_val_col_only_description(self):
-        keys, values, descriptions, tags = annotation_util._flatten_val_col("response", {"HED": "Description/Code 1 here."})
+        keys, values, descriptions, tags = annotation_util._flatten_val_col(
+            "response", {"HED": "Description/Code 1 here."}
+        )
         self.assertEqual(descriptions[0], "Code 1 here.")
         self.assertFalse(tags[0])
 
@@ -402,7 +428,9 @@ class Test(unittest.TestCase):
         self.assertEqual(len(values2), 1, "_flatten_val_col should have right number of values if HED")
         self.assertEqual(len(descriptions2), 1, "_flatten_val_col should have right number of descriptions if HED")
         self.assertEqual(len(tags2), 1, "_flatten_cat_col should have right number of tags if HED")
-        self.assertEqual(descriptions2[0], "Its a color.", "_flatten_cat_col should use the Description tag if available")
+        self.assertEqual(
+            descriptions2[0], "Its a color.", "_flatten_cat_col should use the Description tag if available"
+        )
         self.assertEqual(values2[0], "n/a", "_flatten_cat_col should a n/a value column")
 
     def test_get_row_tags(self):
@@ -423,7 +451,9 @@ class Test(unittest.TestCase):
         )
         dict4 = annotation_util._get_value_entry("Red,Blue,Description/Too bad", "")
         self.assertIn("HED", dict4, "_get_value_entry should have a HED entry when Description tag")
-        self.assertNotIn("Description", dict4, "_get_value_entry should not have a Description entry when Description tag")
+        self.assertNotIn(
+            "Description", dict4, "_get_value_entry should not have a Description entry when Description tag"
+        )
         dict5 = annotation_util._get_value_entry("", "This is a test")
         self.assertIn("HED", dict5, "_get_value_entry should have a HED entry when Description used")
         self.assertIn("Description", dict5, "_get_value_entry should have a Description entry when Description used")
@@ -448,7 +478,9 @@ class Test(unittest.TestCase):
         self.assertEqual("apple banana", str1, "tag_list_to_str should return the correct amount when no extra tag")
         ext2 = ["apple", "Description/banana", "Informational-property/Description/Pear is it."]
         str2 = annotation_util._tag_list_to_str(ext2, "Description/")
-        self.assertEqual("apple banana Pear is it.", str2, "tag_list_to_str should return the correct amount when extra tag")
+        self.assertEqual(
+            "apple banana Pear is it.", str2, "tag_list_to_str should return the correct amount when extra tag"
+        )
 
     def test_to_factor(self):
         series1 = Series([1.0, 2.0, 3.0, 4.0])

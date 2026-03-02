@@ -127,7 +127,9 @@ class TestHedSchemaDF(unittest.TestCase):
         issues = loaded_schema.check_compliance(check_for_warnings=False)
         self.assertEqual(len(issues), 0)
 
-        self.assertEqual(loaded_schema.tags["MadeUpLongTagNameChild"].name, "MadeUpLongTagNameParent/MadeUpLongTagNameChild")
+        self.assertEqual(
+            loaded_schema.tags["MadeUpLongTagNameChild"].name, "MadeUpLongTagNameParent/MadeUpLongTagNameChild"
+        )
         self.assertEqual(loaded_schema.tags["MadeUpLongTagNameParent"].name, "MadeUpLongTagNameParent")
 
         tag_df = pd.DataFrame([], columns=df_constants.tag_columns, dtype=str)
@@ -140,7 +142,9 @@ class TestHedSchemaDF(unittest.TestCase):
         loaded_out_of_order = from_dataframes(dataframes)
         issues = loaded_schema.check_compliance(check_for_warnings=False)
         self.assertEqual(len(issues), 0)
-        self.assertEqual(loaded_schema.tags["MadeUpLongTagNameChild"].name, "MadeUpLongTagNameParent/MadeUpLongTagNameChild")
+        self.assertEqual(
+            loaded_schema.tags["MadeUpLongTagNameChild"].name, "MadeUpLongTagNameParent/MadeUpLongTagNameChild"
+        )
         self.assertEqual(loaded_schema.tags["MadeUpLongTagNameParent"].name, "MadeUpLongTagNameParent")
         self.assertEqual(loaded_schema, loaded_out_of_order)
 
@@ -247,7 +251,9 @@ class TestHedSchemaDF(unittest.TestCase):
         for key in [df_constants.UNIT_KEY, df_constants.UNIT_CLASS_KEY, df_constants.UNIT_MODIFIER_KEY]:
             if key in output_dfs and not output_dfs[key].empty:
                 df = output_dfs[key]
-                self.assertNotIn("omn:EquivalentTo", df.columns, f"{key} DataFrame should not have equivalent_to column")
+                self.assertNotIn(
+                    "omn:EquivalentTo", df.columns, f"{key} DataFrame should not have equivalent_to column"
+                )
 
     def test_no_equivalent_to_column_in_value_classes(self):
         """Test that equivalent_to column is never generated in value class DataFrames."""
@@ -342,14 +348,18 @@ class TestHedSchemaDF(unittest.TestCase):
             unit_df = output_dfs[df_constants.UNIT_KEY]
 
             # Should have hasUnitClass column
-            self.assertIn(df_constants.has_unit_class, unit_df.columns, "Unit DataFrame should have hasUnitClass column")
+            self.assertIn(
+                df_constants.has_unit_class, unit_df.columns, "Unit DataFrame should have hasUnitClass column"
+            )
 
             # Values should be unit class names (strings), not IDs
             has_unit_class_values = unit_df[df_constants.has_unit_class].dropna()
             if len(has_unit_class_values) > 0:
                 # Check that values don't look like IDs (e.g., "hed:HED_0012345")
                 for value in has_unit_class_values:
-                    self.assertFalse(value.startswith("hed:HED_"), f"hasUnitClass should contain names, not IDs: {value}")
+                    self.assertFalse(
+                        value.startswith("hed:HED_"), f"hasUnitClass should contain names, not IDs: {value}"
+                    )
 
     def _verify_lf_line_endings(self, file_path):
         """
@@ -538,7 +548,9 @@ class TestHedSchemaDF(unittest.TestCase):
 
                 # Count carriage returns - should be zero
                 cr_count = content.count(b"\r")
-                self.assertEqual(cr_count, 0, f"Format {ext} should have ZERO carriage return characters, found {cr_count}")
+                self.assertEqual(
+                    cr_count, 0, f"Format {ext} should have ZERO carriage return characters, found {cr_count}"
+                )
 
             # Test TSV format
             tsv_path = os.path.join(tmpdir, "test.tsv")

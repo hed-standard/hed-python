@@ -161,7 +161,9 @@ class SchemaLoader(ABC):
         if not entry.has_attribute(HedKey.InLibrary) and self.appending_to_schema and self._schema.merged:
             return None
 
-        if self.library and (not self._schema.with_standard or (not self._schema.merged and self._schema.with_standard)):
+        if self.library and (
+            not self._schema.with_standard or (not self._schema.merged and self._schema.with_standard)
+        ):
             # only add it if not already present - This is a rare case
             if not entry.has_attribute(HedKey.InLibrary):
                 entry._set_attribute_value(HedKey.InLibrary, self.library)

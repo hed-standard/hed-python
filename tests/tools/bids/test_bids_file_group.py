@@ -55,7 +55,9 @@ class Test(unittest.TestCase):
         self.assertFalse(validation_issues, "BidsFileGroup should have no validation errors")
         validation_issues = events.validate_datafiles(hed_schema, error_handler=ErrorHandler(check_for_warnings=True))
         self.assertTrue(validation_issues, "BidsFileGroup should have validation warnings")
-        self.assertEqual(len(validation_issues), 6, "BidsFileGroup should have 2 validation warnings for missing columns")
+        self.assertEqual(
+            len(validation_issues), 6, "BidsFileGroup should have 2 validation warnings for missing columns"
+        )
 
     def test_summarize(self):
         events = BidsFileGroup(self.root_path, self.file_paths, "events")

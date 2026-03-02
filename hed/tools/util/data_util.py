@@ -36,7 +36,9 @@ def check_match(ds1, ds2, numeric=False):
     if len(ds1.index) != len(ds2.index):
         return f"First series has length {len(ds1.index)} and {len(ds2.index)} events"
     if numeric:
-        close_test = np.isclose(pd.to_numeric(ds1, errors="coerce"), pd.to_numeric(ds2, errors="coerce"), equal_nan=True)
+        close_test = np.isclose(
+            pd.to_numeric(ds1, errors="coerce"), pd.to_numeric(ds2, errors="coerce"), equal_nan=True
+        )
         if sum(np.logical_not(close_test)):
             return f"Series differ at positions {list(ds1.loc[np.logical_not(close_test)].index)}"
     else:

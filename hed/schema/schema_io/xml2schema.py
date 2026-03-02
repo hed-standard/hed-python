@@ -173,7 +173,9 @@ class SchemaLoaderXML(SchemaLoader):
 
         # Merge with existing schema extras if present (from withStandard base schema)
         standard_df = self._schema.extras.get(df_constants.EXTERNAL_ANNOTATION_KEY, None)
-        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = df_util.merge_extras_dataframes(library_df, standard_df)
+        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = df_util.merge_extras_dataframes(
+            library_df, standard_df
+        )
 
     def _add_tags_recursive(self, new_tags, parent_tags):
         for tag_element in new_tags:
@@ -346,7 +348,9 @@ class SchemaLoaderXML(SchemaLoader):
     def _add_to_dict(self, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             raise HedFileError(
-                HedExceptions.IN_LIBRARY_IN_UNMERGED, "Library tag in unmerged schema has InLibrary attribute", self.name
+                HedExceptions.IN_LIBRARY_IN_UNMERGED,
+                "Library tag in unmerged schema has InLibrary attribute",
+                self.name,
             )
 
         return self._add_to_dict_base(entry, key_class)

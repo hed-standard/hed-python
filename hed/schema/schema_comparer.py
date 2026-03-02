@@ -1,9 +1,17 @@
 """Functions supporting comparison of schemas."""
 
 import pandas as pd
+from collections import defaultdict
+
 from hed.schema.hed_schema import HedKey
 from hed.schema.hed_schema_constants import HedSectionKey
-from collections import defaultdict
+from hed.schema.schema_io.df_constants import (
+    EXTERNAL_ANNOTATION_KEY,
+    PREFIXES_KEY,
+    SOURCES_KEY,
+    UNIQUE_EXTRAS_KEYS,
+    in_library as _in_library,
+)
 
 
 class SchemaComparer:
@@ -13,9 +21,9 @@ class SchemaComparer:
     MISC_SECTION = "misc"
     HED_ID_SECTION = "HedId changes"
     EXTRAS_SECTION = "Extras changes"
-    SOURCES = "Sources"
-    PREFIXES = "Prefixes"
-    ANNOTATION_PROPERTY_EXTERNAL = "AnnotationPropertyExternal"
+    SOURCES = SOURCES_KEY
+    PREFIXES = PREFIXES_KEY
+    ANNOTATION_PROPERTY_EXTERNAL = EXTERNAL_ANNOTATION_KEY
 
     SECTION_ENTRY_NAMES = {
         HedSectionKey.Tags: "Tag",
@@ -515,8 +523,6 @@ class SchemaComparer:
         Parameters:
             change_dict (defaultdict): Change dictionary to append to.
         """
-        from hed.schema.schema_io.df_constants import UNIQUE_EXTRAS_KEYS, in_library as _in_library
-
         extras1 = getattr(self.schema1, "extras", {}) or {}
         extras2 = getattr(self.schema2, "extras", {}) or {}
 
@@ -560,11 +566,19 @@ class SchemaComparer:
                 msg = diff["message"]
                 if msg == "Row missing in first schema":
                     change_dict[key].append(
-                        {"change_type": "Minor", "change": f"Row {row_key} missing in first schema", "tag": str(row_key)}
+                        {
+                            "change_type": "Minor",
+                            "change": f"Row {row_key} missing in first schema",
+                            "tag": str(row_key),
+                        }
                     )
                 elif msg == "Row missing in second schema":
                     change_dict[key].append(
-                        {"change_type": "Minor", "change": f"Row {row_key} missing in second schema", "tag": str(row_key)}
+                        {
+                            "change_type": "Minor",
+                            "change": f"Row {row_key} missing in second schema",
+                            "tag": str(row_key),
+                        }
                     )
                 elif msg == "Duplicate keys found":
                     change_dict[key].append(
@@ -577,7 +591,11 @@ class SchemaComparer:
                 elif msg == "Column values differ":
                     col_str = ", ".join(cols) if cols else ""
                     change_dict[key].append(
-                        {"change_type": "Patch", "change": f"Row {row_key} columns differ: {col_str}", "tag": str(row_key)}
+                        {
+                            "change_type": "Patch",
+                            "change": f"Row {row_key} columns differ: {col_str}",
+                            "tag": str(row_key),
+                        }
                     )
 
     @staticmethod

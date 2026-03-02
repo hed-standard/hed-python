@@ -77,7 +77,11 @@ class TestCLIParameterParity(unittest.TestCase):
             elif isinstance(param, click.core.Option):
                 if param.is_flag:
                     flags.append(
-                        (param.name, [opt for opt in param.opts if len(opt) == 2], [opt for opt in param.opts if len(opt) > 2])
+                        (
+                            param.name,
+                            [opt for opt in param.opts if len(opt) == 2],
+                            [opt for opt in param.opts if len(opt) > 2],
+                        )
                     )
                 else:
                     optional[param.name] = {
@@ -127,7 +131,9 @@ class TestCLIParameterParity(unittest.TestCase):
         for orig_dest, cli_dest in dest_mappings.items():
             if orig_dest in original_dests:
                 self.assertIn(
-                    cli_dest, cli_dests, f"Parameter '{orig_dest}' from original parser not found in CLI as '{cli_dest}'"
+                    cli_dest,
+                    cli_dests,
+                    f"Parameter '{orig_dest}' from original parser not found in CLI as '{cli_dest}'",
                 )
 
         # Check flags

@@ -45,7 +45,9 @@ def validate_schema_term_new(hed_entry, hed_term=None) -> list[dict]:
         hed_term = hed_entry.name
     issues_list = []
     # todo: potentially optimize this someday, as most values are the same
-    character_set = get_allowed_characters_by_name(["name"] + hed_entry.attributes.get("allowedCharacter", "").split(","))
+    character_set = get_allowed_characters_by_name(
+        ["name"] + hed_entry.attributes.get("allowedCharacter", "").split(",")
+    )
     indexes = get_problem_indexes(hed_term, character_set)
     for char, index in indexes:
         issues_list += ErrorHandler.format_error(
@@ -74,7 +76,11 @@ def validate_schema_description_new(hed_entry) -> list[dict]:
         name = hed_entry.short_tag_name
     for char, index in indexes:
         issues_list += ErrorHandler.format_error(
-            SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, hed_entry.description, name, problem_char=char, char_index=index
+            SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
+            hed_entry.description,
+            name,
+            problem_char=char,
+            char_index=index,
         )
     return issues_list
 

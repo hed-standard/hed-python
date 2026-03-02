@@ -5,7 +5,12 @@ import pandas as pd
 from hed import load_schema_version
 from hed.models.df_util import shrink_defs, expand_defs, convert_to_form, process_def_expands
 from hed import DefinitionDict
-from hed.models.df_util import _handle_curly_braces_refs, _indexed_dict_from_onsets, _filter_by_index_list, split_delay_tags
+from hed.models.df_util import (
+    _handle_curly_braces_refs,
+    _indexed_dict_from_onsets,
+    _filter_by_index_list,
+    split_delay_tags,
+)
 
 hed_schema_global = load_schema_version("8.4.0")
 
@@ -15,7 +20,9 @@ class TestShrinkDefs(unittest.TestCase):
         self.schema = hed_schema_global
 
     def test_shrink_defs_normal(self):
-        df = pd.DataFrame({"column1": ["(Def-expand/TestDefNormal,(Acceleration/2471,Action/TestDef2)),Event/SomeEvent"]})
+        df = pd.DataFrame(
+            {"column1": ["(Def-expand/TestDefNormal,(Acceleration/2471,Action/TestDef2)),Event/SomeEvent"]}
+        )
         expected_df = pd.DataFrame({"column1": ["Def/TestDefNormal,Event/SomeEvent"]})
         shrink_defs(df, self.schema, ["column1"])
         pd.testing.assert_frame_equal(df, expected_df)
@@ -142,7 +149,9 @@ class TestExpandDefs(unittest.TestCase):
 
     def test_expand_defs_series_placeholder(self):
         series = pd.Series(["Def/TestDefPlaceholder/123,Item/SomeItem"])
-        expected_series = pd.Series(["(Def-expand/TestDefPlaceholder/123,(Acceleration/123,Action/TestDef2)),Item/SomeItem"])
+        expected_series = pd.Series(
+            ["(Def-expand/TestDefPlaceholder/123,(Acceleration/123,Action/TestDef2)),Item/SomeItem"]
+        )
         expand_defs(series, self.schema, self.def_dict, None)
         pd.testing.assert_series_equal(series, expected_series)
 
@@ -418,7 +427,9 @@ class TestInsertColumns(unittest.TestCase):
         pd.testing.assert_frame_equal(result, expected_df)
 
     def test_insert_columns_multiple_columns(self):
-        df = pd.DataFrame({"column1": ["{column2}, Event, {column3}, Action"], "column2": ["Item"], "column3": ["Subject"]})
+        df = pd.DataFrame(
+            {"column1": ["{column2}, Event, {column3}, Action"], "column2": ["Item"], "column3": ["Subject"]}
+        )
         expected_df = pd.DataFrame({"column1": ["Item, Event, Subject, Action"]})
         result = _handle_curly_braces_refs(df, refs=["column2", "column3"], column_names=df.columns)
         pd.testing.assert_frame_equal(result, expected_df)
@@ -592,17 +603,21 @@ class TestOnsetDict(unittest.TestCase):
 
     def test_multiple_item_series_df(self):
         input_df = pd.DataFrame(
-            [["apple", "extra1"], ["orange", "extra2"], ["banana", "extra3"], ["mango", "extra4"]], columns=["HED", "Extra"]
+            [["apple", "extra1"], ["orange", "extra2"], ["banana", "extra3"], ["mango", "extra4"]],
+            columns=["HED", "Extra"],
         )
         indexed_dict = {0: [0, 1], 1: [2], 2: [3]}
         expected_df = pd.DataFrame(
-            [["apple,orange", "extra1"], ["", "extra2"], ["banana", "extra3"], ["mango", "extra4"]], columns=["HED", "Extra"]
+            [["apple,orange", "extra1"], ["", "extra2"], ["banana", "extra3"], ["mango", "extra4"]],
+            columns=["HED", "Extra"],
         )
         self.assertTrue(_filter_by_index_list(input_df, indexed_dict).equals(expected_df))
 
     def test_complex_scenarios_df(self):
         # Test with negative, zero, and positive onsets
-        original = pd.DataFrame([["negative", "extra1"], ["zero", "extra2"], ["positive", "extra3"]], columns=["HED", "Extra"])
+        original = pd.DataFrame(
+            [["negative", "extra1"], ["zero", "extra2"], ["positive", "extra3"]], columns=["HED", "Extra"]
+        )
         indexed_dict = {-1: [0], 0: [1], 1: [2]}
         expected_df = pd.DataFrame(
             [["negative", "extra1"], ["zero", "extra2"], ["positive", "extra3"]], columns=["HED", "Extra"]
@@ -616,7 +631,13 @@ class TestOnsetDict(unittest.TestCase):
         )
         indexed_dict2 = {0: [0, 1], 1: [2], 2: [3, 4]}
         expected_df2 = pd.DataFrame(
-            [["apple,orange", "extra1"], ["", "extra2"], ["banana", "extra3"], ["mango,grape", "extra4"], ["", "extra5"]],
+            [
+                ["apple,orange", "extra1"],
+                ["", "extra2"],
+                ["banana", "extra3"],
+                ["mango,grape", "extra4"],
+                ["", "extra5"],
+            ],
             columns=["HED", "Extra"],
         )
         self.assertTrue(_filter_by_index_list(original2, indexed_dict2).equals(expected_df2))
@@ -655,6 +676,8 @@ class TestSplitDelayTags(unittest.TestCase):
         result = split_delay_tags(series, self.schema, onsets)
         self.assertTrue(result.onset.equals(pd.Series([1.0, 2.0, 3.0, 4.0, 4.0])))
         self.assertTrue(
-            result.HED.equals(pd.Series(["Tag1,Tag2", "Tag6", "Tag3,Tag4", "(Delay/3.0 s,(Tag5)),(Delay/2.0 s,(Tag7))", ""]))
+            result.HED.equals(
+                pd.Series(["Tag1,Tag2", "Tag6", "Tag3,Tag4", "(Delay/3.0 s,(Tag5)),(Delay/2.0 s,(Tag7))", ""])
+            )
         )
         self.assertTrue(result.original_index.equals(pd.Series([0, 1, 2, 0, 1])))

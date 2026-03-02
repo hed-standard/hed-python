@@ -189,7 +189,9 @@ class KeyMap:
         col_list = df.columns.values.tolist()
         keys_present, keys_missing = data_util.separate_values(col_list, self.key_cols)
         if keys_missing and not allow_missing:
-            raise HedFileError("MissingKeyColumn", f"make_template data does not have key columns {str(keys_missing)}", "")
+            raise HedFileError(
+                "MissingKeyColumn", f"make_template data does not have key columns {str(keys_missing)}", ""
+            )
 
         base_df = df[keys_present].copy()
         self.remove_quotes(base_df)

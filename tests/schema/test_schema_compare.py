@@ -294,7 +294,9 @@ class TestExtrasChanges(unittest.TestCase):
     def test_row_added_to_schema2_is_minor(self):
         """A row present in schema2 but not schema1 is Minor."""
         df1 = pd.DataFrame({"source": ["s1"], "link": ["http://a.org"], "description": ["d"]})
-        df2 = pd.DataFrame({"source": ["s1", "s2"], "link": ["http://a.org", "http://b.org"], "description": ["d", "e"]})
+        df2 = pd.DataFrame(
+            {"source": ["s1", "s2"], "link": ["http://a.org", "http://b.org"], "description": ["d", "e"]}
+        )
         schema1 = self._make_schema({SOURCES_KEY: df1})
         schema2 = self._make_schema({SOURCES_KEY: df2})
         comp = SchemaComparer(schema1, schema2)
@@ -306,7 +308,9 @@ class TestExtrasChanges(unittest.TestCase):
 
     def test_row_removed_from_schema2_is_minor(self):
         """A row present in schema1 but not schema2 is Minor."""
-        df1 = pd.DataFrame({"source": ["s1", "s2"], "link": ["http://a.org", "http://b.org"], "description": ["d", "e"]})
+        df1 = pd.DataFrame(
+            {"source": ["s1", "s2"], "link": ["http://a.org", "http://b.org"], "description": ["d", "e"]}
+        )
         df2 = pd.DataFrame({"source": ["s1"], "link": ["http://a.org"], "description": ["d"]})
         schema1 = self._make_schema({SOURCES_KEY: df1})
         schema2 = self._make_schema({SOURCES_KEY: df2})
@@ -341,7 +345,9 @@ class TestExtrasChanges(unittest.TestCase):
 
     def test_duplicate_keys_is_unknown(self):
         """Duplicate key rows in an extras DataFrame are reported as Unknown."""
-        df1 = pd.DataFrame({"source": ["s1", "s1"], "link": ["http://a.org", "http://b.org"], "description": ["d1", "d2"]})
+        df1 = pd.DataFrame(
+            {"source": ["s1", "s1"], "link": ["http://a.org", "http://b.org"], "description": ["d1", "d2"]}
+        )
         df2 = pd.DataFrame({"source": ["s1"], "link": ["http://a.org"], "description": ["d1"]})
         schema1 = self._make_schema({SOURCES_KEY: df1})
         schema2 = self._make_schema({SOURCES_KEY: df2})

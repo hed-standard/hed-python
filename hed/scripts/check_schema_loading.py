@@ -302,7 +302,9 @@ class SchemaLoadTester:
                     library_has_schemas = True
                     found_any = True
 
-                self._test_format_group(library_dir, format_name, prerelease=True, indent="  ", schema_files=schema_files)
+                self._test_format_group(
+                    library_dir, format_name, prerelease=True, indent="  ", schema_files=schema_files
+                )
 
         if not found_any:
             print("[INFO] No prerelease schemas found")
@@ -338,7 +340,9 @@ class SchemaLoadTester:
         print("TEST SUMMARY")
         print("=" * 80)
         print(f"Total Schemas: {self.results['total']}")
-        print(f"Passed:        {self.results['passed']} ({100 * self.results['passed'] // max(1, self.results['total'])}%)")
+        print(
+            f"Passed:        {self.results['passed']} ({100 * self.results['passed'] // max(1, self.results['total'])}%)"
+        )
         print(f"Failed:        {self.results['failed']}")
         print("=" * 80)
 
@@ -453,7 +457,9 @@ def parse_arguments(arg_list=None):
     Returns:
         argparse.Namespace: Parsed arguments.
     """
-    parser = argparse.ArgumentParser(description="Check that all HED schemas in a hed-schemas repository can be loaded.")
+    parser = argparse.ArgumentParser(
+        description="Check that all HED schemas in a hed-schemas repository can be loaded."
+    )
     parser.add_argument(
         "--schemas-dir",
         required=True,

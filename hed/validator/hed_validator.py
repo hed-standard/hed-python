@@ -172,7 +172,10 @@ class HedValidator:
         validation_issues = []
         for match in self.pattern_doubleslash.finditer(original_tag.org_tag):
             validation_issues += error_reporter.ErrorHandler.format_error(
-                ValidationErrors.NODE_NAME_EMPTY, tag=original_tag, index_in_tag=match.start(), index_in_tag_end=match.end()
+                ValidationErrors.NODE_NAME_EMPTY,
+                tag=original_tag,
+                index_in_tag=match.start(),
+                index_in_tag_end=match.end(),
             )
 
         return validation_issues
@@ -201,7 +204,11 @@ class HedValidator:
             return []
         if original_tag.is_unit_class_tag():
             issues += self._unit_validator.check_tag_unit_class_units_are_valid(
-                original_tag, validate_text, report_as=report_as, error_code=error_code, allow_placeholders=allow_placeholders
+                original_tag,
+                validate_text,
+                report_as=report_as,
+                error_code=error_code,
+                allow_placeholders=allow_placeholders,
             )
         elif original_tag.is_value_class_tag():
             issues += self._unit_validator.check_tag_value_class_valid(original_tag, validate_text, report_as=report_as)
@@ -226,7 +233,9 @@ class HedValidator:
         from hed.models.definition_dict import DefTagNames
 
         validation_issues = []
-        definition_groups = hed_string_obj.find_top_level_tags(anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1)
+        definition_groups = hed_string_obj.find_top_level_tags(
+            anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1
+        )
         all_definition_groups = [group for sub_group in definition_groups for group in sub_group.get_all_groups()]
         for group in hed_string_obj.get_all_groups():
             is_definition = group in all_definition_groups
@@ -238,7 +247,10 @@ class HedValidator:
                 validation_issues += self._tag_validator.run_individual_tag_validators(
                     hed_tag, allow_placeholders=allow_placeholders, is_definition=is_definition
                 )
-                if hed_tag.short_base_tag == DefTagNames.DEF_KEY or hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY:
+                if (
+                    hed_tag.short_base_tag == DefTagNames.DEF_KEY
+                    or hed_tag.short_base_tag == DefTagNames.DEF_EXPAND_KEY
+                ):
                     validation_issues += self._def_validator.validate_def_value_units(
                         hed_tag, self, allow_placeholders=allow_placeholders
                     )

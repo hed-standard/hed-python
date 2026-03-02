@@ -22,7 +22,9 @@ from urllib.error import URLError
 MAX_MEMORY_CACHE = 40
 
 
-def load_schema_version(xml_version=None, xml_folder=None, check_prerelease=False) -> Union["HedSchema", "HedSchemaGroup"]:
+def load_schema_version(
+    xml_version=None, xml_folder=None, check_prerelease=False
+) -> Union["HedSchema", "HedSchemaGroup"]:
     """Return a HedSchema or HedSchemaGroup extracted from xml_version
 
     Parameters:
@@ -87,7 +89,9 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None, check_p
 
     """
     if not hed_path:
-        raise HedFileError(HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file", filename=hed_path)
+        raise HedFileError(
+            HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file", filename=hed_path
+        )
 
     is_url = hed_cache._check_if_url(hed_path)
     if is_url:
@@ -96,7 +100,10 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None, check_p
         except URLError as e:
             raise HedFileError(HedExceptions.URL_ERROR, str(e), hed_path) from e
         hed_schema = from_string(
-            file_as_string, schema_format=os.path.splitext(hed_path.lower())[1], name=name, check_prerelease=check_prerelease
+            file_as_string,
+            schema_format=os.path.splitext(hed_path.lower())[1],
+            name=name,
+            check_prerelease=check_prerelease,
         )
     elif hed_path.lower().endswith(".xml"):
         hed_schema = SchemaLoaderXML.load(hed_path, schema=schema, name=name, check_prerelease=check_prerelease)
@@ -259,7 +266,9 @@ def parse_version_list(xml_version_list) -> dict:
             )
         out_versions[schema_namespace].append(version)
 
-    out_versions = {key: ",".join(value) if not key else f"{key}:" + ",".join(value) for key, value in out_versions.items()}
+    out_versions = {
+        key: ",".join(value) if not key else f"{key}:" + ",".join(value) for key, value in out_versions.items()
+    }
 
     return out_versions
 
@@ -309,7 +318,12 @@ def _load_schema_version(xml_version=None, xml_folder=None, check_prerelease=Fal
 
     for version in xml_versions[1:]:
         _load_schema_version_sub(
-            version, schema_namespace, xml_folder=xml_folder, check_prerelease=check_prerelease, schema=first_schema, name=name
+            version,
+            schema_namespace,
+            xml_folder=xml_folder,
+            check_prerelease=check_prerelease,
+            schema=first_schema,
+            name=name,
         )
 
         # Collect duplicate errors when merging schemas in the same namespace
@@ -343,7 +357,9 @@ def _load_schema_version(xml_version=None, xml_folder=None, check_prerelease=Fal
     return first_schema
 
 
-def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, check_prerelease=False, schema=None, name=""):
+def _load_schema_version_sub(
+    xml_version, schema_namespace="", xml_folder=None, check_prerelease=False, schema=None, name=""
+):
     """Return specified version(single version only for this one)
 
     Parameters:
@@ -383,7 +399,10 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
         )
 
     hed_file_path = hed_cache.get_hed_version_path(
-        version_to_validate, library_name=library_name, local_hed_directory=xml_folder, check_prerelease=check_prerelease
+        version_to_validate,
+        library_name=library_name,
+        local_hed_directory=xml_folder,
+        check_prerelease=check_prerelease,
     )
 
     if hed_file_path:
