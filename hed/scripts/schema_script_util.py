@@ -33,9 +33,9 @@ def _is_prerelease_partner(base_schema) -> bool:
 
 
 def validate_schema_object(base_schema, schema_name):
-    """Validate a schema object by checking compliance and roundtrip conversion.
+    """Validate a schema object by checking non-warning compliance and roundtrip conversion.
 
-    Tests the schema for compliance issues and validates that it can be successfully
+    Tests the schema for non-warningcompliance issues and validates that it can be successfully
     converted to and reloaded from all four formats (MEDIAWIKI, XML, JSON, TSV).
 
     Parameters:

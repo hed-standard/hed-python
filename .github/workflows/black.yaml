@@ -22,13 +22,5 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
-      - name: Create virtual environment
-        run: |
-          uv venv --clear .venv
-          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
-
-      - name: Install Black
-        run: uv pip install "black>=24.0.0"
-
-      - name: Check code formatting with Black
-        run: black --check --diff --workers 1 .
+      - name: Run Black formatter (check only)
+        run: uvx black --check --diff .
