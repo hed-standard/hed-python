@@ -544,9 +544,9 @@ class SchemaComparer:
 
             key_cols = UNIQUE_EXTRAS_KEYS.get(key)
             if not key_cols:
-                key_cols = [c for c in set(df1.columns) & set(df2.columns) if c != _in_library]
+                key_cols = sorted(c for c in set(df1.columns) & set(df2.columns) if c != _in_library)
 
-            compare_cols = [c for c in set(df1.columns) & set(df2.columns) if c != _in_library]
+            compare_cols = sorted(c for c in set(df1.columns) & set(df2.columns) if c != _in_library)
             if not compare_cols:
                 continue
 

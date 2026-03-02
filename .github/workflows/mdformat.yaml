@@ -27,4 +27,4 @@ jobs:
           cache-dependency-glob: "**/pyproject.toml"
 
       - name: Run mdformat (check only)
-        run: uvx mdformat --check --wrap no --number docs/ *.md
+        run: uvx --with mdformat-myst mdformat --check --wrap no --number docs/ *.md
