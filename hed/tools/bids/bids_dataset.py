@@ -65,7 +65,9 @@ class BidsDataset:
         self.file_groups = self._set_file_groups()
         self.bad_files = []
 
-        logger.info(f"BidsDataset initialized with {len(self.file_groups)} file groups: {list(self.file_groups.keys())}")
+        logger.info(
+            f"BidsDataset initialized with {len(self.file_groups)} file groups: {list(self.file_groups.keys())}"
+        )
 
     def get_file_group(self, suffix):
         """Return the file group of files with the specified suffix.

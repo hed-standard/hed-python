@@ -46,7 +46,9 @@ class SchemaLoaderDF(SchemaLoader):
         Returns:
             HedSchema: The new schema
         """
-        loader = cls(filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name, check_prerelease=check_prerelease)
+        loader = cls(
+            filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name, check_prerelease=check_prerelease
+        )
         hed_schema = loader._load()
         return hed_schema
 
@@ -72,7 +74,9 @@ class SchemaLoaderDF(SchemaLoader):
     def _parse_data(self):
         self._schema.prologue, self._schema.epilogue = self._get_prologue_epilogue(self.input_data)
         self._schema._initialize_attributes(HedSectionKey.Properties)
-        self._read_attribute_section(self.input_data[constants.ATTRIBUTE_PROPERTY_KEY], section_key=HedSectionKey.Properties)
+        self._read_attribute_section(
+            self.input_data[constants.ATTRIBUTE_PROPERTY_KEY], section_key=HedSectionKey.Properties
+        )
         self._read_attributes()
         self._read_section(self.input_data[constants.UNIT_MODIFIER_KEY], HedSectionKey.UnitModifiers)
         self._read_section(self.input_data[constants.VALUE_CLASS_KEY], HedSectionKey.ValueClasses)
@@ -268,7 +272,10 @@ class SchemaLoaderDF(SchemaLoader):
     def _add_to_dict(self, row_number, row, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             self._add_fatal_error(
-                row_number, row, "Library tag in unmerged schema has InLibrary attribute", HedExceptions.IN_LIBRARY_IN_UNMERGED
+                row_number,
+                row,
+                "Library tag in unmerged schema has InLibrary attribute",
+                HedExceptions.IN_LIBRARY_IN_UNMERGED,
             )
 
         return self._add_to_dict_base(entry, key_class)
@@ -286,7 +293,9 @@ def load_dataframes_from_strings(schema_data):
     """
     return {
         key: (
-            value if isinstance(value, pd.DataFrame) else pd.read_csv(io.StringIO(value), sep="\t", dtype=str, na_filter=False)
+            value
+            if isinstance(value, pd.DataFrame)
+            else pd.read_csv(io.StringIO(value), sep="\t", dtype=str, na_filter=False)
         )
         for key, value in schema_data.items()
     }

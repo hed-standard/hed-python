@@ -36,7 +36,9 @@ class BidsFileGroup:
 
         self.suffix = suffix
         ext_dict = io_util.separate_by_ext(file_list)
-        logger.debug(f"Files by extension: .json={len(ext_dict.get('.json', []))}, .tsv={len(ext_dict.get('.tsv', []))}")
+        logger.debug(
+            f"Files by extension: .json={len(ext_dict.get('.json', []))}, .tsv={len(ext_dict.get('.tsv', []))}"
+        )
 
         self.bad_files = {}
         self.sidecar_dict = {}
@@ -98,12 +100,18 @@ class BidsFileGroup:
         issues = []
 
         logger.debug(f"Validating {len(self.sidecar_dict)} sidecars...")
-        sidecar_issues = self.validate_sidecars(hed_schema, extra_def_dicts=extra_def_dicts, error_handler=error_handler)
+        sidecar_issues = self.validate_sidecars(
+            hed_schema, extra_def_dicts=extra_def_dicts, error_handler=error_handler
+        )
         logger.info(f"Sidecar validation completed: {len(sidecar_issues)} issues found")
         issues += sidecar_issues
 
-        logger.debug(f"Validating {len([f for f in self.datafile_dict.values() if f.has_hed])} HED-enabled data files...")
-        datafile_issues = self.validate_datafiles(hed_schema, extra_def_dicts=extra_def_dicts, error_handler=error_handler)
+        logger.debug(
+            f"Validating {len([f for f in self.datafile_dict.values() if f.has_hed])} HED-enabled data files..."
+        )
+        datafile_issues = self.validate_datafiles(
+            hed_schema, extra_def_dicts=extra_def_dicts, error_handler=error_handler
+        )
         logger.info(f"Data file validation completed: {len(datafile_issues)} issues found")
         issues += datafile_issues
 

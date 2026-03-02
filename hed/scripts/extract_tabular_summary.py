@@ -230,7 +230,9 @@ def extract_summary(args):
         if args.filename_filter:
             original_count = len(file_list)
             file_list = [f for f in file_list if args.filename_filter in Path(f).name]
-            logger.info(f"Filename filter '{args.filename_filter}' reduced files from {original_count} to {len(file_list)}")
+            logger.info(
+                f"Filename filter '{args.filename_filter}' reduced files from {original_count} to {len(file_list)}"
+            )
 
         if not file_list:
             error_msg = (

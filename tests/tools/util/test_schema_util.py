@@ -5,7 +5,6 @@ from hed.tools.util.schema_util import flatten_schema
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         pass

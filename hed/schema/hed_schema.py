@@ -46,9 +46,7 @@ class HedSchema(HedSchemaBase):
         self.filename = None
         self.prologue = ""
         self.epilogue = ""
-        self.extras = (
-            {}
-        )  # Used to store any additional data that might be needed for serialization (like OWL or other formats)
+        self.extras = {}  # Used to store any additional data that might be needed for serialization (like OWL or other formats)
 
         # This is the specified library name_prefix - tags will be {schema_namespace}:{tag_name}
         self._namespace = ""
@@ -425,7 +423,9 @@ class HedSchema(HedSchemaBase):
 
         if schema_namespace and not schema_namespace[:-1].isalpha():
             raise HedFileError(
-                HedExceptions.INVALID_LIBRARY_PREFIX, "Schema namespace must contain only alpha characters", self.filename
+                HedExceptions.INVALID_LIBRARY_PREFIX,
+                "Schema namespace must contain only alpha characters",
+                self.filename,
             )
 
         self._namespace = schema_namespace
@@ -518,7 +518,9 @@ class HedSchema(HedSchemaBase):
 
         return self._get_tag_entry(name, key_class)
 
-    def find_tag_entry(self, tag, schema_namespace="") -> tuple[Union["HedTagEntry", None], Union[str, None], list[dict]]:
+    def find_tag_entry(
+        self, tag, schema_namespace=""
+    ) -> tuple[Union["HedTagEntry", None], Union[str, None], list[dict]]:
         """Find the schema entry for a given source tag.
 
         Parameters:
@@ -559,7 +561,9 @@ class HedSchema(HedSchemaBase):
         """
         return self._sections[key_class].get(name)
 
-    def _find_tag_entry(self, tag, schema_namespace="") -> tuple[Union["HedTagEntry", None], Union[str, None], list[dict]]:
+    def _find_tag_entry(
+        self, tag, schema_namespace=""
+    ) -> tuple[Union["HedTagEntry", None], Union[str, None], list[dict]]:
         """Find the schema entry for a given source tag.
 
         Parameters:

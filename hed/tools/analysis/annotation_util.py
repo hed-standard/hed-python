@@ -56,7 +56,9 @@ def df_to_hed(dataframe, description_tag=True) -> dict:
         if row["HED"] == "n/a" and row["description"] == "n/a":
             continue
         if row["column_value"] == "n/a":
-            hed_dict[row["column_name"]] = _get_value_entry(row["HED"], row["description"], description_tag=description_tag)
+            hed_dict[row["column_name"]] = _get_value_entry(
+                row["HED"], row["description"], description_tag=description_tag
+            )
             continue
         cat_dict = hed_dict.get(row["column_name"], {})
         _update_cat_dict(cat_dict, row["column_value"], row["HED"], row["description"], description_tag=description_tag)
@@ -150,7 +152,12 @@ def hed_to_df(sidecar_dict, col_names=None) -> DataFrame:
         column_description = column_description + descriptions
         hed_tags = hed_tags + tags
 
-    data = {"column_name": column_name, "column_value": column_value, "description": column_description, "HED": hed_tags}
+    data = {
+        "column_name": column_name,
+        "column_value": column_value,
+        "description": column_description,
+        "HED": hed_tags,
+    }
     dataframe = pd.DataFrame(data).astype(str)
     return dataframe
 

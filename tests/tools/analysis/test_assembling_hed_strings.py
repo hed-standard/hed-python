@@ -8,7 +8,6 @@ from hed.models.df_util import expand_defs, shrink_defs
 
 # noinspection PyBroadException
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         bids_root_path = os.path.realpath(

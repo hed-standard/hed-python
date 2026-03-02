@@ -232,7 +232,9 @@ class GroupValidator:
         for unique_prefix in unique_prefixes:
             unique_tag_prefix_bool_mask = [x.long_tag.casefold().startswith(unique_prefix.casefold()) for x in tags]
             if sum(unique_tag_prefix_bool_mask) > 1:
-                validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_NOT_UNIQUE, tag_namespace=unique_prefix)
+                validation_issues += ErrorHandler.format_error(
+                    ValidationErrors.TAG_NOT_UNIQUE, tag_namespace=unique_prefix
+                )
         return validation_issues
 
     @staticmethod
@@ -248,7 +250,9 @@ class GroupValidator:
         duration_issues = []
         for top_tag, group in hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.DURATION_KEYS):
             top_level_tags = [
-                tag.short_base_tag for tag in group.get_all_tags() if tag.base_tag_has_attribute(HedKey.TopLevelTagGroup)
+                tag.short_base_tag
+                for tag in group.get_all_tags()
+                if tag.base_tag_has_attribute(HedKey.TopLevelTagGroup)
             ]
             # Skip onset/inset/offset
             if any(tag in DefTagNames.TEMPORAL_KEYS for tag in top_level_tags):

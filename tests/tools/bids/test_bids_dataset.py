@@ -11,17 +11,20 @@ from hed.tools.bids.bids_tabular_file import BidsTabularFile
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed")
+        cls.root_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed"
+        )
         cls.demo_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed_demo"
         )
         cls.library_path = os.path.realpath(
             os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed_library")
         )
-        cls.empty_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_empty")
+        cls.empty_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_empty"
+        )
         cls.inherit_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed_inheritance"
         )
@@ -46,7 +49,9 @@ class Test(unittest.TestCase):
         self.assertTrue(bids.schema, "BidsDataset constructor extracts a schema from the dataset.")
         self.assertIsInstance(bids.schema, HedSchema, "BidsDataset schema should be HedSchema")
         issues = bids.validate()
-        self.assertFalse(issues, "BidsDataset validate should not return issues when the default check_for_warnings is used")
+        self.assertFalse(
+            issues, "BidsDataset validate should not return issues when the default check_for_warnings is used"
+        )
         issues = bids.validate(check_for_warnings=True)
         self.assertEqual(len(issues), 6, "BidsDataset validate should return issues when check_for_warnings is True")
 
@@ -57,7 +62,9 @@ class Test(unittest.TestCase):
         parts = bids.get_file_group("participants")
         self.assertIsNotNone(parts)
         issues = bids.validate()
-        self.assertFalse(issues, "BidsDataset validate should return issues when the default check_for_warnings is used")
+        self.assertFalse(
+            issues, "BidsDataset validate should return issues when the default check_for_warnings is used"
+        )
         issues = bids.validate(check_for_warnings=True)
         self.assertTrue(issues, "BidsDataset validate should return issues when check_for_warnings is True")
         issues = bids.validate(check_for_warnings=False)
@@ -172,7 +179,9 @@ class Test(unittest.TestCase):
         self.assertEqual(len(events.sidecar_dict), 3, "BidsDataset should have one participants.json file")
         self.assertEqual(len(bids.file_groups), 1, "BidsDataset should have 7 file groups")
         json1 = os.path.realpath(os.path.join(self.inherit_path, "task-FacePerception_events.json"))
-        tsv1 = os.path.realpath(os.path.join(self.inherit_path, "sub-002", "sub-002_task-FacePerception_run-1_events.tsv"))
+        tsv1 = os.path.realpath(
+            os.path.join(self.inherit_path, "sub-002", "sub-002_task-FacePerception_run-1_events.tsv")
+        )
         tsv2 = os.path.realpath(
             os.path.join(self.inherit_path, "sub-003", "eeg", "sub-003_task-FacePerception_run-1_events.tsv")
         )
@@ -187,7 +196,9 @@ class Test(unittest.TestCase):
         self.assertIsInstance(tsv1_sidecar, Sidecar, "BidsDataset events should be a BidsFileGroup")
         merged1 = tsv1_sidecar.loaded_dict
         self.assertIn("rep_status", merged1, "The merged sidecar should have a rep_status")
-        self.assertNotIn("rep_status", sidecar1.contents.loaded_dict, "The original sidecar should not have a rep_status")
+        self.assertNotIn(
+            "rep_status", sidecar1.contents.loaded_dict, "The original sidecar should not have a rep_status"
+        )
 
         # Test inheritance for overwritten keys
         self.assertIsInstance(sidecar1, BidsSidecarFile, "BidsDataset events should be a BidsFileGroup")
@@ -209,7 +220,9 @@ class Test(unittest.TestCase):
 
     def test_libraries(self):
         bids = BidsDataset(self.library_path, suffixes=["participants", "events"])
-        self.assertIsInstance(bids, BidsDataset, "BidsDataset with libraries should create a valid object from valid dataset")
+        self.assertIsInstance(
+            bids, BidsDataset, "BidsDataset with libraries should create a valid object from valid dataset"
+        )
         parts = bids.get_file_group("participants")
         self.assertIsNotNone(parts, "BidsDataset participants should be none if no HED")
 
@@ -222,7 +235,9 @@ class Test(unittest.TestCase):
 
     def test_demo_empty(self):
         bids = BidsDataset(self.demo_path, suffixes=["channels"])
-        self.assertIsInstance(bids, BidsDataset, "BidsDataset with libraries should create a valid object from valid dataset")
+        self.assertIsInstance(
+            bids, BidsDataset, "BidsDataset with libraries should create a valid object from valid dataset"
+        )
         chans = bids.get_file_group("channels")
         self.assertIsNotNone(chans, "BidsDataset channels should not be a BidsFileGroup")
 
@@ -233,12 +248,16 @@ class Test(unittest.TestCase):
     def test_with_schema_group(self):
         x = load_schema_version(["score_2.0.0", "test:testlib_1.0.2"])
         bids = BidsDataset(self.library_path, schema=x, suffixes=["participants"])
-        self.assertIsInstance(bids, BidsDataset, "BidsDataset with libraries should create a valid object from valid dataset")
+        self.assertIsInstance(
+            bids, BidsDataset, "BidsDataset with libraries should create a valid object from valid dataset"
+        )
         parts = bids.get_file_group("participants")
         self.assertIsNotNone(parts, "BidsDataset participants should be a None")
 
         for group in bids.file_groups.values():
-            self.assertIsInstance(group, BidsFileGroup, "BidsDataset with libraries event_files should be  BidsFileGroup")
+            self.assertIsInstance(
+                group, BidsFileGroup, "BidsDataset with libraries event_files should be  BidsFileGroup"
+            )
         self.assertIsInstance(
             bids.schema, HedSchemaGroup, "BidsDataset with libraries should have schema that is a HedSchemaGroup"
         )
@@ -250,7 +269,9 @@ class Test(unittest.TestCase):
         summary1 = bids1.get_summary()
         self.assertIsInstance(summary1, dict, "BidsDataset summary is a dictionary")
         self.assertTrue("hed_schema_versions" in summary1, "BidsDataset summary has a hed_schema_versions key")
-        self.assertIsInstance(summary1["hed_schema_versions"], list, "BidsDataset summary hed_schema_versions is a list")
+        self.assertIsInstance(
+            summary1["hed_schema_versions"], list, "BidsDataset summary hed_schema_versions is a list"
+        )
         self.assertTrue("dataset" in summary1)
         self.assertEqual(
             len(summary1["hed_schema_versions"]), 1, "BidsDataset summary hed_schema_versions entry has one schema"
@@ -265,7 +286,9 @@ class Test(unittest.TestCase):
             summary2["hed_schema_versions"], list, "BidsDataset with libraries hed_schema_versions in summary is a list"
         )
         self.assertEqual(
-            len(summary2["hed_schema_versions"]), 2, "BidsDataset with libraries summary hed_schema_versions list has 3 schema"
+            len(summary2["hed_schema_versions"]),
+            2,
+            "BidsDataset with libraries summary hed_schema_versions list has 3 schema",
         )
         self.assertTrue("dataset" in summary2)
 

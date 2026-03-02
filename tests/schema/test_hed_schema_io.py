@@ -18,7 +18,6 @@ import shutil
 
 # todo: speed up these tests
 class TestHedSchema(unittest.TestCase):
-
     def test_load_schema_invalid_parameters(self):
         bad_filename = "this_is_not_a_real_file.xml"
         with self.assertRaises(HedFileError):
@@ -29,7 +28,9 @@ class TestHedSchema(unittest.TestCase):
             load_schema(bad_filename)
 
     def test_load_schema_name(self):
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.2.0.mediawiki")
+        schema_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.2.0.mediawiki"
+        )
 
         hed_schema = load_schema(schema_path, schema_namespace="testspace", name="Test Name")
         self.assertEqual(hed_schema.schema_namespace, "testspace:")
@@ -195,7 +196,9 @@ class TestHedSchemaUnmerged(unittest.TestCase):
     # Verify the HED cache can handle loading unmerged with_standard schemas in case they are ever used
     @classmethod
     def setUpClass(cls):
-        hed_cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../schema_cache_test_local_unmerged/")
+        hed_cache_dir = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../schema_cache_test_local_unmerged/"
+        )
         if os.path.exists(hed_cache_dir) and os.path.isdir(hed_cache_dir):
             shutil.rmtree(hed_cache_dir)
         _load_schema_version.cache_clear()
@@ -324,10 +327,10 @@ class TestHedSchemaMerging(unittest.TestCase):
 
                     # print(i, files[i], s1.filename)
                     # print(files[i+1], s2.filename)
-                    self.assertTrue(result, f"Saved xml {files[i]} and {files[i+1]} are not equal.")
+                    self.assertTrue(result, f"Saved xml {files[i]} and {files[i + 1]} are not equal.")
                     reload1 = load_schema(filename1)
                     reload2 = load_schema(filename2)
-                    self.assertEqual(reload1, reload2, f"Reloaded xml {files[i]} and {files[i+1]} are not equal.")
+                    self.assertEqual(reload1, reload2, f"Reloaded xml {files[i]} and {files[i + 1]} are not equal.")
                 except Exception as ex:
                     print(ex)
                     self.assertTrue(False)
@@ -341,11 +344,11 @@ class TestHedSchemaMerging(unittest.TestCase):
                     s1.save_as_mediawiki(filename1, save_merged=save_merged)
                     s2.save_as_mediawiki(filename2, save_merged=save_merged)
                     result = filecmp.cmp(filename1, filename2)
-                    self.assertTrue(result, f"Saved wiki {files[i]} and {files[i+1]} are not equal.")
+                    self.assertTrue(result, f"Saved wiki {files[i]} and {files[i + 1]} are not equal.")
 
                     reload1 = load_schema(filename1)
                     reload2 = load_schema(filename2)
-                    self.assertEqual(reload1, reload2, f"Reloaded wiki {files[i]} and {files[i+1]} are not equal.")
+                    self.assertEqual(reload1, reload2, f"Reloaded wiki {files[i]} and {files[i + 1]} are not equal.")
                 except Exception as ex:
                     print(ex)
                     self.assertTrue(False)
@@ -669,7 +672,9 @@ class TestPrereleaseParameter(unittest.TestCase):
     def test_mixed_regular_and_prerelease_schemas(self):
         """Test loading a mix of regular and prerelease schemas with different namespaces."""
         # Load regular schema and prerelease library with different namespaces
-        schemas = load_schema_version(["base:8.2.0", "test:testlib_2.1.0"], xml_folder=self.schema_dir, check_prerelease=True)
+        schemas = load_schema_version(
+            ["base:8.2.0", "test:testlib_2.1.0"], xml_folder=self.schema_dir, check_prerelease=True
+        )
         self.assertIsInstance(schemas, HedSchemaGroup, "Should load as HedSchemaGroup")
         self.assertEqual(len(schemas._schemas), 2, "Should have two schemas")
         self.assertIn("base:", schemas._schemas, "Should have base namespace")

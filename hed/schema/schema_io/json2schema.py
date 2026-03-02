@@ -320,7 +320,8 @@ class SchemaLoaderJSON(SchemaLoader):
         unit_names_set = set(class_data.get(json_constants.UNITS_LIST_KEY, []))
         for key, value in class_data.items():
             if (
-                key not in [json_constants.DESCRIPTION_KEY, json_constants.UNITS_LIST_KEY, json_constants.DEFAULT_UNITS_KEY]
+                key
+                not in [json_constants.DESCRIPTION_KEY, json_constants.UNITS_LIST_KEY, json_constants.DEFAULT_UNITS_KEY]
                 and key not in unit_names_set
             ):
                 entry._set_attribute_value(key, self._convert_to_internal_format(value))
@@ -559,4 +560,6 @@ class SchemaLoaderJSON(SchemaLoader):
 
         # Merge with existing schema extras if present (from withStandard base schema)
         standard_df = self._schema.extras.get(df_constants.EXTERNAL_ANNOTATION_KEY, None)
-        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = df_util.merge_extras_dataframes(library_df, standard_df)
+        self._schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = df_util.merge_extras_dataframes(
+            library_df, standard_df
+        )

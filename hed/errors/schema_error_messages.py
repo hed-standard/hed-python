@@ -63,7 +63,10 @@ def schema_error_SCHEMA_PRERELEASE_VERSION_USED(current_version, known_versions)
 )
 def schema_error_invalid_character_prologue(char_index, source_string, section_name):
     invalid_char = source_string[char_index]
-    return f"'{section_name}' has invalid character '{invalid_char}' at " + f"position {char_index} of string: {source_string}"
+    return (
+        f"'{section_name}' has invalid character '{invalid_char}' at "
+        + f"position {char_index} of string: {source_string}"
+    )
 
 
 @hed_error(
@@ -114,7 +117,9 @@ def schema_error_SCHEMA_CHILD_OF_DEPRECATED(deprecated_tag, non_deprecated_child
     return f"Deprecated tag '{deprecated_tag}' has a child that is not deprecated: '{non_deprecated_child}'."
 
 
-@hed_error(SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED, actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR)
+@hed_error(
+    SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_DEPRECATED, actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR
+)
 def schema_error_SCHEMA_ATTRIBUTE_VALUE_DEPRECATED(tag, deprecated_suggestion, attribute_name):
     return (
         f"Tag '{tag}' {attribute_name} uses '{deprecated_suggestion}' which has been deprecated "
@@ -131,7 +136,8 @@ def schema_error_GENERIC_ATTRIBUTE_VALUE_INVALID(tag, invalid_value, attribute_n
 
 
 @hed_error(
-    SchemaAttributeErrors.SCHEMA_ATTRIBUTE_NUMERIC_INVALID, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID
+    SchemaAttributeErrors.SCHEMA_ATTRIBUTE_NUMERIC_INVALID,
+    actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
 )
 def schema_error_SCHEMA_ATTRIBUTE_NUMERIC_INVALID(tag, invalid_value, attribute_name):
     return f"Element '{tag}' has an invalid {attribute_name}: '{invalid_value}'.  Should be numeric."
@@ -145,7 +151,9 @@ def schema_error_SCHEMA_DEFAULT_UNITS_INVALID(tag, bad_unit, valid_units):
     return f"Tag '{tag}' has an invalid defaultUnit '{bad_unit}'.  Valid units are: '{valid_units}'."
 
 
-@hed_error(SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_DEPRECATED, actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR)
+@hed_error(
+    SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_DEPRECATED, actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR
+)
 def schema_error_SCHEMA_DEFAULT_UNITS_DEPRECATED(unit_class, bad_unit):
     return f"Unit class '{unit_class}' defaultUnit '{bad_unit}' is deprecated.  Please find an alternative default."
 
@@ -158,7 +166,9 @@ def schema_error_SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE(tag, conversion_factor):
     return f"Tag '{tag}' has an invalid conversionFactor '{conversion_factor}'.  Conversion factor must be positive."
 
 
-@hed_error(SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
+@hed_error(
+    SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID
+)
 def schema_error_SCHEMA_HED_ID_INVALID(tag, new_id, old_id=None, valid_min=None, valid_max=None):
     if old_id:
         return (
@@ -171,7 +181,8 @@ def schema_error_SCHEMA_HED_ID_INVALID(tag, new_id, old_id=None, valid_min=None,
 
 
 @hed_error(
-    SchemaAttributeErrors.SCHEMA_ALLOWED_CHARACTERS_INVALID, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID
+    SchemaAttributeErrors.SCHEMA_ALLOWED_CHARACTERS_INVALID,
+    actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
 )
 def schema_error_SCHEMA_ALLOWED_CHARACTERS_INVALID(tag, invalid_character):
     from hed.schema.hed_schema_constants import character_types
@@ -183,14 +194,16 @@ def schema_error_SCHEMA_ALLOWED_CHARACTERS_INVALID(tag, invalid_character):
     )
 
 
-@hed_error(SchemaAttributeErrors.SCHEMA_IN_LIBRARY_INVALID, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID)
+@hed_error(
+    SchemaAttributeErrors.SCHEMA_IN_LIBRARY_INVALID, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID
+)
 def schema_error_SCHEMA_IN_LIBRARY_INVALID(tag, bad_library):
     return f"Tag '{tag}' has an invalid inLibrary: '{bad_library}'.  "
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE, default_severity=ErrorSeverity.WARNING)
 def schema_error_SCHEMA_MISSING_EXTRA_VALUE(section_name, column_name, row_index):
-    return f"Extras section '{section_name}' has an empty value in column '{column_name}' " f"at row {row_index}."
+    return f"Extras section '{section_name}' has an empty value in column '{column_name}' at row {row_index}."
 
 
 @hed_error(
@@ -198,10 +211,7 @@ def schema_error_SCHEMA_MISSING_EXTRA_VALUE(section_name, column_name, row_index
     default_severity=ErrorSeverity.WARNING,
 )
 def schema_error_annotation_prefix_missing(tag, annotation_value, prefix):
-    return (
-        f"Tag '{tag}' has annotation '{annotation_value}' with prefix '{prefix}' "
-        f"that is not defined in the Prefixes section."
-    )
+    return f"Tag '{tag}' has annotation '{annotation_value}' with prefix '{prefix}' that is not defined in the Prefixes section."
 
 
 @hed_error(

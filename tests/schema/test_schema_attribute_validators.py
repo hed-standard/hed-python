@@ -14,39 +14,57 @@ class Test(unittest.TestCase):
     def test_util_placeholder(self):
         tag_entry = self.hed_schema.tags["Event"]
         attribute_name = "unitClass"
-        self.assertTrue(schema_attribute_validators.tag_is_placeholder_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertTrue(
+            schema_attribute_validators.tag_is_placeholder_check(self.hed_schema, tag_entry, attribute_name)
+        )
         attribute_name = "unitClass"
         tag_entry = self.hed_schema.tags["Age/#"]
-        self.assertFalse(schema_attribute_validators.tag_is_placeholder_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(
+            schema_attribute_validators.tag_is_placeholder_check(self.hed_schema, tag_entry, attribute_name)
+        )
 
     def test_util_suggested(self):
         tag_entry = self.hed_schema.tags["Event/Sensory-event"]
         attribute_name = "suggestedTag"
         self.assertFalse(
-            schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.Tags)
+            schema_attribute_validators.item_exists_check(
+                self.hed_schema, tag_entry, attribute_name, HedSectionKey.Tags
+            )
         )
         tag_entry = self.hed_schema.tags["Property"]
         self.assertFalse(
-            schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.Tags)
+            schema_attribute_validators.item_exists_check(
+                self.hed_schema, tag_entry, attribute_name, HedSectionKey.Tags
+            )
         )
         tag_entry = copy.deepcopy(tag_entry)
         tag_entry.attributes["suggestedTag"] = "InvalidSuggestedTag"
         self.assertTrue(
-            schema_attribute_validators.item_exists_check(self.hed_schema, tag_entry, attribute_name, HedSectionKey.Tags)
+            schema_attribute_validators.item_exists_check(
+                self.hed_schema, tag_entry, attribute_name, HedSectionKey.Tags
+            )
         )
 
     def test_util_rooted(self):
         tag_entry = self.hed_schema.tags["Event"]
         attribute_name = "rooted"
-        self.assertFalse(schema_attribute_validators.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(
+            schema_attribute_validators.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name)
+        )
         tag_entry = self.hed_schema.tags["Property"]
-        self.assertFalse(schema_attribute_validators.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(
+            schema_attribute_validators.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name)
+        )
         tag_entry = copy.deepcopy(tag_entry)
         tag_entry.attributes["rooted"] = "Event"
-        self.assertFalse(schema_attribute_validators.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(
+            schema_attribute_validators.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name)
+        )
         tag_entry = copy.deepcopy(tag_entry)
         tag_entry.attributes["rooted"] = "NotRealTag"
-        self.assertTrue(schema_attribute_validators.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertTrue(
+            schema_attribute_validators.tag_exists_base_schema_check(self.hed_schema, tag_entry, attribute_name)
+        )
 
     def test_unit_class_exists(self):
         tag_entry = self.hed_schema.tags["Weight/#"]
@@ -94,7 +112,9 @@ class Test(unittest.TestCase):
     def test_deprecatedFrom(self):
         tag_entry = self.hed_schema.tags["Event/Measurement-event"]
         attribute_name = "deprecatedFrom"
-        self.assertFalse(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(
+            schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name)
+        )
 
         tag_entry = copy.deepcopy(tag_entry)
         tag_entry.attributes["deprecatedFrom"] = "200.3.0"
@@ -107,11 +127,15 @@ class Test(unittest.TestCase):
         self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
 
         tag_entry.attributes["deprecatedFrom"] = "8.0.0"
-        self.assertFalse(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(
+            schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name)
+        )
 
         # deprecatedFrom equal to current version is valid (deprecating in current release)
         tag_entry.attributes["deprecatedFrom"] = "8.2.0"
-        self.assertFalse(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(
+            schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, tag_entry, attribute_name)
+        )
 
         # deprecatedFrom in the future is invalid
         tag_entry.attributes["deprecatedFrom"] = "8.3.0"
@@ -120,11 +144,15 @@ class Test(unittest.TestCase):
 
         unit_class_entry = copy.deepcopy(self.hed_schema.unit_classes["temperatureUnits"])
         # This should raise an issue because it assumes the attribute is set
-        self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name))
+        self.assertTrue(
+            schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name)
+        )
         unit_class_entry.attributes["deprecatedFrom"] = "8.1.0"
         unit_class_entry.units["degree Celsius"].attributes["deprecatedFrom"] = "8.1.0"
         # Still a warning for oC
-        self.assertTrue(schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name))
+        self.assertTrue(
+            schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name)
+        )
         unit_class_entry.units["oC"].attributes["deprecatedFrom"] = "8.1.0"
         self.assertFalse(
             schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry, attribute_name)
@@ -137,7 +165,9 @@ class Test(unittest.TestCase):
 
         # deprecatedFrom=8.2.0 on oC is valid (current version)
         self.assertFalse(
-            schema_attribute_validators.tag_is_deprecated_check(self.hed_schema, unit_class_entry.units["oC"], attribute_name)
+            schema_attribute_validators.tag_is_deprecated_check(
+                self.hed_schema, unit_class_entry.units["oC"], attribute_name
+            )
         )
 
     def test_conversionFactor(self):
@@ -174,17 +204,23 @@ class Test(unittest.TestCase):
         tag_entry = self.hed_schema.value_classes["dateTimeClass"]
         attribute_name = "allowedCharacter"
         valid_attributes = {"letters", "blank", "digits", "alphanumeric", ":", "$", "a"}
-        self.assertFalse(schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name))
+        self.assertFalse(
+            schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name)
+        )
 
         tag_entry = copy.deepcopy(tag_entry)
         for attribute in valid_attributes:
             tag_entry.attributes[attribute_name] = attribute
-            self.assertFalse(schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name))
+            self.assertFalse(
+                schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name)
+            )
 
         invalid_attributes = {"lettersdd", "notaword", ":a"}
         for attribute in invalid_attributes:
             tag_entry.attributes[attribute_name] = attribute
-            self.assertTrue(schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name))
+            self.assertTrue(
+                schema_attribute_validators.allowed_characters_check(self.hed_schema, tag_entry, attribute_name)
+            )
 
     def test_in_library_check(self):
         score = load_schema_version("score_1.1.0")

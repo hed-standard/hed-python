@@ -10,7 +10,6 @@ from hed.tools.analysis.hed_tag_manager import HedTagManager
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.2.0")
@@ -18,7 +17,8 @@ class Test(unittest.TestCase):
         defs = [
             HedString("(Definition/Cond1, (Condition-variable/Var1, Circle, Square))", hed_schema=schema),
             HedString(
-                "(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))", hed_schema=schema
+                "(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))",
+                hed_schema=schema,
             ),
             HedString("(Definition/Cond3/#, (Condition-variable/Var3, Label/#, Ellipse, Cross))", hed_schema=schema),
             HedString("(Definition/Cond4, (Condition-variable, Apple, Banana))", hed_schema=schema),

@@ -65,7 +65,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
         ValueError: If *hed_schema* is not a ``HedSchema`` instance.
     """
     if not isinstance(hed_schema, HedSchema):
-        raise ValueError("To check compliance of a HedGroupSchema, " "call self.check_compliance on the schema itself.")
+        raise ValueError("To check compliance of a HedGroupSchema, call self.check_compliance on the schema itself.")
 
     error_handler = error_handler or ErrorHandler(check_for_warnings)
     validator = SchemaValidator(hed_schema, error_handler)
@@ -321,7 +321,9 @@ class SchemaValidator:
             for name, dups in self.hed_schema[section_key].duplicate_names.items():
                 libraries = {e.has_attribute(HedKey.InLibrary) for e in dups}
                 code = (
-                    SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY if len(libraries) == 2 else SchemaErrors.SCHEMA_DUPLICATE_NODE
+                    SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY
+                    if len(libraries) == 2
+                    else SchemaErrors.SCHEMA_DUPLICATE_NODE
                 )
                 issues += self.error_handler.format_error_with_context(
                     code,

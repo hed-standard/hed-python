@@ -33,9 +33,9 @@ def _is_prerelease_partner(base_schema) -> bool:
 
 
 def validate_schema_object(base_schema, schema_name):
-    """Validate a schema object by checking compliance and roundtrip conversion.
+    """Validate a schema object by checking non-warning compliance and roundtrip conversion.
 
-    Tests the schema for compliance issues and validates that it can be successfully
+    Tests the schema for non-warning compliance issues and validates that it can be successfully
     converted to and reloaded from all four formats (MEDIAWIKI, XML, JSON, TSV).
 
     Parameters:
@@ -89,7 +89,9 @@ def validate_schema(file_path):
 
     _, extension = os.path.splitext(file_path)
     if extension.lower() != extension:
-        return [f"Only fully lowercase extensions are allowed for schema files.  " f"Invalid extension on file: {file_path}"]
+        return [
+            f"Only fully lowercase extensions are allowed for schema files.  Invalid extension on file: {file_path}"
+        ]
 
     validation_issues = []
     try:

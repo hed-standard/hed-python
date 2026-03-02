@@ -17,10 +17,11 @@ from hed.tools.util.io_util import (
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.bids_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), "../../data/bids_tests/eeg_ds003645s_hed"))
+        cls.bids_dir = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../../data/bids_tests/eeg_ds003645s_hed")
+        )
         stern_base_dir = os.path.join(os.path.dirname(__file__), "../data/sternberg")
         att_base_dir = os.path.join(os.path.dirname(__file__), "../data/attention_shift")
         cls.stern_map_path = os.path.join(stern_base_dir, "sternberg_map.tsv")
@@ -64,7 +65,9 @@ class Test(unittest.TestCase):
         filename = clean_filename(None)
         self.assertEqual("", filename, "Return empty when base_name, prefix, and suffix are None, but extension is not")
         filename = clean_filename("c:/temp.json")
-        self.assertEqual("c_temp.json", filename, "Returns stripped base_name + extension when prefix, and suffix are None")
+        self.assertEqual(
+            "c_temp.json", filename, "Returns stripped base_name + extension when prefix, and suffix are None"
+        )
 
     def test_get_allowed(self):
         test_value = "events.tsv"
@@ -173,7 +176,9 @@ class TestGetFullExtension(unittest.TestCase):
         self.assertEqual(get_full_extension("file.txt"), ("file", ".txt"), "Should work with single extensions.")
 
     def test_multiple_extensions(self):
-        self.assertEqual(get_full_extension("archive.tar.gz"), ("archive", ".tar.gz"), "Should work with multiple extensions.")
+        self.assertEqual(
+            get_full_extension("archive.tar.gz"), ("archive", ".tar.gz"), "Should work with multiple extensions."
+        )
 
     def test_no_extension(self):
         self.assertEqual(get_full_extension("filename"), ("filename", ""), "Should work with no extension.")
@@ -193,7 +198,6 @@ class TestGetFullExtension(unittest.TestCase):
 
 
 class TestSeparateByExt(unittest.TestCase):
-
     @patch("hed.tools.util.io_util.get_full_extension")  # Replace 'your_module' with the actual module name
     def test_separate_by_ext(self, mock_get_full_extension):
         file_paths = ["file1.tsv", "file2.json", "file3.tsv", "file4.txt", "file5.json"]

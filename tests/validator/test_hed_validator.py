@@ -66,7 +66,9 @@ class Test(unittest.TestCase):
         events_path = os.path.realpath(
             os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_events_no_index.tsv")
         )
-        json_path = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_events.json"))
+        json_path = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_events.json")
+        )
         sidecar = Sidecar(json_path)
         issues = sidecar.validate(self.hed_schema)
         self.assertEqual(len(issues), 0)
@@ -81,7 +83,9 @@ class Test(unittest.TestCase):
         )
 
         # hed_schema = schema.load_schema(schema_path)
-        json_path = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_events.json"))
+        json_path = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_events.json")
+        )
         sidecar = Sidecar(json_path)
         issues = sidecar.validate(hed_schema=self.hed_schema)
         self.assertEqual(len(issues), 0)
@@ -147,7 +151,10 @@ class Test(unittest.TestCase):
             2: "Property/Informational-property/Description/",
         }
         loaded_file = SpreadsheetInput(
-            events_path, tag_columns=[3], column_prefix_dictionary=prefixed_needed_tag_columns, worksheet_name="LKT Events"
+            events_path,
+            tag_columns=[3],
+            column_prefix_dictionary=prefixed_needed_tag_columns,
+            worksheet_name="LKT Events",
         )
 
         validation_issues = loaded_file.validate(hed_schema=hed_schema)
@@ -157,10 +164,14 @@ class Test(unittest.TestCase):
         schema_path = os.path.realpath(
             os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_schema.mediawiki")
         )
-        events_path = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_events_HED.tsv"))
+        events_path = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_events_HED.tsv")
+        )
 
         hed_schema = schema.load_schema(schema_path)
-        json_path = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_events_HED.json"))
+        json_path = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../data/validator_tests/bids_events_HED.json")
+        )
         sidecar = Sidecar(json_path)
         issues = sidecar.validate(hed_schema)
         self.assertEqual(len(issues), 1)
@@ -194,7 +205,9 @@ class Test(unittest.TestCase):
         self.assertEqual(source_span, (None, None))
 
     def test_duplicate_group_in_definition(self):
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.2.0.mediawiki")
+        schema_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.2.0.mediawiki"
+        )
         hed_schema = schema.load_schema(schema_path)
         string_with_def = "(Definition/TestDef,(Item,Item))"
         test_string = HedString(string_with_def, hed_schema)

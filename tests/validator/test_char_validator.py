@@ -3,7 +3,6 @@ from hed.validator.util.char_util import CharRexValidator
 
 
 class TestGetProblemIndices(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.char_rex_val = CharRexValidator()

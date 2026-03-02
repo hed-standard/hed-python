@@ -104,7 +104,9 @@ class EventManager:
         """
         if not hed:
             return
-        group_tuples = hed.find_top_level_tags(anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY}, include_groups=2)
+        group_tuples = hed.find_top_level_tags(
+            anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY}, include_groups=2
+        )
 
         to_remove = []
         for def_tag, group in group_tuples:
@@ -139,7 +141,9 @@ class EventManager:
         remove_defs = self.get_type_defs(remove_types)  # definitions corresponding to remove types to be filtered out
         new_hed = ["" for _ in range(len(self.hed_strings))]
         for index, item in enumerate(self.hed_strings):
-            new_hed[index] = self._filter_hed(item, remove_types=remove_types, remove_defs=remove_defs, remove_group=False)
+            new_hed[index] = self._filter_hed(
+                item, remove_types=remove_types, remove_defs=remove_defs, remove_group=False
+            )
         if self.onsets is None:
             return new_hed, None, None
         new_base, new_contexts = self._get_base_contexts(remove_types, remove_defs)

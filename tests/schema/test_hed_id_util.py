@@ -65,12 +65,16 @@ class TestVerifyHedIdMatches(unittest.TestCase):
         self.assertEqual(len(errors), 0)
 
     def test_id_matches(self):
-        df = pd.DataFrame([{"rdfs:label": "Event", "hedId": "HED_0012001"}, {"rdfs:label": "Age-#", "hedId": "HED_0012475"}])
+        df = pd.DataFrame(
+            [{"rdfs:label": "Event", "hedId": "HED_0012001"}, {"rdfs:label": "Age-#", "hedId": "HED_0012475"}]
+        )
         errors = _verify_hedid_matches(hed_schema_global.tags, df, hed_id_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 0)
 
     def test_label_mismatch_id(self):
-        df = pd.DataFrame([{"rdfs:label": "Event", "hedId": "HED_0012005"}, {"rdfs:label": "Age-#", "hedId": "HED_0012007"}])
+        df = pd.DataFrame(
+            [{"rdfs:label": "Event", "hedId": "HED_0012005"}, {"rdfs:label": "Age-#", "hedId": "HED_0012007"}]
+        )
 
         errors = _verify_hedid_matches(hed_schema_global.tags, df, hed_id_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 2)

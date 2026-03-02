@@ -61,7 +61,9 @@ def validate_present_attributes(attrib_dict, name):
     """
     if constants.WITH_STANDARD_ATTRIBUTE in attrib_dict and constants.LIBRARY_ATTRIBUTE not in attrib_dict:
         raise HedFileError(
-            HedExceptions.BAD_WITH_STANDARD, "withStandard header attribute found, but no library attribute is present", name
+            HedExceptions.BAD_WITH_STANDARD,
+            "withStandard header attribute found, but no library attribute is present",
+            name,
         )
 
 

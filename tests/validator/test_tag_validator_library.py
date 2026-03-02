@@ -130,7 +130,10 @@ class IndividualHedTagsShort(TestHed3):
     def test_child_required(self):
         test_strings = {"hasChild": "tl:Experimental-stimulus", "missingChild": "tl:Label"}
         expected_results = {"hasChild": True, "missingChild": False}
-        expected_issues = {"hasChild": [], "missingChild": self.format_error(ValidationErrors.TAG_REQUIRES_CHILD, tag=0)}
+        expected_issues = {
+            "hasChild": [],
+            "missingChild": self.format_error(ValidationErrors.TAG_REQUIRES_CHILD, tag=0),
+        }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 
     def test_required_units(self):
@@ -160,7 +163,9 @@ class IndividualHedTagsShort(TestHed3):
             "notRequiredNoNumber": [],
             "notRequiredNumber": [],
             "notRequiredScientific": [],
-            "timeValue": self.format_error(ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None),
+            "timeValue": self.format_error(
+                ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None
+            ),
             "invalidTimeValue": self.format_error(
                 ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None
             ),
@@ -225,7 +230,9 @@ class IndividualHedTagsShort(TestHed3):
             "correctSymbolCapitalizedUnit": [],
             "incorrectUnit": self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_time_units),
             "incorrectPluralUnit": self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units),
-            "incorrectSymbolCapitalizedUnit": self.format_error(ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units),
+            "incorrectSymbolCapitalizedUnit": self.format_error(
+                ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units
+            ),
             "incorrectSymbolCapitalizedUnitModifier": self.format_error(
                 ValidationErrors.UNITS_INVALID, tag=0, units=legal_freq_units
             ),
@@ -320,11 +327,17 @@ class TestTagLevels3(TestHed3):
             "topLevelDuplicate": "tl:Event/Sensory-event,tl:Event/Sensory-event",
             "groupDuplicate": "tl:Item/Object/Man-made-object/VehicleTrain,(tl:Event/Sensory-event,"
             "tl:Purple-color/Purple,tl:Event/Sensory-event)",
-            "noDuplicate": "tl:Event/Sensory-event," "tl:Item/Object/Man-made-object/VehicleTrain," "tl:Purple-color/Purple",
+            "noDuplicate": "tl:Event/Sensory-event,tl:Item/Object/Man-made-object/VehicleTrain,tl:Purple-color/Purple",
             "legalDuplicate": "tl:Item/Object/Man-made-object/VehicleTrain,\
-            (tl:Item/Object/Man-made-object/VehicleTrain," "tl:Event/Sensory-event)",
+            (tl:Item/Object/Man-made-object/VehicleTrain,"
+            "tl:Event/Sensory-event)",
         }
-        expected_results = {"topLevelDuplicate": False, "groupDuplicate": False, "legalDuplicate": True, "noDuplicate": True}
+        expected_results = {
+            "topLevelDuplicate": False,
+            "groupDuplicate": False,
+            "legalDuplicate": True,
+            "noDuplicate": True,
+        }
         expected_issues = {
             "topLevelDuplicate": self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=1),
             "groupDuplicate": self.format_error(ValidationErrors.HED_TAG_REPEATED, tag=3),
@@ -480,7 +493,9 @@ class RequiredTags(TestHed3):
         }
         expected_issues = {
             "complete": [],
-            "missingAgent": self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace="Agent/Animal-agent"),
+            "missingAgent": self.format_error(
+                ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace="Agent/Animal-agent"
+            ),
             "missingAction": self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace="Action"),
             "inSubGroup": [],
             "missingAll": self.format_error(ValidationErrors.REQUIRED_TAG_MISSING, tag_namespace="Action")
@@ -492,7 +507,7 @@ class RequiredTags(TestHed3):
 
     def test_multiple_copies_unique_tags(self):
         test_strings = {
-            "legal": "tl:Event-context," "(Vehicle,Event), Animal-agent, Action, tl:Animal-agent, tl:Action",
+            "legal": "tl:Event-context,(Vehicle,Event), Animal-agent, Action, tl:Animal-agent, tl:Action",
             "multipleDesc": "tl:Event-context,"
             "tl:Event-context,"
             "Vehicle,(Vehicle,tl:Event-context), Animal-agent, Action, tl:Animal-agent, tl:Action",

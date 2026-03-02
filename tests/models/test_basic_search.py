@@ -244,7 +244,12 @@ class TestFindMatching(unittest.TestCase):
 
     def test_wildcard_matching(self):
         series = pd.Series(
-            ["word2, word0, ((word1X))", "word0, ((word1Y)), word2Z", "word0, ((word1)), word2", "word0, (word1), word2"]
+            [
+                "word2, word0, ((word1X))",
+                "word0, ((word1Y)), word2Z",
+                "word0, ((word1)), word2",
+                "word0, (word1), word2",
+            ]
         )
         search_string = "word0, ((word1*)), word2*"
         expected = pd.Series([True, True, True, False])
@@ -284,7 +289,12 @@ class TestFindMatching(unittest.TestCase):
     def test_incorrect_single_delimiter(self):
         query_text = "word0, ((word1)), word2"
         series = pd.Series(
-            ["word0, ((word1)), word2", "(word0, ((word1)), word2)", "word0, ((word1), word2)", "word0, (word1)), word2"]
+            [
+                "word0, ((word1)), word2",
+                "(word0, ((word1)), word2)",
+                "word0, ((word1), word2)",
+                "word0, (word1)), word2",
+            ]
         )
         expected = pd.Series([True, True, False, False])
         self.base_find_matching(series, query_text, expected)

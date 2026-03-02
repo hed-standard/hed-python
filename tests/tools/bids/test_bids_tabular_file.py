@@ -7,7 +7,6 @@ from hed.tools.bids.bids_tabular_file import BidsTabularFile
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
 

@@ -69,7 +69,9 @@ class Test(unittest.TestCase):
         events_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events_bad_category_key.tsv"
         )
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json"
+        )
         sidecar = Sidecar(json_path)
         issues = sidecar.validate(hed_schema=self.hed_schema)
         self.assertEqual(len(issues), 0)
@@ -100,7 +102,9 @@ class Test(unittest.TestCase):
             [3.0, 0, "go", "Red"],
             ["n/a", 0, "go", "(Duration/5, (Red))"],
         ]
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json"
+        )
         sidecar = Sidecar(json_path)
 
         error_handler1 = ErrorHandler(check_for_warnings=False)
@@ -122,7 +126,9 @@ class Test(unittest.TestCase):
         self.assertEqual(len(validation_issues), 3)
 
     def test_blank_and_duplicate_columns(self):
-        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/blank_column_name.tsv")
+        filepath = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/blank_column_name.tsv"
+        )
 
         with self.assertRaises(HedFileError):
             _ = TabularInput(filepath)

@@ -71,7 +71,9 @@ def expand_defs(df, hed_schema, def_dict, columns=None):
 
         for column in columns:
             mask = df[column].str.contains("Def/", case=False)
-            df.loc[mask, column] = df.loc[mask, column].apply(partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict))
+            df.loc[mask, column] = df.loc[mask, column].apply(
+                partial(_expand_defs, hed_schema=hed_schema, def_dict=def_dict)
+            )
 
 
 def _convert_to_form(hed_string, hed_schema, tag_form):
@@ -86,7 +88,9 @@ def _expand_defs(hed_string, hed_schema, def_dict):
     return str(HedString(hed_string, hed_schema, def_dict).expand_defs())
 
 
-def process_def_expands(hed_strings, hed_schema, known_defs=None, ambiguous_defs=None) -> tuple["DefinitionDict", dict, dict]:
+def process_def_expands(
+    hed_strings, hed_schema, known_defs=None, ambiguous_defs=None
+) -> tuple["DefinitionDict", dict, dict]:
     """Gather def-expand tags in the strings/compare with known definitions to find any differences.
 
     Parameters:
@@ -235,7 +239,9 @@ def split_delay_tags(series, hed_schema, onsets):
         return None
     split_df = pd.DataFrame({"onset": onsets, "HED": series, "original_index": series.index})
     delay_strings = [
-        (i, HedString(hed_string, hed_schema)) for (i, hed_string) in series.items() if "delay/" in hed_string.casefold()
+        (i, HedString(hed_string, hed_schema))
+        for (i, hed_string) in series.items()
+        if "delay/" in hed_string.casefold()
     ]
     delay_groups = []
     for i, delay_string in delay_strings:

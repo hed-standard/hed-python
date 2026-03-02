@@ -10,18 +10,20 @@ from hed.schema.hed_schema_io import load_schema_version
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         schema = load_schema_version(xml_version="8.1.0")
         defs = [
             HedString("(Definition/Cond1, (Condition-variable/Var1, Circle, Square))", hed_schema=schema),
             HedString(
-                "(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))", hed_schema=schema
+                "(Definition/Cond2, (condition-variable/Var2, Condition-variable/Apple, Triangle, Sphere))",
+                hed_schema=schema,
             ),
             HedString("(Definition/Cond3/#, (Condition-variable/Var3, Label/#, Ellipse, Cross))", hed_schema=schema),
             HedString("(Definition/Cond4, (Condition-variable, Rectangle, Triangle))", hed_schema=schema),
-            HedString("(Definition/Cond5, (Condition-variable/Lumber, Action, Sensory-presentation))", hed_schema=schema),
+            HedString(
+                "(Definition/Cond5, (Condition-variable/Lumber, Action, Sensory-presentation))", hed_schema=schema
+            ),
             HedString("(Definition/Cond6/#, (Condition-variable/Lumber, Label/#, Agent, Move))", hed_schema=schema),
         ]
         def_dict = DefinitionDict()
@@ -53,7 +55,9 @@ class Test(unittest.TestCase):
 
     def test_constructor(self):
         def_man = HedTypeDefs(self.definitions1)
-        self.assertIsInstance(def_man, HedTypeDefs, "Constructor should create a HedTypeDefinitions directly from a dict")
+        self.assertIsInstance(
+            def_man, HedTypeDefs, "Constructor should create a HedTypeDefinitions directly from a dict"
+        )
         self.assertEqual(len(def_man.def_map), 6, "Constructor condition_map should have the right length")
         self.assertEqual(
             len(def_man.def_map),
@@ -64,7 +68,9 @@ class Test(unittest.TestCase):
     def test_constructor_from_sidecar(self):
         definitions = self.sidecar1.get_def_dict(self.schema)
         def_man = HedTypeDefs(definitions)
-        self.assertIsInstance(def_man, HedTypeDefs, "Constructor should create a HedTypeDefinitions from a tabular input")
+        self.assertIsInstance(
+            def_man, HedTypeDefs, "Constructor should create a HedTypeDefinitions from a tabular input"
+        )
         self.assertEqual(len(def_man.def_map), 8, "Constructor condition_map should have the right length")
         self.assertEqual(len(def_man.definitions), len(definitions))
         defs = def_man.type_def_names

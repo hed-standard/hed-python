@@ -173,7 +173,10 @@ class UnitValueValidator:
                 )
             else:
                 validation_issues += ErrorHandler.format_error(
-                    ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, tag=report_as, value_class=class_name, problem_tag=value[0]
+                    ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
+                    tag=report_as,
+                    value_class=class_name,
+                    problem_tag=value[0],
                 )
         return validation_issues
 

@@ -16,7 +16,9 @@ class Test(unittest.TestCase):
         cls.stern_test1_path = os.path.join(curation_base_dir, "sternberg_test_events.tsv")
         cls.stern_test2_path = os.path.join(curation_base_dir, "sternberg_with_quotes_events.tsv")
         cls.stern_test3_path = os.path.join(curation_base_dir, "sternberg_no_quotes_events.tsv")
-        cls.attention_shift_path2 = os.path.join(curation_base_dir, "sub-001_task-AuditoryVisualShift_run-01_events.tsv")
+        cls.attention_shift_path2 = os.path.join(
+            curation_base_dir, "sub-001_task-AuditoryVisualShift_run-01_events.tsv"
+        )
         cls.attn_map_path = os.path.join(curation_base_dir, "attention_shift_remap_event_template_filled.tsv")
         cls.key_cols1 = ["type"]
         cls.target_cols1 = ["event_type", "task_role", "letter"]
@@ -84,7 +86,9 @@ class Test(unittest.TestCase):
         df1, missing1 = t_map_stern.remap(stern_test1)
         self.assertFalse(missing1, "remap should return empty missing when all keys are accounted for")
         self.assertEqual(len(stern_test1), len(df1), "remap should not change number rows in file")
-        self.assertEqual(df1.iloc[3]["event_type"], "show_letter", "remap should have right value when single column key")
+        self.assertEqual(
+            df1.iloc[3]["event_type"], "show_letter", "remap should have right value when single column key"
+        )
 
     def test_remap_multiple_keys(self):
         t_map_attn = KeyMap(self.key_cols2, self.target_cols2)
@@ -94,7 +98,9 @@ class Test(unittest.TestCase):
         df1, missing1 = t_map_attn.remap(attn_test)
         self.assertFalse(missing1, "remap should return empty missing when all keys are accounted for")
         self.assertEqual(len(attn_test), len(df1), "remap should not change number rows in file")
-        self.assertEqual(df1.iloc[3]["event_type"], "button_press", "remap should have correct value when multiple keys")
+        self.assertEqual(
+            df1.iloc[3]["event_type"], "button_press", "remap should have correct value when multiple keys"
+        )
 
     def test_remap_missing(self):
         t_map = KeyMap(self.key_cols1, self.target_cols1)
@@ -106,7 +112,9 @@ class Test(unittest.TestCase):
         df_new, missing = t_map.remap(stern_test1)
         self.assertTrue(missing, "remap should return return nonempty missing when when keys missing")
         self.assertEqual(len(stern_test1), len(df_new), "remap should not change number rows in file")
-        self.assertEqual(df_new.iloc[3]["event_type"], "n/a", "remap should have n/a in the targets when key is missing")
+        self.assertEqual(
+            df_new.iloc[3]["event_type"], "n/a", "remap should have n/a in the targets when key is missing"
+        )
 
     def test_remap_files(self):
         key_cols = ["type"]

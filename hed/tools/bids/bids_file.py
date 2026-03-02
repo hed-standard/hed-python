@@ -97,6 +97,12 @@ class BidsFile:
     def __str__(self):
         """Return a string representation of this object."""
         my_str = (
-            self.file_path + ":\n\tname_suffix=" + self.suffix + " ext=" + self.ext + " entity_dict=" + str(self.entity_dict)
+            self.file_path
+            + ":\n\tname_suffix="
+            + self.suffix
+            + " ext="
+            + self.ext
+            + " entity_dict="
+            + str(self.entity_dict)
         )
         return my_str

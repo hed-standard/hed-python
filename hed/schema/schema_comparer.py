@@ -1,9 +1,17 @@
 """Functions supporting comparison of schemas."""
 
 import pandas as pd
+from collections import defaultdict
+
 from hed.schema.hed_schema import HedKey
 from hed.schema.hed_schema_constants import HedSectionKey
-from collections import defaultdict
+from hed.schema.schema_io.df_constants import (
+    EXTERNAL_ANNOTATION_KEY,
+    PREFIXES_KEY,
+    SOURCES_KEY,
+    UNIQUE_EXTRAS_KEYS,
+    in_library as _in_library,
+)
 
 
 class SchemaComparer:
@@ -13,9 +21,9 @@ class SchemaComparer:
     MISC_SECTION = "misc"
     HED_ID_SECTION = "HedId changes"
     EXTRAS_SECTION = "Extras changes"
-    SOURCES = "Sources"
-    PREFIXES = "Prefixes"
-    ANNOTATION_PROPERTY_EXTERNAL = "AnnotationPropertyExternal"
+    SOURCES = SOURCES_KEY
+    PREFIXES = PREFIXES_KEY
+    ANNOTATION_PROPERTY_EXTERNAL = EXTERNAL_ANNOTATION_KEY
 
     SECTION_ENTRY_NAMES = {
         HedSectionKey.Tags: "Tag",
@@ -43,10 +51,10 @@ class SchemaComparer:
         MISC_SECTION: "Misc Metadata",
         HED_ID_SECTION: "Modified Hed Ids",
         EXTRAS_SECTION: "Extras",
+        SOURCES: "Sources",
+        PREFIXES: "Prefixes",
+        ANNOTATION_PROPERTY_EXTERNAL: "AnnotationPropertyExternal",
     }
-
-    # TODO: Check that the cases of these are correct.
-    DF_EXTRAS = {SOURCES, PREFIXES, ANNOTATION_PROPERTY_EXTERNAL}
 
     def __init__(self, schema1, schema2):
         """Initialize the SchemaComparer with two schemas.
@@ -305,8 +313,6 @@ class SchemaComparer:
         for section_key, changes in unequal_entries.items():
             if section_key == self.MISC_SECTION:
                 self._add_misc_section_changes(change_dict, section_key, changes)
-            elif section_key in self.DF_EXTRAS:
-                self._add_extras_section_changes(change_dict, section_key, changes)
             else:
                 for tag, (entry1, entry2) in changes.items():
                     if section_key == HedSectionKey.UnitClasses:
@@ -338,35 +344,6 @@ class SchemaComparer:
                 else f"{misc_section} changed from {value1} to {value2}"
             )
             change_dict[section_key].append({"change_type": change_type, "change": change_desc, "tag": misc_section})
-
-    def _add_extras_section_changes(self, change_dict, section_key, changes):
-        """Add changes for extras sections (dataframes) to the change dictionary.
-
-        Handles changes to dataframe-based extras like Sources, Prefixes, and AnnotationPropertyExternal.
-        Note: Extras sections are actually handled by _add_extras_changes which directly compares
-        the dataframes from schema.extras. This method handles any extras-related entries that
-        might appear in the unequal_entries from compare_schemas.
-
-        Parameters:
-            change_dict (defaultdict): Change dictionary to append to.
-            section_key (str): The section identifier (e.g., SOURCES, PREFIXES).
-            changes (dict): Dictionary mapping entry names to (entry1, entry2) tuples.
-        """
-        # Extras sections (Sources, Prefixes, AnnotationPropertyExternal) are stored as dataframes
-        # in schema.extras rather than as schema entries, so they're handled separately
-        # by _add_extras_changes. If we somehow get extras entries here, treat them generically.
-        for name, (entry1, entry2) in changes.items():
-            # Compare the entries as generic schema entries
-            if hasattr(entry1, "attributes") and hasattr(entry2, "attributes"):
-                if entry1.attributes != entry2.attributes:
-                    change_dict[section_key].append(
-                        {"change_type": "Patch", "change": f"{name} attributes modified", "tag": name}
-                    )
-            if hasattr(entry1, "description") and hasattr(entry2, "description"):
-                if entry1.description != entry2.description:
-                    change_dict[section_key].append(
-                        {"change_type": "Patch", "change": f"{name} description modified", "tag": name}
-                    )
 
     @staticmethod
     def _add_unit_classes_changes(change_dict, section_key, entry1, entry2):
@@ -546,8 +523,6 @@ class SchemaComparer:
         Parameters:
             change_dict (defaultdict): Change dictionary to append to.
         """
-        from hed.schema.schema_io.df_constants import UNIQUE_EXTRAS_KEYS
-
         extras1 = getattr(self.schema1, "extras", {}) or {}
         extras2 = getattr(self.schema2, "extras", {}) or {}
 
@@ -575,9 +550,9 @@ class SchemaComparer:
 
             key_cols = UNIQUE_EXTRAS_KEYS.get(key)
             if not key_cols:
-                key_cols = list(set(df1.columns) & set(df2.columns))
+                key_cols = sorted(c for c in set(df1.columns) & set(df2.columns) if c != _in_library)
 
-            compare_cols = list(set(df1.columns) & set(df2.columns))
+            compare_cols = sorted(c for c in set(df1.columns) & set(df2.columns) if c != _in_library)
             if not compare_cols:
                 continue
 
@@ -591,11 +566,19 @@ class SchemaComparer:
                 msg = diff["message"]
                 if msg == "Row missing in first schema":
                     change_dict[key].append(
-                        {"change_type": "Minor", "change": f"Row {row_key} missing in first schema", "tag": str(row_key)}
+                        {
+                            "change_type": "Minor",
+                            "change": f"Row {row_key} missing in first schema",
+                            "tag": str(row_key),
+                        }
                     )
                 elif msg == "Row missing in second schema":
                     change_dict[key].append(
-                        {"change_type": "Minor", "change": f"Row {row_key} missing in second schema", "tag": str(row_key)}
+                        {
+                            "change_type": "Minor",
+                            "change": f"Row {row_key} missing in second schema",
+                            "tag": str(row_key),
+                        }
                     )
                 elif msg == "Duplicate keys found":
                     change_dict[key].append(
@@ -608,7 +591,11 @@ class SchemaComparer:
                 elif msg == "Column values differ":
                     col_str = ", ".join(cols) if cols else ""
                     change_dict[key].append(
-                        {"change_type": "Patch", "change": f"Row {row_key} columns differ: {col_str}", "tag": str(row_key)}
+                        {
+                            "change_type": "Patch",
+                            "change": f"Row {row_key} columns differ: {col_str}",
+                            "tag": str(row_key),
+                        }
                     )
 
     @staticmethod

@@ -62,16 +62,32 @@ class Test(unittest.TestCase):
             [],
             [],
             ErrorHandler.format_error(
-                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy", char_index=60, problem_char="{"
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
+                test_descs[3],
+                "dummy",
+                char_index=60,
+                problem_char="{",
             )
             + ErrorHandler.format_error(
-                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy", char_index=61, problem_char="}"
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
+                test_descs[3],
+                "dummy",
+                char_index=61,
+                problem_char="}",
             )
             + ErrorHandler.format_error(
-                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy", char_index=62, problem_char="["
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
+                test_descs[3],
+                "dummy",
+                char_index=62,
+                problem_char="[",
             )
             + ErrorHandler.format_error(
-                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC, test_descs[3], "dummy", char_index=63, problem_char="]"
+                SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
+                test_descs[3],
+                "dummy",
+                char_index=63,
+                problem_char="]",
             ),
         ]
         self.validate_desc_base(test_descs, expected_issues)

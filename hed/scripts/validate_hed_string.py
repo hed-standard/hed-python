@@ -23,7 +23,8 @@ def get_parser():
         argparse.ArgumentParser: Configured argument parser.
     """
     parser = argparse.ArgumentParser(
-        description="Validate a HED annotation string against a schema", formatter_class=argparse.RawDescriptionHelpFormatter
+        description="Validate a HED annotation string against a schema",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     # Required arguments
@@ -76,7 +77,11 @@ def get_parser():
     )
     logging_group.add_argument("-lf", "--log-file", default="", dest="log_file", help="File path for saving log output")
     logging_group.add_argument(
-        "-lq", "--log-quiet", action="store_true", dest="log_quiet", help="Suppress log output to stderr when using --log-file"
+        "-lq",
+        "--log-quiet",
+        action="store_true",
+        dest="log_quiet",
+        help="Suppress log output to stderr when using --log-file",
     )
     logging_group.add_argument("--no-log", action="store_true", dest="no_log", help="Disable all logging output")
     logging_group.add_argument("-v", "--verbose", action="store_true", help="Output informational messages")

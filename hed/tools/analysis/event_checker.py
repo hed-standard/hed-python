@@ -127,7 +127,10 @@ class EventChecker:
         event_tags = [tag.short_base_tag for tag in all_tags if tag.short_base_tag in self.EVENT_TAGS]
         if not event_tags:
             return ErrorHandler.format_error_with_context(
-                self.error_handler, TagQualityErrors.MISSING_EVENT_TYPE, string=str(group), line=self.original_line_number
+                self.error_handler,
+                TagQualityErrors.MISSING_EVENT_TYPE,
+                string=str(group),
+                line=self.original_line_number,
             )
 
         if len(event_tags) == 1:
@@ -234,7 +237,10 @@ class EventChecker:
         if any("action" in tag.tag_terms for tag in all_tags):
             return []
         return ErrorHandler.format_error_with_context(
-            self.error_handler, TagQualityErrors.MISSING_ACTION_TAG, string=str(hed_group), line=self.original_line_number
+            self.error_handler,
+            TagQualityErrors.MISSING_ACTION_TAG,
+            string=str(hed_group),
+            line=self.original_line_number,
         )
 
 

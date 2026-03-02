@@ -13,7 +13,6 @@ import contextlib
 
 
 class TestAddExtension(unittest.TestCase):
-
     def test_regular_extension(self):
         """Test that regular extensions are added correctly."""
         self.assertEqual(add_extension("filename", ".txt"), "filename.txt")
@@ -96,7 +95,11 @@ class TestSortBaseSchemas(unittest.TestCase):
                 f.write("")  # Create an empty file
 
     def test_mixed_file_types(self):
-        filenames = ["test_schema.mediawiki", os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"), "other_schema.xml"]
+        filenames = [
+            "test_schema.mediawiki",
+            os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
+            "other_schema.xml",
+        ]
         expected = {
             "test_schema": {
                 ".mediawiki": "test_schema.mediawiki",
@@ -125,7 +128,9 @@ class TestSortBaseSchemas(unittest.TestCase):
             os.path.normpath("prerelease/hedtsv/test_schema/test_schema_Tag.tsv"),
             os.path.normpath("prerelease/hedtsv/wrong_folder/wrong_name_Tag.tsv"),  # Should be ignored
         ]
-        expected = {os.path.normpath("prerelease/test_schema"): {".tsv": os.path.normpath("prerelease/hedtsv/test_schema")}}
+        expected = {
+            os.path.normpath("prerelease/test_schema"): {".tsv": os.path.normpath("prerelease/hedtsv/test_schema")}
+        }
         with contextlib.redirect_stdout(None):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)

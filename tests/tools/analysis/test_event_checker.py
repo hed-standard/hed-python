@@ -6,7 +6,6 @@ from hed.tools.analysis.event_checker import EventChecker
 
 
 class TestEventChecker(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.hed_schema = load_schema_version("8.4.0")
@@ -52,7 +51,10 @@ class TestEventChecker(unittest.TestCase):
         self.check_issues("(Data-feature, Blue)")
 
     def test_improperly_grouped_event_tags(self):
-        hed_strings = ["Sensory-event, (Red, Blue), Experiment-control", "((Sensory-event, (Red, Blue), Experiment-control))"]
+        hed_strings = [
+            "Sensory-event, (Red, Blue), Experiment-control",
+            "((Sensory-event, (Red, Blue), Experiment-control))",
+        ]
         for s in hed_strings:
             with self.subTest(s=s):
                 self.check_issues(s, TagQualityErrors.IMPROPER_EVENT_GROUPS)
@@ -83,9 +85,7 @@ class TestEventChecker(unittest.TestCase):
         self.check_issues("(())", TagQualityErrors.MISSING_EVENT_TYPE)
 
     def test_multiple_properly_grouped_events(self):
-        hed_string = (
-            "((Sensory-event, Experimental-stimulus, Visual-presentation)), ((Agent-action, Participant-response, Press))"
-        )
+        hed_string = "((Sensory-event, Experimental-stimulus, Visual-presentation)), ((Agent-action, Participant-response, Press))"
         self.check_issues(hed_string)
 
 

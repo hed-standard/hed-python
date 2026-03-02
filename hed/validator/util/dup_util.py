@@ -6,7 +6,6 @@ from hed.errors.error_types import ValidationErrors
 
 
 class DuplicateChecker:
-
     def __init__(self):
         """Checker for duplications in HED groups.
 

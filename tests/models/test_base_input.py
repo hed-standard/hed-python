@@ -63,7 +63,9 @@ class Test(unittest.TestCase):
     def test_gathered_defs(self):
         # todo: probably remove this test?
         # todo: add unit tests for definitions in tsv file
-        defs = DefinitionDict.get_as_strings(self.tabular_file._sidecar._extract_definitions(hed_schema=self.hed_schema))
+        defs = DefinitionDict.get_as_strings(
+            self.tabular_file._sidecar._extract_definitions(hed_schema=self.hed_schema)
+        )
         expected_defs = {
             "jsonfiledef": "(Acceleration/#,Item/JsonDef1)",
             "jsonfiledef2": "(Age/#,Item/JsonDef2)",
@@ -133,14 +135,22 @@ class TestSortingByOnset(unittest.TestCase):
 
 class TestCombineDataframe(unittest.TestCase):
     def test_combine_dataframe_with_strings(self):
-        data = {"A": ["apple", "banana", "cherry"], "B": ["dog", "elephant", "fox"], "C": ["guitar", "harmonica", "piano"]}
+        data = {
+            "A": ["apple", "banana", "cherry"],
+            "B": ["dog", "elephant", "fox"],
+            "C": ["guitar", "harmonica", "piano"],
+        }
         df = pd.DataFrame(data)
         result = BaseInput.combine_dataframe(df)
         expected = pd.Series(["apple, dog, guitar", "banana, elephant, harmonica", "cherry, fox, piano"])
         self.assertTrue(result.equals(expected))
 
     def test_combine_dataframe_with_nan_values(self):
-        data = {"A": ["apple", np.nan, "cherry"], "B": [np.nan, "elephant", "fox"], "C": ["guitar", "harmonica", np.nan]}
+        data = {
+            "A": ["apple", np.nan, "cherry"],
+            "B": [np.nan, "elephant", "fox"],
+            "C": ["guitar", "harmonica", np.nan],
+        }
         df = pd.DataFrame(data)
         # this is called on load normally
         df = df.fillna("n/a")

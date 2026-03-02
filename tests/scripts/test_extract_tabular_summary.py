@@ -8,10 +8,11 @@ from hed.scripts.extract_tabular_summary import main, get_parser, extract_summar
 
 
 class TestExtractTabularSummary(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.data_root = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/bids_tests/eeg_ds003645s_hed_demo"))
+        cls.data_root = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../data/bids_tests/eeg_ds003645s_hed_demo")
+        )
         # Suppress logging for cleaner test output
         cls.mock_logger_patch = patch("logging.getLogger")
         cls.mock_logger = cls.mock_logger_patch.start()

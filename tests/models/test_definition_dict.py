@@ -64,9 +64,9 @@ class TestDefinitionDict(TestDefBase):
             "twoGroupTags": f"(Definition/InvalidDef1,{self.def_contents_string},{self.def_contents_string2})",
             "extraValidTags": "(Definition/InvalidDefA, Red, Blue)",
             "extraOtherTags": "(Definition/InvalidDef1, Black)",
-            "duplicateDef": (f"(Definition/Def1, {self.def_contents_string}), " f"(Definition/Def1, (Green))"),
+            "duplicateDef": (f"(Definition/Def1, {self.def_contents_string}), (Definition/Def1, (Green))"),
             "duplicateDef2": (
-                f"(Definition/Def1, {self.def_contents_string}), " f"(Definition/Def1/#, {self.placeholder_def_contents})"
+                f"(Definition/Def1, {self.def_contents_string}), (Definition/Def1/#, {self.placeholder_def_contents})"
             ),
             "defTooManyPlaceholders": self.placeholder_invalid_def_string,
             "invalidPlaceholder": f"(Definition/InvalidDef1/InvalidPlaceholder, {self.def_contents_string})",
@@ -120,7 +120,9 @@ class TestDefinitionDict(TestDefBase):
                 value_class="nameClass",
             ),
             "defInGroup": self.format_error(
-                DefinitionErrors.DEF_TAG_IN_DEFINITION, tag=HedTag("Def/OkayDef", self.hed_schema), def_name="ValidDefName"
+                DefinitionErrors.DEF_TAG_IN_DEFINITION,
+                tag=HedTag("Def/OkayDef", self.hed_schema),
+                def_name="ValidDefName",
             ),
             "defExpandInGroup": self.format_error(
                 ValidationErrors.HED_TAGS_NOT_ALLOWED,
@@ -180,7 +182,9 @@ class TestDefinitionDict(TestDefBase):
 
         # Good input string
         def_dict2 = DefinitionDict()
-        def_dict2.add_definitions("(Definition/testdefplaceholder/#,(Acceleration/#,Item/TestDef2, Red))", self.hed_schema)
+        def_dict2.add_definitions(
+            "(Definition/testdefplaceholder/#,(Acceleration/#,Item/TestDef2, Red))", self.hed_schema
+        )
         self.assertEqual(len(def_dict2.issues), 1)
         self.assertEqual(len(def_dict2.defs), 1)
 

@@ -81,7 +81,9 @@ class TestHedSchema(unittest.TestCase):
             tag = HedTag(test_string, hed_schema=self.hed_schema_3g)
             for attribute, expected_value in expected_dict.items():
                 self.assertEqual(
-                    tag.has_attribute(attribute), expected_value, "Test string: %s. Attribute: %s." % (test_string, attribute)
+                    tag.has_attribute(attribute),
+                    expected_value,
+                    "Test string: %s. Attribute: %s." % (test_string, attribute),
                 )
 
     def test_get_all_tag_attributes(self):

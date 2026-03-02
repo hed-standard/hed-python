@@ -21,7 +21,9 @@ class Test(unittest.TestCase):
 
         cls.placeholder_definition_contents = "(Acceleration/#,Item/TestDef2)"
         cls.placeholder_definition_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents})"
-        cls.placeholder_definition_string_no_paren = f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
+        cls.placeholder_definition_string_no_paren = (
+            f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
+        )
         cls.label_def_string = "Def/TestDef"
         cls.expanded_def_string = f"(Def-expand/TestDef,{cls.def_contents_string})"
         cls.basic_hed_string = "Item/BasicTestTag1,Item/BasicTestTag2"
@@ -118,7 +120,9 @@ class TestDefErrors(unittest.TestCase):
         cls.placeholder_label_def_string = "Def/TestDefPlaceholder/2471"
         cls.placeholder_definition_contents = "(Acceleration/#,Item/TestDef2)"
         cls.placeholder_definition_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents})"
-        cls.placeholder_definition_string_no_paren = f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
+        cls.placeholder_definition_string_no_paren = (
+            f"Definition/TestDefPlaceholder/#,{cls.placeholder_definition_contents}"
+        )
         cls.placeholder_expanded_def_string = "(Def-expand/TestDefPlaceholder/2471,(Acceleration/2471,Item/TestDef2))"
 
         cls.placeholder_hed_string_with_def = f"{cls.basic_hed_string},{cls.placeholder_label_def_string}"

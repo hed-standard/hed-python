@@ -111,7 +111,9 @@ class TestValidatorBase(TestHedBase):
             # print(f"filtered: {str(filtered_issues)}")
             these_issues = expected_issues[test_key]
             self.assertEqual(
-                len(filtered_issues), len(these_issues), f"{test_strings[test_key]} should have the same number of issues."
+                len(filtered_issues),
+                len(these_issues),
+                f"{test_strings[test_key]} should have the same number of issues.",
             )
             self.assertCountEqual(filtered_issues, these_issues, test_strings[test_key])
 

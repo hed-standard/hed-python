@@ -109,7 +109,9 @@ class TestInLibraryAttribute(unittest.TestCase):
             # If not required, we don't assert - some schemas (like score) may have no library-specific
             # schema sections (units/unitclasses), only library-specific tags
         else:
-            self.assertFalse(found_inlibrary, f"TSV files should NOT contain inLibrary={library_name} when save_merged=False")
+            self.assertFalse(
+                found_inlibrary, f"TSV files should NOT contain inLibrary={library_name} when save_merged=False"
+            )
 
     def _verify_no_inlibrary_in_tsv_extras(self, tsv_dir):
         """Verify extras sections in TSV never have in_library column."""
@@ -193,7 +195,9 @@ class TestInLibraryAttribute(unittest.TestCase):
         if should_have_inlibrary:
             self.assertTrue(has_inlibrary, f"MediaWiki should contain inLibrary={library_name} when save_merged=True")
         else:
-            self.assertFalse(has_inlibrary, f"MediaWiki should NOT contain inLibrary={library_name} when save_merged=False")
+            self.assertFalse(
+                has_inlibrary, f"MediaWiki should NOT contain inLibrary={library_name} when save_merged=False"
+            )
 
     def test_01_schema_sections_have_inlibrary_when_merged(self):
         """Test that schema sections have inLibrary attribute when save_merged=True."""
@@ -317,7 +321,9 @@ class TestInLibraryAttribute(unittest.TestCase):
                 elif format_name == "tsv":
                     roundtrip_path = os.path.join(self.temp_dir, "lang_roundtrip_unmerged2_tsv")
                     reloaded.save_as_dataframes(roundtrip_path, save_merged=False)
-                    self._verify_inlibrary_in_tsv_schema_sections(roundtrip_path, library_name, should_have_inlibrary=False)
+                    self._verify_inlibrary_in_tsv_schema_sections(
+                        roundtrip_path, library_name, should_have_inlibrary=False
+                    )
 
     def test_07_testlib_inlibrary_behavior(self):
         """Test inLibrary behavior with testlib schema if available."""
@@ -387,9 +393,12 @@ class TestInLibraryAttribute(unittest.TestCase):
                 library_entries = df[df["hedId"] == ""]
                 if not library_entries.empty:
                     # At least one library entry should have inLibrary attribute
-                    has_inlibrary = library_entries["Attributes"].str.contains(f"inLibrary={library_name}", na=False).any()
+                    has_inlibrary = (
+                        library_entries["Attributes"].str.contains(f"inLibrary={library_name}", na=False).any()
+                    )
                     self.assertTrue(
-                        has_inlibrary, "At least one library UnitClass entry should have inLibrary attribute in merged save"
+                        has_inlibrary,
+                        "At least one library UnitClass entry should have inLibrary attribute in merged save",
                     )
 
 

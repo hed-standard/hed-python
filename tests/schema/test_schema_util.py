@@ -27,7 +27,9 @@ class Test(unittest.TestCase):
         schema2 = load_schema_version("v:8.2.0")
         self.assertFalse(schema_util.schema_version_greater_equal(schema2, "8.3.0"))
 
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/schema_utf8.mediawiki")
+        schema_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/schema_utf8.mediawiki"
+        )
         schema3 = load_schema(schema_path, schema_namespace="tl:")
         self.assertTrue(schema_util.schema_version_greater_equal(schema3, "8.3.0"))
 

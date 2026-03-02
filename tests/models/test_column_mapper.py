@@ -126,7 +126,9 @@ class Test(unittest.TestCase):
         mapper.set_column_map(["Column1"])
         self.assertTrue(len(mapper._final_column_map) == 1)
         self.assertTrue(len(mapper.check_for_mapping_issues()) == 1)
-        self.assertTrue(mapper.check_for_mapping_issues()[-1]["code"] == ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
+        self.assertTrue(
+            mapper.check_for_mapping_issues()[-1]["code"] == ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES
+        )
 
         mapper = ColumnMapper()
         prefix_dict = {"Column1": "Label/"}
@@ -135,12 +137,16 @@ class Test(unittest.TestCase):
         mapper.set_column_map(["Column1"])
         self.assertTrue(len(mapper._final_column_map) == 1)
         self.assertTrue(len(mapper.check_for_mapping_issues()) == 1)
-        self.assertTrue(mapper.check_for_mapping_issues()[-1]["code"] == ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
+        self.assertTrue(
+            mapper.check_for_mapping_issues()[-1]["code"] == ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES
+        )
 
         mapper.set_tag_columns(["Column1"])
         self.assertTrue(len(mapper._final_column_map) == 1)
         self.assertTrue(len(mapper.check_for_mapping_issues()) == 1)
-        self.assertTrue(mapper.check_for_mapping_issues()[-1]["code"] == ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES)
+        self.assertTrue(
+            mapper.check_for_mapping_issues()[-1]["code"] == ValidationErrors.DUPLICATE_COLUMN_BETWEEN_SOURCES
+        )
 
     def test_blank_column(self):
         mapper = ColumnMapper()

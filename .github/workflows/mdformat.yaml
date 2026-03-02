@@ -26,15 +26,5 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
-      - name: Create virtual environment
-        run: |
-          uv venv --clear .venv
-          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
-
-      - name: Install dependencies
-        run: uv pip install "mdformat>=0.7.0" "mdformat-myst>=0.1.5"
-
       - name: Run mdformat (check only)
-        run: |
-          mdformat --check --wrap no --number docs/
-          mdformat --check --wrap no --number *.md
+        run: uvx --with mdformat-myst mdformat --check --wrap no --number docs/ *.md

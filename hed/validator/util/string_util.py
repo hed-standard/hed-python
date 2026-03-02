@@ -58,7 +58,9 @@ class StringValidator:
                 continue
             if self._character_is_delimiter(current_character):
                 if current_tag.strip() == current_character:
-                    issues += ErrorHandler.format_error(ValidationErrors.TAG_EMPTY, source_string=hed_string, char_index=i)
+                    issues += ErrorHandler.format_error(
+                        ValidationErrors.TAG_EMPTY, source_string=hed_string, char_index=i
+                    )
                     current_tag = ""
                     continue
                 current_tag = ""

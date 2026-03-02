@@ -4,7 +4,6 @@ from hed.tools.analysis.column_name_summary import ColumnNameSummary
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.columns1 = ["a", "b", "c"]

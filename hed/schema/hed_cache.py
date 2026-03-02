@@ -134,7 +134,9 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
     return all_hed_versions
 
 
-def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None, check_prerelease=False) -> Union[str, None]:
+def get_hed_version_path(
+    xml_version, library_name=None, local_hed_directory=None, check_prerelease=False
+) -> Union[str, None]:
     """Get HED XML file path in a directory.  Only returns filenames that exist.
 
     Parameters:
@@ -226,7 +228,9 @@ def cache_xml_versions(
                 new_hed_versions = _get_hed_xml_versions_one_library(hed_base_url)
                 _merge_in_versions(all_hed_versions, new_hed_versions)
             for hed_library_url in hed_library_urls:
-                new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(hed_library_url, skip_folders=skip_folders)
+                new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(
+                    hed_library_url, skip_folders=skip_folders
+                )
                 _merge_in_versions(all_hed_versions, new_hed_versions)
 
             for library_name, hed_versions in all_hed_versions.items():

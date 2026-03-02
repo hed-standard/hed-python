@@ -8,7 +8,9 @@ from hed.errors import get_printable_issue_string
 class MyTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base_dir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-examples/datasets"))
+        cls.base_dir = os.path.realpath(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "hed-examples/datasets")
+        )
         cls.fail_count = []
 
         # Check if the required directory exists

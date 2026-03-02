@@ -75,7 +75,9 @@ class Test(unittest.TestCase):
             os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events_no_index.tsv"
         )
 
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json"
+        )
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate(self.hed_schema)), 0)
         input_file = TabularInput(events_path, sidecar=sidecar)
@@ -151,7 +153,9 @@ class Test(unittest.TestCase):
         events_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events_no_index.tsv"
         )
-        json_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json")
+        json_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/bids_events.json"
+        )
         sidecar = Sidecar(json_path)
         self.assertEqual(len(sidecar.validate(self.hed_schema)), 0)
         input_file_1 = TabularInput(events_path, sidecar=sidecar)
@@ -162,7 +166,9 @@ class Test(unittest.TestCase):
         self.assertTrue(input_file_1.dataframe.equals(input_file_2.dataframe))
 
     def test_no_column_header_and_convert(self):
-        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/no_column_header.tsv")
+        events_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/no_column_header.tsv"
+        )
         hed_input = SpreadsheetInput(events_path, has_column_names=False, tag_columns=[0, 1])
         hed_input.convert_to_long(self.hed_schema)
 
@@ -207,8 +213,12 @@ class Test(unittest.TestCase):
     def test_ignoring_na_value_column(self):
         from hed import TabularInput
 
-        events_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/na_value_column.tsv")
-        sidecar_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/na_value_column.json")
+        events_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/na_value_column.tsv"
+        )
+        sidecar_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/na_value_column.json"
+        )
         hed_input = TabularInput(events_path, sidecar=sidecar_path)
         self.assertTrue(hed_input.dataframe_a.loc[1, "Value"] == "n/a")
 
@@ -228,7 +238,9 @@ class Test(unittest.TestCase):
         test_output_name = self.base_output_folder + "ExcelMultipleSheets_resave_assembled_no_col_names.xlsx"
         excel_book.convert_to_long(self.hed_schema)
         excel_book.to_excel(test_output_name)
-        reloaded_df = SpreadsheetInput(test_output_name, worksheet_name="LKT 8HED3", tag_columns=[4], has_column_names=False)
+        reloaded_df = SpreadsheetInput(
+            test_output_name, worksheet_name="LKT 8HED3", tag_columns=[4], has_column_names=False
+        )
         self.assertTrue(excel_book.dataframe.equals(reloaded_df.dataframe))
 
 

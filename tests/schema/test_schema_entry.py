@@ -13,7 +13,6 @@ class MockEntry:
 
 
 class TestMockEntry(unittest.TestCase):
-
     def setUp(self):
         # Test setup
         self.root_entry = MockEntry({"color": "blue", "size": "large", "is_round": False})

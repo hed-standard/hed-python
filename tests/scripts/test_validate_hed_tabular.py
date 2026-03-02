@@ -35,7 +35,9 @@ class TestValidateHedTabular(unittest.TestCase):
         self.invalid_tabular_file.close()
 
         # Sidecar setup
-        self.valid_sidecar_content = {"trial_type": {"HED": {"show_face": "Sensory-event", "press_button": "Agent-action"}}}
+        self.valid_sidecar_content = {
+            "trial_type": {"HED": {"show_face": "Sensory-event", "press_button": "Agent-action"}}
+        }
         self.valid_sidecar_file = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json")
         json.dump(self.valid_sidecar_content, self.valid_sidecar_file)
         self.valid_sidecar_file.close()

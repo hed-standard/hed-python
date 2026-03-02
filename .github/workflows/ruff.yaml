@@ -24,13 +24,5 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
-      - name: Create virtual environment
-        run: |
-          uv venv --clear .venv
-          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
-
-      - name: Install Ruff
-        run: uv pip install "ruff>=0.8.0"
-
-      - name: Run Ruff linter
-        run: ruff check .
+      - name: Run Ruff linter and formatter check
+        run: uvx ruff check . && uvx ruff format --check .

@@ -320,12 +320,16 @@ class ColumnMapper:
         issues = []
         for list_name, col_list in zip(list_names, column_lists, strict=False):
             # Convert all known strings to ints, then check for duplicates
-            converted_list = [item if isinstance(item, int) else self._reverse_column_map.get(item, item) for item in col_list]
+            converted_list = [
+                item if isinstance(item, int) else self._reverse_column_map.get(item, item) for item in col_list
+            ]
 
             if col_list != self._optional_tag_columns:
                 for test_col in converted_list:
                     if isinstance(test_col, str) and test_col not in self._reverse_column_map:
-                        issues += ErrorHandler.format_error(ValidationErrors.HED_MISSING_REQUIRED_COLUMN, test_col, list_name)
+                        issues += ErrorHandler.format_error(
+                            ValidationErrors.HED_MISSING_REQUIRED_COLUMN, test_col, list_name
+                        )
 
             issues += self._check_for_duplicates_between_lists(
                 converted_list, list_name, ValidationErrors.DUPLICATE_COLUMN_IN_LIST

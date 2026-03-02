@@ -10,7 +10,6 @@ hed_schema_global = load_schema_version("8.4.0")
 
 
 class TestValidatorUtilityFunctions(TestHedBase):
-
     @classmethod
     def setUpClass(cls):
         cls.hed_schema = hed_schema_global
@@ -127,8 +126,12 @@ class TestSchemaUtilityFunctions(TestHedBase):
         volume_units = {"volume": self.hed_schema.unit_classes["volumeUnits"]}
         distance_units = {"distance": self.hed_schema.unit_classes["physicalLengthUnits"]}
         stripped_volume_string, _, _ = HedTag._get_tag_units_portion(volume_string.extension, volume_units)
-        stripped_volume_string_no_space, _, _ = HedTag._get_tag_units_portion(volume_string_no_space.extension, volume_units)
-        stripped_prefixed_volume_string, _, _ = HedTag._get_tag_units_portion(prefixed_volume_string.extension, volume_units)
+        stripped_volume_string_no_space, _, _ = HedTag._get_tag_units_portion(
+            volume_string_no_space.extension, volume_units
+        )
+        stripped_prefixed_volume_string, _, _ = HedTag._get_tag_units_portion(
+            prefixed_volume_string.extension, volume_units
+        )
         stripped_invalid_volume_string, units_invalid, unit_entry_invalid = HedTag._get_tag_units_portion(
             invalid_volume_string.extension, volume_units
         )

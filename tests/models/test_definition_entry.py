@@ -6,7 +6,6 @@ from hed.models.hed_string import HedString
 
 
 class Test(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")

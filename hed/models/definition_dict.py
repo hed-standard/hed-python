@@ -148,7 +148,10 @@ class DefinitionDict:
 
             if "/" in def_tag_name or "#" in def_tag_name:
                 new_def_issues += ErrorHandler.format_error_with_context(
-                    error_handler, DefinitionErrors.INVALID_DEFINITION_EXTENSION, tag=definition_tag, def_name=def_tag_name
+                    error_handler,
+                    DefinitionErrors.INVALID_DEFINITION_EXTENSION,
+                    tag=definition_tag,
+                    def_name=def_tag_name,
                 )
 
             if new_def_issues:
@@ -294,13 +297,19 @@ class DefinitionDict:
             def_keys = {DefTagNames.DEF_KEY, DefTagNames.DEF_EXPAND_KEY, DefTagNames.DEFINITION_KEY}
             for def_tag in group.find_tags(def_keys, recursive=True, include_groups=0):
                 issues += ErrorHandler.format_error_with_context(
-                    error_handler, DefinitionErrors.DEF_TAG_IN_DEFINITION, tag=def_tag, def_name=definition_tag.extension
+                    error_handler,
+                    DefinitionErrors.DEF_TAG_IN_DEFINITION,
+                    tag=def_tag,
+                    def_name=definition_tag.extension,
                 )
 
             for tag in group.get_all_tags():
                 if tag.has_attribute(HedKey.Unique) or tag.has_attribute(HedKey.Required):
                     issues += ErrorHandler.format_error_with_context(
-                        error_handler, DefinitionErrors.BAD_PROP_IN_DEFINITION, tag=tag, def_name=definition_tag.extension
+                        error_handler,
+                        DefinitionErrors.BAD_PROP_IN_DEFINITION,
+                        tag=tag,
+                        def_name=definition_tag.extension,
                     )
 
         return issues

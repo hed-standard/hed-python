@@ -90,7 +90,10 @@ class DefValidator(DefinitionDict):
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
         if is_def_expand_tag and def_expand_group != def_contents:
             return ErrorHandler.format_error(
-                ValidationErrors.HED_DEF_EXPAND_INVALID, tag=def_tag, actual_def=def_contents, found_def=def_expand_group
+                ValidationErrors.HED_DEF_EXPAND_INVALID,
+                tag=def_tag,
+                actual_def=def_contents,
+                found_def=def_expand_group,
             )
 
         return []
@@ -162,7 +165,9 @@ class DefValidator(DefinitionDict):
 
             # Delay tag is checked for uniqueness elsewhere, so we can safely remove all of them
             children = [
-                child for child in children if not isinstance(child, HedTag) or child.short_base_tag != DefTagNames.DELAY_KEY
+                child
+                for child in children
+                if not isinstance(child, HedTag) or child.short_base_tag != DefTagNames.DELAY_KEY
             ]
             max_children = 1
             if found_onset.short_base_tag == DefTagNames.OFFSET_KEY:
