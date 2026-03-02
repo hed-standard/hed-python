@@ -24,6 +24,7 @@ jobs:
         with:
           python-version: '3.10'
           enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
 
       - name: Create virtual environment
         run: |
