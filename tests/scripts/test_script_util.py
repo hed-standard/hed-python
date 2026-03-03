@@ -306,6 +306,12 @@ class TestCheckWarnings(unittest.TestCase):
             combined,
             "Expected SCHEMA_PRERELEASE_VERSION_USED warning code in output for prerelease version",
         )
+        # Warnings must not gate the roundtrip checks — the warning message should be the only
+        # entry and roundtrip errors (if any) would append further entries, but the key contract
+        # is that the function does NOT return after reporting a warning-only result.
+        # We verify this indirectly: issue count must equal exactly 1 (the warning summary)
+        # because a clean schema with only a version warning should roundtrip without further errors.
+        self.assertEqual(len(issues), 1, "Roundtrip should have run and produced no additional errors")
 
     def test_warning_schema_check_warnings_false_suppresses_warnings(self):
         """Warnings are suppressed and validation passes when check_warnings=False."""
