@@ -32,16 +32,16 @@ def _is_prerelease_partner(base_schema) -> bool:
     return hed_cache.get_hed_version_path(with_standard, check_prerelease=False) is None
 
 
-def validate_schema_object(base_schema, schema_name, check_warnings=True):
-    """Validate a schema object by checking non-warning compliance and roundtrip conversion.
+def validate_schema_object(base_schema, schema_name, check_warnings=False):
+    """Validate a schema object by checking compliance and roundtrip conversion.
 
-    Tests the schema for non-warning compliance issues and validates that it can be successfully
+    Tests the schema for compliance issues and validates that it can be successfully
     converted to and reloaded from all four formats (MEDIAWIKI, XML, JSON, TSV).
 
     Parameters:
         base_schema (HedSchema): The schema object to validate.
         schema_name (str): The name/path of the schema for error reporting.
-        check_warnings (bool): If True, include warnings in the validation. Default is True.
+        check_warnings (bool): If True, include warnings in the validation. Default is False.
 
     Returns:
         list: A list of validation issue strings. Empty if no issues found.
@@ -81,7 +81,6 @@ def validate_schema(file_path, check_warnings=False):
 
     Loads the schema from file, checks the file extension is lowercase,
     and validates the schema object for compliance errors and roundtrip conversion.
-    Does not check for warnings.
 
     Parameters:
         file_path (str): The path to the schema file to validate.
@@ -89,6 +88,7 @@ def validate_schema(file_path, check_warnings=False):
             Template: basename.tsv, where files are named basename_Struct.tsv, basename_Tag.tsv, etc.
             Alternatively, you can point to a directory containing the .tsv files.
         check_warnings (bool): If True, include warnings in the validation. Default is False.
+
     Returns:
         list: A list of validation issue strings. Empty if no issues found.
     """

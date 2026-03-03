@@ -286,22 +286,23 @@ class ErrorHandler:
             list[dict]: A list of dictionaries containing the issue list after filtering by severity.
 
         """
-        return [issue for issue in issues_list if issue["severity"] <= severity]
+        return [issue for issue in issues_list if issue.get("severity", ErrorSeverity.ERROR) <= severity]
 
     @staticmethod
     def separate_issues(issues_list: list[dict]) -> tuple[list[dict], list[dict]]:
         """Separate a list of issues into errors and warnings.
 
         Parameters:
-            issues_list (list[dict]): A list of issue dictionaries, each containing a 'severity' key.
+            issues_list (list[dict]): A list of issue dictionaries. The 'severity' key is
+                optional; issues that omit it are treated as errors (ErrorSeverity.ERROR).
 
         Returns:
             tuple[list[dict], list[dict]]: A tuple of (errors, warnings) where errors contains
                 issues with severity <= ErrorSeverity.ERROR and warnings contains issues with
-                severity >= ErrorSeverity.WARNING.
+                severity > ErrorSeverity.ERROR.
         """
-        errors = [issue for issue in issues_list if issue["severity"] <= ErrorSeverity.ERROR]
-        warnings = [issue for issue in issues_list if issue["severity"] >= ErrorSeverity.WARNING]
+        errors = [issue for issue in issues_list if issue.get("severity", ErrorSeverity.ERROR) <= ErrorSeverity.ERROR]
+        warnings = [issue for issue in issues_list if issue.get("severity", ErrorSeverity.ERROR) > ErrorSeverity.ERROR]
         return errors, warnings
 
     @staticmethod

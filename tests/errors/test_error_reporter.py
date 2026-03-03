@@ -339,3 +339,10 @@ class TestSeparateIssues(unittest.TestCase):
         issues = [self._make_issue(ErrorSeverity.ERROR), self._make_issue(ErrorSeverity.WARNING)]
         ErrorHandler.separate_issues(issues)
         self.assertEqual(len(issues), 2)
+
+    def test_missing_severity_treated_as_error(self):
+        """Issues without a 'severity' key should be treated as errors, not raise KeyError."""
+        issues = [{"message": "no severity"}, self._make_issue(ErrorSeverity.WARNING)]
+        errors, warnings = ErrorHandler.separate_issues(issues)
+        self.assertEqual(len(errors), 1, "Issue missing severity should default to ERROR")
+        self.assertEqual(len(warnings), 1)
