@@ -1,15 +1,18 @@
+import contextlib
+import copy
 import unittest
 import os
 import shutil
+
 from hed import load_schema_version
 from hed.scripts.schema_script_util import (
     add_extension,
     sort_base_schemas,
     validate_all_schema_formats,
     validate_schema,
+    validate_schema_object,
     validate_all_schemas,
 )
-import contextlib
 
 
 class TestAddExtension(unittest.TestCase):
@@ -265,3 +268,53 @@ class TestValidateSchema(unittest.TestCase):
             # Clean up
             if os.path.exists(uppercase_file):
                 os.remove(uppercase_file)
+
+
+class TestCheckWarnings(unittest.TestCase):
+    """Tests for the check_warnings parameter in validate_schema_object and validate_schema."""
+
+    @classmethod
+    def setUpClass(cls):
+        clean = load_schema_version("8.3.0")
+        cls.clean_schema = clean
+        # Deep-copy so the cached shared instance is not mutated.
+        # Setting version to a future value triggers SCHEMA_PRERELEASE_VERSION_USED (warning only).
+        cls.warning_schema = copy.deepcopy(clean)
+        cls.warning_schema.header_attributes["version"] = "999.0.0"
+
+    def test_clean_schema_check_warnings_false(self):
+        """A fully compliant schema produces no issues with check_warnings=False."""
+        with contextlib.redirect_stdout(None):
+            issues = validate_schema_object(self.clean_schema, "test", check_warnings=False)
+        self.assertEqual(issues, [])
+
+    def test_clean_schema_check_warnings_true(self):
+        """A fully compliant schema produces no issues with check_warnings=True."""
+        with contextlib.redirect_stdout(None):
+            issues = validate_schema_object(self.clean_schema, "test", check_warnings=True)
+        self.assertEqual(issues, [])
+
+    def test_warning_schema_check_warnings_true_reports_issues(self):
+        """A prerelease version generates a warning that is reported when check_warnings=True."""
+        with contextlib.redirect_stdout(None):
+            issues = validate_schema_object(self.warning_schema, "test", check_warnings=True)
+        self.assertTrue(issues, "Expected at least one issue for prerelease version warning")
+
+    def test_warning_schema_check_warnings_false_suppresses_warnings(self):
+        """Warnings are suppressed and validation passes when check_warnings=False."""
+        with contextlib.redirect_stdout(None):
+            issues = validate_schema_object(self.warning_schema, "test", check_warnings=False)
+        self.assertEqual(issues, [])
+
+    def test_validate_schema_default_is_warnings_false(self):
+        """validate_schema default check_warnings=False matches explicit False."""
+        schema_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "data",
+            "schema_tests",
+            "HED8.2.0.mediawiki",
+        )
+        with contextlib.redirect_stdout(None):
+            default_issues = validate_schema(schema_path)
+            explicit_issues = validate_schema(schema_path, check_warnings=False)
+        self.assertEqual(default_issues, explicit_issues)

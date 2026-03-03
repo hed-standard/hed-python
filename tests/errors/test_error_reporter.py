@@ -299,3 +299,43 @@ class Test(unittest.TestCase):
         result_with_missing = ErrorHandler.get_code_counts(issues_with_missing_code)
         expected_with_missing = {"VALID_CODE": 2, "UNKNOWN": 1}  # Default for missing code
         self.assertEqual(result_with_missing, expected_with_missing)
+
+
+class TestSeparateIssues(unittest.TestCase):
+    """Tests for ErrorHandler.separate_issues."""
+
+    @staticmethod
+    def _make_issue(severity):
+        return {"severity": severity, "message": "test"}
+
+    def test_empty_list(self):
+        errors, warnings = ErrorHandler.separate_issues([])
+        self.assertEqual(errors, [])
+        self.assertEqual(warnings, [])
+
+    def test_only_errors(self):
+        issues = [self._make_issue(ErrorSeverity.ERROR), self._make_issue(ErrorSeverity.ERROR)]
+        errors, warnings = ErrorHandler.separate_issues(issues)
+        self.assertEqual(len(errors), 2)
+        self.assertEqual(len(warnings), 0)
+
+    def test_only_warnings(self):
+        issues = [self._make_issue(ErrorSeverity.WARNING), self._make_issue(ErrorSeverity.WARNING)]
+        errors, warnings = ErrorHandler.separate_issues(issues)
+        self.assertEqual(len(errors), 0)
+        self.assertEqual(len(warnings), 2)
+
+    def test_mixed(self):
+        issues = [
+            self._make_issue(ErrorSeverity.ERROR),
+            self._make_issue(ErrorSeverity.WARNING),
+            self._make_issue(ErrorSeverity.ERROR),
+        ]
+        errors, warnings = ErrorHandler.separate_issues(issues)
+        self.assertEqual(len(errors), 2)
+        self.assertEqual(len(warnings), 1)
+
+    def test_original_list_unchanged(self):
+        issues = [self._make_issue(ErrorSeverity.ERROR), self._make_issue(ErrorSeverity.WARNING)]
+        ErrorHandler.separate_issues(issues)
+        self.assertEqual(len(issues), 2)

@@ -289,6 +289,22 @@ class ErrorHandler:
         return [issue for issue in issues_list if issue["severity"] <= severity]
 
     @staticmethod
+    def separate_issues(issues_list: list[dict]) -> tuple[list[dict], list[dict]]:
+        """Separate a list of issues into errors and warnings.
+
+        Parameters:
+            issues_list (list[dict]): A list of issue dictionaries, each containing a 'severity' key.
+
+        Returns:
+            tuple[list[dict], list[dict]]: A tuple of (errors, warnings) where errors contains
+                issues with severity <= ErrorSeverity.ERROR and warnings contains issues with
+                severity >= ErrorSeverity.WARNING.
+        """
+        errors = [issue for issue in issues_list if issue["severity"] <= ErrorSeverity.ERROR]
+        warnings = [issue for issue in issues_list if issue["severity"] >= ErrorSeverity.WARNING]
+        return errors, warnings
+
+    @staticmethod
     def format_error(error_type: str, *args, actual_error=None, **kwargs) -> list[dict]:
         """Format an error based on the parameters, which vary based on what type of error this is.
 
