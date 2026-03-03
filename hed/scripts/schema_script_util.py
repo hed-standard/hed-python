@@ -2,8 +2,7 @@ import os.path
 from collections import defaultdict
 from hed.schema import from_string, load_schema, from_dataframes
 from hed.schema import hed_cache
-from hed.errors import get_printable_issue_string, HedFileError
-from hed.errors.error_reporter import separate_issues
+from hed.errors import get_printable_issue_string, separate_issues, HedFileError
 from hed.schema.schema_comparer import SchemaComparer
 
 all_extensions = [".tsv", ".mediawiki", ".xml", ".json"]
@@ -48,10 +47,10 @@ def validate_schema_object(base_schema, schema_name, check_warnings=False):
     """
     validation_issues = []
     try:
-        issues = base_schema.check_compliance(check_warnings=check_warnings)
+        issues = base_schema.check_compliance(check_for_warnings=check_warnings)
         if issues and check_warnings:
             errors, warnings = separate_issues(issues)
-            issues = errors + issues
+            issues = errors + warnings
         else:
             errors = issues
 

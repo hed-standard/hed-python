@@ -1,6 +1,12 @@
 """Error handling module for HED."""
 
-from .error_reporter import ErrorHandler, get_printable_issue_string, sort_issues, replace_tag_references, iter_errors
+from .error_reporter import (
+    ErrorHandler,
+    separate_issues,
+    get_printable_issue_string,
+    sort_issues,
+    iter_errors,
+)
 from .error_types import (
     DefinitionErrors,
     TemporalErrors,

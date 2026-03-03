@@ -204,6 +204,23 @@ error_messages.mark_as_used = True
 schema_error_messages.mark_as_used = True
 
 
+def separate_issues(issues_list: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Separate a list of issues into errors and warnings.
+
+    Parameters:
+        issues_list (list[dict]): A list of issue dictionaries. The 'severity' key is
+            optional; issues that omit it are treated as errors (ErrorSeverity.ERROR).
+
+    Returns:
+        tuple[list[dict], list[dict]]: A tuple of (errors, warnings) where errors contains
+            issues with severity <= ErrorSeverity.ERROR and warnings contains issues with
+            severity > ErrorSeverity.ERROR.
+    """
+    errors = [issue for issue in issues_list if issue.get("severity", ErrorSeverity.ERROR) <= ErrorSeverity.ERROR]
+    warnings = [issue for issue in issues_list if issue.get("severity", ErrorSeverity.ERROR) > ErrorSeverity.ERROR]
+    return errors, warnings
+
+
 class ErrorHandler:
     """Class to hold error context and having general error functions."""
 
@@ -273,37 +290,6 @@ class ErrorHandler:
             self._update_error_with_char_pos(actual_error)
 
         return error_object
-
-    @staticmethod
-    def filter_issues_by_severity(issues_list: list[dict], severity: int) -> list[dict]:
-        """Gather all issues matching or below a given severity.
-
-        Parameters:
-            issues_list (list[dict]): A list of dictionaries containing the full issue list.
-            severity (int): The level of issues to keep.
-
-        Returns:
-            list[dict]: A list of dictionaries containing the issue list after filtering by severity.
-
-        """
-        return [issue for issue in issues_list if issue.get("severity", ErrorSeverity.ERROR) <= severity]
-
-    @staticmethod
-    def separate_issues(issues_list: list[dict]) -> tuple[list[dict], list[dict]]:
-        """Separate a list of issues into errors and warnings.
-
-        Parameters:
-            issues_list (list[dict]): A list of issue dictionaries. The 'severity' key is
-                optional; issues that omit it are treated as errors (ErrorSeverity.ERROR).
-
-        Returns:
-            tuple[list[dict], list[dict]]: A tuple of (errors, warnings) where errors contains
-                issues with severity <= ErrorSeverity.ERROR and warnings contains issues with
-                severity > ErrorSeverity.ERROR.
-        """
-        errors = [issue for issue in issues_list if issue.get("severity", ErrorSeverity.ERROR) <= ErrorSeverity.ERROR]
-        warnings = [issue for issue in issues_list if issue.get("severity", ErrorSeverity.ERROR) > ErrorSeverity.ERROR]
-        return errors, warnings
 
     @staticmethod
     def format_error(error_type: str, *args, actual_error=None, **kwargs) -> list[dict]:
@@ -440,13 +426,46 @@ class ErrorHandler:
         return f"Unknown error. Args: {str(args), str(kwargs)}"
 
     @staticmethod
-    def filter_issues_by_count(issues, count, by_file=False) -> tuple[list[dict], dict[str, int]]:
+    def filter_issues_by_severity(issues_list: list[dict], severity: int) -> list[dict]:
+        """Gather all issues matching or below a given severity.
+
+        Parameters:
+            issues_list (list[dict]): A list of dictionaries containing the full issue list.
+            severity (int): The level of issues to keep.
+
+        Returns:
+            list[dict]: A list of dictionaries containing the issue list after filtering by severity.
+
+        """
+        return [issue for issue in issues_list if issue.get("severity", ErrorSeverity.ERROR) <= severity]
+
+    @staticmethod
+    def aggregate_code_counts(file_code_dict: dict) -> dict:
+        """Aggregate the counts of codes across multiple files.
+
+        Parameters:
+            file_code_dict (dict): A dictionary where keys are filenames and values are
+                dictionaries of code counts.
+
+        Returns:
+            dict: A dictionary with the aggregated counts of codes across all files.
+        """
+        total_counts = defaultdict(int)
+        for file_dict in file_code_dict.values():
+            for code, count in file_dict.items():
+                total_counts[code] += count
+        return dict(total_counts)
+
+    @staticmethod
+    def filter_issues_by_count(
+        issues: list[dict], count: int, by_file: bool = False
+    ) -> tuple[list[dict], dict[str, int]]:
         """Filter the issues list to only include the first count issues of each code.
 
-            Parameters:
-                issues (list): A list of dictionaries containing the full issue list.
-                count (int): The number of issues to keep for each code.
-                by_file (bool): If True, group by file name.
+        Parameters:
+            issues (list[dict]): A list of dictionaries containing the full issue list.
+            count (int): The number of issues to keep for each code.
+            by_file (bool): If True, group by file name.
 
         Returns:
             tuple[list[dict], dict[str, int]]: A tuple containing:
@@ -475,22 +494,6 @@ class ErrorHandler:
         return filtered_issues, ErrorHandler.aggregate_code_counts(file_dicts)
 
     @staticmethod
-    def aggregate_code_counts(file_code_dict) -> dict:
-        """Aggregate the counts of codes across multiple files.
-
-        Parameters:
-            file_code_dict (dict): A dictionary where keys are filenames and values are dictionaries of code counts.
-
-        Returns:
-            dict: A dictionary with the aggregated counts of codes across all files.
-        """
-        total_counts = defaultdict(int)
-        for file_dict in file_code_dict.values():
-            for code, count in file_dict.items():
-                total_counts[code] += count
-        return dict(total_counts)
-
-    @staticmethod
     def get_code_counts(issues: list[dict]) -> dict[str, int]:
         """Count the occurrences of each error code in the issues list.
 
@@ -506,6 +509,34 @@ class ErrorHandler:
             code = issue.get("code", "UNKNOWN")
             code_counts[code] += 1
         return dict(code_counts)
+
+    @staticmethod
+    def replace_tag_references(list_or_dict):
+        """Utility function to remove any references to tags, strings, etc. from any type of nested list or dict.
+
+           Use this if you want to save out issues to a file.
+
+           If you'd prefer a copy returned, use ErrorHandler.replace_tag_references(list_or_dict.copy()).
+
+        Parameters:
+           list_or_dict (list or dict): An arbitrarily nested list/dict structure
+        """
+        if isinstance(list_or_dict, dict):
+            for key, value in list_or_dict.items():
+                if isinstance(value, (dict, list)):
+                    ErrorHandler.replace_tag_references(value)
+                elif isinstance(value, (bool, float, int)):
+                    list_or_dict[key] = value
+                else:
+                    list_or_dict[key] = str(value)
+        elif isinstance(list_or_dict, list):
+            for key, value in enumerate(list_or_dict):
+                if isinstance(value, (dict, list)):
+                    ErrorHandler.replace_tag_references(value)
+                elif isinstance(value, (bool, float, int)):
+                    list_or_dict[key] = value
+                else:
+                    list_or_dict[key] = str(value)
 
 
 def sort_issues(issues, reverse=False) -> list[dict]:
@@ -839,31 +870,3 @@ def _create_error_tree(error_dict, parent_element=None, add_link=True):
         _create_error_tree(value, context_ul, add_link)
 
     return parent_element
-
-
-def replace_tag_references(list_or_dict):
-    """Utility function to remove any references to tags, strings, etc. from any type of nested list or dict.
-
-       Use this if you want to save out issues to a file.
-
-       If you'd prefer a copy returned, use replace_tag_references(list_or_dict.copy()).
-
-    Parameters:
-       list_or_dict (list or dict): An arbitrarily nested list/dict structure
-    """
-    if isinstance(list_or_dict, dict):
-        for key, value in list_or_dict.items():
-            if isinstance(value, (dict, list)):
-                replace_tag_references(value)
-            elif isinstance(value, (bool, float, int)):
-                list_or_dict[key] = value
-            else:
-                list_or_dict[key] = str(value)
-    elif isinstance(list_or_dict, list):
-        for key, value in enumerate(list_or_dict):
-            if isinstance(value, (dict, list)):
-                replace_tag_references(value)
-            elif isinstance(value, (bool, float, int)):
-                list_or_dict[key] = value
-            else:
-                list_or_dict[key] = str(value)

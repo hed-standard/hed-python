@@ -7,7 +7,7 @@ from hed.errors import (
     SchemaWarnings,
     get_printable_issue_string,
     sort_issues,
-    replace_tag_references,
+    separate_issues,
 )
 from hed.errors.error_reporter import hed_tag_error, get_printable_issue_string_html, iter_errors
 from hed import HedString, HedTag
@@ -230,17 +230,17 @@ class Test(unittest.TestCase):
             "b": {"c": 2, "d": [3, {"e": HedString("Hed2", self._schema)}]},
             "f": [5, 6],
         }
-        replace_tag_references(nested_dict)
+        ErrorHandler.replace_tag_references(nested_dict)
         self.assertEqual(nested_dict, {"a": "Hed1", "b": {"c": 2, "d": [3, {"e": "Hed2"}]}, "f": [5, 6]})
 
         # Test with mixed data types and HedString in a nested list
         nested_list = [HedString("Hed1", self._schema), {"a": 2, "b": [3, {"c": HedString("Hed2", self._schema)}]}]
-        replace_tag_references(nested_list)
+        ErrorHandler.replace_tag_references(nested_list)
         self.assertEqual(nested_list, ["Hed1", {"a": 2, "b": [3, {"c": "Hed2"}]}])
 
         # Test with mixed data types and HedString in a list within a dict
         mixed = {"a": HedString("Hed1", self._schema), "b": [2, 3, {"c": HedString("Hed2", self._schema)}, 4]}
-        replace_tag_references(mixed)
+        ErrorHandler.replace_tag_references(mixed)
         self.assertEqual(mixed, {"a": "Hed1", "b": [2, 3, {"c": "Hed2"}, 4]})
 
     def test_register_error_twice(self):
@@ -302,26 +302,26 @@ class Test(unittest.TestCase):
 
 
 class TestSeparateIssues(unittest.TestCase):
-    """Tests for ErrorHandler.separate_issues."""
+    """Tests for separate_issues."""
 
     @staticmethod
     def _make_issue(severity):
         return {"severity": severity, "message": "test"}
 
     def test_empty_list(self):
-        errors, warnings = ErrorHandler.separate_issues([])
+        errors, warnings = separate_issues([])
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
 
     def test_only_errors(self):
         issues = [self._make_issue(ErrorSeverity.ERROR), self._make_issue(ErrorSeverity.ERROR)]
-        errors, warnings = ErrorHandler.separate_issues(issues)
+        errors, warnings = separate_issues(issues)
         self.assertEqual(len(errors), 2)
         self.assertEqual(len(warnings), 0)
 
     def test_only_warnings(self):
         issues = [self._make_issue(ErrorSeverity.WARNING), self._make_issue(ErrorSeverity.WARNING)]
-        errors, warnings = ErrorHandler.separate_issues(issues)
+        errors, warnings = separate_issues(issues)
         self.assertEqual(len(errors), 0)
         self.assertEqual(len(warnings), 2)
 
@@ -331,18 +331,18 @@ class TestSeparateIssues(unittest.TestCase):
             self._make_issue(ErrorSeverity.WARNING),
             self._make_issue(ErrorSeverity.ERROR),
         ]
-        errors, warnings = ErrorHandler.separate_issues(issues)
+        errors, warnings = separate_issues(issues)
         self.assertEqual(len(errors), 2)
         self.assertEqual(len(warnings), 1)
 
     def test_original_list_unchanged(self):
         issues = [self._make_issue(ErrorSeverity.ERROR), self._make_issue(ErrorSeverity.WARNING)]
-        ErrorHandler.separate_issues(issues)
+        separate_issues(issues)
         self.assertEqual(len(issues), 2)
 
     def test_missing_severity_treated_as_error(self):
         """Issues without a 'severity' key should be treated as errors, not raise KeyError."""
         issues = [{"message": "no severity"}, self._make_issue(ErrorSeverity.WARNING)]
-        errors, warnings = ErrorHandler.separate_issues(issues)
+        errors, warnings = separate_issues(issues)
         self.assertEqual(len(errors), 1, "Issue missing severity should default to ERROR")
         self.assertEqual(len(warnings), 1)
