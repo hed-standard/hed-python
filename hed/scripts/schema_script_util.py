@@ -31,7 +31,7 @@ def _is_prerelease_partner(base_schema) -> bool:
     return hed_cache.get_hed_version_path(with_standard, check_prerelease=False) is None
 
 
-def validate_schema_object(base_schema, schema_name, check_warnings=False):
+def validate_schema_object(base_schema, schema_name, check_for_warnings=False):
     """Validate a schema object by checking compliance and roundtrip conversion.
 
     Tests the schema for compliance issues and validates that it can be successfully
@@ -40,17 +40,17 @@ def validate_schema_object(base_schema, schema_name, check_warnings=False):
     Parameters:
         base_schema (HedSchema): The schema object to validate.
         schema_name (str): The name/path of the schema for error reporting.
-        check_warnings (bool): If True, include warnings in the validation. Default is False.
+        check_for_warnings (bool): If True, include warnings in the validation. Default is False.
 
     Returns:
         list: A list of validation issue strings. Empty if no issues found.
     """
     validation_issues = []
     try:
-        issues = base_schema.check_compliance(check_for_warnings=check_warnings)
-        if issues and check_warnings:
+        issues = base_schema.check_compliance(check_for_warnings=check_for_warnings)
+        if issues and check_for_warnings:
             errors, warnings = separate_issues(issues)
-            issues = errors + warnings # Ensure errors are listed before warnings
+            issues = errors + warnings  # Ensure errors are listed before warnings
         else:
             errors = issues
 
@@ -79,7 +79,7 @@ def validate_schema_object(base_schema, schema_name, check_warnings=False):
     return validation_issues
 
 
-def validate_schema(file_path, check_warnings=False):
+def validate_schema(file_path, check_for_warnings=False):
     """Validate a schema file, ensuring it can save/load and passes validation.
 
     Loads the schema from file, checks the file extension is lowercase,
@@ -90,7 +90,7 @@ def validate_schema(file_path, check_warnings=False):
             If loading a TSV file, this should be a single filename where:
             Template: basename.tsv, where files are named basename_Struct.tsv, basename_Tag.tsv, etc.
             Alternatively, you can point to a directory containing the .tsv files.
-        check_warnings (bool): If True, include warnings in the validation. Default is False.
+        check_for_warnings (bool): If True, include warnings in the validation. Default is False.
 
     Returns:
         list: A list of validation issue strings. Empty if no issues found.
@@ -105,7 +105,7 @@ def validate_schema(file_path, check_warnings=False):
     validation_issues = []
     try:
         base_schema = load_schema(file_path)
-        validation_issues = validate_schema_object(base_schema, file_path, check_warnings=check_warnings)
+        validation_issues = validate_schema_object(base_schema, file_path, check_for_warnings=check_for_warnings)
     except HedFileError as e:
         print(f"Saving/loading error: {file_path} {e.message}")
         error_text = e.message

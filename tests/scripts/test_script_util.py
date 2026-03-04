@@ -272,7 +272,7 @@ class TestValidateSchema(unittest.TestCase):
 
 
 class TestCheckWarnings(unittest.TestCase):
-    """Tests for the check_warnings parameter in validate_schema_object and validate_schema."""
+    """Tests for the check_for_warnings parameter in validate_schema_object and validate_schema."""
 
     @classmethod
     def setUpClass(cls):
@@ -283,22 +283,22 @@ class TestCheckWarnings(unittest.TestCase):
         cls.warning_schema = copy.deepcopy(clean)
         cls.warning_schema.header_attributes["version"] = "999.0.0"
 
-    def test_clean_schema_check_warnings_false(self):
-        """A fully compliant schema produces no issues with check_warnings=False."""
+    def test_clean_schema_check_for_warnings_false(self):
+        """A fully compliant schema produces no issues with check_for_warnings=False."""
         with contextlib.redirect_stdout(io.StringIO()):
-            issues = validate_schema_object(self.clean_schema, "test", check_warnings=False)
+            issues = validate_schema_object(self.clean_schema, "test", check_for_warnings=False)
         self.assertEqual(issues, [])
 
-    def test_clean_schema_check_warnings_true(self):
-        """A fully compliant schema produces no issues with check_warnings=True."""
+    def test_clean_schema_check_for_warnings_true(self):
+        """A fully compliant schema produces no issues with check_for_warnings=True."""
         with contextlib.redirect_stdout(io.StringIO()):
-            issues = validate_schema_object(self.clean_schema, "test", check_warnings=True)
+            issues = validate_schema_object(self.clean_schema, "test", check_for_warnings=True)
         self.assertEqual(issues, [])
 
-    def test_warning_schema_check_warnings_true_reports_issues(self):
-        """A prerelease version generates a warning that is reported when check_warnings=True."""
+    def test_warning_schema_check_for_warnings_true_reports_issues(self):
+        """A prerelease version generates a warning that is reported when check_for_warnings=True."""
         with contextlib.redirect_stdout(io.StringIO()):
-            issues = validate_schema_object(self.warning_schema, "test", check_warnings=True)
+            issues = validate_schema_object(self.warning_schema, "test", check_for_warnings=True)
         combined = "\n".join(issues)
         self.assertTrue(issues, "Expected at least one issue for prerelease version warning")
         self.assertIn(
@@ -313,14 +313,14 @@ class TestCheckWarnings(unittest.TestCase):
         # because a clean schema with only a version warning should roundtrip without further errors.
         self.assertEqual(len(issues), 1, "Roundtrip should have run and produced no additional errors")
 
-    def test_warning_schema_check_warnings_false_suppresses_warnings(self):
-        """Warnings are suppressed and validation passes when check_warnings=False."""
+    def test_warning_schema_check_for_warnings_false_suppresses_warnings(self):
+        """Warnings are suppressed and validation passes when check_for_warnings=False."""
         with contextlib.redirect_stdout(io.StringIO()):
-            issues = validate_schema_object(self.warning_schema, "test", check_warnings=False)
+            issues = validate_schema_object(self.warning_schema, "test", check_for_warnings=False)
         self.assertEqual(issues, [])
 
     def test_validate_schema_default_is_warnings_false(self):
-        """validate_schema default check_warnings=False matches explicit False."""
+        """validate_schema default check_for_warnings=False matches explicit False."""
         schema_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "data",
@@ -329,5 +329,5 @@ class TestCheckWarnings(unittest.TestCase):
         )
         with contextlib.redirect_stdout(io.StringIO()):
             default_issues = validate_schema(schema_path)
-            explicit_issues = validate_schema(schema_path, check_warnings=False)
+            explicit_issues = validate_schema(schema_path, check_for_warnings=False)
         self.assertEqual(default_issues, explicit_issues)
