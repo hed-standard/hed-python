@@ -50,7 +50,7 @@ def validate_schema_object(base_schema, schema_name, check_warnings=False):
         issues = base_schema.check_compliance(check_for_warnings=check_warnings)
         if issues and check_warnings:
             errors, warnings = separate_issues(issues)
-            issues = errors + warnings
+            issues = errors + warnings # Ensure errors are listed before warnings
         else:
             errors = issues
 
