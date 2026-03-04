@@ -2,8 +2,7 @@ import os.path
 from collections import defaultdict
 from hed.schema import from_string, load_schema, from_dataframes
 from hed.schema import hed_cache
-from hed.errors import get_printable_issue_string, HedFileError
-from hed.errors.error_types import ErrorSeverity
+from hed.errors import get_printable_issue_string, separate_issues, HedFileError
 from hed.schema.schema_comparer import SchemaComparer
 
 all_extensions = [".tsv", ".mediawiki", ".xml", ".json"]
@@ -32,26 +31,32 @@ def _is_prerelease_partner(base_schema) -> bool:
     return hed_cache.get_hed_version_path(with_standard, check_prerelease=False) is None
 
 
-def validate_schema_object(base_schema, schema_name):
-    """Validate a schema object by checking non-warning compliance and roundtrip conversion.
+def validate_schema_object(base_schema, schema_name, check_warnings=False):
+    """Validate a schema object by checking compliance and roundtrip conversion.
 
-    Tests the schema for non-warning compliance issues and validates that it can be successfully
+    Tests the schema for compliance issues and validates that it can be successfully
     converted to and reloaded from all four formats (MEDIAWIKI, XML, JSON, TSV).
 
     Parameters:
         base_schema (HedSchema): The schema object to validate.
         schema_name (str): The name/path of the schema for error reporting.
+        check_warnings (bool): If True, include warnings in the validation. Default is False.
 
     Returns:
         list: A list of validation issue strings. Empty if no issues found.
     """
     validation_issues = []
     try:
-        issues = base_schema.check_compliance()
-        issues = [issue for issue in issues if issue.get("severity", ErrorSeverity.ERROR) == ErrorSeverity.ERROR]
+        issues = base_schema.check_compliance(check_for_warnings=check_warnings)
+        if issues and check_warnings:
+            errors, warnings = separate_issues(issues)
+            issues = errors + warnings
+        else:
+            errors = issues
+
         if issues:
-            error_message = get_printable_issue_string(issues, title=schema_name)
-            validation_issues.append(error_message)
+            validation_issues.append(get_printable_issue_string(issues, title=schema_name))
+        if errors:
             return validation_issues
 
         # If the withStandard partner only exists in the prerelease cache, all unmerged
@@ -74,14 +79,18 @@ def validate_schema_object(base_schema, schema_name):
     return validation_issues
 
 
-def validate_schema(file_path):
+def validate_schema(file_path, check_warnings=False):
     """Validate a schema file, ensuring it can save/load and passes validation.
 
     Loads the schema from file, checks the file extension is lowercase,
-    and validates the schema object for compliance and roundtrip conversion.
+    and validates the schema object for compliance errors and roundtrip conversion.
 
     Parameters:
         file_path (str): The path to the schema file to validate.
+            If loading a TSV file, this should be a single filename where:
+            Template: basename.tsv, where files are named basename_Struct.tsv, basename_Tag.tsv, etc.
+            Alternatively, you can point to a directory containing the .tsv files.
+        check_warnings (bool): If True, include warnings in the validation. Default is False.
 
     Returns:
         list: A list of validation issue strings. Empty if no issues found.
@@ -96,7 +105,7 @@ def validate_schema(file_path):
     validation_issues = []
     try:
         base_schema = load_schema(file_path)
-        validation_issues = validate_schema_object(base_schema, file_path)
+        validation_issues = validate_schema_object(base_schema, file_path, check_warnings=check_warnings)
     except HedFileError as e:
         print(f"Saving/loading error: {file_path} {e.message}")
         error_text = e.message

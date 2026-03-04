@@ -1,15 +1,19 @@
+import contextlib
+import copy
+import io
 import unittest
 import os
 import shutil
+
 from hed import load_schema_version
 from hed.scripts.schema_script_util import (
     add_extension,
     sort_base_schemas,
     validate_all_schema_formats,
     validate_schema,
+    validate_schema_object,
     validate_all_schemas,
 )
-import contextlib
 
 
 class TestAddExtension(unittest.TestCase):
@@ -107,7 +111,7 @@ class TestSortBaseSchemas(unittest.TestCase):
             },
             "other_schema": {".xml": "other_schema.xml"},
         }
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
@@ -118,7 +122,7 @@ class TestSortBaseSchemas(unittest.TestCase):
             os.path.normpath("hedtsv/wrong_folder/wrong_name_Tag.tsv"),  # Should be ignored
         ]
         expected = {"test_schema": {".tsv": os.path.normpath("hedtsv/test_schema")}}
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
@@ -131,7 +135,7 @@ class TestSortBaseSchemas(unittest.TestCase):
         expected = {
             os.path.normpath("prerelease/test_schema"): {".tsv": os.path.normpath("prerelease/hedtsv/test_schema")}
         }
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
@@ -141,14 +145,14 @@ class TestSortBaseSchemas(unittest.TestCase):
             os.path.normpath("not_hedtsv/test_schema/test_schema_Tag.tsv"),  # Should be ignored
         ]
         expected = {"test_schema": {".mediawiki": "test_schema.mediawiki"}}
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
     def test_empty_input(self):
         filenames = []
         expected = {}
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             result = sort_base_schemas(filenames)
         self.assertEqual(dict(result), expected)
 
@@ -170,7 +174,7 @@ class TestSortBaseSchemas(unittest.TestCase):
                 "case_test_schema": {".mediawiki": "case_test_schema.MEDIAWIKI"},
                 "case_other_schema": {".xml": "case_other_schema.XML"},
             }
-            with contextlib.redirect_stdout(None):
+            with contextlib.redirect_stdout(io.StringIO()):
                 result = sort_base_schemas(filenames)
             self.assertEqual(dict(result), expected)
         finally:
@@ -195,21 +199,21 @@ class TestValidateAllSchemaFormats(unittest.TestCase):
         schema = load_schema_version("8.4.0")
         schema.save_as_xml(os.path.join(self.base_path, self.basename + ".xml"))
         schema.save_as_dataframes(os.path.join(self.base_path, "hedtsv", self.basename))
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             issues = validate_all_schema_formats(os.path.join(self.base_path, self.basename))
         self.assertTrue(issues)
         self.assertEqual(issues[0], "Error loading schema: No such file or directory")
         schema.save_as_mediawiki(os.path.join(self.base_path, self.basename + ".mediawiki"))
         schema.save_as_json(os.path.join(self.base_path, self.basename + ".json"))
 
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(validate_all_schema_formats(os.path.join(self.base_path, self.basename)), [])
 
         schema_incorrect = load_schema_version("8.2.0")
         schema_incorrect.save_as_dataframes(os.path.join(self.base_path, "hedtsv", self.basename))
 
         # Validate and expect errors
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             issues = validate_all_schema_formats(os.path.join(self.base_path, self.basename))
         self.assertTrue(issues)
         # self.assertIn("Error loading schema: No columns to parse from file", issues[0])
@@ -223,7 +227,7 @@ class TestValidateAllSchemaFormats(unittest.TestCase):
 class TestValidateSchema(unittest.TestCase):
     def test_load_invalid_extension(self):
         # Verify capital letters fail validation
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.MEDIAWIKI")[0])
             self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.Mediawiki")[0])
             self.assertIn("Only fully lowercase extensions ", validate_schema("does_not_matter.XML")[0])
@@ -253,7 +257,7 @@ class TestValidateSchema(unittest.TestCase):
             self.assertEqual(schema_files["policy_test"][".xml"], uppercase_file)
 
             # Step 2: validate_all_schemas should use actual path and reject per policy
-            with contextlib.redirect_stdout(None):
+            with contextlib.redirect_stdout(io.StringIO()):
                 issues = validate_all_schemas(schema_files)
 
             # Should get policy violation, not FileNotFoundError
@@ -265,3 +269,65 @@ class TestValidateSchema(unittest.TestCase):
             # Clean up
             if os.path.exists(uppercase_file):
                 os.remove(uppercase_file)
+
+
+class TestCheckWarnings(unittest.TestCase):
+    """Tests for the check_warnings parameter in validate_schema_object and validate_schema."""
+
+    @classmethod
+    def setUpClass(cls):
+        clean = load_schema_version("8.3.0")
+        cls.clean_schema = clean
+        # Deep-copy so the cached shared instance is not mutated.
+        # Setting version to a future value triggers SCHEMA_PRERELEASE_VERSION_USED (warning only).
+        cls.warning_schema = copy.deepcopy(clean)
+        cls.warning_schema.header_attributes["version"] = "999.0.0"
+
+    def test_clean_schema_check_warnings_false(self):
+        """A fully compliant schema produces no issues with check_warnings=False."""
+        with contextlib.redirect_stdout(io.StringIO()):
+            issues = validate_schema_object(self.clean_schema, "test", check_warnings=False)
+        self.assertEqual(issues, [])
+
+    def test_clean_schema_check_warnings_true(self):
+        """A fully compliant schema produces no issues with check_warnings=True."""
+        with contextlib.redirect_stdout(io.StringIO()):
+            issues = validate_schema_object(self.clean_schema, "test", check_warnings=True)
+        self.assertEqual(issues, [])
+
+    def test_warning_schema_check_warnings_true_reports_issues(self):
+        """A prerelease version generates a warning that is reported when check_warnings=True."""
+        with contextlib.redirect_stdout(io.StringIO()):
+            issues = validate_schema_object(self.warning_schema, "test", check_warnings=True)
+        combined = "\n".join(issues)
+        self.assertTrue(issues, "Expected at least one issue for prerelease version warning")
+        self.assertIn(
+            "SCHEMA_PRERELEASE_VERSION_USED",
+            combined,
+            "Expected SCHEMA_PRERELEASE_VERSION_USED warning code in output for prerelease version",
+        )
+        # Warnings must not gate the roundtrip checks — the warning message should be the only
+        # entry and roundtrip errors (if any) would append further entries, but the key contract
+        # is that the function does NOT return after reporting a warning-only result.
+        # We verify this indirectly: issue count must equal exactly 1 (the warning summary)
+        # because a clean schema with only a version warning should roundtrip without further errors.
+        self.assertEqual(len(issues), 1, "Roundtrip should have run and produced no additional errors")
+
+    def test_warning_schema_check_warnings_false_suppresses_warnings(self):
+        """Warnings are suppressed and validation passes when check_warnings=False."""
+        with contextlib.redirect_stdout(io.StringIO()):
+            issues = validate_schema_object(self.warning_schema, "test", check_warnings=False)
+        self.assertEqual(issues, [])
+
+    def test_validate_schema_default_is_warnings_false(self):
+        """validate_schema default check_warnings=False matches explicit False."""
+        schema_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "data",
+            "schema_tests",
+            "HED8.2.0.mediawiki",
+        )
+        with contextlib.redirect_stdout(io.StringIO()):
+            default_issues = validate_schema(schema_path)
+            explicit_issues = validate_schema(schema_path, check_warnings=False)
+        self.assertEqual(default_issues, explicit_issues)

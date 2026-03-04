@@ -5,10 +5,13 @@ This test suite validates that all example notebooks:
 2. Can be executed without errors (with mock data paths)
 3. Import statements work correctly
 
-These tests require the optional 'examples' dependencies:
+TestNotebooks uses only the standard library (json module) to inspect notebook
+structure and does not require optional dependencies.
+TestNotebookExecution requires the optional 'examples' dependencies:
     pip install -e .[examples]
 """
 
+import json
 import os
 import unittest
 from pathlib import Path
@@ -17,7 +20,10 @@ import shutil
 
 
 class TestNotebooks(unittest.TestCase):
-    """Test suite for validating example Jupyter notebooks."""
+    """Test suite for validating example Jupyter notebooks.
+
+    Uses only standard-library JSON parsing — no nbformat/nbconvert required.
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -25,22 +31,41 @@ class TestNotebooks(unittest.TestCase):
         cls.examples_dir = Path(__file__).parent.parent / "examples"
         cls.test_data_dir = Path(__file__).parent / "data"
 
-        # Check if Jupyter dependencies are available
-        try:
-            import nbformat
-            from nbconvert.preprocessors import ExecutePreprocessor
+    @staticmethod
+    def _read_notebook(path):
+        """Read a Jupyter notebook file and return its parsed JSON dict.
 
-            cls.nbformat = nbformat
-            cls.ExecutePreprocessor = ExecutePreprocessor
-            cls.has_jupyter = True
-        except ImportError:
-            cls.has_jupyter = False
-            cls.skip_message = "Jupyter dependencies not installed. Run 'pip install -e .[examples]' to install them."
+        Parameters:
+            path (Path): Path to the .ipynb file.
 
-    def setUp(self):
-        """Set up each individual test."""
-        if not self.has_jupyter:
-            self.skipTest(self.skip_message)
+        Returns:
+            dict: The parsed notebook JSON.
+        """
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    @staticmethod
+    def _get_code_cells(nb):
+        """Return source strings for all code cells in a notebook.
+
+        In the raw .ipynb JSON format each cell's ``source`` may be either a
+        plain string or a list of strings (one per line).  This helper
+        normalises both cases into a single string per cell.
+
+        Parameters:
+            nb (dict): Parsed notebook JSON.
+
+        Returns:
+            list[str]: Source strings from code cells.
+        """
+        sources = []
+        for cell in nb.get("cells", []):
+            if cell.get("cell_type") == "code":
+                src = cell.get("source", "")
+                if isinstance(src, list):
+                    src = "".join(src)
+                sources.append(src)
+        return sources
 
     def test_notebooks_directory_exists(self):
         """Verify the examples directory exists and contains notebooks."""
@@ -56,10 +81,10 @@ class TestNotebooks(unittest.TestCase):
         for notebook_path in notebooks:
             with self.subTest(notebook=notebook_path.name):
                 try:
-                    with open(notebook_path, "r", encoding="utf-8") as f:
-                        nb = self.nbformat.read(f, as_version=4)
+                    nb = self._read_notebook(notebook_path)
                     self.assertIsNotNone(nb, f"Failed to read notebook: {notebook_path.name}")
-                    self.assertGreater(len(nb.cells), 0, f"Notebook has no cells: {notebook_path.name}")
+                    self.assertIn("cells", nb, f"Notebook missing 'cells' key: {notebook_path.name}")
+                    self.assertGreater(len(nb["cells"]), 0, f"Notebook has no cells: {notebook_path.name}")
                 except Exception as e:
                     self.fail(f"Failed to load {notebook_path.name}: {str(e)}")
 
@@ -69,16 +94,10 @@ class TestNotebooks(unittest.TestCase):
 
         for notebook_path in notebooks:
             with self.subTest(notebook=notebook_path.name):
-                with open(notebook_path, "r", encoding="utf-8") as f:
-                    nb = self.nbformat.read(f, as_version=4)
+                nb = self._read_notebook(notebook_path)
+                code_cells = self._get_code_cells(nb)
 
-                # Extract and test import statements
-                import_cells = []
-                for cell in nb.cells:
-                    if cell.cell_type == "code":
-                        source = cell.source
-                        if "import " in source:
-                            import_cells.append(source)
+                import_cells = [src for src in code_cells if "import " in src]
 
                 # Try to validate imports (basic check)
                 for cell_source in import_cells:
@@ -102,10 +121,8 @@ class TestNotebooks(unittest.TestCase):
                 continue
 
             with self.subTest(notebook=notebook_path.name):
-                with open(notebook_path, "r", encoding="utf-8") as f:
-                    nb = self.nbformat.read(f, as_version=4)
-
-                markdown_cells = [c for c in nb.cells if c.cell_type == "markdown"]
+                nb = self._read_notebook(notebook_path)
+                markdown_cells = [c for c in nb.get("cells", []) if c.get("cell_type") == "markdown"]
                 self.assertGreater(len(markdown_cells), 0, f"Notebook {notebook_path.name} has no markdown cells")
 
     def test_specific_notebook_structure(self):
@@ -113,12 +130,8 @@ class TestNotebooks(unittest.TestCase):
         # Test validate_bids_dataset notebook
         validate_nb = self.examples_dir / "validate_bids_dataset.ipynb"
         if validate_nb.exists():
-            with open(validate_nb, "r", encoding="utf-8") as f:
-                nb = self.nbformat.read(f, as_version=4)
-
-            # Should have imports from hed.tools and hed.errors
-            code_sources = [c.source for c in nb.cells if c.cell_type == "code"]
-            all_code = "\n".join(code_sources)
+            nb = self._read_notebook(validate_nb)
+            all_code = "\n".join(self._get_code_cells(nb))
 
             self.assertIn("BidsDataset", all_code, "validate_bids_dataset should import BidsDataset")
             self.assertIn("get_printable_issue_string", all_code, "validate_bids_dataset should import error handling")
@@ -126,11 +139,8 @@ class TestNotebooks(unittest.TestCase):
         # Test summarize_events notebook
         summarize_nb = self.examples_dir / "summarize_events.ipynb"
         if summarize_nb.exists():
-            with open(summarize_nb, "r", encoding="utf-8") as f:
-                nb = self.nbformat.read(f, as_version=4)
-
-            code_sources = [c.source for c in nb.cells if c.cell_type == "code"]
-            all_code = "\n".join(code_sources)
+            nb = self._read_notebook(summarize_nb)
+            all_code = "\n".join(self._get_code_cells(nb))
 
             self.assertIn("TabularSummary", all_code, "summarize_events should import TabularSummary")
 
@@ -140,11 +150,8 @@ class TestNotebooks(unittest.TestCase):
 
         for notebook_path in notebooks:
             with self.subTest(notebook=notebook_path.name):
-                with open(notebook_path, "r", encoding="utf-8") as f:
-                    nb = self.nbformat.read(f, as_version=4)
-
-                # Check that code cells exist and have execution count
-                code_cells = [c for c in nb.cells if c.cell_type == "code"]
+                nb = self._read_notebook(notebook_path)
+                code_cells = self._get_code_cells(nb)
                 self.assertGreater(len(code_cells), 0, f"Notebook {notebook_path.name} has no code cells")
 
     def test_notebook_metadata(self):
@@ -153,10 +160,7 @@ class TestNotebooks(unittest.TestCase):
 
         for notebook_path in notebooks:
             with self.subTest(notebook=notebook_path.name):
-                with open(notebook_path, "r", encoding="utf-8") as f:
-                    nb = self.nbformat.read(f, as_version=4)
-
-                # Check for kernel spec
+                nb = self._read_notebook(notebook_path)
                 self.assertIn("metadata", nb, f"Notebook {notebook_path.name} missing metadata")
 
     def test_validate_bids_dataset_notebook(self):
@@ -166,11 +170,8 @@ class TestNotebooks(unittest.TestCase):
         if not notebook_path.exists():
             self.skipTest("validate_bids_dataset.ipynb not found")
 
-        with open(notebook_path, "r", encoding="utf-8") as f:
-            nb = self.nbformat.read(f, as_version=4)
-
-        # Verify key components
-        all_code = "\n".join([c.source for c in nb.cells if c.cell_type == "code"])
+        nb = self._read_notebook(notebook_path)
+        all_code = "\n".join(self._get_code_cells(nb))
 
         self.assertIn("from hed.errors import", all_code)
         self.assertIn("from hed.tools import BidsDataset", all_code)
@@ -184,11 +185,8 @@ class TestNotebooks(unittest.TestCase):
         if not notebook_path.exists():
             self.skipTest("summarize_events.ipynb not found")
 
-        with open(notebook_path, "r", encoding="utf-8") as f:
-            nb = self.nbformat.read(f, as_version=4)
-
-        # Verify key components
-        all_code = "\n".join([c.source for c in nb.cells if c.cell_type == "code"])
+        nb = self._read_notebook(notebook_path)
+        all_code = "\n".join(self._get_code_cells(nb))
 
         self.assertIn("TabularSummary", all_code)
         self.assertIn("get_file_list", all_code)
@@ -200,11 +198,8 @@ class TestNotebooks(unittest.TestCase):
         if not notebook_path.exists():
             self.skipTest("sidecar_to_spreadsheet.ipynb not found")
 
-        with open(notebook_path, "r", encoding="utf-8") as f:
-            nb = self.nbformat.read(f, as_version=4)
-
-        # Verify key components
-        all_code = "\n".join([c.source for c in nb.cells if c.cell_type == "code"])
+        nb = self._read_notebook(notebook_path)
+        all_code = "\n".join(self._get_code_cells(nb))
 
         self.assertIn("hed_to_df", all_code)
 
@@ -215,11 +210,8 @@ class TestNotebooks(unittest.TestCase):
         if not notebook_path.exists():
             self.skipTest("merge_spreadsheet_into_sidecar.ipynb not found")
 
-        with open(notebook_path, "r", encoding="utf-8") as f:
-            nb = self.nbformat.read(f, as_version=4)
-
-        # Verify key components
-        all_code = "\n".join([c.source for c in nb.cells if c.cell_type == "code"])
+        nb = self._read_notebook(notebook_path)
+        all_code = "\n".join(self._get_code_cells(nb))
 
         self.assertIn("df_to_hed", all_code)
         self.assertIn("merge_hed_dict", all_code)
@@ -231,11 +223,8 @@ class TestNotebooks(unittest.TestCase):
         if not notebook_path.exists():
             self.skipTest("find_event_combinations.ipynb not found")
 
-        with open(notebook_path, "r", encoding="utf-8") as f:
-            nb = self.nbformat.read(f, as_version=4)
-
-        # Verify key components
-        all_code = "\n".join([c.source for c in nb.cells if c.cell_type == "code"])
+        nb = self._read_notebook(notebook_path)
+        all_code = "\n".join(self._get_code_cells(nb))
 
         self.assertIn("KeyMap", all_code)
 
@@ -246,11 +235,8 @@ class TestNotebooks(unittest.TestCase):
         if not notebook_path.exists():
             self.skipTest("extract_json_template.ipynb not found")
 
-        with open(notebook_path, "r", encoding="utf-8") as f:
-            nb = self.nbformat.read(f, as_version=4)
-
-        # Verify key components
-        all_code = "\n".join([c.source for c in nb.cells if c.cell_type == "code"])
+        nb = self._read_notebook(notebook_path)
+        all_code = "\n".join(self._get_code_cells(nb))
 
         # Check for either get_new_dataframe or extract_sidecar_template
         self.assertTrue(

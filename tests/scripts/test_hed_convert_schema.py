@@ -1,12 +1,13 @@
-import unittest
-import shutil
+import contextlib
 import copy
+import io
 import os
+import shutil
+import unittest
 from hed import load_schema, load_schema_version
 from hed.schema import HedSectionKey, HedKey
 from hed.scripts.schema_script_util import add_extension
 from hed.scripts.hed_convert_schema import convert_and_update
-import contextlib
 
 
 class TestConvertAndUpdate(unittest.TestCase):
@@ -25,7 +26,7 @@ class TestConvertAndUpdate(unittest.TestCase):
 
         # Assume filenames updated includes just the original schema file for simplicity
         filenames = [original_name]
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             result = convert_and_update(filenames, set_ids=False)
 
         # Verify no error from convert_and_update and the correct schema version was saved
@@ -43,7 +44,7 @@ class TestConvertAndUpdate(unittest.TestCase):
         schema.save_as_dataframes(tsv_filename)
 
         filenames = [os.path.join(tsv_filename, "test_schema_Tag.tsv")]
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             result = convert_and_update(filenames, set_ids=False)
 
         # Verify no error from convert_and_update and the correct schema version was saved
@@ -72,7 +73,7 @@ class TestConvertAndUpdate(unittest.TestCase):
 
         # Assume filenames updated includes just the original schema file for simplicity
         filenames = [add_extension(basename, ".mediawiki")]
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             result = convert_and_update(filenames, set_ids=False)
         self.assertEqual(result, 0)
 
@@ -81,7 +82,7 @@ class TestConvertAndUpdate(unittest.TestCase):
         self.assertTrue(x)
         self.assertEqual(schema_reloaded, schema_edited)
 
-        with contextlib.redirect_stdout(None):
+        with contextlib.redirect_stdout(io.StringIO()):
             result = convert_and_update(filenames, set_ids=True)
         self.assertEqual(result, 0)
 

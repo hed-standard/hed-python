@@ -40,7 +40,9 @@ Error functions
 
 .. autofunction:: hed.errors.error_reporter.sort_issues
 
-.. autofunction:: hed.errors.error_reporter.replace_tag_references
+.. autofunction:: hed.errors.error_reporter.separate_issues
+
+.. autofunction:: hed.errors.error_reporter.iter_errors
 
 Error types
 -----------
