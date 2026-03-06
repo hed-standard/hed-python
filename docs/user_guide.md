@@ -1,17 +1,13 @@
-```{meta}
 ---
-description: Complete user guide for Python HEDTools - validation, BIDS 
-  integration, analysis, and command-line tools for HED annotations
-keywords: HED tutorial, Python guide, validation examples, BIDS datasets, 
-  sidecar files, command-line interface, Jupyter notebooks, HED overview, event 
-  descriptors, neuroscience, schema
+html_meta:
+  description: Complete user guide for Python HEDTools - validation, BIDS integration, analysis, and command-line tools for HED annotations
+  keywords: HED tutorial, Python guide, validation examples, BIDS datasets, sidecar files, command-line interface, Jupyter notebooks, HED overview, event descriptors, neuroscience, schema
 ---
-```
-
-# Python HEDTools guide
 
 ```{index} user guide, tutorial, getting started, HED, Hierarchical Event Descriptors
 ```
+
+# Python HEDTools guide
 
 HED (Hierarchical Event Descriptors) is a framework for systematically describing events and experimental metadata in machine-actionable form. This guide provides comprehensive documentation for using the HED Python tools for validation, BIDS integration, and analysis.
 

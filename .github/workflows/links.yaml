@@ -32,7 +32,7 @@ jobs:
           echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
-        run: uv pip install -e ".[docs]"
+        run: uv pip install ".[docs]"
 
       - name: Build documentation with Sphinx
         run: |
