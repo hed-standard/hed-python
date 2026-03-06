@@ -13,7 +13,7 @@
 uv venv .venv && source .venv/bin/activate
 uv pip install -e ".[dev,test,docs,examples]"
 git submodule update --init --recursive  # fetch test data
-pytest tests/ --cov
+unittest tests/ --cov
 ```
 
 ## Package Structure
