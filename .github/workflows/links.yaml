@@ -38,10 +38,9 @@ jobs:
         run: |
           sphinx-build -b html docs docs/_build/html
 
-      - name: Link Checker on built documentation
+      - name: Link Checker
         id: lychee
         uses: lycheeverse/lychee-action@v2.8.0
         with:
-          # Check the built HTML files recursively (includes internal links)
-          args: --config lychee.toml --verbose --no-progress --max-redirects 10 'docs/_build/html/**/*.html'
+          args: --config lychee.toml --verbose --no-progress --max-redirects 10 'docs/_build/html/**/*.html' README.md RELEASE_GUIDE.md CONTRIBUTING.md
           fail: true

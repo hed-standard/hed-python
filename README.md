@@ -303,3 +303,7 @@ HEDTools is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 - GitHub issues: [https://github.com/hed-standard/hed-python/issues](https://github.com/hed-standard/hed-python/issues)
 - Questions or ideas: [HED discussions](https://github.com/orgs/hed-standard/discussions)
 - Contact: [hed-maintainers@gmail.com](mailto:hed-maintainers@gmail.com)
+
+## Funding
+
+Partial support for this project was provided by [NIH 1R01MH126700-01A1](https://reporter.nih.gov/project-details/10480619).
