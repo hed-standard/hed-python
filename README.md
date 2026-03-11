@@ -61,7 +61,7 @@ cd hed-python
 pip install -e .
 
 # Install with optional dependency groups
-pip install -e ".[dev]"       # Development tools (ruff, black, codespell)
+pip install -e ".[dev]"       # Development tools (ruff, codespell)
 pip install -e ".[docs]"      # Documentation tools (sphinx, furo)
 pip install -e ".[test]"      # Testing tools (coverage)
 pip install -e ".[examples]"  # Jupyter notebook support
@@ -72,7 +72,7 @@ pip install -e ".[dev,docs,test,examples]"
 
 **Optional dependency groups:**
 
-- `dev` - Code quality tools: ruff (linter), black (formatter), codespell, mdformat
+- `dev` - Code quality tools: ruff (linter + formatter), codespell, mdformat
 - `docs` - Documentation generation: sphinx, furo theme, myst-parser
 - `test` - Code coverage reporting: coverage
 - `examples` - Jupyter notebook support: jupyter, notebook, ipykernel
@@ -182,37 +182,30 @@ sphinx-build -b html . _build/html
 
 To iew the built documentation open `docs/_build/html/index.html` in your browser
 
-### Formatting with Black
+### Code Formatting
 
-This project uses [Black](https://black.readthedocs.io/) for consistent code formatting.
+This project uses [ruff format](https://docs.astral.sh/ruff/formatter/) for consistent code formatting.
 
 ```bash
 # Check if code is properly formatted (without making changes)
-black --check .
+ruff format --check .
 
 # Check and show what would change
-black --check --diff .
+ruff format --check --diff .
 
 # Format all Python code in the repository
-black .
+ruff format .
 
 # Format specific files or directories
-black hed/
-black tests/
+ruff format hed/
+ruff format tests/
 ```
 
-**Windows Users:** If you encounter "I/O operation on closed file" errors, use the `--workers 1` flag:
+**Configuration:** Formatter settings are in `pyproject.toml` under `[tool.ruff.format]` with a line length of 120 characters.
 
-```bash
-black --workers 1 --check .
-black --workers 1 .
-```
+**Exclusions:** Ruff automatically excludes `.venv/`, `__pycache__/`, auto-generated files (`hed/_version.py`), and external repos (`spec_tests/hed-examples/`, `spec_tests/hed-specification/`).
 
-**Configuration:** Black settings are in `pyproject.toml` with a line length of 127 characters (matching our ruff configuration).
-
-**Exclusions:** Black automatically excludes `.venv/`, `__pycache__/`, auto-generated files (`hed/_version.py`), and external repos (`spec_tests/hed-examples/`, `spec_tests/hed-specification/`).
-
-**CI integration:** All code is automatically checked for Black formatting in GitHub Actions. Run `black .` before committing to ensure your code passes CI checks.
+**CI integration:** All code is automatically checked for formatting in GitHub Actions. Run `ruff format .` before committing to ensure your code passes CI checks.
 
 ## Related repositories
 

@@ -37,11 +37,15 @@ exclude_path = [
     'webpack-macros\.html$',
     'sbt-webpack-macros\.html$',
     '.*-macros\.html$',
+    'spec_tests/hed-examples',
+    'spec_tests/hed-schemas',
+    'spec_tests/hed-tests',
+]
+
+# Exclude specific URLs from checking (by regex)
+exclude = [
     '^http://127\.0\.0\.',
     '^http://localhost',
     '^https://localhost',
     '^file://',
-    'spec_tests/hed-examples',
-    'spec_tests/hed-schemas',
-    'spec_tests/hed-tests',
 ]

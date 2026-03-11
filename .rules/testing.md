@@ -2,11 +2,10 @@
 
 ## Framework
 
-- **unittest** is the project standard for writing tests
-- **pytest** as the test runner (supports unittest natively)
+- **unittest** is the project standard for writing and running tests
 - Test files mirror `hed/` package structure under `tests/`
 - Test file naming: `test_<module>.py`
-- No conftest.py or pytest fixtures; uses unittest's `setUp`/`setUpClass`
+- Uses unittest's `setUp`/`setUpClass` (no pytest fixtures or conftest.py)
 
 ## Test Organization (60 test files)
 
@@ -42,13 +41,10 @@ tests/
 
 ```bash
 # All unit tests
-pytest tests/ --cov
-
-# Unittest discovery (alternative)
-python -m unittest discover tests
+python -m unittest discover tests -v
 
 # Spec tests (require submodule init)
-pytest spec_tests/
+python -m unittest discover spec_tests -v
 
 # Specific test file
 python -m unittest tests/models/test_hed_string.py
@@ -57,7 +53,7 @@ python -m unittest tests/models/test_hed_string.py
 python -m unittest tests.models.test_hed_string.TestHedString.test_constructor
 
 # Notebook tests
-pytest tests/test_notebooks.py
+python -m unittest tests.test_notebooks
 ```
 
 ## Test Patterns

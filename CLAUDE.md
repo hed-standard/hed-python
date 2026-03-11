@@ -37,15 +37,14 @@ examples/      - 10 Jupyter notebooks (validation, extraction, summarization wor
 
 ```bash
 # Tests
-pytest tests/ --cov
-python -m unittest discover tests
+python -m unittest discover tests -v
 
 # Spec tests (require submodule init)
-pytest spec_tests/
+python -m unittest discover spec_tests -v
 
 # Linting and formatting
 ruff check --fix --unsafe-fixes hed/ tests/
-black hed/ tests/
+ruff format hed/ tests/
 codespell
 
 # Documentation
@@ -62,7 +61,7 @@ hedpy schema convert --input schema.xml --output schema.json
 
 ### Testing: Real Data Only
 
-- unittest framework (project standard); pytest as runner
+- unittest framework (project standard) for both writing and running tests
 - No mocks; real schemas, real HED strings, real files
 - Spec tests via git submodules for official HED test suites
 - Details: `.rules/testing.md`
@@ -71,7 +70,7 @@ hedpy schema convert --input schema.xml --output schema.json
 
 - PEP 8; 127-char line length
 - Google-style docstrings for public APIs
-- ruff (E, W, F, N, B, C4 rules), black for formatting, codespell for spelling
+- ruff (E, W, F, N, B, C4 rules + ruff format for formatting), codespell for spelling
 - Details: `.rules/python.md`
 
 ### Git and PRs

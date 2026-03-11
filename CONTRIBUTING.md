@@ -93,20 +93,17 @@ This project adheres to a code of conduct that we expect all contributors to fol
 
 We use several tools to maintain code quality:
 
-- **black:** For automatic code formatting
+- **ruff format:** For automatic code formatting
 
   ```bash
   # Check if code is formatted correctly
-  black --check .
+  ruff format --check .
 
   # Automatically format all code
-  black .
+  ruff format .
 
   # Format specific files or directories
-  black hed/ tests/
-
-  # Windows: Use --workers 1 if you encounter file I/O errors
-  black --workers 1 .
+  ruff format hed/ tests/
   ```
 
 - **ruff:** For linting, style checking, and import sorting
