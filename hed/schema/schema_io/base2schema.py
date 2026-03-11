@@ -63,14 +63,14 @@ class SchemaLoader(ABC):
             self.appending_to_schema = True
             if not self._schema.with_standard:
                 raise HedFileError(
-                    HedExceptions.SCHEMA_DUPLICATE_PREFIX,
+                    HedExceptions.SCHEMA_LOAD_FAILED,
                     "Loading multiple normal schemas as a merged one with the same namespace.  "
                     "Ensure schemas have the withStandard header attribute set",
                     self.name,
                 )
             elif with_standard != self._schema.with_standard:
                 raise HedFileError(
-                    HedExceptions.BAD_WITH_STANDARD_MULTIPLE_VALUES,
+                    HedExceptions.SCHEMA_LOAD_FAILED,
                     f"Merging schemas requires same withStandard value ({with_standard} != {self._schema.with_standard}).",
                     self.name,
                 )
@@ -125,7 +125,7 @@ class SchemaLoader(ABC):
                 base_version = load_schema_version(self._schema.with_standard, check_prerelease=self.check_prerelease)
             except HedFileError as e:
                 raise HedFileError(
-                    HedExceptions.BAD_WITH_STANDARD,
+                    HedExceptions.SCHEMA_LIBRARY_INVALID,
                     message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
                     filename=e.filename,
                 ) from e
@@ -194,28 +194,28 @@ class SchemaLoader(ABC):
         if rooted_tag is not None:
             if not schema.with_standard:
                 raise HedFileError(
-                    HedExceptions.ROOTED_TAG_INVALID,
+                    HedExceptions.SCHEMA_ATTRIBUTE_INVALID,
                     f"Rooted tag attribute found on '{tag_entry.short_tag_name}' in a standard schema.",
                     schema.name,
                 )
 
             if not isinstance(rooted_tag, str):
                 raise HedFileError(
-                    HedExceptions.ROOTED_TAG_INVALID,
+                    HedExceptions.SCHEMA_LIBRARY_INVALID,
                     f"Rooted tag '{tag_entry.short_tag_name}' is not a string.\"",
                     schema.name,
                 )
 
             if tag_entry.parent_name and not loading_merged:
                 raise HedFileError(
-                    HedExceptions.ROOTED_TAG_INVALID,
+                    HedExceptions.SCHEMA_LIBRARY_INVALID,
                     f"Found rooted tag '{tag_entry.short_tag_name}' as a non root node.",
                     schema.name,
                 )
 
             if not tag_entry.parent_name and loading_merged:
                 raise HedFileError(
-                    HedExceptions.ROOTED_TAG_INVALID,
+                    HedExceptions.SCHEMA_LIBRARY_INVALID,
                     f"Found rooted tag '{tag_entry.short_tag_name}' as a root node in a merged schema.",
                     schema.name,
                 )
@@ -223,7 +223,7 @@ class SchemaLoader(ABC):
             rooted_entry = schema.tags.get(rooted_tag)
             if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):
                 raise HedFileError(
-                    HedExceptions.ROOTED_TAG_DOES_NOT_EXIST,
+                    HedExceptions.LIBRARY_SCHEMA_INVALID,
                     f"Rooted tag '{tag_entry.short_tag_name}' not found in paired standard schema",
                     schema.name,
                 )

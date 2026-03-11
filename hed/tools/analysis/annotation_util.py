@@ -367,37 +367,6 @@ def _flatten_val_col(col_key, col_dict) -> tuple[list[str], list[str], list[str]
     return [col_key], ["n/a"], [description], [tags]
 
 
-# def _get_row_tags(row, description_tag=True):
-#     """ Return the HED string associated with row, possibly without the description.
-#
-#     Parameters:
-#         row (DataSeries):        Pandas data frame containing a row of a tagging spreadsheet.
-#         description_tag (bool):  If True, include any Description tags in the returned string.
-#
-#     Returns:
-#         str:  A HED string extracted from the row.
-#         str:  A string representing the description (without the Description tag).
-#
-#     Notes:
-#         If description_tag is True the entire tag string is included with description.
-#         If there was a description extracted, it is appended to any existing description.
-#
-#     """
-#     remainder, extracted = extract_tags(row['HED'], 'Description/')
-#     if description_tag:
-#         tags = row["HED"]
-#     else:
-#         tags = remainder
-#
-#     if row["description"] != 'n/a':
-#         description = row["description"]
-#     else:
-#         description = ""
-#     if extracted:
-#         description = " ".join([description, extracted])
-#     return tags, description
-
-
 def _get_value_entry(hed_entry, description_entry, description_tag=True):
     """Return a HED dictionary representing a value entry in a HED tagging spreadsheet.
 
@@ -473,24 +442,3 @@ def _update_cat_dict(cat_dict, value_entry, hed_entry, description_entry, descri
         hed_part = cat_dict.get("HED", {})
         hed_part[value_entry] = value_dict["HED"]
         cat_dict["HED"] = hed_part
-
-
-# def _update_remainder(remainder, update_piece):
-#     """ Update remainder with update piece.
-#
-#     Parameters:
-#         remainder (str):      A tag string without trailing comma.
-#         update_piece (str):   A tag string to be appended.
-#
-#     Returns:
-#         str: A concatenation of remainder and update_piece, paying attention to separating commas.
-#
-#     """
-#     if not update_piece:
-#         return remainder
-#     elif not remainder:
-#         return update_piece
-#     elif remainder.endswith(')') or update_piece.startswith('('):
-#         return remainder + update_piece
-#     else:
-#         return remainder + ", " + update_piece

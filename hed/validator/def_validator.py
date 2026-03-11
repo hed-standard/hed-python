@@ -119,9 +119,6 @@ class DefValidator(DefinitionDict):
 
         # Validate the def name vs the name class
         def_issues = hed_validator._unit_validator._check_value_class(def_tag, tag_label, report_as=None)
-        # def_issues += hed_validator.validate_units(def_tag,
-        #                                            tag_label,
-        #                                            error_code=error_code)
 
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
         if def_contents and def_entry.takes_value and hed_validator:

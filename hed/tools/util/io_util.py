@@ -279,25 +279,6 @@ def get_timestamp():
     return now.strftime(TIME_FORMAT)[:-3]
 
 
-def make_path(root_path, sub_path, filename):
-    """Get path for a file, verifying all components exist.
-
-    Parameters:
-        root_path (str):   path of the root directory.
-        sub_path (str):    sub-path relative to the root directory.
-        filename (str):    filename of the file.
-
-    Returns:
-        str: A valid realpath for the specified file.
-
-    Notes: This function is useful for creating files within BIDS datasets.
-
-    """
-
-    dir_path = os.path.realpath(os.path.join(root_path, sub_path))
-    os.makedirs(dir_path, exist_ok=True)
-
-
 def get_task_from_file(file_path):
     """Returns the task name entity from a BIDS-type file path.
 

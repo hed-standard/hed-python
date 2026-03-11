@@ -20,7 +20,7 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class SpreadsheetValidator:
-    ONSET_TOLERANCE = 10 - 7
+    ONSET_TOLERANCE = 1e-7
     TEMPORAL_ANCHORS = re.compile(r"|".join(map(re.escape, ["onset", "inset", "offset", "delay"])))
 
     def __init__(self, hed_schema):

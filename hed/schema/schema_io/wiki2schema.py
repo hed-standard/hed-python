@@ -77,7 +77,7 @@ class SchemaLoaderWiki(SchemaLoader):
                 hed_attributes = self._get_header_attributes_internal(line[len(wiki_constants.HEADER_LINE_STRING) :])
                 return hed_attributes
         msg = f"First line of file should be HED, instead found: {line}"
-        raise HedFileError(HedExceptions.SCHEMA_HEADER_MISSING, msg, filename=self.name)
+        raise HedFileError(HedExceptions.SCHEMA_HEADER_INVALID, msg, filename=self.name)
 
     def _parse_data(self):
         wiki_lines_by_section = self._split_lines_into_sections(self.input_data)

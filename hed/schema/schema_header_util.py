@@ -17,9 +17,9 @@ def validate_library_name(library_name):
     """
     for i, character in enumerate(library_name):
         if not character.isalpha():
-            return f"Non alpha character '{character}' at position {i} in '{library_name}'"
+            return f"Non alpha character '{character}' at position {i} in library name '{library_name}'"
         if character.isupper():
-            return f"Non lowercase character '{character}' at position {i} in '{library_name}'"
+            return f"Non lowercase character '{character}' at position {i} in library name '{library_name}'"
 
 
 def validate_version_string(version_string):
@@ -41,7 +41,7 @@ def validate_version_string(version_string):
 
 header_attribute_validators = {
     constants.VERSION_ATTRIBUTE: (validate_version_string, HedExceptions.SCHEMA_VERSION_INVALID),
-    constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.BAD_HED_LIBRARY_NAME),
+    constants.LIBRARY_ATTRIBUTE: (validate_library_name, HedExceptions.SCHEMA_LIBRARY_INVALID),
 }
 
 
@@ -61,7 +61,7 @@ def validate_present_attributes(attrib_dict, name):
     """
     if constants.WITH_STANDARD_ATTRIBUTE in attrib_dict and constants.LIBRARY_ATTRIBUTE not in attrib_dict:
         raise HedFileError(
-            HedExceptions.BAD_WITH_STANDARD,
+            HedExceptions.SCHEMA_LIBRARY_INVALID,
             "withStandard header attribute found, but no library attribute is present",
             name,
         )
@@ -93,7 +93,7 @@ def validate_attributes(attrib_dict, name):
                 raise HedFileError(error_code, had_error, name)
         if attribute_name not in valid_header_attributes:
             raise HedFileError(
-                HedExceptions.SCHEMA_UNKNOWN_HEADER_ATTRIBUTE,
+                HedExceptions.SCHEMA_HEADER_INVALID,
                 f"Unknown attribute {attribute_name} found in header line",
                 filename=name,
             )

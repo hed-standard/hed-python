@@ -42,7 +42,6 @@ class GroupValidator:
         checks = [
             self._check_group_relationships,
             self._duplicate_checker.check_for_duplicates,
-            # self.validate_duration_tags,
         ]
 
         for check in checks:
@@ -125,7 +124,6 @@ class GroupValidator:
         if len(validation_issues) > 0:
             return validation_issues
 
-        #   validation_errors = self._reserved_checker.check_reserved_duplicates(reserved_tags, group)
         return validation_issues
 
     @staticmethod
