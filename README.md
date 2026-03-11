@@ -61,7 +61,7 @@ cd hed-python
 pip install -e .
 
 # Install with optional dependency groups
-pip install -e ".[dev]"       # Development tools (ruff, codespell)
+pip install -e ".[dev]"       # Development tools (ruff, typos)
 pip install -e ".[docs]"      # Documentation tools (sphinx, furo)
 pip install -e ".[test]"      # Testing tools (coverage)
 pip install -e ".[examples]"  # Jupyter notebook support
@@ -72,7 +72,7 @@ pip install -e ".[dev,docs,test,examples]"
 
 **Optional dependency groups:**
 
-- `dev` - Code quality tools: ruff (linter + formatter), codespell, mdformat
+- `dev` - Code quality tools: ruff (linter + formatter), typos, mdformat
 - `docs` - Documentation generation: sphinx, furo theme, myst-parser
 - `test` - Code coverage reporting: coverage
 - `examples` - Jupyter notebook support: jupyter, notebook, ipykernel
@@ -180,7 +180,7 @@ cd docs
 sphinx-build -b html . _build/html
 ```
 
-To iew the built documentation open `docs/_build/html/index.html` in your browser
+To view the built documentation open `docs/_build/html/index.html` in your browser
 
 ### Code Formatting
 

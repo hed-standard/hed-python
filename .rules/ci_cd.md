@@ -14,11 +14,11 @@
 
 ### Code Quality
 
-| Workflow         | Triggers          | Python | Description                                  |
-| ---------------- | ----------------- | ------ | -------------------------------------------- |
-| `ruff.yaml`      | Push + PR to main | 3.12   | Ruff linter and formatter check (>=0.8.0)    |
-| `codespell.yaml` | Push + PR to main | 3.10   | Spelling check                               |
-| `mdformat.yaml`  | Push + PR to main | 3.12   | Markdown format check (docs/ and root \*.md) |
+| Workflow        | Triggers          | Python | Description                                  |
+| --------------- | ----------------- | ------ | -------------------------------------------- |
+| `ruff.yaml`     | Push + PR to main | 3.12   | Ruff linter and formatter check (>=0.8.0)    |
+| `typos.yaml`    | Push + PR to main | 3.10   | Spelling check (typos)                       |
+| `mdformat.yaml` | Push + PR to main | 3.12   | Markdown format check (docs/ and root \*.md) |
 
 ### Documentation
 
@@ -35,6 +35,6 @@
 ## All CI Must Pass Before Merge
 
 - Tests across Python 3.10-3.14
-- Linting and formatting (ruff check + ruff format), spelling (codespell), markdown (mdformat)
+- Linting and formatting (ruff check + ruff format), spelling (typos), markdown (mdformat)
 - Documentation builds successfully
 - Package installs correctly in fresh environment

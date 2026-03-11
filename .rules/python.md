@@ -2,7 +2,7 @@
 
 ## Style
 
-- PEP 8 compliant with 127-char line length (configured in pyproject.toml)
+- PEP 8 compliant with 120-char line length (configured in pyproject.toml)
 - Google-style docstrings for all public classes and functions
 - Type hints where appropriate
 
@@ -14,7 +14,7 @@
   - Excludes: .git, .venv, __pycache__, build, dist, hed/\_version.py, spec_tests submodules
   - Per-file: F401 ignored in `__init__.py` (unused imports are re-exports)
 - **ruff format:** Format (`ruff format hed/ tests/`); 120-char line, matches ruff lint config
-- **codespell:** Spell checking; skips binary/data files, ignores domain-specific words (hed, parms, etc.)
+- **typos:** Spell checking; skips binary/data files, ignores domain-specific words (hed, parms, etc.)
 
 ## Naming Conventions
 
@@ -33,7 +33,7 @@
 ## Dependencies
 
 - **Core:** click, click-option-group, pandas (\<3.0), numpy (>=2.0.2), openpyxl, defusedxml, inflect, semantic-version, portalocker
-- **Dev:** ruff (>=0.8.0), codespell, mdformat, mdformat-myst
+- **Dev:** ruff (>=0.8.0), typos (>=1.29.0), mdformat, mdformat-myst
 - **Docs:** sphinx (\<10), furo, sphinx-copybutton, myst-parser, sphinx-autodoc-typehints, linkify-it-py
 - **Test:** coverage
 - **Examples:** jupyter, notebook, nbformat, nbconvert, ipykernel

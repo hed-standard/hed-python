@@ -101,7 +101,7 @@ ruff format --check .
 ruff check hed/ tests/
 
 # Run spell checker
-codespell
+typos
 
 # Run all tests
 python -m unittest discover tests -v

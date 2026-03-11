@@ -50,7 +50,7 @@ jobs:
             3. For suggestions: only mention if they clearly improve code quality
 
             Follow the project's code style: ruff formatting, Google-style docstrings,
-            127-char line length, PEP 8. Check for correctness, test coverage, and
+            120-char line length, PEP 8. Check for correctness, test coverage, and
             backward compatibility.
 
             Do not flag stylistic preferences or false positives.

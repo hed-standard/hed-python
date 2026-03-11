@@ -118,10 +118,10 @@ We use several tools to maintain code quality:
   ruff check --fix hed/ tests/
   ```
 
-- **codespell:** For spell checking
+- **typos:** For spell checking
 
   ```bash
-  codespell
+  typos
   ```
 
 ### Documentation Style

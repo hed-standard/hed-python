@@ -45,14 +45,14 @@ python -m unittest discover spec_tests -v
 # Linting and formatting
 ruff check --fix --unsafe-fixes hed/ tests/
 ruff format hed/ tests/
-codespell
+typos
 
 # Documentation
 cd docs && sphinx-build -b html . _build/html
 
 # CLI
 hedpy --help
-hedpy validate string --hed-string "Event" --schema-version 8.3.0
+hedpy validate string --hed-string "Event" --schema-version 8.4.0
 hedpy validate bids-dataset --bids-path /path/to/bids
 hedpy schema convert --input schema.xml --output schema.json
 ```
@@ -68,9 +68,9 @@ hedpy schema convert --input schema.xml --output schema.json
 
 ### Code Style
 
-- PEP 8; 127-char line length
+- PEP 8; 120-char line length
 - Google-style docstrings for public APIs
-- ruff (E, W, F, N, B, C4 rules + ruff format for formatting), codespell for spelling
+- ruff (E, W, F, N, B, C4 rules + ruff format for formatting), typos for spelling
 - Details: `.rules/python.md`
 
 ### Git and PRs

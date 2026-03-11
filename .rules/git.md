@@ -13,7 +13,7 @@
 - Atomic, focused changes
 - Messages \<50 chars, no emojis
 - No AI attribution in commits or PRs
-- Precommit: Should run ruff check and format and mdformat locally before to eliminate
+- Precommit: Should run ruff check and format and mdformat locally before to eliminate format errors
 
 ## Submodules
 
@@ -35,12 +35,12 @@ Three submodules under `spec_tests/`, all tracking `main`:
 07. Open a PR from your fork's feature branch targeting `main` on `hed-standard/hed-python`
 08. Run `/review-pr` for code review
 09. Address all critical/important findings
-10. Merge when all CI (13 workflows) is green
+10. Merge by a maintainer
 
 ## Release Process (see RELEASE_GUIDE.md)
 
 1. Update CHANGELOG.md
-2. Run code quality checks (ruff check, ruff format, codespell)
+2. Run code quality checks (ruff check, ruff format, typos)
 3. Run all tests (unit + spec)
 4. Push CHANGELOG PR, merge to main
 5. Create git tag (semantic versioning: MAJOR.MINOR.PATCH)
