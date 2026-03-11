@@ -3,17 +3,17 @@
 ## Branch Strategy
 
 - `stable`: Released versions on PyPI
-- `main`/`master`: Most recent usable version
-- `develop`: Experimental, evolving features
+- `main`: Most recent usable version on `hed-standard/hed-python`
 - Feature branches: `feature/<issue-number>-short-description`
-- PRs target `develop` branch
+- Development happens on a personal fork of `hed-standard/hed-python`
+- Push feature branches to the forked repository, then open a PR targeting `main` on `hed-standard/hed-python`
 
 ## Commits
 
 - Atomic, focused changes
 - Messages \<50 chars, no emojis
 - No AI attribution in commits or PRs
-- Pre-commit hook runs ruff check + format on staged .py files
+- Precommit: Should run ruff check and format and mdformat locally before to eliminate format errors
 
 ## Submodules
 
@@ -26,20 +26,21 @@ Three submodules under `spec_tests/`, all tracking `main`:
 
 ## PR Process
 
-1. Create issue (except for minor fixes)
-2. Use `gh issue develop` to create branch from `develop`
-3. Implement with atomic commits
-4. Run tests: `pytest tests/ --cov` and `pytest spec_tests/`
-5. Run linting: `ruff check hed/ tests/` and `black --check hed/ tests/`
-6. Create PR targeting `develop`
-7. Run `/review-pr` for code review
-8. Address all critical/important findings
-9. Merge when all CI (12 workflows) is green
+01. Create issue on `hed-standard/hed-python` (except for minor fixes)
+02. Create a feature branch on your fork: `git checkout -b feature/<issue-number>-short-description`
+03. Implement with atomic commits
+04. Run tests: `python -m unittest discover tests -v` and `python -m unittest discover spec_tests -v`
+05. Run linting and formatting check: `ruff check hed/ tests/` and `ruff format --check hed/ tests/`
+06. Push the feature branch to your fork: `git push origin feature/<issue-number>-short-description`
+07. Open a PR from your fork's feature branch targeting `main` on `hed-standard/hed-python`
+08. Run `/review-pr` for code review
+09. Address all critical/important findings
+10. Merge by a maintainer
 
 ## Release Process (see RELEASE_GUIDE.md)
 
 1. Update CHANGELOG.md
-2. Run code quality checks (black, ruff, codespell)
+2. Run code quality checks (ruff check, ruff format, typos)
 3. Run all tests (unit + spec)
 4. Push CHANGELOG PR, merge to main
 5. Create git tag (semantic versioning: MAJOR.MINOR.PATCH)

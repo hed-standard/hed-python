@@ -15,7 +15,7 @@ Track technical solutions, explored approaches, and references during developmen
 
 ## References
 
-- [HED Specification](https://hed-specification.readthedocs.io)
+- [HED Specification](https://www.hedtags.org/hed-specification)
 - [HED Python API Docs](https://www.hedtags.org/hed-python/)
-- [HED Resources](https://www.hed-resources.org)
+- [HED Resources](https://www.hedtags.org/hed-resources)
 - [BIDS Specification](https://bids-specification.readthedocs.io)

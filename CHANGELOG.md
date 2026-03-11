@@ -121,7 +121,7 @@ The main purpose of this release is to clean up the CLI for the hedtools and to 
 - `hed/scripts/extract_tabular_summary.py` - Non-BIDS tabular summarization
 - `hed/scripts/script_utils.py` - Shared utility functions for scripts
 
-**Script uilities:**
+**Script utilities:**
 
 - Centralized logging setup across all scripts
 - Standardized validation result formatting

@@ -1,5 +1,5 @@
 ---
-name: Codespell
+name: Typos
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  codespell:
+  typos:
     name: Check for spelling errors
     runs-on: ubuntu-latest
 
@@ -25,5 +25,5 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "**/pyproject.toml"
 
-      - name: Run Codespell
-        run: uvx --with tomli codespell .
+      - name: Run typos
+        run: uvx typos

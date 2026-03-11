@@ -2,10 +2,10 @@
 
 ## Before Creating a PR
 
-1. All tests pass: `pytest tests/ --cov` and `pytest spec_tests/`
-2. Linting clean: `ruff check hed/ tests/`
-3. Formatting clean: `black --check hed/ tests/`
-4. Spelling clean: `codespell`
+1. All tests pass: `python -m unittest discover tests -v` and `python -m unittest discover spec_tests -v`
+2. Linting clean: `ruff check . --fix`
+3. Formatting clean: `ruff format --check .`
+4. Spelling clean: `typos`
 5. New functionality has tests (real data, no mocks)
 
 ## PR Review with pr-review-toolkit

@@ -137,7 +137,6 @@ Desktop.ini
 # Project specific
 schema_cache_test/
 hed_cache/
-spec_tests/hed-specification/tests
 spec_tests/*.json
 
 # GitHub Copilot instructions (project-specific)

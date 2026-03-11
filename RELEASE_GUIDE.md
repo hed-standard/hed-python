@@ -95,14 +95,13 @@ Before releasing, ensure all code quality checks pass:
 
 ```bash
 # Run code formatter check
-black --check .
-# On Windows, use: black --workers 1 --check .
+ruff format --check .
 
 # Run linter
 ruff check hed/ tests/
 
 # Run spell checker
-codespell
+typos
 
 # Run all tests
 python -m unittest discover tests -v
