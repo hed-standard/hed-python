@@ -203,7 +203,7 @@ ruff format tests/
 
 **Configuration:** Formatter settings are in `pyproject.toml` under `[tool.ruff.format]` with a line length of 120 characters.
 
-**Exclusions:** Ruff automatically excludes `.venv/`, `__pycache__/`, auto-generated files (`hed/_version.py`), and external repos (`spec_tests/hed-examples/`, `spec_tests/hed-specification/`).
+**Exclusions:** Ruff automatically excludes `.venv/`, `__pycache__/`, auto-generated files (`hed/_version.py`), and external repos (`spec_tests/hed-examples/`, `spec_tests/hed-schemas/`).
 
 **CI integration:** All code is automatically checked for formatting in GitHub Actions. Run `ruff format .` before committing to ensure your code passes CI checks.
 
