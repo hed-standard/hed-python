@@ -1,7 +1,8 @@
 import unittest
 import os
 
-from hed.models import ColumnMapper, ColumnType, HedString
+from hed.models.column_mapper import ColumnMapper
+from hed.models import ColumnType, HedString
 from hed.models.sidecar import Sidecar, DefinitionDict
 from hed.errors import ValidationErrors
 from hed import load_schema

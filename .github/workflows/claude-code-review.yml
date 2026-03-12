@@ -11,8 +11,9 @@ on:
 jobs:
   claude-review:
     # Avoid duplicate runs: use pull_request for same-repo, pull_request_target for forks
-    # Skip bot PRs (dependabot, renovate, etc.) - they don't need code review
+    # Skip bot PRs (dependabot, renovate, etc.) and draft PRs
     if: |
+      !github.event.pull_request.draft &&
       github.event.pull_request.user.type != 'Bot' &&
       !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) &&
       !(github.event_name == 'pull_request_target' && !github.event.pull_request.head.repo.fork)
@@ -28,7 +29,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          # Use base.sha, not head.sha: checking out fork code under
+          # pull_request_target would give untrusted code access to secrets.
+          # Claude reads changes via gh pr diff (API), not the local checkout.
+          ref: ${{ github.event.pull_request.base.sha }}
           fetch-depth: 1
 
       - name: Run Claude Code Review

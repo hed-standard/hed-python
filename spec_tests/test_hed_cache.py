@@ -148,7 +148,7 @@ class TestLocal(unittest.TestCase):
 
         with self.assertRaises(HedFileError) as context8:
             load_schema_version(["8.1.0", "notreallibrary_1.0.0"])
-        self.assertEqual(context8.exception.args[0], "fileNotFound")
+        self.assertEqual(context8.exception.args[0], HedExceptions.FILE_NOT_FOUND)
 
 
 class TestLibraryDataCache(unittest.TestCase):

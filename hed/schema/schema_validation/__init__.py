@@ -24,7 +24,7 @@ from .validation_util import (
     get_allowed_characters_by_name,
     get_problem_indexes,
     schema_version_for_library,
-    validate_schema_description_new,
-    validate_schema_tag_new,
-    validate_schema_term_new,
+    validate_schema_description,
+    validate_schema_tag,
+    validate_schema_term,
 )

@@ -16,10 +16,28 @@ NO_WARN_COLUMNS = ["onset", "duration"]
 
 
 class ColumnMapper:
-    """Mapping of a base input file columns into HED tags.
+    """Translates tabular file columns into HED tag streams for validation and analysis.
+
+    ``ColumnMapper`` is the low-level engine behind :class:`~hed.models.TabularInput` and
+    :class:`~hed.models.SpreadsheetInput`.  It resolves column definitions from a
+    :class:`~hed.models.Sidecar` and/or explicit parameters into a per-column transform
+    pipeline that produces HED strings row-by-row.
+
+    **Use this class directly when you need to:**
+
+    - Build a custom tabular reader that doesn't subclass :class:`~hed.models.BaseInput`.
+    - Inspect or override column mappings before validating (e.g. dynamic column
+      selection at runtime).
+    - Reuse a single mapper across many DataFrames for performance.
+
+    **For the common case** (reading a BIDS events file), prefer
+    :class:`~hed.models.TabularInput` which wraps ``ColumnMapper`` automatically.
 
     Notes:
-        - All column numbers are 0 based.
+        - All column numbers are 0-based.
+        - The ``column_prefix_dictionary`` parameter is treated as a shorthand for
+          creating value columns: ``{"col": "Description"}`` becomes
+          ``{"col": "Description/#"}`` internally.
     """
 
     def __init__(

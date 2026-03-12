@@ -48,10 +48,9 @@ Key exports
 """
 
 from .base_input import BaseInput
-from .column_mapper import ColumnMapper
 from .column_metadata import ColumnMetadata, ColumnType
 from .definition_dict import DefinitionDict
-from .definition_entry import DefinitionEntry
+from .model_constants import DefTagNames, TopTagReturnType
 from .query_handler import QueryHandler
 from .query_service import get_query_handlers, search_hed_objs
 from .hed_group import HedGroup

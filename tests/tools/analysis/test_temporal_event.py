@@ -3,6 +3,7 @@ import unittest
 
 from hed.schema.hed_schema_io import load_schema_version
 from hed.models import HedString, HedGroup, Sidecar, TabularInput
+from hed.models.model_constants import TopTagReturnType
 from hed.tools.analysis.temporal_event import TemporalEvent
 from hed.tools.analysis.event_manager import EventManager
 
@@ -27,7 +28,7 @@ class Test(unittest.TestCase):
 
     def test_constructor_no_group(self):
         test1 = HedString("(Onset, def/blech)", hed_schema=self.schema)
-        groups = test1.find_top_level_tags(["onset"], include_groups=1)
+        groups = test1.find_top_level_tags(["onset"], include_groups=TopTagReturnType.GROUPS)
         temp_event = TemporalEvent(groups[0], 3, 4.5)
         self.assertEqual(temp_event.start_index, 3)
         self.assertEqual(temp_event.start_time, 4.5)
@@ -36,7 +37,7 @@ class Test(unittest.TestCase):
 
     def test_constructor_group(self):
         test1 = HedString("(Onset, (Label/Apple, Blue), Def/Blech/54.3)", hed_schema=self.schema)
-        groups = test1.find_top_level_tags(["onset"], include_groups=1)
+        groups = test1.find_top_level_tags(["onset"], include_groups=TopTagReturnType.GROUPS)
         temp_event = TemporalEvent(groups[0], 3, 4.5)
         self.assertEqual(temp_event.start_index, 3)
         self.assertEqual(temp_event.start_time, 4.5)

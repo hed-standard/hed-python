@@ -230,11 +230,11 @@ class HedValidator:
            list[dict]: The issues associated with the individual tags. Each issue is a dictionary.
 
         """
-        from hed.models.definition_dict import DefTagNames
+        from hed.models.model_constants import DefTagNames, TopTagReturnType
 
         validation_issues = []
         definition_groups = hed_string_obj.find_top_level_tags(
-            anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=1
+            anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=TopTagReturnType.GROUPS
         )
         all_definition_groups = [group for sub_group in definition_groups for group in sub_group.get_all_groups()]
         for group in hed_string_obj.get_all_groups():

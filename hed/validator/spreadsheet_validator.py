@@ -14,7 +14,7 @@ from hed.errors.error_reporter import sort_issues, check_for_any_errors
 from hed.validator.onset_validator import OnsetValidator
 from hed.validator.hed_validator import HedValidator
 from hed.models import df_util
-from hed.models.model_constants import DefTagNames
+from hed.models.model_constants import DefTagNames, TopTagReturnType
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
@@ -285,7 +285,9 @@ class SpreadsheetValidator:
             hed_obj = HedString(value, hed_schema)
             error_handler.push_error_context(ErrorContext.ROW, index + row_adj)
             error_handler.push_error_context(ErrorContext.HED_STRING, hed_obj)
-            for tag in hed_obj.find_top_level_tags(anchor_tags=DefTagNames.TIMELINE_KEYS, include_groups=0):
+            for tag in hed_obj.find_top_level_tags(
+                anchor_tags=DefTagNames.TIMELINE_KEYS, include_groups=TopTagReturnType.TAGS
+            ):
                 issues += error_handler.format_error_with_context(TemporalErrors.TEMPORAL_TAG_NO_TIME, tag=tag)
             error_handler.pop_error_context()
             error_handler.pop_error_context()

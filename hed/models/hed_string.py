@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
-from hed.models.model_constants import DefTagNames
+from hed.models.model_constants import DefTagNames, TopTagReturnType
 
 
 class HedString(HedGroup):
@@ -128,7 +128,9 @@ class HedString(HedGroup):
 
         This does not validate definitions and will blindly removing invalid ones as well.
         """
-        definition_groups = self.find_top_level_tags({DefTagNames.DEFINITION_KEY}, include_groups=1)
+        definition_groups = self.find_top_level_tags(
+            {DefTagNames.DEFINITION_KEY}, include_groups=TopTagReturnType.GROUPS
+        )
         if definition_groups:
             self.remove(definition_groups)
 
@@ -362,10 +364,11 @@ class HedString(HedGroup):
 
         Parameters:
             anchor_tags (container):  A list/set/etc. of short_base_tags to find groups by.
-            include_groups (0, 1 or 2):  Parameter indicating what return values to include.
-                If 0: return only tags.
-                If 1: return only groups.
-                If 2 or any other value: return both.
+            include_groups (TopTagReturnType or int):  Controls what is returned.
+                Use :class:`~hed.models.TopTagReturnType` constants for clarity.
+                ``TAGS`` (0): return only anchor tags.
+                ``GROUPS`` (1): return only groups.
+                ``BOTH`` (2, default): return ``(tag, group)`` pairs.
 
         Returns:
             list: The returned result depends on include_groups.

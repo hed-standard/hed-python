@@ -35,9 +35,9 @@ from hed.schema.schema_validation.compliance_summary import ComplianceSummary
 from hed.schema.schema_validation.validation_util import (
     get_allowed_characters_by_name,
     get_problem_indexes,
-    validate_schema_description_new,
-    validate_schema_tag_new,
-    validate_schema_term_new,
+    validate_schema_description,
+    validate_schema_tag,
+    validate_schema_term,
 )
 
 # ---------------------------------------------------------------------------
@@ -255,8 +255,8 @@ class SchemaValidator:
                     continue
                 checked += 1
                 self.error_handler.push_error_context(ErrorContext.SCHEMA_TAG, str(entry))
-                validator = validate_schema_tag_new if section_key == HedSectionKey.Tags else validate_schema_term_new
-                new_issues = validator(entry) + validate_schema_description_new(entry)
+                validator = validate_schema_tag if section_key == HedSectionKey.Tags else validate_schema_term
+                new_issues = validator(entry) + validate_schema_description(entry)
                 self.error_handler.add_context_and_filter(new_issues)
                 issues += new_issues
                 self.error_handler.pop_error_context()

@@ -7,7 +7,29 @@ from hed.models.hed_group import HedGroup
 
 
 class DefinitionEntry:
-    """A single definition."""
+    """Stores the resolved contents of a single HED Definition.
+
+    A ``DefinitionEntry`` is created when a ``Definition/`` tag group is parsed
+    and stored in a :class:`~hed.models.DefinitionDict`.  It captures:
+
+    - **name** — the lower-cased label portion (without ``Definition/``).
+    - **contents** — the inner :class:`~hed.models.HedGroup` of the definition
+      (``None`` if the definition body is empty).
+    - **takes_value** — whether exactly one tag inside contains a ``#`` placeholder
+      (i.e. the definition expects a run-time value via ``Def/name/value``).
+    - **source_context** — the error-context stack captured at parse time, used
+      to produce precise error messages when the definition is later expanded.
+
+    **Use this class directly when you need to:**
+
+    - Iterate over a :class:`~hed.models.DefinitionDict` and inspect individual
+      definition bodies or their placeholder status.
+    - Build tooling that expands, serialises, or analyses HED definitions
+      programmatically.
+
+    **Most users never need this class** — :meth:`~hed.models.DefinitionDict.get_def_entry`
+    and :meth:`~hed.models.DefinitionDict.expand_def_tag` handle the common workflows.
+    """
 
     def __init__(self, name, contents, takes_value, source_context):
         """Initialize info for a single definition.
