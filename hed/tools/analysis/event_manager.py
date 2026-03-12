@@ -5,7 +5,7 @@ import bisect
 
 from hed.errors.exceptions import HedFileError
 from hed.models.hed_string import HedString
-from hed.models.model_constants import DefTagNames
+from hed.models.model_constants import DefTagNames, TopTagReturnType
 from hed.models import df_util
 from hed.models import string_util
 from hed.tools.analysis.temporal_event import TemporalEvent
@@ -105,7 +105,7 @@ class EventManager:
         if not hed:
             return
         group_tuples = hed.find_top_level_tags(
-            anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY}, include_groups=2
+            anchor_tags={DefTagNames.ONSET_KEY, DefTagNames.OFFSET_KEY}, include_groups=TopTagReturnType.BOTH
         )
 
         to_remove = []

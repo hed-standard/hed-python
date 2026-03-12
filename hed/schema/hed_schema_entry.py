@@ -10,10 +10,30 @@ pluralize.defnoun("hertz", "hertz")
 
 
 class HedSchemaEntry:
-    """A single node in a HedSchema.
+    """A single node in the HED schema vocabulary.
 
-    The structure contains all the node information including attributes and properties.
+    Every term, unit, unit class, value class, attribute, and property that
+    appears in a loaded :class:`~hed.schema.HedSchema` is represented as a
+    ``HedSchemaEntry`` (or one of its subclasses).  The entry stores the node's
+    name, all declared attributes (e.g. ``takesValue``, ``allowedCharacter``),
+    its description, and a back-reference to its containing
+    :class:`~hed.schema.HedSchemaSection`.
 
+    Concrete subclasses add section-specific state:
+
+    - :class:`HedTagEntry` — vocabulary tag nodes.
+    - :class:`UnitClassEntry` — unit class nodes (e.g. *time*, *mass*).
+    - :class:`UnitEntry` — individual unit nodes (e.g. *second*, *gram*).
+
+    **Use this class (or its subclasses) directly when you need to:**
+
+    - Introspect schema vocabulary (e.g. list all tags with ``takesValue``).
+    - Build schema validators, schema browsers, or schema-diff tools.
+    - Implement custom HED annotation tooling that looks up tag metadata.
+
+    **Most users never need this class** — :meth:`~hed.schema.HedSchema.get_tag_entry`
+    and :meth:`~hed.schema.HedSchema.get_all_schema_tags` are sufficient for the
+    common lookup patterns.
     """
 
     def __init__(self, name, section):
@@ -142,7 +162,25 @@ class HedSchemaEntry:
 
 
 class UnitClassEntry(HedSchemaEntry):
-    """A single unit class entry in the HedSchema."""
+    """A unit class node in the HED schema (e.g. *time*, *mass*, *frequency*).
+
+    Extends :class:`HedSchemaEntry` with the set of :class:`UnitEntry` objects
+    that belong to the class and a pre-computed ``derivative_units`` dict that
+    maps every accepted surface form (including SI prefixes and plurals) to its
+    canonical :class:`UnitEntry`.
+
+    Typical access pattern::
+
+        unit_class = schema.get_tag_entry("time", HedSectionKey.UnitClasses)
+        for name, unit in unit_class.units.items():
+            print(name, unit.attributes)
+
+    Attributes:
+        units (dict[str, UnitEntry]): Map from unit name to entry after
+            :meth:`finalize_entry` is called.
+        derivative_units (dict[str, UnitEntry]): Map from every accepted
+            surface form (plural, SI-prefixed, etc.) to the base unit entry.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -216,7 +254,19 @@ class UnitClassEntry(HedSchemaEntry):
 
 
 class UnitEntry(HedSchemaEntry):
-    """A single unit entry with modifiers in the HedSchema."""
+    """A single unit node in the HED schema (e.g. *second*, *gram*, *hertz*).
+
+    Extends :class:`HedSchemaEntry` with the list of SI unit modifiers that
+    apply to this unit, a pre-computed ``derivative_units`` mapping (surface
+    form → conversion factor), and a back-reference to the parent
+    :class:`UnitClassEntry`.
+
+    Attributes:
+        unit_modifiers (list[HedSchemaEntry]): SI modifier entries (e.g. *milli*, *kilo*).
+        derivative_units (dict[str, float]): Map from every accepted surface
+            form to its numeric conversion factor relative to the SI base unit.
+        unit_class_entry (UnitClassEntry): The parent unit class.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -270,7 +320,26 @@ class UnitEntry(HedSchemaEntry):
 
 
 class HedTagEntry(HedSchemaEntry):
-    """A single tag entry in the HedSchema."""
+    """A vocabulary tag node in the HED schema.
+
+    Extends :class:`HedSchemaEntry` with full/short tag name forms, value-class
+    and unit-class associations, and helper methods for tag-path traversal.
+
+    Typical access pattern::
+
+        entry = schema.get_tag_entry("Sensory-event")
+        print(entry.long_tag_name)   # "Event/Sensory-event"
+        print(entry.takes_value_child)  # child "#" entry if tag takes a value
+
+    Attributes:
+        unit_classes (dict[str, UnitClassEntry]): Unit classes accepted by this
+            tag\'s value (non-empty only if ``takesValue`` is set).
+        value_classes (dict[str, HedSchemaEntry]): Value classes that constrain
+            the value format.
+        long_tag_name (str): The full slash-separated path from the schema root,
+            with any trailing ``/#`` stripped.
+        short_tag_name (str): The final component of the tag path (short form).
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

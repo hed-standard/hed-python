@@ -15,7 +15,39 @@ entries_by_section = {
 
 
 class HedSchemaSection:
-    """Container with entries in one section of the schema."""
+    """Typed container for all entries in one section of a loaded HED schema.
+
+    A :class:`~hed.schema.HedSchema` is divided into sections (tags, unit
+    classes, units, value classes, attributes, properties, unit modifiers).
+    Each section is a ``HedSchemaSection`` that maps lower-cased entry names
+    to their :class:`~hed.schema.hed_schema_entry.HedSchemaEntry` objects and
+    tracks which attributes are valid for that section.
+
+    The concrete entry type for each section is determined by
+    :data:`entries_by_section`:
+
+    +----------------------------+-------------------+
+    | Section key                | Entry type        |
+    +============================+===================+
+    | ``HedSectionKey.Tags``     | HedTagEntry       |
+    | ``HedSectionKey.UnitClasses`` | UnitClassEntry |
+    | ``HedSectionKey.Units``    | UnitEntry         |
+    | everything else            | HedSchemaEntry    |
+    +----------------------------+-------------------+
+
+    **Use this class directly when you need to:**
+
+    - Iterate over all entries in a specific schema section.
+    - Build schema comparison or diff tools.
+    - Access ``valid_attributes`` to determine which attributes are legal for
+      a given section.
+
+    Attributes:
+        all_names (dict[str, HedSchemaEntry]): Map from lower-cased name to entry.
+        all_entries (list[HedSchemaEntry]): Entries in insertion order.
+        valid_attributes (dict[str, HedSchemaEntry]): Attribute entries that are
+            declared valid for this section.
+    """
 
     def __init__(self, section_key, case_sensitive=True):
         """Construct schema section.

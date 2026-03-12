@@ -1,5 +1,21 @@
 """Defined constants for definitions, def labels, and expanded labels."""
 
+from enum import IntEnum
+
+
+class TopTagReturnType(IntEnum):
+    """Return-type selector for :meth:`~hed.models.HedString.find_top_level_tags`.
+
+    Attributes:
+        TAGS: Return only the anchor :class:`~hed.models.HedTag` objects.
+        GROUPS: Return only the top-level :class:`~hed.models.HedGroup` objects.
+        BOTH: Return ``(tag, group)`` pairs (default).
+    """
+
+    TAGS = 0
+    GROUPS = 1
+    BOTH = 2
+
 
 class DefTagNames:
     """Source names for definitions, def labels, and expanded labels."""

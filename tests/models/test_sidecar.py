@@ -3,10 +3,11 @@ import os
 import io
 import shutil
 
-from hed.errors import HedFileError, ValidationErrors, ErrorSeverity
+from hed.errors import HedFileError, HedExceptions, ValidationErrors, ErrorSeverity
 from hed.models import ColumnMetadata, HedString, Sidecar
 from hed import schema
-from hed.models import DefinitionDict, DefinitionEntry
+from hed.models import DefinitionDict
+from hed.models.definition_entry import DefinitionEntry
 from hed.errors import ErrorHandler
 
 
@@ -75,7 +76,7 @@ class Test(unittest.TestCase):
         invalid_json = "invalidxmlfile.json"
         with self.assertRaises(HedFileError) as context:
             Sidecar(invalid_json)
-        self.assertEqual(context.exception.args[0], "fileNotFound")
+        self.assertEqual(context.exception.args[0], HedExceptions.FILE_NOT_FOUND)
 
     def test_add_json_string(self):
         with open(self.json_filename) as file:

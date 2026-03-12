@@ -8,7 +8,7 @@ from hed.schema import hed_schema_constants as constants
 from hed.schema.hed_schema_constants import character_types
 
 
-def validate_schema_tag_new(hed_entry) -> list[dict]:
+def validate_schema_tag(hed_entry) -> list[dict]:
     """Check tag entry for capitalization and illegal characters.
 
     Parameters:
@@ -27,11 +27,11 @@ def validate_schema_tag_new(hed_entry) -> list[dict]:
         issues_list += ErrorHandler.format_error(
             SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, hed_term, char_index=0, problem_char=hed_term[0]
         )
-    issues_list += validate_schema_term_new(hed_entry, hed_term)
+    issues_list += validate_schema_term(hed_entry, hed_term)
     return issues_list
 
 
-def validate_schema_term_new(hed_entry, hed_term=None) -> list[dict]:
+def validate_schema_term(hed_entry, hed_term=None) -> list[dict]:
     """Check the term for invalid character issues
 
     Parameters:
@@ -56,7 +56,7 @@ def validate_schema_term_new(hed_entry, hed_term=None) -> list[dict]:
     return issues_list
 
 
-def validate_schema_description_new(hed_entry) -> list[dict]:
+def validate_schema_description(hed_entry) -> list[dict]:
     """Check the description of the entry for invalid character issues
 
     Parameters:
