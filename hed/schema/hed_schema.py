@@ -423,7 +423,7 @@ class HedSchema(HedSchemaBase):
 
         if schema_namespace and not schema_namespace[:-1].isalpha():
             raise HedFileError(
-                HedExceptions.INVALID_LIBRARY_PREFIX,
+                HedExceptions.SCHEMA_LIBRARY_INVALID,
                 "Schema namespace must contain only alpha characters",
                 self.filename,
             )

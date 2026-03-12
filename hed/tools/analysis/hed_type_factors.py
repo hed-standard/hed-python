@@ -1,7 +1,7 @@
 """Manager for factor information for a columnar file."""
 
 import pandas as pd
-from hed.errors.exceptions import HedFileError
+from hed.errors.exceptions import HedExceptions, HedFileError
 
 
 class HedTypeFactors:
@@ -58,15 +58,17 @@ class HedTypeFactors:
         sum_factors = factors.sum(axis=1)
         if factor_encoding == "categorical" and sum_factors.max() > 1:
             raise HedFileError(
-                "MultipleFactorSameEvent",
+                HedExceptions.BAD_PARAMETERS,
                 f"{self.type_value} has multiple occurrences at index {sum_factors.idxmax()}",
                 "",
             )
         elif factor_encoding == "categorical":
             return self._one_hot_to_categorical(factors, levels)
         else:
-            raise ValueError(
-                "BadFactorEncoding", f"{factor_encoding} is not in the allowed encodings: {str(self.ALLOWED_ENCODINGS)}"
+            raise HedFileError(
+                HedExceptions.BAD_PARAMETERS,
+                f"{factor_encoding} is not in the allowed encodings: {str(self.ALLOWED_ENCODINGS)}",
+                "",
             )
 
     def _one_hot_to_categorical(self, factors, levels):
@@ -77,7 +79,7 @@ class HedTypeFactors:
             levels (list):  List of categorical columns to convert.
 
         Return:
-            pd.ataFrame:  Contains one-hot representation of requested levels.
+            pd.DataFrame:  Contains one-hot representation of requested levels.
 
         """
         df = pd.DataFrame("n/a", index=range(len(factors.index)), columns=[self.type_value])

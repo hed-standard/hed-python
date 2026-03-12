@@ -20,7 +20,7 @@ from .bids.bids_tabular_file import BidsTabularFile
 from .bids.bids_util import parse_bids_filename
 
 from .util.data_util import get_new_dataframe, get_value_dict, replace_values, reorder_columns
-from .util.io_util import check_filename, clean_filename, extract_suffix_path, get_file_list, make_path
+from .util.io_util import check_filename, clean_filename, extract_suffix_path, get_file_list
 from .util.io_util import get_path_components
 
 from .analysis.annotation_util import (

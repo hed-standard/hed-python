@@ -14,6 +14,8 @@ from hed.models.model_constants import DefTagNames
 from hed.errors.error_reporter import check_for_any_errors
 from hed.models import df_util
 
+COLUMN_REF_PATTERN = re.compile(r"\{([a-z_\-0-9]+)\}", re.IGNORECASE)
+
 
 # todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
 class SidecarValidator:
@@ -95,7 +97,7 @@ class SidecarValidator:
                 # Only do full string checks on full columns, not partial ref columns.
                 if not is_ref_column:
                     # TODO: Figure out why this pattern is giving lint errors.
-                    refs = re.findall(r"\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
+                    refs = COLUMN_REF_PATTERN.findall(hed_string)
                     refs_strings = {data.column_name: data.get_hed_strings() for data in sidecar}
                     if "HED" not in refs_strings:
                         refs_strings["HED"] = ["n/a"]
@@ -170,7 +172,7 @@ class SidecarValidator:
                         ColumnErrors.MALFORMED_COLUMN_REF, column_name, loc, bad_symbol
                     )
 
-                sub_matches = re.findall(r"\{([a-z_\-0-9]+)\}", hed_string, re.IGNORECASE)
+                sub_matches = COLUMN_REF_PATTERN.findall(hed_string)
                 matches.append(sub_matches)
                 for match in sub_matches:
                     if match not in possible_column_refs:

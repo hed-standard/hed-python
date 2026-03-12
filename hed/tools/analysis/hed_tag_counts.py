@@ -143,7 +143,7 @@ class HedTagCounts:
                 continue
             for value, val_count in count.value_dict.items():
                 if value in self.tag_dict[tag].value_dict:
-                    self.tag_dict[tag].value_dict[value] = self.tag_dict[tag].value_dict + val_count
+                    self.tag_dict[tag].value_dict[value] = self.tag_dict[tag].value_dict[value] + val_count
                 else:
                     self.tag_dict[tag].value_dict[value] = val_count
 

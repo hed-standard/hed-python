@@ -348,7 +348,7 @@ class SchemaLoaderXML(SchemaLoader):
     def _add_to_dict(self, entry, key_class):
         if entry.has_attribute(HedKey.InLibrary) and not self._loading_merged and not self.appending_to_schema:
             raise HedFileError(
-                HedExceptions.IN_LIBRARY_IN_UNMERGED,
+                HedExceptions.SCHEMA_LIBRARY_INVALID,
                 "Library tag in unmerged schema has InLibrary attribute",
                 self.name,
             )

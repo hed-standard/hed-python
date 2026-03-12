@@ -272,7 +272,7 @@ def val_error_def_value_missing(tag):
 
 @hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_value_extra(tag):
-    return f"A def tag does not take a placeholder value, but was given one.  Definition: '{tag}"
+    return f"A def tag does not take a placeholder value, but was given one.  Definition: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_UNMATCHED, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
@@ -287,7 +287,7 @@ def val_error_def_expand_value_missing(tag):
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_VALUE_EXTRA, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_def_expand_value_extra(tag):
-    return f"A Def-expand tag does not take a placeholder value, but was given one.  Definition: '{tag}"
+    return f"A Def-expand tag does not take a placeholder value, but was given one.  Definition: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_TOP_LEVEL_TAG, actual_code=ValidationErrors.TAG_GROUP_ERROR)

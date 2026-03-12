@@ -108,7 +108,7 @@ class BidsDataset:
             return [
                 {
                     "code": "SCHEMA_LOAD_FAILED",
-                    "message": "BIDS dataset_description.json has invalid HEDVersion and passed schema was invalid}",
+                    "message": "BIDS dataset_description.json has invalid HEDVersion and passed schema was invalid",
                 }
             ]
 

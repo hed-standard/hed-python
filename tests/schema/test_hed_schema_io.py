@@ -486,6 +486,16 @@ class TestHedSchemaMerging(unittest.TestCase):
                 load_schema(file)
             self.assertEqual(context.exception.code, HedExceptions.SCHEMA_LIBRARY_INVALID)
 
+    def test_rooted_tag_not_in_standard_schema(self):
+        # HED_badroot_0.0.1.mediawiki has rooted=AlsoNotRealTag which does not exist in the standard schema.
+        # This should raise SCHEMA_LIBRARY_INVALID (not LIBRARY_SCHEMA_INVALID).
+        bad_root_file = os.path.join(self.full_base_folder, "issues_tests/HED_badroot_0.0.1.mediawiki")
+        with self.assertRaises(HedFileError) as context:
+            load_schema(bad_root_file)
+        self.assertEqual(context.exception.code, HedExceptions.SCHEMA_LIBRARY_INVALID)
+        issue_codes = [issue.get("code") for issue in context.exception.issues]
+        self.assertIn(HedExceptions.SCHEMA_LIBRARY_INVALID, issue_codes)
+
     def test_saving_in_library_wiki(self):
         old_score_schema = load_schema_version("score_1.0.0")
 
@@ -692,7 +702,7 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
     ``load_schema_version("X.Y.Z")`` to fetch the standard schema and merges the library's tags
     on top of it.  If version X.Y.Z only exists in the *prerelease* subdirectory of the cache
     (not in the regular cache root), that ``load_schema_version`` call will fail with
-    ``BAD_WITH_STANDARD`` unless ``check_prerelease=True`` is forwarded along the entire call
+    ``SCHEMA_LIBRARY_INVALID`` unless ``check_prerelease=True`` is forwarded along the entire call
     chain:
 
         load_schema / from_string
@@ -703,7 +713,7 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
                             → looks in {cache}/prerelease/ when True
 
     These tests exercise both the success path (flag=True → schema loads and is merged correctly)
-    and the default/False failure path (flag omitted or False → BAD_WITH_STANDARD is raised
+    and the default/False failure path (flag omitted or False → SCHEMA_LIBRARY_INVALID is raised
     before any merge happens).
 
     Fixture design
@@ -774,7 +784,7 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
         #       prerelease/
         #           HED9.9.9.xml        ← only found when check_prerelease=True
         # Nothing is placed in {tmpdir}/ directly, so a lookup without
-        # check_prerelease finds no 9.9.9 and raises BAD_WITH_STANDARD.
+        # check_prerelease finds no 9.9.9 and raises SCHEMA_LIBRARY_INVALID.
         cls._tmpdir = tempfile.TemporaryDirectory()
         prerelease_dir = os.path.join(cls._tmpdir.name, "prerelease")
         os.makedirs(prerelease_dir)
@@ -820,7 +830,7 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
         self.assertIn("prerelease-partner-only-item", result.tags.all_names)
 
     def test_load_schema_prerelease_partner_default_raises(self):
-        """load_schema(...) with the default check_prerelease=False raises BAD_WITH_STANDARD
+        """load_schema(...) with the default check_prerelease=False raises SCHEMA_LIBRARY_INVALID
         when the withStandard partner exists only in the prerelease subdirectory.
 
         This confirms the default is safe: users must explicitly opt in to prerelease
@@ -829,10 +839,10 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
         with patch.object(hed_cache, "HED_CACHE_DIRECTORY", self._cache_dir):
             with self.assertRaises(HedFileError) as ctx:
                 load_schema(self.lib_schema_path)
-        self.assertEqual(ctx.exception.code, HedExceptions.BAD_WITH_STANDARD)
+        self.assertEqual(ctx.exception.code, HedExceptions.SCHEMA_LIBRARY_INVALID)
 
     def test_load_schema_prerelease_partner_explicit_false_raises(self):
-        """load_schema(..., check_prerelease=False) raises BAD_WITH_STANDARD when the
+        """load_schema(..., check_prerelease=False) raises SCHEMA_LIBRARY_INVALID when the
         withStandard partner exists only in the prerelease subdirectory.
 
         Mirrors the default test but with the flag set explicitly, confirming that
@@ -841,7 +851,7 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
         with patch.object(hed_cache, "HED_CACHE_DIRECTORY", self._cache_dir):
             with self.assertRaises(HedFileError) as ctx:
                 load_schema(self.lib_schema_path, check_prerelease=False)
-        self.assertEqual(ctx.exception.code, HedExceptions.BAD_WITH_STANDARD)
+        self.assertEqual(ctx.exception.code, HedExceptions.SCHEMA_LIBRARY_INVALID)
 
     # ------------------------------------------------------------------
     # from_string() tests
@@ -863,7 +873,7 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
         self.assertEqual(result.library, "testpre")
 
     def test_from_string_prerelease_partner_default_raises(self):
-        """from_string(...) with default check_prerelease=False raises BAD_WITH_STANDARD
+        """from_string(...) with default check_prerelease=False raises SCHEMA_LIBRARY_INVALID
         when the withStandard partner exists only in the prerelease subdirectory.
 
         Confirms the same safe default behaviour as load_schema when the schema
@@ -874,4 +884,4 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
         with patch.object(hed_cache, "HED_CACHE_DIRECTORY", self._cache_dir):
             with self.assertRaises(HedFileError) as ctx:
                 from_string(schema_str, schema_format=".mediawiki")
-        self.assertEqual(ctx.exception.code, HedExceptions.BAD_WITH_STANDARD)
+        self.assertEqual(ctx.exception.code, HedExceptions.SCHEMA_LIBRARY_INVALID)
