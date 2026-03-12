@@ -609,7 +609,7 @@ class SchemaLoaderWiki(SchemaLoader):
                 row_number,
                 row,
                 "Library tag in unmerged schema has InLibrary attribute",
-                HedExceptions.IN_LIBRARY_IN_UNMERGED,
+                HedExceptions.SCHEMA_LIBRARY_INVALID,
             )
 
         return self._add_to_dict_base(entry, key_class)

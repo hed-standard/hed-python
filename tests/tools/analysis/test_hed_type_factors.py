@@ -7,7 +7,7 @@ from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_type import HedType
-from hed.errors.exceptions import HedFileError
+from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 
@@ -121,10 +121,10 @@ class Test(unittest.TestCase):
         self.assertEqual(len(fact2), len(self.event_man2.event_list))
         with self.assertRaises(HedFileError) as context:
             var_fact2.get_factors(factor_encoding="categorical")
-        self.assertEqual(context.exception.args[0], "MultipleFactorSameEvent")
-        with self.assertRaises(ValueError) as context:
+        self.assertEqual(context.exception.code, HedExceptions.BAD_PARAMETERS)
+        with self.assertRaises(HedFileError) as context:
             var_fact2.get_factors(factor_encoding="baloney")
-        self.assertEqual(context.exception.args[0], "BadFactorEncoding")
+        self.assertEqual(context.exception.code, HedExceptions.BAD_PARAMETERS)
 
     def test_constructor_unmatched(self):
         with self.assertRaises(KeyError) as context:

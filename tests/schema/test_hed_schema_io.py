@@ -486,6 +486,16 @@ class TestHedSchemaMerging(unittest.TestCase):
                 load_schema(file)
             self.assertEqual(context.exception.code, HedExceptions.SCHEMA_LIBRARY_INVALID)
 
+    def test_rooted_tag_not_in_standard_schema(self):
+        # HED_badroot_0.0.1.mediawiki has rooted=AlsoNotRealTag which does not exist in the standard schema.
+        # This should raise SCHEMA_LIBRARY_INVALID (not LIBRARY_SCHEMA_INVALID).
+        bad_root_file = os.path.join(self.full_base_folder, "issues_tests/HED_badroot_0.0.1.mediawiki")
+        with self.assertRaises(HedFileError) as context:
+            load_schema(bad_root_file)
+        self.assertEqual(context.exception.code, HedExceptions.SCHEMA_LIBRARY_INVALID)
+        issue_codes = [issue.get("code") for issue in context.exception.issues]
+        self.assertIn(HedExceptions.SCHEMA_LIBRARY_INVALID, issue_codes)
+
     def test_saving_in_library_wiki(self):
         old_score_schema = load_schema_version("score_1.0.0")
 
