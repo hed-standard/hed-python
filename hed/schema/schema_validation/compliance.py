@@ -339,7 +339,7 @@ class SchemaValidator:
                     self.error_handler.pop_error_context()
                     self.error_handler.pop_error_context()
                 else:
-                    seen_ids[hed_id] = (entry.name, str(section_key))
+                    seen_ids[hed_id] = (entry.name, section_key.value)
         self.summary.record_issues(len(issues))
         return issues
 
