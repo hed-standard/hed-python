@@ -48,9 +48,19 @@ class Test(unittest.TestCase):
         id_validator = HedIDValidator(self.hed_schema84)
 
         issues = id_validator.verify_tag_id(self.hed_schema84, event_entry, HedKey.HedID)
-        self.assertTrue("It has changed", issues[0]["message"])
-        self.assertTrue("between 10000", issues[0]["message"])
+        self.assertGreater(len(issues), 0)
+        messages = [i["message"] for i in issues]
+        self.assertTrue(any("It has changed" in m for m in messages))
+        self.assertTrue(any("between 10000" in m for m in messages))
 
-        event_entry = self.hed_schema84.tags["Event"]
+    def test_verify_tag_id_invalid_format(self):
+        """A non-integer hedId should produce an INVALID format error."""
+        schema84 = copy.deepcopy(self.hed_schema)
+        schema84.header_attributes[hed_schema_constants.VERSION_ATTRIBUTE] = "8.4.0"
+        event_entry = schema84.tags["Event"]
         event_entry.attributes[HedKey.HedID] = "HED_XXXXXXX"
-        self.assertTrue("It must be an integer in the format", issues[0]["message"])
+
+        id_validator = HedIDValidator(schema84)
+        issues = id_validator.verify_tag_id(schema84, event_entry, HedKey.HedID)
+        self.assertGreater(len(issues), 0)
+        self.assertIn("It must be an integer in the format", issues[0]["message"])

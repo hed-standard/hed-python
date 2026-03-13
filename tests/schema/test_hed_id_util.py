@@ -97,6 +97,24 @@ class TestVerifyHedIdMatches(unittest.TestCase):
         errors = _verify_hedid_matches(self.schema_82.tags, df, hed_id_util._get_hedid_range("", constants.TAG_KEY))
         self.assertEqual(len(errors), 1)
 
+    def test_verify_unknown_library_skips_range_check(self):
+        """An unregistered library returns empty range — IDs should not be reported as out-of-range."""
+        empty_range = set()
+        df = pd.DataFrame([{"rdfs:label": "Event", "hedId": "HED_0012001"}])
+        # testlib has no library_data entry, so _get_hedid_range returns an empty set
+        errors = _verify_hedid_matches(self.schema_82.tags, df, empty_range)
+        self.assertEqual(len(errors), 0, "Unknown-library empty range should not trigger range errors")
+
+    def test_empty_unused_ids_no_crash(self):
+        """_verify_hedid_matches must not crash when unused_tag_ids is empty (covers min/max guard)."""
+        empty_range = set()
+        df = pd.DataFrame(
+            [{"rdfs:label": "Event", "hedId": "HED_0099999"}, {"rdfs:label": "Age-#", "hedId": "HED_0000001"}]
+        )
+        # Should complete without raising ValueError from min()/max()
+        errors = _verify_hedid_matches(self.schema_82.tags, df, empty_range)
+        self.assertEqual(len(errors), 0)
+
     def test_get_all_ids_exists(self):
         # Test when hedId column exists and has proper prefixed IDs
         df = pd.DataFrame({"hedId": ["HED_0000001", "HED_0000002", "HED_0000003"]})
@@ -156,29 +174,53 @@ class TestVerifyHedIdMatches(unittest.TestCase):
 
         self.assertTrue(df.equals(expected_result))
 
+    def test_assign_actually_mutates_df(self):
+        """assign_hed_ids_section must write IDs back into the original DataFrame."""
+        df = pd.DataFrame({"hedId": ["", "", ""], "label": ["A", "B", "C"]})
+        assign_hed_ids_section(df, {1, 2, 3})
+        # All rows should now have a non-empty hedId
+        self.assertTrue(all(df["hedId"].str.startswith("HED_")), "IDs were not written into the DataFrame")
+
+    def test_assign_preserves_existing_ids(self):
+        """assign_hed_ids_section must not overwrite rows that already have an ID."""
+        df = pd.DataFrame({"hedId": ["HED_0000005", "", "HED_0000010"], "label": ["A", "B", "C"]})
+        assign_hed_ids_section(df, {1, 2, 3, 4, 5, 10})
+        self.assertEqual(df.loc[0, "hedId"], "HED_0000005")
+        self.assertEqual(df.loc[2, "hedId"], "HED_0000010")
+        self.assertTrue(df.loc[1, "hedId"].startswith("HED_"))
+
 
 class TestUpdateDataframes(unittest.TestCase):
     def test_update_dataframes_from_schema(self):
-        # valid direction first
-        schema_dataframes = hed_schema_global.get_as_dataframes()
-        schema_83 = load_schema_version("8.3.0")
+        # Use matching schema + dataframes so the ID verification passes
+        schema = load_schema_version("8.4.0")
+        schema_dataframes = schema.get_as_dataframes()
         # Add a test column and ensure it stays around
         fixed_value = "test_column_value"
         for _key, df in schema_dataframes.items():
             df["test_column"] = fixed_value
 
-        updated_dataframes = update_dataframes_from_schema(schema_dataframes, schema_83)
+        updated_dataframes = update_dataframes_from_schema(schema_dataframes, schema)
 
         for key, df in updated_dataframes.items():
             if key not in constants.DF_EXTRAS:
                 self.assertTrue((df["test_column"] == fixed_value).all())
-        # this is expected to bomb horribly, since schema lacks many of the spreadsheet entries.
-        schema = load_schema_version("8.3.0")
-        schema_dataframes_new = load_schema_version("8.3.0").get_as_dataframes()
-        try:
-            update_dataframes_from_schema(schema_dataframes_new, schema)
-        except HedFileError as e:
-            self.assertEqual(len(e.issues), 115)
+
+    def test_conflict_detected(self):
+        """Bug #1 regression: verify HedFileError IS raised when a hedId in the dataframe mismatches the schema."""
+        schema = load_schema_version("8.4.0")
+        schema_dataframes = schema.get_as_dataframes()
+
+        # Corrupt a hedId in the Tag dataframe so it mismatches the schema
+        tag_df = schema_dataframes[constants.TAG_KEY]
+        # Change the first non-empty hedId to an out-of-range value
+        non_empty_mask = tag_df["hedId"].str.startswith("HED_", na=False)
+        first_idx = tag_df.index[non_empty_mask][0]
+        schema_dataframes[constants.TAG_KEY].loc[first_idx, "hedId"] = "HED_0000000"
+
+        with self.assertRaises(HedFileError) as ctx:
+            update_dataframes_from_schema(schema_dataframes, schema)
+        self.assertGreater(len(ctx.exception.issues), 0)
 
 
 if __name__ == "__main__":

@@ -90,7 +90,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", assign_mis
         schema_name = schema.library
     # 1. Verify existing HED ids don't conflict between schema/dataframes
     for df_key, df in dataframes.items():
-        if df_key in constants.DF_SUFFIXES:
+        if df_key in constants.DF_EXTRAS:
             continue
         section_key = constants.section_mapping_hed_id.get(df_key)
         if not section_key:
@@ -173,7 +173,7 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
             id_value = df_id.removeprefix("HED_")
             try:
                 id_int = int(id_value)
-                if id_int not in unused_tag_ids:
+                if unused_tag_ids and id_int not in unused_tag_ids:
                     hedid_errors += schema_util.format_error(
                         row_number,
                         row,
@@ -213,8 +213,7 @@ def assign_hed_ids_section(df, unused_tag_ids):
         # we already verified existing ones
         if hed_id:
             continue
-        hed_id = f"HED_{sorted_unused_ids.pop():07d}"
-        row[constants.hed_id] = hed_id
+        df.at[_row_number, constants.hed_id] = f"HED_{sorted_unused_ids.pop():07d}"
 
 
 def merge_dfs(dest_df, source_df):

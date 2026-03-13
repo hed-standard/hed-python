@@ -43,7 +43,7 @@ class TestComplianceSummary(unittest.TestCase):
         _ = list(issues)
 
     def test_has_all_checks(self):
-        """Summary should contain all 7 top-level checks."""
+        """Summary should contain all 8 top-level checks."""
         issues = self.schema_84.check_compliance()
         summary = issues.compliance_summary
         check_names = [c["name"] for c in summary.check_results]
@@ -53,6 +53,7 @@ class TestComplianceSummary(unittest.TestCase):
             "invalid_characters",
             "attributes",
             "duplicate_names",
+            "duplicate_hed_ids",
             "extras_columns",
             "annotation_attributes",
         ]
@@ -76,6 +77,23 @@ class TestComplianceSummary(unittest.TestCase):
         for check in summary.check_results:
             if check["name"] in ("invalid_characters", "attributes", "duplicate_names"):
                 self.assertGreater(check["entries_checked"], 0, f"Check '{check['name']}' has no entries checked")
+
+    def test_detects_duplicate_hed_id(self):
+        """check_duplicate_hed_ids must fire when two entries share a hedId."""
+        import copy
+        from hed.schema.schema_validation.compliance import SchemaValidator
+        from hed.errors.error_reporter import ErrorHandler
+
+        test_schema = copy.deepcopy(self.schema_84)
+        tags = list(test_schema[HedSectionKey.Tags].values())
+        shared_id = "HED_0010001"
+        tags[0].attributes[HedKey.HedID] = shared_id
+        tags[1].attributes[HedKey.HedID] = shared_id
+
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        issues = sv.check_duplicate_hed_ids()
+        codes = [i["code"] for i in issues]
+        self.assertIn("SCHEMA_ATTRIBUTE_VALUE_INVALID", codes)
 
     def test_summary_sections_tracked(self):
         """Character and attribute checks should list all 7 schema sections."""
