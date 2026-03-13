@@ -52,7 +52,7 @@ def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name) -> list:
 
 
 def attribute_is_deprecated(hed_schema, tag_entry, attribute_name) -> list:
-    """Check if the attribute is deprecated.  does not check value.
+    """Check if the attribute is deprecated. It does not check value.
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation

@@ -61,7 +61,7 @@ def split_def_tags(hed_string, def_names, remove_group=False):
 
     Parameters:
         hed_string (HedString): The input HedString object to be split.
-        def_names (list of str): A list of def names to search for.  Can optionally include a value.
+        def_names (list of str): A list of def names to search for. Can optionally include a value.
         remove_group (bool, optional): Flag indicating whether to remove the parent group. Defaults to False.
 
     Returns:

@@ -10,7 +10,7 @@ class DefinitionEntry:
     """Stores the resolved contents of a single HED Definition.
 
     A ``DefinitionEntry`` is created when a ``Definition/`` tag group is parsed
-    and stored in a :class:`~hed.models.DefinitionDict`.  It captures:
+    and stored in a :class:`~hed.models.DefinitionDict`. It captures:
 
     - **name** — the lower-cased label portion (without ``Definition/``).
     - **contents** — the inner :class:`~hed.models.HedGroup` of the definition

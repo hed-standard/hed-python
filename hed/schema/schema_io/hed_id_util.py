@@ -30,7 +30,7 @@ def _get_hedid_range(schema_name, df_key):
 
     Parameters:
         schema_name(str): The known schema name with an assigned id range.
-        df_key(str): The dataframe range type we're interested in.  a key from constants.DF_SUFFIXES.
+        df_key(str): The dataframe range type we're interested in.
 
     Returns:
         set: A set of all id's in the requested range.
@@ -103,7 +103,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", assign_mis
     if hedid_errors:
         raise HedFileError(
             hedid_errors[0]["code"],
-            f"{len(hedid_errors)} issues found with hedId mismatches.  See the .issues "
+            f"{len(hedid_errors)} issues found with hedId mismatches. See the .issues "
             f"parameter on this exception for more details.",
             schema.name,
             issues=hedid_errors,
@@ -178,7 +178,7 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
                         row_number,
                         row,
                         f"'{label}' has id {id_int} which is outside "
-                        + "of the valid range for this type.  Valid range is: "
+                        + "of the valid range for this type. Valid range is: "
                         + f"{min(unused_tag_ids)} to {max(unused_tag_ids)}",
                     )
                     continue

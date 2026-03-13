@@ -43,7 +43,7 @@ class SpreadsheetValidator:
             data (BaseInput): Input data to be validated.
             def_dicts (list of DefDict or DefDict): all definitions to use for validation
             name (str): The name to report errors from this file as
-            error_handler (ErrorHandler): Error context to use.  Creates a new one if None.
+            error_handler (ErrorHandler): Error context to use. Creates a new one if None.
 
         Returns:
             list[dict]: A list of issues for HED string
@@ -53,7 +53,7 @@ class SpreadsheetValidator:
             error_handler = ErrorHandler()
 
         if not isinstance(data, BaseInput):
-            raise TypeError("Invalid type passed to spreadsheet validator.  Can only validate BaseInput objects.")
+            raise TypeError("Invalid type passed to spreadsheet validator. Can only validate BaseInput objects.")
 
         self.invalid_original_rows = set()
 

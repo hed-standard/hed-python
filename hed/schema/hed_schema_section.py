@@ -220,7 +220,7 @@ class HedSchemaTagSection(HedSchemaSection):
 
     def __init__(self, *args, case_sensitive=False, **kwargs):
         super().__init__(*args, **kwargs, case_sensitive=case_sensitive)
-        # This dict contains all forms of all tags.  The .all_names variable has ONLY the long forms.
+        # This dict contains all forms of all tags. The .all_names variable has ONLY the long forms.
         self.long_form_tags = {}
         self.inheritable_attributes = {}
         self.root_tags = {}

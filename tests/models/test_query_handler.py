@@ -227,7 +227,7 @@ class TestParser(unittest.TestCase):
             "((Event), ((Clear-throat)))": True,
             "((Event, Clear-throat))": False,
         }
-        # Need to think this through more.  How do you exact match a negative tag?
+        # Need to think this through more. How do you exact match a negative tag?
         self.base_test("{ {~Event} }", test_strings)
 
     def test_exact_group_split_or_negation_dual(self):
@@ -540,7 +540,7 @@ class TestParser(unittest.TestCase):
             "(A, B, (C))": False,
             "(A, B, (C)), D": True,
             "(A, B, (C)), (D)": True,
-            "((A, B), (C)), E": False,  # todo: should discuss this case.  Is this correct to be False?
+            "((A, B), (C)), E": False,  # todo: should discuss this case. Is this correct to be False?
             "((A, B), C), E": False,
         }
         self.base_test("[a && b, ???], ?", test_strings)

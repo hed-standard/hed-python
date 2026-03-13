@@ -124,7 +124,7 @@ class Test(unittest.TestCase):
         """copy.copy() on a HedGroup must raise copy.Error, not ValueError or any other type.
 
         Shallow copy is blocked because _parent pointers would alias the original, producing
-        an internally inconsistent object.  The correct deep-copy path is .copy().
+        an internally inconsistent object. The correct deep-copy path is .copy().
         """
         hed_string = HedString("(Tag1, Tag2)", self.hed_schema)
         group = hed_string.get_first_group()

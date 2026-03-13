@@ -154,7 +154,7 @@ class ExpressionWildcardNew(Expression):
                 for child in group.groups():
                     groups_found.append((child, group))
 
-        # Wildcards are only found in containing groups.  I believe this is correct.
+        # Wildcards are only found in containing groups. I believe this is correct.
         # todo: Is this code still needed for this kind of wildcard?  We already are registering every group, just not
         # every group at every level.
         all_found_groups = [SearchResult(group, tag) for tag, group in groups_found]

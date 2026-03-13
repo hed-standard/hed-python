@@ -36,7 +36,7 @@ def _validate_attribute_string(attribute_string):
     match = re.fullmatch(pattern, attribute_string)
     if match:
         return match.group()
-    raise ValueError(f'Malformed attribute {attribute_string}.  Valid formatting is: attribute, or attribute="value"')
+    raise ValueError(f'Malformed attribute {attribute_string}. Valid formatting is: attribute, or attribute="value"')
 
 
 def parse_attribute_string(attr_string):
@@ -46,7 +46,7 @@ def parse_attribute_string(attr_string):
         attr_string(str): Formatted attributes (a=b, c=d, etc.)
 
     Returns:
-        attributes(dict): The located attributes.  Can be empty.
+        attributes(dict): The located attributes. Can be empty.
 
     Raises:
         ValueError: Very malformed input.

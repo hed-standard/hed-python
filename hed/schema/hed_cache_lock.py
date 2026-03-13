@@ -22,7 +22,7 @@ class CacheLock:
 
         Parameters:
             cache_folder(str): The folder to create the lock in(implicitly locking that folder)
-            write_time(bool): If true, read and write the cache time.  Additionally, won't operate if too recent.
+            write_time(bool): If true, read and write the cache time. Additionally, won't operate if too recent.
                               Generally False for local operations.
             time_threshold(int): Time before cache is allowed to refresh again.
 
@@ -40,7 +40,7 @@ class CacheLock:
         self.current_timestamp = time.time()
         time_since_update = self.current_timestamp - last_timestamp
         if time_since_update < self.time_threshold:
-            raise CacheError(f"Last updated {time_since_update} seconds ago.  Threshold is {self.time_threshold}")
+            raise CacheError(f"Last updated {time_since_update} seconds ago. Threshold is {self.time_threshold}")
 
         try:
             self.cache_lock = portalocker.Lock(self.cache_lock_filename, timeout=1)
@@ -61,7 +61,7 @@ def _read_last_cached_time(cache_folder):
         cache_folder (str): The folder we're caching HED schema in.
 
     Returns:
-        float: The time we last updated the cache.  Zero if no update found.
+        float: The time we last updated the cache. Zero if no update found.
 
     """
     timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)

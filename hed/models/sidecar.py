@@ -162,7 +162,7 @@ class Sidecar:
             hed_schema (HedSchema): Input data to be validated.
             extra_def_dicts (list or DefinitionDict): Extra def dicts in addition to sidecar.
             name (str): The name to report this sidecar as.
-            error_handler (ErrorHandler): Error context to use.  Creates a new one if None.
+            error_handler (ErrorHandler): Error context to use. Creates a new one if None.
 
         Returns:
             list[dict]: A list of issues associated with each level in the HED string.

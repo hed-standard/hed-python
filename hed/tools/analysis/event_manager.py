@@ -83,7 +83,7 @@ class EventManager:
             start_time = self.onsets[event_index]
             new_event = TemporalEvent(group, event_index, start_time)
             end_time = new_event.end_time
-            # Todo: This may need updating.  end_index==len(self.onsets) in the edge
+            # Todo: This may need updating: end_index==len(self.onsets) in the edge
             end_index = bisect.bisect_left(self.onsets, end_time)
             new_event.set_end(end_index, end_time)
             self.event_list[event_index].append(new_event)

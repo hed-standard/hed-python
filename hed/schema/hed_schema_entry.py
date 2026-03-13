@@ -14,7 +14,7 @@ class HedSchemaEntry:
 
     Every term, unit, unit class, value class, attribute, and property that
     appears in a loaded :class:`~hed.schema.HedSchema` is represented as a
-    ``HedSchemaEntry`` (or one of its subclasses).  The entry stores the node's
+    ``HedSchemaEntry`` (or one of its subclasses). The entry stores the node's
     name, all declared attributes (e.g. ``takesValue``, ``allowedCharacter``),
     its description, and a back-reference to its containing
     :class:`~hed.schema.HedSchemaSection`.
@@ -45,12 +45,12 @@ class HedSchemaEntry:
 
         """
         self.name = name
-        # key: property/attribute name, value = property value.  Will often be a bool
+        # key: property/attribute name, value = property value. Will often be a bool
         self.attributes = {}
         self.description = None
         self._section = section
 
-        # This section is largely unused.  It will only be filled in when we try to add an attribute
+        # This section is largely unused. It will only be filled in when we try to add an attribute
         # that isn't valid in this section.
         self._unknown_attributes = None
 
@@ -491,7 +491,7 @@ class HedTagEntry(HedSchemaEntry):
 
         """
         super().finalize_entry(schema)
-        # Set the parent and child pointers.  Child is just for "takes value"
+        # Set the parent and child pointers. Child is just for "takes value"
         parent_name, _, child_name = self.name.rpartition("/")
         parent_tag = None
         if parent_name:

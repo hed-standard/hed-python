@@ -53,7 +53,7 @@ class Test(unittest.TestCase):
     def test_validate_schema_description(self):
         test_descs = [
             "This is a tag description with no invalid characters.",
-            "This is (also) a tag description with no invalid characters.  -_:;./()+ ^",
+            "This is (also) a tag description with no invalid characters. -_:;./()+ ^",
             "This description has no invalid characters, as commas are allowed",
             "This description has multiple invalid characters at the end {}[]",
         ]

@@ -19,7 +19,7 @@ class ColumnMapper:
     """Translates tabular file columns into HED tag streams for validation and analysis.
 
     ``ColumnMapper`` is the low-level engine behind :class:`~hed.models.TabularInput` and
-    :class:`~hed.models.SpreadsheetInput`.  It resolves column definitions from a
+    :class:`~hed.models.SpreadsheetInput`. It resolves column definitions from a
     :class:`~hed.models.Sidecar` and/or explicit parameters into a per-column transform
     pipeline that produces HED strings row-by-row.
 
@@ -72,7 +72,7 @@ class ColumnMapper:
 
         """
 
-        # Maps column number to column_entry.  This is what's actually used by most code.
+        # Maps column number to column_entry. This is what's actually used by most code.
         self._final_column_map = {}
         self._no_mapping_info = True
         self._column_map = {}

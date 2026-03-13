@@ -280,7 +280,7 @@ class TestConvertToForm(unittest.TestCase):
         self.assertEqual(len(def_dict), 5)
 
     def test_error_double_defs(self):
-        # One case can't be identified.  Action doesn't count -- it doesn't take value.
+        # One case can't be identified. Action doesn't count -- it doesn't take value.
         test_strings = [
             "(Def-expand/A1/2, (Action/2, Acceleration/5, Item-count/2))",
             "(Def-expand/B2/3, (Action/3, Collection/animals, Acceleration/3))",

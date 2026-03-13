@@ -137,12 +137,12 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
 def get_hed_version_path(
     xml_version, library_name=None, local_hed_directory=None, check_prerelease=False
 ) -> Union[str, None]:
-    """Get HED XML file path in a directory.  Only returns filenames that exist.
+    """Get HED XML file path in a directory. Only returns filenames that exist.
 
     Parameters:
         library_name (str or None): Optional the schema library name.
         xml_version (str): Returns this version if it exists
-        local_hed_directory (str): Path to local HED directory.  Defaults to HED_CACHE_DIRECTORY
+        local_hed_directory (str): Path to local HED directory. Defaults to HED_CACHE_DIRECTORY
         check_prerelease (bool): Also check for prerelease schemas
 
     Returns:
@@ -176,7 +176,7 @@ def cache_local_versions(cache_folder) -> Union[int, None]:
         cache_folder (str): The folder holding the cache.
 
     Returns:
-        Union[int, None]: Returns -1 on cache access failure.  None otherwise
+        Union[int, None]: Returns -1 on cache access failure. None otherwise
 
     """
     if not cache_folder:
@@ -198,8 +198,8 @@ def cache_xml_versions(
     """Cache all schemas at the given URLs.
 
     Parameters:
-        hed_base_urls (str or list): Path or list of paths.   These should point to a single folder.
-        hed_library_urls (str or list): Path or list of paths.  These should point to folder containing library folders.
+        hed_base_urls (str or list): Path or list of paths. These should point to a single folder.
+        hed_library_urls (str or list): Path or list of paths. These should point to folder containing library folders.
         skip_folders (list): A list of subfolders to skip over when downloading.
         cache_folder (str): The folder holding the cache.
 
@@ -250,7 +250,7 @@ def get_library_data(library_name, cache_folder=None) -> dict:
     Currently, this is just the valid ID range.
 
     Parameters:
-        library_name (str): The schema name.  "" for standard schema.
+        library_name (str): The schema name. "" for standard schema.
         cache_folder (str): The cache folder to use if not using the default.
 
     Returns:

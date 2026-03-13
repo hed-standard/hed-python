@@ -44,7 +44,7 @@ def load_schema_version(
         HedFileError: Other fatal errors loading the schema (These are unlikely if you are not editing them locally).
         HedFileError: The prefix is invalid.
     """
-    # Check if we start and end with a square bracket, or double quote.  This might be valid json
+    # Check if we start and end with a square bracket, or double quote. This might be valid json
     if xml_version and isinstance(xml_version, str) and ((xml_version[0], xml_version[-1]) in [("[", "]"), ('"', '"')]):
         try:
             xml_version = json.loads(xml_version)

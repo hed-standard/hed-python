@@ -45,7 +45,7 @@ def merge_dataframes(df1, df2, key):
             # Still different columns after handling in_library - this is an error
             raise HedFileError(
                 HedExceptions.BAD_COLUMN_NAMES,
-                f"Both dataframes corresponding to {key} to be merged must have the same columns.  "
+                f"Both dataframes corresponding to {key} to be merged must have the same columns. "
                 f"df1 columns: {list(df1.columns)} df2 columns: {list(df2.columns)}",
                 "",
             )
@@ -138,12 +138,12 @@ def save_dataframes(base_filename, dataframe_dict):
 
     If base_filename has a .tsv suffix, save directly to the indicated location.
     If base_filename is a directory(does NOT have a .tsv suffix), save the contents into a directory named that.
-    The subfiles are named the same.  e.g. HED8.3.0/HED8.3.0_Tag.tsv
+    The subfiles are named the same: e.g. HED8.3.0/HED8.3.0_Tag.tsv
 
     Parameters:
-        base_filename(str): The base filename to use.  Output is {base_filename}_{suffix}.tsv
+        base_filename(str): The base filename to use. Output is {base_filename}_{suffix}.tsv
                             See DF_SUFFIXES for all expected names.
-        dataframe_dict(dict of str: df.DataFrame): The list of files to save out.  No validation is done.
+        dataframe_dict(dict of str: df.DataFrame): The list of files to save out. No validation is done.
     """
     if base_filename.lower().endswith(".tsv"):
         base, base_ext = os.path.splitext(base_filename)

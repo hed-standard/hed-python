@@ -257,7 +257,7 @@ class HedTag:
     def expanded(self) -> bool:
         """Return if this is currently expanded or not.
 
-           Will always be False unless expandable is set.  This is primarily used for Def/Def-expand tags at present.
+           Will always be False unless expandable is set. This is primarily used for Def/Def-expand tags at present.
 
         Returns:
             bool: True if this is currently expanded.

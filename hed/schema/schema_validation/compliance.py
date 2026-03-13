@@ -1,14 +1,14 @@
 """Schema compliance checking for HED schemas.
 
 This module is designed for HED 8.3+ schemas, which carry full domain and
-range metadata on their attributes.  It can be run on any loaded schema, but
+range metadata on their attributes. It can be run on any loaded schema, but
 schemas earlier than 8.3 will produce extensive known compliance errors
 because they lack the attribute metadata that 8.3 introduced.
 
 The checker validates domain constraints, range constraints, and semantic
-rules for all entries in a schema.  The schema's own Attributes and
+rules for all entries in a schema. The schema's own Attributes and
 Properties sections define which attributes are valid for each section
-(domain) and what type of value each attribute takes (range).  This checker
+(domain) and what type of value each attribute takes (range). This checker
 is data-driven by that metadata rather than hard-coding parallel validator
 dictionaries.
 """
@@ -57,7 +57,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
             Uses a default one if none passed in.
 
     Returns:
-        list: A list of all warnings and errors found.  Each issue is a dict.
+        list: A list of all warnings and errors found. Each issue is a dict.
             The returned list has an additional ``compliance_summary``
             attribute (ComplianceSummary) providing a structured report.
 

@@ -1,7 +1,7 @@
 """HED data models: strings, tags, groups, inputs, queries, and definitions.
 
 This module provides the core data structures used to represent, validate, and
-transform HED-annotated data.  A loaded :class:`~hed.schema.HedSchema` (from
+transform HED-annotated data. A loaded :class:`~hed.schema.HedSchema` (from
 ``hed.schema``) is typically passed in when constructing these objects.
 
 Typical usage

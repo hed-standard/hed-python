@@ -36,17 +36,17 @@ def val_error_invalid_unit(tag, units):
 @hed_error(ValidationErrors.TAG_EMPTY)
 def val_error_extra_comma(source_string, char_index):
     character = source_string[char_index]
-    return f"HED tags cannot be empty.  Extra delimiter found: '{character}' at index {char_index}'"
+    return f"HED tags cannot be empty. Extra delimiter found: '{character}' at index {char_index}'"
 
 
 @hed_tag_error(ValidationErrors.HED_GROUP_EMPTY, actual_code=ValidationErrors.TAG_EMPTY)
 def val_error_empty_group(tag):
-    return f"HED tags cannot be empty.  Extra delimiters found: '{tag}'"
+    return f"HED tags cannot be empty. Extra delimiters found: '{tag}'"
 
 
 @hed_tag_error(TemporalErrors.TEMPORAL_TAG_NO_TIME, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def val_error_temporal_tag_no_time(tag):
-    return f"Cannot have Temporal tags without an 'Onset' column and a time.  Found tag: '{tag}'"
+    return f"Cannot have Temporal tags without an 'Onset' column and a time. Found tag: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.TAG_EXTENDED, has_sub_tag=True, default_severity=ErrorSeverity.WARNING)
@@ -85,7 +85,7 @@ def val_error_invalid_value_class_value(tag, problem_tag, value_class):
 @hed_error(ValidationErrors.TILDES_UNSUPPORTED)
 def val_error_tildes_not_supported(source_string, char_index):
     character = source_string[char_index]
-    return f"Tildes not supported.  Replace (a ~ b ~ c) with (a, (b, c)).  '{character}' at index {char_index}'"
+    return f"Tildes not supported. Replace (a ~ b ~ c) with (a, (b, c)). '{character}' at index {char_index}'"
 
 
 @hed_tag_error(
@@ -100,7 +100,7 @@ def val_error_hed_placeholder_out_of_context(tag):
 )
 def val_error_curly_brace_unsupported_here(tag, problem_tag):
     return (
-        f"Curly braces are only permitted in metadata (e.g., a BIDS sidecar or NWB MeaningsTable) and must contain a column name.  "
+        f"Curly braces are only permitted in metadata (e.g., a BIDS sidecar or NWB MeaningsTable) and must contain a column name. "
         f"Invalid character '{problem_tag}' in tag '{tag}'"
     )
 
@@ -230,7 +230,7 @@ def val_error_hed_blank_column(column_number):
 
 @hed_tag_error(ValidationErrors.HED_LIBRARY_UNMATCHED, actual_code=ValidationErrors.TAG_NAMESPACE_PREFIX_INVALID)
 def val_error_unknown_namespace(tag, unknown_prefix, known_prefixes):
-    return f"Tag '{tag} has unknown namespace '{unknown_prefix}'.  Valid prefixes: {known_prefixes}"
+    return f"Tag '{tag} has unknown namespace '{unknown_prefix}'. Valid prefixes: {known_prefixes}"
 
 
 @hed_tag_error(ValidationErrors.NODE_NAME_EMPTY, has_sub_tag=True, actual_code=ValidationErrors.TAG_INVALID)
@@ -240,7 +240,7 @@ def val_error_extra_slashes_spaces(tag, problem_tag):
 
 @hed_error(ValidationErrors.SIDECAR_KEY_MISSING, default_severity=ErrorSeverity.WARNING)
 def val_error_sidecar_key_missing(invalid_keys, category_keys, column_name):
-    return f"Category values {invalid_keys} do not exist in metadata (e.g., BIDS sidecar or NWB meanings) for column '{column_name}'.  Valid keys are: {category_keys}"
+    return f"Category values {invalid_keys} do not exist in metadata (e.g., BIDS sidecar or NWB meanings) for column '{column_name}'. Valid keys are: {category_keys}"
 
 
 @hed_error(
@@ -256,38 +256,38 @@ def val_error_tsv_column_missing(invalid_keys):
 def val_error_bad_def_expand(tag, actual_def, found_def):
     return (
         f"A data-recording's Def-expand tag does not match the given definition."
-        f"Tag: '{tag}'.  Actual Def: {actual_def}.  Found Def: {found_def}"
+        f"Tag: '{tag}'. Actual Def: {actual_def}. Found Def: {found_def}"
     )
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_UNMATCHED, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_unmatched(tag):
-    return f"A data-recording's Def tag cannot be matched to definition.  Tag: '{tag}'"
+    return f"A data-recording's Def tag cannot be matched to definition. Tag: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_VALUE_MISSING, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_value_missing(tag):
-    return f"A def tag requires a placeholder value, but was not given one.  Definition: '{tag}'"
+    return f"A def tag requires a placeholder value, but was not given one. Definition: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_VALUE_EXTRA, actual_code=ValidationErrors.DEF_INVALID)
 def val_error_def_value_extra(tag):
-    return f"A def tag does not take a placeholder value, but was given one.  Definition: '{tag}'"
+    return f"A def tag does not take a placeholder value, but was given one. Definition: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_UNMATCHED, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_def_expand_unmatched(tag):
-    return f"A data-recording's Def-expand tag cannot be matched to definition.  Tag: '{tag}'"
+    return f"A data-recording's Def-expand tag cannot be matched to definition. Tag: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_VALUE_MISSING, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_def_expand_value_missing(tag):
-    return f"A Def-expand tag requires a placeholder value, but was not given one.  Definition: '{tag}'"
+    return f"A Def-expand tag requires a placeholder value, but was not given one. Definition: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_DEF_EXPAND_VALUE_EXTRA, actual_code=ValidationErrors.DEF_EXPAND_INVALID)
 def val_error_def_expand_value_extra(tag):
-    return f"A Def-expand tag does not take a placeholder value, but was given one.  Definition: '{tag}'"
+    return f"A Def-expand tag does not take a placeholder value, but was given one. Definition: '{tag}'"
 
 
 @hed_tag_error(ValidationErrors.HED_TOP_LEVEL_TAG, actual_code=ValidationErrors.TAG_GROUP_ERROR)
@@ -304,7 +304,7 @@ def val_error_tag_group_tag(tag):
 def val_error_top_level_tags(tag, multiple_tags):
     tags_as_string = [str(tag) for tag in multiple_tags]
     return (
-        f"Multiple top level tags found in a single group.  First one found: {str(tag)}. "
+        f"Multiple top level tags found in a single group. First one found: {str(tag)}. "
         + f"Remainder:{str(tags_as_string)}"
     )
 
@@ -374,19 +374,19 @@ def def_error_no_group_tags(def_name):
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_wrong_number_groups(def_name, tag_list):
-    return f"Too many group tags found in definition for {def_name}.  Expected 1, found: {get_tag_list_str(tag_list)}"
+    return f"Too many group tags found in definition for {def_name}. Expected 1, found: {get_tag_list_str(tag_list)}"
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_wrong_number_tags(def_name, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
-    return f"Too many tags found in definition for {def_name}.  Expected 1, found: {tag_list_strings}"
+    return f"Too many tags found in definition for {def_name}. Expected 1, found: {tag_list_strings}"
 
 
 @hed_error(DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_wrong_placeholder_count(def_name, expected_count, tag_list):
     return (
-        f"Incorrect number placeholders or placeholder tags found in definition for {def_name}.  "
+        f"Incorrect number placeholders or placeholder tags found in definition for {def_name}. "
         + f"Expected {expected_count}, found:  {get_tag_list_str(tag_list)}"
     )
 
@@ -418,7 +418,7 @@ def def_error_bad_location(tag):
 
 @hed_tag_error(TemporalErrors.ONSET_DEF_UNMATCHED, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_error_def_unmatched(tag):
-    return f"The def tag in an onset/offset tag is unmatched.  Def tag: '{tag}'"
+    return f"The def tag in an onset/offset tag is unmatched. Def tag: '{tag}'"
 
 
 @hed_tag_error(TemporalErrors.OFFSET_BEFORE_ONSET, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
@@ -444,7 +444,7 @@ def onset_no_def_found(tag):
 @hed_tag_error(TemporalErrors.ONSET_TOO_MANY_DEFS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_too_many_defs(tag, tag_list):
     tag_list_strings = [str(tag) for tag in tag_list]
-    return f"Too many def tags found in onset for {tag}.  Expected 1, also found: {tag_list_strings}"
+    return f"Too many def tags found in onset for {tag}. Expected 1, also found: {tag_list_strings}"
 
 
 @hed_tag_error(TemporalErrors.ONSET_WRONG_NUMBER_GROUPS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
@@ -468,7 +468,7 @@ def onset_duration_wrong_number_groups(tag, tag_list):
 @hed_tag_error(TemporalErrors.ONSET_TAG_OUTSIDE_OF_GROUP, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_wrong_type_tag(tag, def_tag):
     return (
-        f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'.  All onset context tags must be "
+        f"Onset def tag '{def_tag}' has an improper sibling tag '{tag}'. All onset context tags must be "
         f"in a single group together."
     )
 
@@ -482,7 +482,7 @@ def onset_wrong_placeholder(tag, has_placeholder):
 
 @hed_tag_error(TemporalErrors.DURATION_HAS_OTHER_TAGS, actual_code=ValidationErrors.TEMPORAL_TAG_ERROR)
 def onset_duration_has_other_tags(tag):
-    return f"Tag '{tag}' should not be grouped with Duration or Delay.  Context tags should be in a sub-group."
+    return f"Tag '{tag}' should not be grouped with Duration or Delay. Context tags should be in a sub-group."
 
 
 @hed_error(ColumnErrors.INVALID_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
@@ -498,14 +498,14 @@ def self_column_ref(self_ref):
 @hed_error(ColumnErrors.NESTED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def nested_column_ref(column_name, ref_column):
     return (
-        f"Column {column_name} has a nested reference to {ref_column}.  "
+        f"Column {column_name} has a nested reference to {ref_column}. "
         f"Column reference columns cannot contain other column references."
     )
 
 
 @hed_error(ColumnErrors.MALFORMED_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def malformed_column_ref(column_name, index, symbol):
-    return f"Column {column_name} has a malformed column reference.  Improper symbol {symbol} found at index {index}."
+    return f"Column {column_name} has a malformed column reference. Improper symbol {symbol} found at index {index}."
 
 
 @hed_error(

@@ -88,7 +88,7 @@ class SchemaLoaderDF(SchemaLoader):
             self.fatal_errors = error_reporter.sort_issues(self.fatal_errors)
             raise HedFileError(
                 self.fatal_errors[0]["code"],
-                f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
+                f"{len(self.fatal_errors)} issues found when parsing schema. See the .issues "
                 f"parameter on this exception for more details.",
                 self.name,
                 issues=self.fatal_errors,
@@ -150,7 +150,7 @@ class SchemaLoaderDF(SchemaLoader):
                 for row_number, row in current_rows:
                     tag_name = self._get_tag_name(row)
                     msg = (
-                        f"Cannot resolve parent tag.  "
+                        f"Cannot resolve parent tag. "
                         f"There is probably an issue with circular parent tags of {tag_name} on row {row_number}."
                     )
                     self._add_fatal_error(row_number, row, msg, HedExceptions.SCHEMA_TAG_TSV_BAD_PARENT)

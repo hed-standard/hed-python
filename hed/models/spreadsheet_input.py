@@ -33,7 +33,7 @@ class SpreadsheetInput(BaseInput):
 
         Notes:
             - If file is a string, file_type is derived from file and this parameter is ignored.
-            - column_prefix_dictionary may be deprecated/renamed.  These are no longer prefixes,
+            - column_prefix_dictionary may be deprecated/renamed. These are no longer prefixes,
               but rather converted to value columns.
               e.g. {"key": "Description", 1: "Label/"} will turn into value columns as
               {"key": "Description/#", 1: "Label/#"}

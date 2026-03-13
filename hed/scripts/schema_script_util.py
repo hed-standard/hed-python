@@ -12,9 +12,9 @@ def _is_prerelease_partner(base_schema) -> bool:
     """Return True if base_schema's withStandard partner is only resolvable from the prerelease cache.
 
     When a library schema serialised with ``save_merged=False`` is reloaded, the loader
-    re-fetches the standard schema named in the ``withStandard`` header attribute.  If
+    re-fetches the standard schema named in the ``withStandard`` header attribute. If
     that version lives only in the prerelease subdirectory of the cache, the reload will
-    fail unless ``check_prerelease=True`` is forwarded.  This helper detects that
+    fail unless ``check_prerelease=True`` is forwarded. This helper detects that
     condition by asking the cache whether the version is found without the prerelease
     flag (not found → prerelease required).
 
@@ -99,7 +99,7 @@ def validate_schema(file_path, check_for_warnings=False):
     _, extension = os.path.splitext(file_path)
     if extension.lower() != extension:
         return [
-            f"Only fully lowercase extensions are allowed for schema files.  Invalid extension on file: {file_path}"
+            f"Only fully lowercase extensions are allowed for schema files. Invalid extension on file: {file_path}"
         ]
 
     validation_issues = []
@@ -193,10 +193,10 @@ def sort_base_schemas(filenames, add_all_extensions=False):
             full_parent_path, real_basename2 = os.path.split(full_parent_path)
             real_parent_path, hedtsv_folder = os.path.split(full_parent_path)
             if hedtsv_folder != "hedtsv":
-                print(f"Ignoring file {file_path}.  .tsv files must be in an 'hedtsv' subfolder.")
+                print(f"Ignoring file {file_path}. The .tsv files must be in an 'hedtsv' subfolder.")
                 continue
             if real_basename != real_basename2:
-                print(f"Ignoring file {file_path}.  .tsv files must be in a subfolder with the same name.")
+                print(f"Ignoring file {file_path}. The .tsv files must be in a subfolder with the same name.")
                 continue
             real_name = os.path.join(real_parent_path, real_basename)
             # For TSV files, store the directory path (not individual file path)
@@ -344,9 +344,9 @@ def _roundtrip_all_formats(base_schema, schema_name, save_merged=True, check_pre
         save_merged (bool): If True, save the merged (with-standard) form.
             If False, save only the library-specific content.
         check_prerelease (bool): If True, pass check_prerelease=True to all reload
-            calls.  Required when the schema's withStandard partner exists only in
+            calls. Required when the schema's withStandard partner exists only in
             the prerelease cache directory; otherwise unmerged reloads will fail
-            partner resolution.  Has no effect when save_merged=True because the
+            partner resolution. Has no effect when save_merged=True because the
             merged serialisation embeds the full standard content and no partner
             lookup is performed on reload.
 
@@ -391,7 +391,7 @@ def _get_schema_comparison(schema, schema_reload, file_path, file_format):
     """
     if schema_reload != schema:
         error_text = (
-            f"Failed to reload {file_path} as {file_format}.  "
+            f"Failed to reload {file_path} as {file_format}. "
             f"There is either a problem with the source file, or the saving/loading code."
         )
         title_prompt = (

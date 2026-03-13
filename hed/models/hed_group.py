@@ -418,7 +418,7 @@ class HedGroup:
     def __eq__(self, other):
         """Test whether other is equal to this object.
 
-        Note: This does not account for sorting.  Objects must be in the same order to match.
+        Note: This does not account for sorting. Objects must be in the same order to match.
         """
         if self is other:
             return True
@@ -500,7 +500,7 @@ class HedGroup:
         return found_tags
 
     def find_exact_tags(self, exact_tags, recursive=False, include_groups=1) -> list:
-        """Find the given tags.  This will only find complete matches, any extension or value must also match.
+        """Find the given tags. This will only find complete matches, any extension or value must also match.
 
         Parameters:
             exact_tags (list of HedTag): A container of tags to locate.
