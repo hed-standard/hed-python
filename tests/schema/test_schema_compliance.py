@@ -53,6 +53,7 @@ class TestComplianceSummary(unittest.TestCase):
             "invalid_characters",
             "attributes",
             "duplicate_names",
+            "duplicate_hed_ids",
             "extras_columns",
             "annotation_attributes",
         ]

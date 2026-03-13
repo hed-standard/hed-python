@@ -79,6 +79,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     issues += validator.check_invalid_characters()
     issues += validator.check_attributes()
     issues += validator.check_duplicate_names()
+    issues += validator.check_duplicate_hed_ids()
     issues += validator.check_extras_columns()
     issues += validator.check_annotation_attribute_values()
 
@@ -306,6 +307,35 @@ class SchemaValidator:
             self.summary.record_section(section_key, entry_count)
             self.error_handler.pop_error_context()
 
+        self.summary.record_issues(len(issues))
+        return issues
+
+    def check_duplicate_hed_ids(self):
+        """Check for duplicate hedId values across all schema sections."""
+        self.summary.start_check(
+            "duplicate_hed_ids",
+            "Check for duplicate hedId values within or across schema sections.",
+        )
+        issues = []
+        seen_ids: dict[str, str] = {}  # maps hedId string → first tag name that used it
+        for section_key in HedSectionKey:
+            for entry in self.hed_schema[section_key].values():
+                hed_id = entry.attributes.get(HedKey.HedID)
+                if not hed_id:
+                    continue
+                if hed_id in seen_ids:
+                    self.error_handler.push_error_context(ErrorContext.SCHEMA_SECTION, str(section_key))
+                    self.error_handler.push_error_context(ErrorContext.SCHEMA_TAG, entry.name)
+                    issues += self.error_handler.format_error_with_context(
+                        SchemaAttributeErrors.SCHEMA_HED_ID_INVALID,
+                        entry.name,
+                        new_id=hed_id,
+                        duplicate_tag=seen_ids[hed_id],
+                    )
+                    self.error_handler.pop_error_context()
+                    self.error_handler.pop_error_context()
+                else:
+                    seen_ids[hed_id] = entry.name
         self.summary.record_issues(len(issues))
         return issues
 

@@ -169,7 +169,12 @@ def schema_error_SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE(tag, conversion_factor):
 @hed_error(
     SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID
 )
-def schema_error_SCHEMA_HED_ID_INVALID(tag, new_id, old_id=None, valid_min=None, valid_max=None):
+def schema_error_SCHEMA_HED_ID_INVALID(tag, new_id, old_id=None, valid_min=None, valid_max=None, duplicate_tag=None):
+    if duplicate_tag:
+        return (
+            f"Tag '{tag}' has hedId '{new_id}' which is already used by '{duplicate_tag}'.  "
+            f"Each hedId must be unique across all schema sections."
+        )
     if old_id:
         return (
             f"Tag '{tag}' has an invalid hedId '{new_id}'.  "

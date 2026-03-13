@@ -248,9 +248,12 @@ def load_dataframes(filenames):
             elif os.path.exists(filename):
                 # Handle the extra files if they are present.
                 dataframes[key] = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
-        except OSError:
-            # todo: consider if we want to report this error(we probably do)
-            pass  # We will use a blank one for this
+        except FileNotFoundError:
+            pass  # Missing section files are valid for partial/library schemas; caller gets an empty DataFrame
+        except OSError as e:
+            raise HedFileError(
+                HedExceptions.INVALID_FILE_FORMAT, f"Could not load schema file '{filename}': {e}", filename
+            ) from e
     return dataframes
 
 

@@ -96,7 +96,7 @@ class HedIDValidator:
             except ValueError:
                 return ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, tag_entry.name, new_id)
         # Nothing to verify
-        if new_id is None and old_id is None:
+        if not new_id and old_id is None:
             return []
 
         issues = []
