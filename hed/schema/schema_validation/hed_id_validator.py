@@ -66,7 +66,7 @@ class HedIDValidator:
             tag_library (str): The library prefix for this entry (empty string for standard schema).
 
         Returns:
-            int or None: The previous hedId as an integer, or None if absent or unparseable.
+            int or None: The previous hedId as an integer, or None if absent or unparsable.
         """
         previous_schema = self._previous_schemas.get(tag_library)
         if not previous_schema:
