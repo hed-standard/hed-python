@@ -43,7 +43,7 @@ class TestComplianceSummary(unittest.TestCase):
         _ = list(issues)
 
     def test_has_all_checks(self):
-        """Summary should contain all 7 top-level checks."""
+        """Summary should contain all 8 top-level checks."""
         issues = self.schema_84.check_compliance()
         summary = issues.compliance_summary
         check_names = [c["name"] for c in summary.check_results]

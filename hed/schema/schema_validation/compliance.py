@@ -317,25 +317,29 @@ class SchemaValidator:
             "Check for duplicate hedId values within or across schema sections.",
         )
         issues = []
-        seen_ids: dict[str, str] = {}  # maps hedId string → first tag name that used it
+        seen_ids: dict[str, tuple[str, str]] = {}  # maps hedId string → (first tag name, section key)
         for section_key in HedSectionKey:
-            for entry in self.hed_schema[section_key].values():
+            section = self.hed_schema[section_key]
+            self.summary.record_section(section_key, len(section))
+            for entry in section.values():
                 hed_id = entry.attributes.get(HedKey.HedID)
                 if not hed_id:
                     continue
                 if hed_id in seen_ids:
+                    first_tag_name, first_section_key = seen_ids[hed_id]
                     self.error_handler.push_error_context(ErrorContext.SCHEMA_SECTION, str(section_key))
                     self.error_handler.push_error_context(ErrorContext.SCHEMA_TAG, entry.name)
                     issues += self.error_handler.format_error_with_context(
                         SchemaAttributeErrors.SCHEMA_HED_ID_INVALID,
                         entry.name,
                         new_id=hed_id,
-                        duplicate_tag=seen_ids[hed_id],
+                        duplicate_tag=first_tag_name,
+                        duplicate_tag_section=first_section_key,
                     )
                     self.error_handler.pop_error_context()
                     self.error_handler.pop_error_context()
                 else:
-                    seen_ids[hed_id] = entry.name
+                    seen_ids[hed_id] = (entry.name, str(section_key))
         self.summary.record_issues(len(issues))
         return issues
 

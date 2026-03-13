@@ -101,7 +101,7 @@ class TestVerifyHedIdMatches(unittest.TestCase):
         """An unregistered library returns empty range — IDs should not be reported as out-of-range."""
         empty_range = set()
         df = pd.DataFrame([{"rdfs:label": "Event", "hedId": "HED_0012001"}])
-        # testlib has no library_data entry, so _get_hedid_range returns {}
+        # testlib has no library_data entry, so _get_hedid_range returns an empty set
         errors = _verify_hedid_matches(self.schema_82.tags, df, empty_range)
         self.assertEqual(len(errors), 0, "Unknown-library empty range should not trigger range errors")
 

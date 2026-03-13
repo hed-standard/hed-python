@@ -58,6 +58,30 @@ class HedIDValidator:
                     prev_version = f"{library}_{prev_version}"
                 return prev_version
 
+    def _get_old_id_int(self, tag_entry, tag_library):
+        """Returns the integer hedId from the previous schema version for this entry, or None.
+
+        Parameters:
+            tag_entry (HedSchemaEntry): The schema entry being validated.
+            tag_library (str): The library prefix for this entry (empty string for standard schema).
+
+        Returns:
+            int or None: The previous hedId as an integer, or None if absent or unparseable.
+        """
+        previous_schema = self._previous_schemas.get(tag_library)
+        if not previous_schema:
+            return None
+        old_entry = previous_schema.get_tag_entry(tag_entry.name, key_class=tag_entry.section_key)
+        if not old_entry:
+            return None
+        old_id_str = old_entry.attributes.get(HedKey.HedID)
+        if not old_id_str:
+            return None
+        try:
+            return int(old_id_str.removeprefix("HED_"))
+        except ValueError:
+            return None  # Silently ignore invalid old_id values (shouldn't happen in practice)
+
     def verify_tag_id(self, hed_schema, tag_entry, attribute_name):
         """Validates the hedID attribute values
 
@@ -72,31 +96,21 @@ class HedIDValidator:
             issues(list): A list of issues from validating this attribute.
         """
         # todo: If you have a way to know the schema should have 100% ids, you could check for that and flag missing
-        new_id = tag_entry.attributes.get(attribute_name, "")
-        old_id = None
-        tag_library = tag_entry.has_attribute(HedKey.InLibrary, return_value=True)
-        if not tag_library:
-            tag_library = ""
+        new_id_str = tag_entry.attributes.get(attribute_name, "")
+        tag_library = tag_entry.has_attribute(HedKey.InLibrary, return_value=True) or ""
+        old_id = self._get_old_id_int(tag_entry, tag_library)
 
-        previous_schema = self._previous_schemas.get(tag_library)
-        if previous_schema:
-            old_entry = previous_schema.get_tag_entry(tag_entry.name, key_class=tag_entry.section_key)
-            if old_entry:
-                old_id = old_entry.attributes.get(HedKey.HedID)
+        new_id = None
+        if new_id_str:
+            try:
+                new_id = int(new_id_str.removeprefix("HED_"))
+            except ValueError:
+                return ErrorHandler.format_error(
+                    SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, tag_entry.name, new_id_str
+                )
 
-        if old_id:
-            try:
-                old_id = int(old_id.removeprefix("HED_"))
-            except ValueError:
-                # Just silently ignore invalid old_id values(this shouldn't happen)
-                pass
-        if new_id:
-            try:
-                new_id = int(new_id.removeprefix("HED_"))
-            except ValueError:
-                return ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_HED_ID_INVALID, tag_entry.name, new_id)
         # Nothing to verify
-        if not new_id and old_id is None:
+        if not new_id_str and old_id is None:
             return []
 
         issues = []
