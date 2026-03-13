@@ -30,7 +30,7 @@ def _get_hedid_range(schema_name, df_key):
 
     Parameters:
         schema_name(str): The known schema name with an assigned id range.
-        df_key(str): The dataframe range type we're interested in.
+        df_key(str): The dataframe range type we're interested in. A key from constants.DF_SUFFIXES.
 
     Returns:
         set: A set of all id's in the requested range.
