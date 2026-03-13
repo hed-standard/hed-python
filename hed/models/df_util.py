@@ -97,10 +97,10 @@ def process_def_expands(
         hed_strings (list or pd.Series): A list of HED strings to process.
         hed_schema (HedSchema): The schema to use.
         known_defs (DefinitionDict or list or str or None):
-            A DefinitionDict or anything its constructor takes.  These are the known definitions going in, that must
+            A DefinitionDict or anything its constructor takes. These are the known definitions going in, that must
             match perfectly.
         ambiguous_defs (dict): A dictionary containing ambiguous definitions.
-            format TBD.  Currently def name key: list of lists of HED tags values
+            format TBD. Currently def name key: list of lists of HED tags values
 
     Returns:
         tuple [DefinitionDict, dict, dict]: A tuple containing the DefinitionDict, ambiguous definitions, and a
@@ -133,7 +133,7 @@ def sort_dataframe_by_onsets(df):
 
 
 def replace_ref(text, old_value, new_value="n/a"):
-    """Replace column ref in x with y.  If it's n/a, delete extra commas/parentheses.
+    """Replace column ref in x with y. If it's n/a, delete extra commas/parentheses.
 
     Parameters:
         text (str): The input string containing the ref enclosed in curly braces.
@@ -150,9 +150,9 @@ def replace_ref(text, old_value, new_value="n/a"):
     def _remover(match):
         p1 = match.group("p1").count("(")
         p2 = match.group("p2").count(")")
-        if p1 > p2:  # We have more starting parens than ending.  Make sure we don't remove comma before
+        if p1 > p2:  # We have more starting parens than ending. Make sure we don't remove comma before
             output = match.group("c1") + "(" * (p1 - p2)
-        elif p2 > p1:  # We have more ending parens.  Make sure we don't remove comma after
+        elif p2 > p1:  # We have more ending parens. Make sure we don't remove comma after
             output = ")" * (p2 - p1) + match.group("c2")
         else:
             c1 = match.group("c1")
@@ -231,7 +231,7 @@ def split_delay_tags(series, hed_schema, onsets):
         Union[pd.Dataframe, None]: If we had onsets, a dataframe with 3 columns
             "HED": The HED strings(still str)
             "onset": the updated onsets
-            "original_index": the original source line.  Multiple lines can have the same original source line.
+            "original_index": the original source line. Multiple lines can have the same original source line.
 
     Note: This dataframe may be longer than the original series, but it will never be shorter.
     """
@@ -270,7 +270,7 @@ def filter_series_by_onset(series, onsets):
     """Return the series, with rows that have the same onset combined.
 
     Parameters:
-        series(pd.Series or pd.Dataframe): The series to filter.  If dataframe, it filters the "HED" column.
+        series(pd.Series or pd.Dataframe): The series to filter. If dataframe, it filters the "HED" column.
         onsets(pd.Series): The onset column to filter by.
 
     Returns:

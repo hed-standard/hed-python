@@ -394,7 +394,7 @@ class HedSchema(HedSchemaBase):
 
             If base_filename has a .tsv suffix, save directly to the indicated location.
             If base_filename is a directory(does NOT have a .tsv suffix), save the contents into a directory named that.
-            The subfiles are named the same.  e.g. HED8.3.0/HED8.3.0_Tag.tsv
+            The subfiles are named the same: e.g. HED8.3.0/HED8.3.0_Tag.tsv
 
         Parameters:
             base_filename (str): Save filename. A suffix will be added to most, e.g. _Tag
@@ -469,7 +469,7 @@ class HedSchema(HedSchemaBase):
             check_for_warnings (bool): If True, checks for formatting issues like invalid characters, capitalization.
             name (str): If present, use as the filename for context, rather than using the actual filename.
                         Useful for temp filenames when supporting web services.
-            error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
+            error_handler (ErrorHandler or None): Used to report errors. Uses a default one if none passed in.
 
         Returns:
             list[dict]: A list of all warnings and errors found in the file. Each issue is a dictionary.
@@ -482,7 +482,7 @@ class HedSchema(HedSchemaBase):
         """Return tag entries with the given attribute.
 
         Parameters:
-            attribute (str): A tag attribute.  Eg HedKey.ExtensionAllowed
+            attribute (str): A tag attribute: e.g., HedKey.ExtensionAllowed
             key_class (HedSectionKey): The HedSectionKey for the section to retrieve from.
 
         Returns:
@@ -505,7 +505,7 @@ class HedSchema(HedSchemaBase):
                 This will not handle extensions or similar.
                 If this is a tag, it can have a schema namespace, but it's not required
             key_class (HedSectionKey or str):  The type of entry to return.
-            schema_namespace (str): Only used on Tags.  If incorrect, will return None.
+            schema_namespace (str): Only used on Tags. If incorrect, will return None.
 
         Returns:
             Union[HedSchemaEntry, None]: The schema entry for the given tag, or None if not found.
@@ -524,8 +524,8 @@ class HedSchema(HedSchemaBase):
         """Find the schema entry for a given source tag.
 
         Parameters:
-            tag (str, HedTag):     Any form of tag to look up.  Can have an extension, value, etc.
-            schema_namespace (str):  The schema namespace of the tag, if any.
+            tag (str, HedTag): Any form of tag to look up. Can have an extension, value, etc.
+            schema_namespace (str): The schema namespace of the tag, if any.
 
         Returns:
             tuple[Union["HedTagEntry", None], Union[str, None], list[dict]]:
@@ -567,8 +567,8 @@ class HedSchema(HedSchemaBase):
         """Find the schema entry for a given source tag.
 
         Parameters:
-            tag (str, HedTag):     Any form of tag to look up.  Can have an extension, value, etc.
-            schema_namespace (str):  The schema namespace of the tag, if any.
+            tag (str, HedTag): Any form of tag to look up. Can have an extension, value, etc.
+            schema_namespace (str): The schema namespace of the tag, if any.
 
         Returns:
             tuple[Union["HedTagEntry", None], Union[str, None], list[dict]]:
@@ -616,7 +616,7 @@ class HedSchema(HedSchemaBase):
         """Finds the base tag and remainder from the left, raising exception on issues"""
         current_slash_index = -1
         current_entry = None
-        # Loop left to right, checking each word.  Once we find an invalid word, we stop.
+        # Loop left to right, checking each word. Once we find an invalid word, we stop.
         while True:
             next_index = working_tag.find("/", current_slash_index + 1)
             if next_index == -1:

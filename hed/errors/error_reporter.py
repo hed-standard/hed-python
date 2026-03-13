@@ -106,7 +106,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
     Parameters:
         error_type (str): A value from error_types or optionally another value.
         default_severity (int): The default severity for the decorated error.
-        has_sub_tag (bool): If True, this error message also wants a sub_tag passed down.  eg "This" in "This/Is/A/Tag"
+        has_sub_tag (bool): If True, this error message also wants a sub_tag passed down, e.g., "This" in "This/Is/A/Tag"
         actual_code (str): The actual error to report to the outside world.
 
     """

@@ -90,7 +90,7 @@ class HedSchemaBase(ABC):
         """Return tag entries with the given attribute.
 
         Parameters:
-            attribute (str): A tag attribute.  Eg HedKey.ExtensionAllowed
+            attribute (str): A tag attribute: e.g., HedKey.ExtensionAllowed
             key_class (HedSectionKey): The HedSectionKey for the section to retrieve from.
 
         Returns:
@@ -111,7 +111,7 @@ class HedSchemaBase(ABC):
                 This will not handle extensions or similar.
                 If this is a tag, it can have a schema namespace, but it's not required
             key_class (HedSectionKey or str):  The type of entry to return.
-            schema_namespace (str): Only used on Tags.  If incorrect, will return None.
+            schema_namespace (str): Only used on Tags. If incorrect, will return None.
 
         Returns:
             HedSchemaEntry: The schema entry for the given tag.
@@ -123,7 +123,7 @@ class HedSchemaBase(ABC):
         """Find the schema entry for a given source tag.
 
         Parameters:
-            tag (str, HedTag): Any form of tag to look up.  Can have an extension, value, etc.
+            tag (str, HedTag): Any form of tag to look up. Can have an extension, value, etc.
             schema_namespace (str): The schema namespace of the tag, if any.
 
         Returns:
@@ -148,7 +148,7 @@ class HedSchemaBase(ABC):
             check_for_warnings (bool): If True, checks for formatting issues like invalid characters, capitalization.
             name (str): If present, use as the filename for context, rather than using the actual filename.
                         Useful for temp filenames when supporting web services.
-            error_handler (ErrorHandler or None): Used to report errors.  Uses a default one if none passed in.
+            error_handler (ErrorHandler or None): Used to report errors. Uses a default one if none passed in.
 
         Returns:
             list: A list of all warnings and errors found in the file. Each issue is a dictionary.

@@ -99,7 +99,7 @@ class SchemaLoaderWiki(SchemaLoader):
             self.fatal_errors = error_reporter.sort_issues(self.fatal_errors)
             raise HedFileError(
                 self.fatal_errors[0]["code"],
-                f"{len(self.fatal_errors)} issues found when parsing schema.  See the .issues "
+                f"{len(self.fatal_errors)} issues found when parsing schema. See the .issues "
                 f"parameter on this exception for more details.",
                 self.name,
                 issues=self.fatal_errors,
@@ -169,7 +169,7 @@ class SchemaLoaderWiki(SchemaLoader):
         text = ""
         for _line_number, line in lines:
             text += line
-        # We expect one blank line(plus the normal line break).  Any additional lines should be preserved.
+        # We expect one blank line(plus the normal line break). Any additional lines should be preserved.
         if text.endswith("\n\n"):
             text = text[:-2]
         elif text.endswith("\n"):
@@ -213,7 +213,7 @@ class SchemaLoaderWiki(SchemaLoader):
                     self._add_fatal_error(
                         row_number,
                         row,
-                        "Line has too many *'s at front.  You cannot skip a level.",
+                        "Line has too many *'s at front. You cannot skip a level.",
                         HedExceptions.WIKI_LINE_START_INVALID,
                     )
                     continue
@@ -288,7 +288,7 @@ class SchemaLoaderWiki(SchemaLoader):
             version_line (str): The line in the wiki file that contains the version or other attributes.
 
         Returns:
-            dict: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}
+            dict: The key is the name of the attribute, value being the value: e.g., {'version':'v1.0.1'}
         """
         if "=" not in version_line:
             return self._get_header_attributes_internal_old(version_line)
@@ -311,7 +311,7 @@ class SchemaLoaderWiki(SchemaLoader):
             version_line (str): The line in the wiki file that contains the version or other attributes.
 
         Returns:
-            dict: The key is the name of the attribute, value being the value.  eg {'version':'v1.0.1'}.
+            dict: The key is the name of the attribute, value being the value: e.g., {'version':'v1.0.1'}.
         """
         final_attributes = {}
         attribute_pairs = version_line.split(",")

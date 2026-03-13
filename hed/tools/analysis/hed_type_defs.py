@@ -14,7 +14,7 @@ class HedTypeDefs:
 
         '(Condition-variable/Face-type,Description/A face that should be recognized.,(Image,(Face,Famous)))'
 
-    would have type_values ['face_type'].  All items are strings not objects.
+    would have type_values ['face_type']. All items are strings not objects.
 
 
     """

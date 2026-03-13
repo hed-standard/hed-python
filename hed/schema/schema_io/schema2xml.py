@@ -174,7 +174,7 @@ class Schema2XML(Schema2Base):
         Parameters:
             tag_node (Element):  A tag element.
             tag_attributes ({str:str}): A dictionary of attributes to add to this node.
-            attribute_node_name (str): The type of the node to use for attributes.  Mostly used to override to property for attributes section.
+            attribute_node_name (str): The type of the node to use for attributes. Mostly used to override to property for attributes section.
 
         """
         for attribute, value in tag_attributes.items():

@@ -35,7 +35,7 @@ class HedString(HedGroup):
                 contents = self.split_into_groups(hed_string, hed_schema, def_dict)
             except ValueError:
                 # ValueError is raised by split_into_groups for structurally malformed
-                # strings (mismatched or misordered parentheses).  Rather than raising
+                # strings (mismatched or misordered parentheses). Rather than raising
                 # here, we fall back to an empty parse tree so that the object can be
                 # passed to the validator, which will independently detect and report
                 # the structural error through check_count_tag_group_parentheses /
@@ -43,7 +43,7 @@ class HedString(HedGroup):
                 #
                 # Callers that construct HedString without running it through
                 # HedValidator will receive an empty children list with no error
-                # indication.  Always validate after construction if correctness is
+                # indication. Always validate after construction if correctness is
                 # required.
                 contents = []
         super().__init__(hed_string, contents=contents, startpos=0, endpos=len(hed_string))
@@ -379,7 +379,7 @@ class HedString(HedGroup):
             for tag in group.tags():
                 if tag.short_base_tag.casefold() in anchor_tags:
                     top_level_tags.append((tag, group))
-                    # Only capture a max of 1 per group.  These are implicitly unique.
+                    # Only capture a max of 1 per group. These are implicitly unique.
                     break
 
         if include_groups == 0 or include_groups == 1:
@@ -389,8 +389,8 @@ class HedString(HedGroup):
     def remove_refs(self):
         """Remove any refs(tags contained entirely inside curly braces) from the string.
 
-        This does NOT validate the contents of the curly braces.  This is only relevant when directly
-        editing sidecar strings.  Tools will naturally ignore these.
+        This does NOT validate the contents of the curly braces. This is only relevant when directly
+        editing sidecar strings. Tools will naturally ignore these.
         """
         ref_tags = [tag for tag in self.get_all_tags() if tag.is_column_ref()]
         if ref_tags:

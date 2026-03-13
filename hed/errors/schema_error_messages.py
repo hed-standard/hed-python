@@ -26,7 +26,7 @@ def schema_error_hed_duplicate_from_library(tag, duplicate_tag_list, section):
 def schema_error_SCHEMA_INVALID_SIBLING(tag, sibling_tag_list):
     tag_join_delimiter = ", "
     return (
-        f"Placeholder tag '{str(tag)}' has siblings.  Placeholder tags must be an only child.   Extra tags:"
+        f"Placeholder tag '{str(tag)}' has siblings. Placeholder tags must be an only child. Extra tags:"
         + f"{tag_join_delimiter}{tag_join_delimiter.join(str(n) for n in sibling_tag_list)}"
     )
 
@@ -35,7 +35,7 @@ def schema_error_SCHEMA_INVALID_SIBLING(tag, sibling_tag_list):
 def schema_error_SCHEMA_INVALID_CHILD(tag, child_tag_list):
     tag_join_delimiter = ", "
     return (
-        f"Placeholder tag '{str(tag)}' has children.  Placeholder tags must have no children.   Extra tags:"
+        f"Placeholder tag '{str(tag)}' has children. Placeholder tags must have no children. Extra tags:"
         + f"{tag_join_delimiter}{tag_join_delimiter.join(str(n) for n in child_tag_list)}"
     )
 
@@ -75,7 +75,7 @@ def schema_error_invalid_character_prologue(char_index, source_string, section_n
     actual_code=SchemaWarnings.SCHEMA_CHARACTER_INVALID,
 )
 def schema_warning_invalid_chars_desc(desc_string, tag_name, problem_char, char_index):
-    return f"Invalid character '{problem_char}' in desc for '{tag_name}' at position {char_index}.  '{desc_string}"
+    return f"Invalid character '{problem_char}' in desc for '{tag_name}' at position {char_index}. '{desc_string}"
 
 
 @hed_error(
@@ -90,7 +90,7 @@ def schema_warning_invalid_chars_tag(tag_name, problem_char, char_index):
 @hed_error(SchemaWarnings.SCHEMA_INVALID_CAPITALIZATION, default_severity=ErrorSeverity.WARNING)
 def schema_warning_SCHEMA_INVALID_CAPITALIZATION(tag_name, problem_char, char_index):
     return (
-        "First character must be a capital letter or number.  "
+        "First character must be a capital letter or number. "
         + f"Found character '{problem_char}' in tag '{tag_name}' at position {char_index}."
     )
 
@@ -140,7 +140,7 @@ def schema_error_GENERIC_ATTRIBUTE_VALUE_INVALID(tag, invalid_value, attribute_n
     actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
 )
 def schema_error_SCHEMA_ATTRIBUTE_NUMERIC_INVALID(tag, invalid_value, attribute_name):
-    return f"Element '{tag}' has an invalid {attribute_name}: '{invalid_value}'.  Should be numeric."
+    return f"Element '{tag}' has an invalid {attribute_name}: '{invalid_value}'. Should be numeric."
 
 
 @hed_error(
@@ -148,14 +148,14 @@ def schema_error_SCHEMA_ATTRIBUTE_NUMERIC_INVALID(tag, invalid_value, attribute_
 )
 def schema_error_SCHEMA_DEFAULT_UNITS_INVALID(tag, bad_unit, valid_units):
     valid_units = ",".join(valid_units)
-    return f"Tag '{tag}' has an invalid defaultUnit '{bad_unit}'.  Valid units are: '{valid_units}'."
+    return f"Tag '{tag}' has an invalid defaultUnit '{bad_unit}'. Valid units are: '{valid_units}'."
 
 
 @hed_error(
     SchemaAttributeErrors.SCHEMA_DEFAULT_UNITS_DEPRECATED, actual_code=SchemaAttributeErrors.SCHEMA_DEPRECATION_ERROR
 )
 def schema_error_SCHEMA_DEFAULT_UNITS_DEPRECATED(unit_class, bad_unit):
-    return f"Unit class '{unit_class}' defaultUnit '{bad_unit}' is deprecated.  Please find an alternative default."
+    return f"Unit class '{unit_class}' defaultUnit '{bad_unit}' is deprecated. Please find an alternative default."
 
 
 @hed_error(
@@ -163,7 +163,7 @@ def schema_error_SCHEMA_DEFAULT_UNITS_DEPRECATED(unit_class, bad_unit):
     actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
 )
 def schema_error_SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE(tag, conversion_factor):
-    return f"Tag '{tag}' has an invalid conversionFactor '{conversion_factor}'.  Conversion factor must be positive."
+    return f"Tag '{tag}' has an invalid conversionFactor '{conversion_factor}'. Conversion factor must be positive."
 
 
 @hed_error(
@@ -175,17 +175,17 @@ def schema_error_SCHEMA_HED_ID_INVALID(
     if duplicate_tag:
         section_info = f" in the '{duplicate_tag_section}' section" if duplicate_tag_section else ""
         return (
-            f"Tag '{tag}' has hedId '{new_id}' which is already used by '{duplicate_tag}'{section_info}.  "
+            f"Tag '{tag}' has hedId '{new_id}' which is already used by '{duplicate_tag}'{section_info}. "
             f"Each hedId must be unique across all schema sections."
         )
     if old_id:
         return (
-            f"Tag '{tag}' has an invalid hedId '{new_id}'.  "
-            f"It has changed from the previous schema version.  Old value: {old_id}."
+            f"Tag '{tag}' has an invalid hedId '{new_id}'. "
+            f"It has changed from the previous schema version. Old value: {old_id}."
         )
     elif valid_min:
-        return f"Tag '{tag}' has an invalid hedId '{new_id}'.  It must be between {valid_min} and {valid_max}."
-    return f"Tag '{tag}' has an invalid hedId '{new_id}'.  It must be an integer in the format of HED_XXXXXXX."
+        return f"Tag '{tag}' has an invalid hedId '{new_id}'. It must be between {valid_min} and {valid_max}."
+    return f"Tag '{tag}' has an invalid hedId '{new_id}'. It must be an integer in the format of HED_XXXXXXX."
 
 
 @hed_error(
@@ -196,7 +196,7 @@ def schema_error_SCHEMA_ALLOWED_CHARACTERS_INVALID(tag, invalid_character):
     from hed.schema.hed_schema_constants import character_types
 
     return (
-        f"Tag '{tag}' has an invalid allowedCharacter: '{invalid_character}'.  "
+        f"Tag '{tag}' has an invalid allowedCharacter: '{invalid_character}'. "
         f"Allowed characters are: a single character, "
         f"or one of the following - {', '.join(character_types.keys())}."
     )
@@ -206,7 +206,7 @@ def schema_error_SCHEMA_ALLOWED_CHARACTERS_INVALID(tag, invalid_character):
     SchemaAttributeErrors.SCHEMA_IN_LIBRARY_INVALID, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID
 )
 def schema_error_SCHEMA_IN_LIBRARY_INVALID(tag, bad_library):
-    return f"Tag '{tag}' has an invalid inLibrary: '{bad_library}'.  "
+    return f"Tag '{tag}' has an invalid inLibrary: '{bad_library}'. "
 
 
 @hed_error(SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE, default_severity=ErrorSeverity.WARNING)

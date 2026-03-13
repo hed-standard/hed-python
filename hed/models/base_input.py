@@ -35,12 +35,12 @@ class BaseInput:
         Parameters:
             file (str or file-like or pd.Dataframe): An xlsx/tsv file to open.
             file_type (str or None): ".xlsx" (Excel), ".tsv" or ".txt" (tab-separated text).
-                Derived from file if file is a filename.  Ignored if pandas dataframe.
+                Derived from file if file is a filename. Ignored if pandas dataframe.
             worksheet_name (str or None): Name of Excel workbook worksheet name to use.
                 (Not applicable to tsv files.)
             has_column_names (bool): True if file has column names.
                 This value is ignored if you pass in a pandas dataframe.
-            mapper (ColumnMapper or None):  Indicates which columns have HED tags.
+            mapper (ColumnMapper or None): Indicates which columns have HED tags.
                 See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
             name (str or None): Optional field for how this file will report errors.
             allow_blank_names(bool): If True, column names can be blank
@@ -372,7 +372,7 @@ class BaseInput:
             hed_schema (HedSchema): The schema to use for validation.
             extra_def_dicts (list of DefDict or DefDict): All definitions to use for validation.
             name (str): The name to report errors from this file as.
-            error_handler (ErrorHandler): Error context to use.  Creates a new one if None.
+            error_handler (ErrorHandler): Error context to use. Creates a new one if None.
 
         Returns:
             list[dict]: A list of issues for a HED string.

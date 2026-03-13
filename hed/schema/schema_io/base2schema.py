@@ -64,7 +64,7 @@ class SchemaLoader(ABC):
             if not self._schema.with_standard:
                 raise HedFileError(
                     HedExceptions.SCHEMA_LOAD_FAILED,
-                    "Loading multiple normal schemas as a merged one with the same namespace.  "
+                    "Loading multiple normal schemas as a merged one with the same namespace. "
                     "Ensure schemas have the withStandard header attribute set",
                     self.name,
                 )

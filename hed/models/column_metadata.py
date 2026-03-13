@@ -118,7 +118,7 @@ class ColumnMetadata:
                                      This is used to issue more precise errors that are normally just silently ignored,
                                      but also not crash.
         Returns:
-            ColumnType: The determined type of given column.  Returns None if unknown.
+            ColumnType: The determined type of given column. Returns None if unknown.
 
         """
         if not dict_for_entry or not isinstance(dict_for_entry, dict):

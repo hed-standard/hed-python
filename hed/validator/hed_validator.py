@@ -190,7 +190,7 @@ class HedValidator:
             validate_text (str): the text we want to validate, if not the full extension.
             report_as (HedTag): Report the error tag as coming from a different one.
                                Mostly for definitions that expand.
-            error_code (str): The code to override the error as.  Again mostly for def/def-expand tags.
+            error_code (str): The code to override the error as. Again mostly for def/def-expand tags.
             index_offset (int): Offset into the extension validate_text starts at
             allow_placeholders (bool): Whether placeholders are allowed (affects value class validation for "#")
 

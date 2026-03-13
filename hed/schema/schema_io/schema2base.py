@@ -26,7 +26,7 @@ class Schema2Base:
     .. note:: **Adding a new schema section type**
 
         :meth:`process_schema` is the *single source of truth* for section traversal
-        order.  When a new :class:`~hed.schema.hed_schema_constants.HedSectionKey`
+        order. When a new :class:`~hed.schema.hed_schema_constants.HedSectionKey`
         is added to the schema, **every** step below must be updated:
 
         1. Add the new ``_output_*`` call to :meth:`process_schema` (this file).
@@ -126,8 +126,8 @@ class Schema2Base:
     def _output_extras(self, hed_schema):
         """Optional hook for format-specific sections not covered by the standard traversal.
 
-        The base implementation is a deliberate no-op.  Subclasses that need to
-        emit additional content (e.g. the header-attributes sheet in TSV) override
+        The base implementation is a deliberate no-op. Subclasses that need to
+        emit additional content (e.g., the header-attributes sheet in TSV) override
         this method; subclasses that have nothing extra can safely omit it.
         """
 

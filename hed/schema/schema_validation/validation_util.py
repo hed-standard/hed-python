@@ -90,10 +90,10 @@ def schema_version_for_library(hed_schema, library_name) -> Union[str, None]:
 
     Parameters:
         hed_schema (HedSchema): the schema object
-        library_name (str or None): The library name you're interested in.  "" for the standard schema.
+        library_name (str or None): The library name you're interested in. "" for the standard schema.
 
     Returns:
-        Union[str, None]: The version number of the given library name.  Returns None if unknown library_name.
+        Union[str, None]: The version number of the given library name. Returns None if unknown library_name.
     """
     if library_name is None:
         library_name = ""
@@ -137,7 +137,7 @@ def get_allowed_characters_by_name(character_set_names) -> set[str]:
     Note: "nonascii" is a special case "character" that can be included as well
 
     Parameters:
-        character_set_names (list of str): A list of character sets to allow.  See hed_schema_constants.character_types
+        character_set_names (list of str): A list of character sets to allow. See hed_schema_constants.character_types
 
     Returns:
         set[str]: The set of all characters from the names

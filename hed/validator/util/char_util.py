@@ -82,7 +82,7 @@ class CharValidator:
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             validate_text (str): the text we want to validate, if not the full extension.
-            error_code (str): The code to override the error as.  Again mostly for def/def-expand tags.
+            error_code (str): The code to override the error as. Again mostly for def/def-expand tags.
             index_offset (int): Offset into the extension validate_text starts at.
 
         Returns:
@@ -108,7 +108,7 @@ class CharValidator:
             allowed_chars (str): Characters allowed in string.
             source_tag (HedTag): Tag from which the string came from.
             starting_index (int): Starting index of check_string within the tag.
-            error_code (str): The code to override the error as.  Again mostly for def/def-expand tags.
+            error_code (str): The code to override the error as. Again mostly for def/def-expand tags.
 
         Returns:
             list:  List of dictionaries with validation issues.

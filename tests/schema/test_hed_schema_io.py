@@ -700,7 +700,7 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
     A library schema with ``withStandard="X.Y.Z"`` and ``unmerged="True"`` is a *partnered*
     schema: when it is loaded, the loader (base2schema.SchemaLoader._load) automatically calls
     ``load_schema_version("X.Y.Z")`` to fetch the standard schema and merges the library's tags
-    on top of it.  If version X.Y.Z only exists in the *prerelease* subdirectory of the cache
+    on top of it. If version X.Y.Z only exists in the *prerelease* subdirectory of the cache
     (not in the regular cache root), that ``load_schema_version`` call will fail with
     ``SCHEMA_LIBRARY_INVALID`` unless ``check_prerelease=True`` is forwarded along the entire call
     chain:
@@ -721,15 +721,15 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
     Source files are kept as human-editable MediaWiki so they are easy to update:
 
       tests/data/schema_tests/prerelease/HED9.9.9.mediawiki
-          A minimal standard schema at version 9.9.9.  Version 9.9.9 is deliberately
+          A minimal standard schema at version 9.9.9. Version 9.9.9 is deliberately
           chosen to be impossible to appear in any real HED release, so this fixture
-          can never collide with a legitimate cached schema.  It exists *only* in the
+          can never collide with a legitimate cached schema. It exists *only* in the
           prerelease subdirectory — there is no HED9.9.9.xml in the regular cache root
           — which is exactly the condition under test.
 
       tests/data/schema_tests/prerelease/HED_testpre_1.0.0.mediawiki
           A minimal library schema with ``library="testpre"``, ``version="1.0.0"``,
-          ``withStandard="9.9.9"``, and ``unmerged="True"``.  Kept in the same
+          ``withStandard="9.9.9"``, and ``unmerged="True"``. Kept in the same
           prerelease/ directory as HED9.9.9.mediawiki to make the association clear.
           It declares one tag (Prerelease-partner-only-item) so the merged result
           can be asserted.
@@ -737,24 +737,24 @@ class TestLoadSchemaWithPrereleasePartner(unittest.TestCase):
     Cache isolation
     ---------------
     The real user cache lives at ``~/.hedtools/hed_cache/`` and is controlled by
-    ``hed_cache.HED_CACHE_DIRECTORY``.  To prevent any interaction with it:
+    ``hed_cache.HED_CACHE_DIRECTORY``. To prevent any interaction with it:
 
-    1.  ``setUpClass`` loads HED9.9.9.mediawiki, converts it to an XML string via
+    1. ``setUpClass`` loads HED9.9.9.mediawiki, converts it to an XML string via
         ``get_as_xml_string()`` (XML is the only format the cache scanner recognises),
         and writes ``{tmpdir}/prerelease/HED9.9.9.xml`` into a fresh
-        ``tempfile.TemporaryDirectory``.  The ``tmpdir`` root has no HED9.9.9.xml,
+        ``tempfile.TemporaryDirectory``. The ``tmpdir`` root has no HED9.9.9.xml,
         only the ``prerelease/`` subdirectory does, which is precisely the layout that
         requires ``check_prerelease=True`` to succeed.
 
-    2.  Each test patches ``hed_cache.HED_CACHE_DIRECTORY`` to ``_cache_dir`` (the
-        temp dir root) for the duration of that test only.  Outside the ``with``
+    2. Each test patches ``hed_cache.HED_CACHE_DIRECTORY`` to ``_cache_dir`` (the
+        temp dir root) for the duration of that test only. Outside the ``with``
         block the real constant is restored automatically by ``patch.object``.
 
-    3.  ``_load_schema_version`` is an LRU-cached function.  The cache is cleared in
+    3. ``_load_schema_version`` is an LRU-cached function. The cache is cleared in
         ``setUp`` and ``tearDown`` so no patched-path entries can leak into subsequent
         tests (or be inherited from earlier ones).
 
-    4.  ``tearDownClass`` clears the LRU cache one final time and deletes the temp dir.
+    4. ``tearDownClass`` clears the LRU cache one final time and deletes the temp dir.
     """
 
     @classmethod

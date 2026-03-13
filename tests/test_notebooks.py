@@ -49,7 +49,7 @@ class TestNotebooks(unittest.TestCase):
         """Return source strings for all code cells in a notebook.
 
         In the raw .ipynb JSON format each cell's ``source`` may be either a
-        plain string or a list of strings (one per line).  This helper
+        plain string or a list of strings (one per line). This helper
         normalises both cases into a single string per cell.
 
         Parameters:
