@@ -22,18 +22,18 @@ class SchemaLoaderDF(SchemaLoader):
     Note: due to supporting multiple files, this one differs from the other schema loaders
     """
 
-    def __init__(self, filenames, schema_as_strings_or_df, name="", check_prerelease=False):
+    def __init__(self, filenames, schema_as_strings_or_df, name=""):
         self.filenames = df_util.convert_filenames_to_dict(filenames)
         self.schema_as_strings_or_df = schema_as_strings_or_df
         if self.filenames:
             reported_filename = self.filenames.get(constants.STRUCT_KEY)
         else:
             reported_filename = "from_strings"
-        super().__init__(reported_filename, None, None, None, name, check_prerelease)
+        super().__init__(reported_filename, None, None, None, name)
         self._schema.source_format = "spreadsheet"
 
     @classmethod
-    def load_spreadsheet(cls, filenames=None, schema_as_strings_or_df=None, name="", check_prerelease=False):
+    def load_spreadsheet(cls, filenames=None, schema_as_strings_or_df=None, name=""):
         """Loads and returns the schema, including partnered schema if applicable.
 
         Parameters:
@@ -41,13 +41,12 @@ class SchemaLoaderDF(SchemaLoader):
                                                    If a single filename string, assumes the standard filename suffixes.
             schema_as_strings_or_df(None or dict of str): A valid set of schema spreadsheet files(tsv as strings)
             name (str): what to identify this schema as.
-            check_prerelease(bool): If True, allow the partnered standard schema to be a prerelease version.
 
         Returns:
             HedSchema: The new schema
         """
         loader = cls(
-            filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name, check_prerelease=check_prerelease
+            filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name
         )
         hed_schema = loader._load()
         return hed_schema

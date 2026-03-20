@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
 
     def test_get_hed_versions_library_prerelease(self):
         # Todo: improve this code to actually test it.
-        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score", check_prerelease=True)
+        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score")
         self.assertIsInstance(cached_versions, list)
         self.assertTrue(len(cached_versions) > 0)
 

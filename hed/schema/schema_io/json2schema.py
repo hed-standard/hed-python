@@ -17,7 +17,7 @@ class SchemaLoaderJSON(SchemaLoader):
     SchemaLoaderJSON(filename) will load just the header_attributes
     """
 
-    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name="", check_prerelease=False):
+    def __init__(self, filename, schema_as_string=None, schema=None, file_format=None, name=""):
         """Initialize the JSON schema loader.
 
         Parameters:
@@ -26,9 +26,8 @@ class SchemaLoaderJSON(SchemaLoader):
             schema (HedSchema or None): A HED schema to merge this new file into
             file_format (str or None): Not used for JSON
             name (str or None): Optional user supplied identifier, by default uses filename
-            check_prerelease (bool): If True, allow the partnered standard schema to be a prerelease version.
         """
-        super().__init__(filename, schema_as_string, schema, file_format, name, check_prerelease)
+        super().__init__(filename, schema_as_string, schema, file_format, name)
         self._json_data = None
         self._schema.source_format = ".json"
 

@@ -2,7 +2,7 @@ HED library="testpre" version="1.0.0" withStandard="9.9.9" unmerged="True"
 
 '''Prologue'''
 Library schema whose withStandard partner (9.9.9) exists only in the prerelease
-directory. Used to test check_prerelease propagation through load_schema/from_string.
+directory. Used to test prerelease partner resolution through load_schema/from_string.
 
 !# start schema
 

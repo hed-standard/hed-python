@@ -1,34 +1,10 @@
 import os.path
 from collections import defaultdict
 from hed.schema import from_string, load_schema, from_dataframes
-from hed.schema import hed_cache
 from hed.errors import get_printable_issue_string, separate_issues, HedFileError
 from hed.schema.schema_comparer import SchemaComparer
 
 all_extensions = [".tsv", ".mediawiki", ".xml", ".json"]
-
-
-def _is_prerelease_partner(base_schema) -> bool:
-    """Return True if base_schema's withStandard partner is only resolvable from the prerelease cache.
-
-    When a library schema serialised with ``save_merged=False`` is reloaded, the loader
-    re-fetches the standard schema named in the ``withStandard`` header attribute. If
-    that version lives only in the prerelease subdirectory of the cache, the reload will
-    fail unless ``check_prerelease=True`` is forwarded. This helper detects that
-    condition by asking the cache whether the version is found without the prerelease
-    flag (not found → prerelease required).
-
-    Parameters:
-        base_schema (HedSchema): The schema to inspect.
-
-    Returns:
-        bool: True if ``withStandard`` is set and the version is absent from the
-            regular (non-prerelease) cache directory.
-    """
-    with_standard = base_schema.with_standard
-    if not with_standard:
-        return False
-    return hed_cache.get_hed_version_path(with_standard, check_prerelease=False) is None
 
 
 def validate_schema_object(base_schema, schema_name, check_for_warnings=False):
@@ -59,15 +35,11 @@ def validate_schema_object(base_schema, schema_name, check_for_warnings=False):
         if errors:
             return validation_issues
 
-        # If the withStandard partner only exists in the prerelease cache, all unmerged
-        # reloads must pass check_prerelease=True or they will fail partner resolution.
-        check_prerelease = _is_prerelease_partner(base_schema)
-
         for save_merged in (True, False):
             label = "merged" if save_merged else "unmerged"
             tagged_name = f"{schema_name} ({label})"
             validation_issues += _roundtrip_all_formats(
-                base_schema, tagged_name, save_merged=save_merged, check_prerelease=check_prerelease
+                base_schema, tagged_name, save_merged=save_merged
             )
     except HedFileError as e:
         print(f"Saving/loading error: {schema_name} {e.message}")
@@ -330,7 +302,7 @@ def get_prerelease_path(repo_path, schema_name, schema_version):
     return os.path.join(base_path, "hedtsv", schema_filename)
 
 
-def _roundtrip_all_formats(base_schema, schema_name, save_merged=True, check_prerelease=False):
+def _roundtrip_all_formats(base_schema, schema_name, save_merged=True):
     """Roundtrip a schema through all four formats and compare to the original.
 
     Serializes the schema to mediawiki, XML, JSON, and TSV, reloads each, and
@@ -341,12 +313,6 @@ def _roundtrip_all_formats(base_schema, schema_name, save_merged=True, check_pre
         schema_name (str): Label for error reporting (should include merge context).
         save_merged (bool): If True, save the merged (with-standard) form.
             If False, save only the library-specific content.
-        check_prerelease (bool): If True, pass check_prerelease=True to all reload
-            calls. Required when the schema's withStandard partner exists only in
-            the prerelease cache directory; otherwise unmerged reloads will fail
-            partner resolution. Has no effect when save_merged=True because the
-            merged serialisation embeds the full standard content and no partner
-            lookup is performed on reload.
 
     Returns:
         list: A list of validation issue strings. Empty if no issues found.
@@ -354,19 +320,19 @@ def _roundtrip_all_formats(base_schema, schema_name, save_merged=True, check_pre
     issues = []
 
     mediawiki_string = base_schema.get_as_mediawiki_string(save_merged=save_merged)
-    reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki", check_prerelease=check_prerelease)
+    reloaded_schema = from_string(mediawiki_string, schema_format=".mediawiki")
     issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "mediawiki")
 
     xml_string = base_schema.get_as_xml_string(save_merged=save_merged)
-    reloaded_schema = from_string(xml_string, schema_format=".xml", check_prerelease=check_prerelease)
+    reloaded_schema = from_string(xml_string, schema_format=".xml")
     issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "xml")
 
     json_string = base_schema.get_as_json_string(save_merged=save_merged)
-    reloaded_schema = from_string(json_string, schema_format=".json", check_prerelease=check_prerelease)
+    reloaded_schema = from_string(json_string, schema_format=".json")
     issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "json")
 
     tsv_dataframes = base_schema.get_as_dataframes(save_merged=save_merged)
-    reloaded_schema = from_dataframes(tsv_dataframes, check_prerelease=check_prerelease)
+    reloaded_schema = from_dataframes(tsv_dataframes)
     issues += _get_schema_comparison(base_schema, reloaded_schema, schema_name, "tsv")
 
     return issues

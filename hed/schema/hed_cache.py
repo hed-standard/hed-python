@@ -79,7 +79,7 @@ def get_cache_directory(cache_folder=None) -> str:
     return HED_CACHE_DIRECTORY
 
 
-def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=False) -> Union[list, dict]:
+def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=True) -> Union[list, dict]:
     """Get the HED versions in the HED directory.
 
     Parameters:
@@ -87,7 +87,8 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
         library_name (str or None): An optional schema library name.
                                     None retrieves the standard schema only.
                                     Pass "all" to retrieve all standard and library schemas as a dict.
-        check_prerelease (bool): If True, results can include prerelease schemas
+        check_prerelease (bool): If True, results can include prerelease schemas.
+                                 Pass False to get only released versions (used by compliance checks).
 
     Returns:
         Union[list, dict]: List of version numbers or dictionary {library_name: [versions]}.
@@ -135,15 +136,14 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
 
 
 def get_hed_version_path(
-    xml_version, library_name=None, local_hed_directory=None, check_prerelease=False
+    xml_version, library_name=None, local_hed_directory=None
 ) -> Union[str, None]:
     """Get HED XML file path in a directory. Only returns filenames that exist.
 
     Parameters:
-        library_name (str or None): Optional the schema library name.
         xml_version (str): Returns this version if it exists
+        library_name (str or None): Optional the schema library name.
         local_hed_directory (str): Path to local HED directory. Defaults to HED_CACHE_DIRECTORY
-        check_prerelease (bool): Also check for prerelease schemas
 
     Returns:
         Union[str, None]: The path to the latest HED version the HED directory.
@@ -152,7 +152,7 @@ def get_hed_version_path(
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
 
-    hed_versions = get_hed_versions(local_hed_directory, library_name, check_prerelease)
+    hed_versions = get_hed_versions(local_hed_directory, library_name)
     if not hed_versions or not xml_version:
         return None
     if xml_version in hed_versions:
@@ -161,11 +161,10 @@ def get_hed_version_path(
         if os.path.exists(regular_path):
             return regular_path
 
-        # If check_prerelease is True, also check prerelease directory
-        if check_prerelease:
-            prerelease_path = _create_xml_filename(xml_version, library_name, local_hed_directory, True)
-            if os.path.exists(prerelease_path):
-                return prerelease_path
+        # Also check prerelease directory
+        prerelease_path = _create_xml_filename(xml_version, library_name, local_hed_directory, True)
+        if os.path.exists(prerelease_path):
+            return prerelease_path
     return None
 
 

@@ -2,15 +2,17 @@
 
 ## Enhancements
 
-### Prerelease library schemas can now partner with prerelease standard schemas
+### Prerelease schemas are now always included in version lookups
 
-Loading a library schema with `withStandard` pointing to a prerelease version of the standard schema (e.g. `withStandard="8.5.0"`) would fail with a `BAD_WITH_STANDARD` error because the `withStandard` partner lookup was always restricted to released schemas, with no way to opt in to prerelease partner resolution.
+Previously, loading a schema whose version existed only in the prerelease cache required passing `check_prerelease=True` through every layer of the loading API. This flag has been **removed** from all public functions (`load_schema_version`, `load_schema`, `from_string`, `from_dataframes`), all schema loader classes, and all internal helpers. Prerelease schemas are now found automatically whenever they are present in the cache.
 
 **Changes:**
 
-- `load_schema()` and `from_string()` in `hed_schema_io.py` now accept a `check_prerelease=False` parameter. When `True`, the `withStandard` partner schema is also searched in the prerelease cache.
-- `SchemaLoader` (base class) and all subclasses (`SchemaLoaderXML`, `SchemaLoaderWiki`, `SchemaLoaderJSON`, `SchemaLoaderDF`) accept and forward `check_prerelease`.
-- `check_schema_loading.py` (`hed_check_schema_loading` script and `run_loading_check()`) now automatically passes `check_prerelease=True` when loading schemas from a prerelease directory, so `test_all_prerelease_schemas` in `spec_tests` works correctly for library prereleases partnered with a prerelease standard.
+- Removed the `check_prerelease` parameter from `load_schema_version()`, `load_schema()`, `from_string()`, and `from_dataframes()` in `hed_schema_io.py`.
+- Removed the parameter from `SchemaLoader` (base class) and all subclasses (`SchemaLoaderXML`, `SchemaLoaderWiki`, `SchemaLoaderJSON`, `SchemaLoaderDF`).
+- `get_hed_version_path()` in `hed_cache.py` now always searches both regular and prerelease directories (regular first).
+- `get_hed_versions()` in `hed_cache.py` now defaults to `check_prerelease=True`; the compliance checker explicitly passes `False` to compare against released versions only.
+- `check_schema_loading.py` simplified — removed `_is_prerelease_partner()` helper.
 - `run_loading_check()` now raises `ValueError` immediately for mutually exclusive flag combinations (`prerelease_only` + `exclude_prereleases`, or `library_filter` + `standard_only`), consistent with the existing CLI-level validation.
 
 # Release 0.9.0 January 22, 2026
