@@ -8,7 +8,6 @@
 # - 403 Forbidden: Some sites (npmjs.com, mathworks.com, doi.org) block automated 
 #   requests but work fine in browsers
 # - 429 Too Many Requests: Rate limiting doesn't mean the link is broken
-# - See .lycheeignore for sites/patterns that are completely excluded
 
 # Accept these HTTP status codes as valid
 # 200: OK (standard success)
