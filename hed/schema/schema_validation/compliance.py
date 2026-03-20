@@ -193,7 +193,7 @@ class SchemaValidator:
         libraries = self.hed_schema.library.split(",")
         versions = self.hed_schema.version_number.split(",")
         for library, version in zip(libraries, versions, strict=False):
-            all_known = hed_cache.get_hed_versions(library_name=library)
+            all_known = hed_cache.get_hed_versions(library_name=library, check_prerelease=False)
             if not all_known or Version(all_known[0]) < Version(version):
                 issues += ErrorHandler.format_error(
                     SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED,
@@ -202,7 +202,7 @@ class SchemaValidator:
                 )
 
         if self.hed_schema.with_standard:
-            all_known = hed_cache.get_hed_versions()
+            all_known = hed_cache.get_hed_versions(check_prerelease=False)
             if not all_known or Version(all_known[0]) < Version(self.hed_schema.with_standard):
                 issues += ErrorHandler.format_error(
                     SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED,

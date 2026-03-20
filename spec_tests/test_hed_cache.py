@@ -79,10 +79,20 @@ class Test(unittest.TestCase):
         self.assertTrue(len(cached_versions) > 0)
 
     def test_get_hed_versions_library_prerelease(self):
-        # Todo: improve this code to actually test it.
-        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score", check_prerelease=True)
-        self.assertIsInstance(cached_versions, list)
-        self.assertTrue(len(cached_versions) > 0)
+        # Plant a known prerelease file so this test is deterministic
+        prerelease_dir = os.path.join(self.hed_cache_dir, "prerelease")
+        os.makedirs(prerelease_dir, exist_ok=True)
+        fake_prerelease = os.path.join(prerelease_dir, "HED_score_0.0.1-alpha.1.xml")
+        try:
+            with open(fake_prerelease, "w") as f:
+                f.write("")
+            all_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score")
+            released_only = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score", check_prerelease=False)
+            self.assertIsInstance(all_versions, list)
+            self.assertIn("0.0.1-alpha.1", all_versions)
+            self.assertNotIn("0.0.1-alpha.1", released_only)
+        finally:
+            os.remove(fake_prerelease)
 
     def test_sort_version_list(self):
         valid_versions = ["8.1.0", "8.0.0", "8.0.0-alpha.1", "7.1.1", "1.0.0"]

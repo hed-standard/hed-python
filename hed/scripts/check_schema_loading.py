@@ -131,19 +131,18 @@ class SchemaLoadTester:
 
         return sorted(schema_files)
 
-    def try_load_schema(self, schema_path, relative_path, check_prerelease=False):
+    def try_load_schema(self, schema_path, relative_path):
         """Try to load a single schema file.
 
         Parameters:
             schema_path (Path): Path to schema file/directory.
             relative_path (Path): Relative path for display purposes.
-            check_prerelease (bool): If True, allow the partnered standard schema to be a prerelease version.
 
         Returns:
             tuple: (success: bool, error_message: str or None)
         """
         try:
-            schema = load_schema(str(schema_path), check_prerelease=check_prerelease)
+            schema = load_schema(str(schema_path))
 
             if schema is None:
                 return False, "Schema loaded as None"
@@ -184,7 +183,7 @@ class SchemaLoadTester:
             relative_path = schema_path.relative_to(self.hed_schemas_root)
             self.results["total"] += 1
 
-            success, error = self.try_load_schema(schema_path, relative_path, check_prerelease=prerelease)
+            success, error = self.try_load_schema(schema_path, relative_path)
 
             if success:
                 self.results["passed"] += 1

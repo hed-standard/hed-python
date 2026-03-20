@@ -194,7 +194,7 @@ def tag_is_deprecated_check(hed_schema, tag_entry, attribute_name) -> list:
     library_name = tag_entry.has_attribute(HedKey.InLibrary, return_value=True)
     if not library_name and not hed_schema.with_standard:
         library_name = hed_schema.library
-    all_versions = get_hed_versions(library_name=library_name)
+    all_versions = get_hed_versions(library_name=library_name, check_prerelease=False)
     if deprecated_version:
         library_version = schema_version_for_library(hed_schema, library_name)
         # Allow the current schema version even if it's prerelease (not yet in known versions)
