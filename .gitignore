@@ -138,6 +138,3 @@ Desktop.ini
 schema_cache_test/
 hed_cache/
 spec_tests/*.json
-
-# GitHub Copilot instructions (project-specific)
-.github/copilot-instructions.md
