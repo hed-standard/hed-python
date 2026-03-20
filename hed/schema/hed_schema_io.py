@@ -358,12 +358,12 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
     """
     if not xml_version:
         versions = hed_cache.get_hed_versions(xml_folder, check_prerelease=False)
-        if versions:
+        if isinstance(versions, list) and versions:
             xml_version = versions[0]
         else:
             raise HedFileError(
                 HedExceptions.FILE_NOT_FOUND,
-                "No HED schema versions found in cache. Ensure schemas are installed or cached.",
+                "No HED standard schema versions found in cache. Ensure schemas are installed or cached.",
                 "",
             )
 

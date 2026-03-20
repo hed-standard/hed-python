@@ -50,7 +50,7 @@ class HedIDValidator:
     @staticmethod
     def _get_previous_version(version, library):
         current_version = Version(version)
-        all_schema_versions = get_hed_versions(library_name=library)
+        all_schema_versions = get_hed_versions(library_name=library, check_prerelease=False)
         for old_version in all_schema_versions:
             if Version(old_version) < current_version:
                 prev_version = old_version

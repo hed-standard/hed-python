@@ -88,6 +88,28 @@ class TestHedSchema(unittest.TestCase):
         self.assertTrue(schema.get_tag_entry("Wßord"))
         self.assertTrue(schema.get_tag_entry("Wssord"))
 
+    def test_load_schema_version_default_resolves_latest(self):
+        """Test that empty version resolves to the highest released standard schema."""
+        schema_default = load_schema_version("")
+        self.assertIsInstance(schema_default, HedSchema)
+        # Should be the highest standard version in the cache
+        versions = hed_cache.get_hed_versions(check_prerelease=False)
+        self.assertIsInstance(versions, list)
+        self.assertEqual(schema_default.version_number, versions[0])
+
+    def test_load_schema_version_default_no_standard_raises(self):
+        """Test that empty version with only library schemas raises HedFileError."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Copy only a library schema into the temp directory (no standard schemas)
+            src = os.path.join(
+                os.path.dirname(os.path.realpath(__file__)), "../../hed/schema/schema_data/HED_score_1.0.0.xml"
+            )
+            shutil.copy(src, tmp_dir)
+
+            with self.assertRaises(HedFileError) as context:
+                load_schema_version("", xml_folder=tmp_dir)
+            self.assertIn("No HED standard schema", str(context.exception))
+
     def test_load_and_verify_tags(self):
         # Load 'testlib' by itself
         testlib = load_schema_version("testlib_2.0.0")
