@@ -223,17 +223,17 @@ python -m unittest tests.models.test_hed_string.TestHedStrings.test_constructor
 
 ### CI/CD pipeline (`.github/workflows/`)
 
-| Workflow | File | Trigger | Purpose |
-|---|---|---|---|
-| Tests | `ci.yaml` | push/PR to main | Python 3.10–3.13 on Ubuntu |
-| Coverage | `ci_cov.yaml` | push/PR to main | Coverage report |
-| Windows tests | `ci_windows.yaml` | push/PR to main | Windows compatibility |
-| Ruff | `ruff.yaml` | push/PR to main | Lint + format check |
-| Typos | `typos.yaml` | push/PR to main | Spelling check |
-| Spec tests | `spec_tests.yaml` | push/PR to main | HED specification compliance |
-| Docs | `docs.yaml` | push/PR to main | Sphinx build |
-| Notebooks | `notebook_tests.yaml` | push/PR to main | Jupyter notebook execution |
-| Links | `links.yaml` | scheduled | Dead-link checker (lychee) |
+| Workflow      | File                  | Trigger                     | Purpose                                                                 |
+| ------------- | --------------------- | --------------------------- | ----------------------------------------------------------------------- |
+| Tests         | `ci.yaml`             | push/PR to any branch       | Python 3.10–3.14 on Ubuntu (main branch); 3.10 & 3.13 on other branches |
+| Coverage      | `ci_cov.yaml`         | push to main only           | Coverage report, Python 3.10                                            |
+| Windows tests | `ci_windows.yaml`     | push/PR to main             | Python 3.10–3.12 on Windows                                             |
+| Ruff          | `ruff.yaml`           | push/PR to main             | Lint + format check                                                     |
+| Typos         | `typos.yaml`          | push/PR to main             | Spelling check                                                          |
+| Spec tests    | `spec_tests.yaml`     | push/PR to any branch       | HED specification compliance, Python 3.10                               |
+| Docs          | `docs.yaml`           | push/PR to main             | Sphinx build                                                            |
+| Notebooks     | `notebook_tests.yaml` | push/PR to main             | Jupyter notebook execution                                              |
+| Links         | `links.yaml`          | scheduled + manual dispatch | Dead-link checker (lychee)                                              |
 
 To replicate CI locally, run `ruff check`, `ruff format --check`, `typos`, and `python -m unittest discover tests -v` before pushing.
 
