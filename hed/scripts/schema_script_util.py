@@ -38,9 +38,7 @@ def validate_schema_object(base_schema, schema_name, check_for_warnings=False):
         for save_merged in (True, False):
             label = "merged" if save_merged else "unmerged"
             tagged_name = f"{schema_name} ({label})"
-            validation_issues += _roundtrip_all_formats(
-                base_schema, tagged_name, save_merged=save_merged
-            )
+            validation_issues += _roundtrip_all_formats(base_schema, tagged_name, save_merged=save_merged)
     except HedFileError as e:
         print(f"Saving/loading error: {schema_name} {e.message}")
         error_text = e.message

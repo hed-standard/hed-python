@@ -79,10 +79,15 @@ class Test(unittest.TestCase):
         self.assertTrue(len(cached_versions) > 0)
 
     def test_get_hed_versions_library_prerelease(self):
-        # Todo: improve this code to actually test it.
-        cached_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score")
-        self.assertIsInstance(cached_versions, list)
-        self.assertTrue(len(cached_versions) > 0)
+        all_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score")
+        released_only = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score", check_prerelease=False)
+        self.assertIsInstance(all_versions, list)
+        self.assertTrue(len(all_versions) > 0)
+        self.assertGreater(
+            len(all_versions),
+            len(released_only),
+            "Default (prerelease included) should return more versions than released-only",
+        )
 
     def test_sort_version_list(self):
         valid_versions = ["8.1.0", "8.0.0", "8.0.0-alpha.1", "7.1.1", "1.0.0"]

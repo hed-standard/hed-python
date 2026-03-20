@@ -45,9 +45,7 @@ class SchemaLoaderDF(SchemaLoader):
         Returns:
             HedSchema: The new schema
         """
-        loader = cls(
-            filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name
-        )
+        loader = cls(filenames, schema_as_strings_or_df=schema_as_strings_or_df, name=name)
         hed_schema = loader._load()
         return hed_schema
 

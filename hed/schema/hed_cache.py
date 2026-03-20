@@ -102,7 +102,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
 
     all_hed_versions = {}
     local_directories = [local_hed_directory]
-    if check_prerelease and not local_hed_directory.endswith(prerelease_suffix):
+    if check_prerelease and Path(local_hed_directory).name != "prerelease":
         local_directories.append(os.path.join(local_hed_directory, "prerelease"))
 
     hed_files = []
@@ -135,9 +135,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
     return all_hed_versions
 
 
-def get_hed_version_path(
-    xml_version, library_name=None, local_hed_directory=None
-) -> Union[str, None]:
+def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None) -> Union[str, None]:
     """Get HED XML file path in a directory. Only returns filenames that exist.
 
     Parameters:
@@ -146,7 +144,7 @@ def get_hed_version_path(
         local_hed_directory (str): Path to local HED directory. Defaults to HED_CACHE_DIRECTORY
 
     Returns:
-        Union[str, None]: The path to the latest HED version the HED directory.
+        Union[str, None]: The path to the requested HED version the HED directory.
 
     """
     if not local_hed_directory:
