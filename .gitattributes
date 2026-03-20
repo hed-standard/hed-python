@@ -1,5 +1,3 @@
-hed/_version.py export-subst
-
 # Set default behavior to automatically normalize line endings to LF
 * text=auto eol=lf
 

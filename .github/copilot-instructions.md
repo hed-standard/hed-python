@@ -2,31 +2,32 @@
 
 > **Local environment**: If `.status/local-environment.md` exists in the repository root, read it first — it contains machine-specific shell, OS, and venv details (e.g. Windows/PowerShell vs Linux/bash) that override the generic commands shown here.
 
-## Code Style
+## Code style
 
 - Google-style docstrings; use `Parameters:` not `Args:`
 - Line length: 120 characters (configured in `pyproject.toml`)
+- Markdown headers use sentence case: capitalize only the first word (and proper nouns/acronyms)
 - When creating work summaries, place them in `.status/` at the repository root
 
-## Project Overview
+## Project overview
 
 HED (Hierarchical Event Descriptors) is a framework for systematically describing events and experimental metadata. This Python repository (`hed-python`) provides the core **hedtools** package for validation, analysis, and transformation of HED-annotated datasets. HED is integrated into two major neuroimaging standards: BIDS (Brain Imaging Data Structure) and NWB (Neurodata Without Borders).
 
-### Related Repositories
+### Related repositories
 
 - **[hed-schemas](https://github.com/hed-standard/hed-schemas)**: Standardized vocabularies (HED schemas) in XML/MediaWiki/OWL formats
 - **[hed-specification](https://github.com/hed-standard/hed-specification)**: Formal specification defining HED annotation rules
 - **[hed-examples](https://github.com/hed-standard/hed-examples)**: Example datasets and use cases (used as submodule in `spec_tests/`)
 
-### Package Distribution
+### Package distribution
 
 - **PyPI Package**: `hedtools` (install via `pip install hedtools`)
 - **Python Version**: 3.10+ required
 - **Online Tools**: [hedtools.org](https://hedtools.org) for web-based validation/transformation
 
-## Architecture & Core Components
+## Architecture & core components
 
-### Three-Layer Architecture
+### Three-layer architecture
 
 1. **Models Layer** (`hed/models/`): Core data structures
 
@@ -55,7 +56,7 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
    - **Remodeling** (`remodeling/`): Transformation operations on tabular data
    - **Util** (`util/`): Shared utilities for data manipulation
 
-### Key Data Flow Patterns
+### Key data flow patterns
 
 **Schema Loading & Caching**:
 
@@ -103,9 +104,9 @@ query = QueryHandler("Event and Action")
 search_results = query.search(hed_string)
 ```
 
-## Development Workflows
+## Development workflows
 
-### Testing Strategy
+### Testing strategy
 
 - Use `unittest` framework exclusively (not pytest)
 - Test structure: `tests/` mirrors `hed/` package structure
@@ -115,7 +116,7 @@ search_results = query.search(hed_string)
   - Individual test: `.venv\Scripts\python.exe -m unittest tests.models.test_hed_string.TestHedStrings.test_constructor`
 - Test data stored in `tests/data/` subdirectories
 
-### Schema Integration
+### Schema integration
 
 - Schemas auto-downloaded and cached in `~/.hedtools/` (cross-platform)
 - Local schema copies bundled in releases for offline use
@@ -123,7 +124,7 @@ search_results = query.search(hed_string)
 - Always validate against multiple schema versions in tests
 - Schema formats: XML, MediaWiki, OWL (all equivalent internally)
 
-### Error Handling Conventions
+### Error handling conventions
 
 - Use `ErrorHandler` class for collecting validation issues
 - Return structured error dictionaries, never raise for validation failures
@@ -131,9 +132,9 @@ search_results = query.search(hed_string)
 - Error codes defined in `hed/errors/error_types.py` and reference `hed-specification` repository
 - Error messages in `hed/errors/error_messages.py` and `hed/errors/schema_error_messages.py`
 
-## BIDS-Specific Patterns
+## BIDS-specific patterns
 
-### File Discovery & Inheritance
+### File discovery & inheritance
 
 ```python
 # Use BidsDataset for proper BIDS traversal with inheritance
@@ -145,13 +146,13 @@ for file_group in dataset.iter_file_groups(["events"]):
     tabular_file = file_group.get_tabular_file()
 ```
 
-### Sidecar Inheritance Chain
+### Sidecar inheritance chain
 
 - BIDS inheritance: dataset → subject → session → file level
 - Use `BidsFileGroup` to handle inheritance automatically
 - Never manually resolve inheritance - use built-in mechanisms
 
-## Remodeling Operations Architecture
+## Remodeling operations architecture
 
 Located in `hed/tools/remodeling/operations/`:
 
@@ -161,7 +162,7 @@ Located in `hed/tools/remodeling/operations/`:
 - Use `Dispatcher` class to orchestrate multi-step transformations
 - Operations are JSON-configurable for reproducible analysis pipelines
 
-## Development Environment
+## Development environment
 
 ### Setup
 
@@ -172,7 +173,7 @@ Located in `hed/tools/remodeling/operations/`:
 pip install -e ".[dev,test,docs,examples]"
 ```
 
-### Package Structure
+### Package structure
 
 - Entry point: `hed/__init__.py` exports main user API
 - Unified CLI entry point: `hedpy` → `hed/cli/cli.py`
@@ -186,7 +187,7 @@ pip install -e ".[dev,test,docs,examples]"
 - Core: `pandas<3.0`, `numpy>=2`, `defusedxml`, `portalocker`, `click`, `semantic-version`, `inflect`, `openpyxl`
 - Dev extras: `ruff`, `typos`, `mdformat`; install with `pip install -e ".[dev]"`
 
-### Linting and Formatting
+### Linting and formatting
 
 Run before every commit — these are enforced by CI:
 
@@ -207,7 +208,7 @@ typos
 
 Ruff rules and line length (120) are configured in `pyproject.toml` under `[tool.ruff]`.
 
-### Running Tests
+### Running tests
 
 ```bash
 # All unit tests
@@ -220,7 +221,7 @@ python -m unittest discover spec_tests -v
 python -m unittest tests.models.test_hed_string.TestHedStrings.test_constructor
 ```
 
-### CI/CD Pipeline (`.github/workflows/`)
+### CI/CD pipeline (`.github/workflows/`)
 
 | Workflow | File | Trigger | Purpose |
 |---|---|---|---|
@@ -236,7 +237,7 @@ python -m unittest tests.models.test_hed_string.TestHedStrings.test_constructor
 
 To replicate CI locally, run `ruff check`, `ruff format --check`, `typos`, and `python -m unittest discover tests -v` before pushing.
 
-## Schema Development Notes
+## Schema development notes
 
 - Schemas support multiple formats: (MediaWiki, XML, OWL) but all schema formats are equivalent and are loaded into the same internal representation.
 - Library schemas can be merged with base schema if they have the withStandard attribute in their header.
@@ -244,7 +245,7 @@ To replicate CI locally, run `ruff check`, `ruff format --check`, `typos`, and `
 - Use `HedSchemaGroup` for multi-schema validation scenarios
 - Schema I/O handled by modules in `hed/schema/schema_io/`
 
-## Common Pitfalls to Avoid
+## Common pitfalls to avoid
 
 - Don't use hardcoded schema versions in production code
 - Don't modify schemas in-place — they're cached/shared across processes and are immutable
