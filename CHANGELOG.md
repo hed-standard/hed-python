@@ -11,7 +11,7 @@ Previously, loading a schema whose version existed only in the prerelease cache 
 - Removed the `check_prerelease` parameter from `load_schema_version()`, `load_schema()`, `from_string()`, and `from_dataframes()` in `hed_schema_io.py`.
 - Removed the parameter from `SchemaLoader` (base class) and all subclasses (`SchemaLoaderXML`, `SchemaLoaderWiki`, `SchemaLoaderJSON`, `SchemaLoaderDF`).
 - `get_hed_version_path()` in `hed_cache.py` now always searches both regular and prerelease directories (regular first).
-- `get_hed_versions()` in `hed_cache.py` now defaults to `check_prerelease=True`. **This is a silent API change**: external callers that omitted `check_prerelease` will now receive prerelease versions. Internal callers that need released-only versions (compliance checker, `deprecatedFrom` validation, hedId comparison) explicitly pass `check_prerelease=False`.
+- `get_hed_versions()` in `hed_cache.py` retains the default `check_prerelease=False` (no public API change). Internal callers that need prerelease inclusion (`get_hed_version_path`, error messages) now pass `check_prerelease=True` explicitly.
 - Default schema version is now resolved dynamically from the cache (highest released version) instead of being hardcoded, so new schema releases no longer require a code change.
 - `check_schema_loading.py` simplified — removed `_is_prerelease_partner()` helper.
 - `run_loading_check()` now raises `ValueError` immediately for mutually exclusive flag combinations (`prerelease_only` + `exclude_prereleases`, or `library_filter` + `standard_only`), consistent with the existing CLI-level validation.

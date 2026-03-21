@@ -362,8 +362,9 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
             xml_version = versions[0]
         else:
             raise HedFileError(
-                HedExceptions.FILE_NOT_FOUND,
-                "No HED standard schema versions found in cache. Ensure schemas are installed or cached.",
+                HedExceptions.BAD_PARAMETERS,
+                "No version specified and no HED standard schema versions found in cache. "
+                "Run hed.schema.cache_xml_versions() or install hedtools to populate the cache.",
                 "",
             )
 
@@ -392,7 +393,9 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
         hed_schema = load_schema(hed_file_path, schema_namespace=schema_namespace, schema=schema, name=name)
     else:
         library_string = f"for library '{library_name}'" if library_name else ""
-        known_versions = hed_cache.get_hed_versions(xml_folder, library_name=library_name if library_name else "all")
+        known_versions = hed_cache.get_hed_versions(
+            xml_folder, library_name=library_name if library_name else "all", check_prerelease=True
+        )
         raise HedFileError(
             HedExceptions.FILE_NOT_FOUND,
             f"HED version {library_string}: '{version_to_validate}' not found. Check {hed_cache.get_cache_directory(xml_folder)} for cache or https://github.com/hed-standard/hed-schemas/tree/main/library_schemas. "

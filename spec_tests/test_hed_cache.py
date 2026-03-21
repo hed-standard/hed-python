@@ -84,10 +84,11 @@ class Test(unittest.TestCase):
         os.makedirs(prerelease_dir, exist_ok=True)
         fake_prerelease = os.path.join(prerelease_dir, "HED_score_0.0.1-alpha.1.xml")
         try:
+            # Empty file is fine — get_hed_versions only parses filenames, never reads contents
             with open(fake_prerelease, "w") as f:
                 f.write("")
-            all_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score")
-            released_only = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score", check_prerelease=False)
+            all_versions = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score", check_prerelease=True)
+            released_only = hed_cache.get_hed_versions(self.hed_cache_dir, library_name="score")
             self.assertIsInstance(all_versions, list)
             self.assertIn("0.0.1-alpha.1", all_versions)
             self.assertNotIn("0.0.1-alpha.1", released_only)
@@ -109,6 +110,34 @@ class Test(unittest.TestCase):
         for version in invalid_versions:
             final_version = f"HED{version}.xml"
             self.assertFalse(hed_cache.version_pattern.match(final_version))
+
+    def test_get_hed_version_path_no_auto_refresh_for_custom_directory(self):
+        """get_hed_version_path returns None for a nonexistent version in a custom directory without downloading."""
+        empty_dir = os.path.join(self.hed_cache_dir, "empty_subdir")
+        os.makedirs(empty_dir, exist_ok=True)
+        try:
+            result = hed_cache.get_hed_version_path("99.99.99", local_hed_directory=empty_dir)
+            self.assertIsNone(result)
+        finally:
+            shutil.rmtree(empty_dir)
+
+    def test_get_hed_version_path_auto_refresh_finds_prerelease(self):
+        """get_hed_version_path automatically downloads a prerelease schema from GitHub when not cached locally."""
+        # Use a fresh cache directory so the version is definitely not present
+        fresh_cache = os.path.join(os.path.dirname(self.hed_cache_dir), "schema_cache_auto_refresh/")
+        if os.path.exists(fresh_cache):
+            shutil.rmtree(fresh_cache)
+        os.makedirs(fresh_cache)
+        saved = hed_cache.HED_CACHE_DIRECTORY
+        try:
+            hed_cache.HED_CACHE_DIRECTORY = fresh_cache
+            # 8.0.0 is a released version that should be downloadable from GitHub
+            result = hed_cache.get_hed_version_path("8.0.0")
+            self.assertIsNotNone(result, "Auto-refresh should download 8.0.0 from GitHub")
+            self.assertTrue(os.path.exists(result))
+        finally:
+            hed_cache.HED_CACHE_DIRECTORY = saved
+            shutil.rmtree(fresh_cache, ignore_errors=True)
 
 
 class TestLocal(unittest.TestCase):

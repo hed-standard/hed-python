@@ -79,7 +79,7 @@ def get_cache_directory(cache_folder=None) -> str:
     return HED_CACHE_DIRECTORY
 
 
-def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=True) -> Union[list, dict]:
+def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=False) -> Union[list, dict]:
     """Get the HED versions in the HED directory.
 
     Parameters:
@@ -150,7 +150,30 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
 
-    hed_versions = get_hed_versions(local_hed_directory, library_name)
+    result = _find_hed_version_path(xml_version, library_name, local_hed_directory)
+    if result:
+        return result
+
+    # Version not found locally — try refreshing cache from GitHub (default cache only)
+    if not xml_version or local_hed_directory != HED_CACHE_DIRECTORY:
+        return None
+
+    cache_xml_versions()
+    return _find_hed_version_path(xml_version, library_name, local_hed_directory)
+
+
+def _find_hed_version_path(xml_version, library_name, local_hed_directory):
+    """Look up a HED version path in the given directory without downloading.
+
+    Parameters:
+        xml_version (str): The version to find.
+        library_name (str or None): Optional schema library name.
+        local_hed_directory (str): Directory to search.
+
+    Returns:
+        Union[str, None]: The path if found, None otherwise.
+    """
+    hed_versions = get_hed_versions(local_hed_directory, library_name, check_prerelease=True)
     if not hed_versions or not xml_version:
         return None
     if xml_version in hed_versions:
