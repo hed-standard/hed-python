@@ -108,7 +108,8 @@ class TestHedSchema(unittest.TestCase):
 
             with self.assertRaises(HedFileError) as context:
                 load_schema_version("", xml_folder=tmp_dir)
-            self.assertIn("No HED standard schema", str(context.exception))
+            self.assertEqual(context.exception.args[0], "BAD_PARAMETERS")
+            self.assertIn("No version specified", str(context.exception))
 
     def test_load_and_verify_tags(self):
         # Load 'testlib' by itself
