@@ -88,7 +88,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
                                     None retrieves the standard schema only.
                                     Pass "all" to retrieve all standard and library schemas as a dict.
         check_prerelease (bool): If True, results can include prerelease schemas.
-                                 Pass False to get only released versions (used by compliance checks).
+                                 Default is False, returning only released versions.
 
     Returns:
         Union[list, dict]: List of version numbers or dictionary {library_name: [versions]}.

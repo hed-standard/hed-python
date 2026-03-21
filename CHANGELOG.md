@@ -13,6 +13,8 @@ Previously, loading a schema whose version existed only in the prerelease cache 
 - `get_hed_version_path()` in `hed_cache.py` now always searches both regular and prerelease directories (regular first).
 - `get_hed_versions()` in `hed_cache.py` retains the default `check_prerelease=False` (no public API change). Internal callers that need prerelease inclusion (`get_hed_version_path`, error messages) now pass `check_prerelease=True` explicitly.
 - Default schema version is now resolved dynamically from the cache (highest released version) instead of being hardcoded, so new schema releases no longer require a code change.
+- `get_hed_version_path()` now automatically downloads schemas from GitHub when a requested version is not found in the local cache (default cache directory only).
+- `_load_schema_version_sub()` now raises `BAD_PARAMETERS` (was `FILE_NOT_FOUND`) when no version is specified and the cache is empty, since the problem is a missing argument rather than a missing file.
 - `check_schema_loading.py` simplified — removed `_is_prerelease_partner()` helper.
 - `run_loading_check()` now raises `ValueError` immediately for mutually exclusive flag combinations (`prerelease_only` + `exclude_prereleases`, or `library_filter` + `standard_only`), consistent with the existing CLI-level validation.
 

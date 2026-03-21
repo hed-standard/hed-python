@@ -121,8 +121,8 @@ class Test(unittest.TestCase):
         finally:
             shutil.rmtree(empty_dir)
 
-    def test_get_hed_version_path_auto_refresh_finds_prerelease(self):
-        """get_hed_version_path automatically downloads a prerelease schema from GitHub when not cached locally."""
+    def test_get_hed_version_path_auto_refresh_downloads_missing_version(self):
+        """get_hed_version_path automatically downloads from GitHub when a version is not cached locally."""
         # Use a fresh cache directory so the version is definitely not present
         fresh_cache = os.path.join(os.path.dirname(self.hed_cache_dir), "schema_cache_auto_refresh/")
         if os.path.exists(fresh_cache):
