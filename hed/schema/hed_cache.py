@@ -136,15 +136,20 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
 
 
 def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None) -> Union[str, None]:
-    """Get HED XML file path in a directory. Only returns filenames that exist.
+    """Get the HED XML file path for a given version.
+
+    Searches the local cache first. If the version is not found and local_hed_directory
+    is the default HED cache, the cache is refreshed from GitHub before a second lookup.
+    No network call is made for custom directories.
 
     Parameters:
-        xml_version (str): Returns this version if it exists
-        library_name (str or None): Optional the schema library name.
-        local_hed_directory (str): Path to local HED directory. Defaults to HED_CACHE_DIRECTORY
+        xml_version (str): The version string to look up.
+        library_name (str or None): Optional schema library name.
+        local_hed_directory (str or None): Path to local HED directory. Defaults to HED_CACHE_DIRECTORY.
+            Passing a custom path disables the automatic GitHub refresh.
 
     Returns:
-        Union[str, None]: The path to the requested HED version the HED directory.
+        Union[str, None]: The path to the requested HED XML file, or None.
 
     """
     if not local_hed_directory:
@@ -154,7 +159,9 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
     if result:
         return result
 
-    # Version not found locally — try refreshing cache from GitHub (default cache only)
+    # Version not found locally — try refreshing cache from GitHub (default cache only).
+    # cache_xml_versions() returns -1 on failure (network error, lock contention, rate limit).
+    # In that case the second lookup will return None, which the caller treats as "version not found".
     if not xml_version or local_hed_directory != HED_CACHE_DIRECTORY:
         return None
 
