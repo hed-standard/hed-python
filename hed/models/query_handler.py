@@ -102,7 +102,7 @@ class QueryHandler:
     @staticmethod
     def _tokenize(expression_string):
         """Tokenize the expression string into a list"""
-        grouping_re = r"\[\[|\[|\]\]|\]|}|{|:"
+        grouping_re = r"\[|\]|}|{|:"
         paren_re = r"\)|\(|~"
         word_re = r"\?+|\&\&|\|\||,|[\"_\-a-zA-Z0-9/.^#\*@]+"
         re_string = rf"({grouping_re}|{paren_re}|{word_re})"
