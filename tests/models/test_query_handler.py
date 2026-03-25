@@ -710,3 +710,40 @@ class TestParser(unittest.TestCase):
         self.base_test("{(Onset || Offset), (Def || {Def-expand}): ???}", test_strings)
         test_strings = {"(A, B)": True, "(A, B, C)": True}
         self.base_test("{a || b}", test_strings)
+
+    def test_double_bracket_rejected(self):
+        """Fix #2: [[ and ]] were tokenized but never parsed. Now they are removed from the tokenizer,
+        so [[a]] is parsed as nested descendant groups: [ [a] ]."""
+        test_strings = {
+            "((A))": True,
+            "(A)": False,
+            "A": False,
+        }
+        # [[a]] should now parse as [ [a] ] — nested descendant groups
+        self.base_test("[[a]]", test_strings)
+
+    def test_match_mode_constants(self):
+        """Fix #1: _match_mode should use named constants instead of True/1/2."""
+        from hed.models.query_expressions import Expression
+        from hed.models.query_util import Token
+
+        # Bare term → MATCH_TERM (ancestor search)
+        expr = Expression(Token("event"))
+        self.assertEqual(expr._match_mode, Expression.MATCH_TERM)
+
+        # Slash path → MATCH_EXACT
+        expr = Expression(Token("def/mydef"))
+        self.assertEqual(expr._match_mode, Expression.MATCH_EXACT)
+
+        # Quoted term → MATCH_EXACT
+        expr = Expression(Token('"event"'))
+        self.assertEqual(expr._match_mode, Expression.MATCH_EXACT)
+
+        # Wildcard → MATCH_WILDCARD
+        expr = Expression(Token("eve*"))
+        self.assertEqual(expr._match_mode, Expression.MATCH_WILDCARD)
+
+        # Verify constants are distinct
+        self.assertNotEqual(Expression.MATCH_TERM, Expression.MATCH_EXACT)
+        self.assertNotEqual(Expression.MATCH_EXACT, Expression.MATCH_WILDCARD)
+        self.assertNotEqual(Expression.MATCH_TERM, Expression.MATCH_WILDCARD)

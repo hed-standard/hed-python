@@ -6,20 +6,24 @@ from hed.models.query_util import SearchResult
 class Expression:
     """Base class for parsed query expressions."""
 
+    MATCH_TERM = 0  # Bare term: ancestor search via tag_terms
+    MATCH_EXACT = 1  # Slash-path or quoted: exact tag match
+    MATCH_WILDCARD = 2  # Asterisk prefix match on short_tag
+
     def __init__(self, token, left=None, right=None):
         self.left = left
         self.right = right
         self.token = token
-        self._match_mode = "/" in token.text
+        self._match_mode = Expression.MATCH_EXACT if "/" in token.text else Expression.MATCH_TERM
         self._must_not_be_in_line = False
         if token.text.startswith("@"):
             self._must_not_be_in_line = True
             token.text = token.text[1:]
         if token.text.startswith('"') and token.text.endswith('"') and len(token.text) > 2:
-            self._match_mode = 1
+            self._match_mode = Expression.MATCH_EXACT
             token.text = token.text[1:-1]
         if "*" in token.text:
-            self._match_mode = 2
+            self._match_mode = Expression.MATCH_WILDCARD
             token.text = token.text.replace("*", "")
 
     @staticmethod
@@ -52,9 +56,9 @@ class Expression:
             hed_group(HedGroup): The object to search
             exact(bool): If True, we are only looking for groups containing this term directly, not descendants.
         """
-        if self._match_mode == 2:
+        if self._match_mode == Expression.MATCH_WILDCARD:
             groups_found = hed_group.find_wildcard_tags([self.token.text], recursive=True, include_groups=2)
-        elif self._match_mode:
+        elif self._match_mode == Expression.MATCH_EXACT:
             groups_found = hed_group.find_exact_tags([self.token.text], recursive=True, include_groups=2)
         else:
             groups_found = hed_group.find_tags_with_term(self.token.text, recursive=True, include_groups=2)

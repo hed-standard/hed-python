@@ -1,6 +1,7 @@
 """A single parenthesized HED string."""
 
 from __future__ import annotations
+from collections import deque
 from hed.models.hed_tag import HedTag
 from hed.models.model_constants import DefTagNames
 import copy
@@ -202,14 +203,13 @@ class HedGroup:
             list:  A list of all the tags in this group including descendants.
 
         """
-        node_list = [self]
+        node_list = deque([self])
         final_list = []
 
-        # Using an iterator is worse performance wise here.
         while node_list:
-            current_group_or_tag = node_list.pop(0)
+            current_group_or_tag = node_list.popleft()
             if isinstance(current_group_or_tag, HedGroup):
-                node_list = list(current_group_or_tag.children) + node_list
+                node_list.extendleft(reversed(current_group_or_tag.children))
             else:
                 final_list.append(current_group_or_tag)
         return final_list
@@ -224,14 +224,13 @@ class HedGroup:
             list: The list of all HedGroups in this group, including descendants and self.
 
         """
-        node_list = [self]
+        node_list = deque([self])
         final_list = []
 
-        # Using an iterator is worse performance wise here.
         while node_list:
-            current_group_or_tag = node_list.pop(0)
+            current_group_or_tag = node_list.popleft()
             if isinstance(current_group_or_tag, HedGroup):
-                node_list = list(current_group_or_tag.children) + node_list
+                node_list.extendleft(reversed(current_group_or_tag.children))
                 final_list.append(current_group_or_tag)
 
         if also_return_depth:

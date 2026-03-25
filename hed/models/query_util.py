@@ -94,7 +94,7 @@ class Token:
     ExactMatch = 11
     ExactMatchEnd = 12
     ExactMatchOptional = 14
-    NotInLine = 13  # Not currently a token. In development and may become one.
+    NotInLine = 13  # The @tag prefix operator, indicating tag must NOT be in matched line.
 
     def __init__(self, text):
         """Initialize a token for query parsing.
