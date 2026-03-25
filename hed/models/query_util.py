@@ -94,7 +94,6 @@ class Token:
     ExactMatch = 11
     ExactMatchEnd = 12
     ExactMatchOptional = 14
-    NotInLine = 13  # Reserved constant. The @tag prefix is handled in Expression.__init__, not as a token kind.
 
     def __init__(self, text):
         """Initialize a token for query parsing.
