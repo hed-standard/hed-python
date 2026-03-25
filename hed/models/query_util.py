@@ -94,7 +94,7 @@ class Token:
     ExactMatch = 11
     ExactMatchEnd = 12
     ExactMatchOptional = 14
-    NotInLine = 13  # The @tag prefix operator, indicating tag must NOT be in matched line.
+    NotInLine = 13  # Reserved constant. The @tag prefix is handled in Expression.__init__, not as a token kind.
 
     def __init__(self, text):
         """Initialize a token for query parsing.
@@ -117,7 +117,6 @@ class Token:
             "{": Token.ExactMatch,  # Nothing else
             "}": Token.ExactMatchEnd,  # Nothing else
             ":": Token.ExactMatchOptional,
-            "@": Token.NotInLine,
         }
         self.kind = tokens.get(text, Token.Tag)
         self.text = text

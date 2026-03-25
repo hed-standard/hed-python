@@ -44,7 +44,8 @@ def get_query_handlers(
         try:
             expression_parsers[index] = QueryHandler(query)
         except Exception as e:
-            issues.append(f"[BadQuery {index}]: {query} cannot be parsed: {e}")
+            detail = " ".join(str(e).split())
+            issues.append(f"[BadQuery {index}]: {query} cannot be parsed: {detail}")
     return expression_parsers, query_names, issues
 
 
