@@ -80,7 +80,7 @@ pip install -e ".[dev,docs,test,examples]"
 ### Basic usage
 
 ```python
-from hed import HedString, load_schema_version
+from hed import HedString, get_printable_issue_string, load_schema_version
 
 
 # Load the latest HED schema
@@ -105,17 +105,19 @@ HEDTools provides a unified command-line interface with git-like subcommands:
 hedpy --help
 
 # Validate a BIDS dataset
-hedpy validate-bids /path/to/bids/dataset
+hedpy validate bids-dataset /path/to/bids/dataset
 
-# Extract sidecar template from BIDS dataset
-hedpy extract-sidecar /path/to/dataset --suffix events
+# Validate a HED string
+hedpy validate string "Sensory-event, (Red, Square)" -sv 8.4.0
+
+# Extract sidecar template from a BIDS dataset
+hedpy extract bids-sidecar /path/to/dataset
 
 # Validate HED schemas
 hedpy schema validate /path/to/schema.xml
 
 # Convert schema between formats (XML, MEDIAWIKI, TSV, JSON)
 hedpy schema convert /path/to/schema.xml
-
 ```
 
 **Legacy commands** (deprecated, use `hedpy` instead):
@@ -219,6 +221,7 @@ The HED ecosystem consists of several interconnected repositories:
 | [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents             |
 | [hed-schemas](https://github.com/hed-standard/hed-schemas)             | Official HED schema repository                   |
 | [table-remodeler](https://github.com/hed-standard/table-remodeler)     | Table transformation and remodeling tools        |
+| [hed-vis](https://github.com/hed-standard/hed-vis)                     | HED visualization tools (word clouds, etc.)      |
 | [ndx-hed](https://github.com/hed-standard/ndx-hed)                     | HED support for NWB                              |
 | [hed-javascript](https://github.com/hed-standard/hed-javascript)       | JavaScript HED validation tools                  |
 
@@ -278,7 +281,7 @@ If you use HEDTools in your research, please cite:
 @software{hedtools,
   author = {Ian Callanan, Robbins, Kay and others},
   title = {HEDTools: Python tools for HED},
-  year = {2024},
+  year = {2026},
   publisher = {GitHub},
   url = {https://github.com/hed-standard/hed-python},
   doi = {10.5281/zenodo.8056010}

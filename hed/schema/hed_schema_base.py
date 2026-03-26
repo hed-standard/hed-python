@@ -27,6 +27,12 @@ class HedSchemaBase(ABC):
 
     @name.setter
     def name(self, name):
+        """Set a custom schema name, overriding the filename-derived default.
+
+        Parameters:
+            name (str): The name to assign to this schema.
+
+        """
         self._name = name
 
     @property

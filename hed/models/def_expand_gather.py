@@ -100,6 +100,13 @@ class AmbiguousDef:
         return False
 
     def get_definition_string(self):
+        """Return the resolved definition as a parenthesised HED string.
+
+        Returns:
+            str or None: A string of the form ``(def_tag_name, <contents>)`` if the
+            definition has been resolved, or ``None`` if it has not yet been resolved.
+
+        """
         if self.def_tag_name is None or self.resolved_definition is None:
             return None
         return f"({self.def_tag_name}, {str(self.resolved_definition)})"

@@ -7,6 +7,8 @@ from hed.schema.schema_io.schema2base import Schema2Base
 
 
 class Schema2Wiki(Schema2Base):
+    """Converts a HedSchema to MediaWiki-format text output."""
+
     def __init__(self):
         super().__init__()
         self.current_tag_string = ""

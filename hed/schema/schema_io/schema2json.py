@@ -352,6 +352,7 @@ class Schema2JSON(Schema2Base):
 
         # Helper to get list values from a source dict
         def get_list_value(attr_key, source_dict):
+            """Return the value for attr_key from source_dict as a list."""
             value = source_dict.get(attr_key)
             if value is None:
                 return []
@@ -362,6 +363,7 @@ class Schema2JSON(Schema2Base):
 
         # Helper to get boolean attribute value from a source dict
         def get_bool_attribute(attr_key, source_dict):
+            """Return the boolean or string truth value of attr_key from source_dict."""
             if attr_key not in source_dict:
                 return False
             value = source_dict[attr_key]
@@ -373,6 +375,7 @@ class Schema2JSON(Schema2Base):
 
         # Helper to build attributes dict, omitting false booleans and empty values
         def build_attributes_dict(source_dict, include_takes_value):
+            """Build a JSON attributes dict from source_dict, omitting falsy entries."""
             attrs = {}
 
             # Boolean attributes - only include if true
@@ -510,6 +513,7 @@ class Schema2JSON(Schema2Base):
 
         # Helper to get list values
         def get_list_value(attr_key):
+            """Return the value for attr_key from placeholder_entry.attributes as a list."""
             value = placeholder_entry.attributes.get(attr_key)
             if value is None:
                 return []

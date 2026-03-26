@@ -113,7 +113,7 @@ def process_def_expands(
 
 
 def sort_dataframe_by_onsets(df):
-    """Gather def-expand tags in the strings/compare with known definitions to find any differences.
+    """Sort a dataframe by the onset column.
 
     Parameters:
         df(pd.Dataframe): Dataframe to sort.

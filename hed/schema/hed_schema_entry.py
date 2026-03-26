@@ -1,3 +1,5 @@
+"""Schema entry classes representing individual nodes in the HED vocabulary."""
+
 from __future__ import annotations
 from typing import Union, Any
 from hed.schema.hed_schema_constants import HedSectionKey
@@ -131,6 +133,12 @@ class HedSchemaEntry:
 
     @property
     def section_key(self):
+        """Returns the HedSectionKey identifying which schema section owns this entry.
+
+        Returns:
+            HedSectionKey: The section key for this entry's parent section.
+
+        """
         return self._section.section_key
 
     def __eq__(self, other):

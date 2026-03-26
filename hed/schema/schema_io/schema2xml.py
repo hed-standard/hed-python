@@ -7,6 +7,8 @@ from hed.schema.schema_io.schema2base import Schema2Base
 
 
 class Schema2XML(Schema2Base):
+    """Converts a HedSchema to an XML ElementTree representation."""
+
     def __init__(self):
         super().__init__()
         self.hed_node = None

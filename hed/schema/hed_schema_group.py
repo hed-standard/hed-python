@@ -1,4 +1,4 @@
-""" """
+"""Container for multiple HED schemas used together in multi-library validation."""
 
 from __future__ import annotations
 

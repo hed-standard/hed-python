@@ -1,3 +1,5 @@
+"""Utilities for parsing and validating HED schema header attributes."""
+
 from semantic_version import Version
 
 from hed.schema import hed_schema_constants as constants

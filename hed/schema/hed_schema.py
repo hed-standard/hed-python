@@ -1,3 +1,5 @@
+"""Single HED schema object representing a loaded vocabulary specification."""
+
 from __future__ import annotations
 
 import json

@@ -1,3 +1,5 @@
+"""Column name constants for the DataFrame representation of HED schemas."""
+
 from hed.schema.hed_schema_constants import HedSectionKey
 
 KEY_COLUMN_NAME = "rdfs.label"

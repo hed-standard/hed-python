@@ -85,7 +85,22 @@ class Expression:
 
 
 class ExpressionAnd(Expression):
+    """Query expression node for the logical AND (&&) operator.
+
+    Both sub-expressions must match within the same HED group.
+    """
+
     def handle_expr(self, hed_group, exact=False):
+        """Return groups that satisfy both the left and right sub-expressions.
+
+        Parameters:
+            hed_group (HedGroup): The HED group to search within.
+            exact (bool): If True, require exact child matching.
+
+        Returns:
+            list: Merged :class:`~hed.models.query_util.SearchResult` objects matching both sub-expressions.
+
+        """
         groups1 = self.left.handle_expr(hed_group, exact=exact)
         if not groups1:
             return groups1
@@ -138,7 +153,24 @@ class ExpressionAnd(Expression):
 
 
 class ExpressionWildcardNew(Expression):
+    """Query expression node for wildcard tokens (``?``, ``??``, ``???``).
+
+    - ``?``  — matches any tag or group child.
+    - ``??`` — matches any tag child.
+    - ``???`` — matches any group child.
+    """
+
     def handle_expr(self, hed_group, exact=False):
+        """Return groups containing children that match the wildcard token.
+
+        Parameters:
+            hed_group (HedGroup): The HED group to search within.
+            exact (bool): Unused; present for API consistency with :meth:`Expression.handle_expr`.
+
+        Returns:
+            list: :class:`~hed.models.query_util.SearchResult` objects for each matching child.
+
+        """
         groups_found = []
         if self.token.text == "?":
             # Any tag or group
@@ -166,7 +198,22 @@ class ExpressionWildcardNew(Expression):
 
 
 class ExpressionOr(Expression):
+    """Query expression node for the logical OR (||) operator.
+
+    At least one sub-expression must match within the HED group.
+    """
+
     def handle_expr(self, hed_group, exact=False):
+        """Return groups that satisfy the left or right sub-expression (or both).
+
+        Parameters:
+            hed_group (HedGroup): The HED group to search within.
+            exact (bool): If True, require exact child matching.
+
+        Returns:
+            list: Combined (deduplicated) :class:`~hed.models.query_util.SearchResult` objects.
+
+        """
         groups1 = self.left.handle_expr(hed_group, exact=exact)
         # Don't early out as we need to gather all groups in case children appear more than once etc
         groups2 = self.right.handle_expr(hed_group, exact=exact)
@@ -194,7 +241,22 @@ class ExpressionOr(Expression):
 
 
 class ExpressionNegation(Expression):
+    """Query expression node for logical negation (~).
+
+    Returns all groups that do *not* match the sub-expression.
+    """
+
     def handle_expr(self, hed_group, exact=False):
+        """Return groups that do not satisfy the right sub-expression.
+
+        Parameters:
+            hed_group (HedGroup): The HED group to search within.
+            exact (bool): If True, require exact child matching.
+
+        Returns:
+            list: :class:`~hed.models.query_util.SearchResult` objects for non-matching groups.
+
+        """
         found_groups = self.right.handle_expr(hed_group, exact=exact)
 
         # Todo: this may need more thought with respects to wildcards and negation
@@ -212,13 +274,35 @@ class ExpressionNegation(Expression):
 
 
 class ExpressionDescendantGroup(Expression):
+    """Query expression node that searches within descendant groups.
+
+    Matches the right sub-expression anywhere in the group hierarchy and
+    returns the nearest ancestor groups that contain the match.
+    """
+
     def handle_expr(self, hed_group, exact=False):
+        """Return parent groups whose descendants match the right sub-expression.
+
+        Parameters:
+            hed_group (HedGroup): The HED group to search within.
+            exact (bool): Unused; present for API consistency with :meth:`Expression.handle_expr`.
+
+        Returns:
+            list: :class:`~hed.models.query_util.SearchResult` objects for matching ancestor groups.
+
+        """
         found_groups = self.right.handle_expr(hed_group)
         found_parent_groups = self._get_parent_groups(found_groups)
         return found_parent_groups
 
 
 class ExpressionExactMatch(Expression):
+    """Query expression node that requires an exact (curly-brace) group match.
+
+    The matched group must contain exactly the children specified; no extra
+    children are allowed unless they are declared optional via the left sub-expression.
+    """
+
     def __init__(self, token, left=None, right=None):
         super().__init__(token, left, right)
         self.optional = "any"
@@ -233,6 +317,16 @@ class ExpressionExactMatch(Expression):
         return filtered_list
 
     def handle_expr(self, hed_group, exact=False):
+        """Return groups that exactly match the required (and optional) sub-expressions.
+
+        Parameters:
+            hed_group (HedGroup): The HED group to search within.
+            exact (bool): Propagated to sub-expression matching; always True internally.
+
+        Returns:
+            list: :class:`~hed.models.query_util.SearchResult` objects for exact-matching groups.
+
+        """
         found_groups = self.right.handle_expr(hed_group, exact=True)
         if self.optional == "any":
             return self._get_parent_groups(found_groups)

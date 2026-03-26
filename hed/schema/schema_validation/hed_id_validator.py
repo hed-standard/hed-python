@@ -1,3 +1,5 @@
+"""Validator for HED ID consistency across schema versions."""
+
 from hed.schema.hed_cache import get_library_data
 from semantic_version import Version
 from hed.schema.hed_schema_io import load_schema_version
