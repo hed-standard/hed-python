@@ -1,3 +1,5 @@
+"""CLI script to add missing HED IDs to a schema in the hed-schemas repository."""
+
 from hed.scripts.schema_script_util import get_prerelease_path
 from hed.scripts.hed_convert_schema import convert_and_update
 import argparse
@@ -6,6 +8,12 @@ from hed.schema.schema_io.df_util import convert_filenames_to_dict
 
 # Slightly tweaked version of hed_convert_schema.py with a new main function to allow different parameters.
 def main():
+    """Entry point: parse arguments and add HED IDs to the specified schema version.
+
+    Returns:
+        int: 0 on success, non-zero on failure.
+
+    """
     parser = argparse.ArgumentParser(description="Add hed ids to a specific schema.")
     parser.add_argument("repo_path", help="The location of the hed-schemas directory")
     parser.add_argument("schema_name", help='The name of the schema("standard" for standard schema) to modify')

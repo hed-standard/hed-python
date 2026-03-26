@@ -170,6 +170,15 @@ def clean_filename(filename):
 
 
 def get_basename(file_path):
+    """Return the base filename (without extension) for the given path.
+
+    Parameters:
+        file_path (str): Path to a file.
+
+    Returns:
+        str: The filename stem, e.g. ``sub-01_task-rest_events`` for ``sub-01_task-rest_events.tsv``.
+
+    """
     return get_full_extension(file_path)[0]
 
 

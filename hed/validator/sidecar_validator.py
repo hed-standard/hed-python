@@ -19,6 +19,8 @@ COLUMN_REF_PATTERN = re.compile(r"\{([a-z_\-0-9]+)\}", re.IGNORECASE)
 
 # todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
 class SidecarValidator:
+    """Validates HED annotations in a BIDS JSON sidecar against a HED schema."""
+
     reserved_column_names = ["HED"]
     reserved_category_values = ["n/a"]
 

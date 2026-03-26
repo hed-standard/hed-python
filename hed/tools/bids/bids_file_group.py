@@ -309,6 +309,17 @@ class BidsFileGroup:
 
     @staticmethod
     def create_file_group(root_path, file_list, suffix):
+        """Construct a BidsFileGroup from a list of files sharing the given suffix.
+
+        Parameters:
+            root_path (str): Root path of the BIDS dataset.
+            file_list (list[str]): List of file paths belonging to this suffix group.
+            suffix (str): BIDS file suffix identifying this group (e.g. ``events``).
+
+        Returns:
+            BidsFileGroup or None: The constructed group, or None if it contains no sidecars or data files.
+
+        """
         logger = logging.getLogger("hed.bids_file_group")
         logger.debug(f"Creating file group for suffix '{suffix}' from {len(file_list)} files")
 

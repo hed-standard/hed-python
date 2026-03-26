@@ -20,6 +20,8 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class SpreadsheetValidator:
+    """Validates HED annotations in a tabular (TSV/Excel) spreadsheet against a HED schema."""
+
     ONSET_TOLERANCE = 1e-7
     TEMPORAL_ANCHORS = re.compile(r"|".join(map(re.escape, ["onset", "inset", "offset", "delay"])))
 

@@ -1,3 +1,5 @@
+"""Singleton checker that validates reserved HED tag usage rules loaded from reservedTags.json."""
+
 import json
 import os
 import math
@@ -8,6 +10,8 @@ from hed.errors.error_reporter import ErrorHandler
 
 
 class ReservedChecker:
+    """Thread-safe singleton that loads reserved tag rules and checks groups for compliance."""
+
     _instance = None
     _lock = Lock()
     reserved_reqs_path = os.path.join(os.path.dirname(__file__), "data/reservedTags.json")
@@ -29,6 +33,12 @@ class ReservedChecker:
 
     @staticmethod
     def get_instance():
+        """Return the singleton ReservedChecker instance, creating it on first call.
+
+        Returns:
+            ReservedChecker: The shared singleton instance.
+
+        """
         if ReservedChecker._instance is None:
             ReservedChecker._instance = ReservedChecker()
         return ReservedChecker._instance
@@ -47,6 +57,15 @@ class ReservedChecker:
         return {value["name"] for value in self.reserved_map.values() if value.get(property_name) is True}
 
     def get_reserved(self, group):
+        """Return the list of reserved tags found directly within the given HED group.
+
+        Parameters:
+            group (HedGroup): The group to inspect.
+
+        Returns:
+            list[HedTag]: Tags in the group whose short base tag is a reserved name.
+
+        """
         reserved_tags = [tag for tag in group.tags() if tag.short_base_tag in self.special_names]
         return reserved_tags
 

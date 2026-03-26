@@ -12,6 +12,15 @@ class StringValidator:
     COMMA = ","
 
     def run_string_validator(self, hed_string_obj):
+        """Run all string-level structural checks on a HED string object.
+
+        Parameters:
+            hed_string_obj (HedString): The parsed HED string to validate.
+
+        Returns:
+            list[dict]: Validation issue dictionaries.
+
+        """
         validation_issues = []
         validation_issues += self.check_count_tag_group_parentheses(hed_string_obj.get_original_hed_string())
         validation_issues += self.check_delimiter_issues_in_hed_string(hed_string_obj.get_original_hed_string())

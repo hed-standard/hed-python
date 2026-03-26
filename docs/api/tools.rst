@@ -14,10 +14,50 @@ EventManager
    :undoc-members:
    :show-inheritance:
 
+EventChecker
+~~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.event_checker.EventChecker
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+EventsChecker
+~~~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.event_checker.EventsChecker
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+EventsSummary
+~~~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.events_summary.EventsSummary
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 HedTagManager
 ~~~~~~~~~~~~~
 
 .. autoclass:: hed.tools.analysis.hed_tag_manager.HedTagManager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HedTagCount
+~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.hed_tag_counts.HedTagCount
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HedTagCounts
+~~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.hed_tag_counts.HedTagCounts
    :members:
    :undoc-members:
    :show-inheritance:
@@ -30,6 +70,46 @@ HedTypeManager
    :undoc-members:
    :show-inheritance:
 
+HedType
+~~~~~~~
+
+.. autoclass:: hed.tools.analysis.hed_type.HedType
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HedTypeDefs
+~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.hed_type_defs.HedTypeDefs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HedTypeFactors
+~~~~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.hed_type_factors.HedTypeFactors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HedTypeCount
+~~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.hed_type_counts.HedTypeCount
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+HedTypeCounts
+~~~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.hed_type_counts.HedTypeCounts
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 TabularSummary
 ~~~~~~~~~~~~~~
 
@@ -38,10 +118,10 @@ TabularSummary
    :undoc-members:
    :show-inheritance:
 
-HedType
-~~~~~~~
+ColumnNameSummary
+~~~~~~~~~~~~~~~~~
 
-.. autoclass:: hed.tools.analysis.hed_type.HedType
+.. autoclass:: hed.tools.analysis.column_name_summary.ColumnNameSummary
    :members:
    :undoc-members:
    :show-inheritance:
@@ -53,6 +133,29 @@ FileDictionary
    :members:
    :undoc-members:
    :show-inheritance:
+
+KeyMap
+~~~~~~
+
+.. autoclass:: hed.tools.analysis.key_map.KeyMap
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+TemporalEvent
+~~~~~~~~~~~~~
+
+.. autoclass:: hed.tools.analysis.temporal_event.TemporalEvent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Annotation utilities
+~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: hed.tools.analysis.annotation_util
+   :members:
+   :undoc-members:
 
 BIDS tools
 ----------
@@ -101,5 +204,29 @@ BIDS utilities
 ~~~~~~~~~~~~~~
 
 .. automodule:: hed.tools.bids.bids_util
-   :members: parse_bids_filename
+   :members:
+   :undoc-members:
+
+Utility functions
+-----------------
+
+DataFrame utilities
+~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: hed.tools.util.data_util
+   :members:
+   :undoc-members:
+
+File/IO utilities
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: hed.tools.util.io_util
+   :members:
+   :undoc-members:
+
+Schema utilities
+~~~~~~~~~~~~~~~~
+
+.. automodule:: hed.tools.util.schema_util
+   :members:
    :undoc-members:

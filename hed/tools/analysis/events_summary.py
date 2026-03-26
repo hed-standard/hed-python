@@ -1,3 +1,5 @@
+"""Summarizes events in a tabular file by checking tag coverage and quality."""
+
 from hed import TabularInput
 from hed.errors import ErrorHandler
 from hed.errors.error_types import TagQualityErrors
@@ -5,6 +7,8 @@ from hed.tools.analysis.event_checker import EventsChecker
 
 
 class EventsSummary:
+    """Summarizes HED event annotations for a tabular file, grouping tags by stimulus/response categories."""
+
     # Excluding tags for condition-variables and task -- these can be done separately if we want to.
     REMOVE_TYPES = ["Condition-variable", "Task"]
     # Tags organized by whether they are found with either of these
@@ -175,9 +179,29 @@ class EventsSummary:
 
     @staticmethod
     def match_tags(all_tags, key):
+        """Return True if any tag in all_tags has a short_base_tag matching key.
+
+        Parameters:
+            all_tags (list[HedTag]): The tags to search.
+            key (str): The short base tag name to look for.
+
+        Returns:
+            bool: True if a match is found.
+
+        """
         return any(tag.short_base_tag == key for tag in all_tags)
 
     def update_tags(self, tag_set, all_tags):
+        """Add the most-specific ancestor tag names from all_tags into tag_set, respecting cutoff categories.
+
+        Parameters:
+            tag_set (set): The running set of tag terms to update.
+            all_tags (list[HedTag]): Tags to process.
+
+        Returns:
+            set: The updated tag_set.
+
+        """
         for tag in all_tags:
             terms = tag.tag_terms
             if any(item in self.EXCLUDED_PARENTS for item in terms):

@@ -1,3 +1,5 @@
+"""Shared utilities for schema validation, sorting, and format conversion used by CLI scripts."""
+
 import os.path
 from collections import defaultdict
 from hed.schema import from_string, load_schema, from_dataframes

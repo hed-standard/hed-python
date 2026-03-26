@@ -1,3 +1,5 @@
+"""CLI script to validate HED schema files for compliance and format consistency."""
+
 import sys
 from hed.scripts.schema_script_util import validate_all_schemas, sort_base_schemas
 from hed.errors import get_printable_issue_string
@@ -20,6 +22,15 @@ def get_parser():
 
 
 def main(arg_list=None):
+    """Entry point: parse arguments and validate the specified schema files.
+
+    Parameters:
+        arg_list (list[str] or None): Argument list for testing; uses sys.argv if None.
+
+    Returns:
+        int: 0 if all schemas are valid, 1 if any issues are found.
+
+    """
     parser = get_parser()
     args = parser.parse_args(arg_list)
 

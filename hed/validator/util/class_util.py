@@ -147,6 +147,18 @@ class UnitValueValidator:
 
     @staticmethod
     def report_value_errors(error_dict, class_valid, report_as):
+        """Build validation issues from per-class character error and validity dicts.
+
+        Parameters:
+            error_dict (dict): Mapping of class name to list of (char, index) problem tuples.
+            class_valid (dict): Mapping of class name to a validity result (``True``, ``re.Match``, or ``False``)
+                indicating whether the full value passed word-level format validation for that class.
+            report_as (HedTag): The tag object used as context in error reporting.
+
+        Returns:
+            list[dict]: Validation issue dictionaries.
+
+        """
         validation_issues = []
         for class_name, errors in error_dict.items():
             if not errors and class_valid[class_name]:
@@ -165,6 +177,17 @@ class UnitValueValidator:
 
     @staticmethod
     def report_value_char_errors(class_name, errors, report_as):
+        """Build validation issues for specific invalid characters within a value class string.
+
+        Parameters:
+            class_name (str): The value class name that detected the errors.
+            errors (list[tuple[str, int]]): Character/index pairs of invalid characters.
+            report_as (HedTag): The tag object used as context in error reporting.
+
+        Returns:
+            list[dict]: Validation issue dictionaries.
+
+        """
         validation_issues = []
         for value in errors:
             if value[0] in "{}":
@@ -225,6 +248,16 @@ class UnitValueValidator:
 
 
 def find_invalid_positions(s, pattern):
+    """Return a list of (index, char) pairs for characters in s that do not match pattern.
+
+    Parameters:
+        s (str): The string to scan.
+        pattern (str): A single-character regex pattern specifying valid characters.
+
+    Returns:
+        list[tuple[int, str]]: Each tuple contains the character index and the invalid character.
+
+    """
     # List to store positions of invalid characters
     invalid_positions = []
 
@@ -258,6 +291,18 @@ def is_date_time_value_class(date_time_string) -> bool:
 
 
 def is_name_value_class(name_str) -> bool:
+    """Return True if name_str is a valid HED name-value.
+
+    Allowed characters are ASCII word characters (letters, digits, underscore),
+    hyphens, and Unicode code points U+0080 through U+FFFF.
+
+    Parameters:
+        name_str (str): The string to validate.
+
+    Returns:
+        bool: True if the string matches the allowed pattern.
+
+    """
     pattern = r"^[\w\-\u0080-\uFFFF]+$"
     if re.fullmatch(pattern, name_str):
         return True

@@ -32,6 +32,12 @@ class HedType:
 
     @property
     def total_events(self):
+        """Return the total number of events in the associated event list.
+
+        Returns:
+            int: Number of events.
+
+        """
         return len(self.event_manager.event_list)
 
     def get_type_value_factors(self, type_value):
@@ -60,6 +66,12 @@ class HedType:
 
     @property
     def type_variables(self):
+        """Return the set of type-value names (keys) found in this HedType.
+
+        Returns:
+            set[str]: Set of lowercased type-value name strings.
+
+        """
         return set(self._type_map.keys())
 
     def get_type_def_names(self):
@@ -70,9 +82,21 @@ class HedType:
         return list(set(tag_list))
 
     def get_type_value_names(self):
+        """Return the list of type-value names defined in this HedType.
+
+        Returns:
+            list[str]: Lowercased type-value name strings.
+
+        """
         return list(self._type_map.keys())
 
     def get_summary(self):
+        """Return a summary dict mapping each type-value name to its factor summary.
+
+        Returns:
+            dict: Keys are type-value name strings; values are factor summary dicts.
+
+        """
         var_summary = self._type_map.copy()
         summary = {}
         for var_name, var_sum in var_summary.items():
